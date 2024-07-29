@@ -125,11 +125,13 @@ class SearchAnchor extends StatefulWidget {
     this.viewSurfaceTintColor,
     this.viewSide,
     this.viewShape,
+    this.viewBarPadding,
     this.headerHeight,
     this.headerTextStyle,
     this.headerHintStyle,
     this.dividerColor,
     this.viewConstraints,
+    this.viewPadding,
     this.textCapitalization,
     this.viewOnChanged,
     this.viewOnSubmitted,
@@ -163,6 +165,7 @@ class SearchAnchor extends StatefulWidget {
     MaterialStateProperty<BorderSide?>? barSide,
     MaterialStateProperty<OutlinedBorder?>? barShape,
     MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
+    MaterialStateProperty<EdgeInsetsGeometry?>? viewBarPadding,
     MaterialStateProperty<TextStyle?>? barTextStyle,
     MaterialStateProperty<TextStyle?>? barHintStyle,
     Widget? viewLeading,
@@ -178,6 +181,7 @@ class SearchAnchor extends StatefulWidget {
     Color? dividerColor,
     BoxConstraints? constraints,
     BoxConstraints? viewConstraints,
+    EdgeInsets? viewPadding,
     bool? isFullScreen,
     SearchController searchController,
     TextCapitalization textCapitalization,
@@ -269,6 +273,11 @@ class SearchAnchor extends StatefulWidget {
   /// mode and a [RoundedRectangleBorder] shape with a 28.0 radius otherwise.
   final OutlinedBorder? viewShape;
 
+  /// The padding to use for the search view's search bar.
+  ///
+  /// If null, then the default value is 8.0 horizontally.
+  final MaterialStateProperty<EdgeInsetsGeometry?>? viewBarPadding;
+
   /// The height of the search field on the search view.
   ///
   /// If null, the value of [SearchViewThemeData.headerHeight] will be used. If
@@ -308,6 +317,13 @@ class SearchAnchor extends StatefulWidget {
   /// const BoxConstraints(minWidth: 360.0, minHeight: 240.0)
   /// ```
   final BoxConstraints? viewConstraints;
+
+  /// The padding to use for the search view.
+  ///
+  /// Has no effect if the search view is full-screen.
+  ///
+  /// If null, the value of [SearchViewThemeData.padding] will be used.
+  final EdgeInsets? viewPadding;
 
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
@@ -410,11 +426,13 @@ class _SearchAnchorState extends State<SearchAnchor> {
       viewSurfaceTintColor: widget.viewSurfaceTintColor,
       viewSide: widget.viewSide,
       viewShape: widget.viewShape,
+      viewBarPadding: widget.viewBarPadding,
       viewHeaderHeight: widget.headerHeight,
       viewHeaderTextStyle: widget.headerTextStyle,
       viewHeaderHintStyle: widget.headerHintStyle,
       dividerColor: widget.dividerColor,
       viewConstraints: widget.viewConstraints,
+      viewPadding: widget.viewPadding,
       showFullScreenView: getShowFullScreenView(),
       toggleVisibility: toggleVisibility,
       textDirection: Directionality.of(context),
@@ -479,11 +497,13 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     this.viewSurfaceTintColor,
     this.viewSide,
     this.viewShape,
+    this.viewBarPadding,
     this.viewHeaderHeight,
     this.viewHeaderTextStyle,
     this.viewHeaderHintStyle,
     this.dividerColor,
     this.viewConstraints,
+    this.viewPadding,
     this.textCapitalization,
     required this.showFullScreenView,
     required this.anchorKey,
@@ -507,11 +527,13 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final Color? viewSurfaceTintColor;
   final BorderSide? viewSide;
   final OutlinedBorder? viewShape;
+  final MaterialStateProperty<EdgeInsetsGeometry?>? viewBarPadding;
   final double? viewHeaderHeight;
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
   final BoxConstraints? viewConstraints;
+  final EdgeInsets? viewPadding;
   final TextCapitalization? textCapitalization;
   final bool showFullScreenView;
   final GlobalKey anchorKey;
@@ -662,10 +684,12 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
                 viewSurfaceTintColor: viewSurfaceTintColor,
                 viewSide: viewSide,
                 viewShape: viewShape,
+                viewBarPadding: viewBarPadding,
                 viewHeaderHeight: viewHeaderHeight,
                 viewHeaderTextStyle: viewHeaderTextStyle,
                 viewHeaderHintStyle: viewHeaderHintStyle,
                 dividerColor: dividerColor,
+                viewPadding: viewPadding,
                 showFullScreenView: showFullScreenView,
                 animation: curvedAnimation!,
                 topPadding: topPadding,
@@ -702,10 +726,12 @@ class _ViewContent extends StatefulWidget {
     this.viewSurfaceTintColor,
     this.viewSide,
     this.viewShape,
+    this.viewBarPadding,
     this.viewHeaderHeight,
     this.viewHeaderTextStyle,
     this.viewHeaderHintStyle,
     this.dividerColor,
+    this.viewPadding,
     this.textCapitalization,
     required this.showFullScreenView,
     required this.topPadding,
@@ -729,10 +755,12 @@ class _ViewContent extends StatefulWidget {
   final Color? viewSurfaceTintColor;
   final BorderSide? viewSide;
   final OutlinedBorder? viewShape;
+  final MaterialStateProperty<EdgeInsetsGeometry?>? viewBarPadding;
   final double? viewHeaderHeight;
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
+  final EdgeInsets? viewPadding;
   final TextCapitalization? textCapitalization;
   final bool showFullScreenView;
   final double topPadding;
@@ -920,6 +948,9 @@ class _ViewContentState extends State<_ViewContent> {
       ?? widget.viewHeaderTextStyle
       ?? viewTheme.headerTextStyle
       ?? viewDefaults.headerHintStyle;
+    final EdgeInsets? effectivePadding = widget.viewPadding
+      ?? viewTheme.padding
+      ?? viewDefaults.padding;
 
     final Widget viewDivider = DividerTheme(
       data: dividerTheme.copyWith(color: effectiveDividerColor),
@@ -933,61 +964,65 @@ class _ViewContentState extends State<_ViewContent> {
         child: SizedBox(
           width: _viewRect.width,
           height: _viewRect.height,
-          child: Material(
-            clipBehavior: Clip.antiAlias,
-            shape: effectiveShape,
-            color: effectiveBackgroundColor,
-            surfaceTintColor: effectiveSurfaceTint,
-            elevation: effectiveElevation,
-            child: ClipRect(
+          child: Padding(
+            padding: effectivePadding ?? EdgeInsets.zero,
+            child: Material(
               clipBehavior: Clip.antiAlias,
-              child: OverflowBox(
-                alignment: Alignment.topLeft,
-                maxWidth: math.min(widget.viewMaxWidth, _screenSize!.width),
-                minWidth: 0,
-                child: FadeTransition(
-                  opacity: viewIconsFadeCurve,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(top: widget.topPadding),
-                        child: SafeArea(
-                          top: false,
-                          bottom: false,
-                          child: SearchBar(
-                            autoFocus: true,
-                            constraints: headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null),
-                            leading: widget.viewLeading ?? defaultLeading,
-                            trailing: widget.viewTrailing ?? defaultTrailing,
-                            hintText: widget.viewHintText,
-                            backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-                            overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-                            elevation: const MaterialStatePropertyAll<double>(0.0),
-                            textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
-                            hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
-                            controller: _controller,
-                            onChanged: (String value) {
-                              widget.viewOnChanged?.call(value);
-                              updateSuggestions();
-                            },
-                            onSubmitted: widget.viewOnSubmitted,
-                            textCapitalization: widget.textCapitalization,
-                            textInputAction: widget.textInputAction,
-                            keyboardType: widget.keyboardType,
+              shape: effectiveShape,
+              color: effectiveBackgroundColor,
+              surfaceTintColor: effectiveSurfaceTint,
+              elevation: effectiveElevation,
+              child: ClipRect(
+                clipBehavior: Clip.antiAlias,
+                child: OverflowBox(
+                  alignment: Alignment.topLeft,
+                  maxWidth: math.min(widget.viewMaxWidth, _screenSize!.width),
+                  minWidth: 0,
+                  child: FadeTransition(
+                    opacity: viewIconsFadeCurve,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.only(top: widget.topPadding),
+                          child: SafeArea(
+                            top: false,
+                            bottom: false,
+                            child: SearchBar(
+                              autoFocus: true,
+                              constraints: headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null),
+                              padding: widget.viewBarPadding,
+                              leading: widget.viewLeading ?? defaultLeading,
+                              trailing: widget.viewTrailing ?? defaultTrailing,
+                              hintText: widget.viewHintText,
+                              backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+                              overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+                              elevation: const MaterialStatePropertyAll<double>(0.0),
+                              textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
+                              hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
+                              controller: _controller,
+                              onChanged: (String value) {
+                                widget.viewOnChanged?.call(value);
+                                updateSuggestions();
+                              },
+                              onSubmitted: widget.viewOnSubmitted,
+                              textCapitalization: widget.textCapitalization,
+                              textInputAction: widget.textInputAction,
+                              keyboardType: widget.keyboardType,
+                            ),
                           ),
                         ),
-                      ),
-                      FadeTransition(
-                        opacity: viewDividerFadeCurve,
-                        child: viewDivider),
-                      Expanded(
-                        child: FadeTransition(
-                          opacity: viewListFadeOnIntervalCurve,
-                          child: viewBuilder(result),
+                        FadeTransition(
+                          opacity: viewDividerFadeCurve,
+                          child: viewDivider),
+                        Expanded(
+                          child: FadeTransition(
+                            opacity: viewListFadeOnIntervalCurve,
+                            child: viewBuilder(result),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -1011,6 +1046,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     MaterialStateProperty<BorderSide?>? barSide,
     MaterialStateProperty<OutlinedBorder?>? barShape,
     MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
+    super.viewBarPadding,
     MaterialStateProperty<TextStyle?>? barTextStyle,
     MaterialStateProperty<TextStyle?>? barHintStyle,
     super.viewLeading,
@@ -1026,6 +1062,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.dividerColor,
     BoxConstraints? constraints,
     super.viewConstraints,
+    super.viewPadding,
     super.isFullScreen,
     super.searchController,
     super.textCapitalization,
@@ -1604,6 +1641,10 @@ class _SearchViewDefaultsM3 extends SearchViewThemeData {
 
   @override
   BoxConstraints get constraints => const BoxConstraints(minWidth: 360.0, minHeight: 240.0);
+
+  @override
+  MaterialStateProperty<EdgeInsetsGeometry?>? get barPadding =>
+    const MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.symmetric(horizontal: 8.0));
 
   @override
   Color? get dividerColor => _colors.outline;

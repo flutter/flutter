@@ -48,6 +48,10 @@ class _${blockName}DefaultsM3 extends ${blockName}ThemeData {
   BoxConstraints get constraints => const BoxConstraints(minWidth: 360.0, minHeight: 240.0);
 
   @override
+  MaterialStateProperty<EdgeInsetsGeometry?>? get barPadding =>
+    const MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.symmetric(horizontal: 8.0));
+
+  @override
   Color? get dividerColor => ${componentColor('md.comp.search-view.divider')};
 }
 ''';
