@@ -1693,15 +1693,15 @@ class DropdownButtonFormField<T> extends FormField<T> {
            );
 
            final bool showSelectedItem = items != null && items.where((DropdownMenuItem<T> item) => item.value == state.value).isNotEmpty;
-           bool isHintOrDisabledHintAvailable() {
-             final bool isDropdownDisabled = onChanged == null || (items == null || items.isEmpty);
-             if (isDropdownDisabled) {
-               return hint != null || disabledHint != null;
-             } else {
-               return hint != null;
-             }
-           }
-           final bool isEmpty = !showSelectedItem && !isHintOrDisabledHintAvailable();
+           final bool isDropdownEnabled = onChanged != null && items != null && items.isNotEmpty;
+           // If decoration hintText is provided, use it as the default value for both hint and disabledHint.
+           final Widget? decorationHint = effectiveDecoration.hintText != null ? Text(effectiveDecoration.hintText!) : null;
+           final Widget? effectiveHint = hint ?? decorationHint;
+           final Widget? effectiveDisabledHint = disabledHint ?? effectiveHint;
+           final bool isHintOrDisabledHintAvailable = isDropdownEnabled
+             ? effectiveHint != null
+             : effectiveHint != null || effectiveDisabledHint != null;
+           final bool isEmpty = !showSelectedItem && !isHintOrDisabledHintAvailable;
            final bool hasError = effectiveDecoration.errorText != null;
 
            // An unfocusable Focus widget so that this widget can detect if its
@@ -1742,8 +1742,8 @@ class DropdownButtonFormField<T> extends FormField<T> {
                    items: items,
                    selectedItemBuilder: selectedItemBuilder,
                    value: state.value,
-                   hint: hint,
-                   disabledHint: disabledHint,
+                   hint: effectiveHint,
+                   disabledHint: effectiveDisabledHint,
                    onChanged: onChanged == null ? null : state.didChange,
                    onTap: onTap,
                    elevation: elevation,
@@ -1763,7 +1763,11 @@ class DropdownButtonFormField<T> extends FormField<T> {
                    enableFeedback: enableFeedback,
                    alignment: alignment,
                    borderRadius: borderRadius ?? effectiveBorderRadius(),
-                   inputDecoration: effectiveDecoration.copyWith(errorText: field.errorText),
+                   // Clear the decoration hintText because DropdownButton has its own hint logic.
+                   inputDecoration: effectiveDecoration.copyWith(
+                     errorText: field.errorText,
+                     hintText: effectiveDecoration.hintText != null ? '' : null,
+                   ),
                    isEmpty: isEmpty,
                    isFocused: isFocused,
                    padding: padding,
