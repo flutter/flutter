@@ -56,7 +56,10 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     required Uri workingDirectory,
     CCompilerConfigImpl? cCompilerConfig,
     int? targetAndroidNdkApi,
+    int? targetIOSVersion,
+    int? targetMacOSVersion,
     IOSSdkImpl? targetIOSSdkImpl,
+    required bool linkingEnabled,
   }) async {
     buildInvocations++;
     lastBuildMode = buildMode;
@@ -73,6 +76,8 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     required native_assets_builder.BuildResult buildResult,
     CCompilerConfigImpl? cCompilerConfig,
     int? targetAndroidNdkApi,
+    int? targetIOSVersion,
+    int? targetMacOSVersion,
     IOSSdkImpl? targetIOSSdkImpl,
   }) async {
     linkInvocations++;

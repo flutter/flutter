@@ -489,7 +489,7 @@ abstract class FlutterCommand extends Command<void> {
       defaultsTo: true,
       help: 'Enable (or disable, with "--no-$kEnableDevTools") the launching of the '
             'Flutter DevTools debugger and profiler. '
-            'If specified, "--$kDevToolsServerAddress" is ignored.'
+            'If "--no-$kEnableDevTools" is specified, "--$kDevToolsServerAddress" is ignored.'
     );
     argParser.addOption(
       kDevToolsServerAddress,
@@ -1892,10 +1892,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
   /// If no flag named [name] was added to the [ArgParser], an [ArgumentError]
   /// will be thrown.
   bool boolArg(String name, {bool global = false}) {
-    if (global) {
-      return globalResults![name] as bool;
-    }
-    return argResults![name] as bool;
+    return (global ? globalResults : argResults)!.flag(name);
   }
 
   /// Gets the parsed command-line option named [name] as a `String`.
@@ -1903,18 +1900,12 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
   /// If no option named [name] was added to the [ArgParser], an [ArgumentError]
   /// will be thrown.
   String? stringArg(String name, {bool global = false}) {
-    if (global) {
-      return globalResults![name] as String?;
-    }
-    return argResults![name] as String?;
+    return (global ? globalResults : argResults)!.option(name);
   }
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
   List<String> stringsArg(String name, {bool global = false}) {
-    if (global) {
-      return globalResults![name] as List<String>;
-    }
-    return argResults![name] as List<String>;
+    return (global ? globalResults : argResults)!.multiOption(name);
   }
 }
 
