@@ -2629,7 +2629,15 @@ class InputDecoration {
   /// Sets the [contentPadding] property to [EdgeInsets.zero].
   const InputDecoration.collapsed({
     required this.hintText,
+    @Deprecated(
+      'Invalid parameter because a collapsed decoration has no label. '
+      'This feature was deprecated after v3.24.0-0.1.pre.',
+    )
     this.floatingLabelBehavior,
+    @Deprecated(
+      'Invalid parameter because a collapsed decoration has no label. '
+      'This feature was deprecated after v3.24.0-0.1.pre.',
+    )
     this.floatingLabelAlignment,
     this.hintStyle,
     this.hintTextDirection,
