@@ -4,6 +4,9 @@ go/flutter-android-new-api-level
 ## Objective
 Provide a list of areas to consider and examples of former work for how to update flutter to support a new version of the android API. This happens every fall and flutter developers expect to build against the latest versions quickly after they are available.
 ### Overview
+#### Bump compile and target sdk versions in samples
+Samples, expecially add to app samples, represent apps that mirror the first types of users we see adopt new android apis.
+Example pr https://github.com/flutter/samples/pull/2368
 #### New Android features
 New android features can require a broad spectrum of work. Some will require nothing from flutter. Some will require a lot of work, such as the support for “back preview”. The android team generally needs to be aware and schedule work ahead of time.
 #### Update Gradle/AGP support
