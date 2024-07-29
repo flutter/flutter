@@ -99,7 +99,6 @@ class SearchViewThemeData with Diagnosticable {
     TextStyle? headerHintStyle,
     BoxConstraints? constraints,
     EdgeInsets? padding,
-    bool? shrinkWrap,
     Color? dividerColor,
   }) {
     return SearchViewThemeData(
