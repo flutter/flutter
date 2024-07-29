@@ -968,7 +968,7 @@ class _ViewContentState extends State<_ViewContent> {
           width: _viewRect.width,
           height: _viewRect.height,
           child: Padding(
-            padding: effectivePadding ?? EdgeInsets.zero,
+            padding: widget.showFullScreenView ? EdgeInsets.zero : (effectivePadding ?? EdgeInsets.zero),
             child: Material(
               clipBehavior: Clip.antiAlias,
               shape: effectiveShape,
