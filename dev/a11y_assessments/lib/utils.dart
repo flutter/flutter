@@ -6,3 +6,5 @@ void setWebTitle(String titleName, int color) {
     primaryColor: color
   ));
 }
+
+Color appSeedColor = const Color(0xff6750a4);
