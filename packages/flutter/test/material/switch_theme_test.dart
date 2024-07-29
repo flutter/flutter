@@ -29,6 +29,7 @@ void main() {
     expect(themeData.overlayColor, null);
     expect(themeData.splashRadius, null);
     expect(themeData.thumbIcon, null);
+    expect(themeData.padding, null);
 
     const SwitchTheme theme = SwitchTheme(data: SwitchThemeData(), child: SizedBox());
     expect(theme.data.thumbColor, null);
@@ -40,6 +41,7 @@ void main() {
     expect(theme.data.overlayColor, null);
     expect(theme.data.splashRadius, null);
     expect(theme.data.thumbIcon, null);
+    expect(theme.data.padding, null);
   });
 
   testWidgets('Default SwitchThemeData debugFillProperties', (WidgetTester tester) async {
@@ -66,6 +68,7 @@ void main() {
       overlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffff2)),
       splashRadius: 1.0,
       thumbIcon: MaterialStatePropertyAll<Icon>(Icon(IconData(123))),
+      padding: EdgeInsets.all(4.0),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -82,6 +85,7 @@ void main() {
     expect(description[6], 'overlayColor: WidgetStatePropertyAll(Color(0xfffffff2))');
     expect(description[7], 'splashRadius: 1.0');
     expect(description[8], 'thumbIcon: WidgetStatePropertyAll(Icon(IconData(U+0007B)))');
+    expect(description[9], 'padding: EdgeInsets.all(4.0)');
   });
 
   testWidgets('Material2 - Switch is themeable', (WidgetTester tester) async {
@@ -1040,6 +1044,40 @@ void main() {
         ..rrect(color: localThemeOutlineColor, strokeWidth: localThemeOutlineWidth)
         ..rrect(color: localThemeThumbColor)
     );
+  });
+
+  testWidgets('SwitchTheme padding is respected', (WidgetTester tester) async {
+    Widget buildSwitch({ EdgeInsets? padding }) {
+      return MaterialApp(
+        theme: ThemeData(
+          switchTheme: SwitchThemeData(
+            padding: padding,
+          ),
+        ),
+        home: Scaffold(
+          body: Center(
+            child: Switch(
+              value: true,
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitch());
+
+    expect(tester.getSize(find.byType(Switch)), const Size(60.0, 48.0));
+
+    await tester.pumpWidget(buildSwitch(padding: EdgeInsets.zero));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(Switch)), const Size(52.0, 48.0));
+
+    await tester.pumpWidget(buildSwitch(padding: const EdgeInsets.all(4.0)));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(Switch)), const Size(60.0, 56.0));
   });
 }
 

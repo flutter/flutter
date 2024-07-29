@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:developer';
+///
+/// @docImport 'package:flutter/scheduler.dart';
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'binding.dart';
+/// @docImport 'layer.dart';
+/// @docImport 'proxy_box.dart';
+/// @docImport 'shifted_box.dart';
+/// @docImport 'view.dart';
+library;
+
 import 'box.dart';
 import 'object.dart';
 

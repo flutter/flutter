@@ -77,6 +77,11 @@ class PluginTest {
       final _FlutterProject app = await _FlutterProject.create(tempDir, options, buildTarget,
           name: 'plugintestapp', template: 'app', environment: appCreateEnvironment);
       try {
+        if (cocoapodsTransitiveFlutterDependency) {
+          section('Disable Swift Package Manager');
+          await app.disableSwiftPackageManager();
+        }
+
         section('Add plugins');
         await app.addPlugin('plugintest',
             pluginPath: path.join('..', 'plugintest'));
@@ -145,6 +150,20 @@ class _FlutterProject {
 
   _FlutterProject get example {
     return _FlutterProject(Directory(path.join(rootPath)), 'example');
+  }
+
+  Future<void> disableSwiftPackageManager() async {
+    final File pubspec = pubspecFile;
+    String content = await pubspec.readAsString();
+    content = content.replaceFirst(
+      '# The following section is specific to Flutter packages.\n'
+      'flutter:\n',
+      '# The following section is specific to Flutter packages.\n'
+      'flutter:\n'
+      '\n'
+      '  disable-swift-package-manager: true\n'
+    );
+    await pubspec.writeAsString(content, flush: true);
   }
 
   Future<void> addPlugin(String plugin, {String? pluginPath}) async {
@@ -244,9 +263,14 @@ class $dartPluginClass {
     await podspec.writeAsString(podspecContent, flush: true);
 
     // Make PlugintestPlugin.swift compile on iOS and macOS with target conditionals.
+    // If SwiftPM is disabled, the file will be in `darwin/Classes/`.
+    // Otherwise, the file will be in `darwin/<plugin>/Sources/<plugin>/`.
     final String pluginClass = '${name[0].toUpperCase()}${name.substring(1)}Plugin';
     print('pluginClass: $pluginClass');
-    final File pluginRegister = File(path.join(darwinDir.path, 'Classes', '$pluginClass.swift'));
+    File pluginRegister = File(path.join(darwinDir.path, 'Classes', '$pluginClass.swift'));
+    if (!pluginRegister.existsSync()) {
+      pluginRegister = File(path.join(darwinDir.path, name, 'Sources', name, '$pluginClass.swift'));
+    }
     final String pluginRegisterContent = '''
 #if os(macOS)
 import FlutterMacOS
@@ -494,42 +518,55 @@ s.dependency 'AppAuth', '1.6.0'
         }
 
         if (validateNativeBuildProject) {
-          final File podsProject = File(path.join(rootPath, target, 'Pods', 'Pods.xcodeproj', 'project.pbxproj'));
-          if (!podsProject.existsSync()) {
-            throw TaskResult.failure('Xcode Pods project file missing at ${podsProject.path}');
-          }
+          final File generatedSwiftManifest = File(path.join(
+            rootPath,
+            target,
+            'Flutter',
+            'ephemeral',
+            'Packages',
+            'FlutterGeneratedPluginSwiftPackage',
+            'Package.swift'
+          ));
+          final bool swiftPackageManagerEnabled = generatedSwiftManifest.existsSync();
 
-          final String podsProjectContent = podsProject.readAsStringSync();
-          if (target == 'ios') {
-            // Plugins with versions lower than the app version should not have IPHONEOS_DEPLOYMENT_TARGET set.
-            // The plugintest plugin target should not have IPHONEOS_DEPLOYMENT_TARGET set since it has been lowered
-            // in _reduceDarwinPluginMinimumVersion to 10, which is below the target version of 11.
-            if (podsProjectContent.contains('IPHONEOS_DEPLOYMENT_TARGET = 10')) {
-              throw TaskResult.failure('Plugin build setting IPHONEOS_DEPLOYMENT_TARGET not removed');
+          if (!swiftPackageManagerEnabled) {
+            final File podsProject = File(path.join(rootPath, target, 'Pods', 'Pods.xcodeproj', 'project.pbxproj'));
+            if (!podsProject.existsSync()) {
+              throw TaskResult.failure('Xcode Pods project file missing at ${podsProject.path}');
             }
-            // Transitive dependency AppAuth targeting too-low 8.0 was not fixed.
-            if (podsProjectContent.contains('IPHONEOS_DEPLOYMENT_TARGET = 8')) {
-              throw TaskResult.failure('Transitive dependency build setting IPHONEOS_DEPLOYMENT_TARGET=8 not removed');
-            }
-            if (!podsProjectContent.contains(r'"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "$(inherited) i386";')) {
-              throw TaskResult.failure(r'EXCLUDED_ARCHS is not "$(inherited) i386"');
-            }
-          } else if (target == 'macos') {
-            // Same for macOS deployment target, but 10.8.
-            // The plugintest target should not have MACOSX_DEPLOYMENT_TARGET set.
-            if (podsProjectContent.contains('MACOSX_DEPLOYMENT_TARGET = 10.8')) {
-              throw TaskResult.failure('Plugin build setting MACOSX_DEPLOYMENT_TARGET not removed');
-            }
-            // Transitive dependency AppAuth targeting too-low 10.9 was not fixed.
-            if (podsProjectContent.contains('MACOSX_DEPLOYMENT_TARGET = 10.9')) {
-              throw TaskResult.failure('Transitive dependency build setting MACOSX_DEPLOYMENT_TARGET=10.9 not removed');
-            }
-          }
 
-          if (localEngine != null) {
-            final RegExp localEngineSearchPath = RegExp('FRAMEWORK_SEARCH_PATHS\\s*=[^;]*${localEngine.path}');
-            if (!localEngineSearchPath.hasMatch(podsProjectContent)) {
-              throw TaskResult.failure('FRAMEWORK_SEARCH_PATHS does not contain the --local-engine path');
+            final String podsProjectContent = podsProject.readAsStringSync();
+            if (target == 'ios') {
+              // Plugins with versions lower than the app version should not have IPHONEOS_DEPLOYMENT_TARGET set.
+              // The plugintest plugin target should not have IPHONEOS_DEPLOYMENT_TARGET set since it has been lowered
+              // in _reduceDarwinPluginMinimumVersion to 10, which is below the target version of 11.
+              if (podsProjectContent.contains('IPHONEOS_DEPLOYMENT_TARGET = 10')) {
+                throw TaskResult.failure('Plugin build setting IPHONEOS_DEPLOYMENT_TARGET not removed');
+              }
+              // Transitive dependency AppAuth targeting too-low 8.0 was not fixed.
+              if (podsProjectContent.contains('IPHONEOS_DEPLOYMENT_TARGET = 8')) {
+                throw TaskResult.failure('Transitive dependency build setting IPHONEOS_DEPLOYMENT_TARGET=8 not removed');
+              }
+              if (!podsProjectContent.contains(r'"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "$(inherited) i386";')) {
+                throw TaskResult.failure(r'EXCLUDED_ARCHS is not "$(inherited) i386"');
+              }
+            } else if (target == 'macos') {
+              // Same for macOS deployment target, but 10.8.
+              // The plugintest target should not have MACOSX_DEPLOYMENT_TARGET set.
+              if (podsProjectContent.contains('MACOSX_DEPLOYMENT_TARGET = 10.8')) {
+                throw TaskResult.failure('Plugin build setting MACOSX_DEPLOYMENT_TARGET not removed');
+              }
+              // Transitive dependency AppAuth targeting too-low 10.9 was not fixed.
+              if (podsProjectContent.contains('MACOSX_DEPLOYMENT_TARGET = 10.9')) {
+                throw TaskResult.failure('Transitive dependency build setting MACOSX_DEPLOYMENT_TARGET=10.9 not removed');
+              }
+            }
+
+            if (localEngine != null) {
+              final RegExp localEngineSearchPath = RegExp('FRAMEWORK_SEARCH_PATHS\\s*=[^;]*${localEngine.path}');
+              if (!localEngineSearchPath.hasMatch(podsProjectContent)) {
+                throw TaskResult.failure('FRAMEWORK_SEARCH_PATHS does not contain the --local-engine path');
+              }
             }
           }
         }

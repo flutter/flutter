@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.historicalForms].
+/// Flutter code sample for [FontFeature.historicalForms].
 
 void main() => runApp(const ExampleApp());
 

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'proxy_sliver.dart';
+/// @docImport 'sliver.dart';
+library;
+
 import 'dart:ui' as ui show Color, Gradient, Image, ImageFilter;
 
 import 'package:flutter/animation.dart';
@@ -4323,6 +4329,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     }
     if (_properties.link != null) {
       config.isLink = _properties.link!;
+    }
+    if (_properties.linkUrl != null) {
+      config.linkUrl = _properties.linkUrl;
     }
     if (_properties.slider != null) {
       config.isSlider = _properties.slider!;
