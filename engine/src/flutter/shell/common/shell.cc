@@ -515,11 +515,6 @@ Shell::Shell(DartVMRef vm,
           task_runners_.GetRasterTaskRunner(),
           std::bind(&Shell::OnServiceProtocolEstimateRasterCacheMemory, this,
                     std::placeholders::_1, std::placeholders::_2)};
-  service_protocol_handlers_
-      [ServiceProtocol::kRenderFrameWithRasterStatsExtensionName] = {
-          task_runners_.GetRasterTaskRunner(),
-          std::bind(&Shell::OnServiceProtocolRenderFrameWithRasterStats, this,
-                    std::placeholders::_1, std::placeholders::_2)};
   service_protocol_handlers_[ServiceProtocol::kReloadAssetFonts] = {
       task_runners_.GetPlatformTaskRunner(),
       std::bind(&Shell::OnServiceProtocolReloadAssetFonts, this,
@@ -2005,101 +2000,6 @@ bool Shell::OnServiceProtocolSetAssetBundlePath(
 
   FML_DCHECK(false);
   return false;
-}
-
-static rapidjson::Value SerializeLayerSnapshot(
-    double device_pixel_ratio,
-    const LayerSnapshotData& snapshot,
-    rapidjson::Document* response) {
-  auto& allocator = response->GetAllocator();
-  rapidjson::Value result;
-  result.SetObject();
-  result.AddMember("layer_unique_id", snapshot.GetLayerUniqueId(), allocator);
-  result.AddMember("duration_micros", snapshot.GetDuration().ToMicroseconds(),
-                   allocator);
-
-  const SkRect bounds = snapshot.GetBounds();
-  result.AddMember("top", bounds.top(), allocator);
-  result.AddMember("left", bounds.left(), allocator);
-  result.AddMember("width", bounds.width(), allocator);
-  result.AddMember("height", bounds.height(), allocator);
-
-  sk_sp<SkData> snapshot_bytes = snapshot.GetSnapshot();
-  if (snapshot_bytes) {
-    rapidjson::Value image;
-    image.SetArray();
-    const uint8_t* data =
-        reinterpret_cast<const uint8_t*>(snapshot_bytes->data());
-    for (size_t i = 0; i < snapshot_bytes->size(); i++) {
-      image.PushBack(data[i], allocator);
-    }
-    result.AddMember("snapshot", image, allocator);
-  }
-  return result;
-}
-
-bool Shell::OnServiceProtocolRenderFrameWithRasterStats(
-    const ServiceProtocol::Handler::ServiceProtocolMap& params,
-    rapidjson::Document* response) {
-  FML_DCHECK(task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread());
-
-  // Impeller does not support this protocol method.
-  if (io_manager_->GetImpellerContext()) {
-    const char* error = "Raster status not supported on Impeller backend.";
-    ServiceProtocolFailureError(response, error);
-    return false;
-  }
-
-  // TODO(dkwingsmt): This method only handles view #0, including the snapshot
-  // and the frame size. We need to adapt this method to multi-view.
-  // https://github.com/flutter/flutter/issues/131892
-  int64_t view_id = kFlutterImplicitViewId;
-  if (auto last_layer_tree = rasterizer_->GetLastLayerTree(view_id)) {
-    auto& allocator = response->GetAllocator();
-    response->SetObject();
-    response->AddMember("type", "RenderFrameWithRasterStats", allocator);
-
-    // When rendering the last layer tree, we do not need to build a frame,
-    // invariants in FrameTimingRecorder enforce that raster timings can not be
-    // set before build-end.
-    auto frame_timings_recorder = std::make_unique<FrameTimingsRecorder>();
-    const auto now = fml::TimePoint::Now();
-    frame_timings_recorder->RecordVsync(now, now);
-    frame_timings_recorder->RecordBuildStart(now);
-    frame_timings_recorder->RecordBuildEnd(now);
-
-    last_layer_tree->enable_leaf_layer_tracing(true);
-    rasterizer_->DrawLastLayerTrees(std::move(frame_timings_recorder));
-    last_layer_tree->enable_leaf_layer_tracing(false);
-
-    rapidjson::Value snapshots;
-    snapshots.SetArray();
-
-    LayerSnapshotStore& store =
-        rasterizer_->compositor_context()->snapshot_store();
-    for (const LayerSnapshotData& data : store) {
-      snapshots.PushBack(
-          SerializeLayerSnapshot(device_pixel_ratio_, data, response),
-          allocator);
-    }
-
-    response->AddMember("snapshots", snapshots, allocator);
-
-    const auto& frame_size = ExpectedFrameSize(view_id);
-    response->AddMember("frame_width", frame_size.width(), allocator);
-    response->AddMember("frame_height", frame_size.height(), allocator);
-
-    return true;
-  } else {
-    const char* error =
-        "Failed to render the last frame with raster stats."
-        " Rasterizer does not hold a valid last layer tree."
-        " This could happen if this method was invoked before a frame was "
-        "rendered";
-    FML_DLOG(ERROR) << error;
-    ServiceProtocolFailureError(response, error);
-    return false;
-  }
 }
 
 void Shell::SendFontChangeNotification() {

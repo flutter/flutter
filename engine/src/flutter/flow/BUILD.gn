@@ -21,8 +21,6 @@ source_set("flow") {
     "embedded_views.h",
     "frame_timings.cc",
     "frame_timings.h",
-    "layer_snapshot_store.cc",
-    "layer_snapshot_store.h",
     "layers/backdrop_filter_layer.cc",
     "layers/backdrop_filter_layer.h",
     "layers/cacheable_layer.cc",

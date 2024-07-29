@@ -304,27 +304,24 @@ void ShellTest::OnServiceProtocol(
     const ServiceProtocol::Handler::ServiceProtocolMap& params,
     rapidjson::Document* response) {
   std::promise<bool> finished;
-  fml::TaskRunner::RunNowOrPostTask(task_runner, [shell, some_protocol, params,
-                                                  response, &finished]() {
-    switch (some_protocol) {
-      case ServiceProtocolEnum::kGetSkSLs:
-        shell->OnServiceProtocolGetSkSLs(params, response);
-        break;
-      case ServiceProtocolEnum::kEstimateRasterCacheMemory:
-        shell->OnServiceProtocolEstimateRasterCacheMemory(params, response);
-        break;
-      case ServiceProtocolEnum::kSetAssetBundlePath:
-        shell->OnServiceProtocolSetAssetBundlePath(params, response);
-        break;
-      case ServiceProtocolEnum::kRunInView:
-        shell->OnServiceProtocolRunInView(params, response);
-        break;
-      case ServiceProtocolEnum::kRenderFrameWithRasterStats:
-        shell->OnServiceProtocolRenderFrameWithRasterStats(params, response);
-        break;
-    }
-    finished.set_value(true);
-  });
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runner, [shell, some_protocol, params, response, &finished]() {
+        switch (some_protocol) {
+          case ServiceProtocolEnum::kGetSkSLs:
+            shell->OnServiceProtocolGetSkSLs(params, response);
+            break;
+          case ServiceProtocolEnum::kEstimateRasterCacheMemory:
+            shell->OnServiceProtocolEstimateRasterCacheMemory(params, response);
+            break;
+          case ServiceProtocolEnum::kSetAssetBundlePath:
+            shell->OnServiceProtocolSetAssetBundlePath(params, response);
+            break;
+          case ServiceProtocolEnum::kRunInView:
+            shell->OnServiceProtocolRunInView(params, response);
+            break;
+        }
+        finished.set_value(true);
+      });
   finished.get_future().wait();
 }
 

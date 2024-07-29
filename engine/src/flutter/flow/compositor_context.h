@@ -12,7 +12,6 @@
 #include "flutter/common/macros.h"
 #include "flutter/flow/diff_context.h"
 #include "flutter/flow/embedded_views.h"
-#include "flutter/flow/layer_snapshot_store.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/stopwatch.h"
 #include "flutter/fml/macros.h"
@@ -195,14 +194,11 @@ class CompositorContext {
 
   Stopwatch& ui_time() { return ui_time_; }
 
-  LayerSnapshotStore& snapshot_store() { return layer_snapshot_store_; }
-
  private:
   NOT_SLIMPELLER(RasterCache raster_cache_);
   std::shared_ptr<TextureRegistry> texture_registry_;
   Stopwatch raster_time_;
   Stopwatch ui_time_;
-  LayerSnapshotStore layer_snapshot_store_;
 
   /// Only used by default constructor of `CompositorContext`.
   FixedRefreshRateUpdater fixed_refresh_rate_updater_;

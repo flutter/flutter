@@ -6,7 +6,6 @@
 #define FLUTTER_FLOW_TESTING_LAYER_TEST_H_
 
 #include "display_list/dl_color.h"
-#include "flutter/flow/layer_snapshot_store.h"
 #include "flutter/flow/layers/layer.h"
 
 #include <optional>
@@ -153,7 +152,6 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   PaintContext& display_list_paint_context() {
     return display_list_paint_context_;
   }
-  LayerSnapshotStore& layer_snapshot_store() { return snapshot_store_; }
 
   sk_sp<DisplayList> display_list() {
     if (display_list_ == nullptr) {
@@ -168,16 +166,6 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
     display_list_builder_.Build();
     // Make sure we are starting from a fresh state stack
     FML_DCHECK(display_list_state_stack_.is_empty());
-  }
-
-  void enable_leaf_layer_tracing() {
-    paint_context_.enable_leaf_layer_tracing = true;
-    paint_context_.layer_snapshot_store = &snapshot_store_;
-  }
-
-  void disable_leaf_layer_tracing() {
-    paint_context_.enable_leaf_layer_tracing = false;
-    paint_context_.layer_snapshot_store = nullptr;
   }
 
  private:
@@ -201,7 +189,6 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   LayerStateStack display_list_state_stack_;
   sk_sp<DisplayList> display_list_;
   PaintContext display_list_paint_context_;
-  LayerSnapshotStore snapshot_store_;
 
   std::vector<RasterCacheItem*> cacheable_items_;
 

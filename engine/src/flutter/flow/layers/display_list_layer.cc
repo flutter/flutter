@@ -7,7 +7,6 @@
 #include <utility>
 
 #include "flutter/display_list/dl_builder.h"
-#include "flutter/flow/layer_snapshot_store.h"
 #include "flutter/flow/layers/cacheable_layer.h"
 #include "flutter/flow/layers/offscreen_surface.h"
 #include "flutter/flow/raster_cache.h"
@@ -132,40 +131,6 @@ void DisplayListLayer::Paint(PaintContext& context) const {
 #endif  //  !SLIMPELLER
 
   SkScalar opacity = context.state_stack.outstanding_opacity();
-
-#if !SLIMPELLER
-  // Leaf layer tracing was never supported in the Impeller backend.
-  if (context.enable_leaf_layer_tracing) {
-    const auto canvas_size = context.canvas->GetBaseLayerSize();
-    auto offscreen_surface =
-        std::make_unique<OffscreenSurface>(context.gr_context, canvas_size);
-
-    const auto& ctm = context.canvas->GetTransform();
-
-    const auto start_time = fml::TimePoint::Now();
-    {
-      // render display list to offscreen surface.
-      auto* canvas = offscreen_surface->GetCanvas();
-      {
-        DlAutoCanvasRestore save(canvas, true);
-        canvas->Clear(DlColor::kTransparent());
-        canvas->SetTransform(ctm);
-        canvas->DrawDisplayList(display_list_, opacity);
-      }
-      canvas->Flush();
-    }
-    const fml::TimeDelta offscreen_render_time =
-        fml::TimePoint::Now() - start_time;
-
-    const SkRect device_bounds =
-        RasterCacheUtil::GetDeviceBounds(paint_bounds(), ctm);
-    sk_sp<SkData> raster_data = offscreen_surface->GetRasterData(true);
-    LayerSnapshotData snapshot_data(unique_id(), offscreen_render_time,
-                                    raster_data, device_bounds);
-    context.layer_snapshot_store->Add(snapshot_data);
-  }
-#endif  //  !SLIMPELLER
-
   context.canvas->DrawDisplayList(display_list_, opacity);
 }
 

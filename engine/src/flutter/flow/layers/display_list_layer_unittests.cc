@@ -439,41 +439,6 @@ TEST_F(DisplayListLayerDiffTest, DisplayListCompare) {
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(20, 20, 70, 70));
 }
 
-TEST_F(DisplayListLayerTest, LayerTreeSnapshotsWhenEnabled) {
-  const SkPoint layer_offset = SkPoint::Make(1.5f, -0.5f);
-  const SkRect picture_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
-  DisplayListBuilder builder;
-  builder.DrawRect(picture_bounds, DlPaint());
-  auto display_list = builder.Build();
-  auto layer = std::make_shared<DisplayListLayer>(layer_offset, display_list,
-                                                  false, false);
-
-  layer->Preroll(preroll_context());
-
-  enable_leaf_layer_tracing();
-  layer->Paint(paint_context());
-  disable_leaf_layer_tracing();
-
-  auto& snapshot_store = layer_snapshot_store();
-  EXPECT_EQ(1u, snapshot_store.Size());
-}
-
-TEST_F(DisplayListLayerTest, NoLayerTreeSnapshotsWhenDisabledByDefault) {
-  const SkPoint layer_offset = SkPoint::Make(1.5f, -0.5f);
-  const SkRect picture_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
-  DisplayListBuilder builder;
-  builder.DrawRect(picture_bounds, DlPaint());
-  auto display_list = builder.Build();
-  auto layer = std::make_shared<DisplayListLayer>(layer_offset, display_list,
-                                                  false, false);
-
-  layer->Preroll(preroll_context());
-  layer->Paint(paint_context());
-
-  auto& snapshot_store = layer_snapshot_store();
-  EXPECT_EQ(0u, snapshot_store.Size());
-}
-
 TEST_F(DisplayListLayerTest, DisplayListAccessCountDependsOnVisibility) {
   const SkPoint layer_offset = SkPoint::Make(1.5f, -0.5f);
   const SkRect picture_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
