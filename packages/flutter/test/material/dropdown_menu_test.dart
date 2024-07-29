@@ -344,7 +344,6 @@ void main() {
     Rect dropdownMenuRect = tester.getRect(find.byType(TextField));
     expect(dropdownMenuRect.top, containerRect.top);
 
-
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
 
