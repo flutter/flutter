@@ -228,7 +228,7 @@ public class FlutterLoaderTest {
     flutterLoader.ensureInitializationComplete(ctx, null);
     shadowOf(getMainLooper()).idle();
 
-    final String enableImpellerArg = "--enable-impeller";
+    final String enableImpellerArg = "--enable-impeller=true";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
         .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
