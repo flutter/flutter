@@ -40,11 +40,11 @@ Modify the following files as described:
 
 Additionally, change any references to the old SDK version to the latest in build.gradle across the repo.
 
-### Update our android_virtual_device dependency
+### Update our `android_virtual_device` dependency
 
 1. Locate the desired Android Virtual Device (AVD) from https://chrome-infra-packages.appspot.com/p/chromium/tools/android/avd/linux-amd64/. You should look at the most recently updated AVD and verify that
-  it has the desired `generic_android<API#>.textpb` for the API version you are modified the engine to support. Then, determine it's Instance Identifier.
-2. In ..., find the `android_virtual_device` dependency and update the `version` ... For example,
+  it has the desired `generic_android<API#>.textpb` for the API version you are modified the engine to support. Then, determine its Instance Identifier.
+2. In each of the engine builders (at the time of writing: `ci/builders/linux_android_emulator_skia.json` & `ci/builders/linux_android_emulator.json`), find the `android_virtual_device` and `avd_cipd_version` depedency entries and update them to the versions you desire, e.g.
 
 ```json
 {
@@ -59,8 +59,5 @@ Additionally, change any references to the old SDK version to the latest in buil
 
 ## Next Steps: Update the Framework, Examples and Samples
 
-The Flutter templates in the fra
-https://github.com/flutter/flutter/wiki/New-Android-version
 * Templates in [the framework](https://github.com/flutter/flutter): Change `targetSdkVersion` in various `build.gradle.tmpl` files to use the new API version
-<!-- TODO(camsim99): Update links for the following repos. -->
-* Examples, samples, gallery, etc: Change `targetSdkVersion` in `android/app/build.gradle` for each project to the new API version.
+* [Examples](https://github.com/flutter/flutter/tree/master/examples) and [samples](https://github.com/flutter/samples): Change `targetSdkVersion` in `android/app/build.gradle` for each project to the new API version.
