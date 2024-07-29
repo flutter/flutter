@@ -7,7 +7,6 @@
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/frame_timings.h"
-#include "flutter/flow/layer_snapshot_store.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/paint_utils.h"
 #include "flutter/flow/raster_cache.h"
@@ -108,13 +107,6 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
   DlCanvas* canvas = frame.canvas();
   state_stack.set_delegate(canvas);
 
-  // clear the previous snapshots.
-  LayerSnapshotStore* snapshot_store = nullptr;
-  if (enable_leaf_layer_tracing_) {
-    frame.context().snapshot_store().Clear();
-    snapshot_store = &frame.context().snapshot_store();
-  }
-
   SkColorSpace* color_space = GetColorSpace(frame.canvas());
 
 #if !SLIMPELLER
@@ -135,8 +127,6 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
 #if !SLIMPELLER
       .raster_cache                  = cache,
 #endif  //  !SLIMPELLER
-      .layer_snapshot_store          = snapshot_store,
-      .enable_leaf_layer_tracing     = enable_leaf_layer_tracing_,
       .impeller_enabled              = !!frame.aiks_context(),
       .aiks_context                  = frame.aiks_context(),
       // clang-format on
@@ -198,8 +188,6 @@ sk_sp<DisplayList> LayerTree::Flatten(
 #if !SLIMPELLER
       .raster_cache                  = nullptr,
 #endif  //  !SLIMPELLER
-      .layer_snapshot_store          = nullptr,
-      .enable_leaf_layer_tracing     = false,
       // clang-format on
   };
 

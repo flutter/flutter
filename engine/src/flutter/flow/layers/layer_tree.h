@@ -56,24 +56,9 @@ class LayerTree {
   const PaintRegionMap& paint_region_map() const { return paint_region_map_; }
   PaintRegionMap& paint_region_map() { return paint_region_map_; }
 
-  /// When `Paint` is called, if leaf layer tracing is enabled, additional
-  /// metadata around rasterization of leaf layers is collected.
-  ///
-  /// This is not supported in the Impeller backend.
-  ///
-  /// See: `LayerSnapshotStore`
-  void enable_leaf_layer_tracing(bool enable) {
-    enable_leaf_layer_tracing_ = enable;
-  }
-
-  bool is_leaf_layer_tracing_enabled() const {
-    return enable_leaf_layer_tracing_;
-  }
-
  private:
   std::shared_ptr<Layer> root_layer_;
   SkISize frame_size_ = SkISize::MakeEmpty();  // Physical pixels.
-  bool enable_leaf_layer_tracing_ = false;
 
   PaintRegionMap paint_region_map_;
 

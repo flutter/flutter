@@ -15,7 +15,6 @@
 #include "flutter/display_list/dl_canvas.h"
 #include "flutter/flow/diff_context.h"
 #include "flutter/flow/embedded_views.h"
-#include "flutter/flow/layer_snapshot_store.h"
 #include "flutter/flow/layers/layer_state_stack.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/stopwatch.h"
@@ -114,10 +113,6 @@ struct PaintContext {
   std::shared_ptr<TextureRegistry> texture_registry;
   NOT_SLIMPELLER(const RasterCache* raster_cache);
 
-  // Snapshot store to collect leaf layer snapshots. The store is non-null
-  // only when leaf layer tracing is enabled.
-  LayerSnapshotStore* layer_snapshot_store = nullptr;
-  bool enable_leaf_layer_tracing = false;
   bool impeller_enabled = false;
   impeller::AiksContext* aiks_context;
 };
