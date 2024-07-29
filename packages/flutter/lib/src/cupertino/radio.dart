@@ -393,6 +393,26 @@ class _RadioPainter extends ToggleablePainter {
     canvas.drawCircle(center, radius, pressedPaint);
   }
 
+  void _drawFillGradient(Canvas canvas, Offset center, double radius, List<Color> colors){
+    final LinearGradient fillGradient = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: colors,
+    );
+    final Rect circleRect = Rect.fromCircle(center: center, radius: radius);
+    final Paint gradientPaint = Paint()
+      ..shader = fillGradient.createShader(circleRect);
+    canvas.drawPath(Path()..addOval(circleRect), gradientPaint);
+  }
+
+  void _drawOuterBorder(Canvas canvas, Offset center){
+    final Paint borderPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..color = borderColor
+      ..strokeWidth = _kBorderOutlineStrokeWidth;
+    canvas.drawCircle(center, _kOuterRadius, borderPaint);
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     final bool isDefaultSelected = fillColor == CupertinoColors.white && activeColor == CupertinoColors.systemBlue;
@@ -430,28 +450,26 @@ class _RadioPainter extends ToggleablePainter {
         if (downPosition != null) {
           _drawPressedOverlay(canvas, center, _kOuterRadius);
         }
-        // In dark mode, the inner color of an active radio is a blue tint.
+        // In dark mode, the inner color of an active radio is a blue tint, and
+        // the inner color of a disabled radio is a translucent black color.
         final Paint innerPaint = Paint()
           ..color = isActive
             ? (isDefaultSelected && brightness == Brightness.dark ? _kDarkModeInnerColor : fillColor)
             : _kDisabledInnerColor;
         canvas.drawCircle(center, _kInnerRadius, innerPaint);
+        // Draw an outer border if the radio is disabled and selected.
+        if (!isActive) {
+          _drawOuterBorder(canvas, center);
+        }
       } else {
         // In dark mode, fill the unselected radio button with a gradient.
         if (value == false && brightness == Brightness.dark) {
-          final LinearGradient fillGradient = LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            // Eyeballed from a radio on a physical Macbook Pro running macOS version 14.5.
-            colors: <Color>[
-              inactiveColor.withOpacity(0.14),
-              inactiveColor.withOpacity(0.29),
-            ],
-          );
-          final Rect circleRect = Rect.fromCircle(center: center, radius: _kOuterRadius);
-          final Paint gradientPaint = Paint()
-            ..shader = fillGradient.createShader(circleRect);
-          canvas.drawPath(Path()..addOval(circleRect), gradientPaint);
+          // Eyeballed from a radio on a physical Macbook Pro running macOS version 14.5.
+          final List<Color> darkGradientComposition = <Color>[
+            inactiveColor.withOpacity(0.14),
+            inactiveColor.withOpacity(0.29),
+          ];
+          _drawFillGradient(canvas, center, _kOuterRadius, darkGradientComposition);
         }
         else {
           final Paint paint = Paint();
@@ -462,11 +480,7 @@ class _RadioPainter extends ToggleablePainter {
         if (downPosition != null) {
           _drawPressedOverlay(canvas, center, _kOuterRadius);
         }
-        final Paint borderPaint = Paint()
-          ..style = PaintingStyle.stroke
-          ..color = borderColor
-          ..strokeWidth = _kBorderOutlineStrokeWidth;
-        canvas.drawCircle(center, _kOuterRadius, borderPaint);
+        _drawOuterBorder(canvas, center);
       }
     }
     if (isFocused) {
