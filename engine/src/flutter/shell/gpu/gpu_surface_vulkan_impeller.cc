@@ -7,7 +7,6 @@
 #include "flutter/fml/make_copyable.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"
-#include "impeller/renderer/renderer.h"
 #include "impeller/renderer/surface.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 
@@ -19,11 +18,6 @@ GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
     return;
   }
 
-  auto renderer = std::make_shared<impeller::Renderer>(context);
-  if (!renderer->IsValid()) {
-    return;
-  }
-
   auto aiks_context = std::make_shared<impeller::AiksContext>(
       context, impeller::TypographerContextSkia::Make());
   if (!aiks_context->IsValid()) {
@@ -31,7 +25,6 @@ GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
   }
 
   impeller_context_ = std::move(context);
-  impeller_renderer_ = std::move(renderer);
   aiks_context_ = std::move(aiks_context);
   is_valid_ = true;
 }
@@ -66,9 +59,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
   }
 
   SurfaceFrame::SubmitCallback submit_callback =
-      fml::MakeCopyable([renderer = impeller_renderer_,  //
-                         aiks_context = aiks_context_,   //
-                         surface = std::move(surface)    //
+      fml::MakeCopyable([aiks_context = aiks_context_,  //
+                         surface = std::move(surface)   //
   ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
         if (!aiks_context) {
           return false;
@@ -83,44 +75,41 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
         auto cull_rect =
             surface->GetTargetRenderPassDescriptor().GetRenderTargetSize();
 
-        return renderer->Render(
-            std::move(surface),
-            fml::MakeCopyable([&](impeller::RenderTarget& render_target)
-                                  -> bool {
+        const impeller::RenderTarget& render_target =
+            surface->GetTargetRenderPassDescriptor();
 #if EXPERIMENTAL_CANVAS
-              impeller::TextFrameDispatcher collector(
-                  aiks_context->GetContentContext(), impeller::Matrix());
-              display_list->Dispatch(
-                  collector,
-                  SkIRect::MakeWH(cull_rect.width, cull_rect.height));
-              impeller::ExperimentalDlDispatcher impeller_dispatcher(
-                  aiks_context->GetContentContext(), render_target,
-                  display_list->root_has_backdrop_filter(),
-                  display_list->max_root_blend_mode(),
-                  impeller::IRect::RoundOut(
-                      impeller::Rect::MakeSize(cull_rect)));
-              display_list->Dispatch(
-                  impeller_dispatcher,
-                  SkIRect::MakeWH(cull_rect.width, cull_rect.height));
-              impeller_dispatcher.FinishRecording();
-              aiks_context->GetContentContext().GetTransientsBuffer().Reset();
-              aiks_context->GetContentContext()
-                  .GetLazyGlyphAtlas()
-                  ->ResetTextFrames();
-              return true;
+        impeller::TextFrameDispatcher collector(
+            aiks_context->GetContentContext(), impeller::Matrix());
+        display_list->Dispatch(
+            collector, SkIRect::MakeWH(cull_rect.width, cull_rect.height));
+        impeller::ExperimentalDlDispatcher impeller_dispatcher(
+            aiks_context->GetContentContext(), render_target,
+            display_list->root_has_backdrop_filter(),
+            display_list->max_root_blend_mode(),
+            impeller::IRect::RoundOut(impeller::Rect::MakeSize(cull_rect)));
+        display_list->Dispatch(
+            impeller_dispatcher,
+            SkIRect::MakeWH(cull_rect.width, cull_rect.height));
+        impeller_dispatcher.FinishRecording();
+        aiks_context->GetContentContext().GetTransientsBuffer().Reset();
+        aiks_context->GetContentContext()
+            .GetLazyGlyphAtlas()
+            ->ResetTextFrames();
+        return surface->Present();
 #else
-              impeller::Rect dl_cull_rect = impeller::Rect::MakeSize(cull_rect);
-              impeller::DlDispatcher impeller_dispatcher(dl_cull_rect);
-              display_list->Dispatch(
-                  impeller_dispatcher,
-                  SkIRect::MakeWH(cull_rect.width, cull_rect.height));
-              auto picture = impeller_dispatcher.EndRecordingAsPicture();
-              const bool reset_host_buffer =
-                  surface_frame.submit_info().frame_boundary;
-              return aiks_context->Render(picture, render_target,
-                                          reset_host_buffer);
+        impeller::Rect dl_cull_rect = impeller::Rect::MakeSize(cull_rect);
+        impeller::DlDispatcher impeller_dispatcher(dl_cull_rect);
+        display_list->Dispatch(
+            impeller_dispatcher,
+            SkIRect::MakeWH(cull_rect.width, cull_rect.height));
+        auto picture = impeller_dispatcher.EndRecordingAsPicture();
+        const bool reset_host_buffer =
+            surface_frame.submit_info().frame_boundary;
+        if (!aiks_context->Render(picture, render_target, reset_host_buffer)) {
+          return false;
+        }
+        return surface->Present();
 #endif
-            }));
       });
 
   return std::make_unique<SurfaceFrame>(

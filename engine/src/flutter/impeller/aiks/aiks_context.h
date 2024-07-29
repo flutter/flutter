@@ -43,7 +43,7 @@ class AiksContext {
   ContentContext& GetContentContext() const;
 
   bool Render(const Picture& picture,
-              RenderTarget& render_target,
+              const RenderTarget& render_target,
               bool reset_host_buffer);
 
  private:

@@ -46,7 +46,7 @@ ContentContext& AiksContext::GetContentContext() const {
 }
 
 bool AiksContext::Render(const Picture& picture,
-                         RenderTarget& render_target,
+                         const RenderTarget& render_target,
                          bool reset_host_buffer) {
   if (!IsValid()) {
     return false;
