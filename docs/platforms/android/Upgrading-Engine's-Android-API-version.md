@@ -26,6 +26,8 @@ Typically, `<your-android-dir>` is in your home directory under `~/Library/Andro
 
 ## Update the [Engine](https://github.com/flutter/engine):
 
+### Update the compile and target SDK versions we use
+
 Modify the following files as described:
 * DEPS: Roll buildroot hash
 * DEPS: Change the version parameter under `flutter/android/sdk/all/${{platform}}` to the newly uploaded CIPD version tag. Eg, `'version': 'version:30r2'`
@@ -38,17 +40,27 @@ Modify the following files as described:
 
 Additionally, change any references to the old SDK version to the latest in build.gradle across the repo.
 
-## Update the [Flutter LUCI Recipes](https://flutter.googlesource.com/recipes):
+### Update our android_virtual_device dependency
 
-In the scenario tests (`recipes/engine/scenarios.py`),
+1. Locate the desired Android Virtual Device (AVD) from https://chrome-infra-packages.appspot.com/p/chromium/tools/android/avd/linux-amd64/. You should look at the most recently updated AVD and verify that
+  it has the desired `generic_android<API#>.textpb` for the API version you are modified the engine to support. Then, determine it's Instance Identifier.
+2. In ..., find the `android_virtual_device` dependency and update the `version` ... For example,
 
-1. Update the CIPD hash to the latest version that contains the configuration for the Android Virtual Device (AVD) desired `generic_android<API#>.textpb`.
-2. Change the script to use the new textpb config and change the API number in the logs.
+```json
+{
+    "dependency": "android_virtual_device",
+    "version": "android_<API#>_google_apis_x64.textpb"
+},
+{
+    "dependency": "avd_cipd_version",
+    "version": "build_id:<Instance ID>"
+}
+```
 
-The CIPD package for the AVD launcher can be found at https://chrome-infra-packages.appspot.com/p/chromium/tools/android/avd/+/ and updating the packages uploaded there is tracked in https://bugs.chromium.org/p/chromium/issues/detail?id=1112429#c7.
+## Next Steps: Update the Framework, Examples and Samples
 
-## Update the Framework, Examples and Samples
-
+The Flutter templates in the fra
+https://github.com/flutter/flutter/wiki/New-Android-version
 * Templates in [the framework](https://github.com/flutter/flutter): Change `targetSdkVersion` in various `build.gradle.tmpl` files to use the new API version
 <!-- TODO(camsim99): Update links for the following repos. -->
 * Examples, samples, gallery, etc: Change `targetSdkVersion` in `android/app/build.gradle` for each project to the new API version.
