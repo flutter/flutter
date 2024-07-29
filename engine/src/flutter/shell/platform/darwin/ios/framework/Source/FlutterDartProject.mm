@@ -176,10 +176,6 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   settings.enable_wide_gamut = enableWideGamut;
 #endif
 
-  // TODO(dnfield): We should reverse the order for all these settings so that command line options
-  // are preferred to plist settings. https://github.com/flutter/flutter/issues/124049
-  // Whether to enable Impeller. If the command line explicitly
-  // specified an option for this, ignore what's in the plist.
   if (!command_line.HasOption("enable-impeller")) {
     // Next, look in the app bundle.
     NSNumber* enableImpeller = [bundle objectForInfoDictionaryKey:@"FLTEnableImpeller"];
