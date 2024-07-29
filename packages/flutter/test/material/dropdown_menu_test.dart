@@ -905,28 +905,28 @@ void main() {
 
     // Press down key three times, the highlight should move to the next item each time.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
+    await tester.pump();
     Material item0Material = tester.widget<Material>(button0Material);
     expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
+    await tester.pump();
     Material item1Material = tester.widget<Material>(button1Material);
     expect(item1Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
+    await tester.pump();
     final Material item2Material = tester.widget<Material>(button2Material);
     expect(item2Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
 
     // Press up key two times, the highlight should up each time.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.pumpAndSettle();
+    await tester.pump();
     item1Material = tester.widget<Material>(button1Material);
     expect(item1Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.pumpAndSettle();
+    await tester.pump();
     item0Material = tester.widget<Material>(button0Material);
     expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
 
@@ -948,10 +948,10 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
+    await tester.pump();
     // Search for the last item.
     await tester.enterText(find.byType(TextField).first, menuChildren.last.label);
-    await tester.pumpAndSettle();
+    await tester.pump();
     final Finder buttonMaterial = find.descendant(
       of: find.widgetWithText(MenuItemButton, menuChildren.last.label).last,
       matching: find.byType(Material),
@@ -974,17 +974,17 @@ void main() {
 
     // Open the menu and highlight the third item.
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
-    await tester.pumpAndSettle();
+    await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
+    await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
+    await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     // Filter the menu items.
     await tester.enterText(find.byType(TextField), menuChildren.first.label);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(tester.takeException(), isNull);
   });
 
