@@ -8,7 +8,24 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.publish.maven.MavenPublication
 
-void configureProject(Project project, String outputDir) {
+initscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.yaml:snakeyaml:2.2+'
+    }
+}
+
+
+ext{
+    pubspecLock = new org.yaml.snakeyaml.Yaml().load(
+            new File(new File(System.getProperty('user.dir')).parentFile, "pubspec.lock").newInputStream()
+    )
+}
+
+void configureProject(Project project, String outputDir, boolean isModuleProject) {
     if (!project.hasProperty("android")) {
         throw new GradleException("Android property not found.")
     }
@@ -22,7 +39,17 @@ void configureProject(Project project, String outputDir) {
     // to resolve dependencies.
     project.version = project.version.replace("-SNAPSHOT", "")
 
-    if (project.hasProperty("buildNumber")) {
+    if (!isModuleProject) {
+        def deps = pubspecLock.packages.find{ it.key == "${project.name}" }
+        if (deps != null && deps.value != null && deps.value.version != null && !(deps.value.version.trim().isEmpty())){
+            def _version = deps.value.version
+            project.version = _version
+        }else {
+        }
+    }
+
+    if ((isModuleProject && project.hasProperty("buildNumber"))
+            || (project.version == null || project.version.trim().isEmpty())) {
         project.version = project.property("buildNumber")
     }
 
@@ -76,7 +103,7 @@ void configurePlugin(Project project, String outputDir) {
         // A plugin doesn't support the Android platform when this property isn't defined in the plugin.
         return
     }
-    configureProject(project, outputDir)
+    configureProject(project, outputDir, false)
 }
 
 String getFlutterRoot(Project project) {
@@ -121,14 +148,14 @@ projectsEvaluated {
     if (rootProject.property("is-plugin").toBoolean()) {
         assert rootProject.hasProperty("output-dir")
         // In plugin projects, the root project is the plugin.
-        configureProject(rootProject, rootProject.property("output-dir"))
+        configureProject(rootProject, rootProject.property("output-dir"), false)
         return
     }
     // The module project is the `:flutter` subproject.
     Project moduleProject = rootProject.subprojects.find { it.name == "flutter" }
     assert moduleProject != null
     assert moduleProject.hasProperty("output-dir")
-    configureProject(moduleProject, moduleProject.property("output-dir"))
+    configureProject(moduleProject, moduleProject.property("output-dir"), true)
 
     // Gets the plugin subprojects.
     Set<Project> modulePlugins = rootProject.subprojects.findAll {
