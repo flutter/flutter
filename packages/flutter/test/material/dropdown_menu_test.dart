@@ -932,6 +932,34 @@ void main() {
 
   }, variant: TargetPlatformVariant.desktop());
 
+  // Regression test for https://github.com/flutter/flutter/issues/152375.
+  testWidgets('Searching can hightlight entry after keyboard navigation', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          dropdownMenuEntries: menuChildren,
+        ),
+      ),
+    ));
+
+    // Open the menu and highlight the first item.
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    // Search for the last item.
+    await tester.enterText(find.byType(TextField).first, menuChildren.last.label);
+    await tester.pumpAndSettle();
+    final Finder buttonMaterial = find.descendant(
+      of: find.widgetWithText(MenuItemButton, menuChildren.last.label).last,
+      matching: find.byType(Material),
+    );
+    final Material itemMaterial = tester.widget<Material>(buttonMaterial);
+    expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12)); // Menu 1 button is highlighted.
+  }, variant: TargetPlatformVariant.desktop());
+
   // Regression test for https://github.com/flutter/flutter/issues/151878.
   testWidgets('Filtering does not cause crush with existing currentHighlight', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
