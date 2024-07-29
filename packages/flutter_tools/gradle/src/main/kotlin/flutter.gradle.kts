@@ -11,6 +11,7 @@ class FlutterPluginKts : Plugin<Project> {
         androidExtension?.let { android ->
             android.defaultConfig.let { defaultConfig ->
                 val baseApplicationName = project.findProperty("base-application-name")?.toString() ?: "android.app.Application"
+                // Setting to android.app.Application is the same as omitting the attribute.
                 defaultConfig.manifestPlaceholders["applicationName"] = baseApplicationName
             }
         }
