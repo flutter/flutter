@@ -393,7 +393,7 @@ class _RadioPainter extends ToggleablePainter {
     canvas.drawCircle(center, radius, pressedPaint);
   }
 
-  void _drawFillGradient(Canvas canvas, Offset center, double radius, List<Color> colors){
+  void _drawFillGradient(Canvas canvas, Offset center, double radius, List<Color> colors) {
     final LinearGradient fillGradient = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
@@ -405,7 +405,7 @@ class _RadioPainter extends ToggleablePainter {
     canvas.drawPath(Path()..addOval(circleRect), gradientPaint);
   }
 
-  void _drawOuterBorder(Canvas canvas, Offset center){
+  void _drawOuterBorder(Canvas canvas, Offset center) {
     final Paint borderPaint = Paint()
       ..style = PaintingStyle.stroke
       ..color = borderColor
