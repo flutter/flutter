@@ -8,6 +8,8 @@ import 'dart:typed_data';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine/canvaskit/image.dart';
+import 'package:ui/src/engine/image_decoder.dart';
+import 'package:ui/src/engine/util.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'common.dart';
@@ -97,6 +99,12 @@ void testMain() {
       result,
       List<int>.generate(100000, (int i) => i & 0xFF),
     );
+  });
+
+  test('scaledImageSize scales to a target width with no target height', () {
+    final BitmapSize? size = scaledImageSize(200, 100, 600, null);
+    expect(size?.width, 600);
+    expect(size?.height, 300);
   });
 }
 
