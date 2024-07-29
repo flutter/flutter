@@ -752,13 +752,13 @@ abstract class RenderBox extends RenderObject {
     // more complicated asserts:
     assert(() {
       final RenderObject parent = this.parent;
-      if (owner.debugDoingLayout)
-        return (RenderObject.debugActiveLayout == parent) &&
-            parent.debugDoingThisLayout;
-      if (owner.debugDoingPaint)
-        return ((RenderObject.debugActivePaint == parent) &&
-                parent.debugDoingThisPaint) ||
-            ((RenderObject.debugActivePaint == this) && debugDoingThisPaint);
+      if (owner.debugDoingLayout) {
+        return (RenderObject.debugActiveLayout == parent) && parent.debugDoingThisLayout;
+      }
+      if (owner.debugDoingPaint) {
+        return ((RenderObject.debugActivePaint == parent) && parent.debugDoingThisPaint)
+            || ((RenderObject.debugActivePaint == this)   && debugDoingThisPaint);
+      }
       assert(parent == this.parent);
       return false;
     });
@@ -928,8 +928,9 @@ TheType get theProperty => _theProperty;
 TheType _theProperty;
 void set theProperty(TheType value) {
   assert(value != null);
-  if (_theProperty == value)
+  if (_theProperty == value) {
     return;
+  }
   _theProperty = value;
   markNeedsWhatever(); // the method to mark the object dirty
 }
@@ -1073,7 +1074,7 @@ const double kParagraphSpacing = 1.5;
 const String kSaveButtonTitle = 'Save';
 ```
 
-However, where possible avoid global constants. Rather than `kDefaultButtonColor`, consider `Button.defaultColor`. If necessary, consider creating a class with a private constructor to hold relevant constants.
+However, where possible avoid global constants. Rather than `kDefaultButtonColor`, consider `Button.defaultColor`. If necessary, consider creating an `abstract final class` to hold relevant constants.
 
 
 ### Avoid abbreviations
@@ -1249,7 +1250,9 @@ include a link to that issue in the code.
 Generally the closure passed to `setState` should include all the code that changes the state. Sometimes this is not possible because the state changed elsewhere and the `setState` is called in response. In those cases, include a comment in the `setState` closure that explains what the state is that changed.
 
 ```dart
-  setState(() { /* The animation ticked. We use the animation's value in the build method. */ });
+  setState(() {
+    // The animation ticked. We use the animation's value in the build method.
+  });
 ```
 
 
@@ -1328,25 +1331,21 @@ to the superclass.
 
 ```dart
 // one-line constructor example
-abstract class Foo extends StatelessWidget {
-  Foo(this.bar, { Key key, this.child }) : super(key: key);
-  final int bar;
-  final Widget child;
+class ConstantTween<T> extends Tween<T> {
+  ConstantTween(T value) : super(begin: value, end: value);
+
   // ...
 }
 
 // fully expanded constructor example
-abstract class Foo extends StatelessWidget {
-  Foo(
-    this.bar, {
-    Key key,
-    Widget childWidget,
-  }) : child = childWidget,
-       super(
-         key: key,
-       );
-  final int bar;
-  final Widget child;
+class ConstantTween<T> extends Tween<T> {
+  ConstantTween(
+    T value,
+  ) : super(
+        begin: value,
+        end: value,
+      );
+
   // ...
 }
 ```
@@ -1432,8 +1431,6 @@ Example:
     bar,
     baz,
   );
-  foo(bar,
-    baz);
 ```
 
 ### Use a trailing comma for arguments, parameters, and list items, but only if they each have their own line.
@@ -1488,17 +1485,6 @@ However, there are exceptions. For example, if there are six back-to-back lists 
   ];
 ```
 
-### Prefer single quotes for strings
-
-Use double quotes for nested strings or (optionally) for strings that contain single quotes.
-For all other strings, use single quotes.
-
-Example:
-
-```dart
-print('Hello ${name.split(" ")[0]}');
-```
-
 
 ### Consider using `=>` for short functions and methods
 
@@ -1541,11 +1527,11 @@ For example:
           return <PopupMenuItem<String>>[
             PopupMenuItem<String>(
               value: 'Friends',
-              child: MenuItemWithIcon(Icons.people, 'Friends', '5 new')
+              child: MenuItemWithIcon(Icons.people, 'Friends', '5 new'),
             ),
             PopupMenuItem<String>(
               value: 'Events',
-              child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming')
+              child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming'),
             ),
           ];
         }
@@ -1560,11 +1546,11 @@ For example:
         itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
           PopupMenuItem<String>(
             value: 'Friends',
-            child: MenuItemWithIcon(Icons.people, 'Friends', '5 new')
+            child: MenuItemWithIcon(Icons.people, 'Friends', '5 new'),
           ),
           PopupMenuItem<String>(
             value: 'Events',
-            child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming')
+            child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming'),
           ),
         ]
       );
@@ -1665,60 +1651,6 @@ final List<String> args = <String>[
 
 Use a block (with braces) when a body would wrap onto more than one line (as opposed to using `=>`; the cases where you can use `=>` are discussed in the previous two guidelines).
 
-
-### Separate the 'if' expression from its statement
-
-(This is enforced by the `always_put_control_body_on_new_line` and `curly_braces_in_flow_control_structures` lints.)
-
-Don't put the statement part of an 'if' statement on the same line as
-the expression, even if it is short. (Doing so makes it unobvious that
-there is relevant code there. This is especially important for early
-returns.)
-
-Example:
-
-```dart
-// BAD:
-if (notReady) return;
-
-// GOOD:
-// Use this style for code that is expected to be publicly read by developers
-if (notReady) {
-  return;
-}
-```
-
-If the body is more than one line, or if there is an `else` clause, wrap the body in braces:
-
-```dart
-// BAD:
-if (foo)
-  bar(
-    'baz',
-  );
-
-// BAD:
-if (foo)
-  bar();
-else
-  baz();
-
-// GOOD:
-if (foo) {
-  bar(
-    'baz',
-  );
-}
-
-// GOOD:
-if (foo) {
-  bar();
-} else {
-  baz();
-}
-```
-
-We require bodies to make it very clear where the bodies belong.
 
 ### Align expressions
 
