@@ -77,44 +77,44 @@ class CardTheme extends InheritedWidget with Diagnosticable {
 
   /// Overrides the default value for [Card.clipBehavior].
   ///
-  /// This property is obsolete: please use the [CardThemeData.clipBehavior]
-  /// property in [data] instead.
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [CardThemeData.clipBehavior] property in [data] instead.
   Clip? get clipBehavior => _data != null ? _data.clipBehavior : _clipBehavior;
 
   /// Overrides the default value for [Card.color].
   ///
-  /// This property is obsolete: please use the [CardThemeData.color] property
-  /// in [data] instead.
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [CardThemeData.color] property in [data] instead.
   Color? get color => _data != null ? _data.color : _color;
 
   /// Overrides the default value for [Card.surfaceTintColor].
   ///
-  /// This property is obsolete: please use the [CardThemeData.surfaceTintColor] property
-  /// in [data] instead.
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [CardThemeData.surfaceTintColor] property in [data] instead.
   Color? get surfaceTintColor => _data != null ? _data.surfaceTintColor : _surfaceTintColor;
 
   /// Overrides the default value for [Card.shadowColor].
   ///
-  /// This property is obsolete: please use the [CardThemeData.shadowColor] property
-  /// in [data] instead.
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [CardThemeData.shadowColor] property in [data] instead.
   Color? get shadowColor => _data != null ? _data.shadowColor : _shadowColor;
 
   /// Overrides the default value for [Card.elevation].
   ///
-  /// This property is obsolete: please use the [CardThemeData.elevation] property
-  /// in [data] instead.
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [CardThemeData.elevation] property in [data] instead.
   double? get elevation => _data != null ? _data.elevation : _elevation;
 
   /// Overrides the default value for [Card.margin].
   ///
-  /// This property is obsolete: please use the [CardThemeData.margin] property
-  /// in [data] instead.
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [CardThemeData.margin] property in [data] instead.
   EdgeInsetsGeometry? get margin => _data != null ? _data.margin : _margin;
 
   /// Overrides the default value for [Card.shape].
   ///
-  /// This property is obsolete: please use the [CardThemeData.shape] property
-  /// in [data] instead.
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [CardThemeData.shape] property in [data] instead.
   ShapeBorder? get shape => _data != null ? _data.shape : _shape;
 
   /// The properties used for all descendant [Card] widgets.
@@ -132,6 +132,9 @@ class CardTheme extends InheritedWidget with Diagnosticable {
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
+  ///
+  /// This method is obsolete and will be deprecated in a future release:
+  /// please use the [CardThemeData.copyWith] instead.
   CardTheme copyWith({
     Clip? clipBehavior,
     Color? color,
@@ -164,6 +167,9 @@ class CardTheme extends InheritedWidget with Diagnosticable {
   /// Linearly interpolate between two Card themes.
   ///
   /// {@macro dart.ui.shadow.lerp}
+  ///
+  /// This method is obsolete and will be deprecated in a future release:
+  /// please use the [CardThemeData.lerp] instead.
   static CardTheme lerp(CardTheme? a, CardTheme? b, double t) {
     if (identical(a, b) && a != null) {
       return a;
