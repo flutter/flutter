@@ -951,6 +951,9 @@ class _ViewContentState extends State<_ViewContent> {
     final EdgeInsets? effectivePadding = widget.viewPadding
       ?? viewTheme.padding
       ?? viewDefaults.padding;
+    final MaterialStateProperty<EdgeInsetsGeometry> effectiveBarPadding = widget.viewBarPadding
+      ?? viewTheme.barPadding
+      ?? viewDefaults.barPadding;
 
     final Widget viewDivider = DividerTheme(
       data: dividerTheme.copyWith(color: effectiveDividerColor),
@@ -991,7 +994,7 @@ class _ViewContentState extends State<_ViewContent> {
                             child: SearchBar(
                               autoFocus: true,
                               constraints: headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null),
-                              padding: widget.viewBarPadding,
+                              padding: viewBarPadding,
                               leading: widget.viewLeading ?? defaultLeading,
                               trailing: widget.viewTrailing ?? defaultTrailing,
                               hintText: widget.viewHintText,
