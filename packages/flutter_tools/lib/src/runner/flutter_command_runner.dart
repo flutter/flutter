@@ -414,6 +414,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           throwToolExit('The "--machine" flag is only valid with the "--version" flag or the "analyze --suggestions" command.', exitCode: 2);
         }
 
+        // TODO(bkonyi): can this be removed and passed solely via DebuggingOptions?
         final bool shouldPrintDtdUri = topLevelResults[FlutterGlobalOptions.kPrintDtd] as bool? ?? false;
         DevtoolsLauncher.instance!.printDtdUri = shouldPrintDtdUri;
 
