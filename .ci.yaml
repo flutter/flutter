@@ -4055,7 +4055,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac tool_integration_tests_1_4
+  - name: Mac tool_integration_tests_1_5
     recipe: flutter/flutter_drone
     timeout: 60
     # Flake rate of >2.5% in presubmit
@@ -4071,7 +4071,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
         ]
       shard: tool_integration_tests
-      subshard: "1_4"
+      subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
       test_timeout_secs: "2700"
@@ -4081,7 +4081,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac tool_integration_tests_2_4
+  - name: Mac tool_integration_tests_2_5
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4095,7 +4095,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
         ]
       shard: tool_integration_tests
-      subshard: "2_4"
+      subshard: "2_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
       test_timeout_secs: "2700"
@@ -4105,7 +4105,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac tool_integration_tests_3_4
+  - name: Mac tool_integration_tests_3_5
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4119,7 +4119,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
         ]
       shard: tool_integration_tests
-      subshard: "3_4"
+      subshard: "3_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
       test_timeout_secs: "2700"
@@ -4129,7 +4129,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac tool_integration_tests_4_4
+  - name: Mac tool_integration_tests_4_5
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4143,7 +4143,31 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
         ]
       shard: tool_integration_tests
-      subshard: "4_4"
+      subshard: "4_5"
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700"
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac tool_integration_tests_5_5
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+      shard: tool_integration_tests
+      subshard: "5_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
       test_timeout_secs: "2700"
