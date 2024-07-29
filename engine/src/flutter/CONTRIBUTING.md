@@ -185,7 +185,7 @@ Automatically formatted with `gn format`.
 [pr_49801]: https://github.com/flutter/engine/pull/49801
 [code_of_conduct]: https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md
 [contrib_guide]: https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md
-[engine_dev_setup]: https://github.com/flutter/flutter/blob/master/docs/engine/contributing/Setting-up-the-Engine-development-environment.md
+[engine_dev_setup]: docs/contributing/Setting-up-the-Engine-development-environment.md
 [flutter_style]: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo
 [objc_style]: https://google.github.io/styleguide/objcguide.html
 [java_style]: https://google.github.io/styleguide/javaguide.html
