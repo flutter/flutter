@@ -345,7 +345,6 @@ void main() {
       'a Toggle timeline events for all widget build methods.                    (debugProfileWidgetBuilds)',
       'M Write SkSL shaders to a unique file in the project directory.',
       'g Run source code generators.',
-      'j Dump frame raster stats for the current frame. (Unsupported for web)',
       'h Repeat this help message.',
       'd Detach (terminate "flutter run" but leave application running).',
       'c Clear the screen',

@@ -28,7 +28,6 @@ const String kFlushUIThreadTasksMethod = '_flutter.flushUIThreadTasks';
 const String kRunInViewMethod = '_flutter.runInView';
 const String kListViewsMethod = '_flutter.listViews';
 const String kScreenshotSkpMethod = '_flutter.screenshotSkp';
-const String kRenderFrameWithRasterStatsMethod = '_flutter.renderFrameWithRasterStats';
 const String kReloadAssetFonts = '_flutter.reloadAssetFonts';
 
 const String kFlutterToolAlias = 'Flutter Tools';
@@ -591,26 +590,6 @@ class FlutterVmService {
       },
     );
     await onRunnable;
-  }
-
-  /// Renders the last frame with additional raster tracing enabled.
-  ///
-  /// When a frame is rendered using this method it will incur additional cost
-  /// for rasterization which is not reflective of how long the frame takes in
-  /// production. This is primarily intended to be used to identify the layers
-  /// that result in the most raster perf degradation.
-  Future<Map<String, Object?>?> renderFrameWithRasterStats({
-    required String? viewId,
-    required String? uiIsolateId,
-  }) async {
-    final vm_service.Response? response = await callMethodWrapper(
-      kRenderFrameWithRasterStatsMethod,
-      isolateId: uiIsolateId,
-      args: <String, String?>{
-        'viewId': viewId,
-      },
-    );
-    return response?.json;
   }
 
   Future<String> flutterDebugDumpApp({
