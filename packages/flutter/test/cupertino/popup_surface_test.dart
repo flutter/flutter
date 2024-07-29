@@ -22,35 +22,38 @@ class _FilterTest extends StatelessWidget {
     final double tileHeight = size.height / 4;
     final double tileWidth = size.width / 8;
     return CupertinoApp(
-      home: Stack(fit: StackFit.expand, children: <Widget>[
-        // 512 color tiles
-        // 4 alpha levels (0.416, 0.25, 0.5, 0.75)
-        for (int a = 0; a < 4; a++)
-          for (int h = 0; h < 8; h++) // 8 hues
-            for (int s = 0; s < 4; s++) // 4 saturation levels
-              for (int b = 0; b < 4; b++) // 4 brightness levels
-                Positioned(
-                  left: h * tileWidth + b * tileWidth / 4,
-                  top: a * tileHeight + s * tileHeight / 4,
-                  height: tileHeight,
-                  width: tileWidth,
-                  child: ColoredBox(
-                    color: HSVColor.fromAHSV(
-                      0.5 + a / 8,
-                      h * 45,
-                      0.5 + s / 8,
-                      0.5 + b / 8,
-                    ).toColor(),
+      home: Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          // 512 color tiles
+          // 4 alpha levels (0.416, 0.25, 0.5, 0.75)
+          for (int a = 0; a < 4; a++)
+            for (int h = 0; h < 8; h++) // 8 hues
+              for (int s = 0; s < 4; s++) // 4 saturation levels
+                for (int b = 0; b < 4; b++) // 4 brightness levels
+                  Positioned(
+                    left: h * tileWidth + b * tileWidth / 4,
+                    top: a * tileHeight + s * tileHeight / 4,
+                    height: tileHeight,
+                    width: tileWidth,
+                    child: ColoredBox(
+                      color: HSVColor.fromAHSV(
+                        0.5 + a / 8,
+                        h * 45,
+                        0.5 + s / 8,
+                        0.5 + b / 8,
+                      ).toColor(),
+                    ),
                   ),
-                ),
-        Padding(
-          padding: const EdgeInsets.all(32),
-          child: CupertinoTheme(
-            data: CupertinoThemeData(brightness: brightness),
-            child: _child,
+          Padding(
+            padding: const EdgeInsets.all(32),
+            child: CupertinoTheme(
+              data: CupertinoThemeData(brightness: brightness),
+              child: _child,
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }

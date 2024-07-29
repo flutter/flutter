@@ -208,6 +208,14 @@ bool _isInAccessibilityMode(BuildContext context) {
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
 ///
+/// CupertinoPopupSurface uses ImageFilter.compose, which applies an inner
+/// filter first, followed by an outer filter (e.g. result =
+/// outer(inner(source))).
+///
+/// For CupertinoPopupSurface, the pixels underlying the surface are first
+/// saturated with a ColorFilter, and the resulting saturated pixels are blurred
+/// with ImageFilter.blur.
+///
 /// {@tool dartpad}
 /// This sample shows how to use a [CupertinoAlertDialog].
 ///	The [CupertinoAlertDialog] shows an alert with a set of two choices
