@@ -1,4 +1,4 @@
-Signature: c8667380e9a4e95f86b67a14bf16b285
+Signature: 093de485a1f080405c7831acb198f996
 
 ====================================================================================================
 LIBRARY: etc1
@@ -398,6 +398,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
 FILE: ../../../flutter/third_party/skia/relnotes/ios12.md
+FILE: ../../../flutter/third_party/skia/relnotes/vktypes.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -8481,8 +8482,8 @@ ORIGIN: ../../../flutter/third_party/skia/include/gpu/vk/VulkanMemoryAllocator.h
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/vk/VulkanTypes.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/private/base/SkContainers.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/private/gpu/graphite/DawnTypesPriv.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/include/private/gpu/graphite/VulkanGraphiteTypesPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanGraphiteTypes.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanGraphiteTypesPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/tessellate/MidpointContourParser.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/SkSLPosition.cpp + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
@@ -8494,8 +8495,8 @@ FILE: ../../../flutter/third_party/skia/include/gpu/vk/VulkanMemoryAllocator.h
 FILE: ../../../flutter/third_party/skia/include/gpu/vk/VulkanTypes.h
 FILE: ../../../flutter/third_party/skia/include/private/base/SkContainers.h
 FILE: ../../../flutter/third_party/skia/include/private/gpu/graphite/DawnTypesPriv.h
-FILE: ../../../flutter/third_party/skia/include/private/gpu/graphite/VulkanGraphiteTypesPriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanGraphiteTypes.cpp
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanGraphiteTypesPriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/tessellate/MidpointContourParser.h
 FILE: ../../../flutter/third_party/skia/src/sksl/SkSLPosition.cpp
 ----------------------------------------------------------------------------------------------------
@@ -9588,6 +9589,9 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/render/SDFTextLCDRend
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/render/SDFTextLCDRenderStep.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/task/DrawTask.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/task/DrawTask.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanBackendSemaphore.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanBackendTexture.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanTextureInfo.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/SkSLModule.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/SkSLModule.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/SkSLModuleDataDefault.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9694,6 +9698,9 @@ FILE: ../../../flutter/third_party/skia/src/gpu/graphite/render/SDFTextLCDRender
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/render/SDFTextLCDRenderStep.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/task/DrawTask.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/task/DrawTask.h
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanBackendSemaphore.cpp
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanBackendTexture.cpp
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanTextureInfo.cpp
 FILE: ../../../flutter/third_party/skia/src/sksl/SkSLModule.cpp
 FILE: ../../../flutter/third_party/skia/src/sksl/SkSLModule.h
 FILE: ../../../flutter/third_party/skia/src/sksl/SkSLModuleDataDefault.cpp
