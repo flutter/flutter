@@ -17,7 +17,6 @@
 #include "impeller/playground/image/decompressed_image.h"
 #include "impeller/playground/switches.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/renderer.h"
 #include "impeller/runtime_stage/runtime_stage.h"
 
 namespace impeller {
@@ -78,7 +77,9 @@ class Playground {
 
   std::shared_ptr<Context> MakeContext() const;
 
-  bool OpenPlaygroundHere(const Renderer::RenderCallback& render_callback);
+  using RenderCallback = std::function<bool(RenderTarget& render_target)>;
+
+  bool OpenPlaygroundHere(const RenderCallback& render_callback);
 
   bool OpenPlaygroundHere(SinglePassCallback pass_callback);
 
@@ -124,7 +125,6 @@ class Playground {
   fml::TimeDelta start_time_;
   std::unique_ptr<PlaygroundImpl> impl_;
   std::shared_ptr<Context> context_;
-  std::unique_ptr<Renderer> renderer_;
   Point cursor_position_;
   ISize window_size_ = ISize{1024, 768};
 

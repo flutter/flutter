@@ -7,7 +7,6 @@
 #include "flutter/fml/make_copyable.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/renderer/backend/gles/surface_gles.h"
-#include "impeller/renderer/renderer.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 
 namespace flutter {
@@ -25,11 +24,6 @@ GPUSurfaceGLImpeller::GPUSurfaceGLImpeller(
     return;
   }
 
-  auto renderer = std::make_shared<impeller::Renderer>(context);
-  if (!renderer->IsValid()) {
-    return;
-  }
-
   auto aiks_context = std::make_shared<impeller::AiksContext>(
       context, impeller::TypographerContextSkia::Make());
 
@@ -40,7 +34,6 @@ GPUSurfaceGLImpeller::GPUSurfaceGLImpeller(
   delegate_ = delegate;
   impeller_context_ = std::move(context);
   render_to_surface_ = render_to_surface;
-  impeller_renderer_ = std::move(renderer);
   aiks_context_ = std::move(aiks_context);
   is_valid_ = true;
 }
@@ -105,9 +98,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
   );
 
   SurfaceFrame::SubmitCallback submit_callback =
-      fml::MakeCopyable([renderer = impeller_renderer_,  //
-                         aiks_context = aiks_context_,   //
-                         surface = std::move(surface)    //
+      fml::MakeCopyable([aiks_context = aiks_context_,  //
+                         surface = std::move(surface)   //
   ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
         if (!aiks_context) {
           return false;
@@ -130,14 +122,12 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
         const bool reset_host_buffer =
             surface_frame.submit_info().frame_boundary;
 
-        return renderer->Render(
-            std::move(surface),
-            fml::MakeCopyable(
-                [aiks_context, picture = std::move(picture), reset_host_buffer](
-                    impeller::RenderTarget& render_target) -> bool {
-                  return aiks_context->Render(picture, render_target,
-                                              reset_host_buffer);
-                }));
+        const impeller::RenderTarget& render_target =
+            surface->GetTargetRenderPassDescriptor();
+        if (!aiks_context->Render(picture, render_target, reset_host_buffer)) {
+          return false;
+        }
+        return surface->Present();
       });
 
   return std::make_unique<SurfaceFrame>(
