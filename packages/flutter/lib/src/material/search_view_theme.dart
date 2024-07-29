@@ -45,6 +45,7 @@ class SearchViewThemeData with Diagnosticable {
     this.surfaceTintColor,
     this.constraints,
     this.padding,
+    this.barPadding,
     this.side,
     this.shape,
     this.headerHeight,
@@ -83,6 +84,9 @@ class SearchViewThemeData with Diagnosticable {
   /// Overrides the value of the padding for [SearchAnchor.viewPadding].
   final EdgeInsets? padding;
 
+  /// Overrides the value of the padding for [SearchAnchor.viewBarPadding]
+  final WidgetStateProperty<EdgeInsetsGeometry?>? barPadding;
+
   /// Overrides the value of the divider color for [SearchAnchor.dividerColor].
   final Color? dividerColor;
 
@@ -99,6 +103,7 @@ class SearchViewThemeData with Diagnosticable {
     TextStyle? headerHintStyle,
     BoxConstraints? constraints,
     EdgeInsets? padding,
+    WidgetStateProperty<EdgeInsetsGeometry?>? barPadding,
     Color? dividerColor,
   }) {
     return SearchViewThemeData(
@@ -112,6 +117,7 @@ class SearchViewThemeData with Diagnosticable {
       headerHintStyle: headerHintStyle ?? this.headerHintStyle,
       constraints: constraints ?? this.constraints,
       padding: padding ?? this.padding,
+      barPadding: barPadding ?? this.barPadding,
       dividerColor: dividerColor ?? this.dividerColor,
     );
   }
@@ -132,6 +138,7 @@ class SearchViewThemeData with Diagnosticable {
       headerHintStyle: TextStyle.lerp(a?.headerTextStyle, b?.headerTextStyle, t),
       constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
       padding: EdgeInsets.lerp(a?.padding, b?.padding, t),
+      barPadding: WidgetStateProperty.lerp<EdgeInsetsGeometry?>(a?.barPadding, b?.barPadding, t, EdgeInsetsGeometry.lerp),
       dividerColor: Color.lerp(a?.dividerColor, b?.dividerColor, t),
     );
   }
@@ -148,6 +155,7 @@ class SearchViewThemeData with Diagnosticable {
     headerHintStyle,
     constraints,
     padding,
+    barPadding,
     dividerColor,
   );
 
@@ -170,6 +178,7 @@ class SearchViewThemeData with Diagnosticable {
       && other.headerHintStyle == headerHintStyle
       && other.constraints == constraints
       && other.padding == padding
+      && other.barPadding == barPadding
       && other.dividerColor == dividerColor;
   }
 
@@ -186,6 +195,7 @@ class SearchViewThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle?>('headerHintStyle', headerHintStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsets?>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetStateProperty<EdgeInsetsGeometry?>?>('barPadding', barPadding, defaultValue: null));
     properties.add(DiagnosticsProperty<Color?>('dividerColor', dividerColor, defaultValue: null));
   }
 

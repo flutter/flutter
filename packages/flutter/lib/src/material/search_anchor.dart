@@ -1008,7 +1008,7 @@ class _ViewContentState extends State<_ViewContent> {
                           child: SearchBar(
                             autoFocus: true,
                             constraints: headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null),
-                            padding: widget.viewBarPadding ?? const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 8.0)),
+                            padding: widget.viewBarPadding,
                             leading: widget.viewLeading ?? defaultLeading,
                             trailing: widget.viewTrailing ?? defaultTrailing,
                             hintText: widget.viewHintText,
@@ -1655,6 +1655,10 @@ class _SearchViewDefaultsM3 extends SearchViewThemeData {
 
   @override
   BoxConstraints get constraints => const BoxConstraints(minWidth: 360.0, minHeight: 240.0);
+
+  @override
+  MaterialStateProperty<EdgeInsetsGeometry?>? get barPadding =>
+    const MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.symmetric(horizontal: 8.0));
 
   @override
   Color? get dividerColor => _colors.outline;
