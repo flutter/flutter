@@ -37,9 +37,6 @@ const std::string_view ServiceProtocol::kGetSkSLsExtensionName =
 const std::string_view
     ServiceProtocol::kEstimateRasterCacheMemoryExtensionName =
         "_flutter.estimateRasterCacheMemory";
-const std::string_view
-    ServiceProtocol::kRenderFrameWithRasterStatsExtensionName =
-        "_flutter.renderFrameWithRasterStats";
 const std::string_view ServiceProtocol::kReloadAssetFonts =
     "_flutter.reloadAssetFonts";
 
@@ -61,7 +58,6 @@ ServiceProtocol::ServiceProtocol()
           kGetDisplayRefreshRateExtensionName,
           kGetSkSLsExtensionName,
           kEstimateRasterCacheMemoryExtensionName,
-          kRenderFrameWithRasterStatsExtensionName,
           kReloadAssetFonts,
       }),
       handlers_mutex_(fml::SharedMutex::Create()) {}
