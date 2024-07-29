@@ -8,7 +8,7 @@ class FlutterPluginKts : Plugin<Project> {
     override fun apply(project: Project) {
         val androidExtension = project.extensions.findByType(com.android.build.gradle.AppExtension::class.java)
 
-        androidExtension?.let { android ->
+        androidExtension.let { android ->
             android.defaultConfig.let { defaultConfig ->
                 val baseApplicationName = project.findProperty("base-application-name")?.toString() ?: "android.app.Application"
                 // Setting to android.app.Application is the same as omitting the attribute.
