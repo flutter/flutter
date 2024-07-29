@@ -3335,10 +3335,10 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   pool.RecycleLayers();
   XCTAssertEqual(pool.size(), 2u);
 
-  // Free the unused layers.
+  // Free the unused layers. One should remain.
   auto unused_layers = pool.RemoveUnusedLayers();
   XCTAssertEqual(unused_layers.size(), 2u);
-  XCTAssertEqual(pool.size(), 0u);
+  XCTAssertEqual(pool.size(), 1u);
 }
 
 @end
