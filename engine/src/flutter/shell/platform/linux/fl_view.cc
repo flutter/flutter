@@ -743,7 +743,6 @@ static void fl_view_init(FlView* self) {
                            self);
 
   self->gl_area = GTK_GL_AREA(gtk_gl_area_new());
-  gtk_gl_area_set_has_alpha(self->gl_area, TRUE);
   gtk_widget_show(GTK_WIDGET(self->gl_area));
   gtk_container_add(GTK_CONTAINER(self->event_box), GTK_WIDGET(self->gl_area));
 
