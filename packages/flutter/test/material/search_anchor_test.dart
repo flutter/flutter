@@ -1641,6 +1641,30 @@ void main() {
     expect(inputText.style?.color, Colors.orange);
   });
 
+  testWidgets('SearchAnchor respects viewPadding property', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SearchAnchor(
+          viewPadding: const EdgeInsets.all(16.0),
+          builder: (BuildContext context, SearchController controller) {
+            return IconButton(icon: const Icon(Icons.search), onPressed: () {
+              controller.openView();
+            },);
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return <Widget>[];
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+
+    final Padding padding = tester.widget<Padding>(find.descendant(of: findViewContent(), matching: find.byType(Padding)).first);
+    expect(padding.padding, const EdgeInsets.all(16.0));
+  });
+
   testWidgets('SearchAnchor respects dividerColor property', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -1693,6 +1717,33 @@ void main() {
     final SizedBox sizedBox = tester.widget<SizedBox>(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
     expect(sizedBox.width, 280.0);
     expect(sizedBox.height, 390.0);
+  });
+
+  testWidgets('SearchAnchor respects viewBarPadding property', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: SearchAnchor(
+            viewBarPadding: const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16.0)),
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(icon: const Icon(Icons.search), onPressed: () {
+                controller.openView();
+              },);
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+
+    final Finder findSearchBar = find.descendant(of: findViewContent(), matching: find.byType(SearchBar)).first;
+    final Padding padding = tester.widget<Padding>(find.descendant(of: findSearchBar, matching: find.byType(Padding)).first);
+    expect(padding.padding, const EdgeInsets.symmetric(horizontal: 16.0));
   });
 
   testWidgets('SearchAnchor respects builder property - LTR', (WidgetTester tester) async {
