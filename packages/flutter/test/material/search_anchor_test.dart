@@ -1645,6 +1645,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: SearchAnchor(
+          isFullScreen: false,
           viewPadding: const EdgeInsets.all(16.0),
           builder: (BuildContext context, SearchController controller) {
             return IconButton(icon: const Icon(Icons.search), onPressed: () {
@@ -1663,6 +1664,31 @@ void main() {
 
     final Padding padding = tester.widget<Padding>(find.descendant(of: findViewContent(), matching: find.byType(Padding)).first);
     expect(padding.padding, const EdgeInsets.all(16.0));
+  });
+
+  testWidgets('SearchAnchor ignores viewPadding property if full screen', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SearchAnchor(
+          isFullScreen: true,
+          viewPadding: const EdgeInsets.all(16.0),
+          builder: (BuildContext context, SearchController controller) {
+            return IconButton(icon: const Icon(Icons.search), onPressed: () {
+              controller.openView();
+            },);
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return <Widget>[];
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+
+    final Padding padding = tester.widget<Padding>(find.descendant(of: findViewContent(), matching: find.byType(Padding)).first);
+    expect(padding.padding, EdgeInsets.zero);
   });
 
   testWidgets('SearchAnchor respects dividerColor property', (WidgetTester tester) async {
