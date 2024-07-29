@@ -16,6 +16,12 @@ void main() {
     expect(app.darkTheme!.brightness, equals(Brightness.dark));
   });
 
+  testWidgets('Has page title', (WidgetTester tester) async {
+    await tester.pumpWidget(const App());
+    final Title homepageTitle = find.byType(Title).evaluate().first.widget as Title;
+    expect(homepageTitle.title, equals('Accessibility Assessments Home Page'));
+  });
+
   testWidgets('App can generate high-contrast color scheme',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MediaQuery(
