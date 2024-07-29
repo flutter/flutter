@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'data_table.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'ink_decoration.dart';
+/// @docImport 'ink_ripple.dart';
+/// @docImport 'ink_splash.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'dart:async';
 import 'dart:collection';
 

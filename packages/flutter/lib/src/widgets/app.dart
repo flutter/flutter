@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'heroes.dart';
+/// @docImport 'overlay.dart';
+/// @docImport 'view.dart';
+library;
+
 import 'dart:collection' show HashMap;
 
 import 'package:flutter/foundation.dart';
@@ -657,7 +665,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// When a named route is pushed with [Navigator.pushNamed], the route name is
   /// looked up in this map. If the name is present, the associated
-  /// [widgets.WidgetBuilder] is used to construct a [PageRoute] specified by
+  /// [WidgetBuilder] is used to construct a [PageRoute] specified by
   /// [pageRouteBuilder] to perform an appropriate transition, including [Hero]
   /// animations, to the new route.
   ///
@@ -1351,7 +1359,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   AppLifecycleState? _appLifecycleState;
 
-  /// The default value for [onNavigationNotification].
+  /// The default value for [WidgetsApp.onNavigationNotification].
   ///
   /// Does nothing and stops bubbling if the app is detached. Otherwise, updates
   /// the platform with [NavigationNotification.canHandlePop] and stops

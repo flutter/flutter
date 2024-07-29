@@ -136,8 +136,14 @@ class DriveCommand extends RunCommandBase {
       ..addOption('write-sksl-on-exit',
         help: 'Attempts to write an SkSL file when the drive process is finished '
               'to the provided file, overwriting it if necessary.')
-      ..addMultiOption('test-arguments', help: 'Additional arguments to pass to the '
-          'Dart VM running The test script.')
+      ..addMultiOption(
+        'test-arguments',
+        help: 'Additional arguments to pass to the Dart VM running The test script.\n\n'
+              'This can be used to opt-in to use "dart test" as a runner for the test script, '
+              'which allows, among other things, changing the reporter. For example, to opt-in '
+              'to the "expanded" reporter, pass both "test" and "--reporter=expanded".\n\n'
+              'Please leave feedback at <https://github.com/flutter/flutter/issues/152409>.',
+        )
       ..addOption('profile-memory', help: 'Launch devtools and profile application memory, writing '
           'The output data to the file path provided to this argument as JSON.',
           valueHelp: 'profile_memory.json')
@@ -274,7 +280,6 @@ class DriveCommand extends RunCommandBase {
           buildInfo,
           device,
           debuggingOptions,
-          ipv6 ?? false,
           applicationBinary: applicationBinary,
           route: route,
           userIdentifier: userIdentifier,
@@ -295,7 +300,6 @@ class DriveCommand extends RunCommandBase {
           uri,
           device,
           debuggingOptions,
-          ipv6 ?? false,
         );
       }
 

@@ -222,6 +222,7 @@ EmbedFrameworks() {
 
     # Iterate through all .frameworks in native assets directory.
     for native_asset in "${native_assets_path}"*.framework; do
+      [ -e "$native_asset" ] || continue # Skip when there are no matches.
       # Codesign the framework inside the app bundle.
       RunCommand codesign --force --verbose --sign "${EXPANDED_CODE_SIGN_IDENTITY}" -- "${xcode_frameworks_dir}/$(basename "$native_asset")"
     done

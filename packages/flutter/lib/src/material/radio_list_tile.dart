@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+///
+/// @docImport 'checkbox_list_tile.dart';
+/// @docImport 'color_scheme.dart';
+/// @docImport 'constants.dart';
+/// @docImport 'ink_well.dart';
+/// @docImport 'material.dart';
+/// @docImport 'scaffold.dart';
+/// @docImport 'switch_list_tile.dart';
+/// @docImport 'switch_theme.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
@@ -178,7 +190,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.dense,
     this.secondary,
     this.selected = false,
-    this.controlAffinity = ListTileControlAffinity.platform,
+    this.controlAffinity,
     this.autofocus = false,
     this.contentPadding,
     this.shape,
@@ -217,7 +229,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.dense,
     this.secondary,
     this.selected = false,
-    this.controlAffinity = ListTileControlAffinity.platform,
+    this.controlAffinity,
     this.autofocus = false,
     this.contentPadding,
     this.shape,
@@ -389,7 +401,7 @@ class RadioListTile<T> extends StatelessWidget {
   final bool selected;
 
   /// Where to place the control relative to the text.
-  final ListTileControlAffinity controlAffinity;
+  final ListTileControlAffinity? controlAffinity;
 
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
@@ -488,11 +500,15 @@ class RadioListTile<T> extends StatelessWidget {
         );
     }
 
+    final ListTileThemeData listTileTheme = ListTileTheme.of(context);
+    final ListTileControlAffinity effectiveControlAffinity =
+        controlAffinity ?? listTileTheme.controlAffinity ?? ListTileControlAffinity.platform;
     Widget? leading, trailing;
-    (leading, trailing) = switch (controlAffinity) {
+    (leading, trailing) = switch (effectiveControlAffinity) {
       ListTileControlAffinity.leading || ListTileControlAffinity.platform => (control, secondary),
       ListTileControlAffinity.trailing => (secondary, control),
     };
+
     final ThemeData theme = Theme.of(context);
     final RadioThemeData radioThemeData = RadioTheme.of(context);
     final Set<MaterialState> states = <MaterialState>{

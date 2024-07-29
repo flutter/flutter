@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'scaffold.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -342,7 +345,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
 
   /// Sets the color of navigation destination.
   ///
-  /// If this is null, then [NavigationDrawerTheme.backgroundColor] is used.
+  /// If this is null, then [NavigationDrawerThemeData.backgroundColor] is used.
   final Color? backgroundColor;
 
   @override
@@ -474,7 +477,7 @@ class _StatusTransitionWidgetBuilder extends StatusTransitionWidget {
 }
 
 /// Inherited widget for passing data from the [NavigationDrawer] to the
-/// [NavigationDrawer.destinations] children widgets.
+/// [NavigationDrawerDestination] child widgets.
 ///
 /// Useful for building navigation destinations using:
 /// `_NavigationDrawerDestinationInfo.of(context)`.
