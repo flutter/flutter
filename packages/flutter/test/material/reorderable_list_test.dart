@@ -707,6 +707,7 @@ void main() {
                     title: const Text('Switch tile'),
                     value: true,
                     onChanged: (bool? newValue) { },
+                    internalAddSemanticForOnTap: true,
                   ),
                 ),
               ),

@@ -707,10 +707,12 @@ void main() {
           children: <Widget>[
             ExpansionTile(
               title: Text('First Expansion Tile'),
+              internalAddSemanticForOnTap: true,
             ),
             ExpansionTile(
               initiallyExpanded: true,
               title: Text('Second Expansion Tile'),
+              internalAddSemanticForOnTap: true,
             ),
           ],
         ),

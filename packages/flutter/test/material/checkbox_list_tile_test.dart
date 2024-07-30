@@ -1180,6 +1180,7 @@ void main() {
         onChanged: (bool? value) { log.add(value); },
         title: const Text('Hello'),
         checkboxSemanticLabel: 'there',
+        internalAddSemanticForOnTap: true,
       ),
     ));
 
