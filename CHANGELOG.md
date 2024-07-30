@@ -26,7 +26,7 @@ INTERNAL NOTE
 -->
 ## Flutter 3.24 Changes
 
-### [3.24.0](https://github.com/flutter/flutter/releases/tag/3.24.0) 
+### [3.24.0](https://github.com/flutter/flutter/releases/tag/3.24.0)
 Initial stable release.
 
 ## Flutter 3.22 Changes
