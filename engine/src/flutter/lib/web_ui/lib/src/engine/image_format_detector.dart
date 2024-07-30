@@ -16,7 +16,7 @@ ImageType? detectImageType(Uint8List data) {
   }
 
   formatLoop:
-  for (final ImageFileFormat format in ImageFileFormat.values) {
+  for (final ImageFileSignature format in ImageFileSignature.values) {
     if (data.length < format.header.length) {
       continue;
     }
@@ -34,60 +34,14 @@ ImageType? detectImageType(Uint8List data) {
       }
     }
 
-    final ImageFileType fileType = format.fileType;
-    // TODO(harryterkelsen): If the image is animated, we use Skia to decode.
-    // This is currently too conservative, assuming all GIF and WEBP images are
-    // animated. We should detect if they are actually animated by reading the
-    // image headers, https://github.com/flutter/flutter/issues/151911.
-    return ImageType(fileType,
-        isAnimated:
-            fileType == ImageFileType.gif || fileType == ImageFileType.webp);
+    return format.imageType;
   }
 
   if (isAvif(data)) {
-    return const ImageType(ImageFileType.avif);
+    return ImageType.avif;
   }
 
   return null;
-}
-
-/// The file format of the image, and whether or not it is animated.
-class ImageType {
-  const ImageType(this.fileType, {this.isAnimated = false});
-
-  final ImageFileType fileType;
-  final bool isAnimated;
-
-  /// The MIME type for this image (e.g 'image/jpeg').
-  String get mimeType {
-    String fileString;
-    switch (fileType) {
-      case ImageFileType.png:
-        fileString = 'png';
-      case ImageFileType.gif:
-        fileString = 'gif';
-      case ImageFileType.jpeg:
-        fileString = 'jpeg';
-      case ImageFileType.webp:
-        fileString = 'webp';
-      case ImageFileType.bmp:
-        fileString = 'bmp';
-      case ImageFileType.avif:
-        fileString = 'avif';
-    }
-    return 'image/$fileString';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (other is! ImageType) {
-      return false;
-    }
-    return other.fileType == fileType && other.isAnimated == isAnimated;
-  }
-
-  @override
-  int get hashCode => Object.hash(fileType, isAnimated);
 }
 
 /// The supported image file formats in Flutter Web.
@@ -100,9 +54,69 @@ enum ImageFileType {
   avif,
 }
 
-/// Represents an image file format, such as PNG or JPEG.
-class ImageFileFormat {
-  const ImageFileFormat(this.header, this.fileType);
+/// The file format of the image, and whether or not it is animated.
+enum ImageType {
+  // TODO(harryterkelsen): If the image is animated, we use Skia to decode.
+  // This is currently too conservative, assuming all GIF and WEBP images are
+  // animated. We should detect if they are actually animated by reading the
+  // image headers, https://github.com/flutter/flutter/issues/151911.
+  png(ImageFileType.png, isAnimated: false),
+  gif(ImageFileType.gif, isAnimated: true),
+  jpeg(ImageFileType.jpeg, isAnimated: false),
+  webp(ImageFileType.webp, isAnimated: true),
+  bmp(ImageFileType.bmp, isAnimated: false),
+  avif(ImageFileType.avif, isAnimated: false);
+
+  const ImageType(this.fileType, {required this.isAnimated});
+
+  final ImageFileType fileType;
+  final bool isAnimated;
+
+  /// The MIME type for this image (e.g 'image/jpeg').
+  String get mimeType => 'image/${fileType.name}';
+}
+
+/// The signature bytes in an image file that identify the format.
+enum ImageFileSignature {
+  png(
+    <int?>[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A],
+    ImageType.png,
+  ),
+  gif87a(
+    <int?>[0x47, 0x49, 0x46, 0x38, 0x37, 0x61],
+    ImageType.gif,
+  ),
+  gif89a(
+    <int?>[0x47, 0x49, 0x46, 0x38, 0x39, 0x61],
+    ImageType.gif,
+  ),
+  jpeg(
+    <int?>[0xFF, 0xD8, 0xFF],
+    ImageType.jpeg,
+  ),
+  webp(
+    <int?>[
+      0x52,
+      0x49,
+      0x46,
+      0x46,
+      null,
+      null,
+      null,
+      null,
+      0x57,
+      0x45,
+      0x42,
+      0x50
+    ],
+    ImageType.webp,
+  ),
+  bmp(
+    <int?>[0x42, 0x4D],
+    ImageType.bmp,
+  );
+
+  const ImageFileSignature(this.header, this.imageType);
 
   /// First few bytes in the file that uniquely identify the image file format.
   ///
@@ -113,74 +127,8 @@ class ImageFileFormat {
   /// (animated cursor), .cda, and other formats that start with "RIFF".
   final List<int?> header;
 
-  /// The value that's passed as [_ImageDecoderOptions.type].
-  ///
-  /// The server typically also uses this value as the "Content-Type" header,
-  /// but servers are not required to correctly detect the type. This value
-  /// is also known as MIME type.
-  final ImageFileType fileType;
-
-  /// All image file formats known to the Flutter Web engine.
-  ///
-  /// This list may need to be changed as browsers adopt new formats, and drop
-  /// support for obsolete ones.
-  ///
-  /// This list is checked linearly from top to bottom when detecting an image
-  /// type. It should therefore contain the most popular file formats at the
-  /// top, and less popular towards the bottom.
-  static const List<ImageFileFormat> values = <ImageFileFormat>[
-    // ICO is not supported in Chrome. It is deemed too simple and too specific. See also:
-    //   https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/modules/webcodecs/image_decoder_external.cc;l=38;drc=fd8802b593110ea18a97ef044f8a40dd24a622ec
-
-    // PNG
-    ImageFileFormat(
-      <int?>[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A],
-      ImageFileType.png,
-    ),
-
-    // GIF87a
-    ImageFileFormat(
-      <int?>[0x47, 0x49, 0x46, 0x38, 0x37, 0x61],
-      ImageFileType.gif,
-    ),
-
-    // GIF89a
-    ImageFileFormat(
-      <int?>[0x47, 0x49, 0x46, 0x38, 0x39, 0x61],
-      ImageFileType.gif,
-    ),
-
-    // JPEG
-    ImageFileFormat(
-      <int?>[0xFF, 0xD8, 0xFF],
-      ImageFileType.jpeg,
-    ),
-
-    // WebP
-    ImageFileFormat(
-      <int?>[
-        0x52,
-        0x49,
-        0x46,
-        0x46,
-        null,
-        null,
-        null,
-        null,
-        0x57,
-        0x45,
-        0x42,
-        0x50
-      ],
-      ImageFileType.webp,
-    ),
-
-    // BMP
-    ImageFileFormat(
-      <int?>[0x42, 0x4D],
-      ImageFileType.bmp,
-    ),
-  ];
+  /// The type of image that has the signature bytes in [header] in its header.
+  final ImageType imageType;
 }
 
 /// Function signature of [debugImageTypeDetector], which is the same as the
