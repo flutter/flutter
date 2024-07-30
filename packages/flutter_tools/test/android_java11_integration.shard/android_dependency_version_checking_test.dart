@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:file/src/interface/file_system_entity.dart';
 
 import '../integration.shard/test_utils.dart';
+import '../src/android_common.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
