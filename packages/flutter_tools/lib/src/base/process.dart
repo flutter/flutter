@@ -283,7 +283,8 @@ abstract class ProcessUtils {
 
   /// See [writelnToStdinGuarded].
   ///
-  /// In the event that the write or flush fails, this will throw an Exception.
+  /// In the event that the write or flush fails, this will throw an exception
+  /// that preserves the stack trace of the callsite.
   static Future<void> writelnToStdinUnsafe({
     required IOSink stdin,
     required String line,
@@ -297,7 +298,8 @@ abstract class ProcessUtils {
 
   /// See [writeToStdinGuarded].
   ///
-  /// In the event that the write or flush fails, this will throw an Exception.
+  /// In the event that the write or flush fails, this will throw an exception
+  /// that preserves the stack trace of the callsite.
   static Future<void> writeToStdinUnsafe({
     required IOSink stdin,
     required String content,
