@@ -77,9 +77,6 @@ class DiffContext {
   // Pushes cull rect for current subtree
   bool PushCullRect(const SkRect& clip);
 
-  // Marks entire frame as dirty.
-  void ForceFullRepaint();
-
   // Function that adjusts layer bounds (in device coordinates) depending
   // on filter.
   using FilterBoundsAdjustment = std::function<SkRect(SkRect)>;
@@ -110,10 +107,9 @@ class DiffContext {
 
   bool IsSubtreeDirty() const { return state_.dirty; }
 
-  // Marks that current subtree contains a volatile layer. A volatile layer will
-  // do diffing even if it is a retained subtree. Necessary for TextureLayer
-  // and PlatformViewLayer.
-  void MarkSubtreeHasVolatileLayer();
+  // Marks that current subtree contains a TextureLayer. This is needed to
+  // ensure that we'll Diff the TextureLayer even if inside retained layer.
+  void MarkSubtreeHasTextureLayer();
 
   // Add layer bounds to current paint region; rect is in "local" (layer)
   // coordinates.
@@ -235,7 +231,7 @@ class DiffContext {
     bool has_filter_bounds_adjustment = false;
 
     // Whether there is a texture layer in this subtree.
-    bool has_volatile_layer = false;
+    bool has_texture = false;
   };
 
   void MakeTransformIntegral(DisplayListMatrixClipState& matrix_clip);

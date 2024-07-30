@@ -13,17 +13,6 @@ PlatformViewLayer::PlatformViewLayer(const SkPoint& offset,
                                      int64_t view_id)
     : offset_(offset), size_(size), view_id_(view_id) {}
 
-void PlatformViewLayer::Diff(DiffContext* context, const Layer* old_layer) {
-  DiffContext::AutoSubtreeRestore subtree(context);
-  // Ensure that Diff is called again even if this layer is in retained subtree.
-  context->MarkSubtreeHasVolatileLayer();
-  // It is not necessary to track the actual paint region for the layer due to
-  // forced full repaint below, but the paint region carries the volatile layer
-  // flag.
-  context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
-  context->ForceFullRepaint();
-}
-
 void PlatformViewLayer::Preroll(PrerollContext* context) {
   set_paint_bounds(SkRect::MakeXYWH(offset_.x(), offset_.y(), size_.width(),
                                     size_.height()));
