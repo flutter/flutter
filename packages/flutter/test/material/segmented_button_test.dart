@@ -1159,7 +1159,7 @@ void main() {
     Rect? previewsChildRect;
     for (int i = 0; i <= 3; i++) {
       final Rect currentChildRect = tester.getRect(find.widgetWithText(TextButton, 'Option $i'));
-      if(previewsChildRect != null) {
+      if (previewsChildRect != null) {
         expect(currentChildRect.left, previewsChildRect.left);
         expect(currentChildRect.right, previewsChildRect.right);
         expect(currentChildRect.top, previewsChildRect.top + previewsChildRect.height);
