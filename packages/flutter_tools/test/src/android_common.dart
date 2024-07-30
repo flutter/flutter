@@ -70,8 +70,6 @@ class FakeFlutterProjectFactory extends FlutterProjectFactory {
   }
 }
 
-//
-
 const String gradleSettingsFileContent = r'''
 pluginManagement {
     def flutterSdkPath = {

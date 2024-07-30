@@ -57,6 +57,8 @@ import 'dart:math' as math;
 import 'package:path/path.dart' as path;
 
 import 'run_command.dart';
+import 'suite_runners/android_dependency_smoke_tests/run_android_java11_dependency_smoke_tests.dart';
+import 'suite_runners/android_dependency_smoke_tests/run_android_java17_dependency_smoke_tests.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
 import 'suite_runners/run_analyze_tests.dart';
 import 'suite_runners/run_android_java11_integration_tool_tests.dart';
@@ -134,6 +136,11 @@ Future<void> main(List<String> args) async {
       'tool_integration_tests': _runIntegrationToolTests,
       'android_preview_tool_integration_tests': androidPreviewIntegrationToolTestsRunner,
       'android_java11_tool_integration_tests': androidJava11IntegrationToolTestsRunner,
+      // These tests are split across two ci.yaml targets because AGP 8.0+ requires
+      // Java 17+, while earlier Gradle versions require Java <17, and a ci.yaml
+      // target can currently only have 1 Java version installed.
+      'android_java11_dependency_smoke_tests': androidJava11DependencySmokeTestsRunner,
+      'android_java17_dependency_smoke_tests': androidJava17DependencySmokeTestsRunner,
       'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=html`
       'web_tests': webTestsSuite.runWebHtmlUnitTests,
