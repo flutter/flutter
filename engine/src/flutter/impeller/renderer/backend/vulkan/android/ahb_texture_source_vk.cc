@@ -146,6 +146,10 @@ static std::shared_ptr<YUVConversionVK> CreateYUVConversion(
   const auto& ahb_format =
       ahb_props.get<vk::AndroidHardwareBufferFormatPropertiesANDROID>();
 
+  const bool supports_linear_filtering =
+      !!(ahb_format.formatFeatures &
+         vk::FormatFeatureFlagBits::eSampledImageYcbcrConversionLinearFilter);
+
   auto& conversion_info = conversion_chain.get();
 
   conversion_info.format = ahb_format.format;
@@ -154,12 +158,8 @@ static std::shared_ptr<YUVConversionVK> CreateYUVConversion(
   conversion_info.components = ahb_format.samplerYcbcrConversionComponents;
   conversion_info.xChromaOffset = ahb_format.suggestedXChromaOffset;
   conversion_info.yChromaOffset = ahb_format.suggestedYChromaOffset;
-  // If the potential format features of the sampler Y′CBCR conversion do not
-  // support VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_LINEAR_FILTER_BIT,
-  // chromaFilter must not be VK_FILTER_LINEAR.
-  //
-  // Since we are not checking, let's just default to a safe value.
-  conversion_info.chromaFilter = vk::Filter::eNearest;
+  conversion_info.chromaFilter =
+      supports_linear_filtering ? vk::Filter::eLinear : vk::Filter::eNearest;
   conversion_info.forceExplicitReconstruction = false;
 
   if (conversion_info.format == vk::Format::eUndefined) {
