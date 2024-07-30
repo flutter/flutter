@@ -393,6 +393,7 @@ void main() {
           groupValue: 2,
           onChanged: (int? i) {},
           title: const Text('Title'),
+          internalAddSemanticForOnTap: true,
         ),
       ),
     );
@@ -430,6 +431,7 @@ void main() {
           groupValue: 2,
           onChanged: (int? i) {},
           title: const Text('Title'),
+          internalAddSemanticForOnTap: true,
         ),
       ),
     );
@@ -468,6 +470,7 @@ void main() {
           groupValue: 2,
           onChanged: null,
           title: Text('Title'),
+          internalAddSemanticForOnTap: true,
         ),
       ),
     );
@@ -504,6 +507,7 @@ void main() {
           groupValue: 2,
           onChanged: null,
           title: Text('Title'),
+          internalAddSemanticForOnTap: true,
         ),
       ),
     );

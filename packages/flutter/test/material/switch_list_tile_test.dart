@@ -47,12 +47,14 @@ void main() {
             onChanged: (bool value) { },
             title: const Text('AAA'),
             secondary: const Text('aaa'),
+            internalAddSemanticForOnTap: true,
           ),
           CheckboxListTile(
             value: true,
             onChanged: (bool? value) { },
             title: const Text('BBB'),
             secondary: const Text('bbb'),
+            internalAddSemanticForOnTap: true,
           ),
           RadioListTile<bool>(
             value: true,
@@ -60,6 +62,7 @@ void main() {
             onChanged: (bool? value) { },
             title: const Text('CCC'),
             secondary: const Text('ccc'),
+            internalAddSemanticForOnTap: true,
           ),
         ],
       ),
