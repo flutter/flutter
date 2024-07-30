@@ -222,7 +222,7 @@ class Stepper extends StatefulWidget {
     this.stepIconHeight,
     this.stepIconWidth,
     this.stepIconMargin,
-    this.clipBehavior,
+    this.clipBehavior = Clip.none,
   })  : assert(0 <= currentStep && currentStep < steps.length),
         assert(stepIconHeight == null || (stepIconHeight >= _kStepSize && stepIconHeight <= _kMaxStepSize),
             'stepIconHeight must be greater than $_kStepSize and less or equal to $_kMaxStepSize'),
@@ -374,7 +374,7 @@ class Stepper extends StatefulWidget {
   /// See also:
   ///
   ///  * [Clip], which explains how to use this property.
-  final Clip? clipBehavior;
+  final Clip clipBehavior;
 
   @override
   State<Stepper> createState() => _StepperState();
@@ -806,7 +806,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             child: Column(
               children: <Widget>[
                 ClipRect(
-                  clipBehavior: widget.clipBehavior ?? Clip.none,
+                  clipBehavior: widget.clipBehavior,
                   child: widget.steps[index].content,
                 ),
                 _buildVerticalControls(index),
@@ -902,7 +902,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           maintainState: true,
           visible: i == widget.currentStep,
           child: ClipRect(
-            clipBehavior: widget.clipBehavior ?? Clip.none,
+            clipBehavior: widget.clipBehavior,
             child: widget.steps[i].content,
           ),
         ),

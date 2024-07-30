@@ -1722,13 +1722,12 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/66007.
-  testWidgets('Vertical Stepper steps can be clipped', (WidgetTester tester) async {
-    Widget buildStepper({ required StepperType type, Clip? clipBehavior }) {
+  testWidgets('Default Stepper clipBehavior', (WidgetTester tester) async {
+    Widget buildStepper({ required StepperType type }) {
       return MaterialApp(
         home: Scaffold(
           body: Center(
             child: Stepper(
-              clipBehavior: clipBehavior,
               type: type,
               steps: const <Step>[
                 Step(
@@ -1758,15 +1757,48 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
 
     expect(getContentClipRect().clipBehavior, equals(Clip.none));
 
-    // Test vertical stepper with clipBehavior set to Clip.hardEdge.
-    await tester.pumpWidget(buildStepper(type: StepperType.vertical, clipBehavior: Clip.hardEdge));
-
-    expect(getContentClipRect().clipBehavior, equals(Clip.hardEdge));
-
     // Test horizontal stepper with default clipBehavior.
     await tester.pumpWidget(buildStepper(type: StepperType.horizontal));
 
     expect(getContentClipRect().clipBehavior, equals(Clip.none));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/66007.
+  testWidgets('Stepper steps can be clipped', (WidgetTester tester) async {
+    Widget buildStepper({ required StepperType type, required Clip clipBehavior }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Stepper(
+              clipBehavior: clipBehavior,
+              type: type,
+              steps: const <Step>[
+                Step(
+                  title: Text('step1'),
+                  content: Text('step1 content'),
+                ),
+                Step(
+                  title: Text('step2'),
+                  content: Text('step2 content'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    ClipRect getContentClipRect() {
+      return tester.widget<ClipRect>(find.ancestor(
+        of: find.text('step1 content'),
+        matching: find.byType(ClipRect),
+      ).first);
+    }
+
+    // Test vertical stepper with clipBehavior set to Clip.hardEdge.
+    await tester.pumpWidget(buildStepper(type: StepperType.vertical, clipBehavior: Clip.hardEdge));
+
+    expect(getContentClipRect().clipBehavior, equals(Clip.hardEdge));
 
     // Test horizontal stepper with clipBehavior set to Clip.hardEdge.
     await tester.pumpWidget(buildStepper(type: StepperType.horizontal, clipBehavior: Clip.hardEdge));
