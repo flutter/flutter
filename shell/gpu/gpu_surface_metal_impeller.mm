@@ -6,6 +6,8 @@
 
 #import <Metal/Metal.h>
 #import <QuartzCore/QuartzCore.h>
+#include "flow/surface.h"
+#include "flow/surface_frame.h"
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/make_copyable.h"
@@ -60,7 +62,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const SkISiz
   if (!render_to_surface_) {
     return std::make_unique<SurfaceFrame>(
         nullptr, SurfaceFrame::FramebufferInfo(),
-        [](const SurfaceFrame& surface_frame, DlCanvas* canvas) { return true; }, frame_size);
+        [](const SurfaceFrame& surface_frame, DlCanvas* canvas) { return true; },
+        [](const SurfaceFrame& surface_frame) { return true; }, frame_size);
   }
 
   switch (render_target_type_) {
@@ -100,7 +103,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
 #endif  // IMPELLER_DEBUG
 
   id<MTLTexture> last_texture = static_cast<id<MTLTexture>>(last_texture_);
-  SurfaceFrame::SubmitCallback submit_callback =
+
+  SurfaceFrame::EncodeCallback encode_callback =
       fml::MakeCopyable([damage = damage_,
                          disable_partial_repaint = disable_partial_repaint_,  //
                          aiks_context = aiks_context_,                        //
@@ -149,13 +153,17 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
         }
 
         if (clip_rect && clip_rect->IsEmpty()) {
-          return surface->Present();
+          surface_frame.set_user_data(std::move(surface));
+          return true;
         }
 
         impeller::IRect cull_rect = surface->coverage();
         SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.GetWidth(), cull_rect.GetHeight());
 
         const impeller::RenderTarget& render_target = surface->GetTargetRenderPassDescriptor();
+        surface->SetFrameBoundary(surface_frame.submit_info().frame_boundary);
+
+        surface_frame.set_user_data(std::move(surface));
 #if EXPERIMENTAL_CANVAS
         impeller::TextFrameDispatcher collector(aiks_context->GetContentContext(),
                                                 impeller::Matrix());
@@ -169,19 +177,13 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
         impeller_dispatcher.FinishRecording();
         aiks_context->GetContentContext().GetTransientsBuffer().Reset();
         aiks_context->GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
-
-        return surface->Present();
+        return true;
 #else
         impeller::DlDispatcher impeller_dispatcher(cull_rect);
         display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
         auto picture = impeller_dispatcher.EndRecordingAsPicture();
         const bool reset_host_buffer = surface_frame.submit_info().frame_boundary;
-        surface->SetFrameBoundary(surface_frame.submit_info().frame_boundary);
-
-        if (!aiks_context->Render(picture, render_target, reset_host_buffer)) {
-          return false;
-        }
-        return surface->Present();
+        return aiks_context->Render(picture, render_target, reset_host_buffer);
 #endif
       });
 
@@ -199,12 +201,14 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
     framebuffer_info.supports_partial_repaint = true;
   }
 
-  return std::make_unique<SurfaceFrame>(nullptr,           // surface
-                                        framebuffer_info,  // framebuffer info
-                                        submit_callback,   // submit callback
-                                        frame_size,        // frame size
-                                        nullptr,           // context result
-                                        true               // display list fallback
+  return std::make_unique<SurfaceFrame>(
+      nullptr,           // surface
+      framebuffer_info,  // framebuffer info
+      encode_callback,   // submit callback
+      [](SurfaceFrame& surface_frame) { return surface_frame.take_user_data()->Present(); },
+      frame_size,  // frame size
+      nullptr,     // context result
+      true         // display list fallback
   );
 }
 
@@ -226,13 +230,11 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
   impeller::ContextMTL::Cast(*aiks_context_->GetContext()).GetCaptureManager()->StartCapture();
 #endif  // IMPELLER_DEBUG
 
-  SurfaceFrame::SubmitCallback submit_callback =
+  SurfaceFrame::EncodeCallback encode_callback =
       fml::MakeCopyable([disable_partial_repaint = disable_partial_repaint_,  //
                          damage = damage_,
                          aiks_context = aiks_context_,  //
-                         texture_info,                  //
-                         mtl_texture,                   //
-                         delegate = delegate_           //
+                         mtl_texture                    //
   ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
         if (!aiks_context) {
           return false;
@@ -303,8 +305,13 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
           return false;
         }
 
-        return delegate->PresentTexture(texture_info);
+        return true;
       });
+
+  SurfaceFrame::SubmitCallback submit_callback =
+      [texture_info, delegate = delegate_](const SurfaceFrame& surface_frame) {
+        return delegate->PresentTexture(texture_info);
+      };
 
   SurfaceFrame::FramebufferInfo framebuffer_info;
   framebuffer_info.supports_readback = true;
@@ -322,10 +329,11 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
 
   return std::make_unique<SurfaceFrame>(nullptr,           // surface
                                         framebuffer_info,  // framebuffer info
-                                        submit_callback,   // submit callback
-                                        frame_size,        // frame size
-                                        nullptr,           // context result
-                                        true               // display list fallback
+                                        encode_callback,
+                                        submit_callback,  // submit callback
+                                        frame_size,       // frame size
+                                        nullptr,          // context result
+                                        true              // display list fallback
   );
 }
 
