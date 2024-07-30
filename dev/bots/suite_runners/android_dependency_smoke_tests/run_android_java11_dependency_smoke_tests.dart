@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
-import 'package:file/src/interface/file_system_entity.dart';
-import '../../../../packages/flutter_tools/test/integration.shard/test_utils.dart';
-import '../../../../packages/flutter_tools/test/src/android_common.dart';
-import '../../../../packages/flutter_tools/test/src/common.dart';
-import '../../../../packages/flutter_tools/test/src/context.dart';
+import 'package:file/file.dart';
+import 'package:file/local.dart';
+import '../../test/common.dart';
+import 'common.dart';
 
 List<VersionTuple> versionTuples = <VersionTuple>[
   VersionTuple(agpVersion: '7.0.1', gradleVersion: '7.0.2', kotlinVersion: '1.7.10'),
@@ -21,21 +18,22 @@ List<VersionTuple> versionTuples = <VersionTuple>[
 // This test requires Java 11 due to the intentionally low version of Gradle.
 Future<void> androidJava11DependencySmokeTestsRunner() async {
   late Directory tempDir;
+  /// The [FileSystem] for the integration test environment.
+  const LocalFileSystem fileSystem = LocalFileSystem();
 
   setUp(() async {
-    tempDir = createResolvedTempDirectorySync('run_test.');
+    tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_android_dependency_version_tests');
   });
 
   tearDown(() async {
-    tryToDelete(tempDir as FileSystemEntity);
+    tempDir.deleteSync(recursive: true);
   });
 
   group(
       'flutter create -> flutter build apk succeeds across dependency support range (java 11 subset)', () {
     for (final VersionTuple versionTuple in versionTuples) {
-      testUsingContext('Flutter app builds successfully with AGP/Gradle/Kotlin versions of $versionTuple', () async {
-        final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(versions: versionTuple, tempDir: tempDir);
-        expect(result, const ProcessResultMatcher());
+      test('Flutter app builds successfully with AGP/Gradle/Kotlin versions of $versionTuple', () async {
+        await buildFlutterApkWithSpecifiedDependencyVersions(versions: versionTuple, tempDir: tempDir, localFileSystem: fileSystem);
       });
     }
   });
