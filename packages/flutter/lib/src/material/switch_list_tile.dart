@@ -522,8 +522,8 @@ class SwitchListTile extends StatelessWidget {
   /// Whether to add button:true to the semantics if onTap is provided.
   /// This is a temporary flag to help changing the behavior of ListTile onTap semantics.
   ///
-  /// TODO(hangyujin) Remove this flag after fixing related g3 tests and flipping
-  /// the default value to true.
+  // TODO(hangyujin): Remove this flag after fixing related g3 tests and flipping
+  // the default value to true.
   final bool internalAddSemanticForOnTap;
   @override
   Widget build(BuildContext context) {
