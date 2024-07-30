@@ -1405,7 +1405,6 @@ ResidentRunner setUpResidentRunner(
         FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
     debuggingOptions:
         debuggingOptions ?? DebuggingOptions.enabled(BuildInfo.debug),
-    ipv6: true,
     analytics: globals.analytics,
     systemClock: systemClock ?? SystemClock.fixed(DateTime.now()),
     fileSystem: globals.fs,

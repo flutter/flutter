@@ -798,7 +798,6 @@ void main() {
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
-          flutterUsage: TestUsage(),
           analytics: const NoOpAnalytics(),
         ),
       });
