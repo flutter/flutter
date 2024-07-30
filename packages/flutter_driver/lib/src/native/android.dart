@@ -93,8 +93,8 @@ final class AndroidNativeDriver implements NativeDriver {
         'settings',
         'put',
         'global',
-        'policy_control',
-        'immersive.full=*',
+        'immersive_mode_confirmations',
+        'confirmed',
       ],
     );
 
