@@ -743,17 +743,9 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
     // when leaf layer tracing is enabled we wish to repaint the whole frame
     // for accurate performance metrics.
     if (frame->framebuffer_info().supports_partial_repaint) {
-      // Disable partial repaint if external_view_embedder_ SubmitFlutterView is
-      // involved - ExternalViewEmbedder unconditionally clears the entire
-      // surface and also partial repaint with platform view present is
-      // something that still need to be figured out.
-      bool force_full_repaint =
-          external_view_embedder_ &&
-          (!raster_thread_merger_ || raster_thread_merger_->IsMerged());
-
       damage = std::make_unique<FrameDamage>();
       auto existing_damage = frame->framebuffer_info().existing_damage;
-      if (existing_damage.has_value() && !force_full_repaint) {
+      if (existing_damage.has_value()) {
         damage->SetPreviousLayerTree(GetLastLayerTree(view_id));
         damage->AddAdditionalDamage(existing_damage.value());
         damage->SetClipAlignment(

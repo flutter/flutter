@@ -27,7 +27,7 @@ void DiffContext::BeginSubtree() {
   bool had_integral_transform = state_.integral_transform;
   state_.rect_index = rects_->size();
   state_.has_filter_bounds_adjustment = false;
-  state_.has_texture = false;
+  state_.has_volatile_layer = false;
   state_.integral_transform = false;
 
   if (had_integral_transform) {
@@ -162,6 +162,10 @@ bool DiffContext::PushCullRect(const SkRect& clip) {
   return !state_.matrix_clip.device_cull_rect().isEmpty();
 }
 
+void DiffContext::ForceFullRepaint() {
+  damage_ = SkRect::MakeIWH(frame_size_.width(), frame_size_.height());
+}
+
 SkMatrix DiffContext::GetTransform3x3() const {
   return state_.matrix_clip.matrix_3x3();
 }
@@ -203,14 +207,14 @@ void DiffContext::AddLayerBounds(const SkRect& rect) {
   }
 }
 
-void DiffContext::MarkSubtreeHasTextureLayer() {
+void DiffContext::MarkSubtreeHasVolatileLayer() {
   // Set the has_texture flag on current state and all parent states. That
   // way we'll know that we can't skip diff for retained layers because
   // they contain a TextureLayer.
   for (auto& state : state_stack_) {
-    state.has_texture = true;
+    state.has_volatile_layer = true;
   }
-  state_.has_texture = true;
+  state_.has_volatile_layer = true;
 }
 
 void DiffContext::AddExistingPaintRegion(const PaintRegion& region) {
@@ -238,7 +242,7 @@ PaintRegion DiffContext::CurrentSubtreeRegion() const {
       readbacks_.begin(), readbacks_.end(),
       [&](const Readback& r) { return r.position >= state_.rect_index; });
   return PaintRegion(rects_, state_.rect_index, rects_->size(), has_readback,
-                     state_.has_texture);
+                     state_.has_volatile_layer);
 }
 
 void DiffContext::AddDamage(const PaintRegion& damage) {
