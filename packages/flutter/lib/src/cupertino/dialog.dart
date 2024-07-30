@@ -1327,57 +1327,13 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
   }
 }
 
-// Base class for stateless widget classes that mark their [Element] as
-// [_SlideTarget].
-//
-// Using [_SlideTarget] requires injecting [_SlideTarget] objects as
-// [MetaData.data], which should be an object that is persistent across
-// rebuilds. Stateless widgets can use their elements as a persistent object.
-mixin _SlideTargetWidgetMixin on StatelessWidget {
-  // Called by the element when a pointer that is in touch with the screen moves
-  // from out of the widget to within.
-  void handleSlideIn();
-
-  // Called by the element when the user taps down or lifts up on the button.
-  //
-  // The boolean value is true if the user is tapping down on the button.
-  ValueSetter<bool>? get onPressStateChange;
-
-  @override
-  StatelessElement createElement() => _SlideTargetElement(this);
-}
-
-// A [Element] class that marks itself as `_SlideTarget`.
-class _SlideTargetElement extends StatelessElement implements _SlideTarget {
-  _SlideTargetElement(_SlideTargetWidgetMixin super.widget);
-
-  _SlideTargetWidgetMixin get widgetTarget => widget as _SlideTargetWidgetMixin;
-
-  // |_SlideTarget|
-  @override
-  void didEnter({required bool fromPointerDown}) {
-    widgetTarget.onPressStateChange?.call(true);
-    if (!fromPointerDown) {
-      widgetTarget.handleSlideIn();
-    }
-  }
-
-  // |_SlideTarget|
-  @override
-  void didLeave() {
-    widgetTarget.onPressStateChange?.call(false);
-  }
-
-  // |_SlideTarget|
-  @override
-  void didConfirm() {
-    widgetTarget.onPressStateChange?.call(false);
-  }
-}
-
 // Renders the background of a button (both the pressed background and the idle
 // background) and reports its state to the parent with `onPressStateChange`.
-class _ActionSheetButtonBackground extends StatelessWidget with _SlideTargetWidgetMixin {
+//
+// Although this class doesn't keep any states, it's still a stateful widget
+// because the state is used as a persistent object across rebuilds to provide
+// to [MetaData.data].
+class _ActionSheetButtonBackground extends StatefulWidget {
   const _ActionSheetButtonBackground({
     this.isCancel = false,
     required this.pressed,
@@ -1393,7 +1349,6 @@ class _ActionSheetButtonBackground extends StatelessWidget with _SlideTargetWidg
   /// Called when the user taps down or lifts up on the button.
   ///
   /// The boolean value is true if the user is tapping down on the button.
-  @override
   final ValueSetter<bool>? onPressStateChange;
 
   /// The widget below this widget in the tree.
@@ -1401,9 +1356,12 @@ class _ActionSheetButtonBackground extends StatelessWidget with _SlideTargetWidg
   /// Typically a [Text] widget.
   final Widget child;
 
-  // |_SlideTargetWidgetMixin|
   @override
-  void handleSlideIn(){
+  _ActionSheetButtonBackgroundState createState() => _ActionSheetButtonBackgroundState();
+}
+
+class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackground> implements _SlideTarget {
+  void _emitVibration(){
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.android:
@@ -1416,28 +1374,49 @@ class _ActionSheetButtonBackground extends StatelessWidget with _SlideTargetWidg
     }
   }
 
+  // |_SlideTarget|
+  @override
+  void didEnter({required bool fromPointerDown}) {
+    widget.onPressStateChange?.call(true);
+    if (!fromPointerDown) {
+      _emitVibration();
+    }
+  }
+
+  // |_SlideTarget|
+  @override
+  void didLeave() {
+    widget.onPressStateChange?.call(false);
+  }
+
+  // |_SlideTarget|
+  @override
+  void didConfirm() {
+    widget.onPressStateChange?.call(false);
+  }
+
   @override
   Widget build(BuildContext context) {
     late final Color backgroundColor;
     BorderRadius? borderRadius;
-    if (!isCancel) {
-      backgroundColor = pressed
+    if (!widget.isCancel) {
+      backgroundColor = widget.pressed
         ? _kActionSheetPressedColor
         : _kActionSheetBackgroundColor;
     } else {
-      backgroundColor = pressed
+      backgroundColor = widget.pressed
         ? _kActionSheetCancelPressedColor
         : _kActionSheetCancelColor;
       borderRadius = const BorderRadius.all(Radius.circular(_kCornerRadius));
     }
     return MetaData(
-      metaData: context,
+      metaData: this,
       child: Container(
         decoration: BoxDecoration(
           color: CupertinoDynamicColor.resolve(backgroundColor, context),
           borderRadius: borderRadius,
         ),
-        child: child,
+        child: widget.child,
       )
     );
   }
