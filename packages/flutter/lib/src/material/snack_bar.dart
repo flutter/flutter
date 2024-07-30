@@ -678,6 +678,7 @@ class _SnackBarState extends State<SnackBar> {
 
     final IconButton? iconButton = showCloseIcon
         ? IconButton(
+            key: StandardComponentType.closeButton.key,
             icon: const Icon(Icons.close),
             iconSize: 24.0,
             color: widget.closeIconColor ?? snackBarTheme.closeIconColor ?? defaults.closeIconColor,
