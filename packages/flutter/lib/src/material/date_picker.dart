@@ -52,9 +52,30 @@ const Size _inputRangeLandscapeDialogSize = Size(496, 164.0);
 const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
 const double _inputFormPortraitHeight = 98.0;
 const double _inputFormLandscapeHeight = 108.0;
+
+// 3.0 is the maximum scale factor on mobile phones. As of 07/30/24, iOS goes up
+// to a max of 3.0 text sxale factor, and Android goes up to 2.0. This is the
+// default used for non-range date pickers. This default is changed to a lower
+// value at different parts of the date pickers depending on content, and device
+// orientation.
 const double _kMaxTextScaleFactor = 3.0;
+
+// The max scale factor for the date range pickers.
 const double _kMaxRangeTextScaleFactor = 1.3;
+
+// The max text scale factor for the header. This is lower than the default as
+// the title text already starts at a large size.
 const double _kMaxHeaderTextScaleFactor = 1.6;
+
+// The entry button shares a line with the header text, so there is less room to
+// scale up.
+const double _kMaxHeaderWithEntryTextScaleFactor = 1.4;
+
+const double _kMaxHelpPortraitTextScaleFactor = 1.6;
+const double _kMaxHelpLandscapeTextScaleFactor = 1.4;
+
+// 14 is a common font size used to compute the effective text scale.
+const double _fontSizeToScale = 14.0;
 
 /// Shows a dialog containing a Material Design date picker.
 ///
@@ -684,9 +705,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
     // Constrain the textScaleFactor to the largest supported value to prevent
     // layout issues.
-    // 14 is a common font size used to compute the effective text scale.
-    const double fontSizeToScale = 14.0;
-    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxTextScaleFactor).scale(fontSizeToScale) / fontSizeToScale;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxTextScaleFactor).scale(_fontSizeToScale) / _fontSizeToScale;
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
     final DialogTheme dialogTheme = theme.dialogTheme;
     return Dialog(
@@ -873,10 +892,9 @@ class _DatePickerHeader extends StatelessWidget {
     final TextStyle? helpStyle = (datePickerTheme.headerHelpStyle ?? defaults.headerHelpStyle)?.copyWith(
       color: foregroundColor,
     );
-    const double fontSizeToScale = 14.0;
-    final double currentScale = MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
-    final double maxHeaderTextScaleFactor = math.min(currentScale, entryModeButton != null ? 1.4 : _kMaxHeaderTextScaleFactor);
-    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: maxHeaderTextScaleFactor).scale(fontSizeToScale) / fontSizeToScale;
+    final double currentScale = MediaQuery.textScalerOf(context).scale(_fontSizeToScale) / _fontSizeToScale;
+    final double maxHeaderTextScaleFactor = math.min(currentScale, entryModeButton != null ? _kMaxHeaderWithEntryTextScaleFactor : _kMaxHeaderTextScaleFactor);
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: maxHeaderTextScaleFactor).scale(_fontSizeToScale) / _fontSizeToScale;
     final double scaledFontSize = MediaQuery.textScalerOf(context).scale(titleStyle?.fontSize ?? 32);
     final double headerScaleFactor = textScaleFactor > 1 ? textScaleFactor  : 1.0;
 
@@ -885,7 +903,12 @@ class _DatePickerHeader extends StatelessWidget {
       style: helpStyle,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: math.min(textScaleFactor, orientation ==  Orientation.portrait ? 1.6 : 1.4)),
+      textScaler: MediaQuery.textScalerOf(context).clamp(
+        maxScaleFactor: math.min(textScaleFactor, orientation ==  Orientation.portrait ?
+          _kMaxHelpPortraitTextScaleFactor :
+          _kMaxHelpLandscapeTextScaleFactor
+        )
+      ),
     );
     final Text title = Text(
       titleText,
@@ -2939,9 +2962,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
       ),
     );
 
-    // 14 is a common font size used to compute the effective text scale.
-    const double fontSizeToScale = 14.0;
-    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxRangeTextScaleFactor).scale(fontSizeToScale) / fontSizeToScale;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxRangeTextScaleFactor).scale(_fontSizeToScale) / _fontSizeToScale;
     final Size dialogSize = (useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2) * textScaleFactor;
     switch (orientation) {
       case Orientation.portrait:

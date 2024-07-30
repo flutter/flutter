@@ -42,6 +42,25 @@ const double _yearPickerRowSpacing = 8.0;
 const double _subHeaderHeight = 52.0;
 const double _monthNavButtonsWidth = 108.0;
 
+// 3.0 is the maximum scale factor on mobile phones. As of 07/30/24, iOS goes up
+// to a max of 3.0 text sxale factor, and Android goes up to 2.0. This is the
+// default used for non-range date pickers. This default is changed to a lower
+// value at different parts of the date pickers depending on content, and device
+// orientation.
+const double _kMaxTextScaleFactor = 3.0;
+
+const double _kModeToggleButtonMaxScaleFactor = 2.0;
+
+// The max scale factor of the day picker grid. This affects the size of the
+// individual days in calendar view. Due to them filling a majority of the modal,
+// which covers most of the screen, there's a limit in how large they can grow.
+// There is also less room vertically in landscape orientation.
+const double _kDayPickerGridPortraitMaxScaleFactor = 2.0;
+const double _kDayPickerGridLandscapeMaxScaleFactor = 1.5;
+
+// 14 is a common font size used to compute the effective text scale.
+const double _fontSizeToScale = 14.0;
+
 /// Displays a grid of days for a given month and allows the user to select a
 /// date.
 ///
@@ -319,9 +338,11 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
-    const double fontSizeToScale = 14.0;
-    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(fontSizeToScale) / fontSizeToScale;
-    // Scale the height of the picker area up with larger text.
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxTextScaleFactor).scale(_fontSizeToScale) / _fontSizeToScale;
+    // Scale the height of the picker area up with larger text. The size of the
+    // picker has room for larger text, up until a scale facotr of 1.3. After
+    // after which, we increase the height to add room for content to continue
+    // to scale the text size.
     final double scaledMaxDayPickerHeight =
       textScaleFactor > 1.3 ? _maxDayPickerHeight + ((_maxDayPickerRowCount + 1) * ((textScaleFactor - 1) * 8)) : _maxDayPickerHeight;
     return Stack(
@@ -332,7 +353,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
         ),
         // Put the mode toggle button on top so that it won't be covered up by the _MonthPicker
         MediaQuery.withClampedTextScaling(
-          maxScaleFactor: 2.0,
+          maxScaleFactor: _kModeToggleButtonMaxScaleFactor,
           child: _DatePickerModeToggleButton(
             mode: _mode,
             title: _localizations.formatMonthYear(_currentDisplayedMonthDate),
@@ -1002,7 +1023,9 @@ class _DayPickerState extends State<_DayPicker> {
         horizontal: _monthPickerHorizontalPadding,
       ),
       child: MediaQuery.withClampedTextScaling(
-        maxScaleFactor: isLandscapeOrientation ? 1.5 : 2.0,
+        maxScaleFactor: isLandscapeOrientation ?
+          _kDayPickerGridLandscapeMaxScaleFactor :
+          _kDayPickerGridPortraitMaxScaleFactor,
         child: GridView.custom(
           physics: const ClampingScrollPhysics(),
           gridDelegate: _DayPickerGridDelegate(context),
@@ -1140,8 +1163,7 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
 
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
-    const double fontSizeToScale = 14.0;
-    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(fontSizeToScale) / fontSizeToScale;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(_fontSizeToScale) / _fontSizeToScale;
     final double scaledRowHeight =
       textScaleFactor > 1.3 ? ((textScaleFactor - 1) * 30) + _dayPickerRowHeight : _dayPickerRowHeight;
     const int columnCount = DateTime.daysPerWeek;
@@ -1277,8 +1299,7 @@ class _YearPickerState extends State<YearPicker> {
       );
     }
 
-    const double fontSizeToScale = 14.0;
-    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(fontSizeToScale) / fontSizeToScale;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(_fontSizeToScale) / _fontSizeToScale;
 
     // Backfill the _YearPicker with disabled years if necessary.
     final int offset = _itemCount < minYears ? (minYears - _itemCount) ~/ 2 : 0;
@@ -1390,8 +1411,7 @@ class _YearPickerGridDelegate extends SliverGridDelegate {
 
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
-    const double fontSizeToScale = 14.0;
-    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(fontSizeToScale) / fontSizeToScale;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(_fontSizeToScale) / _fontSizeToScale;
     final int scaledYearPickerColumnCount = textScaleFactor > 1.65 ? _yearPickerColumnCount - 1 : _yearPickerColumnCount;
     final double tileWidth =
       (constraints.crossAxisExtent - (scaledYearPickerColumnCount - 1) * _yearPickerRowSpacing) / scaledYearPickerColumnCount;
