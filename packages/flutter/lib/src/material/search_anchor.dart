@@ -9,6 +9,7 @@ import 'dart:ui';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'back_button.dart';
 import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -899,11 +900,9 @@ class _ViewContentState extends State<_ViewContent> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget defaultLeading = IconButton(
-      icon: const Icon(Icons.arrow_back),
-      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-      onPressed: () { Navigator.of(context).pop(); },
+    final Widget defaultLeading = BackButton(
       style: const ButtonStyle(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+      onPressed: () { Navigator.of(context).pop(); },
     );
 
     final List<Widget> defaultTrailing = <Widget>[

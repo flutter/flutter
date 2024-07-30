@@ -888,7 +888,7 @@ void main() {
     await tester.pumpAndSettle();
     TextField textField = tester.widget(find.byType(TextField));
     expect(textField.textCapitalization, TextCapitalization.characters);
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.tap(find.backButton());
     await tester.pump();
 
     await tester.pumpWidget(buildSearchAnchor(TextCapitalization.none));
@@ -981,7 +981,7 @@ void main() {
     final TextField textFieldInView = tester.widget<TextField>(textFieldFinder);
     expect(textFieldInView.textCapitalization, TextCapitalization.characters);
     // Close search view.
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.tap(find.backButton());
     await tester.pumpAndSettle();
     final TextField textField = tester.widget(find.byType(TextField));
     expect(textField.textCapitalization, TextCapitalization.characters);
@@ -1139,7 +1139,7 @@ void main() {
     expect(decoration.border!.bottom.color, colorScheme.outline);
 
     // Default search view has a leading back button on the start of the header.
-    expect(find.widgetWithIcon(IconButton, Icons.arrow_back), findsOneWidget);
+    expect(find.backButton(), findsOneWidget);
 
     final Text helperText = tester.widget(find.text('hint text'));
     expect(helperText.style?.color, colorScheme.onSurfaceVariant);
@@ -1408,13 +1408,13 @@ void main() {
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
     // Default is a icon button with arrow_back.
-    expect(find.widgetWithIcon(IconButton, Icons.arrow_back), findsOneWidget);
+    expect(find.backButton(), findsOneWidget);
 
     await tester.pumpWidget(Container());
     await tester.pumpWidget(buildAnchor(viewLeading: const Icon(Icons.history)));
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.arrow_back), findsNothing);
+    expect(find.backButton(), findsNothing);
     expect(find.byIcon(Icons.history), findsOneWidget);
   });
 
@@ -2282,13 +2282,13 @@ void main() {
     // Open the search view
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+    expect(find.backButton(), findsOneWidget);
 
     // Change window size
     tester.view.physicalSize = const Size(250.0, 200.0);
     tester.view.devicePixelRatio = 1.0;
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.arrow_back), findsNothing);
+    expect(find.backButton(), findsNothing);
   });
 
   testWidgets('Full-screen search view route should stay if the window size changes', (WidgetTester tester) async {
@@ -2323,13 +2323,13 @@ void main() {
     // Open a full-screen search view
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+    expect(find.backButton(), findsOneWidget);
 
     // Change window size
     tester.view.physicalSize = const Size(250.0, 200.0);
     tester.view.devicePixelRatio = 1.0;
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+    expect(find.backButton(), findsOneWidget);
   });
 
   testWidgets('Search view route does not throw exception during pop animation', (WidgetTester tester) async {
@@ -2368,7 +2368,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Pop search view route
-    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.tap(find.backButton());
     await tester.pumpAndSettle();
 
     // No exception.
@@ -2908,7 +2908,7 @@ void main() {
     await tester.pumpAndSettle();
     TextField textField = tester.widget(find.byType(TextField));
     expect(textField.keyboardType, TextInputType.number);
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.tap(find.backButton());
     await tester.pump();
 
     await tester.pumpWidget(buildSearchAnchor(TextInputType.phone));
@@ -2942,7 +2942,7 @@ void main() {
     final TextField textFieldInView = tester.widget<TextField>(textFieldFinder);
     expect(textFieldInView.keyboardType, TextInputType.number);
     // Close search view.
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.tap(find.backButton());
     await tester.pumpAndSettle();
     final TextField textField = tester.widget(find.byType(TextField));
     expect(textField.keyboardType, TextInputType.number);
@@ -3000,7 +3000,7 @@ void main() {
     await tester.pumpAndSettle();
     TextField textField = tester.widget(find.byType(TextField));
     expect(textField.textInputAction, TextInputAction.previous);
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.tap(find.backButton());
     await tester.pump();
 
     await tester.pumpWidget(buildSearchAnchor(TextInputAction.send));
@@ -3034,7 +3034,7 @@ void main() {
     final TextField textFieldInView = tester.widget<TextField>(textFieldFinder);
     expect(textFieldInView.textInputAction, TextInputAction.previous);
     // Close search view.
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.tap(find.backButton());
     await tester.pumpAndSettle();
     final TextField textField = tester.widget(find.byType(TextField));
     expect(textField.textInputAction, TextInputAction.previous);
