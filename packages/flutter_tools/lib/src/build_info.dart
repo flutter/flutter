@@ -697,7 +697,7 @@ DarwinArch getIOSArchForName(String arch) {
     'arm64e'=> // iPhone XS/XS Max/XR and higher. arm64 runs on arm64e devices.
        DarwinArch.arm64,
     'x86_64'=> DarwinArch.x86_64,
-       _=>throw Exception('Unsupported iOS arch name "$arch"')
+       _=> throw Exception('Unsupported iOS arch name "$arch"')
   };
 }
 
