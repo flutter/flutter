@@ -477,9 +477,11 @@ void main() {
     Widget buildCheckbox({bool value = true}) {
       return CupertinoApp(
         home: Center(
-          child: CupertinoCheckbox(
-            value: value,
-            onChanged: (bool? newValue) {},
+          child: RepaintBoundary(
+            child: CupertinoCheckbox(
+              value: value,
+              onChanged: (bool? newValue) {},
+            ),
           ),
         ),
       );
@@ -501,9 +503,11 @@ void main() {
       return CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: Center(
-          child: CupertinoCheckbox(
-            value: value,
-            onChanged: (bool? newValue) {},
+          child: RepaintBoundary(
+            child: CupertinoCheckbox(
+              value: value,
+              onChanged: (bool? newValue) {},
+            ),
           ),
         ),
       );
@@ -524,9 +528,11 @@ void main() {
     Widget buildCheckbox({bool value = true}) {
       return CupertinoApp(
         home: Center(
-          child: CupertinoCheckbox(
-            value: value,
-            onChanged: null,
+          child: RepaintBoundary(
+            child: CupertinoCheckbox(
+              value: value,
+              onChanged: null,
+            ),
           ),
         ),
       );
@@ -548,9 +554,11 @@ void main() {
       return CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: Center(
-          child: CupertinoCheckbox(
-            value: value,
-            onChanged: null,
+          child: RepaintBoundary(
+            child: CupertinoCheckbox(
+              value: value,
+              onChanged: null,
+            ),
           ),
         ),
       );
