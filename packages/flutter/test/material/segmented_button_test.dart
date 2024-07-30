@@ -1167,6 +1167,40 @@ void main() {
       previewsChildRect = currentChildRect;
     }
   });
+
+  testWidgets('SegmentedButton vertical aligned golden image', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: RepaintBoundary(
+              key: key,
+              child: SegmentedButton<int>(
+                segments: const <ButtonSegment<int>>[
+                  ButtonSegment<int>(
+                    value: 0,
+                    label: Text('Option 0'),
+                  ),
+                  ButtonSegment<int>(
+                    value: 1,
+                    label: Text('Option 1'),
+                  ),
+                ],
+                selected: const <int>{0}, // Prevent any of ButtonSegment to be selected
+                direction: Axis.vertical,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('segmented_button_test_vertical.png'),
+    );
+  });
 }
 
 Set<MaterialState> enabled = const <MaterialState>{};
