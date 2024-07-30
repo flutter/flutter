@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/file.dart';
+import 'dart:io';
+
 import 'package:file/local.dart';
-import '../../test/common.dart';
-import 'common.dart';
+import 'package:flutter_devicelab/framework/apk_utils.dart';
+import 'package:flutter_devicelab/framework/framework.dart';
 
 List<VersionTuple> versionTuples = <VersionTuple>[
   VersionTuple(agpVersion: '7.0.1', gradleVersion: '7.0.2', kotlinVersion: '1.7.10'),
@@ -16,25 +17,12 @@ List<VersionTuple> versionTuples = <VersionTuple>[
 ];
 
 // This test requires Java 11 due to the intentionally low version of Gradle.
-Future<void> androidJava11DependencySmokeTestsRunner() async {
-  late Directory tempDir;
+Future<void> main() async {
   /// The [FileSystem] for the integration test environment.
   const LocalFileSystem fileSystem = LocalFileSystem();
 
-  setUp(() async {
-    tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_android_dependency_version_tests');
-  });
-
-  tearDown(() async {
-    tempDir.deleteSync(recursive: true);
-  });
-
-  group(
-      'flutter create -> flutter build apk succeeds across dependency support range (java 11 subset)', () {
-    for (final VersionTuple versionTuple in versionTuples) {
-      test('Flutter app builds successfully with AGP/Gradle/Kotlin versions of $versionTuple', () async {
-        await buildFlutterApkWithSpecifiedDependencyVersions(versions: versionTuple, tempDir: tempDir, localFileSystem: fileSystem);
-      });
-    }
+  final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_android_dependency_version_tests');
+  await task(() {
+    return buildFlutterApkWithSpecifiedDependencyVersions(versionTuples: versionTuples, tempDir: tempDir, localFileSystem: fileSystem);
   });
 }
