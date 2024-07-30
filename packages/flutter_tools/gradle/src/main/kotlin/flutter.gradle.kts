@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 // This buildscript block supplies dependencies for this file's own import
 // declarations above. It exists solely for compatibility with projects that
 // have not migrated to declaratively apply the Flutter Gradle Plugin;
