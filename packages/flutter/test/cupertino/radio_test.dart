@@ -651,7 +651,7 @@ void main() {
   testWidgets('Radio is slightly lightened when pressed in dark mode', (WidgetTester tester) async {
     const Color activeInnerColor = Color(0xffffffff);
     const Color activeOuterColor = Color(0xff007aff);
-    const Color inactiveBorderColor = Color(0x80808080);
+    const Color inactiveBorderColor = Color(0x40000000);
     const double innerRadius = 2.975;
     const double outerRadius = 7.0;
     const Color pressedShadowColor = Color(0x26ffffff);
