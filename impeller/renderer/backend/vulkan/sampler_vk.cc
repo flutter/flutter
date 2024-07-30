@@ -55,27 +55,18 @@ static vk::UniqueSampler CreateSampler(
     sampler_chain.get<vk::SamplerYcbcrConversionInfo>().conversion =
         yuv_conversion->GetConversion();
 
-    //
-    // TL;DR: When using YUV conversion, our samplers are somewhat hobbled and
-    // not all options configurable in Impeller (especially the linear
-    // filtering which is by far the most used form of filtering) can be
-    // supported. Switch to safe defaults.
-    //
     // Spec: If sampler Y'CBCR conversion is enabled and the potential format
     // features of the sampler Y'CBCR conversion do not support or enable
     // separate reconstruction filters, minFilter and magFilter must be equal to
     // the sampler Y'CBCR conversion's chromaFilter.
     //
-    // Thing is, we don't enable separate reconstruction filters. By the time we
-    // are here, we also don't have access to the descriptor used to create this
-    // conversion. So we don't yet know what the chromaFilter is. But eNearest
-    // is a safe bet since the `AndroidHardwareBufferTextureSourceVK` defaults
-    // to that safe value. So just use that.
+    // We don't enable separate reconstruction filters. So, just do what the
+    // spec. says and use the conversions chromaFilter.
     //
     // See the validation VUID-VkSamplerCreateInfo-minFilter-01645 for more.
     //
-    sampler_info.magFilter = vk::Filter::eNearest;
-    sampler_info.minFilter = vk::Filter::eNearest;
+    sampler_info.minFilter = sampler_info.magFilter =
+        yuv_conversion->GetDescriptor().get().chromaFilter;
 
     // Spec: If sampler Y′CBCR conversion is enabled, addressModeU,
     // addressModeV, and addressModeW must be
