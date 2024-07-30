@@ -25,18 +25,29 @@ const double _kCupertinoFocusColorOpacity = 0.80;
 const double _kCupertinoFocusColorBrightness = 0.69;
 const double _kCupertinoFocusColorSaturation = 0.835;
 
-// Obtained from Apple's Design Resources (macOS Sonoma) figma template:
-// https://www.figma.com/design/vmIRIt4jgAmSFvXO0SAxU2/Apple-Design-Resources---macOS-(Community)
-const Color _kDisabledCheckColor = Color.fromARGB(255, 172, 172, 172);
-
 // Eyeballed from a checkbox on a physical Macbook Pro running macOS version 14.5.
+const Color _kDisabledCheckColor = CupertinoDynamicColor.withBrightness(
+  color: Color.fromARGB(64, 0, 0, 0),
+  darkColor: Color.fromARGB(64, 255, 255, 255),
+);
+const Color _kDisabledBorderColor = CupertinoDynamicColor.withBrightness(
+  color: Color.fromARGB(13, 0, 0, 0),
+  darkColor: Color.fromARGB(13, 0, 0, 0),
+);
 const CupertinoDynamicColor _kDefaultBorderColor = CupertinoDynamicColor.withBrightness(
   color: Color.fromARGB(255, 209, 209, 214),
   darkColor: Color.fromARGB(50, 128, 128, 128),
 );
+const CupertinoDynamicColor _kDefaultFillColor = CupertinoDynamicColor.withBrightness(
+  color: CupertinoColors.activeBlue,
+  darkColor: Color.fromARGB(255, 50, 100, 215),
+);
 const double _kPressedOverlayOpacity = 0.15;
-const double _kBrightnessModeOverlayOpacity = 0.15;
 const Color _kDarkModeCheckColor = Color.fromARGB(255, 222, 232, 248);
+// In dark mode, the fill color of a checkbox is an opacity gradient of the
+// background color.
+const List<double> _kDarkGradientOpacities = <double>[0.14, 0.29];
+const List<double> _kDisabledDarkGradientOpacities = <double>[0.08, 0.14];
 
 /// A macOS style checkbox.
 ///
@@ -260,8 +271,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
         return CupertinoColors.white.withOpacity(0.5);
       }
       if (states.contains(WidgetState.selected)) {
-        return widget.activeColor
-          ?? CupertinoDynamicColor.resolve(CupertinoColors.activeBlue, context);
+        return widget.activeColor ?? CupertinoDynamicColor.resolve(_kDefaultFillColor, context);
       }
       return CupertinoColors.white;
     });
@@ -270,7 +280,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
   WidgetStateProperty<Color> get _defaultCheckColor {
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled) && states.contains(WidgetState.selected)) {
-        return widget.checkColor ?? _kDisabledCheckColor;
+        return widget.checkColor ?? CupertinoDynamicColor.resolve(_kDisabledCheckColor, context);
      }
       if (states.contains(WidgetState.selected)) {
         return widget.checkColor ?? CupertinoColors.white;
@@ -284,6 +294,9 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
       if ((states.contains(WidgetState.selected) || states.contains(WidgetState.focused))
         && !states.contains(WidgetState.disabled)) {
         return const BorderSide(width: 0.0, color: CupertinoColors.transparent);
+      }
+      if (states.contains(WidgetState.disabled)) {
+        return BorderSide(color: CupertinoDynamicColor.resolve(_kDisabledBorderColor, context));
       }
       return BorderSide(color: CupertinoDynamicColor.resolve(_kDefaultBorderColor, context));
     });
@@ -437,23 +450,32 @@ class _CheckboxPainter extends ToggleablePainter {
       ..strokeCap = StrokeCap.round;
   }
 
-  void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side) {
-    // Fill the unchecked checkbox with a gradient in dark mode.
-    if (value == false && brightness == Brightness.dark) {
-      final LinearGradient fillGradient = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        // Eyeballed from a checkbox on a physical Macbook Pro running macOS version 14.5.
-        colors: <Color>[
-          paint.color.withOpacity(0.14),
-          paint.color.withOpacity(0.29),
-        ],
+  // Draw a gradient from the top to the bottom of the checkbox.
+  void _drawFillGradient(Canvas canvas, Rect outer, Color topColor, Color bottomColor) {
+    final LinearGradient fillGradient = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      // Eyeballed from a checkbox on a physical Macbook Pro running macOS version 14.5.
+      colors: <Color>[
+        topColor,
+        bottomColor,
+      ],
+    );
+    final Paint gradientPaint = Paint()
+      ..shader = fillGradient.createShader(outer);
+    canvas.drawPath(shape.getOuterPath(outer), gradientPaint);
+  }
+
+  void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side, bool value) {
+    // Draw a gradient in dark mode except when the checkbox is enabled and checked.
+    if (brightness == Brightness.dark && !(isActive && value)) {
+      _drawFillGradient(
+        canvas,
+        outer,
+        paint.color.withOpacity(isActive ? _kDarkGradientOpacities[0] : _kDisabledDarkGradientOpacities[0]),
+        paint.color.withOpacity(isActive ? _kDarkGradientOpacities[1] : _kDisabledDarkGradientOpacities[1]),
       );
-      final Paint gradientPaint = Paint()
-        ..shader = fillGradient.createShader(outer);
-      canvas.drawPath(shape.getOuterPath(outer), gradientPaint);
-    }
-    else {
+    } else {
       canvas.drawPath(shape.getOuterPath(outer), paint);
     }
     if (side != null) {
@@ -471,7 +493,6 @@ class _CheckboxPainter extends ToggleablePainter {
     const Offset end = Offset(CupertinoCheckbox.width * 0.78, CupertinoCheckbox.width * 0.25);
     path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
     path.lineTo(origin.dx + mid.dx, origin.dy + mid.dy);
-    canvas.drawPath(path, paint);
     path.moveTo(origin.dx + mid.dx, origin.dy + mid.dy);
     path.lineTo(origin.dx + end.dx, origin.dy + end.dy);
     canvas.drawPath(path, paint);
@@ -494,18 +515,12 @@ class _CheckboxPainter extends ToggleablePainter {
 
     switch (value) {
       case false:
-        _drawBox(canvas, outer, paint, side);
+        _drawBox(canvas, outer, paint, side, value ?? true);
       case true:
-        _drawBox(canvas, outer, paint, side);
-        // The fill color of an active checkbox is slightly darker in dark mode.
-        if (brightness == Brightness.dark && isActive) {
-          final Paint overlayPaint = Paint()
-            ..color =  CupertinoColors.black.withOpacity(_kBrightnessModeOverlayOpacity);
-          canvas.drawPath(shape.getOuterPath(outer), overlayPaint);
-        }
+        _drawBox(canvas, outer, paint, side, value ?? true);
         _drawCheck(canvas, origin, strokePaint);
       case null:
-        _drawBox(canvas, outer, paint, side);
+        _drawBox(canvas, outer, paint, side, value ?? true);
         _drawDash(canvas, origin, strokePaint);
     }
     // The checkbox's opacity changes when pressed.
@@ -522,7 +537,7 @@ class _CheckboxPainter extends ToggleablePainter {
         ..color = focusColor
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3.5;
-      _drawBox(canvas, focusOuter, borderPaint, side);
+      _drawBox(canvas, focusOuter, borderPaint, side, value ?? true);
     }
   }
 }

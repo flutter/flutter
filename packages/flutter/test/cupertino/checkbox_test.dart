@@ -600,7 +600,6 @@ void main() {
         ..path(color: defaultActiveFillColor)
         ..rrect()
         ..path(color: defaultCheckColor)
-        ..path(color: defaultCheckColor)
         ..path(color: defaultFocusColor, strokeWidth: 3.5, style: PaintingStyle.stroke),
       reason: 'Checkbox shows the correct focus color',
     );
@@ -618,14 +617,13 @@ void main() {
         ..path(color: defaultActiveFillColor)
         ..rrect()
         ..path(color: defaultCheckColor)
-        ..path(color: defaultCheckColor)
         ..path(color: testFocusColor, strokeWidth: 3.5, style: PaintingStyle.stroke),
         reason: 'Checkbox can configure a focus color',
     );
   });
 
   testWidgets('Checkbox is darkened when pressed in light mode', (WidgetTester tester) async {
-    const Color checkColor = Color(0xffffffff);
+    const Color defaultCheckColor = Color(0xffffffff);
     const Color defaultActiveFillColor = Color(0xff007aff);
     const Color defaultInactiveFillColor = Color(0xffffffff);
     const Color pressedDarkShadow = Color(0x26ffffff);
@@ -672,8 +670,7 @@ void main() {
       paints
         ..path(color: defaultActiveFillColor)
         ..rrect()
-        ..path(color: checkColor)
-        ..path(color: checkColor)
+        ..path(color: defaultCheckColor)
         ..path(color: pressedDarkShadow),
       reason: 'Active pressed checkbox is slightly darkened',
     );
@@ -686,10 +683,9 @@ void main() {
 
   testWidgets('Checkbox is lightened when pressed in dark mode', (WidgetTester tester) async {
     const Color checkColor = Color(0xffffffff);
-    const Color defaultActiveFillColor = Color(0xff0a84ff);
+    const Color defaultActiveFillColor = Color(0xff3264d7);
     const Color defaultInactiveFillColor = Color(0xff000000);
     const Color pressedLightShadow = Color(0x26ffffff);
-    const Color defaultPressedOverlayColor = Color(0x26000000);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -735,8 +731,6 @@ void main() {
       paints
         ..path(color: defaultActiveFillColor)
         ..rrect()
-        ..path(color: defaultPressedOverlayColor)
-        ..path(color: checkColor)
         ..path(color: checkColor)
         ..path(color: pressedLightShadow),
       reason: 'Active pressed checkbox is slightly lightened',
