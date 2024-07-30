@@ -514,13 +514,13 @@ class CommonFinders {
   /// This finder uses the [StandardComponentType] enum to look for buttons that
   /// have the key associated with [StandardComponentType.closeButton]. If
   /// another widget is assigned that key, then it too will be considered an
-  /// "official" back button in the widget tree, allowing this matcher to still
+  /// "official" close button in the widget tree, allowing this matcher to still
   /// find it even though it might use a different icon or tooltip.
   ///
   /// ## Sample code
   ///
   /// ```dart
-  /// expect(find.backButton(), findsOneWidget);
+  /// expect(find.closeButton(), findsOneWidget);
   /// ```
   ///
   /// See also:
