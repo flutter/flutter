@@ -125,8 +125,8 @@ The following kinds of PRs are *not* automatically exempt and require an exempti
 
 ### Test Exemptions
 
-A `@test-exemption-reviewer` member on Discord can exempt a PR by commenting
-`test-exempt: <reason>`.
+A `@test-exemption-reviewer` member on [Discord](Chat.md) can exempt a PR by
+commenting `test-exempt: <reason>`.
 
 The reviewer of the PR (_not_ the test exemption reviewer) should first:
 
