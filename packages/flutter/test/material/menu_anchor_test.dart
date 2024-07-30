@@ -2201,6 +2201,58 @@ void main() {
       skip: kIsWeb && !isCanvasKit, // https://github.com/flutter/flutter/issues/145527
     );
 
+    // Regression test for https://github.com/flutter/flutter/issues/145040.
+    testWidgets('CharacterActivator shortcut mnemonics include modifiers', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: createTestMenus(
+                shortcuts: <TestMenu, MenuSerializableShortcut>{
+                  TestMenu.subSubMenu110: const CharacterActivator('A', control: true),
+                  TestMenu.subSubMenu111: const CharacterActivator('B', alt: true),
+                  TestMenu.subSubMenu112: const CharacterActivator('C', meta: true),
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open a menu initially.
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
+      await tester.pump();
+
+      await tester.tap(find.text(TestMenu.subMenu11.label));
+      await tester.pump();
+
+      final Text mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
+      final Text mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
+      final Text mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+          expect(mnemonic0.data, equals('Ctrl+A'));
+          expect(mnemonic1.data, equals('Alt+B'));
+          expect(mnemonic2.data, equals('Meta+C'));
+        case TargetPlatform.windows:
+          expect(mnemonic0.data, equals('Ctrl+A'));
+          expect(mnemonic1.data, equals('Alt+B'));
+          expect(mnemonic2.data, equals('Win+C'));
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(mnemonic0.data, equals('⌃ A'));
+          expect(mnemonic1.data, equals('⌥ B'));
+          expect(mnemonic2.data, equals('⌘ C'));
+      }
+    },
+      variant: TargetPlatformVariant.all(),
+      skip: kIsWeb && !isCanvasKit, // https://github.com/flutter/flutter/issues/145527
+    );
+
     testWidgets('leadingIcon is used when set', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
