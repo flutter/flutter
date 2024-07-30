@@ -573,49 +573,26 @@ enum TargetPlatform {
   android_x86;
 
   String get fuchsiaArchForTargetPlatform {
-    switch (this) {
-      case TargetPlatform.fuchsia_arm64:
-        return 'arm64';
-      case TargetPlatform.fuchsia_x64:
-        return 'x64';
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
-      case TargetPlatform.darwin:
-      case TargetPlatform.ios:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
-        throw UnsupportedError('Unexpected Fuchsia platform $this');
-    }
+    return switch (this) {
+      TargetPlatform.fuchsia_arm64=> 'arm64',
+      TargetPlatform.fuchsia_x64=>'x64',
+      TargetPlatform.android || TargetPlatform.android_arm || TargetPlatform.android_arm64 ||
+      TargetPlatform.android_x64 || TargetPlatform.android_x86 || TargetPlatform.darwin ||
+      TargetPlatform.ios || TargetPlatform.linux_arm64 || TargetPlatform.linux_x64 ||
+      TargetPlatform.tester || TargetPlatform.web_javascript || TargetPlatform.windows_x64 ||
+      TargetPlatform.windows_arm64 => throw UnsupportedError('Unexpected Fuchsia platform $this'),
+    };
   }
 
   String get simpleName {
-    switch (this) {
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.darwin:
-      case TargetPlatform.windows_x64:
-        return 'x64';
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.windows_arm64:
-        return 'arm64';
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.ios:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-        throw UnsupportedError('Unexpected target platform $this');
-    }
+    return switch (this) {
+      TargetPlatform.linux_x64 || TargetPlatform.darwin || TargetPlatform.windows_x64 => 'x64',
+      TargetPlatform.linux_arm64 || TargetPlatform.windows_arm64 => 'arm64',
+      TargetPlatform.android || TargetPlatform.android_arm || TargetPlatform.android_arm64 ||
+      TargetPlatform.android_x64 || TargetPlatform.android_x86 || TargetPlatform.fuchsia_arm64 ||
+      TargetPlatform.fuchsia_x64 || TargetPlatform.ios || TargetPlatform.tester ||
+      TargetPlatform.web_javascript => throw UnsupportedError('Unexpected target platform $this')
+    };
   }
 }
 
@@ -711,18 +688,17 @@ List<DarwinArch> defaultMacOSArchsForEnvironment(Artifacts artifacts) {
 }
 
 DarwinArch getIOSArchForName(String arch) {
-  switch (arch) {
-    case 'armv7':
-    case 'armv7f': // iPhone 4S.
-    case 'armv7s': // iPad 4.
-      return DarwinArch.armv7;
-    case 'arm64':
-    case 'arm64e': // iPhone XS/XS Max/XR and higher. arm64 runs on arm64e devices.
-      return DarwinArch.arm64;
-    case 'x86_64':
-      return DarwinArch.x86_64;
-  }
-  throw Exception('Unsupported iOS arch name "$arch"');
+  return switch (arch) {
+    'armv7' ||
+    'armv7f'|| // iPhone 4S.
+    'armv7s'=> // iPad 4.
+      DarwinArch.armv7,
+    'arm64'||
+    'arm64e'=> // iPhone XS/XS Max/XR and higher. arm64 runs on arm64e devices.
+       DarwinArch.arm64,
+    'x86_64'=> DarwinArch.x86_64,
+       _=>throw Exception('Unsupported iOS arch name "$arch"')
+  };
 }
 
 DarwinArch getDarwinArchForName(String arch) {
