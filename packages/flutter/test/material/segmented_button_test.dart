@@ -1166,7 +1166,6 @@ void main() {
       }
       previewsChildRect = currentChildRect;
     }
-
   });
 }
 
