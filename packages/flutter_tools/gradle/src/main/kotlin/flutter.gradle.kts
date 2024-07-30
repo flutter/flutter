@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import com.android.build.api.dsl.LibraryExtension;
-import com.android.build.api.dsl.ApplicationExtension;
-import com.android.build.api.dsl.TestedExtension;
-
 
 
 // This buildscript block supplies dependencies for this file's own import
@@ -43,6 +39,10 @@ class FlutterPluginKts : Plugin<Project> {
         }
     }
 
+    // Use Groovy dynamic dispatch when we can't find the android extension by it's common type.
+    // For some reason, despite the internal AGP class BaseAppModuleExtension (eventually) implementing
+    // CommonExtension, a decorated (presumably generated) version of that classs
+    // (BaseAppModuleExtension_decorated) doesn't do the same.
     fun delegateToLegacyGroovyBuilder(project: Project) {
         // Use withGroovyBuilder and getProperty() to access Groovy metaprogramming.
         project.withGroovyBuilder {
