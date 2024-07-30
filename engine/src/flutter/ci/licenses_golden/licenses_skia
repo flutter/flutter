@@ -1,4 +1,4 @@
-Signature: 47becbf5d9ff28678da4aa38c2e18b31
+Signature: 57c7c05808ad30d6ab46be1cc25cd7e3
 
 ====================================================================================================
 LIBRARY: etc1
@@ -397,6 +397,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
+FILE: ../../../flutter/third_party/skia/relnotes/dawntypes.md
 FILE: ../../../flutter/third_party/skia/relnotes/ios12.md
 FILE: ../../../flutter/third_party/skia/relnotes/vktypes.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
@@ -8129,6 +8130,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnCommandBuffe
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnCommandBuffer.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnGraphicsPipeline.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnGraphicsPipeline.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnGraphiteTypesPriv.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnGraphiteUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnGraphiteUtilsPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnQueueManager.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -8141,7 +8143,6 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnSharedContex
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnSharedContext.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnTexture.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnTexture.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnTypesPriv.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/geom/Geometry.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/geom/SubRunData.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/mtl/MtlComputePipeline.h + ../../../flutter/third_party/skia/LICENSE
@@ -8344,6 +8345,7 @@ FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnCommandBuffer.
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnCommandBuffer.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnGraphicsPipeline.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnGraphicsPipeline.h
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnGraphiteTypesPriv.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnGraphiteUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnGraphiteUtilsPriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnQueueManager.cpp
@@ -8356,7 +8358,6 @@ FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnSharedContext.
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnSharedContext.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnTexture.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnTexture.h
-FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnTypesPriv.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/geom/Geometry.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/geom/SubRunData.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/mtl/MtlComputePipeline.h
@@ -8481,7 +8482,7 @@ ORIGIN: ../../../flutter/third_party/skia/include/gpu/vk/VulkanExtensions.h + ..
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/vk/VulkanMemoryAllocator.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/vk/VulkanTypes.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/private/base/SkContainers.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/include/private/gpu/graphite/DawnTypesPriv.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnGraphiteTypesPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanGraphiteTypes.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanGraphiteTypesPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/tessellate/MidpointContourParser.h + ../../../flutter/third_party/skia/LICENSE
@@ -8494,7 +8495,7 @@ FILE: ../../../flutter/third_party/skia/include/gpu/vk/VulkanExtensions.h
 FILE: ../../../flutter/third_party/skia/include/gpu/vk/VulkanMemoryAllocator.h
 FILE: ../../../flutter/third_party/skia/include/gpu/vk/VulkanTypes.h
 FILE: ../../../flutter/third_party/skia/include/private/base/SkContainers.h
-FILE: ../../../flutter/third_party/skia/include/private/gpu/graphite/DawnTypesPriv.h
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnGraphiteTypesPriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanGraphiteTypes.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/vk/VulkanGraphiteTypesPriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/tessellate/MidpointContourParser.h
@@ -9562,6 +9563,8 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/RenderPassDesc.h + ..
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/ScratchResourceManager.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/ScratchResourceManager.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/TextureInfoPriv.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnBackendTexture.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnTextureInfo.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/geom/AnalyticBlurMask.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/geom/AnalyticBlurMask.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/mtl/MtlBackendSemaphore.mm + ../../../flutter/third_party/skia/LICENSE
@@ -9671,6 +9674,8 @@ FILE: ../../../flutter/third_party/skia/src/gpu/graphite/RenderPassDesc.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/ScratchResourceManager.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/ScratchResourceManager.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/TextureInfoPriv.h
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnBackendTexture.cpp
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnTextureInfo.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/geom/AnalyticBlurMask.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/geom/AnalyticBlurMask.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/mtl/MtlBackendSemaphore.mm
