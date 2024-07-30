@@ -343,6 +343,7 @@ void DrawSimpleFrame(ExternalViewEmbedder& external_view_embedder,
           nullptr, std::move(framebuffer_info),
           [](const flutter::SurfaceFrame& surface_frame,
              flutter::DlCanvas* canvas) { return true; },
+          [](const flutter::SurfaceFrame& surface_frame) { return true; },
           frame_size));
 }
 
@@ -375,6 +376,7 @@ void DrawFrameWithView(
           nullptr, std::move(framebuffer_info),
           [](const flutter::SurfaceFrame& surface_frame,
              flutter::DlCanvas* canvas) { return true; },
+          [](const flutter::SurfaceFrame& surface_frame) { return true; },
           frame_size));
 }
 

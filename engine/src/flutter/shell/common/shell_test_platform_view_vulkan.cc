@@ -203,17 +203,21 @@ ShellTestPlatformViewVulkan::OffScreenSurface::AcquireFrame(
                                       SkAlphaType::kOpaque_SkAlphaType);
   auto surface = SkSurfaces::RenderTarget(context_.get(), skgpu::Budgeted::kNo,
                                           image_info, 0, nullptr);
-  SurfaceFrame::SubmitCallback callback = [](const SurfaceFrame&,
-                                             DlCanvas* canvas) -> bool {
+
+  SurfaceFrame::EncodeCallback encode_callback = [](const SurfaceFrame&,
+                                                    DlCanvas* canvas) -> bool {
     canvas->Flush();
     return true;
   };
+  SurfaceFrame::SubmitCallback submit_callback =
+      [](const SurfaceFrame&) -> bool { return true; };
 
   SurfaceFrame::FramebufferInfo framebuffer_info;
   framebuffer_info.supports_readback = true;
 
   return std::make_unique<SurfaceFrame>(std::move(surface), framebuffer_info,
-                                        std::move(callback),
+                                        std::move(encode_callback),
+                                        std::move(submit_callback),
                                         /*frame_size=*/SkISize::Make(800, 600));
 }
 

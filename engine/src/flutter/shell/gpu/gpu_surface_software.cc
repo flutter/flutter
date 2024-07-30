@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "flow/surface_frame.h"
 #include "flutter/fml/logging.h"
 
 #include "third_party/skia/include/core/SkSurface.h"
@@ -39,7 +40,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceSoftware::AcquireFrame(
         [](const SurfaceFrame& surface_frame, DlCanvas* canvas) {
           return true;
         },
-        logical_size);
+        [](const SurfaceFrame& surface_frame) { return true; }, logical_size);
   }
 
   if (!IsValid()) {
@@ -64,7 +65,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceSoftware::AcquireFrame(
   SkCanvas* canvas = backing_store->getCanvas();
   canvas->resetMatrix();
 
-  SurfaceFrame::SubmitCallback on_submit =
+  SurfaceFrame::EncodeCallback encode_callback =
       [self = weak_factory_.GetWeakPtr()](const SurfaceFrame& surface_frame,
                                           DlCanvas* canvas) -> bool {
     // If the surface itself went away, there is nothing more to do.
@@ -73,12 +74,21 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceSoftware::AcquireFrame(
     }
 
     canvas->Flush();
-
-    return self->delegate_->PresentBackingStore(surface_frame.SkiaSurface());
+    return true;
   };
+  SurfaceFrame::SubmitCallback submit_callback =
+      [self = weak_factory_.GetWeakPtr()](const SurfaceFrame& surface_frame) {
+        // If the surface itself went away, there is nothing more to do.
+        if (!self || !self->IsValid()) {
+          return false;
+        }
+        return self->delegate_->PresentBackingStore(
+            surface_frame.SkiaSurface());
+      };
 
   return std::make_unique<SurfaceFrame>(backing_store, framebuffer_info,
-                                        on_submit, logical_size);
+                                        encode_callback, submit_callback,
+                                        logical_size);
 }
 
 // |Surface|
