@@ -574,8 +574,8 @@ enum TargetPlatform {
 
   String get fuchsiaArchForTargetPlatform {
     return switch (this) {
-      TargetPlatform.fuchsia_arm64=> 'arm64',
-      TargetPlatform.fuchsia_x64=>'x64',
+      TargetPlatform.fuchsia_arm64 => 'arm64',
+      TargetPlatform.fuchsia_x64 =>'x64',
       TargetPlatform.android || TargetPlatform.android_arm || TargetPlatform.android_arm64 ||
       TargetPlatform.android_x64 || TargetPlatform.android_x86 || TargetPlatform.darwin ||
       TargetPlatform.ios || TargetPlatform.linux_arm64 || TargetPlatform.linux_x64 ||
@@ -697,7 +697,7 @@ DarwinArch getIOSArchForName(String arch) {
     'arm64e'=> // iPhone XS/XS Max/XR and higher. arm64 runs on arm64e devices.
        DarwinArch.arm64,
     'x86_64'=> DarwinArch.x86_64,
-       _=> throw Exception('Unsupported iOS arch name "$arch"')
+       _ => throw Exception('Unsupported iOS arch name "$arch"')
   };
 }
 
