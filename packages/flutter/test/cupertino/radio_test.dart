@@ -444,10 +444,12 @@ void main() {
     Widget buildRadio({required int value, required int groupValue}) {
       return CupertinoApp(
         home: Center(
-          child: CupertinoRadio<int>(
-            value: value,
-            groupValue: groupValue,
-            onChanged: (int? i) { },
+          child: RepaintBoundary(
+            child: CupertinoRadio<int>(
+              value: value,
+              groupValue: groupValue,
+              onChanged: (int? i) { },
+            ),
           ),
         ),
       );
@@ -469,10 +471,12 @@ void main() {
       return CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: Center(
-          child: CupertinoRadio<int>(
-            value: value,
-            groupValue: groupValue,
-            onChanged: enabled ? (int? i) { } : null,
+          child: RepaintBoundary(
+            child: CupertinoRadio<int>(
+              value: value,
+              groupValue: groupValue,
+              onChanged: enabled ? (int? i) { } : null,
+            ),
           ),
         ),
       );
@@ -493,10 +497,12 @@ void main() {
     Widget buildRadio({required int value, required int groupValue}) {
       return CupertinoApp(
         home: Center(
-          child: CupertinoRadio<int>(
-            value: value,
-            groupValue: groupValue,
-            onChanged: null,
+          child: RepaintBoundary(
+            child: CupertinoRadio<int>(
+              value: value,
+              groupValue: groupValue,
+              onChanged: null,
+            ),
           ),
         ),
       );
@@ -518,10 +524,12 @@ void main() {
       return CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: Center(
-          child: CupertinoRadio<int>(
-            value: value,
-            groupValue: groupValue,
-            onChanged: null,
+          child: RepaintBoundary(
+            child: CupertinoRadio<int>(
+              value: value,
+              groupValue: groupValue,
+              onChanged: null,
+            ),
           ),
         ),
       );
