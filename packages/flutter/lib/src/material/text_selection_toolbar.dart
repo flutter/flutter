@@ -220,6 +220,7 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
             // The navButton that shows and hides the overflow menu is the
             // first child.
             _TextSelectionToolbarOverflowButton(
+              key: _overflowOpen ? StandardComponentType.backButton.key : StandardComponentType.moreButton.key,
               icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
               onPressed: () {
                 setState(() {
@@ -731,6 +732,7 @@ class _TextSelectionToolbarContainer extends StatelessWidget {
 // forward and back controls.
 class _TextSelectionToolbarOverflowButton extends StatelessWidget {
   const _TextSelectionToolbarOverflowButton({
+    super.key,
     required this.icon,
     this.onPressed,
     this.tooltip,

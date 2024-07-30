@@ -463,7 +463,7 @@ void main() {
     expect(
       flying(
         tester,
-        find.byWidgetPredicate((Widget widget) => widget.key != null),
+        find.byWidgetPredicate((Widget widget) => widget.key != null && widget.key is GlobalKey),
       ),
       findsNothing,
     );
