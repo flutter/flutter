@@ -5661,7 +5661,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     // If this is a nested Navigator, handle system backs here so that the root
     // Navigator doesn't get all of them.
     if (widget.handlesBacksWhenNested && Navigator.maybeOf(context, rootNavigator: true) != this) {
-      // TODO(justinmc): Investigate predictive back.
       return PopScope(
         canPop: !canPop(),
         onPopInvokedWithResult: (bool didPop, Object? result) {
