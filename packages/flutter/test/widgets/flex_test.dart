@@ -147,4 +147,56 @@ void main() {
     const Column();
     const Row();
   });
+
+  testWidgets('Default Flex.spacing value', (WidgetTester tester) async {
+    await tester.pumpWidget(const Flex(direction: Axis.vertical));
+
+    final Flex flex = tester.widget(find.byType(Flex));
+    expect(flex.spacing, 0.0);
+  });
+
+  testWidgets('Can update Flex.spacing value', (WidgetTester tester) async {
+    Widget buildFlex({ required double spacing }) {
+      return Center(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Flex(
+            spacing: spacing,
+            direction: Axis.vertical,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                height: 100.0,
+                width: 100.0,
+                color: const Color(0xFFFF0000),
+              ),
+              Container(
+                height: 100.0,
+                width: 100.0,
+                color: const Color(0xFF0000FF),
+              ),
+              Container(
+                height: 100.0,
+                width: 100.0,
+                color: const Color(0xff00FF00),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildFlex(spacing: 8.0));
+
+    RenderFlex renderObject = tester.allRenderObjects.whereType<RenderFlex>().first;
+    expect(renderObject.spacing, equals(8.0));
+    expect(tester.getSize(find.byType(Flex)).width, equals(100.0));
+    expect(tester.getSize(find.byType(Flex)).height, equals(316.0));
+
+    await tester.pumpWidget(buildFlex(spacing: 18.0));
+
+    renderObject = tester.allRenderObjects.whereType<RenderFlex>().first;
+    expect(renderObject.spacing, equals(18.0));
+    expect(tester.getSize(find.byType(Flex)).width, equals(100.0));
+    expect(tester.getSize(find.byType(Flex)).height, equals(336.0));
+  });
 }
