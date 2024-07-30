@@ -895,7 +895,7 @@ void main() {
         '--enable-asserts',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.dart_tool/package_config.json',
+        '--packages=/.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]

@@ -302,7 +302,7 @@ class PackagesGetCommand extends FlutterCommand {
           usage: globals.flutterUsage,
           analytics: analytics,
           projectDir: rootProject.directory,
-          buildInfo: await getBuildInfo(),
+          packageConfigPath: packageConfigPath(),
           generateDartPluginRegistry: true,
         );
 
@@ -325,7 +325,7 @@ class PackagesGetCommand extends FlutterCommand {
           usage: globals.flutterUsage,
           analytics: analytics,
           projectDir: rootProject.directory,
-          buildInfo: await getBuildInfo(),
+          packageConfigPath: packageConfigPath(),
           generateDartPluginRegistry: true,
         );
         final BuildResult result = await globals.buildSystem.build(

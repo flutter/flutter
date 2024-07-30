@@ -1071,7 +1071,7 @@ abstract class FlutterCommand extends Command<void> {
     bool argIfDefined(String flagName, bool ifNotDefined) {
       return argParser.options.containsKey(flagName) ? boolArg(flagName) : ifNotDefined;
     }
-    final bool debugResult = !_excludeDebug && argIfDefined('debug', true);
+    final bool debugResult = !_excludeDebug && argIfDefined('debug', false);
     final bool jitReleaseResult = !_excludeRelease && argIfDefined('jit-release', false);
     final bool releaseResult = !_excludeRelease && argIfDefined('release', false);
     final bool profileResult = argIfDefined('profile', false);
@@ -1171,6 +1171,19 @@ abstract class FlutterCommand extends Command<void> {
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject get project => FlutterProject.current();
 
+  /// The path to the package config for the current project.
+  ///
+  /// If an explicit argument is given, that is returned. Otherwise the file
+  /// system is searched for the package config. For projects in pub workspaces
+  /// the package config might be located in a parent directory.
+  ///
+  /// If none is found `.dart_tool/package_config.json` is returned.
+  String packageConfigPath() {
+    final String? packagesPath = this.packagesPath;
+    return packagesPath ??
+        findPackageConfigFileOrDefault(project.directory).path;
+  }
+
   /// Compute the [BuildInfo] for the current flutter command.
   ///
   /// Commands that build multiple build modes can pass in a [forcedBuildMode]
@@ -1186,9 +1199,7 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg('build-number')
       : null;
 
-    final File packageConfigFile = packagesPath != null
-        ? globals.fs.file(packagesPath)
-        : findPackageConfigFileOrDefault(project.directory);
+    final File packageConfigFile = globals.fs.file(packageConfigPath());
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,
@@ -1733,7 +1744,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         usage: globals.flutterUsage,
         analytics: analytics,
         projectDir: project.directory,
-        buildInfo: await getBuildInfo(),
+        packageConfigPath: packageConfigPath(),
         generateDartPluginRegistry: true,
       );
 

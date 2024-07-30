@@ -571,7 +571,7 @@ abstract class CreateBase extends FlutterCommand {
         usage: globals.flutterUsage,
         analytics: globals.analytics,
         projectDir: project.directory,
-        buildInfo: await getBuildInfo(),
+        packageConfigPath: packageConfigPath(),
         generateDartPluginRegistry: true,
       );
 

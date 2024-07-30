@@ -55,7 +55,7 @@ class BundleBuilder {
     // If the precompiled flag was not passed, force us into debug mode.
     final Environment environment = Environment(
       projectDir: project.directory,
-      buildInfo: buildInfo,
+      packageConfigPath: buildInfo.packageConfigPath,
       outputDir: globals.fs.directory(assetDirPath),
       buildDir: project.dartTool.childDirectory('flutter_build'),
       cacheDir: globals.cache.getRoot(),

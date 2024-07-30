@@ -102,7 +102,7 @@ class SourceVisitor implements ResolvedFiles {
         Environment.kWorkspaceDirectory   =>
           environment.fileSystem.path.dirname(
             environment.fileSystem.path.dirname(
-              environment.buildInfo.packageConfigPath,
+              environment.packageConfigPath,
             )
           ),
         Environment.kBuildDirectory       => environment.buildDir.resolveSymbolicLinksSync(),
