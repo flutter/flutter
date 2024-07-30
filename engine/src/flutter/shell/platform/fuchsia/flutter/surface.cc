@@ -36,7 +36,7 @@ std::unique_ptr<flutter::SurfaceFrame> Surface::AcquireFrame(
       nullptr, std::move(framebuffer_info),
       [](const flutter::SurfaceFrame& surface_frame,
          flutter::DlCanvas* canvas) { return true; },
-      size);
+      [](const flutter::SurfaceFrame& surface_frame) { return true; }, size);
 }
 
 // |flutter::Surface|

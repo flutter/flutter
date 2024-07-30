@@ -104,35 +104,33 @@ auto renderer = impeller::Renderer(context);
 while(true) {
   std::unique_ptr<impeller::Surface> surface = /* Wrap the window surface */;
 
-  renderer->Render(surface, [&scene](RenderTarget& render_target) {
-    /// Render a perspective view.
+  const auto& render_target = surface->GetTargetRenderPassDescriptor();
 
-    auto camera =
-        impeller::Camera::MakePerspective(
-            /* fov */ kPiOver4,
-            /* position */ {50, -30, 50})
-        .LookAt(
-            /* target */ impeller::Vector3::Zero,
-            /* up */ {0, -1, 0});
+  /// Render a perspective view.
 
-    scene.Render(render_target, camera);
+  auto camera =
+      impeller::Camera::MakePerspective(
+        /* fov */ kPiOver4,
+        /* position */ {50, -30, 50})
+      .LookAt(
+        /* target */ impeller::Vector3::Zero,
+        /* up */ {0, -1, 0});
+
+  scene.Render(render_target, camera);
 
     /// Render an overhead view on the bottom right corner of the screen.
 
-    auto size = render_target.GetRenderTargetSize();
-    auto minimap_camera =
-        impeller::Camera::MakeOrthographic(
-            /* view */ Rect::MakeLTRB(-100, -100, 100, 100),
-            /* position */ {0, -50, 0})
-        .LookAt(
-            /* target */ impeller::Vector3::Zero,
-            /* up */ {0, 0, 1})
-        .WithViewport(IRect::MakeXYWH(size.width / 4, size.height / 4,
-                                      size.height / 5, size.height / 5));
+  auto size = render_target.GetRenderTargetSize();
+  auto minimap_camera =
+      impeller::Camera::MakeOrthographic(
+        /* view */ Rect::MakeLTRB(-100, -100, 100, 100),
+        /* position */ {0, -50, 0})
+      .LookAt(
+        /* target */ impeller::Vector3::Zero,
+        /* up */ {0, 0, 1})
+      .WithViewport(IRect::MakeXYWH(size.width / 4, size.height / 4,
+                                    size.height / 5, size.height / 5));
 
-    scene.Render(render_target, minimap_camera);
-
-    return true;
-  });
+  scene.Render(render_target, minimap_camera);
 }
 ```
