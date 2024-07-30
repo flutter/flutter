@@ -177,7 +177,7 @@ class Dart2JSTarget extends Dart2WebTarget {
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       if (buildMode == BuildMode.profile)
         '-Ddart.vm.profile=true'
-      else
+      else if (buildMode == BuildMode.release)
         '-Ddart.vm.product=true',
       for (final String dartDefine in computeDartDefines(environment))
         '-D$dartDefine',
@@ -185,7 +185,7 @@ class Dart2JSTarget extends Dart2WebTarget {
 
     final List<String> compilationArgs = <String>[
       ...sharedCommandOptions,
-      ...compilerConfig.toSharedCommandOptions(),
+      ...compilerConfig.toSharedCommandOptions(buildMode),
       '-o',
       environment.buildDir.childFile('app.dill').path,
       '--packages=.dart_tool/package_config.json',
@@ -298,7 +298,6 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final String platformBinariesPath = artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
     final String platformFilePath = environment.fileSystem.path.join(platformBinariesPath, 'dart2wasm_platform.dill');
 
-    assert(buildMode == BuildMode.release || buildMode == BuildMode.profile);
     final List<String> compilationArgs = <String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
       'compile',
@@ -313,7 +312,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       ],
       if (buildMode == BuildMode.profile)
         '-Ddart.vm.profile=true'
-      else
+      else if (buildMode == BuildMode.release)
         '-Ddart.vm.product=true',
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       for (final String dartDefine in computeDartDefines(environment))
