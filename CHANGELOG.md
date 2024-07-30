@@ -24,6 +24,11 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 INTERNAL NOTE
 -->
+## Flutter 3.24 Changes
+
+### [3.24.0](https://github.com/flutter/flutter/releases/tag/3.24.0) 
+Initial stable release.
+
 ## Flutter 3.22 Changes
 
 ### [3.22.3](https://github.com/flutter/flutter/releases/tag/3.22.3) (July 17, 2024)
