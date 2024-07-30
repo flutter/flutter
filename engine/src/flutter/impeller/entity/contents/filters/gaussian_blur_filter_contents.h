@@ -46,9 +46,6 @@ GaussianBlurPipeline::FragmentShader::KernelSamples LerpHackKernelSamples(
 /// Note: This will replace `DirectionalGaussianBlurFilterContents`.
 class GaussianBlurFilterContents final : public FilterContents {
  public:
-  static std::string_view kNoMipsError;
-  static const int32_t kBlurFilterRequiredMipCount;
-
   explicit GaussianBlurFilterContents(
       Scalar sigma_x,
       Scalar sigma_y,
