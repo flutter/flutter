@@ -690,7 +690,7 @@ void main() {
   });
 
   testWidgets('Checkbox is lightened when pressed in dark mode', (WidgetTester tester) async {
-    const Color checkColor = Color(0xffffffff);
+    const Color checkColor = Color(0xffdee8f8);
     const Color defaultActiveFillColor = Color(0xff3264d7);
     const Color defaultInactiveFillColor = Color(0xff000000);
     const Color pressedLightShadow = Color(0x26ffffff);
