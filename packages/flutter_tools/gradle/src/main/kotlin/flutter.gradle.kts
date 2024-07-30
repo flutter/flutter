@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import com.android.build.api.dsl.LibraryExtension;
 import com.android.build.api.dsl.ApplicationExtension;
+import com.android.build.api.dsl.TestedExtension;
+
 
 
 // This buildscript block supplies dependencies for this file's own import
@@ -28,14 +31,32 @@ apply<FlutterPluginKts>()
 
 class FlutterPluginKts : Plugin<Project> {
     override fun apply(project: Project) {
-        print(project.extensions)
-        val androidExtension = project.extensions.findByType(com.android.build.api.dsl.ApplicationExtension::class.java)
+        // Attempt to find the extension using CommonExtension first
+        var androidExtension = project.extensions.findByType(com.android.build.api.dsl.CommonExtension::class.java)
+        if (androidExtension != null) {
+            val baseApplicationName = project.findProperty("base-application-name")?.toString() ?: "android.app.Application"
+            androidExtension.let { android ->
+                android.defaultConfig!!.manifestPlaceholders["applicationName"] = baseApplicationName
+            }
+        } else {
+            delegateToLegacyGroovyBuilder(project)
+        }
+    }
 
-        androidExtension?.let { android ->
-            android.defaultConfig.let { defaultConfig ->
-                val baseApplicationName = project.findProperty("base-application-name")?.toString() ?: "android.app.Application"
-                // Setting to android.app.Application is the same as omitting the attribute.
-                defaultConfig.manifestPlaceholders["applicationName"] = baseApplicationName
+    fun delegateToLegacyGroovyBuilder(project: Project) {
+        // Use withGroovyBuilder and getProperty() to access Groovy metaprogramming.
+        project.withGroovyBuilder {
+            getProperty("android").withGroovyBuilder {
+                getProperty("defaultConfig").withGroovyBuilder {
+                    var baseApplicationName: String = "android.app.Application"
+                    if (project.hasProperty("base-application-name")) {
+                        baseApplicationName = project.property("base-application-name").toString()
+                    }
+                    // Setting to android.app.Application is the same as omitting the attribute.
+                    getProperty("manifestPlaceholders").withGroovyBuilder {
+                        setProperty("applicationName", baseApplicationName)
+                    }
+                }
             }
         }
     }
