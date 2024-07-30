@@ -354,6 +354,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableEmbedderApi: enableEmbedderApi,
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
+        enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
+        ipv6: boolArg(FlutterCommand.ipv6Flag),
+        printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
       );
     }
   }
@@ -702,7 +705,6 @@ class RunCommand extends RunCommandBase {
         projectRootPath: stringArg('project-root'),
         dillOutputPath: stringArg('output-dill'),
         stayResident: stayResident,
-        ipv6: ipv6 ?? false,
         analytics: globals.analytics,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
         nativeAssetsBuilder: _nativeAssetsBuilder,
@@ -712,7 +714,6 @@ class RunCommand extends RunCommandBase {
         flutterDevices.single,
         target: targetFile,
         flutterProject: flutterProject,
-        ipv6: ipv6,
         debuggingOptions: await createDebuggingOptions(webMode),
         stayResident: stayResident,
         fileSystem: globals.fs,
@@ -731,7 +732,6 @@ class RunCommand extends RunCommandBase {
       applicationBinary: applicationBinaryPath == null
           ? null
           : globals.fs.file(applicationBinaryPath),
-      ipv6: ipv6 ?? false,
       stayResident: stayResident,
     );
   }
@@ -776,9 +776,7 @@ class RunCommand extends RunCommandBase {
           projectRootPath: stringArg('project-root'),
           packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
           dillOutputPath: stringArg('output-dill'),
-          ipv6: ipv6 ?? false,
           userIdentifier: userIdentifier,
-          enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
           nativeAssetsBuilder: _nativeAssetsBuilder,
         );
       } on Exception catch (error) {
@@ -866,7 +864,6 @@ class RunCommand extends RunCommandBase {
     try {
       final int? result = await runner.run(
         appStartedCompleter: appStartedTimeRecorder,
-        enableDevTools: stayResident && boolArg(FlutterCommand.kEnableDevTools),
         route: route,
       );
       handler?.stop();

@@ -28,6 +28,7 @@ abstract class _ActionButton extends StatelessWidget {
     this.color,
     required this.icon,
     required this.onPressed,
+    this.standardComponent,
     this.style,
   });
 
@@ -56,6 +57,10 @@ abstract class _ActionButton extends StatelessWidget {
   /// Null by default.
   final ButtonStyle? style;
 
+  /// An enum value to use to identify this button as a type of
+  /// [StandardComponentType].
+  final StandardComponentType? standardComponent;
+
   /// This returns the appropriate tooltip text for this action button.
   String _getTooltip(BuildContext context);
 
@@ -67,6 +72,7 @@ abstract class _ActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     return IconButton(
+      key: standardComponent?.key,
       icon: icon,
       style: style,
       color: color,
@@ -212,7 +218,10 @@ class BackButton extends _ActionButton {
     super.color,
     super.style,
     super.onPressed,
-  }) : super(icon: const BackButtonIcon());
+  }) : super(
+    icon: const BackButtonIcon(),
+    standardComponent: StandardComponentType.backButton,
+  );
 
   @override
   void _onPressedCallback(BuildContext context) => Navigator.maybePop(context);
@@ -281,7 +290,10 @@ class CloseButtonIcon extends StatelessWidget {
 class CloseButton extends _ActionButton {
   /// Creates a Material Design close icon button.
   const CloseButton({ super.key, super.color, super.onPressed, super.style })
-      : super(icon: const CloseButtonIcon());
+      : super(
+          icon: const CloseButtonIcon(),
+          standardComponent: StandardComponentType.closeButton,
+        );
 
   @override
   void _onPressedCallback(BuildContext context) => Navigator.maybePop(context);
@@ -347,7 +359,10 @@ class DrawerButton extends _ActionButton {
     super.color,
     super.style,
     super.onPressed,
-  }) : super(icon: const DrawerButtonIcon());
+  }) : super(
+        icon: const DrawerButtonIcon(),
+        standardComponent: StandardComponentType.drawerButton,
+      );
 
   @override
   void _onPressedCallback(BuildContext context) => Scaffold.of(context).openDrawer();
