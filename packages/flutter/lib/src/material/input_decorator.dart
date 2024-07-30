@@ -2633,12 +2633,12 @@ class InputDecoration {
       'Invalid parameter because a collapsed decoration has no label. '
       'This feature was deprecated after v3.24.0-0.1.pre.',
     )
-    this.floatingLabelBehavior,
+    FloatingLabelBehavior? floatingLabelBehavior,
     @Deprecated(
       'Invalid parameter because a collapsed decoration has no label. '
       'This feature was deprecated after v3.24.0-0.1.pre.',
     )
-    this.floatingLabelAlignment,
+    FloatingLabelAlignment? floatingLabelAlignment,
     this.hintStyle,
     this.hintTextDirection,
     this.hintMaxLines,
@@ -2688,6 +2688,10 @@ class InputDecoration {
        disabledBorder = null,
        enabledBorder = null,
        semanticCounterText = null,
+       // ignore: prefer_initializing_formals, (can't use initializing formals for a deprecated parameter).
+       floatingLabelBehavior = floatingLabelBehavior,
+       // ignore: prefer_initializing_formals, (can't use initializing formals for a deprecated parameter).
+       floatingLabelAlignment = floatingLabelAlignment,
        alignLabelWithHint = false;
 
   /// An icon to show before the input field and outside of the decoration's
