@@ -234,8 +234,7 @@ class _MyHomePageState extends State<MyHomePage> {
             if (_menuController.isShown) {
               ContextMenuController.removeAny();
             }
-            if (selectionDetails.status == SelectionStatus.none
-               || selectionDetails.status == SelectionStatus.collapsed
+            if (selectionDetails.status != SelectionStatus.uncollapsed
                || !selectionDetails.selectionFinalized) {
               return;
             }
