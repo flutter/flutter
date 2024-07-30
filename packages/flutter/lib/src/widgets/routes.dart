@@ -1429,10 +1429,17 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
+    final Animation<double> proxyAnimation = ProxyAnimation();
+
+    final Animation<double> flexAnimation = (nextRouteTransition == null) ?
+      secondaryAnimation : proxyAnimation;
+
+    final Widget originalTransitions = buildTransitions(context, animation, flexAnimation, child);
+
     if (nextRouteTransition != null) {
-      return nextRouteTransition!(context, animation, secondaryAnimation, child);
+      return nextRouteTransition!(context, animation, secondaryAnimation, originalTransitions);
     } else {
-      return buildTransitions(context, animation, secondaryAnimation, child);
+      return originalTransitions;
     }
   }
 
@@ -2544,15 +2551,6 @@ mixin FlexibleTransitionRouteMixin<T> on ModalRoute<T> {
     } else {
       return null;
     }
-  }
-
-  @override
-  bool didPop(T? result) {
-    final bool popResult = super.didPop(result);
-    if (popResult && receivedTransition != null) {
-      receivedTransition = null;
-    }
-    return popResult;
   }
 
   @override
