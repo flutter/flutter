@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'bottom_navigation_bar.dart';
+/// @docImport 'floating_action_button.dart';
+/// @docImport 'icons.dart';
+/// @docImport 'scaffold.dart';
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
@@ -184,8 +190,8 @@ class NavigationRail extends StatefulWidget {
 
   /// The rail's elevation or z-coordinate.
   ///
-  /// If [Directionality] is [intl.TextDirection.LTR], the inner side is the
-  /// right side, and if [Directionality] is [intl.TextDirection.RTL], it is
+  /// If [Directionality] is [TextDirection.ltr], the inner side is the
+  /// right side, and if [Directionality] is [TextDirection.rtl], it is
   /// the left side.
   ///
   /// The default value is 0.

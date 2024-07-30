@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'elevated_button.dart';
+/// @docImport 'ink_well.dart';
+/// @docImport 'material.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -421,7 +426,7 @@ class FloatingActionButton extends StatelessWidget {
 
   /// True if this is an "extended" floating action button.
   ///
-  /// Typically [extended] buttons have a [StadiumBorder] [shape]
+  /// Typically "extended" buttons have a [StadiumBorder] [shape]
   /// and have been created with the [FloatingActionButton.extended]
   /// constructor.
   ///
