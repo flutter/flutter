@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'menu_anchor.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -1544,6 +1548,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     }
 
     return IconButton(
+      key: StandardComponentType.moreButton.key,
       icon: widget.icon ?? Icon(Icons.adaptive.more),
       padding: widget.padding,
       splashRadius: widget.splashRadius,

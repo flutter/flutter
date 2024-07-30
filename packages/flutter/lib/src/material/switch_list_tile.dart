@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+///
+/// @docImport 'checkbox_list_tile.dart';
+/// @docImport 'color_scheme.dart';
+/// @docImport 'constants.dart';
+/// @docImport 'ink_well.dart';
+/// @docImport 'material.dart';
+/// @docImport 'radio_list_tile.dart';
+/// @docImport 'scaffold.dart';
+library;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
@@ -198,6 +209,7 @@ class SwitchListTile extends StatelessWidget {
     this.visualDensity,
     this.enableFeedback,
     this.hoverColor,
+    this.internalAddSemanticForOnTap = false,
   }) : _switchListTileType = _SwitchListTileType.material,
        applyCupertinoTheme = false,
        assert(activeThumbImage != null || onActiveThumbImageError == null),
@@ -255,6 +267,7 @@ class SwitchListTile extends StatelessWidget {
     this.visualDensity,
     this.enableFeedback,
     this.hoverColor,
+    this.internalAddSemanticForOnTap = false,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
        assert(!isThreeLine || subtitle != null),
        assert(activeThumbImage != null || onActiveThumbImageError == null),
@@ -506,6 +519,12 @@ class SwitchListTile extends StatelessWidget {
   /// {@macro flutter.cupertino.CupertinoSwitch.applyTheme}
   final bool? applyCupertinoTheme;
 
+  /// Whether to add button:true to the semantics if onTap is provided.
+  /// This is a temporary flag to help changing the behavior of ListTile onTap semantics.
+  ///
+  // TODO(hangyujin): Remove this flag after fixing related g3 tests and flipping
+  // the default value to true.
+  final bool internalAddSemanticForOnTap;
   @override
   Widget build(BuildContext context) {
     final Widget control;
@@ -605,6 +624,7 @@ class SwitchListTile extends StatelessWidget {
         onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
         hoverColor: hoverColor,
+        internalAddSemanticForOnTap: internalAddSemanticForOnTap,
       ),
     );
   }

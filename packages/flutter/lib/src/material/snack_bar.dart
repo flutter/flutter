@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'bottom_navigation_bar.dart';
+/// @docImport 'floating_action_button.dart';
+library;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -674,6 +678,7 @@ class _SnackBarState extends State<SnackBar> {
 
     final IconButton? iconButton = showCloseIcon
         ? IconButton(
+            key: StandardComponentType.closeButton.key,
             icon: const Icon(Icons.close),
             iconSize: 24.0,
             color: widget.closeIconColor ?? snackBarTheme.closeIconColor ?? defaults.closeIconColor,

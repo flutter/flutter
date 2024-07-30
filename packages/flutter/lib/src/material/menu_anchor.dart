@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'checkbox_theme.dart';
+/// @docImport 'dropdown_menu.dart';
+/// @docImport 'radio_theme.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -173,6 +181,7 @@ class MenuAnchor extends StatefulWidget {
   /// Defaults to the ambient [MenuThemeData.style].
   final MenuStyle? style;
 
+  /// {@template flutter.material.MenuAnchor.alignmentOffset}
   /// The offset of the menu relative to the alignment origin determined by
   /// [MenuStyle.alignment] on the [style] attribute and the ambient
   /// [Directionality].
@@ -193,6 +202,7 @@ class MenuAnchor extends StatefulWidget {
   /// [alignmentOffset] move the menu position to the left.
   ///
   /// Defaults to [Offset.zero].
+  /// {@endtemplate}
   final Offset? alignmentOffset;
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -2146,7 +2156,7 @@ class _LocalizedShortcutLabeler {
       final LogicalKeyboardKey trigger = serialized.trigger!;
       final List<String> modifiers = <String>[
         if (_usesSymbolicModifiers) ...<String>[
-          // MacOS/iOS platform convention uses this ordering, with ⌘ always last.
+          // macOS/iOS platform convention uses this ordering, with ⌘ always last.
           if (serialized.control!) _getModifierLabel(LogicalKeyboardKey.control, localizations),
           if (serialized.alt!)     _getModifierLabel(LogicalKeyboardKey.alt, localizations),
           if (serialized.shift!)   _getModifierLabel(LogicalKeyboardKey.shift, localizations),
@@ -2180,7 +2190,24 @@ class _LocalizedShortcutLabeler {
         if (shortcutTrigger != null && shortcutTrigger.isNotEmpty) shortcutTrigger,
       ].join(keySeparator);
     } else if (serialized.character != null) {
-      return serialized.character!;
+      final List<String> modifiers = <String>[
+        // Character based shortcuts cannot check shifted keys.
+        if (_usesSymbolicModifiers) ...<String>[
+          // macOS/iOS platform convention uses this ordering, with ⌘ always last.
+          if (serialized.control!) _getModifierLabel(LogicalKeyboardKey.control, localizations),
+          if (serialized.alt!)     _getModifierLabel(LogicalKeyboardKey.alt, localizations),
+          if (serialized.meta!)    _getModifierLabel(LogicalKeyboardKey.meta, localizations),
+        ] else ...<String>[
+          // This order matches the LogicalKeySet version.
+          if (serialized.alt!)     _getModifierLabel(LogicalKeyboardKey.alt, localizations),
+          if (serialized.control!) _getModifierLabel(LogicalKeyboardKey.control, localizations),
+          if (serialized.meta!)    _getModifierLabel(LogicalKeyboardKey.meta, localizations),
+        ],
+      ];
+      return <String>[
+        ...modifiers,
+        serialized.character!,
+      ].join(keySeparator);
     }
     throw UnimplementedError('Shortcut labels for ShortcutActivators that do not implement '
         'MenuSerializableShortcut (e.g. ShortcutActivators other than SingleActivator or '

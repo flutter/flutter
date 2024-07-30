@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+///
+/// @docImport 'checkbox_list_tile.dart';
+/// @docImport 'color_scheme.dart';
+/// @docImport 'constants.dart';
+/// @docImport 'ink_well.dart';
+/// @docImport 'material.dart';
+/// @docImport 'scaffold.dart';
+/// @docImport 'switch_list_tile.dart';
+/// @docImport 'switch_theme.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
@@ -188,6 +200,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
+    this.internalAddSemanticForOnTap = false,
   }) : _radioType = _RadioType.material,
        useCupertinoCheckmarkStyle = false,
        assert(!isThreeLine || subtitle != null);
@@ -228,6 +241,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.useCupertinoCheckmarkStyle = false,
+    this.internalAddSemanticForOnTap = false,
   }) : _radioType = _RadioType.adaptive,
        assert(!isThreeLine || subtitle != null);
 
@@ -437,6 +451,13 @@ class RadioListTile<T> extends StatelessWidget {
 
   final _RadioType _radioType;
 
+  /// Whether to add button:true to the semantics if onTap is provided.
+  /// This is a temporary flag to help changing the behavior of ListTile onTap semantics.
+  ///
+  // TODO(hangyujin): Remove this flag after fixing related g3 tests and flipping
+  // the default value to true.
+  final bool internalAddSemanticForOnTap;
+
   /// Whether to use the checkbox style for the [CupertinoRadio] control.
   ///
   /// Only usable under the [RadioListTile.adaptive] constructor. If set to
@@ -534,6 +555,7 @@ class RadioListTile<T> extends StatelessWidget {
         focusNode: focusNode,
         onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
+        internalAddSemanticForOnTap: internalAddSemanticForOnTap,
       ),
     );
   }

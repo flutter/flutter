@@ -231,83 +231,6 @@ Finder findTooltipContainer(String tooltipText) {
 }
 
 void main() {
-  testWidgets('M2 Chip defaults', (WidgetTester tester) async {
-    late TextTheme textTheme;
-
-    Widget buildFrame(Brightness brightness) {
-      return MaterialApp(
-        theme: ThemeData(brightness: brightness, useMaterial3: false),
-        home: Scaffold(
-          body: Center(
-            child: Builder(
-              builder: (BuildContext context) {
-                textTheme = Theme.of(context).textTheme;
-                return Chip(
-                  avatar: const CircleAvatar(child: Text('A')),
-                  label: const Text('Chip A'),
-                  onDeleted: () { },
-                );
-              },
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildFrame(Brightness.light));
-    expect(getMaterialBox(tester), paints..rrect()..circle(color: const Color(0xff1976d2)));
-    expect(tester.getSize(find.byType(Chip)), const Size(156.0, 48.0));
-    expect(getMaterial(tester).color, null);
-    expect(getMaterial(tester).elevation, 0);
-    expect(getMaterial(tester).shape, const StadiumBorder());
-    expect(getIconData(tester).color?.value, 0xffffffff);
-    expect(getIconData(tester).opacity, null);
-    expect(getIconData(tester).size, null);
-
-    TextStyle labelStyle = getLabelStyle(tester, 'Chip A').style;
-    expect(labelStyle.color?.value, 0xde000000);
-    expect(labelStyle.fontFamily, textTheme.bodyLarge?.fontFamily);
-    expect(labelStyle.fontFamilyFallback, textTheme.bodyLarge?.fontFamilyFallback);
-    expect(labelStyle.fontFeatures, textTheme.bodyLarge?.fontFeatures);
-    expect(labelStyle.fontSize, textTheme.bodyLarge?.fontSize);
-    expect(labelStyle.fontStyle, textTheme.bodyLarge?.fontStyle);
-    expect(labelStyle.fontWeight, textTheme.bodyLarge?.fontWeight);
-    expect(labelStyle.height, textTheme.bodyLarge?.height);
-    expect(labelStyle.inherit, textTheme.bodyLarge?.inherit);
-    expect(labelStyle.leadingDistribution, textTheme.bodyLarge?.leadingDistribution);
-    expect(labelStyle.letterSpacing, textTheme.bodyLarge?.letterSpacing);
-    expect(labelStyle.overflow, textTheme.bodyLarge?.overflow);
-    expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
-    expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
-
-    await tester.pumpWidget(buildFrame(Brightness.dark));
-    await tester.pumpAndSettle(); // Theme transition animation
-    expect(getMaterialBox(tester), paints..rrect(color: const Color(0x1fffffff)));
-    expect(tester.getSize(find.byType(Chip)), const Size(156.0, 48.0));
-    expect(getMaterial(tester).color, null);
-    expect(getMaterial(tester).elevation, 0);
-    expect(getMaterial(tester).shape, const StadiumBorder());
-    expect(getIconData(tester).color?.value, 0xffffffff);
-    expect(getIconData(tester).opacity, null);
-    expect(getIconData(tester).size, null);
-
-    labelStyle = getLabelStyle(tester, 'Chip A').style;
-    expect(labelStyle.color?.value, 0xdeffffff);
-    expect(labelStyle.fontFamily, textTheme.bodyLarge?.fontFamily);
-    expect(labelStyle.fontFamilyFallback, textTheme.bodyLarge?.fontFamilyFallback);
-    expect(labelStyle.fontFeatures, textTheme.bodyLarge?.fontFeatures);
-    expect(labelStyle.fontSize, textTheme.bodyLarge?.fontSize);
-    expect(labelStyle.fontStyle, textTheme.bodyLarge?.fontStyle);
-    expect(labelStyle.fontWeight, textTheme.bodyLarge?.fontWeight);
-    expect(labelStyle.height, textTheme.bodyLarge?.height);
-    expect(labelStyle.inherit, textTheme.bodyLarge?.inherit);
-    expect(labelStyle.leadingDistribution, textTheme.bodyLarge?.leadingDistribution);
-    expect(labelStyle.letterSpacing, textTheme.bodyLarge?.letterSpacing);
-    expect(labelStyle.overflow, textTheme.bodyLarge?.overflow);
-    expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
-    expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
-  });
-
   testWidgets('M3 Chip defaults', (WidgetTester tester) async {
     late TextTheme textTheme;
     final ThemeData lightTheme = ThemeData.light();
@@ -4484,7 +4407,7 @@ void main() {
     expect(box.size, equals(const Size(128, 32.0 + 16.0)));
     expect(textBox.size, equals(const Size(56, 14)));
     expect(iconBox.size, equals(const Size(18, 18)));
-    expect(avatarBox.size, equals(const Size(24, 24)));
+    expect(avatarBox.size, equals(const Size(18, 18)));
     expect(textBox.top, equals(17));
     expect(box.bottom - textBox.bottom, equals(17));
     expect(textBox.left, equals(372));
@@ -4499,7 +4422,7 @@ void main() {
     expect(box.size, equals(const Size(128, 60)));
     expect(textBox.size, equals(const Size(56, 14)));
     expect(iconBox.size, equals(const Size(18, 18)));
-    expect(avatarBox.size, equals(const Size(24, 24)));
+    expect(avatarBox.size, equals(const Size(18, 18)));
     expect(textBox.top, equals(23));
     expect(box.bottom - textBox.bottom, equals(23));
     expect(textBox.left, equals(372));
@@ -4514,7 +4437,7 @@ void main() {
     expect(box.size, equals(const Size(128, 36)));
     expect(textBox.size, equals(const Size(56, 14)));
     expect(iconBox.size, equals(const Size(18, 18)));
-    expect(avatarBox.size, equals(const Size(24, 24)));
+    expect(avatarBox.size, equals(const Size(18, 18)));
     expect(textBox.top, equals(11));
     expect(box.bottom - textBox.bottom, equals(11));
     expect(textBox.left, equals(372));
@@ -4531,7 +4454,7 @@ void main() {
     expect(box.size, equals(const Size(128, 36)));
     expect(textBox.size, equals(const Size(56, 14)));
     expect(iconBox.size, equals(const Size(18, 18)));
-    expect(avatarBox.size, equals(const Size(24, 24)));
+    expect(avatarBox.size, equals(const Size(18, 18)));
     expect(textBox.top, equals(11));
     expect(box.bottom - textBox.bottom, equals(11));
     expect(textBox.left, equals(372));
@@ -5489,9 +5412,9 @@ void main() {
       expect(getMaterial(tester).color, null);
       expect(getMaterial(tester).elevation, 0);
       expect(getMaterial(tester).shape, const StadiumBorder());
-      expect(getIconData(tester).color?.value, 0xffffffff);
+      expect(getIconData(tester).color, const Color(0xdd000000));
       expect(getIconData(tester).opacity, null);
-      expect(getIconData(tester).size, null);
+      expect(getIconData(tester).size, 18.0);
 
       TextStyle labelStyle = getLabelStyle(tester, 'Chip A').style;
       expect(labelStyle.color?.value, 0xde000000);
@@ -5518,7 +5441,7 @@ void main() {
       expect(getMaterial(tester).shape, const StadiumBorder());
       expect(getIconData(tester).color?.value, 0xffffffff);
       expect(getIconData(tester).opacity, null);
-      expect(getIconData(tester).size, null);
+      expect(getIconData(tester).size, 18.0);
 
       labelStyle = getLabelStyle(tester, 'Chip A').style;
       expect(labelStyle.color?.value, 0xdeffffff);
