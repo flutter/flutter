@@ -47,12 +47,14 @@ void main() {
             onChanged: (bool value) { },
             title: const Text('AAA'),
             secondary: const Text('aaa'),
+            internalAddSemanticForOnTap: true,
           ),
           CheckboxListTile(
             value: true,
             onChanged: (bool? value) { },
             title: const Text('BBB'),
             secondary: const Text('bbb'),
+            internalAddSemanticForOnTap: true,
           ),
           RadioListTile<bool>(
             value: true,
@@ -60,6 +62,7 @@ void main() {
             onChanged: (bool? value) { },
             title: const Text('CCC'),
             secondary: const Text('ccc'),
+            internalAddSemanticForOnTap: true,
           ),
         ],
       ),
@@ -72,6 +75,7 @@ void main() {
           id: 1,
           rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           flags: <SemanticsFlag>[
+            SemanticsFlag.isButton,
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.hasToggledState,
             SemanticsFlag.isEnabled,
@@ -86,6 +90,7 @@ void main() {
           rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: Matrix4.translationValues(0.0, 56.0, 0.0),
           flags: <SemanticsFlag>[
+            SemanticsFlag.isButton,
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.isChecked,
@@ -100,6 +105,7 @@ void main() {
           rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: Matrix4.translationValues(0.0, 112.0, 0.0),
           flags: <SemanticsFlag>[
+            SemanticsFlag.isButton,
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.isEnabled,

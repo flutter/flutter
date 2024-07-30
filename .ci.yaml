@@ -4329,13 +4329,15 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac_pixel_7pro entrypoint_dart_registrant
+  # mac mokey test
+  - name: Mac_arm64_mokey entrypoint_dart_registrant
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "mac", "pixel", "7pro"]
+        ["devicelab", "android", "mac", "arm64", "mokey"]
       task_name: entrypoint_dart_registrant
     runIf:
       - dev/**
@@ -4343,13 +4345,15 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac_pixel_7pro hello_world_android__compile
+  # mac mokey benchmark
+  - name: Mac_mokey hello_world_android__compile
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "mac", "pixel", "7pro"]
+        ["devicelab", "android", "mac", "mokey"]
       task_name: hello_world_android__compile
 
   # mac mokey test
@@ -4374,13 +4378,15 @@ targets:
         ["devicelab", "android", "mac", "mokey"]
       task_name: hot_mode_dev_cycle__benchmark
 
-  - name: Mac_pixel_7pro integration_test_test
+  # mac mokey test
+  - name: Mac_mokey integration_test_test
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "mac", "pixel", "7pro"]
+        ["devicelab", "android", "mac", "mokey"]
       task_name: integration_test_test
 
   # mac mokey test
@@ -4394,13 +4400,15 @@ targets:
         ["devicelab", "android", "mac", "arm64", "mokey"]
       task_name: integration_test_test
 
-  - name: Mac_pixel_7pro integration_ui_frame_number
+  # mac mokey test
+  - name: Mac_arm64_mokey integration_ui_frame_number
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "mac", "pixel", "7pro"]
+        ["devicelab", "android", "mac", "arm64", "mokey"]
       task_name: integration_ui_frame_number
 
   # mac mokey benchmark
@@ -4414,17 +4422,21 @@ targets:
         ["devicelab", "android", "mac", "mokey"]
       task_name: microbenchmarks
 
-  - name: Mac_pixel_7pro native_assets_android
+  # mac mokey test
+  - name: Mac_arm64_mokey native_assets_android
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "mac", "pixel", "7pro"]
+        ["devicelab", "android", "mac", "arm64", "mokey"]
       task_name: native_assets_android
 
-  - name: Mac_pixel_7pro run_debug_test_android
+  # mac mokey test
+  - name: Mac_mokey run_debug_test_android
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     runIf:
       - .ci.yaml
@@ -4432,7 +4444,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "mac", "pixel", "7pro"]
+        ["devicelab", "android", "mac", "mokey"]
       task_name: run_debug_test_android
 
   # mac mokey test
@@ -4449,8 +4461,10 @@ targets:
         ["devicelab", "android", "mac", "arm64", "mokey"]
       task_name: run_debug_test_android
 
-  - name: Mac_pixel_7pro run_release_test
+  # mac mokey test
+  - name: Mac_mokey run_release_test
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     runIf:
       - .ci.yaml
@@ -4458,7 +4472,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "mac", "pixel", "7pro"]
+        ["devicelab", "android", "mac", "mokey"]
       task_name: run_release_test
 
   # mac mokey test
