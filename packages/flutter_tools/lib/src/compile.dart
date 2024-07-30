@@ -1067,8 +1067,12 @@ class DefaultResidentCompiler implements ResidentCompiler {
     await _writelnToServerStdinAll(<String>[line], printTrace: printTrace);
   }
 
-  // TODO dont merge; explain why this is needed
-  final Pool _serverWritePool = Pool(1);
+  // TODO(andrewkolos): Concurrent calls to ProcessUtils.writelnToStdinUnsafe
+  //  against the same stdin will result in an exception. To guard against this,
+  //  we need to force calls to run serially. Ideally, this wouldn't be
+  //  necessary since we shouldn't have multiple concurrent writes to the
+  //  compiler process. However, we do (https://github.com/flutter/flutter/issues/152577).
+  final Pool _serverStdinWritePool = Pool(1);
   Future<void> _writelnToServerStdinAll(List<String> lines, {
     bool printTrace = false,
   }) async {
@@ -1076,14 +1080,17 @@ class DefaultResidentCompiler implements ResidentCompiler {
     if (server == null) {
       return;
     }
-    final PoolResource request = await _serverWritePool.request();
-    for (final String line in lines) {
-      await ProcessUtils.writelnToStdinUnsafe(stdin: server.stdin, line: line);
-      if (printTrace) {
-        _logger.printTrace('<- $line');
+    final PoolResource request = await _serverStdinWritePool.request();
+    try {
+      for (final String line in lines) {
+        await ProcessUtils.writelnToStdinUnsafe(stdin: server.stdin, line: line);
+        if (printTrace) {
+          _logger.printTrace('<- $line');
+        }
       }
+    } finally {
+      request.release();
     }
-    request.release();
   }
 }
 
