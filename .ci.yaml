@@ -37,7 +37,10 @@ platform_properties:
       device_type: none
   # The current android emulator config names can be found here:
   # https://chromium.googlesource.com/chromium/src.git/+/HEAD/tools/android/avd/proto
-  # You may use those names for the android_virtual_device version.
+  # You may use those names for the android_virtual_device version. You may find the
+  # avd_cipd_version by clicking on the latest available instance and looking for the
+  # build_id:<Identifier#> here:
+  # https://chrome-infra-packages.appspot.com/p/chromium/tools/android/avd/linux-amd64.
   linux_android_emu:
     properties:
       contexts: >-
