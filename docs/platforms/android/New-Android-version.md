@@ -97,4 +97,4 @@ Integration test is a package shipped in the Flutter tool for running integratio
 
 ### Additional notes
 #### Upload new SDK version to CIPD and consume in buildroot
-See https://github.com/flutter/flutter/blob/master/docs/platforms/android/Upgrading-Engine's-Android-API-version.md for instructions, as this work is also required to build the engine against the new Android version.
+See [Upgrading Engine's Android API version](https://github.com/flutter/flutter/blob/master/docs/platforms/android/Upgrading-Engine's-Android-API-version.md) for instructions, as this work is also required to build the engine against the new Android version.
