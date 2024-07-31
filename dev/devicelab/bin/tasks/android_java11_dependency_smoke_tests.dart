@@ -23,7 +23,10 @@ List<VersionTuple> versionTuples = <VersionTuple>[
   VersionTuple(agpVersion: '7.4.0', gradleVersion: '7.5', kotlinVersion: '1.8.10'),
 ];
 
-// This test requires Java 11 due to the intentionally low version of Gradle.
+// This test requires a Java version less than 17 due to the intentionally low
+// version of Gradle. We choose 11 because this was the primary version used in
+// CI before 17, and hence it is also hosted on CIPD.
+// https://docs.gradle.org/current/userguide/compatibility.html
 Future<void> main() async {
   /// The [FileSystem] for the integration test environment.
   const LocalFileSystem fileSystem = LocalFileSystem();
