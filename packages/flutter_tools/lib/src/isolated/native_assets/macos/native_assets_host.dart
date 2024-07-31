@@ -87,8 +87,15 @@ Future<void> lipoDylibs(File target, List<Uri> sources) async {
 /// dylib itself does not correspond to the path that the file is at. Therefore,
 /// native assets copied into their final location also need their install name
 /// updated with the `install_name_tool`.
-Future<void> setInstallNameDylib(File dylibFile) async {
+Future<void> setInstallNameDylib(
+  File dylibFile,
+  Map<String, String> oldToNewInstallNames,
+) async {
   final String fileName = dylibFile.basename;
+  final String newInstallName = '@rpath/$fileName.framework/$fileName';
+
+  oldToNewInstallNames[await getInstallNameDylib(dylibFile)] = newInstallName;
+
   final ProcessResult installNameResult = await globals.processManager.run(
     <String>[
       'install_name_tool',
@@ -101,6 +108,126 @@ Future<void> setInstallNameDylib(File dylibFile) async {
     throwToolExit(
       'Failed to change the install name of $dylibFile:\n${installNameResult.stderr}',
     );
+  }
+}
+
+Future<String> getInstallNameDylib(File dylibFile) async {
+  final ProcessResult installNameResult = await globals.processManager.run(
+    <String>[
+      'otool',
+      '-D',
+      dylibFile.path,
+    ],
+  );
+  if (installNameResult.exitCode != 0) {
+    throwToolExit(
+      'Failed to get the install name of $dylibFile:\n${installNameResult.stderr}',
+    );
+  }
+
+  // The output of `otool -D` looks like below. For each architecture, there is
+  // a separate install name. We expect the install names to be the same.
+  //
+  // /build/native_assets/ios/buz.framework/buz (architecture x86_64):
+  // @rpath/libbuz.dylib
+  // /build/native_assets/ios/buz.framework/buz (architecture arm64):
+  // @rpath/libbuz.dylib
+
+  final Iterator<String> lines =
+    (installNameResult.stdout as String).trim().split('\n').iterator;
+  final Set<String> installNames = <String>{};
+
+  while (lines.moveNext()) {
+    final String line = lines.current;
+    if (line.contains('(architecture')) {
+      continue;
+    }
+    installNames.add(line.trim());
+  }
+
+  return installNames.single;
+}
+
+Future<List<String>> getDependencyInstallNamesDylib(File dylibFile) async {
+  final ProcessResult listDependenciesResult = await globals.processManager.run(
+    <String>[
+      'otool',
+      '-L',
+      dylibFile.path,
+    ],
+  );
+  if (listDependenciesResult.exitCode != 0) {
+    throwToolExit(
+      'Failed to get the dependencies of $dylibFile:\n${listDependenciesResult.stderr}',
+    );
+  }
+
+  // The output of `otool -L` looks like below. For each architecture, there
+  // is a separate list of dependencies. The first item in the list of
+  // dependencies describes the library itself. The rest are the dependencies.
+  //
+  // /build/native_assets/ios/buz.framework/buz (architecture x86_64):
+  //         @rpath/buz.framework/buz (compatibility version 0.0.0, current version 0.0.0)
+  //         @rpath/libbar.dylib (compatibility version 0.0.0, current version 0.0.0)
+  // /build/native_assets/ios/buz.framework/buz (architecture arm64):
+  //         @rpath/buz.framework/buz (compatibility version 0.0.0, current version 0.0.0)
+  //         @rpath/libbar.dylib (compatibility version 0.0.0, current version 0.0.0)
+
+  final Iterator<String> lines =
+    (listDependenciesResult.stdout as String).trim().split('\n').iterator;
+  final Set<String> dependencies = <String>{};
+  bool isSelf = false;
+
+  while (lines.moveNext()) {
+    final String line = lines.current;
+    if (line.contains('(architecture')) {
+      isSelf = true;
+      continue;
+    }
+    if (isSelf) {
+      isSelf = false;
+      continue;
+    }
+    dependencies.add(line.trim().split(' ')[0]);
+  }
+
+  return dependencies.toList();
+}
+
+Future<void> changeDependencyInstallNameDylib(
+  File dylibFile, {
+  required String from,
+  required String to,
+}) async {
+   final ProcessResult changeDependencyResult = await globals.processManager.run(
+    <String>[
+      'install_name_tool',
+      '-change',
+      from,
+      to,
+      dylibFile.path,
+    ],
+  );
+  if (changeDependencyResult.exitCode != 0) {
+    throwToolExit(
+      'Failed to change a dependency install name of $dylibFile:\n${changeDependencyResult.stderr}',
+    );
+  }
+}
+
+Future<void> rewriteDependencyInstallNamesDylib(
+  File dylibFile,
+  Map<String, String> oldToNewInstallNames,
+) async {
+  for (final String dependencyInstallName in
+       await getDependencyInstallNamesDylib(dylibFile)) {
+    if (oldToNewInstallNames.containsKey(dependencyInstallName)) {
+      await changeDependencyInstallNameDylib(
+        dylibFile,
+        from: dependencyInstallName,
+        to: oldToNewInstallNames[dependencyInstallName]!,
+      );
+    }
   }
 }
 

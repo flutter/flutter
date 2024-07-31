@@ -290,6 +290,10 @@ Future<void> _copyNativeAssetsMacOS(
     globals.logger.printTrace(
       'Copying native assets to ${buildUri.toFilePath()}.',
     );
+
+    final Map<String, String> oldToNewInstallNames = <String, String>{};
+    final List<File> dylibFiles = <File>[];
+
     for (final MapEntry<KernelAssetPath, List<AssetImpl>> assetMapping
         in assetTargetLocations.entries) {
       final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
@@ -316,6 +320,7 @@ Future<void> _copyNativeAssetsMacOS(
       final Directory resourcesDir = versionADir.childDirectory('Resources');
       await resourcesDir.create(recursive: true);
       final File dylibFile = versionADir.childFile(name);
+      dylibFiles.add(dylibFile);
       final Link currentLink = versionsDir.childLink('Current');
       await currentLink.create(fileSystem.path.relative(
         versionADir.path,
@@ -332,7 +337,8 @@ Future<void> _copyNativeAssetsMacOS(
         versionsDir.childDirectory('Current').childFile(name).path,
         from: dylibLink.parent.path,
       ));
-      await setInstallNameDylib(dylibFile);
+
+      await setInstallNameDylib(dylibFile, oldToNewInstallNames);
       await createInfoPlist(name, resourcesDir);
       // Do not code-sign the libraries here with identity. Code-signing
       // for bundled dylibs is done in `macos_assemble.sh embed` because the
@@ -341,6 +347,11 @@ Future<void> _copyNativeAssetsMacOS(
         await codesignDylib(codesignIdentity, buildMode, frameworkDir);
       }
     }
+
+    for (final File dylibFile in dylibFiles) {
+      await rewriteDependencyInstallNamesDylib(dylibFile, oldToNewInstallNames);
+    }
+
     globals.logger.printTrace('Copying native assets done.');
   }
 }

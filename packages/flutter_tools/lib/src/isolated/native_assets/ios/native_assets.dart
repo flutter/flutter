@@ -247,6 +247,10 @@ Future<void> _copyNativeAssetsIOS(
   if (assetTargetLocations.isNotEmpty) {
     globals.logger
         .printTrace('Copying native assets to ${buildUri.toFilePath()}.');
+
+    final Map<String, String> oldToNewInstallNames = <String, String>{};
+    final List<File> dylibFiles = <File>[];
+
     for (final MapEntry<KernelAssetPath, List<AssetImpl>> assetMapping
         in assetTargetLocations.entries) {
       final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
@@ -255,17 +259,23 @@ Future<void> _copyNativeAssetsIOS(
       ];
       final Uri targetUri = buildUri.resolveUri(target);
       final File dylibFile = fileSystem.file(targetUri);
+      dylibFiles.add(dylibFile);
       final Directory frameworkDir = dylibFile.parent;
       if (!await frameworkDir.exists()) {
         await frameworkDir.create(recursive: true);
       }
       await lipoDylibs(dylibFile, sources);
-      await setInstallNameDylib(dylibFile);
+      await setInstallNameDylib(dylibFile, oldToNewInstallNames);
       // TODO(knopp): Wire the value once there is a way to configure that in the hook.
       // https://github.com/dart-lang/native/issues/1133
       await createInfoPlist(targetUri.pathSegments.last, frameworkDir, minimumIOSVersion: '12.0');
       await codesignDylib(codesignIdentity, buildMode, frameworkDir);
     }
+
+    for (final File dylibFile in dylibFiles) {
+      await rewriteDependencyInstallNamesDylib(dylibFile, oldToNewInstallNames);
+    }
+
     globals.logger.printTrace('Copying native assets done.');
   }
 }
