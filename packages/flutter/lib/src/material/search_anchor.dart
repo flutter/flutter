@@ -1186,6 +1186,7 @@ class SearchBar extends StatefulWidget {
     this.autoFocus = false,
     this.textInputAction,
     this.keyboardType,
+    this.scrollPadding = const EdgeInsets.all(20.0),
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1327,6 +1328,9 @@ class SearchBar extends StatefulWidget {
   /// Defaults to the default value specified in [TextField].
   final TextInputType? keyboardType;
 
+  /// {@macro flutter.widgets.editableText.scrollPadding}
+  final EdgeInsets scrollPadding;
+
   @override
   State<SearchBar> createState() => _SearchBarState();
 }
@@ -1467,6 +1471,7 @@ class _SearchBarState extends State<SearchBar> {
                           textCapitalization: effectiveTextCapitalization,
                           textInputAction: widget.textInputAction,
                           keyboardType: widget.keyboardType,
+                          scrollPadding: widget.scrollPadding,
                         ),
                       ),
                     ),
