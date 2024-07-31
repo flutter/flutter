@@ -16,6 +16,7 @@ analyzer:
     deprecated_member_use: ignore
     deprecated_member_use_from_same_package: ignore
   exclude: # DIFFERENT FROM FLUTTER/FLUTTER
+    - examples
     # Fixture depends on dart:ui and raises false positives.
     - flutter_frontend_server/test/fixtures/lib/main.dart
     - prebuilts
