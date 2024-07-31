@@ -2,6 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/animation.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'adapter.dart';
+/// @docImport 'app_lifecycle_listener.dart';
+/// @docImport 'basic.dart';
+/// @docImport 'focus_scope.dart';
+/// @docImport 'media_query.dart';
+/// @docImport 'navigator.dart';
+/// @docImport 'pop_scope.dart';
+library;
+
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui' show AccessibilityFeatures, AppExitResponse, AppLifecycleState,
