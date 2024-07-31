@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 class ServiceClient {
-  Completer<dynamic>? isolateStartedId;
-  Completer<dynamic>? isolatePausedId;
-  Completer<dynamic>? isolateResumeId;
-
   ServiceClient(
     this.client, {
     this.isolateStartedId,
@@ -20,18 +18,23 @@ class ServiceClient {
     client.listen(_onData, onError: _onError, cancelOnError: true);
   }
 
-  Future<Map<String, dynamic>> invokeRPC(String method,
-      [Map<String, dynamic>? params]) async {
+  Completer<Object?>? isolateStartedId;
+  Completer<Object?>? isolatePausedId;
+  Completer<Object?>? isolateResumeId;
+
+  Future<Map<String, Object?>> invokeRPC(
+    String method, [
+    Map<String, Object?>? params,
+  ]) async {
     final String key = _createKey();
-    final String request = json.encode(<String, dynamic>{
+    final String request = json.encode({
       'jsonrpc': '2.0',
       'method': method,
-      'params': params == null ? <String, dynamic>{} : params,
+      'params': params ?? <String, Object?>{},
       'id': key,
     });
     client.add(request);
-    final Completer<Map<String, dynamic>> completer =
-        Completer<Map<String, dynamic>>();
+    final completer = Completer<Map<String, Object?>>();
     _outstandingRequests[key] = completer;
     print('-> $key ($method)');
     return completer.future;
@@ -44,55 +47,46 @@ class ServiceClient {
   }
 
   void _onData(dynamic message) {
-    final Map<String, dynamic> response =
-        json.decode(message as String) as Map<String, dynamic>;
+    final response = json.decode(message as String) as Map<String, Object?>;
     final dynamic key = response['id'];
     if (key != null) {
       print('<- $key');
-      final dynamic completer = _outstandingRequests.remove(key);
-      assert(completer != null);
-      final dynamic result = response['result'];
-      final dynamic error = response['error'];
+      final completer = _outstandingRequests.remove(key)!;
+      final result = response['result'];
+      final error = response['error'];
       if (error != null) {
-        assert(result == null);
         completer.completeError(error);
       } else {
-        assert(result != null);
         completer.complete(result);
       }
     } else {
       if (response['method'] == 'streamNotify') {
-        _onServiceEvent(response['params'] as Map<String, dynamic>?);
+        _onServiceEvent(response['params'] as Map<String, Object?>?);
       }
     }
   }
 
-  void _onServiceEvent(Map<String, dynamic>? params) {
+  void _onServiceEvent(Map<String, Object?>? params) {
     if (params == null) {
       return;
     }
-    final Map<String, dynamic>? event =
-        params['event'] as Map<String, dynamic>?;
+    final event = params['event'] as Map<String, Object?>?;
     if (event == null || event['type'] != 'Event') {
       return;
     }
-    final dynamic isolateId = event['isolate']['id'];
+    final dynamic isolateId = (event['isolate']! as Map<String, Object?>)['id'];
     switch (params['streamId']) {
       case 'Isolate':
         if (event['kind'] == 'IsolateStart') {
           isolateStartedId?.complete(isolateId);
         }
-        break;
       case 'Debug':
         switch (event['kind']) {
           case 'Resume':
             isolateResumeId?.complete(isolateId);
-            break;
           case 'PauseStart':
             isolatePausedId?.complete(isolateId);
-            break;
         }
-        break;
     }
   }
 
@@ -101,7 +95,6 @@ class ServiceClient {
   }
 
   final WebSocket client;
-  final Map<String, Completer<dynamic>> _outstandingRequests =
-      <String, Completer<dynamic>>{};
+  final _outstandingRequests = <String, Completer<dynamic>>{};
   int _id = 1;
 }
