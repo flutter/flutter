@@ -26,7 +26,6 @@ Future<void> _main() async {
   setUpAll(() async {
     flutterDriver = await FlutterDriver.connect();
     nativeDriver = await AndroidNativeDriver.connect();
-    await nativeDriver.configureForScreenshotTesting();
   });
 
   tearDownAll(() async {

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+import 'dart:io' as io;
+
 import 'package:path/path.dart' as path;
 import '../run_command.dart';
 import '../utils.dart';
@@ -20,6 +23,11 @@ import '../utils.dart';
 Future<void> runFlutterDriverAndroidTests() async {
   print('Running Flutter Driver Android tests...');
 
+  // We need to configure the emulator to disable confirmations before the
+  // application starts. Some of these configuration options won't work once
+  // the application is running.
+  await _configureForScreenshotTesting();
+
   // TODO(matanlurey): Should we be using another instrumentation method?
   await runCommand(
     'flutter',
@@ -33,5 +41,62 @@ Future<void> runFlutterDriverAndroidTests() async {
       'integration_tests',
       'android_driver_test',
     ),
+  );
+}
+
+// TODO(matanlurey): Move this code into flutter_driver instead of here.
+Future<void> _configureForScreenshotTesting() async {
+  // Disable confirmation for immersive mode.
+  final io.ProcessResult immersive = await _adb(
+    <String>[
+      'shell',
+      'settings',
+      'put',
+      'global',
+      'immersive_mode_confirmations',
+      'confirmed',
+    ],
+  );
+
+  if (immersive.exitCode != 0) {
+    throw StateError('Failed to configure device: ${immersive.stderr}');
+  }
+
+  const Map<String, String> settings = <String, String>{
+    'show_surface_updates': '1',
+    'transition_animation_scale': '0',
+    'window_animation_scale': '0',
+    'animator_duration_scale': '0',
+  };
+
+  for (final MapEntry<String, String> entry in settings.entries) {
+    final io.ProcessResult result = await _adb(
+      <String>[
+        'shell',
+        'settings',
+        'put',
+        'global',
+        entry.key,
+        entry.value,
+      ],
+    );
+
+    if (result.exitCode != 0) {
+      throw StateError('Failed to configure device: ${result.stderr}');
+    }
+  }
+}
+
+Future<io.ProcessResult> _adb(
+  List<String> args, {
+  Encoding? stdoutEncoding = io.systemEncoding,
+}) {
+  // TODO(matanlurey): Ideally we should specify the device target here.
+  return io.Process.run(
+    'adb',
+    <String>[
+      ...args,
+    ],
+    stdoutEncoding: stdoutEncoding,
   );
 }
