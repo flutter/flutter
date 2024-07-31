@@ -398,7 +398,6 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                 );
           }
           final Widget scrolledActionsSection = _OverscrollBackground(
-            scrollController: _effectiveActionScrollController,
             color: backgroundColor,
             child: actionsSection,
           );
@@ -1456,7 +1455,6 @@ class _Divider extends StatelessWidget {
 class _OverscrollBackground extends StatefulWidget {
   const _OverscrollBackground({
     required this.color,
-    required this.scrollController,
     required this.child,
   });
 
@@ -1465,7 +1463,6 @@ class _OverscrollBackground extends StatefulWidget {
   // This value must be a resolved color instead of, for example, a
   // CupertinoDynamicColor.
   final Color color;
-  final ScrollController scrollController;
   final Widget child;
 
   @override
@@ -1548,7 +1545,7 @@ class _ActionSheetActionSection extends StatelessWidget {
   final int? pressedIndex;
   final Color dividerColor;
   final Color backgroundColor;
-  final ScrollController? scrollController;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -1596,7 +1593,7 @@ class _ActionSheetMainSheet extends StatefulWidget {
     required this.dividerColor,
   });
 
-  final ScrollController? scrollController;
+  final ScrollController scrollController;
   final List<Widget> actions;
   final Widget? contentSection;
   final Color dividerColor;
@@ -1642,7 +1639,6 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
           ),
         Flexible(
           child: _OverscrollBackground(
-            scrollController: widget.scrollController,
             color: backgroundColor,
             child: _ActionSheetActionSection(
               actions: widget.actions,
