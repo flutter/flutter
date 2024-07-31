@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:a11y_assessments/use_cases/material_banner.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_utils.dart';
@@ -19,6 +20,15 @@ void main() {
     await tester.tap(find.text('DISMISS'));
     await tester.pumpAndSettle();
     expect(find.text('Hello, I am a Material Banner'), findsNothing);
+  });
+
+  testWidgets('dismiss button focused on banner open', (WidgetTester tester) async {
+    await pumpsUseCase(tester, MaterialBannerUseCase());
+    await tester.tap(find.text('Show a MaterialBanner'));
+    await tester.pumpAndSettle();
+
+    final TextButton dismissButtonFinder = tester.widget(find.byType(TextButton)) as TextButton;
+    expect(dismissButtonFinder.focusNode!.hasFocus, isTrue);
   });
 
   testWidgets('material banner has one h1 tag', (WidgetTester tester) async {
