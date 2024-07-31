@@ -130,6 +130,7 @@ class CkResizingCodec extends ResizingCodec {
       return image;
     }
 
+    image.dispose();
     return CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
   }
 }
