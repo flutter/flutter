@@ -411,9 +411,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
     }
     // Finally, we dispose any previous train hopping animation because it
     // has been successfully updated at this point.
-    if (previousTrainHoppingListenerRemover != null) {
-      previousTrainHoppingListenerRemover();
-    }
+    previousTrainHoppingListenerRemover?.call();
   }
 
   void _setSecondaryAnimation(Animation<double>? animation, [Future<dynamic>? disposed]) {

@@ -1323,9 +1323,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     final FocusableActionDetector oldTarget = oldWidget ?? widget;
     final bool didShowHoverHighlight = shouldShowHoverHighlight(oldTarget);
     final bool didShowFocusHighlight = shouldShowFocusHighlight(oldTarget);
-    if (task != null) {
-      task();
-    }
+    task?.call();
     final bool doShowHoverHighlight = shouldShowHoverHighlight(widget);
     final bool doShowFocusHighlight = shouldShowFocusHighlight(widget);
     if (didShowFocusHighlight != doShowFocusHighlight) {

@@ -573,11 +573,11 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
     ByteData? message,
     ui.PlatformMessageResponseCallback? callback,
   ) async {
-    ui.channelBuffers.push(channel, message, (ByteData? data) {
-      if (callback != null) {
-        callback(data);
-      }
-    });
+    ui.channelBuffers.push(
+      channel,
+      message,
+      (ByteData? data) => callback?.call(data),
+    );
   }
 
   @override

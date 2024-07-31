@@ -283,9 +283,7 @@ class EdgeDraggingAutoScroller {
       duration: duration,
       curve: Curves.linear,
     );
-    if (onScrollViewScrolled != null) {
-      onScrollViewScrolled!();
-    }
+    onScrollViewScrolled?.call();
     if (_scrolling) {
       await _scroll();
     }

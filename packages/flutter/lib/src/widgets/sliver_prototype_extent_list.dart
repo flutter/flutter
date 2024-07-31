@@ -263,17 +263,13 @@ class _RenderSliverPrototypeExtentList extends RenderSliverFixedExtentBoxAdaptor
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    if (_child != null) {
-      _child!.attach(owner);
-    }
+    _child?.attach(owner);
   }
 
   @override
   void detach() {
     super.detach();
-    if (_child != null) {
-      _child!.detach();
-    }
+    _child?.detach();
   }
 
   @override

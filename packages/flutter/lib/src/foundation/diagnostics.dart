@@ -980,7 +980,7 @@ class _PrefixedStringBuilder {
         if (allowWrap && wrapWidth != null) {
           final int wrapStart = _currentLine.length;
           final int wrapEnd = wrapStart + line.length;
-          if (_wrappableRanges.isNotEmpty && _wrappableRanges.last == wrapStart) {
+          if (_wrappableRanges.lastOrNull == wrapStart) {
             // Extend last range.
             _wrappableRanges.last = wrapEnd;
           } else {

@@ -244,9 +244,7 @@ class ScrollController extends ChangeNotifier {
     assert(!_positions.contains(position));
     _positions.add(position);
     position.addListener(notifyListeners);
-    if (onAttach != null) {
-      onAttach!(position);
-    }
+    onAttach?.call(position);
   }
 
   /// Unregister the given position with this controller.
@@ -255,9 +253,7 @@ class ScrollController extends ChangeNotifier {
   /// controller will not manipulate the given position.
   void detach(ScrollPosition position) {
     assert(_positions.contains(position));
-    if (onDetach != null) {
-      onDetach!(position);
-    }
+    onDetach?.call(position);
     position.removeListener(notifyListeners);
     _positions.remove(position);
   }

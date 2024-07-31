@@ -372,12 +372,7 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
   }
 
   @override
-  Future<bool> popRoute() {
-    if (onPopRoute != null) {
-      return onPopRoute!();
-    }
-    return SynchronousFuture<bool>(true);
-  }
+  Future<bool> popRoute() => onPopRoute?.call() ?? SynchronousFuture<bool>(true);
 
   @override
   Widget build(BuildContext context) => builder(context, routeInformation);

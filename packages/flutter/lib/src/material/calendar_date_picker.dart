@@ -301,7 +301,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
   }
 
   bool _isSelectable(DateTime date) {
-    return widget.selectableDayPredicate == null || widget.selectableDayPredicate!.call(date);
+    return widget.selectableDayPredicate?.call(date) ?? true;
   }
 
   Widget _buildPicker() {
@@ -766,7 +766,7 @@ class _MonthPickerState extends State<_MonthPicker> {
   }
 
   bool _isSelectable(DateTime date) {
-    return widget.selectableDayPredicate == null || widget.selectableDayPredicate!.call(date);
+    return widget.selectableDayPredicate?.call(date) ?? true;
   }
 
   Widget _buildItems(BuildContext context, int index) {
