@@ -4546,7 +4546,6 @@ class _RenderObjectSemantics extends _InterestingSemanticsFragmentProvider {
     }
   }
 
-  /// Returns the semantics that this node would like to add to its parent.
   _SemanticsFragment _computeSemanticsForParent({
     required bool mergeIntoParent,
     required bool blockUserActions,
@@ -5805,9 +5804,6 @@ class _SemanticsGeometry {
       final int toDepth = to.depth;
 
       if (fromDepth >= toDepth) {
-        // if (from.parent == null) {
-        //   print('crashed!!!');
-        // }
         assert(from.parent != null, '$parentFragmentOwner and $childFragmentOwner are not in the same render tree.');
         final RenderObject fromParent = from.parent!;
         fromParent.applyPaintTransform(from, transform);

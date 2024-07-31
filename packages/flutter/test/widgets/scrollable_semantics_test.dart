@@ -633,13 +633,9 @@ void main() {
     expect(nodeGlobalRect(innerListPane), nodeGlobalRect(outerListPane));
 
     for (final SemanticsNode node in targetNodes) {
-      // print('before check');
       tester.binding.pipelineOwner.semanticsOwner!.performAction(node.id, SemanticsAction.showOnScreen);
       await tester.pumpAndSettle();
-      if (nodeGlobalRect(innerListPane) != nodeGlobalRect(outerListPane)) {
-        // print('crashed, innerListPane ${innerListPane.id}\nouterListPane ${outerListPane.id}');
-        debugDumpSemanticsTree();
-      }
+
       expect(nodeGlobalRect(innerListPane), nodeGlobalRect(outerListPane));
     }
 
@@ -666,6 +662,5 @@ Rect nodeGlobalRect(SemanticsNode node) {
       globalTransform = parent.transform!.multiplied(globalTransform);
     }
   }
-  // print('globalTransform\n$globalTransform\n rect=${node.rect}');
   return MatrixUtils.transformRect(globalTransform, node.rect);
 }

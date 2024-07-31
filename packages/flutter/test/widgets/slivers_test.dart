@@ -503,7 +503,6 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
       // Only even items 0~12 are on the screen.
       expect(find.text('item0'), findsOneWidget);
       expect(find.text('item12'), findsOneWidget);

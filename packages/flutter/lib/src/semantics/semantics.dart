@@ -1855,7 +1855,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
   }
 
-  /// The bounding box for this node in its coordinate system.
+  /// Whether is this node is hidden off-screen from parent's bounding box.
   bool get isHidden => hasFlag(SemanticsFlag.isHidden);
   set isHidden(bool value) {
     if (hasFlag(SemanticsFlag.isHidden) != value) {
@@ -2684,6 +2684,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (mergeAllDescendantsIntoThisNodeValueChanged) {
       _updateChildrenMergeFlags();
     }
+
     assert(
       !_canPerformAction(SemanticsAction.increase) || (value == '') == (increasedValue == ''),
       'A SemanticsNode with action "increase" needs to be annotated with either both "value" and "increasedValue" or neither',
