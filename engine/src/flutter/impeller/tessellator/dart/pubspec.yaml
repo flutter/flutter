@@ -2,10 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 name: tessellator
-description: A Dart FFI wrapper for Impeller's tessellator.
-version: 0.0.0
 publish_to: none
-homepage: https://github.com/flutter/impeller/tree/main/tessellator/dart
 
+# Required for workspace support.
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.5.0-294.0.dev
+
+# This package is managed as part of the engine workspace.
+resolution: workspace

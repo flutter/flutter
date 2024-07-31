@@ -81,6 +81,9 @@ environment:
 # Declare all packages that are part of the workspace.
 workspace:
   - ci
+  - flutter_frontend_server
+  - impeller/tessellator/dart
+  - shell/vmservice
   - testing/benchmark
   - testing/dart
   - testing/litetest
