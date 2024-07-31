@@ -563,7 +563,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   }
 
   bool canRequestFocus() {
-    return widget.focusNode?.canRequestFocus ?? widget.requestFocusOnTap
+    return widget.requestFocusOnTap
       ?? switch (Theme.of(context).platform) {
         TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia => false,
         TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
