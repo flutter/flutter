@@ -591,10 +591,57 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
-  /// How much space to place between children in a run in the main axis.
+  /// How much space to place between children in the main axis.
   ///
-  /// For example, if [spacing] is 10.0, the children will be spaced at least
-  /// 10.0 logical pixels apart in the main axis.
+  /// The spacing is only applied between children in the main axis.
+  ///
+  /// If the [spacing] is 10.0 and the [mainAxisAlignment] is
+  /// [MainAxisAlignment.start], then the first child will be placed at the start
+  /// of the main axis, and the second child will be placed 10.0 pixels after
+  /// the first child in the main axis, and so on. The [spacing] is not applied
+  /// before the first child or after the last child.
+  ///
+  /// If the [spacing] is 10.0 and the [mainAxisAlignment] is [MainAxisAlignment.end],
+  /// then the last child will be placed at the end of the main axis, and the
+  /// second-to-last child will be placed 10.0 pixels before the last child in
+  /// the main axis, and so on. No spacing will be placed before the first child
+  /// or after the last child. The [spacing] is not applied before the first
+  /// child or after the last child.
+  ///
+  /// If the [spacing] is 10.0 and the [mainAxisAlignment] is [MainAxisAlignment.center],
+  /// then the children will be placed in the center of the main axis with 10.0
+  /// pixels of space between the children. No spacing will be placed before the first
+  /// child or after the last child. The [spacing] is not applied before the first
+  /// child or after the last child.
+  ///
+  /// If the [spacing] is 10.0 and the [mainAxisAlignment] is [MainAxisAlignment.spaceBetween],
+  /// then there will be a minimum of 10.0 pixels of space between each child in the
+  /// main axis. If the free space is 100.0 pixels between the two children,
+  /// then the minimum space between the children will be 10.0 pixels and the
+  /// remaining 90.0 pixels will be the free space between the children. The
+  /// [spacing] is not applied before the first child or after the last child.
+  ///
+  /// If the [spacing] is 10.0 and the [mainAxisAlignment] is [MainAxisAlignment.spaceAround],
+  /// then there will be a minimum of 10.0 pixels of space between each child in the
+  /// main axis, and the remaining free space will be placed between the children as
+  /// well as before the first child and after the last child. The [spacing] is
+  /// not applied before the first child or after the last child.
+  ///
+  /// If the [spacing] is 10.0 and the [mainAxisAlignment] is [MainAxisAlignment.spaceEvenly],
+  /// then there will be a minimum of 10.0 pixels of space between each child in the
+  /// main axis, and the remaining free space will be evenly placed between the
+  /// children as well as before the first child and after the last child. The
+  /// [spacing] is not applied before the first child or after the last child.
+  ///
+  /// When the [spacing] is non-zero, the layout size will be larger than
+  /// the sum of the children's layout sizes in the main axis.
+  ///
+  /// When the total children's layout sizes and total spacing between the
+  /// children is greater than the maximum constraints in the main axis, then
+  /// the children will overflow. For example, if there are two children and the
+  /// maximum constraint is 100.0 pixels, the children's layout sizes are 50.0
+  /// pixels each, and the spacing is 10.0 pixels, then the children will
+  /// overflow by 10.0 pixels.
   ///
   /// Defaults to 0.0.
   double get spacing => _spacing;
@@ -617,7 +664,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   double _getIntrinsicSize({
     required Axis sizingDirection,
     required double extent, // The extent in the direction that isn't the sizing direction.
-    required double spacing, // The spacing between children.
     required _ChildSizingFunction childSize, // A method to find the size in the sizing direction.
   }) {
     if (_direction == sizingDirection) {
@@ -672,7 +718,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.horizontal,
       extent: height,
-      spacing: spacing,
       childSize: (RenderBox child, double extent) => child.getMinIntrinsicWidth(extent),
     );
   }
@@ -682,7 +727,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.horizontal,
       extent: height,
-      spacing: spacing,
       childSize: (RenderBox child, double extent) => child.getMaxIntrinsicWidth(extent),
     );
   }
@@ -692,7 +736,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.vertical,
       extent: width,
-      spacing: spacing,
       childSize: (RenderBox child, double extent) => child.getMinIntrinsicHeight(extent),
     );
   }
@@ -702,7 +745,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.vertical,
       extent: width,
-      spacing: spacing,
       childSize: (RenderBox child, double extent) => child.getMaxIntrinsicHeight(extent),
     );
   }
