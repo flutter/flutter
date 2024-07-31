@@ -70,6 +70,11 @@ class FakeFlutterProjectFactory extends FlutterProjectFactory {
   }
 }
 
+// The following test outline shares a lot of similarities with the one in
+// dev/devicelab/lib/framework/dependency_smoke_test_task_definition.dart
+// When making changes here, consider making the corresponding changes to that
+// file as well.
+
 const String gradleSettingsFileContent = r'''
 pluginManagement {
     def flutterSdkPath = {
@@ -131,6 +136,9 @@ class VersionTuple {
   }
 }
 
+/// Creates a new Flutter project with the specified AGP, Gradle, and Kotlin
+/// versions and then tries to call `flutter build apk`, returning the
+/// ProcessResult.
 Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
   required VersionTuple versions,
   required Directory tempDir,}) async {

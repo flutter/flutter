@@ -5,7 +5,7 @@
 import 'dart:io';
 
 import 'package:file/local.dart';
-import 'package:flutter_devicelab/framework/apk_utils.dart';
+import 'package:flutter_devicelab/framework/dependency_smoke_test_task_definition.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 
 // Methodology:
