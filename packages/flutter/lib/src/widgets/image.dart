@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'fade_in_image.dart';
+/// @docImport 'icon.dart';
+/// @docImport 'transitions.dart';
+library;
+
 import 'dart:async';
 import 'dart:io' show File;
 
@@ -152,8 +160,8 @@ Future<void> precacheImage(
 /// Signature used by [Image.frameBuilder] to control the widget that will be
 /// used when an [Image] is built.
 ///
-/// The `child` argument contains the default image widget and is guaranteed to
-/// be non-null. Typically, this builder will wrap the `child` widget in some
+/// The `child` argument contains the default image widget.
+/// Typically, this builder will wrap the `child` widget in some
 /// way and return the wrapped widget. If this builder returns `child` directly,
 /// it will yield the same result as if [Image.frameBuilder] was null.
 ///
@@ -173,8 +181,6 @@ Future<void> precacheImage(
 /// as animated GIFs), the value of this argument will be the same for all image
 /// frames. In other words, if the first image frame was available immediately,
 /// then this argument will be true for all image frames.
-///
-/// This builder must not return null.
 ///
 /// See also:
 ///
@@ -211,8 +217,6 @@ typedef ImageFrameBuilder = Widget Function(
 /// continue to fire image chunk events after an image frame has been loaded.
 /// In such cases, the `child` parameter will represent the current
 /// fully-loaded image frame.
-///
-/// This builder must not return null.
 ///
 /// See also:
 ///
@@ -711,6 +715,9 @@ class Image extends StatefulWidget {
   /// if it becomes available asynchronously). Callers might use this builder to
   /// add effects to the image (such as fading the image in when it becomes
   /// available) or to display a placeholder widget while the image is loading.
+  ///
+  /// For more information on how to interpret the arguments that are passed to
+  /// this builder, see the documentation on [ImageFrameBuilder].
   ///
   /// To have finer-grained control over the way that an image's loading
   /// progress is communicated to the user, see [loadingBuilder].

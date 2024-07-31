@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/semantics.dart';
+///
+/// @docImport 'actions.dart';
+/// @docImport 'container.dart';
+/// @docImport 'editable_text.dart';
+/// @docImport 'focus_traversal.dart';
+/// @docImport 'overlay.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';

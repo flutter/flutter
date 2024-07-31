@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'action_buttons.dart';
+/// @docImport 'app_bar.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'ink_decoration.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';

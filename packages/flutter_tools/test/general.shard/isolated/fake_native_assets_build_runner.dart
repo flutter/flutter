@@ -59,6 +59,7 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     int? targetIOSVersion,
     int? targetMacOSVersion,
     IOSSdkImpl? targetIOSSdkImpl,
+    required bool linkingEnabled,
   }) async {
     buildInvocations++;
     lastBuildMode = buildMode;

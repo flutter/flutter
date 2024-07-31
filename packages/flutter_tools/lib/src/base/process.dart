@@ -278,21 +278,50 @@ abstract class ProcessUtils {
     );
   }
 
+  static Future<void> writelnToStdinUnsafe({
+    required IOSink stdin,
+    required String line,
+  }) async {
+    await _writeToStdinUnsafe(
+      stdin: stdin,
+      content: line,
+      isLine: true,
+    );
+  }
+
+  static Future<void> writeToStdinUnsafe({
+    required IOSink stdin,
+    required String content,
+  }) async {
+    await _writeToStdinUnsafe(
+      stdin: stdin,
+      content: content,
+      isLine: false,
+    );
+  }
+
   static Future<void> _writeToStdinGuarded({
     required IOSink stdin,
     required String content,
     required void Function(Object, StackTrace) onError,
     required bool isLine,
   }) async {
+    try {
+      await _writeToStdinUnsafe(stdin: stdin, content: content, isLine: isLine);
+    } on Exception catch (error, stackTrace) {
+      onError(error, stackTrace);
+    }
+  }
+
+  static Future<void> _writeToStdinUnsafe({
+    required IOSink stdin,
+    required String content,
+    required bool isLine,
+  }) {
     final Completer<void> completer = Completer<void>();
 
     void handleError(Object error, StackTrace stackTrace) {
-      try {
-        onError(error, stackTrace);
-        completer.complete();
-      } on Exception catch (e) {
-        completer.completeError(e);
-      }
+      completer.completeError(error, stackTrace);
     }
 
     void writeFlushAndComplete() {
@@ -309,17 +338,7 @@ abstract class ProcessUtils {
       );
     }
 
-    runZonedGuarded(
-      writeFlushAndComplete,
-      (Object error, StackTrace stackTrace) {
-        handleError(error, stackTrace);
-
-        // We may have already completed with an error in `handleError`.
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      },
-    );
+    runZonedGuarded(writeFlushAndComplete, handleError);
 
     return completer.future;
   }
