@@ -200,6 +200,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
+    this.internalAddSemanticForOnTap = false,
   }) : _radioType = _RadioType.material,
        useCupertinoCheckmarkStyle = false,
        assert(!isThreeLine || subtitle != null);
@@ -240,6 +241,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.useCupertinoCheckmarkStyle = false,
+    this.internalAddSemanticForOnTap = false,
   }) : _radioType = _RadioType.adaptive,
        assert(!isThreeLine || subtitle != null);
 
@@ -449,6 +451,13 @@ class RadioListTile<T> extends StatelessWidget {
 
   final _RadioType _radioType;
 
+  /// Whether to add button:true to the semantics if onTap is provided.
+  /// This is a temporary flag to help changing the behavior of ListTile onTap semantics.
+  ///
+  // TODO(hangyujin): Remove this flag after fixing related g3 tests and flipping
+  // the default value to true.
+  final bool internalAddSemanticForOnTap;
+
   /// Whether to use the checkbox style for the [CupertinoRadio] control.
   ///
   /// Only usable under the [RadioListTile.adaptive] constructor. If set to
@@ -546,6 +555,7 @@ class RadioListTile<T> extends StatelessWidget {
         focusNode: focusNode,
         onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
+        internalAddSemanticForOnTap: internalAddSemanticForOnTap,
       ),
     );
   }

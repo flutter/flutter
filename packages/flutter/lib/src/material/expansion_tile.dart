@@ -263,6 +263,7 @@ class ExpansionTile extends StatefulWidget {
     this.enableFeedback = true,
     this.enabled = true,
     this.expansionAnimationStyle,
+    this.internalAddSemanticForOnTap = false,
   }) : assert(
        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
        'CrossAxisAlignment.baseline is not supported since the expanded children '
@@ -562,6 +563,13 @@ class ExpansionTile extends StatefulWidget {
   /// {@end-tool}
   final AnimationStyle? expansionAnimationStyle;
 
+  /// Whether to add button:true to the semantics if onTap is provided.
+  /// This is a temporary flag to help changing the behavior of ListTile onTap semantics.
+  ///
+  // TODO(hangyujin): Remove this flag after fixing related g3 tests and flipping
+  // the default value to true.
+  final bool internalAddSemanticForOnTap;
+
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
@@ -753,6 +761,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
                 subtitle: widget.subtitle,
                 trailing: widget.showTrailingIcon ? widget.trailing ?? _buildTrailingIcon(context) : null,
                 minTileHeight: widget.minTileHeight,
+                internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
               ),
             ),
           ),
