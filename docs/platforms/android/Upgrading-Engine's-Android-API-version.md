@@ -60,4 +60,4 @@ Additionally, change any references to the old SDK version to the latest in buil
 ## Next Steps: Update the Framework, Examples and Samples
 
 * Templates in [the framework](https://github.com/flutter/flutter): Change `targetSdkVersion` in various `build.gradle.tmpl` files to use the new API version
-* [Examples](https://github.com/flutter/flutter/tree/master/examples) and [samples](https://github.com/flutter/samples): Change `targetSdkVersion` in `android/app/build.gradle` for each project to the new API version.
+* [Examples](https://github.com/flutter/flutter/tree/main/examples) and [samples](https://github.com/flutter/samples): Change `targetSdkVersion` in `android/app/build.gradle` for each project to the new API version.
