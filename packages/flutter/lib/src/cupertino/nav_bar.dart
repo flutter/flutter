@@ -1669,7 +1669,10 @@ class _BackChevron extends StatelessWidget {
         break;
     }
 
-    return iconWidget;
+    return KeyedSubtree(
+      key: StandardComponentType.backButton.key,
+      child: iconWidget,
+    );
   }
 }
 
