@@ -546,7 +546,7 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
   required Directory tempDir,
   required LocalFileSystem localFileSystem,}) async {
   for (final VersionTuple versions in versionTuples) {
-    Directory innerTempDir = tempDir.createTempSync(versions.gradleVersion);
+    final Directory innerTempDir = tempDir.createTempSync(versions.gradleVersion);
     try {
       // Create a new flutter project.
       section('Create new app with Gradle ${versions.gradleVersion}, AGP ${versions.agpVersion}, and Kotlin ${versions.kotlinVersion}');

@@ -1228,7 +1228,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
-      shard: android_java11_dependency_smoke_tests
+      task_name: android_java11_dependency_smoke_tests
       tags: >
         ["devicelab", "hostonly", "linux"]
       test_timeout_secs: "2700"
@@ -1246,7 +1246,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
-      shard: android_java17_dependency_smoke_tests
+      task_name: android_java17_dependency_smoke_tests
       tags: >
         ["devicelab", "hostonly", "linux"]
       test_timeout_secs: "2700"
