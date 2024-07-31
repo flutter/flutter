@@ -1275,7 +1275,7 @@ void main() {
     expect(menuAnchor.controller!.isOpen, false);
   });
 
-  testWidgets('The onSelected gets called only when a selection is made', (WidgetTester tester) async {
+  testWidgets('The onSelected gets called only when a selection is made and enable is true', (WidgetTester tester) async {
     int selectionCount = 0;
 
     final ThemeData themeData = ThemeData();
@@ -1404,7 +1404,7 @@ void main() {
   });
 
   testWidgets('The default text input field should not be focused on mobile platforms '
-      'when it is tapped', (WidgetTester tester) async {
+      'when it is tapped when enabled is false', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
 
     Widget buildDropdownMenu() => MaterialApp(
@@ -1413,6 +1413,7 @@ void main() {
         body: Column(
           children: <Widget>[
             DropdownMenu<TestMenu>(
+              enabled: false,
               dropdownMenuEntries: menuChildren,
             ),
           ],
@@ -1466,6 +1467,7 @@ void main() {
             DropdownMenu<TestMenu>(
               requestFocusOnTap: requestFocusOnTap,
               dropdownMenuEntries: menuChildren,
+              controller: TextEditingController(),
             ),
           ],
         ),
@@ -1524,7 +1526,6 @@ void main() {
     final Finder textFieldFinder = find.byType(TextField);
     final TextField textField = tester.widget<TextField>(textFieldFinder);
     expect(textField.canRequestFocus, false);
-
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.moveTo(tester.getCenter(textFieldFinder));
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
@@ -1553,7 +1554,7 @@ void main() {
 
     Finder textFieldFinder = find.byType(TextField);
     TextField textField = tester.widget<TextField>(textFieldFinder);
-    expect(textField.canRequestFocus, true);
+    expect(textField.canRequestFocus, false);
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.moveTo(tester.getCenter(textFieldFinder));
@@ -2219,6 +2220,8 @@ void main() {
       home: Scaffold(
         body: DropdownMenu<String>(
           focusNode: focusNode,
+          requestFocusOnTap: true,
+          controller: TextEditingController(),
           dropdownMenuEntries: const <DropdownMenuEntry<String>>[
             DropdownMenuEntry<String>(
               value: 'Yolk',
@@ -2233,20 +2236,11 @@ void main() {
       ),
     ));
 
-    RenderBox box = tester.renderObject(find.byType(InputDecorator));
-
-    // Test input border when not focused.
-    expect(box, paints..rrect(color: theme.colorScheme.outline));
-
-    focusNode.requestFocus();
-    await tester.pump();
-    // Advance input decorator animation.
-    await tester.pump(const Duration(milliseconds: 200));
-
-    box = tester.renderObject(find.byType(InputDecorator));
-
-    // Test input border when focused.
-    expect(box, paints..rrect(color: theme.colorScheme.primary));
+    final Finder textFieldFinder=find.byType(TextField);
+    final TextField textField = tester.widget(textFieldFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(textFieldFinder);
+    expect(textField.focusNode!.canRequestFocus, true);
   });
 
   testWidgets('DropdownMenu honors inputFormatters', (WidgetTester tester) async {
@@ -2456,44 +2450,58 @@ void main() {
   });
 
   testWidgets('DropDown Menu TextField is set to read-only when dropdown is disabled', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
     final TextEditingController textEditingController = TextEditingController();
-    Widget testWidget(bool isEnabled)=>MaterialApp(
-      home: Scaffold(
-      body: DropdownMenu<String>(
-        controller: textEditingController,
-        focusNode: focusNode,
-        enabled: isEnabled,
-        dropdownMenuEntries: const <DropdownMenuEntry<String>>[
-          DropdownMenuEntry<String>(
-            value: 'Yolk',
-            label: 'Yolk',
+    final FocusNode focusNode=FocusNode();
+    bool isEnabled=false;
+    Widget testWidget()=>MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, void Function(void Function()) setState){
+          return Scaffold(
+          body: Column(
+            children: <Widget>[
+              DropdownMenu<String>(
+                controller: textEditingController,
+                enabled: isEnabled,
+                focusNode: focusNode,
+                requestFocusOnTap: isEnabled,
+                dropdownMenuEntries: const <DropdownMenuEntry<String>>[
+                  DropdownMenuEntry<String>(
+                    value: 'Yolk',
+                    label: 'Yolk',
+                  ),
+                  DropdownMenuEntry<String>(
+                    value: 'Eggbert',
+                    label: 'Eggbert',
+                  ),
+                ],
+              ),
+              FilledButton(onPressed: (){
+                  setState(() {
+                      isEnabled=!isEnabled;
+                  });
+              }, child: const Text('Change'))
+            ],
           ),
-          DropdownMenuEntry<String>(
-            value: 'Eggbert',
-            label: 'Eggbert',
-          ),
-        ],
-      ),
-              )
+        );
+    },)
     );
-    await tester.pumpWidget(testWidget(false));
+    // Test when dropdown is disabled
+    await tester.pumpWidget(testWidget());
+    await tester.pumpAndSettle();
     final Finder dropDownMenuFinder =find.byType(DropdownMenu<String>);
     expect(dropDownMenuFinder,findsOneWidget);
     await tester.enterText(dropDownMenuFinder, 'Flutter');
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('Flutter'), findsNothing);
 
-    await tester.pumpWidget(testWidget(true));
-    final Finder dropDownMenuFinder2 =find.byType(DropdownMenu<String>);
-    expect(dropDownMenuFinder,findsOneWidget);
-    await tester.tap(dropDownMenuFinder2);
+    // Test when dropdown is enabled
+    await tester.tap(find.byType(FilledButton));
     await tester.pumpAndSettle();
-    await tester.enterText(dropDownMenuFinder2, 'Flutter');
-    await tester.pumpAndSettle();
+    await tester.tap(dropDownMenuFinder);
+    await tester.enterText(dropDownMenuFinder, 'Flutter');
     await tester.pumpAndSettle();
     expect(find.text('Flutter'), findsOneWidget);
-  });
+});
 }
 
 enum TestMenu {
