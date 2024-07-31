@@ -5,6 +5,8 @@
 import 'package:flutter/widgets.dart';
 
 import 'auto_complete.dart';
+import 'action_chip.dart';
+import 'snack_bar.dart';
 import 'badge.dart';
 import 'check_box_list_tile.dart';
 import 'date_picker.dart';
@@ -36,4 +38,6 @@ final List<UseCase> useCases = <UseCase>[
   NavigationBarUseCase(),
   TextButtonUseCase(),
   RadioListTileUseCase(),
+  ActionChipUseCase(),
+  SnackBarUseCase(),
 ];
