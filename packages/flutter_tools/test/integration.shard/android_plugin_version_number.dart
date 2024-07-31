@@ -41,6 +41,11 @@ void main() {
       'flutter_project'
     ], workingDirectory: tempDir.path);
 
+    if (result.exitCode != 0) {
+      log(result.exitCode);
+      print("Create project from template failed:\n${result.stderr}");
+    }
+
     final String projectPath = fileSystem.path.join(tempDir.path, 'flutter_project');
 
     final File modulePubspec = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
@@ -49,7 +54,7 @@ void main() {
       'dependencies:',
       '''
 dependencies:
-  image_picker: ^1.0.0''',
+  image_picker_android: any''',
     );
     modulePubspec.writeAsStringSync(pubspecContent);
 
@@ -64,7 +69,10 @@ dependencies:
       '--target-platform=android-arm64',
     ], workingDirectory: projectPath);
 
-    log(result.exitCode);
+    if (result.exitCode != 0) {
+      log(result.exitCode);
+      print("Build aar failed:\n${result.stderr}");
+    }
 
     final File pubspecLock = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.lock'));
 
