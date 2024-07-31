@@ -54,7 +54,7 @@ In the framework, update the following `.ci.yaml` entry:
       ...
 ```
 
-In the engine, you may follow https://github.com/flutter/flutter/blob/master/docs/platforms/android/Upgrading-Engine's-Android-API-version.md to update the AVD dependency.
+In the engine, you may follow [Upgrading Engine's Android API version](https://github.com/flutter/flutter/blob/main/docs/platforms/android/Upgrading-Engine's-Android-API-version.md) to update the AVD dependency.
 
 Example Framework PR: https://github.com/flutter/flutter/pull/152498, Example Engine PR: https://github.com/flutter/engine/pull/54186
 
@@ -97,4 +97,4 @@ Integration test is a package shipped in the Flutter tool for running integratio
 
 ### Additional notes
 #### Upload new SDK version to CIPD and consume in buildroot
-See [Upgrading Engine's Android API version](https://github.com/flutter/flutter/blob/master/docs/platforms/android/Upgrading-Engine's-Android-API-version.md) for instructions, as this work is also required to build the engine against the new Android version.
+See [Upgrading Engine's Android API version](https://github.com/flutter/flutter/blob/main/docs/platforms/android/Upgrading-Engine's-Android-API-version.md) for instructions, as this work is also required to build the engine against the new Android version.
