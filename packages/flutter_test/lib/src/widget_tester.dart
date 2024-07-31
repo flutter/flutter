@@ -1183,8 +1183,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   void printToConsole(String message) {
     binding.debugPrintOverride(message);
   }
-
-  evaluate() {}
 }
 
 typedef _TickerDisposeCallback = void Function(_TestTicker ticker);
