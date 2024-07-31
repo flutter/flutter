@@ -102,8 +102,8 @@ void runSemanticsTests() {
   group('group', () {
     _testGroup();
   });
-  group('dialog', () {
-    _testDialog();
+  group('route', () {
+    _testRoute();
   });
   group('focusable', () {
     _testFocusable();
@@ -2970,7 +2970,7 @@ void _testGroup() {
   });
 }
 
-void _testDialog() {
+void _testRoute() {
   test('renders named and labeled routes', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
@@ -2979,7 +2979,7 @@ void _testDialog() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      label: 'this is a dialog label',
+      label: 'this is a route label',
       flags: 0 | ui.SemanticsFlag.scopesRoute.index | ui.SemanticsFlag.namesRoute.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2995,12 +2995,12 @@ void _testDialog() {
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
-      <sem role="dialog" aria-label="this is a dialog label"><sem-c><sem></sem></sem-c></sem>
+      <sem role="dialog" aria-label="this is a route label"><sem-c><sem></sem></sem-c></sem>
     ''');
 
     expect(
       owner().debugSemanticsTree![0]!.semanticRole?.kind,
-      SemanticRoleKind.dialog,
+      SemanticRoleKind.route,
     );
 
     semantics().semanticsEnabled = false;
@@ -3034,7 +3034,7 @@ void _testDialog() {
     expect(
       warnings,
       <String>[
-        'Semantic node 0 had both scopesRoute and namesRoute set, indicating a self-labelled dialog, but it is missing the label. A dialog should be labelled either by setting namesRoute on itself and providing a label, or by containing a child node with namesRoute that can describe it with its content.',
+        'Semantic node 0 had both scopesRoute and namesRoute set, indicating a self-labelled route, but it is missing the label. A route should be labelled either by setting namesRoute on itself and providing a label, or by containing a child node with namesRoute that can describe it with its content.',
       ],
     );
 
@@ -3045,13 +3045,13 @@ void _testDialog() {
 
     expect(
       owner().debugSemanticsTree![0]!.semanticRole?.kind,
-      SemanticRoleKind.dialog,
+      SemanticRoleKind.route,
     );
 
     semantics().semanticsEnabled = false;
   });
 
-  test('dialog can be described by a descendant', () {
+  test('route can be described by a descendant', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -3090,11 +3090,11 @@ void _testDialog() {
       ''');
     }
 
-    pumpSemantics(label: 'Dialog label');
+    pumpSemantics(label: 'Route label');
 
     expect(
       owner().debugSemanticsTree![0]!.semanticRole?.kind,
-      SemanticRoleKind.dialog,
+      SemanticRoleKind.route,
     );
     expect(
       owner().debugSemanticsTree![2]!.semanticRole?.kind,
@@ -3105,12 +3105,12 @@ void _testDialog() {
       contains(RouteName),
     );
 
-    pumpSemantics(label: 'Updated dialog label');
+    pumpSemantics(label: 'Updated route label');
 
     semantics().semanticsEnabled = false;
   });
 
-  test('scopesRoute alone sets the dialog role with no label', () {
+  test('scopesRoute alone sets the SemanticRoute role with no label', () {
     final List<String> warnings = <String>[];
     printWarning = warnings.add;
 
@@ -3132,7 +3132,7 @@ void _testDialog() {
 
     expect(
       owner().debugSemanticsTree![0]!.semanticRole?.kind,
-      SemanticRoleKind.dialog,
+      SemanticRoleKind.route,
     );
     expect(
       owner().debugSemanticsTree![0]!.semanticRole?.behaviors,
@@ -3190,7 +3190,7 @@ void _testDialog() {
     semantics().semanticsEnabled = false;
   });
 
-  // Test the simple scenario of a dialog coming up and containing focusable
+  // Test the simple scenario of a route coming up and containing focusable
   // descendants that are not initially focused. The expectation is that the
   // first descendant will be auto-focused.
   test('focuses on the first unfocused Focusable', () async {
@@ -3248,9 +3248,9 @@ void _testDialog() {
     semantics().semanticsEnabled = false;
   });
 
-  // Test the scenario of a dialog coming up and containing focusable
+  // Test the scenario of a route coming up and containing focusable
   // descendants with one of them explicitly requesting focus. The expectation
-  // is that the dialog will not attempt to auto-focus on anything and let the
+  // is that the route will not attempt to auto-focus on anything and let the
   // respective descendant take focus.
   test('does nothing if a descendant asks for focus explicitly', () async {
     semantics()
@@ -3306,7 +3306,7 @@ void _testDialog() {
     semantics().semanticsEnabled = false;
   });
 
-  // Test the scenario of a dialog coming up and containing non-focusable
+  // Test the scenario of a route coming up and containing non-focusable
   // descendants that can have a11y focus. The expectation is that the first
   // descendant will be auto-focused, even if it's not input-focusable.
   test('focuses on the first non-focusable descedant', () async {
@@ -3378,8 +3378,8 @@ void _testDialog() {
   });
 
   // This mostly makes sure the engine doesn't crash if given a completely empty
-  // dialog trying to find something to focus on.
-  test('does nothing if nothing is focusable inside the dialog', () async {
+  // route trying to find something to focus on.
+  test('does nothing if nothing is focusable inside the route', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
