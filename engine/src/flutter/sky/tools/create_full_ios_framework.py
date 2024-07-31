@@ -243,7 +243,7 @@ def _generate_gen_snapshot(gen_snapshot_path, destination):
     print('Cannot find gen_snapshot at %s' % gen_snapshot_path)
     sys.exit(1)
 
-  subprocess.check_call(['xcrun', 'bitcode_strip', '-r', gen_snapshot_path, '-o', destination])
+  shutil.copyfile(gen_snapshot_path, destination)
 
 
 if __name__ == '__main__':
