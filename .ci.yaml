@@ -3959,6 +3959,7 @@ targets:
       task_name: platform_view_macos__start_up
 
   - name: Mac platform_channel_sample_test_macos
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/151883
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -5727,9 +5728,10 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_1_6
+  - name: Windows tool_integration_tests_1_7
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -5741,7 +5743,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "1_6"
+      subshard: "1_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
@@ -5751,9 +5753,10 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_2_6
+  - name: Windows tool_integration_tests_2_7
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -5775,7 +5778,8 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_3_6
+  - name: Windows tool_integration_tests_3_7
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5789,7 +5793,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "3_6"
+      subshard: "3_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
@@ -5799,7 +5803,8 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_4_6
+  - name: Windows tool_integration_tests_4_7
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5813,7 +5818,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "4_6"
+      subshard: "4_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
@@ -5823,7 +5828,8 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_5_6
+  - name: Windows tool_integration_tests_5_7
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5837,7 +5843,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "5_6"
+      subshard: "5_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
@@ -5847,7 +5853,8 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_6_6
+  - name: Windows tool_integration_tests_6_7
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5861,7 +5868,32 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "6_6"
+      subshard: "6_7"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+      test_timeout_secs: "2700"
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows tool_integration_tests_7_7
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      shard: tool_integration_tests
+      subshard: "7_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
