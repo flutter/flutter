@@ -231,7 +231,7 @@ void main() {
     });
   });
 
-  testWithoutContext('runInView forwards arguments correctly', () async {
+  testUsingContext('runInView forwards arguments correctly', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
