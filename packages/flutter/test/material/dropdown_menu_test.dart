@@ -2454,6 +2454,46 @@ void main() {
 
     expect(menuAnchor.alignmentOffset, alignmentOffset);
   });
+
+  testWidgets('DropDown Menu TextField is set to read-only when dropdown is disabled', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final TextEditingController textEditingController = TextEditingController();
+    Widget testWidget(bool isEnabled)=>MaterialApp(
+      home: Scaffold(
+      body: DropdownMenu<String>(
+        controller: textEditingController,
+        focusNode: focusNode,
+        enabled: isEnabled,
+        dropdownMenuEntries: const <DropdownMenuEntry<String>>[
+          DropdownMenuEntry<String>(
+            value: 'Yolk',
+            label: 'Yolk',
+          ),
+          DropdownMenuEntry<String>(
+            value: 'Eggbert',
+            label: 'Eggbert',
+          ),
+        ],
+      ),
+              )
+    );
+    await tester.pumpWidget(testWidget(false));
+    final Finder dropDownMenuFinder =find.byType(DropdownMenu<String>);
+    expect(dropDownMenuFinder,findsOneWidget);
+    await tester.enterText(dropDownMenuFinder, 'Flutter');
+    await tester.pump();
+    expect(find.text('Flutter'), findsNothing);
+
+    await tester.pumpWidget(testWidget(true));
+    final Finder dropDownMenuFinder2 =find.byType(DropdownMenu<String>);
+    expect(dropDownMenuFinder,findsOneWidget);
+    await tester.tap(dropDownMenuFinder2);
+    await tester.pumpAndSettle();
+    await tester.enterText(dropDownMenuFinder2, 'Flutter');
+    await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
+    expect(find.text('Flutter'), findsOneWidget);
+  });
 }
 
 enum TestMenu {

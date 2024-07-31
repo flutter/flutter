@@ -814,9 +814,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         final Widget textField = TextField(
           key: _anchorKey,
           enabled: widget.enabled,
+          readOnly: !widget.enabled,
           mouseCursor: effectiveMouseCursor,
           focusNode: widget.focusNode,
-          canRequestFocus: canRequestFocus(),
           enableInteractiveSelection: canRequestFocus(),
           keyboardType: widget.keyboardType,
           textAlign: widget.textAlign,
