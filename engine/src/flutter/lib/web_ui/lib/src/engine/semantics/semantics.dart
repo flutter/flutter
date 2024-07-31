@@ -20,7 +20,6 @@ import '../vector_math.dart';
 import '../window.dart';
 import 'accessibility.dart';
 import 'checkable.dart';
-import 'dialog.dart';
 import 'focusable.dart';
 import 'heading.dart';
 import 'image.dart';
@@ -29,6 +28,7 @@ import 'label_and_value.dart';
 import 'link.dart';
 import 'live_region.dart';
 import 'platform_view.dart';
+import 'route.dart';
 import 'scrollable.dart';
 import 'semantics_helper.dart';
 import 'tappable.dart';
@@ -379,19 +379,19 @@ enum SemanticRoleKind {
   /// There are 3 possible situations:
   ///
   /// * The node also has the `namesRoute` bit set. This means that the node's
-  ///   `label` describes the dialog, which can be expressed by adding the
+  ///   `label` describes the route, which can be expressed by adding the
   ///   `aria-label` attribute.
   /// * A descendant node has the `namesRoute` bit set. This means that the
-  ///   child's content describes the dialog. The child may simply be labelled,
-  ///   or it may be a subtree of nodes that describe the dialog together. The
+  ///   child's content describes the route. The child may simply be labelled,
+  ///   or it may be a subtree of nodes that describe the route together. The
   ///   nearest HTML equivalent is `aria-describedby`. The child acquires the
   ///   [routeName] role, which manages the relevant ARIA attributes.
   /// * There is no `namesRoute` bit anywhere in the sub-tree rooted at the
-  ///   current node. In this case it's likely not a dialog at all, and the node
+  ///   current node. In this case it's likely not a route at all, and the node
   ///   should not get a label or the "dialog" role. It's just a group of
   ///   children. For example, a modal barrier has `scopesRoute` set but marking
-  ///   it as a dialog would be wrong.
-  dialog,
+  ///   it as a route would be wrong.
+  route,
 
   /// The node's role is to host a platform view.
   platformView,
@@ -1653,7 +1653,7 @@ class SemanticsObject {
     } else if (isScrollContainer) {
       return SemanticRoleKind.scrollable;
     } else if (scopesRoute) {
-      return SemanticRoleKind.dialog;
+      return SemanticRoleKind.route;
     } else if (isLink) {
       return SemanticRoleKind.link;
     } else {
@@ -1668,7 +1668,7 @@ class SemanticsObject {
       SemanticRoleKind.incrementable => SemanticIncrementable(this),
       SemanticRoleKind.button => SemanticButton(this),
       SemanticRoleKind.checkable => SemanticCheckable(this),
-      SemanticRoleKind.dialog => SemanticDialog(this),
+      SemanticRoleKind.route => SemanticRoute(this),
       SemanticRoleKind.image => SemanticImage(this),
       SemanticRoleKind.platformView => SemanticPlatformView(this),
       SemanticRoleKind.link => SemanticLink(this),

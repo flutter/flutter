@@ -254,14 +254,14 @@ class AccessibilityFocusManager {
       // as it is subject to non-local effects. Let's say the framework decides
       // that a semantics node is currently not focused. That would lead to
       // changeFocus(false) to be called. However, what if this node is inside
-      // a dialog, and nothing else in the dialog is focused. The Flutter
+      // a route, and nothing else in the route is focused? The Flutter
       // framework expects that the screen reader will focus on the first (in
-      // traversal order) focusable element inside the dialog and send a
+      // traversal order) focusable element inside the route and send a
       // SemanticsAction.focus action. Screen readers on the web do not do
       // that, and so the web engine has to implement this behavior directly. So
-      // the dialog will look for a focusable element and request focus on it,
+      // the route will look for a focusable element and request focus on it,
       // but now there may be a race between this method unsetting the focus and
-      // the dialog requesting focus on the same element.
+      // the route requesting focus on the same element.
       return;
     }
 
