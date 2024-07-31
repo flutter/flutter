@@ -23,9 +23,20 @@ import '../utils.dart';
 Future<void> runFlutterDriverAndroidTests() async {
   print('Running Flutter Driver Android tests...');
 
+  // Print out the results of `adb devices`, for uh, science:
+  print('Listing devices...');
+  final io.ProcessResult devices = await _adb(
+    <String>[
+      'devices',
+    ],
+  );
+  print(devices.stdout);
+  print(devices.stderr);
+
   // We need to configure the emulator to disable confirmations before the
   // application starts. Some of these configuration options won't work once
   // the application is running.
+  print('Configuring device...');
   await _configureForScreenshotTesting();
 
   // TODO(matanlurey): Should we be using another instrumentation method?
