@@ -13,6 +13,7 @@
 
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/entity/draw_order_resolver.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_clip_stack.h"
 #include "impeller/entity/entity_pass_delegate.h"
@@ -52,6 +53,8 @@ class EntityPass {
   /// `EntityPass`. Elements are converted to Entities in
   /// `GetEntityForElement()`.
   using Element = std::variant<Entity, std::unique_ptr<EntityPass>>;
+
+  static bool IsSubpass(const Element& element);
 
   using BackdropFilterProc = std::function<std::shared_ptr<FilterContents>(
       FilterInput::Ref,
@@ -214,8 +217,7 @@ class EntityPass {
       kSkip,
     };
 
-    /// @brief  The resulting entity that should be rendered. If `std::nullopt`,
-    ///         there is nothing to render.
+    /// @brief  The resulting entity that should be rendered.
     Entity entity;
     /// @brief  This is set to `false` if there was an unexpected rendering
     ///         error while resolving the Entity.
@@ -316,10 +318,12 @@ class EntityPass {
   /// evaluated and recorded to an `EntityPassTarget` by the `OnRender` method.
   std::vector<Element> elements_;
 
+  DrawOrderResolver draw_order_resolver_;
+
   /// The stack of currently active clips (during Aiks recording time). Each
-  /// entry is an index into the `elements_` list. The depth value of a clip is
-  /// the max of all the entities it affects, so assignment of the depth value
-  /// is deferred until clip restore or end of the EntityPass.
+  /// entry is an index into the `elements_` list. The depth value of a clip
+  /// is the max of all the entities it affects, so assignment of the depth
+  /// value is deferred until clip restore or end of the EntityPass.
   std::vector<size_t> active_clips_;
 
   EntityPass* superpass_ = nullptr;
@@ -338,8 +342,8 @@ class EntityPass {
   ///   1. An entity with an "advanced blend" is added to the pass.
   ///   2. A subpass with a backdrop filter is added to the pass.
   /// These are tracked as separate values because we may ignore
-  /// `blend_reads_from_pass_texture_` if the device supports framebuffer based
-  /// advanced blends.
+  /// `blend_reads_from_pass_texture_` if the device supports framebuffer
+  /// based advanced blends.
   bool advanced_blend_reads_from_pass_texture_ = false;
   bool backdrop_filter_reads_from_pass_texture_ = false;
 
