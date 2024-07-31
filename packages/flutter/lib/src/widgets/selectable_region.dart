@@ -475,6 +475,10 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   // gestures.
 
+  /// Whether the Shift key was pressed when the most recent [PointerDownEvent]
+  /// was tracked by the [BaseTapAndDragGestureRecognizer].
+  bool _isShiftPressed = false;
+
   // The position of the most recent secondary tap down event on this
   // SelectableRegion.
   Offset? _lastSecondaryTapDownPosition;
@@ -548,6 +552,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           ),
           (TapAndPanGestureRecognizer instance) {
         instance
+          ..onTapTrackStart = _onTapTrackStart
+          ..onTapTrackReset = _onTapTrackReset
           ..onTapDown = _startNewMouseSelectionGesture
           ..onTapUp = _handleMouseTapUp
           ..onDragStart = _handleMouseDragStart
@@ -557,6 +563,16 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           ..dragStartBehavior = DragStartBehavior.down;
       },
     );
+  }
+
+  void _onTapTrackStart() {
+    _isShiftPressed = HardwareKeyboard.instance.logicalKeysPressed
+        .intersection(<LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight})
+        .isNotEmpty;
+  }
+
+  void _onTapTrackReset() {
+    _isShiftPressed = false;
   }
 
   void _initTouchGestureRecognizer() {
@@ -623,6 +639,15 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.linux:
           case TargetPlatform.windows:
             hideToolbar();
+            // It is impossible to extend the selection when the shift key is
+            // pressed and the start of the selection has not been initialized.
+            // In this case we fallback on collapsing the selection to first
+            // initialize the selection.
+            final bool isShiftPressedValid = _isShiftPressed && _selectionDelegate.value.startSelectionPoint != null;
+            if (isShiftPressedValid) {
+              _selectEndTo(offset: details.globalPosition);
+              return;
+            }
             _collapseSelectionAt(offset: details.globalPosition);
         }
       case 2:
