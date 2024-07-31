@@ -752,7 +752,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     if (widget.enableSearch) {
       if (widget.searchCallback != null) {
-        currentHighlight = widget.searchCallback!.call(filteredEntries, _localTextEditingController!.text);
+        currentHighlight = widget.searchCallback!(filteredEntries, _localTextEditingController!.text);
       } else {
         currentHighlight = search(filteredEntries, _localTextEditingController!);
       }
