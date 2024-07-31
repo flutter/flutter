@@ -14,6 +14,8 @@
 /// @docImport 'mergeable_material.dart';
 library;
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -807,36 +809,49 @@ class ShapeBorderTween extends Tween<ShapeBorder?> {
   }
 }
 
-/// The interior of non-transparent material.
-///
-/// Animates [elevation], [shadowColor], and [shape].
-class _MaterialInterior extends ImplicitlyAnimatedWidget {
+typedef _MaterialInteriorProperties = ({
+  double elevation,
+  Color? surfaceTintColor,
+  Color shadowColor,
+  ShapeBorder shape,
+});
+
+// The interior of non-transparent material.
+//
+// Animates [elevation], [shadowColor], and [shape].
+class _MaterialInterior extends AnimatedValue<_MaterialInteriorProperties> {
   /// Creates a const instance of [_MaterialInterior].
   ///
   /// The [elevation] must be specified and greater than or equal to zero.
   const _MaterialInterior({
-    required this.child,
-    required this.shape,
     this.borderOnForeground = true,
     this.clipBehavior = Clip.none,
-    required this.elevation,
     required this.color,
-    required this.shadowColor,
-    required this.surfaceTintColor,
-    super.curve,
+    required ShapeBorder shape,
+    required double elevation,
+    required Color shadowColor,
+    Color? surfaceTintColor,
     required super.duration,
-  }) : assert(elevation >= 0.0);
+    super.curve,
+    required Widget super.child,
+  }) : assert(elevation >= 0.0),
+       super(
+         (elevation: elevation, surfaceTintColor: surfaceTintColor, shadowColor: shadowColor, shape: shape),
+         lerp: _lerpProperties,
+       );
 
-  /// The widget below this widget in the tree.
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget child;
-
-  /// The border of the widget.
-  ///
-  /// This border will be painted, and in addition the outer path of the border
-  /// determines the physical shape.
-  final ShapeBorder shape;
+  static _MaterialInteriorProperties _lerpProperties(
+    _MaterialInteriorProperties a,
+    _MaterialInteriorProperties b,
+    double t,
+  ) {
+    return (
+      elevation: lerpDouble(a.elevation, b.elevation, t)!,
+      surfaceTintColor: Color.lerp(a.surfaceTintColor, b.surfaceTintColor, t),
+      shadowColor: Color.lerp(a.shadowColor, b.shadowColor, t)!,
+      shape: ShapeBorder.lerp(a.shape, b.shape, t)!,
+    );
+  }
 
   /// Whether to paint the border in front of the child.
   ///
@@ -849,90 +864,44 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
-  /// The target z-coordinate at which to place this physical object relative
-  /// to its parent.
-  ///
-  /// The value is non-negative.
-  final double elevation;
-
   /// The target background color.
   final Color color;
 
-  /// The target shadow color.
-  final Color shadowColor;
-
-  /// The target surface tint color.
-  final Color? surfaceTintColor;
-
   @override
-  _MaterialInteriorState createState() => _MaterialInteriorState();
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(DiagnosticsProperty<ShapeBorder>('shape', shape));
-    description.add(DoubleProperty('elevation', elevation));
-    description.add(ColorProperty('color', color));
-    description.add(ColorProperty('shadowColor', shadowColor));
-  }
-}
-
-class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> {
-  Tween<double>? _elevation;
-  ColorTween? _surfaceTintColor;
-  ColorTween? _shadowColor;
-  ShapeBorderTween? _border;
-
-  @override
-  void forEachTween(TweenVisitor<dynamic> visitor) {
-    _elevation = visitor(
-      _elevation,
-      widget.elevation,
-      (dynamic value) => Tween<double>(begin: value as double),
-    ) as Tween<double>?;
-    _shadowColor = visitor(
-      _shadowColor,
-      widget.shadowColor,
-      (dynamic value) => ColorTween(begin: value as Color),
-    ) as ColorTween?;
-    _surfaceTintColor = widget.surfaceTintColor != null
-      ? visitor(
-          _surfaceTintColor,
-          widget.surfaceTintColor,
-              (dynamic value) => ColorTween(begin: value as Color),
-        ) as ColorTween?
-      : null;
-    _border = visitor(
-      _border,
-      widget.shape,
-      (dynamic value) => ShapeBorderTween(begin: value as ShapeBorder),
-    ) as ShapeBorderTween?;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final ShapeBorder shape = _border!.evaluate(animation)!;
-    final double elevation = _elevation!.evaluate(animation);
-    final Color color = Theme.of(context).useMaterial3
-      ? ElevationOverlay.applySurfaceTint(widget.color, _surfaceTintColor?.evaluate(animation), elevation)
-      : ElevationOverlay.applyOverlay(context, widget.color, elevation);
-    final Color shadowColor = _shadowColor!.evaluate(animation)!;
+  Widget build(BuildContext context, _MaterialInteriorProperties value) {
+    final (
+      :double elevation,
+      :Color? surfaceTintColor,
+      :Color shadowColor,
+      :ShapeBorder shape,
+    ) = value;
 
     return PhysicalShape(
       clipper: ShapeBorderClipper(
         shape: shape,
         textDirection: Directionality.maybeOf(context),
       ),
-      clipBehavior: widget.clipBehavior,
+      clipBehavior: clipBehavior,
       elevation: elevation,
-      color: color,
+      color: Theme.of(context).useMaterial3
+          ? ElevationOverlay.applySurfaceTint(color, surfaceTintColor, elevation)
+          : ElevationOverlay.applyOverlay(context, color, elevation),
       shadowColor: shadowColor,
       child: _ShapeBorderPaint(
         shape: shape,
-        borderOnForeground: widget.borderOnForeground,
-        child: widget.child,
+        borderOnForeground: borderOnForeground,
+        child: child!,
       ),
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(DiagnosticsProperty<ShapeBorder>('shape', value.shape));
+    description.add(DoubleProperty('elevation', value.elevation));
+    description.add(ColorProperty('color', color));
+    description.add(ColorProperty('shadowColor', value.shadowColor));
   }
 }
 

@@ -19,28 +19,28 @@ void main() {
 
       final Finder fadeTransitionFinder = find.descendant(
         of: find.byType(SliverAnimatedOpacity),
-        matching: find.byType(SliverFadeTransition),
+        matching: find.byType(SliverOpacity),
       );
 
       const double beginOpacity = 1.0;
       const double endOpacity = 0.0;
 
-      SliverFadeTransition fadeTransition = tester.widget(fadeTransitionFinder);
-      expect(fadeTransition.opacity.value, beginOpacity);
+      SliverOpacity fadeTransition = tester.widget(fadeTransitionFinder);
+      expect(fadeTransition.opacity, beginOpacity);
 
       // Tap on the FloatingActionButton to start the forward animation.
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pump();
 
       fadeTransition = tester.widget(fadeTransitionFinder);
-      expect(fadeTransition.opacity.value, beginOpacity);
+      expect(fadeTransition.opacity, beginOpacity);
 
       // Advance animation to the middle.
       await tester.pump(example.SliverAnimatedOpacityExampleApp.duration ~/ 2);
 
       fadeTransition = tester.widget(fadeTransitionFinder);
       expect(
-        fadeTransition.opacity.value,
+        fadeTransition.opacity,
         lerpDouble(
           beginOpacity,
           endOpacity,
@@ -52,21 +52,21 @@ void main() {
       await tester.pump(example.SliverAnimatedOpacityExampleApp.duration ~/ 2);
 
       fadeTransition = tester.widget(fadeTransitionFinder);
-      expect(fadeTransition.opacity.value, endOpacity);
+      expect(fadeTransition.opacity, endOpacity);
 
       // Tap on the FloatingActionButton again to start the reverse animation.
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pump();
 
       fadeTransition = tester.widget(fadeTransitionFinder);
-      expect(fadeTransition.opacity.value, endOpacity);
+      expect(fadeTransition.opacity, endOpacity);
 
       // Advance animation to the middle.
       await tester.pump(example.SliverAnimatedOpacityExampleApp.duration ~/ 2);
 
       fadeTransition = tester.widget(fadeTransitionFinder);
       expect(
-        fadeTransition.opacity.value,
+        fadeTransition.opacity,
         lerpDouble(
           endOpacity,
           beginOpacity,
@@ -78,7 +78,7 @@ void main() {
       await tester.pump(example.SliverAnimatedOpacityExampleApp.duration ~/ 2);
 
       fadeTransition = tester.widget(fadeTransitionFinder);
-      expect(fadeTransition.opacity.value, beginOpacity);
+      expect(fadeTransition.opacity, beginOpacity);
     },
   );
 }

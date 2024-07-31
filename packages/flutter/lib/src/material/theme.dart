@@ -205,7 +205,7 @@ class ThemeDataTween extends Tween<ThemeData> {
 ///  * [ThemeData], which describes the actual configuration of a theme.
 ///  * [MaterialApp], which includes an [AnimatedTheme] widget configured via
 ///    the [MaterialApp.theme] argument.
-class AnimatedTheme extends ImplicitlyAnimatedWidget {
+class AnimatedTheme extends AnimatedValue<ThemeData> {
   /// Creates an animated theme.
   ///
   /// By default, the theme transition uses a linear curve.
@@ -215,40 +215,20 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
     super.curve,
     super.duration = kThemeAnimationDuration,
     super.onEnd,
-    required this.child,
-  });
+    required Widget super.child,
+  }) : super(data, lerp: ThemeData.lerp);
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
 
-  /// The widget below this widget in the tree.
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget child;
-
   @override
-  AnimatedWidgetBaseState<AnimatedTheme> createState() => _AnimatedThemeState();
-}
-
-class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
-  ThemeDataTween? _data;
-
-  @override
-  void forEachTween(TweenVisitor<dynamic> visitor) {
-    _data = visitor(_data, widget.data, (dynamic value) => ThemeDataTween(begin: value as ThemeData))! as ThemeDataTween;
+  Widget build(BuildContext context, ThemeData value) {
+    return Theme(data: value, child: child!);
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Theme(
-      data: _data!.evaluate(animation),
-      child: widget.child,
-    );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(DiagnosticsProperty<ThemeDataTween>('data', _data, showName: false, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ThemeData>('data', data, defaultValue: null));
   }
 }
