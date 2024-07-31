@@ -63,7 +63,7 @@ Future<void> _configureForScreenshotTesting() async {
       'shell',
       'settings',
       'put',
-      'global',
+      'secure',
       'immersive_mode_confirmations',
       'confirmed',
     ],
