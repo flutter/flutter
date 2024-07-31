@@ -1215,6 +1215,42 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Linux android_java11_dependency_smoke_tests
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:11"}
+        ]
+      task_name: android_java11_dependency_smoke_tests
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      test_timeout_secs: "2700"
+
+  - name: Linux android_java17_dependency_smoke_tests
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      task_name: android_java17_dependency_smoke_tests
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      test_timeout_secs: "2700"
+
   - name: Linux tool_tests_commands
     recipe: flutter/flutter_drone
     timeout: 60
@@ -3923,6 +3959,7 @@ targets:
       task_name: platform_view_macos__start_up
 
   - name: Mac platform_channel_sample_test_macos
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/151883
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4293,13 +4330,15 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac_pixel_7pro entrypoint_dart_registrant
+  # mac mokey test
+  - name: Mac_arm64_mokey entrypoint_dart_registrant
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "mac", "pixel", "7pro"]
+        ["devicelab", "android", "mac", "arm64", "mokey"]
       task_name: entrypoint_dart_registrant
     runIf:
       - dev/**
@@ -4307,13 +4346,15 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac_pixel_7pro hello_world_android__compile
+  # mac mokey benchmark
+  - name: Mac_mokey hello_world_android__compile
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "mac", "pixel", "7pro"]
+        ["devicelab", "android", "mac", "mokey"]
       task_name: hello_world_android__compile
 
   # mac mokey test
@@ -4338,13 +4379,15 @@ targets:
         ["devicelab", "android", "mac", "mokey"]
       task_name: hot_mode_dev_cycle__benchmark
 
-  - name: Mac_pixel_7pro integration_test_test
+  # mac mokey test
+  - name: Mac_mokey integration_test_test
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "mac", "pixel", "7pro"]
+        ["devicelab", "android", "mac", "mokey"]
       task_name: integration_test_test
 
   # mac mokey test
@@ -4358,13 +4401,15 @@ targets:
         ["devicelab", "android", "mac", "arm64", "mokey"]
       task_name: integration_test_test
 
-  - name: Mac_pixel_7pro integration_ui_frame_number
+  # mac mokey test
+  - name: Mac_arm64_mokey integration_ui_frame_number
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "mac", "pixel", "7pro"]
+        ["devicelab", "android", "mac", "arm64", "mokey"]
       task_name: integration_ui_frame_number
 
   # mac mokey benchmark
@@ -4378,17 +4423,21 @@ targets:
         ["devicelab", "android", "mac", "mokey"]
       task_name: microbenchmarks
 
-  - name: Mac_pixel_7pro native_assets_android
+  # mac mokey test
+  - name: Mac_arm64_mokey native_assets_android
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "mac", "pixel", "7pro"]
+        ["devicelab", "android", "mac", "arm64", "mokey"]
       task_name: native_assets_android
 
-  - name: Mac_pixel_7pro run_debug_test_android
+  # mac mokey test
+  - name: Mac_mokey run_debug_test_android
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     runIf:
       - .ci.yaml
@@ -4396,7 +4445,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "mac", "pixel", "7pro"]
+        ["devicelab", "android", "mac", "mokey"]
       task_name: run_debug_test_android
 
   # mac mokey test
@@ -4413,8 +4462,10 @@ targets:
         ["devicelab", "android", "mac", "arm64", "mokey"]
       task_name: run_debug_test_android
 
-  - name: Mac_pixel_7pro run_release_test
+  # mac mokey test
+  - name: Mac_mokey run_release_test
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     runIf:
       - .ci.yaml
@@ -4422,7 +4473,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "mac", "pixel", "7pro"]
+        ["devicelab", "android", "mac", "mokey"]
       task_name: run_release_test
 
   # mac mokey test
@@ -5677,7 +5728,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_1_6
+  - name: Windows tool_integration_tests_1_7
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5691,7 +5742,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "1_6"
+      subshard: "1_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
@@ -5701,7 +5752,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_2_6
+  - name: Windows tool_integration_tests_2_7
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5725,7 +5776,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_3_6
+  - name: Windows tool_integration_tests_3_7
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5739,7 +5790,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "3_6"
+      subshard: "3_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
@@ -5749,7 +5800,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_4_6
+  - name: Windows tool_integration_tests_4_7
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5763,7 +5814,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "4_6"
+      subshard: "4_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
@@ -5773,7 +5824,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_5_6
+  - name: Windows tool_integration_tests_5_7
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5787,7 +5838,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "5_6"
+      subshard: "5_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
@@ -5797,7 +5848,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_6_6
+  - name: Windows tool_integration_tests_6_7
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5811,7 +5862,31 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "6_6"
+      subshard: "6_7"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+      test_timeout_secs: "2700"
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows tool_integration_tests_7_7
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      shard: tool_integration_tests
+      subshard: "7_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
