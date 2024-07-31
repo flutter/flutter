@@ -231,6 +231,7 @@ class VelocityTracker {
     } while (sampleCount < _historySize);
 
     if (sampleCount >= _minSampleSize) {
+      // Marking as "late" ensures that yFit isn't evaluated unless it's needed.
       late final PolynomialFit? xFit = LeastSquaresSolver(time, x, w).solve(2);
       late final PolynomialFit? yFit = LeastSquaresSolver(time, y, w).solve(2);
 

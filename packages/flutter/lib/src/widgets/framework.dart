@@ -4040,7 +4040,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     }
 
     Object? slotFor(int newChildIndex, Element? previousChild) {
-      return slots?[newChildIndex] ?? IndexedSlot<Element?>(newChildIndex, previousChild);
+      return slots != null
+          ? slots[newChildIndex]
+          : IndexedSlot<Element?>(newChildIndex, previousChild);
     }
 
     // This attempts to diff the new child list (newWidgets) with
