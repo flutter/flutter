@@ -1621,6 +1621,26 @@ class Navigator extends StatefulWidget {
   /// as a new page to display.
   final DidRemovePageCallback? onDidRemovePage;
 
+  /// Whether this [Navigator] should handle back gestures in lieu of the root
+  /// [Navigator] when nested.
+  ///
+  /// In a typical [WidgetsApp], the root [Navigator] receives all system back
+  /// gestures. However, the user will expect the current route to be popped in
+  /// a system back gesture, and that route may not be in the root Navigator
+  /// when using one or more nested [Navigator]s.
+  ///
+  /// When this is true and the [Navigator] is nested, [PopScope] will be used
+  /// to handle system back gestures in lieu of its parent [Navigator].
+  ///
+  /// Defaults to true.
+  ///
+  /// See also:
+  ///
+  ///  * [NavigatorPopHandler], which can be used to manually handle system back
+  ///    gestures with a nested [Navigator].
+  ///  * [PopScope], which provides even more control over system back behavior.
+  ///  * [CupertinoTabView], which sets this parameter to false in order to
+  ///    provide custom back handling for its nested [Navigator]s.
   final bool handlesBacksWhenNested;
 
   /// The delegate used for deciding how routes transition in or off the screen
