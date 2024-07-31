@@ -9,11 +9,12 @@ import 'package:flutter_devicelab/framework/dependency_smoke_test_task_definitio
 import 'package:flutter_devicelab/framework/framework.dart';
 
 // Methodology:
-// - AGP: all versions within our support range.
+// - AGP: all versions within our support range (*).
 // - Gradle: The version that AGP lists as the default Gradle version for that
 //           AGP version under the release notes, e.g.
 //           https://developer.android.com/build/releases/past-releases/agp-8-4-0-release-notes.
 // - Kotlin: No methodology as of yet.
+// (*) - support range defined in packages/flutter_tools/gradle/src/main/kotlin/dependency_version_checker.gradle.kts.
 List<VersionTuple> versionTuples = <VersionTuple>[
   VersionTuple(agpVersion: '7.0.1', gradleVersion: '7.0.2', kotlinVersion: '1.7.10'),
   VersionTuple(agpVersion: '7.1.0', gradleVersion: '7.2', kotlinVersion: '1.7.10'),
