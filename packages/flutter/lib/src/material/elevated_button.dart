@@ -172,7 +172,7 @@ class ElevatedButton extends ButtonStyleButton {
   /// All parameters default to null, by default this method returns
   /// a [ButtonStyle] that doesn't override anything.
   ///
-  /// For example, to override the default text and icon colors for a
+  /// For example, to override the default text and icon colors for an
   /// [ElevatedButton], as well as its overlay color, with all of the
   /// standard opacity adjustments for the pressed, focused, and
   /// hovered states, one could write:

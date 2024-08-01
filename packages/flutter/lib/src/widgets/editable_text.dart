@@ -2226,7 +2226,7 @@ class EditableText extends StatefulWidget {
   }
 }
 
-/// State for a [EditableText].
+/// State for an [EditableText].
 class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate, TextInputClient implements AutofillClient {
   Timer? _cursorTimer;
   AnimationController get _cursorBlinkOpacityController {
