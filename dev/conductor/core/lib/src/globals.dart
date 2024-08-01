@@ -16,7 +16,7 @@ const List<String> kBaseReleaseChannels = <String>['stable', 'beta'];
 
 const List<String> kReleaseChannels = <String>[...kBaseReleaseChannels, FrameworkRepository.defaultBranch];
 
-const String kReleaseDocumentationUrl = 'https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process';
+const String kReleaseDocumentationUrl = 'https://github.com/flutter/flutter/blob/main/docs/releases/Flutter-Cherrypick-Process.md';
 
 const String kLuciPackagingConsoleLink = 'https://ci.chromium.org/p/dart-internal/g/flutter_packaging/console';
 
@@ -29,13 +29,13 @@ const String flutterReleaseHotline =
     'https://mail.google.com/chat/u/0/#chat/space/AAAA6RKcK2k';
 
 const String hotfixToStableWiki =
-    'https://github.com/flutter/flutter/wiki/Hotfixes-to-the-Stable-Channel';
+    'https://github.com/flutter/flutter/blob/main/CHANGELOG.md';
 
 const String flutterAnnounceGroup =
     'https://groups.google.com/g/flutter-announce';
 
 const String hotfixDocumentationBestPractices =
-    'https://github.com/flutter/flutter/wiki/Hotfix-Documentation-Best-Practices';
+    'https://github.com/flutter/flutter/blob/main/docs/releases/Hotfix-Documentation-Best-Practices.md';
 
 final RegExp releaseCandidateBranchRegex = RegExp(
   r'flutter-(\d+)\.(\d+)-candidate\.(\d+)',

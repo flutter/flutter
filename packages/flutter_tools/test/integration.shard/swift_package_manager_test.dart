@@ -302,6 +302,75 @@ void main() {
         );
       }
     }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+
+    test('Caches build targets between builds with Swift Package Manager on $platformName', () async {
+      final Directory workingDirectory = fileSystem.systemTempDirectory
+            .createTempSync('swift_package_manager_caching.');
+        final String workingDirectoryPath = workingDirectory.path;
+        try {
+          // Create and build an app using the Swift Package Manager version of
+          // integration_test.
+          await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
+
+          final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
+            flutterBin,
+            workingDirectoryPath,
+            iosLanguage: 'swift',
+            platform: platformName,
+            usesSwiftPackageManager: true,
+            options: <String>['--platforms=$platformName'],
+          );
+          SwiftPackageManagerUtils.addDependency(appDirectoryPath: appDirectoryPath, plugin: integrationTestPlugin);
+
+          final String unpackTarget = 'debug_unpack_$platformName';
+          final String bundleFlutterAssetsTarget = 'debug_${platformName}_bundle_flutter_assets';
+          final bool noCodesign = platformName == 'ios';
+          await SwiftPackageManagerUtils.buildApp(
+            flutterBin,
+            appDirectoryPath,
+            options: <String>[
+              platformName,
+              '--debug',
+              '-v',
+              if (noCodesign)
+                '--no-codesign',
+            ],
+            expectedLines: <Pattern>[
+              r'SchemeAction Run\ Prepare\ Flutter\ Framework\ Script',
+              '$unpackTarget: Starting due to',
+              '-dPreBuildAction=PrepareFramework $unpackTarget',
+            ],
+            unexpectedLines: <String>[],
+          );
+
+          await SwiftPackageManagerUtils.buildApp(
+            flutterBin,
+            appDirectoryPath,
+            options: <String>[
+              platformName,
+              '--debug',
+              '-v',
+              if (noCodesign)
+                '--no-codesign',
+            ],
+            expectedLines: <Pattern>[
+              r'SchemeAction Run\ Prepare\ Flutter\ Framework\ Script',
+              'Skipping target: $unpackTarget',
+              'Skipping target: $bundleFlutterAssetsTarget',
+            ],
+            unexpectedLines: <String>[
+              'Starting due to',
+            ],
+          );
+
+        } finally {
+          await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+          ErrorHandlingFileSystem.deleteIfExists(
+            workingDirectory,
+            recursive: true,
+          );
+        }
+    }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
   }
 
   test('Build ios-framework with module app uses CocoaPods', () async {
@@ -398,6 +467,138 @@ void main() {
             .existsSync(),
         isTrue,
       );
+    } finally {
+      await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+      ErrorHandlingFileSystem.deleteIfExists(
+        workingDirectory,
+        recursive: true,
+      );
+    }
+  }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+
+  test("Generated Swift package uses iOS's project minimum deployment", () async {
+    final Directory workingDirectory = fileSystem.systemTempDirectory
+      .createTempSync('swift_package_manager_minimum_deployment_ios.');
+    final String workingDirectoryPath = workingDirectory.path;
+    try {
+      await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
+      final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
+        flutterBin,
+        workingDirectoryPath,
+        iosLanguage: 'swift',
+        platform: 'ios',
+        usesSwiftPackageManager: true,
+        options: <String>['--platforms=ios'],
+      );
+
+      // Modify the project to raise the deployment version.
+      final File projectFile = fileSystem
+        .directory(appDirectoryPath)
+        .childDirectory('ios')
+        .childDirectory('Runner.xcodeproj')
+        .childFile('project.pbxproj');
+
+      final String oldProject = projectFile.readAsStringSync();
+      final String newProject = oldProject.replaceAll(
+        RegExp(r'IPHONEOS_DEPLOYMENT_TARGET = \d+\.\d+;'),
+        'IPHONEOS_DEPLOYMENT_TARGET = 15.1;',
+      );
+
+      projectFile.writeAsStringSync(newProject);
+
+      // Build the app. This generates Flutter's Swift package.
+      await SwiftPackageManagerUtils.buildApp(
+        flutterBin,
+        appDirectoryPath,
+        options: <String>['ios', '--debug', '-v'],
+      );
+
+      // Verify the generated Swift package uses the project's minimum deployment.
+      final File generatedManifestFile = fileSystem
+        .directory(appDirectoryPath)
+        .childDirectory('ios')
+        .childDirectory('Flutter')
+        .childDirectory('ephemeral')
+        .childDirectory('Packages')
+        .childDirectory('FlutterGeneratedPluginSwiftPackage')
+        .childFile('Package.swift');
+
+      expect(generatedManifestFile.existsSync(), isTrue);
+
+      final String generatedManifest = generatedManifestFile.readAsStringSync();
+      const String expected = '''
+    platforms: [
+        .iOS("15.1")
+    ],
+''';
+
+      expect(generatedManifest.contains(expected), isTrue);
+    } finally {
+      await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+      ErrorHandlingFileSystem.deleteIfExists(
+        workingDirectory,
+        recursive: true,
+      );
+    }
+  }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+
+  test("Generated Swift package uses macOS's project minimum deployment", () async {
+    final Directory workingDirectory = fileSystem.systemTempDirectory
+      .createTempSync('swift_package_manager_minimum_deployment_macos.');
+    final String workingDirectoryPath = workingDirectory.path;
+    try {
+      await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
+      final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
+        flutterBin,
+        workingDirectoryPath,
+        iosLanguage: 'swift',
+        platform: 'macos',
+        usesSwiftPackageManager: true,
+        options: <String>['--platforms=macos'],
+      );
+
+      // Modify the project to raise the deployment version.
+      final File projectFile = fileSystem
+        .directory(appDirectoryPath)
+        .childDirectory('macos')
+        .childDirectory('Runner.xcodeproj')
+        .childFile('project.pbxproj');
+
+      final String oldProject = projectFile.readAsStringSync();
+      final String newProject = oldProject.replaceAll(
+        RegExp(r'MACOSX_DEPLOYMENT_TARGET = \d+\.\d+;'),
+        'MACOSX_DEPLOYMENT_TARGET = 15.1;',
+      );
+
+      projectFile.writeAsStringSync(newProject);
+
+      // Build the app. This generates Flutter's Swift package.
+      await SwiftPackageManagerUtils.buildApp(
+        flutterBin,
+        appDirectoryPath,
+        options: <String>['macos', '--debug', '-v'],
+      );
+
+      // Verify the generated Swift package uses the project's minimum deployment.
+      final File generatedManifestFile = fileSystem
+        .directory(appDirectoryPath)
+        .childDirectory('macos')
+        .childDirectory('Flutter')
+        .childDirectory('ephemeral')
+        .childDirectory('Packages')
+        .childDirectory('FlutterGeneratedPluginSwiftPackage')
+        .childFile('Package.swift');
+
+      expect(generatedManifestFile.existsSync(), isTrue);
+
+      final String generatedManifest = generatedManifestFile.readAsStringSync();
+      const String expected = '''
+    platforms: [
+        .macOS("15.1")
+    ],
+''';
+
+      expect(generatedManifest.contains(expected), isTrue);
     } finally {
       await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
       ErrorHandlingFileSystem.deleteIfExists(

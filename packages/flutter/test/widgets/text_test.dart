@@ -1737,6 +1737,42 @@ void main() {
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
+
+  testWidgets('can set heading level', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    for (int level = 1; level <= 6; level++) {
+      await tester.pumpWidget(
+        Semantics(
+          headingLevel: 1,
+          child: Text(
+            'Heading level $level',
+            textDirection: TextDirection.ltr,
+          ),
+        )
+      );
+      final TestSemantics expectedSemantics = TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            label: 'Heading level $level',
+            headingLevel: 1,
+            textDirection: TextDirection.ltr,
+          ),
+        ],
+      );
+      expect(
+        semantics,
+        hasSemantics(
+          expectedSemantics,
+          ignoreTransform: true,
+          ignoreId: true,
+          ignoreRect: true,
+        ),
+      );
+    }
+
+    semantics.dispose();
+  });
 }
 
 Future<void> _pumpTextWidget({

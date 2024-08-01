@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'card_theme.dart';
+/// @docImport 'data_table_theme.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -21,7 +26,9 @@ import 'material_state.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
 
-/// A Material Design data table that shows data using multiple pages.
+/// A table that follows the
+/// [Material 2](https://material.io/go/design-data-tables)
+/// design specification, using multiple pages to display data.
 ///
 /// A paginated data table shows [rowsPerPage] rows of data per page and
 /// provides controls for showing other pages.
@@ -52,7 +59,10 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [DataTable], which is not paginated.
-///  * <https://material.io/go/design-data-tables#data-tables-tables-within-cards>
+///  * `TableView` from the
+///    [two_dimensional_scrollables](https://pub.dev/packages/two_dimensional_scrollables)
+///    package, for displaying large amounts of data without pagination.
+///  * <https://material.io/go/design-data-tables>
 class PaginatedDataTable extends StatefulWidget {
   /// Creates a widget describing a paginated [DataTable] on a [Card].
   ///

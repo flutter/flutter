@@ -5,7 +5,7 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 //
-// Visit https://flutter.dev/docs/cookbook/testing/widget/introduction for
+// Visit https://flutter.dev/to/widget-testing for
 // more information about Widget testing.
 
 import 'package:flutter/material.dart';

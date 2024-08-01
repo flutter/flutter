@@ -36,14 +36,15 @@ void main() {
 
     test('provide correct flags for custom dart define', () {
       expect(
-        FuchsiaKernelCompiler.getBuildInfoFlags(
-          buildInfo: const BuildInfo(
-            BuildMode.debug,
-            null,
-            treeShakeIcons: true,
-            dartDefines: <String>['abc=efg'],
-          ),
-          manifestPath: ''),
+          FuchsiaKernelCompiler.getBuildInfoFlags(
+              buildInfo: const BuildInfo(
+                BuildMode.debug,
+                null,
+                treeShakeIcons: true,
+                dartDefines: <String>['abc=efg'],
+                packageConfigPath: '.dart_tool/package_config.json',
+              ),
+              manifestPath: ''),
           allOf(<Matcher>[
             contains('-Dabc=efg'),
           ]));

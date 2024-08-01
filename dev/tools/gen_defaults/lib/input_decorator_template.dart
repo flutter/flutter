@@ -34,9 +34,9 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
   @override
   TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return TextStyle(color: Theme.of(context).disabledColor);
+      return TextStyle(color: ${componentColor('md.comp.filled-text-field.disabled.supporting-text')});
     }
-    return TextStyle(color: Theme.of(context).hintColor);
+    return TextStyle(color: ${componentColor('md.comp.filled-text-field.supporting-text')});
   });
 
   @override
@@ -124,10 +124,10 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
     if (states.contains(MaterialState.disabled)) {
       return ${componentColor('md.comp.filled-text-field.disabled.trailing-icon')};
     }
-    if (states.contains(MaterialState.error)) {${componentColor('md.comp.filled-text-field.error.trailing-icon') == componentColor('md.comp.filled-text-field.error.focus.trailing-icon') ? '' : '''
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.hovered)) {
         return ${componentColor('md.comp.filled-text-field.error.hover.trailing-icon')};
-      }
+      }${componentColor('md.comp.filled-text-field.error.trailing-icon') == componentColor('md.comp.filled-text-field.error.focus.trailing-icon') ? '' : '''
       if (states.contains(MaterialState.focused)) {
         return ${componentColor('md.comp.filled-text-field.error.focus.trailing-icon')};
       }'''}

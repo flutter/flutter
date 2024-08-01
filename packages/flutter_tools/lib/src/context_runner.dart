@@ -102,7 +102,6 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         fileSystem: globals.fs,
         artifacts: globals.artifacts!,
-        usage: globals.flutterUsage,
         analytics: globals.analytics,
         gradleUtils: globals.gradleUtils!,
         platform: globals.platform,

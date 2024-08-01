@@ -167,7 +167,7 @@ void main() {
 
     expect(value, equals(0.20));
     expect(log.length, 1);
-    expect(log[0], const Offset(212.0, 300.0));
+    expect(log[0], const Offset(213.0, 300.0));
   });
 
   testWidgets('Slider can move when tapped (LTR)', (WidgetTester tester) async {
@@ -417,8 +417,8 @@ void main() {
     );
 
     final List<Offset> expectedLog = <Offset>[
-      const Offset(24.0, 300.0),
-      const Offset(24.0, 300.0),
+      const Offset(26.0, 300.0),
+      const Offset(26.0, 300.0),
       const Offset(400.0, 300.0),
     ];
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
@@ -439,13 +439,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 7);
-    expect(log.last.dx, moreOrLessEquals(344.5, epsilon: 0.1));
+    expect(log.last.dx, moreOrLessEquals(344.8, epsilon: 0.1));
     // Final position.
     await tester.pump(const Duration(milliseconds: 80));
-    expectedLog.add(const Offset(24.0, 300.0));
+    expectedLog.add(const Offset(26.0, 300.0));
     expect(value, equals(0.0));
     expect(log.length, 8);
-    expect(log.last.dx, moreOrLessEquals(24.0, epsilon: 0.1));
+    expect(log.last.dx, moreOrLessEquals(26.0, epsilon: 0.1));
     await gesture.up();
   });
 
@@ -490,7 +490,7 @@ void main() {
     expect(updates, equals(1));
   });
 
-  testWidgets('discrete Slider repaints when dragged', (WidgetTester tester) async {
+  testWidgets('Discrete Slider repaints when dragged', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     final List<Offset> log = <Offset>[];
@@ -526,8 +526,8 @@ void main() {
     );
 
     final List<Offset> expectedLog = <Offset>[
-      const Offset(24.0, 300.0),
-      const Offset(24.0, 300.0),
+      const Offset(26.0, 300.0),
+      const Offset(26.0, 300.0),
       const Offset(400.0, 300.0),
     ];
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
@@ -548,13 +548,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 7);
-    expect(log.last.dx, moreOrLessEquals(344.5, epsilon: 0.1));
+    expect(log.last.dx, moreOrLessEquals(344.8, epsilon: 0.1));
     // Final position.
     await tester.pump(const Duration(milliseconds: 80));
-    expectedLog.add(const Offset(24.0, 300.0));
+    expectedLog.add(const Offset(26.0, 300.0));
     expect(value, equals(0.0));
     expect(log.length, 8);
-    expect(log.last.dx, moreOrLessEquals(24.0, epsilon: 0.1));
+    expect(log.last.dx, moreOrLessEquals(26.0, epsilon: 0.1));
     await gesture.up();
   });
 
@@ -1175,7 +1175,7 @@ void main() {
           ..circle(x: 400.0, y: 24.0, radius: 1.0)
           ..circle(x: 587.0, y: 24.0, radius: 1.0)
           ..circle(x: 774.0, y: 24.0, radius: 1.0)
-          ..circle(x: 24.0, y: 24.0, radius: 10.0),
+          ..circle(x: 26.0, y: 24.0, radius: 10.0),
       );
 
       gesture = await tester.startGesture(center);
@@ -1186,13 +1186,13 @@ void main() {
       expect(
         material,
         paints
-          ..circle(x: 111.20703125, y: 24.0, radius: 5.687664985656738)
+          ..circle(x: 112.7431640625, y: 24.0, radius: 5.687664985656738)
           ..circle(x: 26.0, y: 24.0, radius: 1.0)
           ..circle(x: 213.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 1.0)
           ..circle(x: 587.0, y: 24.0, radius: 1.0)
           ..circle(x: 774.0, y: 24.0, radius: 1.0)
-          ..circle(x: 111.20703125, y: 24.0, radius: 10.0),
+          ..circle(x: 112.7431640625, y: 24.0, radius: 10.0),
       );
 
       // Reparenting in the middle of an animation should do nothing.
@@ -1206,13 +1206,13 @@ void main() {
       expect(
         material,
         paints
-          ..circle(x: 190.0135726928711, y: 24.0, radius: 12.0)
+          ..circle(x: 191.130521774292, y: 24.0, radius: 12.0)
           ..circle(x: 26.0, y: 24.0, radius: 1.0)
           ..circle(x: 213.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 1.0)
           ..circle(x: 587.0, y: 24.0, radius: 1.0)
           ..circle(x: 774.0, y: 24.0, radius: 1.0)
-          ..circle(x: 190.0135726928711, y: 24.0, radius: 10.0),
+          ..circle(x: 191.130521774292, y: 24.0, radius: 10.0),
       );
       // Wait for animations to finish.
       await tester.pumpAndSettle();
@@ -1292,6 +1292,7 @@ void main() {
                             SemanticsFlag.isSlider,
                           ],
                           actions: <SemanticsAction>[
+                            SemanticsAction.focus,
                             SemanticsAction.increase,
                             SemanticsAction.decrease,
                           ],
@@ -1350,6 +1351,7 @@ void main() {
                             SemanticsFlag.isFocusable,
                             SemanticsFlag.isSlider,
                           ],
+                          actions: <SemanticsAction>[SemanticsAction.focus],
                           value: '50%',
                           increasedValue: '55%',
                           decreasedValue: '45%',
@@ -1452,7 +1454,10 @@ void main() {
                         TestSemantics(
                           id: 4,
                           flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                          actions: <SemanticsAction>[
+                            if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
+                            SemanticsAction.increase, SemanticsAction.decrease,
+                          ],
                           value: '50%',
                           increasedValue: '60%',
                           decreasedValue: '40%',
@@ -1565,6 +1570,7 @@ void main() {
                             SemanticsFlag.isSlider,
                           ],
                           actions: <SemanticsAction>[
+                            SemanticsAction.focus,
                             SemanticsAction.increase,
                             SemanticsAction.decrease,
                             SemanticsAction.didGainAccessibilityFocus,
@@ -1625,6 +1631,7 @@ void main() {
                             SemanticsFlag.isSlider,
                           ],
                           actions: <SemanticsAction>[
+                            SemanticsAction.focus,
                             SemanticsAction.didGainAccessibilityFocus,
                           ],
                           value: '50%',
@@ -1729,7 +1736,7 @@ void main() {
                         TestSemantics(
                           id: 4,
                           flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                          actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.increase, SemanticsAction.decrease],
                           value: '40',
                           increasedValue: '60',
                           decreasedValue: '20',
@@ -1789,7 +1796,7 @@ void main() {
                         TestSemantics(
                           id: 4,
                           flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                          actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.increase, SemanticsAction.decrease],
                           value: '40',
                           increasedValue: '60',
                           decreasedValue: '20',
@@ -2633,6 +2640,7 @@ void main() {
                           SemanticsFlag.isSlider,
                         ],
                         actions: <SemanticsAction>[
+                          SemanticsAction.focus,
                           SemanticsAction.increase,
                           SemanticsAction.decrease,
                           SemanticsAction.didGainAccessibilityFocus,
@@ -3241,11 +3249,11 @@ void main() {
     expect(
       renderObject,
       paints
-        // active track RRect
-        ..rrect(rrect: RRect.fromLTRBAndCorners(-14.0, 2.0, 5.0, 8.0, topLeft: const Radius.circular(3.0), bottomLeft: const Radius.circular(3.0)))
-        // inactive track RRect
-        ..rrect(rrect: RRect.fromLTRBAndCorners(5.0, 3.0, 24.0, 7.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
-        // thumb
+        // Inactive track RRect.
+        ..rrect(rrect: RRect.fromLTRBR(3.0, 3.0, 24.0, 7.0, const Radius.circular(2.0)))
+        // Active track RRect.
+        ..rrect(rrect: RRect.fromLTRBR(-14.0, 2.0, 7.0, 8.0, const Radius.circular(3.0)))
+        // Thumb.
         ..circle(x: 5.0, y: 5.0, radius: 10.0, ),
     );
   });
@@ -3277,7 +3285,7 @@ void main() {
     await tester.pumpAndSettle(); // Finish the animation.
 
     late RRect activeTrackRRect;
-    expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
+    expect(renderObject, paints..rrect()..something((Symbol method, List<dynamic> arguments) {
       if (method != #drawRRect) {
         return false;
       }
@@ -3285,10 +3293,18 @@ void main() {
       return true;
     }));
 
+    const double padding = 4.0;
     // The thumb should at one-third(5 / 15) of the Slider.
     // The right of the active track shape is the position of the thumb.
     // 24.0 is the default margin, (800.0 - 24.0 - 24.0) is the slider's width.
-    expect(nearEqual(activeTrackRRect.right, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
+    expect(
+      nearEqual(
+        activeTrackRRect.right,
+        (800.0 - 24.0 - 24.0  + (padding / 2)) * (5 / 15) + 24.0 + padding / 2,
+        0.01,
+      ),
+      true,
+    );
   });
 
   testWidgets('Slider paints thumbColor', (WidgetTester tester) async {

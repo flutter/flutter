@@ -24,14 +24,11 @@ apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 
 android {
-    // Conditional for compatibility with AGP <4.2.
-    if (project.android.hasProperty("namespace")) {
-        namespace = "{{androidIdentifier}}"
-    }
-
+    namespace = "{{androidIdentifier}}"
     compileSdk = {{compileSdkVersion}}
     defaultConfig {
         minSdk = {{minSdkVersion}}
+        targetSdk = {{targetSdkVersion}}
     }
 }
 

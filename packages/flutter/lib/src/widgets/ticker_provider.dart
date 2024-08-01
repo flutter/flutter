@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/animation.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -236,11 +239,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
     _updateTicker();
   }
 
-  void _updateTicker() {
-    if (_ticker != null) {
-      _ticker!.muted = !_tickerModeNotifier!.value;
-    }
-  }
+  void _updateTicker() => _ticker?.muted = !_tickerModeNotifier!.value;
 
   void _updateTickerModeNotifier() {
     final ValueListenable<bool> newNotifier = TickerMode.getNotifier(context);

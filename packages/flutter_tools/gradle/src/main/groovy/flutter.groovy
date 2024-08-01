@@ -206,7 +206,7 @@ class FlutterPlugin implements Plugin<Project> {
     /**
      * Flutter Docs Website URLs for help messages.
      */
-    private final String kWebsiteDeploymentAndroidBuildConfig = "https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration"
+    private final String kWebsiteDeploymentAndroidBuildConfig = "https://flutter.dev/to/review-gradle-config"
 
     @Override
     void apply(Project project) {
@@ -340,26 +340,17 @@ class FlutterPlugin implements Plugin<Project> {
                         "dependency_version_checker.gradle.kts")
                 project.apply from: dependencyCheckerPluginPath
             } catch (Exception e) {
-                // If the exception was thrown by us in the dependency version checker plugin then
-                // re-throw it.
-                Exception outer = e.getCause()
-                if (outer != null) {
-                    Exception inner = outer.getCause()
-                    if (inner != null) {
-                        Exception unwrapped = inner.getCause()
-                        if (unwrapped != null) {
-                            if (unwrapped instanceof DependencyValidationException) {
-                                throw e
-                            }
-                        }
-                    }
+                if (!project.usesUnsupportedDependencyVersions) {
+                    // Possible bug in dependency checking code - warn and do not block build.
+                    project.logger.error("Warning: Flutter was unable to detect project Gradle, Java, " +
+                            "AGP, and KGP versions. Skipping dependency version checking. Error was: "
+                            + e)
                 }
-
-                // Otherwise, dependency version checking has failed. Log and continue
-                // the build.
-                project.logger.error("Warning: Flutter was unable to detect project Gradle, Java, " +
-                        "AGP, and KGP versions. Skipping dependency version checking. Error was: "
-                        + e)
+                else {
+                    // If usesUnsupportedDependencyVersions is set, the exception was thrown by us
+                    // in the dependency version checker plugin so re-throw it here.
+                    throw e
+                }
             }
         }
 
@@ -1380,6 +1371,11 @@ class FlutterPlugin implements Plugin<Project> {
                 bundleAarTask.dependsOn(copyFlutterAssetsTask)
             }
 
+            def bundleAarTaskWithLint = project.tasks.findByName("bundle${variant.name.capitalize()}LocalLintAar")
+            if (bundleAarTaskWithLint) {
+                bundleAarTaskWithLint.dependsOn(copyFlutterAssetsTask)
+            }
+
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
 
@@ -1829,16 +1825,4 @@ class FlutterTask extends BaseFlutterTask {
         buildBundle()
     }
 
-}
-
-// Custom error for when the dependency_version_checker.kts script finds a dependency out of
-// the defined support range.
-class DependencyValidationException extends Exception {
-    public DependencyValidationException(String errorMessage) {
-        super(errorMessage);
-    }
-
-    public DependencyValidationException(String errorMessage, Throwable cause) {
-        super(errorMessage, cause);
-    }
 }

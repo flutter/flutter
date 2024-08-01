@@ -235,6 +235,19 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
 
+  bool get useLocalCanvasKit {
+    // If we have specified not to use CDN, use local CanvasKit
+    if (!boolArg(FlutterOptions.kWebResourcesCdnFlag)) {
+      return true;
+    }
+
+    // If we are using a locally built web sdk, we should use local CanvasKit
+    if (stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null) {
+      return true;
+    }
+    return false;
+  }
+
   WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
     stringArg(FlutterOptions.kWebRendererFlag),
     useWasm: useWasm
@@ -274,6 +287,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webHeaders: webHeaders,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
+        webUseLocalCanvaskit: useLocalCanvasKit,
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
         uninstallFirst: uninstallFirst,
@@ -325,6 +339,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webHeaders: webHeaders,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
+        webUseLocalCanvaskit: useLocalCanvasKit,
         vmserviceOutFile: stringArg('vmservice-out-file'),
         fastStart: argParser.options.containsKey('fast-start')
           && boolArg('fast-start')
@@ -339,6 +354,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableEmbedderApi: enableEmbedderApi,
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
+        enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
+        ipv6: boolArg(FlutterCommand.ipv6Flag),
+        printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
       );
     }
   }
@@ -578,7 +596,7 @@ class RunCommand extends RunCommandBase {
       runTargetName: deviceType,
       runTargetOsVersion: deviceOsVersion,
       runModeName: modeName,
-      runProjectModule: FlutterProject.current().isModule,
+      runProjectModule: project.isModule,
       runProjectHostLanguage: hostLanguage.join(','),
       runAndroidEmbeddingVersion: androidEmbeddingVersion,
       runEnableImpeller: enableImpeller.asBool,
@@ -687,7 +705,6 @@ class RunCommand extends RunCommandBase {
         projectRootPath: stringArg('project-root'),
         dillOutputPath: stringArg('output-dill'),
         stayResident: stayResident,
-        ipv6: ipv6 ?? false,
         analytics: globals.analytics,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
         nativeAssetsBuilder: _nativeAssetsBuilder,
@@ -697,7 +714,6 @@ class RunCommand extends RunCommandBase {
         flutterDevices.single,
         target: targetFile,
         flutterProject: flutterProject,
-        ipv6: ipv6,
         debuggingOptions: await createDebuggingOptions(webMode),
         stayResident: stayResident,
         fileSystem: globals.fs,
@@ -716,7 +732,6 @@ class RunCommand extends RunCommandBase {
       applicationBinary: applicationBinaryPath == null
           ? null
           : globals.fs.file(applicationBinaryPath),
-      ipv6: ipv6 ?? false,
       stayResident: stayResident,
     );
   }
@@ -738,9 +753,9 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final BuildInfo buildInfo = await getBuildInfo();
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
-    final BuildInfo buildInfo = await getBuildInfo();
     final bool hotMode = shouldUseHotMode(buildInfo);
     final String? applicationBinaryPath = stringArg(FlutterOptions.kUseApplicationBinary);
 
@@ -761,9 +776,7 @@ class RunCommand extends RunCommandBase {
           projectRootPath: stringArg('project-root'),
           packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
           dillOutputPath: stringArg('output-dill'),
-          ipv6: ipv6 ?? false,
           userIdentifier: userIdentifier,
-          enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
           nativeAssetsBuilder: _nativeAssetsBuilder,
         );
       } on Exception catch (error) {
@@ -802,7 +815,6 @@ class RunCommand extends RunCommandBase {
         stringsArg(FlutterOptions.kEnableExperiment).isNotEmpty) {
       expFlags = stringsArg(FlutterOptions.kEnableExperiment);
     }
-    final FlutterProject flutterProject = FlutterProject.current();
     final List<FlutterDevice> flutterDevices = <FlutterDevice>[
       for (final Device device in devices!)
         await FlutterDevice.create(
@@ -818,7 +830,7 @@ class RunCommand extends RunCommandBase {
     final ResidentRunner runner = await createRunner(
       applicationBinaryPath: applicationBinaryPath,
       flutterDevices: flutterDevices,
-      flutterProject: flutterProject,
+      flutterProject: project,
       hotMode: hotMode,
     );
 
@@ -852,7 +864,6 @@ class RunCommand extends RunCommandBase {
     try {
       final int? result = await runner.run(
         appStartedCompleter: appStartedTimeRecorder,
-        enableDevTools: stayResident && boolArg(FlutterCommand.kEnableDevTools),
         route: route,
       );
       handler?.stop();
