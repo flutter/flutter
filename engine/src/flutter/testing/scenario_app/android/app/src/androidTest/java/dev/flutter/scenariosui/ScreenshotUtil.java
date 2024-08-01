@@ -9,6 +9,7 @@ import dev.flutter.scenarios.TestableFlutterActivity;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
@@ -20,7 +21,6 @@ import java.util.concurrent.Executors;
  * further proccessed. On a LUCI environment, the screenshots are sent to Skia Gold.
  */
 public class ScreenshotUtil {
-  private static final String HOST = "localhost";
   private static final int PORT = 3000;
 
   private static Connection conn;
@@ -67,7 +67,7 @@ public class ScreenshotUtil {
       executor.execute(
           () -> {
             try {
-              final Socket socket = new Socket(HOST, PORT);
+              final Socket socket = new Socket(InetAddress.getLoopbackAddress(), PORT);
               conn = new Connection(socket);
             } catch (IOException e) {
               throw new RuntimeException(e);
