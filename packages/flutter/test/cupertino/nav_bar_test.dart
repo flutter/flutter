@@ -501,8 +501,8 @@ void main() {
         });
 
     Iterable<double> opacities = titles.map<double>((Element element) {
-      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
-      return renderOpacity.opacity.value;
+      final RenderOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderOpacity>()!;
+      return renderOpacity.opacity;
     });
 
     expect(opacities, <double> [
@@ -526,8 +526,8 @@ void main() {
         });
 
     opacities = titles.map<double>((Element element) {
-      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
-      return renderOpacity.opacity.value;
+      final RenderOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderOpacity>()!;
+      return renderOpacity.opacity;
     });
 
     expect(opacities, <double> [
@@ -597,7 +597,7 @@ void main() {
     expect(tester.getCenter(find.byKey(segmentedControlsKey)).dx, 400.0);
     // The large title is invisible now.
     expect(
-      tester.renderObject<RenderAnimatedOpacity>(find.widgetWithText(AnimatedOpacity, 'Title')).opacity.value,
+      tester.renderObject<RenderOpacity>(find.widgetWithText(AnimatedOpacity, 'Title')).opacity,
       0.0,
     );
   });
@@ -631,22 +631,22 @@ void main() {
     expect(find.text('Middle'), findsOneWidget);
 
     // Initially (in expanded state) middle widget is not visible.
-    RenderAnimatedOpacity middleOpacity = tester.element(find.text('Middle')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
-    expect(middleOpacity.opacity.value, 0.0);
+    RenderOpacity middleOpacity = tester.element(find.text('Middle')).findAncestorRenderObjectOfType<RenderOpacity>()!;
+    expect(middleOpacity.opacity, 0.0);
 
     scrollController.jumpTo(600.0);
     await tester.pumpAndSettle();
 
     // Middle widget is visible when nav bar is collapsed.
-    middleOpacity = tester.element(find.text('Middle')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
-    expect(middleOpacity.opacity.value, 1.0);
+    middleOpacity = tester.element(find.text('Middle')).findAncestorRenderObjectOfType<RenderOpacity>()!;
+    expect(middleOpacity.opacity, 1.0);
 
     scrollController.jumpTo(0.0);
     await tester.pumpAndSettle();
 
     // Middle widget is not visible when nav bar is again expanded.
-    middleOpacity = tester.element(find.text('Middle')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
-    expect(middleOpacity.opacity.value, 0.0);
+    middleOpacity = tester.element(find.text('Middle')).findAncestorRenderObjectOfType<RenderOpacity>()!;
+    expect(middleOpacity.opacity, 0.0);
   });
 
   testWidgets('Small title can be overridden', (WidgetTester tester) async {
@@ -680,11 +680,11 @@ void main() {
     expect(find.text('Title'), findsOneWidget);
     expect(find.text('Different title'), findsOneWidget);
 
-    RenderAnimatedOpacity largeTitleOpacity =
-        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+    RenderOpacity largeTitleOpacity = tester.element(find.text('Title'))
+        .findAncestorRenderObjectOfType<RenderOpacity>()!;
     // Large title initially visible.
     expect(
-      largeTitleOpacity.opacity.value,
+      largeTitleOpacity.opacity,
       1.0,
     );
     // Middle widget not even wrapped with RenderOpacity, i.e. is always visible.
@@ -699,11 +699,10 @@ void main() {
     await tester.pump(); // Once to trigger the opacity animation.
     await tester.pump(const Duration(milliseconds: 300));
 
-    largeTitleOpacity =
-        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+    largeTitleOpacity = tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderOpacity>()!;
     // Large title no longer visible.
     expect(
-      largeTitleOpacity.opacity.value,
+      largeTitleOpacity.opacity,
       0.0,
     );
 

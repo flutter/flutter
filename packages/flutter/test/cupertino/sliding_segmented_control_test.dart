@@ -420,9 +420,9 @@ void main() {
     );
 
     double getChildOpacityByName(String childName) {
-      return tester.renderObject<RenderAnimatedOpacity>(
+      return tester.renderObject<RenderOpacity>(
         find.ancestor(matching: find.byType(AnimatedOpacity), of: find.text(childName)),
-      ).opacity.value;
+      ).opacity;
     }
 
     // Opacity 1 with no interaction.
@@ -461,9 +461,9 @@ void main() {
 
   testWidgets('Long press does not change the opacity of currently-selected child', (WidgetTester tester) async {
     double getChildOpacityByName(String childName) {
-      return tester.renderObject<RenderAnimatedOpacity>(
+      return tester.renderObject<RenderOpacity>(
         find.ancestor(matching: find.byType(AnimatedOpacity), of: find.text(childName)),
-      ).opacity.value;
+      ).opacity;
     }
 
     await tester.pumpWidget(setupSimpleSegmentedControl());

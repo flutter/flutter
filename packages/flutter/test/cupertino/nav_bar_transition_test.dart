@@ -691,10 +691,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Middle widget is visible when nav bar is collapsed.
-    final RenderAnimatedOpacity userMiddleOpacity = tester
+    final RenderOpacity userMiddleOpacity = tester
         .element(find.byWidget(userMiddle))
-        .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
-    expect(userMiddleOpacity.opacity.value, 1.0);
+        .findAncestorRenderObjectOfType<RenderOpacity>()!;
+    expect(userMiddleOpacity.opacity, 1.0);
 
     tester
         .state<NavigatorState>(find.byType(Navigator))
