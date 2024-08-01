@@ -707,8 +707,19 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  // This option is no longer publicly supported, and therefore is always
+  // hidden.
+  //
+  // The option still exists for internal testing, and to give existing users
+  // time to migrate off the HTML renderer, but it is no longer advertised as a
+  // supported mode.
+  //
+  // See also:
+  //   * https://github.com/flutter/flutter/issues/151786
+  //   * https://github.com/flutter/flutter/issues/145954
   void usesWebRendererOption() {
     argParser.addOption(
+      hide: true,
       FlutterOptions.kWebRendererFlag,
       allowed: WebRendererMode.values.map((WebRendererMode e) => e.name),
       help: 'The renderer implementation to use when building for the web.',
