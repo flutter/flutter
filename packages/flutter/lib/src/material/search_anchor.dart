@@ -184,6 +184,7 @@ class SearchAnchor extends StatefulWidget {
     required SuggestionsBuilder suggestionsBuilder,
     TextInputAction? textInputAction,
     TextInputType? keyboardType,
+    EdgeInsets scrollPadding,
   }) = _SearchAnchorWithSearchBar;
 
   /// Whether the search view grows to fill the entire screen when the
@@ -1033,6 +1034,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     required super.suggestionsBuilder,
     super.textInputAction,
     super.keyboardType,
+    EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
   }) : super(
     viewHintText: viewHintText ?? barHintText,
     headerHeight: viewHeaderHeight,
@@ -1066,6 +1068,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
         textCapitalization: textCapitalization,
         textInputAction: textInputAction,
         keyboardType: keyboardType,
+        scrollPadding: scrollPadding,
       );
     }
   );
@@ -1186,6 +1189,7 @@ class SearchBar extends StatefulWidget {
     this.autoFocus = false,
     this.textInputAction,
     this.keyboardType,
+    this.scrollPadding = const EdgeInsets.all(20.0),
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1327,6 +1331,9 @@ class SearchBar extends StatefulWidget {
   /// Defaults to the default value specified in [TextField].
   final TextInputType? keyboardType;
 
+  /// {@macro flutter.widgets.editableText.scrollPadding}
+  final EdgeInsets scrollPadding;
+
   @override
   State<SearchBar> createState() => _SearchBarState();
 }
@@ -1467,6 +1474,7 @@ class _SearchBarState extends State<SearchBar> {
                           textCapitalization: effectiveTextCapitalization,
                           textInputAction: widget.textInputAction,
                           keyboardType: widget.keyboardType,
+                          scrollPadding: widget.scrollPadding,
                         ),
                       ),
                     ),

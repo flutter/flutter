@@ -3274,6 +3274,43 @@ void main() {
 
     expect(find.text('Item - 1'), findsOneWidget);
   });
+
+  testWidgets('SearchBar.scrollPadding is passed through to EditableText', (WidgetTester tester) async {
+    const EdgeInsets scrollPadding = EdgeInsets.zero;
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: SearchBar(
+            scrollPadding: scrollPadding,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(EditableText), findsOneWidget);
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.scrollPadding, scrollPadding);
+  });
+
+  testWidgets('SearchAnchor.bar.scrollPadding is passed through to EditableText', (WidgetTester tester) async {
+    const EdgeInsets scrollPadding = EdgeInsets.zero;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor.bar(
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+            scrollPadding: scrollPadding,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(EditableText), findsOneWidget);
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.scrollPadding, scrollPadding);
+  });
 }
 
 Future<void> checkSearchBarDefaults(WidgetTester tester, ColorScheme colorScheme, Material material) async {
