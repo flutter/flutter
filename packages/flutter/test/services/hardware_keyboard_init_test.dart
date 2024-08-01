@@ -28,7 +28,7 @@ void ensureBindingIsNotInitialized() {
 
 // Serialized ui.KeyEventType to its ID.
 int eventTypeToInt(ui.KeyEventType type) {
-  switch(type) {
+  switch (type) {
     case ui.KeyEventType.down:
       return 0;
     case ui.KeyEventType.up:
@@ -84,7 +84,7 @@ KeyData fakeKeyData(ui.KeyEventType type, int timestampInMicroseconds) {
   );
 }
 
-// Send the given key data to both key chanels.
+// Send the given key data to both key channels.
 void sendKeyData(KeyData key, {
   PlatformMessageResponseCallback? keyDataCallback,
   PlatformMessageResponseCallback? rawKeyEventCallback,
