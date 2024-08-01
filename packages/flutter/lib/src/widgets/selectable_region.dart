@@ -1827,8 +1827,8 @@ class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovemen
 /// [Selectable]s do not change or move around frequently.
 ///
 /// This delegate keeps track of the [Selectable]s that received start or end
-/// [SelectionEvent]s to accurately synthesize [SelectionEvent]s for the
-/// children [Selectable]s when needed.
+/// [SelectionEvent]s and the global locations of those events to accurately
+/// synthesize [SelectionEvent]s for children [Selectable]s when needed.
 ///
 /// When a new [SelectionEdgeUpdateEvent] is dispatched to a [Selectable], this
 /// delegate checks whether the [Selectable] has already received a selection
@@ -1836,11 +1836,10 @@ class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovemen
 /// edges that have not yet received an update. This synthesized event is dispatched
 /// before dispatching the new event.
 ///
-/// For example, if we have an existing start edge for this delegate and a
-/// [Selectable] receives an end [SelectionEdgeUpdateEvent] and it hasn't yet
-/// received a start [SelectionEdgeUpdateEvent], it synthesizes a start
-/// [SelectionEdgeUpdateEvent] and dispatches it before dispatching the original
-/// end [SelectionEdgeUpdateEvent].
+/// For example, if we have an existing start edge for this delegate and a [Selectable]
+/// child receives an end [SelectionEdgeUpdateEvent] and the child hasn't received a start
+/// [SelectionEdgeUpdateEvent], we synthesize a start [SelectionEdgeUpdateEvent] for the
+/// child [Selectable] and dispatch it before dispatching the original end [SelectionEdgeUpdateEvent].
 ///
 /// See also:
 ///
@@ -1864,19 +1863,24 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
   /// [SelectParagraphSelectionEvent], and [SelectAllSelectionEvent].
   ///
   /// Call this method after determining the new selection as a result of
-  /// a [SelectionEvent] that selects a boundary.
+  /// a [SelectionEvent] that selects a boundary. The [currentSelectionStartIndex]
+  /// and [currentSelectionEndIndex] should be set to valid values at the time
+  /// this method is called.
   @protected
   void updateInternalSelectionStateForBoundaryEvents() {
+    assert(
+      currentSelectionStartIndex != -1 && currentSelectionEndIndex != -1,
+      'This method should only be called after determining the selection as a result of a [SelectionEvent] that selects a boundary.',
+    );
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
       return;
     }
     final int start = min(currentSelectionStartIndex, currentSelectionEndIndex);
     final int end = max(currentSelectionStartIndex, currentSelectionEndIndex);
     for (int index = start; index <= end; index += 1) {
-      _hasReceivedStartEvent.add(selectables[index]);
-      _hasReceivedEndEvent.add(selectables[index]);
+      trackInternalSelectionStateForSelectable(selectable: selectables[index]);
     }
-    _updateLastEdgeEventsFromGeometries();
+    _updateLastSelectionEdgeLocationsFromGeometries();
   }
 
   /// Clears the internal selection state.
@@ -1897,12 +1901,12 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
 
   /// Tracks the internal selection state for a given [Selectable].
   ///
-  /// When `forEnd` is null, the [Selectable] will be registered as having received both
-  /// start and end events.
-  ///
   /// When `forEnd` is true, the [Selectable] will be registered as having received
   /// an end event. When false, the [Selectable] is registered as having received
   /// a start event.
+  ///
+  /// When `forEnd` is null, the [Selectable] will be registered as having received both
+  /// start and end events.
   @protected
   void trackInternalSelectionStateForSelectable({required Selectable selectable, bool? forEnd}) {
     if (forEnd == null) {
@@ -1919,6 +1923,7 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
 
   /// Updates the last selection edge location of the edge specified by `forEnd`
   /// to the provided `globalSelectionEdgeLocation`.
+  @protected
   void updateLastSelectionEdgeLocation({required Offset globalSelectionEdgeLocation, required bool forEnd}) {
     if (forEnd) {
       _lastEndEdgeUpdateGlobalPosition = globalSelectionEdgeLocation;
@@ -1927,20 +1932,26 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
     }
   }
 
-  /// Updates the last tracked global positions of both start and end selection
+  /// Updates the last selection edge locations of both start and end selection
   /// edges based on their [SelectionGeometry].
-  void _updateLastEdgeEventsFromGeometries() {
+  void _updateLastSelectionEdgeLocationsFromGeometries() {
     if (currentSelectionStartIndex != -1 && selectables[currentSelectionStartIndex].value.hasSelection) {
       final Selectable start = selectables[currentSelectionStartIndex];
       final Offset localStartEdge = start.value.startSelectionPoint!.localPosition +
           Offset(0, - start.value.startSelectionPoint!.lineHeight / 2);
-      _lastStartEdgeUpdateGlobalPosition = MatrixUtils.transformPoint(start.getTransformTo(null), localStartEdge);
+      updateLastSelectionEdgeLocation(
+        globalSelectionEdgeLocation: MatrixUtils.transformPoint(start.getTransformTo(null), localStartEdge),
+        forEnd: false,
+      );
     }
     if (currentSelectionEndIndex != -1 && selectables[currentSelectionEndIndex].value.hasSelection) {
       final Selectable end = selectables[currentSelectionEndIndex];
       final Offset localEndEdge = end.value.endSelectionPoint!.localPosition +
           Offset(0, -end.value.endSelectionPoint!.lineHeight / 2);
-      _lastEndEdgeUpdateGlobalPosition = MatrixUtils.transformPoint(end.getTransformTo(null), localEndEdge);
+      updateLastSelectionEdgeLocation(
+        globalSelectionEdgeLocation: MatrixUtils.transformPoint(end.getTransformTo(null), localEndEdge),
+        forEnd: true,
+      );
     }
   }
 
@@ -2016,7 +2027,7 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
     return super.dispatchSelectionEventToChild(selectable, event);
   }
 
-  /// Ensures the [Selectable] child has received up to date selection event.
+  /// Ensures the `selectable` child has received the most up to date selection events.
   ///
   /// This method is called when:
   ///   1. A new [Selectable] is added to the delegate, and its screen location
