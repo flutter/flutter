@@ -137,8 +137,8 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 - (BOOL)isFlutterDeepLinkingEnabled {
   NSNumber* isDeepLinkingEnabled =
       [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"];
-  // if not set, return NO
-  return isDeepLinkingEnabled ? [isDeepLinkingEnabled boolValue] : NO;
+  // if not set, return YES
+  return isDeepLinkingEnabled ? [isDeepLinkingEnabled boolValue] : YES;
 }
 
 // This method is called when opening an URL with custom schemes.

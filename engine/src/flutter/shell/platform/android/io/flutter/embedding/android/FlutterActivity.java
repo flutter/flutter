@@ -18,9 +18,9 @@ import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_DA
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_DESTROY_ENGINE_WITH_ACTIVITY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_ENABLE_STATE_RESTORATION;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE;
-import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.INITIAL_ROUTE_META_DATA_KEY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.NORMAL_THEME_META_DATA_KEY;
+import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.deepLinkEnabled;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -1404,9 +1404,7 @@ public class FlutterActivity extends Activity
   public boolean shouldHandleDeeplinking() {
     try {
       Bundle metaData = getMetaData();
-      boolean shouldHandleDeeplinking =
-          metaData != null ? metaData.getBoolean(HANDLE_DEEPLINKING_META_DATA_KEY) : false;
-      return shouldHandleDeeplinking;
+      return deepLinkEnabled(metaData);
     } catch (PackageManager.NameNotFoundException e) {
       return false;
     }
