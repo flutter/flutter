@@ -79,7 +79,6 @@ const TextStyle _kActionSheetContentStyle = TextStyle(
 );
 
 // Generic constants shared between Dialog and ActionSheet.
-// Blur kernel eyeballed from iOS simulator
 const double _kCornerRadius = 14.0;
 const double _kDividerThickness = 0.3;
 
@@ -546,7 +545,8 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// blur filter.
   final double blurSigma;
 
-  /// Whether or not a [ColorFilter] should be applied beneath this surface.
+  /// Whether or not the area beneath this surface should be saturated with a
+  /// [ColorFilter].
   ///
   /// The appearance of the [ColorFilter] is determined by the [Brightness]
   /// value obtained from the ambient [CupertinoTheme].
@@ -572,21 +572,23 @@ class CupertinoPopupSurface extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// Because [CupertinoPopupSurface] is composed of proxy boxes, which mimic
-  /// the size of their child, a [child] is required to ensure that this surface
-  /// has a size.
+  // Because [CupertinoPopupSurface] is composed of proxy boxes, which mimic
+  // the size of their child, a [child] is required to ensure that this surface
+  // has a size.
   final Widget child;
 
   /// The default strength of the blur applied to widgets underlying a
   /// [CupertinoPopupSurface].
+  ///
+  /// Eyeballed from the iOS 17 simulator.
   static const double defaultBlurSigma = 30.0;
 
   /// The default corner radius of a [CupertinoPopupSurface].
   static const BorderRadius _clipper = BorderRadius.all(Radius.circular(14));
 
-  // The ColorFilter matrix used to saturate widgets underlying a
-  // CupertinoPopupSurface when the ambient CupertinoThemeData.brightness is
-  // Brightness.light.
+  // The [ColorFilter] matrix used to saturate widgets underlying a
+  // [CupertinoPopupSurface] when the ambient [CupertinoThemeData.brightness] is
+  // [Brightness.light].
   //
   // To derive this matrix, the saturation matrix was taken from
   // https://docs.rainmeter.net/tips/colormatrix-guide/ and was tweaked to
@@ -615,9 +617,9 @@ class CupertinoPopupSurface extends StatelessWidget {
      0.00,  0.00,  0.00, 1.00, 0.00
   ];
 
-  // The ColorFilter matrix used to saturate widgets underlying a
-  // CupertinoPopupSurface when the ambient CupertinoThemeData.brightness is
-  // Brightness.dark.
+  // The [ColorFilter] matrix used to saturate widgets underlying a
+  // [CupertinoPopupSurface] when the ambient [CupertinoThemeData.brightness] is
+  // [Brightness.dark].
   //
   // To derive this matrix, the saturation matrix was taken from
   // https://docs.rainmeter.net/tips/colormatrix-guide/ and was tweaked to
@@ -648,7 +650,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   ];
 
   ImageFilter? _buildFilter(Brightness? brightness) {
-    if (kIsWeb || !isVibrancePainted) {
+    if (!isVibrancePainted) {
       if (blurSigma <= 0) {
         return null;
       }
