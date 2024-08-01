@@ -85,6 +85,7 @@ source_set("framework_common") {
     "framework/Source/FlutterBinaryMessengerRelay.mm",
     "framework/Source/FlutterChannels.mm",
     "framework/Source/FlutterCodecs.mm",
+    "framework/Source/FlutterHourFormat.mm",
     "framework/Source/FlutterNSBundleUtils.h",
     "framework/Source/FlutterNSBundleUtils.mm",
     "framework/Source/FlutterStandardCodec.mm",

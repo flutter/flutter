@@ -12,6 +12,7 @@
 #import "FlutterAppLifecycleDelegate.h"
 #import "FlutterBinaryMessenger.h"
 #import "FlutterDartProject.h"
+#import "FlutterHourFormat.h"
 #import "FlutterMacros.h"
 #import "FlutterPluginRegistrarMacOS.h"
 #import "FlutterTexture.h"

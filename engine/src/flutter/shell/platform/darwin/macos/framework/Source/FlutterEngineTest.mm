@@ -1268,6 +1268,44 @@ TEST_F(FlutterEngineTest, DisplaySizeIsInPhysicalPixel) {
   engine = nil;
 }
 
+TEST_F(FlutterEngineTest, ReportsHourFormat) {
+  __block BOOL expectedValue;
+
+  // Set up mocks.
+  id channelMock = OCMClassMock([FlutterBasicMessageChannel class]);
+  OCMStub([channelMock messageChannelWithName:@"flutter/settings"
+                              binaryMessenger:[OCMArg any]
+                                        codec:[OCMArg any]])
+      .andReturn(channelMock);
+  OCMStub([channelMock sendMessage:[OCMArg any]]).andDo((^(NSInvocation* invocation) {
+    __weak id message;
+    [invocation getArgument:&message atIndex:2];
+    EXPECT_EQ(message[@"alwaysUse24HourFormat"], @(expectedValue));
+  }));
+
+  id mockHourFormat = OCMClassMock([FlutterHourFormat class]);
+  OCMStub([mockHourFormat isAlwaysUse24HourFormat]).andDo((^(NSInvocation* invocation) {
+    [invocation setReturnValue:&expectedValue];
+  }));
+
+  id engineMock = CreateMockFlutterEngine(nil);
+
+  // Verify the YES case.
+  expectedValue = YES;
+  EXPECT_TRUE([engineMock runWithEntrypoint:@"main"]);
+  [engineMock shutDownEngine];
+
+  // Verify the NO case.
+  expectedValue = NO;
+  EXPECT_TRUE([engineMock runWithEntrypoint:@"main"]);
+  [engineMock shutDownEngine];
+
+  // Clean up mocks.
+  [mockHourFormat stopMocking];
+  [engineMock stopMocking];
+  [channelMock stopMocking];
+}
+
 }  // namespace flutter::testing
 
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)
