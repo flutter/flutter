@@ -4,12 +4,12 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/scroll_view/custom_scroll_view.1.dart';
+import 'package:flutter_api_samples/widgets/scroll_view/custom_scroll_view.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Widget tree is visible', (WidgetTester tester) async {
-    await tester.pumpWidget(const CustomScrollViewExampleApp());
+    await tester.pumpWidget(const example.CustomScrollViewExampleApp());
 
     // The crucial Widgets are:
     // - Scaffold
@@ -74,7 +74,7 @@ void main() {
   });
   testWidgets('IconButton click extends existing SliverList',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const CustomScrollViewExampleApp());
+    await tester.pumpWidget(const example.CustomScrollViewExampleApp());
 
     // Initially, there is only one SliverList in the CustomScrollView
     expect(
@@ -140,7 +140,7 @@ void main() {
   });
   testWidgets('IconButton click and mouse scroll reveals additional SliverList',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const CustomScrollViewExampleApp());
+    await tester.pumpWidget(const example.CustomScrollViewExampleApp());
 
     //CustomScrollView does not contain the element 'Item: -1'
     expect(
