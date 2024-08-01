@@ -10,6 +10,7 @@
 #include "flutter/lib/ui/window/pointer_data.h"
 #import "flutter/lib/ui/window/viewport_metrics.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterHourFormat.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
@@ -1333,6 +1334,35 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [partialMockVC stopMocking];
   [settingsChannel stopMocking];
   [mockTraitCollection stopMocking];
+}
+
+- (void)testItReportsAlwaysUsed24HourFormat {
+  // Setup test.
+  id settingsChannel = OCMStrictClassMock([FlutterBasicMessageChannel class]);
+  OCMStub([self.mockEngine settingsChannel]).andReturn(settingsChannel);
+  FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:self.mockEngine
+                                                                    nibName:nil
+                                                                     bundle:nil];
+  // Test the YES case.
+  id mockHourFormat = OCMClassMock([FlutterHourFormat class]);
+  OCMStub([mockHourFormat isAlwaysUse24HourFormat]).andReturn(YES);
+  OCMExpect([settingsChannel sendMessage:[OCMArg checkWithBlock:^BOOL(id message) {
+                               return [message[@"alwaysUse24HourFormat"] isEqual:@(YES)];
+                             }]]);
+  [vc onUserSettingsChanged:nil];
+  [mockHourFormat stopMocking];
+
+  // Test the NO case.
+  mockHourFormat = OCMClassMock([FlutterHourFormat class]);
+  OCMStub([mockHourFormat isAlwaysUse24HourFormat]).andReturn(NO);
+  OCMExpect([settingsChannel sendMessage:[OCMArg checkWithBlock:^BOOL(id message) {
+                               return [message[@"alwaysUse24HourFormat"] isEqual:@(NO)];
+                             }]]);
+  [vc onUserSettingsChanged:nil];
+  [mockHourFormat stopMocking];
+
+  // Clean up mocks.
+  [settingsChannel stopMocking];
 }
 
 - (void)testItReportsAccessibilityOnOffSwitchLabelsFlagNotSet {

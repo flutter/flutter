@@ -2158,7 +2158,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 - (void)onUserSettingsChanged:(NSNotification*)notification {
   [[_engine.get() settingsChannel] sendMessage:@{
     @"textScaleFactor" : @([self textScaleFactor]),
-    @"alwaysUse24HourFormat" : @([self isAlwaysUse24HourFormat]),
+    @"alwaysUse24HourFormat" : @([FlutterHourFormat isAlwaysUse24HourFormat]),
     @"platformBrightness" : [self brightnessMode],
     @"platformContrast" : [self contrastMode],
     @"nativeSpellCheckServiceDefined" : @true,
@@ -2230,24 +2230,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   } else {
     return NO;
   }
-}
-
-- (BOOL)isAlwaysUse24HourFormat {
-  // iOS does not report its "24-Hour Time" user setting in the API. Instead, it applies
-  // it automatically to NSDateFormatter when used with [NSLocale currentLocale]. It is
-  // essential that [NSLocale currentLocale] is used. Any custom locale, even the one
-  // that's the same as [NSLocale currentLocale] will ignore the 24-hour option (there
-  // must be some internal field that's not exposed to developers).
-  //
-  // Therefore this option behaves differently across Android and iOS. On Android this
-  // setting is exposed standalone, and can therefore be applied to all locales, whether
-  // the "current system locale" or a custom one. On iOS it only applies to the current
-  // system locale. Widget implementors must take this into account in order to provide
-  // platform-idiomatic behavior in their widgets.
-  NSString* dateFormat = [NSDateFormatter dateFormatFromTemplate:@"j"
-                                                         options:0
-                                                          locale:[NSLocale currentLocale]];
-  return [dateFormat rangeOfString:@"a"].location == NSNotFound;
 }
 
 // The brightness mode of the platform, e.g., light or dark, expressed as a string that
