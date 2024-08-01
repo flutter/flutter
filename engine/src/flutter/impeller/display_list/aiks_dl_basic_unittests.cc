@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "display_list/display_list.h"
+#include "display_list/dl_sampling_options.h"
+#include "display_list/dl_tile_mode.h"
+#include "display_list/effects/dl_color_filter.h"
+#include "display_list/effects/dl_color_source.h"
+#include "display_list/effects/dl_image_filter.h"
 #include "flutter/impeller/aiks/aiks_unittests.h"
 
 #include "flutter/display_list/dl_blend_mode.h"
@@ -12,9 +18,16 @@
 #include "flutter/impeller/geometry/scalar.h"
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
+#include "include/core/SkMatrix.h"
 
 namespace impeller {
 namespace testing {
+
+namespace {
+SkM44 FromImpellerMatrix(const Matrix& matrix) {
+  return SkM44::ColMajor(matrix.m);
+}
+}  // namespace
 
 using namespace flutter;
 
@@ -334,8 +347,14 @@ TEST_P(AiksTest, CanRenderDifferentShapesWithSameColorSource) {
       1.0,
   };
 
-  paint.setColorSource(DlColorSource::MakeLinear({0, 0}, {100, 100}, 2, colors,
-                                                 stops, DlTileMode::kRepeat));
+  paint.setColorSource(DlColorSource::MakeLinear(
+      /*start_point=*/{0, 0},            //
+      /*end_point=*/{100, 100},          //
+      /*stop_count=*/2,                  //
+      /*colors=*/colors,                 //
+      /*stops=*/stops,                   //
+      /*tile_mode=*/DlTileMode::kRepeat  //
+      ));
 
   builder.Save();
   builder.Translate(100, 100);
@@ -760,6 +779,292 @@ TEST_P(AiksTest, SolidColorCirclesOvalsRRectsMaskBlurCorrectly) {
 
   auto dl = builder.Build();
   ASSERT_TRUE(OpenPlaygroundHere(dl));
+}
+
+TEST_P(AiksTest, CanRenderClippedBackdropFilter) {
+  DisplayListBuilder builder;
+
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  // Draw something interesting in the background.
+  std::vector<DlColor> colors = {DlColor::RGBA(0.9568, 0.2627, 0.2118, 1.0),
+                                 DlColor::RGBA(0.1294, 0.5882, 0.9529, 1.0)};
+  std::vector<Scalar> stops = {
+      0.0,
+      1.0,
+  };
+  DlPaint paint;
+  paint.setColorSource(DlColorSource::MakeLinear(
+      /*start_point=*/{0, 0},            //
+      /*end_point=*/{100, 100},          //
+      /*stop_count=*/2,                  //
+      /*colors=*/colors.data(),          //
+      /*stops=*/stops.data(),            //
+      /*tile_mode=*/DlTileMode::kRepeat  //
+      ));
+
+  builder.DrawPaint(paint);
+
+  SkRect clip_rect = SkRect::MakeLTRB(50, 50, 400, 300);
+  SkRRect clip_rrect = SkRRect::MakeRectXY(clip_rect, 100, 100);
+
+  // Draw a clipped SaveLayer, where the clip coverage and SaveLayer size are
+  // the same.
+  builder.ClipRRect(clip_rrect, DlCanvas::ClipOp::kIntersect);
+
+  DlPaint save_paint;
+  auto backdrop_filter = std::make_shared<DlColorFilterImageFilter>(
+      DlBlendColorFilter::Make(DlColor::kRed(), DlBlendMode::kExclusion));
+  builder.SaveLayer(&clip_rect, &save_paint, backdrop_filter.get());
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanDrawPerspectiveTransformWithClips) {
+  // Avoiding `GetSecondsElapsed()` to reduce risk of golden flakiness.
+  int time = 0;
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    DisplayListBuilder builder;
+
+    builder.Save();
+    {
+      builder.Translate(300, 300);
+
+      // 1. Draw/restore a clip before drawing the image, which will get drawn
+      //    to the depth buffer behind the image.
+      builder.Save();
+      {
+        DlPaint paint;
+        paint.setColor(DlColor::kGreen());
+        builder.DrawPaint(paint);
+        builder.ClipRect(SkRect::MakeLTRB(-180, -180, 180, 180),
+                         DlCanvas::ClipOp::kDifference);
+
+        paint.setColor(DlColor::kBlack());
+        builder.DrawPaint(paint);
+      }
+      builder.Restore();  // Restore rectangle difference clip.
+
+      builder.Save();
+      {
+        // 2. Draw an oval clip that applies to the image, which will get drawn
+        //    in front of the image on the depth buffer.
+        builder.ClipOval(SkRect::MakeLTRB(-200, -200, 200, 200));
+
+        Matrix result =
+            Matrix(1.0, 0.0, 0.0, 0.0,    //
+                   0.0, 1.0, 0.0, 0.0,    //
+                   0.0, 0.0, 1.0, 0.003,  //
+                   0.0, 0.0, 0.0, 1.0) *
+            Matrix::MakeRotationY({Radians{-1.0f + (time++ / 60.0f)}});
+
+        // 3. Draw the rotating image with a perspective transform.
+        builder.Transform(FromImpellerMatrix(result));
+
+        auto image =
+            DlImageImpeller::Make(CreateTextureForFixture("airplane.jpg"));
+        auto position = -SkPoint::Make(image->dimensions().fWidth,
+                                       image->dimensions().fHeight) *
+                        0.5;
+        builder.DrawImage(image, position, {});
+      }
+      builder.Restore();  // Restore oval intersect clip.
+
+      // 4. Draw a semi-translucent blue circle atop all previous draws.
+      DlPaint paint;
+      paint.setColor(DlColor::kBlue().modulateOpacity(0.4));
+      builder.DrawCircle({}, 230, paint);
+    }
+    builder.Restore();  // Restore translation.
+
+    return builder.Build();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, ImageColorSourceEffectTransform) {
+  // Compare with https://fiddle.skia.org/c/6cdc5aefb291fda3833b806ca347a885
+
+  DisplayListBuilder builder;
+  auto texture = DlImageImpeller::Make(CreateTextureForFixture("monkey.png"));
+
+  DlPaint paint;
+  paint.setColor(DlColor::kWhite());
+  builder.DrawPaint(paint);
+
+  // Translation
+  {
+    SkMatrix matrix = SkMatrix::Translate(50, 50);
+    DlPaint paint;
+    paint.setColorSource(std::make_shared<DlImageColorSource>(
+        texture, DlTileMode::kRepeat, DlTileMode::kRepeat,
+        DlImageSampling::kNearestNeighbor, &matrix));
+
+    builder.DrawRect(SkRect::MakeLTRB(0, 0, 100, 100), paint);
+  }
+
+  // Rotation/skew
+  {
+    builder.Save();
+    builder.Rotate(45);
+    DlPaint paint;
+
+    Matrix impeller_matrix(1, -1, 0, 0,  //
+                           1, 1, 0, 0,   //
+                           0, 0, 1, 0,   //
+                           0, 0, 0, 1);
+    SkMatrix matrix = SkM44::ColMajor(impeller_matrix.m).asM33();
+    paint.setColorSource(std::make_shared<DlImageColorSource>(
+        texture, DlTileMode::kRepeat, DlTileMode::kRepeat,
+        DlImageSampling::kNearestNeighbor, &matrix));
+    builder.DrawRect(SkRect::MakeLTRB(100, 0, 200, 100), paint);
+    builder.Restore();
+  }
+
+  // Scale
+  {
+    builder.Translate(100, 0);
+    builder.Scale(100, 100);
+    DlPaint paint;
+
+    SkMatrix matrix = SkMatrix::Scale(0.005, 0.005);
+    paint.setColorSource(std::make_shared<DlImageColorSource>(
+        texture, DlTileMode::kRepeat, DlTileMode::kRepeat,
+        DlImageSampling::kNearestNeighbor, &matrix));
+
+    builder.DrawRect(SkRect::MakeLTRB(0, 0, 1, 1), paint);
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, SubpassWithClearColorOptimization) {
+  DisplayListBuilder builder;
+
+  // Use a non-srcOver blend mode to ensure that we don't detect this as an
+  // opacity peephole optimization.
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue().modulateOpacity(0.5));
+  paint.setBlendMode(DlBlendMode::kSrc);
+
+  SkRect bounds = SkRect::MakeLTRB(0, 0, 200, 200);
+  builder.SaveLayer(&bounds, &paint);
+
+  paint.setColor(DlColor::kTransparent());
+  paint.setBlendMode(DlBlendMode::kSrc);
+  builder.DrawPaint(paint);
+  builder.Restore();
+
+  paint.setColor(DlColor::kBlue());
+  paint.setBlendMode(DlBlendMode::kDstOver);
+  builder.SaveLayer(nullptr, &paint);
+  builder.Restore();
+
+  // This playground should appear blank on CI since we are only drawing
+  // transparent black. If the clear color optimization is broken, the texture
+  // will be filled with NaNs and may produce a magenta texture on macOS or iOS.
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Render a white circle at the top left corner of the screen.
+TEST_P(AiksTest, MatrixImageFilterDoesntCullWhenTranslatedFromOffscreen) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.Translate(100, 100);
+  // Draw a circle in a SaveLayer at -300, but move it back on-screen with a
+  // +300 translation applied by a SaveLayer image filter.
+  DlPaint paint;
+  SkMatrix translate = SkMatrix::Translate(300, 0);
+  paint.setImageFilter(
+      DlMatrixImageFilter::Make(translate, DlImageSampling::kLinear));
+  builder.SaveLayer(nullptr, &paint);
+
+  DlPaint circle_paint;
+  circle_paint.setColor(DlColor::kGreen());
+  builder.DrawCircle({-300, 0}, 100, circle_paint);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Render a white circle at the top left corner of the screen.
+TEST_P(AiksTest,
+       MatrixImageFilterDoesntCullWhenScaledAndTranslatedFromOffscreen) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.Translate(100, 100);
+  // Draw a circle in a SaveLayer at -300, but move it back on-screen with a
+  // +300 translation applied by a SaveLayer image filter.
+
+  DlPaint paint;
+  paint.setImageFilter(DlMatrixImageFilter::Make(
+      SkMatrix::Translate(300, 0) * SkMatrix::Scale(2, 2),
+      DlImageSampling::kNearestNeighbor));
+  builder.SaveLayer(nullptr, &paint);
+
+  DlPaint circle_paint;
+  circle_paint.setColor(DlColor::kGreen());
+  builder.DrawCircle({-150, 0}, 50, circle_paint);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// This should be solid red, if you see a little red box this is broken.
+TEST_P(AiksTest, ClearColorOptimizationWhenSubpassIsBiggerThanParentPass) {
+  SetWindowSize({400, 400});
+  DisplayListBuilder builder;
+
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kRed());
+  builder.DrawRect(SkRect::MakeLTRB(200, 200, 300, 300), paint);
+
+  paint.setImageFilter(DlMatrixImageFilter::Make(SkMatrix::Scale(2, 2),
+                                                 DlImageSampling::kLinear));
+  builder.SaveLayer(nullptr, &paint);
+  // Draw a rectangle that would fully cover the parent pass size, but not
+  // the subpass that it is rendered in.
+  paint.setColor(DlColor::kGreen());
+  builder.DrawRect(SkRect::MakeLTRB(0, 0, 400, 400), paint);
+  // Draw a bigger rectangle to force the subpass to be bigger.
+
+  paint.setColor(DlColor::kRed());
+  builder.DrawRect(SkRect::MakeLTRB(0, 0, 800, 800), paint);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, EmptySaveLayerIgnoresPaint) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kRed());
+  builder.DrawPaint(paint);
+  builder.ClipRect(SkRect::MakeXYWH(100, 100, 200, 200));
+  paint.setColor(DlColor::kBlue());
+  builder.SaveLayer(nullptr, &paint);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, EmptySaveLayerRendersWithClear) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("airplane.jpg"));
+  builder.DrawImage(image, {10, 10}, {});
+  builder.ClipRect(SkRect::MakeXYWH(100, 100, 200, 200));
+
+  DlPaint paint;
+  paint.setBlendMode(DlBlendMode::kClear);
+  builder.SaveLayer(nullptr, &paint);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 }  // namespace testing
