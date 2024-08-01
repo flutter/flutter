@@ -1883,7 +1883,11 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
     _updateLastSelectionEdgeLocationsFromGeometries();
   }
 
-  /// Clears the internal selection state.
+  /// Clears the internal selection state. 
+  /// 
+  /// This indicates that no [Selectable] child under this delegate
+  /// has received start or end events, and resets any tracked global
+  /// locations for start and end [SelectionEdgeUpdateEvent]s.
   @protected
   void clearInternalSelectionState() {
     _hasReceivedStartEvent.clear();
@@ -1893,6 +1897,9 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
   }
 
   /// Clears the internal selection state for a given [Selectable].
+  /// 
+  /// This indicates that the given `selectable` has neither received a
+  /// start or end [SelectionEdgeUpdateEvent]s.
   @protected
   void clearInternalSelectionStateForSelectable(Selectable selectable) {
     _hasReceivedStartEvent.remove(selectable);
