@@ -985,86 +985,26 @@ void main() {
   });
 
   testWidgets('AnimatedTheme onEnd callback test', (WidgetTester tester) async {
-    int counter = 0;
-    void increment() => counter += 1;
-
-    await tester.pumpWidget(
-      Stack(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          AnimatedTheme(
-            data: ThemeData(primaryColor: Colors.black),
-            duration: const Duration(seconds: 2),
-            onEnd: increment,
-            child: const SizedBox.shrink(),
-          ),
-        ],
+    await tester.pumpWidget(wrap(
+      child: TestAnimatedWidget(
+        callback: mockOnEndFunction.handler,
+        switchKey: switchKey,
+        state: _TestAnimatedThemeWidgetState(),
       ),
-    );
+    ));
 
-    await tester.pump(const Duration(seconds: 1));
-    expect(counter, equals(0));
+    final Finder widgetFinder = find.byKey(switchKey);
 
-    await tester.pumpWidget(
-      Stack(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          AnimatedTheme(
-            data: ThemeData(primaryColor: Colors.white),
-            duration: const Duration(seconds: 2),
-            onEnd: increment,
-            child: const SizedBox.shrink(),
-          ),
-        ],
-      ),
-    );
+    await tester.tap(widgetFinder);
 
-    expect(counter, equals(0));
+    await tester.pump();
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(animationDuration);
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(additionalDelay);
+    expect(mockOnEndFunction.called, 1);
 
-    await tester.pump(const Duration(seconds: 1));
-    expect(counter, equals(0));
-
-    await tester.pump(const Duration(seconds: 1));
-    expect(counter, equals(1));
-  });
-
-  testWidgets('AnimatedTheme transition test', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Stack(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          AnimatedTheme(
-            data: ThemeData(primaryColor: Colors.black),
-            duration: const Duration(seconds: 2),
-            child: const SizedBox.shrink(),
-          ),
-        ],
-      ),
-    );
-
-    Color primaryColor() => findBuiltValue<AnimatedTheme, Theme>(tester).data.primaryColor;
-
-    await tester.pump(const Duration(seconds: 1));
-    expect(primaryColor(), Colors.black);
-
-    await tester.pumpWidget(
-      Stack(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          AnimatedTheme(
-            data: ThemeData(primaryColor: Colors.white),
-            duration: const Duration(seconds: 2),
-            child: const SizedBox.shrink(),
-          ),
-        ],
-      ),
-    );
-
-    await tester.pump(const Duration(seconds: 1));
-    expect(primaryColor(), const Color(0xFF7F7F7F));
-
-    await tester.pump(const Duration(seconds: 1));
-    expect(primaryColor(), Colors.white);
+    await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
   group('Verify that default args match non-animated variants', () {
@@ -1184,6 +1124,18 @@ class _TestTweenAnimationBuilderWidgetState extends _TestAnimatedWidgetState {
           child: child,
         );
       },
+    );
+  }
+}
+
+class _TestAnimatedThemeWidgetState extends _TestAnimatedWidgetState {
+  @override
+  Widget getAnimatedWidget() {
+    return AnimatedTheme(
+      data: toggle ? ThemeData.dark() : ThemeData.light(),
+      duration: duration,
+      onEnd: widget.callback,
+      child: child,
     );
   }
 }
