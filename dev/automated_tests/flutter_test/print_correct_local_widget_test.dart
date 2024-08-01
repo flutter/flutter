@@ -12,9 +12,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: const Scaffold(
-          appBar: AppBar(
-            title: Text('RenderFlex OverFlow'),
-          ),
+          appBar: AppBar(title: Text('RenderFlex OverFlow')),
           body: SizedBox(
             width: 400.0,
             child: Row(

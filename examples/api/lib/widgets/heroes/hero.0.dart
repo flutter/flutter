@@ -48,9 +48,7 @@ class HeroExample extends StatelessWidget {
   void _gotoDetailsPage(BuildContext context) {
     Navigator.of(context).push(MaterialPageRoute<void>(
       builder: (BuildContext context) => const Scaffold(
-        appBar: AppBar(
-          title: Text('Second Page'),
-        ),
+        appBar: AppBar(title: Text('Second Page')),
         body: Center(
           child: Hero(
             tag: 'hero-rectangle',

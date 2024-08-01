@@ -455,9 +455,9 @@ void main() {
   testWidgets('AppBar uses AppBarTheme.centerTitle when centerTitle is null', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
-      home: const Scaffold(appBar: AppBar(
-        title: Text('Title'),
-      )),
+      home: const Scaffold(
+        appBar: AppBar(title: Text('Title')),
+      ),
     ));
 
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
@@ -483,9 +483,9 @@ void main() {
   testWidgets('AppBar.centerTitle adapts to TargetPlatform when AppBarTheme.centerTitle is null', (WidgetTester tester) async{
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
-      home: const Scaffold(appBar: AppBar(
-        title: Text('Title'),
-      )),
+      home: const Scaffold(
+        appBar: AppBar(title: Text('Title')),
+      ),
     ));
 
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));

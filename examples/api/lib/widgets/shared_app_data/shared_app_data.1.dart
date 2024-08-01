@@ -17,22 +17,9 @@ class SharedAppDataExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: SharedAppDataExample(),
-    );
-  }
-}
-
-class SharedAppDataExample extends StatelessWidget {
-  const SharedAppDataExample({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: AppBar(
-        title: Text('SharedAppData Sample'),
-      ),
-      body: Center(
-        child: CustomWidget(),
+      home: Scaffold(
+        appBar: AppBar(title: Text('SharedAppData Sample')),
+        body: Center(child: SharedAppDataExample()),
       ),
     );
   }
@@ -40,8 +27,8 @@ class SharedAppDataExample extends StatelessWidget {
 
 // An example of a widget which depends on the SharedObject's value, which might
 // be provided - along with SharedObject - in a Dart package.
-class CustomWidget extends StatelessWidget {
-  const CustomWidget({super.key});
+class SharedAppDataExample extends StatelessWidget {
+  const SharedAppDataExample({super.key});
 
   @override
   Widget build(BuildContext context) {

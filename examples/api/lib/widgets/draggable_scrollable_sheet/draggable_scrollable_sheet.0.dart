@@ -19,9 +19,7 @@ class DraggableScrollableSheetExampleApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade100),
       ),
       home: const Scaffold(
-        appBar: AppBar(
-          title: Text('DraggableScrollableSheet Sample'),
-        ),
+        appBar: AppBar(title: Text('DraggableScrollableSheet Sample')),
         body: DraggableScrollableSheetExample(),
       ),
     );

@@ -18,9 +18,7 @@ class ChipApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: const Scaffold(
-        appBar: AppBar(
-          title: Text('FilterChip Sample'),
-        ),
+        appBar: AppBar(title: Text('FilterChip Sample')),
         body: FilterChipExample(),
       ),
     );

@@ -19,8 +19,8 @@ class OfExampleApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const Scaffold(
-        body: MyScaffoldBody(),
         appBar: AppBar(title: Text('Scaffold.of Example')),
+        body: MyScaffoldBody(),
       ),
       color: Colors.white,
     );
