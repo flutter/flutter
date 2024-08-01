@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   example.SharedObject getSharedObject(WidgetTester tester) {
     final BuildContext context = tester.element(
-      find.byType(example.CustomWidget),
+      find.byType(example.SharedAppDataExample),
     );
     return example.SharedObject.of(context);
   }
