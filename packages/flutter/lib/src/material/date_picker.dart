@@ -927,7 +927,6 @@ class _DatePickerHeader extends StatelessWidget {
     switch (orientation) {
       case Orientation.portrait:
         return Semantics(
-          container: true,
           child: SizedBox(
             height: _datePickerHeaderPortraitHeight * fontScaleAdjustedHeaderHeight,
             child: Material(
@@ -962,7 +961,6 @@ class _DatePickerHeader extends StatelessWidget {
         );
       case Orientation.landscape:
         return Semantics(
-          container: true,
           child:SizedBox(
             width: _datePickerHeaderLandscapeWidth,
             child: Material(
