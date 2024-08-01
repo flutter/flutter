@@ -34,6 +34,8 @@ Future<void> testMain() async {
       (int viewId) {
         final DomElement element = createDomHTMLDivElement();
         element.style.backgroundColor = 'blue';
+        element.style.width = '100%';
+        element.style.height = '100%';
         return element;
       }
     );
@@ -233,6 +235,103 @@ Future<void> testMain() async {
     await renderScene(sb.build());
 
     await matchGoldenFile('platformview_opacity.png', region: region);
+  });
+
+  test('platformview cliprect', () async {
+    await _createPlatformView(1, platformViewType);
+
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(recorder);
+    canvas.drawCircle(
+      const ui.Offset(50, 50),
+      50,
+      ui.Paint()
+        ..style = ui.PaintingStyle.fill
+        ..color = const ui.Color(0xFFFF0000)
+    );
+
+    final ui.SceneBuilder sb = ui.SceneBuilder();
+    sb.pushOffset(50, 50);
+    sb.pushClipRect(const ui.Rect.fromLTRB(60, 60, 100, 100));
+
+    sb.addPicture(const ui.Offset(50, 50), recorder.endRecording());
+    sb.addPlatformView(
+      1,
+      offset: const ui.Offset(75, 75),
+      width: 50,
+      height: 50,
+    );
+    await renderScene(sb.build());
+
+    await matchGoldenFile('platformview_cliprect.png', region: region);
+  });
+
+  test('platformview cliprrect', () async {
+    await _createPlatformView(1, platformViewType);
+
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(recorder);
+    canvas.drawCircle(
+      const ui.Offset(50, 50),
+      50,
+      ui.Paint()
+        ..style = ui.PaintingStyle.fill
+        ..color = const ui.Color(0xFFFF0000)
+    );
+
+    final ui.SceneBuilder sb = ui.SceneBuilder();
+    sb.pushOffset(50, 50);
+    sb.pushClipRRect(
+      const ui.RRect.fromLTRBXY(60, 60, 100, 100, 5, 10),
+      clipBehavior: ui.Clip.antiAlias
+    );
+
+    sb.addPicture(const ui.Offset(50, 50), recorder.endRecording());
+    sb.addPlatformView(
+      1,
+      offset: const ui.Offset(75, 75),
+      width: 50,
+      height: 50,
+    );
+    await renderScene(sb.build());
+
+    await matchGoldenFile('platformview_cliprrect.png', region: region);
+  });
+
+  test('platformview clippath', () async {
+    await _createPlatformView(1, platformViewType);
+
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(recorder);
+    canvas.drawCircle(
+      const ui.Offset(50, 50),
+      50,
+      ui.Paint()
+        ..style = ui.PaintingStyle.fill
+        ..color = const ui.Color(0xFFFF0000)
+    );
+
+    final ui.SceneBuilder sb = ui.SceneBuilder();
+    sb.pushOffset(50, 50);
+
+    final ui.Path path = ui.Path();
+    path.moveTo(80, 100);
+    path.lineTo(60, 75);
+    path.arcToPoint(const ui.Offset(80, 75), radius: const ui.Radius.elliptical(10, 15));
+    path.arcToPoint(const ui.Offset(100, 75), radius: const ui.Radius.elliptical(10, 15));
+    path.close();
+    sb.pushClipPath(path);
+
+    sb.addPicture(const ui.Offset(50, 50), recorder.endRecording());
+    sb.addPlatformView(
+      1,
+      offset: const ui.Offset(75, 75),
+      width: 50,
+      height: 50,
+    );
+    await renderScene(sb.build());
+
+    await matchGoldenFile('platformview_clippath.png', region: region);
   });
 }
 

@@ -14,6 +14,10 @@ SKWASM_EXPORT char* skString_getData(SkString* string) {
   return string->data();
 }
 
+SKWASM_EXPORT int skString_getLength(SkString* string) {
+  return string->size();
+}
+
 SKWASM_EXPORT void skString_free(SkString* string) {
   return delete string;
 }

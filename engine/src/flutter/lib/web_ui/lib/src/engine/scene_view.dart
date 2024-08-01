@@ -187,6 +187,12 @@ class EngineSceneView {
       }
     }
 
+    for (final SliceContainer? container in reusableContainers) {
+      if (container != null) {
+        sceneElement.removeChild(container.container);
+      }
+    }
+
     containers = newContainers;
 
     DomElement? currentElement = sceneElement.firstElementChild;
@@ -198,13 +204,6 @@ class EngineSceneView {
       } else {
         sceneElement.insertBefore(container.container, currentElement);
       }
-    }
-
-    // Remove any other unused containers
-    while (currentElement != null) {
-      final DomElement? sibling = currentElement.nextElementSibling;
-      sceneElement.removeChild(currentElement);
-      currentElement = sibling;
     }
   }
 }
@@ -277,15 +276,24 @@ final class PictureSliceContainer extends SliceContainer {
 }
 
 final class PlatformViewContainer extends SliceContainer {
-  PlatformViewContainer(this.viewId) : container = createPlatformViewSlot(viewId);
+  PlatformViewContainer(this.viewId) :
+    container = createDomElement('flt-clip'),
+    slot = createPlatformViewSlot(viewId) {
+      container.appendChild(slot);
+  }
 
   final int viewId;
   PlatformViewStyling? _styling;
   ui.Rect? _bounds;
   bool _dirty = false;
 
+  ui.Path? _clipPath;
+  String? _clipPathString;
+
   @override
   final DomElement container;
+
+  final DomElement slot;
 
   set styling(PlatformViewStyling styling) {
     if (_styling != styling) {
@@ -301,13 +309,54 @@ final class PlatformViewContainer extends SliceContainer {
     }
   }
 
+  set clipPath(ScenePath? path) {
+    if (_clipPath == path) {
+      return;
+    }
+
+    _clipPath = path;
+    _clipPathString = path?.toSvgString();
+  }
+
+  String cssStringForClip(PlatformViewClip clip, double devicePixelRatio) {
+    switch (clip) {
+      case PlatformViewNoClip():
+        clipPath = null;
+        return '';
+      case PlatformViewRectClip():
+        clipPath = null;
+        final double top = clip.rect.top / devicePixelRatio;
+        final double right = clip.rect.right / devicePixelRatio;
+        final double bottom = clip.rect.bottom / devicePixelRatio;
+        final double left = clip.rect.left / devicePixelRatio;
+        return 'rect(${top}px ${right}px ${bottom}px ${left}px)';
+      case PlatformViewRRectClip():
+        clipPath = null;
+        final double top = clip.rrect.top / devicePixelRatio;
+        final double right = clip.rrect.right / devicePixelRatio;
+        final double bottom = clip.rrect.bottom / devicePixelRatio;
+        final double left = clip.rrect.left / devicePixelRatio;
+        final double tlRadiusX = clip.rrect.tlRadiusX / devicePixelRatio;
+        final double tlRadiusY = clip.rrect.tlRadiusY / devicePixelRatio;
+        final double trRadiusX = clip.rrect.trRadiusX / devicePixelRatio;
+        final double trRadiusY = clip.rrect.trRadiusY / devicePixelRatio;
+        final double brRadiusX = clip.rrect.brRadiusX / devicePixelRatio;
+        final double brRadiusY = clip.rrect.brRadiusY / devicePixelRatio;
+        final double blRadiusX = clip.rrect.blRadiusX / devicePixelRatio;
+        final double blRadiusY = clip.rrect.blRadiusY / devicePixelRatio;
+        return 'rect(${top}px ${right}px ${bottom}px ${left}px round ${tlRadiusX}px ${trRadiusX}px ${brRadiusX}px ${blRadiusX}px / ${tlRadiusY}px ${trRadiusY}px ${brRadiusY}px ${blRadiusY}px)';
+      case PlatformViewPathClip():
+        clipPath = clip.path;
+        return "path('$_clipPathString')";
+    }
+  }
 
   @override
   void updateContents() {
     assert(_styling != null);
     assert(_bounds != null);
     if (_dirty) {
-      final DomCSSStyleDeclaration style = container.style;
+      final DomCSSStyleDeclaration style = slot.style;
       style.position = 'absolute';
       style.width = '${_bounds!.width}px';
       style.height = '${_bounds!.height}px';
@@ -329,7 +378,14 @@ final class PlatformViewContainer extends SliceContainer {
       style.transform = float64ListToCssTransform(scaleMatrix.storage);
       style.transformOrigin = '0 0 0';
       style.opacity = _styling!.opacity != 1.0 ? '${_styling!.opacity}' : '';
-      // TODO(jacksongardner): Implement clip styling for platform views
+
+      final DomCSSStyleDeclaration containerStyle = container.style;
+      containerStyle.position = 'absolute';
+      containerStyle.width = '100%';
+      containerStyle.height = '100%';
+
+      final String clipPathString = cssStringForClip(_styling!.clip, devicePixelRatio);
+      containerStyle.clipPath = clipPathString;
 
       _dirty = false;
     }

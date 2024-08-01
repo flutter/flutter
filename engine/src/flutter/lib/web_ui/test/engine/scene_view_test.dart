@@ -128,10 +128,10 @@ void testMain() {
 
     final DomElement sceneElement = sceneView.sceneElement;
     final List<DomElement> children = sceneElement.children.toList();
+
     expect(children.length, 1);
     final DomElement containerElement = children.first;
-    expect(
-        containerElement.tagName, equalsIgnoringCase('flt-canvas-container'));
+    expect(containerElement.tagName, equalsIgnoringCase('flt-canvas-container'));
 
     final List<DomElement> containerChildren =
         containerElement.children.toList();
@@ -161,11 +161,15 @@ void testMain() {
 
     final DomElement sceneElement = sceneView.sceneElement;
     final List<DomElement> children = sceneElement.children.toList();
-    expect(children.length, 1);
-    final DomElement containerElement = children.first;
-    expect(
-        containerElement.tagName, equalsIgnoringCase('flt-platform-view-slot'));
 
+    expect(children.length, 1);
+    final DomElement clipElement = children.first;
+    expect(clipElement.tagName, equalsIgnoringCase('flt-clip'));
+
+    final List<DomElement> clipChildren = clipElement.children.toList();
+    expect(clipChildren.length, 1);
+
+    final DomElement containerElement = clipChildren.first;
     final DomCSSStyleDeclaration style = containerElement.style;
     expect(style.left, '');
     expect(style.top, '');

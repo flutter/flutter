@@ -20,6 +20,9 @@ external SkStringHandle skStringAllocate(int size);
 @Native<Pointer<Int8> Function(SkStringHandle)>(symbol: 'skString_getData', isLeaf: true)
 external Pointer<Int8> skStringGetData(SkStringHandle handle);
 
+@Native<Int Function(SkStringHandle)>(symbol: 'skString_getLength', isLeaf: true)
+external int skStringGetLength(SkStringHandle handle);
+
 @Native<Void Function(SkStringHandle)>(symbol: 'skString_free', isLeaf: true)
 external void skStringFree(SkStringHandle handle);
 
