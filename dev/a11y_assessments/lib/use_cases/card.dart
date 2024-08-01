@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 
 import 'use_cases.dart';
 
-class ActionChipUseCase extends UseCase {
+class CardUseCase extends UseCase {
   @override
-  String get name => 'ActionChip';
+  String get name => 'Card';
 
   @override
-  String get route => '/action-chip';
+  String get route => '/card';
 
   @override
   Widget build(BuildContext context) => const MainWidget();
@@ -31,20 +31,17 @@ class MainWidgetState extends State<MainWidget> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('ActionChip'),
+        title: const Text('Card'),
       ),
-      body: Center(
+      body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            ActionChip(
-              avatar: const Icon(Icons.favorite),
-              label: const Text('Action'),
-              onPressed: () {},
-            ),
-            const ActionChip(
-              avatar: Icon(Icons.favorite),
-              label: Text('Action'),
+            Card(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Text('Card'),
+              ),
             ),
           ],
         ),
