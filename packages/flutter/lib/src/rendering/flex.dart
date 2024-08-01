@@ -591,6 +591,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
+  /// {@template flutter.rendering.RenderFlex.spacing}
   /// How much space to place between children in the main axis.
   ///
   /// The spacing is only applied between children in the main axis.
@@ -604,14 +605,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   /// If the [spacing] is 10.0 and the [mainAxisAlignment] is [MainAxisAlignment.end],
   /// then the last child will be placed at the end of the main axis, and the
   /// second-to-last child will be placed 10.0 pixels before the last child in
-  /// the main axis, and so on. No spacing will be placed before the first child
-  /// or after the last child. The [spacing] is not applied before the first
+  /// the main axis, and so on. The [spacing] is not applied before the first
   /// child or after the last child.
   ///
   /// If the [spacing] is 10.0 and the [mainAxisAlignment] is [MainAxisAlignment.center],
   /// then the children will be placed in the center of the main axis with 10.0
-  /// pixels of space between the children. No spacing will be placed before the first
-  /// child or after the last child. The [spacing] is not applied before the first
+  /// pixels of space between the children. The [spacing] is not applied before the first
   /// child or after the last child.
   ///
   /// If the [spacing] is 10.0 and the [mainAxisAlignment] is [MainAxisAlignment.spaceBetween],
@@ -644,6 +643,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   /// overflow by 10.0 pixels.
   ///
   /// Defaults to 0.0.
+  /// {@endtemplate}
   double get spacing => _spacing;
   double _spacing;
   set spacing (double value) {

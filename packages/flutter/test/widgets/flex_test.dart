@@ -264,7 +264,7 @@ void main() {
 
     await tester.pumpWidget(constrainedFlex(
       direction: Axis.vertical,
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.end,
       spacing: 100.0,
     ));
     // 50.0 * 3 (children) + 100.0 * 2 (spacing) = 350.0 > 300.0 (constraints)
@@ -282,7 +282,7 @@ void main() {
 
     await tester.pumpWidget(constrainedFlex(
       direction: Axis.vertical,
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       spacing: 100.0,
     ));
     // 50.0 * 3 (children) + 100.0 * 2 (spacing) = 350.0 > 300.0 (constraints)
@@ -300,7 +300,7 @@ void main() {
 
     await tester.pumpWidget(constrainedFlex(
       direction: Axis.vertical,
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       spacing: 100.0,
     ));
     // 50.0 * 3 (children) + 100.0 * 2 (spacing) = 350.0 > 300.0 (constraints)
@@ -318,7 +318,7 @@ void main() {
 
     await tester.pumpWidget(constrainedFlex(
       direction: Axis.vertical,
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       spacing: 100.0,
     ));
     // 50.0 * 3 (children) + 100.0 * 2 (spacing) = 350.0 > 300.0 (constraints)
@@ -336,7 +336,7 @@ void main() {
 
     await tester.pumpWidget(constrainedFlex(
       direction: Axis.vertical,
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       spacing: 100.0,
     ));
     // 50.0 * 3 (children) + 100.0 * 2 (spacing) = 350.0 > 300.0 (constraints)
