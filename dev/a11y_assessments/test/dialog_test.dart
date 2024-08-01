@@ -30,7 +30,7 @@ void main() {
     expect(find.text('This is a typical dialog.'), findsNothing);
   });
 
-  testWidgets('ok button has autofocus when digalog opens', (WidgetTester tester) async {
+  testWidgets('ok button has autofocus when dialog opens', (WidgetTester tester) async {
     await pumpsUseCase(tester, DialogUseCase());
 
     Future<void> invokeDialog() async {
