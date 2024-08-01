@@ -499,26 +499,22 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
 /// atop a [BackdropFilter]. The surface color is light gray when the ambient
 /// [CupertinoTheme] brightness is [Brightness.light], and dark gray when the
 /// ambient brightness is [Brightness.dark]. The [BackdropFilter] applied
-/// beneath the surface saturates and blurs underlying content.
+/// beneath the surface saturates and blurs underlying content. In other words,
+/// the overall effect is result = add_surface_color(blur(saturate(source))).
 ///
 /// The blur strength can be changed by setting [blurSigma] to a positive value,
 /// or removed by setting the [blurSigma] to 0.
 ///
 /// The saturation effect can be removed by setting [isVibrancePainted] to
-/// false. Removing the vibrance can prevent oversaturating areas where multiple
-/// [CupertinoPopupSurface]s are stacked upon eachother.
+/// false. The saturation effect is not supported on Web and will not be
+/// applied regardless of the value of [isVibrancePainted]. Removing the vibrance
+/// can be helpful to achieve consistent appearance across web
+/// and mobile, or to prevent oversaturating areas where multiple
+/// [CupertinoPopupSurface]s are stacked upon each other.
 ///
-/// For more complicated layouts, the surface color can be disabled by setting
-/// [isSurfacePainted] to false. This can be used to render divider gaps, such
-/// as with [CupertinoAlertDialog], or for rendering custom surface colors.
-///
-/// CupertinoPopupSurface uses ImageFilter.compose, which applies an inner
-/// filter first, followed by an outer filter (e.g. result =
-/// outer(inner(source))).
-///
-/// For CupertinoPopupSurface, the pixels underlying the surface are first
-/// saturated with a ColorFilter, and the resulting saturated pixels are blurred
-/// with ImageFilter.blur.
+/// The surface color can be disabled by setting [isSurfacePainted] to false,
+/// which is useful for more complicated layouts, such as rendering divider gaps
+/// in [CupertinoAlertDialog] or rendering custom surface colors.
 ///
 /// {@tool dartpad}
 /// This sample shows how to use a [CupertinoPopupSurface]. The [CupertinoPopupSurface]
