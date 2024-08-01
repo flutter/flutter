@@ -32,7 +32,7 @@ INTERNAL NOTE
 - [dart/55943](https://github.com/dart-lang/sdk/issues/55943) - Fixes an issue where FFI calls with variadic arguments on MacOS Arm64 would mangle the arguments.
 - [flutter/149700](https://github.com/flutter/flutter/issues/149700) - [Impeller] Fixes rendering corruption when running on Intel mac simulators.
 - [flutter/149701](https://github.com/flutter/flutter/issues/149701) - [Impeller] Fixes an issue on iOS that causese paths to render incorrectly.
-- [flutter/149702](https://github.com/flutter/flutter/issues/149702) - [Impeller] Corrects and issue on iOs where coverage computation results in distored pixels in Impeller targets.
+- [flutter/149702](https://github.com/flutter/flutter/issues/149702) - [Impeller] Corrects and issue on iOS where coverage computation results in distored pixels in Impeller targets.
 - [flutter/149704](https://github.com/flutter/flutter/issues/149704) - [Impeller] Fixes and issue on iOS where flickering may be occur when translating a blurred rounded rectangle.
 - [flutter/149745](https://github.com/flutter/flutter/issues/149745) - [Impeller] Fixes a segfault on iOS when tessellating empty convex polygons.
 - [flutter/149771](https://github.com/flutter/flutter/issues/149771) - [Impeller] Fixes a rendering error on iOS when advanced blend is double scaled.
