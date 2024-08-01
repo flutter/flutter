@@ -49,7 +49,6 @@ void main() {
     test('parses failed to start error', () {
       final DartDevelopmentServiceException expected =
           DartDevelopmentServiceException.failedToStart();
-
       final DartDevelopmentServiceException actual =
           DartDevelopmentServiceException.fromJson(
         <String, Object>{
