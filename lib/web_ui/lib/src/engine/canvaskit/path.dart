@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
+import '../scene_painting.dart';
 import '../vector_math.dart';
 import 'canvaskit_api.dart';
 import 'native_memory.dart';
@@ -15,7 +16,7 @@ import 'path_metrics.dart';
 /// An implementation of [ui.Path] which is backed by an `SkPath`.
 ///
 /// The `SkPath` is required for `CkCanvas` methods which take a path.
-class CkPath implements ui.Path {
+class CkPath implements ScenePath {
   factory CkPath() {
     final SkPath skPath = SkPath();
     skPath.setFillType(toSkFillType(ui.PathFillType.nonZero));
@@ -314,7 +315,8 @@ class CkPath implements ui.Path {
     return CkPath.fromSkPath(newPath, _fillType);
   }
 
-  String? toSvgString() {
+  @override
+  String toSvgString() {
     return skiaObject.toSVGString();
   }
 

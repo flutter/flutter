@@ -43,7 +43,7 @@ class ClipPathLayer
 class ClipPathOperation implements LayerOperation {
   ClipPathOperation(this.path, this.clip);
 
-  final ui.Path path;
+  final ScenePath path;
   final ui.Clip clip;
 
   @override
@@ -68,8 +68,7 @@ class ClipPathOperation implements LayerOperation {
 
   @override
   PlatformViewStyling createPlatformViewStyling() {
-    // TODO(jacksongardner): implement clip styling for platform views
-    return const PlatformViewStyling();
+    return PlatformViewStyling(clip: PlatformViewPathClip(path));
   }
 }
 
@@ -104,8 +103,7 @@ class ClipRectOperation implements LayerOperation {
 
   @override
   PlatformViewStyling createPlatformViewStyling() {
-    // TODO(jacksongardner): implement clip styling for platform views
-    return const PlatformViewStyling();
+    return PlatformViewStyling(clip: PlatformViewRectClip(rect));
   }
 }
 
@@ -140,8 +138,7 @@ class ClipRRectOperation implements LayerOperation {
 
   @override
   PlatformViewStyling createPlatformViewStyling() {
-    // TODO(jacksongardner): implement clip styling for platform views
-    return const PlatformViewStyling();
+    return PlatformViewStyling(clip: PlatformViewRRectClip(rrect));
   }
 }
 
@@ -501,13 +498,15 @@ class PlatformViewPosition {
 class PlatformViewStyling {
   const PlatformViewStyling({
     this.position = const PlatformViewPosition.zero(),
+    this.clip = const PlatformViewNoClip(),
     this.opacity = 1.0
   });
 
-  bool get isDefault => position.isZero && (opacity == 1.0);
+  bool get isDefault => position.isZero && (opacity == 1.0) && clip is PlatformViewNoClip;
 
   final PlatformViewPosition position;
   final double opacity;
+  final PlatformViewClip clip;
 
   static PlatformViewStyling combine(PlatformViewStyling outer, PlatformViewStyling inner) {
     // Attempt to reuse one of the existing immutable objects.
@@ -519,6 +518,7 @@ class PlatformViewStyling {
     }
     return PlatformViewStyling(
       position: PlatformViewPosition.combine(outer.position, inner.position),
+      clip: PlatformViewClip.combine(outer.clip, inner.clip.positioned(outer.position)),
       opacity: outer.opacity * inner.opacity,
     );
   }
@@ -531,13 +531,206 @@ class PlatformViewStyling {
     if (other is! PlatformViewStyling) {
       return false;
     }
-    return (position == other.position) && (opacity == other.opacity);
+    return (position == other.position) && (opacity == other.opacity) && (clip == other.clip);
   }
 
   @override
   int get hashCode {
-    return Object.hash(position, opacity);
+    return Object.hash(position, opacity, clip);
   }
+}
+
+sealed class PlatformViewClip {
+  PlatformViewClip positioned(PlatformViewPosition position);
+
+  ui.Rect get boundingRect;
+
+  bool covers(ui.Rect rect);
+
+  ScenePath get toPath;
+
+  static PlatformViewClip combine(PlatformViewClip outer, PlatformViewClip inner) {
+    if (outer is PlatformViewNoClip) {
+      return inner;
+    }
+    if (inner is PlatformViewNoClip) {
+      return outer;
+    }
+
+    if (outer.covers(inner.boundingRect)) {
+      return outer;
+    }
+
+    if (inner.covers(outer.boundingRect)) {
+      return inner;
+    }
+
+    final ScenePath path = ui.Path() as ScenePath;
+    path.addPath(outer.toPath, ui.Offset.zero);
+    path.addPath(inner.toPath, ui.Offset.zero);
+    return PlatformViewPathClip(path);
+  }
+}
+
+class PlatformViewNoClip implements PlatformViewClip {
+  const PlatformViewNoClip();
+
+  @override
+  PlatformViewClip positioned(PlatformViewPosition positioned) {
+    return this;
+  }
+
+  @override
+  ScenePath get toPath => ui.Path() as ScenePath;
+
+  @override
+  ui.Rect get boundingRect => ui.Rect.zero;
+
+  @override
+  bool covers(ui.Rect rect) {
+    return false;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == PlatformViewNoClip);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+}
+
+class PlatformViewRectClip implements PlatformViewClip {
+  PlatformViewRectClip(this.rect);
+
+  final ui.Rect rect;
+
+  @override
+  PlatformViewClip positioned(PlatformViewPosition position) {
+    if (position.isZero) {
+      return this;
+    }
+    final ui.Offset? offset = position.offset;
+    if (offset != null) {
+      return PlatformViewRectClip(rect.shift(offset));
+    } else {
+      return PlatformViewPathClip(toPath.transform(position.transform!.toFloat64()) as ScenePath);
+    }
+  }
+
+  @override
+  ScenePath get toPath => (ui.Path() as ScenePath)..addRect(rect);
+
+  @override
+  ui.Rect get boundingRect => rect;
+
+  @override
+  bool covers(ui.Rect other) {
+    return rect.left <= other.left &&
+      rect.right >= other.right &&
+      rect.top <= other.top &&
+      rect.bottom >= other.bottom;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is PlatformViewRectClip && rect == other.rect;
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, rect);
+}
+
+class PlatformViewRRectClip implements PlatformViewClip {
+  PlatformViewRRectClip(this.rrect);
+
+  final ui.RRect rrect;
+
+  @override
+  PlatformViewClip positioned(PlatformViewPosition position) {
+    if (position.isZero) {
+      return this;
+    }
+    final ui.Offset? offset = position.offset;
+    if (offset != null) {
+      return PlatformViewRRectClip(rrect.shift(offset));
+    } else {
+      return PlatformViewPathClip(toPath.transform(position.transform!.toFloat64()) as ScenePath);
+    }
+  }
+
+  @override
+  ScenePath get toPath => (ui.Path() as ScenePath)..addRRect(rrect);
+
+  @override
+  ui.Rect get boundingRect => throw UnimplementedError();
+
+  @override
+  bool covers(ui.Rect other) {
+    final ui.Rect rect = rrect.safeInnerRect;
+    return rect.left <= other.left &&
+      rect.right >= other.right &&
+      rect.top <= other.top &&
+      rect.bottom >= other.bottom;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is PlatformViewRRectClip && rrect == other.rrect;
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, rrect);
+}
+
+class PlatformViewPathClip implements PlatformViewClip {
+  PlatformViewPathClip(this.path);
+
+  final ScenePath path;
+
+  @override
+  PlatformViewClip positioned(PlatformViewPosition position) {
+    if (position.isZero) {
+      return this;
+    }
+
+    final ui.Offset? offset = position.offset;
+    if (offset != null) {
+      return PlatformViewPathClip(path.shift(offset) as ScenePath);
+    } else {
+      return PlatformViewPathClip(path.transform(position.transform!.toFloat64()) as ScenePath);
+    }
+  }
+
+  @override
+  ScenePath get toPath => path;
+
+  @override
+  ui.Rect get boundingRect => path.getBounds();
+
+  @override
+  bool covers(ui.Rect rect) {
+    // There is no way of determining if an arbitrary path fully covers a rectangle
+    // so we always conservatively return false here.
+    return false;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is PlatformViewPathClip && path == other.path;
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, path);
 }
 
 class LayerBuilder {

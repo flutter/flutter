@@ -5,7 +5,9 @@
 #include "export.h"
 #include "helpers.h"
 #include "third_party/skia/include/core/SkPath.h"
+#include "third_party/skia/include/core/SkString.h"
 #include "third_party/skia/include/pathops/SkPathOps.h"
+#include "third_party/skia/include/utils/SkParsePath.h"
 
 using namespace Skwasm;
 
@@ -193,4 +195,9 @@ SKWASM_EXPORT SkPath* path_combine(SkPathOp operation,
     delete output;
     return nullptr;
   }
+}
+
+SKWASM_EXPORT SkString* path_getSvgString(SkPath* path) {
+  SkString* string = new SkString(SkParsePath::ToSVGString(*path));
+  return string;
 }
