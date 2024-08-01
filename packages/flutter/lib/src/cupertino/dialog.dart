@@ -505,10 +505,9 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
 /// or removed by setting the [blurSigma] to 0.
 ///
 /// The saturation effect can be removed by setting [isVibrancePainted] to
-/// false. The saturation effect is not supported on Web and will not be
-/// applied regardless of the value of [isVibrancePainted]. Removing the vibrance
-/// can be helpful to achieve consistent appearance across web
-/// and mobile, or to prevent oversaturating areas where multiple
+/// false. The saturation effect is not supported on the html web renderer and
+/// will not be applied regardless of the value of [isVibrancePainted]. Removing
+/// the vibrance can prevent oversaturating areas where multiple
 /// [CupertinoPopupSurface]s are stacked upon each other.
 ///
 /// The surface color can be disabled by setting [isSurfacePainted] to false,
@@ -649,7 +648,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   ];
 
   ImageFilter? _buildFilter(Brightness? brightness) {
-    if (!isVibrancePainted) {
+    if ((kIsWeb && !isCanvasKit) || !isVibrancePainted) {
       if (blurSigma <= 0) {
         return null;
       }
