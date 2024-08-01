@@ -83,8 +83,7 @@ void main() {
         matching: find.byType(SliverList),
       ),
       findsOne,
-      reason:
-          'Expected one, initial (bottom), SliverList in the CustomScrollView',
+      reason: 'Expected one, initial (bottom), SliverList in the CustomScrollView',
     );
 
     //SliverList contains one Container
