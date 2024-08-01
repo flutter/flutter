@@ -155,6 +155,89 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
     return _projectInfo ??= await xcodeProjectInterpreter.getInfo(hostAppRoot.path);
   }
   XcodeProjectInfo? _projectInfo;
+
+  /// The build settings for the host app of this project, as a detached map.
+  ///
+  /// Returns null, if Xcode tooling is unavailable.
+  Future<Map<String, String>?> buildSettingsForBuildInfo(
+    BuildInfo? buildInfo, {
+    String? scheme,
+    String? configuration,
+    String? target,
+    EnvironmentType environmentType = EnvironmentType.physical,
+    String? deviceId,
+    bool isWatch = false,
+  }) async {
+    if (!existsSync()) {
+      return null;
+    }
+    final XcodeProjectInfo? info = await projectInfo();
+    if (info == null) {
+      return null;
+    }
+
+    scheme ??= info.schemeFor(buildInfo);
+    if (scheme == null) {
+      info.reportFlavorNotFoundAndExit();
+    }
+
+    configuration ??= (await projectInfo())?.buildConfigurationFor(
+      buildInfo,
+      scheme,
+    );
+
+    final XcodeSdk sdk = switch ((environmentType, this)) {
+      (EnvironmentType.physical, _) when isWatch => XcodeSdk.WatchOS,
+      (EnvironmentType.simulator, _) when isWatch => XcodeSdk.WatchSimulator,
+      (EnvironmentType.physical, IosProject _) => XcodeSdk.IPhoneOS,
+      (EnvironmentType.simulator, IosProject _) => XcodeSdk.WatchSimulator,
+      (EnvironmentType.physical, MacOSProject _) => XcodeSdk.MacOSX,
+      (_, _) => throw ArgumentError('Unsupported SDK')
+    };
+
+    return _buildSettingsForXcodeProjectBuildContext(
+      XcodeProjectBuildContext(
+        scheme: scheme,
+        configuration: configuration,
+        sdk: sdk,
+        target: target,
+        deviceId: deviceId,
+      ),
+    );
+  }
+
+  Future<Map<String, String>?> _buildSettingsForXcodeProjectBuildContext(XcodeProjectBuildContext buildContext) async {
+    if (!existsSync()) {
+      return null;
+    }
+    final Map<String, String>? currentBuildSettings = _buildSettingsByBuildContext[buildContext];
+    if (currentBuildSettings == null) {
+      final Map<String, String>? calculatedBuildSettings = await _xcodeProjectBuildSettings(buildContext);
+      if (calculatedBuildSettings != null) {
+        _buildSettingsByBuildContext[buildContext] = calculatedBuildSettings;
+      }
+    }
+    return _buildSettingsByBuildContext[buildContext];
+  }
+
+  final Map<XcodeProjectBuildContext, Map<String, String>> _buildSettingsByBuildContext = <XcodeProjectBuildContext, Map<String, String>>{};
+
+  Future<Map<String, String>?> _xcodeProjectBuildSettings(XcodeProjectBuildContext buildContext) async {
+    final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
+    if (xcodeProjectInterpreter == null || !xcodeProjectInterpreter.isInstalled) {
+      return null;
+    }
+
+    final Map<String, String> buildSettings = await xcodeProjectInterpreter.getBuildSettings(
+      xcodeProject.path,
+      buildContext: buildContext,
+    );
+    if (buildSettings.isNotEmpty) {
+      // No timeouts, flakes, or errors.
+      return buildSettings;
+    }
+    return null;
+  }
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -422,80 +505,6 @@ class IosProject extends XcodeBasedProject {
       globals.printTrace('$kProductNameKey not present, defaulting to $hostAppProjectName');
     }
     return productName ?? XcodeBasedProject._defaultHostAppName;
-  }
-
-  /// The build settings for the host app of this project, as a detached map.
-  ///
-  /// Returns null, if iOS tooling is unavailable.
-  Future<Map<String, String>?> buildSettingsForBuildInfo(
-    BuildInfo? buildInfo, {
-    String? scheme,
-    String? configuration,
-    String? target,
-    EnvironmentType environmentType = EnvironmentType.physical,
-    String? deviceId,
-    bool isWatch = false,
-  }) async {
-    if (!existsSync()) {
-      return null;
-    }
-    final XcodeProjectInfo? info = await projectInfo();
-    if (info == null) {
-      return null;
-    }
-
-    scheme ??= info.schemeFor(buildInfo);
-    if (scheme == null) {
-      info.reportFlavorNotFoundAndExit();
-    }
-
-    configuration ??= (await projectInfo())?.buildConfigurationFor(
-      buildInfo,
-      scheme,
-    );
-    return _buildSettingsForXcodeProjectBuildContext(
-      XcodeProjectBuildContext(
-        environmentType: environmentType,
-        scheme: scheme,
-        configuration: configuration,
-        target: target,
-        deviceId: deviceId,
-        isWatch: isWatch,
-      ),
-    );
-  }
-
-  Future<Map<String, String>?> _buildSettingsForXcodeProjectBuildContext(XcodeProjectBuildContext buildContext) async {
-    if (!existsSync()) {
-      return null;
-    }
-    final Map<String, String>? currentBuildSettings = _buildSettingsByBuildContext[buildContext];
-    if (currentBuildSettings == null) {
-      final Map<String, String>? calculatedBuildSettings = await _xcodeProjectBuildSettings(buildContext);
-      if (calculatedBuildSettings != null) {
-        _buildSettingsByBuildContext[buildContext] = calculatedBuildSettings;
-      }
-    }
-    return _buildSettingsByBuildContext[buildContext];
-  }
-
-  final Map<XcodeProjectBuildContext, Map<String, String>> _buildSettingsByBuildContext = <XcodeProjectBuildContext, Map<String, String>>{};
-
-  Future<Map<String, String>?> _xcodeProjectBuildSettings(XcodeProjectBuildContext buildContext) async {
-    final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
-    if (xcodeProjectInterpreter == null || !xcodeProjectInterpreter.isInstalled) {
-      return null;
-    }
-
-    final Map<String, String> buildSettings = await xcodeProjectInterpreter.getBuildSettings(
-      xcodeProject.path,
-      buildContext: buildContext,
-    );
-    if (buildSettings.isNotEmpty) {
-      // No timeouts, flakes, or errors.
-      return buildSettings;
-    }
-    return null;
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
