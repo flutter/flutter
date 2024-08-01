@@ -36,7 +36,7 @@ class _${blockName}DefaultsM3 extends SliderThemeData {
   Color? get disabledInactiveTrackColor => ${componentColor('$tokenGroup.disabled.inactive.track')};
 
   @override
-  Color? get disabledSecondaryActiveTrackColor => ${componentColor('$tokenGroup.disabled.active.track')}.withOpacity(0.12);
+  Color? get disabledSecondaryActiveTrackColor => ${componentColor('$tokenGroup.disabled.active.track')};
 
   @override
   Color? get activeTickMarkColor => _colors.${getToken("$tokenGroup.stop-indicator.color-selected")};
@@ -55,7 +55,7 @@ class _${blockName}DefaultsM3 extends SliderThemeData {
   Color? get thumbColor => ${componentColor('$tokenGroup.handle')};
 
   @override
-  Color? get disabledThumbColor => ${componentColor('$tokenGroup.disabled.handle')}.withOpacity(${getToken("$tokenGroup.disabled.handle.opacity")});
+  Color? get disabledThumbColor => ${componentColor('$tokenGroup.disabled.handle')};
 
   @override
   Color? get overlayColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
@@ -114,8 +114,7 @@ class _${blockName}DefaultsM3 extends SliderThemeData {
     });
 
   @override
-  // TODO(tahatesser): Update this hard-coded value to use the token value when it is available.
-  double? get trackGapSize => 6.0;
+  double? get trackGapSize => ${getToken("$tokenGroup.active.handle.padding")};
 }
 ''';
 }

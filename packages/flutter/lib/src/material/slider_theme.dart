@@ -3642,7 +3642,7 @@ class BarSliderThumbShape extends SliderComponentShape {
         width: thumbSize.width,
         height: thumbSize.height,
       ),
-      Radius.circular(thumbSize.shortestSide /2),
+      Radius.circular(thumbSize.shortestSide / 2),
     );
     canvas.drawRRect(rrect, Paint()..color = color);
   }

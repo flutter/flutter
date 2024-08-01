@@ -2072,7 +2072,7 @@ class _SliderDefaultsM3 extends SliderThemeData {
   Color? get disabledInactiveTrackColor => _colors.onSurface.withOpacity(0.12);
 
   @override
-  Color? get disabledSecondaryActiveTrackColor => _colors.onSurface.withOpacity(0.38).withOpacity(0.12);
+  Color? get disabledSecondaryActiveTrackColor => _colors.onSurface.withOpacity(0.38);
 
   @override
   Color? get activeTickMarkColor => _colors.secondaryContainer;
@@ -2091,7 +2091,7 @@ class _SliderDefaultsM3 extends SliderThemeData {
   Color? get thumbColor => _colors.primary;
 
   @override
-  Color? get disabledThumbColor => _colors.onSurface.withOpacity(0.38).withOpacity(0.38);
+  Color? get disabledThumbColor => _colors.onSurface.withOpacity(0.38);
 
   @override
   Color? get overlayColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
@@ -2150,7 +2150,6 @@ class _SliderDefaultsM3 extends SliderThemeData {
     });
 
   @override
-  // TODO(tahatesser): Update this hard-coded value to use the token value when it is available.
   double? get trackGapSize => 6.0;
 }
 
