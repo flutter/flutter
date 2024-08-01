@@ -61,8 +61,8 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('TreeSliver Demo'),
+      appBar: const AppBar(
+        title: Text('TreeSliver Demo'),
       ),
       body: CustomScrollView(
         slivers: <Widget>[

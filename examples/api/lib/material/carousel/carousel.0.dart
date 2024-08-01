@@ -13,20 +13,20 @@ class CarouselExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          leading: const Icon(Icons.cast),
-          title: const Text('Flutter TV'),
-          actions: const <Widget>[
+          leading: Icon(Icons.cast),
+          title: Text('Flutter TV'),
+          actions: <Widget>[
             Padding(
               padding: EdgeInsetsDirectional.only(end: 16.0),
               child: CircleAvatar(child: Icon(Icons.account_circle)),
             ),
           ],
         ),
-        body: const CarouselExample(),
+        body: CarouselExample(),
       ),
     );
   }

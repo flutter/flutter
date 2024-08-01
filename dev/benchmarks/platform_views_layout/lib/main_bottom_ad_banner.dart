@@ -55,7 +55,7 @@ class PlatformViewAppState extends State<PlatformViewApp> {
       theme: ThemeData.light(),
       title: 'Advanced Layout',
       home: Scaffold(
-        appBar: AppBar(title: const Text('Platform View Bottom Ad Banner')),
+        appBar: const AppBar(title: Text('Platform View Bottom Ad Banner')),
         body: Column(
           children: <Widget>[
             Expanded(

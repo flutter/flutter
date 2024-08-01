@@ -1887,7 +1887,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          appBar: AppBar(title: const Text('Headings')),
+          appBar: const AppBar(title: Text('Headings')),
           body: ListView(
             children: <Widget>[
               for (int level = 1; level <= 6; level++)
