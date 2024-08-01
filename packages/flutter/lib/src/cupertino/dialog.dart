@@ -571,7 +571,6 @@ class CupertinoPopupSurface extends StatelessWidget {
   final bool isSurfacePainted;
 
   /// The widget below this widget in the tree.
-  ///
   // Because [CupertinoPopupSurface] is composed of proxy boxes, which mimic
   // the size of their child, a [child] is required to ensure that this surface
   // has a size.
