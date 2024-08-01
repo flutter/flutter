@@ -180,8 +180,9 @@ void main() {
     final Offset location = tester.getCenter(find.byType(CustomScrollView));
     final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
     testPointer.hover(location);
-    await tester.sendEventToBinding(PointerScrollEvent(
-        position: location, scrollDelta: const Offset(0, -1)));
+    await tester.sendEventToBinding(
+      PointerScrollEvent(position: location, scrollDelta: const Offset(0, -1)),
+    );
 
     await tester.pump();
 
