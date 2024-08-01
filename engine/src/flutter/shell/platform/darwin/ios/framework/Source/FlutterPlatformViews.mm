@@ -5,14 +5,27 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 
 #include <Metal/Metal.h>
+#include <unordered_map>
 
+#include "flow/surface_frame.h"
 #include "flutter/flow/view_slicer.h"
+#include "flutter/fml/make_copyable.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
+#include "fml/logging.h"
+#include "fml/synchronization/count_down_latch.h"
 
 FLUTTER_ASSERT_ARC
+
+#ifdef FML_OS_IOS_SIMULATOR
+// The number of frames the rasterizer task runner will continue
+// to run on the platform thread after no platform view is rendered.
+//
+// Note: this is an arbitrary number.
+static const int kDefaultMergedLeaseDuration = 10;
+#endif  // FML_OS_IOS_SIMULATOR
 
 @implementation UIView (FirstResponder)
 - (BOOL)flt_hasFirstResponderInViewHierarchySubtree {
@@ -80,72 +93,70 @@ namespace flutter {
 // Becomes NO if Apple's API changes and blurred backdrop filters cannot be applied.
 BOOL canApplyBlurBackdrop = YES;
 
-std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewLayerPool::GetLayer(
-    GrDirectContext* gr_context,
-    const std::shared_ptr<IOSContext>& ios_context,
-    MTLPixelFormat pixel_format) {
-  if (available_layer_index_ >= layers_.size()) {
-    std::shared_ptr<FlutterPlatformViewLayer> layer;
-    fml::scoped_nsobject<UIView> overlay_view;
-    fml::scoped_nsobject<UIView> overlay_view_wrapper;
-
-    bool impeller_enabled = !!ios_context->GetImpellerContext();
-    if (!gr_context && !impeller_enabled) {
-      overlay_view.reset([[FlutterOverlayView alloc] init]);
-      overlay_view_wrapper.reset([[FlutterOverlayView alloc] init]);
-
-      auto ca_layer = fml::scoped_nsobject<CALayer>{[overlay_view.get() layer]};
-      std::unique_ptr<IOSSurface> ios_surface = IOSSurface::Create(ios_context, ca_layer);
-      std::unique_ptr<Surface> surface = ios_surface->CreateGPUSurface();
-
-      layer = std::make_shared<FlutterPlatformViewLayer>(
-          std::move(overlay_view), std::move(overlay_view_wrapper), std::move(ios_surface),
-          std::move(surface));
-    } else {
-      CGFloat screenScale = [UIScreen mainScreen].scale;
-      overlay_view.reset([[FlutterOverlayView alloc] initWithContentsScale:screenScale
-                                                               pixelFormat:pixel_format]);
-      overlay_view_wrapper.reset([[FlutterOverlayView alloc] initWithContentsScale:screenScale
-                                                                       pixelFormat:pixel_format]);
-
-      auto ca_layer = fml::scoped_nsobject<CALayer>{[overlay_view.get() layer]};
-      std::unique_ptr<IOSSurface> ios_surface = IOSSurface::Create(ios_context, ca_layer);
-      std::unique_ptr<Surface> surface = ios_surface->CreateGPUSurface(gr_context);
-
-      layer = std::make_shared<FlutterPlatformViewLayer>(
-          std::move(overlay_view), std::move(overlay_view_wrapper), std::move(ios_surface),
-          std::move(surface));
-      layer->gr_context = gr_context;
-    }
-    // The overlay view wrapper masks the overlay view.
-    // This is required to keep the backing surface size unchanged between frames.
-    //
-    // Otherwise, changing the size of the overlay would require a new surface,
-    // which can be very expensive.
-    //
-    // This is the case of an animation in which the overlay size is changing in every frame.
-    //
-    // +------------------------+
-    // |   overlay_view         |
-    // |    +--------------+    |              +--------------+
-    // |    |    wrapper   |    |  == mask =>  | overlay_view |
-    // |    +--------------+    |              +--------------+
-    // +------------------------+
-    layer->overlay_view_wrapper.get().clipsToBounds = YES;
-    [layer->overlay_view_wrapper.get() addSubview:layer->overlay_view];
-    layers_.push_back(layer);
+std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewLayerPool::GetNextLayer() {
+  std::shared_ptr<FlutterPlatformViewLayer> result;
+  if (available_layer_index_ < layers_.size()) {
+    result = layers_[available_layer_index_];
+    available_layer_index_++;
   }
-  std::shared_ptr<FlutterPlatformViewLayer> layer = layers_[available_layer_index_];
-  if (gr_context != layer->gr_context) {
-    layer->gr_context = gr_context;
-    // The overlay already exists, but the GrContext was changed so we need to recreate
-    // the rendering surface with the new GrContext.
-    IOSSurface* ios_surface = layer->ios_surface.get();
+
+  return result;
+}
+
+void FlutterPlatformViewLayerPool::CreateLayer(GrDirectContext* gr_context,
+                                               const std::shared_ptr<IOSContext>& ios_context,
+                                               MTLPixelFormat pixel_format) {
+  FML_DCHECK([[NSThread currentThread] isMainThread]);
+  std::shared_ptr<FlutterPlatformViewLayer> layer;
+  fml::scoped_nsobject<UIView> overlay_view;
+  fml::scoped_nsobject<UIView> overlay_view_wrapper;
+
+  bool impeller_enabled = !!ios_context->GetImpellerContext();
+  if (!gr_context && !impeller_enabled) {
+    overlay_view.reset([[FlutterOverlayView alloc] init]);
+    overlay_view_wrapper.reset([[FlutterOverlayView alloc] init]);
+
+    auto ca_layer = fml::scoped_nsobject<CALayer>{[overlay_view.get() layer]};
+    std::unique_ptr<IOSSurface> ios_surface = IOSSurface::Create(ios_context, ca_layer);
+    std::unique_ptr<Surface> surface = ios_surface->CreateGPUSurface();
+
+    layer = std::make_shared<FlutterPlatformViewLayer>(std::move(overlay_view),
+                                                       std::move(overlay_view_wrapper),
+                                                       std::move(ios_surface), std::move(surface));
+  } else {
+    CGFloat screenScale = [UIScreen mainScreen].scale;
+    overlay_view.reset([[FlutterOverlayView alloc] initWithContentsScale:screenScale
+                                                             pixelFormat:pixel_format]);
+    overlay_view_wrapper.reset([[FlutterOverlayView alloc] initWithContentsScale:screenScale
+                                                                     pixelFormat:pixel_format]);
+
+    auto ca_layer = fml::scoped_nsobject<CALayer>{[overlay_view.get() layer]};
+    std::unique_ptr<IOSSurface> ios_surface = IOSSurface::Create(ios_context, ca_layer);
     std::unique_ptr<Surface> surface = ios_surface->CreateGPUSurface(gr_context);
-    layer->surface = std::move(surface);
+
+    layer = std::make_shared<FlutterPlatformViewLayer>(std::move(overlay_view),
+                                                       std::move(overlay_view_wrapper),
+                                                       std::move(ios_surface), std::move(surface));
+    layer->gr_context = gr_context;
   }
-  available_layer_index_++;
-  return layer;
+  // The overlay view wrapper masks the overlay view.
+  // This is required to keep the backing surface size unchanged between frames.
+  //
+  // Otherwise, changing the size of the overlay would require a new surface,
+  // which can be very expensive.
+  //
+  // This is the case of an animation in which the overlay size is changing in every frame.
+  //
+  // +------------------------+
+  // |   overlay_view         |
+  // |    +--------------+    |              +--------------+
+  // |    |    wrapper   |    |  == mask =>  | overlay_view |
+  // |    +--------------+    |              +--------------+
+  // +------------------------+
+  layer->overlay_view_wrapper.get().clipsToBounds = YES;
+  [layer->overlay_view_wrapper.get() addSubview:layer->overlay_view];
+
+  layers_.push_back(layer);
 }
 
 void FlutterPlatformViewLayerPool::RecycleLayers() {
@@ -208,10 +219,11 @@ void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterRe
   NSString* viewTypeString = args[@"viewType"];
   std::string viewType(viewTypeString.UTF8String);
 
-  if (views_.count(viewId) != 0) {
+  if (platform_views_.count(viewId) != 0) {
     result([FlutterError errorWithCode:@"recreating_view"
                                message:@"trying to create an already created view"
                                details:[NSString stringWithFormat:@"view id: '%lld'", viewId]]);
+    return;
   }
 
   NSObject<FlutterPlatformViewFactory>* factory = factories_[viewType].get();
@@ -247,19 +259,22 @@ void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterRe
   // Set a unique view identifier, so the platform view can be identified in unit tests.
   platform_view.accessibilityIdentifier =
       [NSString stringWithFormat:@"platform_view[%lld]", viewId];
-  views_[viewId] = fml::scoped_nsobject<NSObject<FlutterPlatformView>>(embedded_view);
 
   FlutterTouchInterceptingView* touch_interceptor = [[FlutterTouchInterceptingView alloc]
                   initWithEmbeddedView:platform_view
                platformViewsController:GetWeakPtr()
       gestureRecognizersBlockingPolicy:gesture_recognizers_blocking_policies_[viewType]];
 
-  touch_interceptors_[viewId] =
-      fml::scoped_nsobject<FlutterTouchInterceptingView>(touch_interceptor);
-
   ChildClippingView* clipping_view = [[ChildClippingView alloc] initWithFrame:CGRectZero];
   [clipping_view addSubview:touch_interceptor];
-  root_views_[viewId] = fml::scoped_nsobject<UIView>(clipping_view);
+
+  platform_views_.emplace(
+      viewId, PlatformViewData{
+                  .view = fml::scoped_nsobject<NSObject<FlutterPlatformView>>(embedded_view),  //
+                  .touch_interceptor =
+                      fml::scoped_nsobject<FlutterTouchInterceptingView>(touch_interceptor),  //
+                  .root_view = fml::scoped_nsobject<UIView>(clipping_view)                    //
+              });
 
   result(nil);
 }
@@ -268,7 +283,7 @@ void FlutterPlatformViewsController::OnDispose(FlutterMethodCall* call, FlutterR
   NSNumber* arg = [call arguments];
   int64_t viewId = [arg longLongValue];
 
-  if (views_.count(viewId) == 0) {
+  if (platform_views_.count(viewId) == 0) {
     result([FlutterError errorWithCode:@"unknown_view"
                                message:@"trying to dispose an unknown"
                                details:[NSString stringWithFormat:@"view id: '%lld'", viewId]]);
@@ -284,14 +299,14 @@ void FlutterPlatformViewsController::OnAcceptGesture(FlutterMethodCall* call,
   NSDictionary<NSString*, id>* args = [call arguments];
   int64_t viewId = [args[@"id"] longLongValue];
 
-  if (views_.count(viewId) == 0) {
+  if (platform_views_.count(viewId) == 0) {
     result([FlutterError errorWithCode:@"unknown_view"
                                message:@"trying to set gesture state for an unknown view"
                                details:[NSString stringWithFormat:@"view id: '%lld'", viewId]]);
     return;
   }
 
-  FlutterTouchInterceptingView* view = touch_interceptors_[viewId].get();
+  FlutterTouchInterceptingView* view = platform_views_[viewId].touch_interceptor.get();
   [view releaseGesture];
 
   result(nil);
@@ -302,14 +317,14 @@ void FlutterPlatformViewsController::OnRejectGesture(FlutterMethodCall* call,
   NSDictionary<NSString*, id>* args = [call arguments];
   int64_t viewId = [args[@"id"] longLongValue];
 
-  if (views_.count(viewId) == 0) {
+  if (platform_views_.count(viewId) == 0) {
     result([FlutterError errorWithCode:@"unknown_view"
                                message:@"trying to set gesture state for an unknown view"
                                details:[NSString stringWithFormat:@"view id: '%lld'", viewId]]);
     return;
   }
 
-  FlutterTouchInterceptingView* view = touch_interceptors_[viewId].get();
+  FlutterTouchInterceptingView* view = platform_views_[viewId].touch_interceptor.get();
   [view blockGesture];
 
   result(nil);
@@ -334,20 +349,11 @@ void FlutterPlatformViewsController::CancelFrame() {
   ResetFrameState();
 }
 
-// TODO(cyanglaz): https://github.com/flutter/flutter/issues/56474
-// Make this method check if there are pending view operations instead.
-// Also rename it to `HasPendingViewOperations`.
-bool FlutterPlatformViewsController::HasPlatformViewThisOrNextFrame() {
-  return !composition_order_.empty() || !active_composition_order_.empty();
-}
-
-const int FlutterPlatformViewsController::kDefaultMergedLeaseDuration;
-
 PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
     const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-  // TODO(cyanglaz): https://github.com/flutter/flutter/issues/56474
-  // Rename `has_platform_view` to `view_mutated` when the above issue is resolved.
-  if (!HasPlatformViewThisOrNextFrame()) {
+  // TODO(jonahwilliams): remove this once Software backend is removed for iOS Sim.
+#ifdef FML_OS_IOS_SIMULATOR
+  if (composition_order_.empty()) {
     return PostPrerollResult::kSuccess;
   }
   if (!raster_thread_merger->IsMerged()) {
@@ -366,17 +372,21 @@ PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
   // In order to sync the rendering of the platform views (quartz) with skia's rendering,
   // We need to begin an explicit CATransaction. This transaction needs to be submitted
   // after the current frame is submitted.
-  BeginCATransaction();
   raster_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
   return PostPrerollResult::kSuccess;
+#else
+  return PostPrerollResult::kSuccess;
+#endif  // FML_OS_IOS_SIMULATOR
 }
 
 void FlutterPlatformViewsController::EndFrame(
     bool should_resubmit_frame,
     const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+#if FML_OS_IOS_SIMULATOR
   if (should_resubmit_frame) {
     raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
   }
+#endif  // FML_OS_IOS_SIMULATOR
 }
 
 void FlutterPlatformViewsController::PushFilterToVisitedPlatformViews(
@@ -392,10 +402,6 @@ void FlutterPlatformViewsController::PushFilterToVisitedPlatformViews(
 void FlutterPlatformViewsController::PrerollCompositeEmbeddedView(
     int64_t view_id,
     std::unique_ptr<EmbeddedViewParams> params) {
-  // All the CATransactions should be committed by the end of the last frame,
-  // so catransaction_added_ must be false.
-  FML_DCHECK(!catransaction_added_);
-
   SkRect view_bounds = SkRect::Make(frame_size_);
   std::unique_ptr<EmbedderViewSlice> view;
   view = std::make_unique<DisplayListEmbedderViewSlice>(view_bounds);
@@ -426,34 +432,24 @@ UIView* FlutterPlatformViewsController::GetPlatformViewByID(int64_t view_id) {
 
 FlutterTouchInterceptingView* FlutterPlatformViewsController::GetFlutterTouchInterceptingViewByID(
     int64_t view_id) {
-  if (views_.empty()) {
+  if (platform_views_.empty()) {
     return nil;
   }
-  return touch_interceptors_[view_id].get();
+  return platform_views_[view_id].touch_interceptor.get();
 }
 
 long FlutterPlatformViewsController::FindFirstResponderPlatformViewId() {
-  for (auto const& [id, root_view] : root_views_) {
-    if (((UIView*)root_view.get()).flt_hasFirstResponderInViewHierarchySubtree) {
+  for (auto const& [id, platform_view_data] : platform_views_) {
+    UIView* root_view = (UIView*)platform_view_data.root_view.get();
+    if (root_view.flt_hasFirstResponderInViewHierarchySubtree) {
       return id;
     }
   }
   return -1;
 }
 
-int FlutterPlatformViewsController::CountClips(const MutatorsStack& mutators_stack) {
-  std::vector<std::shared_ptr<Mutator>>::const_reverse_iterator iter = mutators_stack.Bottom();
-  int clipCount = 0;
-  while (iter != mutators_stack.Top()) {
-    if ((*iter)->IsClipType()) {
-      clipCount++;
-    }
-    ++iter;
-  }
-  return clipCount;
-}
-
 void FlutterPlatformViewsController::ClipViewSetMaskView(UIView* clipView) {
+  FML_DCHECK([[NSThread currentThread] isMainThread]);
   if (clipView.maskView) {
     return;
   }
@@ -472,7 +468,7 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
   if (flutter_view_ == nullptr) {
     return;
   }
-  FML_DCHECK(CATransform3DEqualToTransform(embedded_view.layer.transform, CATransform3DIdentity));
+
   ResetAnchor(embedded_view.layer);
   ChildClippingView* clipView = (ChildClippingView*)embedded_view.superview;
 
@@ -597,7 +593,7 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
 void FlutterPlatformViewsController::CompositeWithParams(int64_t view_id,
                                                          const EmbeddedViewParams& params) {
   CGRect frame = CGRectMake(0, 0, params.sizePoints().width(), params.sizePoints().height());
-  FlutterTouchInterceptingView* touchInterceptor = touch_interceptors_[view_id].get();
+  FlutterTouchInterceptingView* touchInterceptor = platform_views_[view_id].touch_interceptor.get();
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   FML_DCHECK(CGPointEqualToPoint([touchInterceptor embeddedView].frame.origin, CGPointZero));
   if (non_zero_origin_views_.find(view_id) == non_zero_origin_views_.end() &&
@@ -621,7 +617,7 @@ void FlutterPlatformViewsController::CompositeWithParams(int64_t view_id,
   touchInterceptor.alpha = 1;
 
   const MutatorsStack& mutatorStack = params.mutatorsStack();
-  UIView* clippingView = root_views_[view_id].get();
+  UIView* clippingView = platform_views_[view_id].root_view.get();
   // The frame of the clipping view should be the final bounding rect.
   // Because the translate matrix in the Mutator Stack also includes the offset,
   // when we apply the transforms matrix in |ApplyMutators|, we need
@@ -634,125 +630,231 @@ void FlutterPlatformViewsController::CompositeWithParams(int64_t view_id,
 }
 
 DlCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(int64_t view_id) {
-  // Any UIKit related code has to run on main thread.
-  FML_DCHECK([[NSThread currentThread] isMainThread]);
-  // Do nothing if the view doesn't need to be composited.
-  if (views_to_recomposite_.count(view_id) == 0) {
-    return slices_[view_id]->canvas();
-  }
-  CompositeWithParams(view_id, current_composition_params_[view_id]);
-  views_to_recomposite_.erase(view_id);
   return slices_[view_id]->canvas();
 }
 
 void FlutterPlatformViewsController::Reset() {
-  for (int64_t view_id : active_composition_order_) {
-    UIView* sub_view = root_views_[view_id].get();
-    [sub_view removeFromSuperview];
-  }
-  root_views_.clear();
-  touch_interceptors_.clear();
-  views_.clear();
+  // Reset will only be called from the raster thread or a merged raster/platform thread.
+  // platform_views_ must only be modified on the platform thread, and any operations that
+  // read or modify platform views should occur there.
+  fml::TaskRunner::RunNowOrPostTask(
+      platform_task_runner_, [&, composition_order = composition_order_]() {
+        for (int64_t view_id : composition_order_) {
+          [platform_views_[view_id].root_view.get() removeFromSuperview];
+        }
+        platform_views_.clear();
+      });
+
   composition_order_.clear();
-  active_composition_order_.clear();
   slices_.clear();
   current_composition_params_.clear();
-  clip_count_.clear();
   views_to_recomposite_.clear();
   layer_pool_->RecycleLayers();
   visited_platform_views_.clear();
 }
 
-SkRect FlutterPlatformViewsController::GetPlatformViewRect(int64_t view_id) {
-  UIView* platform_view = GetPlatformViewByID(view_id);
-  UIScreen* screen = [UIScreen mainScreen];
-  CGRect platform_view_cgrect = [platform_view convertRect:platform_view.bounds
-                                                    toView:flutter_view_];
-  return SkRect::MakeXYWH(platform_view_cgrect.origin.x * screen.scale,    //
-                          platform_view_cgrect.origin.y * screen.scale,    //
-                          platform_view_cgrect.size.width * screen.scale,  //
-                          platform_view_cgrect.size.height * screen.scale  //
-  );
-}
-
 bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
                                                  const std::shared_ptr<IOSContext>& ios_context,
-                                                 std::unique_ptr<SurfaceFrame> frame) {
+                                                 std::unique_ptr<SurfaceFrame> background_frame) {
   TRACE_EVENT0("flutter", "FlutterPlatformViewsController::SubmitFrame");
 
-  // Any UIKit related code has to run on main thread.
-  FML_DCHECK([[NSThread currentThread] isMainThread]);
-  if (flutter_view_ == nullptr) {
-    return frame->Submit();
+  // No platform views to render; we're done.
+  if (flutter_view_ == nullptr || (composition_order_.empty() && !had_platform_views_)) {
+    had_platform_views_ = false;
+    return background_frame->Submit();
   }
+  had_platform_views_ = true;
 
-  DisposeViews();
-
-  DlCanvas* background_canvas = frame->Canvas();
-
+  bool did_encode = true;
+  LayersMap platform_view_layers;
+  std::vector<std::unique_ptr<SurfaceFrame>> surface_frames;
+  surface_frames.reserve(composition_order_.size());
   std::unordered_map<int64_t, SkRect> view_rects;
-  for (auto view_id : composition_order_) {
-    view_rects[view_id] = GetPlatformViewRect(view_id);
+
+  for (int64_t view_id : composition_order_) {
+    view_rects[view_id] = current_composition_params_[view_id].finalBoundingRect();
   }
 
   std::unordered_map<int64_t, SkRect> overlay_layers =
-      SliceViews(background_canvas, composition_order_, slices_, view_rects);
+      SliceViews(background_frame->Canvas(), composition_order_, slices_, view_rects);
 
-  LayersMap platform_view_layers;
-  auto did_submit = true;
-
-  int overlay_id = 0;
+  size_t required_overlay_layers = 0;
   for (int64_t view_id : composition_order_) {
     std::unordered_map<int64_t, SkRect>::const_iterator overlay = overlay_layers.find(view_id);
     if (overlay == overlay_layers.end()) {
       continue;
     }
-    std::shared_ptr<FlutterPlatformViewLayer> layer =
-        GetLayer(gr_context,                                      //
-                 ios_context,                                     //
-                 slices_[view_id].get(),                          //
-                 overlay->second,                                 //
-                 view_id,                                         //
-                 overlay_id,                                      //
-                 ((FlutterView*)flutter_view_.get()).pixelFormat  //
-        );
-    did_submit &= layer->did_submit_last_frame;
-    platform_view_layers[view_id].push_back(layer);
+    required_overlay_layers++;
+  }
+
+  // If there are not sufficient overlay layers, we must construct them on the platform
+  // thread, at least until we've refactored iOS surface creation to use IOSurfaces
+  // instead of CALayers.
+  CreateMissingOverlays(gr_context, ios_context, required_overlay_layers);
+
+  int64_t overlay_id = 0;
+  for (int64_t view_id : composition_order_) {
+    std::unordered_map<int64_t, SkRect>::const_iterator overlay = overlay_layers.find(view_id);
+    if (overlay == overlay_layers.end()) {
+      continue;
+    }
+    std::shared_ptr<FlutterPlatformViewLayer> layer = GetExistingLayer();
+    if (!layer) {
+      continue;
+    }
+
+    std::unique_ptr<SurfaceFrame> frame = layer->surface->AcquireFrame(frame_size_);
+    // If frame is null, AcquireFrame already printed out an error message.
+    if (!frame) {
+      continue;
+    }
+    DlCanvas* overlay_canvas = frame->Canvas();
+    int restore_count = overlay_canvas->GetSaveCount();
+    overlay_canvas->Save();
+    overlay_canvas->ClipRect(overlay->second);
+    overlay_canvas->Clear(DlColor::kTransparent());
+    slices_[view_id]->render_into(overlay_canvas);
+    overlay_canvas->RestoreToCount(restore_count);
+
+    // This flutter view is never the last in a frame, since we always submit the
+    // underlay view last.
+    frame->set_submit_info({.frame_boundary = false, .present_with_transaction = true});
+    layer->did_submit_last_frame = frame->Encode();
+
+    did_encode &= layer->did_submit_last_frame;
+    platform_view_layers[view_id] = LayerData{
+        .rect = overlay->second,   //
+        .view_id = view_id,        //
+        .overlay_id = overlay_id,  //
+        .layer = layer             //
+    };
+    surface_frames.push_back(std::move(frame));
     overlay_id++;
+  }
+
+  background_frame->set_submit_info({.present_with_transaction = true});
+  background_frame->Encode();
+  surface_frames.push_back(std::move(background_frame));
+
+  // Mark all layers as available, so they can be used in the next frame.
+  std::vector<std::shared_ptr<FlutterPlatformViewLayer>> unused_layers =
+      layer_pool_->RemoveUnusedLayers();
+  layer_pool_->RecycleLayers();
+
+  auto task = [&,                                                         //
+               platform_view_layers = std::move(platform_view_layers),    //
+               current_composition_params = current_composition_params_,  //
+               views_to_recomposite = views_to_recomposite_,              //
+               composition_order = composition_order_,                    //
+               unused_layers = std::move(unused_layers),                  //
+               surface_frames = std::move(surface_frames)                 //
+  ]() mutable {
+    PerformSubmit(platform_view_layers,        //
+                  current_composition_params,  //
+                  views_to_recomposite,        //
+                  composition_order,           //
+                  unused_layers,               //
+                  surface_frames               //
+    );
+  };
+
+  fml::TaskRunner::RunNowOrPostTask(platform_task_runner_, fml::MakeCopyable(std::move(task)));
+
+  return did_encode;
+}
+
+void FlutterPlatformViewsController::CreateMissingOverlays(
+    GrDirectContext* gr_context,
+    const std::shared_ptr<IOSContext>& ios_context,
+    size_t required_overlay_layers) {
+  TRACE_EVENT0("flutter", "FlutterPlatformViewsController::CreateMissingLayers");
+
+  if (required_overlay_layers <= layer_pool_->size()) {
+    return;
+  }
+  auto missing_layer_count = required_overlay_layers - layer_pool_->size();
+
+  // If the raster thread isn't merged, create layers on the platform thread and block until
+  // complete.
+  auto latch = std::make_shared<fml::CountDownLatch>(1u);
+  fml::TaskRunner::RunNowOrPostTask(platform_task_runner_, [&]() {
+    for (auto i = 0u; i < missing_layer_count; i++) {
+      CreateLayer(gr_context,                                      //
+                  ios_context,                                     //
+                  ((FlutterView*)flutter_view_.get()).pixelFormat  //
+      );
+    }
+    latch->CountDown();
+  });
+  if (![[NSThread currentThread] isMainThread]) {
+    latch->Wait();
+  }
+}
+
+/// Update the buffers and mutate the platform views in CATransaction on the platform thread.
+void FlutterPlatformViewsController::PerformSubmit(
+    const LayersMap& platform_view_layers,
+    std::unordered_map<int64_t, EmbeddedViewParams>& current_composition_params,
+    const std::unordered_set<int64_t>& views_to_recomposite,
+    const std::vector<int64_t>& composition_order,
+    const std::vector<std::shared_ptr<FlutterPlatformViewLayer>>& unused_layers,
+    const std::vector<std::unique_ptr<SurfaceFrame>>& surface_frames) {
+  TRACE_EVENT0("flutter", "FlutterPlatformViewsController::PerformSubmit");
+  FML_DCHECK([[NSThread currentThread] isMainThread]);
+
+  [CATransaction begin];
+
+  // Configure Flutter overlay views.
+  for (const auto& [view_id, layer_data] : platform_view_layers) {
+    layer_data.layer->UpdateViewState(flutter_view_,         //
+                                      layer_data.rect,       //
+                                      layer_data.view_id,    //
+                                      layer_data.overlay_id  //
+    );
+  }
+
+  // Dispose unused Flutter Views.
+  for (auto& view : GetViewsToDispose()) {
+    [view removeFromSuperview];
+  }
+
+  // Composite Platform Views.
+  for (int64_t view_id : views_to_recomposite) {
+    CompositeWithParams(view_id, current_composition_params[view_id]);
+  }
+
+  // Present callbacks.
+  for (const auto& frame : surface_frames) {
+    frame->Submit();
   }
 
   // If a layer was allocated in the previous frame, but it's not used in the current frame,
   // then it can be removed from the scene.
-  RemoveUnusedLayers();
+  RemoveUnusedLayers(unused_layers, composition_order);
+
   // Organize the layers by their z indexes.
-  BringLayersIntoView(platform_view_layers);
-  // Mark all layers as available, so they can be used in the next frame.
-  layer_pool_->RecycleLayers();
+  BringLayersIntoView(platform_view_layers, composition_order);
 
-  did_submit &= frame->Submit();
-
-  // If the frame is submitted with embedded platform views,
-  // there should be a |[CATransaction begin]| call in this frame prior to all the drawing.
-  // If that case, we need to commit the transaction.
-  CommitCATransactionIfNeeded();
-  return did_submit;
+  [CATransaction commit];
 }
 
-void FlutterPlatformViewsController::BringLayersIntoView(LayersMap layer_map) {
+void FlutterPlatformViewsController::BringLayersIntoView(
+    const LayersMap& layer_map,
+    const std::vector<int64_t>& composition_order) {
   FML_DCHECK(flutter_view_);
   UIView* flutter_view = flutter_view_.get();
-  // Clear the `active_composition_order_`, which will be populated down below.
-  active_composition_order_.clear();
+
+  previous_composition_order_.clear();
   NSMutableArray* desired_platform_subviews = [NSMutableArray array];
-  for (size_t i = 0; i < composition_order_.size(); i++) {
-    int64_t platform_view_id = composition_order_[i];
-    std::vector<std::shared_ptr<FlutterPlatformViewLayer>> layers = layer_map[platform_view_id];
-    UIView* platform_view_root = root_views_[platform_view_id].get();
+  for (int64_t platform_view_id : composition_order) {
+    UIView* platform_view_root = platform_views_[platform_view_id].root_view.get();
     [desired_platform_subviews addObject:platform_view_root];
-    for (const std::shared_ptr<FlutterPlatformViewLayer>& layer : layers) {
-      [desired_platform_subviews addObject:layer->overlay_view_wrapper];
+
+    auto maybe_layer_data = layer_map.find(platform_view_id);
+    if (maybe_layer_data != layer_map.end()) {
+      [desired_platform_subviews addObject:maybe_layer_data->second.layer->overlay_view_wrapper];
     }
-    active_composition_order_.push_back(platform_view_id);
+    previous_composition_order_.push_back(platform_view_id);
   }
 
   NSSet* desired_platform_subviews_set = [NSSet setWithArray:desired_platform_subviews];
@@ -761,6 +863,7 @@ void FlutterPlatformViewsController::BringLayersIntoView(LayersMap layer_map) {
                                                                         NSDictionary* bindings) {
         return [desired_platform_subviews_set containsObject:object];
       }]];
+
   // Manipulate view hierarchy only if needed, to address a performance issue where
   // `BringLayersIntoView` is called even when view hierarchy stays the same.
   // See: https://github.com/flutter/flutter/issues/121833
@@ -773,19 +876,21 @@ void FlutterPlatformViewsController::BringLayersIntoView(LayersMap layer_map) {
   }
 }
 
-std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLayer(
-    GrDirectContext* gr_context,
-    const std::shared_ptr<IOSContext>& ios_context,
-    EmbedderViewSlice* slice,
-    SkRect rect,
-    int64_t view_id,
-    int64_t overlay_id,
-    MTLPixelFormat pixel_format) {
-  FML_DCHECK(flutter_view_);
-  std::shared_ptr<FlutterPlatformViewLayer> layer =
-      layer_pool_->GetLayer(gr_context, ios_context, pixel_format);
+std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetExistingLayer() {
+  return layer_pool_->GetNextLayer();
+}
 
-  UIView* overlay_view_wrapper = layer->overlay_view_wrapper.get();
+void FlutterPlatformViewsController::CreateLayer(GrDirectContext* gr_context,
+                                                 const std::shared_ptr<IOSContext>& ios_context,
+                                                 MTLPixelFormat pixel_format) {
+  layer_pool_->CreateLayer(gr_context, ios_context, pixel_format);
+}
+
+void FlutterPlatformViewLayer::UpdateViewState(UIView* flutter_view,
+                                               SkRect rect,
+                                               int64_t view_id,
+                                               int64_t overlay_id) {
+  UIView* overlay_view_wrapper = this->overlay_view_wrapper.get();
   auto screenScale = [UIScreen mainScreen].scale;
   // Set the size of the overlay view wrapper.
   // This wrapper view masks the overlay view.
@@ -795,60 +900,40 @@ std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLay
   overlay_view_wrapper.accessibilityIdentifier =
       [NSString stringWithFormat:@"platform_view[%lld].overlay[%lld]", view_id, overlay_id];
 
-  UIView* overlay_view = layer->overlay_view.get();
+  UIView* overlay_view = this->overlay_view.get();
   // Set the size of the overlay view.
   // This size is equal to the device screen size.
-  overlay_view.frame = [flutter_view_.get() convertRect:flutter_view_.get().bounds
-                                                 toView:overlay_view_wrapper];
+  overlay_view.frame = [flutter_view convertRect:flutter_view.bounds toView:overlay_view_wrapper];
   // Set a unique view identifier, so the overlay_view can be identified in XCUITests.
   overlay_view.accessibilityIdentifier =
       [NSString stringWithFormat:@"platform_view[%lld].overlay_view[%lld]", view_id, overlay_id];
-
-  std::unique_ptr<SurfaceFrame> frame = layer->surface->AcquireFrame(frame_size_);
-  // If frame is null, AcquireFrame already printed out an error message.
-  if (!frame) {
-    return layer;
-  }
-  DlCanvas* overlay_canvas = frame->Canvas();
-  int restore_count = overlay_canvas->GetSaveCount();
-  overlay_canvas->Save();
-  overlay_canvas->ClipRect(rect);
-  overlay_canvas->Clear(DlColor::kTransparent());
-  slice->render_into(overlay_canvas);
-  overlay_canvas->RestoreToCount(restore_count);
-
-  // This flutter view is never the last in a frame, since we always submit the
-  // underlay view last.
-  frame->set_submit_info({.frame_boundary = false});
-
-  layer->did_submit_last_frame = frame->Submit();
-  return layer;
 }
 
-void FlutterPlatformViewsController::RemoveUnusedLayers() {
-  for (const auto& layer : layer_pool_->RemoveUnusedLayers()) {
+void FlutterPlatformViewsController::RemoveUnusedLayers(
+    const std::vector<std::shared_ptr<FlutterPlatformViewLayer>>& unused_layers,
+    const std::vector<int64_t>& composition_order) {
+  for (const std::shared_ptr<FlutterPlatformViewLayer>& layer : unused_layers) {
     [layer->overlay_view_wrapper removeFromSuperview];
   }
 
   std::unordered_set<int64_t> composition_order_set;
-  for (int64_t view_id : composition_order_) {
+  for (int64_t view_id : composition_order) {
     composition_order_set.insert(view_id);
   }
   // Remove unused platform views.
-  for (int64_t view_id : active_composition_order_) {
+  for (int64_t view_id : previous_composition_order_) {
     if (composition_order_set.find(view_id) == composition_order_set.end()) {
-      UIView* platform_view_root = root_views_[view_id].get();
+      UIView* platform_view_root = platform_views_[view_id].root_view.get();
       [platform_view_root removeFromSuperview];
     }
   }
 }
 
-void FlutterPlatformViewsController::DisposeViews() {
+std::vector<UIView*> FlutterPlatformViewsController::GetViewsToDispose() {
+  std::vector<UIView*> views;
   if (views_to_dispose_.empty()) {
-    return;
+    return views;
   }
-
-  FML_DCHECK([[NSThread currentThread] isMainThread]);
 
   std::unordered_set<int64_t> views_to_composite(composition_order_.begin(),
                                                  composition_order_.end());
@@ -858,31 +943,14 @@ void FlutterPlatformViewsController::DisposeViews() {
       views_to_delay_dispose.insert(viewId);
       continue;
     }
-    UIView* root_view = root_views_[viewId].get();
-    [root_view removeFromSuperview];
-    views_.erase(viewId);
-    touch_interceptors_.erase(viewId);
-    root_views_.erase(viewId);
+    UIView* root_view = platform_views_[viewId].root_view.get();
+    views.push_back(root_view);
     current_composition_params_.erase(viewId);
-    clip_count_.erase(viewId);
     views_to_recomposite_.erase(viewId);
+    platform_views_.erase(viewId);
   }
   views_to_dispose_ = std::move(views_to_delay_dispose);
-}
-
-void FlutterPlatformViewsController::BeginCATransaction() {
-  FML_DCHECK([[NSThread currentThread] isMainThread]);
-  FML_DCHECK(!catransaction_added_);
-  [CATransaction begin];
-  catransaction_added_ = true;
-}
-
-void FlutterPlatformViewsController::CommitCATransactionIfNeeded() {
-  if (catransaction_added_) {
-    FML_DCHECK([[NSThread currentThread] isMainThread]);
-    [CATransaction commit];
-    catransaction_added_ = false;
-  }
+  return views;
 }
 
 void FlutterPlatformViewsController::ResetFrameState() {

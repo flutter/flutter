@@ -12,7 +12,6 @@
 FLUTTER_ASSERT_ARC
 
 // This is mostly a duplication of FlutterView.
-// TODO(amirh): once GL support is in evaluate if we can merge this with FlutterView.
 @implementation FlutterOverlayView {
   fml::CFRef<CGColorSpaceRef> _colorSpaceRef;
 }

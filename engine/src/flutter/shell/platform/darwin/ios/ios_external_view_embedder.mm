@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/ios_external_view_embedder.h"
+#include "fml/task_runner.h"
 
 #include "flutter/common/constants.h"
 
@@ -12,8 +13,8 @@ namespace flutter {
 
 IOSExternalViewEmbedder::IOSExternalViewEmbedder(
     const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller,
-    std::shared_ptr<IOSContext> context)
-    : platform_views_controller_(platform_views_controller), ios_context_(std::move(context)) {
+    const std::shared_ptr<IOSContext>& context)
+    : platform_views_controller_(platform_views_controller), ios_context_(context) {
   FML_CHECK(ios_context_);
 }
 
@@ -76,6 +77,7 @@ void IOSExternalViewEmbedder::SubmitFlutterView(
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     std::unique_ptr<SurfaceFrame> frame) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::SubmitFlutterView");
+
   // TODO(dkwingsmt): This class only supports rendering into the implicit view.
   // Properly support multi-view in the future.
   FML_DCHECK(flutter_view_id == kFlutterImplicitViewId);
@@ -94,7 +96,12 @@ void IOSExternalViewEmbedder::EndFrame(
 
 // |ExternalViewEmbedder|
 bool IOSExternalViewEmbedder::SupportsDynamicThreadMerging() {
+// TODO(jonahwilliams): remove this once Software backend is removed for iOS Sim.
+#if FML_OS_IOS_SIMULATOR
   return true;
+#else
+  return false;
+#endif  // FML_OS_IOS_SIMULATOR
 }
 
 // |ExternalViewEmbedder|

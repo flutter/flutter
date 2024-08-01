@@ -80,22 +80,25 @@ GPUCAMetalLayerHandle IOSSurfaceMetalSkia::GetCAMetalLayer(const SkISize& frame_
 }
 
 // |GPUSurfaceMetalDelegate|
+bool IOSSurfaceMetalSkia::PreparePresent(GrMTLHandle drawable) const {
+  id<MTLCommandBuffer> command_buffer = [command_queue_ commandBuffer];
+  id<CAMetalDrawable> metal_drawable = (__bridge id<CAMetalDrawable>)drawable;
+  if ([metal_drawable conformsToProtocol:@protocol(FlutterMetalDrawable)]) {
+    [(id<FlutterMetalDrawable>)metal_drawable flutterPrepareForPresent:command_buffer];
+  }
+  [command_buffer commit];
+  [command_buffer waitUntilScheduled];
+  return true;
+}
+
+// |GPUSurfaceMetalDelegate|
 bool IOSSurfaceMetalSkia::PresentDrawable(GrMTLHandle drawable) const {
   if (drawable == nullptr) {
     FML_DLOG(ERROR) << "Could not acquire next Metal drawable from the SkSurface.";
     return false;
   }
 
-  id<MTLCommandBuffer> command_buffer = [command_queue_ commandBuffer];
-
   id<CAMetalDrawable> metal_drawable = (__bridge id<CAMetalDrawable>)drawable;
-  if ([metal_drawable conformsToProtocol:@protocol(FlutterMetalDrawable)]) {
-    [(id<FlutterMetalDrawable>)metal_drawable flutterPrepareForPresent:command_buffer];
-  }
-
-  [command_buffer commit];
-  [command_buffer waitUntilScheduled];
-
   [metal_drawable present];
   return true;
 }
