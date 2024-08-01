@@ -12,6 +12,8 @@
 /dev/devicelab/bin/tasks/analyzer_benchmark.dart @andrewkolos @flutter/tool
 /dev/devicelab/bin/tasks/android_choreographer_do_frame_test.dart @reidbaker @flutter/engine
 /dev/devicelab/bin/tasks/android_defines_test.dart @andrewkolos @flutter/tool
+/dev/devicelab/bin/tasks/android_java11_dependency_smoke_tests.dart @gmackall @flutter/android
+/dev/devicelab/bin/tasks/android_java17_dependency_smoke_tests.dart @gmackall @flutter/android
 /dev/devicelab/bin/tasks/android_lifecycles_test.dart @reidbaker @flutter/engine
 /dev/devicelab/bin/tasks/android_obfuscate_test.dart @andrewkolos @flutter/tool
 /dev/devicelab/bin/tasks/android_picture_cache_complexity_scoring_perf__timeline_summary.dart @flar @flutter/engine
