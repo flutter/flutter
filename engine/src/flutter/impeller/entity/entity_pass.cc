@@ -20,6 +20,7 @@
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
+#include "impeller/entity/draw_order_resolver.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_clip_stack.h"
 #include "impeller/entity/inline_pass_context.h"
@@ -43,6 +44,10 @@ std::tuple<std::optional<Color>, BlendMode> ElementAsBackgroundColor(
   return {};
 }
 }  // namespace
+
+bool EntityPass::IsSubpass(const Element& element) {
+  return std::holds_alternative<std::unique_ptr<EntityPass>>(element);
+}
 
 EntityPass::EntityPass() = default;
 
@@ -106,11 +111,14 @@ void EntityPass::AddEntity(Entity entity) {
   if (entity.GetBlendMode() > Entity::kLastPipelineBlendMode) {
     advanced_blend_reads_from_pass_texture_ = true;
   }
+  draw_order_resolver_.AddElement(elements_.size(),
+                                  entity.GetBlendMode() == BlendMode::kSource);
   elements_.emplace_back(std::move(entity));
 }
 
 void EntityPass::PushClip(Entity entity) {
   elements_.emplace_back(std::move(entity));
+  draw_order_resolver_.PushClip(elements_.size() - 1);
   active_clips_.emplace_back(elements_.size() - 1);
 }
 
@@ -129,6 +137,7 @@ void EntityPass::PopClips(size_t num_clips, uint64_t depth) {
     FML_DCHECK(element);
     element->SetClipDepth(depth);
     active_clips_.pop_back();
+    draw_order_resolver_.PopClip();
   }
 }
 
@@ -271,8 +280,14 @@ EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
   FML_DCHECK(pass->superpass_ == nullptr);
   pass->superpass_ = this;
 
-  if (pass->backdrop_filter_proc_) {
+  bool has_backdrop_filter = pass->backdrop_filter_proc_ != nullptr;
+  if (has_backdrop_filter) {
     backdrop_filter_reads_from_pass_texture_ = true;
+
+    // Since backdrop filters trigger the RenderPass to end and lose all depth
+    // information for opaque draws, this is a hard barrier for the draw order
+    // optimization. Flush all sorted draws accumulated up to this point.
+    draw_order_resolver_.Flush();
   }
   if (pass->blend_mode_ > Entity::kLastPipelineBlendMode) {
     advanced_blend_reads_from_pass_texture_ = true;
@@ -280,6 +295,12 @@ EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
 
   auto subpass_pointer = pass.get();
   elements_.emplace_back(std::move(pass));
+
+  draw_order_resolver_.AddElement(elements_.size() - 1, false);
+  if (has_backdrop_filter) {
+    draw_order_resolver_.Flush();
+  }
+
   return subpass_pointer;
 }
 
@@ -744,6 +765,55 @@ bool EntityPass::RenderElement(Entity& element_entity,
                                ContentContext& renderer,
                                EntityPassClipStack& clip_coverage_stack,
                                Point global_pass_position) const {
+  // Setup advanced blends.
+  if (element_entity.GetBlendMode() > Entity::kLastPipelineBlendMode) {
+    if (renderer.GetDeviceCapabilities().SupportsFramebufferFetch()) {
+      auto src_contents = element_entity.GetContents();
+      auto contents = std::make_shared<FramebufferBlendContents>();
+      contents->SetChildContents(src_contents);
+      contents->SetBlendMode(element_entity.GetBlendMode());
+      element_entity.SetContents(std::move(contents));
+      element_entity.SetBlendMode(BlendMode::kSource);
+    } else {
+      // End the active pass and flush the buffer before rendering
+      // "advanced" blends. Advanced blends work by binding the current
+      // render target texture as an input ("destination"), blending with a
+      // second texture input ("source"), writing the result to an
+      // intermediate texture, and finally copying the data from the
+      // intermediate texture back to the render target texture. And so all
+      // of the commands that have written to the render target texture so
+      // far need to execute before it's bound for blending (otherwise the
+      // blend pass will end up executing before all the previous commands
+      // in the active pass).
+
+      if (!pass_context.EndPass()) {
+        VALIDATION_LOG
+            << "Failed to end the current render pass in order to read "
+               "from "
+               "the backdrop texture and apply an advanced blend.";
+        return false;
+      }
+
+      // Amend an advanced blend filter to the contents, attaching the pass
+      // texture.
+      auto texture = pass_context.GetTexture();
+      if (!texture) {
+        VALIDATION_LOG << "Failed to fetch the color texture in order to "
+                          "apply an advanced blend.";
+        return false;
+      }
+
+      FilterInput::Vector inputs = {
+          FilterInput::Make(texture, element_entity.GetTransform().Invert()),
+          FilterInput::Make(element_entity.GetContents())};
+      auto contents =
+          ColorFilterContents::MakeBlend(element_entity.GetBlendMode(), inputs);
+      contents->SetCoverageHint(element_entity.GetCoverage());
+      element_entity.SetContents(std::move(contents));
+      element_entity.SetBlendMode(BlendMode::kSource);
+    }
+  }
+
   auto result = pass_context.GetRenderPass(pass_depth);
   if (!result.pass) {
     // Failure to produce a render pass should be explained by specific errors
@@ -776,15 +846,19 @@ bool EntityPass::RenderElement(Entity& element_entity,
   }
 
   if (result.just_created) {
-    // Restore any clips that were recorded before the backdrop filter was
-    // applied.
-    auto& replay_entities = clip_coverage_stack.GetReplayEntities();
-    for (const auto& replay : replay_entities) {
-      SetClipScissor(clip_coverage_stack.CurrentClipCoverage(), *result.pass,
-                     global_pass_position);
-      if (!replay.entity.Render(renderer, *result.pass)) {
-        VALIDATION_LOG << "Failed to render entity for clip restore.";
-      }
+    clip_coverage_stack.ActivateClipReplay();
+  }
+
+  // If there are any pending clips to replay, render any that may affect
+  // the entity we're about to render.
+  while (const EntityPassClipStack::ReplayResult* next_replay_clip =
+             clip_coverage_stack.GetNextReplayResult(element_entity)) {
+    auto& replay_entity = next_replay_clip->entity;
+    SetClipScissor(clip_coverage_stack.CurrentClipCoverage(), *result.pass,
+                   global_pass_position);
+    if (!replay_entity.Render(renderer, *result.pass)) {
+      VALIDATION_LOG << "Failed to render entity for clip replay.";
+      return false;
     }
   }
 
@@ -891,21 +965,87 @@ bool EntityPass::OnRender(
                   renderer, clip_coverage_stack, global_pass_position);
   }
 
-  bool is_collapsing_clear_colors = !collapsed_parent_pass &&
-                                    // Backdrop filters act as a entity before
-                                    // everything and disrupt the optimization.
-                                    !backdrop_filter_proc_;
-  for (const auto& element : elements_) {
-    // Skip elements that are incorporated into the clear color.
-    if (is_collapsing_clear_colors) {
-      auto [entity_color, _] =
-          ElementAsBackgroundColor(element, clear_color_size);
-      if (entity_color.has_value()) {
-        continue;
-      }
-      is_collapsing_clear_colors = false;
-    }
+  bool should_collapse_clear_colors =
+      !collapsed_parent_pass &&
+      // Backdrop filters act as a entity before
+      // everything and disrupt the optimization.
+      !backdrop_filter_proc_;
 
+  // Count the number of elements eaten by the clear color optimization. Break
+  // it down in terms of opaque and translucent elements so that we can skip
+  // over these entities when applying the clear color optimization.
+  size_t opaque_clear_entity_count = 0;
+  size_t translucent_clear_entity_count = 0;
+  if (should_collapse_clear_colors) {
+    for (const auto& element : elements_) {
+      if (const Entity* entity = std::get_if<Entity>(&element)) {
+        std::optional<Color> entity_color =
+            entity->AsBackgroundColor(clear_color_size);
+        if (entity_color.has_value()) {
+          if (entity->GetBlendMode() == BlendMode::kSource) {
+            opaque_clear_entity_count++;
+          } else {
+            translucent_clear_entity_count++;
+          }
+          // We've found an entity that replaces the whole background color of
+          // this layer, so continue counting.
+          continue;
+        }
+      }
+      // We came across an element that doesn't replace the background color of
+      // this layer, so stop counting.
+      break;
+    }
+  }
+
+  using ElementCallback = std::function<bool(const Element&)>;
+  using ElementIterator = std::function<bool(const ElementCallback&)>;
+
+  ElementIterator element_iterator;
+
+  if (renderer.GetDeviceCapabilities().SupportsFramebufferFetch()) {
+    element_iterator =
+        [this, &opaque_clear_entity_count,
+         &translucent_clear_entity_count](const ElementCallback& callback) {
+          const auto& sorted_elements = draw_order_resolver_.GetSortedDraws(
+              opaque_clear_entity_count, translucent_clear_entity_count);
+
+          for (const auto& element_ref : sorted_elements) {
+            const Element& element = elements_[element_ref];
+            if (!callback(element)) {
+              return false;
+            }
+          }
+          return true;
+        };
+  } else {
+    // If framebuffer fetch isn't supported, just disable the draw order
+    // optimization. We could technically make it work by flushing each time
+    // we encounter an advanced blend at recording time down the road.
+    element_iterator = [this, &opaque_clear_entity_count,
+                        &translucent_clear_entity_count](
+                           const ElementCallback& callback) {
+      size_t skips = opaque_clear_entity_count + translucent_clear_entity_count;
+      for (const auto& element : elements_) {
+        if (skips > 0) {
+          skips--;
+          continue;
+        }
+        if (!callback(element)) {
+          return false;
+        }
+      }
+      return true;
+    };
+  }
+
+  const auto& render_element = [&, this](Entity& entity) {
+    return RenderElement(entity, clip_height_floor, pass_context, pass_depth,
+                         renderer, clip_coverage_stack, global_pass_position);
+  };
+
+  std::optional<Entity> deferred_entity;
+  bool result = element_iterator([&](const Element& element) {
     EntityResult result =
         GetEntityForElement(element,               // element
                             renderer,              // renderer
@@ -924,70 +1064,36 @@ bool EntityPass::OnRender(
         // in `GetEntityForElement()`.
         return false;
       case EntityResult::kSkip:
-        continue;
+        return true;
     };
 
-    //--------------------------------------------------------------------------
-    /// Setup advanced blends.
-    ///
-
-    if (result.entity.GetBlendMode() > Entity::kLastPipelineBlendMode) {
-      if (renderer.GetDeviceCapabilities().SupportsFramebufferFetch()) {
-        auto src_contents = result.entity.GetContents();
-        auto contents = std::make_shared<FramebufferBlendContents>();
-        contents->SetChildContents(src_contents);
-        contents->SetBlendMode(result.entity.GetBlendMode());
-        result.entity.SetContents(std::move(contents));
-        result.entity.SetBlendMode(BlendMode::kSource);
-      } else {
-        // End the active pass and flush the buffer before rendering "advanced"
-        // blends. Advanced blends work by binding the current render target
-        // texture as an input ("destination"), blending with a second texture
-        // input ("source"), writing the result to an intermediate texture, and
-        // finally copying the data from the intermediate texture back to the
-        // render target texture. And so all of the commands that have written
-        // to the render target texture so far need to execute before it's bound
-        // for blending (otherwise the blend pass will end up executing before
-        // all the previous commands in the active pass).
-
-        if (!pass_context.EndPass()) {
-          VALIDATION_LOG
-              << "Failed to end the current render pass in order to read from "
-                 "the backdrop texture and apply an advanced blend.";
-          return false;
-        }
-
-        // Amend an advanced blend filter to the contents, attaching the pass
-        // texture.
-        auto texture = pass_context.GetTexture();
-        if (!texture) {
-          VALIDATION_LOG << "Failed to fetch the color texture in order to "
-                            "apply an advanced blend.";
-          return false;
-        }
-
-        FilterInput::Vector inputs = {
-            FilterInput::Make(texture, result.entity.GetTransform().Invert()),
-            FilterInput::Make(result.entity.GetContents())};
-        auto contents = ColorFilterContents::MakeBlend(
-            result.entity.GetBlendMode(), inputs);
-        contents->SetCoverageHint(result.entity.GetCoverage());
-        result.entity.SetContents(std::move(contents));
-        result.entity.SetBlendMode(BlendMode::kSource);
+    if (deferred_entity.has_value() &&
+        result.entity.GetBlendMode() != BlendMode::kSource) {
+      if (!render_element(*deferred_entity)) {
+        return false;
       }
+      deferred_entity.reset();
     }
 
-    //--------------------------------------------------------------------------
-    /// Render the Element.
-    ///
-    if (!RenderElement(result.entity, clip_height_floor, pass_context,
-                       pass_depth, renderer, clip_coverage_stack,
-                       global_pass_position)) {
-      // Specific validation logs are handled in `render_element()`.
-      return false;
+    if (IsSubpass(element)) {
+      if (deferred_entity.has_value()) {
+        if (!render_element(*deferred_entity)) {
+          return false;
+        }
+      }
+      deferred_entity = std::move(result.entity);
+      return true;
     }
+
+    return render_element(result.entity);
+  });
+  if (!result) {
+    return false;
   }
 
+  if (deferred_entity.has_value() && !render_element(*deferred_entity)) {
+    return false;
+  }
   return true;
 }
 
