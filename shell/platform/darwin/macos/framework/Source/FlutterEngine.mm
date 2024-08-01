@@ -964,7 +964,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     @"platformBrightness" : [brightness isEqualToString:@"Dark"] ? @"dark" : @"light",
     // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/32006.
     @"textScaleFactor" : @1.0,
-    @"alwaysUse24HourFormat" : @false
+    @"alwaysUse24HourFormat" : @([FlutterHourFormat isAlwaysUse24HourFormat]),
   }];
 }
 
