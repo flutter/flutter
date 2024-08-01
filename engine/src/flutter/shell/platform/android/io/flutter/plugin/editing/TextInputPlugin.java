@@ -546,22 +546,11 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     }
     mEditable.removeEditingStateListener(this);
     notifyViewExited();
-
-    boolean needsRestart =
-        configuration.inputAction == null
-            || configuration.inputAction == EditorInfo.IME_ACTION_DONE
-            || configuration.inputAction == EditorInfo.IME_ACTION_NONE;
     configuration = null;
     updateAutofillConfigurationIfNeeded(null);
     inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
     unlockPlatformViewInputConnection();
     lastClientRect = null;
-
-    if (needsRestart) {
-      // Call restartInput to reset IME internal states. Otherwise some IMEs (Gboard for instance)
-      // keep reacting based on the previous input configuration until a new configuration is set.
-      mImm.restartInput(mView);
-    }
   }
 
   private static class InputTarget {
