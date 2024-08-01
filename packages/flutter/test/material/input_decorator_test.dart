@@ -284,13 +284,13 @@ Color getContainerColor(WidgetTester tester) {
 }
 
 double getOpacity(WidgetTester tester, String textValue) {
-  final FadeTransition opacityWidget = tester.widget<FadeTransition>(
+  final Opacity opacityWidget = tester.widget<Opacity>(
     find.ancestor(
       of: find.text(textValue),
-      matching: find.byType(FadeTransition),
+      matching: find.byType(Opacity),
     ).first,
   );
-  return opacityWidget.opacity.value;
+  return opacityWidget.opacity;
 }
 
 TextStyle? getIconStyle(WidgetTester tester, IconData icon) {
