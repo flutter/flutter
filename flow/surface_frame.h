@@ -93,6 +93,19 @@ class SurfaceFrame {
     //
     // Defaults to true, which is generally a safe value.
     bool frame_boundary = true;
+
+    // Whether this surface presents with a CATransaction on Apple platforms.
+    //
+    // When there are platform views in the scene, the drawable needs to be
+    // presented in the same CATransaction as the one created for platform view
+    // mutations.
+    //
+    // If the drawables are being presented from the raster thread, we cannot
+    // use a transaction as it will dirty the UIViews being presented. If there
+    // is a non-Flutter UIView active, such as in add2app or a
+    // presentViewController page transition, then this will cause CoreAnimation
+    // assertion errors and exit the app.
+    bool present_with_transaction = false;
   };
 
   bool Encode();

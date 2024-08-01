@@ -219,7 +219,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _pluginPublications = [[NSMutableDictionary alloc] init];
   _registrars = [[NSMutableDictionary alloc] init];
   [self recreatePlatformViewController];
-
   _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
   _textureRegistry = [[FlutterTextureRegistryRelay alloc] initWithParent:self];
   _connections.reset(new flutter::ConnectionCollection());
@@ -869,6 +868,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   flutter::Shell::CreateCallback<flutter::PlatformView> on_create_platform_view =
       [self](flutter::Shell& shell) {
         [self recreatePlatformViewController];
+        self->_platformViewsController->SetTaskRunner(
+            shell.GetTaskRunners().GetPlatformTaskRunner());
         return std::make_unique<flutter::PlatformViewIOS>(
             shell, self->_renderingApi, self->_platformViewsController, shell.GetTaskRunners(),
             shell.GetConcurrentWorkerTaskRunner(), shell.GetIsGpuDisabledSyncSwitch());
@@ -1468,6 +1469,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   flutter::Shell::CreateCallback<flutter::PlatformView> on_create_platform_view =
       [result, context](flutter::Shell& shell) {
         [result recreatePlatformViewController];
+        result->_platformViewsController->SetTaskRunner(
+            shell.GetTaskRunners().GetPlatformTaskRunner());
         return std::make_unique<flutter::PlatformViewIOS>(
             shell, context, result->_platformViewsController, shell.GetTaskRunners());
       };
