@@ -569,16 +569,6 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   }
 }
 
-/// Function signature for linear interpolation.
-///
-/// {@template flutter.widgets.LerpCallback}
-/// For example, [Color.lerp] qualifies as a `LerpCallback<Color>`.
-///
-/// The callback should have the return type [T]; the return type
-/// is nullable for compatibility with existing "lerp" methods.
-/// {@endtemplate}
-typedef LerpCallback<T> = T? Function(T a, T b, double t);
-
 /// A widget that animates based on changes to its [value].
 ///
 /// This class uses a [duration], [curve], and [lerp] callback to determine
@@ -702,7 +692,7 @@ abstract class AnimatedValue<T extends Object> extends StatefulWidget {
   /// A function that defines the type [T]'s linear interpolation
   /// from one [value] to another.
   ///
-  /// {@macro flutter.widgets.LerpCallback}
+  /// {@macro flutter.animation.LerpCallback}
   ///
   /// If the [LerpCallback] is defined as a global function or `static` method,
   /// it can be used in a `const` constructor!

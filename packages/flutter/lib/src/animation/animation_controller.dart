@@ -6,6 +6,7 @@
 /// @docImport 'package:flutter_test/flutter_test.dart';
 library;
 
+import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -1024,5 +1025,143 @@ class _RepeatingSimulation extends Simulation {
     // if [timeInSeconds] elapsed the [_exitTimeInSeconds] && [count] is not null,
     // consider marking the simulation as "DONE"
     return count != null && (timeInSeconds >= _exitTimeInSeconds);
+  }
+}
+
+/// Function signature for linear interpolation.
+///
+/// {@template flutter.animation.LerpCallback}
+/// For example, [Color.lerp] qualifies as a `LerpCallback<Color>`.
+///
+/// The callback should have the return type [T]; the return type
+/// is nullable for compatibility with existing "lerp" methods.
+/// {@endtemplate}
+typedef LerpCallback<T> = T? Function(T a, T b, double t);
+
+
+class ValueAnimation<T extends Object> extends Animation<T>
+  with AnimationEagerListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
+  ValueAnimation({
+    required TickerProvider tickerProvider,
+    required T initialValue,
+    required this.duration,
+    required this.curve,
+    required this.lerp,
+  }) : _from = initialValue,
+       _target = initialValue,
+       _value = initialValue {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterAnimationLibrary,
+        className: '$ValueAnimation',
+        object: this,
+      );
+    }
+    _ticker = tickerProvider.createTicker(_tick);
+  }
+
+  Duration duration;
+  Curve curve;
+  LerpCallback<T> lerp;
+
+  Ticker? _ticker;
+
+  T _from;
+  T _target;
+
+  @override
+  T get value => _value;
+  T _value;
+  set value(T newTarget) {
+    assert (
+      _ticker != null,
+      'Cannot update a ValueAnimation after it was disposed.',
+    );
+    if (newTarget != value) {
+      _ticker!.stop();
+
+      if (duration == Duration.zero) {
+        value = newTarget;
+        _statusUpdate(AnimationStatus.completed);
+      } else {
+        _from = value;
+        _target = newTarget;
+        _value = lerp(_from, _target, 0)!;
+        _statusUpdate(AnimationStatus.forward);
+      }
+    }
+  }
+
+  void _tick(Duration elapsed) {
+    late final double progress = elapsed.inMicroseconds / duration.inMicroseconds;
+
+    if (_value == _target || progress >= 1.0) {
+      _value = _target;
+      _statusUpdate(AnimationStatus.completed);
+    } else {
+      final double t = curve.transform(math.max(progress, 0.0));
+      _value = lerp(_from, _target, t)!;
+    }
+    notifyListeners();
+  }
+
+  /// Recreates the [Ticker] with the new [TickerProvider].
+  void resync(TickerProvider tickerProvider) {
+    final Ticker oldTicker = _ticker!;
+    _ticker = tickerProvider.createTicker(_tick)..absorbTicker(oldTicker);
+  }
+
+  /// The current status of the value's animation.
+  ///
+  /// Possible status values:
+  ///
+  ///  * [AnimationStatus.dismissed] when the animation is first created,
+  ///    and just before it's disposed of.
+  ///  * [AnimationStatus.forward] when an animation is in progress.
+  ///  * [AnimationStatus.completed] when the animation is finished.
+  ///
+  /// [AnimationStatus.reverse] is used in [AnimationController]
+  /// but does not apply to a [ValueAnimation].
+  @override
+  AnimationStatus get status => throw UnimplementedError();
+  AnimationStatus _lastReportedStatus = AnimationStatus.dismissed;
+  void _statusUpdate(AnimationStatus newStatus) {
+    if (newStatus == _lastReportedStatus) {
+      return;
+    }
+    if (status.isAnimating) {
+      _ticker!.start();
+    } else {
+      _ticker!.stop(canceled: newStatus.isDismissed);
+    }
+    _lastReportedStatus = newStatus;
+    notifyStatusListeners(newStatus);
+  }
+
+ @override
+  void dispose() {
+    assert(() {
+      if (_ticker == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('AnimationController.dispose() called more than once.'),
+          ErrorDescription('A given $runtimeType cannot be disposed more than once.\n'),
+          DiagnosticsProperty<ValueAnimation<T>>(
+            'The following $runtimeType object was disposed multiple times',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+        ]);
+      }
+      return true;
+    }());
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
+    _statusUpdate(AnimationStatus.dismissed);
+    _ticker!.dispose();
+    _ticker = null;
+    clearStatusListeners();
+    clearListeners();
+    super.dispose();
   }
 }
