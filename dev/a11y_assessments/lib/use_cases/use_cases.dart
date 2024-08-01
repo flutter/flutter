@@ -11,7 +11,6 @@ import 'card.dart';
 import 'check_box_list_tile.dart';
 import 'date_picker.dart';
 import 'dialog.dart';
-import 'dropdown_menu.dart';
 import 'expansion_tile.dart';
 import 'material_banner.dart';
 import 'navigation_bar.dart';
@@ -47,5 +46,4 @@ final List<UseCase> useCases = <UseCase>[
   SwitchListTileUseCase(),
   ExpansionTileUseCase(),
   CardUseCase(),
-  DropdownMenuUseCase()
 ];
