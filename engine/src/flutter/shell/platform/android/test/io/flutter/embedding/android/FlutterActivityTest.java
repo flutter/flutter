@@ -332,8 +332,8 @@ public class FlutterActivityTest {
     Bundle bundle = new Bundle();
     FlutterActivity spyFlutterActivity = spy(flutterActivity);
     when(spyFlutterActivity.getMetaData()).thenReturn(bundle);
-    // Empty bundle should return false.
-    assertFalse(spyFlutterActivity.shouldHandleDeeplinking());
+    // Empty bundle should return true.
+    assertTrue(spyFlutterActivity.shouldHandleDeeplinking());
   }
 
   @Test
