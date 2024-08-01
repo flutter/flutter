@@ -80,12 +80,18 @@ FLUTTER_ASSERT_ARC
   OCMStub([self.mockMainBundle objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"])
       .andReturn(nil);
 
+  OCMStub([self.mockNavigationChannel
+              invokeMethod:@"pushRouteInformation"
+                 arguments:@{@"location" : @"http://myApp/custom/route?query=test"}])
+      .andReturn(@YES);
+
   BOOL result =
       [self.appDelegate application:[UIApplication sharedApplication]
                             openURL:[NSURL URLWithString:@"http://myApp/custom/route?query=test"]
                             options:@{}];
-  XCTAssertFalse(result);
-  OCMReject([self.mockNavigationChannel invokeMethod:OCMOCK_ANY arguments:OCMOCK_ANY]);
+
+  XCTAssertTrue(result);
+  OCMVerifyAll(self.mockNavigationChannel);
 }
 
 - (void)testLaunchUrlWithDeepLinkingDisabled {
