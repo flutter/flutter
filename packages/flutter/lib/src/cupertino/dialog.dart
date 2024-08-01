@@ -260,8 +260,8 @@ class CupertinoAlertDialog extends StatefulWidget {
   /// A scroll controller that can be used to control the scrolling of the
   /// [content] in the dialog.
   ///
-  /// Defaults to null, and is typically not needed, since most alert messages
-  /// are short.
+  /// Defaults to null, which means the [CupertinoDialogAction] will create a
+  /// scroll controller internally.
   ///
   /// See also:
   ///
@@ -272,7 +272,8 @@ class CupertinoAlertDialog extends StatefulWidget {
   /// A scroll controller that can be used to control the scrolling of the
   /// actions in the dialog.
   ///
-  /// Defaults to null, and is typically not needed.
+  /// Defaults to null, which means the [CupertinoDialogAction] will create an
+  /// action scroll controller internally.
   ///
   /// See also:
   ///
@@ -397,7 +398,6 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                 );
           }
           final Widget scrolledActionsSection = _OverscrollBackground(
-            scrollController: _effectiveActionScrollController,
             color: backgroundColor,
             child: actionsSection,
           );
@@ -1079,14 +1079,15 @@ class CupertinoActionSheet extends StatefulWidget {
   /// A scroll controller that can be used to control the scrolling of the
   /// [message] in the action sheet.
   ///
-  /// This attribute is typically not needed, as alert messages should be
-  /// short.
+  /// Defaults to null, which means the [CupertinoActionSheet] will create a
+  /// scroll controller internally.
   final ScrollController? messageScrollController;
 
   /// A scroll controller that can be used to control the scrolling of the
   /// [actions] in the action sheet.
   ///
-  /// This attribute is typically not needed.
+  /// Defaults to null, which means the [CupertinoActionSheet] will create an
+  /// action scroll controller internally.
   final ScrollController? actionScrollController;
 
   /// The optional cancel button that is grouped separately from the other
@@ -1633,7 +1634,6 @@ class _Divider extends StatelessWidget {
 class _OverscrollBackground extends StatefulWidget {
   const _OverscrollBackground({
     required this.color,
-    required this.scrollController,
     required this.child,
   });
 
@@ -1642,7 +1642,6 @@ class _OverscrollBackground extends StatefulWidget {
   // This value must be a resolved color instead of, for example, a
   // CupertinoDynamicColor.
   final Color color;
-  final ScrollController? scrollController;
   final Widget child;
 
   @override
@@ -1725,7 +1724,7 @@ class _ActionSheetActionSection extends StatelessWidget {
   final int? pressedIndex;
   final Color dividerColor;
   final Color backgroundColor;
-  final ScrollController? scrollController;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -1778,7 +1777,7 @@ class _ActionSheetMainSheet extends StatelessWidget {
 
   final int? pressedIndex;
   final _PressedUpdateHandler onPressedUpdate;
-  final ScrollController? scrollController;
+  final ScrollController scrollController;
   final List<Widget> actions;
   final Widget? contentSection;
   final Color dividerColor;
@@ -1786,7 +1785,6 @@ class _ActionSheetMainSheet extends StatelessWidget {
   Widget _scrolledActionsSection(BuildContext context) {
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     return _OverscrollBackground(
-      scrollController: scrollController,
       color: backgroundColor,
       child: _ActionSheetActionSection(
         actions: actions,
@@ -1847,7 +1845,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
   const _CupertinoAlertContentSection({
     this.title,
     this.message,
-    this.scrollController,
+    required this.scrollController,
     this.titlePadding,
     this.messagePadding,
     this.titleTextStyle,
@@ -1870,10 +1868,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
 
   // A scroll controller that can be used to control the scrolling of the
   // content in the dialog.
-  //
-  // Defaults to null, and is typically not needed, since most alert contents
-  // are short.
-  final ScrollController? scrollController;
+  final ScrollController scrollController;
 
   // Paddings used around title and message.
   // CupertinoAlertDialog and CupertinoActionSheet have different paddings.
@@ -1959,10 +1954,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
   // A scroll controller that can be used to control the scrolling of the
   // actions in the dialog.
-  //
-  // Defaults to null, and is typically not needed, since most alert dialogs
-  // don't have many actions.
-  final ScrollController? scrollController;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
