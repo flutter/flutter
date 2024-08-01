@@ -78,23 +78,6 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
       order = LexicalFocusOrder(widget.order.toString());
     }
 
-    Color? overlayColor(Set<WidgetState> states) {
-      if (states.contains(WidgetState.focused)) {
-        return Colors.red;
-      }
-      if (states.contains(WidgetState.hovered)) {
-        return Colors.blue;
-      }
-      return null; // defer to the default overlayColor
-    }
-
-    Color? foregroundColor(Set<WidgetState> states) {
-      if (states.contains(WidgetState.focused) || states.contains(WidgetState.hovered)) {
-        return Colors.white;
-      }
-      return null; // defer to the default foregroundColor
-    }
-
     return FocusTraversalOrder(
       order: order,
       child: Padding(
@@ -102,9 +85,24 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
         child: OutlinedButton(
           focusNode: focusNode,
           autofocus: widget.autofocus,
-          style: ButtonStyle(
-            overlayColor: WidgetStateProperty.resolveWith<Color?>(overlayColor),
-            foregroundColor: WidgetStateProperty.resolveWith<Color?>(foregroundColor),
+          style: const ButtonStyle(
+            overlayColor: WidgetStateProperty<Color?>.fromMap(
+              // If neither of these states is active, the property will
+              // resolve to null, deferring to the default overlay color.
+              <WidgetState, Color>{
+                WidgetState.focused: Colors.red,
+                WidgetState.hovered: Colors.blue,
+              },
+            ),
+            foregroundColor: WidgetStateProperty<Color?>.fromMap(
+              // "WidgetState.focused | WidgetState.hovered" could be used
+              // instead of separate map keys, but this setup allows setting
+              // the button style to a constant value for improved efficiency.
+              <WidgetState, Color>{
+                WidgetState.focused: Colors.white,
+                WidgetState.hovered: Colors.white,
+              },
+            ),
           ),
           onPressed: () => _handleOnPressed(),
           child: Text(widget.name),

@@ -66,30 +66,24 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   bool selected = false;
 
+  /// Sets the button's foreground and background colors.
+  /// If not selected, resolves to null and defers to default values.
+  static const ButtonStyle style = ButtonStyle(
+    foregroundColor: WidgetStateProperty<Color?>.fromMap(<WidgetState, Color>{
+      WidgetState.selected: Colors.white,
+    }),
+    backgroundColor: WidgetStateProperty<Color?>.fromMap(<WidgetState, Color>{
+      WidgetState.selected: Colors.indigo,
+    }),
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: SelectableButton(
           selected: selected,
-          style: ButtonStyle(
-            foregroundColor: WidgetStateProperty.resolveWith<Color?>(
-              (Set<WidgetState> states) {
-                if (states.contains(WidgetState.selected)) {
-                  return Colors.white;
-                }
-                return null; // defer to the defaults
-              },
-            ),
-            backgroundColor: WidgetStateProperty.resolveWith<Color?>(
-              (Set<WidgetState> states) {
-                if (states.contains(WidgetState.selected)) {
-                  return Colors.indigo;
-                }
-                return null; // defer to the defaults
-              },
-            ),
-          ),
+          style: style,
           onPressed: () {
             setState(() {
               selected = !selected;
