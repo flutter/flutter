@@ -1897,8 +1897,8 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
 
   /// Tracks the internal selection state for a given [Selectable].
   ///
-  /// Registers a [Selectable] as having received both start and end events when
-  /// `forEnd` is null.
+  /// When `forEnd` is null, the [Selectable] will be registered as having received both
+  /// start and end events.
   ///
   /// When `forEnd` is true, the [Selectable] will be registered as having received
   /// an end event. When false, the [Selectable] is registered as having received
