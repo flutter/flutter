@@ -144,7 +144,7 @@ class EngineSceneBuilder implements ui.SceneBuilder {
     ui.ClipPathEngineLayer? oldLayer
   }) => pushLayer<ClipPathLayer>(
       ClipPathLayer(),
-      ClipPathOperation(path, clipBehavior),
+      ClipPathOperation(path as ScenePath, clipBehavior),
     );
 
   @override

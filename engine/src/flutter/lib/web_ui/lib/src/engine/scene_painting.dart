@@ -23,3 +23,9 @@ abstract class SceneImageFilter implements ui.ImageFilter {
   // has been processed by the filter.
   ui.Rect filterBounds(ui.Rect inputBounds);
 }
+
+abstract class ScenePath implements ui.Path {
+  // In order to properly clip platform views with paths, we need to be able to get a
+  // string representation of them.
+  String toSvgString();
+}

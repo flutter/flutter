@@ -201,3 +201,6 @@ external void pathGetBounds(PathHandle path, RawRect outRect);
   symbol: 'path_combine',
   isLeaf: true)
 external PathHandle pathCombine(int operation, PathHandle path1, PathHandle path2);
+
+@Native<SkStringHandle Function(PathHandle)>(symbol: 'path_getSvgString', isLeaf: true)
+external SkStringHandle pathGetSvgString(PathHandle path);
