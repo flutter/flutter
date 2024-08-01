@@ -72,8 +72,8 @@ void main() {
       reason: 'Expected element with text "Item: 0" in the CustomScrollView',
     );
   });
-  testWidgets('IconButton click extends existing SliverList',
-      (WidgetTester tester) async {
+
+  testWidgets('IconButton click extends existing SliverList', (WidgetTester tester) async {
     await tester.pumpWidget(const example.CustomScrollViewExampleApp());
 
     // Initially, there is only one SliverList in the CustomScrollView
