@@ -6,6 +6,9 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWS_INTERNAL_H_
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
+#include "fml/task_runner.h"
+#include "impeller/base/thread_safety.h"
+#include "third_party/skia/include/core/SkRect.h"
 
 #include <Metal/Metal.h>
 
@@ -138,7 +141,6 @@ void ResetAnchor(CALayer* layer);
 CGRect GetCGRectFromSkRect(const SkRect& clipSkRect);
 BOOL BlurRadiusEqualToBlurRadius(CGFloat radius1, CGFloat radius2);
 
-class IOSContextGL;
 class IOSSurface;
 
 struct FlutterPlatformViewLayer {
@@ -161,28 +163,41 @@ struct FlutterPlatformViewLayer {
   // We track this to know when the GrContext for the Flutter app has changed
   // so we can update the overlay with the new context.
   GrDirectContext* gr_context;
+
+  void UpdateViewState(UIView* flutter_view, SkRect rect, int64_t view_id, int64_t overlay_id);
 };
 
-// This class isn't thread safe.
+/// @brief Storage for Overlay layers across frames.
+///
+/// Note: this class does not synchronize access to its layers or any layer removal. As it
+/// is currently used, layers must be created on the platform thread but other methods of
+/// it are called on the raster thread. This is safe as overlay layers are only ever added
+/// while the raster thread is latched.
 class FlutterPlatformViewLayerPool {
  public:
   FlutterPlatformViewLayerPool() = default;
 
   ~FlutterPlatformViewLayerPool() = default;
 
-  // Gets a layer from the pool if available, or allocates a new one.
-  // Finally, it marks the layer as used. That is, it increments `available_layer_index_`.
-  std::shared_ptr<FlutterPlatformViewLayer> GetLayer(GrDirectContext* gr_context,
-                                                     const std::shared_ptr<IOSContext>& ios_context,
-                                                     MTLPixelFormat pixel_format);
+  /// @brief Gets a layer from the pool if available.
+  ///
+  /// The layer is marked as used until [RecycleLayers] is called.
+  std::shared_ptr<FlutterPlatformViewLayer> GetNextLayer();
 
-  // Removes unused layers from the pool. Returns the unused layers.
+  /// @brief Create a new overlay layer.
+  ///
+  /// This method can only be called on the Platform thread.
+  void CreateLayer(GrDirectContext* gr_context,
+                   const std::shared_ptr<IOSContext>& ios_context,
+                   MTLPixelFormat pixel_format);
+
+  /// @brief Removes unused layers from the pool. Returns the unused layers.
   std::vector<std::shared_ptr<FlutterPlatformViewLayer>> RemoveUnusedLayers();
 
-  // Marks the layers in the pool as available for reuse.
+  /// @brief Marks the layers in the pool as available for reuse.
   void RecycleLayers();
 
-  // Returns the count of layers currently in the pool.
+  /// @brief The count of layers currently in the pool.
   size_t size() const;
 
  private:
@@ -212,6 +227,8 @@ class FlutterPlatformViewsController {
 
   fml::WeakPtr<flutter::FlutterPlatformViewsController> GetWeakPtr();
 
+  void SetTaskRunner(const fml::RefPtr<fml::TaskRunner>& platform_task_runner);
+
   void SetFlutterView(UIView* flutter_view) __attribute__((cf_audited_transfer));
 
   void SetFlutterViewController(UIViewController<FlutterViewResponder>* flutter_view_controller)
@@ -233,6 +250,7 @@ class FlutterPlatformViewsController {
   // Also reverts the composition_order_ to its original state at the beginning of the frame.
   void CancelFrame();
 
+  // Runs on the raster thread.
   void PrerollCompositeEmbeddedView(int64_t view_id,
                                     std::unique_ptr<flutter::EmbeddedViewParams> params);
 
@@ -254,21 +272,27 @@ class FlutterPlatformViewsController {
   // returns nil.
   FlutterTouchInterceptingView* GetFlutterTouchInterceptingViewByID(int64_t view_id);
 
+  // Runs on the raster thread.
   PostPrerollResult PostPrerollAction(
       const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger);
 
+  // Runs on the raster thread.
   void EndFrame(bool should_resubmit_frame,
                 const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger);
 
+  // Return the Canvas for the overlay slice for the given platform view.
+  //
+  // Runs on the raster thread.
   DlCanvas* CompositeEmbeddedView(int64_t view_id);
 
-  // The rect of the platform view at index view_id. This rect has been translated into the
-  // host view coordinate system. Units are device screen pixels.
-  SkRect GetPlatformViewRect(int64_t view_id);
-
   // Discards all platform views instances and auxiliary resources.
+  //
+  // Runs on the raster thread.
   void Reset();
 
+  // Encode rendering for the Flutter overlay views and queue up perform platform view mutations.
+  //
+  // Runs on the raster thread.
   bool SubmitFrame(GrDirectContext* gr_context,
                    const std::shared_ptr<IOSContext>& ios_context,
                    std::unique_ptr<SurfaceFrame> frame);
@@ -287,8 +311,39 @@ class FlutterPlatformViewsController {
   // Pushes the view id of a visted platform view to the list of visied platform views.
   void PushVisitedPlatformView(int64_t view_id) { visited_platform_views_.push_back(view_id); }
 
+  // Visible for testing.
+  void CompositeWithParams(int64_t view_id, const EmbeddedViewParams& params);
+
+  const EmbeddedViewParams& GetCompositionParams(int64_t view_id) const {
+    return current_composition_params_.find(view_id)->second;
+  }
+
  private:
-  using LayersMap = std::map<int64_t, std::vector<std::shared_ptr<FlutterPlatformViewLayer>>>;
+  struct LayerData {
+    SkRect rect;
+    int64_t view_id;
+    int64_t overlay_id;
+    std::shared_ptr<FlutterPlatformViewLayer> layer;
+  };
+
+  using LayersMap = std::unordered_map<int64_t, LayerData>;
+
+  // Update the buffers and mutate the platform views in CATransaction.
+  //
+  // Runs on the platform thread.
+  void PerformSubmit(const LayersMap& platform_view_layers,
+                     std::unordered_map<int64_t, EmbeddedViewParams>& current_composition_params,
+                     const std::unordered_set<int64_t>& views_to_recomposite,
+                     const std::vector<int64_t>& composition_order,
+                     const std::vector<std::shared_ptr<FlutterPlatformViewLayer>>& unused_layers,
+                     const std::vector<std::unique_ptr<SurfaceFrame>>& surface_frames);
+
+  /// @brief Populate any missing overlay layers.
+  ///
+  /// This requires posting a task to the platform thread and blocking on its completion.
+  void CreateMissingOverlays(GrDirectContext* gr_context,
+                             const std::shared_ptr<IOSContext>& ios_context,
+                             size_t required_overlay_layers);
 
   void OnCreate(FlutterMethodCall* call, FlutterResult result) __attribute__((cf_audited_transfer));
   void OnDispose(FlutterMethodCall* call, FlutterResult result)
@@ -297,18 +352,9 @@ class FlutterPlatformViewsController {
       __attribute__((cf_audited_transfer));
   void OnRejectGesture(FlutterMethodCall* call, FlutterResult result)
       __attribute__((cf_audited_transfer));
-  // Dispose the views in `views_to_dispose_`.
-  void DisposeViews();
 
-  // Returns true if there are embedded views in the scene at current frame
-  // Or there will be embedded views in the next frame.
-  // TODO(cyanglaz): https://github.com/flutter/flutter/issues/56474
-  // Make this method check if there are pending view operations instead.
-  // Also rename it to `HasPendingViewOperations`.
-  bool HasPlatformViewThisOrNextFrame();
-
-  // Traverse the `mutators_stack` and return the number of clip operations.
-  int CountClips(const MutatorsStack& mutators_stack);
+  /// @brief Return all views to be disposed on the platform thread.
+  std::vector<UIView*> GetViewsToDispose();
 
   void ClipViewSetMaskView(UIView* clipView) __attribute__((cf_audited_transfer));
 
@@ -325,30 +371,23 @@ class FlutterPlatformViewsController {
                      UIView* embedded_view,
                      const SkRect& bounding_rect) __attribute__((cf_audited_transfer));
 
-  void CompositeWithParams(int64_t view_id, const EmbeddedViewParams& params);
+  std::shared_ptr<FlutterPlatformViewLayer> GetExistingLayer();
 
-  // Allocates a new FlutterPlatformViewLayer if needed, draws the pixels within the rect from
-  // the picture on the layer's canvas.
-  std::shared_ptr<FlutterPlatformViewLayer> GetLayer(GrDirectContext* gr_context,
-                                                     const std::shared_ptr<IOSContext>& ios_context,
-                                                     EmbedderViewSlice* slice,
-                                                     SkRect rect,
-                                                     int64_t view_id,
-                                                     int64_t overlay_id,
-                                                     MTLPixelFormat pixel_format);
+  // Runs on the platform thread.
+  void CreateLayer(GrDirectContext* gr_context,
+                   const std::shared_ptr<IOSContext>& ios_context,
+                   MTLPixelFormat pixel_format);
+
   // Removes overlay views and platform views that aren't needed in the current frame.
   // Must run on the platform thread.
-  void RemoveUnusedLayers();
+  void RemoveUnusedLayers(
+      const std::vector<std::shared_ptr<FlutterPlatformViewLayer>>& unused_layers,
+      const std::vector<int64_t>& composition_order);
+
   // Appends the overlay views and platform view and sets their z index based on the composition
   // order.
-  void BringLayersIntoView(LayersMap layer_map);
-
-  // Begin a CATransaction.
-  // This transaction needs to be balanced with |CommitCATransactionIfNeeded|.
-  void BeginCATransaction();
-
-  // Commit a CATransaction if |BeginCATransaction| has been called during the frame.
-  void CommitCATransactionIfNeeded();
+  void BringLayersIntoView(const LayersMap& layer_map,
+                           const std::vector<int64_t>& composition_order);
 
   // Resets the state of the frame.
   void ResetFrameState();
@@ -366,61 +405,81 @@ class FlutterPlatformViewsController {
   fml::scoped_nsobject<UIView> flutter_view_;
   fml::scoped_nsobject<UIViewController<FlutterViewResponder>> flutter_view_controller_;
   fml::scoped_nsobject<FlutterClippingMaskViewPool> mask_view_pool_;
-  std::map<std::string, fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>> factories_;
-  std::map<int64_t, fml::scoped_nsobject<NSObject<FlutterPlatformView>>> views_;
-  std::map<int64_t, fml::scoped_nsobject<FlutterTouchInterceptingView>> touch_interceptors_;
-  // Mapping a platform view ID to the top most parent view (root_view) of a platform view. In
-  // |SubmitFrame|, root_views_ are added to flutter_view_ as child views.
-  //
-  // The platform view with the view ID is a child of the root view; If the platform view is not
-  // clipped, and no clipping view is added, the root view will be the intercepting view.
-  std::map<int64_t, fml::scoped_nsobject<UIView>> root_views_;
-  // Mapping a platform view ID to its latest composition params.
-  std::map<int64_t, EmbeddedViewParams> current_composition_params_;
-  // Mapping a platform view ID to the count of the clipping operations that were applied to the
-  // platform view last time it was composited.
-  std::map<int64_t, int64_t> clip_count_;
-  SkISize frame_size_;
-
-  // The number of frames the rasterizer task runner will continue
-  // to run on the platform thread after no platform view is rendered.
-  //
-  // Note: this is an arbitrary number that attempts to account for cases
-  // where the platform view might be momentarily off the screen.
-  static const int kDefaultMergedLeaseDuration = 10;
-
-  // Method channel `OnDispose` calls adds the views to be disposed to this set to be disposed on
-  // the next frame.
-  std::unordered_set<int64_t> views_to_dispose_;
-
-  // A vector of embedded view IDs according to their composition order.
-  // The last ID in this vector belond to the that is composited on top of all others.
-  std::vector<int64_t> composition_order_;
-
-  // A vector of visited platform view IDs.
-  std::vector<int64_t> visited_platform_views_;
-
-  // The latest composition order that was presented in Present().
-  std::vector<int64_t> active_composition_order_;
-
-  // Only compoiste platform views in this set.
-  std::unordered_set<int64_t> views_to_recomposite_;
+  std::unordered_map<std::string, fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>>
+      factories_;
 
   // The FlutterPlatformViewGestureRecognizersBlockingPolicy for each type of platform view.
-  std::map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>
+  std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>
       gesture_recognizers_blocking_policies_;
 
-  bool catransaction_added_ = false;
+  /// The size of the current onscreen surface in physical pixels.
+  SkISize frame_size_;
+
+  /// The task runner for posting tasks to the platform thread.
+  fml::RefPtr<fml::TaskRunner> platform_task_runner_;
+
+  /// Each of the following structs stores part of the platform view hierarchy according to its
+  /// ID.
+  ///
+  /// This data must only be accessed on the platform thread.
+  struct PlatformViewData {
+    fml::scoped_nsobject<NSObject<FlutterPlatformView>> view;
+    fml::scoped_nsobject<FlutterTouchInterceptingView> touch_interceptor;
+    fml::scoped_nsobject<UIView> root_view;
+  };
+
+  /// This data must only be accessed on the platform thread.
+  std::unordered_map<int64_t, PlatformViewData> platform_views_;
+
+  /// The composition parameters for each platform view.
+  ///
+  /// This state is only modified on the raster thread.
+  std::unordered_map<int64_t, EmbeddedViewParams> current_composition_params_;
+
+  /// Method channel `OnDispose` calls adds the views to be disposed to this set to be disposed on
+  /// the next frame.
+  ///
+  /// This state is modified on both the platform and raster thread.
+  std::unordered_set<int64_t> views_to_dispose_;
+
+  /// view IDs in composition order.
+  ///
+  /// This state is only modified on the raster thread.
+  std::vector<int64_t> composition_order_;
+
+  /// platform view IDs visited during layer tree composition.
+  ///
+  /// This state is only modified on the raster thread.
+  std::vector<int64_t> visited_platform_views_;
+
+  /// Only composite platform views in this set.
+  ///
+  /// This state is only modified on the raster thread.
+  std::unordered_set<int64_t> views_to_recomposite_;
+
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+  /// A set to keep track of embedded views that do not have (0, 0) origin.
+  /// An insertion triggers a warning message about non-zero origin logged on the debug console.
+  /// See https://github.com/flutter/flutter/issues/109700 for details.
+  std::unordered_set<int64_t> non_zero_origin_views_;
+#endif
+
+  /// @brief The composition order from the previous thread.
+  ///
+  /// Only accessed from the platform thread.
+  std::vector<int64_t> previous_composition_order_;
+
+  /// Whether the previous frame had any platform views in active composition order.
+  ///
+  /// This state is tracked so that the first frame after removing the last platform view
+  /// runs through the platform view rendering code path, giving us a chance to remove the
+  /// platform view from the UIView hierarchy.
+  ///
+  /// Only accessed from the raster thread.
+  bool had_platform_views_ = false;
 
   // WeakPtrFactory must be the last member.
   std::unique_ptr<fml::WeakPtrFactory<FlutterPlatformViewsController>> weak_factory_;
-
-#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-  // A set to keep track of embedded views that does not have (0, 0) origin.
-  // An insertion triggers a warning message about non-zero origin logged on the debug console.
-  // See https://github.com/flutter/flutter/issues/109700 for details.
-  std::unordered_set<int64_t> non_zero_origin_views_;
-#endif
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterPlatformViewsController);
 };

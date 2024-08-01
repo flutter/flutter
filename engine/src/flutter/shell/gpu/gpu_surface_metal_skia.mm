@@ -157,8 +157,9 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromCAMetalLayer(
     return nullptr;
   }
 
-  auto encode_callback = [this, drawable](const SurfaceFrame& surface_frame,
-                                          DlCanvas* canvas) -> bool {
+  SurfaceFrame::EncodeCallback encode_callback =
+      [this, drawable, mtl_layer](const SurfaceFrame& surface_frame, DlCanvas* canvas) -> bool {
+    mtl_layer.presentsWithTransaction = surface_frame.submit_info().present_with_transaction;
     if (canvas == nullptr) {
       FML_DLOG(ERROR) << "Canvas not available.";
       return false;
@@ -186,7 +187,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromCAMetalLayer(
     return true;
   };
 
-  auto submit_callback = [this, drawable](const SurfaceFrame& surface_frame) -> bool {
+  SurfaceFrame::SubmitCallback submit_callback =
+      [this, drawable](const SurfaceFrame& surface_frame) -> bool {
     TRACE_EVENT0("flutter", "GPUSurfaceMetal::Submit");
     return delegate_->PresentDrawable(drawable);
   };

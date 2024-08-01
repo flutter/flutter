@@ -58,6 +58,13 @@ class SurfaceMTL final : public Surface {
   // Returns a Rect defining the area of the surface in device pixels
   IRect coverage() const;
 
+  /// Mark this surface as presenting with a transaction.
+  ///
+  /// If true, [Present] will block on the scheduling of a command buffer.
+  void PresentWithTransaction(bool present_with_transaction) {
+    present_with_transaction_ = present_with_transaction;
+  }
+
   // |Surface|
   bool Present() const override;
 
@@ -74,6 +81,7 @@ class SurfaceMTL final : public Surface {
   bool requires_blit_ = false;
   std::optional<IRect> clip_rect_;
   bool frame_boundary_ = false;
+  bool present_with_transaction_ = false;
 
   static bool ShouldPerformPartialRepaint(std::optional<IRect> damage_rect);
 

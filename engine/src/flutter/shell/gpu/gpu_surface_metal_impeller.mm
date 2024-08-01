@@ -109,8 +109,11 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
                          disable_partial_repaint = disable_partial_repaint_,  //
                          aiks_context = aiks_context_,                        //
                          drawable,                                            //
-                         last_texture                                         //
+                         last_texture,                                        //
+                         mtl_layer                                            //
   ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
+        mtl_layer.presentsWithTransaction = surface_frame.submit_info().present_with_transaction;
+
         if (!aiks_context) {
           return false;
         }
@@ -151,6 +154,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
         if (!surface) {
           return false;
         }
+        surface->PresentWithTransaction(surface_frame.submit_info().present_with_transaction);
 
         if (clip_rect && clip_rect->IsEmpty()) {
           surface_frame.set_user_data(std::move(surface));
@@ -270,6 +274,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
 
         auto surface = impeller::SurfaceMTL::MakeFromTexture(aiks_context->GetContext(),
                                                              mtl_texture, clip_rect);
+
+        surface->PresentWithTransaction(surface_frame.submit_info().present_with_transaction);
 
         if (clip_rect && clip_rect->IsEmpty()) {
           return surface->Present();

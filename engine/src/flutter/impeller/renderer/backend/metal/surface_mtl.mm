@@ -286,7 +286,7 @@ bool SurfaceMTL::Present() const {
     // If the threads have been merged, or there is a pending frame capture,
     // then block on cmd buffer scheduling to ensure that the
     // transaction/capture work correctly.
-    if ([[NSThread currentThread] isMainThread] ||
+    if (present_with_transaction_ || [[NSThread currentThread] isMainThread] ||
         [[MTLCaptureManager sharedCaptureManager] isCapturing] ||
         alwaysWaitForScheduling) {
       TRACE_EVENT0("flutter", "waitUntilScheduled");

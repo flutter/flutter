@@ -14,7 +14,7 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
  public:
   IOSExternalViewEmbedder(const std::shared_ptr<FlutterPlatformViewsController>&
                               platform_views_controller,
-                          std::shared_ptr<IOSContext> context);
+                          const std::shared_ptr<IOSContext>& context);
 
   // |ExternalViewEmbedder|
   virtual ~IOSExternalViewEmbedder() override;

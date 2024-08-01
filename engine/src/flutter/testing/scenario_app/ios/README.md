@@ -9,14 +9,14 @@ run:
 
 ```sh
 # From the root of the engine repository
-$ ./testing/run_ios_tests.sh ios_debug_sim_unopt
+$ ./testing/scenario_app/run_ios_tests.sh ios_debug_sim_unopt
 ```
 
 or:
 
 ```sh
 # From the root of the engine repository
-$ ./testing/run_ios_tests.sh ios_debug_sim_unopt_arm64
+$ ./testing/scenario_app/run_ios_tests.sh ios_debug_sim_unopt_arm64
 ```
 
 To run or debug in Xcode, open the xcodeproj file located in

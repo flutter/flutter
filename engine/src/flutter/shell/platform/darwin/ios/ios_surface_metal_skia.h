@@ -48,6 +48,9 @@ class SK_API_AVAILABLE_CA_METAL_LAYER IOSSurfaceMetalSkia final : public IOSSurf
   bool PresentDrawable(GrMTLHandle drawable) const override __attribute__((cf_audited_transfer));
 
   // |GPUSurfaceMetalDelegate|
+  bool PreparePresent(GrMTLHandle drawable) const override;
+
+  // |GPUSurfaceMetalDelegate|
   GPUMTLTextureInfo GetMTLTexture(const SkISize& frame_info) const override
       __attribute__((cf_audited_transfer));
 
