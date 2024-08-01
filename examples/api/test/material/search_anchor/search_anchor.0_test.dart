@@ -12,7 +12,7 @@ void main() {
 
     expect(find.widgetWithText(AppBar, 'Search Bar Sample'), findsOne);
 
-    expect(find.byWidgetPredicate((Widget widget) => widget is Card && widget.color ==const Color(0xff6750a4)), findsOne);
+    expect(find.byWidgetPredicate((Widget widget) => widget is Card && widget.color == const Color(0xff6750a4)), findsOne);
 
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
@@ -28,7 +28,7 @@ void main() {
     await tester.tap(find.widgetWithText(ListTile, 'red'));
     await tester.pumpAndSettle();
 
-    expect(find.byWidgetPredicate((Widget widget) => widget is Card && widget.color ==const Color(0xff904a42)), findsOne);
+    expect(find.byWidgetPredicate((Widget widget) => widget is Card && widget.color == const Color(0xff904a42)), findsOne);
 
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
@@ -50,6 +50,6 @@ void main() {
     await tester.tap(find.widgetWithText(ListTile, 'blue'));
     await tester.pumpAndSettle();
 
-    expect(find.byWidgetPredicate((Widget widget) => widget is Card && widget.color ==const Color(0xff36618e)), findsOne);
+    expect(find.byWidgetPredicate((Widget widget) => widget is Card && widget.color == const Color(0xff36618e)), findsOne);
   });
 }
