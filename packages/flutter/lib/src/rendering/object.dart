@@ -5318,7 +5318,12 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       usedSemanticsIds,
     );
 
-    _compileFragmentSubtree(usedSemanticsIds: usedSemanticsIds, siblingNodes: siblingNodes);
+    _compileFragmentSubtree(
+      usedSemanticsIds: usedSemanticsIds,
+      siblingNodes: siblingNodes,
+      parentSemanticsClipRect: node.parentSemanticsClipRect,
+      parentPaintClipRect: node.parentPaintClipRect,
+    );
     // Sibling node needs to attach to the parent of an explicit node.
     for (final SemanticsNode siblingNode in siblingNodes) {
       // sibling nodes are in the same coordinate of the immediate explicit node.
@@ -5339,10 +5344,15 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   void _compileFragmentSubtree({
     required List<SemanticsNode> siblingNodes,
     required Set<int> usedSemanticsIds,
+    required Rect? parentSemanticsClipRect,
+    required Rect? parentPaintClipRect,
   }) {
-    assert(_shouldFormSemanticsNode && owner.cachedSemanticsNode != null);
     final List<SemanticsNode> children = <SemanticsNode>[];
-    final SemanticsNode node = owner.cachedSemanticsNode!;
+    final SemanticsNode? node = owner.cachedSemanticsNode;
+    assert(
+      node == null ||
+      (parentSemanticsClipRect == node.parentSemanticsClipRect && parentPaintClipRect == node.parentPaintClipRect),
+    );
     for (final _InterestingSemanticsFragmentProvider provider in _compilingChildren) {
       final _InterestingSemanticsFragment fragment = provider.getFragment();
       if (fragment is _SwitchableSemanticsFragment) {
@@ -5357,8 +5367,8 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       }
       final List<SemanticsNode> childSiblingNodes = <SemanticsNode>[];
       fragment.compileSemanticsNodes(
-        parentSemanticsClipRect: node.parentSemanticsClipRect,
-        parentPaintClipRect: node.parentPaintClipRect,
+        parentSemanticsClipRect: parentSemanticsClipRect,
+        parentPaintClipRect: parentPaintClipRect,
         elevationAdjustment: 0.0,
         result: children,
         siblingNodes: childSiblingNodes,
@@ -5367,10 +5377,13 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       siblingNodes.addAll(childSiblingNodes);
       children.removeWhere(_shouldDrop);
     }
-    if (_effectiveConfig.isSemanticBoundary) {
-      owner.renderObject.assembleSemanticsNode(node, _effectiveConfig, children);
-    } else {
-      node.updateWith(config: _effectiveConfig, childrenInInversePaintOrder: children);
+    if (node != null) {
+      assert(_shouldFormSemanticsNode);
+      if (_effectiveConfig.isSemanticBoundary) {
+        owner.renderObject.assembleSemanticsNode(node, _effectiveConfig, children);
+      } else {
+        node.updateWith(config: _effectiveConfig, childrenInInversePaintOrder: children);
+      }
     }
   }
 
@@ -5391,6 +5404,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       // This will likely short circuit in children's recursive call to
       // compileSemanticsNodes if children's fragments are cached and
       // geometries doesn't change.
+      final SemanticsNode? node = owner.cachedSemanticsNode;
       _compileFragmentSubtree(
         // The decision for dropping certain sibling nodes are made by
         // the caller of compileSemanticsNodes that ends up calling this
@@ -5402,6 +5416,8 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
         // renderObjectSemanticsDidChange would have marked the
         // _RenderObjectSemantics of the parent of this fragment's
         // _RenderObjectSemantics owner dirty already.
+        parentPaintClipRect: node?.parentPaintClipRect ?? parentPaintClipRect,
+        parentSemanticsClipRect: node?.parentSemanticsClipRect ?? parentSemanticsClipRect,
         siblingNodes: <SemanticsNode>[],
         usedSemanticsIds: <int>{},
       );
@@ -5448,7 +5464,10 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
     if (producedNode == null || !_semanticsNodes.contains(producedNode)) {
       // The produced node may be old cache before this fragment was used
       // to be a semantics boundary.
-      return false;
+      //
+      // Return true since it is not certain whether children's geometries may
+      // change or not.
+      return true;
     }
     final _SemanticsGeometry? geometry = _SemanticsGeometry.computeGeometryFor(
       this,
