@@ -1565,6 +1565,11 @@ void main() {
       final SemanticsHandle semantics = tester.ensureSemantics();
 
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        // Sized Box
+        expect(tester.getSemantics(find.bySemanticsLabel('SELECT DATE\nFri, Jan 15')), matchesSemantics(
+          label: 'SELECT DATE\nFri, Jan 15',
+        ));
+
         // Header
         expect(tester.getSemantics(find.text('SELECT DATE')), matchesSemantics(
           label: 'SELECT DATE\nFri, Jan 15',
