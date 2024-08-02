@@ -162,7 +162,7 @@ void main() {
     );
 
     expect(find.byType(Title), findsOneWidget);
-  }, skip: kIsWeb);
+  }, skip: kIsWeb /* [intended] This is a web only behavior. */);
 
   testWidgets('Title is not generated if the platform is web', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -173,7 +173,7 @@ void main() {
     );
 
     expect(find.byType(Title), findsNothing);
-  }, skip: !kIsWeb);
+  }, skip: kIsWeb /* [intended] This is a behavior in all platforms but web */);
 
   group('error control test', () {
     Future<void> expectFlutterError({
