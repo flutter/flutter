@@ -108,6 +108,7 @@ void main() {
 
     expect(find.widgetWithText(CustomScrollView, 'Item: 1'));
   });
+
   testWidgets('IconButton click and mouse scroll reveals additional SliverList', (WidgetTester tester) async {
     await tester.pumpWidget(const example.CustomScrollViewExampleApp());
 
