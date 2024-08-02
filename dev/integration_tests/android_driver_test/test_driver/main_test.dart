@@ -18,7 +18,7 @@ void main() async {
   await testExecutable(_main);
 }
 
-final bool _isLuciCi = io.Platform.environment['LUCI_CI'] == 'true';
+final bool _isLuciCi = io.Platform.environment['LUCI_CI'] == 'True';
 
 Future<void> _main() async {
   // To generate golden files locally, uncomment the following line.
