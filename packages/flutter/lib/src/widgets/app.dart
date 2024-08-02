@@ -1787,7 +1787,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         },
       );
     } else if (widget.title == null && kIsWeb) {
-      title = null;
+      title =  null;
     } else {
       title = Title(
         title: widget.title ?? '',
@@ -1825,7 +1825,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
                       child: Localizations(
                         locale: appLocale,
                         delegates: _localizationsDelegates.toList(),
-                        child: title,
+                        child: title ?? result,
                       ),
                     ),
                   ),
