@@ -153,7 +153,7 @@ void main() {
     expect(checked, isTrue);
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('Title is generated if the platform is not web', (WidgetTester tester) async {
+  testWidgets('Title is not created if title is not passed and kIsweb', (WidgetTester tester) async {
     await tester.pumpWidget(
       WidgetsApp(
         color: const Color(0xFF123456),
@@ -161,19 +161,8 @@ void main() {
       ),
     );
 
-    expect(find.byType(Title), findsOneWidget);
-  }, skip: kIsWeb /* [intended] This is a web only behavior. */);
-
-  testWidgets('Title is not generated if the platform is web', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      WidgetsApp(
-        color: const Color(0xFF123456),
-        builder: (BuildContext context, Widget? child) => Container(),
-      ),
-    );
-
-    expect(find.byType(Title), findsNothing);
-  }, skip: !kIsWeb /* [intended] This is a behavior in all platforms but web */);
+    expect(find.byType(Title), kIsWeb ? findsNothing : findsOneWidget);
+  });
 
   group('error control test', () {
     Future<void> expectFlutterError({
