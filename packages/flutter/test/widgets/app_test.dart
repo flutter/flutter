@@ -173,7 +173,7 @@ void main() {
     );
 
     expect(find.byType(Title), findsNothing);
-  }, skip: kIsWeb /* [intended] This is a behavior in all platforms but web */);
+  }, skip: !kIsWeb /* [intended] This is a behavior in all platforms but web */);
 
   group('error control test', () {
     Future<void> expectFlutterError({
