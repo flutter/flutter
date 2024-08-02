@@ -156,7 +156,7 @@ void main() {
 
   testWidgets('TextButton.defaultStyle produces a ButtonStyle with appropriate non-null values', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
-    final ThemeData theme = ThemeData.from(useMaterial3: true, colorScheme: colorScheme);
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
 
     final TextButton button = TextButton(
       onPressed: () { },
@@ -210,7 +210,7 @@ void main() {
 
     testWidgets('TextButton.defaultStyle with an icon produces a ButtonStyle with appropriate non-null values', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
-    final ThemeData theme = ThemeData.from(useMaterial3: true, colorScheme: colorScheme);
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
 
     final TextButton button = TextButton.icon(
       onPressed: () { },

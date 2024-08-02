@@ -129,7 +129,7 @@ void main() {
 
   testWidgets('FilledButton.defaultStyle produces a ButtonStyle with appropriate non-null values', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
-    final ThemeData theme = ThemeData.from(useMaterial3: true, colorScheme: colorScheme);
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
 
     final FilledButton button = FilledButton(
       onPressed: () { },
@@ -183,7 +183,7 @@ void main() {
 
     testWidgets('FilledButton.defaultStyle with an icon produces a ButtonStyle with appropriate non-null values', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
-    final ThemeData theme = ThemeData.from(useMaterial3: true, colorScheme: colorScheme);
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
 
     final FilledButton button = FilledButton.icon(
       onPressed: () { },

@@ -176,7 +176,7 @@ void main() {
 
   testWidgets('OutlinedButton.defaultStyle produces a ButtonStyle with appropriate non-null values', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
-    final ThemeData theme = ThemeData.from(useMaterial3: true, colorScheme: colorScheme);
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
 
     final OutlinedButton button = OutlinedButton(
       onPressed: () { },
@@ -230,7 +230,7 @@ void main() {
 
     testWidgets('OutlinedButton.defaultStyle with an icon produces a ButtonStyle with appropriate non-null values', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
-    final ThemeData theme = ThemeData.from(useMaterial3: true, colorScheme: colorScheme);
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
 
     final OutlinedButton button = OutlinedButton.icon(
       onPressed: () { },
