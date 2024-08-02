@@ -5371,6 +5371,9 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       );
       siblingNodes.addAll(childSiblingNodes);
     }
+    // If this fragment won't form a semantics node, it is safe to disregard
+    // the `children` here. The `compileSemanticsNodes` that calls this method
+    // will gather semantics nodes for parent to be returned.
     if (_formedSemanticsNode!) {
       final SemanticsNode node = owner.cachedSemanticsNode!;
       children.removeWhere(_shouldDrop);

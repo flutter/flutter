@@ -1941,7 +1941,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
   ///
   /// This value indicates whether this node has any ancestors with
   /// [mergeAllDescendantsIntoThisNode] set to true.
-  bool get isMergedIntoParent => parent != null && _isMergedIntoParent;
+  bool get isMergedIntoParent {
+    assert(!_isMergedIntoParent || parent != null);
+    return _isMergedIntoParent;
+  }
   bool _isMergedIntoParent = false;
 
   /// Whether the user can interact with this node in assistive technologies.
@@ -2213,6 +2216,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     assert(child._parent == this);
     assert(child.attached == attached);
     child._parent = null;
+    child._isMergedIntoParent = false;
     if (attached) {
       child.detach();
     }
