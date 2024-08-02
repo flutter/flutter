@@ -27,7 +27,7 @@ void main() {
     await tester.tap(find.text('Show a MaterialBanner'));
     await tester.pumpAndSettle();
 
-    final TextButton dismissButtonFinder = tester.widget(find.byType(TextButton)) as TextButton;
+    final TextButton dismissButtonFinder = tester.widget<TextButton>(find.byType(TextButton));
     expect(dismissButtonFinder.focusNode!.hasFocus, isTrue);
   });
 
