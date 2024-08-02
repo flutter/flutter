@@ -491,24 +491,25 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
   }
 }
 
-/// An iOS-style rounded rectangle surface useful for showing modal overlays,
-/// such as dialogs and action sheets.
+/// An iOS-style component for creating modal overlays like dialogs and action
+/// sheets.
 ///
-/// By default, this surface is composed of a transparent surface color painted
-/// atop a [BackdropFilter]. The surface color is light gray when the ambient
-/// [CupertinoTheme] brightness is [Brightness.light], and dark gray when the
-/// ambient brightness is [Brightness.dark]. The [BackdropFilter] applied
-/// beneath the surface saturates and blurs underlying content. In other words,
-/// the overall effect is result = add_surface_color(blur(saturate(source))).
+/// By default, [CupertinoPopupSurface] generates a rounded rectangle surface
+/// that applies two effects to the background content:
+///
+///   1. Background filter: Saturates and then blurs content behind the surface.
+///   2. Overlay color: Covers the filtered background with a transparent
+///      surface color. The color adapts to the CupertinoTheme's brightness:
+///      light gray when the ambient [CupertinoTheme] brightness is
+///      [Brightness.light], and dark gray when [Brightness.dark].
 ///
 /// The blur strength can be changed by setting [blurSigma] to a positive value,
 /// or removed by setting the [blurSigma] to 0.
 ///
-/// The saturation effect can be removed by setting [isVibrancePainted] to
-/// false. The saturation effect is not supported on the html web renderer and
-/// will not be applied regardless of the value of [isVibrancePainted]. Removing
-/// the vibrance can prevent oversaturating areas where multiple
-/// [CupertinoPopupSurface]s are stacked upon each other.
+/// The saturation effect can be removed for debugging by setting
+/// [debugIsVibrancePainted] to false. The saturation effect is not supported on
+/// the html web renderer and will not be applied regardless of the value of
+/// [debugIsVibrancePainted].
 ///
 /// The surface color can be disabled by setting [isSurfacePainted] to false,
 /// which is useful for more complicated layouts, such as rendering divider gaps
@@ -533,7 +534,7 @@ class CupertinoPopupSurface extends StatelessWidget {
     super.key,
     this.blurSigma = defaultBlurSigma,
     this.isSurfacePainted = true,
-    this.isVibrancePainted = true,
+    this.debugIsVibrancePainted = true,
     required this.child,
   }) : assert(blurSigma >= 0);
 
@@ -550,12 +551,8 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// The appearance of the [ColorFilter] is determined by the [Brightness]
   /// value obtained from the ambient [CupertinoTheme].
   ///
-  /// When stacking multiple [CupertinoPopupSurface]s, setting
-  /// [isVibrancePainted] to false can prevent the backdrop from becoming too
-  /// saturated.
-  ///
   /// Defaults to true.
-  final bool isVibrancePainted;
+  final bool debugIsVibrancePainted;
 
   /// Whether or not to paint a translucent white on top of this surface's
   /// blurred background. [isSurfacePainted] should be true for a typical popup
@@ -648,7 +645,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   ];
 
   ImageFilter? _buildFilter(Brightness? brightness) {
-    if ((kIsWeb && !isCanvasKit) || !isVibrancePainted) {
+    if ((kIsWeb && !isSkiaWeb) || !debugIsVibrancePainted) {
       if (blurSigma <= 0) {
         return null;
       }

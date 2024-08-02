@@ -100,20 +100,20 @@ void main() {
 
   // Golden displays color tiles without CupertinoPopupSurface being
   // displayed.
-  testWidgets('Setting isVibrancePainted to false removes the color filter', (WidgetTester tester) async {
+  testWidgets('Setting debugIsVibrancePainted to false removes the color filter', (WidgetTester tester) async {
     await tester.pumpWidget(
       const _FilterTest(
         CupertinoPopupSurface(
           blurSigma: 0,
           isSurfacePainted: false,
-          isVibrancePainted: false,
+          debugIsVibrancePainted: false,
           child: SizedBox(),
         ),
       ),
     );
 
     // The BackdropFilter widget should not be mounted when blurSigma is 0 and
-    // CupertinoPopupSurface.isVibrancePainted is false.
+    // CupertinoPopupSurface.debugIsVibrancePainted is false.
     expect(
       find.descendant(
         of: find.byType(CupertinoPopupSurface),
@@ -142,7 +142,7 @@ void main() {
                 padding: EdgeInsets.all(32),
                 child: CupertinoPopupSurface(
                   blurSigma: 0,
-                  isVibrancePainted: false,
+                  debugIsVibrancePainted: false,
                   child: SizedBox(),
                 ),
               ),
@@ -174,7 +174,7 @@ void main() {
                 data: CupertinoThemeData(brightness: Brightness.dark),
                 child: CupertinoPopupSurface(
                   blurSigma: 0,
-                  isVibrancePainted: false,
+                  debugIsVibrancePainted: false,
                   child: SizedBox(),
                 ),
               ),
@@ -202,7 +202,7 @@ void main() {
           children: <Widget>[
             CupertinoPopupSurface(
               blurSigma: 0,
-              isVibrancePainted: false,
+              debugIsVibrancePainted: false,
               isSurfacePainted: false,
               child: SizedBox(),
             ),
@@ -224,7 +224,7 @@ void main() {
       const _FilterTest(
         CupertinoPopupSurface(
           isSurfacePainted: false,
-          isVibrancePainted: false,
+          debugIsVibrancePainted: false,
           blurSigma: 5,
           child: SizedBox(),
         ),
@@ -240,7 +240,7 @@ void main() {
       const _FilterTest(
         CupertinoPopupSurface(
           isSurfacePainted: false,
-          isVibrancePainted: false,
+          debugIsVibrancePainted: false,
           child: SizedBox(),
         ),
       ),
@@ -261,7 +261,7 @@ void main() {
       const _FilterTest(
         CupertinoPopupSurface(
           isSurfacePainted: false,
-          isVibrancePainted: false,
+          debugIsVibrancePainted: false,
           blurSigma: 0,
           child: SizedBox(),
         ),
@@ -287,7 +287,7 @@ void main() {
       const _FilterTest(
         CupertinoPopupSurface(
           isSurfacePainted: false,
-          isVibrancePainted: false,
+          debugIsVibrancePainted: false,
           blurSigma: 0,
           child: SizedBox(),
         ),
@@ -328,7 +328,7 @@ void main() {
             child: SizedBox(),
           ),
           CupertinoPopupSurface(
-            isVibrancePainted: false,
+            debugIsVibrancePainted: false,
             child: SizedBox(),
           )
         ]),
