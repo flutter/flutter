@@ -1180,10 +1180,12 @@ void main() {
         onChanged: (bool? value) { log.add(value); },
         title: const Text('Hello'),
         checkboxSemanticLabel: 'there',
+        internalAddSemanticForOnTap: true,
       ),
     ));
 
     expect(tester.getSemantics(find.byType(CheckboxListTile)), matchesSemantics(
+      isButton: true,
       hasCheckedState: true,
       isChecked: true,
       hasEnabledState: true,

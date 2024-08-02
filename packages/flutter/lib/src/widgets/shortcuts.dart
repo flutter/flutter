@@ -902,22 +902,17 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   /// [Action] must be enabled.
   @protected
   KeyEventResult handleKeypress(BuildContext context, KeyEvent event) {
-    final Intent? matchedIntent = _find(event, HardwareKeyboard.instance);
-    if (matchedIntent != null) {
-      final BuildContext? primaryContext = primaryFocus?.context;
-      if (primaryContext != null) {
-        final Action<Intent>? action = Actions.maybeFind<Intent>(
-          primaryContext,
-          intent: matchedIntent,
-        );
-        if (action != null) {
-          final (bool enabled, Object? invokeResult) = Actions.of(primaryContext).invokeActionIfEnabled(
-            action, matchedIntent, primaryContext,
-          );
-          if (enabled) {
-            return action.toKeyEventResult(matchedIntent, invokeResult);
-          }
-        }
+    // Marking some variables as "late" ensures that they aren't evaluated unless needed.
+    late final Intent? intent = _find(event, HardwareKeyboard.instance);
+    late final BuildContext? context = primaryFocus?.context;
+    late final Action<Intent>? action = Actions.maybeFind<Intent>(context!, intent: intent);
+
+    if (intent != null && context != null && action != null) {
+      final (bool enabled, Object? invokeResult) =
+          Actions.of(context).invokeActionIfEnabled(action, intent, context);
+
+      if (enabled) {
+        return action.toKeyEventResult(intent, invokeResult);
       }
     }
     return modal ? KeyEventResult.skipRemainingHandlers : KeyEventResult.ignored;
@@ -1419,8 +1414,7 @@ class ShortcutRegistry with ChangeNotifier {
   // registry.
   void _disposeEntry(ShortcutRegistryEntry entry) {
     assert(_debugCheckEntryIsValid(entry));
-    final Map<ShortcutActivator, Intent>? removedShortcut = _registeredShortcuts.remove(entry);
-    if (removedShortcut != null) {
+    if (_registeredShortcuts.remove(entry) != null) {
       _notifyListenersNextFrame();
     }
   }

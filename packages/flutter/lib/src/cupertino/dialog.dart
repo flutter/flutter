@@ -260,8 +260,8 @@ class CupertinoAlertDialog extends StatefulWidget {
   /// A scroll controller that can be used to control the scrolling of the
   /// [content] in the dialog.
   ///
-  /// Defaults to null, and is typically not needed, since most alert messages
-  /// are short.
+  /// Defaults to null, which means the [CupertinoDialogAction] will create a
+  /// scroll controller internally.
   ///
   /// See also:
   ///
@@ -272,7 +272,8 @@ class CupertinoAlertDialog extends StatefulWidget {
   /// A scroll controller that can be used to control the scrolling of the
   /// actions in the dialog.
   ///
-  /// Defaults to null, and is typically not needed.
+  /// Defaults to null, which means the [CupertinoDialogAction] will create an
+  /// action scroll controller internally.
   ///
   /// See also:
   ///
@@ -397,7 +398,6 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                 );
           }
           final Widget scrolledActionsSection = _OverscrollBackground(
-            scrollController: _effectiveActionScrollController,
             color: backgroundColor,
             child: actionsSection,
           );
@@ -663,14 +663,14 @@ class _SlidingTapGestureRecognizer extends VerticalDragGestureRecognizer {
 // enters, leaves, or ends this `MetaData` widget, corresponding methods of this
 // class will be called.
 //
-// Multiple `_ActionSheetSlideTarget`s might be nested.
+// Multiple `_SlideTarget`s might be nested.
 // `_TargetSelectionGestureRecognizer` uses a simple algorithm that only
 // compares if the inner-most slide target has changed (which suffices our use
 // case).  Semantically, this means that all outer targets will be treated as
 // identical to the inner-most one, i.e. when the pointer enters or leaves a
 // slide target, the corresponding method will be called on all targets that
 // nest it.
-abstract class _ActionSheetSlideTarget {
+abstract class _SlideTarget {
   // A pointer has entered this region.
   //
   // This includes:
@@ -702,7 +702,7 @@ abstract class _ActionSheetSlideTarget {
 }
 
 // Recognizes sliding taps and thereupon interacts with
-// `_ActionSheetSlideTarget`s.
+// `_SlideTarget`s.
 class _TargetSelectionGestureRecognizer extends GestureRecognizer {
   _TargetSelectionGestureRecognizer({super.debugOwner, required this.hitTest})
     : _slidingTap = _SlidingTapGestureRecognizer(debugOwner: debugOwner) {
@@ -715,7 +715,7 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
 
   final _HitTester hitTest;
 
-  final List<_ActionSheetSlideTarget> _currentTargets = <_ActionSheetSlideTarget>[];
+  final List<_SlideTarget> _currentTargets = <_SlideTarget>[];
   final _SlidingTapGestureRecognizer _slidingTap;
 
   @override
@@ -744,7 +744,7 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
     super.dispose();
   }
 
-  // Collect the `_ActionSheetSlideTarget`s that are currently hit by the
+  // Collect the `_SlideTarget`s that are currently hit by the
   // pointer, check whether the current target have changed, and invoke their
   // methods if necessary.
   //
@@ -755,27 +755,27 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
 
     // A slide target might nest other targets, therefore multiple targets might
     // be found.
-    final List<_ActionSheetSlideTarget> foundTargets = <_ActionSheetSlideTarget>[];
+    final List<_SlideTarget> foundTargets = <_SlideTarget>[];
     for (final HitTestEntry entry in result.path) {
       if (entry.target case final RenderMetaData target) {
-        if (target.metaData is _ActionSheetSlideTarget) {
-          foundTargets.add(target.metaData as _ActionSheetSlideTarget);
+        if (target.metaData is _SlideTarget) {
+          foundTargets.add(target.metaData as _SlideTarget);
         }
       }
     }
 
     // Compare whether the active target has changed by simply comparing the
     // first (inner-most) avatar of the nest, ignoring the cases where
-    // _currentTargets intersect with foundTargets (see _ActionSheetSlideTarget's
+    // _currentTargets intersect with foundTargets (see _SlideTarget's
     // document for more explanation).
     if (_currentTargets.firstOrNull != foundTargets.firstOrNull) {
-      for (final _ActionSheetSlideTarget target in _currentTargets) {
+      for (final _SlideTarget target in _currentTargets) {
         target.didLeave();
       }
       _currentTargets
         ..clear()
         ..addAll(foundTargets);
-      for (final _ActionSheetSlideTarget target in _currentTargets) {
+      for (final _SlideTarget target in _currentTargets) {
         target.didEnter(fromPointerDown: fromPointerDown);
       }
     }
@@ -791,14 +791,14 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
 
   void _onEnd(Offset globalPosition) {
     _updateDrag(globalPosition, fromPointerDown: false);
-    for (final _ActionSheetSlideTarget target in _currentTargets) {
+    for (final _SlideTarget target in _currentTargets) {
       target.didConfirm();
     }
     _currentTargets.clear();
   }
 
   void _onCancel() {
-    for (final _ActionSheetSlideTarget target in _currentTargets) {
+    for (final _SlideTarget target in _currentTargets) {
       target.didLeave();
     }
     _currentTargets.clear();
@@ -928,14 +928,15 @@ class CupertinoActionSheet extends StatefulWidget {
   /// A scroll controller that can be used to control the scrolling of the
   /// [message] in the action sheet.
   ///
-  /// This attribute is typically not needed, as alert messages should be
-  /// short.
+  /// Defaults to null, which means the [CupertinoActionSheet] will create a
+  /// scroll controller internally.
   final ScrollController? messageScrollController;
 
   /// A scroll controller that can be used to control the scrolling of the
   /// [actions] in the action sheet.
   ///
-  /// This attribute is typically not needed.
+  /// Defaults to null, which means the [CupertinoActionSheet] will create an
+  /// action scroll controller internally.
   final ScrollController? actionScrollController;
 
   /// The optional cancel button that is grouped separately from the other
@@ -949,6 +950,9 @@ class CupertinoActionSheet extends StatefulWidget {
 }
 
 class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
+  int? _pressedIndex;
+  static const int _kCancelButtonIndex = -1;
+
   ScrollController? _backupMessageScrollController;
 
   ScrollController? _backupActionScrollController;
@@ -1004,6 +1008,20 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     );
   }
 
+  void _onPressedUpdate(int actionIndex, bool state) {
+    if (!state) {
+      if (_pressedIndex == actionIndex) {
+        setState(() {
+          _pressedIndex = null;
+        });
+      }
+    } else {
+      setState(() {
+        _pressedIndex = actionIndex;
+      });
+    }
+  }
+
   Widget _buildCancelButton() {
     assert(widget.cancelButton != null);
     final double cancelPadding = (widget.actions != null || widget.message != null || widget.title != null)
@@ -1012,7 +1030,10 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
       padding: EdgeInsets.only(top: cancelPadding),
       child: _ActionSheetButtonBackground(
         isCancel: true,
-        onPressStateChange: (_) {},
+        pressed: _pressedIndex == _kCancelButtonIndex,
+        onPressStateChange: (bool state) {
+          _onPressedUpdate(_kCancelButtonIndex, state);
+        },
         child: widget.cancelButton!,
       ),
     );
@@ -1106,6 +1127,8 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
             child: _ActionSheetMainSheet(
+              pressedIndex: _pressedIndex,
+              onPressedUpdate: _onPressedUpdate,
               scrollController: _effectiveActionScrollController,
               contentSection: _buildContent(context),
               actions: widget.actions ?? List<Widget>.empty(),
@@ -1208,16 +1231,16 @@ class CupertinoActionSheetAction extends StatefulWidget {
 }
 
 class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
-    implements _ActionSheetSlideTarget {
-  // |_ActionSheetSlideTarget|
+    implements _SlideTarget {
+  // |_SlideTarget|
   @override
   void didEnter({required bool fromPointerDown}) {}
 
-  // |_ActionSheetSlideTarget|
+  // |_SlideTarget|
   @override
   void didLeave() {}
 
-  // |_ActionSheetSlideTarget|
+  // |_SlideTarget|
   @override
   void didConfirm() {
     widget.onPressed();
@@ -1307,14 +1330,22 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
 
 // Renders the background of a button (both the pressed background and the idle
 // background) and reports its state to the parent with `onPressStateChange`.
+//
+// Although this class doesn't keep any states, it's still a stateful widget
+// because the state is used as a persistent object across rebuilds to provide
+// to [MetaData.data].
 class _ActionSheetButtonBackground extends StatefulWidget {
   const _ActionSheetButtonBackground({
     this.isCancel = false,
+    required this.pressed,
     this.onPressStateChange,
     required this.child,
   });
 
   final bool isCancel;
+
+  /// Whether the user is holding on this button.
+  final bool pressed;
 
   /// Called when the user taps down or lifts up on the button.
   ///
@@ -1330,9 +1361,7 @@ class _ActionSheetButtonBackground extends StatefulWidget {
   _ActionSheetButtonBackgroundState createState() => _ActionSheetButtonBackgroundState();
 }
 
-class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackground> implements _ActionSheetSlideTarget {
-  bool isBeingPressed = false;
-
+class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackground> implements _SlideTarget {
   void _emitVibration(){
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
@@ -1346,27 +1375,24 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
     }
   }
 
-  // |_ActionSheetSlideTarget|
+  // |_SlideTarget|
   @override
   void didEnter({required bool fromPointerDown}) {
-    setState(() { isBeingPressed = true; });
     widget.onPressStateChange?.call(true);
     if (!fromPointerDown) {
       _emitVibration();
     }
   }
 
-  // |_ActionSheetSlideTarget|
+  // |_SlideTarget|
   @override
   void didLeave() {
-    setState(() { isBeingPressed = false; });
     widget.onPressStateChange?.call(false);
   }
 
-  // |_ActionSheetSlideTarget|
+  // |_SlideTarget|
   @override
   void didConfirm() {
-    setState(() { isBeingPressed = false; });
     widget.onPressStateChange?.call(false);
   }
 
@@ -1375,11 +1401,11 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
     late final Color backgroundColor;
     BorderRadius? borderRadius;
     if (!widget.isCancel) {
-      backgroundColor = isBeingPressed
+      backgroundColor = widget.pressed
         ? _kActionSheetPressedColor
         : _kActionSheetBackgroundColor;
     } else {
-      backgroundColor = isBeingPressed
+      backgroundColor = widget.pressed
         ? _kActionSheetCancelPressedColor
         : _kActionSheetCancelColor;
       borderRadius = const BorderRadius.all(Radius.circular(_kCornerRadius));
@@ -1454,7 +1480,6 @@ class _Divider extends StatelessWidget {
 class _OverscrollBackground extends StatefulWidget {
   const _OverscrollBackground({
     required this.color,
-    required this.scrollController,
     required this.child,
   });
 
@@ -1463,7 +1488,6 @@ class _OverscrollBackground extends StatefulWidget {
   // This value must be a resolved color instead of, for example, a
   // CupertinoDynamicColor.
   final Color color;
-  final ScrollController? scrollController;
   final Widget child;
 
   @override
@@ -1546,7 +1570,7 @@ class _ActionSheetActionSection extends StatelessWidget {
   final int? pressedIndex;
   final Color dividerColor;
   final Color backgroundColor;
-  final ScrollController? scrollController;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -1566,6 +1590,7 @@ class _ActionSheetActionSection extends StatelessWidget {
         ));
       }
       column.add(_ActionSheetButtonBackground(
+        pressed: pressedIndex == actionIndex,
         onPressStateChange: (bool state) {
           onPressedUpdate(actionIndex, state);
         },
@@ -1586,71 +1611,51 @@ class _ActionSheetActionSection extends StatelessWidget {
 }
 
 // The part of an action sheet without the cancel button.
-class _ActionSheetMainSheet extends StatefulWidget {
+class _ActionSheetMainSheet extends StatelessWidget {
   const _ActionSheetMainSheet({
+    required this.pressedIndex,
+    required this.onPressedUpdate,
     required this.scrollController,
     required this.actions,
     required this.contentSection,
     required this.dividerColor,
   });
 
-  final ScrollController? scrollController;
+  final int? pressedIndex;
+  final _PressedUpdateHandler onPressedUpdate;
+  final ScrollController scrollController;
   final List<Widget> actions;
   final Widget? contentSection;
   final Color dividerColor;
 
-  @override
-  _ActionSheetMainSheetState createState() => _ActionSheetMainSheetState();
-}
-
-class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
-  int? _pressedIndex;
-
-  bool get _hasContent => widget.contentSection != null;
-  bool get _hasActions => widget.actions.isNotEmpty;
-
-  void _onPressedUpdate(int actionIndex, bool state) {
-    if (!state) {
-      if (_pressedIndex == actionIndex) {
-        setState(() {
-          _pressedIndex = null;
-        });
-      }
-    } else {
-      setState(() {
-        _pressedIndex = actionIndex;
-      });
-    }
+  Widget _scrolledActionsSection(BuildContext context) {
+    final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
+    return _OverscrollBackground(
+      color: backgroundColor,
+      child: _ActionSheetActionSection(
+        actions: actions,
+        scrollController: scrollController,
+        dividerColor: dividerColor,
+        backgroundColor: backgroundColor,
+        pressedIndex: pressedIndex,
+        onPressedUpdate: onPressedUpdate,
+      ),
+    );
   }
 
   Widget _dividerAndActionsSection(BuildContext context) {
-    if (!_hasActions) {
-      return _empty;
-    }
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        if (_hasContent)
-          _Divider(
-            dividerColor: widget.dividerColor,
-            hiddenColor: backgroundColor,
-            hidden: false,
-          ),
+        _Divider(
+          dividerColor: dividerColor,
+          hiddenColor: backgroundColor,
+          hidden: false,
+        ),
         Flexible(
-          child: _OverscrollBackground(
-            scrollController: widget.scrollController,
-            color: backgroundColor,
-            child: _ActionSheetActionSection(
-              actions: widget.actions,
-              scrollController: widget.scrollController,
-              pressedIndex: _pressedIndex,
-              dividerColor: widget.dividerColor,
-              backgroundColor: backgroundColor,
-              onPressedUpdate: _onPressedUpdate,
-            ),
-          ),
+          child: _scrolledActionsSection(context),
         ),
       ],
     );
@@ -1658,14 +1663,16 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        return _PriorityColumn(
-          top: widget.contentSection ?? _empty,
-          bottom: _dividerAndActionsSection(context),
-          bottomMinHeight: _kActionSheetActionsSectionMinHeight + _kDividerThickness,
-        );
-      },
+    if (actions.isEmpty) {
+      return contentSection ?? _empty;
+    }
+    if (contentSection == null) {
+      return _scrolledActionsSection(context);
+    }
+    return _PriorityColumn(
+      top: contentSection!,
+      bottom: _dividerAndActionsSection(context),
+      bottomMinHeight: _kActionSheetActionsSectionMinHeight + _kDividerThickness,
     );
   }
 
@@ -1684,7 +1691,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
   const _CupertinoAlertContentSection({
     this.title,
     this.message,
-    this.scrollController,
+    required this.scrollController,
     this.titlePadding,
     this.messagePadding,
     this.titleTextStyle,
@@ -1707,10 +1714,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
 
   // A scroll controller that can be used to control the scrolling of the
   // content in the dialog.
-  //
-  // Defaults to null, and is typically not needed, since most alert contents
-  // are short.
-  final ScrollController? scrollController;
+  final ScrollController scrollController;
 
   // Paddings used around title and message.
   // CupertinoAlertDialog and CupertinoActionSheet have different paddings.
@@ -1796,10 +1800,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
   // A scroll controller that can be used to control the scrolling of the
   // actions in the dialog.
-  //
-  // Defaults to null, and is typically not needed, since most alert dialogs
-  // don't have many actions.
-  final ScrollController? scrollController;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {

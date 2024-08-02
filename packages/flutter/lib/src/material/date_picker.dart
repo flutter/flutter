@@ -52,7 +52,30 @@ const Size _inputRangeLandscapeDialogSize = Size(496, 164.0);
 const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
 const double _inputFormPortraitHeight = 98.0;
 const double _inputFormLandscapeHeight = 108.0;
-const double _kMaxTextScaleFactor = 1.3;
+
+// 3.0 is the maximum scale factor on mobile phones. As of 07/30/24, iOS goes up
+// to a max of 3.0 text sxale factor, and Android goes up to 2.0. This is the
+// default used for non-range date pickers. This default is changed to a lower
+// value at different parts of the date pickers depending on content, and device
+// orientation.
+const double _kMaxTextScaleFactor = 3.0;
+
+// The max scale factor for the date range pickers.
+const double _kMaxRangeTextScaleFactor = 1.3;
+
+// The max text scale factor for the header. This is lower than the default as
+// the title text already starts at a large size.
+const double _kMaxHeaderTextScaleFactor = 1.6;
+
+// The entry button shares a line with the header text, so there is less room to
+// scale up.
+const double _kMaxHeaderWithEntryTextScaleFactor = 1.4;
+
+const double _kMaxHelpPortraitTextScaleFactor = 1.6;
+const double _kMaxHelpLandscapeTextScaleFactor = 1.4;
+
+// 14 is a common font size used to compute the effective text scale.
+const double _fontSizeToScale = 14.0;
 
 /// Shows a dialog containing a Material Design date picker.
 ///
@@ -524,6 +547,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     final bool useMaterial3 = theme.useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Orientation orientation = MediaQuery.orientationOf(context);
+    final bool isLandscapeOrientation = orientation == Orientation.landscape;
     final DatePickerThemeData datePickerTheme = DatePickerTheme.of(context);
     final DatePickerThemeData defaults = DatePickerTheme.defaults(context);
     final TextTheme textTheme = theme.textTheme;
@@ -546,35 +570,38 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
           // M3 default is OK.
       }
     } else {
-      headlineStyle = orientation == Orientation.landscape ? textTheme.headlineSmall : textTheme.headlineMedium;
+      headlineStyle = isLandscapeOrientation ? textTheme.headlineSmall : textTheme.headlineMedium;
     }
     final Color? headerForegroundColor = datePickerTheme.headerForegroundColor ?? defaults.headerForegroundColor;
     headlineStyle = headlineStyle?.copyWith(color: headerForegroundColor);
 
     final Widget actions = ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 52.0),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Align(
-          alignment: AlignmentDirectional.centerEnd,
-          child: OverflowBar(
-            spacing: 8,
-            children: <Widget>[
-              TextButton(
-                style: datePickerTheme.cancelButtonStyle ?? defaults.cancelButtonStyle,
-                onPressed: _handleCancel,
-                child: Text(widget.cancelText ?? (
-                  useMaterial3
-                    ? localizations.cancelButtonLabel
-                    : localizations.cancelButtonLabel.toUpperCase()
-                )),
-              ),
-              TextButton(
-                style: datePickerTheme.confirmButtonStyle ?? defaults.confirmButtonStyle,
-                onPressed: _handleOk,
-                child: Text(widget.confirmText ?? localizations.okButtonLabel),
-              ),
-            ],
+      child: MediaQuery.withClampedTextScaling(
+        maxScaleFactor: isLandscapeOrientation ? 1.6 : _kMaxTextScaleFactor,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: OverflowBar(
+              spacing: 8,
+              children: <Widget>[
+                TextButton(
+                  style: datePickerTheme.cancelButtonStyle ?? defaults.cancelButtonStyle,
+                  onPressed: _handleCancel,
+                  child: Text(widget.cancelText ?? (
+                    useMaterial3
+                      ? localizations.cancelButtonLabel
+                      : localizations.cancelButtonLabel.toUpperCase()
+                  )),
+                ),
+                TextButton(
+                  style: datePickerTheme.confirmButtonStyle ?? defaults.confirmButtonStyle,
+                  onPressed: _handleOk,
+                  child: Text(widget.confirmText ?? localizations.okButtonLabel),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -604,23 +631,27 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
             child: Shortcuts(
               shortcuts: _formShortcutMap,
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  const Spacer(),
-                  InputDatePickerFormField(
-                    initialDate: _selectedDate.value,
-                    firstDate: widget.firstDate,
-                    lastDate: widget.lastDate,
-                    onDateSubmitted: _handleDateChanged,
-                    onDateSaved: _handleDateChanged,
-                    selectableDayPredicate: widget.selectableDayPredicate,
-                    errorFormatText: widget.errorFormatText,
-                    errorInvalidText: widget.errorInvalidText,
-                    fieldHintText: widget.fieldHintText,
-                    fieldLabelText: widget.fieldLabelText,
-                    keyboardType: widget.keyboardType,
-                    autofocus: true,
+                  Flexible(
+                    child: MediaQuery.withClampedTextScaling(
+                      maxScaleFactor: 2.0,
+                      child: InputDatePickerFormField(
+                        initialDate: _selectedDate.value,
+                        firstDate: widget.firstDate,
+                        lastDate: widget.lastDate,
+                        onDateSubmitted: _handleDateChanged,
+                        onDateSaved: _handleDateChanged,
+                        selectableDayPredicate: widget.selectableDayPredicate,
+                        errorFormatText: widget.errorFormatText,
+                        errorInvalidText: widget.errorInvalidText,
+                        fieldHintText: widget.fieldHintText,
+                        fieldLabelText: widget.fieldLabelText,
+                        keyboardType: widget.keyboardType,
+                        autofocus: true,
+                      ),
+                    ),
                   ),
-                  const Spacer(),
                 ],
               ),
             ),
@@ -674,9 +705,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
     // Constrain the textScaleFactor to the largest supported value to prevent
     // layout issues.
-    // 14 is a common font size used to compute the effective text scale.
-    const double fontSizeToScale = 14.0;
-    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxTextScaleFactor).scale(fontSizeToScale) / fontSizeToScale;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxTextScaleFactor).scale(_fontSizeToScale) / _fontSizeToScale;
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
     final DialogTheme dialogTheme = theme.dialogTheme;
     return Dialog(
@@ -863,27 +892,44 @@ class _DatePickerHeader extends StatelessWidget {
     final TextStyle? helpStyle = (datePickerTheme.headerHelpStyle ?? defaults.headerHelpStyle)?.copyWith(
       color: foregroundColor,
     );
+    final double currentScale = MediaQuery.textScalerOf(context).scale(_fontSizeToScale) / _fontSizeToScale;
+    final double maxHeaderTextScaleFactor = math.min(currentScale, entryModeButton != null ? _kMaxHeaderWithEntryTextScaleFactor : _kMaxHeaderTextScaleFactor);
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: maxHeaderTextScaleFactor).scale(_fontSizeToScale) / _fontSizeToScale;
+    final double scaledFontSize = MediaQuery.textScalerOf(context).scale(titleStyle?.fontSize ?? 32);
+    final double headerScaleFactor = textScaleFactor > 1 ? textScaleFactor  : 1.0;
 
     final Text help = Text(
       helpText,
       style: helpStyle,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
+      textScaler: MediaQuery.textScalerOf(context).clamp(
+        maxScaleFactor: math.min(textScaleFactor, orientation ==  Orientation.portrait ?
+          _kMaxHelpPortraitTextScaleFactor :
+          _kMaxHelpLandscapeTextScaleFactor
+        )
+      ),
     );
     final Text title = Text(
       titleText,
       semanticsLabel: titleSemanticsLabel ?? titleText,
       style: titleStyle,
-      maxLines: orientation == Orientation.portrait ? 1 : 2,
+      maxLines: orientation == Orientation.portrait ?
+        (scaledFontSize > 70 ? 2 : 1) :
+        scaledFontSize > 40 ? 3 : 2,
       overflow: TextOverflow.ellipsis,
+      textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: textScaleFactor),
     );
+
+    final double fontScaleAdjustedHeaderHeight =
+      headerScaleFactor > 1.3 ? headerScaleFactor - 0.2 : 1.0;
 
     switch (orientation) {
       case Orientation.portrait:
         return Semantics(
           container: true,
           child: SizedBox(
-            height: _datePickerHeaderPortraitHeight,
+            height: _datePickerHeaderPortraitHeight * fontScaleAdjustedHeaderHeight,
             child: Material(
               color: backgroundColor,
               child: Padding(
@@ -1612,7 +1658,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
         duration: _dialogSizeAnimationDuration,
         curve: Curves.easeIn,
         child: MediaQuery.withClampedTextScaling(
-          maxScaleFactor: _kMaxTextScaleFactor,
+          maxScaleFactor: _kMaxRangeTextScaleFactor,
           child: Builder(builder: (BuildContext context) {
             return contents;
           }),
@@ -2916,9 +2962,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
       ),
     );
 
-    // 14 is a common font size used to compute the effective text scale.
-    const double fontSizeToScale = 14.0;
-    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxTextScaleFactor).scale(fontSizeToScale) / fontSizeToScale;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxRangeTextScaleFactor).scale(_fontSizeToScale) / _fontSizeToScale;
     final Size dialogSize = (useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2) * textScaleFactor;
     switch (orientation) {
       case Orientation.portrait:

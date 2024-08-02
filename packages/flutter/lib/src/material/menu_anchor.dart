@@ -516,14 +516,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
     }
   }
 
-  KeyEventResult _checkForEscape(KeyEvent event) {
-    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
-      _close();
-      return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
-  }
-
   /// Open the menu, optionally at a position relative to the [MenuAnchor].
   ///
   /// Call this when the menu should be shown to the user.
@@ -567,9 +559,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
     assert(_debugMenuInfo('Closing $this'));
     if (!_isOpen) {
       return;
-    }
-    if (_isRoot) {
-      FocusManager.instance.removeEarlyKeyEventHandler(_checkForEscape);
     }
     _closeChildren(inDispose: inDispose);
     // Don't hide if we're in the middle of a build.
@@ -1188,9 +1177,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
     if (widget.focusNode == null) {
       _internalFocusNode = FocusNode();
       assert(() {
-        if (_internalFocusNode != null) {
-          _internalFocusNode!.debugLabel = '$MenuItemButton(${widget.child})';
-        }
+        _internalFocusNode?.debugLabel = '$MenuItemButton(${widget.child})';
         return true;
       }());
     }
@@ -1357,11 +1344,11 @@ class CheckboxMenuButton extends StatelessWidget {
       onPressed: onChanged == null ? null : () {
         switch (value) {
           case false:
-            onChanged!.call(true);
+            onChanged!(true);
           case true:
-            onChanged!.call(tristate ? null : false);
+            onChanged!(tristate ? null : false);
           case null:
-            onChanged!.call(false);
+            onChanged!(false);
         }
       },
       onHover: onHover,
@@ -1555,10 +1542,9 @@ class RadioMenuButton<T> extends StatelessWidget {
       key: key,
       onPressed: onChanged == null ? null : () {
         if (toggleable && groupValue == value) {
-          onChanged!.call(null);
-          return;
+          return onChanged!(null);
         }
-        onChanged!.call(value);
+        onChanged!(value);
       },
       onHover: onHover,
       onFocusChange: onFocusChange,
@@ -1860,9 +1846,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     if (widget.focusNode == null) {
       _internalFocusNode = FocusNode();
       assert(() {
-        if (_internalFocusNode != null) {
-          _internalFocusNode!.debugLabel = '$SubmenuButton(${widget.child})';
-        }
+        _internalFocusNode?.debugLabel = '$SubmenuButton(${widget.child})';
         return true;
       }());
     }
@@ -1894,9 +1878,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       if (widget.focusNode == null) {
         _internalFocusNode ??= FocusNode();
         assert(() {
-          if (_internalFocusNode != null) {
-            _internalFocusNode!.debugLabel = '$SubmenuButton(${widget.child})';
-          }
+          _internalFocusNode?.debugLabel = '$SubmenuButton(${widget.child})';
           return true;
         }());
       }
@@ -2272,7 +2254,7 @@ class _LocalizedShortcutLabeler {
       final LogicalKeyboardKey trigger = serialized.trigger!;
       final List<String> modifiers = <String>[
         if (_usesSymbolicModifiers) ...<String>[
-          // MacOS/iOS platform convention uses this ordering, with ⌘ always last.
+          // macOS/iOS platform convention uses this ordering, with ⌘ always last.
           if (serialized.control!) _getModifierLabel(LogicalKeyboardKey.control, localizations),
           if (serialized.alt!)     _getModifierLabel(LogicalKeyboardKey.alt, localizations),
           if (serialized.shift!)   _getModifierLabel(LogicalKeyboardKey.shift, localizations),
@@ -2306,7 +2288,24 @@ class _LocalizedShortcutLabeler {
         if (shortcutTrigger != null && shortcutTrigger.isNotEmpty) shortcutTrigger,
       ].join(keySeparator);
     } else if (serialized.character != null) {
-      return serialized.character!;
+      final List<String> modifiers = <String>[
+        // Character based shortcuts cannot check shifted keys.
+        if (_usesSymbolicModifiers) ...<String>[
+          // macOS/iOS platform convention uses this ordering, with ⌘ always last.
+          if (serialized.control!) _getModifierLabel(LogicalKeyboardKey.control, localizations),
+          if (serialized.alt!)     _getModifierLabel(LogicalKeyboardKey.alt, localizations),
+          if (serialized.meta!)    _getModifierLabel(LogicalKeyboardKey.meta, localizations),
+        ] else ...<String>[
+          // This order matches the LogicalKeySet version.
+          if (serialized.alt!)     _getModifierLabel(LogicalKeyboardKey.alt, localizations),
+          if (serialized.control!) _getModifierLabel(LogicalKeyboardKey.control, localizations),
+          if (serialized.meta!)    _getModifierLabel(LogicalKeyboardKey.meta, localizations),
+        ],
+      ];
+      return <String>[
+        ...modifiers,
+        serialized.character!,
+      ].join(keySeparator);
     }
     throw UnimplementedError('Shortcut labels for ShortcutActivators that do not implement '
         'MenuSerializableShortcut (e.g. ShortcutActivators other than SingleActivator or '
