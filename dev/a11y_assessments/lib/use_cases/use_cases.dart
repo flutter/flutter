@@ -4,15 +4,20 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'action_chip.dart';
 import 'auto_complete.dart';
 import 'badge.dart';
+import 'card.dart';
 import 'check_box_list_tile.dart';
 import 'date_picker.dart';
 import 'dialog.dart';
+import 'expansion_tile.dart';
 import 'material_banner.dart';
 import 'navigation_bar.dart';
 import 'radio_list_tile.dart';
 import 'slider.dart';
+import 'snack_bar.dart';
+import 'switch_list_tile.dart';
 import 'text_button.dart';
 import 'text_field.dart';
 import 'text_field_password.dart';
@@ -36,4 +41,9 @@ final List<UseCase> useCases = <UseCase>[
   NavigationBarUseCase(),
   TextButtonUseCase(),
   RadioListTileUseCase(),
+  ActionChipUseCase(),
+  SnackBarUseCase(),
+  SwitchListTileUseCase(),
+  ExpansionTileUseCase(),
+  CardUseCase(),
 ];

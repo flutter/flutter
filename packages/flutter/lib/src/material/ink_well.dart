@@ -1034,13 +1034,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   void _updateHighlightsAndSplashes() {
     for (final InkHighlight? highlight in _highlights.values) {
-      if (highlight != null) {
-        highlight.customBorder = widget.customBorder;
-      }
+      highlight?.customBorder = widget.customBorder;
     }
-    if (_currentSplash != null) {
-      _currentSplash!.customBorder = widget.customBorder;
-    }
+    _currentSplash?.customBorder = widget.customBorder;
+
     if (_splashes != null && _splashes!.isNotEmpty) {
       for (final InteractiveInkFeature inkFeature in _splashes!) {
         inkFeature.customBorder = widget.customBorder;

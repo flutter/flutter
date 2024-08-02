@@ -379,10 +379,8 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
 
   @override
   void dispose() {
-    if (_currentEntry != null) {
-      _currentEntry!.controller.dispose();
-      _currentEntry!.animation.dispose();
-    }
+    _currentEntry?.controller.dispose();
+    _currentEntry?.animation.dispose();
     for (final _ChildEntry entry in _outgoingEntries) {
       entry.controller.dispose();
       entry.animation.dispose();

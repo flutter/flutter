@@ -911,7 +911,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   }
 
   static double _minWidth(RenderBox? box, double height) => box?.getMinIntrinsicWidth(height) ?? 0.0;
-  static double _maxWidth(RenderBox? box, double height) => box?.getMaxIntrinsicWidth(height) ?? 0.0 ;
+  static double _maxWidth(RenderBox? box, double height) => box?.getMaxIntrinsicWidth(height) ?? 0.0;
   static double _minHeight(RenderBox? box, double width) => box?.getMinIntrinsicHeight(width) ?? 0.0;
   static Size _boxSize(RenderBox? box) => box?.size ?? Size.zero;
   static double _getBaseline(RenderBox box, BoxConstraints boxConstraints) {
@@ -2629,8 +2629,16 @@ class InputDecoration {
   /// Sets the [contentPadding] property to [EdgeInsets.zero].
   const InputDecoration.collapsed({
     required this.hintText,
-    this.floatingLabelBehavior,
-    this.floatingLabelAlignment,
+    @Deprecated(
+      'Invalid parameter because a collapsed decoration has no label. '
+      'This feature was deprecated after v3.24.0-0.1.pre.',
+    )
+    FloatingLabelBehavior? floatingLabelBehavior,
+    @Deprecated(
+      'Invalid parameter because a collapsed decoration has no label. '
+      'This feature was deprecated after v3.24.0-0.1.pre.',
+    )
+    FloatingLabelAlignment? floatingLabelAlignment,
     this.hintStyle,
     this.hintTextDirection,
     this.hintMaxLines,
@@ -2680,6 +2688,10 @@ class InputDecoration {
        disabledBorder = null,
        enabledBorder = null,
        semanticCounterText = null,
+       // ignore: prefer_initializing_formals, (can't use initializing formals for a deprecated parameter).
+       floatingLabelBehavior = floatingLabelBehavior,
+       // ignore: prefer_initializing_formals, (can't use initializing formals for a deprecated parameter).
+       floatingLabelAlignment = floatingLabelAlignment,
        alignLabelWithHint = false;
 
   /// An icon to show before the input field and outside of the decoration's

@@ -160,7 +160,7 @@ void main() {
     expect(response.statusCode, HttpStatus.ok);
     final Map<String, String> headers = response.headers;
     expect(headers['Cross-Origin-Opener-Policy'], 'same-origin');
-    expect(headers['Cross-Origin-Embedder-Policy'], 'require-corp');
+    expect(headers['Cross-Origin-Embedder-Policy'], 'credentialless');
   });
 
   testWithoutContext('release asset server serves html content without COOP/COEP headers when specified', () async {

@@ -68,12 +68,7 @@ class MockCodec implements Codec {
 
 class FakeEventReportingImageStreamCompleter extends ImageStreamCompleter {
   FakeEventReportingImageStreamCompleter({Stream<ImageChunkEvent>? chunkEvents}) {
-    if (chunkEvents != null) {
-      chunkEvents.listen((ImageChunkEvent event) {
-          reportImageChunkEvent(event);
-        },
-      );
-    }
+    chunkEvents?.listen(reportImageChunkEvent);
   }
 }
 

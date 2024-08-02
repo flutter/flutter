@@ -1701,12 +1701,8 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
       return null;
     }
     return (DragUpdateDetails details) {
-      if (horizontalHandler != null) {
-        horizontalHandler(details);
-      }
-      if (panHandler != null) {
-        panHandler(details);
-      }
+      horizontalHandler?.call(details);
+      panHandler?.call(details);
     };
   }
 
@@ -1736,12 +1732,8 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
       return null;
     }
     return (DragUpdateDetails details) {
-      if (verticalHandler != null) {
-        verticalHandler(details);
-      }
-      if (panHandler != null) {
-        panHandler(details);
-      }
+      verticalHandler?.call(details);
+      panHandler?.call(details);
     };
   }
 }

@@ -740,11 +740,7 @@ class InspectorReferenceData {
 // Production implementation of [WidgetInspectorService].
 class _WidgetInspectorService with WidgetInspectorService {
   _WidgetInspectorService() {
-    selection.addListener(() {
-      if (selectionChangedCallback != null) {
-        selectionChangedCallback!();
-      }
-    });
+    selection.addListener(() => selectionChangedCallback?.call());
   }
 }
 

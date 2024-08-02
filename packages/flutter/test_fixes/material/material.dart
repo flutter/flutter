@@ -163,26 +163,6 @@ void main() {
   RectangularSliderTrackShape(disabledThumbGapWidth: 2.0);
   RectangularSliderTrackShape(error: '');
 
-  // Changes made in https://github.com/flutter/flutter/pull/46115
-  const InputDecoration inputDecoration = InputDecoration(hasFloatingPlaceholder: true);
-  InputDecoration(hasFloatingPlaceholder: false);
-  InputDecoration();
-  InputDecoration(error: '');
-  InputDecoration.collapsed(hasFloatingPlaceholder: true);
-  InputDecoration.collapsed(hasFloatingPlaceholder: false);
-  InputDecoration.collapsed();
-  InputDecoration.collapsed(error: '');
-  inputDecoration.hasFloatingPlaceholder;
-  const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(hasFloatingPlaceholder: true);
-  InputDecorationTheme(hasFloatingPlaceholder: false);
-  InputDecorationTheme();
-  InputDecorationTheme(error: '');
-  inputDecorationTheme.hasFloatingPlaceholder;
-  inputDecorationTheme.copyWith(hasFloatingPlaceholder: false);
-  inputDecorationTheme.copyWith(hasFloatingPlaceholder: true);
-  inputDecorationTheme.copyWith();
-  inputDecorationTheme.copyWith(error: '');
-
   // Changes made in https://github.com/flutter/flutter/pull/79160
   Draggable draggable = Draggable();
   draggable = Draggable(dragAnchor: DragAnchor.child);

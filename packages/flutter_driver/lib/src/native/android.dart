@@ -85,33 +85,6 @@ final class AndroidNativeDriver implements NativeDriver {
   }
 
   @override
-  Future<void> configureForScreenshotTesting() async {
-    const Map<String, String> settings = <String, String>{
-      'show_surface_updates': '1',
-      'transition_animation_scale': '0',
-      'window_animation_scale': '0',
-      'animator_duration_scale': '0',
-    };
-
-    for (final MapEntry<String, String> entry in settings.entries) {
-      final io.ProcessResult result = await _adb(
-        <String>[
-          'shell',
-          'settings',
-          'put',
-          'global',
-          entry.key,
-          entry.value,
-        ],
-      );
-
-      if (result.exitCode != 0) {
-        throw StateError('Failed to configure device: ${result.stderr}');
-      }
-    }
-  }
-
-  @override
   Future<NativeScreenshot> screenshot() async {
     // Similar pause to the one in `<FlutterDriver>.screenshot()`.
     await Future<void>.delayed(const Duration(seconds: 2));
