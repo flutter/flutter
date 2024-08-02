@@ -457,7 +457,7 @@ class AnimationController extends Animation<double>
   AnimationStatus get status => _status;
   late AnimationStatus _status;
 
-  TickerFuture _toggle(String method, bool animateForward, double? from) {
+  TickerFuture _toggle(String method, double? from, {required bool animateForward}) {
     assert(() {
       if (duration == null && (animateForward || reverseDuration == null)) {
         final (String duration, String durationQuotes) = animateForward
@@ -497,7 +497,9 @@ class AnimationController extends Animation<double>
   /// During the animation, [status] is reported as [AnimationStatus.forward],
   /// which switches to [AnimationStatus.completed] when [upperBound] is
   /// reached at the end of the animation.
-  TickerFuture forward({ double? from }) => _toggle('forward', true, from);
+  TickerFuture forward({ double? from }) {
+    return _toggle('forward', from, animateForward: true);
+  }
 
   /// Starts running this animation in reverse (towards the beginning).
   ///
@@ -513,7 +515,9 @@ class AnimationController extends Animation<double>
   /// During the animation, [status] is reported as [AnimationStatus.reverse],
   /// which switches to [AnimationStatus.dismissed] when [lowerBound] is
   /// reached at the end of the animation.
-  TickerFuture reverse({ double? from }) => _toggle('reverse', false, from);
+  TickerFuture reverse({ double? from }) {
+    return _toggle('reverse', from, animateForward: false);
+  }
 
   /// Toggles the direction of this animation.
   ///
@@ -529,7 +533,7 @@ class AnimationController extends Animation<double>
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
   TickerFuture toggle({ bool? forward }) {
-    return _toggle('toggle', forward ?? !isForwardOrCompleted, null);
+    return _toggle('toggle', null, animateForward: forward ?? !isForwardOrCompleted);
   }
 
   /// Drives the animation from its current value to the given target, "forward".
