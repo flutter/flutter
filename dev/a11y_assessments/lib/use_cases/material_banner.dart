@@ -53,7 +53,11 @@ class MainWidgetState extends State<MainWidget> {
           TextButton(
             focusNode: dismissButtonFocusNode,
             onPressed: () {
-              setState(() {
+TextButton(
+  focusNode: dismissButtonFocusNode,
+  onPressed: hideBanner,
+  child: const Text('DISMISS'),
+)
                 hideBanner();
               });
             },
