@@ -15,13 +15,54 @@ class MaterialBannerUseCase extends UseCase {
   String get route => '/material_banner';
 
   @override
-  Widget build(BuildContext context) => MainWidget();
+  Widget build(BuildContext context) => const MainWidget();
 }
 
-class MainWidget extends StatelessWidget {
-  MainWidget({super.key});
+class MainWidget extends StatefulWidget {
+  const MainWidget({super.key});
 
-  final FocusNode dismissButtonFocusNode = FocusNode();
+  @override
+  State<MainWidget> createState() => MainWidgetState();
+}
+class MainWidgetState extends State<MainWidget> {
+
+  FocusNode dismissButtonFocusNode = FocusNode();
+  FocusNode showButtonFocusNode = FocusNode();
+
+  @override
+  void dispose() {
+    dismissButtonFocusNode.dispose();
+    showButtonFocusNode.dispose();
+    super.dispose();
+  }
+
+  void hideBanner() {
+    ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+    showButtonFocusNode.requestFocus();
+  }
+
+  void showBanner() {
+    ScaffoldMessenger.of(context).showMaterialBanner(
+      MaterialBanner(
+        padding: const EdgeInsets.all(20),
+        content: const Text('Hello, I am a Material Banner'),
+        leading: const Icon(Icons.agriculture_outlined),
+        backgroundColor: Colors.blue,
+        actions: <Widget>[
+          TextButton(
+            focusNode: dismissButtonFocusNode,
+            onPressed: () {
+              setState(() {
+                hideBanner();
+              });
+            },
+            child: const Text('DISMISS'),
+          ),
+        ],
+      ),
+    );
+    dismissButtonFocusNode.requestFocus();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,26 +73,12 @@ class MainWidget extends StatelessWidget {
       ),
       body: Center(
         child: ElevatedButton(
+          focusNode: showButtonFocusNode,
           child: const Text('Show a MaterialBanner'),
           onPressed: () {
-            ScaffoldMessenger.of(context).showMaterialBanner(
-            MaterialBanner(
-              padding: const EdgeInsets.all(20),
-              content: const Text('Hello, I am a Material Banner'),
-              leading: const Icon(Icons.agriculture_outlined),
-              backgroundColor: Colors.green,
-              actions: <Widget>[
-                TextButton(
-                  focusNode: dismissButtonFocusNode,
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
-                  },
-                  child: const Text('DISMISS'),
-                ),
-              ],
-            ),
-          );
-          dismissButtonFocusNode.requestFocus();
+            setState(() {
+              showBanner();
+            });
           },
         ),
       ),

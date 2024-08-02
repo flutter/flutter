@@ -30,4 +30,15 @@ void main() {
     final TextButton dismissButtonFinder = tester.widget<TextButton>(find.byType(TextButton));
     expect(dismissButtonFinder.focusNode!.hasFocus, isTrue);
   });
+
+  testWidgets('show button focused on banner close', (WidgetTester tester) async {
+    await pumpsUseCase(tester, MaterialBannerUseCase());
+    await tester.tap(find.text('Show a MaterialBanner'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(TextButton));
+
+    final ElevatedButton showButtonFinder = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
+    expect(showButtonFinder.focusNode!.hasFocus, isTrue);
+  });
 }
