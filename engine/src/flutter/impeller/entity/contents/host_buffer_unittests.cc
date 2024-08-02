@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <limits>
+#include <utility>
 #include "flutter/testing/testing.h"
+#include "impeller/base/validation.h"
+#include "impeller/core/allocator.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/entity/entity_playground.h"
 
@@ -154,6 +158,49 @@ TEST_P(HostBufferTest, EmplaceWithProcIsAligned) {
 
   view = buffer->Emplace(64, 16, [](uint8_t*) {});
   EXPECT_EQ(view.range, Range(32, 64));
+}
+
+static constexpr const size_t kMagicFailingAllocation = 1024000 * 2;
+
+class FailingAllocator : public Allocator {
+ public:
+  explicit FailingAllocator(std::shared_ptr<Allocator> delegate)
+      : Allocator(), delegate_(std::move(delegate)) {}
+
+  ~FailingAllocator() = default;
+
+  std::shared_ptr<DeviceBuffer> OnCreateBuffer(
+      const DeviceBufferDescriptor& desc) {
+    // Magic number used in test below to trigger failure.
+    if (desc.size == kMagicFailingAllocation) {
+      return nullptr;
+    }
+    return delegate_->CreateBuffer(desc);
+  }
+
+  std::shared_ptr<Texture> OnCreateTexture(const TextureDescriptor& desc) {
+    return delegate_->CreateTexture(desc);
+  }
+
+  ISize GetMaxTextureSizeSupported() const override {
+    return delegate_->GetMaxTextureSizeSupported();
+  }
+
+ private:
+  std::shared_ptr<Allocator> delegate_;
+};
+
+TEST_P(HostBufferTest, EmplaceWithFailingAllocationDoesntCrash) {
+  ScopedValidationDisable disable;
+  std::shared_ptr<FailingAllocator> allocator =
+      std::make_shared<FailingAllocator>(GetContext()->GetResourceAllocator());
+  auto buffer = HostBuffer::Create(allocator);
+
+  auto view = buffer->Emplace(nullptr, kMagicFailingAllocation, 0);
+
+  EXPECT_EQ(view.buffer, nullptr);
+  EXPECT_EQ(view.range.offset, 0u);
+  EXPECT_EQ(view.range.length, 0u);
 }
 
 }  // namespace  testing
