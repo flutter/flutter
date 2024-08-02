@@ -153,6 +153,17 @@ void main() {
     expect(checked, isTrue);
   }, variant: KeySimulatorTransitModeVariant.all());
 
+  testWidgets('Title is not created if title is not passed and kIsweb', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFF123456),
+        builder: (BuildContext context, Widget? child) => Container(),
+      ),
+    );
+
+    expect(find.byType(Title), kIsWeb ? findsNothing : findsOneWidget);
+  });
+
   group('error control test', () {
     Future<void> expectFlutterError({
       required GlobalKey<NavigatorState> key,
