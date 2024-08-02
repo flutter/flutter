@@ -5,8 +5,10 @@
 #ifndef FLUTTER_IMPELLER_BASE_ALLOCATION_SIZE_H_
 #define FLUTTER_IMPELLER_BASE_ALLOCATION_SIZE_H_
 
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <type_traits>
 
 namespace impeller {
 
@@ -37,7 +39,9 @@ class AllocationSize {
   ///
   /// @param[in]  size  The size in `Period` number of bytes.
   ///
-  explicit constexpr AllocationSize(double size) : bytes_(size * Period) {}
+  template <class T, class = std::enable_if_t<std::is_arithmetic_v<T>>>
+  explicit constexpr AllocationSize(T size)
+      : bytes_(std::ceil(size) * Period) {}
 
   //----------------------------------------------------------------------------
   /// @brief      Create an allocation size from another instance with a
@@ -158,37 +162,37 @@ inline namespace allocation_size_literals {
 
 // NOLINTNEXTLINE
 constexpr Bytes operator"" _bytes(unsigned long long int size) {
-  return Bytes{static_cast<double>(size)};
+  return Bytes{size};
 }
 
 // NOLINTNEXTLINE
 constexpr KiloBytes operator"" _kb(unsigned long long int size) {
-  return KiloBytes{static_cast<double>(size)};
+  return KiloBytes{size};
 }
 
 // NOLINTNEXTLINE
 constexpr MegaBytes operator"" _mb(unsigned long long int size) {
-  return MegaBytes{static_cast<double>(size)};
+  return MegaBytes{size};
 }
 
 // NOLINTNEXTLINE
 constexpr GigaBytes operator"" _gb(unsigned long long int size) {
-  return GigaBytes{static_cast<double>(size)};
+  return GigaBytes{size};
 }
 
 // NOLINTNEXTLINE
 constexpr KibiBytes operator"" _kib(unsigned long long int size) {
-  return KibiBytes{static_cast<double>(size)};
+  return KibiBytes{size};
 }
 
 // NOLINTNEXTLINE
 constexpr MebiBytes operator"" _mib(unsigned long long int size) {
-  return MebiBytes{static_cast<double>(size)};
+  return MebiBytes{size};
 }
 
 // NOLINTNEXTLINE
 constexpr GibiBytes operator"" _gib(unsigned long long int size) {
-  return GibiBytes{static_cast<double>(size)};
+  return GibiBytes{size};
 }
 
 }  // namespace allocation_size_literals
