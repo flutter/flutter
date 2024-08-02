@@ -89,7 +89,7 @@ void main() {
       reason: 'Expected no element with text "Item: 1" in the CustomScrollView',
     );
 
-    // Tap the IconButton in the AppBar
+    // Tap the IconButton in the AppBar.
     final Finder iconButtonFinder = find.descendant(
       of: find.byType(AppBar),
       matching: find.byType(IconButton),
