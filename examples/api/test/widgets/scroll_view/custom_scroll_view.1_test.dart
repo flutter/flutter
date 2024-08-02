@@ -106,14 +106,7 @@ void main() {
       reason: 'Expected additional Container in the SliverList after the IconButton click',
     );
 
-    expect(
-      find.descendant(
-        of: find.byType(CustomScrollView),
-        matching: find.text('Item: 1'),
-      ),
-      findsOne,
-      reason: 'Expected element with text "Item: 1" in the CustomScrollView',
-    );
+    expect(find.widgetWithText(CustomScrollView, 'Item: 1'));
   });
   testWidgets('IconButton click and mouse scroll reveals additional SliverList', (WidgetTester tester) async {
     await tester.pumpWidget(const example.CustomScrollViewExampleApp());
