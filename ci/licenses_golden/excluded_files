@@ -3429,9 +3429,6 @@
 ../../../fuchsia/sdk/linux/obj/arm64-api-17/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-17/sysroot/dist/lib/hwasan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-17/sysroot/dist/lib/ld.so.1
-../../../fuchsia/sdk/linux/obj/arm64-api-18/sysroot/dist/lib/asan/ld.so.1
-../../../fuchsia/sdk/linux/obj/arm64-api-18/sysroot/dist/lib/hwasan/ld.so.1
-../../../fuchsia/sdk/linux/obj/arm64-api-18/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-19/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-19/sysroot/dist/lib/hwasan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-19/sysroot/dist/lib/ld.so.1
@@ -3451,8 +3448,6 @@
 ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-17/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-17/sysroot/dist/lib/ld.so.1
-../../../fuchsia/sdk/linux/obj/riscv64-api-18/sysroot/dist/lib/asan/ld.so.1
-../../../fuchsia/sdk/linux/obj/riscv64-api-18/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-19/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-19/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/dist/lib/asan/ld.so.1
@@ -3467,8 +3462,6 @@
 ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-17/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-17/sysroot/dist/lib/ld.so.1
-../../../fuchsia/sdk/linux/obj/x64-api-18/sysroot/dist/lib/asan/ld.so.1
-../../../fuchsia/sdk/linux/obj/x64-api-18/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-19/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-19/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/dist/lib/asan/ld.so.1
