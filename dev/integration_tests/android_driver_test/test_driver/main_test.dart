@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/native_driver.dart';
 import 'package:test/test.dart';
@@ -16,6 +18,8 @@ void main() async {
   await testExecutable(_main);
 }
 
+final bool _isLuciCi = io.Platform.environment['LUCI_CI'] == 'True';
+
 Future<void> _main() async {
   // To generate golden files locally, uncomment the following line.
   // autoUpdateGoldenFiles = true;
@@ -24,7 +28,12 @@ Future<void> _main() async {
   late NativeDriver nativeDriver;
 
   setUpAll(() async {
-    flutterDriver = await FlutterDriver.connect();
+    flutterDriver = await FlutterDriver.connect(
+      // TODO(matanlurey): Workaround log uploading in LUCI not being enabled.
+      // Default to true on CI because log uploading doesn't work.
+      // See <https://github.com/flutter/flutter/issues/152775>.
+      printCommunication: _isLuciCi,
+    );
     nativeDriver = await AndroidNativeDriver.connect();
   });
 
