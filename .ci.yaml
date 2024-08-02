@@ -66,9 +66,8 @@ platform_properties:
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "curl", "version": "version:7.64.0"}
         ]
-      os: Ubuntu
-      cores: "8"
-      device_type: none
+      os: Linux
+      device_type: "mokey"
   linux_android:
     properties:
       dependencies: >-
@@ -2846,39 +2845,36 @@ targets:
 
   - name: Linux_build_test flutter_gallery__transition_perf
     recipe: devicelab/devicelab_drone_build_test
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: flutter_gallery__transition_perf
       artifact: gallery__transition_perf
-      drone_dimensions: >
-        ["device_os=N","os=Linux", "device_type=msm8952"]
 
   - name: Linux_build_test flutter_gallery__transition_perf_e2e
     recipe: devicelab/devicelab_drone_build_test
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: flutter_gallery__transition_perf_e2e
       artifact: gallery__transition_perf_e2e
-      drone_dimensions: >
-        ["device_os=N","os=Linux", "device_type=msm8952"]
 
   - name: Linux_build_test flutter_gallery__transition_perf_hybrid
     recipe: devicelab/devicelab_drone_build_test
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: flutter_gallery__transition_perf_hybrid
       artifact: gallery__transition_perf_hybrid
-      drone_dimensions: >
-        ["device_os=N","os=Linux", "device_type=msm8952"]
 
   # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__transition_perf_with_semantics
