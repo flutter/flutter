@@ -5348,11 +5348,6 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
     required Rect? parentPaintClipRect,
   }) {
     final List<SemanticsNode> children = <SemanticsNode>[];
-    final SemanticsNode? node = owner.cachedSemanticsNode;
-    assert(
-      node == null ||
-      (parentSemanticsClipRect == node.parentSemanticsClipRect && parentPaintClipRect == node.parentPaintClipRect),
-    );
     for (final _InterestingSemanticsFragmentProvider provider in _compilingChildren) {
       final _InterestingSemanticsFragment fragment = provider.getFragment();
       if (fragment is _SwitchableSemanticsFragment) {
@@ -5375,10 +5370,10 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
         parentInfoChanged: true,
       );
       siblingNodes.addAll(childSiblingNodes);
-      children.removeWhere(_shouldDrop);
     }
-    if (node != null) {
-      assert(_shouldFormSemanticsNode);
+    if (_formedSemanticsNode!) {
+      final SemanticsNode node = owner.cachedSemanticsNode!;
+      children.removeWhere(_shouldDrop);
       if (_effectiveConfig.isSemanticBoundary) {
         owner.renderObject.assembleSemanticsNode(node, _effectiveConfig, children);
       } else {
@@ -5404,7 +5399,15 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       // This will likely short circuit in children's recursive call to
       // compileSemanticsNodes if children's fragments are cached and
       // geometries doesn't change.
-      final SemanticsNode? node = owner.cachedSemanticsNode;
+      final Rect? semanticsClipRect;
+      final Rect? paintClipRect;
+      if (_formedSemanticsNode!) {
+        semanticsClipRect = owner.cachedSemanticsNode?.parentSemanticsClipRect;
+        paintClipRect = owner.cachedSemanticsNode?.parentPaintClipRect;
+      } else {
+        semanticsClipRect = parentSemanticsClipRect;
+        paintClipRect = parentPaintClipRect;
+      }
       _compileFragmentSubtree(
         // The decision for dropping certain sibling nodes are made by
         // the caller of compileSemanticsNodes that ends up calling this
@@ -5416,8 +5419,8 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
         // renderObjectSemanticsDidChange would have marked the
         // _RenderObjectSemantics of the parent of this fragment's
         // _RenderObjectSemantics owner dirty already.
-        parentPaintClipRect: node?.parentPaintClipRect ?? parentPaintClipRect,
-        parentSemanticsClipRect: node?.parentSemanticsClipRect ?? parentSemanticsClipRect,
+        parentPaintClipRect: paintClipRect,
+        parentSemanticsClipRect: semanticsClipRect,
         siblingNodes: <SemanticsNode>[],
         usedSemanticsIds: <int>{},
       );
