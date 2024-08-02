@@ -78,7 +78,11 @@ TextButton(
       ),
       body: Center(
         child: ElevatedButton(
-          focusNode: showButtonFocusNode,
+ElevatedButton(
+  focusNode: showButtonFocusNode,
+  onPressed: showBanner,
+  child: const Text('Show a MaterialBanner'),
+)
           child: const Text('Show a MaterialBanner'),
           onPressed: () {
             setState(() {
