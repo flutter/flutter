@@ -11,11 +11,7 @@ void main() {
   testWidgets('Widget tree is visible', (WidgetTester tester) async {
     await tester.pumpWidget(const example.CustomScrollViewExampleApp());
 
-    expect(
-      find.byType(Scaffold),
-      findsOne,
-      reason: 'Expected to have a Scaffold in the App',
-    );
+    expect(find.byType(Scaffold), findsOne);
 
     expect(
       find.descendant(
