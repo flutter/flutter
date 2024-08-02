@@ -43,10 +43,11 @@ TEST_P(RuntimeStageTest, CanRejectInvalidBlob) {
       flutter::testing::OpenFixtureAsMapping("ink_sparkle.frag.iplr");
   ASSERT_TRUE(fixture);
   auto junk_allocation = std::make_shared<Allocation>();
-  ASSERT_TRUE(junk_allocation->Truncate(fixture->GetSize(), false));
+  ASSERT_TRUE(junk_allocation->Truncate(Bytes{fixture->GetSize()}, false));
   // Not meant to be secure. Just reject obviously bad blobs using magic
   // numbers.
-  ::memset(junk_allocation->GetBuffer(), 127, junk_allocation->GetLength());
+  ::memset(junk_allocation->GetBuffer(), 127,
+           junk_allocation->GetLength().GetByteSize());
   auto stages = RuntimeStage::DecodeRuntimeStages(
       CreateMappingFromAllocation(junk_allocation));
   ASSERT_FALSE(stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())]);

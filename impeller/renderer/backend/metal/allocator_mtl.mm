@@ -100,8 +100,7 @@ void DebugAllocatorStats::Decrement(size_t size) {
 }
 
 Bytes DebugAllocatorStats::GetAllocationSize() {
-  // RAM is measured in MiB, thus a divisor of 2^20 instead of 1,000,000.
-  return Bytes{static_cast<double>(size_)};
+  return Bytes{size_.load()};
 }
 
 AllocatorMTL::AllocatorMTL(id<MTLDevice> device, std::string label)
