@@ -26,7 +26,8 @@ class MainWidget extends StatefulWidget {
 }
 class MainWidgetState extends State<MainWidget> {
 
-  FocusNode dismissButtonFocusNode = FocusNode();
+  final FocusNode dismissButtonFocusNode = FocusNode();
+  final FocusNode showButtonFocusNode = FocusNode();
   FocusNode showButtonFocusNode = FocusNode();
 
   @override
