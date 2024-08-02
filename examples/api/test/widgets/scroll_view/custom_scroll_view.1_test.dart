@@ -142,7 +142,7 @@ void main() {
     // Second check before we start.
     // Initially, mouse scroll event should do nothing.
     // It should not reveal additional (top) SliverList
-    // because additional SliverList does not exists yet.
+    // because the additional SliverList does not exist yet.
     final Offset location = tester.getCenter(find.byType(CustomScrollView));
     final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
     testPointer.hover(location);
