@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'routes.dart';
+/// @docImport 'text_editing_intents.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -1315,9 +1323,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     final FocusableActionDetector oldTarget = oldWidget ?? widget;
     final bool didShowHoverHighlight = shouldShowHoverHighlight(oldTarget);
     final bool didShowFocusHighlight = shouldShowFocusHighlight(oldTarget);
-    if (task != null) {
-      task();
-    }
+    task?.call();
     final bool doShowHoverHighlight = shouldShowHoverHighlight(widget);
     final bool doShowFocusHighlight = shouldShowFocusHighlight(widget);
     if (didShowFocusHighlight != doShowFocusHighlight) {
