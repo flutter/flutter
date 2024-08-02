@@ -147,7 +147,11 @@ class HostBuffer {
 
   size_t GetLength() const { return offset_; }
 
-  void MaybeCreateNewBuffer();
+  /// Attempt to create a new internal buffer if the existing capacity is not
+  /// sufficient.
+  ///
+  /// A false return value indicates an unrecoverable allocation failure.
+  [[nodiscard]] bool MaybeCreateNewBuffer();
 
   const std::shared_ptr<DeviceBuffer>& GetCurrentBuffer() const;
 
