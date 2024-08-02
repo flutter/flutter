@@ -39,6 +39,15 @@ Future<void> runFlutterDriverAndroidTests() async {
   print('Configuring device...');
   await _configureForScreenshotTesting();
 
+  // TODO(matanlurey): Reconcile why there are two log output directories?
+  //
+  // It appears that FLUTTER_LOGS_DIR is the only one that is copied to LUCI
+  // outputs for the framework repo, but on the engine repo both of these flags
+  // are used.
+  //
+  // See https://github.com/flutter/flutter/issues/152772.
+  final String? logsDir = io.Platform.environment['FLUTTER_LOGS_DIR'];
+
   // TODO(matanlurey): Should we be using another instrumentation method?
   await runCommand(
     'flutter',
@@ -57,6 +66,9 @@ Future<void> runFlutterDriverAndroidTests() async {
       'integration_tests',
       'android_driver_test',
     ),
+    environment: <String, String>{
+      if (logsDir != null) 'FLUTTER_TEST_OUTPUTS_DIR': logsDir,
+    },
   );
 }
 
