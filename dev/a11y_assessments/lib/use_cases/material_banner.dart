@@ -28,7 +28,6 @@ class MainWidgetState extends State<MainWidget> {
 
   final FocusNode dismissButtonFocusNode = FocusNode();
   final FocusNode showButtonFocusNode = FocusNode();
-  FocusNode showButtonFocusNode = FocusNode();
 
   @override
   void dispose() {
@@ -48,21 +47,13 @@ class MainWidgetState extends State<MainWidget> {
         padding: const EdgeInsets.all(20),
         content: const Text('Hello, I am a Material Banner'),
         leading: const Icon(Icons.agriculture_outlined),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.yellowAccent,
         actions: <Widget>[
           TextButton(
             focusNode: dismissButtonFocusNode,
-            onPressed: () {
-TextButton(
-  focusNode: dismissButtonFocusNode,
-  onPressed: hideBanner,
-  child: const Text('DISMISS'),
-)
-                hideBanner();
-              });
-            },
+            onPressed: hideBanner,
             child: const Text('DISMISS'),
-          ),
+          )
         ],
       ),
     );
@@ -78,19 +69,11 @@ TextButton(
       ),
       body: Center(
         child: ElevatedButton(
-ElevatedButton(
-  focusNode: showButtonFocusNode,
-  onPressed: showBanner,
-  child: const Text('Show a MaterialBanner'),
-)
-          child: const Text('Show a MaterialBanner'),
-          onPressed: () {
-            setState(() {
-              showBanner();
-            });
-          },
+          focusNode: showButtonFocusNode,
+          onPressed: showBanner,
+          child: const Text('Show a MaterialBanner')
+          )
         ),
-      ),
-    );
+      );
+    }
   }
-}
