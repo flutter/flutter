@@ -956,7 +956,7 @@ class _DatePickerHeader extends StatelessWidget {
                 ),
               ),
             ),
-          );
+        );
       case Orientation.landscape:
         return SizedBox(
             width: _datePickerHeaderLandscapeWidth,
