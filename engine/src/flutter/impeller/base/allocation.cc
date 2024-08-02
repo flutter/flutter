@@ -21,15 +21,15 @@ uint8_t* Allocation::GetBuffer() const {
   return buffer_;
 }
 
-size_t Allocation::GetLength() const {
+Bytes Allocation::GetLength() const {
   return length_;
 }
 
-size_t Allocation::GetReservedLength() const {
+Bytes Allocation::GetReservedLength() const {
   return reserved_;
 }
 
-bool Allocation::Truncate(size_t length, bool npot) {
+bool Allocation::Truncate(Bytes length, bool npot) {
   const auto reserved = npot ? ReserveNPOT(length) : Reserve(length);
   if (!reserved) {
     return false;
@@ -54,18 +54,18 @@ uint32_t Allocation::NextPowerOfTwoSize(uint32_t x) {
   return x + 1;
 }
 
-bool Allocation::ReserveNPOT(size_t reserved) {
+bool Allocation::ReserveNPOT(Bytes reserved) {
   // Reserve at least one page of data.
-  reserved = std::max<size_t>(4096u, reserved);
-  return Reserve(NextPowerOfTwoSize(reserved));
+  reserved = std::max(Bytes{4096u}, reserved);
+  return Reserve(Bytes{NextPowerOfTwoSize(reserved.GetByteSize())});
 }
 
-bool Allocation::Reserve(size_t reserved) {
+bool Allocation::Reserve(Bytes reserved) {
   if (reserved <= reserved_) {
     return true;
   }
 
-  auto new_allocation = ::realloc(buffer_, reserved);
+  auto new_allocation = ::realloc(buffer_, reserved.GetByteSize());
   if (!new_allocation) {
     // If new length is zero, a minimum non-zero sized allocation is returned.
     // So this check will not trip and this routine will indicate success as
@@ -81,7 +81,7 @@ bool Allocation::Reserve(size_t reserved) {
 }
 
 std::shared_ptr<fml::Mapping> CreateMappingWithCopy(const uint8_t* contents,
-                                                    size_t length) {
+                                                    Bytes length) {
   if (contents == nullptr) {
     return nullptr;
   }
@@ -91,7 +91,7 @@ std::shared_ptr<fml::Mapping> CreateMappingWithCopy(const uint8_t* contents,
     return nullptr;
   }
 
-  std::memmove(allocation->GetBuffer(), contents, length);
+  std::memmove(allocation->GetBuffer(), contents, length.GetByteSize());
 
   return CreateMappingFromAllocation(allocation);
 }
@@ -103,7 +103,7 @@ std::shared_ptr<fml::Mapping> CreateMappingFromAllocation(
   }
   return std::make_shared<fml::NonOwnedMapping>(
       reinterpret_cast<const uint8_t*>(allocation->GetBuffer()),  //
-      allocation->GetLength(),                                    //
+      allocation->GetLength().GetByteSize(),                      //
       [allocation](auto, auto) {}                                 //
   );
 }

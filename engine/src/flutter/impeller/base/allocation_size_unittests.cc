@@ -107,4 +107,19 @@ TEST(AllocationSizeTest, CanPerformSimpleArithmetic) {
   }
 }
 
+TEST(AllocationSizeTest, CanConstructWithArith) {
+  {
+    Bytes a(1u);
+    ASSERT_EQ(a.GetByteSize(), 1u);
+  }
+  {
+    Bytes a(1.5);
+    ASSERT_EQ(a.GetByteSize(), 2u);
+  }
+  {
+    Bytes a(1.5f);
+    ASSERT_EQ(a.GetByteSize(), 2u);
+  }
+}
+
 }  // namespace impeller::testing

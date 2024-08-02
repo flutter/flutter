@@ -201,7 +201,7 @@ void TextureGLES::SetLabel(std::string_view label) {
 bool TextureGLES::OnSetContents(const uint8_t* contents,
                                 size_t length,
                                 size_t slice) {
-  return OnSetContents(CreateMappingWithCopy(contents, length), slice);
+  return OnSetContents(CreateMappingWithCopy(contents, Bytes{length}), slice);
 }
 
 // |Texture|

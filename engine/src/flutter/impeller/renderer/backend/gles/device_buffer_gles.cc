@@ -46,7 +46,8 @@ bool DeviceBufferGLES::OnCopyHostBuffer(const uint8_t* source,
     return false;
   }
 
-  if (offset + source_range.length > backing_store_->GetLength()) {
+  if (offset + source_range.length >
+      backing_store_->GetLength().GetByteSize()) {
     return false;
   }
 
@@ -87,9 +88,10 @@ bool DeviceBufferGLES::BindAndUploadDataIfNecessary(BindingType type) const {
   gl.BindBuffer(target_type, buffer.value());
 
   if (upload_generation_ != generation_) {
-    TRACE_EVENT1("impeller", "BufferData", "Bytes",
-                 std::to_string(backing_store_->GetLength()).c_str());
-    gl.BufferData(target_type, backing_store_->GetLength(),
+    TRACE_EVENT1(
+        "impeller", "BufferData", "Bytes",
+        std::to_string(backing_store_->GetLength().GetByteSize()).c_str());
+    gl.BufferData(target_type, backing_store_->GetLength().GetByteSize(),
                   backing_store_->GetBuffer(), GL_STATIC_DRAW);
     upload_generation_ = generation_;
   }
@@ -119,7 +121,7 @@ void DeviceBufferGLES::UpdateBufferData(
         update_buffer_data) {
   if (update_buffer_data) {
     update_buffer_data(backing_store_->GetBuffer(),
-                       backing_store_->GetLength());
+                       backing_store_->GetLength().GetByteSize());
     ++generation_;
   }
 }

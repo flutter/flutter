@@ -75,7 +75,7 @@ DecompressedImage DecompressedImage::ConvertToRGBA() const {
   }
 
   auto rgba_allocation = std::make_shared<Allocation>();
-  if (!rgba_allocation->Truncate(size_.Area() * 4u, false)) {
+  if (!rgba_allocation->Truncate(Bytes{size_.Area() * 4u}, false)) {
     return {};
   }
 
@@ -114,9 +114,9 @@ DecompressedImage DecompressedImage::ConvertToRGBA() const {
   return DecompressedImage{
       size_, Format::kRGBA,
       std::make_shared<fml::NonOwnedMapping>(
-          rgba_allocation->GetBuffer(),      //
-          rgba_allocation->GetLength(),      //
-          [rgba_allocation](auto, auto) {})  //
+          rgba_allocation->GetBuffer(),                //
+          rgba_allocation->GetLength().GetByteSize(),  //
+          [rgba_allocation](auto, auto) {})            //
   };
 }
 
