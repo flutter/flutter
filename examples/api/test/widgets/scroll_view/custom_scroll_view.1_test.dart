@@ -8,209 +8,138 @@ import 'package:flutter_api_samples/widgets/scroll_view/custom_scroll_view.1.dar
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Widget tree is visible', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.CustomScrollViewExampleApp());
+  group('Combination of two behavoirs: IconButton click and mouse scroll.', () {
+    group('Before IconButton click.', () {
+      group('Before IconButton click and before mouse scroll.', () {
+        testWidgets('What should be visible or not visible in the initial state.', (WidgetTester tester) async {
+          await tester.pumpWidget(const example.CustomScrollViewExampleApp());
 
-    expect(
-      find.byType(Scaffold),
-      findsOne,
-      reason: 'Expected to have a Scaffold in the App',
-    );
+          expect(find.byType(Scaffold), findsOne);
 
-    expect(
-      find.descendant(
-        of: find.byType(Scaffold),
-        matching: find.byType(AppBar),
-      ),
-      findsOne,
-      reason: 'Expected to have an Appbar in the Scaffold',
-    );
+          expect(
+            find.descendant(
+              of: find.byType(Scaffold),
+              matching: find.byType(AppBar),
+            ),
+            findsOne,
+          );
 
-    expect(
-      find.descendant(
-        of: find.byType(AppBar),
-        matching: find.byType(IconButton),
-      ),
-      findsOne,
-      reason: 'Expected an IconButton in the AppBar',
-    );
+          expect(
+            find.descendant(
+              of: find.byType(AppBar),
+              matching: find.byType(IconButton),
+            ),
+            findsOne,
+          );
 
-    expect(
-      find.descendant(
-        of: find.byType(Scaffold),
-        matching: find.byType(CustomScrollView),
-      ),
-      findsOne,
-      reason: 'Expected a CustomScrollView in the Scaffold',
-    );
+          expect(
+            find.descendant(
+              of: find.byType(Scaffold),
+              matching: find.byType(CustomScrollView),
+            ),
+            findsOne,
+          );
 
-    expect(
-      find.descendant(
-        of: find.byType(CustomScrollView),
-        matching: find.byType(SliverList),
-      ),
-      findsOne,
-      reason: 'Expected one, initial (bottom) SliverList in the CustomScrollView',
-    );
+          expect(
+            find.descendant(
+              of: find.byType(CustomScrollView),
+              matching: find.byType(SliverList),
+            ),
+            findsOne,
+            reason: 'Expected one, initial (bottom) SliverList in the CustomScrollView.',
+          );
+          expect(
+            find.widgetWithText(SliverList, 'Item: -1'),
+            findsNothing,
+            reason: 'Initial state should present only "Item: 0" on the SliverList.',
+          );
+          expect(
+            find.widgetWithText(SliverList, 'Item: 0'),
+            findsOne,
+            reason: 'Initial state should present "Item: 0" on the SliverList.',
+          );
+          expect(
+            find.widgetWithText(SliverList, 'Item: 1'),
+            findsNothing,
+            reason: 'Initial state should present only "Item: 0" on the SliverList.',
+          );
+        });
+      });
+      group('Before IconButton click and after mouse scroll.', () {
+        testWidgets('Mouse scroll does not reveal additional SliverList.', (WidgetTester tester) async {
+          await tester.pumpWidget(const example.CustomScrollViewExampleApp());
 
-    expect(
-      find.descendant(
-        of: find.byType(CustomScrollView),
-        matching: find.text('Item: 0'),
-      ),
-      findsOne,
-      reason: 'Expected element with text "Item: 0" in the CustomScrollView',
-    );
-  });
+          // Mouse wheel scroll
+          final Offset location = tester.getCenter(find.byType(CustomScrollView));
+          final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
+          testPointer.hover(location);
+          await tester.sendEventToBinding(
+            PointerScrollEvent(position: location, scrollDelta: const Offset(0, -1)),
+          );
+          await tester.pump();
 
-  testWidgets('IconButton click extends existing SliverList', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.CustomScrollViewExampleApp());
+          expect(find.byType(SliverList), findsOne, reason: 'Mouse scroll does not reveal additional SliverList.');
+          expect(find.widgetWithText(SliverList, 'Item: -1'), findsNothing);
+          expect(find.widgetWithText(SliverList, 'Item: 0'), findsOne);
+          expect(find.widgetWithText(SliverList, 'Item: 1'), findsNothing);
+        });
+      });
+    });
+    group('After IconButton click.', () {
+      group('After IconButton click and before mouse scroll.', () {
+        testWidgets('Additional element on the SliverList is shown.', (WidgetTester tester) async {
+          await tester.pumpWidget(const example.CustomScrollViewExampleApp());
 
-    expect(
-      find.descendant(
-        of: find.byType(CustomScrollView),
-        matching: find.byType(SliverList),
-      ),
-      findsOne,
-      reason: 'Expected one, initial (bottom) SliverList in the CustomScrollView',
-    );
+          await tester.tap(find.byType(IconButton));
+          await tester.pump();
 
-    expect(
-      find.descendant(
-        of: find.byType(SliverList),
-        matching: find.byType(Container),
-      ),
-      findsOne,
-      reason: 'Expected one, initial (bottom) Container in the SliverList',
-    );
+          expect(find.widgetWithText(SliverList, 'Item: -1'), findsNothing);
+          expect(find.widgetWithText(SliverList, 'Item: 0'), findsOne);
+          expect(
+            find.widgetWithText(SliverList, 'Item: 1'),
+            findsOne,
+            reason: 'Additional element on the SliverList is shown.',
+          );
+        });
+        testWidgets('Additional SliverList should not be visible.', (WidgetTester tester) async {
+          await tester.pumpWidget(const example.CustomScrollViewExampleApp());
 
-    expect(
-      find.descendant(
-        of: find.byType(CustomScrollView),
-        matching: find.text('Item: 1'),
-      ),
-      findsNothing,
-      reason: 'Expected no element with text "Item: 1" in the CustomScrollView',
-    );
+          await tester.tap(find.byType(IconButton));
+          await tester.pump();
 
-    // Tap the IconButton in the AppBar
-    final Finder iconButtonFinder = find.descendant(
-      of: find.byType(AppBar),
-      matching: find.byType(IconButton),
-    );
-    await tester.tap(iconButtonFinder);
-    await tester.pump();
+          expect(
+            find.byType(SliverList),
+            findsOne,
+            reason: 'Additional SliverList should not be visible.',
+          );
+        });
+      });
+      group('After IconButton click and after mouse scroll.', () {
+        testWidgets('Mouse scroll reveals additonal SliverList.', (WidgetTester tester) async {
+          await tester.pumpWidget(const example.CustomScrollViewExampleApp());
 
-    expect(
-      find.descendant(
-        of: find.byType(SliverList),
-        matching: find.byType(Container),
-      ),
-      findsExactly(2),
-      reason: 'Expected additional Container in the SliverList after the IconButton click',
-    );
+          await tester.tap(find.byType(IconButton));
+          await tester.pump();
 
-    expect(
-      find.descendant(
-        of: find.byType(CustomScrollView),
-        matching: find.text('Item: 1'),
-      ),
-      findsOne,
-      reason: 'Expected element with text "Item: 1" in the CustomScrollView',
-    );
-  });
-  testWidgets('IconButton click and mouse scroll reveals additional SliverList', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.CustomScrollViewExampleApp());
+          // Mouse wheel scroll
+          final Offset location = tester.getCenter(find.byType(CustomScrollView));
+          final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
+          testPointer.hover(location);
+          await tester.sendEventToBinding(
+            PointerScrollEvent(position: location, scrollDelta: const Offset(0, -1)),
+          );
+          await tester.pump();
 
-    expect(
-      find.descendant(
-        of: find.byType(CustomScrollView),
-        matching: find.text('Item: -1'),
-      ),
-      findsNothing,
-      reason: 'Expected no element with text "Item: -1" in the CustomScrollView',
-    );
-
-    expect(
-      find.descendant(
-        of: find.byType(CustomScrollView),
-        matching: find.text('Item: 1'),
-      ),
-      findsNothing,
-      reason: 'Expected no element with text "Item: 1" in the CustomScrollView',
-    );
-
-    // First check before we start
-    expect(
-      find.descendant(
-        of: find.byType(CustomScrollView),
-        matching: find.byType(SliverList),
-      ),
-      findsOne,
-      reason: 'Expected to have only one, initial (bottom) SliverList in the CustomScrollView',
-    );
-
-    // Second check before we start.
-    // Initially, mouse scroll event should do nothing.
-    // It should not reveal additional (top) SliverList
-    // because additional SliverList does not exists yet.
-    final Offset location = tester.getCenter(find.byType(CustomScrollView));
-    final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
-    testPointer.hover(location);
-    await tester.sendEventToBinding(
-      PointerScrollEvent(position: location, scrollDelta: const Offset(0, -1)),
-    );
-    await tester.pump();
-
-    expect(
-      find.descendant(
-        of: find.byType(CustomScrollView),
-        matching: find.byType(SliverList),
-      ),
-      findsOne,
-      reason: 'Still expected to have only one, initial (bottom), SliverList in the CustomScrollView',
-    );
-
-    // Tap the IconButton in the AppBar
-    await tester.tap(
-      find.descendant(
-        of: find.byType(AppBar),
-        matching: find.byType(IconButton),
-      ),
-    );
-    await tester.pump();
-
-    testPointer.hover(location);
-    await tester.sendEventToBinding(
-      PointerScrollEvent(position: location, scrollDelta: const Offset(0, -1)),
-    );
-    await tester.pump();
-
-    expect(
-      find.descendant(
-        of: find.byType(CustomScrollView),
-        matching: find.byType(SliverList),
-      ),
-      findsExactly(2),
-      reason: 'Expected to have two, top and bottom SliverList in the CustomScrollView',
-    );
-
-    expect(
-      find.descendant(
-        of: find.byType(CustomScrollView),
-        matching: find.text('Item: -1'),
-      ),
-      findsOne,
-      reason: 'Expected element with text "Item: -1" in the CustomScrollView',
-    );
-
-    expect(
-      find.descendant(
-        of: find.byType(CustomScrollView),
-        matching: find.text('Item: 1'),
-      ),
-      findsOne,
-      reason: 'Expected element with text "Item: 1" in the CustomScrollView',
-    );
+          expect(
+            find.byType(SliverList),
+            findsExactly(2),
+            reason: 'Mouse scroll reveals additonal SliverList.',
+          );
+          expect(find.widgetWithText(SliverList, 'Item: 0'), findsOne);
+          expect(find.widgetWithText(SliverList, 'Item: -1'), findsOne);
+          expect(find.widgetWithText(SliverList, 'Item: 1'), findsOne);
+        });
+      });
+    });
   });
 }
