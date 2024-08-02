@@ -1787,7 +1787,10 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         },
       );
     } else if (widget.title == null && kIsWeb) {
-      title =  null;
+      // Updating the <title /> element in the DOM is problematic in embedded
+      // and multiview modes as title should be managed by host apps.
+      // Refer to https://github.com/flutter/flutter/pull/152003 for more info.
+      title = null;
     } else {
       title = Title(
         title: widget.title ?? '',
