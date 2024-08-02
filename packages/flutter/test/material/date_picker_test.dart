@@ -1565,6 +1565,8 @@ void main() {
       final SemanticsHandle semantics = tester.ensureSemantics();
 
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        expect(find.byKey(const Key('Portait Box')), findsOneWidget);
+
         // Header
         expect(tester.getSemantics(find.text('SELECT DATE')), matchesSemantics(
           label: 'SELECT DATE\nFri, Jan 15',
