@@ -62,7 +62,6 @@ const double _kBorderOutlineStrokeWidth = 0.3;
 const List<double> _kDarkGradientOpacities = <double>[0.14, 0.29];
 const List<double> _kDisabledDarkGradientOpacities = <double>[0.08, 0.14];
 
-
 /// A macOS-style radio button.
 ///
 /// Used to select between a number of mutually exclusive values. When one radio
