@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/scaffold/scaffold_messenger_state.s
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Pressing the button show show a material banner', (WidgetTester tester) async {
+  testWidgets('Pressing the button should show a material banner', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ShowMaterialBannerExampleApp(),
     );
