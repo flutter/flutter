@@ -31,6 +31,17 @@ void main() {
     expect(dismissButtonFinder.focusNode!.hasFocus, isTrue);
   });
 
+  testWidgets('show button focused on banner close', (WidgetTester tester) async {
+    await pumpsUseCase(tester, MaterialBannerUseCase());
+    await tester.tap(find.text('Show a MaterialBanner'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(TextButton));
+
+    final ElevatedButton showButtonFinder = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
+    expect(showButtonFinder.focusNode!.hasFocus, isTrue);
+  });
+
   testWidgets('material banner has one h1 tag', (WidgetTester tester) async {
     await pumpsUseCase(tester, MaterialBannerUseCase());
     final Finder findHeadingLevelOnes = find.bySemanticsLabel('MaterialBanner Demo');
