@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 #include "impeller/entity/entity_pass_clip_stack.h"
-
-#include "flutter/fml/logging.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/entity.h"
 
@@ -39,12 +37,10 @@ void EntityPassClipStack::PushSubpass(std::optional<Rect> subpass_coverage,
                                 .clip_height = clip_height},
           },
   });
-  next_replay_index_ = 0;
 }
 
 void EntityPassClipStack::PopSubpass() {
   subpass_state_.pop_back();
-  next_replay_index_ = subpass_state_.back().rendered_clip_entities.size();
 }
 
 const std::vector<ClipCoverageLayer>
@@ -142,22 +138,12 @@ void EntityPassClipStack::RecordEntity(const Entity& entity,
     case Contents::ClipCoverage::Type::kNoChange:
       return;
     case Contents::ClipCoverage::Type::kAppend:
-      FML_DCHECK(next_replay_index_ ==
-                 subpass_state.rendered_clip_entities.size())
-          << "Not all clips have been replayed before appending new clip.";
       subpass_state.rendered_clip_entities.push_back(
           {.entity = entity.Clone(), .clip_coverage = clip_coverage});
-      next_replay_index_++;
       break;
     case Contents::ClipCoverage::Type::kRestore:
-      FML_DCHECK(next_replay_index_ <=
-                 subpass_state.rendered_clip_entities.size());
       if (!subpass_state.rendered_clip_entities.empty()) {
         subpass_state.rendered_clip_entities.pop_back();
-
-        if (next_replay_index_ > subpass_state.rendered_clip_entities.size()) {
-          next_replay_index_ = subpass_state.rendered_clip_entities.size();
-        }
       }
       break;
   }
@@ -171,29 +157,6 @@ EntityPassClipStack::GetCurrentSubpassState() {
 const std::vector<EntityPassClipStack::ReplayResult>&
 EntityPassClipStack::GetReplayEntities() const {
   return subpass_state_.back().rendered_clip_entities;
-}
-
-void EntityPassClipStack::ActivateClipReplay() {
-  next_replay_index_ = 0;
-}
-
-const EntityPassClipStack::ReplayResult*
-EntityPassClipStack::GetNextReplayResult(const Entity& entity) {
-  if (next_replay_index_ >=
-      subpass_state_.back().rendered_clip_entities.size()) {
-    // No clips need to be replayed.
-    return nullptr;
-  }
-  ReplayResult* next_replay =
-      &subpass_state_.back().rendered_clip_entities[next_replay_index_];
-  if (next_replay->entity.GetClipDepth() < entity.GetClipDepth()) {
-    // The next replay clip doesn't affect the current entity, so don't replay
-    // it yet.
-    return nullptr;
-  }
-
-  next_replay_index_++;
-  return next_replay;
 }
 
 }  // namespace impeller

@@ -73,8 +73,6 @@ class Entity {
 
   Entity(Entity&&);
 
-  Entity& operator=(Entity&&);
-
   /// @brief  Get the global transform matrix for this Entity.
   const Matrix& GetTransform() const;
 
