@@ -7,7 +7,6 @@
 
 #include <Block.h>
 
-#include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/platform/darwin/scoped_typeref.h"
 
 #if defined(__has_feature) && __has_feature(objc_arc)

@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/macros.h"
 
 namespace fml {

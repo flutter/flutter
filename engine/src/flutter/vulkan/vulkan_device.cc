@@ -174,7 +174,7 @@ bool VulkanDevice::InitializeCommandPool() {
 }
 
 VulkanDevice::~VulkanDevice() {
-  FML_ALLOW_UNUSED_LOCAL(WaitIdle());
+  [[maybe_unused]] auto result = WaitIdle();
 }
 
 bool VulkanDevice::IsValid() const {

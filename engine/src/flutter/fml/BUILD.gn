@@ -18,7 +18,6 @@ source_set("fml") {
     "base32.h",
     "build_config.h",
     "closure.h",
-    "compiler_specific.h",
     "concurrent_message_loop.cc",
     "concurrent_message_loop.h",
     "container.h",

@@ -10,7 +10,6 @@
 #include <set>
 #include <string>
 
-#include "flutter/fml/compiler_specific.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
 namespace flutter {

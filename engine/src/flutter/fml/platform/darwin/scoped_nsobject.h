@@ -13,7 +13,6 @@
 // singled out because it is most typically included from other header files.
 #import <Foundation/NSObject.h>
 
-#include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_typeref.h"
 

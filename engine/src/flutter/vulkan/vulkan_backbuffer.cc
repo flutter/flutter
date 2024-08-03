@@ -39,7 +39,7 @@ VulkanBackbuffer::VulkanBackbuffer(const VulkanProcTable& p_vk,
 }
 
 VulkanBackbuffer::~VulkanBackbuffer() {
-  FML_ALLOW_UNUSED_LOCAL(WaitFences());
+  [[maybe_unused]] auto result = WaitFences();
 }
 
 bool VulkanBackbuffer::IsValid() const {

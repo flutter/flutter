@@ -12,7 +12,6 @@
 #include <unordered_set>
 
 #include "flutter/common/task_runners.h"
-#include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/lib/ui/io_manager.h"

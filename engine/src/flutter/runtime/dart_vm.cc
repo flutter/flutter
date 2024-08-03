@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "flutter/common/settings.h"
-#include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/cpu_affinity.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
@@ -71,12 +70,12 @@ static const char* kSerialGCArgs[] = {
     // clang-format on
 };
 
-FML_ALLOW_UNUSED_TYPE
+[[maybe_unused]]
 static const char* kDartWriteProtectCodeArgs[] = {
     "--no_write_protect_code",
 };
 
-FML_ALLOW_UNUSED_TYPE
+[[maybe_unused]]
 static const char* kDartDisableIntegerDivisionArgs[] = {
     "--no_use_integer_division",
 };
@@ -105,7 +104,7 @@ static std::string DartFileRecorderArgs(const std::string& path) {
   return oss.str();
 }
 
-FML_ALLOW_UNUSED_TYPE
+[[maybe_unused]]
 static const char* kDartDefaultTraceStreamsArgs[]{
     "--timeline_streams=Dart,Embedder,GC",
 };

@@ -59,8 +59,7 @@ TEST(ThreadTest, CanCreateRWMutex) {
   f.mtx.UnlockWriter();
   // int b = f.a; <--- Static analysis error.
   f.mtx.LockReader();
-  int b = f.a;  // NOLINT(clang-analyzer-deadcode.DeadStores)
-  FML_ALLOW_UNUSED_LOCAL(b);
+  [[maybe_unused]] int b = f.a;  // NOLINT(clang-analyzer-deadcode.DeadStores)
   f.mtx.UnlockReader();
 }
 
@@ -76,8 +75,7 @@ TEST(ThreadTest, CanCreateRWMutexLock) {
   // int b = f.a; <--- Static analysis error.
   {
     auto read_lock = ReaderLock(f.mtx);
-    int b = f.a;  // NOLINT(clang-analyzer-deadcode.DeadStores)
-    FML_ALLOW_UNUSED_LOCAL(b);
+    [[maybe_unused]] int b = f.a;  // NOLINT(clang-analyzer-deadcode.DeadStores)
   }
 
   // f.mtx.UnlockReader(); <--- Static analysis error.
