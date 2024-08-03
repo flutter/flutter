@@ -8,16 +8,17 @@
 #include <iomanip>
 #include <vector>
 
-#include "flutter/fml/compiler_specific.h"
 #include "vulkan_utilities.h"
 
 namespace vulkan {
 
-static const VkDebugReportFlagsEXT kVulkanErrorFlags FML_ALLOW_UNUSED_TYPE =
+[[maybe_unused]]
+static const VkDebugReportFlagsEXT kVulkanErrorFlags =
     VK_DEBUG_REPORT_WARNING_BIT_EXT |
     VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT | VK_DEBUG_REPORT_ERROR_BIT_EXT;
 
-static const VkDebugReportFlagsEXT kVulkanInfoFlags FML_ALLOW_UNUSED_TYPE =
+[[maybe_unused]]
+static const VkDebugReportFlagsEXT kVulkanInfoFlags =
     VK_DEBUG_REPORT_INFORMATION_BIT_EXT | VK_DEBUG_REPORT_DEBUG_BIT_EXT;
 
 std::string VulkanDebugReport::DebugExtensionName() {

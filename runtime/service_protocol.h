@@ -10,7 +10,6 @@
 #include <string>
 #include <string_view>
 
-#include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/synchronization/atomic_object.h"
 #include "flutter/fml/synchronization/shared_mutex.h"

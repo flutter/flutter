@@ -155,7 +155,7 @@ VulkanSwapchain::VulkanSwapchain(const VulkanProcTable& p_vk,
 
   swapchain_ = VulkanHandle<VkSwapchainKHR>{
       swapchain, [this](VkSwapchainKHR swapchain) {
-        FML_ALLOW_UNUSED_LOCAL(device_.WaitIdle());
+        [[maybe_unused]] auto result = device_.WaitIdle();
         vk.DestroySwapchainKHR(device_.GetHandle(), swapchain, nullptr);
       }};
 
