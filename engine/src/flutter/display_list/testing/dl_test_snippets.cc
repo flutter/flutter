@@ -50,11 +50,15 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
       {"SetAntiAlias",
        {
            {0, 8, 0, [](DlOpReceiver& r) { r.setAntiAlias(true); }},
+
+           // Reset attribute to default as last entry
            {0, 0, 0, [](DlOpReceiver& r) { r.setAntiAlias(false); }},
        }},
       {"SetInvertColors",
        {
            {0, 8, 0, [](DlOpReceiver& r) { r.setInvertColors(true); }},
+
+           // Reset attribute to default as last entry
            {0, 0, 0, [](DlOpReceiver& r) { r.setInvertColors(false); }},
        }},
       {"SetStrokeCap",
@@ -63,6 +67,8 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) { r.setStrokeCap(DlStrokeCap::kRound); }},
            {0, 8, 0,
             [](DlOpReceiver& r) { r.setStrokeCap(DlStrokeCap::kSquare); }},
+
+           // Reset attribute to default as last entry
            {0, 0, 0,
             [](DlOpReceiver& r) { r.setStrokeCap(DlStrokeCap::kButt); }},
        }},
@@ -72,6 +78,8 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) { r.setStrokeJoin(DlStrokeJoin::kBevel); }},
            {0, 8, 0,
             [](DlOpReceiver& r) { r.setStrokeJoin(DlStrokeJoin::kRound); }},
+
+           // Reset attribute to default as last entry
            {0, 0, 0,
             [](DlOpReceiver& r) { r.setStrokeJoin(DlStrokeJoin::kMiter); }},
        }},
@@ -83,6 +91,8 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) {
               r.setDrawStyle(DlDrawStyle::kStrokeAndFill);
             }},
+
+           // Reset attribute to default as last entry
            {0, 0, 0,
             [](DlOpReceiver& r) { r.setDrawStyle(DlDrawStyle::kFill); }},
        }},
@@ -90,12 +100,16 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
        {
            {0, 8, 0, [](DlOpReceiver& r) { r.setStrokeWidth(1.0); }},
            {0, 8, 0, [](DlOpReceiver& r) { r.setStrokeWidth(5.0); }},
+
+           // Reset attribute to default as last entry
            {0, 0, 0, [](DlOpReceiver& r) { r.setStrokeWidth(0.0); }},
        }},
       {"SetStrokeMiter",
        {
            {0, 8, 0, [](DlOpReceiver& r) { r.setStrokeMiter(0.0); }},
            {0, 8, 0, [](DlOpReceiver& r) { r.setStrokeMiter(5.0); }},
+
+           // Reset attribute to default as last entry
            {0, 0, 0, [](DlOpReceiver& r) { r.setStrokeMiter(4.0); }},
        }},
       {"SetColor",
@@ -104,6 +118,8 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) { r.setColor(DlColor(SK_ColorGREEN)); }},
            {0, 8, 0,
             [](DlOpReceiver& r) { r.setColor(DlColor(SK_ColorBLUE)); }},
+
+           // Reset attribute to default as last entry
            {0, 0, 0,
             [](DlOpReceiver& r) { r.setColor(DlColor(SK_ColorBLACK)); }},
        }},
@@ -113,6 +129,8 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) { r.setBlendMode(DlBlendMode::kSrcIn); }},
            {0, 8, 0,
             [](DlOpReceiver& r) { r.setBlendMode(DlBlendMode::kDstIn); }},
+
+           // Reset attribute to default as last entry
            {0, 0, 0,
             [](DlOpReceiver& r) { r.setBlendMode(DlBlendMode::kSrcOver); }},
        }},
@@ -128,6 +146,8 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) { r.setColorSource(kTestSource4.get()); }},
            {0, 80 + 6 * 4, 0,
             [](DlOpReceiver& r) { r.setColorSource(kTestSource5.get()); }},
+
+           // Reset attribute to default as last entry
            {0, 0, 0, [](DlOpReceiver& r) { r.setColorSource(nullptr); }},
        }},
       {"SetImageFilter",
@@ -186,7 +206,6 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) { r.setImageFilter(&kTestCFImageFilter1); }},
            {0, 24, 0,
             [](DlOpReceiver& r) { r.setImageFilter(&kTestCFImageFilter2); }},
-           {0, 0, 0, [](DlOpReceiver& r) { r.setImageFilter(nullptr); }},
            {0, 24, 0,
             [](DlOpReceiver& r) {
               r.setImageFilter(
@@ -194,6 +213,9 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
                       .makeWithLocalMatrix(SkMatrix::Translate(2, 2))
                       .get());
             }},
+
+           // Reset attribute to default as last entry
+           {0, 0, 0, [](DlOpReceiver& r) { r.setImageFilter(nullptr); }},
        }},
       {"SetColorFilter",
        {
@@ -219,6 +241,8 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) {
               r.setColorFilter(DlLinearToSrgbGammaColorFilter::kInstance.get());
             }},
+
+           // Reset attribute to default as last entry
            {0, 0, 0, [](DlOpReceiver& r) { r.setColorFilter(nullptr); }},
        }},
       {"SetMaskFilter",
@@ -238,6 +262,8 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
            {0, 32, 0,
             [](DlOpReceiver& r) { r.setMaskFilter(&kTestMaskFilter5); }, 0u,
             2u},
+
+           // Reset attribute to default as last entry
            {0, 0, 0, [](DlOpReceiver& r) { r.setMaskFilter(nullptr); }, 0u, 1u},
        }},
   };
