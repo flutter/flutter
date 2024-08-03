@@ -73,8 +73,8 @@ class _OffsetBoundaryInheritedElement extends InheritedElement implements ShapeB
     final RenderBox? rb = renderObject as RenderBox?;
     assert(rb != null && rb.hasSize, 'OffsetBoundaryProvider is not available');
     final Rect boundary = rb!.localToGlobal(Offset.zero) & rb.size;
-    final double dx = shape.dx.clamp(boundary.left, boundary.right);
-    final double top = shape.dy.clamp(boundary.top, boundary.bottom);
+    final double dx = clampDouble(shape.dx, boundary.left, boundary.right);
+    final double top = clampDouble(shape.dy, boundary.top, boundary.bottom);
     return Offset(dx, top);
   }
 }
@@ -136,8 +136,8 @@ class _RectBoundaryInheritedElement extends InheritedElement implements ShapeBou
     final RenderBox? rb = renderObject as RenderBox?;
     assert(rb != null && rb.hasSize, 'RectBoundaryProvider is not available');
     final Rect boundary = rb!.localToGlobal(Offset.zero) & rb.size;
-    final double left = shape.left.clamp(boundary.left, boundary.right - shape.width);
-    final double top = shape.top.clamp(boundary.top, boundary.bottom - shape.height);
+    final double left = clampDouble(shape.left, boundary.left, boundary.right - shape.width);
+    final double top = clampDouble(shape.top, boundary.top, boundary.bottom - shape.height);
     return Rect.fromLTWH(left, top, shape.width, shape.height);
   }
 }
