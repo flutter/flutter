@@ -1332,7 +1332,7 @@ void main() {
     const Duration shortRequestDelay = Duration(milliseconds: 1000);
     focusNode.requestFocus();
 
-    // Enter first letter.
+    // Enter the first letter.
     delay = longRequestDelay;
     await tester.enterText(find.byKey(fieldKey), 'c');
     await tester.pump();
@@ -1400,7 +1400,7 @@ void main() {
     const Duration secondRequestDelay = Duration(milliseconds: 2000);
     const Duration thirdRequestDelay = Duration(milliseconds: 3000);
 
-    // Enter first letter.
+    // Enter the first letter.
     delay = firstRequestDelay;
     await tester.enterText(find.byKey(fieldKey), 'l');
     await tester.pump();

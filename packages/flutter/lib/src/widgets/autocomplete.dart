@@ -361,7 +361,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final TextEditingValue value = _textEditingController.value;
     final Iterable<T> options = await widget.optionsBuilder(value);
 
-    // Makes sure that the previous call results do not replace to new ones.
+    // Makes sure that previous call results do not replace new ones.
     if (callId != _onChangedCallId) {
       return;
     }
