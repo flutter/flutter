@@ -462,14 +462,16 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                         width: isInAccessibilityMode
                             ? _kAccessibilityCupertinoDialogWidth
                             : _kCupertinoDialogWidth,
-                        child: CupertinoPopupSurface(
-                          isSurfacePainted: false,
-                          child: Semantics(
-                            namesRoute: true,
-                            scopesRoute: true,
-                            explicitChildNodes: true,
-                            label: localizations.alertDialogLabel,
-                            child: _buildBody(context),
+                        child: _ActionSheetGestureDetector(
+                          child: CupertinoPopupSurface(
+                            isSurfacePainted: false,
+                            child: Semantics(
+                              namesRoute: true,
+                              scopesRoute: true,
+                              explicitChildNodes: true,
+                              label: localizations.alertDialogLabel,
+                              child: _buildBody(context),
+                            ),
                           ),
                         ),
                       ),
@@ -1843,7 +1845,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
 // Renders the background of a button (both the pressed background and the idle
 // background) and reports its state to the parent with `onPressStateChange`.
-class _AlertDialogButtonBackground extends StatelessWidget {
+class _AlertDialogButtonBackground extends StatefulWidget {
   const _AlertDialogButtonBackground({
     required this.idleColor,
     required this.pressedColor,
@@ -1868,37 +1870,57 @@ class _AlertDialogButtonBackground extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget child;
 
-  void onTapDown(TapDownDetails details) {
-    onPressStateChange?.call(true);
+  @override
+  _AlertDialogButtonBackgroundState createState() => _AlertDialogButtonBackgroundState();
+}
+
+class _AlertDialogButtonBackgroundState extends State<_AlertDialogButtonBackground>
+    implements _SlideTarget {
+  void _emitVibration(){
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+        HapticFeedback.selectionClick();
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        break;
+    }
   }
 
-  void onTapUp(TapUpDetails details) {
-    onPressStateChange?.call(false);
+  // |_SlideTarget|
+  @override
+  void didEnter({required bool fromPointerDown}) {
+    widget.onPressStateChange?.call(true);
+    if (!fromPointerDown) {
+      _emitVibration();
+    }
   }
 
-  void onTapCancel() {
-    onPressStateChange?.call(false);
+  // |_SlideTarget|
+  @override
+  void didLeave() {
+    widget.onPressStateChange?.call(false);
+  }
+
+  // |_SlideTarget|
+  @override
+  void didConfirm() {
+    widget.onPressStateChange?.call(false);
   }
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor = pressed ? pressedColor : idleColor;
-    return MergeSemantics(
-      // TODO(mattcarroll): Button press dynamics need overhaul for iOS:
-      // https://github.com/flutter/flutter/issues/19786
-      child: GestureDetector(
-        excludeFromSemantics: true,
-        behavior: HitTestBehavior.opaque,
-        onTapDown: onTapDown,
-        onTapUp: onTapUp,
-        // TODO(mattcarroll): Cancel is currently triggered when user moves
-        //  past slop instead of off button: https://github.com/flutter/flutter/issues/19783
-        onTapCancel: onTapCancel,
+    final Color backgroundColor = widget.pressed ? widget.pressedColor : widget.idleColor;
+    return MetaData(
+      metaData: this,
+      child: MergeSemantics(
         child: Container(
           decoration: BoxDecoration(
             color: CupertinoDynamicColor.resolve(backgroundColor, context),
           ),
-          child: child,
+          child: widget.child,
         ),
       ),
     );
@@ -1911,7 +1933,7 @@ class _AlertDialogButtonBackground extends StatelessWidget {
 ///
 ///  * [CupertinoAlertDialog], a dialog that informs the user about situations
 ///    that require acknowledgment.
-class CupertinoDialogAction extends StatelessWidget {
+class CupertinoDialogAction extends StatefulWidget {
   /// Creates an action for an iOS-style dialog.
   const CupertinoDialogAction({
     super.key,
@@ -1958,10 +1980,30 @@ class CupertinoDialogAction extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget child;
 
+  @override
+  State<CupertinoDialogAction> createState() => _CupertinoDialogActionState();
+}
+
+class _CupertinoDialogActionState extends State<CupertinoDialogAction>
+    implements _SlideTarget {
+  // |_SlideTarget|
+  @override
+  void didEnter({required bool fromPointerDown}) {}
+
+  // |_SlideTarget|
+  @override
+  void didLeave() {}
+
+  // |_SlideTarget|
+  @override
+  void didConfirm() {
+    widget.onPressed?.call();
+  }
+
   /// Whether the button is enabled or disabled. Buttons are disabled by
   /// default. To enable a button, set its [onPressed] property to a non-null
   /// value.
-  bool get enabled => onPressed != null;
+  bool get enabled => widget.onPressed != null;
 
   // Dialog action content shrinks to fit, up to a certain point, and if it still
   // cannot fit at the minimum size, the text content is ellipsized.
@@ -1991,7 +2033,7 @@ class CupertinoDialogAction extends StatelessWidget {
         ),
         child: Semantics(
           button: true,
-          onTap: onPressed,
+          onTap: widget.onPressed,
           child: DefaultTextStyle(
             style: textStyle,
             textAlign: TextAlign.center,
@@ -2022,12 +2064,12 @@ class CupertinoDialogAction extends StatelessWidget {
   Widget build(BuildContext context) {
     TextStyle style = _kCupertinoDialogActionStyle.copyWith(
       color: CupertinoDynamicColor.resolve(
-        isDestructiveAction ? CupertinoColors.systemRed : CupertinoTheme.of(context).primaryColor,
+        widget.isDestructiveAction ? CupertinoColors.systemRed : CupertinoTheme.of(context).primaryColor,
         context,
       ),
-    ).merge(textStyle);
+    ).merge(widget.textStyle);
 
-    if (isDefaultAction) {
+    if (widget.isDefaultAction) {
       style = style.copyWith(fontWeight: FontWeight.w600);
     }
 
@@ -2047,20 +2089,19 @@ class CupertinoDialogAction extends StatelessWidget {
     final Widget sizedContent = _isInAccessibilityMode(context)
         ? _buildContentWithAccessibilitySizingPolicy(
             textStyle: style,
-            content: child,
+            content: widget.child,
           )
         : _buildContentWithRegularSizingPolicy(
             context: context,
             textStyle: style,
-            content: child,
+            content: widget.child,
             padding: padding,
           );
 
     return MouseRegion(
-      cursor: onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
-      child: GestureDetector(
-        excludeFromSemantics: true,
-        onTap: onPressed,
+      cursor: widget.onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      child: MetaData(
+        metaData: this,
         behavior: HitTestBehavior.opaque,
         child: ConstrainedBox(
           constraints: const BoxConstraints(
