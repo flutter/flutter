@@ -1190,6 +1190,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // No exception.
+    expect(tester.takeException(), isNull);
   });
 }
 
