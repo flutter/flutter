@@ -1418,7 +1418,7 @@ void main() {
     await tester.pump();
     expect(lastOptions, null);
 
-    // lastOptions should get updated from last optionsBuilder call results only.
+    // lastOptions should get updated only from the last request.
     await tester.pump(firstRequestDelay);
     expect(find.byKey(optionsKey), findsNothing);
     expect(lastOptions, null);
