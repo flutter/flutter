@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/animation.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:async';
 import 'dart:collection';
 
@@ -1878,7 +1884,7 @@ abstract class InheritedWidget extends ProxyWidget {
 /// object widgets subclass one of:
 ///
 ///  * [LeafRenderObjectWidget], if the widget has no children.
-///  * [SingleChildRenderObjectElement], if the widget has exactly one child.
+///  * [SingleChildRenderObjectWidget], if the widget has exactly one child.
 ///  * [MultiChildRenderObjectWidget], if the widget takes a list of children.
 ///  * [SlottedMultiChildRenderObjectWidget], if the widget organizes its
 ///    children in different named slots.
@@ -2645,8 +2651,8 @@ final class BuildScope {
   ///
   /// This is necessary to preserve the sort order defined by [Element._sort].
   ///
-  /// This field is set to null when [buildScope] is not actively rebuilding
-  /// the widget tree.
+  /// This field is set to null when [BuildOwner.buildScope] is not actively
+  /// rebuilding the widget tree.
   bool? _dirtyElementsNeedsResorting;
   final List<Element> _dirtyElements = <Element>[];
 
@@ -3255,9 +3261,6 @@ class BuildOwner {
   ///
   /// In debug mode, this also runs some sanity checks, for example checking for
   /// duplicate global keys.
-  ///
-  /// After the current call stack unwinds, a microtask that notifies listeners
-  /// about changes to global keys will run.
   @pragma('vm:notify-debugger-on-exception')
   void finalizeTree() {
     if (!kReleaseMode) {
@@ -4033,7 +4036,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(slots == null || newWidgets.length == slots.length);
 
     Element? replaceWithNullIfForgotten(Element child) {
-      return forgottenChildren != null && forgottenChildren.contains(child) ? null : child;
+      return (forgottenChildren?.contains(child) ?? false) ? null : child;
     }
 
     Object? slotFor(int newChildIndex, Element? previousChild) {
@@ -4219,7 +4222,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _parent = parent;
     _slot = newSlot;
     _lifecycleState = _ElementLifecycle.active;
-    _depth = _parent != null ? _parent!.depth + 1 : 1;
+    _depth = 1 + (_parent?.depth ?? 0);
     if (parent != null) {
       // Only assign ownership if the parent is non-null. If parent is null
       // (the root node), the owner should have already been assigned.
@@ -4598,7 +4601,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void activate() {
     assert(_lifecycleState == _ElementLifecycle.inactive);
     assert(owner != null);
-    final bool hadDependencies = (_dependencies != null && _dependencies!.isNotEmpty) || _hadUnsatisfiedDependencies;
+    final bool hadDependencies = (_dependencies?.isNotEmpty ?? false) || _hadUnsatisfiedDependencies;
     _lifecycleState = _ElementLifecycle.active;
     // We unregistered our dependencies in deactivate, but never cleared the list.
     // Since we're going to be reused, let's clear our list now.
@@ -4633,7 +4636,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void deactivate() {
     assert(_lifecycleState == _ElementLifecycle.active);
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
-    if (_dependencies != null && _dependencies!.isNotEmpty) {
+    if (_dependencies?.isNotEmpty ?? false) {
       for (final InheritedElement dependency in _dependencies!) {
         dependency.removeDependent(this);
       }
@@ -4893,8 +4896,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// Returns `true` if [dependOnInheritedElement] was previously called with [ancestor].
   @protected
-  bool doesDependOnInheritedElement(InheritedElement ancestor) =>
-      _dependencies != null && _dependencies!.contains(ancestor);
+  bool doesDependOnInheritedElement(InheritedElement ancestor) {
+    return _dependencies?.contains(ancestor) ?? false;
+  }
 
   @override
   InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object? aspect }) {
@@ -4907,7 +4911,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedElements == null ? null : _inheritedElements![T];
+    final InheritedElement? ancestor = _inheritedElements?[T];
     if (ancestor != null) {
       return dependOnInheritedElement(ancestor, aspect: aspect) as T;
     }
@@ -4923,8 +4927,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedElements == null ? null : _inheritedElements![T];
-    return ancestor;
+    return _inheritedElements?[T];
   }
 
   /// Called in [Element.mount] and [Element.activate] to register this element in
@@ -5415,7 +5418,7 @@ typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails details);
 ///
 ///  * [FlutterError.onError], which can be set to a method that exits the
 ///    application if that is preferable to showing an error message.
-///  * <https://flutter.dev/docs/testing/errors>, more information about error
+///  * <https://docs.flutter.dev/testing/errors>, more information about error
 ///    handling in Flutter.
 class ErrorWidget extends LeafRenderObjectWidget {
   /// Creates a widget that displays the given exception.
@@ -5467,14 +5470,14 @@ class ErrorWidget extends LeafRenderObjectWidget {
   ///    [FlutterErrorDetails] object immediately prior to this callback being
   ///    invoked, and which can also be configured to control how errors are
   ///    reported.
-  ///  * <https://flutter.dev/docs/testing/errors>, more information about error
+  ///  * <https://docs.flutter.dev/testing/errors>, more information about error
   ///    handling in Flutter.
   static ErrorWidgetBuilder builder = _defaultErrorWidgetBuilder;
 
   static Widget _defaultErrorWidgetBuilder(FlutterErrorDetails details) {
     String message = '';
     assert(() {
-      message = '${_stringify(details.exception)}\nSee also: https://flutter.dev/docs/testing/errors';
+      message = '${_stringify(details.exception)}\nSee also: https://docs.flutter.dev/testing/errors';
       return true;
     }());
     final Object exception = details.exception;

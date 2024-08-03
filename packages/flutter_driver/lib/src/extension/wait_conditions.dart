@@ -37,7 +37,7 @@ class _InternalNoTransientCallbacksCondition implements WaitCondition {
   /// Creates an [_InternalNoTransientCallbacksCondition] instance.
   const _InternalNoTransientCallbacksCondition();
 
-  /// Factory constructor to parse an [InternalNoTransientCallbacksCondition]
+  /// Factory constructor to parse an [_InternalNoTransientCallbacksCondition]
   /// instance from the given [SerializableWaitCondition] instance.
   factory _InternalNoTransientCallbacksCondition.deserialize(SerializableWaitCondition condition) {
     if (condition.conditionName != 'NoTransientCallbacksCondition') {
@@ -63,7 +63,7 @@ class _InternalNoPendingFrameCondition implements WaitCondition {
   /// Creates an [_InternalNoPendingFrameCondition] instance.
   const _InternalNoPendingFrameCondition();
 
-  /// Factory constructor to parse an [InternalNoPendingFrameCondition] instance
+  /// Factory constructor to parse an [_InternalNoPendingFrameCondition] instance
   /// from the given [SerializableWaitCondition] instance.
   factory _InternalNoPendingFrameCondition.deserialize(SerializableWaitCondition condition) {
     if (condition.conditionName != 'NoPendingFrameCondition') {
@@ -89,7 +89,7 @@ class _InternalFirstFrameRasterizedCondition implements WaitCondition {
   /// Creates an [_InternalFirstFrameRasterizedCondition] instance.
   const _InternalFirstFrameRasterizedCondition();
 
-  /// Factory constructor to parse an [InternalNoPendingFrameCondition] instance
+  /// Factory constructor to parse an [_InternalFirstFrameRasterizedCondition] instance
   /// from the given [SerializableWaitCondition] instance.
   factory _InternalFirstFrameRasterizedCondition.deserialize(SerializableWaitCondition condition) {
     if (condition.conditionName != 'FirstFrameRasterizedCondition') {

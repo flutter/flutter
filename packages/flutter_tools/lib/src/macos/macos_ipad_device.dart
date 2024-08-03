@@ -99,7 +99,6 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs = const <String, Object>{},
     bool prebuiltApplication = false,
-    bool ipv6 = false,
     String? userIdentifier,
   }) async {
     // Only attaching to a running app launched from Xcode is supported.
@@ -116,6 +115,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   Future<void> buildForDevice({
     String? mainPath,
     required BuildInfo buildInfo,
+    bool usingCISystem = false,
   }) async {
     // Only attaching to a running app launched from Xcode is supported.
     throw UnimplementedError('Building for "$name" is not supported.');

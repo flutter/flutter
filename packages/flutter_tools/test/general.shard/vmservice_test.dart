@@ -167,7 +167,7 @@ void main() {
 
   testWithoutContext('setAssetDirectory forwards arguments correctly', () async {
     final MockVMService mockVMService = MockVMService();
-    final FlutterVmService flutterVmService = FlutterVmService(mockVMService, logger: BufferLogger.test());
+    final FlutterVmService flutterVmService = FlutterVmService(mockVMService);
 
     await flutterVmService.setAssetDirectory(
       assetsDirectory: Uri(path: 'abc', scheme: 'file'),
@@ -186,7 +186,7 @@ void main() {
 
   testWithoutContext('setAssetDirectory forwards arguments correctly - windows', () async {
     final MockVMService mockVMService = MockVMService();
-    final FlutterVmService flutterVmService = FlutterVmService(mockVMService, logger: BufferLogger.test());
+    final FlutterVmService flutterVmService = FlutterVmService(mockVMService);
 
     await flutterVmService.setAssetDirectory(
       assetsDirectory: Uri(path: 'C:/Users/Tester/AppData/Local/Temp/hello_worldb42a6da5/hello_world/build/flutter_assets', scheme: 'file'),
@@ -207,7 +207,7 @@ void main() {
 
   testWithoutContext('getSkSLs forwards arguments correctly', () async {
     final MockVMService mockVMService = MockVMService();
-    final FlutterVmService flutterVmService = FlutterVmService(mockVMService, logger: BufferLogger.test());
+    final FlutterVmService flutterVmService = FlutterVmService(mockVMService);
 
     await flutterVmService.getSkSLs(viewId: 'abc');
 
@@ -220,7 +220,7 @@ void main() {
 
   testWithoutContext('flushUIThreadTasks forwards arguments correctly', () async {
     final MockVMService mockVMService = MockVMService();
-    final FlutterVmService flutterVmService = FlutterVmService(mockVMService, logger: BufferLogger.test());
+    final FlutterVmService flutterVmService = FlutterVmService(mockVMService);
 
     await flutterVmService.flushUIThreadTasks(uiIsolateId: 'def');
 
@@ -231,7 +231,7 @@ void main() {
     });
   });
 
-  testWithoutContext('runInView forwards arguments correctly', () async {
+  testUsingContext('runInView forwards arguments correctly', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
@@ -424,14 +424,6 @@ void main() {
           method: 'getVMTimeline',
           error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
-        const FakeVmServiceRequest(
-          method: kRenderFrameWithRasterStatsMethod,
-          args: <String, dynamic>{
-            'viewId': '1',
-            'isolateId': '12',
-          },
-          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
-        ),
       ]
     );
 
@@ -451,10 +443,6 @@ void main() {
 
     final vm_service.Response? timeline = await fakeVmServiceHost.vmService.getTimeline();
     expect(timeline, isNull);
-
-    final Map<String, Object?>? rasterStats =
-      await fakeVmServiceHost.vmService.renderFrameWithRasterStats(viewId: '1', uiIsolateId: '12');
-    expect(rasterStats, isNull);
 
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
@@ -476,35 +464,6 @@ void main() {
       'isolate/123',
     );
     expect(isolate, null);
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  });
-
-  testWithoutContext('renderWithStats forwards stats correctly', () async {
-    // ignore: always_specify_types
-    const Map<String, dynamic> response = {
-      'type': 'RenderFrameWithRasterStats',
-      'snapshots':<dynamic>[
-        // ignore: always_specify_types
-        {
-          'layer_unique_id':1512,
-          'duration_micros':477,
-          'snapshot':'',
-        },
-      ],
-    };
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(method: kRenderFrameWithRasterStatsMethod, args: <String, Object>{
-          'isolateId': 'isolate/123',
-          'viewId': 'view/1',
-        }, jsonResponse: response),
-      ]
-    );
-
-    final Map<String, Object?>? rasterStats =
-      await fakeVmServiceHost.vmService.renderFrameWithRasterStats(viewId: 'view/1', uiIsolateId: 'isolate/123');
-    expect(rasterStats, equals(response));
 
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
@@ -783,6 +742,17 @@ void main() {
           error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
       ]);
+
+      expect(
+        () => fakeVmServiceHost.vmService.findExtensionIsolate(kExtensionName),
+        throwsA(isA<VmServiceDisappearedException>()),
+      );
+    });
+
+    testWithoutContext('throws when the service is disposed', () async {
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+
+      await fakeVmServiceHost.vmService.dispose();
 
       expect(
         () => fakeVmServiceHost.vmService.findExtensionIsolate(kExtensionName),

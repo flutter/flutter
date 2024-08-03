@@ -2,6 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/services.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'button.dart';
+/// @docImport 'dialog.dart';
+/// @docImport 'nav_bar.dart';
+/// @docImport 'page_scaffold.dart';
+/// @docImport 'tab_scaffold.dart';
+library;
+
 import 'dart:math';
 import 'dart:ui' show ImageFilter, lerpDouble;
 
@@ -769,14 +782,14 @@ class _CupertinoBackGestureController<T> {
   final ValueGetter<bool> getIsActive;
   final ValueGetter<bool> getIsCurrent;
 
-  /// The drag gesture has changed by [fractionalDelta]. The total range of the
-  /// drag should be 0.0 to 1.0.
+  /// The drag gesture has changed by [delta]. The total range of the drag
+  /// should be 0.0 to 1.0.
   void dragUpdate(double delta) {
     controller.value -= delta;
   }
 
-  /// The drag gesture has ended with a horizontal motion of
-  /// [fractionalVelocity] as a fraction of screen width per second.
+  /// The drag gesture has ended with a horizontal motion of [velocity] as a
+  /// fraction of screen width per second.
   void dragEnd(double velocity) {
     // Fling in the appropriate direction.
     //
@@ -854,7 +867,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
       // Eyeballed gradient used to mimic a drop shadow on the start side only.
       <Color>[
         Color(0x04000000),
-        Color(0x00000000),
+        CupertinoColors.transparent,
       ],
     ),
   );

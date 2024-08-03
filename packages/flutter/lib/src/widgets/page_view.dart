@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'single_child_scroll_view.dart';
+/// @docImport 'text.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show clampDouble, precisionErrorTolerance;
@@ -383,13 +389,16 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
 
   @override
   double? get page {
+    if (!hasPixels) {
+      return null;
+    }
     assert(
-      !hasPixels || hasContentDimensions,
+      hasContentDimensions || !haveDimensions,
       'Page value is only available after content dimensions are established.',
     );
-    return !hasPixels || !hasContentDimensions
-      ? null
-      : _cachedPage ?? getPageFromPixels(clampDouble(pixels, minScrollExtent, maxScrollExtent), viewportDimension);
+    return hasContentDimensions || haveDimensions
+        ? _cachedPage ?? getPageFromPixels(clampDouble(pixels, minScrollExtent, maxScrollExtent), viewportDimension)
+        : null;
   }
 
   @override

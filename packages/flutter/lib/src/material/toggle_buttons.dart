@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'button_style_button.dart';
+/// @docImport 'ink_well.dart';
+/// @docImport 'segmented_button.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -266,7 +271,7 @@ class ToggleButtons extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// Configures the minimum size of the area within which the buttons may
@@ -334,11 +339,11 @@ class ToggleButtons extends StatelessWidget {
   /// [ToggleButtonsThemeData.fillColor] is also null, then
   /// the fill color is null.
   ///
-  /// If fillColor is a [MaterialStateProperty<Color>], then [MaterialStateProperty.resolve]
-  /// is used for the following [MaterialState]s:
+  /// If fillColor is a [WidgetStateProperty<Color>], then [WidgetStateProperty.resolve]
+  /// is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.disabled]
-  ///  * [MaterialState.selected]
+  ///  * [WidgetState.disabled]
+  ///  * [WidgetState.selected]
   ///
   final Color? fillColor;
 
@@ -770,6 +775,8 @@ class ToggleButtons extends StatelessWidget {
             style: ButtonStyle(
               backgroundColor: MaterialStatePropertyAll<Color?>(effectiveFillColor),
               foregroundColor: MaterialStatePropertyAll<Color?>(currentColor),
+              iconSize: const MaterialStatePropertyAll<double>(24.0),
+              iconColor: MaterialStatePropertyAll<Color?>(currentColor),
               overlayColor: _ToggleButtonDefaultOverlay(
                 selected:  onPressed != null && isSelected[index],
                 unselected: onPressed != null && !isSelected[index],

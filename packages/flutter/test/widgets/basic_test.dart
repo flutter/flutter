@@ -750,7 +750,7 @@ void main() {
     // golden file can be approved at any time.
     await tester.pumpWidget(RepaintBoundary(
       child: Container(
-        color: const Color(0xFFF40125),
+        color: const Color(0xFF161145),
       ),
     ));
 
@@ -858,6 +858,7 @@ void main() {
         matchesSemantics(
           label: 'button',
           hasTapAction: true,
+          hasFocusAction: true,
           isButton: true,
           isFocusable: true,
           hasEnabledState: true,

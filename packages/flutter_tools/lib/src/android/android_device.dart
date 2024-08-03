@@ -59,7 +59,7 @@ class AndroidDevice extends Device {
     this.productID,
     required this.modelID,
     this.deviceCodeName,
-    required Logger logger,
+    required super.logger,
     required ProcessManager processManager,
     required Platform platform,
     required AndroidSdk androidSdk,
@@ -778,7 +778,12 @@ class AndroidDevice extends Device {
 
   @override
   void clearLogs() {
-    _processUtils.runSync(adbCommandForDevice(<String>['logcat', '-c']));
+     final RunResult result = _processUtils.runSync(adbCommandForDevice(<String>['logcat', '-c']));
+     // Do not log to standard error because that causes test to fail.
+     if (result.exitCode != 0) {
+      _logger.printTrace('"adb logcat -c" failed: exitCode: ${result.exitCode}'
+        ' stdout: ${result.stdout} stderr: ${result.stderr}');
+    }
   }
 
   @override

@@ -23,9 +23,6 @@ class _MyGlobalObjectKey<T extends State<StatefulWidget>> extends GlobalObjectKe
 }
 
 void main() {
-  setUp(() { LayoutBuilder.applyDoubleRebuildFix = true; });
-  tearDown(() { LayoutBuilder.applyDoubleRebuildFix = false; });
-
   testWidgets('UniqueKey control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
     expect(key, hasOneLineDescription);
@@ -2066,10 +2063,7 @@ class Inherited extends InheritedWidget {
 
   @override
   InheritedElement createElement() {
-    if (elementCreator != null) {
-      return elementCreator!(this);
-    }
-    return super.createElement();
+    return elementCreator?.call(this) ?? super.createElement();
   }
 }
 

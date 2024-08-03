@@ -1316,6 +1316,35 @@ void main() {
         expect(find.text('2017'), findsNothing);
       });
     });
+
+    testWidgets('Calendar dialog contents are visible - textScaler 0.88, 1.0, 2.0',
+      (WidgetTester tester) async {
+        addTearDown(tester.view.reset);
+        tester.view.physicalSize = const Size(400, 800);
+        tester.view.devicePixelRatio = 1.0;
+        final List<double> scales = <double>[0.88, 1.0, 2.0];
+
+        for (final double scale in scales) {
+          await tester.pumpWidget(
+            MaterialApp(
+              home: MediaQuery(
+                data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+                child: Material(
+                  child: DatePickerDialog(
+                    firstDate: DateTime(2001),
+                    lastDate: DateTime(2031, DateTime.december, 31),
+                    initialDate: DateTime(2016, DateTime.january, 15),
+                    initialEntryMode: DatePickerEntryMode.calendarOnly,
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          await expectLater(find.byType(Dialog), matchesGoldenFile('date_picker.calendar.contents.visible.$scale.png'));
+        }
+    });
   });
 
   group('Input mode', () {
@@ -1545,6 +1574,7 @@ void main() {
           label: '3, Sunday, January 3, 2016, Today',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
 
@@ -1553,6 +1583,7 @@ void main() {
           tooltip: 'Switch to input',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -1565,6 +1596,7 @@ void main() {
           label: 'OK',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -1573,6 +1605,7 @@ void main() {
           label: 'CANCEL',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -1603,6 +1636,7 @@ void main() {
           tooltip: 'Switch to calendar',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -1616,6 +1650,7 @@ void main() {
           isFocused: true,
           value: '01/15/2016',
           hasTapAction: true,
+          hasFocusAction: true,
           hasSetTextAction: true,
           hasSetSelectionAction: true,
           hasCopyAction: true,
@@ -1630,6 +1665,7 @@ void main() {
           label: 'OK',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -1638,6 +1674,7 @@ void main() {
           label: 'CANCEL',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,

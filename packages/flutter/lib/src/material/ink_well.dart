@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'data_table.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'ink_decoration.dart';
+/// @docImport 'ink_ripple.dart';
+/// @docImport 'ink_splash.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'dart:async';
 import 'dart:collection';
 
@@ -394,14 +403,14 @@ class InkResponse extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// Whether this ink response should be clipped its bounds.
@@ -510,12 +519,12 @@ class InkResponse extends StatelessWidget {
   /// This default null property can be used as an alternative to
   /// [focusColor], [hoverColor], [highlightColor], and
   /// [splashColor]. If non-null, it is resolved against one of
-  /// [MaterialState.focused], [MaterialState.hovered], and
-  /// [MaterialState.pressed]. It's convenient to use when the parent
-  /// widget can pass along its own MaterialStateProperty value for
+  /// [WidgetState.focused], [WidgetState.hovered], and
+  /// [WidgetState.pressed]. It's convenient to use when the parent
+  /// widget can pass along its own WidgetStateProperty value for
   /// the overlay color.
   ///
-  /// [MaterialState.pressed] triggers a ripple (an ink splash), per
+  /// [WidgetState.pressed] triggers a ripple (an ink splash), per
   /// the current Material Design spec. The [overlayColor] doesn't map
   /// a state to [highlightColor] because a separate highlight is not
   /// used by the current design guidelines. See
@@ -606,12 +615,12 @@ class InkResponse extends StatelessWidget {
 
   /// {@template flutter.material.inkwell.statesController}
   /// Represents the interactive "state" of this widget in terms of
-  /// a set of [MaterialState]s, like [MaterialState.pressed] and
-  /// [MaterialState.focused].
+  /// a set of [WidgetState]s, like [WidgetState.pressed] and
+  /// [WidgetState.focused].
   ///
   /// Classes based on this one can provide their own
-  /// [MaterialStatesController] to which they've added listeners.
-  /// They can also update the controller's [MaterialStatesController.value]
+  /// [WidgetStatesController] to which they've added listeners.
+  /// They can also update the controller's [WidgetStatesController.value]
   /// however, this may only be done when it's safe to call
   /// [State.setState], like in an event handler.
   /// {@endtemplate}
@@ -1025,13 +1034,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   void _updateHighlightsAndSplashes() {
     for (final InkHighlight? highlight in _highlights.values) {
-      if (highlight != null) {
-        highlight.customBorder = widget.customBorder;
-      }
+      highlight?.customBorder = widget.customBorder;
     }
-    if (_currentSplash != null) {
-      _currentSplash!.customBorder = widget.customBorder;
-    }
+    _currentSplash?.customBorder = widget.customBorder;
+
     if (_splashes != null && _splashes!.isNotEmpty) {
       for (final InteractiveInkFeature inkFeature in _splashes!) {
         inkFeature.customBorder = widget.customBorder;

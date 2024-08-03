@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'choice_chip.dart';
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'input_chip.dart';
+/// @docImport 'material.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
@@ -110,6 +119,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.surfaceTintColor,
     this.iconTheme,
     this.avatarBoxConstraints,
+    this.chipAnimationStyle,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.flat;
@@ -145,6 +155,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.surfaceTintColor,
     this.iconTheme,
     this.avatarBoxConstraints,
+    this.chipAnimationStyle,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.elevated;
@@ -195,6 +206,8 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   final IconThemeData? iconTheme;
   @override
   final BoxConstraints? avatarBoxConstraints;
+  @override
+  final ChipAnimationStyle? chipAnimationStyle;
 
   @override
   bool get isEnabled => onPressed != null;
@@ -233,6 +246,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       surfaceTintColor: surfaceTintColor,
       iconTheme: iconTheme,
       avatarBoxConstraints: avatarBoxConstraints,
+      chipAnimationStyle: chipAnimationStyle,
     );
   }
 }

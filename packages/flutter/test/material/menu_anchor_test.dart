@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker/leak_tracker.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -255,13 +256,13 @@ void main() {
     expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(105.0, 0.0, 695.0, 72.0)));
     expect(
       tester.getRect(find.widgetWithText(MenuItemButton, TestMenu.subMenu10.label)),
-      equals(const Rect.fromLTRB(249.0, 80.0, 483.0, 136.0)),
+      equals(const Rect.fromLTRB(257.0, 80.0, 491.0, 136.0)),
     );
     expect(
       tester.getRect(
         find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1),
       ),
-      equals(const Rect.fromLTRB(241.0, 64.0, 491.0, 264.0)),
+      equals(const Rect.fromLTRB(249.0, 64.0, 499.0, 264.0)),
     );
   });
 
@@ -2200,6 +2201,58 @@ void main() {
       skip: kIsWeb && !isCanvasKit, // https://github.com/flutter/flutter/issues/145527
     );
 
+    // Regression test for https://github.com/flutter/flutter/issues/145040.
+    testWidgets('CharacterActivator shortcut mnemonics include modifiers', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: createTestMenus(
+                shortcuts: <TestMenu, MenuSerializableShortcut>{
+                  TestMenu.subSubMenu110: const CharacterActivator('A', control: true),
+                  TestMenu.subSubMenu111: const CharacterActivator('B', alt: true),
+                  TestMenu.subSubMenu112: const CharacterActivator('C', meta: true),
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open a menu initially.
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
+      await tester.pump();
+
+      await tester.tap(find.text(TestMenu.subMenu11.label));
+      await tester.pump();
+
+      final Text mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
+      final Text mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
+      final Text mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+          expect(mnemonic0.data, equals('Ctrl+A'));
+          expect(mnemonic1.data, equals('Alt+B'));
+          expect(mnemonic2.data, equals('Meta+C'));
+        case TargetPlatform.windows:
+          expect(mnemonic0.data, equals('Ctrl+A'));
+          expect(mnemonic1.data, equals('Alt+B'));
+          expect(mnemonic2.data, equals('Win+C'));
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(mnemonic0.data, equals('⌃ A'));
+          expect(mnemonic1.data, equals('⌥ B'));
+          expect(mnemonic2.data, equals('⌘ C'));
+      }
+    },
+      variant: TargetPlatformVariant.all(),
+      skip: kIsWeb && !isCanvasKit, // https://github.com/flutter/flutter/issues/145527
+    );
+
     testWidgets('leadingIcon is used when set', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -2226,6 +2279,45 @@ void main() {
       await tester.pump();
 
       expect(find.text('leadingIcon'), findsOneWidget);
+    });
+
+    testWidgets('autofocus is used when set and widget is enabled',
+        (WidgetTester tester) async {
+
+      listenForFocusChanges();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                MenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    MenuItemButton(
+                      autofocus: true,
+                      // Required for clickability.
+                      onPressed: () {},
+                      child: Text(TestMenu.mainMenu0.label),
+                    ),
+                    MenuItemButton(
+                      onPressed: () {},
+                      child: Text(TestMenu.mainMenu1.label),
+                    ),
+                  ],
+                ),
+                const Expanded(child: Placeholder()),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pump();
+
+      expect(controller.isOpen, equals(true));
+      expect(focusedMenu, equals('MenuItemButton(Text("${TestMenu.mainMenu0.label}"))'));
     });
 
     testWidgets('trailingIcon is used when set', (WidgetTester tester) async {
@@ -3141,7 +3233,7 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(161.0, 0.0, 639.0, 40.0),
           Rect.fromLTRB(265.0, 40.0, 467.0, 160.0),
-          Rect.fromLTRB(467.0, 72.0, 707.0, 232.0),
+          Rect.fromLTRB(467.0, 80.0, 707.0, 240.0),
         ]),
       );
     });
@@ -3157,7 +3249,7 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(161.0, 0.0, 639.0, 40.0),
           Rect.fromLTRB(333.0, 40.0, 535.0, 160.0),
-          Rect.fromLTRB(93.0, 72.0, 333.0, 232.0),
+          Rect.fromLTRB(93.0, 80.0, 333.0, 240.0),
         ]),
       );
     });
@@ -3421,6 +3513,7 @@ void main() {
               TestSemantics.rootChild(
                 actions: <SemanticsAction>[
                   SemanticsAction.tap,
+                  SemanticsAction.focus,
                 ],
                 label: 'ABC',
                 rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
@@ -3551,7 +3644,7 @@ void main() {
                               SemanticsFlag.hasExpandedState,
                               SemanticsFlag.isExpanded,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: 'ABC',
                             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                           ),
@@ -3573,7 +3666,7 @@ void main() {
                                       SemanticsFlag.isEnabled,
                                       SemanticsFlag.isFocusable,
                                     ],
-                                    actions: <SemanticsAction>[SemanticsAction.tap],
+                                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                                   ),
                                 ],
                               ),
@@ -3621,7 +3714,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: 'ABC',
                             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                           ),
@@ -3802,6 +3895,51 @@ void main() {
         ..rect(color: overlayColor.withOpacity(0.1)),
     );
   });
+
+  testWidgets('Garbage collector destroys child _MenuAnchorState after parent is closed', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/149584
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MenuAnchor(
+            controller: controller,
+            menuChildren: const <Widget>[
+              SubmenuButton(
+                menuChildren: <Widget>[],
+                child: Text(''),
+              )
+            ],
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pump();
+
+      final WeakReference<State> state =
+        WeakReference<State>(
+          tester.firstState<State<SubmenuButton>>(
+            find.byType(SubmenuButton),
+          ),
+        );
+      expect(state.target, isNotNull);
+
+      controller.close();
+      await tester.pump();
+
+      controller.open();
+      await tester.pump();
+
+      controller.close();
+      await tester.pump();
+
+      // Garbage collect. 1 should be enough, but 3 prevents flaky tests.
+      await tester.runAsync<void>(() async {
+        await forceGC(fullGcCycles: 3);
+      });
+
+      expect(state.target, isNull);
+    }, skip: kIsWeb // [intended] ForceGC does not work in web and in release mode. See https://api.flutter.dev/flutter/package-leak_tracker_leak_tracker/forceGC.html
+  );
 }
 
 List<Widget> createTestMenus({

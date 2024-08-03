@@ -10,7 +10,6 @@ import '../base/process.dart';
 import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../reporting/reporting.dart';
 import 'gradle_utils.dart';
 
 typedef GradleErrorTest = bool Function(String);
@@ -358,7 +357,7 @@ final GradleHandledError minSdkVersionHandler = GradleHandledError(
       '$textInBold\n'
       'Following this change, your app will not be available to users running Android SDKs below ${minSdkVersionMatch?.group(2)}.\n'
       'Consider searching for a version of this plugin that supports these lower versions of the Android SDK instead.\n'
-      'For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration',
+      'For more information, see: https://flutter.dev/to/review-gradle-config',
       title: _boxTitle,
     );
     return GradleBuildStatus.exit;
@@ -414,8 +413,9 @@ final GradleHandledError lockFileDepMissingHandler = GradleHandledError(
     final File gradleFile = project.directory
         .childDirectory('android')
         .childFile('build.gradle');
+        final String generatedGradleCommand = globals.platform.isWindows ? r'.\gradlew.bat' : './gradlew';
     final String textInBold = globals.logger.terminal.bolden(
-      'To regenerate the lockfiles run: `./gradlew :generateLockfiles` in ${gradleFile.path}\n'
+      'To regenerate the lockfiles run: `$generatedGradleCommand :generateLockfiles` in ${gradleFile.path}\n'
       'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}'
     );
     globals.printBox(
@@ -591,7 +591,7 @@ final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandle
       "${globals.logger.terminal.warningMark} Your project's Gradle version "
           'is incompatible with the Java version that Flutter is using for Gradle.\n\n'
           'If you recently upgraded Android Studio, consult the migration guide '
-          'at docs.flutter.dev/go/android-java-gradle-error.\n\n'
+          'at https://flutter.dev/to/java-gradle-incompatibility.\n\n'
           'Otherwise, to fix this issue, first, check the Java version used by Flutter by '
           'running `flutter doctor --verbose`.\n\n'
           'Then, update the Gradle version specified in ${gradlePropertiesFile.path} '
