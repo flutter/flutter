@@ -276,6 +276,7 @@ class ChipThemeData with Diagnosticable {
       brightness: brightness,
       elevation: 0.0,
       pressElevation: 8.0,
+      iconTheme: const IconThemeData(size: 18.0),
     );
   }
 

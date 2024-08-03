@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'form.dart';
+/// @docImport 'pages.dart';
+/// @docImport 'pop_scope.dart';
+/// @docImport 'router.dart';
+/// @docImport 'will_pop_scope.dart';
+library;
+
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
@@ -3738,7 +3749,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     if (!_serializableHistory.hasData) {
       String? initialRoute = widget.initialRoute;
       if (widget.pages.isEmpty) {
-        initialRoute = initialRoute ?? Navigator.defaultRouteName;
+        initialRoute ??= Navigator.defaultRouteName;
       }
       if (initialRoute != null) {
         _history.addAll(

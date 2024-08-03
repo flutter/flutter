@@ -1281,6 +1281,80 @@ void main() {
     await checkDragHandleAndColors();
   });
 
+  testWidgets('Drag handle interactive area size at minimum possible size', (WidgetTester tester) async {
+    Widget buildScaffold(GlobalKey scaffoldKey, {Size? dragHandleSize}) {
+      return MaterialApp(
+        theme: ThemeData.light().copyWith(
+          bottomSheetTheme:  BottomSheetThemeData(
+            dragHandleSize: dragHandleSize
+          ),
+        ),
+        home: Scaffold(
+          key: scaffoldKey,
+        ),
+      );
+    }
+
+    const Size smallerDragHandleSize = Size(20, 20);
+
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(buildScaffold(scaffoldKey, dragHandleSize: smallerDragHandleSize));
+
+    showModalBottomSheet<void>(
+      context: scaffoldKey.currentContext!,
+      showDragHandle: true,
+      builder: (BuildContext context) {
+        return const Text('BottomSheet');
+      },
+    );
+
+    await tester.pump(); // Bottom sheet show animation starts.
+    await tester.pump(const Duration(seconds: 1)); // Animation done.
+
+    final Finder dragHandle = find.bySemanticsLabel('Dismiss');
+    expect(
+      tester.getSize(dragHandle),
+      const Size(kMinInteractiveDimension, kMinInteractiveDimension),
+    );
+  });
+
+  testWidgets('Drag handle interactive area size at given dragHandleSize', (WidgetTester tester) async {
+    Widget buildScaffold(GlobalKey scaffoldKey, {Size? dragHandleSize}) {
+      return MaterialApp(
+        theme: ThemeData.light().copyWith(
+          bottomSheetTheme: BottomSheetThemeData(
+            dragHandleSize: dragHandleSize
+          ),
+        ),
+        home: Scaffold(
+          key: scaffoldKey,
+        ),
+      );
+    }
+
+    const Size extendedDragHandleSize = Size(100, 50);
+
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(buildScaffold(scaffoldKey, dragHandleSize: extendedDragHandleSize));
+
+    showModalBottomSheet<void>(
+      context: scaffoldKey.currentContext!,
+      showDragHandle: true,
+      builder: (BuildContext context) {
+        return const Text('BottomSheet');
+      },
+    );
+
+    await tester.pump(); // Bottom sheet show animation starts.
+    await tester.pump(const Duration(seconds: 1)); // Animation done.
+
+    final Finder dragHandle = find.bySemanticsLabel('Dismiss');
+    expect(
+      tester.getSize(dragHandle),
+      extendedDragHandleSize,
+    );
+  });
+
   testWidgets('showModalBottomSheet does not use root Navigator by default', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(

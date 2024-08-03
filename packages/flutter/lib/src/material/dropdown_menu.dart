@@ -175,6 +175,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.expandedInsets,
     this.filterCallback,
     this.searchCallback,
+    this.alignmentOffset,
     required this.dropdownMenuEntries,
     this.inputFormatters,
   }) : assert(filterCallback == null || enableFilter);
@@ -475,6 +476,9 @@ class DropdownMenu<T> extends StatefulWidget {
   ///    and notifies its listeners on [TextEditingValue] changes.
   final List<TextInputFormatter>? inputFormatters;
 
+  /// {@macro flutter.material.MenuAnchor.alignmentOffset}
+  final Offset? alignmentOffset;
+
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
 }
@@ -748,7 +752,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     if (widget.enableSearch) {
       if (widget.searchCallback != null) {
-        currentHighlight = widget.searchCallback!.call(filteredEntries, _localTextEditingController!.text);
+        currentHighlight = widget.searchCallback!(filteredEntries, _localTextEditingController!.text);
       } else {
         currentHighlight = search(filteredEntries, _localTextEditingController!);
       }
@@ -784,6 +788,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     Widget menuAnchor = MenuAnchor(
       style: effectiveMenuStyle,
+      alignmentOffset: widget.alignmentOffset,
       controller: _controller,
       menuChildren: menu,
       crossAxisUnconstrained: false,
