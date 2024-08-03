@@ -11,7 +11,7 @@
 #include <stdlib.h>
 
 #include <utility>
-#include "flutter/fml/compiler_specific.h"
+
 #include "flutter/fml/logging.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/memory/ref_ptr.h"

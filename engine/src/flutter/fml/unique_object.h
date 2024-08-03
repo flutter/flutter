@@ -7,7 +7,6 @@
 
 #include <utility>
 
-#include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 
