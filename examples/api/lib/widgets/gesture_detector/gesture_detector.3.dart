@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -17,58 +16,48 @@ class DragBoundaryExampleApp extends StatefulWidget {
 }
 
 class DragBoundaryExampleAppState extends State<DragBoundaryExampleApp> {
-  Offset _basePosition = Offset.zero;
-  Offset _dragPosition = Offset.zero;
-  late DragBoundary? boundaryInfo;
+  Offset _currentPosition = Offset.zero;
+  final Size _boxSize = const Size(100, 100);
   @override
   Widget build(BuildContext context) {
-    final Offset offset = _dragPosition - _basePosition;
     return MaterialApp(
       home: Scaffold(
         body: Padding(
           padding: const EdgeInsets.all(100),
-          child: DragRectBoundaryProvider(
-            child: Stack(
-              children: <Widget>[
-                Container(
-                  color: Colors.green,
-                ),
-                Positioned(
-                  top: offset.dy,
-                  left: offset.dx,
-                  child: Builder(
-                    builder: (BuildContext context) {
-                      return GestureDetector(
+          child: RectBoundaryProvider(
+            child: Builder(
+              builder: (BuildContext context) {
+                return Stack(
+                  children: <Widget>[
+                    Container(
+                      color: Colors.green,
+                    ),
+                    Positioned(
+                      top: _currentPosition.dy,
+                      left: _currentPosition.dx,
+                      child: GestureDetector(
                         behavior: HitTestBehavior.translucent,
-                        onPanStart: (DragStartDetails details) {
-                          boundaryInfo = DragRectBoundaryProvider.of(context)?.getDragBoundary(context, details.globalPosition);
-                          setState(() {
-                            _basePosition = details.globalPosition - offset;
-                            _dragPosition = details.globalPosition;
-                          });
-                        },
                         onPanUpdate: (DragUpdateDetails details) {
-                          setState(() {
-                            if (boundaryInfo == null) {
-                              return;
-                            }
-                            if (boundaryInfo!.isWithinBoundary(details.globalPosition)) {
-                              _dragPosition = details.globalPosition;
-                            } else {
-                              _dragPosition = boundaryInfo!.getNearestPositionWithinBoundary(details.globalPosition);
-                            }
-                          });
+                          final RenderBox containerBox = context.findRenderObject()! as RenderBox;
+                          _currentPosition += details.delta;
+                          final Rect? withinBoundary = RectBoundaryProvider.of(context)?.nearestShapeWithinBoundary(
+                            containerBox.localToGlobal(_currentPosition) & _boxSize,
+                          );
+                          if (withinBoundary != null) {
+                            _currentPosition = containerBox.globalToLocal(withinBoundary.topLeft);
+                          }
+                          setState(() {});
                         },
                         child: Container(
-                          width: 100,
-                          height: 100,
+                          width: _boxSize.width,
+                          height: _boxSize.height,
                           color: Colors.red,
                         ),
-                      );
-                    },
-                  ),
-                ),
-              ],
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ),
