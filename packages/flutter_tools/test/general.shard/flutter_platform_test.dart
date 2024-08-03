@@ -144,6 +144,7 @@ void main() {
                 BuildMode.debug,
                 null,
                 treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
               ),
             ),
             enableVmService: false,
