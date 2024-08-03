@@ -62,13 +62,8 @@ class EntityPassClipStack {
                     Contents::ClipCoverage::Type type,
                     std::optional<Rect> clip_coverage);
 
+  // Visible for testing.
   const std::vector<ReplayResult>& GetReplayEntities() const;
-
-  void ActivateClipReplay();
-
-  /// @brief Returns the next Entity that should be replayed. If there are no
-  ///        enities to replay, then nullptr is returned.
-  const ReplayResult* GetNextReplayResult(const Entity& entity);
 
   // Visible for testing.
   const std::vector<ClipCoverageLayer> GetClipCoverageLayers() const;
@@ -82,7 +77,6 @@ class EntityPassClipStack {
   SubpassState& GetCurrentSubpassState();
 
   std::vector<SubpassState> subpass_state_;
-  size_t next_replay_index_ = 0;
 };
 
 }  // namespace impeller
