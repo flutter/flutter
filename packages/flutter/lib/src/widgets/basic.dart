@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
 
@@ -2265,10 +2271,7 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
     final MultiChildLayoutParentData parentData = renderObject.parentData! as MultiChildLayoutParentData;
     if (parentData.id != id) {
       parentData.id = id;
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent is RenderObject) {
-        targetParent.markNeedsLayout();
-      }
+      renderObject.parent?.markNeedsLayout();
     }
   }
 
@@ -3400,7 +3403,9 @@ class AspectRatio extends SingleChildRenderObjectWidget {
 ///
 /// This class is useful, for example, when unlimited width is available and
 /// you would like a child that would otherwise attempt to expand infinitely to
-/// instead size itself to a more reasonable width.
+/// instead size itself to a more reasonable width. Additionally, putting a
+/// [Column] inside an [IntrinsicWidth] will allow all [Column] children to be
+/// as wide as the widest child.
 ///
 /// The constraints that this widget passes to its child will adhere to the
 /// parent's constraints, so if the constraints are not large enough to satisfy
@@ -3477,7 +3482,9 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
 ///
 /// This class is useful, for example, when unlimited height is available and
 /// you would like a child that would otherwise attempt to expand infinitely to
-/// instead size itself to a more reasonable height.
+/// instead size itself to a more reasonable height. Additionally, putting a
+/// [Row] inside an [IntrinsicHeight] will allow all [Row] children to be as tall
+/// as the tallest child.
 ///
 /// The constraints that this widget passes to its child will adhere to the
 /// parent's constraints, so if the constraints are not large enough to satisfy
@@ -4371,10 +4378,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
     }
 
     if (needsLayout) {
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent is RenderObject) {
-        targetParent.markNeedsLayout();
-      }
+      renderObject.parent?.markNeedsLayout();
     }
   }
 
@@ -5240,10 +5244,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
     }
 
     if (needsLayout) {
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent is RenderObject) {
-        targetParent.markNeedsLayout();
-      }
+      renderObject.parent?.markNeedsLayout();
     }
   }
 
