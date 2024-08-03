@@ -1355,4 +1355,80 @@ void main() {
     await tester.pump(longRequestDelay - shortRequestDelay);
     expect(lastOptions, <String>['chameleon']);
   });
+
+  testWidgets('updates result only from the last call made to optionsBuilder', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    Iterable<String>? lastOptions;
+    Duration? delay;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) async {
+              final Iterable<String> options = kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+              if (delay == null) {
+                return options;
+              }
+              return Future<Iterable<String>>.delayed(delay, () => options);
+            },
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+              );
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastOptions = options;
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      )
+    );
+
+    focusNode.requestFocus();
+    const Duration firstRequestDelay = Duration(milliseconds: 1000);
+    const Duration secondRequestDelay = Duration(milliseconds: 2000);
+    const Duration thirdRequestDelay = Duration(milliseconds: 3000);
+
+    // Enter first letter.
+    delay = firstRequestDelay;
+    await tester.enterText(find.byKey(fieldKey), 'l');
+    await tester.pump();
+    expect(lastOptions, null);
+
+    // Enter the second letter which resolves slower.
+    delay = secondRequestDelay;
+    await tester.enterText(find.byKey(fieldKey), 'le');
+    await tester.pump();
+    expect(lastOptions, null);
+
+    // Enter the third letter which resolves the slowest.
+    delay = thirdRequestDelay;
+    await tester.enterText(find.byKey(fieldKey), 'lem');
+    await tester.pump();
+    expect(lastOptions, null);
+
+    // lastOptions should get updated from last optionsBuilder call results only.
+    await tester.pump(firstRequestDelay);
+    expect(find.byKey(optionsKey), findsNothing);
+    expect(lastOptions, null);
+
+    await tester.pump(secondRequestDelay - firstRequestDelay);
+    expect(find.byKey(optionsKey), findsNothing);
+    expect(lastOptions, null);
+
+    await tester.pump(thirdRequestDelay - secondRequestDelay);
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions, <String>['lemur']);
+  });
 }
