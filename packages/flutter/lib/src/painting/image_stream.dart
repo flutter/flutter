@@ -1055,6 +1055,8 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     return timestamp - _shownTimestamp >= _frameDuration!;
   }
 
+  ImageInfo? _emittedImage;
+
   Future<void> _decodeNextFrameAndSchedule() async {
     // This will be null if we gave it away. If not, it's still ours and it
     // must be disposed of.
@@ -1079,13 +1081,17 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       if (!hasListeners) {
         return;
       }
-      // This is not an animated image, just return it and don't schedule more
-      // frames.
-      _emitFrame(ImageInfo(
+
+      final ImageInfo imageInfo = ImageInfo(
         image: _nextFrame!.image.clone(),
         scale: _scale,
         debugLabel: debugLabel,
-      ));
+      );
+      _emittedImage = imageInfo;
+
+      // This is not an animated image, just return it and don't schedule more
+      // frames.
+      _emitFrame(imageInfo);
       _nextFrame!.image.dispose();
       _nextFrame = null;
       return;
@@ -1130,6 +1136,8 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _chunkSubscription?.onData(null);
       _chunkSubscription?.cancel();
       _chunkSubscription = null;
+      _emittedImage?.dispose();
+      _emittedImage = null;
     }
   }
 }
