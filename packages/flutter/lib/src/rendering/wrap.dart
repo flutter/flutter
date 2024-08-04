@@ -582,20 +582,6 @@ class RenderWrap extends RenderBox
     return defaultComputeDistanceToHighestActualBaseline(baseline);
   }
 
-  double _getMainAxisExtent(Size childSize) {
-    return switch (direction) {
-      Axis.horizontal => childSize.width,
-      Axis.vertical   => childSize.height,
-    };
-  }
-
-  double _getCrossAxisExtent(Size childSize) {
-    return switch (direction) {
-      Axis.horizontal => childSize.height,
-      Axis.vertical   => childSize.width,
-    };
-  }
-
   Offset _getOffset(double mainAxisOffset, double crossAxisOffset) {
     return switch (direction) {
       Axis.horizontal => Offset(mainAxisOffset, crossAxisOffset),
