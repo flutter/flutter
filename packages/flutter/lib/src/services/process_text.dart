@@ -68,10 +68,10 @@ abstract class ProcessTextService {
 ///       ...
 ///     </application>
 ///     <!-- Required to query activities that can process text, see:
-///           https://developer.android.com/training/package-visibility?hl=en and
-///           https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+///          https://developer.android.com/training/package-visibility and
+///          https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
 ///
-///           In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+///          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
 ///     <queries>
 ///         <intent>
 ///             <action android:name="android.intent.action.PROCESS_TEXT"/>

@@ -21,6 +21,8 @@ void main() async {
   await _testProject(HotReloadProject(indexHtml: indexHtmlFlutterJsPromisesShort), name: 'flutter.js (promises, short)');
   await _testProject(HotReloadProject(indexHtml: indexHtmlFlutterJsLoad), name: 'flutter.js (load)');
   await _testProject(HotReloadProject(indexHtml: indexHtmlNoFlutterJs), name: 'No flutter.js');
+  await _testProject(HotReloadProject(indexHtml: indexHtmlWithFlutterBootstrapScriptTag), name: 'Using flutter_bootstrap.js script tag');
+  await _testProject(HotReloadProject(indexHtml: indexHtmlWithInlinedFlutterBootstrapScript), name: 'Using inlined flutter_bootstrap.js');
 }
 
 Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) async {
@@ -73,8 +75,7 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
         completer.complete();
       }
     });
-    await flutter.run(chrome: true,
-      additionalCommandArgs: <String>['--dart-define=FLUTTER_WEB_USE_SKIA=true', '--verbose']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=canvaskit']);
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();

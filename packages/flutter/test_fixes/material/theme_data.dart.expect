@@ -137,40 +137,40 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/97972
   ThemeData themeData = ThemeData();
   themeData = ThemeData(checkboxTheme: CheckboxThemeData(
- 	  fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+ 	  fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return null;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return Colors.black;
       }
  	    return null;
  	  }),
  	  ), radioTheme: RadioThemeData(
- 	   fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-       if (states.contains(MaterialState.disabled)) {
+ 	   fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+       if (states.contains(WidgetState.disabled)) {
          return null;
        }
-       if (states.contains(MaterialState.selected)) {
+       if (states.contains(WidgetState.selected)) {
          return Colors.black;
        }
  	     return null;
  	   }),
  	  ), switchTheme: SwitchThemeData(
- 	   thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-       if (states.contains(MaterialState.disabled)) {
+ 	   thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+       if (states.contains(WidgetState.disabled)) {
          return null;
        }
-       if (states.contains(MaterialState.selected)) {
+       if (states.contains(WidgetState.selected)) {
          return Colors.black;
        }
  	     return null;
  	   }),
- 	   trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-       if (states.contains(MaterialState.disabled)) {
+ 	   trackColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+       if (states.contains(WidgetState.disabled)) {
          return null;
        }
-       if (states.contains(MaterialState.selected)) {
+       if (states.contains(WidgetState.selected)) {
          return Colors.black;
        }
  	     return null;
@@ -178,40 +178,40 @@ void main() {
  	));
   themeData = ThemeData(
     checkboxTheme: CheckboxThemeData(
-      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-       if (states.contains(MaterialState.disabled)) {
+      fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+       if (states.contains(WidgetState.disabled)) {
          return null;
        }
-       if (states.contains(MaterialState.selected)) {
+       if (states.contains(WidgetState.selected)) {
          return Colors.black;
        }
  	     return null;
       }),
     ), radioTheme: RadioThemeData(
-      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-       if (states.contains(MaterialState.disabled)) {
+      fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+       if (states.contains(WidgetState.disabled)) {
          return null;
        }
-       if (states.contains(MaterialState.selected)) {
+       if (states.contains(WidgetState.selected)) {
          return Colors.black;
        }
  	     return null;
       }),
     ), switchTheme: SwitchThemeData(
-      thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return null;
         }
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return Colors.black;
         }
  	      return null;
       }),
-      trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      trackColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return null;
         }
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return Colors.black;
         }
  	      return null;
@@ -219,40 +219,40 @@ void main() {
     ),
   );
   themeData = ThemeData.raw(checkboxTheme: CheckboxThemeData(
- 	   fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-       if (states.contains(MaterialState.disabled)) {
+ 	   fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+       if (states.contains(WidgetState.disabled)) {
          return null;
        }
-       if (states.contains(MaterialState.selected)) {
+       if (states.contains(WidgetState.selected)) {
          return Colors.black;
        }
  	     return null;
  	   }),
  	  ), radioTheme: RadioThemeData(
- 	   fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-       if (states.contains(MaterialState.disabled)) {
+ 	   fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+       if (states.contains(WidgetState.disabled)) {
          return null;
        }
-       if (states.contains(MaterialState.selected)) {
+       if (states.contains(WidgetState.selected)) {
          return Colors.black;
        }
  	     return null;
  	   }),
  	  ), switchTheme: SwitchThemeData(
- 	   thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-       if (states.contains(MaterialState.disabled)) {
+ 	   thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+       if (states.contains(WidgetState.disabled)) {
          return null;
        }
-       if (states.contains(MaterialState.selected)) {
+       if (states.contains(WidgetState.selected)) {
          return Colors.black;
        }
  	     return null;
  	   }),
- 	   trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-       if (states.contains(MaterialState.disabled)) {
+ 	   trackColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+       if (states.contains(WidgetState.disabled)) {
          return null;
        }
-       if (states.contains(MaterialState.selected)) {
+       if (states.contains(WidgetState.selected)) {
          return Colors.black;
        }
  	     return null;
@@ -260,40 +260,40 @@ void main() {
  	));
  themeData = ThemeData.raw(
     checkboxTheme: CheckboxThemeData(
-      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return null;
         }
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return Colors.black;
         }
  	      return null;
       }),
     ), radioTheme: RadioThemeData(
-      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return null;
         }
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return Colors.black;
         }
  	      return null;
       }),
     ), switchTheme: SwitchThemeData(
-      thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return null;
         }
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return Colors.black;
         }
  	      return null;
       }),
-      trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      trackColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return null;
         }
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return Colors.black;
         }
  	      return null;
@@ -301,40 +301,40 @@ void main() {
     ),
   );
   themeData = themeData.copyWith(checkboxTheme: CheckboxThemeData(
-      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return null;
         }
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return Colors.black;
         }
  	      return null;
       }),
     ), radioTheme: RadioThemeData(
-      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return null;
         }
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return Colors.black;
         }
  	      return null;
       }),
  	  ), switchTheme: SwitchThemeData(
- 	   thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-       if (states.contains(MaterialState.disabled)) {
+ 	   thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+       if (states.contains(WidgetState.disabled)) {
          return null;
        }
-       if (states.contains(MaterialState.selected)) {
+       if (states.contains(WidgetState.selected)) {
          return Colors.black;
        }
  	     return null;
  	   }),
- 	   trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-       if (states.contains(MaterialState.disabled)) {
+ 	   trackColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+       if (states.contains(WidgetState.disabled)) {
          return null;
        }
-       if (states.contains(MaterialState.selected)) {
+       if (states.contains(WidgetState.selected)) {
          return Colors.black;
        }
  	     return null;
@@ -342,40 +342,40 @@ void main() {
  	));
   themeData = themeData.copyWith(
     checkboxTheme: CheckboxThemeData(
-      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return null;
         }
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return Colors.black;
         }
  	      return null;
       }),
     ), radioTheme: RadioThemeData(
-      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return null;
         }
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return Colors.black;
         }
  	      return null;
       }),
     ), switchTheme: SwitchThemeData(
-      thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return null;
         }
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return Colors.black;
         }
  	      return null;
       }),
-      trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      trackColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return null;
         }
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return Colors.black;
         }
  	      return null;
@@ -412,28 +412,28 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/110162
   ThemeData themeData = ThemeData();
-  themeData = ThemeData(colorScheme: ColorScheme(background: Colors.grey));
-  themeData = ThemeData(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(background: Colors.grey));
-  themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(background: Colors.grey));
-  themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, background: Colors.grey));
+  themeData = ThemeData(colorScheme: ColorScheme(surface: Colors.grey));
+  themeData = ThemeData(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(surface: Colors.grey));
+  themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(surface: Colors.grey));
+  themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, surface: Colors.grey));
   themeData = ThemeData(otherParam: '');
-  themeData = ThemeData.raw(colorScheme: ColorScheme(background: Colors.grey));
-  themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(background: Colors.grey));
-  themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(background: Colors.grey));
-  themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, background: Colors.grey));
+  themeData = ThemeData.raw(colorScheme: ColorScheme(surface: Colors.grey));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(surface: Colors.grey));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(surface: Colors.grey));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, surface: Colors.grey));
   themeData = ThemeData.raw(otherParam: '');
-  themeData = themeData.copyWith(colorScheme: ColorScheme(background: Colors.grey));
+  themeData = themeData.copyWith(colorScheme: ColorScheme(surface: Colors.grey));
   themeData = themeData.copyWith(otherParam: '');
-  themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(background: Colors.grey));
-  themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(background: Colors.grey));
-  themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, background: Colors.grey));
-  themeData.colorScheme.background;
+  themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(surface: Colors.grey));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(surface: Colors.grey));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, surface: Colors.grey));
+  themeData.colorScheme.surface;
 
   // Changes made in https://github.com/flutter/flutter/pull/110162
   ThemeData themeData = ThemeData();
-  themeData = ThemeData(colorScheme: ColorScheme(background: Colors.grey).copyWith(error: Colors.red));
-  themeData = ThemeData.raw(colorScheme: ColorScheme(background: Colors.grey).copyWith(error: Colors.red));
-  themeData = themeData.copyWith(colorScheme: ColorScheme(background: Colors.grey).copyWith(error: Colors.red));
+  themeData = ThemeData(colorScheme: ColorScheme(surface: Colors.grey).copyWith(error: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme(surface: Colors.grey).copyWith(error: Colors.red));
+  themeData = themeData.copyWith(colorScheme: ColorScheme(surface: Colors.grey).copyWith(error: Colors.red));
 
   // Changes made in https://github.com/flutter/flutter/pull/111080
   ThemeData themeData = ThemeData();

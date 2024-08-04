@@ -28,7 +28,7 @@ Future<void> main() async {
     // to be verified.
     final Future<String> inputEventWasVerified = driver.requestData('input_was_verified');
 
-    // Keep issueing taps until we get the requested data. The actual setup
+    // Keep issuing taps until we get the requested data. The actual setup
     // of the platform view is asynchronous so we might have to tap more than
     // once to  get a response.
     bool stop = false;

@@ -189,26 +189,27 @@ void main() {
   });
 
   testWidgets('Text Fade', (WidgetTester tester) async {
-    await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(useMaterial3: false),
-          home: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: RepaintBoundary(
-              child: Center(
-                child: Container(
-                  width: 200.0,
-                  height: 200.0,
-                  color: Colors.green,
-                  child: Center(
-                    child: Container(
-                      width: 100.0,
-                      color: Colors.blue,
-                      child: const Text(
-                        'Pp PPp PPPp PPPPp PPPPpp PPPPppp PPPPppppp ',
-                        style: TextStyle(color: Colors.black),
-                        maxLines: 3,
-                        overflow: TextOverflow.fade,
+      await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(useMaterial3: false),
+            home: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: RepaintBoundary(
+                child: Center(
+                  child: Container(
+                    width: 200.0,
+                    height: 200.0,
+                    color: Colors.green,
+                    child: Center(
+                      child: Container(
+                        width: 100.0,
+                        color: Colors.blue,
+                        child: const Text(
+                          'Pp PPp PPPp PPPPp PPPPpp PPPPppp PPPPppppp ',
+                          style: TextStyle(color: Colors.black),
+                          maxLines: 3,
+                          overflow: TextOverflow.fade,
+                        ),
                       ),
                     ),
                   ),
@@ -216,14 +217,14 @@ void main() {
               ),
             ),
           ),
-        ),
-    );
+      );
 
-    await expectLater(
-      find.byType(RepaintBoundary).first,
-      matchesGoldenFile('text_golden.Fade.png'),
-    );
-  });
+      await expectLater(
+        find.byType(RepaintBoundary).first,
+        matchesGoldenFile('text_golden.Fade.png'),
+      );
+    },
+  );
 
   testWidgets('Default Strut text', (WidgetTester tester) async {
     await tester.pumpWidget(

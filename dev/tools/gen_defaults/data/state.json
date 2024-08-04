@@ -1,8 +1,8 @@
 {
-  "version": "v0_162",
+  "version": "v4_1_0",
 
   "md.sys.state.dragged.state-layer-opacity": 0.16,
-  "md.sys.state.focus.state-layer-opacity": 0.12,
+  "md.sys.state.focus.state-layer-opacity": 0.1,
   "md.sys.state.hover.state-layer-opacity": 0.08,
-  "md.sys.state.pressed.state-layer-opacity": 0.12
+  "md.sys.state.pressed.state-layer-opacity": 0.1
 }

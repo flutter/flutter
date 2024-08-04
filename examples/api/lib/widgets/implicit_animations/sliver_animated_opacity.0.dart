@@ -11,13 +11,19 @@ void main() => runApp(const SliverAnimatedOpacityExampleApp());
 class SliverAnimatedOpacityExampleApp extends StatelessWidget {
   const SliverAnimatedOpacityExampleApp({super.key});
 
+  static const Duration duration = Duration(milliseconds: 500);
+  static const Curve curve = Curves.easeInOut;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverAnimatedOpacity Sample')),
         body: const Center(
-          child: SliverAnimatedOpacityExample(),
+          child: SliverAnimatedOpacityExample(
+            duration: duration,
+            curve: curve,
+          ),
         ),
       ),
     );
@@ -25,13 +31,23 @@ class SliverAnimatedOpacityExampleApp extends StatelessWidget {
 }
 
 class SliverAnimatedOpacityExample extends StatefulWidget {
-  const SliverAnimatedOpacityExample({super.key});
+  const SliverAnimatedOpacityExample({
+    required this.duration,
+    required this.curve,
+    super.key,
+  });
+
+  final Duration duration;
+
+  final Curve curve;
 
   @override
-  State<SliverAnimatedOpacityExample> createState() => _SliverAnimatedOpacityExampleState();
+  State<SliverAnimatedOpacityExample> createState() =>
+      _SliverAnimatedOpacityExampleState();
 }
 
-class _SliverAnimatedOpacityExampleState extends State<SliverAnimatedOpacityExample>
+class _SliverAnimatedOpacityExampleState
+    extends State<SliverAnimatedOpacityExample>
     with SingleTickerProviderStateMixin {
   bool _visible = true;
 
@@ -40,7 +56,8 @@ class _SliverAnimatedOpacityExampleState extends State<SliverAnimatedOpacityExam
     return CustomScrollView(slivers: <Widget>[
       SliverAnimatedOpacity(
         opacity: _visible ? 1.0 : 0.0,
-        duration: const Duration(milliseconds: 500),
+        duration: widget.duration,
+        curve: widget.curve,
         sliver: SliverFixedExtentList(
           itemExtent: 100.0,
           delegate: SliverChildBuilderDelegate(

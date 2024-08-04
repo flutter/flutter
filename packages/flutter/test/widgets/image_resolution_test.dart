@@ -38,23 +38,16 @@ class TestAssetBundle extends CachingAssetBundle {
 
   @override
   Future<ByteData> load(String key) {
-    late ByteData data;
-    switch (key) {
-      case 'AssetManifest.bin':
-        data = manifest;
-      case 'assets/image.png':
-        data = testByteData(1.0);
-      case 'assets/1.0x/image.png':
-        data = testByteData(10.0); // see "...with a main asset and a 1.0x asset"
-      case 'assets/1.5x/image.png':
-        data = testByteData(1.5);
-      case 'assets/2.0x/image.png':
-        data = testByteData(2.0);
-      case 'assets/3.0x/image.png':
-        data = testByteData(3.0);
-      case 'assets/4.0x/image.png':
-        data = testByteData(4.0);
-    }
+    final ByteData data = switch (key) {
+      'AssetManifest.bin'     => manifest,
+      'assets/image.png'      => testByteData(1.0),
+      'assets/1.0x/image.png' => testByteData(10.0), // see "...with a main asset and a 1.0x asset"
+      'assets/1.5x/image.png' => testByteData(1.5),
+      'assets/2.0x/image.png' => testByteData(2.0),
+      'assets/3.0x/image.png' => testByteData(3.0),
+      'assets/4.0x/image.png' => testByteData(4.0),
+      _ => throw ArgumentError('Unexpected key: $key'),
+    };
     return SynchronousFuture<ByteData>(data);
   }
 

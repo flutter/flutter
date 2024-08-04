@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:ui' show Color, Rect, Size;
 
 import 'package:flutter/foundation.dart';
@@ -21,7 +24,7 @@ export 'curves.dart' show Curve;
 /// from a callback.
 typedef AnimatableCallback<T> = T Function(double value);
 
-/// An object that can produce a value of type `T` given an [Animation<double>]
+/// An object that can produce a value of type [T] given an [Animation<double>]
 /// as input.
 ///
 /// Typically, the values of the input animation are nominally in the range 0.0
@@ -82,9 +85,15 @@ abstract class Animatable<T> {
   }
 
   /// Returns a new [Animatable] whose value is determined by first evaluating
-  /// the given parent and then evaluating this object.
+  /// the given parent and then evaluating this object at the result.
   ///
-  /// This allows [Tween]s to be chained before obtaining an [Animation].
+  /// This method represents function composition on [transform]:
+  /// the [transform] method of the returned [Animatable] is the result of
+  /// composing this object's [transform] method with
+  /// the given parent's [transform] method.
+  ///
+  /// This allows [Tween]s to be chained before obtaining an [Animation],
+  /// without allocating an [Animation] for the intermediate result.
   Animatable<T> chain(Animatable<double> parent) {
     return _ChainedEvaluation<T>(parent, this);
   }
@@ -149,11 +158,12 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// [animate] method and pass it the [Animation] object that you want to
 /// modify.
 ///
-/// You can chain [Tween] objects together using the [chain] method, so that a
-/// single [Animation] object is configured by multiple [Tween] objects called
-/// in succession. This is different than calling the [animate] method twice,
-/// which results in two separate [Animation] objects, each configured with a
-/// single [Tween].
+/// You can chain [Tween] objects together using the [chain] method,
+/// producing the function composition of their [transform] methods.
+/// Configuring a single [Animation] object by calling [animate] on the
+/// resulting [Tween] produces the same result as calling the [animate] method
+/// on each [Tween] separately in succession, but more efficiently because
+/// it avoids creating [Animation] objects for the intermediate results.
 ///
 /// {@tool snippet}
 ///

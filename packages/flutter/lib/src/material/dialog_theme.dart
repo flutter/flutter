@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dialog.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -40,6 +43,7 @@ class DialogTheme with Diagnosticable {
     this.actionsPadding,
     this.barrierColor,
     this.insetPadding,
+    this.clipBehavior,
   });
 
   /// Overrides the default value for [Dialog.backgroundColor].
@@ -80,6 +84,9 @@ class DialogTheme with Diagnosticable {
   /// Overrides the default value for [Dialog.insetPadding].
   final EdgeInsets? insetPadding;
 
+  /// Overrides the default value of [Dialog.clipBehavior].
+  final Clip? clipBehavior;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DialogTheme copyWith({
@@ -95,6 +102,7 @@ class DialogTheme with Diagnosticable {
     EdgeInsetsGeometry? actionsPadding,
     Color? barrierColor,
     EdgeInsets? insetPadding,
+    Clip? clipBehavior,
   }) {
     return DialogTheme(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -109,6 +117,7 @@ class DialogTheme with Diagnosticable {
       actionsPadding: actionsPadding ?? this.actionsPadding,
       barrierColor: barrierColor ?? this.barrierColor,
       insetPadding: insetPadding ?? this.insetPadding,
+      clipBehavior: clipBehavior ?? this.clipBehavior,
     );
   }
 
@@ -137,6 +146,7 @@ class DialogTheme with Diagnosticable {
       actionsPadding: EdgeInsetsGeometry.lerp(a?.actionsPadding, b?.actionsPadding, t),
       barrierColor: Color.lerp(a?.barrierColor, b?.barrierColor, t),
       insetPadding: EdgeInsets.lerp(a?.insetPadding, b?.insetPadding, t),
+      clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
     );
   }
 
@@ -154,6 +164,7 @@ class DialogTheme with Diagnosticable {
     actionsPadding,
     barrierColor,
     insetPadding,
+    clipBehavior
   ]);
 
   @override
@@ -176,7 +187,8 @@ class DialogTheme with Diagnosticable {
         && other.contentTextStyle == contentTextStyle
         && other.actionsPadding == actionsPadding
         && other.barrierColor == barrierColor
-        && other.insetPadding == insetPadding;
+        && other.insetPadding == insetPadding
+        && other.clipBehavior == clipBehavior;
   }
 
   @override
@@ -194,5 +206,6 @@ class DialogTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('actionsPadding', actionsPadding, defaultValue: null));
     properties.add(ColorProperty('barrierColor', barrierColor));
     properties.add(DiagnosticsProperty<EdgeInsets>('insetPadding', insetPadding, defaultValue: null));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
   }
 }

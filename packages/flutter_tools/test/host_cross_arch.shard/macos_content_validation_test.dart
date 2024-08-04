@@ -24,6 +24,49 @@ void main() {
     ]);
   });
 
+  test('verify FlutterMacOS.xcframework artifact', () {
+    final String flutterRoot = getFlutterRoot();
+
+    final Directory xcframeworkArtifact = fileSystem.directory(
+      fileSystem.path.join(
+        flutterRoot,
+        'bin',
+        'cache',
+        'artifacts',
+        'engine',
+        'darwin-x64',
+        'FlutterMacOS.xcframework',
+      ),
+    );
+
+    final Directory tempDir = createResolvedTempDirectorySync('macos_content_validation.');
+
+    // Pre-cache macOS engine FlutterMacOS.xcframework artifacts.
+    final ProcessResult result = processManager.runSync(
+      <String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'precache',
+        '--macos',
+      ],
+      workingDirectory: tempDir.path,
+    );
+
+    expect(result, const ProcessResultMatcher());
+    expect(xcframeworkArtifact.existsSync(), isTrue);
+
+    final Directory frameworkArtifact = fileSystem.directory(
+      fileSystem.path.joinAll(<String>[
+        xcframeworkArtifact.path,
+        'macos-arm64_x86_64',
+        'FlutterMacOS.framework',
+      ]),
+    );
+    // Check read/write permissions are set correctly in the framework engine artifact.
+    final String artifactStat = frameworkArtifact.statSync().mode.toRadixString(8);
+    expect(artifactStat, '40755');
+  });
+
   for (final String buildMode in <String>['Debug', 'Release']) {
     final String buildModeLower = buildMode.toLowerCase();
 
@@ -131,6 +174,10 @@ void main() {
           'FlutterMacOS.framework',
         ),
       );
+
+      // Check read/write permissions are being correctly set.
+      final String outputFrameworkStat = outputFlutterFramework.statSync().mode.toRadixString(8);
+      expect(outputFrameworkStat, '40755');
 
       // Check complicated macOS framework symlink structure.
       final Link current = outputFlutterFramework.childDirectory('Versions').childLink('Current');

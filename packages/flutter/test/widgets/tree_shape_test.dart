@@ -7,6 +7,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'multi_view_testing.dart';
 
@@ -52,7 +53,9 @@ void main() {
     ));
   });
 
-  testWidgets('A View cannot be a child of a render object widget', (WidgetTester tester) async {
+  testWidgets('A View cannot be a child of a render object widget',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     await tester.pumpWidget(Center(
       child: View(
         view: FakeView(tester.view),
@@ -67,7 +70,9 @@ void main() {
     ));
   });
 
-  testWidgets('The child of a ViewAnchor cannot be a View', (WidgetTester tester) async {
+  testWidgets('The child of a ViewAnchor cannot be a View',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       ViewAnchor(
         child: View(

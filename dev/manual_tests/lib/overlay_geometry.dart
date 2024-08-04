@@ -37,13 +37,16 @@ class _MarkerPainter extends CustomPainter {
       ..color = const Color(0xFFFFFFFF)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
-    if (type == MarkerType.topLeft) {
-      canvas.drawLine(Offset(r, r), Offset(r + r - 1.0, r), paint);
-      canvas.drawLine(Offset(r, r), Offset(r, r + r - 1.0), paint);
-    }
-    if (type == MarkerType.bottomRight) {
-      canvas.drawLine(Offset(r, r), Offset(1.0, r), paint);
-      canvas.drawLine(Offset(r, r), Offset(r, 1.0), paint);
+
+    switch (type) {
+      case MarkerType.topLeft:
+        canvas.drawLine(Offset(r, r), Offset(r + r - 1.0, r), paint);
+        canvas.drawLine(Offset(r, r), Offset(r, r + r - 1.0), paint);
+      case MarkerType.bottomRight:
+        canvas.drawLine(Offset(r, r), Offset(1.0, r), paint);
+        canvas.drawLine(Offset(r, r), Offset(r, 1.0), paint);
+      case MarkerType.touch:
+        break;
     }
   }
 

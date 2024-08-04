@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.swash].
+/// Flutter code sample for [FontFeature.swash].
 
 void main() => runApp(const ExampleApp());
 

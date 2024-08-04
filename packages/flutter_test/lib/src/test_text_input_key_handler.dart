@@ -221,56 +221,57 @@ class MacOSTestTextInputKeyHandler extends TestTextInputKeyHandler {
 
   @override
   Future<void> handleKeyDownEvent(LogicalKeyboardKey key) async {
-    if (key == LogicalKeyboardKey.shift ||
-        key == LogicalKeyboardKey.shiftLeft ||
-        key == LogicalKeyboardKey.shiftRight) {
-      _shift = true;
-    } else if (key == LogicalKeyboardKey.alt ||
-        key == LogicalKeyboardKey.altLeft ||
-        key == LogicalKeyboardKey.altRight) {
-      _alt = true;
-    } else if (key == LogicalKeyboardKey.meta ||
-        key == LogicalKeyboardKey.metaLeft ||
-        key == LogicalKeyboardKey.metaRight) {
-      _meta = true;
-    } else if (key == LogicalKeyboardKey.control ||
-        key == LogicalKeyboardKey.controlLeft ||
-        key == LogicalKeyboardKey.controlRight) {
-      _control = true;
-    } else {
-      for (final MapEntry<SingleActivator, List<String>> entry
-          in _macOSActivatorToSelectors.entries) {
-        final SingleActivator activator = entry.key;
-        if (activator.triggers.first == key &&
-            activator.shift == _shift &&
-            activator.alt == _alt &&
-            activator.meta == _meta &&
-            activator.control == _control) {
-          await _sendSelectors(entry.value);
-          return;
+    switch (key) {
+      case LogicalKeyboardKey.shift:
+      case LogicalKeyboardKey.shiftLeft:
+      case LogicalKeyboardKey.shiftRight:
+        _shift = true;
+      case LogicalKeyboardKey.alt:
+      case LogicalKeyboardKey.altLeft:
+      case LogicalKeyboardKey.altRight:
+        _alt = true;
+      case LogicalKeyboardKey.meta:
+      case LogicalKeyboardKey.metaLeft:
+      case LogicalKeyboardKey.metaRight:
+        _meta = true;
+      case LogicalKeyboardKey.control:
+      case LogicalKeyboardKey.controlLeft:
+      case LogicalKeyboardKey.controlRight:
+        _control = true;
+      default:
+        for (final MapEntry<SingleActivator, List<String>> entry in _macOSActivatorToSelectors.entries) {
+          final SingleActivator activator = entry.key;
+          if (activator.triggers.first == key &&
+              activator.shift == _shift &&
+              activator.alt == _alt &&
+              activator.meta == _meta &&
+              activator.control == _control) {
+            await _sendSelectors(entry.value);
+            return;
+          }
         }
-      }
     }
   }
 
   @override
   Future<void> handleKeyUpEvent(LogicalKeyboardKey key) async {
-    if (key == LogicalKeyboardKey.shift ||
-        key == LogicalKeyboardKey.shiftLeft ||
-        key == LogicalKeyboardKey.shiftRight) {
-      _shift = false;
-    } else if (key == LogicalKeyboardKey.alt ||
-        key == LogicalKeyboardKey.altLeft ||
-        key == LogicalKeyboardKey.altRight) {
-      _alt = false;
-    } else if (key == LogicalKeyboardKey.meta ||
-        key == LogicalKeyboardKey.metaLeft ||
-        key == LogicalKeyboardKey.metaRight) {
-      _meta = false;
-    } else if (key == LogicalKeyboardKey.control ||
-        key == LogicalKeyboardKey.controlLeft ||
-        key == LogicalKeyboardKey.controlRight) {
-      _control = false;
+    switch (key) {
+      case LogicalKeyboardKey.shift:
+      case LogicalKeyboardKey.shiftLeft:
+      case LogicalKeyboardKey.shiftRight:
+        _shift = false;
+      case LogicalKeyboardKey.alt:
+      case LogicalKeyboardKey.altLeft:
+      case LogicalKeyboardKey.altRight:
+        _alt = false;
+      case LogicalKeyboardKey.meta:
+      case LogicalKeyboardKey.metaLeft:
+      case LogicalKeyboardKey.metaRight:
+        _meta = false;
+      case LogicalKeyboardKey.control:
+      case LogicalKeyboardKey.controlLeft:
+      case LogicalKeyboardKey.controlRight:
+        _control = false;
     }
   }
 

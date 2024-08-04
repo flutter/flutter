@@ -188,23 +188,16 @@ class FakeAndroidPlatformViewsController {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch (call.method) {
-      case 'create':
-        return _create(call);
-      case 'dispose':
-        return _dispose(call);
-      case 'resize':
-        return _resize(call);
-      case 'touch':
-        return _touch(call);
-      case 'setDirection':
-        return _setDirection(call);
-      case 'clearFocus':
-        return _clearFocus(call);
-      case 'offset':
-        return _offset(call);
-    }
-    return Future<dynamic>.sync(() => null);
+    return switch (call.method) {
+      'create'       => _create(call),
+      'dispose'      => _dispose(call),
+      'resize'       => _resize(call),
+      'touch'        => _touch(call),
+      'setDirection' => _setDirection(call),
+      'clearFocus'   => _clearFocus(call),
+      'offset'       => _offset(call),
+      _ => Future<dynamic>.sync(() => null),
+    };
   }
 
   Future<dynamic> _create(MethodCall call) async {
@@ -400,17 +393,13 @@ class FakeIosPlatformViewsController {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch (call.method) {
-      case 'create':
-        return _create(call);
-      case 'dispose':
-        return _dispose(call);
-      case 'acceptGesture':
-        return _acceptGesture(call);
-      case 'rejectGesture':
-        return _rejectGesture(call);
-    }
-    return Future<dynamic>.sync(() => null);
+    return switch (call.method) {
+      'create'        => _create(call),
+      'dispose'       => _dispose(call),
+      'acceptGesture' => _acceptGesture(call),
+      'rejectGesture' => _rejectGesture(call),
+      _ => Future<dynamic>.sync(() => null),
+    };
   }
 
   Future<dynamic> _create(MethodCall call) async {
@@ -503,17 +492,13 @@ class FakeMacosPlatformViewsController {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch (call.method) {
-      case 'create':
-        return _create(call);
-      case 'dispose':
-        return _dispose(call);
-      case 'acceptGesture':
-        return _acceptGesture(call);
-      case 'rejectGesture':
-        return _rejectGesture(call);
-    }
-    return Future<dynamic>.sync(() => null);
+    return switch (call.method) {
+      'create'        => _create(call),
+      'dispose'       => _dispose(call),
+      'acceptGesture' => _acceptGesture(call),
+      'rejectGesture' => _rejectGesture(call),
+      _ => Future<dynamic>.sync(() => null),
+    };
   }
 
   Future<dynamic> _create(MethodCall call) async {

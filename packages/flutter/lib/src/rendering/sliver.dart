@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'proxy_box.dart';
+/// @docImport 'sliver_fill.dart';
+/// @docImport 'sliver_grid.dart';
+/// @docImport 'sliver_list.dart';
+/// @docImport 'sliver_padding.dart';
+/// @docImport 'sliver_persistent_header.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -80,7 +90,7 @@ class SliverLayoutDimensions {
     scrollOffset,
     precedingScrollExtent,
     viewportMainAxisExtent,
-    viewportMainAxisExtent
+    crossAxisExtent,
   );
 }
 
@@ -556,7 +566,9 @@ class SliverConstraints extends Constraints {
     assert(other.debugAssertIsValid());
     return other.axisDirection == axisDirection
         && other.growthDirection == growthDirection
+        && other.userScrollDirection == userScrollDirection
         && other.scrollOffset == scrollOffset
+        && other.precedingScrollExtent == precedingScrollExtent
         && other.overlap == overlap
         && other.remainingPaintExtent == remainingPaintExtent
         && other.crossAxisExtent == crossAxisExtent
@@ -570,7 +582,9 @@ class SliverConstraints extends Constraints {
   int get hashCode => Object.hash(
     axisDirection,
     growthDirection,
+    userScrollDirection,
     scrollOffset,
+    precedingScrollExtent,
     overlap,
     remainingPaintExtent,
     crossAxisExtent,
@@ -587,6 +601,7 @@ class SliverConstraints extends Constraints {
       '$growthDirection',
       '$userScrollDirection',
       'scrollOffset: ${scrollOffset.toStringAsFixed(1)}',
+      'precedingScrollExtent: ${precedingScrollExtent.toStringAsFixed(1)}',
       'remainingPaintExtent: ${remainingPaintExtent.toStringAsFixed(1)}',
       if (overlap != 0.0) 'overlap: ${overlap.toStringAsFixed(1)}',
       'crossAxisExtent: ${crossAxisExtent.toStringAsFixed(1)}',
@@ -1385,7 +1400,7 @@ abstract class RenderSliver extends RenderObject {
   /// having been called in [hitTest] but cannot rely upon [paint] having been
   /// called. For example, a render object might be a child of a [RenderOpacity]
   /// object, which calls [hitTest] on its children when its opacity is zero
-  /// even through it does not [paint] its children.
+  /// even though it does not [paint] its children.
   ///
   /// ## Coordinates for RenderSliver objects
   ///

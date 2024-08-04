@@ -55,7 +55,7 @@ Future<void> buildWindows(
   if (!windowsProject.cmakeFile.existsSync()) {
     throwToolExit(
       'No Windows desktop project configured. See '
-      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://flutter.dev/to/add-desktop-support '
       'to learn about adding Windows support to a project.');
   }
 
@@ -73,7 +73,7 @@ Future<void> buildWindows(
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
-  migration.run();
+  await migration.run();
 
   // Ensure that necessary ephemeral files are generated and up to date.
   _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);
@@ -114,20 +114,19 @@ Future<void> buildWindows(
   }
 
   final String? binaryName = getCmakeExecutableName(windowsProject);
-  final File appFile = buildDirectory
+  final File binaryFile = buildDirectory
     .childDirectory('runner')
     .childDirectory(sentenceCase(buildModeName))
     .childFile('$binaryName.exe');
-  if (appFile.existsSync()) {
-    final String appSize = (buildInfo.mode == BuildMode.debug)
-        ? '' // Don't display the size when building a debug variant.
-        : ' (${getSizeAsMB(appFile.lengthSync())})';
-    globals.logger.printStatus(
-      '${globals.logger.terminal.successMark}  '
-      'Built ${globals.fs.path.relative(appFile.path)}$appSize.',
-      color: TerminalColor.green,
-    );
-  }
+  final FileSystemEntity buildOutput =  binaryFile.existsSync() ? binaryFile : binaryFile.parent;
+  // We don't print a size because the output directory can contain
+  // optional files not needed by the user and because the binary is not
+  // self-contained.
+  globals.logger.printStatus(
+    '${globals.logger.terminal.successMark} '
+    'Built ${globals.fs.path.relative(buildOutput.path)}',
+    color: TerminalColor.green,
+  );
 
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
     final String arch = getNameForTargetPlatform(targetPlatform);

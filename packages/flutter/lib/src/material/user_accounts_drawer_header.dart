@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'drawer.dart';
+/// @docImport 'material.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -87,8 +92,8 @@ class _AccountDetails extends StatefulWidget {
 }
 
 class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProviderStateMixin {
-  late Animation<double> _animation;
-  late AnimationController _controller;
+  late final CurvedAnimation _animation;
+  late final AnimationController _controller;
   @override
   void initState () {
     super.initState();
@@ -110,6 +115,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
   @override
   void dispose() {
     _controller.dispose();
+    _animation.dispose();
     super.dispose();
   }
 

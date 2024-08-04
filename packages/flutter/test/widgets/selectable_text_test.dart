@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../impeller_test_helpers.dart';
 import '../widgets/clipboard_utils.dart';
@@ -220,7 +221,9 @@ void main() {
     );
   }
 
-  testWidgets('throw if no Overlay widget exists above', (WidgetTester tester) async {
+  testWidgets('throw if no Overlay widget exists above',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -3390,6 +3393,68 @@ void main() {
       final EditableText widget = tester.widget(find.byType(EditableText));
       expect(widget.selectionControls, equals(materialTextSelectionControls));
     },
+  );
+
+  testWidgets('PageView beats SelectableText drag gestures (iOS)', (WidgetTester tester) async {
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/130198.
+    final PageController pageController = PageController();
+    addTearDown(pageController.dispose);
+    const String testValue = 'abc def ghi jkl mno pqr stu vwx yz';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: PageView(
+            controller: pageController,
+            children: const <Widget>[
+              Center(
+                child: SelectableText(testValue),
+              ),
+              SizedBox(
+                height: 200.0,
+                child: Center(
+                  child: Text('Page 2'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await skipPastScrollingAnimation(tester);
+
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+    final Offset pPos = textOffsetToPosition(tester, testValue.indexOf('p'));
+
+    // A double tap + drag should take precendence over parent drags.
+    final TestGesture gesture = await tester.startGesture(gPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    await gesture.down(gPos);
+    await tester.pumpAndSettle();
+    await gesture.moveTo(pPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    final TextEditingValue currentValue =
+        tester.state<EditableTextState>(find.byType(EditableText)).textEditingValue;
+    expect(currentValue.selection, TextSelection(baseOffset: testValue.indexOf('g'), extentOffset: testValue.indexOf('p') + 3));
+
+
+    expect(pageController.page, isNotNull);
+    expect(pageController.page, 0.0);
+    // A horizontal drag directly on the SelectableText should move the page
+    // view to the next page.
+    final Rect selectableTextRect = tester.getRect(find.byType(SelectableText));
+    await tester.dragFrom(selectableTextRect.centerRight - const Offset(0.1, 0.0), const Offset(-500.0, 0.0));
+    await tester.pumpAndSettle();
+    expect(pageController.page, isNotNull);
+    expect(pageController.page, 1.0);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
   testWidgets(

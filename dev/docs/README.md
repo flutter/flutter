@@ -25,7 +25,7 @@ the following locations:
   * [Web Embedder](dart-ui_web/dart-ui_web-library.html)
 * [Installation](https://flutter.dev/docs/get-started/install)
 * [Codelabs](https://flutter.dev/docs/codelabs)
-* [Contributing to Flutter](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
+* [Contributing to Flutter](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md)
 
 ## Offline Documentation
 

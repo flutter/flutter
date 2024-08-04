@@ -21,6 +21,7 @@ import '../base/time.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
+import '../device_vm_service_discovery_for_attach.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -57,10 +58,9 @@ Future<void> _kDefaultDartDevelopmentServiceStarter(
 ) async {
   await device.dds.startDartDevelopmentService(
     vmServiceUri,
-    hostPort: 0,
-    ipv6: true,
+    ddsPort: 0,
     disableServiceAuthCodes: disableServiceAuthCodes,
-    logger: globals.logger,
+    ipv6: true,
   );
 }
 
@@ -187,15 +187,10 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     if (text == null || text.isEmpty) {
       return <Device>[];
     }
-    final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
-    for (final String line in text) {
-      final FuchsiaDevice? device = await _parseDevice(line);
-      if (device == null) {
-        continue;
-      }
-      devices.add(device);
-    }
-    return devices;
+    return <FuchsiaDevice>[
+      for (final String line in text)
+        if (await _parseDevice(line) case final FuchsiaDevice device) device,
+    ];
   }
 
   @override
@@ -216,7 +211,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
       _logger.printError('Failed to resolve host for Fuchsia device `$name`');
       return null;
     }
-    return FuchsiaDevice(resolvedHost, name: name);
+    return FuchsiaDevice(resolvedHost, name: name, logger: _logger);
   }
 
   @override
@@ -224,7 +219,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
 }
 
 class FuchsiaDevice extends Device {
-  FuchsiaDevice(super.id, {required this.name})
+  FuchsiaDevice(super.id, {required this.name, required super.logger})
       : super(
           platformType: PlatformType.fuchsia,
           category: null,
@@ -299,7 +294,6 @@ class FuchsiaDevice extends Device {
     required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs = const <String, Object?>{},
     bool prebuiltApplication = false,
-    bool ipv6 = false,
     String? userIdentifier,
   }) async {
     if (await isSession) {
@@ -595,6 +589,24 @@ class FuchsiaDevice extends Device {
   @override
   void clearLogs() {}
 
+  @override
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) {
+    if (fuchsiaModule == null) {
+      throwToolExit("'--module' is required for attaching to a Fuchsia device");
+    }
+    if (expectedHostPort != null) {
+      throwToolExit("'--host-vmservice-port' is not supported when attaching to a Fuchsia device");
+    }
+    return FuchsiaIsolateVMServiceDiscoveryForAttach(getIsolateDiscoveryProtocol(fuchsiaModule));
+  }
+
   /// [true] if the current host address is IPv6.
   late final bool ipv6 = isIPv6Address(id);
 
@@ -736,6 +748,30 @@ class FuchsiaDevice extends Device {
   @override
   Future<void> dispose() async {
     await _portForwarder?.dispose();
+  }
+}
+
+class FuchsiaIsolateVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
+  FuchsiaIsolateVMServiceDiscoveryForAttach(this.isolateDiscoveryProtocol);
+  final FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
+
+  @override
+  Stream<Uri> get uris {
+    final Future<Uri> uriFuture = (() async {
+      // Wrapping the call in an anonymous async function for easier error handling.
+      try {
+        return await isolateDiscoveryProtocol.uri;
+      } on Exception {
+        final FuchsiaDevice device = isolateDiscoveryProtocol._device;
+        isolateDiscoveryProtocol.dispose();
+        final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
+        for (final ForwardedPort port in ports) {
+          await device.portForwarder.unforward(port);
+        }
+        rethrow;
+      }
+    })();
+    return Stream<Uri>.fromFuture(uriFuture).asBroadcastStream();
   }
 }
 

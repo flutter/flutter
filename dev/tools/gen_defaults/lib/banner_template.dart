@@ -24,7 +24,7 @@ class _${blockName}DefaultsM3 extends MaterialBannerThemeData {
   Color? get backgroundColor => ${componentColor("md.comp.banner.container")};
 
   @override
-  Color? get surfaceTintColor => ${color("md.comp.banner.container.surface-tint-layer.color")};
+  Color? get surfaceTintColor => ${colorOrTransparent("md.comp.banner.container.surface-tint-layer.color")};
 
   @override
   Color? get dividerColor => ${color("md.comp.divider.color")};

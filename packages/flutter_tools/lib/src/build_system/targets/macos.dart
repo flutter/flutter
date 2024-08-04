@@ -60,6 +60,7 @@ abstract class UnpackMacOS extends Target {
       '--delete',
       '--filter',
       '- .DS_Store/',
+      '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
       basePath,
       environment.outputDir.path,
     ]);
@@ -157,7 +158,7 @@ class ReleaseUnpackMacOS extends UnpackMacOS {
   @override
   List<Source> get inputs => <Source>[
     ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.release),
+    const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.release),
   ];
 }
 
@@ -171,7 +172,7 @@ class ProfileUnpackMacOS extends UnpackMacOS {
   @override
   List<Source> get inputs => <Source>[
     ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.profile),
+    const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.profile),
   ];
 }
 
@@ -185,7 +186,7 @@ class DebugUnpackMacOS extends UnpackMacOS {
   @override
   List<Source> get inputs => <Source>[
     ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
+    const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.debug),
   ];
 }
 
@@ -438,6 +439,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.darwin,
+      buildMode: buildMode,
       flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(

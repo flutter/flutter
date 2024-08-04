@@ -13,11 +13,7 @@ void main() {
       return tester.widget<TextButton>(find.widgetWithText(TextButton, text));
     }
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: example.ToggleButtonsExampleApp(),
-        ),
-      ),
+      const example.ToggleButtonsExampleApp(),
     );
 
     TextButton firstButton = findButton('Apple');
@@ -25,7 +21,7 @@ void main() {
     TextButton thirdButton = findButton('Orange');
 
     const Color selectedColor = Color(0xffef9a9a);
-    const Color unselectedColor = Color(0x00fffbfe);
+    const Color unselectedColor = Color(0x00fef7ff);
 
     /// First button is selected.
     expect(firstButton.style!.backgroundColor!.resolve(enabled), selectedColor);
@@ -51,11 +47,7 @@ void main() {
       return tester.widget<TextButton>(find.widgetWithText(TextButton, text));
     }
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: example.ToggleButtonsExampleApp(),
-        ),
-      ),
+      const example.ToggleButtonsExampleApp(),
     );
 
     TextButton firstButton = findButton('Tomatoes');
@@ -63,7 +55,7 @@ void main() {
     TextButton thirdButton = findButton('Carrots');
 
     const Color selectedColor = Color(0xffa5d6a7);
-    const Color unselectedColor = Color(0x00fffbfe);
+    const Color unselectedColor = Color(0x00fef7ff);
 
     /// Second button is selected.
     expect(firstButton.style!.backgroundColor!.resolve(enabled), unselectedColor);
@@ -90,11 +82,7 @@ void main() {
       return tester.widget<TextButton>(find.widgetWithIcon(TextButton, iconData));
     }
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: example.ToggleButtonsExampleApp(),
-        ),
-      ),
+      const example.ToggleButtonsExampleApp(),
     );
 
     TextButton firstButton = findButton(Icons.sunny);
@@ -102,7 +90,7 @@ void main() {
     TextButton thirdButton = findButton(Icons.ac_unit);
 
     const Color selectedColor =  Color(0xff90caf9);
-    const Color unselectedColor = Color(0x00fffbfe);
+    const Color unselectedColor = Color(0x00fef7ff);
 
 
     /// Third button is selected.

@@ -192,6 +192,55 @@ final XmlElement nonBrowsableCategoryIntentFilter = XmlElement(
     ),
   ],
 );
+final XmlElement nonSchemeCategoryIntentFilter = XmlElement(
+  XmlName('intent-filter'),
+  <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
+  <XmlElement>[
+    XmlElement(
+      XmlName('action'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
+    ),
+    XmlElement(
+      XmlName('category'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
+    ),
+    XmlElement(
+      XmlName('category'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
+    ),
+    XmlElement(
+      XmlName('data'),
+      <XmlAttribute>[
+        XmlAttribute(XmlName('host', 'android'), 'non-browsable-category.com'),
+      ],
+    ),
+  ],
+);
+final XmlElement nonHostCategoryIntentFilter = XmlElement(
+  XmlName('intent-filter'),
+  <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
+  <XmlElement>[
+    XmlElement(
+      XmlName('action'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
+    ),
+    XmlElement(
+      XmlName('category'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
+    ),
+    XmlElement(
+      XmlName('category'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
+    ),
+    XmlElement(
+      XmlName('data'),
+      <XmlAttribute>[
+        XmlAttribute(XmlName('scheme', 'android'), 'http'),
+        XmlAttribute(XmlName('path', 'android'), '/path1'),
+      ],
+    ),
+  ],
+);
 
 void main() {
   late Directory tempDir;
@@ -206,8 +255,8 @@ void main() {
 
   void testDeeplink(
     dynamic deeplink,
-    String scheme,
-    String host,
+    String? scheme,
+    String? host,
     String path, {
     required bool hasAutoVerify,
     required bool hasActionView,
@@ -251,6 +300,8 @@ void main() {
     activity.children.add(nonActionIntentFilter);
     activity.children.add(nonDefaultCategoryIntentFilter);
     activity.children.add(nonBrowsableCategoryIntentFilter);
+    activity.children.add(nonSchemeCategoryIntentFilter);
+    activity.children.add(nonHostCategoryIntentFilter);
     androidManifestFile.writeAsStringSync(androidManifest.toString(), flush: true);
 
     // Ensure that gradle files exists from templates.
@@ -278,7 +329,7 @@ void main() {
     expect(json['applicationId'], 'com.example.testapp');
     expect(json['deeplinkingFlagEnabled'], true);
     final List<dynamic> deeplinks = json['deeplinks']! as List<dynamic>;
-    expect(deeplinks.length, 8);
+    expect(deeplinks.length, 10);
     testDeeplink(deeplinks[0], 'http', 'pure-http.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: true);
     testDeeplink(deeplinks[1], 'custom', 'custom.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: true);
     testDeeplink(deeplinks[2], 'custom', 'hybrid.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: true);
@@ -287,6 +338,8 @@ void main() {
     testDeeplink(deeplinks[5], 'http', 'non-action.com', '.*', hasAutoVerify:true, hasActionView: false, hasDefaultCategory:true, hasBrowsableCategory: true);
     testDeeplink(deeplinks[6], 'http', 'non-default-category.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:false, hasBrowsableCategory: true);
     testDeeplink(deeplinks[7], 'http', 'non-browsable-category.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: false);
+    testDeeplink(deeplinks[8], null, 'non-browsable-category.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: true);
+    testDeeplink(deeplinks[9], 'http', null, '/path1', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: true);
   });
 
   testWithoutContext(

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'date_picker.dart';
+/// @docImport 'text_field.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
@@ -17,7 +21,6 @@ import 'colors.dart';
 import 'curves.dart';
 import 'debug.dart';
 import 'dialog.dart';
-import 'feedback.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'ink_well.dart';
@@ -547,7 +550,7 @@ class _DayPeriodControl extends StatelessWidget {
     final int newHour = (selectedTime.hour + TimeOfDay.hoursPerPeriod) % TimeOfDay.hoursPerDay;
     final TimeOfDay newTime = selectedTime.replacing(hour: newHour);
     if (onPeriodChanged != null) {
-      onPeriodChanged!.call(newTime);
+      onPeriodChanged!(newTime);
     } else {
       _TimePickerModel.setSelectedTime(context, newTime);
     }
@@ -819,6 +822,20 @@ class _RenderInputPadding extends RenderShiftedBox {
       constraints: constraints,
       layoutChild: ChildLayoutHelper.dryLayoutChild,
     );
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final double? result = child.getDryBaseline(constraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(constraints);
+    return result + Alignment.center.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
   }
 
   @override
@@ -3357,7 +3374,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get backgroundColor {
-    return _colors.surface;
+    return _colors.surfaceContainerHigh;
   }
 
   @override
@@ -3445,7 +3462,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get dialBackgroundColor {
-    return _colors.surfaceVariant;
+    return _colors.surfaceContainerHighest;
   }
 
   @override
@@ -3522,22 +3539,22 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
           const double hoverOpacity = 0.08;
           overlayColor = _colors.onPrimaryContainer.withOpacity(hoverOpacity);
         } else if (states.contains(MaterialState.focused)) {
-          const double focusOpacity = 0.12;
+          const double focusOpacity = 0.1;
           overlayColor = _colors.onPrimaryContainer.withOpacity(focusOpacity);
         }
         return Color.alphaBlend(overlayColor, _colors.primaryContainer);
       } else {
-        Color overlayColor = _colors.surfaceVariant;
+        Color overlayColor = _colors.surfaceContainerHighest;
         if (states.contains(MaterialState.pressed)) {
           overlayColor = _colors.onSurface;
         } else if (states.contains(MaterialState.hovered)) {
           const double hoverOpacity = 0.08;
           overlayColor = _colors.onSurface.withOpacity(hoverOpacity);
         } else if (states.contains(MaterialState.focused)) {
-          const double focusOpacity = 0.12;
+          const double focusOpacity = 0.1;
           overlayColor = _colors.onSurface.withOpacity(focusOpacity);
         }
-        return Color.alphaBlend(overlayColor, _colors.surfaceVariant);
+        return Color.alphaBlend(overlayColor, _colors.surfaceContainerHighest);
       }
     });
   }

@@ -213,4 +213,80 @@ void main() {
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
+
+  testWithoutContext('PlistParser.plistJsonContent can parse pbxproj file', () async {
+    final String xcodeProjectFile = fileSystem.path.join(
+      getFlutterRoot(),
+      'dev',
+      'integration_tests',
+      'flutter_gallery',
+      'ios',
+      'Runner.xcodeproj',
+      'project.pbxproj'
+    );
+
+    final BufferLogger logger = BufferLogger(
+      terminal: Terminal.test(),
+      outputPreferences: OutputPreferences(),
+    );
+
+    final PlistParser parser = PlistParser(
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: logger,
+    );
+
+    final String? projectFileAsJson = parser.plistJsonContent(xcodeProjectFile);
+    expect(projectFileAsJson, isNotNull);
+    expect(projectFileAsJson, contains('"PRODUCT_NAME":"Flutter Gallery"'));
+    expect(logger.errorText, isEmpty);
+  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
+
+  testWithoutContext('PlistParser.plistJsonContent can parse pbxproj file with unicode and emojis', () async {
+    String xcodeProjectFile = fileSystem.path.join(
+      getFlutterRoot(),
+      'dev',
+      'integration_tests',
+      'flutter_gallery',
+      'ios',
+      'Runner.xcodeproj',
+      'project.pbxproj'
+    );
+
+    final BufferLogger logger = BufferLogger(
+      terminal: Terminal.test(),
+      outputPreferences: OutputPreferences(),
+    );
+
+    final PlistParser parser = PlistParser(
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: logger,
+    );
+
+    xcodeProjectFile = xcodeProjectFile.replaceAll('AppDelegate.m', 'AppDélegate.m');
+    xcodeProjectFile = xcodeProjectFile.replaceAll('AppDelegate.h', 'App👍Delegate.h');
+
+    final String? projectFileAsJson = parser.plistJsonContent(xcodeProjectFile);
+    expect(projectFileAsJson, isNotNull);
+    expect(projectFileAsJson, contains('"PRODUCT_NAME":"Flutter Gallery"'));
+    expect(logger.errorText, isEmpty);
+  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
+
+  testWithoutContext('PlistParser.plistJsonContent returns null when errors', () async {
+    final BufferLogger logger = BufferLogger(
+      terminal: Terminal.test(),
+      outputPreferences: OutputPreferences(),
+    );
+
+    final PlistParser parser = PlistParser(
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: logger,
+    );
+
+    final String? projectFileAsJson = parser.plistJsonContent('bad/path');
+    expect(projectFileAsJson, isNull);
+    expect(logger.errorText, isNotEmpty);
+  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 }

@@ -125,7 +125,8 @@ void testUsingContext(
           CrashReporter: () => const NoopCrashReporter(),
           TemplateRenderer: () => const MustacheTemplateRenderer(),
           BuildTargets: () => const BuildTargetsImpl(),
-          Analytics: () => NoOpAnalytics(),
+          Analytics: () => const NoOpAnalytics(),
+          Stdio: () => FakeStdio(),
         },
         body: () {
           // To catch all errors thrown by the test, even uncaught async errors, we use a zone.
@@ -290,13 +291,11 @@ class FakeDeviceManager implements DeviceManager {
   Device? getSingleEphemeralDevice(List<Device> devices) => null;
 
   List<Device> filteredDevices(DeviceDiscoveryFilter? filter) {
-    if (filter?.deviceConnectionInterface == DeviceConnectionInterface.attached) {
-      return attachedDevices;
-    }
-    if (filter?.deviceConnectionInterface == DeviceConnectionInterface.wireless) {
-      return wirelessDevices;
-    }
-    return attachedDevices + wirelessDevices;
+    return switch (filter?.deviceConnectionInterface) {
+      DeviceConnectionInterface.attached => attachedDevices,
+      DeviceConnectionInterface.wireless => wirelessDevices,
+      null => attachedDevices + wirelessDevices,
+    };
   }
 }
 

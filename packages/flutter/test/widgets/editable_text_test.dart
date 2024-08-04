@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/clipboard_utils.dart';
 import 'editable_text_utils.dart';
@@ -141,7 +142,7 @@ void main() {
                 showSelectionHandles: true,
                 autofocus: true,
                 focusNode: focusNode,
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 keyboardType: TextInputType.text,
@@ -191,6 +192,81 @@ void main() {
     },
     skip: kIsWeb, // [intended]
   );
+
+  group('Check the passed groupId value', () {
+    testWidgets(
+      'The value of the passed-in groupId should match the groupId of the EditableText',
+          (WidgetTester tester) async {
+        final List<String> groupIds = <String>['Group A', 'Group B', 'Group C'];
+        final List<GlobalKey> keys =
+        List<GlobalKey>.generate(3, (_) => GlobalKey());
+        final List<Widget> inputFields = <Widget>[
+          TextFormField(key: keys[0], groupId: groupIds[0]),
+          CupertinoTextField(key: keys[1], groupId: groupIds[1]),
+          TextField(key: keys[2], groupId: groupIds[2]),
+        ];
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Align(
+              alignment: Alignment.topLeft,
+              child: Column(
+                children: inputFields.map((Widget child) {
+                  return Material(child: child);
+                }).toList(),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump();
+
+        for (int i = 0; i < 3; i++) {
+          final EditableText editableText = tester.widget(find.descendant(
+            of: find.byKey(keys[i]),
+            matching: find.byType(EditableText),
+          ));
+          expect(editableText.groupId, groupIds[i]);
+        }
+      },
+    );
+
+    testWidgets(
+      'When the value of groupId is not passed in, the default type should be EditableText',
+          (WidgetTester tester) async {
+        final List<GlobalKey> keys =
+        List<GlobalKey>.generate(3, (_) => GlobalKey());
+        final List<Widget> inputFields = <Widget>[
+          TextFormField(key: keys[0]),
+          CupertinoTextField(key: keys[1]),
+          TextField(key: keys[2]),
+        ];
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Align(
+              alignment: Alignment.topLeft,
+              child: Column(
+                children: inputFields.map((Widget child) {
+                  return Material(child: child);
+                }).toList(),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump();
+
+        for (int i = 0; i < 3; i++) {
+          final EditableText editableText = tester.widget(find.descendant(
+            of: find.byKey(keys[i]),
+            matching: find.byType(EditableText),
+          ));
+          expect(editableText.groupId == EditableText, true);
+        }
+      },
+    );
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/126312.
   testWidgets('when open input connection in didUpdateWidget, should not throw', (WidgetTester tester) async {
@@ -904,6 +980,64 @@ void main() {
 
     state = tester.state<EditableTextState>(find.byType(EditableText));
     expect(state.textInputConfiguration.enableInteractiveSelection, isFalse);
+  });
+
+  testWidgets('EditableText sends viewId to config', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapWithView: false,
+      View(
+        view: FakeFlutterView(tester.view, viewId: 77),
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusScope(
+              node: focusScopeNode,
+              autofocus: true,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.textInputConfiguration.viewId, 77);
+
+    await tester.pumpWidget(
+      wrapWithView: false,
+      View(
+        view: FakeFlutterView(tester.view, viewId: 88),
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusScope(
+              node: focusScopeNode,
+              autofocus: true,
+              child: EditableText(
+                enableInteractiveSelection: false,
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                keyboardType: TextInputType.multiline,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.textInputConfiguration.viewId, 88);
   });
 
   testWidgets('selection persists when unfocused', (WidgetTester tester) async {
@@ -3286,6 +3420,53 @@ void main() {
     await tester.pump();
 
     expect(tester.testTextInput.setClientArgs!['obscureText'], isFalse);
+  });
+
+  testWidgets('Sends viewId and updates config when it changes', (WidgetTester tester) async {
+    int viewId = 14;
+    late StateSetter setState;
+    final GlobalKey key = GlobalKey();
+
+    await tester.pumpWidget(
+      wrapWithView: false,
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter stateSetter) {
+          setState = stateSetter;
+          return View(
+            view: FakeFlutterView(tester.view, viewId: viewId),
+            child: MediaQuery(
+              data: const MediaQueryData(),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: EditableText(
+                  key: key,
+                  controller: controller,
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    // Focus the field to establish the input connection.
+    focusNode.requestFocus();
+    await tester.pump();
+
+    expect(tester.testTextInput.setClientArgs!['viewId'], 14);
+    expect(tester.testTextInput.log, contains(matchesMethodCall('TextInput.setClient')));
+    tester.testTextInput.log.clear();
+
+    setState(() { viewId = 15; });
+    await tester.pump();
+
+    expect(tester.testTextInput.setClientArgs!['viewId'], 15);
+    expect(tester.testTextInput.log, contains(matchesMethodCall('TextInput.updateConfig')));
+    tester.testTextInput.log.clear();
   });
 
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
@@ -9079,7 +9260,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: focusNode,
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -9173,7 +9354,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: focusNode,
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -9748,7 +9929,9 @@ void main() {
       expect(errorString, contains('Unbalanced call to endBatchEdit'));
     });
 
-     testWidgets('catch unfinished batch edits on disposal', (WidgetTester tester) async {
+     testWidgets('catch unfinished batch edits on disposal',
+     experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+     (WidgetTester tester) async {
       await tester.pumpWidget(buildWidget());
 
       // Connect.
@@ -14990,7 +15173,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: focusNode,
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             keyboardType: TextInputType.text,
@@ -15047,7 +15230,7 @@ void main() {
                 showSelectionHandles: true,
                 autofocus: true,
                 focusNode: focusNode,
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 keyboardType: TextInputType.text,
@@ -15115,7 +15298,7 @@ void main() {
                 showSelectionHandles: true,
                 autofocus: true,
                 focusNode: focusNode,
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 keyboardType: TextInputType.text,
@@ -15188,7 +15371,7 @@ void main() {
                 showSelectionHandles: true,
                 autofocus: true,
                 focusNode: focusNode,
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 keyboardType: TextInputType.text,
@@ -15249,7 +15432,7 @@ void main() {
                 showSelectionHandles: true,
                 autofocus: true,
                 focusNode: focusNode,
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 keyboardType: TextInputType.text,
@@ -15326,7 +15509,7 @@ void main() {
                 showSelectionHandles: true,
                 autofocus: true,
                 focusNode: focusNode,
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 keyboardType: TextInputType.text,
@@ -15346,6 +15529,7 @@ void main() {
       final EditableText editableText = tester.widget(find.byType(EditableText));
       final BuildContext context = tester.firstElement(find.byType(EditableText));
       final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+      addTearDown(magnifierInfo.dispose);
       expect(
         editableText.magnifierConfiguration.magnifierBuilder(
           context,
@@ -16177,6 +16361,112 @@ void main() {
         ),
         isNull,
       );
+    });
+
+    testWidgets('magnifier is in correct position when EditableText is scaled', (WidgetTester tester) async {
+      controller.text = 'hello \n world \n this \n is \n text';
+      final GlobalKey magnifierKey = GlobalKey();
+      const double scale = 0.5;
+      await tester.pumpWidget(MaterialApp(
+        home: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Transform.scale(
+              scale: scale,
+              child: EditableText(
+                controller: controller,
+                maxLines: null,
+                showSelectionHandles: true,
+                autofocus: true,
+                focusNode: focusNode,
+                style: Typography.material2018().black.titleMedium!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                selectionControls: materialTextSelectionControls,
+                keyboardType: TextInputType.text,
+                textAlign: TextAlign.right,
+                magnifierConfiguration: TextMagnifierConfiguration(
+                  shouldDisplayHandlesInMagnifier: false,
+                  magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierInfo>? notifier) {
+                    return TextMagnifier(
+                      key: magnifierKey,
+                      magnifierInfo: notifier!,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ));
+
+      await tester.tapAt(textOffsetToPosition(tester, 3));
+      await tester.pumpAndSettle();
+      final List<RenderBox> handles = List<RenderBox>.from(
+        tester.renderObjectList<RenderBox>(
+          find.descendant(
+            of: find.byType(CompositedTransformFollower),
+            matching: find.byType(Padding),
+          ),
+        ),
+      );
+      expect(handles, hasLength(1));
+      final RenderBox handle = handles.first;
+      expect(find.byKey(magnifierKey), findsNothing);
+
+      final TestGesture gesture = await tester.startGesture(handle.localToGlobal(Offset(
+          handle.size.width / 2,
+          handle.size.height / 2,
+        ),
+      ));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.byKey(magnifierKey), findsOneWidget);
+      final Offset magnifierStart = tester.getTopLeft(find.byKey(magnifierKey));
+
+      // Dragging by a quarter of a line height does not move the magnifier.
+      // Typically, when not scaled, you need to drag by a full line height to
+      // get the magnifier to move vertically.
+      final double lineHeight = findRenderEditable(tester).preferredLineHeight;
+      await gesture.moveBy(Offset(0.0, lineHeight / 4));
+      await tester.pump(const Duration(milliseconds: 20));
+      await tester.pumpAndSettle();
+      expect(find.byKey(magnifierKey), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(magnifierKey)), magnifierStart);
+
+      // Dragging by another quarter line height (total half a line height) does
+      // move the magnifier, because the text is scaled down by half.
+      await gesture.moveBy(Offset(0.0, lineHeight / 4));
+      await tester.pump(const Duration(milliseconds: 20));
+      await tester.pumpAndSettle();
+      expect(find.byKey(magnifierKey), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.byKey(magnifierKey)).dy,
+        magnifierStart.dy + lineHeight / 2,
+      );
+
+      // Drag back up by a quarter line height, cursor doesn't move.
+      await gesture.moveBy(Offset(0.0, -lineHeight / 4));
+      await tester.pump(const Duration(milliseconds: 20));
+      await tester.pumpAndSettle();
+      expect(find.byKey(magnifierKey), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.byKey(magnifierKey)).dy,
+        magnifierStart.dy + lineHeight / 2,
+      );
+
+      // Continuing the drag up to a half line height (whole line height scaled)
+      // does move the cursor.
+      await gesture.moveBy(Offset(0.0, -lineHeight / 4));
+      await tester.pump(const Duration(milliseconds: 20));
+      await tester.pumpAndSettle();
+      expect(find.byKey(magnifierKey), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(magnifierKey)), magnifierStart);
+
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 20));
+      expect(find.byKey(magnifierKey), findsNothing);
+
+      await tester.pumpAndSettle();
     });
   });
 
@@ -17139,6 +17429,254 @@ void main() {
     await tester.pumpAndSettle();
     expect(scrollController.offset, 75.0);
   });
+
+  testWidgets('getPositionForPoint is correct when EditableText is scaled', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    controller.text = 'Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Transform.scale(
+            scale: 0.5,
+            child: EditableText(
+              key: key,
+              cursorColor: cursorColor,
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 2,
+              minLines: 2,
+              style: textStyle,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // With no scroll, the top left is the first character.
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+    expect(
+      state.renderEditable.getPositionForPoint(topLeft),
+      const TextPosition(offset: 0),
+    );
+
+    // After scrolling to view the fourth line, the top left is the start of the
+    // third line.
+    state.bringIntoView(const TextPosition(offset: 18));
+    await tester.pumpAndSettle();
+    expect(
+      state.renderEditable.getPositionForPoint(topLeft),
+      const TextPosition(offset: 12),
+    );
+  },
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('selectPositionAt is correct when EditableText is scaled', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    controller.text = 'Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Transform.scale(
+            scale: 0.5,
+            child: EditableText(
+              key: key,
+              cursorColor: cursorColor,
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 2,
+              minLines: 2,
+              style: textStyle,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: -1),
+    );
+
+    // Scroll to the fourth line and select the full line above that.
+    state.bringIntoView(const TextPosition(offset: 18));
+    await tester.pumpAndSettle();
+    state.renderEditable.selectPositionAt(
+      from: topLeft,
+      to: topLeft + const Offset(100.0, 0.0),
+      cause: SelectionChangedCause.drag,
+    );
+    await tester.pumpAndSettle();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection(baseOffset: 12, extentOffset: 17),
+    );
+  },
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('selectWordsInRange is correct when EditableText is scaled', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    controller.text = 'Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Transform.scale(
+            scale: 0.5,
+            child: EditableText(
+              key: key,
+              cursorColor: cursorColor,
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 2,
+              minLines: 2,
+              style: textStyle,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: -1),
+    );
+
+    // Scroll to the fourth line and select the full line above that.
+    state.bringIntoView(const TextPosition(offset: 18));
+    await tester.pumpAndSettle();
+    state.renderEditable.selectWordsInRange(
+      from: topLeft,
+      to: topLeft + const Offset(100.0, 0.0),
+      cause: SelectionChangedCause.drag,
+    );
+    await tester.pumpAndSettle();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection(baseOffset: 12, extentOffset: 17),
+    );
+  },
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('selectWordEdge is correct when EditableText is scaled', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    controller.text = 'Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Transform.scale(
+            scale: 0.5,
+            child: EditableText(
+              key: key,
+              cursorColor: cursorColor,
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 2,
+              minLines: 2,
+              style: textStyle,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    //final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: -1),
+    );
+
+    // Scroll to the fourth line.
+    state.bringIntoView(const TextPosition(offset: 18));
+    await tester.pumpAndSettle();
+
+    // Secondary tap inside of the 3rd line.
+    state.renderEditable.handleSecondaryTapDown(TapDownDetails(
+      globalPosition: textOffsetToPosition(tester, 13),
+    ));
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: -1),
+    );
+
+    // selectWordEdge moves the selection to the end of the 3rd line.
+    state.renderEditable.selectWordEdge(
+      cause: SelectionChangedCause.tap,
+    );
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 17, affinity: TextAffinity.upstream),
+    );
+  });
+
+  testWidgets('Composing region can truncate grapheme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            autofocus: true,
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    assert(focusNode.hasFocus);
+
+    controller.value = const TextEditingValue(
+      text: 'Á',
+      selection: TextSelection(baseOffset: 1, extentOffset: 2),
+      composing: TextSelection(baseOffset: 1, extentOffset: 2),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Can implement TextEditingController', (WidgetTester tester) async {
+    final _TextEditingControllerImpl controller = _TextEditingControllerImpl();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            autofocus: true,
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class UnsettableController extends TextEditingController {
@@ -17501,8 +18039,50 @@ class _AccentColorTextEditingController extends TextEditingController {
   }
 }
 
+class _TextEditingControllerImpl extends ChangeNotifier implements TextEditingController {
+  final TextEditingController _innerController = TextEditingController();
+
+  @override
+  void clear() => _innerController.clear();
+
+  @override
+  void clearComposing() => _innerController.clearComposing();
+
+  @override
+  TextSelection get selection => _innerController.selection;
+  @override
+  set selection(TextSelection newSelection) => _innerController.selection = newSelection;
+
+  @override
+  String get text => _innerController.text;
+  @override
+  set text(String newText) => _innerController.text = newText;
+
+  @override
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
+    return _innerController.buildTextSpan(context: context, style: style, withComposing: withComposing);
+  }
+
+  @override
+  TextEditingValue get value => _innerController.value;
+  @override
+  set value(TextEditingValue newValue) => _innerController.value = newValue;
+}
+
 class _TestScrollController extends ScrollController {
   bool get attached => hasListeners;
 }
 
 class FakeSpellCheckService extends DefaultSpellCheckService {}
+
+class FakeFlutterView extends TestFlutterView {
+  FakeFlutterView(TestFlutterView view, {required this.viewId})
+      : super(
+          view: view,
+          display: view.display,
+          platformDispatcher: view.platformDispatcher,
+        );
+
+  @override
+  final int viewId;
+}

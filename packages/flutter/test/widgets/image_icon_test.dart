@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../painting/mocks_for_image_cache.dart';
 
@@ -20,7 +21,10 @@ void main() {
     );
   });
 
-  testWidgets('ImageIcon sizing - no theme, default size', (WidgetTester tester) async {
+  testWidgets('ImageIcon sizing - no theme, default size',
+  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: ImageIcon(image),
@@ -32,7 +36,10 @@ void main() {
     expect(find.byType(Image), findsOneWidget);
   });
 
-  testWidgets('Icon opacity', (WidgetTester tester) async {
+  testWidgets('Icon opacity',
+  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: IconTheme(

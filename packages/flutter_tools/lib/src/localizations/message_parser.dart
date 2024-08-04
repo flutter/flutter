@@ -96,16 +96,12 @@ class Node {
   // Token constructors.
   Node.openBrace(this.positionInMessage): type = ST.openBrace, value = '{';
   Node.closeBrace(this.positionInMessage): type = ST.closeBrace, value = '}';
-  Node.brace(this.positionInMessage, String this.value) {
-    if (value == '{') {
-      type = ST.openBrace;
-    } else if (value == '}') {
-      type = ST.closeBrace;
-    } else {
-      // We should never arrive here.
-      throw L10nException('Provided value $value is not a brace.');
-    }
-  }
+  Node.brace(this.positionInMessage, String this.value)
+      : type = switch (value) {
+          '{' => ST.openBrace,
+          '}' => ST.closeBrace,
+          _ => throw L10nException('Provided value $value is not a brace.')
+        };
   Node.equalSign(this.positionInMessage): type = ST.equalSign, value = '=';
   Node.comma(this.positionInMessage): type = ST.comma, value = ',';
   Node.string(this.positionInMessage, String this.value): type = ST.string;

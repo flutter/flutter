@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'scroll_activity.dart';
+/// @docImport 'scroll_configuration.dart';
+/// @docImport 'scroll_position.dart';
+/// @docImport 'scroll_position_with_single_context.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'scrollable.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -675,12 +686,10 @@ class BouncingScrollPhysics extends ScrollPhysics {
   /// as more of the area past the edge is dragged in (represented by an increasing
   /// `overscrollFraction` which starts at 0 when there is no overscroll).
   double frictionFactor(double overscrollFraction) {
-    switch (decelerationRate) {
-      case ScrollDecelerationRate.fast:
-        return 0.26 * math.pow(1 - overscrollFraction, 2);
-      case ScrollDecelerationRate.normal:
-        return 0.52 * math.pow(1 - overscrollFraction, 2);
-    }
+    return math.pow(1 - overscrollFraction, 2) * switch (decelerationRate) {
+      ScrollDecelerationRate.fast   => 0.26,
+      ScrollDecelerationRate.normal => 0.52,
+    };
   }
 
   @override

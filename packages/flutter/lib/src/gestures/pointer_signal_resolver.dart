@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'binding.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'events.dart';
@@ -96,6 +101,11 @@ class PointerSignalResolver {
   void resolve(PointerSignalEvent event) {
     if (_firstRegisteredCallback == null) {
       assert(_currentEvent == null);
+      // Nothing in the framework/app wants to handle the `event`. Allow the
+      // platform to trigger any default native actions.
+      event.respond(
+        allowPlatformDefault: true
+      );
       return;
     }
     assert(_isSameEvent(_currentEvent!, event));

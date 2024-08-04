@@ -459,6 +459,8 @@ void main() {
             'ephemeral': false,
             'emulatorId': 'device',
             'sdk': 'Android 12',
+            'isConnected': true,
+            'connectionInterface': 'attached',
             'capabilities': <String, Object?>{
               'hotReload': true,
               'hotRestart': true,
@@ -479,6 +481,8 @@ void main() {
             'ephemeral': false,
             'emulatorId': null,
             'sdk': 'preview',
+            'isConnected': true,
+            'connectionInterface': 'attached',
             'capabilities': <String, Object?>{
               'hotReload': true,
               'hotRestart': true,
@@ -697,7 +701,8 @@ void main() {
       final DaemonMessage startResponse = await broadcastOutput.firstWhere(_notEvent);
       expect(startResponse.data['id'], 0);
       expect(startResponse.data['error'], isNull);
-      final String? ddsUri = startResponse.data['result'] as String?;
+      final Map<String, Object?>? result = startResponse.data['result'] as Map<String, Object?>?;
+      final String? ddsUri = result!['ddsUri'] as String?;
       expect(ddsUri, fakeDdsUri.toString());
       expect(device.dds.startCalled, true);
       expect(device.dds.startDisableServiceAuthCodes, false);
@@ -723,6 +728,31 @@ void main() {
       expect(stopResponse.data['id'], 1);
       expect(stopResponse.data['error'], isNull);
       expect(device.dds.shutdownCalled, true);
+    });
+
+    testUsingContext('device.getDiagnostics returns correct value', () async {
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+      );
+      final FakePollingDeviceDiscovery discoverer1 = FakePollingDeviceDiscovery();
+      discoverer1.diagnostics = <String>['fake diagnostic 1', 'fake diagnostic 2'];
+      final FakePollingDeviceDiscovery discoverer2 = FakePollingDeviceDiscovery();
+      discoverer2.diagnostics = <String>['fake diagnostic 3', 'fake diagnostic 4'];
+      daemon.deviceDomain.addDeviceDiscoverer(discoverer1);
+      daemon.deviceDomain.addDeviceDiscoverer(discoverer2);
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{
+        'id': 0,
+        'method': 'device.getDiagnostics',
+      }));
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response.data['id'], 0);
+      expect(response.data['result'], <String>[
+        'fake diagnostic 1',
+        'fake diagnostic 2',
+        'fake diagnostic 3',
+        'fake diagnostic 4',
+      ]);
     });
 
     testUsingContext('emulator.launch without an emulatorId should report an error', () async {
@@ -795,7 +825,7 @@ void main() {
       expect(result['host'], '127.0.0.1');
       expect(result['port'], 1234);
     }, overrides: <Type, Generator>{
-      DevtoolsLauncher: () => FakeDevtoolsLauncher(DevToolsServerAddress('127.0.0.1', 1234)),
+      DevtoolsLauncher: () => FakeDevtoolsLauncher(serverAddress: DevToolsServerAddress('127.0.0.1', 1234)),
     });
 
     testUsingContext('devtools.serve command should return null fields if null returned', () async {
@@ -811,7 +841,7 @@ void main() {
       expect(result['host'], null);
       expect(result['port'], null);
     }, overrides: <Type, Generator>{
-      DevtoolsLauncher: () => FakeDevtoolsLauncher(null),
+      DevtoolsLauncher: () => FakeDevtoolsLauncher(),
     });
 
     testUsingContext('proxy.connect tries to connect to an ipv4 address and proxies the connection correctly', () async {
@@ -1129,6 +1159,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   final bool isConnected = true;
 
   @override
+  final DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
+
+  @override
   Future<String> get sdkNameAndVersion async => 'Android 12';
 
   @override
@@ -1214,11 +1247,14 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
-    required Logger logger,
-    int? hostPort,
+    int? ddsPort,
+    FlutterDevice? device,
     bool? ipv6,
     bool? disableServiceAuthCodes,
+    bool enableDevTools = false,
     bool cacheStartupProfile = false,
+    String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
   }) async {
     startCalled = true;
     startVMServiceUri = vmServiceUri;
@@ -1252,18 +1288,6 @@ class FakeDeviceLogReader implements DeviceLogReader {
   @override
   String get name => 'device';
 
-}
-
-class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
-  FakeDevtoolsLauncher(this._serverAddress);
-
-  final DevToolsServerAddress? _serverAddress;
-
-  @override
-  Future<DevToolsServerAddress?> serve() async => _serverAddress;
-
-  @override
-  Future<void> close() async {}
 }
 
 class FakeApplicationPackageFactory implements ApplicationPackageFactory {

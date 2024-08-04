@@ -794,6 +794,8 @@ HEADER
 
 import 'bar.dart';
 
+// ignore_for_file: type=lint
+
 /// The translations for English (`en`).
 class FooEn extends Foo {
   FooEn([String locale = 'en']) : super(locale);
@@ -894,6 +896,8 @@ flutter:\r
       expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
 import 'app_localizations.dart';
 
+// ignore_for_file: type=lint
+
 /// The translations for English (`en`).
 class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
@@ -924,6 +928,8 @@ class AppLocalizationsEn extends AppLocalizations {
 HEADER
 
 import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
 
 /// The translations for English (`en`).
 class AppLocalizationsEn extends AppLocalizations {
@@ -2522,10 +2528,10 @@ NumberFormat.decimalPatternDigits(
   testWithoutContext('dollar signs are escaped properly when there is a select clause', () {
     const String dollarSignWithSelect = r'''
 {
-  "dollarSignWithSelect": "$nice_bug\nHello Bug! Manifistation #1 {selectPlaceholder, select, case{message} other{messageOther}}"
+  "dollarSignWithSelect": "$nice_bug\nHello Bug! Manifestation #1 {selectPlaceholder, select, case{message} other{messageOther}}"
 }''';
     setupLocalizations(<String, String>{ 'en': dollarSignWithSelect });
-    expect(getGeneratedFileContent(locale: 'en'), contains(r'\$nice_bug\nHello Bug! Manifistation #1 $_temp0'));
+    expect(getGeneratedFileContent(locale: 'en'), contains(r'\$nice_bug\nHello Bug! Manifestation #1 $_temp0'));
   });
 
   testWithoutContext('can generate method with named parameter', () {

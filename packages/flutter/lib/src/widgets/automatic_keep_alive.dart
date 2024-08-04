@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'scroll_view.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -400,6 +403,10 @@ mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
   Widget build(BuildContext context) {
     if (wantKeepAlive && _keepAliveHandle == null) {
       _ensureKeepAlive();
+      // Whenever wantKeepAlive's value changes (or might change), the
+      // subclass should call [updateKeepAlive].
+      // That will ensure that the keepalive is disabled (or enabled)
+      // without requiring a rebuild.
     }
     return const _NullWidget();
   }

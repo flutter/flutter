@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'list_wheel_viewport.dart';
+/// @docImport 'sliver_fixed_extent_list.dart';
+/// @docImport 'sliver_grid.dart';
+/// @docImport 'sliver_list.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
@@ -1385,7 +1393,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     return constraints.biggest;
   }
 
-  static const int _maxLayoutCycles = 10;
+  static const int _maxLayoutCyclesPerChild = 10;
 
   // Out-of-band data computed during layout.
   late double _minScrollExtent;
@@ -1419,6 +1427,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     };
 
     final double centerOffsetAdjustment = center!.centerOffsetAdjustment;
+    final int maxLayoutCycles = _maxLayoutCyclesPerChild * childCount;
 
     double correction;
     int count = 0;
@@ -1435,9 +1444,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         }
       }
       count += 1;
-    } while (count < _maxLayoutCycles);
+    } while (count < maxLayoutCycles);
     assert(() {
-      if (count >= _maxLayoutCycles) {
+      if (count >= maxLayoutCycles) {
         assert(count != 1);
         throw FlutterError(
           'A RenderViewport exceeded its maximum number of layout cycles.\n'

@@ -83,6 +83,7 @@ void main() {
       BuildMode.debug,
       '',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
 
     await compiler.initialize(
@@ -91,6 +92,7 @@ void main() {
       testFiles: <String>['project/test/fake_test.dart'],
       buildInfo: buildInfo,
       webRenderer: WebRendererMode.canvaskit,
+      useWasm: false,
     );
 
     expect(processManager.hasRemainingExpectations, isFalse);

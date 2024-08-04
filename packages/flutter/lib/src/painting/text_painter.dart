@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:math' show max;
 import 'dart:ui' as ui show
   BoxHeightStyle,
@@ -216,6 +219,7 @@ class WordBoundary extends TextBoundary {
     };
   }
 
+  static final RegExp _regExpSpaceSeparatorOrPunctuaion = RegExp(r'[\p{Space_Separator}\p{Punctuation}]', unicode: true);
   bool _skipSpacesAndPunctuations(int offset, bool forward) {
     // Use code point since some punctuations are supplementary characters.
     // "inner" here refers to the code unit that's before the break in the
@@ -232,7 +236,7 @@ class WordBoundary extends TextBoundary {
     final bool hardBreakRulesApply = innerCodePoint == null || outerCodeUnit == null
     // WB3a & WB3b: always break before and after newlines.
                                   || _isNewline(innerCodePoint) || _isNewline(outerCodeUnit);
-    return hardBreakRulesApply || !RegExp(r'[\p{Space_Separator}\p{Punctuation}]', unicode: true).hasMatch(String.fromCharCode(innerCodePoint));
+    return hardBreakRulesApply || !_regExpSpaceSeparatorOrPunctuaion.hasMatch(String.fromCharCode(innerCodePoint));
   }
 
   /// Returns a [TextBoundary] suitable for handling keyboard navigation
@@ -276,10 +280,14 @@ class _UntilTextBoundary extends TextBoundary {
 }
 
 class _TextLayout {
-  _TextLayout._(this._paragraph, this.writingDirection, this.rawString);
+  _TextLayout._(this._paragraph, this.writingDirection, this._painter);
 
   final TextDirection writingDirection;
-  final String rawString;
+
+  // Computing plainText is a bit expensive and is currently not needed for
+  // simple static text. Pass in the entire text painter so `TextPainter.plainText`
+  // is only called when needed.
+  final TextPainter _painter;
 
   // This field is not final because the owner TextPainter could create a new
   // ui.Paragraph with the exact same text layout (for example, when only the
@@ -325,34 +333,40 @@ class _TextLayout {
     };
   }
 
+  static final RegExp _regExpSpaceSeparators = RegExp(r'\p{Space_Separator}', unicode: true);
   /// The line caret metrics representing the end of text location.
   ///
   /// This is usually used when the caret is placed at the end of the text
   /// (text.length, downstream), unless maxLines is set to a non-null value, in
   /// which case the caret is placed at the visual end of the last visible line.
   ///
-  /// This should not be called when the paragraph is emtpy as the implementation
+  /// This should not be called when the paragraph is empty as the implementation
   /// relies on line metrics.
   ///
-  /// When the last bidi level run in the paragraph and the parargraph's bidi
+  /// When the last bidi level run in the paragraph and the paragraph's bidi
   /// levels have opposite parities (which implies opposite writing directions),
   /// this makes sure the caret is placed at the same "end" of the line as if the
   /// line ended with a line feed.
   late final _LineCaretMetrics _endOfTextCaretMetrics = _computeEndOfTextCaretAnchorOffset();
   _LineCaretMetrics _computeEndOfTextCaretAnchorOffset() {
+    final String rawString = _painter.plainText;
     final int lastLineIndex = _paragraph.numberOfLines - 1;
     assert(lastLineIndex >= 0);
     final ui.LineMetrics lineMetrics = _paragraph.getLineMetricsAt(lastLineIndex)!;
-    // SkParagraph currently treats " " and "\t" as white spaces. Trailing white
-    // spaces don't contribute to the line width and thus require special handling
+    // Trailing white spaces don't contribute to the line width and thus require special handling
     // when they're present.
     // Luckily they have the same bidi embedding level as the paragraph as per
     // https://unicode.org/reports/tr9/#L1, so we can anchor the caret to the
     // last logical trailing space.
-    final bool hasTrailingSpaces = switch (rawString.codeUnitAt(rawString.length - 1)) {
-      0x9 ||        // horizontal tab
-      0x20 => true, // space
-      _ => false,
+    // Whitespace character definitions refer to Java/ICU, not Unicode-Zs.
+    // https://github.com/unicode-org/icu/blob/23d9628f88a2d0127c564ad98297061c36d3ce77/icu4c/source/common/unicode/uchar.h#L3388-L3425
+    final String lastCodeUnit = rawString[rawString.length - 1];
+    final bool hasTrailingSpaces = switch (lastCodeUnit.codeUnitAt(0)) {
+      0x0009 => true,   // horizontal tab
+      0x00A0 ||         // no-break space
+      0x2007 ||         // figure space
+      0x202F => false,  // narrow no-break space
+      _ => _regExpSpaceSeparators.hasMatch(lastCodeUnit),
     };
 
     final double baseline = lineMetrics.baseline;
@@ -682,12 +696,6 @@ class TextPainter {
       painter.dispose();
     }
   }
-
-  @Deprecated(  // flutter_ignore: deprecation_syntax (see analyze.dart)
-    'The disableStrutHalfLeading flag is for internal migration purposes only and should not be used.'
-  )
-  /// Migration only flag, do not use.
-  static bool disableStrutHalfLeading = true;
 
   // Whether textWidthBasis has changed after the most recent `layout` call.
   bool _debugNeedsRelayout = true;
@@ -1024,25 +1032,6 @@ class TextPainter {
   ui.ParagraphStyle _createParagraphStyle([ TextAlign? textAlignOverride ]) {
     assert(textDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     final TextStyle baseStyle = _text?.style ?? const TextStyle();
-    final StrutStyle? strutStyle = _strutStyle;
-
-    final bool applyMigration = !kIsWeb && TextPainter.disableStrutHalfLeading
-                             && strutStyle != null && (strutStyle.forceStrutHeight ?? false)
-                             && strutStyle.leadingDistribution == TextLeadingDistribution.even;
-    final StrutStyle? strutStyleForMigration = !applyMigration
-      ? strutStyle
-      : StrutStyle(
-        fontFamily: strutStyle.fontFamily,
-        fontFamilyFallback: strutStyle.fontFamilyFallback,
-        fontSize: strutStyle.fontSize,
-        height: strutStyle.height,
-        leadingDistribution: TextLeadingDistribution.proportional,
-        leading: strutStyle.leading,
-        fontWeight: strutStyle.fontWeight,
-        fontStyle: strutStyle.fontStyle,
-        forceStrutHeight: strutStyle.forceStrutHeight,
-      );
-
     return baseStyle.getParagraphStyle(
       textAlign: textAlignOverride ?? textAlign,
       textDirection: textDirection,
@@ -1051,7 +1040,7 @@ class TextPainter {
       textHeightBehavior: _textHeightBehavior,
       ellipsis: _ellipsis,
       locale: _locale,
-      strutStyle: strutStyleForMigration,
+      strutStyle: _strutStyle,
     );
   }
 
@@ -1070,6 +1059,7 @@ class TextPainter {
   }
 
   ui.Paragraph _getOrCreateLayoutTemplate() => _layoutTemplate ??= _createLayoutTemplate();
+
   /// The height of a space in [text] in logical pixels.
   ///
   /// Not every line of text in [text] will have this height, but this height
@@ -1213,7 +1203,7 @@ class TextPainter {
     //    called.
     final ui.Paragraph paragraph = (cachedLayout?.paragraph ?? _createParagraph(text))
       ..layout(ui.ParagraphConstraints(width: layoutMaxWidth));
-    final _TextLayout layout = _TextLayout._(paragraph, textDirection, plainText);
+    final _TextLayout layout = _TextLayout._(paragraph, textDirection, this);
     final double contentWidth = layout._contentWidthFor(minWidth, maxWidth, textWidthBasis);
 
     final _TextPainterLayoutCacheWithOffset newLayoutCache;
@@ -1330,8 +1320,6 @@ class TextPainter {
     return isLowSurrogate(prevCodeUnit) ? offset - 2 : offset - 1;
   }
 
-  // Get the caret metrics (in logical pixels) based off the trailing edge of the
-  // character upstream from the given string offset.
   static double _computePaintOffsetFraction(TextAlign textAlign, TextDirection textDirection) {
     return switch ((textAlign, textDirection)) {
       (TextAlign.left, _) => 0.0,
@@ -1352,7 +1340,7 @@ class TextPainter {
     final _LineCaretMetrics? caretMetrics = _computeCaretMetrics(position);
 
     if (caretMetrics == null) {
-        final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection!);
+      final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection!);
       // The full width is not (width - caretPrototype.width), because
       // RenderEditable reserves cursor width on the right. Ideally this
       // should be handled by RenderEditable instead.
@@ -1378,12 +1366,14 @@ class TextPainter {
   /// {@endtemplate}
   ///
   /// Valid only after [layout] has been called.
-  double? getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
+  double getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
     final TextBox textBox = _getOrCreateLayoutTemplate().getBoxesForRange(0, 1, boxHeightStyle: ui.BoxHeightStyle.strut).single;
     return textBox.toRect().height;
   }
+
   bool _isNewlineAtOffset(int offset) => 0 <= offset && offset < plainText.length
                                       && WordBoundary._isNewline(plainText.codeUnitAt(offset));
+
   // Cached caret metrics. This allows multiple invokes of [getOffsetForCaret] and
   // [getFullHeightForCaret] in a row without performing redundant and expensive
   // get rect calls to the paragraph.
@@ -1487,15 +1477,20 @@ class TextPainter {
     final _LineCaretMetrics metrics;
     final List<TextBox> boxes = cachedLayout.paragraph
       .getBoxesForRange(graphemeRange.start, graphemeRange.end, boxHeightStyle: ui.BoxHeightStyle.strut);
+
     if (boxes.isNotEmpty) {
-      final TextBox box = boxes.single;
-      metrics =_LineCaretMetrics(
-        offset: Offset(anchorToLeadingEdge ? box.start : box.end, box.top),
+      final bool anchorToLeft = switch (glyphInfo.writingDirection) {
+        TextDirection.ltr => anchorToLeadingEdge,
+        TextDirection.rtl => !anchorToLeadingEdge,
+      };
+      final TextBox box = anchorToLeft ? boxes.first : boxes.last;
+      metrics = _LineCaretMetrics(
+        offset: Offset(anchorToLeft ? box.left : box.right, box.top),
         writingDirection: box.direction,
       );
     } else {
       // Fall back to glyphInfo. This should only happen when using the HTML renderer.
-      assert(kIsWeb && !isCanvasKit);
+      assert(kIsWeb && !isSkiaWeb);
       final Rect graphemeBounds = glyphInfo.graphemeClusterLayoutBounds;
       final double dx = switch (glyphInfo.writingDirection) {
         TextDirection.ltr => anchorToLeadingEdge ? graphemeBounds.left : graphemeBounds.right,
@@ -1683,6 +1678,7 @@ class TextPainter {
   ///
   /// After disposal this painter is unusable.
   void dispose() {
+    assert(!debugDisposed);
     assert(() {
       _disposed = true;
       return true;

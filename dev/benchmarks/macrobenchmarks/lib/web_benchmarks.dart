@@ -306,7 +306,7 @@ class TimeseriesVisualization {
     drawLine(0, _normalized(_stats.average), _screenWidth, _normalized(_stats.average));
 
     // Draw a horizontal dashed line corresponding to the outlier cut off.
-    _ctx.setLineDash(<JSAny?>[5.toJS, 5.toJS].toJS);
+    _ctx.setLineDash(<JSNumber>[5.toJS, 5.toJS].toJS);
     drawLine(0, _normalized(_stats.outlierCutOff), _screenWidth, _normalized(_stats.outlierCutOff));
 
     // Draw a light red band that shows the noise (1 stddev in each direction).

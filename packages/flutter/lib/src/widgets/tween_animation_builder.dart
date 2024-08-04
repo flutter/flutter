@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/foundation.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'animated_size.dart';
+/// @docImport 'transitions.dart';
+library;
+
 import 'package:flutter/animation.dart';
 
 import 'framework.dart';
@@ -90,6 +97,11 @@ import 'value_listenable_builder.dart';
 /// [AnimatedBuilder], which can be used similarly to this
 /// [TweenAnimationBuilder], but unlike the latter it is powered by a
 /// developer-managed [AnimationController].
+///
+/// See also:
+///
+/// * [ValueListenableBuilder], a widget whose content stays synced with a
+///   [ValueListenable] instead of a [Tween].
 class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget {
   /// Creates a [TweenAnimationBuilder].
   ///

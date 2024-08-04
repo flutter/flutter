@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
 
 import 'dart:math' as math;
 
@@ -425,10 +427,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   bool isDisposed = false;
 
   void _updateCurveDirection(AnimationStatus status) {
-    _curveDirection = switch (status) {
-      AnimationStatus.dismissed || AnimationStatus.completed => null,
-      AnimationStatus.forward || AnimationStatus.reverse => _curveDirection ?? status,
-    };
+    _curveDirection = status.isAnimating ? _curveDirection ?? status : null;
   }
 
   bool get _useForwardCurve {
@@ -684,12 +683,7 @@ abstract class CompoundAnimation<T> extends Animation<T>
   /// The default is that if the [next] animation is moving, use its status.
   /// Otherwise, default to [first].
   @override
-  AnimationStatus get status {
-    if (next.status == AnimationStatus.forward || next.status == AnimationStatus.reverse) {
-      return next.status;
-    }
-    return first.status;
-  }
+  AnimationStatus get status => next.status.isAnimating ? next.status : first.status;
 
   @override
   String toString() {
@@ -748,7 +742,7 @@ class AnimationMax<T extends num> extends CompoundAnimation<T> {
 
 /// An animation that tracks the minimum of two other animations.
 ///
-/// The [value] of this animation is the maximum of the values of
+/// The [value] of this animation is the minimum of the values of
 /// [first] and [next].
 class AnimationMin<T extends num> extends CompoundAnimation<T> {
   /// Creates an [AnimationMin].

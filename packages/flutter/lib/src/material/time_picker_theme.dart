@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'color_scheme.dart';
+/// @docImport 'dialog.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'text_field.dart';
+/// @docImport 'text_theme.dart';
+/// @docImport 'time_picker.dart';
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -69,7 +77,7 @@ class TimePickerThemeData with Diagnosticable {
   /// The background color of a time picker.
   ///
   /// If this is null, the time picker defaults to the overall theme's
-  /// [ColorScheme.background].
+  /// [ColorScheme.surfaceContainerHigh].
   final Color? backgroundColor;
 
   /// The style of the cancel button of a [TimePickerDialog].
@@ -85,7 +93,7 @@ class TimePickerThemeData with Diagnosticable {
   /// ```dart
   /// BorderSide(
   ///   color: Color.alphaBlend(
-  ///     Theme.of(context).colorScheme.onBackground.withOpacity(0.38),
+  ///     Theme.of(context).colorScheme.onSurface.withOpacity(0.38),
   ///     Theme.of(context).colorScheme.surface,
   ///   ),
   /// ),
@@ -94,8 +102,8 @@ class TimePickerThemeData with Diagnosticable {
 
   /// The background color of the AM/PM toggle.
   ///
-  /// If [dayPeriodColor] is a [MaterialStateColor], then the effective
-  /// background color can depend on the [MaterialState.selected] state, i.e.
+  /// If [dayPeriodColor] is a [WidgetStateColor], then the effective
+  /// background color can depend on the [WidgetState.selected] state, i.e.
   /// if the segment is selected or not.
   ///
   /// By default, if the segment is selected, the overall theme's
@@ -135,8 +143,8 @@ class TimePickerThemeData with Diagnosticable {
 
   /// The color of the day period text that represents AM/PM.
   ///
-  /// If [dayPeriodTextColor] is a [MaterialStateColor], then the effective
-  /// text color can depend on the [MaterialState.selected] state, i.e. if the
+  /// If [dayPeriodTextColor] is a [WidgetStateColor], then the effective
+  /// text color can depend on the [WidgetState.selected] state, i.e. if the
   /// text is selected or not.
   ///
   /// By default the overall theme's [ColorScheme.primary] color is used when
@@ -154,7 +162,7 @@ class TimePickerThemeData with Diagnosticable {
   /// [TimePickerEntryMode.dial] or [TimePickerEntryMode.dialOnly].
   ///
   /// If this is null and [ThemeData.useMaterial3] is true, the time picker
-  /// dial background color defaults [ColorScheme.surfaceVariant] color.
+  /// dial background color defaults [ColorScheme.surfaceContainerHighest] color.
   ///
   /// If this is null and [ThemeData.useMaterial3] is false, the time picker
   /// dial background color defaults to [ColorScheme.onSurface] color with
@@ -172,8 +180,8 @@ class TimePickerThemeData with Diagnosticable {
 
   /// The color of the dial text that represents specific hours and minutes.
   ///
-  /// If [dialTextColor] is a [MaterialStateColor], then the effective
-  /// text color can depend on the [MaterialState.selected] state, i.e. if the
+  /// If [dialTextColor] is a [WidgetStateColor], then the effective
+  /// text color can depend on the [WidgetState.selected] state, i.e. if the
   /// text is selected or not.
   ///
   /// If this color is null then the dial's text colors are based on the
@@ -182,8 +190,8 @@ class TimePickerThemeData with Diagnosticable {
 
   /// The [TextStyle] for the numbers on the time selection dial.
   ///
-  /// If [dialTextStyle]'s [TextStyle.color] is a [MaterialStateColor], then the
-  /// effective text color can depend on the [MaterialState.selected] state,
+  /// If [dialTextStyle]'s [TextStyle.color] is a [WidgetStateColor], then the
+  /// effective text color can depend on the [WidgetState.selected] state,
   /// i.e. if the text is selected or not.
   ///
   /// If this style is null then the dial's text style is based on the theme's
@@ -213,8 +221,8 @@ class TimePickerThemeData with Diagnosticable {
 
   /// The background color of the hour and minute header segments.
   ///
-  /// If [hourMinuteColor] is a [MaterialStateColor], then the effective
-  /// background color can depend on the [MaterialState.selected] state, i.e.
+  /// If [hourMinuteColor] is a [WidgetStateColor], then the effective
+  /// background color can depend on the [WidgetState.selected] state, i.e.
   /// if the segment is selected or not.
   ///
   /// By default, if the segment is selected, the overall theme's
@@ -234,8 +242,8 @@ class TimePickerThemeData with Diagnosticable {
 
   /// The color of the header text that represents hours and minutes.
   ///
-  /// If [hourMinuteTextColor] is a [MaterialStateColor], then the effective
-  /// text color can depend on the [MaterialState.selected] state, i.e. if the
+  /// If [hourMinuteTextColor] is a [WidgetStateColor], then the effective
+  /// text color can depend on the [WidgetState.selected] state, i.e. if the
   /// text is selected or not.
   ///
   /// By default the overall theme's [ColorScheme.primary] color is used when
@@ -271,7 +279,7 @@ class TimePickerThemeData with Diagnosticable {
   /// `RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)))`.
   final ShapeBorder? shape;
 
-  /// The color of the time selector seperator between the hour and minute controls.
+  /// The color of the time selector separator between the hour and minute controls.
   ///
   /// if this is null, the time picker defaults to the overall theme's
   /// [ColorScheme.onSurface].
@@ -280,7 +288,7 @@ class TimePickerThemeData with Diagnosticable {
   /// [hourMinuteTextColor].
   final MaterialStateProperty<Color?>? timeSelectorSeparatorColor;
 
-  /// Used to configure the text style for the time selector seperator between the hour
+  /// Used to configure the text style for the time selector separator between the hour
   /// and minute controls.
   ///
   /// If this is null, the time picker defaults to the overall theme's

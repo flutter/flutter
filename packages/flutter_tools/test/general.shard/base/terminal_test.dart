@@ -5,6 +5,7 @@
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:test/fake.dart';
 
@@ -20,7 +21,7 @@ void main() {
       );
       bufferLogger.printStatus('0123456789' * 8);
 
-      expect(bufferLogger.statusText, equals(('${'0123456789' * 4}\n') * 2));
+      expect(bufferLogger.statusText, equals('${'0123456789' * 4}\n' * 2));
     });
 
     testWithoutContext('can turn off wrapping', () async {
@@ -263,6 +264,18 @@ void main() {
       'Error setting terminal echo mode, OS Error: The handle is invalid.',
     );
     terminal.singleCharMode = true;
+  });
+
+  testWithoutContext('singleCharMode is reset by shutdown hook', () {
+    final ShutdownHooks shutdownHooks = ShutdownHooks();
+    final FakeStdio stdio = FakeStdio();
+    final AnsiTerminal terminal = AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), shutdownHooks: shutdownHooks);
+    stdio.stdinHasTerminal = true;
+    stdio._stdin = FakeStdin();
+
+    terminal.singleCharMode = true;
+    shutdownHooks.runShutdownHooks(BufferLogger.test());
+    expect(terminal.singleCharMode, false);
   });
 }
 

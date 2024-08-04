@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -38,6 +39,7 @@ void main() {
     late FakeProcessManager fakeSuccessfulProcessManager;
     late FakeProcessManager fakeFailedProcessManagerForHostAddress;
     late File sshConfig;
+    final Logger logger = FakeLogger();
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
@@ -114,7 +116,7 @@ void main() {
       required BuildMode mode,
     }) async {
       const String appName = 'app_name';
-      final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123');
+      final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123', logger: logger);
       globals.fs.directory('fuchsia').createSync(recursive: true);
       final File pubspecFile = globals.fs.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync('name: $appName');
@@ -137,8 +139,12 @@ void main() {
                     .fuchsia);
       }
 
-      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(
-          BuildInfo(mode, null, treeShakeIcons: false));
+      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(BuildInfo(
+        mode,
+        null,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ));
       return device.startApp(
         app!,
         prebuiltApplication: prebuilt,
@@ -182,15 +188,19 @@ void main() {
         'start and stop prebuilt in release mode fails without session',
         () async {
       const String appName = 'app_name';
-      final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123');
+      final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123', logger: logger);
       globals.fs.directory('fuchsia').createSync(recursive: true);
       final File pubspecFile = globals.fs.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync('name: $appName');
       final File far = globals.fs.file('app_name-0.far')..createSync();
 
       final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far)!;
-      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(
-          const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
+      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(const BuildInfo(
+        BuildMode.release,
+        null,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ));
       final LaunchResult launchResult = await device.startApp(app,
           prebuiltApplication: true, debuggingOptions: debuggingOptions);
       expect(launchResult.started, isFalse);
@@ -208,15 +218,19 @@ void main() {
     testUsingContext('start and stop prebuilt in release mode with session',
         () async {
       const String appName = 'app_name';
-      final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123');
+      final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123', logger: logger);
       globals.fs.directory('fuchsia').createSync(recursive: true);
       final File pubspecFile = globals.fs.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync('name: $appName');
       final File far = globals.fs.file('app_name-0.far')..createSync();
 
       final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far)!;
-      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(
-          const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
+      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(const BuildInfo(
+        BuildMode.release,
+        null,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ));
       final LaunchResult launchResult = await device.startApp(app,
           prebuiltApplication: true, debuggingOptions: debuggingOptions);
       expect(launchResult.started, isTrue);
@@ -397,7 +411,7 @@ void main() {
     });
 
     testUsingContext('fail when cant get host address', () async {
-      expect(() async => FuchsiaDeviceWithFakeDiscovery('123').hostAddress,
+      expect(() async => FuchsiaDeviceWithFakeDiscovery('123', logger: logger).hostAddress,
           throwsToolExit(message: 'Failed to get local address, aborting.'));
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
@@ -467,7 +481,7 @@ Process _createFakeProcess({
 }
 
 class FuchsiaDeviceWithFakeDiscovery extends FuchsiaDevice {
-  FuchsiaDeviceWithFakeDiscovery(super.id, {super.name = ''});
+  FuchsiaDeviceWithFakeDiscovery(super.id, {super.name = '', required super.logger});
 
   @override
   FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(

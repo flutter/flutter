@@ -36,6 +36,7 @@ void main() {
     expect(flutterManifest.fonts, isEmpty);
     expect(flutterManifest.assets, isEmpty);
     expect(flutterManifest.additionalLicenses, isEmpty);
+    expect(flutterManifest.defaultFlavor, null);
   });
 
   testWithoutContext('FlutterManifest is null when the pubspec.yaml file is not a map', () async {
@@ -1414,6 +1415,70 @@ name: test
 
     expect(flutterManifest, isNotNull);
     expect(flutterManifest!.dependencies, isEmpty);
+  });
+
+  testWithoutContext('FlutterManifest knows if Swift Package Manager is disabled', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  disable-swift-package-manager: true
+''';
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    )!;
+
+    expect(flutterManifest.disabledSwiftPackageManager, true);
+  });
+
+  testWithoutContext('FlutterManifest does not disable Swift Package Manager if missing', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    )!;
+
+    expect(flutterManifest.disabledSwiftPackageManager, false);
+  });
+
+  testWithoutContext('FlutterManifest can parse default flavor', () async {
+    const String manifest = '''
+name: test
+flutter:
+    default-flavor: prod
+''';
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: BufferLogger.test(),
+    );
+
+    expect(flutterManifest, isNotNull);
+    expect(flutterManifest!.defaultFlavor, 'prod');
+  });
+
+  testWithoutContext('FlutterManifest fails on invalid default flavor', () async {
+    const String manifest = '''
+name: test
+flutter:
+    default-flavor: 3
+''';
+
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(logger.errorText, 'Expected "default-flavor" to be a string, but got 3 (int).\n');
   });
 }
 

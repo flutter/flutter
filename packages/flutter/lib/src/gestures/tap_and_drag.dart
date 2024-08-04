@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'arena.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -652,9 +657,12 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// ### When competing with `TapGestureRecognizer` and `DragGestureRecognizer`
 ///
 /// Similar to [TapGestureRecognizer] and [DragGestureRecognizer],
-/// [BaseTapAndDragGestureRecognizer] will not aggressively declare victory when it detects
-/// a tap, so when it is competing with those gesture recognizers and others it has a chance
-/// of losing.
+/// [BaseTapAndDragGestureRecognizer] will not aggressively declare victory when
+/// it detects a tap, so when it is competing with those gesture recognizers and
+/// others it has a chance of losing. Similarly, when `eagerVictoryOnDrag` is set
+/// to `false`, this recognizer will not aggressively declare victory when it
+/// detects a drag. By default, `eagerVictoryOnDrag` is set to `true`, so this
+/// recognizer will aggressively declare victory when it detects a drag.
 ///
 /// When competing against [TapGestureRecognizer], if the pointer does not move past the tap
 /// tolerance, then the recognizer that entered the arena first will win. In this case the
@@ -748,6 +756,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     super.debugOwner,
     super.supportedDevices,
     super.allowedButtonsFilter,
+    this.eagerVictoryOnDrag = true,
   }) : _deadline = kPressTimeout,
       dragStartBehavior = DragStartBehavior.start;
 
@@ -761,7 +770,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   /// no difference in behavior between the two settings.
   ///
   /// For more information about the gesture arena:
-  /// https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation
+  /// https://flutter.dev/to/gesture-disambiguation
   ///
   /// By default, the drag start behavior is [DragStartBehavior.start].
   ///
@@ -781,6 +790,15 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   /// recognizer will be reset.
   @override
   int? maxConsecutiveTap;
+
+  /// Whether this recognizer eagerly declares victory when it has detected
+  /// a drag.
+  ///
+  /// When this value is `false`, this recognizer will wait until it is the last
+  /// recognizer in the gesture arena before declaring victory on a drag.
+  ///
+  /// Defaults to `true`.
+  bool eagerVictoryOnDrag;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   ///
@@ -984,11 +1002,21 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
 
     _wonArenaForPrimaryPointer = true;
 
-    // resolve(GestureDisposition.accepted) will be called when the [PointerMoveEvent] has
-    // moved a sufficient global distance.
-    if (_start != null) {
+    // resolve(GestureDisposition.accepted) will be called when the [PointerMoveEvent]
+    // has moved a sufficient global distance to be considered a drag and
+    // `eagerVictoryOnDrag` is set to `true`.
+    if (_start != null && eagerVictoryOnDrag) {
       assert(_dragState == _DragState.accepted);
       assert(currentUp == null);
+      _acceptDrag(_start!);
+    }
+
+    // This recognizer will wait until it is the last one in the gesture arena
+    // before accepting a drag when `eagerVictoryOnDrag` is set to `false`.
+    if (_start != null && !eagerVictoryOnDrag) {
+      assert(_dragState == _DragState.possible);
+      assert(currentUp == null);
+      _dragState = _DragState.accepted;
       _acceptDrag(_start!);
     }
 
@@ -1037,6 +1065,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     }
 
     _stopDeadlineTimer();
+    _start = null;
     _dragState = _DragState.ready;
     _pastSlopTolerance = false;
   }
@@ -1076,7 +1105,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
 
         // This can occur when the recognizer is accepted before a [PointerMoveEvent] has been
         // received that moves the pointer a sufficient global distance to be considered a drag.
-        if (_start != null) {
+        if (_start != null && _wonArenaForPrimaryPointer) {
+          _dragState = _DragState.accepted;
           _acceptDrag(_start!);
         }
       }
@@ -1156,9 +1186,11 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     if (_hasSufficientGlobalDistanceToAccept(event.kind)
         || (_wonArenaForPrimaryPointer && _globalDistanceMovedAllAxes.abs() > computePanSlop(event.kind, gestureSettings))) {
       _start = event;
-      _dragState = _DragState.accepted;
-      if (!_wonArenaForPrimaryPointer) {
-        resolve(GestureDisposition.accepted);
+      if (eagerVictoryOnDrag) {
+        _dragState = _DragState.accepted;
+        if (!_wonArenaForPrimaryPointer) {
+          resolve(GestureDisposition.accepted);
+        }
       }
     }
   }

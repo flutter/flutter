@@ -26,7 +26,7 @@ class _${blockName}DefaultsM3 extends BottomAppBarTheme {
   Color? get color => ${componentColor('md.comp.bottom-app-bar.container')};
 
   @override
-  Color? get surfaceTintColor => ${componentColor('md.comp.bottom-app-bar.container.surface-tint-layer')};
+  Color? get surfaceTintColor => ${colorOrTransparent('md.comp.bottom-app-bar.container.surface-tint-layer')};
 
   @override
   Color? get shadowColor => Colors.transparent;

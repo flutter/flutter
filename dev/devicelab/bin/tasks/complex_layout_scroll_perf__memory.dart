@@ -13,5 +13,6 @@ Future<void> main() async {
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_memory/scroll_perf.dart',
     'com.yourcompany.complexLayout',
+    requiresTapToStart: true,
   ).run);
 }

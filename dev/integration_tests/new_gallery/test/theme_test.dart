@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gallery/themes/material_demo_theme_data.dart';
 
 void main() {
-  test('verify former toggleableActiveColor themes are set', () async {
+  test('verify the activeColors of toggleable widget themes are set', () async {
     const Color primaryColor = Color(0xFF6200EE);
     final ThemeData themeData = MaterialDemoThemeData.themeData;
 

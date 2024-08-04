@@ -2,9 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'binding.dart';
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'dart:ui' hide window;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 /// Test version of [AccessibilityFeatures] in which specific features may
 /// be set to arbitrary values.
@@ -154,6 +161,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }) : _platformDispatcher = platformDispatcher {
     _updateViewsAndDisplays();
     _platformDispatcher.onMetricsChanged = _handleMetricsChanged;
+    _platformDispatcher.onViewFocusChange = _handleViewFocusChanged;
   }
 
   /// The [PlatformDispatcher] that is wrapped by this [TestPlatformDispatcher].
@@ -176,10 +184,75 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   set onMetricsChanged(VoidCallback? callback) {
     _onMetricsChanged = callback;
   }
-
   void _handleMetricsChanged() {
     _updateViewsAndDisplays();
     _onMetricsChanged?.call();
+  }
+
+  @override
+  ViewFocusChangeCallback? get onViewFocusChange => _platformDispatcher.onViewFocusChange;
+  ViewFocusChangeCallback? _onViewFocusChange;
+  @override
+  set onViewFocusChange(ViewFocusChangeCallback? callback) {
+    _onViewFocusChange = callback;
+  }
+  void _handleViewFocusChanged(ViewFocusEvent event) {
+    _updateViewsAndDisplays();
+    _currentlyFocusedViewId = switch (event.state) {
+      ViewFocusState.focused => event.viewId,
+      ViewFocusState.unfocused => null,
+    };
+    _onViewFocusChange?.call(event);
+  }
+
+  /// Returns the list of [ViewFocusEvent]s that have been received by
+  /// [requestViewFocusChange] since the last call to
+  /// [resetFocusedViewTestValues].
+  ///
+  /// Clearing or modifying the returned list will do nothing (it's a copy).
+  /// Call [resetFocusedViewTestValues] to clear.
+  List<ViewFocusEvent> get testFocusEvents => _testFocusEvents.toList();
+  final List<ViewFocusEvent> _testFocusEvents = <ViewFocusEvent>[];
+
+  /// Returns the last view ID to be focused by [onViewFocusChange].
+  /// Returns null if no views are focused.
+  ///
+  /// Can be reset to null with [resetFocusedViewTestValues].
+  int? get currentlyFocusedViewIdTestValue => _currentlyFocusedViewId;
+  int? _currentlyFocusedViewId;
+
+  /// Clears [testFocusEvents] and sets [currentlyFocusedViewIdTestValue] to
+  /// null.
+  void resetFocusedViewTestValues() {
+    if (_currentlyFocusedViewId != null) {
+      // If there is a focused view, then tell everyone who still cares that
+      // it's unfocusing.
+      _platformDispatcher.onViewFocusChange?.call(
+        ViewFocusEvent(
+          viewId: _currentlyFocusedViewId!,
+          state: ViewFocusState.unfocused,
+          direction: ViewFocusDirection.undefined,
+        ),
+      );
+      _currentlyFocusedViewId = null;
+    }
+    _testFocusEvents.clear();
+  }
+
+  @override
+  void requestViewFocusChange({
+    required int viewId,
+    required ViewFocusState state,
+    required ViewFocusDirection direction,
+  }) {
+    _testFocusEvents.add(
+      ViewFocusEvent(
+        viewId: viewId,
+        state: state,
+        direction: direction,
+      ),
+    );
+    _platformDispatcher.requestViewFocusChange(viewId: viewId, state: state, direction: direction);
   }
 
   @override
@@ -305,6 +378,18 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// service is defined and returns to the real value.
   void clearNativeSpellCheckServiceDefined() {
     _nativeSpellCheckServiceDefinedTestValue = null;
+  }
+
+  @override
+  bool get supportsShowingSystemContextMenu => _supportsShowingSystemContextMenu ?? _platformDispatcher.supportsShowingSystemContextMenu;
+  bool? _supportsShowingSystemContextMenu;
+  set supportsShowingSystemContextMenu(bool value) { // ignore: avoid_setters_without_getters
+    _supportsShowingSystemContextMenu = value;
+  }
+
+  /// Resets [supportsShowingSystemContextMenu] to the default value.
+  void resetSupportsShowingSystemContextMenu() {
+    _supportsShowingSystemContextMenu = null;
   }
 
   @override
@@ -458,6 +543,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     clearTextScaleFactorTestValue();
     clearNativeSpellCheckServiceDefined();
     resetBrieflyShowPassword();
+    resetSupportsShowingSystemContextMenu();
     resetInitialLifecycleState();
     resetSystemFontFamily();
   }

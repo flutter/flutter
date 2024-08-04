@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app.dart';
+/// @docImport 'material_localizations.dart';
+/// @docImport 'selectable_text.dart';
+library;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 
@@ -35,6 +40,7 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [SelectableRegion], which provides an overview of the selection system.
+///  * [SelectableText], which enables selection on a single run of text.
 class SelectionArea extends StatefulWidget {
   /// Creates a [SelectionArea].
   ///

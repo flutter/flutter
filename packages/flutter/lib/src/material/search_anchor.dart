@@ -8,6 +8,7 @@ import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 
+import 'back_button.dart';
 import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -183,6 +184,7 @@ class SearchAnchor extends StatefulWidget {
     required SuggestionsBuilder suggestionsBuilder,
     TextInputAction? textInputAction,
     TextInputType? keyboardType,
+    EdgeInsets scrollPadding,
   }) = _SearchAnchorWithSearchBar;
 
   /// Whether the search view grows to fill the entire screen when the
@@ -228,7 +230,7 @@ class SearchAnchor extends StatefulWidget {
   /// The search view's background fill color.
   ///
   /// If null, the value of [SearchViewThemeData.backgroundColor] will be used.
-  /// If this is also null, then the default value is [ColorScheme.surface].
+  /// If this is also null, then the default value is [ColorScheme.surfaceContainerHigh].
   final Color? viewBackgroundColor;
 
   /// The elevation of the search view's [Material].
@@ -239,7 +241,10 @@ class SearchAnchor extends StatefulWidget {
 
   /// The surface tint color of the search view's [Material].
   ///
-  /// See [Material.surfaceTintColor] for more details.
+  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
+  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
+  /// which provide more flexibility. The intention is to eventually remove surface tint color from
+  /// the framework.
   ///
   /// If null, the value of [SearchViewThemeData.surfaceTintColor] will be used.
   /// If this is also null, then the default value is [ColorScheme.surfaceTint].
@@ -515,6 +520,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final CapturedThemes capturedThemes;
   final TextInputAction? textInputAction;
   final TextInputType? keyboardType;
+  CurvedAnimation? curvedAnimation;
+  CurvedAnimation? viewFadeOnIntervalCurve;
 
   @override
   Color? get barrierColor => Colors.transparent;
@@ -556,6 +563,13 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     updateTweens(anchorKey.currentContext!);
     toggleVisibility?.call();
     return super.didPop(result);
+  }
+
+  @override
+  void dispose() {
+    curvedAnimation?.dispose();
+    viewFadeOnIntervalCurve?.dispose();
+    super.dispose();
   }
 
   void updateViewConfig(BuildContext context) {
@@ -617,23 +631,25 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
       child: AnimatedBuilder(
         animation: animation,
         builder: (BuildContext context, Widget? child) {
-          final Animation<double> curvedAnimation = CurvedAnimation(
+          curvedAnimation ??= CurvedAnimation(
             parent: animation,
             curve: Curves.easeInOutCubicEmphasized,
             reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
           );
 
-          final Rect viewRect = _rectTween.evaluate(curvedAnimation)!;
+          final Rect viewRect = _rectTween.evaluate(curvedAnimation!)!;
           final double topPadding = showFullScreenView
-            ? lerpDouble(0.0, MediaQuery.paddingOf(context).top, curvedAnimation.value)!
+            ? lerpDouble(0.0, MediaQuery.paddingOf(context).top, curvedAnimation!.value)!
             : 0.0;
 
+          viewFadeOnIntervalCurve ??= CurvedAnimation(
+            parent: animation,
+            curve: _kViewFadeOnInterval,
+            reverseCurve: _kViewFadeOnInterval.flipped,
+          );
+
           return FadeTransition(
-            opacity: CurvedAnimation(
-              parent: animation,
-              curve: _kViewFadeOnInterval,
-              reverseCurve: _kViewFadeOnInterval.flipped,
-            ),
+            opacity: viewFadeOnIntervalCurve!,
             child: capturedThemes.wrap(
               _ViewContent(
                 viewOnChanged: viewOnChanged,
@@ -651,7 +667,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
                 viewHeaderHintStyle: viewHeaderHintStyle,
                 dividerColor: dividerColor,
                 showFullScreenView: showFullScreenView,
-                animation: curvedAnimation,
+                animation: curvedAnimation!,
                 topPadding: topPadding,
                 viewMaxWidth: _rectTween.end!.width,
                 viewRect: viewRect,
@@ -735,8 +751,13 @@ class _ViewContent extends StatefulWidget {
 class _ViewContentState extends State<_ViewContent> {
   Size? _screenSize;
   late Rect _viewRect;
+  late CurvedAnimation viewIconsFadeCurve;
+  late CurvedAnimation viewDividerFadeCurve;
+  late CurvedAnimation viewListFadeOnIntervalCurve;
   late final SearchController _controller;
   Iterable<Widget> result = <Widget>[];
+  String? searchValue;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -744,6 +765,7 @@ class _ViewContentState extends State<_ViewContent> {
     _viewRect = widget.viewRect;
     _controller = widget.searchController;
     _controller.addListener(updateSuggestions);
+    _setupAnimations();
   }
 
   @override
@@ -767,13 +789,55 @@ class _ViewContentState extends State<_ViewContent> {
         _viewRect = Offset.zero & _screenSize!;
       }
     }
-    unawaited(updateSuggestions());
+
+    if (searchValue != _controller.text) {
+      _timer?.cancel();
+      _timer = Timer(Duration.zero, () async {
+        searchValue = _controller.text;
+        final Iterable<Widget> suggestions =
+            await widget.suggestionsBuilder(context, _controller);
+        _timer?.cancel();
+        _timer = null;
+        if (mounted) {
+          setState(() {
+            result = suggestions;
+          });
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
     _controller.removeListener(updateSuggestions);
+    _disposeAnimations();
+    _timer?.cancel();
+    _timer = null;
     super.dispose();
+  }
+
+  void _setupAnimations() {
+    viewIconsFadeCurve = CurvedAnimation(
+      parent: widget.animation,
+      curve: _kViewIconsFadeOnInterval,
+      reverseCurve: _kViewIconsFadeOnInterval.flipped,
+    );
+    viewDividerFadeCurve = CurvedAnimation(
+      parent: widget.animation,
+      curve: _kViewDividerFadeOnInterval,
+      reverseCurve: _kViewFadeOnInterval.flipped,
+    );
+      viewListFadeOnIntervalCurve = CurvedAnimation(
+      parent: widget.animation,
+      curve: _kViewListFadeOnInterval,
+      reverseCurve: _kViewListFadeOnInterval.flipped,
+    );
+  }
+
+  void _disposeAnimations() {
+    viewIconsFadeCurve.dispose();
+    viewDividerFadeCurve.dispose();
+    viewListFadeOnIntervalCurve.dispose();
   }
 
   Widget viewBuilder(Iterable<Widget> suggestions) {
@@ -790,21 +854,22 @@ class _ViewContentState extends State<_ViewContent> {
   }
 
   Future<void> updateSuggestions() async {
-    final Iterable<Widget> suggestions = await widget.suggestionsBuilder(context, _controller);
-    if (mounted) {
-      setState(() {
-        result = suggestions;
-      });
+    if (searchValue != _controller.text) {
+      searchValue = _controller.text;
+      final Iterable<Widget> suggestions = await widget.suggestionsBuilder(context, _controller);
+      if (mounted) {
+        setState(() {
+          result = suggestions;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final Widget defaultLeading = IconButton(
-      icon: const Icon(Icons.arrow_back),
-      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-      onPressed: () { Navigator.of(context).pop(); },
+    final Widget defaultLeading = BackButton(
       style: const ButtonStyle(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+      onPressed: () { Navigator.of(context).pop(); },
     );
 
     final List<Widget> defaultTrailing = <Widget>[
@@ -881,11 +946,7 @@ class _ViewContentState extends State<_ViewContent> {
                 maxWidth: math.min(widget.viewMaxWidth, _screenSize!.width),
                 minWidth: 0,
                 child: FadeTransition(
-                  opacity: CurvedAnimation(
-                    parent: widget.animation,
-                    curve: _kViewIconsFadeOnInterval,
-                    reverseCurve: _kViewIconsFadeOnInterval.flipped,
-                  ),
+                  opacity: viewIconsFadeCurve,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
@@ -918,19 +979,11 @@ class _ViewContentState extends State<_ViewContent> {
                         ),
                       ),
                       FadeTransition(
-                        opacity: CurvedAnimation(
-                          parent: widget.animation,
-                          curve: _kViewDividerFadeOnInterval,
-                          reverseCurve: _kViewFadeOnInterval.flipped,
-                        ),
+                        opacity: viewDividerFadeCurve,
                         child: viewDivider),
                       Expanded(
                         child: FadeTransition(
-                          opacity: CurvedAnimation(
-                            parent: widget.animation,
-                            curve: _kViewListFadeOnInterval,
-                            reverseCurve: _kViewListFadeOnInterval.flipped,
-                          ),
+                          opacity: viewListFadeOnIntervalCurve,
                           child: viewBuilder(result),
                         ),
                       ),
@@ -981,6 +1034,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     required super.suggestionsBuilder,
     super.textInputAction,
     super.keyboardType,
+    EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
   }) : super(
     viewHintText: viewHintText ?? barHintText,
     headerHeight: viewHeaderHeight,
@@ -1014,6 +1068,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
         textCapitalization: textCapitalization,
         textInputAction: textInputAction,
         keyboardType: keyboardType,
+        scrollPadding: scrollPadding,
       );
     }
   );
@@ -1115,6 +1170,7 @@ class SearchBar extends StatefulWidget {
     this.leading,
     this.trailing,
     this.onTap,
+    this.onTapOutside,
     this.onChanged,
     this.onSubmitted,
     this.constraints,
@@ -1133,6 +1189,7 @@ class SearchBar extends StatefulWidget {
     this.autoFocus = false,
     this.textInputAction,
     this.keyboardType,
+    this.scrollPadding = const EdgeInsets.all(20.0),
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1167,6 +1224,9 @@ class SearchBar extends StatefulWidget {
   /// Called when the user taps this search bar.
   final GestureTapCallback? onTap;
 
+  /// Called when the user taps outside the search bar.
+  final TapRegionCallback? onTapOutside;
+
   /// Invoked upon user input.
   final ValueChanged<String>? onChanged;
 
@@ -1192,7 +1252,7 @@ class SearchBar extends StatefulWidget {
   /// The search bar's background fill color.
   ///
   /// If null, the value of [SearchBarThemeData.backgroundColor] will be used.
-  /// If this is also null, then the default value is [ColorScheme.surface].
+  /// If this is also null, then the default value is [ColorScheme.surfaceContainerHigh].
   final MaterialStateProperty<Color?>? backgroundColor;
 
   /// The shadow color of the search bar's [Material].
@@ -1203,10 +1263,13 @@ class SearchBar extends StatefulWidget {
 
   /// The surface tint color of the search bar's [Material].
   ///
-  /// See [Material.surfaceTintColor] for more details.
+  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
+  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
+  /// which provide more flexibility. The intention is to eventually remove surface tint color from
+  /// the framework.
   ///
   /// If null, the value of [SearchBarThemeData.surfaceTintColor] will be used.
-  /// If this is also null, then the default value is [ColorScheme.surfaceTint].
+  /// If this is also null, then the default value is [Colors.transparent].
   final MaterialStateProperty<Color?>? surfaceTintColor;
 
   /// The highlight color that's typically used to indicate that
@@ -1268,6 +1331,9 @@ class SearchBar extends StatefulWidget {
   /// Defaults to the default value specified in [TextField].
   final TextInputType? keyboardType;
 
+  /// {@macro flutter.widgets.editableText.scrollPadding}
+  final EdgeInsets scrollPadding;
+
   @override
   State<SearchBar> createState() => _SearchBarState();
 }
@@ -1297,7 +1363,6 @@ class _SearchBarState extends State<SearchBar> {
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final IconThemeData iconTheme = IconTheme.of(context);
     final SearchBarThemeData searchBarTheme = SearchBarTheme.of(context);
     final SearchBarThemeData defaults = _SearchBarDefaultsM3(context);
 
@@ -1328,33 +1393,27 @@ class _SearchBarState extends State<SearchBar> {
       ?? searchBarTheme.textStyle?.resolve(states)
       ?? defaults.hintStyle?.resolve(states);
 
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    bool isIconThemeColorDefault(Color? color) {
-      if (isDark) {
-        return color == kDefaultIconLightColor;
-      }
-      return color == kDefaultIconDarkColor;
-    }
+    final Color defaultColor = switch (colorScheme.brightness) {
+      Brightness.light => kDefaultIconDarkColor,
+      Brightness.dark  => kDefaultIconLightColor,
+    };
+    final IconThemeData? customTheme = switch (IconTheme.of(context)) {
+      final IconThemeData iconTheme when iconTheme.color != defaultColor => iconTheme,
+      _ => null,
+    };
 
     Widget? leading;
     if (widget.leading != null) {
       leading = IconTheme.merge(
-        data: isIconThemeColorDefault(iconTheme.color)
-          ? IconThemeData(color: colorScheme.onSurface)
-          : iconTheme,
+        data: customTheme ?? IconThemeData(color: colorScheme.onSurface),
         child: widget.leading!,
       );
     }
 
-    List<Widget>? trailing;
-    if (widget.trailing != null) {
-      trailing = widget.trailing?.map((Widget trailing) => IconTheme.merge(
-        data: isIconThemeColorDefault(iconTheme.color)
-          ? IconThemeData(color: colorScheme.onSurfaceVariant)
-          : iconTheme,
-        child: trailing,
-      )).toList();
-    }
+    final List<Widget>? trailing = widget.trailing?.map((Widget trailing) => IconTheme.merge(
+      data: customTheme ?? IconThemeData(color: colorScheme.onSurfaceVariant),
+      child: trailing,
+    )).toList();
 
     return ConstrainedBox(
       constraints: widget.constraints ?? searchBarTheme.constraints ?? defaults.constraints!,
@@ -1391,6 +1450,7 @@ class _SearchBarState extends State<SearchBar> {
                           autofocus: widget.autoFocus,
                           onTap: widget.onTap,
                           onTapAlwaysCalled: true,
+                          onTapOutside: widget.onTapOutside,
                           focusNode: _focusNode,
                           onChanged: widget.onChanged,
                           onSubmitted: widget.onSubmitted,
@@ -1414,10 +1474,11 @@ class _SearchBarState extends State<SearchBar> {
                           textCapitalization: effectiveTextCapitalization,
                           textInputAction: widget.textInputAction,
                           keyboardType: widget.keyboardType,
+                          scrollPadding: widget.scrollPadding,
                         ),
                       ),
                     ),
-                    if (trailing != null) ...trailing,
+                    ...?trailing,
                   ],
                 ),
               ),
@@ -1445,7 +1506,7 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor =>
-    MaterialStatePropertyAll<Color>(_colors.surface);
+    MaterialStatePropertyAll<Color>(_colors.surfaceContainerHigh);
 
   @override
   MaterialStateProperty<double>? get elevation =>
@@ -1457,13 +1518,13 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
 
   @override
   MaterialStateProperty<Color>? get surfaceTintColor =>
-    MaterialStatePropertyAll<Color>(_colors.surfaceTint);
+    const MaterialStatePropertyAll<Color>(Colors.transparent);
 
   @override
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
-        return _colors.onSurface.withOpacity(0.12);
+        return _colors.onSurface.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
@@ -1520,13 +1581,13 @@ class _SearchViewDefaultsM3 extends SearchViewThemeData {
   static double fullScreenBarHeight = 72.0;
 
   @override
-  Color? get backgroundColor => _colors.surface;
+  Color? get backgroundColor => _colors.surfaceContainerHigh;
 
   @override
   double? get elevation => 6.0;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   // No default side
 

@@ -102,7 +102,6 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         fileSystem: globals.fs,
         artifacts: globals.artifacts!,
-        usage: globals.flutterUsage,
         analytics: globals.analytics,
         gradleUtils: globals.gradleUtils!,
         platform: globals.platform,
@@ -218,7 +217,7 @@ Future<T> runInContext<T>(
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        dartExecutable: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+        artifacts: globals.artifacts!,
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),

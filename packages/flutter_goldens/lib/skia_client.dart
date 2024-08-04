@@ -2,20 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'flutter_goldens.dart';
+library;
+
 import 'dart:convert';
-import 'dart:ffi' show Abi;
 import 'dart:io' as io;
 
 import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
-import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 // If you are here trying to figure out how to use golden files in the Flutter
 // repo itself, consider reading this wiki page:
-// https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
+// https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 const String _kGoldctlKey = 'GOLDCTL';
@@ -23,7 +24,10 @@ const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
 const String _kWebRendererKey = 'FLUTTER_WEB_RENDERER';
 const String _kImpellerKey = 'FLUTTER_TEST_IMPELLER';
 
-/// Exception thrown when an error is returned from the [SkiaClient].
+/// Signature of callbacks used to inject [print] replacements.
+typedef LogCallback = void Function(String);
+
+/// Exception thrown when an error is returned from the [SkiaGoldClient].
 class SkiaException implements Exception {
   /// Creates a new `SkiaException` with a required error [message].
   const SkiaException(this.message);
@@ -41,19 +45,18 @@ class SkiaException implements Exception {
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
 class SkiaGoldClient {
-  /// Creates a [SkiaGoldClient] with the given [workDirectory].
+  /// Creates a [SkiaGoldClient] with the given [workDirectory] and [Platform].
   ///
   /// All other parameters are optional. They may be provided in tests to
-  /// override the defaults for [fs], [process], [platform], and [httpClient].
+  /// override the defaults for [fs], [process], and [httpClient].
   SkiaGoldClient(
     this.workDirectory, {
-    this.fs = const LocalFileSystem(),
-    this.process = const LocalProcessManager(),
-    this.platform = const LocalPlatform(),
-    Abi? abi,
-    io.HttpClient? httpClient,
-  }) : httpClient = httpClient ?? io.HttpClient(),
-       abi = abi ?? Abi.current();
+    required this.fs,
+    required this.process,
+    required this.platform,
+    required this.httpClient,
+    required this.log,
+  });
 
   /// The file system to use for storing the local clone of the repository.
   ///
@@ -61,10 +64,8 @@ class SkiaGoldClient {
   /// replaced by a memory file system.
   final FileSystem fs;
 
-  /// A wrapper for the [dart:io.Platform] API.
-  ///
-  /// This is useful in tests, where the system platform (the default) can be
-  /// replaced by a mock platform instance.
+  /// The environment (current working directory, identity of the OS,
+  /// environment variables, etc).
   final Platform platform;
 
   /// A controller for launching sub-processes.
@@ -77,18 +78,16 @@ class SkiaGoldClient {
   /// A client for making Http requests to the Flutter Gold dashboard.
   final io.HttpClient httpClient;
 
-  /// The ABI of the current host platform.
-  ///
-  /// If not overriden for testing, defaults to [Abi.current];
-  final Abi abi;
-
-  /// The local [Directory] within the [comparisonRoot] for the current test
+  /// The local [Directory] within the comparison root for the current test
   /// context. In this directory, the client will create image and JSON files
   /// for the goldctl tool to use.
   ///
-  /// This is informed by the [FlutterGoldenFileComparator] [basedir]. It cannot
-  /// be null.
+  /// This is informed by [FlutterGoldenFileComparator.basedir]. It cannot be
+  /// null.
   final Directory workDirectory;
+
+  /// The logging function to use when reporting messages to the console.
+  final LogCallback log;
 
   /// The local [Directory] where the Flutter repository is hosted.
   ///
@@ -242,7 +241,7 @@ class SkiaGoldClient {
         ..writeln('Visit https://flutter-gold.skia.org/ to view and approve ')
         ..writeln('the image(s), or revert the associated change. For more ')
         ..writeln('information, visit the wiki: ')
-        ..writeln('https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter')
+        ..writeln('https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md')
         ..writeln()
         ..writeln('Debug information for Gold --------------------------------')
         ..writeln('stdout: ${result.stdout}')
@@ -332,7 +331,11 @@ class SkiaGoldClient {
   ///
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [FlutterPreSubmitFileComparator].
-  Future<void> tryjobAdd(String testName, File goldenFile) async {
+  ///
+  /// If the tryjob fails due to pixel differences, the method will succeed
+  /// as the failure will be triaged in the 'Flutter Gold' dashboard, and the
+  /// `stdout` will contain the failure message; otherwise will return `null`.
+  Future<String?> tryjobAdd(String testName, File goldenFile) async {
     final List<String> imgtestCommand = <String>[
       _goldctl,
       'imgtest', 'add',
@@ -346,7 +349,7 @@ class SkiaGoldClient {
 
     final io.ProcessResult result = await process.run(imgtestCommand);
 
-    final String/*!*/ resultStdout = result.stdout.toString();
+    final String resultStdout = result.stdout.toString();
     if (result.exitCode != 0 &&
       !(resultStdout.contains('Untriaged') || resultStdout.contains('negative image'))) {
       String? resultContents;
@@ -369,6 +372,7 @@ class SkiaGoldClient {
         ..writeln('result-state.json: ${resultContents ?? 'No result file found.'}');
       throw SkiaException(buf.toString());
     }
+    return result.exitCode == 0 ? null : resultStdout;
   }
 
   // Constructs arguments for `goldctl` for controlling how pixels are compared.
@@ -380,7 +384,7 @@ class SkiaGoldClient {
   // differences are very small (typically not noticeable to human eye).
   List<String> _getPixelMatchingArguments() {
     // Only use fuzzy pixel matching in the HTML renderer.
-    if (!_isBrowserTest || _isBrowserCanvasKitTest) {
+    if (!_isBrowserTest || _isBrowserSkiaTest) {
       return const <String>[];
     }
 
@@ -421,35 +425,28 @@ class SkiaGoldClient {
   Future<String?> getExpectationForTest(String testName) async {
     late String? expectation;
     final String traceID = getTraceID(testName);
-    await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
-      final Uri requestForExpectations = Uri.parse(
-        'https://flutter-gold.skia.org/json/v2/latestpositivedigest/$traceID'
-      );
-      late String rawResponse;
-      try {
-        final io.HttpClientRequest request = await httpClient.getUrl(requestForExpectations);
-        final io.HttpClientResponse response = await request.close();
-        rawResponse = await utf8.decodeStream(response);
-        final dynamic jsonResponse = json.decode(rawResponse);
-        if (jsonResponse is! Map<String, dynamic>) {
-          throw const FormatException('Skia gold expectations do not match expected format.');
-        }
-        expectation = jsonResponse['digest'] as String?;
-      } on FormatException catch (error) {
-        // Ideally we'd use something like package:test's printOnError, but best reliability
-        // in getting logs on CI for now we're just using print.
-        // See also: https://github.com/flutter/flutter/issues/91285
-        print( // ignore: avoid_print
-          'Formatting error detected requesting expectations from Flutter Gold.\n'
-          'error: $error\n'
-          'url: $requestForExpectations\n'
-          'response: $rawResponse'
-        );
-        rethrow;
-      }
-    },
-      SkiaGoldHttpOverrides(),
+    final Uri requestForExpectations = Uri.parse(
+      'https://flutter-gold.skia.org/json/v2/latestpositivedigest/$traceID'
     );
+    late String rawResponse;
+    try {
+      final io.HttpClientRequest request = await httpClient.getUrl(requestForExpectations);
+      final io.HttpClientResponse response = await request.close();
+      rawResponse = await utf8.decodeStream(response);
+      final dynamic jsonResponse = json.decode(rawResponse);
+      if (jsonResponse is! Map<String, dynamic>) {
+        throw const FormatException('Skia gold expectations do not match expected format.');
+      }
+      expectation = jsonResponse['digest'] as String?;
+    } on FormatException catch (error) {
+      log(
+        'Formatting error detected requesting expectations from Flutter Gold.\n'
+        'error: $error\n'
+        'url: $requestForExpectations\n'
+        'response: $rawResponse'
+      );
+      rethrow;
+    }
     return expectation;
   }
 
@@ -459,16 +456,12 @@ class SkiaGoldClient {
   /// The provided image hash represents an expectation from Flutter Gold.
   Future<List<int>>getImageBytes(String imageHash) async {
     final List<int> imageBytes = <int>[];
-    await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
-      final Uri requestForImage = Uri.parse(
-        'https://flutter-gold.skia.org/img/images/$imageHash.png',
-      );
-      final io.HttpClientRequest request = await httpClient.getUrl(requestForImage);
-      final io.HttpClientResponse response = await request.close();
-      await response.forEach((List<int> bytes) => imageBytes.addAll(bytes));
-    },
-      SkiaGoldHttpOverrides(),
+    final Uri requestForImage = Uri.parse(
+      'https://flutter-gold.skia.org/img/images/$imageHash.png',
     );
+    final io.HttpClientRequest request = await httpClient.getUrl(requestForImage);
+    final io.HttpClientResponse response = await request.close();
+    await response.forEach((List<int> bytes) => imageBytes.addAll(bytes));
     return imageBytes;
   }
 
@@ -484,7 +477,7 @@ class SkiaGoldClient {
       if (revParse.exitCode != 0) {
         throw const SkiaException('Current commit of Flutter can not be found.');
       }
-      return (revParse.stdout as String/*!*/).trim();
+      return (revParse.stdout as String).trim();
     }
   }
 
@@ -495,9 +488,9 @@ class SkiaGoldClient {
   /// image was rendered on, and for web tests, the browser the image was
   /// rendered on.
   String _getKeysJSON() {
+    final String? webRenderer = _webRendererValue;
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
-      'Abi': abi.toString(),
       'CI' : 'luci',
       if (_isImpeller)
         'impeller': 'swiftshader',
@@ -505,8 +498,8 @@ class SkiaGoldClient {
     if (_isBrowserTest) {
       keys['Browser'] = _browserKey;
       keys['Platform'] = '${keys['Platform']}-browser';
-      if (_isBrowserCanvasKitTest) {
-        keys['WebRenderer'] = 'canvaskit';
+      if (webRenderer != null) {
+        keys['WebRenderer'] = webRenderer;
       }
     }
     return json.encode(keys);
@@ -524,12 +517,12 @@ class SkiaGoldClient {
     final File authFile = workDirectory.childFile(fs.path.join(
       'temp',
       'auth_opt.json',
-    ))/*!*/;
+    ));
 
     if (await authFile.exists()) {
       final String contents = await authFile.readAsString();
       final Map<String, dynamic> decoded = json.decode(contents) as Map<String, dynamic>;
-      return !(decoded['GSUtil'] as bool/*!*/);
+      return !(decoded['GSUtil'] as bool);
     }
     return false;
   }
@@ -552,8 +545,15 @@ class SkiaGoldClient {
     return platform.environment[_kTestBrowserKey] != null;
   }
 
-  bool get _isBrowserCanvasKitTest {
-    return _isBrowserTest && platform.environment[_kWebRendererKey] == 'canvaskit';
+  bool get _isBrowserSkiaTest {
+    return _isBrowserTest && switch (platform.environment[_kWebRendererKey]) {
+      'canvaskit' || 'skwasm' => true,
+      _ => false,
+    };
+  }
+
+  String? get _webRendererValue {
+    return _isBrowserSkiaTest ? platform.environment[_kWebRendererKey] : null;
   }
 
   bool get _isImpeller {
@@ -569,24 +569,25 @@ class SkiaGoldClient {
   /// the latest positive digest on Flutter Gold with a hex-encoded md5 hash of
   /// the image keys.
   String getTraceID(String testName) {
-    final Map<String, Object?> keys = <String, Object?>{
+    final String? webRenderer = _webRendererValue;
+    final Map<String, Object?> parameters = <String, Object?>{
       if (_isBrowserTest)
         'Browser' : _browserKey,
-      if (_isBrowserCanvasKitTest)
-        'WebRenderer' : 'canvaskit',
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
-      'Abi': abi.toString(),
-      'name' : testName,
-      'source_type' : 'flutter',
+      if (webRenderer != null)
+        'WebRenderer' : webRenderer,
       if (_isImpeller)
         'impeller': 'swiftshader',
+      'name' : testName,
+      'source_type' : 'flutter',
     };
-    final String jsonTrace = json.encode(keys);
+    final Map<String, Object?> sorted = <String, Object?>{};
+    for (final String key in parameters.keys.toList()..sort()) {
+      sorted[key] = parameters[key];
+    }
+    final String jsonTrace = json.encode(sorted);
     final String md5Sum = md5.convert(utf8.encode(jsonTrace)).toString();
     return md5Sum;
   }
 }
-
-/// Used to make HttpRequests during testing.
-class SkiaGoldHttpOverrides extends io.HttpOverrides { }

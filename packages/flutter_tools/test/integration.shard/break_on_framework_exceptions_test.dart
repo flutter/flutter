@@ -359,7 +359,7 @@ void main() {
       SchedulerBinding.instance!.addTimingsCallback((List<FrameTiming> timings) {
         throw 'TimingsCallback';
       });
-      ui.window.onReportTimings!(<FrameTiming>[]);
+      ui.PlatformDispatcher.instance.onReportTimings!(<FrameTiming>[]);
       '''
     );
 

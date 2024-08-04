@@ -24,14 +24,14 @@ output files can be generated without the Internet.
 
 The tool can be run based on the existing database. To do this, run:
 
-```bash
+```sh
 /PATH/TO/ROOT/bin/gen_keycodes
 ```
 
 The tool can also be run by rebuilding the database by drawing online information
 anew before generating the files. To do this, run:
 
-```bash
+```sh
 /PATH/TO/ROOT/bin/gen_keycodes --collect
 ```
 
@@ -77,7 +77,7 @@ The planes are planned as follows:
 
 - **Plane 0x01**: The unprintable plane. This plane contains logical keys that
   are defined by the [Chromium key
-  list](https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_key_data.inc)
+  list](https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/main/ui/events/keycodes/dom/dom_key_data.inc)
   and do not generate Unicode characters. The value is defined as the macro
   value defined by the Chromium key list. Examples are CapsLock (0x105),
   ArrowUp (0x304), F1 (0x801), Hiragata (0x716), and TVPower (0xD4B).

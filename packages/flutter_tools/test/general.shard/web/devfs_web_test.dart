@@ -17,9 +17,9 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/html_utils.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
+import 'package:flutter_tools/src/web_template.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart';
@@ -69,6 +69,7 @@ void main() {
         NullSafetyMode.unsound,
         usesDdcModuleSystem,
         webRenderer: WebRendererMode.canvaskit,
+        useLocalCanvasKit: false,
       );
       releaseAssetServer = ReleaseAssetServer(
         globals.fs.file('main.dart').uri,
@@ -76,6 +77,7 @@ void main() {
         flutterRoot: null,
         platform: FakePlatform(),
         webBuildDirectory: null,
+        needsCoopCoep: false,
       );
     }, overrides: <Type, Generator>{
       Logger: () => logger,
@@ -244,6 +246,10 @@ void main() {
       .childDirectory('web')
       ..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
+    globals.fs.file(globals.fs.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/base/path/')));
@@ -257,6 +263,11 @@ void main() {
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')
       ..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
+    globals.fs.file(globals.fs.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
+
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/')));
@@ -296,6 +307,7 @@ void main() {
       NullSafetyMode.unsound,
       usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
+      useLocalCanvasKit: false,
     );
 
     expect(webAssetServer.basePath, 'foo/bar');
@@ -317,6 +329,7 @@ void main() {
       NullSafetyMode.unsound,
       usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
+      useLocalCanvasKit: false,
     );
 
     // Defaults to "/" when there's no base element.
@@ -340,6 +353,7 @@ void main() {
         NullSafetyMode.unsound,
         usesDdcModuleSystem,
         webRenderer: WebRendererMode.canvaskit,
+        useLocalCanvasKit: false,
       ),
       throwsToolExit(),
     );
@@ -362,6 +376,7 @@ void main() {
         NullSafetyMode.unsound,
         usesDdcModuleSystem,
         webRenderer: WebRendererMode.canvaskit,
+        useLocalCanvasKit: false,
       ),
       throwsToolExit(),
     );
@@ -380,6 +395,48 @@ void main() {
       containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate'),
     ]));
     expect((await response.read().toList()).first, utf8.encode('main() {}'));
+  }));
+
+  test('serves flutter_bootstrap.js without useLocalCanvasKit', () => testbed.run(() async {
+    globals.fs.file(globals.fs.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
+
+    final Response response = await webAssetServer.handleRequest(
+      Request('GET', Uri.parse('http://foobar/flutter_bootstrap.js'))
+    );
+
+    expect(response.statusCode, 200);
+    final String body = await response.readAsString();
+    expect(body, isNot(contains('useLocalCanvasKit')));
+  }));
+
+  test('serves flutter_bootstrap.js with useLocalCanvasKit', () => testbed.run(() async {
+    globals.fs.file(globals.fs.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
+
+    webAssetServer = WebAssetServer(
+      httpServer,
+      packages,
+      InternetAddress.loopbackIPv4,
+      <String, String>{},
+      <String, String>{},
+      NullSafetyMode.unsound,
+      usesDdcModuleSystem,
+      webRenderer: WebRendererMode.canvaskit,
+      useLocalCanvasKit: true,
+    );
+
+    final Response response = await webAssetServer.handleRequest(
+      Request('GET', Uri.parse('http://foobar/flutter_bootstrap.js'))
+    );
+
+    expect(response.statusCode, 200);
+    final String body = await response.readAsString();
+    expect(body, contains('"useLocalCanvasKit":true'));
   }));
 
   test('Returns notModified when the ifNoneMatch header matches the etag', () => testbed.run(() async {
@@ -404,6 +461,10 @@ void main() {
       .childDirectory('web')
       ..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
+    globals.fs.file(globals.fs.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/bar/baz')));
@@ -454,6 +515,11 @@ void main() {
   }));
 
   test('serves default index.html', () => testbed.run(() async {
+    globals.fs.file(globals.fs.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
+
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/')));
 
@@ -686,6 +752,7 @@ void main() {
         '',
         treeShakeIcons: false,
         nullSafetyMode: NullSafetyMode.unsound,
+        packageConfigPath: '.dart_tool/package_config.json',
       ),
       enableDwds: false,
       enableDds: false,
@@ -697,6 +764,9 @@ void main() {
       nullSafetyMode: NullSafetyMode.unsound,
       ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.html,
+      isWasm: false,
+      useLocalCanvasKit: false,
+      rootDirectory: globals.fs.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -797,6 +867,7 @@ void main() {
         BuildMode.debug,
         '',
         treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
       ),
       enableDwds: false,
       enableDds: false,
@@ -808,6 +879,9 @@ void main() {
       nullSafetyMode: NullSafetyMode.sound,
       ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.html,
+      isWasm: false,
+      useLocalCanvasKit: false,
+      rootDirectory: globals.fs.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -828,6 +902,10 @@ void main() {
       .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdk).path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdkSourcemaps).path;
+    final String flutterJs = globals.fs.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    );
     globals.fs.file(webPrecompiledSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('HELLO');
@@ -840,6 +918,9 @@ void main() {
     globals.fs.file(webPrecompiledCanvaskitSdkSourcemaps)
       ..createSync(recursive: true)
       ..writeAsStringSync('CHUM');
+    globals.fs.file(flutterJs)
+      ..createSync(recursive: true)
+      ..writeAsStringSync('(flutter.js content)');
 
     await webDevFS.update(
       mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
@@ -907,6 +988,7 @@ void main() {
           BuildMode.debug,
           '',
           treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
         ),
         enableDwds: true,
         enableDds: false,
@@ -918,6 +1000,9 @@ void main() {
         nullSafetyMode: NullSafetyMode.sound,
         ddcModuleSystem: usesDdcModuleSystem,
         webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        rootDirectory: globals.fs.currentDirectory,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -981,6 +1066,9 @@ void main() {
       nullSafetyMode: NullSafetyMode.sound,
       ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
+      isWasm: false,
+      useLocalCanvasKit: false,
+      rootDirectory: globals.fs.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1016,7 +1104,8 @@ void main() {
         treeShakeIcons: false,
         dartDefines: <String>[
           'FLUTTER_WEB_USE_SKIA=true',
-        ]
+        ],
+        packageConfigPath: '.dart_tool/package_config.json',
       ),
       enableDwds: false,
       enableDds: false,
@@ -1028,6 +1117,9 @@ void main() {
       nullSafetyMode: NullSafetyMode.sound,
       ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
+      isWasm: false,
+      useLocalCanvasKit: false,
+      rootDirectory: globals.fs.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1064,7 +1156,8 @@ void main() {
         treeShakeIcons: false,
         dartDefines: <String>[
           'FLUTTER_WEB_AUTO_DETECT=true',
-        ]
+        ],
+        packageConfigPath: '.dart_tool/package_config.json',
       ),
       enableDwds: false,
       enableDds: false,
@@ -1076,6 +1169,9 @@ void main() {
       nullSafetyMode: NullSafetyMode.sound,
       ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.auto,
+      isWasm: false,
+      useLocalCanvasKit: false,
+      rootDirectory: globals.fs.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1125,6 +1221,9 @@ void main() {
       nullSafetyMode: NullSafetyMode.unsound,
       ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
+      isWasm: false,
+      useLocalCanvasKit: false,
+      rootDirectory: globals.fs.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1154,6 +1253,7 @@ void main() {
         BuildMode.debug,
         '',
         treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
       ),
       false,
       false,
@@ -1162,6 +1262,8 @@ void main() {
       const <String, String>{},
       NullSafetyMode.unsound,
       webRenderer: WebRendererMode.canvaskit,
+      isWasm: false,
+      useLocalCanvasKit: false,
       testMode: true
     );
 
@@ -1186,6 +1288,7 @@ void main() {
         BuildMode.debug,
         '',
         treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
       ),
       false,
       false,
@@ -1196,6 +1299,8 @@ void main() {
       },
       NullSafetyMode.unsound,
       webRenderer: WebRendererMode.canvaskit,
+      isWasm: false,
+      useLocalCanvasKit: false,
       testMode: true
     );
 
@@ -1234,6 +1339,7 @@ void main() {
       NullSafetyMode.sound,
       usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
+      useLocalCanvasKit: false,
     );
 
     expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
@@ -1278,6 +1384,9 @@ void main() {
       nullSafetyMode: NullSafetyMode.unsound,
       ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
+      isWasm: false,
+      useLocalCanvasKit: false,
+      rootDirectory: globals.fs.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);

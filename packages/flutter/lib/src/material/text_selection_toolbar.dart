@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'adaptive_text_selection_toolbar.dart';
+/// @docImport 'spell_check_suggestions_toolbar.dart';
+/// @docImport 'text_selection_toolbar_text_button.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -215,6 +220,7 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
             // The navButton that shows and hides the overflow menu is the
             // first child.
             _TextSelectionToolbarOverflowButton(
+              key: _overflowOpen ? StandardComponentType.backButton.key : StandardComponentType.moreButton.key,
               icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
               onPressed: () {
                 setState(() {
@@ -569,6 +575,40 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
     size = nextSize;
   }
 
+  // Horizontally expand the children when the menu overflows so they can react to
+  // pointer events into their whole area.
+  void _resizeChildrenWhenOverflow() {
+    if (!overflowOpen) {
+      return;
+    }
+
+    final RenderBox navButton = firstChild!;
+    int i = -1;
+
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
+
+      i++;
+
+      // Ignore the navigation button.
+      if (renderObjectChild == navButton) {
+        return;
+      }
+
+      // There is no need to update children that won't be painted.
+      if (!_shouldPaintChild(renderObjectChild, i)) {
+        childParentData.shouldPaint = false;
+        return;
+      }
+
+      child.layout(
+        BoxConstraints.tightFor(width: size.width),
+        parentUsesSize: true,
+      );
+    });
+  }
+
   @override
   void performLayout() {
     _lastIndexThatFits = -1;
@@ -579,6 +619,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
 
     _layoutChildren();
     _placeChildren();
+    _resizeChildrenWhenOverflow();
   }
 
   @override
@@ -691,6 +732,7 @@ class _TextSelectionToolbarContainer extends StatelessWidget {
 // forward and back controls.
 class _TextSelectionToolbarOverflowButton extends StatelessWidget {
   const _TextSelectionToolbarOverflowButton({
+    super.key,
     required this.icon,
     this.onPressed,
     this.tooltip,

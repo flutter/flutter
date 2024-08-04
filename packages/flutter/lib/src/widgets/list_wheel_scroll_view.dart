@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'scroll_view.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'dart:collection';
 import 'dart:math' as math;
 
@@ -425,6 +431,7 @@ class _FixedExtentScrollable extends Scrollable {
     required super.viewportBuilder,
     super.restorationId,
     super.scrollBehavior,
+    super.hitTestBehavior,
   });
 
   final double itemExtent;
@@ -570,6 +577,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.onSelectedItemChanged,
     this.renderChildrenOutsideViewport = false,
     this.clipBehavior = Clip.hardEdge,
+    this.hitTestBehavior = HitTestBehavior.opaque,
     this.restorationId,
     this.scrollBehavior,
     required List<Widget> children,
@@ -603,6 +611,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.onSelectedItemChanged,
     this.renderChildrenOutsideViewport = false,
     this.clipBehavior = Clip.hardEdge,
+    this.hitTestBehavior = HitTestBehavior.opaque,
     this.restorationId,
     this.scrollBehavior,
     required this.childDelegate,
@@ -689,6 +698,11 @@ class ListWheelScrollView extends StatefulWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
+  /// {@macro flutter.widgets.scrollable.hitTestBehavior}
+  ///
+  /// Defaults to [HitTestBehavior.opaque].
+  final HitTestBehavior hitTestBehavior;
+
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
 
@@ -754,6 +768,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
         physics: widget.physics,
         itemExtent: widget.itemExtent,
         restorationId: widget.restorationId,
+        hitTestBehavior: widget.hitTestBehavior,
         scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return ListWheelViewport(

@@ -161,7 +161,7 @@ void main() {
     Material chipMaterial = getMaterial(tester);
     expect(chipMaterial.elevation, 0);
     expect(chipMaterial.shadowColor, Colors.transparent);
-    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(chipMaterial.surfaceTintColor, Colors.transparent);
     expect(
       chipMaterial.shape,
       RoundedRectangleBorder(
@@ -189,7 +189,7 @@ void main() {
     chipMaterial = getMaterial(tester);
     expect(chipMaterial.elevation, 0);
     expect(chipMaterial.shadowColor, Colors.transparent);
-    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(chipMaterial.surfaceTintColor, Colors.transparent);
     expect(
       chipMaterial.shape,
       RoundedRectangleBorder(
@@ -235,7 +235,7 @@ void main() {
     Material chipMaterial = getMaterial(tester);
     expect(chipMaterial.elevation, 1);
     expect(chipMaterial.shadowColor, theme.colorScheme.shadow);
-    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(chipMaterial.surfaceTintColor, Colors.transparent);
     expect(
       chipMaterial.shape,
       const RoundedRectangleBorder(
@@ -245,7 +245,7 @@ void main() {
     );
 
     ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
-    expect(decoration.color, null);
+    expect(decoration.color, theme.colorScheme.surfaceContainerLow);
 
     // Test disabled ActionChip.elevated defaults.
     await tester.pumpWidget(
@@ -263,7 +263,7 @@ void main() {
     chipMaterial = getMaterial(tester);
     expect(chipMaterial.elevation, 0);
     expect(chipMaterial.shadowColor, theme.colorScheme.shadow);
-    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(chipMaterial.surfaceTintColor, Colors.transparent);
     expect(
       chipMaterial.shape,
       const RoundedRectangleBorder(
@@ -492,5 +492,41 @@ void main() {
     // Calculate the distance between avatar and label.
     labelTopLeft = tester.getTopLeft(find.byType(Container));
     expect(labelTopLeft.dx, avatarCenter.dx + (iconSize / 2) + labelPadding);
+  });
+
+  testWidgets('ActionChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
+    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+      enableAnimation: AnimationStyle(duration: Durations.extralong4),
+      selectAnimation: AnimationStyle.noAnimation,
+    );
+
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: ActionChip(
+          chipAnimationStyle: chipAnimationStyle,
+          label: const Text('ActionChip'),
+        ),
+      ),
+    ));
+
+    expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
+  });
+
+  testWidgets('Elevated ActionChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
+    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+      enableAnimation: AnimationStyle(duration: Durations.extralong4),
+      selectAnimation: AnimationStyle.noAnimation,
+    );
+
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: ActionChip.elevated(
+          chipAnimationStyle: chipAnimationStyle,
+          label: const Text('ActionChip'),
+        ),
+      ),
+    ));
+
+    expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
   });
 }

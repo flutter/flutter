@@ -98,19 +98,12 @@ class ValidateProject {
   }
 
   String getStringResult(ProjectValidatorResult result) {
-    final String icon;
-    switch (result.status) {
-      case StatusProjectValidator.error:
-        icon = '[✗]';
-      case StatusProjectValidator.info:
-      case StatusProjectValidator.success:
-        icon = '[✓]';
-      case StatusProjectValidator.warning:
-        icon = '[!]';
-      case StatusProjectValidator.crash:
-        icon = '[☠]';
-    }
-
+    final String icon = switch (result.status) {
+      StatusProjectValidator.warning => '[!]',
+      StatusProjectValidator.error   => '[✗]',
+      StatusProjectValidator.crash   => '[☠]',
+      StatusProjectValidator.info || StatusProjectValidator.success => '[✓]',
+    };
     return '$icon $result';
   }
 }

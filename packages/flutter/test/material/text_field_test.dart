@@ -26,11 +26,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
+import '../widgets/feedback_tester.dart';
 import '../widgets/live_text_utils.dart';
 import '../widgets/process_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
-import 'feedback_tester.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -746,9 +746,10 @@ void main() {
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
-                        flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+                        flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
                         actions: <SemanticsAction>[
                           SemanticsAction.tap,
+                          SemanticsAction.focus,
                           SemanticsAction.didGainAccessibilityFocus,
                           SemanticsAction.didLoseAccessibilityFocus,
                         ],
@@ -796,6 +797,92 @@ void main() {
     final EditableText editableTextWidget = tester.widget(editableTextFinder);
     expect(editableTextWidget.onEditingComplete, onEditingComplete);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/127597.
+  testWidgets(
+    'The second TextField is clicked, triggers the onTapOutside callback of the previous TextField',
+        (WidgetTester tester) async {
+      final GlobalKey keyA = GlobalKey();
+      final GlobalKey keyB = GlobalKey();
+      final GlobalKey keyC = GlobalKey();
+      bool outsideClickA = false;
+      bool outsideClickB = false;
+      bool outsideClickC = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: Column(
+              children: <Widget>[
+                const Text('Outside'),
+                Material(
+                  child: TextField(
+                    key: keyA,
+                    groupId: 'Group A',
+                    onTapOutside: (PointerDownEvent event) {
+                      outsideClickA = true;
+                    },
+                  ),
+                ),
+                Material(
+                  child: TextField(
+                    key: keyB,
+                    groupId: 'Group B',
+                    onTapOutside: (PointerDownEvent event) {
+                      outsideClickB = true;
+                    },
+                  ),
+                ),
+                Material(
+                  child: TextField(
+                    key: keyC,
+                    groupId: 'Group C',
+                    onTapOutside: (PointerDownEvent event) {
+                      outsideClickC = true;
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      Future<void> click(Finder finder) async {
+        await tester.tap(finder);
+        await tester.enterText(finder, 'Hello');
+        await tester.pump();
+      }
+
+      expect(outsideClickA, false);
+      expect(outsideClickB, false);
+      expect(outsideClickC, false);
+
+      await click(find.byKey(keyA));
+      await tester.showKeyboard(find.byKey(keyA));
+      await tester.idle();
+      expect(outsideClickA, false);
+      expect(outsideClickB, false);
+      expect(outsideClickC, false);
+
+      await click(find.byKey(keyB));
+      expect(outsideClickA, true);
+      expect(outsideClickB, false);
+      expect(outsideClickC, false);
+
+      await click(find.byKey(keyC));
+      expect(outsideClickA, true);
+      expect(outsideClickB, true);
+      expect(outsideClickC, false);
+
+      await tester.tap(find.text('Outside'));
+      expect(outsideClickA, true);
+      expect(outsideClickB, true);
+      expect(outsideClickC, true);
+    },
+  );
 
   testWidgets('TextField has consistent size', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
@@ -1789,6 +1876,48 @@ void main() {
     expect(find.text('Paste'), findsOneWidget);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
+  testWidgets('infinite multi-line text hint text is not ellipsized by default', (WidgetTester tester) async {
+    const String kLongString =
+      'Enter your email Enter your email Enter your '
+      'email Enter your email Enter your email Enter '
+      'your email Enter your email';
+    const double defaultLineHeight = 24;
+    await tester.pumpWidget(overlay(
+      child: const TextField(
+        maxLines: null,
+        decoration: InputDecoration(
+          labelText: 'Email',
+          hintText: kLongString,
+        ),
+      ),
+    ));
+    final Text hintText = tester.widget<Text>(find.text(kLongString));
+    expect(hintText.overflow, isNull);
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.text(kLongString));
+    expect(paragraph.size.height > defaultLineHeight * 2, isTrue);
+  });
+
+  testWidgets('non-infinite multi-line hint text is  ellipsized by default', (WidgetTester tester) async {
+    const String kLongString =
+        'Enter your email Enter your email Enter your '
+        'email Enter your email Enter your email Enter '
+        'your email Enter your email';
+    const double defaultLineHeight = 24;
+    await tester.pumpWidget(overlay(
+      child: const TextField(
+        maxLines: 2,
+        decoration: InputDecoration(
+          labelText: 'Email',
+          hintText: kLongString,
+        ),
+      ),
+    ));
+    final Text hintText = tester.widget<Text>(find.text(kLongString));
+    expect(hintText.overflow, TextOverflow.ellipsis);
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.text(kLongString));
+    expect(paragraph.size.height < defaultLineHeight * 2 + precisionErrorTolerance, isTrue);
+  });
+
   testWidgets('Entering text hides selection handle caret', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
@@ -1831,6 +1960,56 @@ void main() {
     expect(handle.opacity.value, equals(0.0));
   });
 
+  testWidgets('multiple text fields with prefix and suffix have correct semantics order.', (WidgetTester tester) async {
+    final TextEditingController controller1 = _textEditingController(
+      text: 'abc',
+    );
+    final TextEditingController controller2 = _textEditingController(
+      text: 'def',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              TextField(
+                decoration: const InputDecoration(
+                  prefixText: 'prefix1',
+                  suffixText: 'suffix1',
+                ),
+                enabled: false,
+                controller: controller1,
+              ),
+              TextField(
+                decoration: const InputDecoration(
+                  prefixText: 'prefix2',
+                  suffixText: 'suffix2',
+                ),
+                enabled: false,
+                controller: controller2,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    final List<String> orders = tester.semantics.simulatedAccessibilityTraversal(
+      startNode: find.semantics.byLabel('prefix1'),
+    ).map((SemanticsNode node) => node.label + node.value).toList();
+
+    expect(
+      orders,
+      <String>[
+        'prefix1',
+        'abc',
+        'suffix1',
+        'prefix2',
+        'def',
+        'suffix2',
+      ],
+    );
+  });
+
   testWidgets('selection handles are excluded from the semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController();
@@ -1856,9 +2035,15 @@ void main() {
         children: <TestSemantics>[
           TestSemantics(
             id: 1,
-            flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocused],
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isTextField,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+              SemanticsFlag.isFocused,
+            ],
             actions: <SemanticsAction>[
               SemanticsAction.tap,
+              SemanticsAction.focus,
               SemanticsAction.moveCursorBackwardByCharacter,
               SemanticsAction.setSelection,
               SemanticsAction.paste,
@@ -2501,6 +2686,192 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
+  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - PageView', (WidgetTester tester) async {
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/142624.
+    final TextEditingController controller = _textEditingController();
+    final PageController pageController = PageController();
+    addTearDown(pageController.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: PageView(
+            controller: pageController,
+            children: <Widget>[
+              Center(
+                child: TextField(
+                  dragStartBehavior: DragStartBehavior.down,
+                  controller: controller,
+                ),
+              ),
+              const SizedBox(
+                height: 200.0,
+                child: Center(
+                  child: Text('Page 2'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi jkl mno pqr stu vwx yz';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+    final Offset iPos = textOffsetToPosition(tester, testValue.indexOf('i'));
+
+    // Tap on text field to gain focus, and set selection to '|a'. On iOS
+    // the selection is set to the word edge closest to the tap position.
+    // We await for kDoubleTapTimeout after the up event, so our next down event
+    // does not register as a double tap.
+    final TestGesture gesture = await tester.startGesture(aPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+
+    // If the position we tap during a drag start is on the collapsed selection, then
+    // we can move the cursor with a drag.
+    // Here we tap on '|a', where our selection was previously, and attempt move
+    // to '|g'.
+    await gesture.down(aPos);
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('g'));
+
+    // Release the pointer.
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // If the position we tap during a drag start is on the collapsed selection, then
+    // we can move the cursor with a drag.
+    // Here we tap on '|g', where our selection was previously, and move to '|i'.
+    await gesture.down(gPos);
+    await tester.pump();
+    await gesture.moveTo(iPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('i'));
+
+    // End gesture and skip the magnifier hide animation, so it can release
+    // resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(pageController.page, isNotNull);
+    expect(pageController.page, 0.0);
+    // A horizontal drag directly on the TextField, but not on the current
+    // collapsed selection should move the page view to the next page.
+    final Rect textFieldRect = tester.getRect(find.byType(TextField));
+    await tester.dragFrom(textFieldRect.centerRight - const Offset(0.1, 0.0), const Offset(-500.0, 0.0));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, testValue.indexOf('i'));
+    expect(pageController.page, isNotNull);
+    expect(pageController.page, 1.0);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
+
+  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - TextField in Dismissible', (WidgetTester tester) async {
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/124421.
+    final TextEditingController controller = _textEditingController();
+    bool dismissed = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              Dismissible(
+                key: UniqueKey(),
+                onDismissed: (DismissDirection? direction) {
+                  dismissed = true;
+                },
+                child: TextField(
+                  dragStartBehavior: DragStartBehavior.down,
+                  controller: controller,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi jkl mno pqr stu vwx yz';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+    final Offset iPos = textOffsetToPosition(tester, testValue.indexOf('i'));
+
+    // Tap on text field to gain focus, and set selection to '|a'. On iOS
+    // the selection is set to the word edge closest to the tap position.
+    // We await for kDoubleTapTimeout after the up event, so our next down event
+    // does not register as a double tap.
+    final TestGesture gesture = await tester.startGesture(aPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+
+    // If the position we tap during a drag start is on the collapsed selection, then
+    // we can move the cursor with a drag.
+    // Here we tap on '|a', where our selection was previously, and attempt move
+    // to '|g'.
+    await gesture.down(aPos);
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('g'));
+
+    // Release the pointer.
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // If the position we tap during a drag start is on the collapsed selection, then
+    // we can move the cursor with a drag.
+    // Here we tap on '|g', where our selection was previously, and move to '|i'.
+    await gesture.down(gPos);
+    await tester.pump();
+    await gesture.moveTo(iPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('i'));
+
+    // End gesture and skip the magnifier hide animation, so it can release
+    // resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(dismissed, false);
+    // A horizontal drag directly on the TextField, but not on the current
+    // collapsed selection should allow for the Dismissible to be dismissed.
+    await tester.dragFrom(tester.getRect(find.byType(TextField)).centerRight - const Offset(0.1, 0.0), const Offset(-400.0, 0.0));
+    await tester.pumpAndSettle();
+    expect(dismissed, true);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
+
   testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - ListView', (WidgetTester tester) async {
     // This is a regression test for
     // https://github.com/flutter/flutter/issues/122519
@@ -2545,17 +2916,14 @@ void main() {
     // If the position we tap during a drag start is on the collapsed selection, then
     // we can move the cursor with a drag.
     // Here we tap on '|a', where our selection was previously, and attempt move
-    // to '|g'. The cursor will not move because the `VerticalDragGestureRecognizer`
-    // in the scrollable will beat the `TapAndHorizontalDragGestureRecognizer`
-    // in the TextField. This is because moving from `|a` to `|g` is a completely
-    // vertical movement.
+    // to '|g'.
     await gesture.down(aPos);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pumpAndSettle();
 
     expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.baseOffset, testValue.indexOf('g'));
 
     // Release the pointer.
     await gesture.up();
@@ -2563,11 +2931,8 @@ void main() {
 
     // If the position we tap during a drag start is on the collapsed selection, then
     // we can move the cursor with a drag.
-    // Here we tap on '|a', where our selection was previously, and move to '|i'.
-    // Unlike our previous attempt to drag to `|g`, this works because moving
-    // to `|i` includes a horizontal movement so the `TapAndHorizontalDragGestureRecognizer`
-    // in TextField can beat the `VerticalDragGestureRecognizer` in the scrollable.
-    await gesture.down(aPos);
+    // Here we tap on '|g', where our selection was previously, and move to '|i'.
+    await gesture.down(gPos);
     await tester.pump();
     await gesture.moveTo(iPos);
     await tester.pumpAndSettle();
@@ -5092,7 +5457,34 @@ void main() {
       color: Colors.pink[500],
       fontSize: 10.0,
     );
+    final ThemeData themeData = ThemeData();
+
+    await tester.pumpWidget(
+      overlay(
+        child: Theme(
+          data: themeData,
+          child: TextField(
+            decoration: const InputDecoration(
+              hintText: 'Placeholder',
+            ),
+            style: style,
+          ),
+        ),
+      ),
+    );
+
+    final Text hintText = tester.widget(find.text('Placeholder'));
+    expect(hintText.style!.color, themeData.colorScheme.onSurfaceVariant);
+    expect(hintText.style!.fontSize, style.fontSize);
+  });
+
+  testWidgets('Material2 - TextField with default hintStyle', (WidgetTester tester) async {
+    final TextStyle style = TextStyle(
+      color: Colors.pink[500],
+      fontSize: 10.0,
+    );
     final ThemeData themeData = ThemeData(
+      useMaterial3: false,
       hintColor: Colors.blue[500],
     );
 
@@ -5186,9 +5578,12 @@ void main() {
           value: 'some text',
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
         ),
         TestSemantics.rootChild(
@@ -6530,7 +6925,7 @@ void main() {
         ),
     );
 
-    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]));
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled]));
 
     semantics.dispose();
   });
@@ -6599,7 +6994,7 @@ void main() {
       ),
     );
 
-    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
+    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus])));
     semantics.dispose();
   });
 
@@ -6640,7 +7035,7 @@ void main() {
       ),
     );
 
-    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
+    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus])));
 
     semantics.dispose();
   });
@@ -6944,7 +7339,7 @@ void main() {
     );
 
     expect(semantics, includesNodeWith(
-      flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+      flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
       maxValueLength: 10,
       currentValueLength: 0,
     ));
@@ -6959,7 +7354,12 @@ void main() {
     await tester.pump();
 
     expect(semantics, includesNodeWith(
-      flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocused],
+      flags: <SemanticsFlag>[
+        SemanticsFlag.isTextField,
+        SemanticsFlag.hasEnabledState,
+        SemanticsFlag.isEnabled,
+        SemanticsFlag.isFocused,
+      ],
       maxValueLength: 10,
       currentValueLength: 3,
     ));
@@ -6985,7 +7385,12 @@ void main() {
 
     expect(
       semantics,
-      includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isReadOnly]),
+      includesNodeWith(flags: <SemanticsFlag>[
+        SemanticsFlag.isTextField,
+        SemanticsFlag.hasEnabledState,
+        SemanticsFlag.isEnabled,
+        SemanticsFlag.isReadOnly,
+      ]),
     );
 
     semantics.dispose();
@@ -8008,9 +8413,12 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
         ),
       ],
@@ -8027,9 +8435,12 @@ void main() {
           value: 'Guten Tag',
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
         ),
       ],
@@ -8047,6 +8458,7 @@ void main() {
           textSelection: const TextSelection.collapsed(offset: 9),
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
@@ -8055,6 +8467,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8073,6 +8487,7 @@ void main() {
           value: 'Guten Tag',
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
@@ -8083,6 +8498,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8102,6 +8519,7 @@ void main() {
           value: 'Schönen Feierabend',
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
@@ -8110,6 +8528,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8131,10 +8551,15 @@ void main() {
     expect(
         semantics,
         includesNodeWith(
-          actions: <SemanticsAction>[SemanticsAction.tap],
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            SemanticsAction.focus,
+          ],
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
           value: 'Hello',
         )
@@ -8146,10 +8571,15 @@ void main() {
     expect(
       semantics,
       includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.tap],
+        actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
+        ],
         textDirection: TextDirection.ltr,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.hasEnabledState,
+          SemanticsFlag.isEnabled,
           SemanticsFlag.isObscured,
         ],
       )
@@ -8161,10 +8591,15 @@ void main() {
     expect(
         semantics,
         includesNodeWith(
-          actions: <SemanticsAction>[SemanticsAction.tap],
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            SemanticsAction.focus,
+          ],
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
           value: 'Hello',
         )
@@ -8198,6 +8633,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.setText,
             // Absent the following because enableInteractiveSelection: false
             // SemanticsAction.moveCursorBackwardByCharacter,
@@ -8207,6 +8643,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8239,9 +8677,12 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
         ),
       ],
@@ -8260,6 +8701,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
@@ -8268,6 +8710,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8286,6 +8730,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
@@ -8298,6 +8743,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8339,6 +8786,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
@@ -8347,6 +8795,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8385,6 +8835,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
@@ -8395,6 +8846,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8431,8 +8884,8 @@ void main() {
         children: <TestSemantics>[
           TestSemantics(
             id: inputFieldId,
-            flags: <SemanticsFlag>[SemanticsFlag.isTextField],
-            actions: <SemanticsAction>[SemanticsAction.tap],
+            flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
             value: textInTextField,
             textDirection: TextDirection.ltr,
           ),
@@ -8451,10 +8904,13 @@ void main() {
             id: inputFieldId,
             flags: <SemanticsFlag>[
               SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
               SemanticsFlag.isFocused,
             ],
             actions: <SemanticsAction>[
               SemanticsAction.tap,
+              SemanticsAction.focus,
               SemanticsAction.moveCursorBackwardByCharacter,
               SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
@@ -8504,8 +8960,8 @@ void main() {
         children: <TestSemantics>[
           TestSemantics(
             id: inputFieldId,
-            flags: <SemanticsFlag>[SemanticsFlag.isTextField],
-            actions: <SemanticsAction>[SemanticsAction.tap],
+            flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
             value: textInTextField,
             textDirection: TextDirection.ltr,
           ),
@@ -8524,10 +8980,13 @@ void main() {
             id: inputFieldId,
             flags: <SemanticsFlag>[
               SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
               SemanticsFlag.isFocused,
             ],
             actions: <SemanticsAction>[
               SemanticsAction.tap,
+              SemanticsAction.focus,
               SemanticsAction.moveCursorBackwardByCharacter,
               SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
@@ -8701,9 +9160,12 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
           children: <TestSemantics>[
             TestSemantics(
@@ -8733,12 +9195,15 @@ void main() {
           textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.setSelection,
             SemanticsAction.setText,
             SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
           children: <TestSemantics>[
@@ -8793,9 +9258,12 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
           children: <TestSemantics>[
             TestSemantics(
@@ -8840,9 +9308,12 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
           children: <TestSemantics>[
             TestSemantics(
@@ -15876,14 +16347,12 @@ void main() {
     expect(controller.selection.extentOffset, 20);
 
     await tester.pump(kDoubleTapTimeout);
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     await tester.tapAt(textOffsetToPosition(tester, 23));
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 13);
     expect(controller.selection.extentOffset, 23);
 
     await tester.pump(kDoubleTapTimeout);
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     await tester.tapAt(textOffsetToPosition(tester, 4));
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 13);
@@ -17910,6 +18379,184 @@ void main() {
   },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
+
+
+  testWidgets('when enabled listens to onFocus events and gains focus', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(focusNode: focusNode),
+          ),
+        ),
+      ),
+    );
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 2,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 3,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 4,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isTextField,
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isEnabled,
+                        ],
+                        actions: <SemanticsAction>[
+                          SemanticsAction.tap,
+                          if (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.linux)
+                            SemanticsAction.didGainAccessibilityFocus,
+                          if (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.linux)
+                            SemanticsAction.didLoseAccessibilityFocus,
+                          SemanticsAction.focus
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    expect(focusNode.hasFocus, isFalse);
+    semanticsOwner.performAction(4, SemanticsAction.focus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    semantics.dispose();
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('when disabled does not listen to onFocus events or gain focus', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(focusNode: focusNode, enabled: false),
+          ),
+        ),
+      ),
+    );
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 2,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 3,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 4,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isTextField,
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isReadOnly,
+                        ],
+                        actions: <SemanticsAction>[
+                          if (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.linux)
+                            SemanticsAction.didGainAccessibilityFocus,
+                          if (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.linux)
+                            SemanticsAction.didLoseAccessibilityFocus,
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    expect(focusNode.hasFocus, isFalse);
+    semanticsOwner.performAction(4, SemanticsAction.focus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isFalse);
+    semantics.dispose();
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('when receives SemanticsAction.focus while already focused, shows keyboard', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(focusNode: focusNode),
+          ),
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    tester.testTextInput.log.clear();
+    expect(focusNode.hasFocus, isTrue);
+    semanticsOwner.performAction(4, SemanticsAction.focus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    expect(tester.testTextInput.log.single.method, 'TextInput.show');
+
+    semantics.dispose();
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('when receives SemanticsAction.focus while focused but read-only, does not show keyboard', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(focusNode: focusNode, readOnly: true),
+          ),
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    tester.testTextInput.log.clear();
+    expect(focusNode.hasFocus, isTrue);
+    semanticsOwner.performAction(4, SemanticsAction.focus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    expect(tester.testTextInput.log, isEmpty);
+
+    semantics.dispose();
+  }, variant: TargetPlatformVariant.all());
 }
 
 /// A Simple widget for testing the obscure text.

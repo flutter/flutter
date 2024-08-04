@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'container.dart';
+/// @docImport 'scrollable.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -9,6 +15,7 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
+import 'scroll_configuration.dart';
 
 export 'package:flutter/gestures.dart' show
   DragDownDetails,
@@ -120,7 +127,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// them to the callbacks. To ignore accessibility events, set
 /// [excludeFromSemantics] to true.
 ///
-/// See <http://flutter.dev/gestures/> for additional information.
+/// See <http://flutter.dev/to/gestures> for additional information.
 ///
 /// Material design applications typically react to touches with ink splash
 /// effects. The [InkWell] class implements this effect and can be used in place
@@ -159,7 +166,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// first served. The child onTap is called, and the parent's is not as the gesture has
 /// been consumed.
 /// For more information on gesture disambiguation see:
-/// [Gesture disambiguation](https://docs.flutter.dev/development/ui/advanced/gestures#gesture-disambiguation).
+/// [Gesture disambiguation](https://flutter.dev/to/gesture-disambiguation).
 ///
 /// Setting [GestureDetector.behavior] to [HitTestBehavior.opaque]
 /// or [HitTestBehavior.translucent] has no impact on parent-child relationships:
@@ -1020,6 +1027,7 @@ class GestureDetector extends StatelessWidget {
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
     final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+    final ScrollBehavior configuration = ScrollConfiguration.of(context);
 
     if (onTapDown != null ||
         onTapUp != null ||
@@ -1137,6 +1145,7 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onVerticalDragEnd
             ..onCancel = onVerticalDragCancel
             ..dragStartBehavior = dragStartBehavior
+            ..multitouchDragStrategy = configuration.getMultitouchDragStrategy(context)
             ..gestureSettings = gestureSettings
             ..supportedDevices = supportedDevices;
         },
@@ -1158,6 +1167,7 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onHorizontalDragEnd
             ..onCancel = onHorizontalDragCancel
             ..dragStartBehavior = dragStartBehavior
+            ..multitouchDragStrategy = configuration.getMultitouchDragStrategy(context)
             ..gestureSettings = gestureSettings
             ..supportedDevices = supportedDevices;
         },
@@ -1179,6 +1189,7 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onPanEnd
             ..onCancel = onPanCancel
             ..dragStartBehavior = dragStartBehavior
+            ..multitouchDragStrategy = configuration.getMultitouchDragStrategy(context)
             ..gestureSettings = gestureSettings
             ..supportedDevices = supportedDevices;
         },
@@ -1690,12 +1701,8 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
       return null;
     }
     return (DragUpdateDetails details) {
-      if (horizontalHandler != null) {
-        horizontalHandler(details);
-      }
-      if (panHandler != null) {
-        panHandler(details);
-      }
+      horizontalHandler?.call(details);
+      panHandler?.call(details);
     };
   }
 
@@ -1725,12 +1732,8 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
       return null;
     }
     return (DragUpdateDetails details) {
-      if (verticalHandler != null) {
-        verticalHandler(details);
-      }
-      if (panHandler != null) {
-        panHandler(details);
-      }
+      verticalHandler?.call(details);
+      panHandler?.call(details);
     };
   }
 }

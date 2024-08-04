@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'action_buttons.dart';
+/// @docImport 'animated_icons.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'list_tile.dart';
+library;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -515,7 +521,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   }
 
   void _onAnimationStatusChanged(AnimationStatus status) {
-    if (status != AnimationStatus.completed) {
+    if (!status.isCompleted) {
       return;
     }
     widget.animation.removeStatusListener(_onAnimationStatusChanged);

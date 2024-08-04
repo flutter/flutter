@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:dual_screen/dual_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -188,13 +187,12 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
 
   void _resolveState(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
-    final bool isFoldable = isDisplayFoldable(context);
     if (_DemoState.values[_demoStateIndex.value] == _DemoState.fullscreen &&
         !isDesktop) {
       // Do not allow fullscreen state for mobile.
       _demoStateIndex.value = _DemoState.normal.index;
     } else if (_DemoState.values[_demoStateIndex.value] == _DemoState.normal &&
-        (isDesktop || isFoldable)) {
+        isDesktop) {
       // Do not allow normal state for desktop.
       _demoStateIndex.value =
           _hasOptions ? _DemoState.options.index : _DemoState.info.index;
@@ -209,7 +207,6 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
 
   @override
   Widget build(BuildContext context) {
-    final bool isFoldable = isDisplayFoldable(context);
     final bool isDesktop = isDisplayDesktop(context);
     _resolveState(context);
 
@@ -372,14 +369,6 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
           child: sectionAndDemo,
         ),
       );
-    } else if (isFoldable) {
-      body = Padding(
-        padding: const EdgeInsets.only(top: 12.0),
-        child: TwoPane(
-          startPane: demoContent,
-          endPane: section,
-        ),
-      );
     } else {
       section = AnimatedSize(
         duration: const Duration(milliseconds: 200),
@@ -429,20 +418,15 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
 
     Widget page;
 
-    if (isDesktop || isFoldable) {
+    if (isDesktop) {
       page = AnimatedBuilder(
           animation: _codeBackgroundColorController,
           builder: (BuildContext context, Widget? child) {
-            Brightness themeBrightness;
-
-            switch (GalleryOptions.of(context).themeMode) {
-              case ThemeMode.system:
-                themeBrightness = MediaQuery.of(context).platformBrightness;
-              case ThemeMode.light:
-                themeBrightness = Brightness.light;
-              case ThemeMode.dark:
-                themeBrightness = Brightness.dark;
-            }
+            final Brightness themeBrightness = switch (GalleryOptions.of(context).themeMode) {
+              ThemeMode.system => MediaQuery.of(context).platformBrightness,
+              ThemeMode.light => Brightness.light,
+              ThemeMode.dark => Brightness.dark,
+            };
 
             Widget contents = Container(
               padding: EdgeInsets.symmetric(horizontal: horizontalPadding),

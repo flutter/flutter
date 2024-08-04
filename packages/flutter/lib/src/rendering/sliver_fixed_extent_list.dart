@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'sliver_fill.dart';
+/// @docImport 'sliver_list.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -465,4 +469,29 @@ class RenderSliverFixedExtentList extends RenderSliverFixedExtentBoxAdaptor {
     _itemExtent = value;
     markNeedsLayout();
   }
+}
+
+/// A sliver that places multiple box children with the corresponding main axis extent in
+/// a linear array.
+class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
+  /// Creates a sliver that contains multiple box children that have a explicit
+  /// extent in the main axis.
+  RenderSliverVariedExtentList({
+    required super.childManager,
+    required ItemExtentBuilder itemExtentBuilder,
+  }) : _itemExtentBuilder = itemExtentBuilder;
+
+  @override
+  ItemExtentBuilder get itemExtentBuilder => _itemExtentBuilder;
+  ItemExtentBuilder _itemExtentBuilder;
+  set itemExtentBuilder(ItemExtentBuilder value) {
+    if (_itemExtentBuilder == value) {
+      return;
+    }
+    _itemExtentBuilder = value;
+    markNeedsLayout();
+  }
+
+  @override
+  double? get itemExtent => null;
 }

@@ -43,5 +43,6 @@ Future<void> main() async {
     await tester.pump(const Duration(milliseconds: 100));
     final ui.Image? image4 = renderImage.image;
     expect(image3, same(image4));
+    imageCache.clear();
   });
 }

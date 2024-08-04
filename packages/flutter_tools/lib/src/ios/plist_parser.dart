@@ -64,6 +64,35 @@ class PlistParser {
     }
   }
 
+  /// Returns the content, converted to JSON, of the plist file located at
+  /// [filePath].
+  ///
+  /// If [filePath] points to a non-existent file or a file that's not a
+  /// valid property list file, this will return null.
+  String? plistJsonContent(String filePath) {
+    if (!_fileSystem.isFileSync(_plutilExecutable)) {
+      throw const FileNotFoundException(_plutilExecutable);
+    }
+    final List<String> args = <String>[
+      _plutilExecutable,
+      '-convert',
+      'json',
+      '-o',
+      '-',
+      filePath,
+    ];
+    try {
+      final String jsonContent = _processUtils.runSync(
+        args,
+        throwOnError: true,
+      ).stdout.trim();
+      return jsonContent;
+    } on ProcessException catch (error) {
+      _logger.printError('$error');
+      return null;
+    }
+  }
+
   /// Replaces the string key in the given plist file with the given value.
   ///
   /// If the value is null, then the key will be removed.
@@ -143,27 +172,18 @@ class PlistParser {
   static final RegExp _nonBase64Pattern = RegExp('[^a-zA-Z0-9+/=]+');
 
   Object? _parseXmlNode(XmlElement node) {
-    switch (node.name.local){
-      case 'string':
-        return node.innerText;
-      case 'real':
-        return double.parse(node.innerText);
-      case 'integer':
-        return int.parse(node.innerText);
-      case 'true':
-        return true;
-      case 'false':
-        return false;
-      case 'date':
-        return DateTime.parse(node.innerText);
-      case 'data':
-        return base64.decode(node.innerText.replaceAll(_nonBase64Pattern, ''));
-      case 'array':
-        return node.children.whereType<XmlElement>().map<Object?>(_parseXmlNode).whereType<Object>().toList();
-      case 'dict':
-        return _parseXmlDict(node);
-    }
-    return null;
+    return switch (node.name.local) {
+      'string'  => node.innerText,
+      'real'    => double.parse(node.innerText),
+      'integer' => int.parse(node.innerText),
+      'true'    => true,
+      'false'   => false,
+      'date'    => DateTime.parse(node.innerText),
+      'data'    => base64.decode(node.innerText.replaceAll(_nonBase64Pattern, '')),
+      'array'   => node.children.whereType<XmlElement>().map<Object?>(_parseXmlNode).whereType<Object>().toList(),
+      'dict'    => _parseXmlDict(node),
+      _         => null,
+    };
   }
 
   /// Parses the Plist file located at [plistFilePath] and returns the value

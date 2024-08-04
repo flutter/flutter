@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'form_row.dart';
+/// @docImport 'form_section.dart';
+/// @docImport 'list_tile.dart';
+/// @docImport 'text_form_field_row.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -372,34 +378,31 @@ class CupertinoListSection extends StatelessWidget {
       height: dividerHeight,
     );
 
-    Widget? headerWidget;
-    if (header != null) {
-      headerWidget = DefaultTextStyle(
-        style: CupertinoTheme.of(context).textTheme.textStyle.merge(
-              type == CupertinoListSectionType.base
-                  ? TextStyle(
-                      fontSize: 13.0,
-                      color: CupertinoDynamicColor.resolve(
-                          _kHeaderFooterColor, context))
-                  : const TextStyle(
-                      fontSize: 20.0, fontWeight: FontWeight.bold),
-            ),
-        child: header!,
-      );
-    }
+    TextStyle style = CupertinoTheme.of(context).textTheme.textStyle;
 
-    Widget? footerWidget;
-    if (footer != null) {
-      footerWidget = DefaultTextStyle(
-        style: type == CupertinoListSectionType.base
-            ? CupertinoTheme.of(context).textTheme.textStyle.merge(TextStyle(
-                  fontSize: 13.0,
-                  color: CupertinoDynamicColor.resolve(
-                      _kHeaderFooterColor, context),
-                ))
-            : CupertinoTheme.of(context).textTheme.textStyle,
-        child: footer!,
-      );
+    Widget? headerWidget, footerWidget;
+    switch (type) {
+      case CupertinoListSectionType.base:
+        style = style.merge(TextStyle(
+          fontSize: 13.0,
+          color: CupertinoDynamicColor.resolve(_kHeaderFooterColor, context),
+        ));
+        if (header != null) {
+          headerWidget = DefaultTextStyle(style: style, child: header!);
+        }
+        if (footer != null) {
+          footerWidget = DefaultTextStyle(style: style, child: footer!);
+        }
+      case CupertinoListSectionType.insetGrouped:
+        if (header != null) {
+          headerWidget = DefaultTextStyle(
+            style: style.merge(const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+            child: header!,
+          );
+        }
+        if (footer != null) {
+          footerWidget = DefaultTextStyle(style: style, child: footer!);
+        }
     }
 
     Widget? decoratedChildrenGroup;

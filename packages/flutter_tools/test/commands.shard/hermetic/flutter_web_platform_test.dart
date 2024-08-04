@@ -84,14 +84,16 @@ void main() {
     fileSystem.directory('/test').createSync();
     final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
       'ProjectRoot',
-      buildInfo: const BuildInfo(BuildMode.debug, '', treeShakeIcons: false),
+      buildInfo: BuildInfo.debug,
       webMemoryFS: WebMemoryFS(),
       fileSystem: fileSystem,
+      buildDirectory: fileSystem.directory('build'),
       logger: logger,
       chromiumLauncher: chromiumLauncher,
       artifacts: artifacts,
       processManager: processManager,
       webRenderer: WebRendererMode.canvaskit,
+      useWasm: false,
       serverFactory: () async => server,
       testPackageUri: Uri.parse('test'),
     );
@@ -129,16 +131,19 @@ void main() {
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
+        packageConfigPath: '.dart_tool/package_config.json',
         treeShakeIcons: false,
         extraFrontEndOptions: <String>['--dartdevc-module-format=ddc'],
       ),
       webMemoryFS: WebMemoryFS(),
       fileSystem: fileSystem,
+      buildDirectory: fileSystem.directory('build'),
       logger: logger,
       chromiumLauncher: chromiumLauncher,
       artifacts: artifacts,
       processManager: processManager,
       webRenderer: WebRendererMode.canvaskit,
+      useWasm: false,
       serverFactory: () async => server,
       testPackageUri: Uri.parse('test'),
     );

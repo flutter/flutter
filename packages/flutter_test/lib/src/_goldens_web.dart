@@ -2,13 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'matchers.dart';
+library;
+
 import 'dart:convert';
-import 'dart:html' as html;
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:matcher/expect.dart' show fail;
 
 import 'goldens.dart';
+import 'web.dart' as web;
 
 /// An unsupported [GoldenFileComparator] that exists for API compatibility.
 class LocalFileComparator extends GoldenFileComparator {
@@ -41,12 +45,12 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
 ///   * [matchesGoldenFile], the function from [flutter_test] that invokes the
 ///    comparator.
 class DefaultWebGoldenComparator extends WebGoldenComparator {
-  /// Creates a new [DefaultWebGoldenComparator] for the specified [testFile].
+  /// Creates a new [DefaultWebGoldenComparator] for the specified [testUri].
   ///
   /// Golden file keys will be interpreted as file paths relative to the
-  /// directory in which [testFile] resides.
+  /// directory in which [testUri] resides.
   ///
-  /// The [testFile] URL must represent a file.
+  /// The [testUri] must represent a file.
   DefaultWebGoldenComparator(this.testUri);
 
   /// The test file currently being executed.
@@ -58,21 +62,23 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
   @override
   Future<bool> compare(double width, double height, Uri golden) async {
     final String key = golden.toString();
-    final html.HttpRequest request = await html.HttpRequest.request(
-      'flutter_goldens',
-      method: 'POST',
-      sendData: json.encode(<String, Object>{
-        'testUri': testUri.toString(),
-        'key': key,
-        'width': width.round(),
-        'height': height.round(),
-      }),
-    );
-    final String response = request.response as String;
-    if (response == 'true') {
+    final web.Response response = await web.window.fetch(
+      'flutter_goldens'.toJS,
+      web.RequestInit(
+        method: 'POST',
+        body: json.encode(<String, Object>{
+          'testUri': testUri.toString(),
+          'key': key,
+          'width': width.round(),
+          'height': height.round(),
+        }).toJS,
+      )
+    ).toDart;
+    final String responseText = (await response.text().toDart).toDart;
+    if (responseText == 'true') {
       return true;
     }
-    fail(response);
+    fail(responseText);
   }
 
   @override
@@ -85,20 +91,22 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
   Future<bool> compareBytes(Uint8List bytes, Uri golden) async {
     final String key = golden.toString();
     final String bytesEncoded = base64.encode(bytes);
-    final html.HttpRequest request = await html.HttpRequest.request(
-      'flutter_goldens',
-      method: 'POST',
-      sendData: json.encode(<String, Object>{
-        'testUri': testUri.toString(),
-        'key': key,
-        'bytes': bytesEncoded,
-      }),
-    );
-    final String response = request.response as String;
-    if (response == 'true') {
+    final web.Response response = await web.window.fetch(
+      'flutter_goldens'.toJS,
+      web.RequestInit(
+        method: 'POST',
+        body: json.encode(<String, Object>{
+          'testUri': testUri.toString(),
+          'key': key,
+          'bytes': bytesEncoded,
+        }).toJS,
+      )
+    ).toDart;
+    final String responseText = (await response.text().toDart).toDart;
+    if (responseText == 'true') {
       return true;
     }
-    fail(response);
+    fail(responseText);
   }
 
   @override

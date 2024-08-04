@@ -11,35 +11,28 @@ class Scrim extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Size deviceSize = MediaQuery.of(context).size;
     return ExcludeSemantics(
       child: AnimatedBuilder(
         animation: controller,
         builder: (BuildContext context, Widget? child) {
-          final Color color =
-              const Color(0xFFFFF0EA).withOpacity(controller.value * 0.87);
+          final Widget scrimRectangle = ColoredBox(
+            color: Color.fromRGBO(0xFF, 0xF0, 0xEA, controller.value * 0.87),
+            child: SizedBox.fromSize(size: MediaQuery.sizeOf(context)),
+          );
 
-          final Widget scrimRectangle = Container(
-              width: deviceSize.width, height: deviceSize.height, color: color);
-
-          final bool ignorePointer =
-              (controller.status == AnimationStatus.dismissed);
-          final bool tapToRevert = (controller.status == AnimationStatus.completed);
-
-          if (tapToRevert) {
-            return MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: GestureDetector(
-                onTap: () {
-                  controller.reverse();
-                },
-                child: scrimRectangle,
-              ),
-            );
-          } else if (ignorePointer) {
-            return IgnorePointer(child: scrimRectangle);
-          } else {
-            return scrimRectangle;
+          switch (controller.status) {
+            case AnimationStatus.completed:
+              return MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: controller.reverse,
+                  child: scrimRectangle,
+                ),
+              );
+            case AnimationStatus.dismissed:
+              return IgnorePointer(child: scrimRectangle);
+            case AnimationStatus.forward || AnimationStatus.reverse:
+              return scrimRectangle;
           }
         },
       ),

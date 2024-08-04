@@ -55,9 +55,26 @@ class _TextButtonExampleState extends State<TextButtonExample> {
   TextDirection textDirection = TextDirection.ltr;
   ThemeMode themeMode = ThemeMode.light;
   late final ScrollController scrollController;
+  Future<void>? currentAction;
 
   static const Widget verticalSpacer = SizedBox(height: 16);
   static const Widget horizontalSpacer = SizedBox(width: 32);
+
+  static const ImageProvider grassImage = NetworkImage(
+    'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_grass.jpeg',
+  );
+  static const ImageProvider defaultImage = NetworkImage(
+    'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_nhu_default.png',
+  );
+  static const ImageProvider hoveredImage = NetworkImage(
+    'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_nhu_hovered.png',
+  );
+  static const ImageProvider pressedImage = NetworkImage(
+    'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_nhu_pressed.png',
+  );
+  static const ImageProvider runningImage = NetworkImage(
+    'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_nhu_end.png',
+  );
 
   @override
   void initState() {
@@ -86,16 +103,16 @@ class _TextButtonExampleState extends State<TextButtonExample> {
 
     // This gradient's appearance reflects the button's state.
     // Always return a gradient decoration so that AnimatedContainer
-    // can interpolorate in between. Used by TextButton #7.
-    Decoration? statesToDecoration(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    // can interpolate in between. Used by TextButton #7.
+    Decoration? statesToDecoration(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return BoxDecoration(
           gradient: LinearGradient(colors: <Color>[color2, color2]), // solid fill
         );
       }
       return BoxDecoration(
         gradient: LinearGradient(
-          colors: switch (states.contains(MaterialState.hovered)) {
+          colors: switch (states.contains(WidgetState.hovered)) {
             true => <Color>[color1, color2],
             false => <Color>[color2, color1],
           },
@@ -132,7 +149,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       // In this example, and most of the ones that follow, we're using
       // the TextButton.styleFrom() convenience method to create a ButtonStyle.
       // The styleFrom method is a little easier because it creates
-      // ButtonStyle MaterialStateProperty parameters for you.
+      // ButtonStyle WidgetStateProperty parameters for you.
       // In this case, Specifying foregroundColor overrides the text,
       // icon and overlay (splash and highlight) colors a little differently
       // depending on the button's state. BackgroundColor is just the background
@@ -196,7 +213,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       // theme or the MaterialApp theme's ThemeData.textButtonTheme.
       TextButton(
         style: TextButton.styleFrom(
-          foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+          foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
             return ShaderMask(
               shaderCallback: (Rect bounds) {
                 return LinearGradient(
@@ -231,10 +248,10 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       // outlines the button's shape.
       TextButton(
         style: TextButton.styleFrom(
-          foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+          foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
             return DecoratedBox(
               decoration: BoxDecoration(
-                border: states.contains(MaterialState.hovered)
+                border: states.contains(WidgetState.hovered)
                   ? Border(bottom: BorderSide(color: colorScheme.primary))
                   : const Border(), // essentially "no border"
               ),
@@ -255,7 +272,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       // closely). Because we want the outline to only appear when the button is hovered
       // we can't use the styleFrom() side parameter, because that creates the same
       // outline for all states. The ButtonStyle.copyWith() method is used to add
-      // a MaterialState<BorderSide?> property that does the right thing.
+      // a WidgetState<BorderSide?> property that does the right thing.
       //
       // The gradient background is translucent - all of the colors have opacity 0.5 -
       // so the overlay's splash and highlight colors are visible even though they're
@@ -267,7 +284,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
         onPressed: () {},
         style: TextButton.styleFrom(
           overlayColor: color2,
-          backgroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+          backgroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
             return AnimatedContainer(
               duration: const Duration(milliseconds: 500),
               decoration: statesToDecoration(states),
@@ -275,8 +292,8 @@ class _TextButtonExampleState extends State<TextButtonExample> {
             );
           },
         ).copyWith(
-          side: MaterialStateProperty.resolveWith<BorderSide?>((Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered)) {
+          side: WidgetStateProperty.resolveWith<BorderSide?>((Set<WidgetState> states) {
+            if (states.contains(WidgetState.hovered)) {
               return BorderSide(width: 3, color: color3);
             }
             return null; // defer to the default
@@ -298,11 +315,11 @@ class _TextButtonExampleState extends State<TextButtonExample> {
         onPressed: () {},
         style: TextButton.styleFrom(
           foregroundColor: Colors.white,
-          backgroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+          backgroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
             return Ink(
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: NetworkImage(grassUrl),
+                  image: grassImage,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -315,7 +332,8 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       verticalSpacer,
 
       // Override the foregroundBuilder to specify images for the button's pressed
-      // hovered and inactive states.
+      // hovered and default states. We switch to an additional image while the
+      // button's callback is "running".
       //
       // This is an example of completely changing the default appearance of a button
       // by specifying images for each state and by turning off the overlays by
@@ -326,13 +344,30 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       // TextButton's child parameter is required, so we still have
       // to provide one.
       TextButton(
-        onPressed: () {},
+        onPressed: () async {
+          // This is slightly complicated so that if the user presses the button
+          // while the current Future.delayed action is running, the currentAction
+          // flag is only reset to null after the _new_ action completes.
+          late final Future<void> thisAction;
+          thisAction = Future<void>.delayed(const Duration(seconds: 1), () {
+            if (currentAction == thisAction) {
+              setState(() { currentAction = null; });
+            }
+          });
+          setState(() { currentAction = thisAction; });
+        },
         style: TextButton.styleFrom(
           overlayColor: Colors.transparent,
-          foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
-            String url = states.contains(MaterialState.hovered) ? smiley3Url : smiley1Url;
-            if (states.contains(MaterialState.pressed)) {
-              url = smiley2Url;
+          foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
+            late final ImageProvider image;
+            if (currentAction != null) {
+              image = runningImage;
+            } else if (states.contains(WidgetState.pressed)) {
+              image = pressedImage;
+            } else if (states.contains(WidgetState.hovered)) {
+              image = hoveredImage;
+            } else {
+              image = defaultImage;
             }
             return AnimatedContainer(
               width: 64,
@@ -341,7 +376,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
               curve: Curves.fastOutSlowIn,
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: NetworkImage(url),
+                  image: image,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -370,8 +405,6 @@ class _TextButtonExampleState extends State<TextButtonExample> {
           },
         ),
         horizontalSpacer,
-
-        // All of the button examples appear below. They're arranged in two columns.
 
         Expanded(
           child:  Scrollbar(
@@ -459,8 +492,3 @@ class TextButtonExampleSwitches extends StatelessWidget {
     );
   }
 }
-
-const String grassUrl = 'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_grass.jpeg';
-const String smiley1Url = 'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_smiley1.png';
-const String smiley2Url = 'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_smiley2.png';
-const String smiley3Url = 'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_smiley3.png';

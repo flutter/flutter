@@ -883,6 +883,7 @@ void main() {
     group('simulatedTraversal', () {
       final List<Matcher> fullTraversalMatchers = <Matcher>[
         containsSemantics(isHeader: true, label: 'Semantics Test'),
+        containsSemantics(label: 'Text Field'),
         containsSemantics(isTextField: true),
         containsSemantics(label: 'Off Switch'),
         containsSemantics(hasToggledState: true),
@@ -913,7 +914,7 @@ void main() {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We're expecting the traversal to start where the slider is.
-        final List<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers]..removeRange(0, 8);
+        final List<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers]..removeRange(0, 9);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(start: find.byType(Slider)),
@@ -988,7 +989,7 @@ void main() {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We're expecting the traversal to end where the slider is, inclusive.
-        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers].getRange(0, 9);
+        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers].getRange(0, 10);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(end: find.byType(Slider)),
@@ -1049,7 +1050,7 @@ void main() {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We're expecting the traversal to start at the text field and end at the slider.
-        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers].getRange(1, 9);
+        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers].getRange(1, 10);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(
@@ -1777,7 +1778,7 @@ class _SemanticsTestWidget extends StatelessWidget {
         child: Column(
           children: <Widget>[
             const _SemanticsTestCard(
-              label: 'TextField',
+              label: 'Text Field',
               widget: TextField(),
             ),
             _SemanticsTestCard(

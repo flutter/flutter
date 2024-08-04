@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // Regenerates a Dart file with a class containing IconData constants.
-// See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts-&-Icons
+// See https://github.com/flutter/flutter/blob/main/docs/libraries/material/Updating-Material-Design-Fonts-%26-Icons.md
 // Should be idempotent with:
 // dart dev/tools/update_icons.dart --new-codepoints bin/cache/artifacts/material_fonts/codepoints
 
@@ -388,15 +388,10 @@ bool testIsSuperset(Map<String, String> newCodepoints, Map<String, String> oldCo
 @visibleForTesting
 bool testIsStable(Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
   final int oldCodepointsCount = oldCodepoints.length;
-  final List<String> unstable = <String>[];
-
-  oldCodepoints.forEach((String key, String value) {
-    if (newCodepoints.containsKey(key)) {
-      if (value != newCodepoints[key]) {
-        unstable.add(key);
-      }
-    }
-  });
+  final List<String> unstable = <String>[
+    for (final MapEntry<String, String>(:String key, :String value) in oldCodepoints.entries)
+      if (newCodepoints.containsKey(key) && value != newCodepoints[key]) key,
+  ];
 
   if (unstable.isNotEmpty) {
     stderr.writeln('❌ out of $oldCodepointsCount existing codepoints, ${unstable.length} were unstable: $unstable');

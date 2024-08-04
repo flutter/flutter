@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/gestures.dart';
+/// @docImport 'package:flutter/semantics.dart';
+///
+/// @docImport 'about.dart';
+/// @docImport 'app_bar.dart';
+/// @docImport 'color_scheme.dart';
+/// @docImport 'drawer_header.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'navigation_drawer.dart';
+/// @docImport 'scaffold.dart';
+library;
+
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 
@@ -175,12 +187,14 @@ class Drawer extends StatelessWidget {
   /// The color used as a surface tint overlay on the drawer's background color,
   /// which reflects the drawer's [elevation].
   ///
-  /// If [ThemeData.useMaterial3] is false property has no effect.
-  ///
-  /// If null and [ThemeData.useMaterial3] is true then [ThemeData]'s
-  /// [ColorScheme.surfaceTint] will be used.
+  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
+  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
+  /// which provide more flexibility. The intention is to eventually remove surface tint color from
+  /// the framework.
   ///
   /// To disable this feature, set [surfaceTintColor] to [Colors.transparent].
+  ///
+  /// Defaults to [Colors.transparent].
   ///
   /// See also:
   ///   * [Material.surfaceTintColor], which describes how the surface tint will
@@ -265,7 +279,7 @@ class Drawer extends StatelessWidget {
           shadowColor: shadowColor ?? drawerTheme.shadowColor ?? defaults.shadowColor,
           surfaceTintColor: surfaceTintColor ?? drawerTheme.surfaceTintColor ?? defaults.surfaceTintColor,
           shape: effectiveShape,
-          clipBehavior: effectiveShape != null ? (clipBehavior ?? Clip.hardEdge) : Clip.none,
+          clipBehavior: effectiveShape != null ? (clipBehavior ?? drawerTheme.clipBehavior ?? defaults.clipBehavior!) : Clip.none,
           child: child,
         ),
       ),
@@ -487,15 +501,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (widget.scrimColor != oldWidget.scrimColor) {
       _scrimColorTween = _buildScrimColorTween();
     }
-    if (widget.isDrawerOpen != oldWidget.isDrawerOpen) {
-      switch (_controller.status) {
-        case AnimationStatus.completed:
-        case AnimationStatus.dismissed:
-          _controller.value = widget.isDrawerOpen ? 1.0 : 0.0;
-        case AnimationStatus.forward:
-        case AnimationStatus.reverse:
-          break;
-      }
+    if (widget.isDrawerOpen != oldWidget.isDrawerOpen && !_controller.isAnimating) {
+      _controller.value = widget.isDrawerOpen ? 1.0 : 0.0;
     }
   }
 
@@ -527,7 +534,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         _historyEntry?.remove();
         _historyEntry = null;
       case AnimationStatus.dismissed:
-        break;
       case AnimationStatus.completed:
         break;
     }
@@ -566,20 +572,17 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   bool _previouslyOpened = false;
 
+  int get _directionFactor {
+    return switch ((Directionality.of(context), widget.alignment)) {
+      (TextDirection.rtl, DrawerAlignment.start) => -1,
+      (TextDirection.rtl, DrawerAlignment.end)   =>  1,
+      (TextDirection.ltr, DrawerAlignment.start) =>  1,
+      (TextDirection.ltr, DrawerAlignment.end)   => -1,
+    };
+  }
+
   void _move(DragUpdateDetails details) {
-    double delta = details.primaryDelta! / _width;
-    switch (widget.alignment) {
-      case DrawerAlignment.start:
-        break;
-      case DrawerAlignment.end:
-        delta = -delta;
-    }
-    switch (Directionality.of(context)) {
-      case TextDirection.rtl:
-        _controller.value -= delta;
-      case TextDirection.ltr:
-        _controller.value += delta;
-    }
+    _controller.value += details.primaryDelta! / _width * _directionFactor;
 
     final bool opened = _controller.value > 0.5;
     if (opened != _previouslyOpened && widget.drawerCallback != null) {
@@ -592,22 +595,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (_controller.isDismissed) {
       return;
     }
-    if (details.velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
-      double visualVelocity = details.velocity.pixelsPerSecond.dx / _width;
-      switch (widget.alignment) {
-        case DrawerAlignment.start:
-          break;
-        case DrawerAlignment.end:
-          visualVelocity = -visualVelocity;
-      }
-      switch (Directionality.of(context)) {
-        case TextDirection.rtl:
-          _controller.fling(velocity: -visualVelocity);
-          widget.drawerCallback?.call(visualVelocity < 0.0);
-        case TextDirection.ltr:
-          _controller.fling(velocity: visualVelocity);
-          widget.drawerCallback?.call(visualVelocity > 0.0);
-      }
+    final double xVelocity = details.velocity.pixelsPerSecond.dx;
+    if (xVelocity.abs() >= _kMinFlingVelocity) {
+      final double visualVelocity = xVelocity / _width * _directionFactor;
+
+      _controller.fling(velocity: visualVelocity);
+      widget.drawerCallback?.call(visualVelocity > 0.0);
     } else if (_controller.value < 0.5) {
       close();
     } else {
@@ -669,7 +662,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         (DrawerAlignment.end,   TextDirection.ltr) => MediaQuery.paddingOf(context).right,
       };
 
-    if (_controller.status == AnimationStatus.dismissed) {
+    if (_controller.isDismissed) {
       if (widget.enableOpenDragGesture && !isDesktop) {
         return Align(
           alignment: _drawerOuterAlignment,
@@ -680,7 +673,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
             behavior: HitTestBehavior.translucent,
             excludeFromSemantics: true,
             dragStartBehavior: widget.dragStartBehavior,
-            child: Container(width: dragAreaWidth),
+            child: LimitedBox(maxHeight: 0.0, child: SizedBox(width: dragAreaWidth, height: double.infinity)),
           ),
         );
       } else {
@@ -699,6 +692,11 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           platformHasBackButton = false;
       }
 
+      Widget drawerScrim = const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand());
+      if (_scrimColorTween.evaluate(_controller) case final Color color) {
+        drawerScrim = ColoredBox(color: color, child: drawerScrim);
+      }
+
       final Widget child = _DrawerControllerScope(
         controller: widget,
         child: RepaintBoundary(
@@ -712,9 +710,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                     onTap: close,
                     child: Semantics(
                       label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-                      child: Container( // The drawer's "scrim"
-                        color: _scrimColorTween.evaluate(_controller),
-                      ),
+                      child: drawerScrim,
                     ),
                   ),
                 ),
@@ -767,7 +763,10 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
 class _DrawerDefaultsM2 extends DrawerThemeData {
   const _DrawerDefaultsM2(this.context)
-      : super(elevation: 16.0);
+      : super(
+        elevation: 16.0,
+        clipBehavior: Clip.hardEdge,
+      );
 
   final BuildContext context;
 
@@ -785,16 +784,19 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
 
 class _DrawerDefaultsM3 extends DrawerThemeData {
   _DrawerDefaultsM3(this.context)
-      : super(elevation: 1.0);
+      : super(
+          elevation: 1.0,
+          clipBehavior: Clip.hardEdge,
+        );
 
   final BuildContext context;
   late final TextDirection direction = Directionality.of(context);
 
   @override
-  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+  Color? get backgroundColor => Theme.of(context).colorScheme.surfaceContainerLow;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   Color? get shadowColor => Colors.transparent;

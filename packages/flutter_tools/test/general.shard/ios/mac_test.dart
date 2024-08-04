@@ -11,15 +11,16 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcresult.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
@@ -189,14 +190,12 @@ void main() {
 
   group('Diagnose Xcode build failure', () {
     late Map<String, String> buildSettings;
-    late TestUsage testUsage;
     late FakeAnalytics fakeAnalytics;
 
     setUp(() {
       buildSettings = <String, String>{
         'PRODUCT_BUNDLE_IDENTIFIER': 'test.app',
       };
-      testUsage = TestUsage();
 
       final MemoryFileSystem fs = MemoryFileSystem.test();
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -217,19 +216,15 @@ void main() {
           buildSettings: buildSettings,
         ),
       );
-
-      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger, fakeAnalytics);
-      expect(testUsage.events, contains(
-        TestUsageEvent(
-          'build',
-          'ios',
-          label: 'xcode-bitcode-failure',
-          parameters: CustomDimensions(
-            buildEventCommand: buildCommands.toString(),
-            buildEventSettings: buildSettings.toString(),
-          ),
-        ),
-      ));
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: SupportedPlatform.ios,
+        project: FakeFlutterProject(fileSystem: fs),
+      );
       expect(
         fakeAnalytics.sentEvents,
         contains(Event.flutterBuildInfo(
@@ -310,8 +305,15 @@ Error launching application on iPhone.''',
           buildSettings: buildSettingsWithDevTeam,
         ),
       );
-
-      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger, fakeAnalytics);
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: SupportedPlatform.ios,
+        project: FakeFlutterProject(fileSystem: fs),
+      );
       expect(
         logger.errorText,
         contains(noProvisioningProfileInstruction),
@@ -348,8 +350,15 @@ Error launching application on iPhone.''',
           buildSettings: buildSettingsWithDevTeam,
         ),
       );
-
-      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger, fakeAnalytics);
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: SupportedPlatform.ios,
+        project: FakeFlutterProject(fileSystem: fs),
+      );
       expect(
         logger.errorText,
         contains(missingPlatformInstructions('iOS 17.0')),
@@ -388,8 +397,15 @@ Could not build the precompiled application for the device.''',
           buildSettings: buildSettings,
         ),
       );
-
-      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger, fakeAnalytics);
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: SupportedPlatform.ios,
+        project: FakeFlutterProject(fileSystem: fs),
+      );
       expect(
         logger.errorText,
         contains('Building a deployable iOS app requires a selected Development Team with a \nProvisioning Profile.'),
@@ -432,9 +448,220 @@ Could not build the precompiled application for the device.''',
         ])
       );
 
-      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger, fakeAnalytics);
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: SupportedPlatform.ios,
+        project: FakeFlutterProject(fileSystem: fs),
+      );
       expect(logger.errorText, contains('Error (Xcode): Target aot_assembly_release failed'));
       expect(logger.errorText, isNot(contains('Building a deployable iOS app requires a selected Development Team')));
+    });
+
+    testWithoutContext('parses redefinition of module error', () async{
+      const List<String> buildCommands = <String>['xcrun', 'cc', 'blah'];
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: buildCommands,
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettings,
+        ),
+        xcResult: XCResult.test(issues: <XCResultIssue>[
+          XCResultIssue.test(message: "Redefinition of module 'plugin_1_name'", subType: 'Error'),
+          XCResultIssue.test(message: "Redefinition of module 'plugin_2_name'", subType: 'Error'),
+        ]),
+      );
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final FakeFlutterProject project = FakeFlutterProject(
+        fileSystem: fs,
+        usesSwiftPackageManager: true,
+      );
+      project.ios.podfile.createSync(recursive: true);
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: SupportedPlatform.ios,
+        project: project,
+      );
+      expect(logger.errorText, contains(
+        'Your project uses both CocoaPods and Swift Package Manager, which can '
+        'cause the above error. It may be caused by there being both a CocoaPod '
+        'and Swift Package Manager dependency for the following module(s): '
+        'plugin_1_name, plugin_2_name.'
+      ));
+    });
+
+    testWithoutContext('parses duplicate symbols error with arch and number', () async{
+      const List<String> buildCommands = <String>['xcrun', 'cc', 'blah'];
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stdout: r'''
+duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_SdtF' in:
+               /Users/username/path/to/app/build/ios/Debug-iphonesimulator/plugin_1_name/plugin_1_name.framework/plugin_1_name[arm64][5](PluginNamePlugin.o)
+               /Users/username/path/to/app/build/ios/Debug-iphonesimulator/plugin_1_name.o
+           duplicate symbol '_$s29plugin_1_name23PluginNamePluginCAA15UserDefaultsApiAAWP' in:
+               /Users/username/path/to/app/build/ios/Debug-iphonesimulator/plugin_1_name/plugin_1_name.framework/plugin_1_name[arm64][5](PluginNamePlugin.o)
+               /Users/username/path/to/app/build/ios/Debug-iphonesimulator/plugin_1_name.o
+''',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: buildCommands,
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettings,
+        ),
+        xcResult: XCResult.test(issues: <XCResultIssue>[
+          XCResultIssue.test(message: '37 duplicate symbols', subType: 'Error'),
+        ]),
+      );
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final FakeFlutterProject project = FakeFlutterProject(
+        fileSystem: fs,
+        usesSwiftPackageManager: true,
+      );
+      project.ios.podfile.createSync(recursive: true);
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: SupportedPlatform.ios,
+        project: project,
+      );
+      expect(logger.errorText, contains(
+        'Your project uses both CocoaPods and Swift Package Manager, which can '
+        'cause the above error. It may be caused by there being both a CocoaPod '
+        'and Swift Package Manager dependency for the following module(s): '
+        'plugin_1_name.'
+      ));
+    });
+
+    testWithoutContext('parses duplicate symbols error with number', () async{
+      const List<String> buildCommands = <String>['xcrun', 'cc', 'blah'];
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stdout: r'''
+duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_SdtF' in:
+               /Users/username/path/to/app/build/ios/Debug-iphonesimulator/plugin_1_name/plugin_1_name.framework/plugin_1_name[5](PluginNamePlugin.o)
+               /Users/username/path/to/app/build/ios/Debug-iphonesimulator/plugin_1_name.o
+''',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: buildCommands,
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettings,
+        ),
+        xcResult: XCResult.test(issues: <XCResultIssue>[
+          XCResultIssue.test(message: '37 duplicate symbols', subType: 'Error'),
+        ]),
+      );
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final FakeFlutterProject project = FakeFlutterProject(
+        fileSystem: fs,
+        usesSwiftPackageManager: true,
+      );
+      project.ios.podfile.createSync(recursive: true);
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: SupportedPlatform.ios,
+        project: project,
+      );
+      expect(logger.errorText, contains(
+        'Your project uses both CocoaPods and Swift Package Manager, which can '
+        'cause the above error. It may be caused by there being both a CocoaPod '
+        'and Swift Package Manager dependency for the following module(s): '
+        'plugin_1_name.'
+      ));
+    });
+
+    testWithoutContext('parses duplicate symbols error without arch and number', () async{
+      const List<String> buildCommands = <String>['xcrun', 'cc', 'blah'];
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stdout: r'''
+duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_SdtF' in:
+               /Users/username/path/to/app/build/ios/Debug-iphonesimulator/plugin_1_name/plugin_1_name.framework/plugin_1_name(PluginNamePlugin.o)
+''',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: buildCommands,
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettings,
+        ),
+        xcResult: XCResult.test(issues: <XCResultIssue>[
+          XCResultIssue.test(message: '37 duplicate symbols', subType: 'Error'),
+        ]),
+      );
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final FakeFlutterProject project = FakeFlutterProject(
+        fileSystem: fs,
+        usesSwiftPackageManager: true,
+      );
+      project.ios.podfile.createSync(recursive: true);
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: SupportedPlatform.ios,
+        project: project,
+      );
+      expect(logger.errorText, contains(
+        'Your project uses both CocoaPods and Swift Package Manager, which can '
+        'cause the above error. It may be caused by there being both a CocoaPod '
+        'and Swift Package Manager dependency for the following module(s): '
+        'plugin_1_name.'
+      ));
+    });
+
+    testUsingContext('parses missing module error', () async{
+      const List<String> buildCommands = <String>['xcrun', 'cc', 'blah'];
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: buildCommands,
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettings,
+        ),
+        xcResult: XCResult.test(issues: <XCResultIssue>[
+          XCResultIssue.test(message: "Module 'plugin_1_name' not found", subType: 'Error'),
+          XCResultIssue.test(message: "Module 'plugin_2_name' not found", subType: 'Error'),
+        ]),
+      );
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final FakeFlutterProject project = FakeFlutterProject(fileSystem: fs);
+      project.ios.podfile.createSync(recursive: true);
+      project.directory.childFile('.packages').createSync(recursive: true);
+      project.manifest = FakeFlutterManifest();
+      createFakePlugins(project, fs, <String>['plugin_1_name', 'plugin_2_name']);
+      fs.systemTempDirectory.childFile('cache/plugin_1_name/ios/plugin_1_name/Package.swift')
+          .createSync(recursive: true);
+      fs.systemTempDirectory.childFile('cache/plugin_2_name/ios/plugin_2_name/Package.swift')
+          .createSync(recursive: true);
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: SupportedPlatform.ios,
+        project: project,
+      );
+      expect(logger.errorText, contains(
+        'Your project uses CocoaPods as a dependency manager, but the following plugin(s) '
+        'only support Swift Package Manager: plugin_1_name, plugin_2_name.'
+      ));
     });
   });
 
@@ -454,9 +681,10 @@ Could not build the precompiled application for the device.''',
       'another line';
 
     testWithoutContext('upgradePbxProjWithFlutterAssets', () async {
-      final File pbxprojFile = MemoryFileSystem.test().file('project.pbxproj')
+      final FakeIosProject project = FakeIosProject(fileSystem: MemoryFileSystem.test());
+      final File pbxprojFile = project.xcodeProjectInfoFile
+        ..createSync(recursive: true)
         ..writeAsStringSync(flutterAssetPbxProjLines);
-      final FakeIosProject project = FakeIosProject(pbxprojFile);
 
       bool result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);
@@ -528,14 +756,88 @@ Could not build the precompiled application for the device.''',
   });
 }
 
+void createFakePlugins(
+  FlutterProject flutterProject,
+  FileSystem fileSystem,
+  List<String> pluginNames,
+) {
+  const String pluginYamlTemplate = '''
+  flutter:
+    plugin:
+      platforms:
+        ios:
+          pluginClass: PLUGIN_CLASS
+        macos:
+          pluginClass: PLUGIN_CLASS
+  ''';
+
+  final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('cache');
+  final File packagesFile = flutterProject.directory.childFile('.packages')
+        ..createSync(recursive: true);
+  for (final String name in pluginNames) {
+    final Directory pluginDirectory = fakePubCache.childDirectory(name);
+    packagesFile.writeAsStringSync(
+        '$name:${pluginDirectory.childFile('lib').uri}\n',
+        mode: FileMode.writeOnlyAppend);
+    pluginDirectory.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(pluginYamlTemplate.replaceAll('PLUGIN_CLASS', name));
+  }
+}
+
 class FakeIosProject extends Fake implements IosProject {
-  FakeIosProject(this.xcodeProjectInfoFile);
-  @override
-  final File xcodeProjectInfoFile;
+  FakeIosProject({
+    required MemoryFileSystem fileSystem,
+  }) : hostAppRoot = fileSystem.directory('app_name').childDirectory('ios');
 
   @override
-  Future<String> hostAppBundleName(BuildInfo? buildInfo) async => 'UnitTestRunner.app';
+  Directory hostAppRoot;
 
   @override
-  Directory get xcodeProject => xcodeProjectInfoFile.fileSystem.directory('Runner.xcodeproj');
+  File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
+
+  @override
+  Future<String> productName(BuildInfo? buildInfo) async => 'UnitTestRunner';
+
+  @override
+  Directory get xcodeProject => hostAppRoot.childDirectory('Runner.xcodeproj');
+
+  @override
+  File get podfile => hostAppRoot.childFile('Podfile');
+}
+
+class FakeFlutterProject extends Fake implements FlutterProject {
+  FakeFlutterProject({
+    required this.fileSystem,
+    this.usesSwiftPackageManager = false,
+    this.isModule = false,
+  });
+
+  MemoryFileSystem fileSystem;
+
+  @override
+  late final Directory directory = fileSystem.directory('app_name');
+
+  @override
+  late FlutterManifest manifest;
+
+  @override
+  File get flutterPluginsFile => directory.childFile('.flutter-plugins');
+
+  @override
+  File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
+
+  @override
+  late final IosProject ios = FakeIosProject(fileSystem: fileSystem);
+
+  @override
+  final bool usesSwiftPackageManager;
+
+  @override
+  final bool isModule;
+}
+
+class FakeFlutterManifest extends Fake implements FlutterManifest {
+  @override
+  Set<String> get dependencies => <String>{};
 }

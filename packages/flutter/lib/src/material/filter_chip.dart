@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'action_chip.dart';
+/// @docImport 'checkbox.dart';
+/// @docImport 'choice_chip.dart';
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'input_chip.dart';
+/// @docImport 'material.dart';
+/// @docImport 'switch.dart';
+library;
+
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
@@ -103,6 +112,7 @@ class FilterChip extends StatelessWidget
     this.avatarBorder = const CircleBorder(),
     this.avatarBoxConstraints,
     this.deleteIconBoxConstraints,
+    this.chipAnimationStyle,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.flat;
@@ -149,6 +159,7 @@ class FilterChip extends StatelessWidget
     this.avatarBorder = const CircleBorder(),
     this.avatarBoxConstraints,
     this.deleteIconBoxConstraints,
+    this.chipAnimationStyle,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.elevated;
@@ -221,6 +232,8 @@ class FilterChip extends StatelessWidget
   final BoxConstraints? avatarBoxConstraints;
   @override
   final BoxConstraints? deleteIconBoxConstraints;
+  @override
+  final ChipAnimationStyle? chipAnimationStyle;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -272,6 +285,7 @@ class FilterChip extends StatelessWidget
       iconTheme: iconTheme,
       avatarBoxConstraints: avatarBoxConstraints,
       deleteIconBoxConstraints: deleteIconBoxConstraints,
+      chipAnimationStyle: chipAnimationStyle,
     );
   }
 }
@@ -338,7 +352,7 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
       }
       return _chipVariant == _ChipVariant.flat
         ? null
-        : null;
+        : _colors.surfaceContainerLow;
     });
 
   @override
@@ -347,7 +361,7 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
     : _colors.shadow;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   Color? get checkmarkColor => isEnabled

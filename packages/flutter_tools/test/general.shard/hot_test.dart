@@ -109,7 +109,7 @@ void main() {
 
   group('hotRestart', () {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    late FileSystem fileSystem;
+    late MemoryFileSystem fileSystem;
     late TestUsage testUsage;
     late FakeAnalytics fakeAnalytics;
 
@@ -137,8 +137,7 @@ void main() {
           ..writeAsStringSync('\n');
         final FakeDevice device = FakeDevice();
         final List<FlutterDevice> devices = <FlutterDevice>[
-          FlutterDevice(device, generator: residentCompiler, buildInfo: BuildInfo.debug, developmentShaderCompiler: const FakeShaderCompiler())
-            ..devFS = FakeDevFs(),
+          FakeFlutterDevice(device),
         ];
         final OperationResult result = await HotRunner(
           devices,
@@ -146,7 +145,6 @@ void main() {
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
           analytics: fakeAnalytics,
-
         ).restart(fullRestart: true);
         expect(result.isOk, false);
         expect(result.message, 'setupHotRestart failed');
@@ -534,7 +532,7 @@ void main() {
   });
 
   group('hot attach', () {
-    late FileSystem fileSystem;
+    late MemoryFileSystem fileSystem;
     late FakeAnalytics fakeAnalytics;
 
     setUp(() {
@@ -578,7 +576,7 @@ void main() {
   });
 
   group('hot cleanupAtFinish()', () {
-    late FileSystem fileSystem;
+    late MemoryFileSystem fileSystem;
     late FakeAnalytics fakeAnalytics;
 
     setUp(() {

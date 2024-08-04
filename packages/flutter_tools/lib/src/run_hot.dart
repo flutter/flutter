@@ -86,7 +86,6 @@ class HotRunner extends ResidentRunner {
     super.projectRootPath,
     super.dillOutputPath,
     super.stayResident,
-    bool super.ipv6 = false,
     super.machine,
     super.devtoolsHandler,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
@@ -132,8 +131,6 @@ class HotRunner extends ResidentRunner {
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
 
-  DateTime? firstBuildTime;
-
   String? _targetPlatform;
   String? _sdkName;
   bool? _emulator;
@@ -148,19 +145,20 @@ class HotRunner extends ResidentRunner {
       return;
     }
 
-    if (flutterDevices.length == 1) {
-      final Device device = flutterDevices.first.device!;
-      _targetPlatform = getNameForTargetPlatform(await device.targetPlatform);
-      _sdkName = await device.sdkNameAndVersion;
-      _emulator = await device.isLocalEmulator;
-    } else if (flutterDevices.length > 1) {
-      _targetPlatform = 'multiple';
-      _sdkName = 'multiple';
-      _emulator = false;
-    } else {
-      _targetPlatform = 'unknown';
-      _sdkName = 'unknown';
-      _emulator = false;
+    switch (flutterDevices.length) {
+      case 1:
+        final Device device = flutterDevices.first.device!;
+        _targetPlatform = getNameForTargetPlatform(await device.targetPlatform);
+        _sdkName = await device.sdkNameAndVersion;
+        _emulator = await device.isLocalEmulator;
+      case > 1:
+        _targetPlatform = 'multiple';
+        _sdkName = 'multiple';
+        _emulator = false;
+      default:
+        _targetPlatform = 'unknown';
+        _sdkName = 'unknown';
+        _emulator = false;
     }
   }
 
@@ -229,7 +227,6 @@ class HotRunner extends ResidentRunner {
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     bool allowExistingDdsInstance = false,
-    bool enableDevTools = false,
     bool needsFullRestart = true,
   }) async {
     _didAttach = true;
@@ -254,7 +251,8 @@ class HotRunner extends ResidentRunner {
       await enableObservatory();
     }
 
-    if (enableDevTools) {
+    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
+    if (debuggingOptions.enableDevTools) {
       // The method below is guaranteed never to return a failing future.
       unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
         devToolsServerAddress: debuggingOptions.devToolsServerAddress,
@@ -363,7 +361,6 @@ class HotRunner extends ResidentRunner {
   Future<int> run({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
-    bool enableDevTools = false,
     String? route,
   }) async {
     await _calculateTargetPlatform();
@@ -384,7 +381,6 @@ class HotRunner extends ResidentRunner {
 
     final Stopwatch appStartedTimer = Stopwatch()..start();
     final File mainFile = globals.fs.file(mainPath);
-    firstBuildTime = DateTime.now();
 
     Duration totalCompileTime = Duration.zero;
     Duration totalLaunchAppTime = Duration.zero;
@@ -472,7 +468,6 @@ class HotRunner extends ResidentRunner {
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
-      enableDevTools: enableDevTools,
       needsFullRestart: false,
     );
   }
@@ -532,7 +527,6 @@ class HotRunner extends ResidentRunner {
         mainUri: entrypointFile.absolute.uri,
         target: target,
         bundle: assetBundle,
-        firstBuildTime: firstBuildTime,
         bundleFirstUpload: isFirstUpload,
         bundleDirty: !isFirstUpload && rebuildBundle,
         fullRestart: fullRestart,
@@ -706,7 +700,7 @@ class HotRunner extends ResidentRunner {
       }
     }
     await Future.wait(operations);
-
+    globals.printTrace('Finished waiting on operations.');
     await _launchFromDevFS();
     restartTimer.stop();
     globals.printTrace('Hot restart performed in ${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
@@ -784,7 +778,11 @@ class HotRunner extends ResidentRunner {
       if (!silent) {
         globals.printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
       }
+      // TODO(bkonyi): remove when ready to serve DevTools from DDS.
       unawaited(residentDevtoolsHandler!.hotRestart(flutterDevices));
+      // for (final FlutterDevice? device in flutterDevices) {
+      //   unawaited(device?.handleHotRestart());
+      // }
       return result;
     }
     final OperationResult result = await _hotReloadHelper(
@@ -1514,24 +1512,16 @@ String _describePausedIsolates(int pausedIsolatesFound, String serviceEventKind)
     message.write('$pausedIsolatesFound isolates are ');
     plural = true;
   }
-  switch (serviceEventKind) {
-    case vm_service.EventKind.kPauseStart:
-      message.write('paused (probably due to --start-paused)');
-    case vm_service.EventKind.kPauseExit:
-      message.write('paused because ${ plural ? 'they have' : 'it has' } terminated');
-    case vm_service.EventKind.kPauseBreakpoint:
-      message.write('paused in the debugger on a breakpoint');
-    case vm_service.EventKind.kPauseInterrupted:
-      message.write('paused due in the debugger');
-    case vm_service.EventKind.kPauseException:
-      message.write('paused in the debugger after an exception was thrown');
-    case vm_service.EventKind.kPausePostRequest:
-      message.write('paused');
-    case '':
-      message.write('paused for various reasons');
-    default:
-      message.write('paused');
-  }
+  message.write(switch (serviceEventKind) {
+    vm_service.EventKind.kPauseStart       => 'paused (probably due to --start-paused)',
+    vm_service.EventKind.kPauseExit        => 'paused because ${ plural ? 'they have' : 'it has' } terminated',
+    vm_service.EventKind.kPauseBreakpoint  => 'paused in the debugger on a breakpoint',
+    vm_service.EventKind.kPauseInterrupted => 'paused due in the debugger',
+    vm_service.EventKind.kPauseException   => 'paused in the debugger after an exception was thrown',
+    vm_service.EventKind.kPausePostRequest => 'paused',
+    '' => 'paused for various reasons',
+    _  => 'paused',
+  });
   return message.toString();
 }
 

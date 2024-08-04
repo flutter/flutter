@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
+import 'dart:js_interop';
+
+import 'package:web/web.dart' as web;
 
 Future<void> main() async {
   final StringBuffer output = StringBuffer();
@@ -10,15 +12,16 @@ Future<void> main() async {
     String.fromEnvironment('test.valueB');
   if (combined == 'Example,AValue') {
     output.write('--- TEST SUCCEEDED ---');
-    print('--- TEST SUCCEEDED ---');
   } else {
     output.write('--- TEST FAILED ---');
-    print('--- TEST FAILED ---');
   }
 
-  html.HttpRequest.request(
-    '/test-result',
-    method: 'POST',
-    sendData: '$output',
-  );
+  await web.window.fetch(
+    '/test-result'.toJS,
+    web.RequestInit(
+      method: 'POST',
+      body: '$output'.toJS,
+    )
+  ).toDart;
+  print(output);
 }

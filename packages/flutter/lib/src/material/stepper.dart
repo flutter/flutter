@@ -222,6 +222,7 @@ class Stepper extends StatefulWidget {
     this.stepIconHeight,
     this.stepIconWidth,
     this.stepIconMargin,
+    this.clipBehavior = Clip.none,
   })  : assert(0 <= currentStep && currentStep < steps.length),
         assert(stepIconHeight == null || (stepIconHeight >= _kStepSize && stepIconHeight <= _kMaxStepSize),
             'stepIconHeight must be greater than $_kStepSize and less or equal to $_kMaxStepSize'),
@@ -339,8 +340,8 @@ class Stepper extends StatefulWidget {
   /// Customize connected lines colors.
   ///
   /// Resolves in the following states:
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.disabled].
   ///
   /// If not set then the widget will use default colors, primary for selected state
   /// and grey.shade400 for disabled state.
@@ -365,6 +366,15 @@ class Stepper extends StatefulWidget {
 
   /// Overrides the default step icon margin.
   final EdgeInsets? stepIconMargin;
+
+  /// The [Step.content] will be clipped to this Clip type.
+  ///
+  /// Defaults to [Clip.none].
+  ///
+  /// See also:
+  ///
+  ///  * [Clip], which explains how to use this property.
+  final Clip clipBehavior;
 
   @override
   State<Stepper> createState() => _StepperState();
@@ -456,36 +466,20 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Widget _buildCircleChild(int index, bool oldState) {
     final StepState state = oldState ? _oldStates[index]! : widget.steps[index].state;
-    final bool isDarkActive = _isDark() && widget.steps[index].isActive;
-    final Widget? icon = widget.stepIconBuilder?.call(index, state);
-    if (icon != null) {
+    if (widget.stepIconBuilder?.call(index, state) case final Widget icon) {
       return icon;
     }
     TextStyle? textStyle = _stepStyle(index)?.indexStyle;
+    final bool isDarkActive = _isDark() && widget.steps[index].isActive;
+    final Color iconColor = isDarkActive ? _kCircleActiveDark : _kCircleActiveLight;
     textStyle ??= isDarkActive ? _kStepStyle.copyWith(color: Colors.black87) : _kStepStyle;
 
-    switch (state) {
-      case StepState.indexed:
-      case StepState.disabled:
-        return Text(
-          '${index + 1}',
-          style: textStyle,
-        );
-      case StepState.editing:
-        return Icon(
-          Icons.edit,
-          color: isDarkActive ? _kCircleActiveDark : _kCircleActiveLight,
-          size: 18.0,
-        );
-      case StepState.complete:
-        return Icon(
-          Icons.check,
-          color: isDarkActive ? _kCircleActiveDark : _kCircleActiveLight,
-          size: 18.0,
-        );
-      case StepState.error:
-        return const Center(child: Text('!', style: _kStepStyle));
-    }
+    return switch (state) {
+      StepState.indexed || StepState.disabled => Text('${index + 1}', style: textStyle),
+      StepState.editing  => Icon(Icons.edit, color: iconColor, size: 18.0),
+      StepState.complete => Icon(Icons.check, color: iconColor, size: 18.0),
+      StepState.error    => const Center(child: Text('!', style: _kStepStyle)),
+    };
   }
 
   Color _circleColor(int index) {
@@ -791,7 +785,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             width: _stepIconWidth ?? _kStepSize,
             child: Center(
               child: SizedBox(
-                width: widget.connectorThickness ?? 1.0,
+                width: !_isLast(index) ? (widget.connectorThickness ?? 1.0) : 0.0,
                 child: Container(
                   color: _connectorColor(widget.steps[index].isActive),
                 ),
@@ -811,7 +805,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             ),
             child: Column(
               children: <Widget>[
-                widget.steps[index].content,
+                ClipRect(
+                  clipBehavior: widget.clipBehavior,
+                  child: widget.steps[index].content,
+                ),
                 _buildVerticalControls(index),
               ],
             ),
@@ -904,7 +901,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         Visibility(
           maintainState: true,
           visible: i == widget.currentStep,
-          child: widget.steps[i].content,
+          child: ClipRect(
+            clipBehavior: widget.clipBehavior,
+            child: widget.steps[i].content,
+          ),
         ),
       );
     }

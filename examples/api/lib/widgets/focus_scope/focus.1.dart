@@ -47,7 +47,7 @@ class FocusableText extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(8.0),
           // Change the color based on whether or not this Container has focus.
-          color: Focus.of(context).hasPrimaryFocus ? Colors.black12 : null,
+          color: Focus.of(context).hasPrimaryFocus ? Colors.red : Colors.white,
           child: Text(data),
         );
       }),

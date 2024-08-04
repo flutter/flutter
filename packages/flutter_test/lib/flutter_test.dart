@@ -51,12 +51,19 @@
 ///  * [debugCheckIntrinsicSizes], which can be set in a
 ///    `flutter_test_config.dart` file to enable deeper [RenderBox]
 ///    tests of the intrinsic APIs automatically while laying out widgets.
+///
+/// @docImport 'package:flutter/rendering.dart';
+///
+/// @docImport 'src/controller.dart';
+/// @docImport 'src/test_compat.dart';
+/// @docImport 'src/widget_tester.dart';
 library flutter_test;
 
 export 'dart:async' show Future;
 
-export 'src/_goldens_io.dart' if (dart.library.html) 'src/_goldens_web.dart';
-export 'src/_matchers_io.dart' if (dart.library.html) 'src/_matchers_web.dart';
+export 'src/_goldens_io.dart' if (dart.library.js_interop) 'src/_goldens_web.dart';
+export 'src/_matchers_io.dart' if (dart.library.js_interop) 'src/_matchers_web.dart';
+export 'src/_test_selector_io.dart' if (dart.library.js_interop) 'src/_test_selector_web.dart';
 export 'src/accessibility.dart';
 export 'src/animation_sheet.dart';
 export 'src/binding.dart';

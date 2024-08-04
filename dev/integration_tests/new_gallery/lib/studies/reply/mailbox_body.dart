@@ -34,40 +34,15 @@ class MailboxBody extends StatelessWidget {
         final String destinationString = destination
             .toString()
             .substring(destination.toString().indexOf('.') + 1);
-        late List<Email> emails;
 
-        switch (destination) {
-          case MailboxPageType.inbox:
-            {
-              emails = model.inboxEmails;
-              break;
-            }
-          case MailboxPageType.sent:
-            {
-              emails = model.outboxEmails;
-              break;
-            }
-          case MailboxPageType.starred:
-            {
-              emails = model.starredEmails;
-              break;
-            }
-          case MailboxPageType.trash:
-            {
-              emails = model.trashEmails;
-              break;
-            }
-          case MailboxPageType.spam:
-            {
-              emails = model.spamEmails;
-              break;
-            }
-          case MailboxPageType.drafts:
-            {
-              emails = model.draftEmails;
-              break;
-            }
-        }
+        final List<Email> emails = switch (destination) {
+          MailboxPageType.inbox   => model.inboxEmails,
+          MailboxPageType.sent    => model.outboxEmails,
+          MailboxPageType.starred => model.starredEmails,
+          MailboxPageType.trash   => model.trashEmails,
+          MailboxPageType.spam    => model.spamEmails,
+          MailboxPageType.drafts  => model.draftEmails,
+        };
 
         return SafeArea(
           bottom: false,
