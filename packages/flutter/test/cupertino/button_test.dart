@@ -424,8 +424,27 @@ void main() {
         ),
       ),
     );
-
     expect(textStyle.color, CupertinoColors.activeBlue);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoButton.tinted(
+          onPressed: () { },
+          child: Builder(builder: (BuildContext context) {
+            textStyle = DefaultTextStyle.of(context).style;
+            return const Placeholder();
+          }),
+        ),
+      ),
+    );
+    expect(textStyle.color, CupertinoColors.activeBlue);
+    BoxDecoration decoration = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(CupertinoButton),
+        matching: find.byType(DecoratedBox),
+      ),
+    ).decoration as BoxDecoration;
+    expect(decoration.color, CupertinoColors.activeBlue.withOpacity(0.12));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -438,9 +457,8 @@ void main() {
         ),
       ),
     );
-
     expect(textStyle.color, isSameColorAs(CupertinoColors.white));
-    BoxDecoration decoration = tester.widget<DecoratedBox>(
+    decoration = tester.widget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoButton),
         matching: find.byType(DecoratedBox),
@@ -461,6 +479,28 @@ void main() {
       ),
     );
     expect(textStyle.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
+
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoButton.tinted(
+          onPressed: () { },
+          child: Builder(builder: (BuildContext context) {
+            textStyle = DefaultTextStyle.of(context).style;
+            return const Placeholder();
+          }),
+        ),
+      ),
+    );
+    expect(textStyle.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
+    decoration = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(CupertinoButton),
+        matching: find.byType(DecoratedBox),
+      ),
+    ).decoration as BoxDecoration;
+    expect(decoration.color, CupertinoColors.activeBlue.darkColor.withOpacity(0.26));
 
     await tester.pumpWidget(
       CupertinoApp(

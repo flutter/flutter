@@ -55,6 +55,28 @@ const Map<CupertinoButtonSize, double> _kCupertinoButtonMinSize = <CupertinoButt
 
 
 
+/// The style of a [CupertinoButton] that changes the style of the button's background.
+/// Based on the iOS Human Interface Guidelines (https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS)
+enum _CupertinoButtonStyle {
+  /// No background or border, primary foreground color
+  plain,
+  /// Translucent background, primary foreground color
+  tinted,
+  /// Solid background, contrasting foreground color
+  filled,
+}
+
+
+
+// The relative values needed to transform a color to it's equivalent focus
+// outline color.
+const double _kCupertinoFocusColorOpacity = 0.80;
+const double _kCupertinoFocusColorBrightness = 0.69;
+const double _kCupertinoFocusColorSaturation = 0.835;
+
+const double _kCupertinoButtonTintedOpacityLight = 0.12;
+const double _kCupertinoButtonTintedOpacityDark = 0.26;
+
 /// An iOS-style button.
 ///
 /// Takes in a text or an icon that fades out and in on touch. May optionally have a
@@ -98,7 +120,34 @@ class CupertinoButton extends StatefulWidget {
     this.autofocus = false,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
-       _filled = false;
+       _style = _CupertinoButtonStyle.plain;
+
+  /// Creates an iOS-style button with a tinted background.
+  ///
+  /// The background color is derived from the [CupertinoTheme]'s `primaryColor` + transparency.
+  /// The foreground color is the [CupertinoTheme]'s `primaryColor`.
+  ///
+  /// To specify a custom background color, use the [color] argument of the
+  /// default constructor.
+  ///
+  /// To match the iOS "grey" button style, set [color] to [CupertinoColors.systemGrey].
+  const CupertinoButton.tinted({
+    super.key,
+    required this.child,
+    this.size = CupertinoButtonSize.large,
+    this.padding,
+    this.color,
+    this.disabledColor = CupertinoColors.quaternarySystemFill,
+    this.minSize,
+    this.pressedOpacity = 0.4,
+    this.borderRadius,
+    this.alignment = Alignment.center,
+    this.focusColor,
+    this.focusNode,
+    this.onFocusChange,
+    this.autofocus = false,
+    required this.onPressed,
+  }) : _style = _CupertinoButtonStyle.tinted;
 
   /// Creates an iOS-style button with a filled background.
   ///
@@ -123,7 +172,7 @@ class CupertinoButton extends StatefulWidget {
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        color = null,
-       _filled = true;
+       _style = _CupertinoButtonStyle.filled;
 
   /// The widget below this widget in the tree.
   ///
@@ -209,7 +258,7 @@ class CupertinoButton extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  final bool _filled;
+  final _CupertinoButtonStyle _style;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
   /// enable a button, set its [onPressed] property to a non-null value.
@@ -316,11 +365,22 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     final bool enabled = widget.enabled;
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
     final Color primaryColor = themeData.primaryColor;
-    final Color? backgroundColor = widget.color == null
-      ? (widget._filled ? primaryColor : null)
-      : CupertinoDynamicColor.maybeResolve(widget.color, context);
+    final Color? backgroundColor = (
+      widget.color == null
+        ? widget._style != _CupertinoButtonStyle.plain
+          ? primaryColor
+          : null
+        : CupertinoDynamicColor.maybeResolve(widget.color, context)
+    )?.withOpacity(
+      widget._style == _CupertinoButtonStyle.tinted
+        ? themeData.brightness != Brightness.dark
+          ? _kCupertinoButtonTintedOpacityLight
+          : _kCupertinoButtonTintedOpacityDark
+        : 1.0
+    );
 
-    final Color foregroundColor = backgroundColor != null
+
+    final Color foregroundColor = widget._style == _CupertinoButtonStyle.filled
       ? themeData.primaryContrastingColor
       : enabled
         ? primaryColor
