@@ -4,7 +4,6 @@
 
 import 'dart:ui';
 
-import 'basic.dart';
 import 'framework.dart';
 
 /// An abstract class that defines the boundaries of a geometric shape.
