@@ -1005,6 +1005,16 @@ void main() {
             SizedBox(width: 200, height: 1),
             Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 601, height: 1)),
             Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 200, height: 1)),
+
+            SizedBox(width: 800, height: 1),
+
+            // Test WrapFit.runMaybeTight
+            SizedBox(width: 200, height: 1), Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 600, height: 1)),
+            SizedBox(width: 200, height: 1), Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 300, height: 1)), SizedBox(width: 200, height: 1),
+            SizedBox(width: 200, height: 1), Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 500, height: 1)),
+            SizedBox(width: 200, height: 1),
+            Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 601, height: 1)),
+            Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 200, height: 1)),
           ],
         ),
       ),
@@ -1032,6 +1042,15 @@ void main() {
                             Offset(0, 14),
                             Offset(0, 15),
                             Offset(0, 16),
+
+                            Offset(0, 17),
+
+                            Offset(0, 18), Offset(200,  18),
+                            Offset(0, 19), Offset(200,  19), Offset(500,  19),
+                            Offset(0, 20), Offset(200,  20),
+                            Offset(0, 21),
+                            Offset(0, 22),
+                            Offset(0, 23),
                           ]);
 
     verifySize(tester, const <Size>[
@@ -1055,6 +1074,15 @@ void main() {
                             Size(200, 1),
                             Size(601, 1),
                             Size(200, 1),
+
+                            Size(800, 1),
+
+                            Size(200, 1), Size(600, 1),
+                            Size(200, 1), Size(300, 1), Size(200, 1),
+                            Size(200, 1), Size(600, 1),
+                            Size(200, 1),
+                            Size(800, 1),
+                            Size(800, 1),
                           ]);
   });
 
@@ -1090,6 +1118,16 @@ void main() {
             SizedBox(width: 1, height: 200),
             Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 1, height: 401)),
             Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 1, height: 200)),
+
+            SizedBox(width: 1, height: 600),
+
+            // Test WrapFit.runMaybeTight
+            SizedBox(width: 1, height: 200), Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 1, height: 400)),
+            SizedBox(width: 1, height: 200), Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 1, height: 100)), SizedBox(width: 1, height: 200),
+            SizedBox(width: 1, height: 200), Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 1, height: 300)),
+            SizedBox(width: 1, height: 200),
+            Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 1, height: 401)),
+            Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 1, height: 200)),
           ],
         ),
       ),
@@ -1117,6 +1155,15 @@ void main() {
                             Offset(14, 0),
                             Offset(15, 0),
                             Offset(16, 0),
+
+                            Offset(17, 0),
+
+                            Offset(18, 0), Offset(18, 200),
+                            Offset(19, 0), Offset(19, 200), Offset(19, 300),
+                            Offset(20, 0), Offset(20, 200),
+                            Offset(21, 0),
+                            Offset(22, 0),
+                            Offset(23, 0),
                           ]);
 
     verifySize(tester, const <Size>[
@@ -1140,6 +1187,15 @@ void main() {
                             Size(1, 200),
                             Size(1, 401),
                             Size(1, 200),
+
+                            Size(1, 600),
+
+                            Size(1, 200), Size(1, 400),
+                            Size(1, 200), Size(1, 100), Size(1, 200),
+                            Size(1, 200), Size(1, 400),
+                            Size(1, 200),
+                            Size(1, 600),
+                            Size(1, 600),
                           ]);
   });
 
