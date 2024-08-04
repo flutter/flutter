@@ -592,48 +592,14 @@ class RenderWrap extends RenderBox
   @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
-    return _computeDryLayout(constraints);
-  }
-
-  Size _computeDryLayout(BoxConstraints constraints, [ChildLayouter layoutChild = ChildLayoutHelper.dryLayoutChild]) {
-    final (BoxConstraints childConstraints, double mainAxisLimit) = switch (direction) {
-      Axis.horizontal => (BoxConstraints(maxWidth: constraints.maxWidth), constraints.maxWidth),
-      Axis.vertical => (BoxConstraints(maxHeight: constraints.maxHeight), constraints.maxHeight),
-    };
-
-    double mainAxisExtent = 0.0;
-    double crossAxisExtent = 0.0;
-    double runMainAxisExtent = 0.0;
-    double runCrossAxisExtent = 0.0;
-    int childCount = 0;
-    RenderBox? child = firstChild;
-    while (child != null) {
-      final Size childSize = layoutChild(child, childConstraints);
-      final double childMainAxisExtent = _getMainAxisExtent(childSize);
-      final double childCrossAxisExtent = _getCrossAxisExtent(childSize);
-      // There must be at least one child before we move on to the next run.
-      if (childCount > 0 && runMainAxisExtent + childMainAxisExtent + spacing > mainAxisLimit) {
-        mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
-        crossAxisExtent += runCrossAxisExtent + runSpacing;
-        runMainAxisExtent = 0.0;
-        runCrossAxisExtent = 0.0;
-        childCount = 0;
-      }
-      runMainAxisExtent += childMainAxisExtent;
-      runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
-      if (childCount > 0) {
-        runMainAxisExtent += spacing;
-      }
-      childCount += 1;
-      child = childAfter(child);
+    if (firstChild == null) {
+      return constraints.smallest;
     }
-    crossAxisExtent += runCrossAxisExtent;
-    mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
 
-    return constraints.constrain(switch (direction) {
-      Axis.horizontal => Size(mainAxisExtent, crossAxisExtent),
-      Axis.vertical   => Size(crossAxisExtent, mainAxisExtent),
-    });
+    final (_AxisSize childrenAxisSize, _) = _computeRuns(constraints, ChildLayoutHelper.dryLayoutChild);
+    final _AxisSize containerAxisSize = childrenAxisSize.applyConstraints(constraints, direction);
+
+    return containerAxisSize.toSize(direction);
   }
 
   static Size _getChildSize(RenderBox child) => child.size;
