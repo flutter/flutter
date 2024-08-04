@@ -86,7 +86,7 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             Text(
               'Selected Segment: ${_selectedSegment.name}',
               style: const TextStyle(color: CupertinoColors.white),
@@ -94,19 +94,28 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
             const SizedBox(height: 20),
             Row(
               mainAxisSize: MainAxisSize.min,
-              children: [
+              children: <Widget>[
                 const Text('Disable one segment', style: TextStyle(color: CupertinoColors.white)),
                 CupertinoSwitch(
                   value: _toggleOne,
-                  onChanged: (value) {
+                  onChanged: (bool value) {
                     setState(() {
                       _toggleOne = value;
-                      _toggleAll = false;
-                      _segments = <int, bool>{
-                        0: false,
-                        1: true,
-                        2: true,
-                      };
+                      if (value) {
+                        _toggleAll = false;
+                        _segments = <int, bool>{
+                          0: false,
+                          1: true,
+                          2: true,
+                        };
+                      } else {
+                        _toggleAll = true;
+                        _segments = <int, bool>{
+                          0: true,
+                          1: true,
+                          2: true,
+                        };
+                      }
                     });
                   },
                 ),
@@ -114,15 +123,15 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
             ),
             Row(
               mainAxisSize: MainAxisSize.min,
-              children: [
+              children: <Widget>[
                 const Text('Toggle all segments', style: TextStyle(color: CupertinoColors.white)),
                 CupertinoSwitch(
                   value: _toggleAll,
-                  onChanged: (value) {
+                  onChanged: (bool value) {
                     setState(() {
                       _toggleAll = value;
-                      _toggleOne = false;
                       if (value) {
+                        _toggleOne = false;
                         _segments = <int, bool>{
                           0: true,
                           1: true,
