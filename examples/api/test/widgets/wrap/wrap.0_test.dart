@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_api_samples/widgets/wrap/wrap.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
-Iterable<double> _getXOffsets(WidgetTester tester){
+Iterable<double> _getXOffsets(WidgetTester tester) {
   return tester.renderObject <RenderWrap>(find.byType(Wrap)).getChildrenAsList().map((RenderBox e) => e.localToGlobal(Offset.zero).dy);
 }
 
@@ -58,6 +58,6 @@ void main() {
   );
 }
 
-void _expectAllTheSame(Iterable<dynamic> items){
+void _expectAllTheSame(Iterable<dynamic> items) {
   expect(items, List<dynamic>.generate(items.length, (int index) => items.firstOrNull));
 }
