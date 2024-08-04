@@ -174,41 +174,40 @@ class _RunMetrics {
 ///  * [Wrap], the wrap widget.
 ///  * [Wrapped], the widget to set the [WrapFit].
 enum WrapFit {
-  /// The child is placed either in the current or the next run, depending on
-  /// its min intrinsic size in the [Wrap.direction].
-  /// Within this run, it is forced to fill the entire run, unless the [Wrap]
-  /// has no max size constraint in the run direction.
+  /// Determines whether to place the child in the current or the
+  /// next run, depending on its minimum intrinsic size.
   ///
-  /// This setting is more expensive, because it also computes the minimal
-  /// size of the child. Avoid using it for complex children.
+  /// The child is stretched to fill the entire run
+  /// (this does not apply if the [Wrap] is unconstrained).
   ///
-  /// The [Wrapped] widget assigns this kind of [WrapFit] to its child.
+  /// This is the default fit of the [Wrapped] widget.
+  ///
+  /// This setting can be expensive (see [RenderBox.getMinIntrinsicWidth]).
   runTight(true),
 
-  /// The child is placed either in the current or the next run, depending on
-  /// its min intrinsic size in the [Wrap.direction].
+  /// Determines whether to place the child in the current or the
+  /// next run, depending on its minimum intrinsic size.
   ///
-  /// If this is the last child or the next child wont fit into this run, then
-  /// the child is forced to fill the remaining space in the current run unless
-  /// the [Wrap] has no max size constraint in the run direction.
+  /// The child is stretched to fill the entire run if the next child starts a
+  /// new run (this does not apply if the [Wrap] is unconstrained).
   ///
-  /// This setting is more expensive, because it also computes the minimal
-  /// size of the child and the next child. Avoid using it for complex children.
+  /// This setting can be expensive (see [RenderBox.getMinIntrinsicWidth]).
   runMaybeTight(false),
 
-  /// The child is placed either in the current or the next run, depending on
-  /// its min intrinsic size in the [Wrap.direction].
+  /// Determines whether to place the child in the current or the
+  /// next run, depending on its minimum intrinsic size.
   ///
-  /// This setting is more expensive, because it also computes the minimal
-  /// size of the child. Avoid using it for complex children.
+  /// This setting can be expensive (see [RenderBox.getMinIntrinsicWidth]).
   runLoose(false),
 
-  /// The child is forced to fill the available space in a new run, unless the
-  /// [Wrap] has no max size constraint in the run direction.
+  /// The child is placed in a new run and stretched to fill the
+  /// available space.
+  ///
+  /// (This does not apply if the [Wrap] is unconstrained.)
   tight(true),
 
-  /// The child can at most fill the available space in an empty run and is
-  /// placed base on its size and the remaining space.
+  /// Determines whether to place the child in the current or the
+  /// next run, depending on its size.
   ///
   /// This is the default behavior for a child of [Wrap].
   loose(false);
