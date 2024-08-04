@@ -171,7 +171,6 @@ class _RunMetrics {
 ///
 /// See also:
 ///
-///  * [RenderWrap], the wrap render object.
 ///  * [Wrap], the wrap widget.
 ///  * [Wrapped], the widget to set the [WrapFit].
 enum WrapFit {
