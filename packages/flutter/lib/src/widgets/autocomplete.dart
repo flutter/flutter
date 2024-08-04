@@ -353,7 +353,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
   }
 
-  // Helps identify the latest call to _onChangedField
+  // Assigning an ID to every call of _onChangedField is necessary to avoid a
+  // situation where _options is updated by an older call when multiple
+  // _onChangedField calls are running simultaneously.
   int _onChangedCallId = 0;
   // Called when _textEditingController changes.
   Future<void> _onChangedField() async {
