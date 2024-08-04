@@ -12,12 +12,48 @@ import 'colors.dart';
 import 'constants.dart';
 import 'theme.dart';
 
-// Measured against iOS 12 in Xcode.
-const EdgeInsets _kButtonPadding = EdgeInsets.all(16.0);
-const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
-  vertical: 14.0,
-  horizontal: 64.0,
-);
+
+// Measured against iOS 17 guidelines (https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS)
+
+/// The size of a [CupertinoButton].
+/// Based on the iOS Human Interface Guidelines (https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS)
+enum CupertinoButtonSize {
+  /// Displays a smaller button with round sides and smaller text (uses [CupertinoThemeData.textTheme.actionSmallTextStyle]).
+  small,
+  /// Displays a medium sized button with round sides and regular-sized text
+  medium,
+  /// Displays a (classic) large button with rounded edges and regular-sized text
+  large,
+}
+
+const Map<CupertinoButtonSize, EdgeInsetsGeometry> _kCupertinoButtonPadding = <CupertinoButtonSize, EdgeInsetsGeometry>{
+  CupertinoButtonSize.small: EdgeInsets.symmetric(
+    vertical: 6,
+    horizontal: 12,
+  ),
+  CupertinoButtonSize.medium: EdgeInsets.symmetric(
+    vertical: 8,
+    horizontal: 15,
+  ),
+  CupertinoButtonSize.large: EdgeInsets.symmetric(
+    vertical: 16,
+    horizontal: 20,
+  ),
+};
+
+final Map<CupertinoButtonSize, BorderRadius> _kCupertinoButtonSizeBorderRadius = <CupertinoButtonSize, BorderRadius>{
+  CupertinoButtonSize.small: BorderRadius.circular(28),
+  CupertinoButtonSize.medium: BorderRadius.circular(32),
+  CupertinoButtonSize.large: BorderRadius.circular(12),
+};
+
+const Map<CupertinoButtonSize, double> _kCupertinoButtonMinSize = <CupertinoButtonSize, double>{
+  CupertinoButtonSize.small: 28,
+  CupertinoButtonSize.medium: 32,
+  CupertinoButtonSize.large: 44,
+};
+
+
 
 /// An iOS-style button.
 ///
@@ -48,12 +84,13 @@ class CupertinoButton extends StatefulWidget {
   const CupertinoButton({
     super.key,
     required this.child,
+    this.size = CupertinoButtonSize.large,
     this.padding,
     this.color,
     this.disabledColor = CupertinoColors.quaternarySystemFill,
-    this.minSize = kMinInteractiveDimensionCupertino,
+    this.minSize,
     this.pressedOpacity = 0.4,
-    this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
+    this.borderRadius,
     this.alignment = Alignment.center,
     this.focusColor,
     this.focusNode,
@@ -72,11 +109,12 @@ class CupertinoButton extends StatefulWidget {
   const CupertinoButton.filled({
     super.key,
     required this.child,
+    this.size = CupertinoButtonSize.large,
     this.padding,
     this.disabledColor = CupertinoColors.quaternarySystemFill,
-    this.minSize = kMinInteractiveDimensionCupertino,
+    this.minSize,
     this.pressedOpacity = 0.4,
-    this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
+    this.borderRadius,
     this.alignment = Alignment.center,
     this.focusColor,
     this.focusNode,
@@ -133,8 +171,13 @@ class CupertinoButton extends StatefulWidget {
 
   /// The radius of the button's corners when it has a background color.
   ///
-  /// Defaults to round corners of 8 logical pixels.
+  /// Defaults to [_kCupertinoButtonSizeBorderRadius], based on [size].
   final BorderRadius? borderRadius;
+
+  /// The size of the button
+  ///
+  /// Defaults to [CupertinoButtonSize.large]
+  final CupertinoButtonSize size;
 
   /// The alignment of the button's [child].
   ///
@@ -291,8 +334,15 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
         .withSaturation(kCupertinoFocusColorSaturation)
         .toColor();
 
-    final TextStyle textStyle = themeData.textTheme.textStyle.copyWith(color: foregroundColor);
-    final IconThemeData iconTheme = IconTheme.of(context).copyWith(color: foregroundColor);
+    final TextStyle textStyle = (
+      widget.size == CupertinoButtonSize.small
+        ? themeData.textTheme.actionSmallTextStyle
+        : themeData.textTheme.actionTextStyle
+    ).copyWith(color: foregroundColor);
+    final IconThemeData iconTheme = IconTheme.of(context).copyWith(
+      color: foregroundColor,
+      size: textStyle.fontSize! * 1.2,
+    );
 
     return MouseRegion(
       cursor: enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
@@ -311,12 +361,10 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
           child: Semantics(
             button: true,
             child: ConstrainedBox(
-              constraints: widget.minSize == null
-                ? const BoxConstraints()
-                : BoxConstraints(
-                    minWidth: widget.minSize!,
-                    minHeight: widget.minSize!,
-                  ),
+              constraints: BoxConstraints(
+                minWidth: widget.minSize ?? _kCupertinoButtonMinSize[widget.size]!,
+                minHeight: widget.minSize ?? _kCupertinoButtonMinSize[widget.size]!,
+              ),
               child: FadeTransition(
                 opacity: _opacityAnimation,
                 child: DecoratedBox(
@@ -330,15 +378,13 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                           ),
                         )
                       : null,
-                    borderRadius: widget.borderRadius,
+                    borderRadius: widget.borderRadius ?? _kCupertinoButtonSizeBorderRadius[widget.size],
                     color: backgroundColor != null && !enabled
                       ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
                       : backgroundColor,
                   ),
                   child: Padding(
-                    padding: widget.padding ?? (backgroundColor != null
-                      ? _kBackgroundButtonPadding
-                      : _kButtonPadding),
+                    padding: widget.padding ?? _kCupertinoButtonPadding[widget.size]!,
                     child: Align(
                       alignment: widget.alignment,
                       widthFactor: 1.0,
