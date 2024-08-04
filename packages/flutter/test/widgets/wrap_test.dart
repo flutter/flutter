@@ -1278,10 +1278,4 @@ void main() {
     );
     expect(getParentData().fit, WrapFit.tight);
   });
-
-  test('Test WrapFit getters', () {
-    for (final WrapFit fit in WrapFit.values) {
-      expect(fit.isLoose != fit.isTight, true);
-    }
-  });
 }

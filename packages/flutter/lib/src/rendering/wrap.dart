@@ -217,10 +217,6 @@ enum WrapFit {
 
   /// `true` if the [WrapFit] always forces the child to fill the assigned run.
   final bool isTight;
-
-  /// `true` if the [WrapFit] may allow the child to only fill the assigned run
-  /// partially.
-  bool get isLoose => !isTight;
 }
 
 /// Parent data for use with [RenderWrap].
