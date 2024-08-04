@@ -60,7 +60,7 @@ class _WrapExampleState extends State<WrapExample> {
                     iconAlignment: IconAlignment.end,
                     label: Text(content),
                     style: TextButton.styleFrom(
-                      backgroundColor: switch(fit) {
+                      backgroundColor: switch (fit) {
                         WrapFit.runTight => const Color.fromARGB(255, 243, 33, 33),
                         WrapFit.runLoose => const Color.fromARGB(255, 255, 146, 146),
                         WrapFit.runMaybeTight => const Color.fromARGB(255, 41, 182, 62),
