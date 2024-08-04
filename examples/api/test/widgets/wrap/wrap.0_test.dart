@@ -29,21 +29,31 @@ void main() {
       await tester.enterText(find.byType(TextField), itemText);
       await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pump();
-      expect(find.text(itemText), findsNWidgets(2));
+      expect(find.text(itemText), findsOneWidget);
       _expectAllTheSame(_getXOffsets(tester).toList().take(3));
 
-      // Clear TextField
-      await tester.enterText(find.byType(TextField), '');
-      await tester.pump();
-      expect(find.text(itemText), findsOneWidget);
-      _expectAllTheSame(_getXOffsets(tester).take(3));
-
       // Delete Item 1
-      await tester.tap(find.byIcon(Icons.delete).at(1));
+      await tester.longPress(find.bySubtype<FilledButton>().at(1));
       await tester.pump();
       expect(find.text('Item 1'), findsNothing);
 
       _expectAllTheSame(_getXOffsets(tester));
+    },
+  );
+
+  testWidgets(
+    'Fits can be cycled',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const example.WrapExampleApp());
+
+      expect(find.byTooltip(WrapFit.loose.name), findsNWidgets(2));
+      expect(find.byTooltip(WrapFit.runTight.name), findsNothing);
+
+      await tester.tap(find.bySubtype<FilledButton>().first);
+      await tester.pump();
+
+      expect(find.byTooltip(WrapFit.loose.name), findsOneWidget);
+      expect(find.byTooltip(WrapFit.runTight.name), findsOneWidget);
     },
   );
 }

@@ -28,7 +28,7 @@ class WrapExample extends StatefulWidget {
 }
 
 class _WrapExampleState extends State<WrapExample> {
-  List<String> items = <String>['Item 0', 'Item 1'];
+  List<(WrapFit, String)> items = <(WrapFit, String)>[(WrapFit.loose, 'Item 0'), (WrapFit.loose, 'Item 1')];
 
   @override
   Widget build(BuildContext context) {
@@ -40,23 +40,38 @@ class _WrapExampleState extends State<WrapExample> {
           runSpacing: 8,
           spacing: 8,
           children: <Widget>[
-            for (int i = 0; i < items.length; i++)
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(items[i]),
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          items.removeAt(i);
-                        });
+            for (final (int index, (WrapFit fit, String content)) in items.indexed)
+              Wrapped(
+                fit: fit,
+                child: Tooltip(
+                  message: fit.name,
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      setState(() {
+                       items[index] = (WrapFit.values[(fit.index + 1) % WrapFit.values.length], content);
+                      });
+                    },
+                    onLongPress: () {
+                      setState(() {
+                        items.removeAt(index);
+                      });
+                    },
+                    icon: const Icon(Icons.switch_access_shortcut),
+                    iconAlignment: IconAlignment.end,
+                    label: Text(content),
+                    style: TextButton.styleFrom(
+                      backgroundColor: switch(fit) {
+                        WrapFit.runTight => const Color.fromARGB(255, 243, 33, 33),
+                        WrapFit.runLoose => const Color.fromARGB(255, 255, 146, 146),
+                        WrapFit.runMaybeTight => const Color.fromARGB(255, 41, 182, 62),
+                        WrapFit.tight => const Color.fromARGB(255, 3, 43, 244),
+                        WrapFit.loose => const Color.fromARGB(255, 34, 196, 255),
                       },
-                      icon: const Icon(Icons.delete),
-                    )
-                  ],),
+                      foregroundColor: fit.isTight ? Colors.white : Colors.black,
+                  ),
+                ),
               ),
+            ),
             Wrapped(
               // If the child fits in the current run,
               // its max width is set to the remaining space.
@@ -70,7 +85,7 @@ class _WrapExampleState extends State<WrapExample> {
                 ),
                 onSubmitted: (String value) {
                   setState(() {
-                    items.add(value);
+                    items.add((WrapFit.loose, value));
                   });
                 },
               ),
