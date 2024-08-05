@@ -41,7 +41,7 @@ enum DeviceOrientation {
   /// clockwise from its boot orientation.
   portraitUp,
 
-  /// The orientation that is 90 degrees clockwise from [portraitUp].
+  /// The orientation that is 90 degrees counterclockwise from [portraitUp].
   ///
   /// If the device shows its boot logo in landscape, then the boot logo is
   /// shown in [landscapeLeft].
@@ -50,7 +50,7 @@ enum DeviceOrientation {
   /// The orientation that is 180 degrees from [portraitUp].
   portraitDown,
 
-  /// The orientation that is 90 degrees counterclockwise from [portraitUp].
+  /// The orientation that is 90 degrees clockwise from [portraitUp].
   landscapeRight,
 }
 
