@@ -53,7 +53,7 @@ class MainWidgetState extends State<MainWidget> {
             focusNode: dismissButtonFocusNode,
             onPressed: hideBanner,
             child: const Text('DISMISS'),
-          )
+          ),
         ],
       ),
     );
