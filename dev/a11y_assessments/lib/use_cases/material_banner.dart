@@ -71,9 +71,9 @@ class MainWidgetState extends State<MainWidget> {
         child: ElevatedButton(
           focusNode: showButtonFocusNode,
           onPressed: showBanner,
-          child: const Text('Show a MaterialBanner')
-          )
+          child: const Text('Show a MaterialBanner'),
         ),
-      );
-    }
+      ),
+    );
   }
+}
