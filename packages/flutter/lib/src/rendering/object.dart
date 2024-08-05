@@ -4460,25 +4460,17 @@ class _RenderObjectSemantics extends _InterestingSemanticsFragmentProvider {
       );
       return _cachedSemanticFragment! as _InterestingSemanticsFragment;
     }
-    final _SemanticsFragment? oldFragment = _cachedSemanticFragment;
-    // It is safe to assume `oldFragment` still has up-to-date parent inherited
-    // semantics properties. Otherwise, the parent fragment's rendering object
-    // would have been marked semantics dirty and call _getSemanticsForParent of
-    // this object instead.
-    final bool mergeIntoParent;
-    final bool blockUserActions;
-    if (oldFragment is _SwitchableSemanticsFragment) {
-      mergeIntoParent = oldFragment.owner.cachedSemanticsNode?.parent?.isPartOfNodeMerging ?? false;
-      blockUserActions = oldFragment.owner.cachedSemanticsNode?.areUserActionsBlocked ?? false;
-    } else {
-      assert(oldFragment == null || oldFragment is _RootSemanticsFragment);
-      mergeIntoParent = false;
-      blockUserActions = false;
-    }
+    final bool mergeIntoParent = cachedSemanticsNode?.parent?.isPartOfNodeMerging ?? false;
+    final bool blockUserActions = cachedSemanticsNode?.areUserActionsBlocked ?? false;
     final _SemanticsFragment newFragment = _computeSemanticsForParent(
       mergeIntoParent: mergeIntoParent,
       blockUserActions: blockUserActions,
     );
+    // It is safe to assume `oldFragment` still has up-to-date parent inherited
+    // semantics properties. Otherwise, the parent fragment's rendering object
+    // would have been marked semantics dirty and call _getSemanticsForParent of
+    // this object instead.
+    final _SemanticsFragment? oldFragment = _cachedSemanticFragment;
     // The _cachedSemanticFragment must also be an
     // _InterestingSemanticsFragment. Otherwise, the parent rendering
     // object's _semantics must have be marked dirty and call
@@ -5579,6 +5571,14 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       for (final _InterestingSemanticsFragmentProvider provider in _compilingChildren) {
         final _InterestingSemanticsFragment fragment = provider.getFragment();
         fragment.markBlocksUserActions(_effectiveConfig.isBlockingUserActions);
+      }
+      if (!_effectiveConfig.isBlockingUserActions) {
+        // Unblocking user action may causes merge conflicts between child
+        // fragments.
+        //
+        // Marking the owner dirty causes it to reevaluate merge conflict if
+        // its getSemantics is called.
+        owner.isDirty = true;
       }
     }
   }
