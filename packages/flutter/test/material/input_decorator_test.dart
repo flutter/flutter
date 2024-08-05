@@ -6605,7 +6605,7 @@ void main() {
       expect(decoration.isCollapsed, false);
     });
 
-    test('InputDecorationTheme.isCollapsed can be overriden', () {
+    test('InputDecorationTheme.isCollapsed can be overridden', () {
       final InputDecoration decoration = const InputDecoration(
         isCollapsed: true,
         hintText: 'Hello, Flutter!',
