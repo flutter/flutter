@@ -1150,7 +1150,7 @@ void main() {
     expect(tester.getRect(getItem(5)).width, difference);
   });
 
-  testWidgets('Updating Carousel does not cause exception', (WidgetTester tester) async {
+  testWidgets('Updating CarouselView does not cause exception', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/152787
     bool isLight = true;
     await tester.pumpWidget(
