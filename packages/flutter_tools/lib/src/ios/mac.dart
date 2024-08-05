@@ -24,6 +24,7 @@ import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/swift_package_manager.dart';
 import '../macos/xcode.dart';
+import '../migrations/swift_package_manager_gitignore_migration.dart';
 import '../migrations/swift_package_manager_integration_migration.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
@@ -175,6 +176,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         fileSystem: globals.fs,
         plistParser: globals.plistParser,
       ),
+      SwiftPackageManagerGitignoreMigration(project, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
