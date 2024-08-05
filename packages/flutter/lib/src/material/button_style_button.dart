@@ -162,22 +162,39 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
   final IconAlignment iconAlignment;
 
-  /// Returns a non-null [ButtonStyle] that's based primarily on the [Theme]'s
-  /// [ThemeData.textTheme] and [ThemeData.colorScheme].
+  /// Returns a [ButtonStyle] that's based primarily on the [Theme]'s
+  /// [ThemeData.textTheme] and [ThemeData.colorScheme], but has most values
+  /// filled out (non-null).
   ///
-  /// The returned style can be overridden by the [style] parameter and
-  /// by the style returned by [themeStyleOf]. For example the default
-  /// style of the [TextButton] subclass can be overridden with its
-  /// [TextButton.style] constructor parameter, or with a
-  /// [TextButtonTheme].
+  /// The returned style can be overridden by the [style] parameter and by the
+  /// style returned by [themeStyleOf] that some button-specific themes like
+  /// [TextButtonTheme] or [ElevatedButtonTheme] override. For example the
+  /// default style of the [TextButton] subclass can be overridden with its
+  /// [TextButton.style] constructor parameter, or with a [TextButtonTheme].
   ///
-  /// Concrete button subclasses should return a ButtonStyle that
-  /// has no null properties, and where all of the [WidgetStateProperty]
-  /// properties resolve to non-null values.
+  /// Concrete button subclasses should return a [ButtonStyle] with as many
+  /// non-null properties as possible, where all of the non-null
+  /// [WidgetStateProperty] properties resolve to non-null values.
+  ///
+  /// ## Properties that can be null
+  ///
+  /// Some properties, like [ButtonStyle.fixedSize] would override other values
+  /// in the same [ButtonStyle] if set, so they are allowed to be null.  Here is
+  /// a summary of properties that are allowed to be null when returned in the
+  /// [ButtonStyle] returned by this function, an why:
+  ///
+  /// - [ButtonStyle.fixedSize] because it would override other values in the
+  ///   same [ButtonStyle], like [ButtonStyle.maximumSize].
+  /// - [ButtonStyle.side] because null is a valid value for a button that has
+  ///   no side. [OutlinedButton] returns a non-null default for this, however.
+  /// - [ButtonStyle.backgroundBuilder] and [ButtonStyle.foregroundBuilder]
+  ///   because they would override the [ButtonStyle.foregroundColor] and
+  ///   [ButtonStyle.backgroundColor] of the same [ButtonStyle].
   ///
   /// See also:
   ///
-  ///  * [themeStyleOf], Returns the ButtonStyle of this button's component theme.
+  /// * [themeStyleOf], returns the ButtonStyle of this button's component
+  ///   theme.
   @protected
   ButtonStyle defaultStyleOf(BuildContext context);
 
@@ -479,7 +496,10 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
           customBorder: resolvedShape.copyWith(side: resolvedSide),
           statesController: statesController,
           child: IconTheme.merge(
-            data: IconThemeData(color: resolvedIconColor ?? resolvedForegroundColor, size: resolvedIconSize),
+            data: IconThemeData(
+              color: resolvedIconColor ?? resolvedForegroundColor,
+              size: resolvedIconSize,
+            ),
             child: effectiveChild,
           ),
         ),
