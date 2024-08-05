@@ -57,8 +57,7 @@ import 'test_async_utils.dart';
 ///
 ///   * [GoldenFileComparator], the abstract class that [LocalFileComparator]
 ///   implements.
-///   * [matchesGoldenFile], the function from [flutter_test] that invokes the
-///    comparator.
+///   * [matchesGoldenFile], the function that invokes the comparator.
 class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutput {
   /// Creates a new [LocalFileComparator] for the specified [testFile].
   ///

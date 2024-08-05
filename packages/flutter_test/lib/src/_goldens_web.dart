@@ -42,8 +42,7 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
 ///
 /// See also:
 ///
-///   * [matchesGoldenFile], the function from [flutter_test] that invokes the
-///    comparator.
+///   * [matchesGoldenFile], the function that invokes the comparator.
 class DefaultWebGoldenComparator extends WebGoldenComparator {
   /// Creates a new [DefaultWebGoldenComparator] for the specified [testUri].
   ///

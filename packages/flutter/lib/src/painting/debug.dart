@@ -5,6 +5,8 @@
 /// @docImport 'dart:developer';
 /// @docImport 'dart:ui';
 ///
+/// @docImport 'package:flutter_test/flutter_test.dart';
+///
 /// @docImport 'borders.dart';
 /// @docImport 'box_decoration.dart';
 /// @docImport 'box_shadow.dart';
