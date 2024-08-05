@@ -2019,6 +2019,8 @@ class _TabBarViewState extends State<TabBarView> {
         viewportFraction: widget.viewportFraction,
       );
     } else {
+      // There is a case that TabBarView was initialized but not render.
+      // It is unnecessary jump to the new page in this case.
       if (!_pageController!.position.hasContentDimensions) {
         return;
       }
