@@ -1071,7 +1071,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
   //  against the same stdin will result in an exception. To guard against this,
   //  we need to force calls to run serially. Ideally, this wouldn't be
   //  necessary since we shouldn't have multiple concurrent writes to the
-  //  compiler process. However, we do (https://github.com/flutter/flutter/issues/152577).
+  //  compiler process.
+  //  However, we do. See https://github.com/flutter/flutter/issues/152577.
   final Pool _serverStdinWritePool = Pool(1);
   Future<void> _writelnToServerStdinAll(List<String> lines, {
     bool printTrace = false,
@@ -1082,8 +1083,12 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }
     final PoolResource request = await _serverStdinWritePool.request();
     try {
+      await ProcessUtils.writelnToStdinUnsafe(
+        stdin: server.stdin,
+        line: lines.join('\n'),
+      );
+
       for (final String line in lines) {
-        await ProcessUtils.writelnToStdinUnsafe(stdin: server.stdin, line: line);
         if (printTrace) {
           _logger.printTrace('<- $line');
         }
