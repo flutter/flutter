@@ -125,13 +125,12 @@ class DartDevelopmentServiceException implements Exception {
         case {
           'error_code': final int errorCode,
           'message': final String message,
-          'uri': final String? uri
         }) {
       return switch (errorCode) {
         existingDdsInstanceError =>
           DartDevelopmentServiceException.existingDdsInstance(
             message,
-            ddsUri: Uri.parse(uri!),
+            ddsUri: Uri.parse(json['uri']! as String),
           ),
         failedToStartError => DartDevelopmentServiceException.failedToStart(),
         connectionError =>

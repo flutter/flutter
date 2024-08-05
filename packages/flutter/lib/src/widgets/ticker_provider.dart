@@ -239,11 +239,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
     _updateTicker();
   }
 
-  void _updateTicker() {
-    if (_ticker != null) {
-      _ticker!.muted = !_tickerModeNotifier!.value;
-    }
-  }
+  void _updateTicker() => _ticker?.muted = !_tickerModeNotifier!.value;
 
   void _updateTickerModeNotifier() {
     final ValueListenable<bool> newNotifier = TickerMode.getNotifier(context);
