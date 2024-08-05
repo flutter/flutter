@@ -1467,7 +1467,6 @@ void main() {
             DropdownMenu<TestMenu>(
               requestFocusOnTap: requestFocusOnTap,
               dropdownMenuEntries: menuChildren,
-              controller: TextEditingController(),
             ),
           ],
         ),
