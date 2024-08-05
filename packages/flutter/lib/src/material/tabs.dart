@@ -2019,6 +2019,7 @@ class _TabBarViewState extends State<TabBarView> {
         viewportFraction: widget.viewportFraction,
       );
     } else {
+      if (!_pageController!.position.hasContentDimensions) return;
       _pageController!.jumpToPage(_currentIndex!);
     }
   }
