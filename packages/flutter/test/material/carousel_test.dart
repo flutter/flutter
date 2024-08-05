@@ -1151,6 +1151,7 @@ void main() {
   });
 
   testWidgets('Updating Carousel does not cause exception', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/152787
     bool isLight = true;
     await tester.pumpWidget(
       StatefulBuilder(
