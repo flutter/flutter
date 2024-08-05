@@ -911,7 +911,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   }
 
   static double _minWidth(RenderBox? box, double height) => box?.getMinIntrinsicWidth(height) ?? 0.0;
-  static double _maxWidth(RenderBox? box, double height) => box?.getMaxIntrinsicWidth(height) ?? 0.0 ;
+  static double _maxWidth(RenderBox? box, double height) => box?.getMaxIntrinsicWidth(height) ?? 0.0;
   static double _minHeight(RenderBox? box, double width) => box?.getMinIntrinsicHeight(width) ?? 0.0;
   static Size _boxSize(RenderBox? box) => box?.size ?? Size.zero;
   static double _getBaseline(RenderBox box, BoxConstraints boxConstraints) {
@@ -2622,19 +2622,34 @@ class InputDecoration {
   ///
   /// This type of input decoration does not include a border by default.
   ///
+  /// A collapsed decoration cannot have [labelText], [errorText], [counter],
+  /// [icon], prefixes, and suffixes.
+  ///
   /// Sets the [isCollapsed] property to true.
+  /// Sets the [contentPadding] property to [EdgeInsets.zero].
   const InputDecoration.collapsed({
     required this.hintText,
-    this.floatingLabelBehavior,
-    this.floatingLabelAlignment,
+    @Deprecated(
+      'Invalid parameter because a collapsed decoration has no label. '
+      'This feature was deprecated after v3.24.0-0.1.pre.',
+    )
+    FloatingLabelBehavior? floatingLabelBehavior,
+    @Deprecated(
+      'Invalid parameter because a collapsed decoration has no label. '
+      'This feature was deprecated after v3.24.0-0.1.pre.',
+    )
+    FloatingLabelAlignment? floatingLabelAlignment,
     this.hintStyle,
     this.hintTextDirection,
+    this.hintMaxLines,
+    this.hintFadeDuration,
     this.filled = false,
     this.fillColor,
     this.focusColor,
     this.hoverColor,
     this.border = InputBorder.none,
     this.enabled = true,
+    this.constraints,
   }) : icon = null,
        iconColor = null,
        label = null,
@@ -2645,8 +2660,6 @@ class InputDecoration {
        helperText = null,
        helperStyle = null,
        helperMaxLines = null,
-       hintMaxLines = null,
-       hintFadeDuration = null,
        error = null,
        errorText = null,
        errorStyle = null,
@@ -2675,8 +2688,11 @@ class InputDecoration {
        disabledBorder = null,
        enabledBorder = null,
        semanticCounterText = null,
-       alignLabelWithHint = false,
-       constraints = null;
+       // ignore: prefer_initializing_formals, (can't use initializing formals for a deprecated parameter).
+       floatingLabelBehavior = floatingLabelBehavior,
+       // ignore: prefer_initializing_formals, (can't use initializing formals for a deprecated parameter).
+       floatingLabelAlignment = floatingLabelAlignment,
+       alignLabelWithHint = false;
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
@@ -3019,7 +3035,8 @@ class InputDecoration {
 
   /// Whether the decoration is the same size as the input field.
   ///
-  /// A collapsed decoration cannot have [labelText], [errorText], an [icon].
+  /// A collapsed decoration cannot have [labelText], [errorText], [counter],
+  /// [icon], prefixes, and suffixes.
   ///
   /// To create a collapsed input decoration, use [InputDecoration.collapsed].
   final bool? isCollapsed;
@@ -3881,7 +3898,7 @@ class InputDecoration {
 /// the current input decoration theme to initialize null [InputDecoration]
 /// properties.
 ///
-/// The [InputDecoration.applyDefaults] method is used to combine a input
+/// The [InputDecoration.applyDefaults] method is used to combine an input
 /// decoration theme with an [InputDecoration] object.
 @immutable
 class InputDecorationTheme with Diagnosticable {

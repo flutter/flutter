@@ -4,8 +4,8 @@
 
 import 'dart:async';
 
-import 'package:dds/dds.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -48,7 +48,6 @@ void main() {
       processManager: processManager,
       enableVmService: enableVmService,
       dartEntrypointArgs: dartEntrypointArgs,
-      uriConverter: (String input) => '$input/converted',
       enableImpeller: enableImpeller,
     );
 
@@ -198,6 +197,7 @@ void main() {
   });
 
   group('DDS', () {
+    late DDSLauncherCallback originalDdsLauncher;
     setUp(() {
       processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
@@ -221,26 +221,30 @@ void main() {
         ),
       ]);
       device = createDevice(enableVmService: true);
+      originalDdsLauncher = ddsLauncherCallback;
+      ddsLauncherCallback = (Uri remoteVmServiceUri, {
+        required bool enableAuthCodes,
+        required bool ipv6,
+        required bool enableDevTools,
+        required List<String> cachedUserTags,
+        Uri? serviceUri,
+        String? google3WorkspaceRoot,
+        Uri? devToolsServerAddress,
+      }) async {
+        return (process: null, serviceUri: Uri.parse('http://localhost:1234'), devToolsUri: null, dtdUri: null);
+      };
+    });
+
+    tearDown(() {
+      ddsLauncherCallback = originalDdsLauncher;
     });
 
     testUsingContext('skips setting VM Service port and uses the input port for DDS instead', () async {
       await device.start('example.dill');
       await device.vmServiceUri;
 
-      final Uri uri = await (device as TestFlutterTesterDevice).ddsServiceUriFuture();
-      expect(uri.port, 1234);
-    });
-
-    testUsingContext('sets up UriConverter from context', () async {
-      await device.start('example.dill');
-      await device.vmServiceUri;
-
-      final FakeDartDevelopmentService dds = (device as TestFlutterTesterDevice).dds
-      as FakeDartDevelopmentService;
-      final String? result = dds
-          .uriConverter
-          ?.call('test');
-      expect(result, 'test/converted');
+      final Uri? uri = await (device as TestFlutterTesterDevice).vmServiceUri;
+      expect(uri!.port, 1234);
     });
   });
 }
@@ -255,7 +259,6 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     required super.processManager,
     required super.enableVmService,
     required List<String> dartEntrypointArgs,
-    required UriConverter uriConverter,
     required bool enableImpeller,
   }) : super(
     id: 999,
@@ -279,27 +282,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     icudtlPath: null,
     compileExpression: null,
     fontConfigManager: FontConfigManager(),
-    uriConverter: uriConverter,
   );
-  late DartDevelopmentService dds;
-
-  final Completer<Uri> _ddsServiceUriCompleter = Completer<Uri>();
-
-  Future<Uri> ddsServiceUriFuture() => _ddsServiceUriCompleter.future;
-
-  @override
-  Future<DartDevelopmentService> startDds(
-    Uri uri, {
-    UriConverter? uriConverter,
-  }) async {
-    _ddsServiceUriCompleter.complete(uri);
-    dds = FakeDartDevelopmentService(
-      Uri.parse('http://localhost:${debuggingOptions.hostVmServicePort}'),
-      Uri.parse('http://localhost:8080'),
-      uriConverter: uriConverter,
-    );
-    return dds;
-  }
 
   @override
   Future<FlutterVmService> connectToVmServiceImpl(
@@ -319,18 +302,6 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
   Future<StreamChannel<String>> get remoteChannel async => StreamChannelController<String>().foreign;
 }
 
-class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
-  FakeDartDevelopmentService(this.uri, this.original, {this.uriConverter});
-
-  final Uri original;
-  final UriConverter? uriConverter;
-
-  @override
-  final Uri uri;
-
-  @override
-  Uri get remoteVmServiceUri => original;
-}
 class FakeHttpServer extends Fake implements HttpServer {
   @override
   int get port => 0;

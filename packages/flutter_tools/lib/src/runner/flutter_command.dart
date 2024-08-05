@@ -489,7 +489,7 @@ abstract class FlutterCommand extends Command<void> {
       defaultsTo: true,
       help: 'Enable (or disable, with "--no-$kEnableDevTools") the launching of the '
             'Flutter DevTools debugger and profiler. '
-            'If specified, "--$kDevToolsServerAddress" is ignored.'
+            'If "--no-$kEnableDevTools" is specified, "--$kDevToolsServerAddress" is ignored.'
     );
     argParser.addOption(
       kDevToolsServerAddress,
