@@ -1818,6 +1818,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       final double increase = increaseValue();
       onChanged!(increase);
       onChangeEnd!(increase);
+      _state.showValueIndicator();
     }
   }
 
@@ -1827,6 +1828,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       final double decrease = decreaseValue();
       onChanged!(decrease);
       onChangeEnd!(decrease);
+      _state.showValueIndicator();
     }
   }
 
