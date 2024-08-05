@@ -1776,23 +1776,35 @@ class _ActionSheetContentSection extends StatelessWidget {
     // `Text` will scale the provided font size inside, so its parameter is
     // unscaled first.
     final double effectiveFontSize = style.fontSize / contextScaleFactor;
+    print('Font ${style.fontSize} lead ${style.lead}');
 
-    final double titleTopPadding = 0.44 * style.lead;
-    final double titleFullHeight = 1.5 * style.lead;
-    final double titleBottomPadding = titleFullHeight - titleTopPadding - style.fontSize;
+    final double topMinPadding = 1.1 * style.lead - style.fontSize;
+    final double topMaxPadding = 1.1 * style.lead - 0.46 * style.fontSize;
+    final double optionalTopPadding = topMaxPadding - topMinPadding;
+    final double maxMiddlePadding = 1.5 * style.lead - topMinPadding - style.fontSize;
     final List<Widget> titleContentGroup = <Widget>[
       if (title != null)
-        Padding(
-          padding: EdgeInsets.only(
-            top: titleTopPadding,
-            bottom: titleBottomPadding,
+        // Expanded(child:
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: optionalTopPadding + maxMiddlePadding + style.fontSize,
+            ),
+            child:
+            Column(
+              children: <Widget>[
+                Spacer(flex: (optionalTopPadding * 100).round()),
+                // SizedBox(height: optionalTopPadding),
+                DefaultTextStyle(
+                            style: titleTextStyle.copyWith(fontSize: effectiveFontSize),
+                            textAlign: TextAlign.center,
+                            child: title!,
+                ),
+                // SizedBox(height: maxMiddlePadding),
+                Spacer(flex: (maxMiddlePadding * 100).round()),
+              ]
+            ),
           ),
-          child: DefaultTextStyle(
-            style: titleTextStyle.copyWith(fontSize: effectiveFontSize),
-            textAlign: TextAlign.center,
-            child: title!,
-          ),
-        ),
+        // ),
       if (message != null)
         DefaultTextStyle(
           style: messageTextStyle.copyWith(fontSize: effectiveFontSize),
@@ -1801,15 +1813,11 @@ class _ActionSheetContentSection extends StatelessWidget {
         ),
     ];
 
-    final double topPadding;
     final double bottomPadding;
-    final double verticalPadding = 1.1 * style.lead - style.fontSize;
     if (title != null && message != null) {
-      topPadding = verticalPadding;
-      bottomPadding = verticalPadding * 2 + style.fontSize;
+      bottomPadding = 2.2 * style.lead - style.fontSize;
     } else {
-      topPadding = verticalPadding + 0.55 * style.fontSize;
-      bottomPadding = topPadding;
+      bottomPadding = topMaxPadding;
     }
 
     return CupertinoScrollbar(
@@ -1818,7 +1826,7 @@ class _ActionSheetContentSection extends StatelessWidget {
         controller: scrollController,
         child: Padding(
           padding: EdgeInsets.only(
-            top: topPadding,
+            top: topMinPadding,
             bottom: bottomPadding,
             left: _kActionSheetButtonHorizontalPadding,
             right: _kActionSheetButtonHorizontalPadding,
@@ -2529,23 +2537,42 @@ class _RenderPriorityColumn extends RenderFlex {
 
   _TwoChildrenHeights _childrenHeights(double width, double maxHeight) {
     assert(childCount == 2);
-    final double topIntrinsic = firstChild!.getMinIntrinsicHeight(width);
-    final double bottomIntrinsic = lastChild!.getMinIntrinsicHeight(width);
-    // Try to layout both children as their intrinsic height.
-    if (topIntrinsic + bottomIntrinsic <= maxHeight) {
+    final double topMax = firstChild!.getMaxIntrinsicHeight(width);
+    final double topMin = firstChild!.getMinIntrinsicHeight(width);
+    final double bottomMax = lastChild!.getMaxIntrinsicHeight(width);
+    final double bottomMin = lastChild!.getMinIntrinsicHeight(width);
+    print('top ($topMax - $topMin) bottom ($bottomMax - $bottomMin)');
+    // Try to layout both children as their max intrinsic height.
+    if (topMax + bottomMax <= maxHeight) {
       return (
-        topChildHeight: topIntrinsic,
-        bottomChildHeight: bottomIntrinsic,
+        topChildHeight: topMax,
+        bottomChildHeight: bottomMax,
       );
     }
-    // _bottomMinHeight is only effective when bottom actually needs that much.
-    final double effectiveBottomMinHeight = math.min(_bottomMinHeight, bottomIntrinsic);
+    // If there isn't room for both max intrinsic height, but room for both min
+    // intrinsic height, then prioritize the remaining room to top.
+    if (topMax + bottomMin <= maxHeight) {
+      return (
+        topChildHeight: topMax,
+        bottomChildHeight: maxHeight - topMax,
+      );
+    }
+    if (topMin + bottomMin <= maxHeight) {
+      return (
+        topChildHeight: maxHeight - bottomMin,
+        bottomChildHeight: bottomMin,
+      );
+    }
+    // If there isn't room for both min intrinsic height, then one of them
+    // has to scroll, which is bottom. But bottom needs at least
+    // _bottomMinHeight (subject to its demand).
+    final double effectiveBottomMinHeight = math.min(_bottomMinHeight, bottomMin);
     // Try to layout top as intrinsics, as long as the bottom has at least
     // effectiveBottomMinHeight.
-    if (maxHeight - topIntrinsic >= effectiveBottomMinHeight) {
+    if (maxHeight - topMin >= effectiveBottomMinHeight) {
       return (
-        topChildHeight: topIntrinsic,
-        bottomChildHeight: maxHeight - topIntrinsic,
+        topChildHeight: topMin,
+        bottomChildHeight: maxHeight - topMin,
       );
     }
     // Try to layout bottom as effectiveBottomMinHeight, as long as top has at
