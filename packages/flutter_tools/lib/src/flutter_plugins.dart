@@ -15,6 +15,7 @@ import 'base/file_system.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/template.dart';
+import 'base/utils.dart';
 import 'base/version.dart';
 import 'cache.dart';
 import 'convert.dart';
@@ -28,6 +29,12 @@ import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'project.dart';
 
+Future<bool> _fileContentEqualsString(File file, String utf16String) async {
+  final List<int> fileBytes = await file.readAsBytes();
+  final List<int> utf8StringBytes = utf8.encode(utf16String);
+  return listEquals(fileBytes, utf8StringBytes);
+}
+
 Future<void> _renderTemplateToFile(
   String template,
   Object? context,
@@ -36,6 +43,10 @@ Future<void> _renderTemplateToFile(
 ) async {
   final String renderedTemplate = templateRenderer
     .renderString(template, context);
+  if (await file.exists() && await _fileContentEqualsString(file, renderedTemplate)) {
+    globals.printTrace('Skip rendering ${file.basename} because it was previously generated, and the content is the same.');
+    return;
+  }
   await file.create(recursive: true);
   await file.writeAsString(renderedTemplate);
 }
