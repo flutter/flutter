@@ -37,7 +37,10 @@ platform_properties:
       device_type: none
   # The current android emulator config names can be found here:
   # https://chromium.googlesource.com/chromium/src.git/+/HEAD/tools/android/avd/proto
-  # You may use those names for the android_virtual_device version.
+  # You may use those names for the android_virtual_device version. You may find the
+  # avd_cipd_version by clicking on the latest available instance and looking for the
+  # build_id:<Identifier#> here:
+  # https://chrome-infra-packages.appspot.com/p/chromium/tools/android/avd/linux-amd64.
   linux_android_emu:
     properties:
       contexts: >-
@@ -47,8 +50,8 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
-          {"dependency": "android_virtual_device", "version": "android_34_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8759428741582061553"},
+          {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8741513191637853009"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       os: Ubuntu
@@ -373,6 +376,7 @@ targets:
 
   - name: Linux_android_emu android views
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/152684
     properties:
       tags: >
         ["framework","hostonly","linux"]
@@ -1215,6 +1219,42 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Linux android_java11_dependency_smoke_tests
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:11"}
+        ]
+      task_name: android_java11_dependency_smoke_tests
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      test_timeout_secs: "2700"
+
+  - name: Linux android_java17_dependency_smoke_tests
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      task_name: android_java17_dependency_smoke_tests
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      test_timeout_secs: "2700"
+
   - name: Linux tool_tests_commands
     recipe: flutter/flutter_drone
     timeout: 60
@@ -1258,11 +1298,15 @@ targets:
   - name: Linux_android_emu flutter_driver_android_test
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
+    bringup: true # https://github.com/flutter/flutter/issues/152684
     properties:
       shard: flutter_driver_android
       tags: >
          ["framework", "hostonly", "shard", "linux"]
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
 
   - name: Linux realm_checker
     recipe: flutter/flutter_drone
@@ -1990,6 +2034,7 @@ targets:
 
   - name: Linux_android_emu android_defines_test
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/152684
     timeout: 60
     properties:
       tags: >
@@ -2414,6 +2459,7 @@ targets:
 
   - name: Linux_android_emu external_textures_integration_test
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/152684
     timeout: 60
     # Functionally the same as "presubmit: false", except that we will run on
     # presubmit during engine rolls. This test is the *only* automated e2e
@@ -2807,11 +2853,11 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: flutter_gallery__transition_perf
       artifact: gallery__transition_perf
       drone_dimensions: >
-        ["device_os=N","os=Linux", "device_type=msm8952"]
+        ["device_os=U","os=Linux", "device_type=mokey"]
 
   - name: Linux_build_test flutter_gallery__transition_perf_e2e
     recipe: devicelab/devicelab_drone_build_test
@@ -2819,11 +2865,11 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: flutter_gallery__transition_perf_e2e
       artifact: gallery__transition_perf_e2e
       drone_dimensions: >
-        ["device_os=N","os=Linux", "device_type=msm8952"]
+        ["device_os=U","os=Linux", "device_type=mokey"]
 
   - name: Linux_build_test flutter_gallery__transition_perf_hybrid
     recipe: devicelab/devicelab_drone_build_test
@@ -2831,11 +2877,11 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: flutter_gallery__transition_perf_hybrid
       artifact: gallery__transition_perf_hybrid
       drone_dimensions: >
-        ["device_os=N","os=Linux", "device_type=msm8952"]
+        ["device_os=U","os=Linux", "device_type=mokey"]
 
   # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__transition_perf_with_semantics
@@ -5695,7 +5741,6 @@ targets:
   - name: Windows tool_integration_tests_1_7
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -5720,7 +5765,6 @@ targets:
   - name: Windows tool_integration_tests_2_7
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -5743,7 +5787,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_3_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5768,7 +5811,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_4_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5793,7 +5835,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_5_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5818,7 +5859,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_6_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5843,7 +5883,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_7_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:

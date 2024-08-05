@@ -282,9 +282,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void performLayout() {
     assert(_rootTransform != null);
     final bool sizedByChild = !constraints.isTight;
-    if (child != null) {
-      child!.layout(constraints, parentUsesSize: sizedByChild);
-    }
+    child?.layout(constraints, parentUsesSize: sizedByChild);
     _size = sizedByChild && child != null ? child!.size : constraints.smallest;
     assert(size.isFinite);
     assert(constraints.isSatisfiedBy(size));
@@ -301,9 +299,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// coordinate system as that expected by the root [Layer], which will
   /// normally be in physical (device) pixels.
   bool hitTest(HitTestResult result, { required Offset position }) {
-    if (child != null) {
-      child!.hitTest(BoxHitTestResult.wrap(result), position: position);
-    }
+    child?.hitTest(BoxHitTestResult.wrap(result), position: position);
     result.add(HitTestEntry(this));
     return true;
   }
