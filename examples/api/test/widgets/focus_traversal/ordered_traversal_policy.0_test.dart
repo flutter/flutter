@@ -17,7 +17,6 @@ void main() {
       const example.OrderedTraversalPolicyExampleApp(),
     );
 
-
     expect(hasFocus(tester, 'One'), isTrue);
 
     const List<String> focusOrder = <String>[
@@ -26,7 +25,7 @@ void main() {
       'Four',
       'Five',
       'Six',
-      'One'
+      'One',
     ];
 
     for (final String text in focusOrder) {
