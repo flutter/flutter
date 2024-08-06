@@ -959,7 +959,7 @@ used.
   // AGP template version incompatible with Java version.
   final gradle.JavaAgpCompat? minimumCompatibleAgpVersion = gradle.getMinimumAgpVersionForJavaVersion(globals.logger, javaV: javaVersion);
   final String compatibleAgpVersionMessage = minimumCompatibleAgpVersion == null ? '' : ' (minimum compatible AGP version: ${minimumCompatibleAgpVersion.agpMin})';
-  final String gradleBuildFilePaths = '    - ${_getBuildGradleConfigurationFilePaths(projectType, projectDirPath)!.join('\n    - ')}';
+  final String gradleBuildFilePaths = '    ${_getBuildGradleConfigurationFilePaths(projectType, projectDirPath)!.join('\n    - ')}';
 
   globals.printWarning('''
 $incompatibleVersionsAndRecommendedOptionMessage
