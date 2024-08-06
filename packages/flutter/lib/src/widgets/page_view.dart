@@ -199,7 +199,9 @@ class PageController extends ScrollController {
       position._cachedPage = page.toDouble();
       return Future<void>.value();
     }
-    if (!position.hasContentDimensions) {
+    // If you are updating a page with controller that is not rendered,
+    // It maybe be crash as there is not ViewportDimension.
+    if (!position.hasViewportDimension) {
       return Future<void>.value();
     }
     return position.animateTo(
@@ -219,7 +221,9 @@ class PageController extends ScrollController {
       position._cachedPage = page.toDouble();
       return;
     }
-    if (!position.hasContentDimensions) {
+    // If you are updating a page with controller that is not rendered,
+    // It maybe be crash as there is not ViewportDimension.
+    if (!position.hasViewportDimension) {
       return;
     }
     position.jumpTo(position.getPixelsFromPage(page.toDouble()));
