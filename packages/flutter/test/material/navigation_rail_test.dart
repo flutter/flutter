@@ -175,6 +175,187 @@ void main() {
     expect(leading.localToGlobal(Offset.zero), const Offset(0, 8.0));
   });
 
+  testWidgets('Leading spacing is correct with 1 destinations', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: null,
+        leading: FloatingActionButton(onPressed: () { }),
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+        ],
+      ),
+    );
+
+    final RenderBox leading = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(0));
+    expect(leading.localToGlobal(Offset.zero), const Offset(12.0, 8.0));
+  });
+
+  testWidgets('Leading spacing is correct with 2 destinations', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: null,
+        leading: FloatingActionButton(onPressed: () { }),
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Longer Label'),
+          ),
+        ],
+      ),
+    );
+
+    final RenderBox leading = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(0));
+    expect(leading.localToGlobal(Offset.zero), const Offset(12.0, 8.0));
+  });
+
+  testWidgets('Trailing spacing is correct with 0 destinations', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: null,
+        trailing: FloatingActionButton(onPressed: () { }),
+        destinations: const <NavigationRailDestination>[],
+      ),
+    );
+
+    final RenderBox leading = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(0));
+    expect(leading.localToGlobal(Offset.zero), const Offset(0, 8.0));
+  });
+
+  testWidgets('Trailing spacing is correct with 1 destinations', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: null,
+        trailing: FloatingActionButton(onPressed: () { }),
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+        ],
+      ),
+    );
+
+    final RenderBox leading = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(0));
+    expect(leading.localToGlobal(Offset.zero), const Offset(12.0, 52.0));
+  });
+
+  testWidgets('Trailing spacing is correct with 2 destinations', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: null,
+        trailing: FloatingActionButton(onPressed: () { }),
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Longer Label'),
+          ),
+        ],
+      ),
+    );
+
+    final RenderBox leading = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(0));
+    expect(leading.localToGlobal(Offset.zero), const Offset(12.0, 96.0));
+  });
+
+  testWidgets('Change destinations and selectedIndex', (WidgetTester tester) async {
+    late StateSetter stateSetter;
+    int? selectedIndex;
+    List<NavigationRailDestination> destinations = const <NavigationRailDestination>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  NavigationRail(
+                    selectedIndex: selectedIndex,
+                    destinations: destinations,
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).destinations.length, 0);
+    expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).selectedIndex, isNull);
+
+    stateSetter(() {
+      destinations = const <NavigationRailDestination>[
+        NavigationRailDestination(
+          icon: Icon(Icons.favorite_border),
+          selectedIcon: Icon(Icons.favorite),
+          label: Text('Abc'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.bookmark_border),
+          selectedIcon: Icon(Icons.bookmark),
+          label: Text('Longer Label'),
+        ),
+      ];
+    });
+
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).destinations.length, 2);
+    expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).selectedIndex, isNull);
+
+    stateSetter(() {
+      selectedIndex = 0;
+    });
+
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).destinations.length, 2);
+    expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).selectedIndex, 0);
+
+    stateSetter(() {
+      destinations = const <NavigationRailDestination>[
+        NavigationRailDestination(
+          icon: Icon(Icons.favorite_border),
+          selectedIcon: Icon(Icons.favorite),
+          label: Text('Abc'),
+        ),
+      ];
+    });
+
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).destinations.length, 1);
+    expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).selectedIndex, 0);
+  });
+
   testWidgets('Renders wider for a destination with a long label - [labelType]=all', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
@@ -3757,6 +3938,192 @@ void main() {
 
       final RenderBox leading = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(0));
       expect(leading.localToGlobal(Offset.zero), const Offset(0, 8.0));
+    });
+
+    testWidgets('Leading spacing is correct with 1 destinations', (WidgetTester tester) async {
+      await _pumpNavigationRail(
+        tester,
+        useMaterial3: false,
+        navigationRail: NavigationRail(
+          selectedIndex: null,
+          leading: FloatingActionButton(onPressed: () { }),
+          destinations: const <NavigationRailDestination>[
+            NavigationRailDestination(
+              icon: Icon(Icons.favorite_border),
+              selectedIcon: Icon(Icons.favorite),
+              label: Text('Abc'),
+            ),
+          ],
+        ),
+      );
+
+      final RenderBox leading = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(0));
+      expect(leading.localToGlobal(Offset.zero), const Offset(8.0, 8.0));
+    });
+
+    testWidgets('Leading spacing is correct with 2 destinations', (WidgetTester tester) async {
+      await _pumpNavigationRail(
+        tester,
+        useMaterial3: false,
+        navigationRail: NavigationRail(
+          selectedIndex: null,
+          leading: FloatingActionButton(onPressed: () { }),
+          destinations: const <NavigationRailDestination>[
+            NavigationRailDestination(
+              icon: Icon(Icons.favorite_border),
+              selectedIcon: Icon(Icons.favorite),
+              label: Text('Abc'),
+            ),
+            NavigationRailDestination(
+              icon: Icon(Icons.bookmark_border),
+              selectedIcon: Icon(Icons.bookmark),
+              label: Text('Longer Label'),
+            ),
+          ],
+        ),
+      );
+
+      final RenderBox leading = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(0));
+      expect(leading.localToGlobal(Offset.zero), const Offset(8.0, 8.0));
+    });
+
+    testWidgets('Trailing spacing is correct with 0 destinations', (WidgetTester tester) async {
+      await _pumpNavigationRail(
+        tester,
+        useMaterial3: false,
+        navigationRail: NavigationRail(
+          selectedIndex: null,
+          trailing: FloatingActionButton(onPressed: () { }),
+          destinations: const <NavigationRailDestination>[],
+        ),
+      );
+
+      final RenderBox leading = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(0));
+      expect(leading.localToGlobal(Offset.zero), const Offset(0, 8.0));
+    });
+
+    testWidgets('Trailing spacing is correct with 1 destinations', (WidgetTester tester) async {
+      await _pumpNavigationRail(
+        tester,
+        useMaterial3: false,
+        navigationRail: NavigationRail(
+          selectedIndex: null,
+          trailing: FloatingActionButton(onPressed: () { }),
+          destinations: const <NavigationRailDestination>[
+            NavigationRailDestination(
+              icon: Icon(Icons.favorite_border),
+              selectedIcon: Icon(Icons.favorite),
+              label: Text('Abc'),
+            ),
+          ],
+        ),
+      );
+
+      final RenderBox leading = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(0));
+      expect(leading.localToGlobal(Offset.zero), const Offset(8.0, 80.0));
+    });
+
+    testWidgets('Trailing spacing is correct with 2 destinations', (WidgetTester tester) async {
+      await _pumpNavigationRail(
+        tester,
+        useMaterial3: false,
+        navigationRail: NavigationRail(
+          selectedIndex: null,
+          trailing: FloatingActionButton(onPressed: () { }),
+          destinations: const <NavigationRailDestination>[
+            NavigationRailDestination(
+              icon: Icon(Icons.favorite_border),
+              selectedIcon: Icon(Icons.favorite),
+              label: Text('Abc'),
+            ),
+            NavigationRailDestination(
+              icon: Icon(Icons.bookmark_border),
+              selectedIcon: Icon(Icons.bookmark),
+              label: Text('Longer Label'),
+            ),
+          ],
+        ),
+      );
+
+      final RenderBox leading = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(0));
+      expect(leading.localToGlobal(Offset.zero), const Offset(8.0, 152.0));
+    });
+
+    testWidgets('Change destinations and selectedIndex', (WidgetTester tester) async {
+      late StateSetter stateSetter;
+      int? selectedIndex;
+      List<NavigationRailDestination> destinations = const <NavigationRailDestination>[];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              stateSetter = setState;
+              return Scaffold(
+                body: Row(
+                  children: <Widget>[
+                    NavigationRail(
+                      selectedIndex: selectedIndex,
+                      destinations: destinations,
+                    ),
+                    const Expanded(
+                      child: Text('body'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).destinations.length, 0);
+      expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).selectedIndex, isNull);
+
+      stateSetter(() {
+        destinations = const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Longer Label'),
+          ),
+        ];
+      });
+
+      await tester.pumpAndSettle();
+
+      expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).destinations.length, 2);
+      expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).selectedIndex, isNull);
+
+      stateSetter(() {
+        selectedIndex = 0;
+      });
+
+      await tester.pumpAndSettle();
+
+      expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).destinations.length, 2);
+      expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).selectedIndex, 0);
+
+      stateSetter(() {
+        destinations = const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+        ];
+      });
+
+      await tester.pumpAndSettle();
+
+      expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).destinations.length, 1);
+      expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).selectedIndex, 0);
     });
 
     testWidgets('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
