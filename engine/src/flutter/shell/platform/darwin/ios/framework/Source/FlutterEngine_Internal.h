@@ -48,7 +48,7 @@ extern NSString* const kFlutterEngineWillDealloc;
                                  base64Encode:(bool)base64Encode;
 
 - (FlutterPlatformPlugin*)platformPlugin;
-- (std::shared_ptr<flutter::FlutterPlatformViewsController>&)platformViewsController;
+- (std::shared_ptr<flutter::PlatformViewsController>&)platformViewsController;
 - (FlutterTextInputPlugin*)textInputPlugin;
 - (FlutterRestorationPlugin*)restorationPlugin;
 - (void)launchEngine:(nullable NSString*)entrypoint

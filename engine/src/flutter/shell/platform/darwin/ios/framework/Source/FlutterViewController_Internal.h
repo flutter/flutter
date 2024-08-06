@@ -16,7 +16,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
 
 namespace flutter {
-class FlutterPlatformViewsController;
+class PlatformViewsController;
 }
 
 FLUTTER_DARWIN_EXPORT
@@ -58,7 +58,7 @@ typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
 @property(nonatomic, assign, readwrite) BOOL prefersStatusBarHidden;
 
 - (fml::WeakNSObject<FlutterViewController>)getWeakNSObject;
-- (std::shared_ptr<flutter::FlutterPlatformViewsController>&)platformViewsController;
+- (std::shared_ptr<flutter::PlatformViewsController>&)platformViewsController;
 - (FlutterRestorationPlugin*)restorationPlugin;
 
 // Accepts keypress events, and then calls |nextAction| if the event was not
