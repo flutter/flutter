@@ -6,11 +6,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const FlexibleRouteTransitionsApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class FlexibleRouteTransitionsApp extends StatelessWidget {
+  const FlexibleRouteTransitionsApp({super.key});
 
   @override
   Widget build(BuildContext context) {
