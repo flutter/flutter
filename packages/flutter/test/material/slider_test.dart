@@ -4484,12 +4484,12 @@ void main() {
       ),
     );
 
-    // Slider does not show value indicator initially.
+    // Slider shows value indicator initially on focus.
     await tester.pumpAndSettle();
     RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
     expect(
       valueIndicatorBox,
-      isNot(paints..scale()..path(color: theme.colorScheme.primary)),
+      paints..scale()..path(color: theme.colorScheme.primary),
     );
 
     // Right arrow (increase)
