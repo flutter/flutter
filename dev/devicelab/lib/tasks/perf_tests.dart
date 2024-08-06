@@ -811,7 +811,7 @@ Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations
 
 /// Opens the file at testDirectory + 'ios/Runner/Info.plist'
 /// and adds additional manifest settings.
-void _updateManifestSettings({
+void _updateManifestSettings(String testDirectory, {
   required bool disablePartialRepaint,
   required bool platformThreadMerged
 }) {
@@ -1393,6 +1393,7 @@ class PerfTest {
         if (disablePartialRepaint || enableMergedPlatformThread) {
           changedPlist = true;
           _updateManifestSettings(
+            testDirectory,
             disablePartialRepaint: disablePartialRepaint,
             platformThreadMerged: enableMergedPlatformThread
           );
