@@ -158,15 +158,16 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   @override
   String? get barrierLabel => null;
 
+  // Check Material fullscreen dialogs. Should be fine without delegatedTransition.
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
-    return (nextRoute is! CupertinoRouteTransitionMixin && nextRoute is FlexibleTransitionRouteMixin<T> && nextRoute.delegatedTransition != null) || nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog;
+    return (nextRoute is! CupertinoRouteTransitionMixin && nextRoute is ModalRoute<T> && nextRoute.delegatedTransition != null) || nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog;
   }
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
-    return previousRoute is FlexibleTransitionRouteMixin<T> || previousRoute is CupertinoRouteTransitionMixin && !previousRoute.fullscreenDialog;
+    return previousRoute is ModalRoute<T> || previousRoute is CupertinoRouteTransitionMixin && !previousRoute.fullscreenDialog;
   }
 
   @override
@@ -273,7 +274,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 ///  * [CupertinoTabScaffold], for applications that have a tab bar at the
 ///    bottom with multiple pages.
 ///  * [CupertinoPage], for a [Page] version of this class.
-class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T>, FlexibleTransitionRouteMixin<T> {
+class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
   /// Creates a page route for use in an iOS designed app.
   ///
   /// The [builder], [maintainState], and [fullscreenDialog] arguments must not
@@ -314,7 +315,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
 //
 // This route uses the builder from the page to build its content. This ensures
 // the content is up to date after page updates.
-class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T>, FlexibleTransitionRouteMixin<T> {
+class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
   _PageBasedCupertinoPageRoute({
     required CupertinoPage<T> page,
     super.allowSnapshotting = true,

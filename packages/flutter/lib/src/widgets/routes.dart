@@ -1417,10 +1417,22 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     return child;
   }
 
+  /// The delegated transition provided to the previous route.
+  DelegatedTransitionBuilder? get delegatedTransition => null;
+
+  /// The delegated transition received from an incoming route.
+  DelegatedTransitionBuilder? receivedTransition;
+
   /// Transition that matches with the next route. Will be null if there is no
   /// next route or a next route is not provided. If a non-null value exists,
   /// then it will be used in place of [buildTransitions].
-  DelegatedTransitionBuilder? get nextRouteTransition => null;
+  DelegatedTransitionBuilder? get nextRouteTransition {
+    if (receivedTransition != null) {
+      return receivedTransition;
+    } else {
+      return null;
+    }
+  }
 
   /// docs
   Widget buildFlexTransitions(
@@ -1959,12 +1971,22 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
+    if (nextRoute is ModalRoute<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition != this.delegatedTransition) {
+      receivedTransition = nextRoute.delegatedTransition;
+    } else {
+      receivedTransition = null;
+    }
     super.didChangeNext(nextRoute);
     changedInternalState();
   }
 
   @override
   void didPopNext(Route<dynamic> nextRoute) {
+    if (nextRoute is ModalRoute<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition != this.delegatedTransition) {
+      receivedTransition = nextRoute.delegatedTransition;
+    } else {
+      receivedTransition = null;
+    }
     super.didPopNext(nextRoute);
     changedInternalState();
     _maybeDispatchNavigationNotification();
@@ -2532,44 +2554,5 @@ abstract class PopEntry<T> {
   @override
   String toString() {
     return 'PopEntry canPop: ${canPopNotifier.value}, onPopInvoked: $onPopInvokedWithResult';
-  }
-}
-
-/// Mixin for a route that can provide a delegated secondary transition to the
-/// outgoing route.
-mixin FlexibleTransitionRouteMixin<T> on ModalRoute<T> {
-  /// The delegated transition provided to the previous route.
-  DelegatedTransitionBuilder? get delegatedTransition;
-
-  /// The delegated transition received from an incoming route.
-  DelegatedTransitionBuilder? receivedTransition;
-
-  @override
-  DelegatedTransitionBuilder? get nextRouteTransition {
-    if (receivedTransition != null) {
-      return receivedTransition;
-    } else {
-      return null;
-    }
-  }
-
-  @override
-  void didChangeNext(Route<dynamic>? nextRoute) {
-    if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition != this.delegatedTransition) {
-      receivedTransition = nextRoute.delegatedTransition;
-    } else {
-      receivedTransition = null;
-    }
-    super.didChangeNext(nextRoute);
-  }
-
-  @override
-  void didPopNext(Route<dynamic> nextRoute) {
-    if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition != this.delegatedTransition) {
-      receivedTransition = nextRoute.delegatedTransition;
-    } else {
-      receivedTransition = null;
-    }
-    super.didPopNext(nextRoute);
   }
 }

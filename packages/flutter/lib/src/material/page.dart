@@ -32,7 +32,7 @@ import 'theme.dart';
 ///  * [MaterialRouteTransitionMixin], which provides the material transition
 ///    for this route.
 ///  * [MaterialPage], which is a [Page] of this class.
-class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T>, FlexibleTransitionRouteMixin<T> {
+class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
   /// Construct a MaterialPageRoute whose contents are defined by [builder].
   MaterialPageRoute({
     required this.builder,
@@ -81,7 +81,7 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
 ///    by the [PageTransitionsTheme].
 ///  * [CupertinoPageTransitionsBuilder], which is the default page transition
 ///    for iOS and macOS.
-mixin MaterialRouteTransitionMixin<T> on PageRoute<T> implements FlexibleTransitionRouteMixin<T>{
+mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   /// Builds the primary contents of the route.
   @protected
   Widget buildContent(BuildContext context);
@@ -108,7 +108,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> implements FlexibleTransit
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     return (nextRoute is MaterialRouteTransitionMixin && !nextRoute.fullscreenDialog)
       || (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog)
-      || (nextRoute is FlexibleTransitionRouteMixin<T>);
+      || (nextRoute is ModalRoute<T> && nextRoute.delegatedTransition != null);
   }
 
   @override
@@ -195,7 +195,7 @@ class MaterialPage<T> extends Page<T> {
 //
 // This route uses the builder from the page to build its content. This ensures
 // the content is up to date after page updates.
-class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T>, FlexibleTransitionRouteMixin<T> {
+class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
   _PageBasedMaterialPageRoute({
     required MaterialPage<T> page,
     super.allowSnapshotting,
