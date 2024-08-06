@@ -27,6 +27,9 @@ class FlutterPlatformNodeDelegateMac : public FlutterPlatformNodeDelegate {
 
   void Init(std::weak_ptr<OwnerBridge> bridge, ui::AXNode* node) override;
 
+  void NodeDataChanged(const ui::AXNodeData& old_node_data,
+                       const ui::AXNodeData& new_node_data) override;
+
   //---------------------------------------------------------------------------
   /// @brief      Gets the live region text of this node in UTF-8 format. This
   ///             is useful to determine the changes in between semantics

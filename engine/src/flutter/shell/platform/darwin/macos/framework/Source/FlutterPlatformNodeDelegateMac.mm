@@ -35,6 +35,17 @@ void FlutterPlatformNodeDelegateMac::Init(std::weak_ptr<OwnerBridge> bridge, ui:
   NSCAssert(ax_platform_node_, @"Failed to create platform node.");
 }
 
+void FlutterPlatformNodeDelegateMac::NodeDataChanged(const ui::AXNodeData& old_node_data,
+                                                     const ui::AXNodeData& new_node_data) {
+  if (old_node_data.IsTextField() && !new_node_data.IsTextField()) {
+    ax_platform_node_->Destroy();
+    ax_platform_node_ = ui::AXPlatformNode::Create(this);
+  } else if (!old_node_data.IsTextField() && new_node_data.IsTextField()) {
+    ax_platform_node_->Destroy();
+    ax_platform_node_ = new FlutterTextPlatformNode(this, view_controller_);
+  }
+}
+
 FlutterPlatformNodeDelegateMac::~FlutterPlatformNodeDelegateMac() {
   // Destroy() also calls delete on itself.
   ax_platform_node_->Destroy();

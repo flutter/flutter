@@ -519,7 +519,8 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 }
 
 - (void)updateSemantics:(const FlutterSemanticsUpdate2*)update {
-  NSAssert(_engine.semanticsEnabled, @"Semantics must be enabled.");
+  // Semantics will be disabled when unfocusing application but the updateSemantics:
+  // callback is received in next run loop turn.
   if (!_engine.semanticsEnabled) {
     return;
   }

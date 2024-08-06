@@ -190,6 +190,9 @@ NSRect FlutterTextPlatformNode::GetFrame() {
   FlutterPlatformNodeDelegate* delegate = static_cast<FlutterPlatformNodeDelegate*>(GetDelegate());
   bool offscreen;
   auto bridge_ptr = delegate->GetOwnerBridge().lock();
+  if (!bridge_ptr) {
+    return NSZeroRect;
+  }
   gfx::RectF bounds = bridge_ptr->RelativeToGlobalBounds(delegate->GetAXNode(), offscreen, true);
 
   // Converts to NSRect to use NSView rect conversion.
