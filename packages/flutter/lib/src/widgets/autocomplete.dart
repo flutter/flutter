@@ -369,7 +369,6 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       return;
     }
     _options = options;
-
     _updateHighlight(_highlightedOptionIndex.value);
     final T? selection = _selection;
     if (selection != null && value.text != widget.displayStringForOption(selection)) {
