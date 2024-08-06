@@ -98,7 +98,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   DelegatedTransitionBuilder? _delegatedTransition;
 
   @override
-  DelegatedTransitionBuilder? get delegatedTransition => _delegatedTransition;
+  DelegatedTransitionBuilder? get delegatedTransition => fullscreenDialog ? null : _delegatedTransition;
 
   set delegatedTransition(DelegatedTransitionBuilder? newTransition) {
     _delegatedTransition = newTransition;
