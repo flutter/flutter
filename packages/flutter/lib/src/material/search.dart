@@ -49,7 +49,8 @@ import 'theme.dart';
 /// given `context`. It can not be `null`.
 ///
 /// The `maintainState` argument is used to determine if the route should remain
-/// in memory when it is inactive. By default, `maintainState` is `false`.
+/// in memory when it is inactive (see [ModalRoute.maintainState] for more details].
+/// By default, `maintainState` is `false`.
 ///
 /// The transition to the search page triggered by this method looks best if the
 /// screen triggering the transition contains an [AppBar] at the top and the

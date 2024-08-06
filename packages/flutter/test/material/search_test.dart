@@ -1185,20 +1185,29 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       navigatorObservers: <NavigatorObserver>[navigationObserver],
       home: Builder(builder: (BuildContext context) => Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  TextButton(
-                      onPressed: () async {
-                        await showSearch(context: context, delegate: delegate);
-                      },
-                      child: const Text('showSearch')),
-                  TextButton(
-                      onPressed: () async {
-                        await showSearch(context: context, delegate: delegate, maintainState: true);
-                      },
-                      child: const Text('showSearchWithMaintainState')),
-                ],
-              )),
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          TextButton(
+            onPressed: () async {
+              await showSearch(
+                context: context,
+                delegate: delegate,
+              );
+            },
+            child: const Text('showSearch'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await showSearch(
+                context: context,
+                delegate: delegate,
+                maintainState: true,
+              );
+            },
+            child: const Text('showSearchWithMaintainState'),
+          ),
+        ],
+      )),
     ));
 
     expect(navigationObserver.pushCount, 0);
