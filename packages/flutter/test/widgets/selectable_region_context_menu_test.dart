@@ -162,6 +162,11 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
+  List<SelectedContentRange> getSelections() {
+    return <SelectedContentRange>[];
+  }
+
+  @override
   final SelectionGeometry value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
