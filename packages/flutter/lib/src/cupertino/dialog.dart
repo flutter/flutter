@@ -551,6 +551,8 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// The appearance of the [ColorFilter] is determined by the [Brightness]
   /// value obtained from the ambient [CupertinoTheme].
   ///
+  /// The vibrance is always painted if asserts are disabled.
+  ///
   /// Defaults to true.
   final bool debugIsVibrancePainted;
 
@@ -645,7 +647,12 @@ class CupertinoPopupSurface extends StatelessWidget {
   ];
 
   ImageFilter? _buildFilter(Brightness? brightness) {
-    if ((kIsWeb && !isSkiaWeb) || !debugIsVibrancePainted) {
+    bool isVibrancePainted = true;
+    assert(() {
+      isVibrancePainted = debugIsVibrancePainted;
+      return true;
+    }());
+    if ((kIsWeb && !isSkiaWeb) || !isVibrancePainted) {
       if (blurSigma <= 0) {
         return null;
       }
