@@ -163,6 +163,17 @@ void AccessibilityBridge::OnRoleChanged(ui::AXTree* tree,
                                         ax::mojom::Role old_role,
                                         ax::mojom::Role new_role) {}
 
+void AccessibilityBridge::OnNodeDataChanged(
+    ui::AXTree* tree,
+    const ui::AXNodeData& old_node_data,
+    const ui::AXNodeData& new_node_data) {
+  auto platform_view =
+      GetFlutterPlatformNodeDelegateFromID(new_node_data.id).lock();
+  if (platform_view) {
+    platform_view->NodeDataChanged(old_node_data, new_node_data);
+  }
+}
+
 void AccessibilityBridge::OnNodeCreated(ui::AXTree* tree, ui::AXNode* node) {
   BASE_DCHECK(node);
   id_wrapper_map_[node->id()] = CreateFlutterPlatformNodeDelegate();

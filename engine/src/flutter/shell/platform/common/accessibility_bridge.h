@@ -261,6 +261,11 @@ class AccessibilityBridge
                      ax::mojom::Role new_role) override;
 
   // |AXTreeObserver|
+  void OnNodeDataChanged(ui::AXTree* tree,
+                         const ui::AXNodeData& old_node_data,
+                         const ui::AXNodeData& new_node_data) override;
+
+  // |AXTreeObserver|
   void OnAtomicUpdateFinished(
       ui::AXTree* tree,
       bool root_changed,

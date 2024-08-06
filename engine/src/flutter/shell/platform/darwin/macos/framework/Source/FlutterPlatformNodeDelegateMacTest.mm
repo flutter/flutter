@@ -296,4 +296,81 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
   EXPECT_EQ([native_text_field.stringValue isEqualToString:@"textfield"], YES);
 }
 
+TEST(FlutterPlatformNodeDelegateMac, ChangingFlagsUpdatesNativeViewAccessible) {
+  FlutterViewController* viewController = CreateTestViewController();
+  FlutterEngine* engine = viewController.engine;
+  [viewController loadView];
+
+  // Creates a NSWindow so that the native text field can become first responder.
+  NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+                                                 styleMask:NSBorderlessWindowMask
+                                                   backing:NSBackingStoreBuffered
+                                                     defer:NO];
+  window.contentView = viewController.view;
+  engine.semanticsEnabled = YES;
+
+  auto bridge = viewController.accessibilityBridge.lock();
+  // Initialize ax node data.
+  FlutterSemanticsNode2 root;
+  root.id = 0;
+  root.flags = static_cast<FlutterSemanticsFlag>(0);
+  root.actions = static_cast<FlutterSemanticsAction>(0);
+  root.label = "root";
+  root.hint = "";
+  root.value = "";
+  root.increased_value = "";
+  root.decreased_value = "";
+  root.tooltip = "";
+  root.child_count = 1;
+  int32_t children[] = {1};
+  root.children_in_traversal_order = children;
+  root.custom_accessibility_actions_count = 0;
+  root.rect = {0, 0, 100, 100};  // LTRB
+  root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+
+  double rectSize = 50;
+  double transformFactor = 0.5;
+
+  FlutterSemanticsNode2 child1;
+  child1.id = 1;
+  child1.flags = static_cast<FlutterSemanticsFlag>(0);
+  child1.actions = static_cast<FlutterSemanticsAction>(0);
+  child1.label = "";
+  child1.hint = "";
+  child1.value = "textfield";
+  child1.increased_value = "";
+  child1.decreased_value = "";
+  child1.tooltip = "";
+  child1.text_selection_base = -1;
+  child1.text_selection_extent = -1;
+  child1.child_count = 0;
+  child1.custom_accessibility_actions_count = 0;
+  child1.rect = {0, 0, rectSize, rectSize};  // LTRB
+  child1.transform = {transformFactor, 0, 0, 0, transformFactor, 0, 0, 0, 1};
+  bridge->AddFlutterSemanticsNodeUpdate(child1);
+
+  bridge->CommitUpdates();
+
+  auto child_platform_node_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
+  // Verify the accessibility attribute matches.
+  id native_accessibility = child_platform_node_delegate->GetNativeViewAccessible();
+  EXPECT_TRUE([[native_accessibility className] isEqualToString:@"AXPlatformNodeCocoa"]);
+
+  // Converting child to text field should produce `FlutterTextField` native view accessible.
+  child1.flags = FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField;
+  bridge->AddFlutterSemanticsNodeUpdate(child1);
+  bridge->CommitUpdates();
+
+  native_accessibility = child_platform_node_delegate->GetNativeViewAccessible();
+  EXPECT_TRUE([native_accessibility isKindOfClass:[FlutterTextField class]]);
+
+  child1.flags = static_cast<FlutterSemanticsFlag>(0);
+  bridge->AddFlutterSemanticsNodeUpdate(child1);
+  bridge->CommitUpdates();
+
+  native_accessibility = child_platform_node_delegate->GetNativeViewAccessible();
+  EXPECT_TRUE([[native_accessibility className] isEqualToString:@"AXPlatformNodeCocoa"]);
+}
+
 }  // namespace flutter::testing
