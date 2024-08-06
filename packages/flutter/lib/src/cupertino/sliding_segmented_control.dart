@@ -22,7 +22,7 @@ import 'colors.dart';
 
 // Minimum padding from edges of the segmented control to edges of
 // encompassing widget.
-const EdgeInsetsGeometry _kHorizontalItemPadding = EdgeInsets.symmetric(vertical: 2, horizontal: 2);
+const EdgeInsetsGeometry _kHorizontalItemPadding = EdgeInsets.symmetric(vertical: 2, horizontal: 3);
 
 // The corner radius of the segmented control.
 const Radius _kCornerRadius = Radius.circular(9);
@@ -44,9 +44,8 @@ const CupertinoDynamicColor _kThumbColor = CupertinoDynamicColor.withBrightness(
 );
 
 // The height of the separator.
-const double _kSeparatorHeight = 12.0;
+const double _kSeparatorHeight = 18.0;
 // The amount of space by which to inset each separator.
-// const EdgeInsets _kSeparatorInset = EdgeInsets.symmetric(vertical: 6);
 const EdgeInsets _kSeparatorInset = EdgeInsets.symmetric(vertical: (_kMinSegmentedControlHeight - _kSeparatorHeight) / 2);
 const double _kSeparatorWidth = 1;
 const Radius _kSeparatorRadius = Radius.circular(_kSeparatorWidth / 2);
