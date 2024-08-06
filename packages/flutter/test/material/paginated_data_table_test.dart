@@ -1541,34 +1541,51 @@ void main() {
   });
 
   testWidgets(
-      'PaginatedDataTable headerBackgroundColor and footerBackgroundColor set properly',
-      (WidgetTester tester) async {
-    await binding.setSurfaceSize(const Size(800, 800));
-    addTearDown(() => binding.setSurfaceSize(null));
-    const Color headerBackgroundColor = Color(0xFFF53935);
+    'PaginatedDataTable headerBackgroundColor and footerBackgroundColor set properly',
+    (WidgetTester tester) async {
+      await binding.setSurfaceSize(const Size(800, 800));
+      addTearDown(() => binding.setSurfaceSize(null));
 
-    const Color footerBackgroundColor = Color(0xFFA53695);
+      const Color headerBackgroundColor = Color(0xFFF53935);
+      const Color footerBackgroundColor = Color(0xFFA53695);
 
-    await tester.pumpWidget(MaterialApp(
-      home: PaginatedDataTable(
-        headerBackgroundColor: headerBackgroundColor,
-        footerBackgroundColor: footerBackgroundColor,
-        showFirstLastButtons: true,
-        header: const Text('Test table'),
-        source: source,
-        columns: const <DataColumn>[
-          DataColumn(label: Text('Name')),
-          DataColumn(label: Text('Calories'), numeric: true),
-          DataColumn(label: Text('Generation')),
-        ],
-      ),
-    ));
+      // Define a data source for the table
+      final source = MyDataTableSource();
 
-    final Iterable<Ink> inks = tester.widgetList(find.byType(Ink));
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: PaginatedDataTable(
+            headerBackgroundColor: headerBackgroundColor,
+            footerBackgroundColor: footerBackgroundColor,
+            showFirstLastButtons: true,
+            header: const Text('Test table'),
+            source: source,
+            columns: const <DataColumn>[
+              DataColumn(label: Text('Name')),
+              DataColumn(label: Text('Calories'), numeric: true),
+              DataColumn(label: Text('Generation')),
+            ],
+          ),
+        ),
+      ));
 
-    expect(inks.elementAt(0).color, headerBackgroundColor);
-    expect(inks.elementAt(1).color, footerBackgroundColor);
-  });
+      // Get the containers inside the PaginatedDataTable
+      final headerContainer = tester.widget<Container>(find
+          .descendant(
+              of: find.byType(PaginatedDataTable),
+              matching: find.byType(Container))
+          .first);
+      final footerContainer = tester.widget<Container>(find
+          .descendant(
+              of: find.byType(PaginatedDataTable),
+              matching: find.byType(Container))
+          .last);
+
+      // Check the color of the containers
+      expect(headerContainer.color, headerBackgroundColor);
+      expect(footerContainer.color, footerBackgroundColor);
+    },
+  );
 
   testWidgets('PaginatedDataTable footerStyle set properly',
       (WidgetTester tester) async {
