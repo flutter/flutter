@@ -25,6 +25,8 @@ dev_dependencies:
     sdk: flutter
   flutter_goldens:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   fake_async: 1.3.1
   # To track memory leaks.
   leak_tracker_flutter_testing: 3.0.5
