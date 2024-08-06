@@ -11,6 +11,7 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart';
+import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
@@ -205,7 +206,10 @@ class IconTreeShaker {
                        'using codepoints $codePointsString');
     final Process fontSubsetProcess = await _processManager.start(cmd);
     try {
-      fontSubsetProcess.stdin.writeln(codePointsString);
+      await ProcessUtils.writelnToStdinUnsafe(
+        stdin: fontSubsetProcess.stdin,
+        line: codePointsString,
+      );
       await fontSubsetProcess.stdin.flush();
       await fontSubsetProcess.stdin.close();
     } on Exception {

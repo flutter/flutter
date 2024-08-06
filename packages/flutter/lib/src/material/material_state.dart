@@ -2,6 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/scheduler.dart';
+///
+/// @docImport 'action_chip.dart';
+/// @docImport 'button_style.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'ink_well.dart';
+/// @docImport 'input_decorator.dart';
+/// @docImport 'list_tile.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'text_button.dart';
+/// @docImport 'time_picker_theme.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'input_border.dart';

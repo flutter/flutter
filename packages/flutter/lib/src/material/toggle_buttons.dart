@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'button_style_button.dart';
+/// @docImport 'ink_well.dart';
+/// @docImport 'segmented_button.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -770,6 +775,8 @@ class ToggleButtons extends StatelessWidget {
             style: ButtonStyle(
               backgroundColor: MaterialStatePropertyAll<Color?>(effectiveFillColor),
               foregroundColor: MaterialStatePropertyAll<Color?>(currentColor),
+              iconSize: const MaterialStatePropertyAll<double>(24.0),
+              iconColor: MaterialStatePropertyAll<Color?>(currentColor),
               overlayColor: _ToggleButtonDefaultOverlay(
                 selected:  onPressed != null && isSelected[index],
                 unselected: onPressed != null && !isSelected[index],

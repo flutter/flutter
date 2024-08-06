@@ -733,8 +733,8 @@ void main() {
               artifacts.getArtifactPath(Artifact.engineDartBinary),
               'run',
               'increment',
-              '--input=/.tmp_rand0/retransformerInput-asset.txt-transformOutput0.txt',
-              '--output=/.tmp_rand0/retransformerInput-asset.txt-transformOutput1.txt',
+              '--input=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput0.txt',
+              '--output=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput1.txt',
             ],
             onRun: (List<String> command) {
               final ArgResults argParseResults = (ArgParser()
@@ -831,8 +831,8 @@ void main() {
               artifacts.getArtifactPath(Artifact.engineDartBinary),
               'run',
               'increment',
-              '--input=/.tmp_rand0/retransformerInput-asset.txt-transformOutput0.txt',
-              '--output=/.tmp_rand0/retransformerInput-asset.txt-transformOutput1.txt',
+              '--input=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput0.txt',
+              '--output=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput1.txt',
             ],
             exitCode: 1,
           ),
@@ -895,10 +895,9 @@ void main() {
       expect(devFSWriter.entries, isNull, reason: 'DevFS should not have written anything since the update failed.');
       expect(
         logger.errorText,
-        'User-defined transformation of asset "/.tmp_rand0/retransformerInput-asset.txt" failed.\n'
         'Transformer process terminated with non-zero exit code: 1\n'
         'Transformer package: increment\n'
-        'Full command: Artifact.engineDartBinary run increment --input=/.tmp_rand0/retransformerInput-asset.txt-transformOutput0.txt --output=/.tmp_rand0/retransformerInput-asset.txt-transformOutput1.txt\n'
+        'Full command: Artifact.engineDartBinary run increment --input=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput0.txt --output=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput1.txt\n'
         'stdout:\n'
         '\n'
         'stderr:\n'

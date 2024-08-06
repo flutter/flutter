@@ -1395,7 +1395,6 @@ class PerfTest {
             '--local-engine-src-path',
             localEngineSrcPath
           ],
-          '--no-dds',
           '--no-android-gradle-daemon',
           '-v',
           '--verbose-system-logs',
@@ -1470,9 +1469,6 @@ class PerfTest {
           'average_vsync_transitions_missed',
           '90th_percentile_vsync_transitions_missed',
           '99th_percentile_vsync_transitions_missed',
-          'average_frame_request_pending_latency',
-          '90th_percentile_frame_request_pending_latency',
-          '99th_percentile_frame_request_pending_latency',
           if (measureCpuGpu && !isAndroid) ...<String>[
             // See https://github.com/flutter/flutter/issues/68888
             if (data['average_cpu_usage'] != null) 'average_cpu_usage',
@@ -1518,22 +1514,6 @@ const List<String> _kCommonScoreKeys = <String>[
   'worst_frame_rasterizer_time_millis',
   '90th_percentile_frame_rasterizer_time_millis',
   '99th_percentile_frame_rasterizer_time_millis',
-  'average_layer_cache_count',
-  '90th_percentile_layer_cache_count',
-  '99th_percentile_layer_cache_count',
-  'worst_layer_cache_count',
-  'average_layer_cache_memory',
-  '90th_percentile_layer_cache_memory',
-  '99th_percentile_layer_cache_memory',
-  'worst_layer_cache_memory',
-  'average_picture_cache_count',
-  '90th_percentile_picture_cache_count',
-  '99th_percentile_picture_cache_count',
-  'worst_picture_cache_count',
-  'average_picture_cache_memory',
-  '90th_percentile_picture_cache_memory',
-  '99th_percentile_picture_cache_memory',
-  'worst_picture_cache_memory',
   'old_gen_gc_count',
 ];
 
