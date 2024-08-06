@@ -132,22 +132,11 @@ void main() {
   // in light mode.
   testWidgets('Brightness.light surface', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const CupertinoApp(
-        home: ColoredBox(
-          color: Color(0xff000000),
-          child: Stack(
-            fit: StackFit.expand,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.all(32),
-                child: CupertinoPopupSurface(
-                  blurSigma: 0,
-                  debugIsVibrancePainted: false,
-                  child: SizedBox(),
-                ),
-              ),
-            ],
-          ),
+       const _FilterTest(
+        CupertinoPopupSurface(
+          blurSigma: 0,
+          debugIsVibrancePainted: false,
+          child: SizedBox(),
         ),
       ),
     );
@@ -162,27 +151,14 @@ void main() {
   // in dark mode.
   testWidgets('Brightness.dark surface', (WidgetTester tester) async {
     await tester.pumpWidget(
-    const CupertinoApp(
-      home: ColoredBox(
-        color: Color(0xffffffff),
-        child: Padding(
-          padding: EdgeInsets.all(32),
-          child: Stack(
-            fit: StackFit.expand,
-            children: <Widget>[
-              CupertinoTheme(
-                data: CupertinoThemeData(brightness: Brightness.dark),
-                child: CupertinoPopupSurface(
-                  blurSigma: 0,
-                  debugIsVibrancePainted: false,
-                  child: SizedBox(),
-                ),
-              ),
-            ],
-          ),
+      const _FilterTest(
+        CupertinoPopupSurface(
+          blurSigma: 0,
+          debugIsVibrancePainted: false,
+          child: SizedBox(),
         ),
+        brightness: Brightness.dark,
       ),
-    ),
   );
 
     await expectLater(
@@ -191,25 +167,20 @@ void main() {
     );
   });
 
-  // Golden displays a CupertinoPopupSurface with the color removed (should
-  // be empty).
+  // Golden displays a CupertinoPopupSurface with the color removed. The result
+  // should only display color tiles.
   testWidgets('Setting isSurfacePainted to false removes the surface color', (WidgetTester tester) async {
-    await tester.pumpWidget(const CupertinoApp(
-      home: ColoredBox(
-        color: Color(0xff000000),
-        child: Stack(
-          fit: StackFit.expand,
-          children: <Widget>[
-            CupertinoPopupSurface(
-              blurSigma: 0,
-              debugIsVibrancePainted: false,
-              isSurfacePainted: false,
-              child: SizedBox(),
-            ),
-          ],
+    await tester.pumpWidget(
+      const _FilterTest(
+        CupertinoPopupSurface(
+          blurSigma: 0,
+          isSurfacePainted: false,
+          debugIsVibrancePainted: false,
+          child: SizedBox(),
         ),
+        brightness: Brightness.dark,
       ),
-    ));
+    );
 
     await expectLater(
       find.byType(CupertinoApp),
