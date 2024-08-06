@@ -1395,7 +1395,6 @@ class PerfTest {
             '--local-engine-src-path',
             localEngineSrcPath
           ],
-          '--no-dds',
           '--no-android-gradle-daemon',
           '-v',
           '--verbose-system-logs',
