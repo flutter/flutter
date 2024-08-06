@@ -1549,9 +1549,6 @@ void main() {
       const Color headerBackgroundColor = Color(0xFFF53935);
       const Color footerBackgroundColor = Color(0xFFA53695);
 
-      // Define a data source for the table
-      final source = MyDataTableSource();
-
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: PaginatedDataTable(
