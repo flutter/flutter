@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'use_cases/use_cases.dart';
 
@@ -37,6 +38,12 @@ class App extends StatelessWidget {
     );
     return MaterialApp(
       title: 'Accessibility Assessments',
+      localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      locale: const Locale('en', ''),
       theme: lightTheme,
       darkTheme: darkTheme,
       routes: <String, WidgetBuilder>{
@@ -65,17 +72,14 @@ class HomePageState extends State<HomePage> {
 
   Widget _buildUseCaseItem(int index, UseCase useCase) {
     return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Builder(
-          builder: (BuildContext context) {
-            return TextButton(
-              key: Key(useCase.name),
-              onPressed: () => Navigator.of(context).pushNamed(useCase.route),
-              child: Text(useCase.name),
-            );
-          }
-      )
-    );
+        padding: const EdgeInsets.all(10),
+        child: Builder(builder: (BuildContext context) {
+          return TextButton(
+            key: Key(useCase.name),
+            onPressed: () => Navigator.of(context).pushNamed(useCase.route),
+            child: Text(useCase.name),
+          );
+        }));
   }
 
   @override
