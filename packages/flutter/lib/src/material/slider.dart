@@ -196,7 +196,7 @@ class Slider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.allowedInteraction,
-  })  : _sliderType = _SliderType.material,
+  }) : _sliderType = _SliderType.material,
        assert(min <= max),
        assert(value >= min && value <= max,
          'Value $value is not between minimum $min and maximum $max'),
@@ -2001,7 +2001,7 @@ class _SliderDefaultsM2 extends SliderThemeData {
   Color? get overlayColor => _colors.primary.withOpacity(0.12);
 
   @override
-  TextStyle? get valueIndicatorTextStyle => Theme.of(context).textTheme.labelMedium!.copyWith(
+  TextStyle? get valueIndicatorTextStyle => Theme.of(context).textTheme.bodyLarge!.copyWith(
     color: _colors.onPrimary,
   );
 
@@ -2076,8 +2076,8 @@ class _SliderDefaultsM3 extends SliderThemeData {
 
   @override
   TextStyle? get valueIndicatorTextStyle => Theme.of(context).textTheme.labelMedium!.copyWith(
-            color: _colors.onPrimary,
-          );
+    color: _colors.onPrimary,
+  );
 
   @override
   SliderComponentShape? get valueIndicatorShape => const DropSliderValueIndicatorShape();
