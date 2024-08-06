@@ -316,7 +316,6 @@ void main() {
         'android/',
         'ios/',
       ],
-      expectedGitignoreLines: flutterPluginsIgnores,
     );
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
