@@ -200,7 +200,7 @@ class PageController extends ScrollController {
       return Future<void>.value();
     }
     // If you are updating a page with controller that is not rendered,
-    // It maybe be crash as there is not ViewportDimension.
+    // It maybe be crash because there is not ViewportDimension.
     if (!position.hasViewportDimension) {
       return Future<void>.value();
     }
@@ -222,7 +222,7 @@ class PageController extends ScrollController {
       return;
     }
     // If you are updating a page with controller that is not rendered,
-    // It maybe be crash as there is not ViewportDimension.
+    // It maybe be crash because there is not ViewportDimension.
     if (!position.hasViewportDimension) {
       return;
     }
