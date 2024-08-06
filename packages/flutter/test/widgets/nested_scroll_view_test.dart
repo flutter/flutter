@@ -3634,6 +3634,108 @@ void main() {
       areCreateAndDispose,
     );
   });
+
+  group('Physics is NeverScrollableScrollPhysics in NestedScrollView', () {
+    final GlobalKey<NestedScrollViewState> nestedScrollView = GlobalKey();
+    const double expandedAppBarHeight = 122.0;
+    const double itemHeight = 50.0;
+    Widget buildApp(int itemCount) {
+      return MaterialApp(
+        home: Scaffold(
+          body: NestedScrollView(
+            key: nestedScrollView,
+            physics: const NeverScrollableScrollPhysics(),
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                const SliverAppBar(
+                  expandedHeight: expandedAppBarHeight,
+                  pinned: true,
+                  title: Text('AppBar Title'),
+                ),
+              ];
+            },
+            body: ListView.builder(
+              padding: EdgeInsets.zero,
+              itemCount: itemCount,
+              physics: const ClampingScrollPhysics(),
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(
+                  height: itemHeight,
+                  child: Center(child: Text('Item $index')),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+   testWidgets('Verify cannot scroll', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/150533
+      const int itemCount = 9;
+      await tester.pumpWidget(buildApp(itemCount));
+      expect(find.byType(SliverAppBar), findsOneWidget);
+      expect(appBarHeight(tester), expandedAppBarHeight);
+      final double listViewHeight = tester.renderObject<RenderBox>(find.byType(ListView)).size.height;
+      final double nestedScrollViewHeight = tester.renderObject<RenderBox>(find.byType(NestedScrollView)).size.height;
+      expect(listViewHeight + expandedAppBarHeight, nestedScrollViewHeight);
+      // The height of the element is smaller than the height of the ListView.
+      expect(itemCount * itemHeight, lessThan(listViewHeight));
+      final Offset point1 = tester.getCenter(find.text('Item 3'));
+      // Scroll up
+      await tester.dragFrom(point1, const Offset(0.0, -50.0));
+      await tester.pump();
+      // Check if the AppBar height
+      expect(appBarHeight(tester), expandedAppBarHeight);
+      // Check scroll offset
+      expect(nestedScrollView.currentState?.outerController.offset, 0);
+      expect(nestedScrollView.currentState?.innerController.offset, 0);
+
+      // scroll down
+      await tester.dragFrom(point1, const Offset(0.0, 50.0));
+      await tester.pump();
+      // Check if the AppBar height
+      expect(appBarHeight(tester), expandedAppBarHeight);
+      // Check scroll offset
+      expect(nestedScrollView.currentState?.outerController.offset, 0);
+      expect(nestedScrollView.currentState?.innerController.offset, 0);
+    });
+
+    testWidgets('Verify scrolling up and down', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/150533
+      const int itemCount = 10;
+      await tester.pumpWidget(buildApp(itemCount));
+      expect(find.byType(SliverAppBar), findsOneWidget);
+      expect(appBarHeight(tester), expandedAppBarHeight);
+      final double listViewHeight = tester.renderObject<RenderBox>(find.byType(ListView)).size.height;
+      final double nestedScrollViewHeight = tester.renderObject<RenderBox>(find.byType(NestedScrollView)).size.height;
+      expect(listViewHeight + expandedAppBarHeight, nestedScrollViewHeight);
+
+      // The height of the element is greater than the height of the ListView
+      // and less than the height of the NestedScrollView
+      expect(itemCount * itemHeight, greaterThan(listViewHeight));
+      expect(itemCount * itemHeight, lessThan(nestedScrollViewHeight));
+      final Offset point1 = tester.getCenter(find.text('Item 3'));
+      // Scroll up
+      await tester.dragFrom(point1, const Offset(0.0, -50.0));
+      await tester.pump();
+      // Check if the AppBar height
+      expect(appBarHeight(tester), expandedAppBarHeight - 50);
+      // Check scroll offset
+      expect(nestedScrollView.currentState?.outerController.offset, 50);
+      expect(nestedScrollView.currentState?.innerController.offset, 0);
+
+      // scroll down
+      await tester.dragFrom(point1, const Offset(0.0, 50.0));
+      await tester.pump();
+      // Check if the AppBar height
+      expect(appBarHeight(tester), expandedAppBarHeight);
+      // Check scroll offset
+      expect(nestedScrollView.currentState?.outerController.offset, 0);
+      expect(nestedScrollView.currentState?.innerController.offset, 0);
+    });
+
+  });
 }
 
 double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;

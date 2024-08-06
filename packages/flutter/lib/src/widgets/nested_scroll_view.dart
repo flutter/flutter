@@ -1512,7 +1512,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       // the whole NestedScrollView, since it is possible to have different
       // ScrollPhysics for the inner and outer positions.
       physics.shouldAcceptUserOffset(this)
-        || innerCanDrag,
+        || innerCanDrag || pixels != 0.0
     );
   }
 
