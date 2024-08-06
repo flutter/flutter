@@ -199,7 +199,9 @@ class PageController extends ScrollController {
       position._cachedPage = page.toDouble();
       return Future<void>.value();
     }
-
+    if (!position.hasContentDimensions) {
+      return Future<void>.value();
+    }
     return position.animateTo(
       position.getPixelsFromPage(page.toDouble()),
       duration: duration,
@@ -217,7 +219,9 @@ class PageController extends ScrollController {
       position._cachedPage = page.toDouble();
       return;
     }
-
+    if (!position.hasContentDimensions) {
+      return;
+    }
     position.jumpTo(position.getPixelsFromPage(page.toDouble()));
   }
 
