@@ -7400,4 +7400,101 @@ void main() {
     targetRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
     expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
   });
+
+  testWidgets(
+      'Can init the TabBarView with DefaultTabController on the background without any error',
+      (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/152861
+
+    await tester.pumpWidget(
+      MaterialApp(
+        initialRoute: '/sub',
+        routes: {
+          '/': (context) => const DefaultTabController(
+                length: 2,
+                initialIndex: 1,
+                child: Scaffold(
+                  body: TabBarView(children: [Text('Page 1'), Text('Page 2')]),
+                  bottomNavigationBar: TabBar(tabs: [
+                    Text('Hello'),
+                    Text('World'),
+                  ]),
+                ),
+          ),
+          '/sub': (context) => Scaffold(
+                body: Center(
+                  child: ElevatedButton(
+                    child: const Text('Go back to Root(Home) page'),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+              ),
+        },
+      ),
+    );
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 2'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets(
+      'Be able to call animateTo by TabController while TabBarView not in the viewport',
+      (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/86222
+    final TabController tabController = TabController(length: 2, vsync: const TestVSync());
+    addTearDown(tabController.dispose);
+    await tester.pumpWidget(MaterialApp(
+      home: Navigator(
+        onPopPage: (route, result) {
+          return route.didPop(result);
+        },
+        pages: [
+          MaterialPage(
+              child: Scaffold(
+            body: SizedBox(
+              width: 100,
+              height: 100,
+              child: TabBarView(
+                controller: tabController,
+                children: const [
+                  Scaffold(body: Text('Page 1')),
+                  Scaffold(body: Text('Page 2')),
+                ],
+              ),
+            ),
+            floatingActionButton: TabBar(controller: tabController, tabs: const [
+              Text('Page 1'),
+              Text('Page 2'),
+            ]),
+          )),
+          MaterialPage(
+              child: Scaffold(
+            appBar: AppBar(),
+            body: Center(
+              child: Builder(builder: (context) {
+                return ElevatedButton(
+                  onPressed: () {
+                    // Switch the tab
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Change tab'),
+                );
+              }),
+            ),
+          )),
+        ],
+      ),
+    ));
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsNothing);
+    tabController.animateTo(1);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+    expect(find.text('Page 2'), findsOneWidget);
+  });
 }
