@@ -165,11 +165,11 @@ AccessibilityBridgeMac::MacOSEventsFromAXEvent(ui::AXEventGenerator::Event event
         // If it is a text field, the value change notifications are handled by
         // the FlutterTextField directly. Only need to make sure it is the
         // first responder.
-        FlutterTextField* native_text_field =
-            (FlutterTextField*)mac_platform_node_delegate->GetNativeViewAccessible();
+        id native_text_field = mac_platform_node_delegate->GetNativeViewAccessible();
+        FML_DCHECK([native_text_field isKindOfClass:FlutterTextField.class]);
         id focused = mac_platform_node_delegate->GetFocus();
         if (!focused || native_text_field == focused) {
-          [native_text_field startEditing];
+          [(FlutterTextField*)native_text_field startEditing];
         }
         break;
       }

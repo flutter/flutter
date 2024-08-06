@@ -140,6 +140,12 @@ class FlutterPlatformNodeDelegate : public ui::AXPlatformNodeDelegateBase {
   virtual void Init(std::weak_ptr<OwnerBridge> bridge, ui::AXNode* node);
 
   //------------------------------------------------------------------------------
+  // @brief       Called when node was updated. Subclasses can override this
+  //              to update platform nodes.
+  virtual void NodeDataChanged(const ui::AXNodeData& old_node_data,
+                               const ui::AXNodeData& new_node_data) {}
+
+  //------------------------------------------------------------------------------
   /// @brief      Gets the underlying ax node for this platform node delegate.
   ui::AXNode* GetAXNode() const;
 
