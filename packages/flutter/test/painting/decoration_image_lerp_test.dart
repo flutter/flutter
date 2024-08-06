@@ -593,6 +593,7 @@ Future<void> load(MemoryImage image) {
   }
   final ImageStreamListener wrappedListener = ImageStreamListener(listener);
   stream.addListener(wrappedListener);
+  /// Later!!!
   addTearDown(()=>stream.removeListener(wrappedListener));
 
   return completer.future;

@@ -1087,6 +1087,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
         scale: _scale,
         debugLabel: debugLabel,
       );
+      print('!!! created imageInfo: ${identityHashCode(imageInfo)}, image: ${identityHashCode(imageInfo.image)}');
       _emittedImage = imageInfo;
 
       // This is not an animated image, just return it and don't schedule more
