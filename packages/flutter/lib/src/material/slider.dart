@@ -721,7 +721,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
     final _RenderSlider slider =
         _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
-    // TODO: slider._startInteraction();
+
     shouldIncrease ? slider.increaseAction() : slider.decreaseAction();
   }
 
@@ -1446,7 +1446,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (focused) {
       _state.overlayController.forward();
       if (showValueIndicator) {
-        _state.valueIndicatorController.forward();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _state.showValueIndicator();
+          _state.valueIndicatorController.forward();
+        });
       }
     } else {
       _state.overlayController.reverse();
@@ -1938,13 +1941,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       final double increase = increaseValue();
       onChanged!(increase);
       _state.overlayController.forward();
-      if (showValueIndicator) {
-        _startValueIndicatorTimer().then((_) async {
-          onChangeEnd!(increase);
-        });
-      } else {
-        onChangeEnd!(increase);
-      }
+      onChangeEnd!(increase);
     }
   }
 
@@ -1954,13 +1951,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       final double decrease = decreaseValue();
       onChanged!(decrease);
       _state.overlayController.forward();
-      if (showValueIndicator) {
-        _startValueIndicatorTimer().then((_) {
-          onChangeEnd!(decrease);
-        });
-      } else {
-        onChangeEnd!(decrease);
-      }
+      onChangeEnd!(decrease);
     }
   }
 

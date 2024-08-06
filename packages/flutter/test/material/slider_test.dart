@@ -4443,4 +4443,123 @@ void main() {
       await tester.pumpAndSettle();
       expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
   });
+
+  testWidgets('Value indicator appears after pressing the keyboard shortcuts',
+      (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    double startValue = 0.0;
+    double currentValue = 0.5;
+    double endValue = 0.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+              return Slider(
+                value: currentValue,
+                label: currentValue.toStringAsFixed(1),
+                divisions: 10,
+                onChangeStart: (double newValue) {
+                  setState(() {
+                    startValue = newValue;
+                  });
+                },
+                onChanged: (double newValue) {
+                  setState(() {
+                    currentValue = newValue;
+                  });
+                },
+                onChangeEnd: (double newValue) {
+                  setState(() {
+                    endValue = newValue;
+                  });
+                },
+                autofocus: true,
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Value indicator is visible when focus
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(startValue, 0.5);
+    expect(currentValue, 0.6);
+    expect(endValue, 0.6);
+    RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints
+        ..scale()
+        ..path(color: theme.colorScheme.primary)
+        ..paragraph(),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(startValue, 0.6);
+    expect(currentValue, 0.5);
+    expect(endValue, 0.5);
+
+    valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      find.byType(Overlay),
+      findsOneWidget
+    );
+    expect(
+      valueIndicatorBox,
+      paints
+        ..scale()
+        ..path(color: theme.colorScheme.primary)
+        ..paragraph(),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(startValue, 0.5);
+    expect(currentValue, 0.6);
+    expect(endValue, 0.6);
+
+    valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints
+        ..scale()
+        ..path(color: theme.colorScheme.primary)
+        ..paragraph(),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(startValue, 0.6);
+    expect(currentValue, 0.5);
+    expect(endValue, 0.5);
+    valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints
+        ..scale()
+        ..path(color: theme.colorScheme.primary)
+        ..paragraph(),
+    );
+
+    // The indicator will exists until unfocus
+    await tester.pump(const Duration(seconds: 3));
+     valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints
+        ..scale()
+        ..path(color: theme.colorScheme.primary)
+        ..paragraph(),
+    );
+  });
 }
