@@ -4446,7 +4446,7 @@ void main() {
 
   testWidgets('Slider value indicator is shown when using arrow keys', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     double startValue = 0.0;
     double currentValue = 0.5;
     double endValue = 0.0;
