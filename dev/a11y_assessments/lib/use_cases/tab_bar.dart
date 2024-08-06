@@ -34,12 +34,15 @@ class TabBarExample extends StatelessWidget {
             tabs: <Widget>[
               Tab(
                 icon: Icon(Icons.cloud_outlined),
+                text: 'Cloudy',
               ),
               Tab(
                 icon: Icon(Icons.beach_access_sharp),
+                text: 'Rainy',
               ),
               Tab(
                 icon: Icon(Icons.brightness_5_sharp),
+                text: 'Sunny',
               ),
             ],
           ),
