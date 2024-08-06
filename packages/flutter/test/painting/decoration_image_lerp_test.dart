@@ -38,12 +38,17 @@ void main() {
     //   0x60, 0x82,
     // ]));
 
+    late final _ImageLoader greenLoader = _ImageLoader(green);
+
     await tester.runAsync(() async {
-      await load(green);
+      await greenLoader.load();
       // await load(red);
     });
 
+    await tester.pumpWidget(Placeholder());
+
     imageCache.clear();
+    addTearDown(greenLoader.dispose);
 
     // await tester.pumpWidget(
     //   ColoredBox(
@@ -584,6 +589,32 @@ void main() {
   }, skip: kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
 }
 
+
+class _ImageLoader {
+  _ImageLoader(this.image);
+
+  late final MemoryImage image;
+  late final ImageStream stream;
+  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
+  late final ImageStreamListener wrappedListener;
+
+  void _listener(ImageInfo image, bool syncCall) {
+    _completer.complete(image);
+    addTearDown(image.dispose);
+  }
+
+  Future<void> load() {
+    stream = image.resolve(ImageConfiguration.empty);
+    wrappedListener = ImageStreamListener(_listener);
+    stream.addListener(wrappedListener);
+    return _completer.future;
+  }
+
+  void dispose(){
+    stream.removeListener(wrappedListener);
+  }
+}
+
 Future<void> load(MemoryImage image) {
   final ImageStream stream = image.resolve(ImageConfiguration.empty);
   final Completer<ImageInfo> completer = Completer<ImageInfo>();
@@ -593,7 +624,7 @@ Future<void> load(MemoryImage image) {
   }
   final ImageStreamListener wrappedListener = ImageStreamListener(listener);
   stream.addListener(wrappedListener);
-  /// Later!!!
+
   addTearDown(()=>stream.removeListener(wrappedListener));
 
   return completer.future;
