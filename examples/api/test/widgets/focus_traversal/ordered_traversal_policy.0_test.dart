@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/widgets/focus_traversal/focus_traversal_group.0.dart' as example;
+import 'package:flutter_api_samples/widgets/focus_traversal/ordered_traversal_policy.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -14,25 +14,18 @@ void main() {
 
   testWidgets('The focus updates should follow the focus traversal groups policy', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.FocusTraversalGroupExampleApp(),
+      const example.OrderedTraversalPolicyExampleApp(),
     );
 
-    // Set the focus to the first button.
-    Focus.of(tester.element(find.text('num: 0'))).requestFocus();
-    await tester.pump();
-
-    expect(hasFocus(tester, 'num: 0'), isTrue);
+    expect(hasFocus(tester, 'One'), isTrue);
 
     const List<String> focusOrder = <String>[
-      'num: 1',
-      'num: 2',
-      'String: A',
-      'String: B',
-      'String: C',
-      'ignored num: 3',
-      'ignored num: 2',
-      'ignored num: 1',
-      'num: 0',
+      'Two',
+      'Three',
+      'Four',
+      'Five',
+      'Six',
+      'One',
     ];
 
     for (final String text in focusOrder) {

@@ -5,6 +5,7 @@
 /// @docImport 'dart:ui';
 ///
 /// @docImport 'package:flutter/widgets.dart';
+/// @docImport 'package:flutter_driver/driver_extension.dart';
 library;
 
 import 'dart:ui' as ui;
