@@ -163,7 +163,6 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   @override
   String? get barrierLabel => null;
 
-  // Check Material fullscreen dialogs. Should be fine without delegatedTransition.
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
@@ -297,7 +296,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
   }
 
   @override
-  DelegatedTransitionBuilder? delegatedTransition = CupertinoPageTransition.delegateTransition;
+  DelegatedTransitionBuilder? get delegatedTransition => this.fullscreenDialog ? null : CupertinoPageTransition.delegateTransition;
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
@@ -328,7 +327,7 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
   }
 
   @override
-  DelegatedTransitionBuilder? delegatedTransition = CupertinoPageTransition.delegateTransition;
+  DelegatedTransitionBuilder? get delegatedTransition => this.fullscreenDialog ? null : CupertinoPageTransition.delegateTransition;
 
   CupertinoPage<T> get _page => settings as CupertinoPage<T>;
 
