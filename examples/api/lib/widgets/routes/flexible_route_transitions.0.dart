@@ -49,7 +49,19 @@ class MyHomePage extends StatelessWidget {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(
+                    VerticalTransitionPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return  const MyHomePage(title: 'Crazy Vertical Transition');
+                      },
+                    ),
+                  );
+                },
+                child: const Text('Crazy Vertical Transition'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
                       builder: (BuildContext context) {
                         return  const MyHomePage(title: 'Zoom Transition');
                       },
@@ -60,7 +72,7 @@ class MyHomePage extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  CupertinoPageRoute route = CupertinoPageRoute(
+                  final CupertinoPageRoute<void> route = CupertinoPageRoute<void>(
                     builder: (BuildContext context) {
                       return  const MyHomePage(title: 'Cupertino Transition');
                     }
@@ -69,26 +81,6 @@ class MyHomePage extends StatelessWidget {
                 },
                 child: const Text('Cupertino Transition'),
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MBSPageRoute(
-                      context: context,
-                      pageBuilder: (BuildContext buildContext) {
-                        return  const MyHomePage(title: 'MBS Transition');
-                      },
-                    ),
-                  );
-                },
-                child: const Text('Modal Bottom Sheet'),
-              ),
-              if (MBSNavigator.of(context) != null)
-                TextButton(
-                  onPressed: () {
-                    (Navigator.of(context).widget as MBSNavigator).popMBS();
-                  },
-                  child: const Text('Pop Bottom Sheet')
-                ),
             ],
           ),
         ),
@@ -96,26 +88,69 @@ class MyHomePage extends StatelessWidget {
   }
 }
 
+class VerticalTransitionPageRoute<T> extends PageRoute<T> {
+  /// Creates a page route for use in an iOS designed app.
+  VerticalTransitionPageRoute({
+    required this.builder,
+  });
 
-// Offset from offscreen below to stopping below the top of the screen.
-final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
-  begin: const Offset(0.0, 1.0),
-  end: const Offset(0.0, 0.1),
-);
+  final WidgetBuilder builder;
 
-final Animatable<Offset> _kFullBottomUpTween = Tween<Offset>(
-  begin: const Offset(0.0, 1.0),
-  end: Offset.zero,
-);
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition => VerticalPageTransition._delegatedTransition;
 
-// Offset from offscreen below to stopping below the top of the screen.
-final Animatable<Offset> _kMidUpTween = Tween<Offset>(
-  begin: Offset.zero,
-  end: const Offset(0.0, -0.05),
-);
+  @override
+  Color? get barrierColor => const Color(0x00000000);
 
-class MBSTransition extends StatelessWidget {
-  MBSTransition({
+  @override
+  bool get barrierDismissible => false;
+
+  @override
+  String? get barrierLabel => 'Should be no visible barrier...';
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  bool get opaque => false;
+
+  // Begin PageRoute.
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 2000);
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return builder(context);
+  }
+
+  static Widget buildPageTransitions<T>(
+    ModalRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return VerticalPageTransition(
+      primaryRouteAnimation: animation,
+      secondaryRouteAnimation: secondaryAnimation,
+      child: child,
+    );
+  }
+
+  // TODO(justinmc): No canTransitionTo needed? I want to be able to have
+  // back-to-back VerticalPageTransitions.
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child);
+  }
+
+  // End PageRoute.
+}
+
+class VerticalPageTransition extends StatelessWidget {
+  VerticalPageTransition({
     super.key,
     required Animation<double> primaryRouteAnimation,
     required this.secondaryRouteAnimation,
@@ -123,31 +158,21 @@ class MBSTransition extends StatelessWidget {
   }) : _primaryPositionAnimation =
            CurvedAnimation(
                  parent: primaryRouteAnimation,
-                 curve: Curves.fastEaseInToSlowEaseOut,
-                 reverseCurve: Curves.fastEaseInToSlowEaseOut.flipped,
+                 curve: curve,
+                 reverseCurve: curve,
                ).drive(_kBottomUpTween),
       _secondaryPositionAnimation =
            CurvedAnimation(
                  parent: secondaryRouteAnimation,
-                 curve: Curves.linearToEaseOut,
-                 reverseCurve: Curves.easeInToLinear,
+                 curve: curve,
+                 reverseCurve: curve,
                )
-           .drive(_kMidUpTween),
-      _tertiaryPositionAnimation =
-            CurvedAnimation(
-                 parent: primaryRouteAnimation,
-                 curve: Curves.linearToEaseOut,
-                 reverseCurve: Curves.easeInToLinear,
-               )
-           .drive(_kFullBottomUpTween);
+           .drive(_kTopDownTween);
 
   // When this page is coming in to cover another page.
   final Animation<Offset> _primaryPositionAnimation;
 
-  // When this page is coming in to cover another page.
-  final Animation<Offset> _tertiaryPositionAnimation;
-
-  // When this page is coming in to cover another page.
+  // When this page is being coverd by another page.
   final Animation<Offset> _secondaryPositionAnimation;
 
   /// Animation
@@ -156,27 +181,23 @@ class MBSTransition extends StatelessWidget {
   /// The widget below this widget in the tree.
   final Widget child;
 
-  /// The delegated transition.
-  static Widget delegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
-    const Offset begin = Offset.zero;
-    const Offset end = Offset(0.0, 0.05);
-    const Curve curve = Curves.ease;
+  static const Curve curve = Curves.decelerate;
 
-    final Animatable<Offset> tween = Tween<Offset>(begin: begin, end: end).chain(CurveTween(curve: curve));
+  static final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
+    begin: const Offset(0.0, 1.0),
+    end: Offset.zero,
+  );
 
-    return SlideTransition(
-      position: secondaryAnimation.drive(tween),
-      child: child,
-    );
-  }
+  static final Animatable<Offset> _kTopDownTween = Tween<Offset>(
+    begin: Offset.zero,
+    end: const Offset(0.0, -1.0),
+  );
 
-  /// The secondary delegated transition.
-  static Widget secondaryDelegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
-    const Offset begin = Offset.zero;
-    const Offset end = Offset(0.0, -0.05);
-    const Curve curve = Curves.ease;
-
-    final Animatable<Offset> tween = Tween<Offset>(begin: begin, end: end).chain(CurveTween(curve: curve));
+  static Widget _delegatedTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
+    final Animatable<Offset> tween = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0.0, -1.0),
+    ).chain(CurveTween(curve: curve));
 
     return SlideTransition(
       position: secondaryAnimation.drive(tween),
@@ -188,13 +209,12 @@ class MBSTransition extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     final TextDirection textDirection = Directionality.of(context);
-    final bool topLevelMBS = Navigator.of(context).widget is! MBSNavigator;
     return SlideTransition(
       position: _secondaryPositionAnimation,
       textDirection: textDirection,
       transformHitTests: false,
       child:  SlideTransition(
-        position: topLevelMBS ? _primaryPositionAnimation : _tertiaryPositionAnimation,
+        position: _primaryPositionAnimation,
         textDirection: textDirection,
         child: ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
@@ -202,141 +222,5 @@ class MBSTransition extends StatelessWidget {
         )
       ),
     );
-  }
-}
-
-class MBSPageRoute<T> extends PageRoute<T> with MBSRouteTransitionMixin<T>,FlexibleTransitionRouteMixin<T> {
-  /// Creates a page route for use in an iOS designed app.
-  MBSPageRoute({
-    required this.pageBuilder,
-    required BuildContext context,
-  }) : _delegatedTransition = (Navigator.of(context).widget is MBSNavigator) ?
-      MBSTransition.secondaryDelegateTransition : MBSTransition.delegateTransition;
-
-  final WidgetBuilder pageBuilder;
-
-  @override
-  DelegatedTransitionBuilder? get delegatedTransition => _delegatedTransition;
-
-  final DelegatedTransitionBuilder _delegatedTransition;
-
-  @override
-  Widget buildContent(BuildContext context) => pageBuilder(context);
-
-  @override
-  Color? get barrierColor => const Color(0x20000000);
-
-  @override
-  bool get barrierDismissible => false;
-
-  @override
-  String? get barrierLabel => 'Stacked card appearance for modal bottom sheet';
-
-  @override
-  bool get maintainState => true;
-
-  @override
-  bool get opaque => false;
-}
-
-mixin MBSRouteTransitionMixin<T> on PageRoute<T> {
-  /// Builds the primary contents of the route.
-  @protected
-  Widget buildContent(BuildContext context);
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 500);
-
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final Widget child = buildContent(context);
-    return MBSNavigator(
-      parentNavigatorContext: context,
-      initialRoute: '/',
-      onGenerateRoute: (RouteSettings settings) {
-        return CupertinoPageRoute(
-          builder: (BuildContext context) {
-            return Semantics(
-              scopesRoute: true,
-              explicitChildNodes: true,
-              child: child,
-            );
-          }
-        );
-      }
-    );
-  }
-
-  static Widget buildPageTransitions<T>(
-    ModalRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return MBSTransition(
-      primaryRouteAnimation: animation,
-      secondaryRouteAnimation: secondaryAnimation,
-      child: child,
-    );
-  }
-
-  @override
-  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
-    return nextRoute is MBSRouteTransitionMixin;
-  }
-
-  @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child);
-  }
-}
-
-class MBSNavigator extends Navigator {
-
-  const MBSNavigator({
-    super.key,
-    super.pages,
-    super.onPopPage,
-    super.initialRoute,
-    super.onGenerateInitialRoutes,
-    super.onGenerateRoute,
-    super.onUnknownRoute,
-    super.transitionDelegate,
-    super.reportsRouteUpdateToEngine,
-    super.clipBehavior,
-    super.observers,
-    super.requestFocus,
-    super.restorationScopeId,
-    super.routeTraversalEdgeBehavior,
-    required this.parentNavigatorContext,
-  });
-
-  final BuildContext parentNavigatorContext;
-
-  void popMBS() {
-    Navigator.of(parentNavigatorContext).pop();
-  }
-
-  static NavigatorState? of(
-    BuildContext context, {
-    bool rootNavigator = false,
-  }) {
-    // Handles the case where the input context is a navigator element.
-    NavigatorState? navigator;
-    if (context is StatefulElement && context.state is NavigatorState) {
-      navigator = context.state as NavigatorState;
-    }
-    if (rootNavigator) {
-      navigator = context.findRootAncestorStateOfType<NavigatorState>() ?? navigator;
-    } else {
-      navigator = navigator ?? context.findAncestorStateOfType<NavigatorState>();
-    }
-    if (navigator?.widget is! MBSNavigator) {
-      return null;
-    }
-
-    return navigator;
   }
 }
