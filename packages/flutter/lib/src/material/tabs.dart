@@ -2008,18 +2008,29 @@ class _TabBarViewState extends State<TabBarView> {
     _updateChildren();
   }
 
+  // Checks we can call methods like jumpToPage - which requires we have a
+  // position and viewport dimension.
+  bool _pageCanChange() {
+    return _pageController != null
+      && _pageController!.hasClients
+      && _pageController!.position.hasViewportDimension;
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateTabController();
     _currentIndex = _controller!.index;
-    if (_pageController == null) {
+    if (_pageCanChange()) {
+      _pageController!.jumpToPage(_currentIndex!);
+    } else {
+      // Dispose if we had one already, this can happen if the index of the tab
+      // controller, which sets _currentIndex, changes before we have laid out.
+      _pageController?.dispose();
       _pageController = PageController(
         initialPage: _currentIndex!,
         viewportFraction: widget.viewportFraction,
       );
-    } else {
-      _pageController!.jumpToPage(_currentIndex!);
     }
   }
 
@@ -2067,7 +2078,14 @@ class _TabBarViewState extends State<TabBarView> {
 
     if (_controller!.index != _currentIndex) {
       _currentIndex = _controller!.index;
-      _warpToCurrentIndex();
+      if (_pageCanChange()) {
+        // Only warp if we have laid out before and have dimensions.
+        _warpToCurrentIndex();
+      }
+
+      if (mounted) {
+        setState(() { _updateChildren(); });
+      }
     }
   }
 
@@ -2089,9 +2107,6 @@ class _TabBarViewState extends State<TabBarView> {
       _jumpToPage(_currentIndex!);
     } else {
       await _animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
-    }
-    if (mounted) {
-      setState(() { _updateChildren(); });
     }
     return Future<void>.value();
   }
@@ -2124,10 +2139,6 @@ class _TabBarViewState extends State<TabBarView> {
       _jumpToPage(_currentIndex!);
     } else {
       await _animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
-    }
-
-    if (mounted) {
-      setState(() { _updateChildren(); });
     }
   }
 

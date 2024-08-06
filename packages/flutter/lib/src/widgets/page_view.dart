@@ -384,6 +384,12 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   double getPixelsFromPage(double page) {
+    assert(
+      hasViewportDimension,
+      '_PagePosition.getPixelsFromPage was called without a viewport dimension. '
+      'This can happen if the page is changed before anything has been laid out. '
+      'Without a dimension, the correct page position cannot be calculated.',
+    );
     return page * viewportDimension * viewportFraction + _initialPageOffset;
   }
 
