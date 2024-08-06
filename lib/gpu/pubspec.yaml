@@ -3,8 +3,9 @@
 # found in the LICENSE file.
 
 name: flutter_gpu
-description: A framework for writing Flutter applications
+description: a powerful, low-level graphics API for Flutter
 homepage: https://flutter.dev
+repository: https://github.com/flutter/engine/tree/main/lib/gpu
 
 environment:
   sdk: '>=3.2.0-0 <4.0.0'
