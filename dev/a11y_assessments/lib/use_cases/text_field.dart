@@ -22,41 +22,44 @@ class _MainWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    setWebTitle('TextField Demo', Theme.of(context).colorScheme.primary.value);
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: const Text('TextField demo')),
-      ),
-      body: ListView(
-        children: <Widget>[
-          Semantics(
-            label: 'Input field with suffix @gmail.com',
-            child: const TextField(
-              key: Key('enabled text field'),
-              maxLines: null,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                suffixText: '@gmail.com',
-                hintText: 'Enter your email',
+    return Title(
+      color: Theme.of(context).colorScheme.primary,
+      title: 'TextField Demo',
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Semantics(headingLevel: 1, child: const Text('TextField demo')),
+        ),
+        body: ListView(
+          children: <Widget>[
+            Semantics(
+              label: 'Input field with suffix @gmail.com',
+              child: const TextField(
+                key: Key('enabled text field'),
+                maxLines: null,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  suffixText: '@gmail.com',
+                  hintText: 'Enter your email',
+                ),
               ),
             ),
-          ),
-          Semantics(
-            label: 'Input field with suffix @gmail.com',
-            child: TextField(
-              key: const Key('disabled text field'),
-              maxLines: null,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                suffixText: '@gmail.com',
-                hintText: 'Enter your email',
+            Semantics(
+              label: 'Input field with suffix @gmail.com',
+              child: TextField(
+                key: const Key('disabled text field'),
+                maxLines: null,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  suffixText: '@gmail.com',
+                  hintText: 'Enter your email',
+                ),
+                enabled: false,
+                controller: TextEditingController(text: 'xyz'),
               ),
-              enabled: false,
-              controller: TextEditingController(text: 'xyz'),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

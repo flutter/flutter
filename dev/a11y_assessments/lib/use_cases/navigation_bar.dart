@@ -29,51 +29,54 @@ class MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    setWebTitle('NavigationBar Demo', Theme.of(context).colorScheme.primary.value);
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: const Text('NavigationBar Demo')),
+    return Title(
+      color: Theme.of(context).colorScheme.primary,
+      title: 'NavigationBar Demo',
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Semantics(headingLevel: 1, child: const Text('NavigationBar Demo')),
+        ),
+        bottomNavigationBar: NavigationBar(
+          onDestinationSelected: (int index) {
+            setState(() {
+              currentPageIndex = index;
+            });
+          },
+          indicatorColor: Colors.amber[800],
+          selectedIndex: currentPageIndex,
+          destinations: const <Widget>[
+            NavigationDestination(
+              selectedIcon: Icon(Icons.home),
+              icon: Icon(Icons.home_outlined),
+              label: 'Home',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.business),
+              label: 'Business',
+            ),
+            NavigationDestination(
+              selectedIcon: Icon(Icons.school),
+              icon: Icon(Icons.school_outlined),
+              label: 'School',
+            ),
+          ],
+        ),
+        body: <Widget>[
+          Container(
+            alignment: Alignment.center,
+            child: const Text('Page 1'),
+          ),
+          Container(
+            alignment: Alignment.center,
+            child: const Text('Page 2'),
+          ),
+          Container(
+            alignment: Alignment.center,
+            child: const Text('Page 3'),
+          ),
+        ][currentPageIndex],
       ),
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) {
-          setState(() {
-            currentPageIndex = index;
-          });
-        },
-        indicatorColor: Colors.amber[800],
-        selectedIndex: currentPageIndex,
-        destinations: const <Widget>[
-          NavigationDestination(
-            selectedIcon: Icon(Icons.home),
-            icon: Icon(Icons.home_outlined),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.business),
-            label: 'Business',
-          ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.school),
-            icon: Icon(Icons.school_outlined),
-            label: 'School',
-          ),
-        ],
-      ),
-      body: <Widget>[
-        Container(
-          alignment: Alignment.center,
-          child: const Text('Page 1'),
-        ),
-        Container(
-          alignment: Alignment.center,
-          child: const Text('Page 2'),
-        ),
-        Container(
-          alignment: Alignment.center,
-          child: const Text('Page 3'),
-        ),
-      ][currentPageIndex],
     );
   }
 }

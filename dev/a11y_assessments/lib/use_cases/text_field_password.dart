@@ -22,30 +22,33 @@ class _MainWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    setWebTitle('TextField Password Demo', Theme.of(context).colorScheme.primary.value);
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: const Text('TextField password demo')),
-      ),
-      body: ListView(
-        children: const <Widget>[
-          TextField(
-            key: Key('enabled password'),
-            decoration: InputDecoration(
-              labelText: 'Password',
+    return Title(
+      color: Theme.of(context).colorScheme.primary,
+      title: 'TextField Password Demo',
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Semantics(headingLevel: 1, child: const Text('TextField password demo')),
+        ),
+        body: ListView(
+          children: const <Widget>[
+            TextField(
+              key: Key('enabled password'),
+              decoration: InputDecoration(
+                labelText: 'Password',
+              ),
+              obscureText: true,
             ),
-            obscureText: true,
-          ),
-          TextField(
-            key: Key('disabled password'),
-            decoration: InputDecoration(
-              labelText: 'Password',
+            TextField(
+              key: Key('disabled password'),
+              decoration: InputDecoration(
+                labelText: 'Password',
+              ),
+              enabled: false,
+              obscureText: true,
             ),
-            enabled: false,
-            obscureText: true,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

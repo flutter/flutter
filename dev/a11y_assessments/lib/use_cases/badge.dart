@@ -28,21 +28,24 @@ class MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    setWebTitle('Badge Demo', Theme.of(context).colorScheme.primary.value);
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: const Text('Badge Demo')),
-      ),
-      body: const Center(
-        child: Badge(
-          label: Text(
-            '5',
-            semanticsLabel: '5 new messages',
-            style: TextStyle(color: Colors.white),
+    return Title(
+      color: Theme.of(context).colorScheme.primary,
+      title: 'Badge Demo',
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Semantics(headingLevel: 1, child: const Text('Badge Demo')),
+        ),
+        body: const Center(
+          child: Badge(
+            label: Text(
+              '5',
+              semanticsLabel: '5 new messages',
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.green,
+            child: Icon(Icons.mail, semanticLabel: 'Messages'),
           ),
-          backgroundColor: Colors.green,
-          child: Icon(Icons.mail, semanticLabel: 'Messages'),
         ),
       ),
     );
