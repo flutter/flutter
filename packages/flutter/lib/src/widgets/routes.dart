@@ -1434,7 +1434,20 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     }
   }
 
-  /// docs
+  /// Wraps the transitions of the route with a delegated transition received
+  /// from a route being pushed on top of the current route.
+  ///
+  /// This allows the current route to sync its exit transition with the
+  /// entrance transition of the incoming route.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows an app that uses three different page transitions, a
+  /// Material Zoom transition, the standard Cupertino sliding transition, and a
+  /// custom vertical transition. All of the page routes are able to inform the
+  /// previous page how to transition off the screen to sync with the new page.
+  ///
+  /// ** See code in examples/api/lib/widgets/routes/flexible_route_transitions.0.dart **
+  /// {@end-tool}
   Widget buildFlexTransitions(
     BuildContext context,
     Animation<double> animation,
