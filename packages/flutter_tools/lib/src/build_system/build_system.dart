@@ -372,7 +372,6 @@ class Environment {
 
     final Directory rootBuildDir = buildDir ?? projectDir.childDirectory('build');
     final Directory buildDirectory = rootBuildDir.childDirectory(buildPrefix);
-    // final File packageConfigFile = findPackageConfigFileOrDefault(projectDir);
     return Environment._(
       outputDir: outputDir,
       projectDir: projectDir,
