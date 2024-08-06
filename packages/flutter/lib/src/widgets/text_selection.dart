@@ -1537,10 +1537,8 @@ class SelectionOverlay {
       _buildScheduled = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         _buildScheduled = false;
-        if (_handles != null) {
-          _handles!.start.markNeedsBuild();
-          _handles!.end.markNeedsBuild();
-        }
+        _handles?.start.markNeedsBuild();
+        _handles?.end.markNeedsBuild();
         _toolbar?.markNeedsBuild();
         if (_contextMenuController.isShown) {
           _contextMenuController.markNeedsBuild();

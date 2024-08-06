@@ -94,13 +94,11 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
         element.innerText = client.getSelectedContent()?.plainText ?? '';
 
         // Programmatically select the dom element in browser.
-        final web.Range range = web.document.createRange();
-        range.selectNode(element);
-        final web.Selection? selection = web.window.getSelection();
-        if (selection != null) {
-          selection.removeAllRanges();
-          selection.addRange(range);
-        }
+        final web.Range range = web.document.createRange()..selectNode(element);
+
+        web.window.getSelection()
+          ?..removeAllRanges()
+           ..addRange(range);
       }
     });
   }

@@ -740,11 +740,7 @@ class InspectorReferenceData {
 // Production implementation of [WidgetInspectorService].
 class _WidgetInspectorService with WidgetInspectorService {
   _WidgetInspectorService() {
-    selection.addListener(() {
-      if (selectionChangedCallback != null) {
-        selectionChangedCallback!();
-      }
-    });
+    selection.addListener(() => selectionChangedCallback?.call());
   }
 }
 
@@ -3459,7 +3455,9 @@ class _Location {
     required this.file,
     required this.line,
     required this.column,
-    // ignore: unused_element
+    // TODO(srawlins): `unused_element_parameter` is being separated from
+    // `unused_element`. Ignore both names until the separation is complete.
+    // ignore: unused_element, unused_element_parameter
     this.name,
   });
 

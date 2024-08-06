@@ -19,6 +19,8 @@ import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 const LocalFileSystem _localFs = LocalFileSystem();
+const String _kGoldctlKey = 'GOLDCTL';
+const String _kGoldctlPresubmitKey = 'GOLD_TRYJOB';
 
 // TODO(matanlurey): Refactor flutter_goldens to just re-use that code instead.
 Future<void> testExecutable(
@@ -31,19 +33,41 @@ Future<void> testExecutable(
     'where the "goldenFileComparator" has not yet been set. This is to ensure '
     'that the correct comparator is used for the current test environment.',
   );
-  final io.Directory tmpDir = io.Directory.systemTemp.createTempSync('android_driver_test');
-  goldenFileComparator = _GoldenFileComparator(
-    SkiaGoldClient(
-      _localFs.directory(tmpDir.path),
-      fs: _localFs,
-      process: const LocalProcessManager(),
-      platform: const LocalPlatform(),
-      httpClient: io.HttpClient(),
-      log: io.stderr.writeln,
-    ),
-    namePrefix: namePrefix,
-    isPresubmit: false,
+  if (!io.Platform.environment.containsKey(_kGoldctlKey)) {
+    io.stderr.writeln(
+      'Environment variable $_kGoldctlKey is not set. Assuming this is a local '
+      'test run and will not upload results to Skia Gold.',
+    );
+    return testMain();
+  }
+  final io.Directory tmpDir = io.Directory.systemTemp.createTempSync(
+    'android_driver_test',
   );
+  final bool isPresubmit = io.Platform.environment.containsKey(
+    _kGoldctlPresubmitKey,
+  );
+  io.stderr.writeln(
+    '=== Using Skia Gold ===\n'
+    'Environment variable $_kGoldctlKey is set, using Skia Gold: \n'
+    '  - tmpDir:      ${tmpDir.path}\n'
+    '  - namePrefix:  $namePrefix\n'
+    '  - isPresubmit: $isPresubmit\n',
+  );
+  final SkiaGoldClient skiaGoldClient = SkiaGoldClient(
+    _localFs.directory(tmpDir.path),
+    fs: _localFs,
+    process: const LocalProcessManager(),
+    platform: const LocalPlatform(),
+    httpClient: io.HttpClient(),
+    log: io.stderr.writeln,
+  );
+  await skiaGoldClient.auth();
+  goldenFileComparator = _GoldenFileComparator(
+    skiaGoldClient,
+    namePrefix: namePrefix,
+    isPresubmit: isPresubmit,
+  );
+  return testMain();
 }
 
 final class _GoldenFileComparator extends GoldenFileComparator {
@@ -68,11 +92,22 @@ final class _GoldenFileComparator extends GoldenFileComparator {
     }
 
     golden = _addPrefix(golden);
-    await update(golden, imageBytes);
-
-    final io.File goldenFile = _getGoldenFile(golden);
+    final io.File goldenFile = await update(golden, imageBytes);
     if (isPresubmit) {
-      await skiaClient.tryjobAdd(golden.path, _localFs.file(goldenFile.path));
+      final String? result = await skiaClient.tryjobAdd(
+        golden.path,
+        _localFs.file(goldenFile.path),
+      );
+      if (result != null) {
+        io.stderr.writeln(
+          'Skia Gold detected an error when comparing "$golden":\n\n$result',
+        );
+        io.stderr.writeln('Still succeeding, will be triaged in Flutter Gold');
+      } else {
+        io.stderr.writeln(
+          'Skia Gold comparison succeeded comparing "$golden".',
+        );
+      }
       return true;
     } else {
       return skiaClient.imgtestAdd(golden.path, _localFs.file(goldenFile.path));
@@ -80,10 +115,14 @@ final class _GoldenFileComparator extends GoldenFileComparator {
   }
 
   @override
-  Future<void> update(Uri golden, Uint8List imageBytes) async {
+  Future<io.File> update(Uri golden, Uint8List imageBytes) async {
+    io.stderr.writeln(
+      'Updating golden file: $golden (${imageBytes.length} bytes)...',
+    );
     final io.File goldenFile = _getGoldenFile(golden);
     await goldenFile.parent.create(recursive: true);
     await goldenFile.writeAsBytes(imageBytes, flush: true);
+    return goldenFile;
   }
 
   io.File _getGoldenFile(Uri uri) {

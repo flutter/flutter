@@ -3176,8 +3176,8 @@ class RenderMouseRegion extends RenderProxyBoxWithHitTestBehavior implements Mou
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    if (onHover != null && event is PointerHoverEvent) {
-      return onHover!(event);
+    if (event is PointerHoverEvent) {
+      onHover?.call(event);
     }
   }
 
