@@ -29,45 +29,47 @@ class MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: const Text('TextButton Demo')),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            MergeSemantics(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  const Text('This is a TextButton:'),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _count++;
-                      });
-                    },
-                    child: const Text('Action'),
-                  ),
-                  Text('Clicked $_count time(s).'),
-                ],
+    return Title(
+      color: Theme.of(context).colorScheme.primary,
+      title: 'Text Button Demo',
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Semantics(headingLevel: 1, child: const Text('TextButton Demo')),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              MergeSemantics(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    const Text('This is a TextButton:'),
+                    TextButton(
+                      onPressed: () {
+                        setState(() { _count++; });
+                      },
+                      child: const Text('Action'),
+                    ),
+                    Text('Clicked $_count time(s).'),
+                  ],
+                ),
               ),
-            ),
-            const MergeSemantics(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text('This is a disabled TextButton:'),
-                  TextButton(
-                    onPressed: null,
-                    child: Text('Action Disabled'),
-                  ),
-                ],
+              const MergeSemantics(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text('This is a disabled TextButton:'),
+                    TextButton(
+                      onPressed: null,
+                      child: Text('Action Disabled'),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class CardUseCase extends UseCase {
@@ -28,22 +28,26 @@ class MainWidgetState extends State<MainWidget> {
   bool favorite = false;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: const Text('Card')),
-      ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Card(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Text('Card'),
+    return Title(
+      color: Theme.of(context).colorScheme.primary,
+      title: 'Card Demo',
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Semantics(headingLevel: 1, child: const Text('Card')),
+        ),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Card(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text('Card'),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

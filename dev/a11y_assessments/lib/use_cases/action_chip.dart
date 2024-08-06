@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class ActionChipUseCase extends UseCase {
@@ -28,25 +28,29 @@ class MainWidgetState extends State<MainWidget> {
   bool favorite = false;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel:1, child: const Text('ActionChip')),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ActionChip(
-              avatar: const Icon(Icons.favorite),
-              label: const Text('Action'),
-              onPressed: () {},
-            ),
-            const ActionChip(
-              avatar: Icon(Icons.favorite),
-              label: Text('Action'),
-            ),
-          ],
+    return Title(
+      color: Theme.of(context).colorScheme.primary,
+      title: 'Action Chip Demo',
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Semantics(headingLevel:1, child: const Text('ActionChip')),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              ActionChip(
+                avatar: const Icon(Icons.favorite),
+                label: const Text('Action'),
+                onPressed: () {},
+              ),
+              const ActionChip(
+                avatar: Icon(Icons.favorite),
+                label: Text('Action'),
+              ),
+            ],
+          ),
         ),
       ),
     );
