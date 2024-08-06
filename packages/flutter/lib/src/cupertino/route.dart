@@ -161,12 +161,9 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
-    return (nextRoute is! CupertinoRouteTransitionMixin && nextRoute is ModalRoute<T> && nextRoute.delegatedTransition != null) || nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog;
-  }
-
-  @override
-  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
-    return previousRoute is ModalRoute<T> || previousRoute is CupertinoRouteTransitionMixin && !previousRoute.fullscreenDialog;
+    return (!(nextRoute is PageRoute<T>) || (nextRoute is PageRoute<T> && !nextRoute.fullscreenDialog)) &&
+      ((nextRoute is ModalRoute<T> && nextRoute.delegatedTransition != null) ||
+      nextRoute is CupertinoRouteTransitionMixin);
   }
 
   @override
@@ -292,7 +289,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
   }
 
   @override
-  DelegatedTransitionBuilder? get delegatedTransition => this.fullscreenDialog ? null : CupertinoPageTransition.delegateTransition;
+  DelegatedTransitionBuilder? get delegatedTransition => CupertinoPageTransition.delegateTransition;
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;

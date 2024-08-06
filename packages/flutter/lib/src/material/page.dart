@@ -106,9 +106,8 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
-    return (nextRoute is MaterialRouteTransitionMixin && !nextRoute.fullscreenDialog)
-      || (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog)
-      || (nextRoute is ModalRoute<T> && nextRoute.delegatedTransition != null);
+    return (!(nextRoute is PageRoute<T>) || nextRoute is PageRoute<T> && !nextRoute.fullscreenDialog)
+      && ((nextRoute is MaterialRouteTransitionMixin) || (nextRoute is ModalRoute<T> && nextRoute.delegatedTransition != null));
   }
 
   @override
