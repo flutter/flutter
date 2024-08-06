@@ -27,31 +27,34 @@ class _MainWidgetState extends State<_MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    setWebTitle('Check Box Demo', Theme.of(context).colorScheme.primary.value);
-    return Scaffold(
-      appBar: AppBar(title: const Text('CheckBoxListTile')),
-      body: ListView(
-        children: <Widget>[
-          CheckboxListTile(
-            value: _checked,
-            onChanged: (bool? value) {
-              setState(() {
-                _checked = value!;
-              });
-            },
-            title: const Text('a check box list title'),
-          ),
-          CheckboxListTile(
-            value: _checked,
-            onChanged: (bool? value) {
-              setState(() {
-                _checked = value!;
-              });
-            },
-            title: const Text('a disabled check box list title'),
-            enabled: false,
-          ),
-        ],
+    return Title(
+      color: appSeedColor,
+      title: 'CheckBox List Tile Demo',
+      child: Scaffold(
+        appBar: AppBar(title: const Text('CheckBoxListTile')),
+        body: ListView(
+          children: <Widget>[
+            CheckboxListTile(
+              value: _checked,
+              onChanged: (bool? value) {
+                setState(() {
+                  _checked = value!;
+                });
+              },
+              title: const Text('a check box list title'),
+            ),
+            CheckboxListTile(
+              value: _checked,
+              onChanged: (bool? value) {
+                setState(() {
+                  _checked = value!;
+                });
+              },
+              title: const Text('a disabled check box list title'),
+              enabled: false,
+            ),
+          ],
+        ),
       ),
     );
   }

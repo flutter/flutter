@@ -35,24 +35,27 @@ class _MainWidgetState extends State<_MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    setWebTitle('NavigationBar Demo', Theme.of(context).colorScheme.primary.value);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Radio button')),
-      body: ListView(
-        children: <Widget>[
-          RadioListTile<SingingCharacter>(
-            title: const Text('Lafayette'),
-            value: SingingCharacter.lafayette,
-            groupValue: _value,
-            onChanged: _onChanged,
-          ),
-          RadioListTile<SingingCharacter>(
-            title: const Text('Jefferson'),
-            value: SingingCharacter.jefferson,
-            groupValue: _value,
-            onChanged: _onChanged,
-          ),
-        ],
+    return Title(
+      color: appSeedColor,
+      title: 'Radio Button Demo',
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Radio button')),
+        body: ListView(
+          children: <Widget>[
+            RadioListTile<SingingCharacter>(
+              title: const Text('Lafayette'),
+              value: SingingCharacter.lafayette,
+              groupValue: _value,
+              onChanged: _onChanged,
+            ),
+            RadioListTile<SingingCharacter>(
+              title: const Text('Jefferson'),
+              value: SingingCharacter.jefferson,
+              groupValue: _value,
+              onChanged: _onChanged,
+            ),
+          ],
+        ),
       ),
     );
   }

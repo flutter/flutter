@@ -31,7 +31,6 @@ class MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    setWebTitle('MaterialBanner Demo', Theme.of(context).colorScheme.primary.value);
     VoidCallback? onPress;
     if (controller == null) {
       onPress = () {
@@ -58,15 +57,19 @@ class MainWidgetState extends State<MainWidget> {
         });
       };
     }
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('MaterialBanner'),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: onPress,
-          child: const Text('Show a MaterialBanner'),
+    return Title(
+      color: appSeedColor,
+      title: 'MaterialBanner Demo',
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: const Text('MaterialBanner'),
+        ),
+        body: Center(
+          child: ElevatedButton(
+            onPressed: onPress,
+            child: const Text('Show a MaterialBanner'),
+          ),
         ),
       ),
     );

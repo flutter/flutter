@@ -49,7 +49,7 @@ class _MainWidgetState extends State<_MainWidget> {
   Widget build(BuildContext context) {
     return Title(
       color: appSeedColor,
-      title: 'Autocomplete',
+      title: 'AutoComplete Demo',
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
