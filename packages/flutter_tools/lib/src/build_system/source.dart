@@ -103,7 +103,7 @@ class SourceVisitor implements ResolvedFiles {
           environment.fileSystem.path.dirname(
             environment.fileSystem.path.dirname(
               environment.packageConfigPath,
-            )
+            ),
           ),
         Environment.kBuildDirectory       => environment.buildDir.resolveSymbolicLinksSync(),
         Environment.kCacheDirectory       => environment.cacheDir.resolveSymbolicLinksSync(),
