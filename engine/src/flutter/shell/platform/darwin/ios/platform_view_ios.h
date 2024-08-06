@@ -42,13 +42,13 @@ class PlatformViewIOS final : public PlatformView {
  public:
   PlatformViewIOS(PlatformView::Delegate& delegate,
                   const std::shared_ptr<IOSContext>& context,
-                  const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller,
+                  const std::shared_ptr<PlatformViewsController>& platform_views_controller,
                   const flutter::TaskRunners& task_runners);
 
   explicit PlatformViewIOS(
       PlatformView::Delegate& delegate,
       IOSRenderingAPI rendering_api,
-      const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller,
+      const std::shared_ptr<PlatformViewsController>& platform_views_controller,
       const flutter::TaskRunners& task_runners,
       const std::shared_ptr<fml::ConcurrentTaskRunner>& worker_task_runner,
       const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch);
@@ -139,7 +139,7 @@ class PlatformViewIOS final : public PlatformView {
   std::mutex ios_surface_mutex_;
   std::unique_ptr<IOSSurface> ios_surface_;
   std::shared_ptr<IOSContext> ios_context_;
-  const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller_;
+  const std::shared_ptr<PlatformViewsController>& platform_views_controller_;
   AccessibilityBridgeManager accessibility_bridge_;
   fml::scoped_nsprotocol<FlutterTextInputPlugin*> text_input_plugin_;
   ScopedObserver dealloc_view_controller_observer_;

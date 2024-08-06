@@ -6,6 +6,7 @@
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
 #include "fml/synchronization/count_down_latch.h"
+#include "shell/platform/darwin/ios/framework/Source/platform_views_controller.h"
 
 #import "flutter/fml/thread.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
@@ -121,6 +122,11 @@ class FlutterPlatformViewsTestMockPlatformViewDelegate : public PlatformView::De
   flutter::Settings settings_;
 };
 
+BOOL BlurRadiusEqualToBlurRadius(CGFloat radius1, CGFloat radius2) {
+  const CGFloat epsilon = 0.01;
+  return std::abs(radius1 - radius2) < epsilon;
+}
+
 }  // namespace
 }  // namespace flutter
 
@@ -144,7 +150,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -200,7 +206,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -293,7 +299,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -370,7 +376,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -447,7 +453,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -525,7 +531,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -646,7 +652,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -792,7 +798,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -1082,7 +1088,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -1401,7 +1407,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -1462,7 +1468,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -1563,7 +1569,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -1639,7 +1645,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -1711,7 +1717,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -1782,7 +1788,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -1858,7 +1864,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -1961,7 +1967,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -2065,7 +2071,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -2132,7 +2138,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -2256,7 +2262,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -2370,7 +2376,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -2435,7 +2441,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -2506,7 +2512,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -2559,7 +2565,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -2622,7 +2628,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -2724,7 +2730,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -2911,7 +2917,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -3002,7 +3008,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -3082,7 +3088,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -3175,7 +3181,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -3286,7 +3292,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                /*raster=*/GetDefaultTaskRunner(),
                                /*ui=*/GetDefaultTaskRunner(),
                                /*io=*/GetDefaultTaskRunner());
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
   flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -3364,7 +3370,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   auto ios_context = [engine iosPlatformView]->GetIosContext();
   auto gr_context = ios_context->GetMainContext();
 
-  auto pool = flutter::FlutterPlatformViewLayerPool{};
+  auto pool = flutter::OverlayLayerPool{};
 
   // Add layers to the pool.
   pool.CreateLayer(gr_context.get(), ios_context, MTLPixelFormatBGRA8Unorm);
