@@ -60,6 +60,7 @@ TaskFunction createUiKitViewScrollPerfTest({bool? enableImpeller}) {
     testDriver: 'test_driver/scroll_perf_test.dart',
     needsFullTimeline: false,
     enableImpeller: enableImpeller,
+    enableMergedPlatformThread: true,
   ).run;
 }
 
@@ -809,10 +810,11 @@ Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations
 }
 
 /// Opens the file at testDirectory + 'ios/Runner/Info.plist'
-/// and adds the following entry to the application.
-/// <FTLDisablePartialRepaint/>
-/// <true/>
-void _disablePartialRepaint(String testDirectory) {
+/// and adds additional manifest settings.
+void _updateManifestSettings(String testDirectory, {
+  required bool disablePartialRepaint,
+  required bool platformThreadMerged
+}) {
   final String manifestPath = path.join(
       testDirectory, 'ios', 'Runner', 'Info.plist');
   final File file = File(manifestPath);
@@ -824,7 +826,10 @@ void _disablePartialRepaint(String testDirectory) {
   final String xmlStr = file.readAsStringSync();
   final XmlDocument xmlDoc = XmlDocument.parse(xmlStr);
   final List<(String, String)> keyPairs = <(String, String)>[
-    ('FLTDisablePartialRepaint', 'true'),
+    if (disablePartialRepaint)
+      ('FLTDisablePartialRepaint', disablePartialRepaint.toString()),
+    if (platformThreadMerged)
+    ('FLTEnableMergedPlatformUIThread', platformThreadMerged.toString())
   ];
 
   final XmlElement applicationNode =
@@ -1222,6 +1227,7 @@ class PerfTest {
     this.enableImpeller,
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
+    this.enableMergedPlatformThread = false,
     this.createPlatforms = const <String>[],
   }): _resultFilename = resultFilename;
 
@@ -1242,6 +1248,7 @@ class PerfTest {
     this.enableImpeller,
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
+    this.enableMergedPlatformThread = false,
     this.createPlatforms = const <String>[],
   }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
 
@@ -1284,6 +1291,9 @@ class PerfTest {
 
   /// Whether partial repaint functionality should be disabled (iOS only).
   final bool disablePartialRepaint;
+
+  /// Whether the UI thread should be the platform thread.
+  final bool enableMergedPlatformThread;
 
   /// Number of seconds to time out the test after, allowing debug callbacks to run.
   final int? timeoutSeconds;
@@ -1380,9 +1390,13 @@ class PerfTest {
             _addOpenGLESToManifest(testDirectory);
           }
         }
-        if (disablePartialRepaint) {
+        if (disablePartialRepaint || enableMergedPlatformThread) {
           changedPlist = true;
-          _disablePartialRepaint(testDirectory);
+          _updateManifestSettings(
+            testDirectory,
+            disablePartialRepaint: disablePartialRepaint,
+            platformThreadMerged: enableMergedPlatformThread
+          );
         }
 
         final List<String> options = <String>[
