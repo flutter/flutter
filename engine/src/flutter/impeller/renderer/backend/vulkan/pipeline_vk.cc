@@ -451,7 +451,8 @@ std::unique_ptr<PipelineVK> PipelineVK::Create(
     const std::shared_ptr<DeviceHolderVK>& device_holder,
     const std::weak_ptr<PipelineLibrary>& weak_library,
     std::shared_ptr<SamplerVK> immutable_sampler) {
-  TRACE_EVENT0("flutter", "PipelineVK::Create");
+  TRACE_EVENT1("flutter", "PipelineVK::Create", "Name",
+               desc.GetLabel().c_str());
 
   auto library = weak_library.lock();
 
