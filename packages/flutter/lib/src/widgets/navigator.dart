@@ -3749,7 +3749,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     if (!_serializableHistory.hasData) {
       String? initialRoute = widget.initialRoute;
       if (widget.pages.isEmpty) {
-        initialRoute = initialRoute ?? Navigator.defaultRouteName;
+        initialRoute ??= Navigator.defaultRouteName;
       }
       if (initialRoute != null) {
         _history.addAll(

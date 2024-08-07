@@ -707,6 +707,7 @@ void main() {
                     title: const Text('Switch tile'),
                     value: true,
                     onChanged: (bool? newValue) { },
+                    internalAddSemanticForOnTap: true,
                   ),
                 ),
               ),
@@ -744,6 +745,7 @@ void main() {
             return false;
           });
           expect(child, matchesSemantics(
+            isButton: true,
             hasToggledState: true,
             isToggled: true,
             isEnabled: true,
