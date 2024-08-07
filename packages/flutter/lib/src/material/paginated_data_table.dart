@@ -85,7 +85,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.header,
     this.headerBackgroundColor,
     this.footerBackgroundColor,
-    this.footerStyle,
+    this.footerStyle = const TextStyle(color: Colors.black),
     this.actions,
     required this.columns,
     this.sortColumnIndex,
@@ -135,6 +135,7 @@ class PaginatedDataTable extends StatefulWidget {
         dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
         dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight,
         assert(rowsPerPage > 0),
+        assert(footerStyle != null),
         assert(() {
           if (onRowsPerPageChanged != null) {
             assert(availableRowsPerPage.contains(rowsPerPage));
