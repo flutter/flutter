@@ -377,6 +377,44 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
+
+  testUsingContext('flutter build web option visibility', () async {
+    final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+    createTestCommandRunner(buildCommand);
+    final BuildWebCommand command = buildCommand.subcommands.values.single as BuildWebCommand;
+
+    void expectVisible(String option) {
+      expect(command.argParser.options.keys, contains(option));
+      expect(command.argParser.options[option]!.hide, isFalse);
+      expect(command.usage, contains(option));
+    }
+
+    void expectHidden(String option) {
+      expect(command.argParser.options.keys, contains(option));
+      expect(command.argParser.options[option]!.hide, isTrue);
+      expect(command.usage, isNot(contains(option)));
+    }
+
+    expectVisible('pwa-strategy');
+    expectVisible('web-resources-cdn');
+    expectVisible('optimization-level');
+    expectVisible('source-maps');
+    expectVisible('csp');
+    expectVisible('dart2js-optimization');
+    expectVisible('dump-info');
+    expectVisible('no-frequency-based-minification');
+    expectVisible('wasm');
+    expectVisible('strip-wasm');
+    expectVisible('base-href');
+
+    expectHidden('web-renderer');
+  }, overrides: <Type, Generator>{
+    Platform: () => fakePlatform,
+    FileSystem: () => fileSystem,
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    ProcessManager: () => processManager,
+  });
+
 }
 
 void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
