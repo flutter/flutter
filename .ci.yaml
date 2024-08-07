@@ -1240,7 +1240,6 @@ targets:
   - name: Linux android_java17_dependency_smoke_tests
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
