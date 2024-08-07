@@ -655,12 +655,15 @@ std::optional<nlohmann::json::object_t> Reflector::ReflectResource(
       CompilerBackend::ExtendedResourceIndex::kPrimary, resource.id);
   result["ext_res_1"] = compiler_.GetExtendedMSLResourceBinding(
       CompilerBackend::ExtendedResourceIndex::kSecondary, resource.id);
+  result["relaxed_precision"] =
+      compiler_->get_decoration(
+          resource.id, spv::Decoration::DecorationRelaxedPrecision) == 1;
+  result["offset"] = offset.value_or(0u);
   auto type = ReflectType(resource.type_id);
   if (!type.has_value()) {
     return std::nullopt;
   }
   result["type"] = std::move(type.value());
-  result["offset"] = offset.value_or(0u);
   return result;
 }
 
