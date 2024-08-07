@@ -8,8 +8,6 @@ import 'package:flutter/rendering.dart';
 
 import 'use_cases/use_cases.dart';
 
-import 'utils.dart';
-
 void main() {
   runApp(const App());
   if (kIsWeb) {
