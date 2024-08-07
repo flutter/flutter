@@ -377,10 +377,8 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
         ? CupertinoTheme.brightnessOf(context) == Brightness.light
           ? kCupertinoButtonTintedOpacityLight
           : kCupertinoButtonTintedOpacityDark
-        : 1.0
+        : widget.color?.opacity ?? 1.0,
     );
-
-
     final Color foregroundColor = widget._style == _CupertinoButtonStyle.filled
       ? themeData.primaryContrastingColor
       : enabled

@@ -424,7 +424,7 @@ void main() {
         ),
       ),
     );
-    expect(textStyle.color, CupertinoColors.activeBlue);
+    expect(textStyle.color, isSameColorAs(CupertinoColors.activeBlue));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -444,7 +444,7 @@ void main() {
         matching: find.byType(DecoratedBox),
       ),
     ).decoration as BoxDecoration;
-    expect(decoration.color, CupertinoColors.activeBlue.withOpacity(0.12));
+    expect(decoration.color, isSameColorAs(CupertinoColors.activeBlue.withOpacity(0.12)));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -464,7 +464,7 @@ void main() {
         matching: find.byType(DecoratedBox),
       ),
     ).decoration as BoxDecoration;
-    expect(decoration.color, CupertinoColors.activeBlue);
+    expect(decoration.color, isSameColorAs(CupertinoColors.activeBlue));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -500,7 +500,7 @@ void main() {
         matching: find.byType(DecoratedBox),
       ),
     ).decoration as BoxDecoration;
-    expect(decoration.color, CupertinoColors.activeBlue.darkColor.withOpacity(0.26));
+    expect(decoration.color, isSameColorAs(CupertinoColors.activeBlue.darkColor.withOpacity(0.26)));
 
     await tester.pumpWidget(
       CupertinoApp(
