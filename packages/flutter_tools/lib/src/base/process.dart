@@ -228,8 +228,11 @@ abstract class ProcessUtils {
 
   /// Write [line] to [stdin] and catch any errors with [onError].
   ///
-  /// Specifically with [Process] file descriptors, an exception that is
-  /// thrown as part of a write can be most reliably caught with a
+  /// Concurrent calls to this method will result in an exception due to its
+  /// dependence on [IOSink.flush] (see https://github.com/dart-lang/sdk/issues/25277).
+  ///
+  /// Context: specifically with [Process] file descriptors, an exception that
+  /// is thrown as part of a write can be most reliably caught with a
   /// [ZoneSpecification] error handler.
   ///
   /// On some platforms, the following code appears to work:
@@ -278,6 +281,10 @@ abstract class ProcessUtils {
     );
   }
 
+  /// See [writelnToStdinGuarded].
+  ///
+  /// In the event that the write or flush fails, this will throw an exception
+  /// that preserves the stack trace of the callsite.
   static Future<void> writelnToStdinUnsafe({
     required IOSink stdin,
     required String line,
@@ -289,6 +296,10 @@ abstract class ProcessUtils {
     );
   }
 
+  /// See [writeToStdinGuarded].
+  ///
+  /// In the event that the write or flush fails, this will throw an exception
+  /// that preserves the stack trace of the callsite.
   static Future<void> writeToStdinUnsafe({
     required IOSink stdin,
     required String content,
