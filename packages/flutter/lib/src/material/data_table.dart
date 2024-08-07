@@ -131,6 +131,7 @@ class DataRow {
     this.selected = false,
     this.onSelectChanged,
     this.onLongPress,
+    this.onHover,
     this.color,
     this.mouseCursor,
     required this.cells,
@@ -143,6 +144,7 @@ class DataRow {
     this.selected = false,
     this.onSelectChanged,
     this.onLongPress,
+    this.onHover,
     this.color,
     this.mouseCursor,
     required this.cells,
@@ -174,6 +176,11 @@ class DataRow {
   /// that callback behavior overrides the gesture behavior of the row for
   /// that particular cell.
   final ValueChanged<bool?>? onSelectChanged;
+
+
+  /// onHover returns true or false when the row is hovered
+  /// onHover works independently of onSelectChanged
+  final ValueChanged<bool?>? onHover;
 
   /// Called if the row is long-pressed.
   ///
@@ -737,6 +744,7 @@ class DataTable extends StatelessWidget {
   // Set by the constructor to the index of the only Column that is
   // non-numeric, if there is exactly one, otherwise null.
   final int? _onlyTextColumn;
+
   static int? _initOnlyTextColumn(List<DataColumn> columns) {
     int? result;
     for (int index = 0; index < columns.length; index += 1) {
@@ -920,6 +928,7 @@ class DataTable extends StatelessWidget {
     required bool showEditIcon,
     required GestureTapCallback? onTap,
     required VoidCallback? onSelectChanged,
+    required ValueChanged<bool>? onHover,
     required GestureTapCallback? onDoubleTap,
     required GestureLongPressCallback? onLongPress,
     required GestureTapDownCallback? onTapDown,
@@ -978,6 +987,7 @@ class DataTable extends StatelessWidget {
       );
     } else if (onSelectChanged != null || onRowLongPress != null) {
       label = TableRowInkWell(
+        onHover: onHover,
         onTap: onSelectChanged,
         onLongPress: onRowLongPress,
         overlayColor: overlayColor,
@@ -1164,6 +1174,7 @@ class DataTable extends StatelessWidget {
           onTapCancel: cell.onTapCancel,
           onTapDown: cell.onTapDown,
           onSelectChanged: row.onSelectChanged == null ? null : () => row.onSelectChanged?.call(!row.selected),
+           onHover: row.onHover,
           overlayColor: row.color ?? effectiveDataRowColor,
           onRowLongPress: row.onLongPress,
           mouseCursor: row.mouseCursor?.resolve(states) ?? dataTableTheme.dataRowCursor?.resolve(states),
@@ -1215,6 +1226,7 @@ class TableRowInkWell extends InkResponse {
     super.key,
     super.child,
     super.onTap,
+    super.onHover,
     super.onDoubleTap,
     super.onLongPress,
     super.onHighlightChanged,
