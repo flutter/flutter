@@ -1,0 +1,14 @@
+use std::{thread, time};
+
+const one_second: time::Duration = time::Duration::from_millis(1000);
+
+#[no_mangle]
+pub extern "C" fn sum(a:i32, b:i32)->i32{
+    return a + b;
+}
+
+#[no_mangle]
+pub extern "C" fn sum_long_running(a:i32, b:i32)->i32{
+    thread::sleep(one_second);
+    return a + b;
+}

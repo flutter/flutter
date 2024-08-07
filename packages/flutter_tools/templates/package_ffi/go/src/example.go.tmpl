@@ -1,0 +1,14 @@
+//go:generate go run github.com/csnewman/flutter-go-bridge/cmd/flutter-go-bridge generate --src example.go --go bridge/bridge.gen.go --dart ../lib/bridge.gen.dart
+package {{projectName}}
+
+import "time"
+
+// functions have to be capitalized as per how go generate works https://github.com/csnewman/flutter-go-bridge
+func Sum(a int, b int) int {
+	return a + b
+}
+
+func SumLongRunning(a int, b int) int {
+	time.Sleep(time.Second)
+	return a + b
+}

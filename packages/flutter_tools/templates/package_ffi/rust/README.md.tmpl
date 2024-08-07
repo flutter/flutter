@@ -20,6 +20,18 @@ This template uses the following structure:
 
 * `bin`: Contains the `build.dart` that performs the external native builds.
 
+## Generating bindings
+
+Before you can generate the bindings, you need to generate the C header file with `cbindgen`.
+In the src directory, run `cbindgen -l C --crate {{projectName}} --output use_rust.h`
+The output value can be of your choice. You will have to update `entry-points` and `include-directives`
+options in `ffigen.yaml`.
+
+In the directory with `ffigen.yaml`, run `dart run ffigen --config ffigen.yaml`. If you need to enable
+native assets, then run `dart --enable-experiment=native-assets run ffigen --config ffigen.yaml`
+
+The bindings should be generated under the lib directory
+
 ## Building and bundling native code
 
 `build.dart` does the building of native components.

@@ -6,11 +6,9 @@
 // They will block the Dart execution while running the native function, so
 // only do this for native functions which are guaranteed to be short-lived.
 FFI_PLUGIN_EXPORT extern "C" { intptr_t sum(intptr_t a, intptr_t b) {
-#ifdef DEBUG
-  return a + b + 1000;
-#else
+
   return a + b;
-#endif
+
   }
 }
 

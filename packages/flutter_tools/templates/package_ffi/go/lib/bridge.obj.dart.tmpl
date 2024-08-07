@@ -1,0 +1,12 @@
+import 'bridge.gen.dart';
+
+Bridge? _bridge;
+
+Bridge getBridge() {
+  if (_bridge != null) {
+    return _bridge!;
+  }
+
+  _bridge = Bridge.open();
+  return _bridge!;
+}
