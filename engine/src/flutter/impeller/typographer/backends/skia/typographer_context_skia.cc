@@ -204,13 +204,13 @@ static ISize ComputeNextAtlasSize(
 }
 
 static void DrawGlyph(SkCanvas* canvas,
+                      const SkPoint position,
                       const ScaledFont& scaled_font,
                       const SubpixelGlyph& glyph,
                       const Rect& scaled_bounds,
                       const GlyphProperties& prop,
                       bool has_color) {
   const auto& metrics = scaled_font.font.GetMetrics();
-  SkPoint position = SkPoint::Make(1, 1);
   SkGlyphID glyph_id = glyph.glyph.index;
 
   SkFont sk_font(
@@ -235,6 +235,7 @@ static void DrawGlyph(SkCanvas* canvas,
     glyph_paint.setStrokeJoin(ToSkiaJoin(glyph.properties.stroke_join));
     glyph_paint.setStrokeMiter(prop.stroke_miter * scaled_font.scale);
   }
+  canvas->save();
   canvas->translate(glyph.subpixel_offset.x, glyph.subpixel_offset.y);
   canvas->drawGlyphs(1u,         // count
                      &glyph_id,  // glyphs
@@ -244,6 +245,68 @@ static void DrawGlyph(SkCanvas* canvas,
                      sk_font,                                 // font
                      glyph_paint                              // paint
   );
+  canvas->restore();
+}
+
+/// @brief Batch render to a single surface.
+///
+/// This is only safe for use when updating a fresh texture.
+static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
+                                  std::shared_ptr<BlitPass>& blit_pass,
+                                  HostBuffer& host_buffer,
+                                  const std::shared_ptr<Texture>& texture,
+                                  const std::vector<FontGlyphPair>& new_pairs,
+                                  size_t start_index,
+                                  size_t end_index) {
+  TRACE_EVENT0("impeller", __FUNCTION__);
+
+  bool has_color = atlas.GetType() == GlyphAtlas::Type::kColorBitmap;
+
+  SkBitmap bitmap;
+  bitmap.setInfo(GetImageInfo(atlas, Size(texture->GetSize())));
+  if (!bitmap.tryAllocPixels()) {
+    return false;
+  }
+
+  auto surface = SkSurfaces::WrapPixels(bitmap.pixmap());
+  if (!surface) {
+    return false;
+  }
+  auto canvas = surface->getCanvas();
+  if (!canvas) {
+    return false;
+  }
+
+  for (size_t i = start_index; i < end_index; i++) {
+    const FontGlyphPair& pair = new_pairs[i];
+    auto data = atlas.FindFontGlyphBounds(pair);
+    if (!data.has_value()) {
+      continue;
+    }
+    auto [pos, bounds] = data.value();
+    Size size = pos.GetSize();
+    if (size.IsEmpty()) {
+      continue;
+    }
+
+    DrawGlyph(canvas, SkPoint::Make(pos.GetLeft(), pos.GetTop()),
+              pair.scaled_font, pair.glyph, bounds, pair.glyph.properties,
+              has_color);
+  }
+
+  // Writing to a malloc'd buffer and then copying to the staging buffers
+  // benchmarks as substantially faster on a number of Android devices.
+  BufferView buffer_view = host_buffer.Emplace(
+      bitmap.getAddr(0, 0),
+      texture->GetSize().Area() *
+          BytesPerPixelForPixelFormat(
+              atlas.GetTexture()->GetTextureDescriptor().format),
+      DefaultUniformAlignment());
+
+  return blit_pass->AddCopy(std::move(buffer_view),  //
+                            texture,                 //
+                            IRect::MakeXYWH(0, 0, texture->GetSize().width,
+                                            texture->GetSize().height));
 }
 
 static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
@@ -288,7 +351,7 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
       return false;
     }
 
-    DrawGlyph(canvas, pair.scaled_font, pair.glyph, bounds,
+    DrawGlyph(canvas, SkPoint::Make(1, 1), pair.scaled_font, pair.glyph, bounds,
               pair.glyph.properties, has_color);
 
     // Writing to a malloc'd buffer and then copying to the staging buffers
@@ -512,35 +575,13 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   std::shared_ptr<CommandBuffer> cmd_buffer = context.CreateCommandBuffer();
   std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
 
-  // The R8/A8 textures used for certain glyphs is not supported as color
-  // attachments in most graphics drivers. For other textures, most framebuffer
-  // attachments have a much smaller size limit than the max texture size.
-  {
-    TRACE_EVENT0("flutter", "ClearGlyphAtlas");
-    size_t byte_size =
-        new_texture->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
-    BufferView buffer_view =
-        host_buffer.Emplace(nullptr, byte_size, DefaultUniformAlignment());
-
-    ::memset(buffer_view.buffer->OnGetContents() + buffer_view.range.offset, 0,
-             byte_size);
-    buffer_view.buffer->Flush();
-    blit_pass->AddCopy(buffer_view, new_texture);
-  }
-
   fml::ScopedCleanupClosure closure([&]() {
     blit_pass->EncodeCommands(context.GetResourceAllocator());
     context.GetCommandQueue()->Submit({std::move(cmd_buffer)});
   });
 
-  // Blit the old texture to the top left of the new atlas.
-  if (new_atlas->GetTexture() && blit_old_atlas) {
-    blit_pass->AddCopy(new_atlas->GetTexture(), new_texture,
-                       IRect::MakeSize(new_atlas->GetTexture()->GetSize()),
-                       {0, 0});
-  }
-
   // Now append all remaining glyphs. This should never have any missing data...
+  auto old_texture = new_atlas->GetTexture();
   new_atlas->SetTexture(std::move(new_texture));
 
   // ---------------------------------------------------------------------------
@@ -556,11 +597,19 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   // Step 4a: Draw new font-glyph pairs into the a host buffer and encode
   // the uploads into the blit pass.
   // ---------------------------------------------------------------------------
-  if (!UpdateAtlasBitmap(*new_atlas, blit_pass, host_buffer,
-                         new_atlas->GetTexture(), new_glyphs,
-                         first_missing_index, new_glyphs.size())) {
+  if (!BulkUpdateAtlasBitmap(*new_atlas, blit_pass, host_buffer,
+                             new_atlas->GetTexture(), new_glyphs,
+                             first_missing_index, new_glyphs.size())) {
     return nullptr;
   }
+
+  // Blit the old texture to the top left of the new atlas.
+  if (blit_old_atlas && old_texture) {
+    blit_pass->AddCopy(old_texture, new_atlas->GetTexture(),
+                       IRect::MakeSize(new_atlas->GetTexture()->GetSize()),
+                       {0, 0});
+  }
+
   // ---------------------------------------------------------------------------
   // Step 8b: Record the texture in the glyph atlas.
   // ---------------------------------------------------------------------------
