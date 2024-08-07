@@ -672,32 +672,57 @@ void main() {
     expect(focusNode.hasFocus, isFalse);
   });
 
-  testWidgets('IconThemeData is not replaced by CupertinoButton', (WidgetTester tester) async {
-    const IconThemeData givenIconTheme = IconThemeData(size: 12.0);
+  testWidgets('IconThemeData falls back to default value when the TextStyle has a null size', (WidgetTester tester) async {
+    const IconThemeData defaultIconTheme = IconThemeData(size: kCupertinoButtonMinDefaultIconSize * 1.2);
 
     IconThemeData? actualIconTheme;
 
+    // large size
     await tester.pumpWidget(
       CupertinoApp(
+        theme: const CupertinoThemeData(
+          textTheme: CupertinoTextThemeData(
+            actionTextStyle: TextStyle(),
+          ),
+        ),
         home: Center(
-          child: IconTheme(
-            data: givenIconTheme,
-            child: CupertinoButton(
-              onPressed: () {},
-              child: Builder(
-                  builder: (BuildContext context) {
-                    actualIconTheme = IconTheme.of(context);
+          child: CupertinoButton(
+            onPressed: () {},
+            child: Builder(
+                builder: (BuildContext context) {
+                  actualIconTheme = IconTheme.of(context);
 
-                    return const Placeholder();
-                  }
-              ),
+                  return const Placeholder();
+                }
             ),
           ),
         ),
       ),
     );
+    expect(actualIconTheme?.size, defaultIconTheme.size);
 
-    expect(actualIconTheme?.size, givenIconTheme.size);
+    // small size
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          textTheme: CupertinoTextThemeData(
+            actionSmallTextStyle: TextStyle(),
+          ),
+        ),
+        home: Center(
+          child: CupertinoButton(
+            onPressed: () {},
+            child: Builder(
+                builder: (BuildContext context) {
+                  actualIconTheme = IconTheme.of(context);
+
+                  return const Placeholder();
+                }
+            ),
+          ),
+        ),
+      ),
+    );
   });
 }
 
