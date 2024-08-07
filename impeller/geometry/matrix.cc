@@ -290,7 +290,7 @@ std::optional<MatrixDecomposition> Matrix::Decompose() const {
   /*
    *  Compute X scale factor and normalize first row.
    */
-  result.scale.x = row[0].Length();
+  result.scale.x = row[0].GetLength();
   row[0] = row[0].Normalize();
 
   /*
@@ -302,7 +302,7 @@ std::optional<MatrixDecomposition> Matrix::Decompose() const {
   /*
    *  Compute Y scale and normalize 2nd row.
    */
-  result.scale.y = row[1].Length();
+  result.scale.y = row[1].GetLength();
   row[1] = row[1].Normalize();
   result.shear.xy /= result.scale.y;
 
@@ -317,7 +317,7 @@ std::optional<MatrixDecomposition> Matrix::Decompose() const {
   /*
    *  Next, get Z scale and normalize 3rd row.
    */
-  result.scale.z = row[2].Length();
+  result.scale.z = row[2].GetLength();
   row[2] = row[2].Normalize();
 
   result.shear.xz /= result.scale.z;
