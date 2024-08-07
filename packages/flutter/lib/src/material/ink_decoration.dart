@@ -151,7 +151,7 @@ class Ink extends StatefulWidget {
   Ink({
     super.key,
     this.padding,
-    Color? this.color,
+    Color? color,
     Decoration? decoration,
     this.width,
     this.height,
