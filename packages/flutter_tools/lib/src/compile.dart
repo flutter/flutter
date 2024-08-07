@@ -7,7 +7,6 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 import 'package:usage/uuid/uuid.dart';
 
@@ -17,7 +16,6 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
-import 'base/process.dart';
 import 'build_info.dart';
 import 'convert.dart';
 
@@ -591,7 +589,7 @@ abstract class ResidentCompiler {
   /// Should be invoked when results of compilation are accepted by the client.
   ///
   /// Either [accept] or [reject] should be called after every [recompile] call.
-  Future<void> accept();
+  void accept();
 
   /// Should be invoked when results of compilation are rejected by the client.
   ///
@@ -601,7 +599,7 @@ abstract class ResidentCompiler {
   /// Should be invoked when frontend server compiler should forget what was
   /// accepted previously so that next call to [recompile] produces complete
   /// kernel file.
-  Future<void> reset();
+  void reset();
 
   Future<Object> shutdown();
 }
@@ -744,9 +742,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
     final String inputKey = Uuid().generateV4();
 
     if (nativeAssets != null && nativeAssets.isNotEmpty) {
-      await _writelnToServerStdin('native-assets $nativeAssets', printTrace: true);
+      server.stdin.writeln('native-assets $nativeAssets');
+      _logger.printTrace('<- native-assets $nativeAssets');
     }
-    await _writelnToServerStdin('recompile $mainUri $inputKey', printTrace: true);
+    server.stdin.writeln('recompile $mainUri $inputKey');
+    _logger.printTrace('<- recompile $mainUri $inputKey');
     final List<Uri>? invalidatedFiles = request.invalidatedFiles;
     if (invalidatedFiles != null) {
       for (final Uri fileUri in invalidatedFiles) {
@@ -761,7 +761,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
         _logger.printTrace(message);
       }
     }
-    await _writelnToServerStdin(inputKey, printTrace: true);
+    server.stdin.writeln(inputKey);
+    _logger.printTrace('<- $inputKey');
 
     return _stdoutHandler.compilerOutput?.future;
   }
@@ -898,10 +899,12 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }));
 
     if (nativeAssetsUri != null && nativeAssetsUri.isNotEmpty) {
-      await _writelnToServerStdin('native assets $nativeAssetsUri', printTrace: true);
+      _server?.stdin.writeln('native-assets $nativeAssetsUri');
+      _logger.printTrace('<- native-assets $nativeAssetsUri');
     }
 
-    await _writelnToServerStdin('compile $scriptUri', printTrace: true);
+    _server?.stdin.writeln('compile $scriptUri');
+    _logger.printTrace('<- compile $scriptUri');
 
     return _stdoutHandler.compilerOutput?.future;
   }
@@ -942,24 +945,24 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }
 
     final String inputKey = Uuid().generateV4();
-    await _writelnToServerStdinAll(<String>[
-      'compile-expression $inputKey',
-      request.expression,
-      ...?request.definitions,
-      inputKey,
-      ...?request.definitionTypes,
-      inputKey,
-      ...?request.typeDefinitions,
-      inputKey,
-      ...?request.typeBounds,
-      inputKey,
-      ...?request.typeDefaults,
-      inputKey,
-      request.libraryUri ?? '',
-      request.klass ?? '',
-      request.method ?? '',
-      request.isStatic.toString(),
-    ]);
+    server.stdin
+      ..writeln('compile-expression $inputKey')
+      ..writeln(request.expression);
+    request.definitions?.forEach(server.stdin.writeln);
+    server.stdin.writeln(inputKey);
+    request.definitionTypes?.forEach(server.stdin.writeln);
+    server.stdin.writeln(inputKey);
+    request.typeDefinitions?.forEach(server.stdin.writeln);
+    server.stdin.writeln(inputKey);
+    request.typeBounds?.forEach(server.stdin.writeln);
+    server.stdin.writeln(inputKey);
+    request.typeDefaults?.forEach(server.stdin.writeln);
+    server.stdin
+      ..writeln(inputKey)
+      ..writeln(request.libraryUri ?? '')
+      ..writeln(request.klass ?? '')
+      ..writeln(request.method ?? '')
+      ..writeln(request.isStatic);
 
     return _stdoutHandler.compilerOutput?.future;
   }
@@ -997,28 +1000,27 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }
 
     final String inputKey = Uuid().generateV4();
-    await _writelnToServerStdinAll(<String>[
-      'compile-expression-to-js $inputKey',
-      request.libraryUri ?? '',
-      request.line.toString(),
-      request.column.toString(),
-      for (final MapEntry<String, String> entry in request.jsModules?.entries ?? <MapEntry<String, String>>[])
-        '${entry.key}:${entry.value}',
-      inputKey,
-      for (final MapEntry<String, String> entry in request.jsFrameValues?.entries ?? <MapEntry<String, String>>[])
-        '${entry.key}:${entry.value}',
-      inputKey,
-      request.moduleName ?? '',
-      request.expression ?? ''
-    ]);
+    server.stdin
+      ..writeln('compile-expression-to-js $inputKey')
+      ..writeln(request.libraryUri ?? '')
+      ..writeln(request.line)
+      ..writeln(request.column);
+    request.jsModules?.forEach((String k, String v) { server.stdin.writeln('$k:$v'); });
+    server.stdin.writeln(inputKey);
+    request.jsFrameValues?.forEach((String k, String v) { server.stdin.writeln('$k:$v'); });
+    server.stdin
+      ..writeln(inputKey)
+      ..writeln(request.moduleName ?? '')
+      ..writeln(request.expression ?? '');
 
     return _stdoutHandler.compilerOutput?.future;
   }
 
   @override
-  Future<void> accept() async {
+  void accept() {
     if (_compileRequestNeedsConfirmation) {
-      await _writelnToServerStdin('accept', printTrace: true);
+      _server?.stdin.writeln('accept');
+      _logger.printTrace('<- accept');
     }
     _compileRequestNeedsConfirmation = false;
   }
@@ -1039,14 +1041,16 @@ class DefaultResidentCompiler implements ResidentCompiler {
       return Future<CompilerOutput?>.value();
     }
     _stdoutHandler.reset(expectSources: false);
-    await _writelnToServerStdin('reject', printTrace: true);
+    _server?.stdin.writeln('reject');
+    _logger.printTrace('<- reject');
     _compileRequestNeedsConfirmation = false;
     return _stdoutHandler.compilerOutput?.future;
   }
 
   @override
-  Future<void> reset() async {
-    await _writelnToServerStdin('reset', printTrace: true);
+  void reset() {
+    _server?.stdin.writeln('reset');
+    _logger.printTrace('<- reset');
   }
 
   @override
@@ -1059,43 +1063,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _logger.printTrace('killing pid ${server.pid}');
     server.kill();
     return server.exitCode;
-  }
-
-  Future<void> _writelnToServerStdin(String line, {
-    bool printTrace = false,
-  }) async {
-    await _writelnToServerStdinAll(<String>[line], printTrace: printTrace);
-  }
-
-  // TODO(andrewkolos): Concurrent calls to ProcessUtils.writelnToStdinUnsafe
-  //  against the same stdin will result in an exception. To guard against this,
-  //  we need to force calls to run serially. Ideally, this wouldn't be
-  //  necessary since we shouldn't have multiple concurrent writes to the
-  //  compiler process.
-  //  However, we do. See https://github.com/flutter/flutter/issues/152577.
-  final Pool _serverStdinWritePool = Pool(1);
-  Future<void> _writelnToServerStdinAll(List<String> lines, {
-    bool printTrace = false,
-  }) async {
-    final Process? server = _server;
-    if (server == null) {
-      return;
-    }
-    final PoolResource request = await _serverStdinWritePool.request();
-    try {
-      await ProcessUtils.writelnToStdinUnsafe(
-        stdin: server.stdin,
-        line: lines.join('\n'),
-      );
-
-      for (final String line in lines) {
-        if (printTrace) {
-          _logger.printTrace('<- $line');
-        }
-      }
-    } finally {
-      request.release();
-    }
   }
 }
 

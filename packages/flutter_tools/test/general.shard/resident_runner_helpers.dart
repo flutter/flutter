@@ -346,10 +346,10 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   }
 
   @override
-  Future<void> accept() async {}
+  void accept() { }
 
   @override
-  Future<void> reset() async {}
+  void reset() { }
 }
 
 class FakeProjectFileInvalidator extends Fake implements ProjectFileInvalidator {
