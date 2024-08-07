@@ -33,7 +33,7 @@ const Map<CupertinoButtonSize, EdgeInsetsGeometry> kCupertinoButtonPadding = <Cu
     horizontal: 12,
   ),
   CupertinoButtonSize.medium: EdgeInsets.symmetric(
-    vertical: 8,
+    vertical: 10,
     horizontal: 15,
   ),
   CupertinoButtonSize.large: EdgeInsets.symmetric(
@@ -43,8 +43,8 @@ const Map<CupertinoButtonSize, EdgeInsetsGeometry> kCupertinoButtonPadding = <Cu
 };
 
 final Map<CupertinoButtonSize, BorderRadius> kCupertinoButtonSizeBorderRadius = <CupertinoButtonSize, BorderRadius>{
-  CupertinoButtonSize.small: BorderRadius.circular(28),
-  CupertinoButtonSize.medium: BorderRadius.circular(32),
+  CupertinoButtonSize.small: BorderRadius.circular(40),
+  CupertinoButtonSize.medium: BorderRadius.circular(40),
   CupertinoButtonSize.large: BorderRadius.circular(12),
 };
 

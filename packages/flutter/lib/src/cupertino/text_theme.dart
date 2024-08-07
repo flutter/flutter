@@ -34,7 +34,6 @@ const TextStyle _kDefaultActionTextStyle = TextStyle(
   inherit: false,
   fontFamily: 'CupertinoSystemText',
   fontSize: 17.0,
-  fontWeight: FontWeight.w400,
   letterSpacing: -0.41,
   color: CupertinoColors.activeBlue,
   decoration: TextDecoration.none,
@@ -49,8 +48,7 @@ const TextStyle _kDefaultActionSmallTextStyle = TextStyle(
   inherit: false,
   fontFamily: 'CupertinoSystemText',
   fontSize: 15.0,
-  fontWeight: FontWeight.w400,
-  letterSpacing: -0.41,
+  letterSpacing: -0.23,
   color: CupertinoColors.activeBlue,
   decoration: TextDecoration.none,
 );
