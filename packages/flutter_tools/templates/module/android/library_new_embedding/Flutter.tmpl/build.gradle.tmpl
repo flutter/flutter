@@ -30,7 +30,6 @@ group = "{{androidIdentifier}}"
 version = "1.0"
 
 android {
-    
     namespace = "{{androidIdentifier}}"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
@@ -45,6 +44,23 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
+    }
+}
+
+android.buildTypes.all {buildType ->
+    if (!android.productFlavors.isEmpty()) {
+        android.productFlavors.all{productFlavor ->
+            System.out.println("Hi Gray in tmpl " + buildType.name + productFlavor.name.capitalize())
+            android.publishing.singleVariant(productFlavor.name + buildType.name.capitalize()) {
+                withSourcesJar()
+                withJavadocJar()
+            }
+        }
+    } else {
+        android.publishing.singleVariant(buildType.name) {
+            withSourcesJar()
+            withJavadocJar()
+        }
     }
 }
 
