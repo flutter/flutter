@@ -165,7 +165,7 @@ class SearchAnchor extends StatefulWidget {
     MaterialStateProperty<BorderSide?>? barSide,
     MaterialStateProperty<OutlinedBorder?>? barShape,
     MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
-    MaterialStateProperty<EdgeInsetsGeometry?>? viewBarPadding,
+    EdgeInsets? viewBarPadding,
     MaterialStateProperty<TextStyle?>? barTextStyle,
     MaterialStateProperty<TextStyle?>? barHintStyle,
     Widget? viewLeading,
@@ -276,7 +276,7 @@ class SearchAnchor extends StatefulWidget {
   /// The padding to use for the search view's search bar.
   ///
   /// If null, then the default value is 8.0 horizontally.
-  final MaterialStateProperty<EdgeInsetsGeometry?>? viewBarPadding;
+  final EdgeInsets? viewBarPadding;
 
   /// The height of the search field on the search view.
   ///
@@ -527,7 +527,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final Color? viewSurfaceTintColor;
   final BorderSide? viewSide;
   final OutlinedBorder? viewShape;
-  final MaterialStateProperty<EdgeInsetsGeometry?>? viewBarPadding;
+  final EdgeInsets? viewBarPadding;
   final double? viewHeaderHeight;
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
@@ -755,7 +755,7 @@ class _ViewContent extends StatefulWidget {
   final Color? viewSurfaceTintColor;
   final BorderSide? viewSide;
   final OutlinedBorder? viewShape;
-  final MaterialStateProperty<EdgeInsetsGeometry?>? viewBarPadding;
+  final EdgeInsets? viewBarPadding;
   final double? viewHeaderHeight;
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
@@ -951,7 +951,7 @@ class _ViewContentState extends State<_ViewContent> {
     final EdgeInsets? effectivePadding = widget.viewPadding
       ?? viewTheme.padding
       ?? viewDefaults.padding;
-    final WidgetStateProperty<EdgeInsetsGeometry?>? effectiveBarPadding = widget.viewBarPadding
+    final EdgeInsets? effectiveBarPadding = widget.viewBarPadding
       ?? viewTheme.barPadding
       ?? viewDefaults.barPadding;
 
@@ -994,7 +994,7 @@ class _ViewContentState extends State<_ViewContent> {
                             child: SearchBar(
                               autoFocus: true,
                               constraints: headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null),
-                              padding: effectiveBarPadding,
+                              padding: WidgetStatePropertyAll<EdgeInsets?>(effectiveBarPadding),
                               leading: widget.viewLeading ?? defaultLeading,
                               trailing: widget.viewTrailing ?? defaultTrailing,
                               hintText: widget.viewHintText,
@@ -1646,8 +1646,7 @@ class _SearchViewDefaultsM3 extends SearchViewThemeData {
   BoxConstraints get constraints => const BoxConstraints(minWidth: 360.0, minHeight: 240.0);
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry?>? get barPadding =>
-    const MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.symmetric(horizontal: 8.0));
+  EdgeInsets? get barPadding => const EdgeInsets.symmetric(horizontal: 8.0);
 
   @override
   Color? get dividerColor => _colors.outline;
