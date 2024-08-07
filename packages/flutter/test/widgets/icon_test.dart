@@ -358,7 +358,6 @@ void main() {
     expect(const IconData(123).toString(), 'IconData(U+0007B)');
   });
 
-
   testWidgets('Fill, weight, grade, and optical size variations are passed', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
@@ -441,6 +440,20 @@ void main() {
       const FontVariation('GRAD', 8.0),
       const FontVariation('opsz', 9.0)
     ]);
+  });
+
+  testWidgets("TextStyle's foreground is exposed and its color will be used", (WidgetTester tester) async {
+    final Paint foreground = Paint()..color = Color(0xFF666666);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: Icon(const IconData(0x41), foreground: foreground)),
+      ),
+    );
+
+    final RichText richText = tester.firstWidget(find.byType(RichText));
+    expect(richText.text.style?.color, isNull);
+    expect(richText.text.style?.foreground?.color, equals(const Color(0xFF666666)));
   });
 
   test('Throws if given invalid values', () {
