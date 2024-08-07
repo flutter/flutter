@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 /// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter_test/flutter_test.dart';
 library;
 
 import 'dart:typed_data';

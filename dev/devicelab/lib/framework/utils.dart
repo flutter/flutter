@@ -478,6 +478,10 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
         '5',
       ],
 
+    // DDS should be disabled for flutter drive in CI.
+    // See https://github.com/flutter/flutter/issues/152684.
+    if (command == 'drive') '--no-dds',
+
     if (command == 'drive' && hostAgent.dumpDirectory != null) ...<String>[
       '--screenshot',
       hostAgent.dumpDirectory!.path,
