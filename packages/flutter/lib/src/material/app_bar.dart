@@ -991,9 +991,6 @@ class _AppBarState extends State<AppBar> {
             TargetPlatform.iOS || TargetPlatform.macOS => null,
           },
           header: true,
-          // set default headingLevel: 1 for one h1 element
-          // per page to meet accessibility guidelines
-          headingLevel: 1,
           child: title,
         );
       }
