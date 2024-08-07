@@ -783,7 +783,6 @@ class _AppBarState extends State<AppBar> {
       final bool isEndDrawerOpen = scaffoldState.hasEndDrawer && scaffoldState.isEndDrawerOpen;
 
       if (isDrawerOpen || isEndDrawerOpen) {
-        _scrollNotificationObserver = null;
         return;
       }
     }
