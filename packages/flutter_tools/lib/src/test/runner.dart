@@ -40,7 +40,6 @@ abstract class FlutterTestRunner {
     String? tags,
     String? excludeTags,
     bool enableVmService = false,
-    bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
     Map<String, String>? precompiledDillFiles,
@@ -108,7 +107,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String? tags,
     String? excludeTags,
     bool enableVmService = false,
-    bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
     Map<String, String>? precompiledDillFiles,
@@ -239,7 +237,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       ..addAll(testFiles.map((Uri uri) => uri.toString()));
 
     final InternetAddressType serverType =
-        ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
+        debuggingOptions.ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
     final loader.FlutterPlatform platform = loader.installHook(
       testWrapper: testWrapper,
@@ -649,7 +647,7 @@ class SpawnPlugin extends PlatformPlugin {
       fs: globals.fs,
       nativeAssetsYaml: nativeAssetsYaml,
     );
-    residentCompiler.accept();
+    await residentCompiler.accept();
 
     globals.printTrace('Compiling ${sourceFile.absolute.uri} took ${compilerTime.elapsedMilliseconds}ms');
     testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);

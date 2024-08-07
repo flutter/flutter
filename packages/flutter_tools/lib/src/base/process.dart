@@ -228,8 +228,11 @@ abstract class ProcessUtils {
 
   /// Write [line] to [stdin] and catch any errors with [onError].
   ///
-  /// Specifically with [Process] file descriptors, an exception that is
-  /// thrown as part of a write can be most reliably caught with a
+  /// Concurrent calls to this method will result in an exception due to its
+  /// dependence on [IOSink.flush] (see https://github.com/dart-lang/sdk/issues/25277).
+  ///
+  /// Context: specifically with [Process] file descriptors, an exception that
+  /// is thrown as part of a write can be most reliably caught with a
   /// [ZoneSpecification] error handler.
   ///
   /// On some platforms, the following code appears to work:
@@ -278,21 +281,58 @@ abstract class ProcessUtils {
     );
   }
 
+  /// See [writelnToStdinGuarded].
+  ///
+  /// In the event that the write or flush fails, this will throw an exception
+  /// that preserves the stack trace of the callsite.
+  static Future<void> writelnToStdinUnsafe({
+    required IOSink stdin,
+    required String line,
+  }) async {
+    await _writeToStdinUnsafe(
+      stdin: stdin,
+      content: line,
+      isLine: true,
+    );
+  }
+
+  /// See [writeToStdinGuarded].
+  ///
+  /// In the event that the write or flush fails, this will throw an exception
+  /// that preserves the stack trace of the callsite.
+  static Future<void> writeToStdinUnsafe({
+    required IOSink stdin,
+    required String content,
+  }) async {
+    await _writeToStdinUnsafe(
+      stdin: stdin,
+      content: content,
+      isLine: false,
+    );
+  }
+
   static Future<void> _writeToStdinGuarded({
     required IOSink stdin,
     required String content,
     required void Function(Object, StackTrace) onError,
     required bool isLine,
   }) async {
+    try {
+      await _writeToStdinUnsafe(stdin: stdin, content: content, isLine: isLine);
+    } on Exception catch (error, stackTrace) {
+      onError(error, stackTrace);
+    }
+  }
+
+  static Future<void> _writeToStdinUnsafe({
+    required IOSink stdin,
+    required String content,
+    required bool isLine,
+  }) {
     final Completer<void> completer = Completer<void>();
 
     void handleError(Object error, StackTrace stackTrace) {
-      try {
-        onError(error, stackTrace);
-        completer.complete();
-      } on Exception catch (e) {
-        completer.completeError(e);
-      }
+      completer.completeError(error, stackTrace);
     }
 
     void writeFlushAndComplete() {
@@ -309,17 +349,7 @@ abstract class ProcessUtils {
       );
     }
 
-    runZonedGuarded(
-      writeFlushAndComplete,
-      (Object error, StackTrace stackTrace) {
-        handleError(error, stackTrace);
-
-        // We may have already completed with an error in `handleError`.
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      },
-    );
+    runZonedGuarded(writeFlushAndComplete, handleError);
 
     return completer.future;
   }

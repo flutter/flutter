@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'action_chip.dart';
+/// @docImport 'chip.dart';
+/// @docImport 'choice_chip.dart';
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'filter_chip.dart';
+/// @docImport 'input_chip.dart';
+/// @docImport 'material.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -267,6 +276,7 @@ class ChipThemeData with Diagnosticable {
       brightness: brightness,
       elevation: 0.0,
       pressElevation: 8.0,
+      iconTheme: const IconThemeData(size: 18.0),
     );
   }
 

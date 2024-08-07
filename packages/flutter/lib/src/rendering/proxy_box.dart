@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'proxy_sliver.dart';
+/// @docImport 'sliver.dart';
+library;
+
 import 'dart:ui' as ui show Color, Gradient, Image, ImageFilter;
 
 import 'package:flutter/animation.dart';
@@ -3170,8 +3176,8 @@ class RenderMouseRegion extends RenderProxyBoxWithHitTestBehavior implements Mou
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    if (onHover != null && event is PointerHoverEvent) {
-      return onHover!(event);
+    if (event is PointerHoverEvent) {
+      onHover?.call(event);
     }
   }
 

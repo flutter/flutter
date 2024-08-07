@@ -233,6 +233,9 @@ class FlutterProject {
   /// which contains the dependencies each plugin depends on.
   File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
 
+  /// The `.gitignore` file of this project.
+  File get gitignoreFile => directory.childFile('.gitignore');
+
   /// The `.dart-tool` directory of this project.
   Directory get dartTool => directory.childDirectory('.dart_tool');
 
