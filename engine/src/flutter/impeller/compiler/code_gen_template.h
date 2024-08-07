@@ -75,9 +75,7 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
   // ===========================================================================
   // Stage Inputs ==============================================================
   // ===========================================================================
-{% if length(stage_inputs) > 0 %}
 {% for stage_input in stage_inputs %}
-
   static constexpr auto kInput{{camel_case(stage_input.name)}} = ShaderStageIOSlot { // {{stage_input.name}}
     "{{stage_input.name}}",             // name
     {{stage_input.location}}u,          // attribute location
@@ -91,7 +89,6 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
     {{stage_input.relaxed_precision}},  // relaxed precision
   };
 {% endfor %}
-{% endif %}
 
   static constexpr std::array<const ShaderStageIOSlot*, {{length(stage_inputs)}}> kAllShaderStageInputs = {
 {% for stage_input in stage_inputs %}
@@ -131,7 +128,6 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
   // ===========================================================================
   // Stage Outputs =============================================================
   // ===========================================================================
-{% if length(stage_outputs) > 0 %}
 {% for stage_output in stage_outputs %}
   static constexpr auto kOutput{{camel_case(stage_output.name)}} = ShaderStageIOSlot { // {{stage_output.name}}
     "{{stage_output.name}}",             // name
@@ -151,7 +147,6 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
     &kOutput{{camel_case(stage_output.name)}}, // {{stage_output.name}}
 {% endfor %}
   };
-{% endif %}
 
   // ===========================================================================
   // Resource Binding Utilities ================================================

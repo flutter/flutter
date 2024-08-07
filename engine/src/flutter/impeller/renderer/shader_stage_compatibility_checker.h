@@ -10,10 +10,31 @@
 #include "impeller/core/shader_types.h"
 
 namespace impeller {
-/// This is a classed use to check that the input slots of fragment shaders
-/// match the output slots of the vertex shaders.
-/// If they don't match it will result in linker errors when creating the
-/// pipeline.  It's not used at runtime.
+
+//------------------------------------------------------------------------------
+/// @brief      Checks, at C++ compile-time, if the two pipeline stages are
+///             compatible.
+///
+///             Stages may be incompatible if the outputs declared in the vertex
+///             stage don't line up with the inputs declared in the fragment
+///             stage. Additionally, the types of the inputs and outputs need to
+///             be identical. Some drivers like the one on the PowerVR GE8320
+///             also have bugs the require the precision qualifier of the stage
+///             interfaces to match exactly.
+///
+///             Not ensuring stage compatibility will cause pipeline creation
+///             errors that will only be caught at runtime. In addition to the
+///             bugs discovered related to precision qualifier, some errors may
+///             only manifest at runtime on some devices.
+///
+///             This static compile-time C++ check ensures that all the possible
+///             runtime errors will be caught at build time.
+///
+///             There is no runtime overhead to using this class.
+///
+/// @tparam     VertexShaderT    The vertex shader stage metadata.
+/// @tparam     FragmentShaderT  The fragment shader stage metadata.
+///
 template <typename VertexShaderT, typename FragmentShaderT>
 class ShaderStageCompatibilityChecker {
  public:
@@ -59,21 +80,6 @@ class ShaderStageCompatibilityChecker {
   }
 };
 
-// The following shaders don't define output slots.
-// TODO(https://github.com/flutter/flutter/issues/146852): Make impellerc emit
-// an empty array for output slots.
-struct ClipVertexShader;
-struct SolidFillVertexShader;
-
-template <typename FragmentShaderT>
-class ShaderStageCompatibilityChecker<ClipVertexShader, FragmentShaderT> {
- public:
-  static constexpr bool Check() { return true; }
-};
-template <typename FragmentShaderT>
-class ShaderStageCompatibilityChecker<SolidFillVertexShader, FragmentShaderT> {
- public:
-  static constexpr bool Check() { return true; }
-};
 }  // namespace impeller
+
 #endif  // FLUTTER_IMPELLER_RENDERER_SHADER_STAGE_COMPATIBILITY_CHECKER_H_
