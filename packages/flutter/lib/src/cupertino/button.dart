@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'constants.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 
 
@@ -18,7 +19,7 @@ import 'theme.dart';
 /// The size of a [CupertinoButton].
 /// Based on the iOS Human Interface Guidelines (https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS)
 enum CupertinoButtonSize {
-  /// Displays a smaller button with round sides and smaller text (uses [CupertinoThemeData.textTheme.actionSmallTextStyle]).
+  /// Displays a smaller button with round sides and smaller text (uses [CupertinoTextThemeData.actionSmallTextStyle]).
   small,
   /// Displays a medium sized button with round sides and regular-sized text
   medium,
