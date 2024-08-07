@@ -119,22 +119,25 @@ struct ShaderStageIOSlot {
   size_t vec_size;
   size_t columns;
   size_t offset;
+  bool relaxed_precision;
 
   constexpr size_t GetHash() const {
     return fml::HashCombine(name, location, set, binding, type, bit_width,
-                            vec_size, columns, offset);
+                            vec_size, columns, offset, relaxed_precision);
   }
 
   constexpr bool operator==(const ShaderStageIOSlot& other) const {
-    return name == other.name &&            //
-           location == other.location &&    //
-           set == other.set &&              //
-           binding == other.binding &&      //
-           type == other.type &&            //
-           bit_width == other.bit_width &&  //
-           vec_size == other.vec_size &&    //
-           columns == other.columns &&      //
-           offset == other.offset;
+    return name == other.name &&                         //
+           location == other.location &&                 //
+           set == other.set &&                           //
+           binding == other.binding &&                   //
+           type == other.type &&                         //
+           bit_width == other.bit_width &&               //
+           vec_size == other.vec_size &&                 //
+           columns == other.columns &&                   //
+           offset == other.offset &&                     //
+           relaxed_precision == other.relaxed_precision  //
+        ;
   }
 };
 
