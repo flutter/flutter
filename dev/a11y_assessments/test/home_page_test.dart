@@ -5,10 +5,8 @@
 import 'package:a11y_assessments/main.dart';
 import 'package:a11y_assessments/use_cases/auto_complete.dart';
 import 'package:a11y_assessments/use_cases/check_box_list_tile.dart';
-// import 'package:a11y_assessments/use_cases/auto_complete.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 
@@ -158,7 +156,7 @@ void main() {
   //   expect(autocompleteTitle.title, equals('AutoComplete Demo'));
   // });
 
-  testWidgets('should not pass "null" to setApplicationSwitcherDescription', (WidgetTester tester) async {
+  testWidgets('Each A11y Assessments page should have a unique page title.', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
@@ -171,19 +169,26 @@ void main() {
       title: 'Accessibility Assessments',
       child: Container(),
     ));
-
-    await pumpsUseCase(tester, AutoCompleteUseCase());
-    await pumpsUseCase(tester, CheckBoxListTile());
-
-    expect(log, hasLength(7));
     expect(log[0], isMethodCall(
       'SystemChrome.setApplicationSwitcherDescription',
       arguments: <String, dynamic>{'label': 'Accessibility Assessments', 'primaryColor': 4278255360},
     ));
-    expect(log[1], isMethodCall(
+
+    await pumpsUseCase(tester, AutoCompleteUseCase());
+    expect(log[2], isMethodCall(
       'SystemChrome.setApplicationSwitcherDescription',
       arguments: <String, dynamic>{'label': 'AutoComplete Demo', 'primaryColor': 4284960932},
     ));
+
+    await pumpsUseCase(tester, CheckBoxListTile());
+    print('CheckboxListTile log:');
+    print(log);
+    print('end CheckboxListTile log');
+    expect(log[6], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'CheckBox List Tile Demo', 'primaryColor': 4284960932},
+    ));
+
   });
 
   testWidgets('a11y assessments home page has one h1 tag', (WidgetTester tester) async {
@@ -193,3 +198,13 @@ void main() {
     expect(findHeadingLevelOnes, findsOne);
   });
 }
+// [
+//  MethodCall(SystemChrome.setApplicationSwitcherDescription, {label: Accessibility Assessments, primaryColor: 4278255360}), 
+//  MethodCall(SystemChrome.setApplicationSwitcherDescription, {label: , primaryColor: 4280391411}), 
+//  MethodCall(SystemChrome.setApplicationSwitcherDescription, {label: AutoComplete Demo, primaryColor: 4284960932}), 
+//  MethodCall(LiveText.isLiveTextInputAvailable, null), 
+//  MethodCall(Clipboard.hasStrings, text/plain), 
+//  MethodCall(SystemChrome.setApplicationSwitcherDescription, {label: , primaryColor: 4280391411}), 
+//  MethodCall(SystemChrome.setApplicationSwitcherDescription, {label: CheckBox List Tile Demo, primaryColor: 4284960932})
+// ]
+
