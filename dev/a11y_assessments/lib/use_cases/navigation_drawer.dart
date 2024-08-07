@@ -71,7 +71,6 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Text('Page Index = $screenIndex'),
               ElevatedButton(
