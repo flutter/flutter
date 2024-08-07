@@ -37,7 +37,7 @@ class _MainWidgetState extends State<_MainWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Radio button demo')
+        title: Semantics(headingLevel: 1, child: const Text('Radio button demo'))
       ),
       body: ListView(
         children: <Widget>[
