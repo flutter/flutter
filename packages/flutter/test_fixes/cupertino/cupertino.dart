@@ -248,4 +248,20 @@ void main() {
 
   final PlatformMenuBar platformMenuBar = PlatformMenuBar(menus: <PlatformMenuItem>[], body: const SizedBox());
   final Widget bodyValue = platformMenuBar.body;
+
+  // Changes made in https://github.com/flutter/flutter/pull/151367
+  final cupertinoSwitch =  CupertinoSwitch(
+    value: value,
+    onChanged: onChanged,
+    activeColor: Colors.red,
+  );
+  Color? activeTrackColor =  cupertinoSwitch.activeColor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/151367
+  final cupertinoSwitch =  CupertinoSwitch(
+    value: value,
+    onChanged: onChanged,
+    trackColor: Colors.red,
+  );
+  Color? inactiveTrackColor =  cupertinoSwitch.trackColor;
 }
