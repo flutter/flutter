@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [dart]:ui FontFeature.FontFeature.tabularFigures.
+/// Flutter code sample for [FontFeature.tabularFigures].
 
 void main() => runApp(const ExampleApp());
 

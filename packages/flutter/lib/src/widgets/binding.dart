@@ -5,6 +5,7 @@
 /// @docImport 'dart:ui';
 /// @docImport 'package:flutter/animation.dart';
 /// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
 ///
 /// @docImport 'adapter.dart';
 /// @docImport 'app_lifecycle_listener.dart';
