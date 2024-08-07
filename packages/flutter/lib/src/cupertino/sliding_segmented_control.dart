@@ -93,6 +93,8 @@ class _Segment<T> extends StatefulWidget {
     required this.highlighted,
     required this.isDragging,
     required this.enabled,
+    required this.isLeftSegment,
+    required this.isRightSegment,
   }) : super(key: key);
 
   final Widget child;
@@ -100,6 +102,8 @@ class _Segment<T> extends StatefulWidget {
   final bool pressed;
   final bool highlighted;
   final bool enabled;
+  final bool isLeftSegment;
+  final bool isRightSegment;
 
   // Whether the thumb of the parent widget (CupertinoSlidingSegmentedControl)
   // is currently being dragged.
@@ -154,6 +158,14 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
 
   @override
   Widget build(BuildContext context) {
+    Alignment scaleAlignment;
+    if (widget.isLeftSegment) {
+      scaleAlignment = Alignment.centerLeft;
+    } else if (widget.isRightSegment) {
+      scaleAlignment = Alignment.centerRight;
+    } else {
+      scaleAlignment = Alignment.center;
+    }
     return MetaData(
       // Expand the hitTest area of this widget.
       behavior: HitTestBehavior.opaque,
@@ -175,6 +187,7 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
               duration: _kHighlightAnimationDuration,
               curve: Curves.ease,
               child: ScaleTransition(
+                alignment: scaleAlignment,
                 scale: highlightPressScaleAnimation,
                 child: widget.child,
               ),
@@ -706,6 +719,17 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
         enabled = widget.setEnabled![entry.key]!;
       }
 
+      final TextDirection textDirection = Directionality.of(context);
+      final bool isLeftSegment = switch (textDirection) {
+        TextDirection.ltr => highlightedIndex == 0,
+        TextDirection.rtl => highlightedIndex == children.length - 1
+      };
+
+      final bool isRightSegment = switch (textDirection) {
+        TextDirection.ltr => highlightedIndex == children.length - 1,
+        TextDirection.rtl => highlightedIndex == 0
+      };
+
       children.add(
         Semantics(
           button: true,
@@ -720,6 +744,8 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
               pressed: pressed == entry.key,
               isDragging: isThumbDragging,
               enabled: enabled,
+              isLeftSegment: isLeftSegment,
+              isRightSegment: isRightSegment,
               child: entry.value,
             ),
           ),
@@ -1177,6 +1203,10 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     }
 
     final int? highlightedChildIndex = highlightedIndex;
+    final bool isLeadingChild = highlightedChildIndex != null
+      && highlightedChildIndex == 0;
+    final bool isTrailingChild = highlightedChildIndex != null
+      && highlightedChildIndex == children.length ~/ 2;
     // Paint thumb if there's a highlighted segment.
     if (highlightedChildIndex != null) {
       final RenderBox selectedChild = children[highlightedChildIndex * 2];
@@ -1205,8 +1235,17 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
 
       final Rect unscaledThumbRect = state.thumbAnimatable?.evaluate(state.thumbController) ?? newThumbRect;
       currentThumbRect = unscaledThumbRect;
+
+      double delta = 0;
+      if (isLeadingChild) {
+        delta = unscaledThumbRect.width - unscaledThumbRect.width * thumbScale;
+      }
+
+      if (isTrailingChild) {
+        delta = unscaledThumbRect.width * thumbScale - unscaledThumbRect.width;
+      }
       final Rect thumbRect = Rect.fromCenter(
-        center: unscaledThumbRect.center,
+        center: unscaledThumbRect.center - Offset(delta / 2, 0),
         width: unscaledThumbRect.width * thumbScale,
         height: unscaledThumbRect.height * thumbScale,
       );
