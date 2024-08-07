@@ -339,6 +339,10 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   /// The map must have more than one entry.
   final Map<T, Widget> children;
 
+  /// The identifying keys and the corresponding widget status whether the
+  /// segment is enabled or not.
+  ///
+  /// If this is null, all segments are selectable by default.
   final Map<T, bool>? setEnabled;
 
   /// The identifier of the widget that is currently selected.
@@ -466,6 +470,13 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     longPress.onLongPress = () { };
 
     highlighted = widget.groupValue;
+    if (widget.setEnabled != null) {
+      // If `setEnabled` map contains the `groupValue` and the status is set to
+      // false, then this segment should not be highlighted.
+      if (widget.setEnabled!.containsKey(widget.groupValue) && !widget.setEnabled![widget.groupValue]!) {
+        highlighted = null;
+      }
+    }
   }
 
   @override
@@ -478,6 +489,13 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     if (!isThumbDragging && highlighted != widget.groupValue) {
       thumbController.animateWith(_kThumbSpringAnimationSimulation);
       thumbAnimatable = null;
+      if (widget.setEnabled != null) {
+        // If `setEnabled` map contains the `groupValue` and the status is set to
+        // false, then no update needed.
+        if (widget.setEnabled!.containsKey(widget.groupValue) && !widget.setEnabled![widget.groupValue]!) {
+          return;
+        }
+      }
       highlighted = widget.groupValue;
     }
   }
@@ -554,6 +572,13 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     if (highlighted == newValue) {
       return;
     }
+    if (widget.setEnabled != null) {
+      // If `setEnabled` map contains the `groupValue` and the status is set to
+      // false, then no update needed.
+      if (widget.setEnabled!.containsKey(newValue) && !widget.setEnabled![newValue]!) {
+        return;
+      }
+    }
     setState(() { highlighted = newValue; });
     // Additionally, start the thumb animation if the highlighted segment
     // changes. If the thumbController is already running, the render object's
@@ -579,6 +604,12 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     final T segment = segmentForXPosition(details.localPosition.dx);
     onPressedChangedByGesture(null);
     if (segment != widget.groupValue) {
+      if (widget.setEnabled != null) {
+        // When disabled segment is tapped, `onValueChanged` should not be called.
+        if (widget.setEnabled!.containsKey(segment) && !widget.setEnabled![segment]!) {
+          return;
+        }
+      }
       widget.onValueChanged(segment);
     }
   }
