@@ -1544,11 +1544,11 @@ void main() {
       (WidgetTester tester) async {
     await binding.setSurfaceSize(const Size(800, 800));
     addTearDown(() => binding.setSurfaceSize(null));
-    const Color footerStyleColor = Colors.yellow;
+    const Color footerStyleColor = Color.fromARGB(255, 255, 0, 0);
 
     await tester.pumpWidget(MaterialApp(
       home: PaginatedDataTable(
-        footerStyle: const TextStyle(color: Colors.yellow),
+        footerStyle: const TextStyle(color: Color.fromARGB(255, 255, 0, 0)),
         showFirstLastButtons: true,
         header: const Text('Test table'),
         source: source,
