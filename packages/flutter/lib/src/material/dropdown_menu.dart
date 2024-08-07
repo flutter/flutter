@@ -397,7 +397,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// properties are used.
   ///
   /// Defaults to null.
-  final EdgeInsets? expandedInsets;
+  final EdgeInsetsGeometry? expandedInsets;
 
   /// When [DropdownMenu.enableFilter] is true, this callback is used to
   /// compute the list of filtered items.
@@ -884,9 +884,20 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       },
     );
 
-    if (widget.expandedInsets case final EdgeInsets padding) {
+    if (widget.expandedInsets case final EdgeInsetsGeometry padding) {
       menuAnchor = Padding(
-        padding: padding.copyWith(top: 0.0, bottom: 0.0),
+        // Clamp the top and bottom padding to 0.
+        padding: padding.clamp(
+          EdgeInsets.zero,
+          const EdgeInsets.only(
+            left: double.infinity,
+            right: double.infinity,
+          ).add(const EdgeInsetsDirectional.only(
+              end: double.infinity,
+              start: double.infinity,
+            ),
+          ),
+        ),
         child: Align(
           alignment: AlignmentDirectional.topStart,
           child: menuAnchor,
