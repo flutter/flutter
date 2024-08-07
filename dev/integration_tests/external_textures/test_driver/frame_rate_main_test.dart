@@ -12,14 +12,14 @@ final RegExp _statsRegExp = RegExp('Produced: (.*)fps\nConsumed: (.*)fps\nWidget
 const Duration _samplingTime = Duration(seconds: 8);
 
 Future<void> main() async {
-  late final FlutterDriver driver;
+  FlutterDriver? driver;
 
   setUpAll(() async {
     driver = await FlutterDriver.connect();
   });
 
   tearDownAll(() async {
-    await driver.close();
+    await driver?.close();
   });
 
   // Verifies we consume texture frames at a rate close to the minimum of the
@@ -31,19 +31,19 @@ Future<void> main() async {
     final SerializableFinder summary = find.byValueKey('summary');
 
     // Wait for calibration to complete and fab to appear.
-    await driver.waitFor(fab);
+    await driver?.waitFor(fab);
 
-    final String calibrationResult = await driver.getText(summary);
+    final String calibrationResult = (await driver?.getText(summary))!;
     final Match? matchCalibration = _calibrationRegExp.matchAsPrefix(calibrationResult);
     expect(matchCalibration, isNotNull);
     final double flutterFrameRate = double.parse(matchCalibration?.group(1) ?? '0');
 
     // Texture frame stats at 0.5x Flutter frame rate
-    await driver.tap(fab);
+    await driver?.tap(fab);
     await Future<void>.delayed(_samplingTime);
-    await driver.tap(fab);
+    await driver?.tap(fab);
 
-    final String statsSlow = await driver.getText(summary);
+    final String statsSlow = (await driver?.getText(summary))!;
     final Match matchSlow = _statsRegExp.matchAsPrefix(statsSlow)!;
     expect(matchSlow, isNotNull);
 
@@ -55,11 +55,11 @@ Future<void> main() async {
     expect(widgetBuilds, 1);
 
     // Texture frame stats at 2.0x Flutter frame rate
-    await driver.tap(fab);
+    await driver?.tap(fab);
     await Future<void>.delayed(_samplingTime);
-    await driver.tap(fab);
+    await driver?.tap(fab);
 
-    final String statsFast = await driver.getText(summary);
+    final String statsFast = (await driver?.getText(summary))!;
     final Match matchFast = _statsRegExp.matchAsPrefix(statsFast)!;
     expect(matchFast, isNotNull);
 

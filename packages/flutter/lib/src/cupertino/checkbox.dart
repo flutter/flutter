@@ -104,6 +104,7 @@ class CupertinoCheckbox extends StatefulWidget {
     required this.onChanged,
     this.activeColor,
     this.inactiveColor,
+    this.fillColor,
     this.checkColor,
     this.focusColor,
     this.focusNode,
@@ -152,10 +153,50 @@ class CupertinoCheckbox extends StatefulWidget {
 
   /// The color to use when this checkbox is checked.
   ///
+  /// If [fillColor] returns a non-null color in the [WidgetState.selected]
+  /// state, [fillColor] will be used instead of [activeColor].
+  ///
   /// Defaults to [CupertinoColors.activeBlue].
   final Color? activeColor;
 
+  /// {@template flutter.cupertino.CupertinoCheckbox.fillColor}
+  /// The color used to fill this checkbox.
+  ///
+  /// Resolves in the following states:
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
+  ///
+  /// {@tool snippet}
+  /// This example resolves the [fillColor] based on the current [WidgetState]
+  /// of the [CupertinoCheckbox], providing a different [Color] when it is
+  /// [WidgetState.disabled].
+  ///
+  /// ```dart
+  /// CupertinoCheckbox(
+  ///   value: true,
+  ///   onChanged: (_){},
+  ///   fillColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+  ///     if (states.contains(WidgetState.disabled)) {
+  ///       return Colors.orange.withOpacity(.32);
+  ///     }
+  ///     return Colors.orange;
+  ///   })
+  /// )
+  /// ```
+  /// {@end-tool}
+  /// {@endtemplate}
+  ///
+  /// If [fillColor] resolves to null for the requested state, then the fill color
+  /// falls back to [activeColor] if the state includes [WidgetState.selected],
+  /// or [inactiveColor] otherwise.
+  final WidgetStateProperty<Color?>? fillColor;
+
   /// The color used if the checkbox is inactive.
+  ///
+  /// If [fillColor] returns a non-null color in the unselected
+  /// state, [fillColor] will be used instead of [inactiveColor].
   ///
   /// By default, [CupertinoColors.inactiveGray] is used.
   final Color? inactiveColor;
@@ -318,6 +359,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
   @override
   Widget build(BuildContext context) {
     // Colors need to be resolved in selected and non selected states separately.
+    // The `states` getter constructs a new set every time, making it safe to edit in place.
     final Set<WidgetState> activeStates = states..add(WidgetState.selected);
     final Set<WidgetState> inactiveStates = states..remove(WidgetState.selected);
 
@@ -325,7 +367,11 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
     // throughout the lifecycle of this build method.
     final Set<WidgetState> currentStates = states;
 
-    final Color effectiveActiveColor = _defaultFillColor.resolve(activeStates);
+    final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
+        ?? _defaultFillColor.resolve(activeStates);
+
+    final Color effectiveInactiveColor = widget.fillColor?.resolve(inactiveStates)
+        ?? _defaultFillColor.resolve(inactiveStates);
 
     final BorderSide effectiveBorderSide = _resolveSide(widget.side, currentStates)
       ?? _defaultSide.resolve(currentStates);
@@ -353,7 +399,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
           ..isFocused = currentStates.contains(WidgetState.focused)
           ..isHovered = currentStates.contains(WidgetState.hovered)
           ..activeColor = effectiveActiveColor
-          ..inactiveColor = _defaultFillColor.resolve(inactiveStates)
+          ..inactiveColor = effectiveInactiveColor
           ..checkColor = _defaultCheckColor.resolve(currentStates)
           ..value = value
           ..previousValue = _previousValue

@@ -24,8 +24,8 @@ Future<void> _main() async {
   // To generate golden files locally, uncomment the following line.
   // autoUpdateGoldenFiles = true;
 
-  late FlutterDriver flutterDriver;
-  late NativeDriver nativeDriver;
+  FlutterDriver? flutterDriver;
+  NativeDriver? nativeDriver;
 
   setUpAll(() async {
     flutterDriver = await FlutterDriver.connect(
@@ -38,14 +38,14 @@ Future<void> _main() async {
   });
 
   tearDownAll(() async {
-    await nativeDriver.close();
-    await flutterDriver.close();
+    await nativeDriver?.close();
+    await flutterDriver?.close();
   });
 
   test('should screenshot and match a full-screen blue rectangle', () async {
-    await flutterDriver.waitFor(find.byType('DecoratedBox'));
+    await flutterDriver?.waitFor(find.byType('DecoratedBox'));
     await expectLater(
-      nativeDriver.screenshot(),
+      nativeDriver?.screenshot(),
       matchesGoldenFile('android_driver_test.BlueRectangle.png'),
     );
   }, timeout: Timeout.none);
