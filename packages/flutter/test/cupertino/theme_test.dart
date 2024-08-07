@@ -225,12 +225,16 @@ void main() {
   });
 
   late Brightness currentBrightness;
-  void colorMatches(Color? componentColor, CupertinoDynamicColor expectedDynamicColor) {
-    switch (currentBrightness) {
-      case Brightness.light:
-        expect(componentColor, isSameColorAs(expectedDynamicColor.color));
-      case Brightness.dark:
-        expect(componentColor, isSameColorAs(expectedDynamicColor.darkColor));
+  void colorMatches(Color? componentColor, Color expectedDynamicColor) {
+    if (expectedDynamicColor is CupertinoDynamicColor) {
+      switch (currentBrightness) {
+        case Brightness.light:
+          expect(componentColor, isSameColorAs(expectedDynamicColor.color));
+        case Brightness.dark:
+          expect(componentColor, isSameColorAs(expectedDynamicColor.darkColor));
+      }
+    } else {
+      expect(componentColor, isSameColorAs(expectedDynamicColor));
     }
   }
 
@@ -254,7 +258,7 @@ void main() {
 
       final CupertinoThemeData theme = await testTheme(tester, data);
 
-      colorMatches(theme.primaryContrastingColor, CupertinoColors.systemBackground);
+      colorMatches(theme.primaryContrastingColor, CupertinoColors.white);
       colorMatches(theme.barBackgroundColor, barBackgroundColor);
       colorMatches(theme.scaffoldBackgroundColor, CupertinoColors.systemBackground);
       colorMatches(theme.textTheme.textStyle.color, CupertinoColors.label);
