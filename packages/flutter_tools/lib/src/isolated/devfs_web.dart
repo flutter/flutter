@@ -1020,7 +1020,7 @@ class WebDevFS implements DevFS {
     await _validateTemplateFile('flutter_bootstrap.js');
     final DateTime candidateCompileTime = DateTime.now();
     if (fullRestart) {
-      generator.reset();
+      await generator.reset();
     }
 
     // The tool generates an entrypoint file in a temp directory to handle
