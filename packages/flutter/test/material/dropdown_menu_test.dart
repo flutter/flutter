@@ -295,7 +295,7 @@ void main() {
       final DropdownMenuEntry<ShortMenu> entry = DropdownMenuEntry<ShortMenu>(value: value, label: value.label);
       shortMenuItems.add(entry);
     }
-    Widget buildMenuAnchor({EdgeInsetsGeometry? expandedInsets}) {
+    Widget buildMenuAnchor({EdgeInsets? expandedInsets}) {
       return MaterialApp(
         home: Scaffold(
           body: SizedBox(
@@ -340,26 +340,8 @@ void main() {
     await tester.pumpWidget(buildMenuAnchor(expandedInsets: const EdgeInsets.only(left: 35.0, top: 50.0, right: 20.0)));
     box = tester.firstRenderObject(find.byType(TextField));
     expect(box.size.width, parentWidth - 35.0 - 20.0);
-    Rect containerRect = tester.getRect(find.byType(SizedBox).first);
-    Rect dropdownMenuRect = tester.getRect(find.byType(TextField));
-    expect(dropdownMenuRect.top, containerRect.top);
-
-    await tester.tap(find.byType(TextField));
-    await tester.pumpAndSettle();
-
-    buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0'));
-    expect(buttonSize.width, parentWidth - 35.0 - 20.0);
-
-    // Regression test for https://github.com/flutter/flutter/issues/151769.
-    // If expandedInsets is not zero, the width of the text field should be adjusted
-    // based on the EdgeInsets.end and EdgeInsets.start. The top and bottom values
-    // will be ignored.
-    await tester.pumpWidget(Container());
-    await tester.pumpWidget(buildMenuAnchor(expandedInsets: const EdgeInsetsDirectional.only(start: 35.0, top: 50.0, end: 20.0)));
-    box = tester.firstRenderObject(find.byType(TextField));
-    expect(box.size.width, parentWidth - 35.0 - 20.0);
-    containerRect = tester.getRect(find.byType(SizedBox).first);
-    dropdownMenuRect = tester.getRect(find.byType(TextField));
+    final Rect containerRect = tester.getRect(find.byType(SizedBox).first);
+    final Rect dropdownMenuRect = tester.getRect(find.byType(TextField));
     expect(dropdownMenuRect.top, containerRect.top);
 
     await tester.tap(find.byType(TextField));
