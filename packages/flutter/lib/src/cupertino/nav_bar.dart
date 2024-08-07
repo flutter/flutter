@@ -946,9 +946,6 @@ class _LargeTitleNavigationBarSliverDelegate
                       duration: _kNavBarTitleFadeDuration,
                       child: Semantics(
                         header: true,
-                        // set default headingLevel: 1 for one h1 element
-                        // per page to meet accessibility guidelines
-                        headingLevel: 1,
                         child: DefaultTextStyle(
                           style: CupertinoTheme.of(context)
                               .textTheme
@@ -1188,9 +1185,7 @@ class _PersistentNavigationBar extends StatelessWidget {
     if (middle != null) {
       middle = DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
-        // set default headingLevel: 1 for one h1 element
-        // per page to meet accessibility guidelines
-        child: Semantics(header: true, headingLevel: 1, child: middle),
+        child: Semantics(header: true, child: middle),
       );
       // When the middle's visibility can change on the fly like with large title
       // slivers, wrap with animated opacity.
