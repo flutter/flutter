@@ -200,6 +200,11 @@ class PageController extends ScrollController {
       return Future<void>.value();
     }
 
+    if (!position.hasViewportDimension) {
+      position._pageToUseOnStartup = page.toDouble();
+      return Future<void>.value();
+    }
+
     return position.animateTo(
       position.getPixelsFromPage(page.toDouble()),
       duration: duration,
@@ -215,6 +220,11 @@ class PageController extends ScrollController {
     final _PagePosition position = this.position as _PagePosition;
     if (position._cachedPage != null) {
       position._cachedPage = page.toDouble();
+      return;
+    }
+
+    if (!position.hasViewportDimension) {
+      position._pageToUseOnStartup = page.toDouble();
       return;
     }
 
