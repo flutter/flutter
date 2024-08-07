@@ -16,6 +16,7 @@ import 'expansion_tile.dart';
 import 'material_banner.dart';
 import 'navigation_bar.dart';
 import 'navigation_drawer.dart';
+import 'navigation_rail.dart';
 import 'radio_list_tile.dart';
 import 'slider.dart';
 import 'snack_bar.dart';
@@ -50,4 +51,5 @@ final List<UseCase> useCases = <UseCase>[
   CardUseCase(),
   DrawerUseCase(),
   NavigationDrawerUseCase(),
+  NavigationRailUseCase(),
 ];
