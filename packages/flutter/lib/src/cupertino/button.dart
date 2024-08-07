@@ -107,7 +107,7 @@ class CupertinoButton extends StatefulWidget {
   const CupertinoButton({
     super.key,
     required this.child,
-    this.size = CupertinoButtonSize.large,
+    this.sizeStyle = CupertinoButtonSize.large,
     this.padding,
     this.color,
     this.disabledColor = CupertinoColors.quaternarySystemFill,
@@ -135,7 +135,7 @@ class CupertinoButton extends StatefulWidget {
   const CupertinoButton.tinted({
     super.key,
     required this.child,
-    this.size = CupertinoButtonSize.large,
+    this.sizeStyle = CupertinoButtonSize.large,
     this.padding,
     this.color,
     this.disabledColor = CupertinoColors.quaternarySystemFill,
@@ -159,7 +159,7 @@ class CupertinoButton extends StatefulWidget {
   const CupertinoButton.filled({
     super.key,
     required this.child,
-    this.size = CupertinoButtonSize.large,
+    this.sizeStyle = CupertinoButtonSize.large,
     this.padding,
     this.disabledColor = CupertinoColors.quaternarySystemFill,
     this.minSize,
@@ -221,13 +221,13 @@ class CupertinoButton extends StatefulWidget {
 
   /// The radius of the button's corners when it has a background color.
   ///
-  /// Defaults to [kCupertinoButtonSizeBorderRadius], based on [size].
+  /// Defaults to [kCupertinoButtonSizeBorderRadius], based on [sizeStyle].
   final BorderRadius? borderRadius;
 
   /// The size of the button
   ///
   /// Defaults to [CupertinoButtonSize.large]
-  final CupertinoButtonSize size;
+  final CupertinoButtonSize sizeStyle;
 
   /// The alignment of the button's [child].
   ///
@@ -396,7 +396,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
         .toColor();
 
     final TextStyle textStyle = (
-      widget.size == CupertinoButtonSize.small
+      widget.sizeStyle == CupertinoButtonSize.small
         ? themeData.textTheme.actionSmallTextStyle
         : themeData.textTheme.actionTextStyle
     ).copyWith(color: foregroundColor);
@@ -423,8 +423,8 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
             button: true,
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minWidth: widget.minSize ?? kCupertinoButtonMinSize[widget.size]!,
-                minHeight: widget.minSize ?? kCupertinoButtonMinSize[widget.size]!,
+                minWidth: widget.minSize ?? kCupertinoButtonMinSize[widget.sizeStyle]!,
+                minHeight: widget.minSize ?? kCupertinoButtonMinSize[widget.sizeStyle]!,
               ),
               child: FadeTransition(
                 opacity: _opacityAnimation,
@@ -439,13 +439,13 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                           ),
                         )
                       : null,
-                    borderRadius: widget.borderRadius ?? kCupertinoButtonSizeBorderRadius[widget.size],
+                    borderRadius: widget.borderRadius ?? kCupertinoButtonSizeBorderRadius[widget.sizeStyle],
                     color: backgroundColor != null && !enabled
                       ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
                       : backgroundColor,
                   ),
                   child: Padding(
-                    padding: widget.padding ?? kCupertinoButtonPadding[widget.size]!,
+                    padding: widget.padding ?? kCupertinoButtonPadding[widget.sizeStyle]!,
                     child: Align(
                       alignment: widget.alignment,
                       widthFactor: 1.0,

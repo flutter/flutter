@@ -134,8 +134,8 @@ void main() {
 
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       onPressed: null,
+      sizeStyle: CupertinoButtonSize.small,
       child: child,
-      size: CupertinoButtonSize.small,
     )));
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
@@ -145,8 +145,8 @@ void main() {
 
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       onPressed: null,
+      sizeStyle: CupertinoButtonSize.medium,
       child: child,
-      size: CupertinoButtonSize.medium,
     )));
     expect(
       buttonBox.size,
@@ -154,8 +154,8 @@ void main() {
     );
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       onPressed: null,
+      // sizeStyle: CupertinoButtonSize.large,
       child: child,
-      size: CupertinoButtonSize.large,
     )));
     expect(
       buttonBox.size,
