@@ -83,7 +83,7 @@ const double kCupertinoFocusColorOpacity = 0.80,
 const double kCupertinoButtonTintedOpacityLight = 0.12,
              kCupertinoButtonTintedOpacityDark = 0.26;
 
-/// The default icon size for a [CupertinoButton] when the [child] is an [Icon].
+/// The default icon size for [IconThemeData.size] of [CupertinoButton.child].
 ///
 /// Used only when the [CupertinoTextThemeData.actionTextStyle] or [CupertinoTextThemeData.actionSmallTextStyle]
 /// has a null [TextStyle.fontSize].
