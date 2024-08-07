@@ -50,7 +50,6 @@ android {
 android.buildTypes.all {buildType ->
     if (!android.productFlavors.isEmpty()) {
         android.productFlavors.all{productFlavor ->
-            System.out.println("Hi Gray in tmpl " + buildType.name + productFlavor.name.capitalize())
             android.publishing.singleVariant(productFlavor.name + buildType.name.capitalize()) {
                 withSourcesJar()
                 withJavadocJar()
