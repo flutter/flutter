@@ -14,7 +14,8 @@ void main() {
     expect(find.text('Action Disabled'), findsOneWidget);
   });
 
-  testWidgets('text button increments correctly when clicked', (WidgetTester tester) async {
+  testWidgets('text button increments correctly when clicked',
+      (WidgetTester tester) async {
     await pumpsUseCase(tester, TextButtonUseCase());
 
     expect(find.text('Action'), findsOneWidget);

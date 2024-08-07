@@ -11,6 +11,7 @@ import 'card.dart';
 import 'check_box_list_tile.dart';
 import 'date_picker.dart';
 import 'dialog.dart';
+import 'drawer.dart';
 import 'expansion_tile.dart';
 import 'material_banner.dart';
 import 'navigation_bar.dart';
@@ -21,6 +22,7 @@ import 'switch_list_tile.dart';
 import 'text_button.dart';
 import 'text_field.dart';
 import 'text_field_password.dart';
+import 'navigation_drawer.dart';
 
 abstract class UseCase {
   String get name;
@@ -46,4 +48,6 @@ final List<UseCase> useCases = <UseCase>[
   SwitchListTileUseCase(),
   ExpansionTileUseCase(),
   CardUseCase(),
+  DrawerUseCase(),
+  NavigationDrawerUseCase(),
 ];
