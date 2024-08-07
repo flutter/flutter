@@ -309,13 +309,13 @@ struct Matrix {
   constexpr Vector3 GetBasisZ() const { return Vector3(m[8], m[9], m[10]); }
 
   constexpr Vector3 GetScale() const {
-    return Vector3(GetBasisX().Length(), GetBasisY().Length(),
-                   GetBasisZ().Length());
+    return Vector3(GetBasisX().GetLength(), GetBasisY().GetLength(),
+                   GetBasisZ().GetLength());
   }
 
   constexpr Scalar GetDirectionScale(Vector3 direction) const {
-    return 1.0f / (this->Basis().Invert() * direction.Normalize()).Length() *
-           direction.Length();
+    return 1.0f / (this->Basis().Invert() * direction.Normalize()).GetLength() *
+           direction.GetLength();
   }
 
   constexpr bool IsAffine() const {

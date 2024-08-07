@@ -44,10 +44,10 @@ struct Vector3 {
    *
    *  @return the calculated length.
    */
-  constexpr Scalar Length() const { return sqrt(x * x + y * y + z * z); }
+  constexpr Scalar GetLength() const { return sqrt(x * x + y * y + z * z); }
 
   constexpr Vector3 Normalize() const {
-    const auto len = Length();
+    const auto len = GetLength();
     return {x / len, y / len, z / len};
   }
 
