@@ -31,7 +31,7 @@ class MainWidgetState extends State<MainWidget> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Badge Demo'),
+        title: Semantics(headingLevel: 1, child: const Text('Badge Demo')),
       ),
       body: const Center(
         child: Badge(
