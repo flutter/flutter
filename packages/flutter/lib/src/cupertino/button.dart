@@ -26,7 +26,7 @@ enum CupertinoButtonSize {
   large,
 }
 
-const Map<CupertinoButtonSize, EdgeInsetsGeometry> _kCupertinoButtonPadding = <CupertinoButtonSize, EdgeInsetsGeometry>{
+const Map<CupertinoButtonSize, EdgeInsetsGeometry> kCupertinoButtonPadding = <CupertinoButtonSize, EdgeInsetsGeometry>{
   CupertinoButtonSize.small: EdgeInsets.symmetric(
     vertical: 6,
     horizontal: 12,
@@ -41,13 +41,13 @@ const Map<CupertinoButtonSize, EdgeInsetsGeometry> _kCupertinoButtonPadding = <C
   ),
 };
 
-final Map<CupertinoButtonSize, BorderRadius> _kCupertinoButtonSizeBorderRadius = <CupertinoButtonSize, BorderRadius>{
+final Map<CupertinoButtonSize, BorderRadius> kCupertinoButtonSizeBorderRadius = <CupertinoButtonSize, BorderRadius>{
   CupertinoButtonSize.small: BorderRadius.circular(28),
   CupertinoButtonSize.medium: BorderRadius.circular(32),
   CupertinoButtonSize.large: BorderRadius.circular(12),
 };
 
-const Map<CupertinoButtonSize, double> _kCupertinoButtonMinSize = <CupertinoButtonSize, double>{
+const Map<CupertinoButtonSize, double> kCupertinoButtonMinSize = <CupertinoButtonSize, double>{
   CupertinoButtonSize.small: 28,
   CupertinoButtonSize.medium: 32,
   CupertinoButtonSize.large: 44,
@@ -70,12 +70,12 @@ enum _CupertinoButtonStyle {
 
 // The relative values needed to transform a color to it's equivalent focus
 // outline color.
-const double _kCupertinoFocusColorOpacity = 0.80;
-const double _kCupertinoFocusColorBrightness = 0.69;
-const double _kCupertinoFocusColorSaturation = 0.835;
+const double kCupertinoFocusColorOpacity = 0.80;
+const double kCupertinoFocusColorBrightness = 0.69;
+const double kCupertinoFocusColorSaturation = 0.835;
 
-const double _kCupertinoButtonTintedOpacityLight = 0.12;
-const double _kCupertinoButtonTintedOpacityDark = 0.26;
+const double kCupertinoButtonTintedOpacityLight = 0.12;
+const double kCupertinoButtonTintedOpacityDark = 0.26;
 
 /// An iOS-style button.
 ///
@@ -220,7 +220,7 @@ class CupertinoButton extends StatefulWidget {
 
   /// The radius of the button's corners when it has a background color.
   ///
-  /// Defaults to [_kCupertinoButtonSizeBorderRadius], based on [size].
+  /// Defaults to [kCupertinoButtonSizeBorderRadius], based on [size].
   final BorderRadius? borderRadius;
 
   /// The size of the button
@@ -374,8 +374,8 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     )?.withOpacity(
       widget._style == _CupertinoButtonStyle.tinted
         ? CupertinoTheme.brightnessOf(context) == Brightness.light
-          ? _kCupertinoButtonTintedOpacityLight
-          : _kCupertinoButtonTintedOpacityDark
+          ? kCupertinoButtonTintedOpacityLight
+          : kCupertinoButtonTintedOpacityDark
         : 1.0
     );
 
@@ -422,8 +422,8 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
             button: true,
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minWidth: widget.minSize ?? _kCupertinoButtonMinSize[widget.size]!,
-                minHeight: widget.minSize ?? _kCupertinoButtonMinSize[widget.size]!,
+                minWidth: widget.minSize ?? kCupertinoButtonMinSize[widget.size]!,
+                minHeight: widget.minSize ?? kCupertinoButtonMinSize[widget.size]!,
               ),
               child: FadeTransition(
                 opacity: _opacityAnimation,
@@ -438,13 +438,13 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                           ),
                         )
                       : null,
-                    borderRadius: widget.borderRadius ?? _kCupertinoButtonSizeBorderRadius[widget.size],
+                    borderRadius: widget.borderRadius ?? kCupertinoButtonSizeBorderRadius[widget.size],
                     color: backgroundColor != null && !enabled
                       ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
                       : backgroundColor,
                   ),
                   child: Padding(
-                    padding: widget.padding ?? _kCupertinoButtonPadding[widget.size]!,
+                    padding: widget.padding ?? kCupertinoButtonPadding[widget.size]!,
                     child: Align(
                       alignment: widget.alignment,
                       widthFactor: 1.0,
