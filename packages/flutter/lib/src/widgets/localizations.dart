@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_localizations/flutter_localizations.dart';
 ///
 /// @docImport 'app.dart';
 /// @docImport 'reorderable_list.dart';
