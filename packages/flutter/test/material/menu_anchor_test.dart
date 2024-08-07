@@ -1302,6 +1302,59 @@ void main() {
             'clipBehavior: Clip.none'),
       );
     });
+    testWidgets('menus can be traversed multiple times', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/150334
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                MenuItemButton(
+                  autofocus: true,
+                  onPressed: () {},
+                  child: const Text('External Focus'),
+                ),
+                MenuBar(
+                  controller: controller,
+                  children: createTestMenus(
+                    onPressed: onPressed,
+                    onOpen: onOpen,
+                    onClose: onClose,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      // Have to open a menu initially to start things going.
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 10"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("External Focus"))'));
+
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 10"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+    });
 
     testWidgets('keyboard tab traversal works', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1440,6 +1493,40 @@ void main() {
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 113"))'));
+
+      // Since this is a leaf off of a vertical menu, moving left should
+      // return to this menu's parent button.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+
+      // Moving left while in a first-level submenu should focus the
+      // previous top-level menubar anchor.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
+
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
+
+      // Pressing arrowup from a top-level menubar anchor should focus the last
+      // item in that anchor's submenu.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+      await tester.pump();
+
+      // Enter the submenu.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
+
+      // Move to next top-level menu button.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 2"))'));
     });
 
     testWidgets('keyboard directional traversal works in RTL mode', (WidgetTester tester) async {
@@ -1526,6 +1613,356 @@ void main() {
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 113"))'));
+
+      // Since this is a leaf off of a vertical menu, moving right should
+      // return to this menu's parent button.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+
+      // Moving left while in a first-level submenu should focus the
+      // previous top-level menubar anchor.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
+
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
+
+      // Pressing arrowup from a top-level menubar anchor should focus the last
+      // item in that anchor's submenu.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+
+      // Enter the submenu.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
+
+      // Move to next top-level menu button.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 2"))'));
+    });
+
+     testWidgets('MenuAnchor tab traversal works', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/144381
+      final FocusNode buttonFocusNode = FocusNode(debugLabel: TestMenu.anchorButton.label);
+      addTearDown(buttonFocusNode.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                MenuAnchor(
+                  childFocusNode: buttonFocusNode,
+                  menuChildren: <Widget>[
+                    MenuItemButton(onPressed: () {}, child: const Text('start')),
+                    ...createTestMenus(
+                      onPressed: onPressed,
+                      onOpen: onOpen,
+                      onClose: onClose,
+                    ),
+                  ],
+                  builder: (
+                    BuildContext context,
+                    MenuController controller,
+                    Widget? child,
+                  ) {
+                    return TextButton(
+                      focusNode: buttonFocusNode,
+                      onPressed: () {
+                        if (controller.isOpen) {
+                          controller.close();
+                        } else {
+                          controller.open();
+                        }
+                      },
+                      child: Text(TestMenu.anchorButton.label),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(focusedMenu, equals(TestMenu.anchorButton.label));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(focusedMenu, equals(TestMenu.anchorButton.label));
+
+      // Directional traversal doesn't work until a menu item is focused.
+      // To start focusing, hover over the first menu item.
+      await hoverOver(tester, find.text('start'));
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("start"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 2"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("start"))'));
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 2"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
+
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      opened.clear();
+      closed.clear();
+
+      // Test closing a menu with enter.
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(opened, isEmpty);
+      expect(closed, <TestMenu>[TestMenu.mainMenu0]);
+    });
+
+    testWidgets('MenuAnchor LTR directional traversal works', (WidgetTester tester) async {
+      final FocusNode buttonFocusNode = FocusNode(debugLabel: TestMenu.anchorButton.label);
+      addTearDown(buttonFocusNode.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                MenuAnchor(
+                  childFocusNode: buttonFocusNode,
+                  menuChildren: <Widget>[
+                    MenuItemButton(onPressed: () {}, child: const Text('start')),
+                    ...createTestMenus(
+                      onPressed: onPressed,
+                      onOpen: onOpen,
+                      onClose: onClose,
+                    ),
+                  ],
+                  builder: (
+                    BuildContext context,
+                    MenuController controller,
+                    Widget? child,
+                  ) {
+                    return TextButton(
+                      focusNode: buttonFocusNode,
+                      onPressed: () {
+                        if (controller.isOpen) {
+                          controller.close();
+                        } else {
+                          controller.open();
+                        }
+                      },
+                      child: const Text('Open'),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      expect(focusedMenu, equals(TestMenu.anchorButton.label));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(focusedMenu, equals(TestMenu.anchorButton.label));
+      expect(find.text('start'), findsOneWidget);
+
+      // Directional traversal doesn't work until a menu item is focused.
+      // To start focusing, hover over the first menu item.
+      await hoverOver(tester, find.text('start'));
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("start"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
+      expect(find.text('Sub Menu 00'), findsOne);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 00"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 01"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 02"))'));
+
+      // We're at the deepest menu on a LTR menu, so arrow right should not change focus.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 02"))'));
+
+      // Arrow left should move focus to the parent anchor.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
+      expect(find.text('Sub Menu 00'), findsNothing);
+
+      // We're at the root menu, so arrow left should not change focus and
+      // should not open the submenu.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
+      expect(find.text('Sub Menu 00'), findsNothing);
+
+      // Open the submenu again
+      await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
+      expect(find.text('Sub Menu 00'), findsOne);
+
+      // Close all menus
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pump();
+      expect(focusedMenu, equals(TestMenu.anchorButton.label));
+      expect(find.byType(MenuItemButton), findsNothing);
+    });
+
+
+    testWidgets('MenuAnchor RTL directional traversal works', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/119532
+      final FocusNode buttonFocusNode = FocusNode(debugLabel: TestMenu.anchorButton.label);
+      addTearDown(buttonFocusNode.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Material(
+              child: Column(
+                children: <Widget>[
+                  MenuAnchor(
+                    childFocusNode: buttonFocusNode,
+                    menuChildren: <Widget>[
+                      MenuItemButton(onPressed: () {}, child: const Text('start')),
+                      ...createTestMenus(
+                        onPressed: onPressed,
+                        onOpen: onOpen,
+                        onClose: onClose,
+                      ),
+                    ],
+                    builder: (
+                      BuildContext context,
+                      MenuController controller,
+                      Widget? child,
+                    ) {
+                      return TextButton(
+                        focusNode: buttonFocusNode,
+                        onPressed: () {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                        child: const Text('Open'),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      expect(focusedMenu, equals(TestMenu.anchorButton.label));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(focusedMenu, equals(TestMenu.anchorButton.label));
+      expect(find.text('start'), findsOneWidget);
+
+      // Directional traversal doesn't work until a menu item is focused.
+      // To start focusing, hover over the first menu item.
+      await hoverOver(tester, find.text('start'));
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("start"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
+      expect(find.text('Sub Menu 00'), findsOne);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 00"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 01"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 02"))'));
+
+      // We're at the deepest menu on a RTL menu, so arrow left should not change focus.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 02"))'));
+
+      // Arrow right should move focus to the parent anchor.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
+      expect(find.text('Sub Menu 00'), findsNothing);
+
+      // We're at the root menu, so arrow right should not change focus and
+      // should not open the submenu.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
+      expect(find.text('Sub Menu 00'), findsNothing);
+
+      // Open the submenu again
+      await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
+      expect(find.text('Sub Menu 00'), findsOne);
+
+      // Close all menus
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pump();
+      expect(focusedMenu, equals(TestMenu.anchorButton.label));
+      expect(find.byType(MenuItemButton), findsNothing);
     });
 
     testWidgets('hover traversal works', (WidgetTester tester) async {
@@ -1582,6 +2019,103 @@ void main() {
       await hoverOver(tester, find.text(TestMenu.subSubMenu110.label));
       await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
+    });
+
+
+    testWidgets('hover traversal invalidates directional focus scope data', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/150910
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: createTestMenus(
+                onPressed: onPressed,
+                onOpen: onOpen,
+                onClose: onClose,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      // Have to open a menu initially to start things going.
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
+
+      await hoverOver(tester, find.text(TestMenu.subMenu12.label));
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+      // Move pointer to disabled menu
+      await hoverOver(tester, find.text(TestMenu.mainMenu5.label));
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 10"))'));
+
+      await hoverOver(tester, find.text(TestMenu.subMenu12.label));
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+    });
+
+    testWidgets('scrolling does not trigger hover traversal', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/150911
+      final GlobalKey scrolledMenuItemKey = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuAnchor(
+              style: const MenuStyle(
+                fixedSize: WidgetStatePropertyAll<Size>(Size.fromHeight(200)),
+              ),
+              controller: controller,
+              menuChildren: <Widget>[
+                for (int i = 0; i < 20; i++)
+                  MenuItemButton(
+                    key: i == 15 ? scrolledMenuItemKey : null,
+                    onPressed: () {},
+                    child: Text('Item $i'),
+                  )
+              ]
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      await hoverOver(tester, find.text('Item 1'));
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Item 1"))'));
+
+      // Scroll the menu while the pointer is over a menu item. The focus should
+      // not change.
+      tester.renderObject(find.text('Item 15')).showOnScreen();
+      await tester.pumpAndSettle();
+      expect(focusedMenu, equals('MenuItemButton(Text("Item 1"))'));
+
+      // Traverse with the keyboard to test that the menu scrolls without hover
+      // focus affecting the focused menu.
+      for (int i = 2; i < 20; i++) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Item $i"))'));
+      }
     });
 
     testWidgets('menus close on ancestor scroll', (WidgetTester tester) async {

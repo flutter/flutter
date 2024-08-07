@@ -16,6 +16,7 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/xcode_build_settings.dart';
 import '../ios/xcodeproj.dart';
+import '../migrations/swift_package_manager_gitignore_migration.dart';
 import '../migrations/swift_package_manager_integration_migration.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
@@ -100,6 +101,7 @@ Future<void> buildMacOS({
         fileSystem: globals.fs,
         plistParser: globals.plistParser,
       ),
+      SwiftPackageManagerGitignoreMigration(flutterProject, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
