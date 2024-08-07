@@ -24,13 +24,13 @@ import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/swift_package_manager.dart';
 import '../macos/xcode.dart';
+import '../migrations/swift_package_manager_gitignore_migration.dart';
 import '../migrations/swift_package_manager_integration_migration.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
 import '../plugins.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import 'application_package.dart';
 import 'code_signing.dart';
 import 'migrations/host_app_info_plist_migration.dart';
@@ -155,7 +155,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   final FlutterProject project = FlutterProject.current();
 
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
-    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.flutterUsage, globals.analytics),
+    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.analytics),
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
     ProjectBuildLocationMigration(app.project, globals.logger),
@@ -176,6 +176,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         fileSystem: globals.fs,
         plistParser: globals.plistParser,
       ),
+      SwiftPackageManagerGitignoreMigration(project, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -452,7 +453,6 @@ Future<XcodeBuildResult> buildXcodeProject({
           + getElapsedAsSeconds(sw.elapsed).padLeft(5),
     );
     final Duration elapsedDuration = sw.elapsed;
-    globals.flutterUsage.sendTiming(xcodeBuildActionToString(buildAction), 'xcode-ios', elapsedDuration);
     globals.analytics.send(Event.timing(
       workflow: xcodeBuildActionToString(buildAction),
       variableName: 'xcode-ios',
@@ -625,7 +625,6 @@ Future<void> diagnoseXcodeBuildFailure(
   required Analytics analytics,
   required Logger logger,
   required FileSystem fileSystem,
-  required Usage flutterUsage,
   required SupportedPlatform platform,
   required FlutterProject project,
 }) async {
@@ -639,13 +638,6 @@ Future<void> diagnoseXcodeBuildFailure(
     final String command = xcodeBuildExecution.buildCommands.toString();
     final String settings = xcodeBuildExecution.buildSettings.toString();
 
-    BuildEvent(
-      label,
-      type: buildType,
-      command: command,
-      settings: settings,
-      flutterUsage: flutterUsage,
-    ).send();
     analytics.send(Event.flutterBuildInfo(
       label: label,
       buildType: buildType,

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/gestures.dart';
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -709,7 +713,7 @@ class SelectionGeometry {
     return other is SelectionGeometry
         && other.startSelectionPoint == startSelectionPoint
         && other.endSelectionPoint == endSelectionPoint
-        && other.selectionRects == selectionRects
+        && listEquals(other.selectionRects, selectionRects)
         && other.status == status
         && other.hasContent == hasContent;
   }

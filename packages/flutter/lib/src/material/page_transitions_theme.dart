@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app.dart';
+/// @docImport 'page.dart';
+/// @docImport 'predictive_back_page_transitions_builder.dart';
+library;
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';

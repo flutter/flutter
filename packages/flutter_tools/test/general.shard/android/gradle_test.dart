@@ -546,9 +546,9 @@ flutter:
     });
   });
 
-  group('gradgradle_utils.le version', () {
+  group('gradle version', () {
     testWithoutContext('should be compatible with the Android plugin version', () {
-      // Grangradle_utils.ular versions.
+      // Granular versions.
       expect(gradle_utils.getGradleVersionFor('1.0.0'), '2.3');
       expect(gradle_utils.getGradleVersionFor('1.0.1'), '2.3');
       expect(gradle_utils.getGradleVersionFor('1.0.2'), '2.3');
@@ -558,7 +558,7 @@ flutter:
       expect(gradle_utils.getGradleVersionFor('1.1.2'), '2.3');
       expect(gradle_utils.getGradleVersionFor('1.1.2'), '2.3');
       expect(gradle_utils.getGradleVersionFor('1.1.3'), '2.3');
-      // Versgradle_utils.ion Ranges.
+      // Version Ranges.
       expect(gradle_utils.getGradleVersionFor('1.2.0'), '2.9');
       expect(gradle_utils.getGradleVersionFor('1.3.1'), '2.9');
 
@@ -592,7 +592,11 @@ flutter:
       expect(gradle_utils.getGradleVersionFor('7.1.2'), '7.5');
       expect(gradle_utils.getGradleVersionFor('7.2'), '7.5');
       expect(gradle_utils.getGradleVersionFor('8.0'), '8.0');
-      expect(gradle_utils.getGradleVersionFor(gradle_utils.maxKnownAgpVersion), '8.0');
+      expect(gradle_utils.getGradleVersionFor('8.1'), '8.0');
+      expect(gradle_utils.getGradleVersionFor('8.2'), '8.2');
+      expect(gradle_utils.getGradleVersionFor('8.3'), '8.4');
+      expect(gradle_utils.getGradleVersionFor('8.4'), '8.6');
+      expect(gradle_utils.getGradleVersionFor(gradle_utils.maxKnownAgpVersion), '8.7');
     });
 
     testWithoutContext('throws on unsupported versions', () {

@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'action_buttons.dart';
+/// @docImport 'app_bar.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'ink_decoration.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -523,8 +531,8 @@ class IconButton extends StatelessWidget {
   ///
   /// Non-null properties of this style override the corresponding
   /// properties in [_IconButtonM3.themeStyleOf] and [_IconButtonM3.defaultStyleOf].
-  /// [MaterialStateProperty]s that resolve to non-null values will similarly
-  /// override the corresponding [MaterialStateProperty]s in [_IconButtonM3.themeStyleOf]
+  /// [WidgetStateProperty]s that resolve to non-null values will similarly
+  /// override the corresponding [WidgetStateProperty]s in [_IconButtonM3.themeStyleOf]
   /// and [_IconButtonM3.defaultStyleOf].
   ///
   /// The [style] is only used for Material 3 [IconButton]. If [ThemeData.useMaterial3]
@@ -569,7 +577,7 @@ class IconButton extends StatelessWidget {
   /// A static convenience method that constructs an icon button
   /// [ButtonStyle] given simple values. This method is only used for Material 3.
   ///
-  /// The [foregroundColor] color is used to create a [MaterialStateProperty]
+  /// The [foregroundColor] color is used to create a [WidgetStateProperty]
   /// [ButtonStyle.foregroundColor] value. Specify a value for [foregroundColor]
   /// to specify the color of the button's icons. The [hoverColor], [focusColor]
   /// and [highlightColor] colors are used to indicate the hover, focus,
@@ -577,7 +585,7 @@ class IconButton extends StatelessWidget {
   ///
   /// If [overlayColor] is specified and its value is [Colors.transparent]
   /// then the pressed/focused/hovered highlights are effectively defeated.
-  /// Otherwise a [MaterialStateProperty] with the same opacities as the
+  /// Otherwise a [WidgetStateProperty] with the same opacities as the
   /// default is created.
   ///
   /// Use [backgroundColor] for the button's background fill color. Use [disabledForegroundColor]
@@ -587,7 +595,7 @@ class IconButton extends StatelessWidget {
   /// parameters are used to construct [ButtonStyle].mouseCursor.
   ///
   /// All of the other parameters are either used directly or used to
-  /// create a [MaterialStateProperty] with a single value for all
+  /// create a [WidgetStateProperty] with a single value for all
   /// states.
   ///
   /// All parameters default to null, by default this method returns

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'pinned_header_sliver.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'sliver_floating_header.dart';
+/// @docImport 'sliver_persistent_header.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -41,6 +47,8 @@ import 'slotted_render_object_widget.dart';
 ///
 ///  * [PinnedHeaderSliver] - which just pins the header at the top
 ///    of the [CustomScrollView].
+///  * [SliverFloatingHeader] - which animates the header in and out of view
+///    in response to downward and upwards scrolls.
 ///  * [SliverPersistentHeader] - a general purpose header that can be
 ///    configured as a pinned, resizing, or floating header.
 class SliverResizingHeader extends StatelessWidget {

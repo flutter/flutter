@@ -325,6 +325,309 @@ void main() {
     expect(inner.offset, 0.0);
   });
 
+  testWidgets('NestedScrollView allows taps on children while over-scrolled to the top', (WidgetTester tester) async {
+    final Key innerKey = UniqueKey();
+    final GlobalKey<NestedScrollViewState> outerKey = GlobalKey();
+
+    final ScrollController outerController = ScrollController();
+    addTearDown(outerController.dispose);
+
+    const Duration frame = Duration(milliseconds: 16);
+    bool tapped = false;
+
+    Widget build() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Scaffold(
+          body: NestedScrollView(
+            key: outerKey,
+            controller: outerController,
+            physics: const BouncingScrollPhysics(),
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
+              SliverToBoxAdapter(
+                child: Container(color: Colors.green, height: 300),
+              ),
+              SliverOverlapAbsorber(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                sliver: SliverToBoxAdapter(
+                  child: Container(
+                    color: Colors.blue,
+                    height: 64,
+                  ),
+                ),
+              ),
+            ],
+            body: ListView.builder(
+              key: innerKey,
+              physics: const BouncingScrollPhysics(),
+              itemCount: 15,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text('Item $index'),
+                  onTap: () {
+                    tapped = true;
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build());
+
+    final ScrollController outer = outerKey.currentState!.outerController;
+    final ScrollController inner = outerKey.currentState!.innerController;
+
+    // Assert the initial positions
+    expect(outer.offset, 0.0);
+    expect(inner.offset, 0.0);
+
+    // Over-scroll the inner Scrollable to the top
+    await tester.fling(find.byKey(innerKey), const Offset(0, 200), 2000);
+
+    for (int i = 0; i < 5; i++) {
+      await tester.pump(frame);
+    }
+
+    // Ensure the inner Scrollable is over-scrolled
+    expect(inner.offset, lessThan(0.0));
+
+    // Tap on the first item in the ListView
+    await tester.tap(find.text('Item 0'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    await tester.pump(frame);
+
+    await tester.tap(find.text('Item 1'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Item 0'));
+    expect(tapped, isTrue);
+    tapped = false;
+  });
+
+  testWidgets('NestedScrollView absorbs touch to stop scrolling when not at the edge', (WidgetTester tester) async {
+    final Key innerKey = UniqueKey();
+    final GlobalKey<NestedScrollViewState> outerKey = GlobalKey();
+
+    final ScrollController outerController = ScrollController();
+    addTearDown(outerController.dispose);
+
+    const Duration frame = Duration(milliseconds: 16);
+    bool tapped = false;
+
+    Widget build() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Scaffold(
+          body: NestedScrollView(
+            key: outerKey,
+            controller: outerController,
+            physics: const BouncingScrollPhysics(),
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
+              SliverToBoxAdapter(
+                child: Container(color: Colors.green, height: 300),
+              ),
+              SliverOverlapAbsorber(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                sliver: SliverToBoxAdapter(
+                  child: Container(
+                    color: Colors.blue,
+                    height: 64,
+                  ),
+                ),
+              ),
+            ],
+            body: ListView.builder(
+              key: innerKey,
+              physics: const BouncingScrollPhysics(),
+              itemExtent: 56,
+              itemCount: 15,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text('Item $index'),
+                  onTap: () {
+                    tapped = true;
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build());
+
+    final ScrollController outer = outerKey.currentState!.outerController;
+    final ScrollController inner = outerKey.currentState!.innerController;
+
+    // Assert the initial positions
+    expect(outer.offset, 0.0);
+    expect(inner.offset, 0.0);
+
+    // Fling to somewhere in the middle of the outer Scrollable
+    await tester.fling(find.byKey(innerKey), const Offset(0, -200), 2000);
+
+    for (int i = 0; i < 3; i++) {
+      await tester.pump(frame);
+    }
+
+    // Ensure we are not at the edge
+    expect(outer.offset, greaterThan(0.0));
+    expect(outer.offset, lessThan(outer.position.maxScrollExtent));
+    final double offset = outer.offset;
+
+    // Tap on the first item in the ListView
+    await tester.tap(find.text('Item 2'), warnIfMissed: false);
+    expect(tapped, isFalse);
+
+    await tester.pump(frame);
+
+    // Ensure the outer Scrollable is not moving
+    expect(offset, equals(outer.offset));
+
+    await tester.tap(find.text('Item 2'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Item 2'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    // Fling the scrollable further
+    await tester.fling(find.byKey(innerKey), const Offset(0, -200), 2000);
+
+    for (int i = 0; i < 3; i++) {
+      await tester.pump(frame);
+    }
+
+    // Ensure the outer Scrollable is at edge
+    expect(outer.offset, equals(outer.position.maxScrollExtent));
+    // Ensure the inner Scrollable is not over-scrolled yet
+    expect(inner.offset, lessThan(inner.position.maxScrollExtent));
+
+    final double innerOffset = inner.offset;
+
+    // Tap on an item near the end of the ListView
+    await tester.tap(find.text('Item 10'), warnIfMissed: false);
+    expect(tapped, isFalse);
+
+    await tester.pump(frame);
+
+    // Ensure the inner Scrollable is not moving
+    expect(innerOffset, equals(inner.offset));
+
+    // Tapping on an item should register the tap normally, as the scrollable is idle
+    await tester.tap(find.text('Item 10'));
+    expect(tapped, isTrue);
+  });
+
+  testWidgets('NestedScrollView when over-scrolled at the end allows touches on children', (WidgetTester tester) async {
+    final Key innerKey = UniqueKey();
+    final GlobalKey<NestedScrollViewState> outerKey = GlobalKey();
+
+    final ScrollController outerController = ScrollController();
+    addTearDown(outerController.dispose);
+
+    const Duration frame = Duration(milliseconds: 16);
+    bool tapped = false;
+
+    Widget build() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Scaffold(
+          body: NestedScrollView(
+            key: outerKey,
+            controller: outerController,
+            physics: const BouncingScrollPhysics(),
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
+              SliverToBoxAdapter(
+                child: Container(color: Colors.green, height: 300),
+              ),
+              SliverOverlapAbsorber(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                sliver: SliverToBoxAdapter(
+                  child: Container(
+                    color: Colors.blue,
+                    height: 64,
+                  ),
+                ),
+              ),
+            ],
+            body: ListView.builder(
+              key: innerKey,
+              physics: const BouncingScrollPhysics(),
+              itemExtent: 56,
+              itemCount: 15,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text('Item $index'),
+                  onTap: () {
+                    tapped = true;
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build());
+
+    final ScrollController outer = outerKey.currentState!.outerController;
+    final ScrollController inner = outerKey.currentState!.innerController;
+
+    // Assert the initial positions
+    expect(outer.offset, 0.0);
+    expect(inner.offset, 0.0);
+
+    // Fling to somewhere in the middle of the outer Scrollable
+    await tester.fling(find.byKey(innerKey), const Offset(0, -2000), 2000);
+
+    for (int i = 0; i < 10; i++) {
+      await tester.pump(frame);
+    }
+
+    // Ensure the outer Scrollable is at edge
+    expect(outer.offset, equals(outer.position.maxScrollExtent));
+    // Ensure the inner Scrollable is over-scrolled
+    expect(inner.offset, greaterThan(inner.position.maxScrollExtent));
+
+    // Tap on an item near the end of the ListView
+    await tester.tap(find.text('Item 14'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    double settleOffset = inner.offset;
+
+    for (int i = 0; i < 5; i++) {
+      await tester.pump(frame);
+      await tester.pump(frame); // Pump a second frame to ensure the Scrollable has a chance to move
+
+      await tester.tap(find.text('Item 14'));
+      expect(tapped, isTrue);
+      tapped = false;
+      // Ensure the inner Scrollable is settling
+      expect(settleOffset, greaterThan(inner.offset));
+      settleOffset = inner.offset;
+    }
+
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Item 14'));
+    expect(tapped, isTrue);
+  });
+
   testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
@@ -2457,7 +2760,7 @@ void main() {
 
       // Tap after releasing the overscroll to trigger secondary inner ballistic
       // scroll activity with 0 velocity.
-      await tester.tap(find.text('Item 49'), warnIfMissed: false);
+      await tester.tap(find.text('Item 49'));
       await tester.pumpAndSettle();
 
       // If handled correctly, the ballistic scroll activity should finish
