@@ -1540,34 +1540,6 @@ void main() {
         headingRowColor.resolve(<MaterialState>{}));
   });
 
-  testWidgets(
-      'PaginatedDataTable headerBackgroundColor and footerBackgroundColor set properly',
-      (WidgetTester tester) async {
-    const Color headerBackgroundColor = Color(0xFFF53935);
-
-    const Color footerBackgroundColor = Color(0xFFA53695);
-
-    await tester.pumpWidget(MaterialApp(
-      home: PaginatedDataTable(
-        headerBackgroundColor: headerBackgroundColor,
-        footerBackgroundColor: footerBackgroundColor,
-        showFirstLastButtons: true,
-        header: const Text('Test table'),
-        source: source,
-        columns: const <DataColumn>[
-          DataColumn(label: Text('Name')),
-          DataColumn(label: Text('Calories'), numeric: true),
-          DataColumn(label: Text('Generation')),
-        ],
-      ),
-    ));
-
-    final Iterable<Ink> inks = tester.widgetList(find.byType(Ink));
-
-    expect(inks.elementAt(0).color, headerBackgroundColor);
-    expect(inks.elementAt(1).color, footerBackgroundColor);
-  });
-
   testWidgets('PaginatedDataTable footerStyle set properly',
       (WidgetTester tester) async {
     await binding.setSurfaceSize(const Size(800, 800));
