@@ -192,7 +192,7 @@ class TestHotRunnerConfig extends HotRunnerConfig {
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
   @override
-  Future<void> accept() async {}
+  void accept() {}
 }
 
 class FakeFlutterVmService extends Fake implements FlutterVmService {
