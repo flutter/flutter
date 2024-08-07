@@ -52,7 +52,7 @@ const Radius _kSeparatorRadius = Radius.circular(_kSeparatorWidth / 2);
 
 // The minimum scale factor of the thumb, when being pressed on for a sufficient
 // amount of time.
-const double _kMinThumbScale = 0.95; // quncheng: ???
+const double _kMinThumbScale = 0.95;
 
 // The minimum horizontal distance between the edges of the separator and the
 // closest child.
