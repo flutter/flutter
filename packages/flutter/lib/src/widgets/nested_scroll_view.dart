@@ -167,9 +167,17 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// ### Stretching [SliverAppBar]s
 ///
-// See https://github.com/flutter/flutter/issues/54059
-/// Currently, [NestedScrollView] does not support stretching the outer
-/// scrollable, e.g. when using [SliverAppBar.stretch].
+/// If need to support stretching the outer scrollable, will need to set the
+/// bouncing scroll physics to NestedScrollView.physics, and set
+/// ClampingScrollPhysics to the body's scroll view.
+///
+/// {@tool dartpad}
+/// This simple example shows a [NestedScrollView] whose header contains a
+/// stretch [SliverAppBar]. set the bouncing scroll physics to
+/// NestedScrollView.physics, and set ClampingScrollPhysics to the body's scroll view.
+///
+/// ** See code in examples/api/lib/widgets/nested_scroll_view/nested_scroll_view.3.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -770,8 +778,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       }
     }
 
-    if (innerPosition == null) {
-      // It's either just us or a velocity=0 situation.
+    if (innerPosition == null || _outerPosition!.pixels < _outerPosition!.minScrollExtent) {
+      // It's either just us or a velocity=0 situation or outer pixels exceeds
+      // the minScrollExtent.
       return _outerPosition!.createBallisticScrollActivity(
         _outerPosition!.physics.createBallisticSimulation(
           _outerPosition!,
@@ -1123,16 +1132,29 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
           outerDelta = math.max(outerDelta, overscroll);
           overscrolls.add(overscroll);
         }
+
+        double outerOverscroll = 0.0;
         if (outerDelta != 0.0) {
-          outerDelta -= _outerPosition!.applyClampedDragUpdate(outerDelta);
+          outerOverscroll = _outerPosition!.applyClampedDragUpdate(outerDelta);
+          outerDelta -= outerOverscroll;
         }
 
         // Now deal with any overscroll
+        double outerRemainingDelta = outerDelta;
         for (int i = 0; i < innerPositions.length; ++i) {
           final double remainingDelta = overscrolls[i] - outerDelta;
           if (remainingDelta > 0.0) {
-            innerPositions[i].applyFullDragUpdate(remainingDelta);
+            final double applyDelta = innerPositions[i].applyFullDragUpdate(remainingDelta);
+            outerRemainingDelta = math.min(applyDelta, outerRemainingDelta);
           }
+        }
+        // `outerOverscroll` The remaining scroll amount in the outer layer.
+        // `outerRemainingDelta` The amount of scroll that can still be applied
+        // to the outer layer after applying the inner layer.
+        // Only when both values are not 0.0, we need to apply the remaining
+        // scroll amount to the outer layer.
+        if (outerRemainingDelta != 0.0 && outerOverscroll != 0.0) {
+          _outerPosition!.applyFullDragUpdate(outerRemainingDelta.abs());
         }
       }
     }
