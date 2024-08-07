@@ -779,7 +779,7 @@ class _AppBarState extends State<AppBar> {
     final ScaffoldState? scaffoldState = Scaffold.maybeOf(context);
 
     if (scaffoldState != null) {
-      final bool isDrawerOpen = scaffoldState.isDrawerOpen;
+      final bool isDrawerOpen = scaffoldState.hasDrawer && scaffoldState.isDrawerOpen;
       final bool isEndDrawerOpen = scaffoldState.hasEndDrawer && scaffoldState.isEndDrawerOpen;
 
       if (isDrawerOpen || isEndDrawerOpen) {
