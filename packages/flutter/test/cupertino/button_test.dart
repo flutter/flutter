@@ -454,7 +454,7 @@ void main() {
         ),
       ),
     );
-    expect(textStyle.color, isSameColorAs(CupertinoColors.black));
+    expect(textStyle.color, isSameColorAs(CupertinoColors.white));
     decoration = tester.widget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoButton),
