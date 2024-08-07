@@ -88,6 +88,7 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
     {{stage_input.type.vec_size}}u,     // vec size
     {{stage_input.type.columns}}u,      // number of columns
     {{stage_input.offset}}u,            // offset for interleaved layout
+    {{stage_input.relaxed_precision}},  // relaxed precision
   };
 {% endfor %}
 {% endif %}
@@ -140,7 +141,9 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
     {{stage_output.type.type_name}},     // type
     {{stage_output.type.bit_width}}u,    // bit width of type
     {{stage_output.type.vec_size}}u,     // vec size
-    {{stage_output.type.columns}}u       // number of columns
+    {{stage_output.type.columns}}u,      // number of columns
+    {{stage_output.offset}}u,            // offset for interleaved layout
+    {{stage_output.relaxed_precision}},  // relaxed precision
   };
 {% endfor %}
   static constexpr std::array<const ShaderStageIOSlot*, {{length(stage_outputs)}}> kAllShaderStageOutputs = {

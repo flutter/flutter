@@ -47,7 +47,8 @@ class ShaderStageCompatibilityChecker {
               input_slot->bit_width != output_slot->bit_width ||
               input_slot->vec_size != output_slot->vec_size ||
               input_slot->columns != output_slot->columns ||
-              input_slot->offset != output_slot->offset) {
+              input_slot->offset != output_slot->offset ||
+              input_slot->relaxed_precision != output_slot->relaxed_precision) {
             return false;
           }
         }

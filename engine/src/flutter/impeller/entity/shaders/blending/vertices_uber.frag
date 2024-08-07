@@ -19,7 +19,7 @@ frag_info;
 
 uniform f16sampler2D texture_sampler;
 
-in highp vec2 v_texture_coords;
+in mediump vec2 v_texture_coords;
 in mediump f16vec4 v_color;
 
 out f16vec4 frag_color;
