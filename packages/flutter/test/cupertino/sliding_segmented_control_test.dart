@@ -1755,4 +1755,172 @@ void main() {
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
+
+  testWidgets('CupertinoSlidingSegmentedControl defaults - no selection', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
+
+    Widget buildSlidingSegmentedControl({ Brightness? brightness }) {
+      return CupertinoApp(
+        theme: CupertinoThemeData(
+          brightness: brightness ?? Brightness.light,
+        ),
+        home: CupertinoPageScaffold(
+          child: Center(
+            child: CupertinoSlidingSegmentedControl<int>(
+              children: children,
+              onValueChanged: defaultCallback,
+            ),
+          ),
+        )
+      );
+    }
+
+    // Light theme
+    await tester.pumpWidget(buildSlidingSegmentedControl());
+
+    await expectLater(
+      find.byType(CupertinoSlidingSegmentedControl<int>),
+      matchesGoldenFile('cupertino_sliding_segmented_control.light_theme.png'),
+    );
+
+    // Dark theme
+    await tester.pumpWidget(buildSlidingSegmentedControl(brightness: Brightness.dark));
+
+    await expectLater(
+      find.byType(CupertinoSlidingSegmentedControl<int>),
+      matchesGoldenFile('cupertino_sliding_segmented_control.dark_theme.png'),
+    );
+  });
+
+  testWidgets('CupertinoSlidingSegmentedControl defaults - group value is not null', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
+
+    Widget buildSlidingSegmentedControl({ Brightness? brightness }) {
+      return CupertinoApp(
+        theme: CupertinoThemeData(
+          brightness: brightness ?? Brightness.light,
+        ),
+        home: CupertinoPageScaffold(
+          child: Center(
+            child: CupertinoSlidingSegmentedControl<int>(
+              groupValue: 1,
+              children: children,
+              onValueChanged: defaultCallback,
+            ),
+          ),
+        )
+      );
+    }
+
+    // Light theme
+    await tester.pumpWidget(buildSlidingSegmentedControl());
+
+    await expectLater(
+      find.byType(CupertinoSlidingSegmentedControl<int>),
+      matchesGoldenFile('cupertino_sliding_segmented_control.with_selection.light_theme.png'),
+    );
+
+    // Dark theme
+    await tester.pumpWidget(buildSlidingSegmentedControl(brightness: Brightness.dark));
+
+    await expectLater(
+      find.byType(CupertinoSlidingSegmentedControl<int>),
+      matchesGoldenFile('cupertino_sliding_segmented_control.with_selection.dark_theme.png'),
+    );
+  });
+
+  testWidgets('CupertinoSlidingSegmentedControl defaults - disabled', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
+
+    Widget buildSlidingSegmentedControl({ Brightness? brightness }) {
+      return CupertinoApp(
+        theme: CupertinoThemeData(
+          brightness: brightness ?? Brightness.light,
+        ),
+        home: CupertinoPageScaffold(
+          child: Center(
+            child: CupertinoSlidingSegmentedControl<int>(
+              setEnabled: const <int, bool> {
+                0: false,
+              },
+              children: children,
+              onValueChanged: defaultCallback,
+            ),
+          ),
+        )
+      );
+    }
+
+    // Light theme
+    await tester.pumpWidget(buildSlidingSegmentedControl());
+
+    await expectLater(
+      find.byType(CupertinoSlidingSegmentedControl<int>),
+      matchesGoldenFile('cupertino_sliding_segmented_control.disabled.light_theme.png'),
+    );
+
+    // Dark theme
+    await tester.pumpWidget(buildSlidingSegmentedControl(brightness: Brightness.dark));
+
+    await expectLater(
+      find.byType(CupertinoSlidingSegmentedControl<int>),
+      matchesGoldenFile('cupertino_sliding_segmented_control.disabled.dark_theme.png'),
+    );
+  });
+
+  testWidgets('Segment can be disabled', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
+
+    groupValue = 1;
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            setEnabled: const <int, bool> {
+              0: false,
+            },
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      )
+    );
+
+    expect(getHighlightedIndex(tester), 1);
+
+    // Tap disabled segment
+    await tester.tap(find.text('A'));
+    await tester.pumpAndSettle();
+
+    expect(getHighlightedIndex(tester), 1); // The highlighted index doesn't change
+
+    // Tap enabled segment
+    await tester.tap(find.text('CCCC'));
+    await tester.pumpAndSettle();
+
+    expect(getHighlightedIndex(tester), 2);
+
+    // Tap disabled segment
+    await tester.tap(find.text('A'));
+    await tester.pumpAndSettle();
+
+    expect(getHighlightedIndex(tester), 2); // The highlighted index doesn't change
+  });
 }
