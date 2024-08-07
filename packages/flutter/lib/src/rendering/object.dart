@@ -4368,8 +4368,11 @@ class _RenderObjectSemantics extends _InterestingSemanticsFragmentProvider {
 
   /// The cached node created directly by this Object.
   ///
-  /// This cache may only be non null after the `_SemanticsFragment` provided
-  /// by this object is compiled and forms a semantics node.
+  /// This cache is filled after the `_SemanticsFragment` provided by this
+  /// object is compiled and forms a semantics node.
+  ///
+  /// Caching the semantics node ensures the id is consistent in the life time
+  /// of this object.
   ///
   /// Note, not all `_SemanticsFragment` forms a semantics node. See
   /// the `_SwitchableSemanticsFragment`.
@@ -4397,7 +4400,7 @@ class _RenderObjectSemantics extends _InterestingSemanticsFragmentProvider {
   /// This can only be called if the owning rendering object is a semantics
   /// boundary. For non boundary rendering objects, they require semantics
   /// information from both their parent and child rendering objects to update
-  /// its cache, so it can't ever asked to update by themselves.
+  /// its cache, so it can't update by themselves.
   void updateSemanticsAsBoundary() {
     assert(semanticsConfiguration.isSemanticBoundary || renderObject.semanticsParent == null);
     if (!kReleaseMode) {
@@ -4481,10 +4484,7 @@ class _RenderObjectSemantics extends _InterestingSemanticsFragmentProvider {
       // that access this fragment provider is a _ContainerSemanticsFragment.
       // It is not this semantics fragment provider's responsibility to do the
       // clean up, but the parent's.
-      oldFragment._ancestorsAndExplicitnessUntilParent.skip(1).forEach(newFragment.addAncestor);
-      if (oldFragment._tagsForChildren?.isNotEmpty ?? false) {
-        newFragment.addTags(oldFragment._tagsForChildren!);
-      }
+      newFragment.copyParentInheritedDataFrom(oldFragment);
     }
     // Same here, if the fragment were to change to non
     // _InterestingSemanticsFragment, the parent rendering object's _semantics
@@ -4494,8 +4494,8 @@ class _RenderObjectSemantics extends _InterestingSemanticsFragmentProvider {
     return _cachedSemanticFragment = newFragment as _InterestingSemanticsFragment;
   }
 
-  // Gets the semantics fragment with given parent inherited semantics
-  // properties.
+  /// Gets the semantics fragment with given parent inherited semantics
+  /// properties.
   _SemanticsFragment _getSemanticsForParent({
     required bool mergeIntoParent,
     required bool blockUserActions,
@@ -4862,8 +4862,15 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   /// to the parent semantics node.
   _InterestingSemanticsFragment? _implicitParent;
 
-  bool _shouldDrop(SemanticsNode node) {
-    return node.rect.isEmpty || (node.transform?.isZero() ?? false);
+  bool _shouldDrop(SemanticsNode node) => node.isInvisible;
+
+  /// Copies parent inherited data from another _InterestingSemanticsFragment.
+  void copyParentInheritedDataFrom(_InterestingSemanticsFragment other) {
+    other._ancestorsAndExplicitnessUntilParent.skip(1).forEach(addAncestor);
+    if (other._tagsForChildren?.isNotEmpty ?? false) {
+      addTags(other._tagsForChildren!);
+    }
+    _implicitParent = other._implicitParent;
   }
 
   /// The children to be added to the parent.
@@ -5377,11 +5384,6 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
     }
   }
 
-  @override
-  bool _shouldDrop(SemanticsNode node) {
-    return !_mergeIntoParent && super._shouldDrop(node);
-  }
-
   void _updateParentInheritedSemanticsProperties({
     required Rect? parentSemanticsClipRect,
     required Rect? parentPaintClipRect,
@@ -5445,7 +5447,8 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
         ..transform = mergedGeometry.transform
         ..parentSemanticsClipRect = mergedGeometry.semanticsClipRect
         ..parentPaintClipRect = mergedGeometry.paintClipRect
-        ..tags = tags.isEmpty ? null : tags;
+        ..tags = tags.isEmpty ? null : tags
+        ..isMergedIntoParent = _mergeIntoParent;
     }
   }
 
@@ -5488,7 +5491,8 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       ..transform = geometry.transform
       ..parentSemanticsClipRect = geometry.semanticsClipRect
       ..parentPaintClipRect = geometry.paintClipRect
-      ..tags = _tagsForChildren;
+      ..tags = _tagsForChildren
+      ..isMergedIntoParent = _mergeIntoParent;
     // Any node other than producedNode in _semanticsNodes are sibling nodes
     // from children fragments, their rects are in the same coordinates as the
     // producedNode.
@@ -5606,7 +5610,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
     }
     for (final _InterestingSemanticsFragmentProvider provider in _compilingChildren) {
       final _InterestingSemanticsFragment fragment = provider.getFragment();
-      fragment.markMergesToParent(_mergeIntoParent && _effectiveConfig.isMergingSemanticsOfDescendants);
+      fragment.markMergesToParent(_mergeIntoParent || _effectiveConfig.isMergingSemanticsOfDescendants);
     }
   }
 }
