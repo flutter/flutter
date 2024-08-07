@@ -90,6 +90,11 @@ class SpellCheckResults {
 
   @override
   int get hashCode => Object.hash(spellCheckedText, Object.hashAll(suggestionSpans));
+
+  @override
+  String toString() {
+    return 'SpellCheckResults(spellCheckText: $spellCheckedText, suggestionSpans: $suggestionSpans)';
+  }
 }
 
 /// Determines how spell check results are received for text input.
