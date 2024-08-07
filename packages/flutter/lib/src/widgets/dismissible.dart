@@ -33,6 +33,12 @@ typedef DismissDirectionCallback = void Function(DismissDirection direction);
 /// Used by [Dismissible.confirmDismiss].
 typedef ConfirmDismissCallback = Future<bool?> Function(DismissDirection direction);
 
+/// Signature used by [Dismissible] to give the application an opportunity to
+/// accept or deny a dismiss gesture.
+///
+/// Used by [Dismissible.shouldDismiss].
+typedef AcceptDismissCallback = bool? Function(AcceptDismissDetails details);
+
 /// Signature used by [Dismissible] to indicate that the dismissible has been dragged.
 ///
 /// Used by [Dismissible.onUpdate].
@@ -105,6 +111,7 @@ class Dismissible extends StatefulWidget {
     this.background,
     this.secondaryBackground,
     this.confirmDismiss,
+    this.shouldDismiss,
     this.onResize,
     this.onUpdate,
     this.onDismissed,
@@ -142,6 +149,22 @@ class Dismissible extends StatefulWidget {
   /// If the returned Future<bool?> completes to false or null the [onResize]
   /// and [onDismissed] callbacks will not run.
   final ConfirmDismissCallback? confirmDismiss;
+
+  /// Gives the app the ability to accept or reject a dismiss gesture, overriding
+  /// the default behavior.
+  ///
+  /// Returning `null` will use de default behavior.
+  ///
+  /// {@tool snippet}
+  /// The default flinging effect can be disabled by using:
+  /// ```dart
+  /// Dismissible(
+  ///   ...
+  ///   shouldDismiss: (AcceptDismissDetails details) => details.reached ? null : false,
+  /// )
+  /// ```
+  /// {@end-tool}
+  final AcceptDismissCallback? shouldDismiss;
 
   /// Called when the widget changes size (i.e., when contracting before being dismissed).
   final VoidCallback? onResize;
@@ -230,7 +253,7 @@ class Dismissible extends StatefulWidget {
 ///   * [Dismissible.onUpdate], which receives this information.
 class DismissUpdateDetails {
   /// Create a new instance of [DismissUpdateDetails].
-  DismissUpdateDetails({
+  const DismissUpdateDetails({
     this.direction = DismissDirection.horizontal,
     this.reached = false,
     this.previousReached = false,
@@ -248,6 +271,35 @@ class DismissUpdateDetails {
   /// This can be used in conjunction with [DismissUpdateDetails.reached] to catch the moment
   /// that the [Dismissible] is dragged across the threshold.
   final bool previousReached;
+
+  /// The offset ratio of the dismissible in its parent container.
+  ///
+  /// A value of 0.0 represents the normal position and 1.0 means the child is
+  /// completely outside its parent.
+  ///
+  /// This can be used to synchronize other elements to what the dismissible is doing on screen,
+  /// e.g. using this value to set the opacity thereby fading dismissible as it's dragged offscreen.
+  final double progress;
+}
+
+/// Details for [AcceptDismissCallback].
+///
+/// See also:
+///
+///   * [Dismissible.shouldDismiss], which receives this information.
+class AcceptDismissDetails {
+  /// Create a new instance of [AcceptDismissDetails].
+  const AcceptDismissDetails({
+    this.direction = DismissDirection.horizontal,
+    this.reached = false,
+    this.progress = 0.0,
+  });
+
+  /// The direction that the dismissible is being dragged.
+  final DismissDirection direction;
+
+  /// Whether the dismiss threshold is currently reached.
+  final bool reached;
 
   /// The offset ratio of the dismissible in its parent container.
   ///
@@ -441,7 +493,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   void _handleDismissUpdateValueChanged() {
-    if (widget.onUpdate != null) {
+    if (widget.onUpdate case final DismissUpdateCallback onUpdate) {
       final bool oldDismissThresholdReached = _dismissThresholdReached;
       _dismissThresholdReached = _moveController.value > _dismissThreshold;
       final DismissUpdateDetails details = DismissUpdateDetails(
@@ -450,7 +502,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
           previousReached: oldDismissThresholdReached,
           progress: _moveController.value,
       );
-      widget.onUpdate!(details);
+      onUpdate(details);
     }
   }
 
@@ -503,6 +555,31 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       return;
     }
     _dragUnderway = false;
+
+    // Use value returned by `widget.shouldDismiss` if a callback is provided
+    // If the callback returns null, use the default behavior
+    if (widget.shouldDismiss case final AcceptDismissCallback shouldDismissCallback) {
+      final AcceptDismissDetails details = AcceptDismissDetails(
+        direction: _dismissDirection,
+        reached: _moveController.value > _dismissThreshold,
+        progress: _moveController.value,
+      );
+      final bool? shouldDismiss = shouldDismissCallback(details);
+
+      if (shouldDismiss != null) {
+        if (_moveController.isDismissed) {
+          return;
+        }
+
+        if (shouldDismiss) {
+          _moveController.forward();
+        } else {
+          _moveController.reverse();
+        }
+        return;
+      }
+    }
+
     if (_moveController.isCompleted) {
       _handleMoveCompleted();
       return;

@@ -22,6 +22,7 @@ Widget buildTest({
   Axis scrollDirection = Axis.vertical,
   DismissDirection dismissDirection = defaultDismissDirection,
   double? startToEndThreshold,
+  AcceptDismissCallback? shouldDismiss,
   TextDirection textDirection = TextDirection.ltr,
   Future<bool?> Function(BuildContext context, DismissDirection direction)? confirmDismiss,
   ScrollController? controller,
@@ -40,6 +41,7 @@ Widget buildTest({
             confirmDismiss: confirmDismiss == null ? null : (DismissDirection direction) {
               return confirmDismiss(context, direction);
             },
+            shouldDismiss: shouldDismiss,
             onDismissed: (DismissDirection direction) {
               setState(() {
                 reportedDismissDirection = direction;
@@ -865,6 +867,48 @@ void main() {
     completer.complete(false);
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.text('0')), position);
+  });
+
+  testWidgets('Default behavior expected when `shouldDismiss` returns `null`', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildTest(
+        shouldDismiss: (AcceptDismissDetails details) => null,
+      )
+    );
+
+    // Check that flung item is dismissed.
+    await checkFlingItemAfterMovement(tester, 0, gestureDirection: AxisDirection.right, mechanism: flingElement);
+    expect(find.text('0'), findsNothing);
+
+    await dismissItem(tester, 1, gestureDirection: AxisDirection.right);
+    expect(find.text('1'), findsNothing);
+  });
+
+  testWidgets('Value returned by `shouldDismiss` override dismiss gesture validation', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildTest(
+        shouldDismiss: (AcceptDismissDetails details) => false,
+      )
+    );
+
+    await checkFlingItemAfterMovement(tester, 0, gestureDirection: AxisDirection.right, mechanism: flingElement);
+    expect(find.text('0'), findsOneWidget);
+
+    await dismissItem(tester, 1, gestureDirection: AxisDirection.right);
+    expect(find.text('1'), findsOneWidget);
+  });
+  testWidgets('Use `shouldDismiss` to disable flinging', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildTest(
+        shouldDismiss: (AcceptDismissDetails details) => details.reached ? null : false,
+      )
+    );
+
+    await checkFlingItemAfterMovement(tester, 0, gestureDirection: AxisDirection.right, mechanism: flingElement);
+    expect(find.text('0'), findsOneWidget);
+
+    await dismissItem(tester, 1, gestureDirection: AxisDirection.right);
+    expect(find.text('1'), findsNothing);
   });
 
   testWidgets('Dismissible with null resizeDuration calls onDismissed immediately', (WidgetTester tester) async {
