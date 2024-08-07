@@ -4443,4 +4443,109 @@ void main() {
       await tester.pumpAndSettle();
       expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
   });
+
+  testWidgets('Slider value indicator is shown when using arrow keys', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final ThemeData theme = ThemeData();
+    double startValue = 0.0;
+    double currentValue = 0.5;
+    double endValue = 0.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Slider(
+                value: currentValue,
+                divisions: 5,
+                label: currentValue.toStringAsFixed(1),
+                onChangeStart: (double newValue) {
+                  setState(() {
+                    startValue = newValue;
+                  });
+                },
+                onChanged: (double newValue) {
+                  setState(() {
+                    currentValue = newValue;
+                  });
+                },
+                onChangeEnd: (double newValue) {
+                  setState(() {
+                    endValue = newValue;
+                  });
+                },
+                autofocus: true,
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+
+    // Slider does not show value indicator initially.
+    await tester.pumpAndSettle();
+    RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      isNot(paints..scale()..path(color: theme.colorScheme.primary)),
+    );
+
+    // Right arrow (increase)
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(startValue, 0.6);
+    expect(currentValue.toStringAsFixed(1), '0.8');
+    expect(endValue.toStringAsFixed(1), '0.8');
+
+    // Value indicator is visible.
+    valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints..scale()..path(color: theme.colorScheme.primary),
+    );
+
+    // Left arrow (decrease)
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(startValue, 0.8);
+    expect(currentValue.toStringAsFixed(1), '0.6');
+    expect(endValue.toStringAsFixed(1), '0.6');
+
+    // Value indicator is still visible.
+    valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints..scale()..path(color: theme.colorScheme.primary),
+    );
+
+    // Up arrow (increase)
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(startValue, 0.6);
+    expect(currentValue.toStringAsFixed(1), '0.8');
+    expect(endValue.toStringAsFixed(1), '0.8');
+
+    // Value indicator is still visible.
+    valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints..scale()..path(color: theme.colorScheme.primary),
+    );
+
+    // Down arrow (decrease)
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(startValue, 0.8);
+    expect(currentValue.toStringAsFixed(1), '0.6');
+    expect(endValue.toStringAsFixed(1), '0.6');
+
+    // Value indicator is still visible.
+    valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints..scale()..path(color: theme.colorScheme.primary),
+    );
+  }, variant: TargetPlatformVariant.desktop());
 }

@@ -2063,10 +2063,7 @@ class Inherited extends InheritedWidget {
 
   @override
   InheritedElement createElement() {
-    if (elementCreator != null) {
-      return elementCreator!(this);
-    }
-    return super.createElement();
+    return elementCreator?.call(this) ?? super.createElement();
   }
 }
 
