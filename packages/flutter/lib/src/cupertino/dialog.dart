@@ -653,7 +653,7 @@ class CupertinoPopupSurface extends StatelessWidget {
       return true;
     }());
     if ((kIsWeb && !isSkiaWeb) || !isVibrancePainted) {
-      if (blurSigma <= 0) {
+      if (blurSigma == 0) {
         return null;
       }
       return ImageFilter.blur(
@@ -667,7 +667,7 @@ class CupertinoPopupSurface extends StatelessWidget {
       Brightness.light || null => const ColorFilter.matrix(_lightSaturationMatrix)
     };
 
-    if (blurSigma <= 0) {
+    if (blurSigma == 0) {
       return colorFilter;
     }
 

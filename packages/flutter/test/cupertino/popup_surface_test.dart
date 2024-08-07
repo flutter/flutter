@@ -290,9 +290,11 @@ void main() {
       matchesGoldenFile('cupertinoPopupSurface.composition.png'),
     );
 
-    await tester.pumpWidget(
+     await tester.pumpWidget(
       const _FilterTest(
-        Stack(children: <Widget>[
+        Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
           CupertinoPopupSurface(
             isSurfacePainted: false,
             blurSigma: 0,
