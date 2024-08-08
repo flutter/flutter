@@ -1398,7 +1398,7 @@ class PerfTest {
           if (forceOpenGLES ?? false) {
             _addOpenGLESToManifest(testDirectory);
           }
-          if (enabledMergedPlatformThread) {
+          if (enableMergedPlatformThread) {
             _addMergedPlatformThreadSupportToManifest(testDirectory);
           }
         }
