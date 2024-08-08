@@ -20,7 +20,9 @@ namespace flutter {
 namespace testing {
 
 EmbedderTestContextGL::EmbedderTestContextGL(std::string assets_path)
-    : EmbedderTestContext(std::move(assets_path)) {}
+    : EmbedderTestContext(std::move(assets_path)) {
+  egl_context_ = std::make_shared<TestEGLContext>();
+}
 
 EmbedderTestContextGL::~EmbedderTestContextGL() {
   SetGLGetFBOCallback(nullptr);
@@ -28,7 +30,7 @@ EmbedderTestContextGL::~EmbedderTestContextGL() {
 
 void EmbedderTestContextGL::SetupSurface(SkISize surface_size) {
   FML_CHECK(!gl_surface_);
-  gl_surface_ = std::make_unique<TestGLSurface>(surface_size);
+  gl_surface_ = std::make_unique<TestGLSurface>(egl_context_, surface_size);
 }
 
 bool EmbedderTestContextGL::GLMakeCurrent() {

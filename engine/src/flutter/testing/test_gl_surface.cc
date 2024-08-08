@@ -130,15 +130,14 @@ static EGLDisplay CreateSwangleDisplay() {
       display_config);
 }
 
-TestGLSurface::TestGLSurface(SkISize surface_size)
-    : surface_size_(surface_size) {
-  display_ = CreateSwangleDisplay();
-  FML_CHECK(display_ != EGL_NO_DISPLAY);
+TestEGLContext::TestEGLContext() {
+  display = CreateSwangleDisplay();
+  FML_CHECK(display != EGL_NO_DISPLAY);
 
-  auto result = ::eglInitialize(display_, nullptr, nullptr);
+  auto result = ::eglInitialize(display, nullptr, nullptr);
   FML_CHECK(result == EGL_TRUE) << GetEGLError();
 
-  EGLConfig config = {0};
+  config = {0};
 
   EGLint num_config = 0;
   const EGLint attribute_list[] = {EGL_RED_SIZE,
@@ -157,38 +156,9 @@ TestGLSurface::TestGLSurface(SkISize surface_size)
                                    EGL_OPENGL_ES2_BIT,
                                    EGL_NONE};
 
-  result = ::eglChooseConfig(display_, attribute_list, &config, 1, &num_config);
+  result = ::eglChooseConfig(display, attribute_list, &config, 1, &num_config);
   FML_CHECK(result == EGL_TRUE) << GetEGLError();
   FML_CHECK(num_config == 1) << GetEGLError();
-
-  {
-    const EGLint onscreen_surface_attributes[] = {
-        EGL_WIDTH,  surface_size_.width(),   //
-        EGL_HEIGHT, surface_size_.height(),  //
-        EGL_NONE,
-    };
-
-    onscreen_surface_ = ::eglCreatePbufferSurface(
-        display_,                    // display connection
-        config,                      // config
-        onscreen_surface_attributes  // surface attributes
-    );
-    FML_CHECK(onscreen_surface_ != EGL_NO_SURFACE) << GetEGLError();
-  }
-
-  {
-    const EGLint offscreen_surface_attributes[] = {
-        EGL_WIDTH,  1,  //
-        EGL_HEIGHT, 1,  //
-        EGL_NONE,
-    };
-    offscreen_surface_ = ::eglCreatePbufferSurface(
-        display_,                     // display connection
-        config,                       // config
-        offscreen_surface_attributes  // surface attributes
-    );
-    FML_CHECK(offscreen_surface_ != EGL_NO_SURFACE) << GetEGLError();
-  }
 
   {
     const EGLint context_attributes[] = {
@@ -197,50 +167,68 @@ TestGLSurface::TestGLSurface(SkISize surface_size)
         EGL_NONE                     //
     };
 
-    onscreen_context_ =
-        ::eglCreateContext(display_,           // display connection
+    onscreen_context =
+        ::eglCreateContext(display,            // display connection
                            config,             // config
                            EGL_NO_CONTEXT,     // sharegroup
                            context_attributes  // context attributes
         );
-    FML_CHECK(onscreen_context_ != EGL_NO_CONTEXT) << GetEGLError();
+    FML_CHECK(onscreen_context != EGL_NO_CONTEXT) << GetEGLError();
 
-    offscreen_context_ =
-        ::eglCreateContext(display_,           // display connection
+    offscreen_context =
+        ::eglCreateContext(display,            // display connection
                            config,             // config
-                           onscreen_context_,  // sharegroup
+                           onscreen_context,   // sharegroup
                            context_attributes  // context attributes
         );
-    FML_CHECK(offscreen_context_ != EGL_NO_CONTEXT) << GetEGLError();
+    FML_CHECK(offscreen_context != EGL_NO_CONTEXT) << GetEGLError();
   }
 }
 
-TestGLSurface::~TestGLSurface() {
-  context_ = nullptr;
-
-  auto result = ::eglDestroyContext(display_, onscreen_context_);
+TestEGLContext::~TestEGLContext() {
+  auto result = ::eglDestroyContext(display, onscreen_context);
   FML_CHECK(result == EGL_TRUE) << GetEGLError();
 
-  result = ::eglDestroyContext(display_, offscreen_context_);
+  result = ::eglDestroyContext(display, offscreen_context);
   FML_CHECK(result == EGL_TRUE) << GetEGLError();
 
-  result = ::eglDestroySurface(display_, onscreen_surface_);
-  FML_CHECK(result == EGL_TRUE) << GetEGLError();
-
-  result = ::eglDestroySurface(display_, offscreen_surface_);
-  FML_CHECK(result == EGL_TRUE) << GetEGLError();
-
-  result = ::eglTerminate(display_);
+  result = ::eglTerminate(display);
   FML_CHECK(result == EGL_TRUE);
 }
 
-const SkISize& TestGLSurface::GetSurfaceSize() const {
+TestGLOnscreenOnlySurface::TestGLOnscreenOnlySurface(
+    std::shared_ptr<TestEGLContext> context,
+    SkISize size)
+    : surface_size_(size), egl_context_(std::move(context)) {
+  const EGLint attributes[] = {
+      EGL_WIDTH,  size.width(),   //
+      EGL_HEIGHT, size.height(),  //
+      EGL_NONE,
+  };
+
+  onscreen_surface_ =
+      ::eglCreatePbufferSurface(egl_context_->display,  // display connection
+                                egl_context_->config,   // config
+                                attributes              // surface attributes
+      );
+  FML_CHECK(onscreen_surface_ != EGL_NO_SURFACE) << GetEGLError();
+}
+
+TestGLOnscreenOnlySurface::~TestGLOnscreenOnlySurface() {
+  skia_context_ = nullptr;
+
+  auto result = ::eglDestroySurface(egl_context_->display, onscreen_surface_);
+  FML_CHECK(result == EGL_TRUE) << GetEGLError();
+}
+
+const SkISize& TestGLOnscreenOnlySurface::GetSurfaceSize() const {
   return surface_size_;
 }
 
-bool TestGLSurface::MakeCurrent() {
-  auto result = ::eglMakeCurrent(display_, onscreen_surface_, onscreen_surface_,
-                                 onscreen_context_);
+bool TestGLOnscreenOnlySurface::MakeCurrent() {
+  auto result =
+      ::eglMakeCurrent(egl_context_->display, onscreen_surface_,
+                       onscreen_surface_, egl_context_->onscreen_context);
 
   if (result == EGL_FALSE) {
     FML_LOG(ERROR) << "Could not make the context current. " << GetEGLError();
@@ -249,9 +237,9 @@ bool TestGLSurface::MakeCurrent() {
   return result == EGL_TRUE;
 }
 
-bool TestGLSurface::ClearCurrent() {
-  auto result = ::eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                                 EGL_NO_CONTEXT);
+bool TestGLOnscreenOnlySurface::ClearCurrent() {
+  auto result = ::eglMakeCurrent(egl_context_->display, EGL_NO_SURFACE,
+                                 EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
   if (result == EGL_FALSE) {
     FML_LOG(ERROR) << "Could not clear the current context. " << GetEGLError();
@@ -260,8 +248,8 @@ bool TestGLSurface::ClearCurrent() {
   return result == EGL_TRUE;
 }
 
-bool TestGLSurface::Present() {
-  auto result = ::eglSwapBuffers(display_, onscreen_surface_);
+bool TestGLOnscreenOnlySurface::Present() {
+  auto result = ::eglSwapBuffers(egl_context_->display, onscreen_surface_);
 
   if (result == EGL_FALSE) {
     FML_LOG(ERROR) << "Could not swap buffers. " << GetEGLError();
@@ -270,23 +258,12 @@ bool TestGLSurface::Present() {
   return result == EGL_TRUE;
 }
 
-uint32_t TestGLSurface::GetFramebuffer(uint32_t width, uint32_t height) const {
+uint32_t TestGLOnscreenOnlySurface::GetFramebuffer(uint32_t width,
+                                                   uint32_t height) const {
   return GetWindowFBOId();
 }
 
-bool TestGLSurface::MakeResourceCurrent() {
-  auto result = ::eglMakeCurrent(display_, offscreen_surface_,
-                                 offscreen_surface_, offscreen_context_);
-
-  if (result == EGL_FALSE) {
-    FML_LOG(ERROR) << "Could not make the resource context current. "
-                   << GetEGLError();
-  }
-
-  return result == EGL_TRUE;
-}
-
-void* TestGLSurface::GetProcAddress(const char* name) const {
+void* TestGLOnscreenOnlySurface::GetProcAddress(const char* name) const {
   if (name == nullptr) {
     return nullptr;
   }
@@ -297,15 +274,15 @@ void* TestGLSurface::GetProcAddress(const char* name) const {
   return reinterpret_cast<void*>(symbol);
 }
 
-sk_sp<GrDirectContext> TestGLSurface::GetGrContext() {
-  if (context_) {
-    return context_;
+sk_sp<GrDirectContext> TestGLOnscreenOnlySurface::GetGrContext() {
+  if (skia_context_) {
+    return skia_context_;
   }
 
   return CreateGrContext();
 }
 
-sk_sp<GrDirectContext> TestGLSurface::CreateGrContext() {
+sk_sp<GrDirectContext> TestGLOnscreenOnlySurface::CreateGrContext() {
   if (!MakeCurrent()) {
     return nullptr;
   }
@@ -325,7 +302,8 @@ sk_sp<GrDirectContext> TestGLSurface::CreateGrContext() {
 
   GrGLGetProc get_proc = [](void* context, const char name[]) -> GrGLFuncPtr {
     return reinterpret_cast<GrGLFuncPtr>(
-        reinterpret_cast<TestGLSurface*>(context)->GetProcAddress(name));
+        reinterpret_cast<TestGLOnscreenOnlySurface*>(context)->GetProcAddress(
+            name));
   };
 
   std::string version(c_version);
@@ -337,11 +315,11 @@ sk_sp<GrDirectContext> TestGLSurface::CreateGrContext() {
     return nullptr;
   }
 
-  context_ = GrDirectContexts::MakeGL(interface);
-  return context_;
+  skia_context_ = GrDirectContexts::MakeGL(interface);
+  return skia_context_;
 }
 
-sk_sp<SkSurface> TestGLSurface::GetOnscreenSurface() {
+sk_sp<SkSurface> TestGLOnscreenOnlySurface::GetOnscreenSurface() {
   FML_CHECK(::eglGetCurrentContext() != EGL_NO_CONTEXT);
 
   GrGLFramebufferInfo framebuffer_info = {};
@@ -384,7 +362,7 @@ sk_sp<SkSurface> TestGLSurface::GetOnscreenSurface() {
   return surface;
 }
 
-sk_sp<SkImage> TestGLSurface::GetRasterSurfaceSnapshot() {
+sk_sp<SkImage> TestGLOnscreenOnlySurface::GetRasterSurfaceSnapshot() {
   auto surface = GetOnscreenSurface();
 
   if (!surface) {
@@ -412,8 +390,47 @@ sk_sp<SkImage> TestGLSurface::GetRasterSurfaceSnapshot() {
   return host_snapshot;
 }
 
-uint32_t TestGLSurface::GetWindowFBOId() const {
+uint32_t TestGLOnscreenOnlySurface::GetWindowFBOId() const {
   return 0u;
+}
+
+TestGLSurface::TestGLSurface(SkISize surface_size)
+    : TestGLSurface(std::make_shared<TestEGLContext>(), surface_size) {}
+
+TestGLSurface::TestGLSurface(std::shared_ptr<TestEGLContext> egl_context,
+                             SkISize surface_size)
+    : TestGLOnscreenOnlySurface(std::move(egl_context), surface_size) {
+  {
+    const EGLint offscreen_surface_attributes[] = {
+        EGL_WIDTH,  1,  //
+        EGL_HEIGHT, 1,  //
+        EGL_NONE,
+    };
+    offscreen_surface_ = ::eglCreatePbufferSurface(
+        egl_context_->display,        // display connection
+        egl_context_->config,         // config
+        offscreen_surface_attributes  // surface attributes
+    );
+    FML_CHECK(offscreen_surface_ != EGL_NO_SURFACE) << GetEGLError();
+  }
+}
+
+TestGLSurface::~TestGLSurface() {
+  auto result = ::eglDestroySurface(egl_context_->display, offscreen_surface_);
+  FML_CHECK(result == EGL_TRUE) << GetEGLError();
+}
+
+bool TestGLSurface::MakeResourceCurrent() {
+  auto result =
+      ::eglMakeCurrent(egl_context_->display, offscreen_surface_,
+                       offscreen_surface_, egl_context_->offscreen_context);
+
+  if (result == EGL_FALSE) {
+    FML_LOG(ERROR) << "Could not make the resource context current. "
+                   << GetEGLError();
+  }
+
+  return result == EGL_TRUE;
 }
 
 }  // namespace testing
