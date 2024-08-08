@@ -15,7 +15,7 @@ import 'package:yaml/yaml.dart';
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
 
-const String defaultTemplateArbFileName = 'app_en.arb';
+const String defaultTemplateLocale = 'en_US';
 const String defaultOutputFileString = 'output-localization-file.dart';
 const String defaultClassNameString = 'AppLocalizations';
 const String singleMessageArbFileString = '''
@@ -55,7 +55,7 @@ import 'package:flutter/foundation.dart';
 void _standardFlutterDirectoryL10nSetup(FileSystem fs) {
   final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
     ..createSync(recursive: true);
-  l10nDirectory.childFile(defaultTemplateArbFileName)
+  l10nDirectory.childFile(defaultTemplateLocale)
     .writeAsStringSync(singleMessageArbFileString);
   l10nDirectory.childFile(esArbFileName)
     .writeAsStringSync(singleEsMessageArbFileString);
@@ -113,7 +113,7 @@ void main() {
       fileSystem: fs,
       inputPathString: l10nDirectory.path,
       outputPathString: outputPathString ?? l10nDirectory.path,
-      templateArbFileName: defaultTemplateArbFileName,
+      templateLocale: defaultTemplateLocale,
       outputFileString: outputFileString ?? defaultOutputFileString,
       classNameString: defaultClassNameString,
       headerString: headerString,
@@ -188,7 +188,7 @@ void main() {
         .childDirectory('lib')
         .childDirectory('l10n')
         ..createSync(recursive: true);
-      l10nDirectory.childFile(defaultTemplateArbFileName)
+      l10nDirectory.childFile(defaultTemplateLocale)
         .writeAsStringSync(singleMessageArbFileString);
       l10nDirectory.childFile(esArbFileName)
         .writeAsStringSync(singleEsMessageArbFileString);
@@ -200,7 +200,7 @@ void main() {
         projectPathString: flutterProjectPath,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
-        templateArbFileName: defaultTemplateArbFileName,
+        templateLocale: defaultTemplateLocale,
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
@@ -237,7 +237,7 @@ void main() {
         .childDirectory('lib')
         .childDirectory('l10n')
         ..createSync(recursive: true);
-      l10nDirectory.childFile(defaultTemplateArbFileName)
+      l10nDirectory.childFile(defaultTemplateLocale)
         .writeAsStringSync(singleMessageArbFileString);
       l10nDirectory.childFile(esArbFileName)
         .writeAsStringSync(singleEsMessageArbFileString);
@@ -249,7 +249,7 @@ void main() {
           projectPathString: 'absolute/path/to/flutter_project',
           inputPathString: defaultL10nPathString,
           outputPathString: defaultL10nPathString,
-          templateArbFileName: defaultTemplateArbFileName,
+          templateLocale: defaultTemplateLocale,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           logger: logger,
@@ -276,7 +276,7 @@ void main() {
           projectPathString: './',
           inputPathString: defaultL10nPathString,
           outputPathString: defaultL10nPathString,
-          templateArbFileName: defaultTemplateArbFileName,
+          templateLocale: defaultTemplateLocale,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           logger: logger,
@@ -358,7 +358,7 @@ void main() {
     expect(generator.header, '/// Sample header in a text file');
   });
 
-  testWithoutContext('sets templateArbFileName with more than one underscore correctly', () {
+  testWithoutContext('sets templateLocale with more than one underscore correctly', () {
     setupLocalizations(<String, String>{
       'en': singleMessageArbFileString,
       'es': singleEsMessageArbFileString,
@@ -501,7 +501,7 @@ void main() {
         fileSystem: fs,
         inputPathString: defaultL10nPathString,
         // outputPathString is intentionally not defined
-        templateArbFileName: defaultTemplateArbFileName,
+        templateLocale: defaultTemplateLocale,
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         useSyntheticPackage: false,
@@ -529,7 +529,7 @@ void main() {
       l10nDirectory.childDirectory('output');
 
       l10nDirectory
-        .childFile(defaultTemplateArbFileName)
+        .childFile(defaultTemplateLocale)
         .writeAsStringSync(singleMessageArbFileString);
       l10nDirectory
         .childFile(esArbFileName)
@@ -539,7 +539,7 @@ void main() {
         fileSystem: fs,
         inputPathString: defaultL10nPathString,
         outputPathString: fs.path.join('lib', 'l10n', 'output'),
-        templateArbFileName: defaultTemplateArbFileName,
+        templateLocale: defaultTemplateLocale,
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         useSyntheticPackage: false,
@@ -566,7 +566,7 @@ void main() {
         fileSystem: fs,
           inputPathString: defaultL10nPathString,
           outputPathString: fs.path.join('lib', 'l10n', 'output'),
-          templateArbFileName: defaultTemplateArbFileName,
+          templateLocale: defaultTemplateLocale,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           useSyntheticPackage: false,
@@ -734,7 +734,7 @@ flutter:
         options: LocalizationOptions(
           arbDir: Uri.directory(defaultL10nPathString).path,
           outputDir: Uri.directory(defaultL10nPathString, windows: false).path,
-          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
+          templateLocale: defaultTemplateLocale,
           syntheticPackage: false,
         ),
         logger: logger,
@@ -755,7 +755,7 @@ flutter:
         outputLocalizationFile: Uri.file('bar.dart', windows: false).path,
         outputDir: Uri.directory(defaultL10nPathString, windows: false).path,
         preferredSupportedLocales: <String>['es'],
-        templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
+        templateLocale: defaultTemplateLocale,
         untranslatedMessagesFile: Uri.file('untranslated', windows: false).path,
         syntheticPackage: false,
         requiredResourceAttributes: true,
@@ -775,7 +775,7 @@ flutter:
 
       expect(generator.inputDirectory.path, '/lib/l10n/');
       expect(generator.outputDirectory.path, '/lib/l10n/');
-      expect(generator.templateArbFile.path, '/lib/l10n/app_en.arb');
+      expect(generator.templateLocale, 'en_US');
       expect(generator.baseOutputFile.path, '/lib/l10n/bar.dart');
       expect(generator.className, 'Foo');
       expect(generator.preferredSupportedLocales.single, LocaleInfo.fromString('es'));
@@ -825,7 +825,7 @@ flutter:
         outputClass: 'Foo',
         outputLocalizationFile: Uri.file('bar', windows: false).path,
         preferredSupportedLocales: <String>['en_US'],
-        templateArbFile: Uri.file('example.arb', windows: false).path,
+        templateLocale: 'en_US',
         untranslatedMessagesFile: Uri.file('untranslated', windows: false).path,
       );
 
@@ -883,7 +883,7 @@ flutter:\r
         options: LocalizationOptions(
           arbDir: Uri.directory(defaultL10nPathString).path,
           outputDir: Uri.directory(defaultL10nPathString, windows: false).path,
-          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
+          templateLocale: defaultTemplateLocale,
           syntheticPackage: false,
         ),
         logger: BufferLogger.test(),
@@ -914,7 +914,7 @@ class AppLocalizationsEn extends AppLocalizations {
         header: 'HEADER',
         arbDir: Uri.directory(defaultL10nPathString).path,
         outputDir: Uri.directory(defaultL10nPathString, windows: false).path,
-        templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
+        templateLocale: defaultTemplateLocale,
         syntheticPackage: false,
       ),
       logger: logger,
@@ -950,7 +950,7 @@ class AppLocalizationsEn extends AppLocalizations {
         fileSystem: fs,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
-        templateArbFileName: defaultTemplateArbFileName,
+        templateLocale: defaultTemplateLocale,
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
@@ -976,7 +976,7 @@ class AppLocalizationsEn extends AppLocalizations {
         fileSystem: fs,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
-        templateArbFileName: defaultTemplateArbFileName,
+        templateLocale: defaultTemplateLocale,
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
@@ -1003,7 +1003,7 @@ class AppLocalizationsEn extends AppLocalizations {
         fileSystem: fs,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
-        templateArbFileName: defaultTemplateArbFileName,
+        templateLocale: defaultTemplateLocale,
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         preferredSupportedLocales: preferredSupportedLocale,
@@ -1035,7 +1035,7 @@ class AppLocalizationsEn extends AppLocalizations {
               fileSystem: fs,
               inputPathString: defaultL10nPathString,
               outputPathString: defaultL10nPathString,
-              templateArbFileName: defaultTemplateArbFileName,
+              templateLocale: defaultTemplateLocale,
               outputFileString: defaultOutputFileString,
               classNameString: defaultClassNameString,
               preferredSupportedLocales: preferredSupportedLocale,
@@ -1050,33 +1050,6 @@ class AppLocalizationsEn extends AppLocalizations {
         );
       },
     );
-
-    testWithoutContext('correctly sorts arbPathString alphabetically', () {
-      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-        ..createSync(recursive: true);
-      // Write files in non-alphabetical order so that read performs in that order
-      l10nDirectory.childFile('app_zh.arb')
-        .writeAsStringSync(singleZhMessageArbFileString);
-      l10nDirectory.childFile('app_es.arb')
-        .writeAsStringSync(singleEsMessageArbFileString);
-      l10nDirectory.childFile('app_en.arb')
-        .writeAsStringSync(singleMessageArbFileString);
-
-      final LocalizationsGenerator generator = LocalizationsGenerator(
-        fileSystem: fs,
-        inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
-        templateArbFileName: defaultTemplateArbFileName,
-        outputFileString: defaultOutputFileString,
-        classNameString: defaultClassNameString,
-        logger: logger,
-      )
-        ..loadResources();
-
-      expect(generator.arbPathStrings.first, fs.path.join('lib', 'l10n', 'app_en.arb'));
-      expect(generator.arbPathStrings.elementAt(1), fs.path.join('lib', 'l10n', 'app_es.arb'));
-      expect(generator.arbPathStrings.elementAt(2), fs.path.join('lib', 'l10n', 'app_zh.arb'));
-    });
 
     testWithoutContext('correctly parses @@locale property in arb file', () {
       const String arbFileWithEnLocale = '''
@@ -1108,7 +1081,7 @@ class AppLocalizationsEn extends AppLocalizations {
         fileSystem: fs,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
-        templateArbFileName: 'first_file.arb',
+        templateLocale: 'first_file.arb',
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
@@ -1151,7 +1124,7 @@ class AppLocalizationsEn extends AppLocalizations {
             fileSystem: fs,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
-            templateArbFileName: 'app_es.arb',
+            templateLocale: 'app_es.arb',
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
             logger: logger,
@@ -1176,7 +1149,7 @@ class AppLocalizationsEn extends AppLocalizations {
             fileSystem: fs,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
-            templateArbFileName: 'app.arb',
+            templateLocale: 'app.arb',
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
             logger: logger,
@@ -1209,7 +1182,7 @@ class AppLocalizationsEn extends AppLocalizations {
           fileSystem: fs,
           inputPathString: defaultL10nPathString,
           outputPathString: defaultL10nPathString,
-          templateArbFileName: 'app_en.arb',
+          templateLocale: 'app_en.arb',
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           logger: logger,
@@ -1244,7 +1217,7 @@ class AppLocalizationsEn extends AppLocalizations {
             fileSystem: fs,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
-            templateArbFileName: 'app_en.arb',
+            templateLocale: 'app_en.arb',
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
             logger: logger,
@@ -1270,7 +1243,7 @@ class AppLocalizationsEn extends AppLocalizations {
             fileSystem: fs,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
-            templateArbFileName: 'app_en_US.arb',
+            templateLocale: 'app_en_US.arb',
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
             logger: logger,
@@ -2388,7 +2361,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             fileSystem: fs,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
-            templateArbFileName: 'app_invalid.arb',
+            templateLocale: 'app_invalid.arb',
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
             logger: logger,
