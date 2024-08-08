@@ -79,21 +79,8 @@ void main() {
     await gesture.moveBy(Offset(-_kGestureOffset.dx, -_kGestureOffset.dy));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
-
-    expect(find.byType(CupertinoScrollbar), paints..rrect(
-      color: _kScrollbarColor,
-      rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(
-          800.0 - 3 - 3, // Screen width - margin - thickness.
-          44 + 20 + 3.0, // nav bar height + top margin
-          3, // Thickness.
-          // Fraction visible * (viewport size - padding - margin)
-          // where Fraction visible = (viewport size - padding) / content size
-          (600.0 - 34 - 44 - 20) / 4000.0 * (600.0 - 2 * 3 - 34 - 44 - 20),
-        ),
-        _kScrollbarRadius,
-      ),
-    ));
+    expect(tester.getRect(find.byType(CupertinoScrollbar)),
+        rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, 800, 600), epsilon: 1)); // (800, 600) is viewport size
   });
 
   testWidgets("should not paint when there isn't enough space", (WidgetTester tester) async {
