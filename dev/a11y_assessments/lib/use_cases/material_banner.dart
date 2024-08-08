@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class MaterialBannerUseCase extends UseCase {
-
   @override
   String get name => 'MaterialBanner';
 
@@ -27,7 +26,8 @@ class MainWidget extends StatefulWidget {
 
 class MainWidgetState extends State<MainWidget> {
   double currentSliderValue = 20;
-  ScaffoldFeatureController<MaterialBanner, MaterialBannerClosedReason>? controller;
+  ScaffoldFeatureController<MaterialBanner, MaterialBannerClosedReason>?
+      controller;
 
   @override
   Widget build(BuildContext context) {

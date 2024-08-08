@@ -9,7 +9,7 @@ import 'test_utils.dart';
 
 void main() {
   testWidgets('snack bar can run', (WidgetTester tester) async {
-    await pumpsUseCase(tester,  SnackBarUseCase());
+    await pumpsUseCase(tester, SnackBarUseCase());
     const String snackBarText = 'Awesome Snackbar!';
     expect(find.text(snackBarText), findsNothing);
     await tester.tap(find.text('Show Snackbar'));

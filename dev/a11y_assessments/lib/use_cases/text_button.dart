@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class TextButtonUseCase extends UseCase {
-
   @override
   String get name => 'TextButton';
 
@@ -46,7 +45,9 @@ class MainWidgetState extends State<MainWidget> {
                   const Text('This is a TextButton:'),
                   TextButton(
                     onPressed: () {
-                      setState(() { _count++; });
+                      setState(() {
+                        _count++;
+                      });
                     },
                     child: const Text('Action'),
                   ),

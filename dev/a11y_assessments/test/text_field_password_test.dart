@@ -31,7 +31,8 @@ void main() {
     }
   });
 
-  testWidgets('text field passwords do not have hint text', (WidgetTester tester) async {
+  testWidgets('text field passwords do not have hint text',
+      (WidgetTester tester) async {
     await pumpsUseCase(tester, TextFieldPasswordUseCase());
     expect(find.byType(TextField), findsExactly(2));
 
@@ -40,7 +41,6 @@ void main() {
       final Finder finder = find.byKey(const Key('enabled password'));
       final TextField textField = tester.widget<TextField>(finder);
       expect(textField.decoration?.hintText, isNull);
-
     }
 
     // Test the disabled password

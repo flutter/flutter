@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class DatePickerUseCase extends UseCase {
-
   @override
   String get name => 'DatePicker';
 
@@ -26,7 +25,6 @@ class _MainWidget extends StatefulWidget {
 }
 
 class _MainWidgetState extends State<_MainWidget> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

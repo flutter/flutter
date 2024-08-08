@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class TextFieldPasswordUseCase extends UseCase {
-
   @override
   String get name => 'TextField password';
 
