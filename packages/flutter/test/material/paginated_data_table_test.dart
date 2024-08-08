@@ -1423,6 +1423,7 @@ void main() {
         showFirstLastButtons: true,
         header: const Text('Test table'),
         rowsPerPage: 8,
+        onRowsPerPageChanged: (int? rowsPerPage) { },
         source: source,
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
@@ -1450,6 +1451,8 @@ void main() {
         footerBackgroundColor: footerBackgroundColor,
         showFirstLastButtons: true,
         header: const Text('Test table'),
+        rowsPerPage: 8,
+        onRowsPerPageChanged: (int? rowsPerPage) { },
         source: source,
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
