@@ -454,7 +454,11 @@ Future<String> eval(
   return output.toString().trimRight();
 }
 
-List<String> _flutterCommandArgs(String command, List<String> options) {
+List<String> _flutterCommandArgs(
+  String command,
+  List<String> options, {
+  bool driveWithDds = false,
+}) {
   // Commands support the --device-timeout flag.
   final Set<String> supportedDeviceTimeoutCommands = <String>{
     'attach',
@@ -478,9 +482,9 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
         '5',
       ],
 
-    // DDS should be disabled for flutter drive in CI.
+    // DDS should generally be disabled for flutter drive in CI.
     // See https://github.com/flutter/flutter/issues/152684.
-    if (command == 'drive') '--no-dds',
+    if (command == 'drive' && !driveWithDds) '--no-dds',
 
     if (command == 'drive' && hostAgent.dumpDirectory != null) ...<String>[
       '--screenshot',
@@ -505,10 +509,15 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
 Future<int> flutter(String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
+  bool driveWithDds = false,  // `flutter drive` tests should generally have dds disabled.
+                              // The exception is tests that also exercise DevTools, such as
+                              // DevToolsMemoryTest in perf_tests.dart.
   Map<String, String>? environment,
   String? workingDirectory,
 }) async {
-  final List<String> args = _flutterCommandArgs(command, options);
+  final List<String> args = _flutterCommandArgs(
+    command, options, driveWithDds: driveWithDds,
+  );
   final int exitCode = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
     canFail: canFail, environment: environment, workingDirectory: workingDirectory);
 
