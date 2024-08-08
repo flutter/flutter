@@ -171,7 +171,7 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
 
   @override
   Widget build(BuildContext context) {
-    Alignment scaleAlignment;
+    final Alignment scaleAlignment;
     if (widget.isLeftmostSegment) {
       scaleAlignment = Alignment.centerLeft;
     } else if (widget.isRightmostSegment) {
@@ -784,6 +784,8 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     return UnconstrainedBox(
       constrainedAxis: Axis.horizontal,
       child: Container(
+        // Clip the thumb shadow if it is outside of the segmented control. This
+        // behavior is eyeballed by the iOS 17.5 simulator.
         clipBehavior: Clip.antiAlias,
         padding: widget.padding.resolve(Directionality.of(context)),
         decoration: BoxDecoration(
