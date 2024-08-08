@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'color_scheme.dart';
+/// @docImport 'navigation_bar.dart';
+/// @docImport 'scaffold.dart';
+library;
+
 import 'dart:collection' show Queue;
 import 'dart:math' as math;
 
@@ -372,18 +377,18 @@ class BottomNavigationBar extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// items.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.selected].
+  ///  * [WidgetState.selected].
   ///
   /// If null, then the value of [BottomNavigationBarThemeData.mouseCursor] is used. If
-  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
   ///
   /// See also:
   ///
-  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor]
-  ///    that is also a [MaterialStateProperty<MouseCursor>].
+  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor]
+  ///    that is also a [WidgetStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.

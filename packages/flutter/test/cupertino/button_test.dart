@@ -296,7 +296,7 @@ void main() {
       TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics.rootChild(
-            actions: SemanticsAction.tap.index,
+            actions: SemanticsAction.tap.index | SemanticsAction.focus.index,
             label: 'ABC',
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
@@ -454,7 +454,7 @@ void main() {
         ),
       ),
     );
-    expect(textStyle.color, isSameColorAs(CupertinoColors.black));
+    expect(textStyle.color, isSameColorAs(CupertinoColors.white));
     decoration = tester.widget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoButton),

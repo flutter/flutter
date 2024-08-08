@@ -2,6 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'animated_scroll_view.dart';
+/// @docImport 'container.dart';
+/// @docImport 'implicit_animations.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'sliver_fill.dart';
+/// @docImport 'sliver_persistent_header.dart';
+/// @docImport 'sliver_prototype_extent_list.dart';
+/// @docImport 'text.dart';
+/// @docImport 'two_dimensional_viewport.dart';
+/// @docImport 'viewport.dart';
+/// @docImport 'visibility.dart';
+library;
+
 import 'dart:collection' show HashMap, SplayTreeMap;
 import 'dart:math' as math;
 
@@ -1444,9 +1459,8 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
     if (parentData.keepAlive != keepAlive) {
       // No need to redo layout if it became true.
       parentData.keepAlive = keepAlive;
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent is RenderObject && !keepAlive) {
-        targetParent.markNeedsLayout();
+      if (!keepAlive) {
+        renderObject.parent?.markNeedsLayout();
       }
     }
   }
@@ -1541,11 +1555,7 @@ class _SliverZeroFlexParentDataWidget extends ParentDataWidget<SliverPhysicalPar
     }
 
     if (needsLayout) {
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent is RenderObject) {
-        targetParent.markNeedsLayout();
-      }
-
+      renderObject.parent?.markNeedsLayout();
     }
   }
 
@@ -1613,10 +1623,7 @@ class SliverCrossAxisExpanded extends ParentDataWidget<SliverPhysicalContainerPa
     }
 
     if (needsLayout) {
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent is RenderObject) {
-        targetParent.markNeedsLayout();
-      }
+      renderObject.parent?.markNeedsLayout();
     }
   }
 

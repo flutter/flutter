@@ -191,6 +191,7 @@ void main() {
         Analytics: () => fakeAnalytics,
       });
 
+      // TODO(bkonyi): remove when ready to serve DevTools from DDS.
       group('${FlutterGlobalOptions.kPrintDtd} flag', () {
         testUsingContext('sets DevtoolsLauncher.printDtdUri to false when not present', () async {
           final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;

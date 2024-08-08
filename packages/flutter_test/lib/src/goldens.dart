@@ -4,7 +4,7 @@
 
 /// @docImport 'package:flutter/widgets.dart';
 ///
-/// @docImport '_goldens_web.dart';
+/// @docImport '_goldens_io.dart';
 /// @docImport 'binding.dart';
 /// @docImport 'matchers.dart';
 /// @docImport 'widget_tester.dart';
@@ -55,8 +55,7 @@ import '_goldens_io.dart' if (dart.library.js_interop) '_goldens_web.dart' as go
 ///
 ///  * [LocalFileComparator] for the default [GoldenFileComparator]
 ///    implementation for `flutter test`.
-///  * [matchesGoldenFile], the function from [flutter_test] that invokes the
-///    comparator.
+///  * [matchesGoldenFile], the function that invokes the comparator.
 abstract class GoldenFileComparator {
   /// Compares the pixels of decoded png [imageBytes] against the golden file
   /// identified by [golden].
@@ -128,8 +127,67 @@ abstract class GoldenFileComparator {
 ///
 /// Callers may choose to override the default comparator by setting this to a
 /// custom comparator during test set-up (or using directory-level test
-/// configuration). For example, some projects may wish to install a comparator
-/// with tolerance levels for allowable differences.
+/// configuration).
+///
+/// {@tool snippet}
+/// For example, some projects may wish to install a comparator with tolerance
+/// levels for allowable differences:
+///
+/// ```dart
+/// void main() {
+///   testWidgets('matches golden file with a 0.01 tolerance', (WidgetTester tester) async {
+///     final GoldenFileComparator previousGoldenFileComparator = goldenFileComparator;
+///     goldenFileComparator = _TolerantGoldenFileComparator(
+///       Uri.parse('test/my_widget_test.dart'),
+///       precisionTolerance: 0.01,
+///     );
+///     addTearDown(() => goldenFileComparator = previousGoldenFileComparator);
+///
+///     await tester.pumpWidget(const ColoredBox(color: Color(0xff00ff00)));
+///
+///     await expectLater(
+///       find.byType(ColoredBox),
+///       matchesGoldenFile('my_golden.png'),
+///     );
+///   });
+/// }
+///
+/// class _TolerantGoldenFileComparator extends LocalFileComparator {
+///   _TolerantGoldenFileComparator(
+///     super.testFile, {
+///     required double precisionTolerance,
+///   })  : assert(
+///         0 <= precisionTolerance && precisionTolerance <= 1,
+///         'precisionTolerance must be between 0 and 1',
+///         ),
+///         _precisionTolerance = precisionTolerance;
+///
+///   /// How much the golden image can differ from the test image.
+///   ///
+///   /// It is expected to be between 0 and 1. Where 0 is no difference (the same image)
+///   /// and 1 is the maximum difference (completely different images).
+///   final double _precisionTolerance;
+///
+///   @override
+///   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+///     final ComparisonResult result = await GoldenFileComparator.compareLists(
+///       imageBytes,
+///       await getGoldenBytes(golden),
+///     );
+///
+///     final bool passed = result.passed || result.diffPercent <= _precisionTolerance;
+///     if (passed) {
+///       result.dispose();
+///       return true;
+///     }
+///
+///     final String error = await generateFailureOutput(result, golden, basedir);
+///     result.dispose();
+///     throw FlutterError(error);
+///   }
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -157,8 +215,7 @@ GoldenFileComparator goldenFileComparator = const TrivialComparator._();
 ///    not running in a web browser.
 ///  * [DefaultWebGoldenComparator] for the default [WebGoldenComparator]
 ///    implementation for `flutter test`.
-///  * [matchesGoldenFile], the function from [flutter_test] that invokes the
-///    comparator.
+///  * [matchesGoldenFile], the function that invokes the comparator.
 abstract class WebGoldenComparator {
   /// Compares the rendered pixels of size [width]x[height] that is being
   /// rendered on the top left of the screen against the golden file identified

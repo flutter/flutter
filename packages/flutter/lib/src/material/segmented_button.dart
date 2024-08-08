@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'checkbox.dart';
+/// @docImport 'choice_chip.dart';
+/// @docImport 'filter_chip.dart';
+/// @docImport 'radio.dart';
+/// @docImport 'toggle_buttons.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:math';
 
@@ -202,22 +209,22 @@ class SegmentedButton<T> extends StatefulWidget {
   /// [ButtonStyle] given simple values.
   ///
   /// The [foregroundColor], [selectedForegroundColor], and [disabledForegroundColor]
-  /// colors are used to create a [MaterialStateProperty] [ButtonStyle.foregroundColor],
+  /// colors are used to create a [WidgetStateProperty] [ButtonStyle.foregroundColor],
   /// and a derived [ButtonStyle.overlayColor] if [overlayColor] isn't specified.
   ///
   /// If [overlayColor] is specified and its value is [Colors.transparent]
   /// then the pressed/focused/hovered highlights are effectively defeated.
-  /// Otherwise a [MaterialStateProperty] with the same opacities as the
+  /// Otherwise a [WidgetStateProperty] with the same opacities as the
   /// default is created.
   ///
   /// The [backgroundColor], [selectedBackgroundColor] and [disabledBackgroundColor]
-  /// colors are used to create a [MaterialStateProperty] [ButtonStyle.backgroundColor].
+  /// colors are used to create a [WidgetStateProperty] [ButtonStyle.backgroundColor].
   ///
   /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
   /// parameters are used to construct [ButtonStyle.mouseCursor].
   ///
   /// All of the other parameters are either used directly or used to
-  /// create a [MaterialStateProperty] with a single value for all
+  /// create a [WidgetStateProperty] with a single value for all
   /// states.
   ///
   /// All parameters default to null. By default this method returns
@@ -336,7 +343,7 @@ class SegmentedButton<T> extends StatefulWidget {
   ///   * [ButtonStyle.shape]
   ///
   /// The following style properties are applied to each of the individual
-  /// button segments. For properties that are a [MaterialStateProperty],
+  /// button segments. For properties that are a [WidgetStateProperty],
   /// they will be resolved with the current state of the segment:
   ///
   ///   * [ButtonStyle.textStyle]

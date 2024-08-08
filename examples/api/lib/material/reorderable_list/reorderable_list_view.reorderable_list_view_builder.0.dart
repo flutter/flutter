@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [ReorderableListView.ReorderableListView.builder].
+/// Flutter code sample for [ReorderableListView.builder].
 
 void main() => runApp(const ReorderableApp());
 
