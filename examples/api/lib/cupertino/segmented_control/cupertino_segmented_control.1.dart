@@ -39,10 +39,10 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
   Sky _selectedSegment = Sky.midnight;
   bool _toggleOne = false;
   bool _toggleAll = true;
-  Map<int, bool> _segments = <int, bool>{
-    0: true,
-    1: true,
-    2: true,
+  Map<Sky, bool> _segments = <Sky, bool>{
+    Sky.midnight: true,
+    Sky.viridian: true,
+    Sky.cerulean: true,
   };
 
   @override
@@ -103,17 +103,17 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
                       _toggleOne = value;
                       if (value) {
                         _toggleAll = false;
-                        _segments = <int, bool>{
-                          0: false,
-                          1: true,
-                          2: true,
+                        _segments = <Sky, bool>{
+                          Sky.midnight: false,
+                          Sky.viridian: true,
+                          Sky.cerulean: true,
                         };
                       } else {
                         _toggleAll = true;
-                        _segments = <int, bool>{
-                          0: true,
-                          1: true,
-                          2: true,
+                        _segments = <Sky, bool>{
+                          Sky.midnight: true,
+                          Sky.viridian: true,
+                          Sky.cerulean: true,
                         };
                       }
                     });
@@ -132,16 +132,16 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
                       _toggleAll = value;
                       if (value) {
                         _toggleOne = false;
-                        _segments = <int, bool>{
-                          0: true,
-                          1: true,
-                          2: true,
+                        _segments = <Sky, bool>{
+                          Sky.midnight: true,
+                          Sky.viridian: true,
+                          Sky.cerulean: true,
                         };
                       } else {
-                        _segments = <int, bool>{
-                          0: false,
-                          1: false,
-                          2: false,
+                        _segments = <Sky, bool>{
+                          Sky.midnight: false,
+                          Sky.viridian: false,
+                          Sky.cerulean: false,
                         };
                       }
                     });

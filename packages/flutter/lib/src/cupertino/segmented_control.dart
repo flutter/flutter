@@ -115,14 +115,14 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
     this.disabledColor,
     this.disabledTextColor,
     this.padding,
-    this.segmentStates = const <int, bool>{},
+    this.segmentStates,
   }) : assert(children.length >= 2),
        assert(
          groupValue == null || children.keys.any((T child) => child == groupValue),
          'The groupValue must be either null or one of the keys in the children map.',
        ),
        assert(
-         segmentStates.length <= children.length,
+         segmentStates == null || segmentStates.length <= children.length,
          'The segmentStates map must has length equal or less than the children map.',
        );
 
@@ -189,7 +189,7 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
   /// This map must have the equal or less length than the children map.
   ///
   /// All segments are enabled by default.
-  final Map<int, bool> segmentStates;
+  final Map<T, bool>? segmentStates;
 
   @override
   State<CupertinoSegmentedControl<T>> createState() => _SegmentedControlState<T>();
@@ -352,7 +352,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
     if (currentKey != _pressedKey) {
       return;
     }
-    if (widget.segmentStates[index] ?? true) {
+    if (widget.segmentStates?[currentKey] ?? true) {
       if (currentKey != widget.groupValue) {
         widget.onValueChanged(currentKey);
       }
@@ -361,7 +361,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
   }
 
   Color? getTextColor(int index, T currentKey) {
-    if (!(widget.segmentStates[index] ?? true)) {
+    if (!(widget.segmentStates?[currentKey] ?? true)) {
       return _disabledTextColor;
     }
     if (_selectionControllers[index].isAnimating) {
@@ -374,7 +374,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
   }
 
   Color? getBackgroundColor(int index, T currentKey) {
-    if (!(widget.segmentStates[index] ?? true)) {
+    if (!(widget.segmentStates?[currentKey] ?? true)) {
       return _disabledColor;
     }
     if (_selectionControllers[index].isAnimating) {
@@ -415,10 +415,10 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
         cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTapDown: (widget.segmentStates[index] ?? true) ? (TapDownDetails event) {
+          onTapDown: (widget.segmentStates?[currentKey] ?? true) ? (TapDownDetails event) {
             _onTapDown(currentKey);
           } : null,
-          onTapCancel: (widget.segmentStates[index] ?? true) ? _onTapCancel : null,
+          onTapCancel: (widget.segmentStates?[currentKey] ?? true) ? _onTapCancel : null,
           onTap: () {
             _onTap(currentKey, index);
           },
