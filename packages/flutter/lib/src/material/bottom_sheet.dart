@@ -868,6 +868,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
     required this.isScrollControlled,
     this.scrollControlDisabledMaxHeightRatio = _defaultScrollControlDisabledMaxHeightRatio,
     super.settings,
+    super.requestFocus,
     this.transitionAnimationController,
     this.anchorPoint,
     this.useSafeArea = false,

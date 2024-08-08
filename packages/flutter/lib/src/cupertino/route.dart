@@ -282,6 +282,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
     required this.builder,
     this.title,
     super.settings,
+    super.requestFocus,
     this.maintainState = true,
     super.fullscreenDialog,
     super.allowSnapshotting = true,
@@ -1076,6 +1077,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     bool semanticsDismissible = false,
     super.filter,
     super.settings,
+    super.requestFocus,
     this.anchorPoint,
   }) : _barrierDismissible = barrierDismissible,
        _semanticsDismissible = semanticsDismissible;
@@ -1387,6 +1389,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
     super.transitionDuration = const Duration(milliseconds: 250),
     this.transitionBuilder,
     super.settings,
+    super.requestFocus,
     super.anchorPoint,
   }) : super(
         pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
