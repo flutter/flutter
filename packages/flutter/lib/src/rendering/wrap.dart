@@ -665,27 +665,28 @@ class RenderWrap extends RenderBox
 
   (_AxisSize childrenSize, List<_RunMetrics> runMetrics) _computeRuns(BoxConstraints constraints, ChildLayouter layoutChild) {
     assert(firstChild != null);
-    final (BoxConstraints childConstraintsLoose,
-           BoxConstraints childConstraintsTight,
-           double mainAxisLimit,
-           double Function(RenderBox child, double crossAxisSize) getChildMinIntrinsicMainAxisExtent,
-           BoxConstraints Function(double maxSize) childConstraintsFittingLooseInRun,
-           BoxConstraints Function(double maxSize) childConstraintsFittingTightInRun) = switch (direction) {
-      Axis.horizontal => (
-           BoxConstraints(maxWidth: constraints.maxWidth),
-           BoxConstraints(minWidth: constraints.maxWidth, maxWidth: constraints.maxWidth),
-           constraints.maxWidth,
-           (RenderBox child, double crossAxisSize) => child.getMinIntrinsicWidth(crossAxisSize),
-           (double maxSize) => BoxConstraints(maxWidth: maxSize),
-           (double maxSize) => BoxConstraints(minWidth: maxSize, maxWidth: maxSize)),
-      Axis.vertical => (
-           BoxConstraints(maxHeight: constraints.maxHeight),
-           BoxConstraints(minHeight: constraints.maxHeight, maxHeight: constraints.maxHeight),
-           constraints.maxHeight,
-           (RenderBox child, double crossAxisSize) => child.getMinIntrinsicHeight(crossAxisSize),
-           (double maxSize) => BoxConstraints(maxHeight: maxSize),
-           (double maxSize) => BoxConstraints(minHeight: maxSize, maxHeight: maxSize)),
-    };
+
+    final BoxConstraints childConstraintsLoose, childConstraintsTight;
+    final double mainAxisLimit;
+    final double Function(RenderBox child, double crossAxisSize) getChildMinIntrinsicMainAxisExtent;
+    final BoxConstraints Function(double maxSize) childConstraintsFittingLooseInRun, childConstraintsFittingTightInRun;
+
+    switch (direction) {
+      case Axis.horizontal:
+        childConstraintsLoose = BoxConstraints(maxWidth: constraints.maxWidth);
+        childConstraintsTight = BoxConstraints(minWidth: constraints.maxWidth, maxWidth: constraints.maxWidth);
+        mainAxisLimit = constraints.maxWidth;
+        getChildMinIntrinsicMainAxisExtent = (RenderBox child, double crossAxisSize) => child.getMinIntrinsicWidth(crossAxisSize);
+        childConstraintsFittingLooseInRun = (double maxSize) => BoxConstraints(maxWidth: maxSize);
+        childConstraintsFittingTightInRun = (double maxSize) => BoxConstraints(minWidth: maxSize, maxWidth: maxSize);
+      case Axis.vertical:
+        childConstraintsLoose = BoxConstraints(maxHeight: constraints.maxHeight);
+        childConstraintsTight = BoxConstraints(minHeight: constraints.maxHeight, maxHeight: constraints.maxHeight);
+        mainAxisLimit = constraints.maxHeight;
+        getChildMinIntrinsicMainAxisExtent = (RenderBox child, double crossAxisSize) => child.getMinIntrinsicHeight(crossAxisSize);
+        childConstraintsFittingLooseInRun = (double maxSize) => BoxConstraints(maxHeight: maxSize);
+        childConstraintsFittingTightInRun = (double maxSize) => BoxConstraints(minHeight: maxSize, maxHeight: maxSize);
+    }
 
     final (bool flipMainAxis, _) = _areAxesFlipped;
     final double spacing = this.spacing;
