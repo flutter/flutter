@@ -98,7 +98,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   DelegatedTransitionBuilder? _delegatedTransition;
 
   @override
-  DelegatedTransitionBuilder? get delegatedTransition => fullscreenDialog ? null : _delegatedTransition;
+  DelegatedTransitionBuilder? get delegatedTransition => _delegatedTransition;
 
   set delegatedTransition(DelegatedTransitionBuilder? newTransition) {
     _delegatedTransition = newTransition;
@@ -132,7 +132,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
-    delegatedTransition = theme.delegatedTransition(context);
+    delegatedTransition = theme.delegatedTransition(context, allowSnapshotting);
     return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 }
