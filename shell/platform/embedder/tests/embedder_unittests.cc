@@ -2735,8 +2735,9 @@ static void expectSoftwareRenderingOutputMatches(
         ASSERT_EQ(layers[0]->backing_store->type,
                   kFlutterBackingStoreTypeSoftware2);
         matches = SurfacePixelDataMatchesBytes(
-            static_cast<SkSurface*>(
-                layers[0]->backing_store->software2.user_data),
+            reinterpret_cast<EmbedderTestBackingStoreProducer::UserData*>(
+                layers[0]->backing_store->software2.user_data)
+                ->surface.get(),
             bytes);
         latch.Signal();
       });

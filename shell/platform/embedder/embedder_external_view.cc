@@ -7,6 +7,8 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/dl_op_spy.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/GrRecordingContext.h"
 
 #ifdef IMPELLER_SUPPORTS_RENDERING
 #include "impeller/display_list/dl_dispatcher.h"  // nogncheck
@@ -88,6 +90,27 @@ const EmbeddedViewParams* EmbedderExternalView::GetEmbeddedViewParams() const {
   return embedded_view_params_.get();
 }
 
+// TODO(https://github.com/flutter/flutter/issues/151670): Implement this for
+//  Impeller as well.
+#if !SLIMPELLER
+static void InvalidateApiState(SkSurface& skia_surface) {
+  auto recording_context = skia_surface.recordingContext();
+
+  // Should never happen.
+  FML_DCHECK(recording_context) << "Recording context was null.";
+
+  auto direct_context = recording_context->asDirectContext();
+  if (direct_context == nullptr) {
+    // Can happen when using software rendering.
+    // Print an error but otherwise continue in that case.
+    FML_LOG(ERROR) << "Embedder asked to invalidate cached graphics API state "
+                      "but Flutter is not using a graphics API.";
+  } else {
+    direct_context->resetContext(kAll_GrBackendState);
+  }
+}
+#endif
+
 bool EmbedderExternalView::Render(const EmbedderRenderTarget& render_target,
                                   bool clear_surface) {
   TRACE_EVENT0("flutter", "EmbedderExternalView::Render");
@@ -142,6 +165,28 @@ bool EmbedderExternalView::Render(const EmbedderRenderTarget& render_target,
   if (!skia_surface) {
     return false;
   }
+
+  auto [ok, invalidate_api_state] = render_target.MaybeMakeCurrent();
+
+  if (invalidate_api_state) {
+    InvalidateApiState(*skia_surface);
+  }
+  if (!ok) {
+    FML_LOG(ERROR) << "Could not make the surface current.";
+    return false;
+  }
+
+  // Clear the current render target (most likely EGLSurface) at the
+  // end of this scope.
+  fml::ScopedCleanupClosure clear_current_surface([&]() {
+    auto [ok, invalidate_api_state] = render_target.MaybeClearCurrent();
+    if (invalidate_api_state) {
+      InvalidateApiState(*skia_surface);
+    }
+    if (!ok) {
+      FML_LOG(ERROR) << "Could not clear the current surface.";
+    }
+  });
 
   FML_DCHECK(render_target.GetRenderTargetSize() == render_surface_size_);
 

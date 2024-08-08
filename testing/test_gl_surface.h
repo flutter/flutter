@@ -15,11 +15,33 @@
 namespace flutter {
 namespace testing {
 
-class TestGLSurface {
- public:
-  explicit TestGLSurface(SkISize surface_size);
+struct TestEGLContext {
+  explicit TestEGLContext();
 
-  ~TestGLSurface();
+  ~TestEGLContext();
+
+  using EGLDisplay = void*;
+  using EGLContext = void*;
+  using EGLConfig = void*;
+
+  EGLDisplay display;
+  EGLContext onscreen_context;
+  EGLContext offscreen_context;
+
+  // EGLConfig is technically a property of the surfaces, no the context,
+  // but it's not that well separated in EGL (e.g. when
+  // EGL_KHR_no_config_context is not supported), so we just store it here.
+  EGLConfig config;
+};
+
+class TestGLOnscreenOnlySurface {
+ public:
+  explicit TestGLOnscreenOnlySurface(SkISize surface_size);
+
+  explicit TestGLOnscreenOnlySurface(std::shared_ptr<TestEGLContext> context,
+                                     SkISize size);
+
+  ~TestGLOnscreenOnlySurface();
 
   const SkISize& GetSurfaceSize() const;
 
@@ -30,8 +52,6 @@ class TestGLSurface {
   bool Present();
 
   uint32_t GetFramebuffer(uint32_t width, uint32_t height) const;
-
-  bool MakeResourceCurrent();
 
   void* GetProcAddress(const char* name) const;
 
@@ -45,22 +65,33 @@ class TestGLSurface {
 
   uint32_t GetWindowFBOId() const;
 
- private:
-  // Importing the EGL.h pulls in platform headers which are problematic
-  // (especially X11 which #defineds types like Bool). Any TUs importing
-  // this header then become susceptible to failures because of platform
-  // specific craziness. Don't expose EGL internals via this header.
-  using EGLDisplay = void*;
-  using EGLContext = void*;
+ protected:
   using EGLSurface = void*;
 
   const SkISize surface_size_;
-  EGLDisplay display_;
-  EGLContext onscreen_context_;
-  EGLContext offscreen_context_;
+  std::shared_ptr<TestEGLContext> egl_context_;
   EGLSurface onscreen_surface_;
+
+  sk_sp<GrDirectContext> skia_context_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(TestGLOnscreenOnlySurface);
+};
+
+class TestGLSurface : public TestGLOnscreenOnlySurface {
+ public:
+  explicit TestGLSurface(SkISize surface_size);
+
+  explicit TestGLSurface(std::shared_ptr<TestEGLContext> egl_context,
+                         SkISize surface_size);
+
+  ~TestGLSurface();
+
+  bool MakeResourceCurrent();
+
+ private:
+  using EGLSurface = void*;
+
   EGLSurface offscreen_surface_;
-  sk_sp<GrDirectContext> context_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TestGLSurface);
 };

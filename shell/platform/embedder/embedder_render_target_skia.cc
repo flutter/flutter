@@ -11,9 +11,13 @@ namespace flutter {
 EmbedderRenderTargetSkia::EmbedderRenderTargetSkia(
     FlutterBackingStore backing_store,
     sk_sp<SkSurface> render_surface,
-    fml::closure on_release)
+    fml::closure on_release,
+    MakeOrClearCurrentCallback on_make_current,
+    MakeOrClearCurrentCallback on_clear_current)
     : EmbedderRenderTarget(backing_store, std::move(on_release)),
-      render_surface_(std::move(render_surface)) {
+      render_surface_(std::move(render_surface)),
+      on_make_current_(std::move(on_make_current)),
+      on_clear_current_(std::move(on_clear_current)) {
   FML_DCHECK(render_surface_);
 }
 
@@ -35,6 +39,24 @@ EmbedderRenderTargetSkia::GetAiksContext() const {
 
 SkISize EmbedderRenderTargetSkia::GetRenderTargetSize() const {
   return SkISize::Make(render_surface_->width(), render_surface_->height());
+}
+
+EmbedderRenderTarget::SetCurrentResult
+EmbedderRenderTargetSkia::MaybeMakeCurrent() const {
+  if (on_make_current_ != nullptr) {
+    return on_make_current_();
+  }
+
+  return {true, false};
+}
+
+EmbedderRenderTarget::SetCurrentResult
+EmbedderRenderTargetSkia::MaybeClearCurrent() const {
+  if (on_clear_current_ != nullptr) {
+    return on_clear_current_();
+  }
+
+  return {true, false};
 }
 
 }  // namespace flutter
