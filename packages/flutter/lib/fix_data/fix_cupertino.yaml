@@ -295,4 +295,50 @@ transforms:
     - kind: 'rename'
       newName: 'buildOverscrollIndicator'
 
+  # Changes made in https://github.com/flutter/flutter/pull/151367
+  - title: "Rename to 'activeTrackColor'"
+    date: 2024-07-15
+    element:
+      uris: [ 'cupertino.dart' ]
+      getter: 'activeColor'
+      inClass: 'CupertinoSwitch'
+    changes:
+      - kind: 'rename'
+        newName: 'activeTrackColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/151367
+  - title: "Migrate to 'activeTrackColor'"
+    date: 2024-07-15
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'CupertinoSwitch'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'activeColor'
+        newName: 'activeTrackColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/151367
+  - title: "Rename to 'inactiveTrackColor'"
+    date: 2024-07-15
+    element:
+      uris: [ 'cupertino.dart' ]
+      getter: 'trackColor'
+      inClass: 'CupertinoSwitch'
+    changes:
+      - kind: 'rename'
+        newName: 'inactiveTrackColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/151367
+  - title: "Migrate to 'inactiveTrackColor'"
+    date: 2024-07-15
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'CupertinoSwitch'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'trackColor'
+        newName: 'inactiveTrackColor'
+
 # Before adding a new fix: read instructions at the top of this file.

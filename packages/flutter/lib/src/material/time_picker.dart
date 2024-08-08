@@ -550,7 +550,7 @@ class _DayPeriodControl extends StatelessWidget {
     final int newHour = (selectedTime.hour + TimeOfDay.hoursPerPeriod) % TimeOfDay.hoursPerDay;
     final TimeOfDay newTime = selectedTime.replacing(hour: newHour);
     if (onPeriodChanged != null) {
-      onPeriodChanged!.call(newTime);
+      onPeriodChanged!(newTime);
     } else {
       _TimePickerModel.setSelectedTime(context, newTime);
     }
