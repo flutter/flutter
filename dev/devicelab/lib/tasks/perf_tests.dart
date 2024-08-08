@@ -2160,6 +2160,7 @@ class DevToolsMemoryTest {
 
       await flutter(
         'drive',
+        driveWithDds: true,
         options: <String>[
           '-d', _device.deviceId,
           '--profile',
