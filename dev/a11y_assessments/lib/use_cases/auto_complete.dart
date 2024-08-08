@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class AutoCompleteUseCase extends UseCase {
-
   @override
   String get name => 'AutoComplete';
 
@@ -32,7 +31,11 @@ class _MainWidgetState extends State<_MainWidget> {
     'lemon',
   ];
 
-  static Widget _fieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+  static Widget _fieldViewBuilder(
+      BuildContext context,
+      TextEditingController textEditingController,
+      FocusNode focusNode,
+      VoidCallback onFieldSubmitted) {
     return TextFormField(
       focusNode: focusNode,
       controller: textEditingController,
