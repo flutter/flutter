@@ -1431,9 +1431,10 @@ void main() {
       ),
     ));
 
-    final RichText rowsPerPageText = tester.widget(find.byWidgetPredicate((widget) => widget is RichText && widget.text.toPlainText().contains('Rows per page:')));
-    final TextStyle selectedTextStyle = rowsPerPageText.text.style!;
-    expect(selectedTextStyle.color, equals(footerStyleColor));
+      expect(find.byWidgetPredicate((widget) => widget is RichText && widget.text.toPlainText().contains('Rows per page:')), findsOneWidget);
+      final RichText rowsPerPageText = tester.widget(find.byWidgetPredicate((widget) => widget is RichText && widget.text.toPlainText().contains('Rows per page:')));
+      final TextStyle selectedTextStyle = rowsPerPageText.text.style!;
+      expect(selectedTextStyle.color, equals(footerStyleColor));
   });
 
   testWidgets('PaginatedDataTable headerBackgroundColor and footerBackgroundColor set properly', (WidgetTester tester) async {
