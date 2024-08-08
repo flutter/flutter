@@ -23,7 +23,7 @@ jobs:
       - name: ./bin/flutter test --coverage
         run: pushd packages/flutter;../../bin/flutter test --coverage -j 1;popd
       - name: upload coverage
-        uses: codecov/codecov-action@125fc84a9a348dbcf27191600683ec096ec9021c
+        uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673
         with:
           files: packages/flutter/coverage/lcov.info
           verbose: true
