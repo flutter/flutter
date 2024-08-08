@@ -2512,8 +2512,8 @@ Widget _buildPicker({
 }
 
 class _MockDefaultCupertinoLocalizations extends DefaultCupertinoLocalizations {
-  const _MockDefaultCupertinoLocalizations(this.isArabic);
-  final bool isArabic;
+  const _MockDefaultCupertinoLocalizations();
+
   static const List<String> _testMonths = <String>[
     'Janeiro',    // January
     'Fevereiro',  // February
@@ -2529,30 +2529,14 @@ class _MockDefaultCupertinoLocalizations extends DefaultCupertinoLocalizations {
     'Dezembro',   // December
   ];
 
-  static const List<String> _testMonthsArabic = <String>[
-    'يناير',    // January
-    'فبراير',   // February
-    'مارس',     // March
-    'أبريل',    // April
-    'مايو',     // May
-    'يونيو',    // June
-    'يوليو',    // July
-    'أغسطس',    // August
-    'سبتمبر',   // September
-    'أكتوبر',   // October
-    'نوفمبر',   // November
-    'ديسمبر',   // December
-  ];
-
+  @override
+  String datePickerMonth(int monthIndex) => _testMonths[monthIndex - 1];
 
   @override
-  String datePickerMonth(int monthIndex) => isArabic ? _testMonthsArabic[monthIndex - 1] : _testMonths[monthIndex - 1];
-
-  @override
-  String datePickerStandaloneMonth(int monthIndex) => isArabic ? _testMonthsArabic[monthIndex - 1] : _testMonths[monthIndex - 1];
+  String datePickerStandaloneMonth(int monthIndex) => _testMonths[monthIndex - 1];
 
   static Future<CupertinoLocalizations> load(Locale locale) async {
-    return  _MockDefaultCupertinoLocalizations(locale.languageCode == 'ar');
+    return  _MockDefaultCupertinoLocalizations();
   }
 
   static const LocalizationsDelegate<CupertinoLocalizations> delegate =
@@ -2564,7 +2548,7 @@ class _MockCupertinoLocalizationsDelegate
   const _MockCupertinoLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => locale.languageCode == 'ar' || locale.languageCode == 'pt';
+  bool isSupported(Locale locale) =>  locale.languageCode == 'pt';
 
   @override
   Future<CupertinoLocalizations> load(Locale locale) =>
@@ -2581,13 +2565,11 @@ Future<void> _loadFonts() async {
   final Directory flutterRoot =
       fs.directory(platform.environment['FLUTTER_ROOT']);
 
-   Future<void> loadFont(String fontName, String fontPath,[bool arabian = false]) async {
-    final File fontFile = flutterRoot.childFile(fs.path.join('bin', 'cache', 'artifacts', arabian ? 'arabic_fonts' : 'material_fonts', fontPath));
+   Future<void> loadFont(String fontName, String fontPath) async {
+    final File fontFile = flutterRoot.childFile(fs.path.join('bin', 'cache', 'artifacts', 'material_fonts', fontPath));
     final ByteData fontData = fontFile.readAsBytesSync().buffer.asByteData();
     await (FontLoader(fontName)..addFont(Future<ByteData>.value(fontData))).load();
   }
 
   await loadFont('Roboto', 'Roboto-Regular.ttf');
-  // Load the Tajawal font for Arabic.
-  // await loadFont('Tajawal', 'Tajawal-Regular.ttf', true);
 }
