@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter_localizations/flutter_localizations.dart';
+///
 /// @docImport 'app_bar.dart';
 /// @docImport 'color_scheme.dart';
 /// @docImport 'dialog.dart';
@@ -275,7 +277,7 @@ class MaterialApp extends StatefulWidget {
     this.routerConfig,
     this.backButtonDispatcher,
     this.builder,
-    this.title = '',
+    this.title,
     this.onGenerateTitle,
     this.onNavigationNotification,
     this.color,
@@ -386,7 +388,7 @@ class MaterialApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.title}
   ///
   /// This value is passed unmodified to [WidgetsApp.title].
-  final String title;
+  final String? title;
 
   /// {@macro flutter.widgets.widgetsApp.onGenerateTitle}
   ///

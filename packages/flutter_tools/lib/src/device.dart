@@ -603,10 +603,11 @@ String getNameForDeviceConnectionInterface(DeviceConnectionInterface connectionI
 /// the host operating system in the case of Flutter Desktop.
 abstract class Device {
   Device(this.id, {
+    required Logger logger,
     required this.category,
     required this.platformType,
     required this.ephemeral,
-  });
+  }) : dds = DartDevelopmentService(logger: logger);
 
   final String id;
 
@@ -733,7 +734,7 @@ abstract class Device {
   DevicePortForwarder? get portForwarder;
 
   /// Get the DDS instance for this device.
-  final DartDevelopmentService dds = DartDevelopmentService();
+  final DartDevelopmentService dds;
 
   /// Clear the device's logs.
   void clearLogs();
@@ -778,7 +779,6 @@ abstract class Device {
     required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs,
     bool prebuiltApplication = false,
-    bool ipv6 = false,
     String? userIdentifier,
   });
 
@@ -1007,7 +1007,11 @@ class DebuggingOptions {
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
-   })  : debuggingEnabled = true,
+    this.enableDevTools = true,
+    this.ipv6 = false,
+    this.google3WorkspaceRoot,
+    this.printDtd = false,
+   }) : debuggingEnabled = true,
         webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -1065,6 +1069,10 @@ class DebuggingOptions {
       nullAssertions = false,
       nativeNullAssertions = false,
       serveObservatory = false,
+      enableDevTools = false,
+      ipv6 = false,
+      google3WorkspaceRoot = null,
+      printDtd = false,
       webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
 
   DebuggingOptions._({
@@ -1123,6 +1131,10 @@ class DebuggingOptions {
     required this.enableEmbedderApi,
     required this.usingCISystem,
     required this.debugLogsDirectoryPath,
+    required this.enableDevTools,
+    required this.ipv6,
+    required this.google3WorkspaceRoot,
+    required this.printDtd,
   });
 
   final bool debuggingEnabled;
@@ -1167,6 +1179,10 @@ class DebuggingOptions {
   final bool enableEmbedderApi;
   final bool usingCISystem;
   final String? debugLogsDirectoryPath;
+  final bool enableDevTools;
+  final bool ipv6;
+  final String? google3WorkspaceRoot;
+  final bool printDtd;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1220,7 +1236,6 @@ class DebuggingOptions {
     EnvironmentType environmentType,
     String? route,
     Map<String, Object?> platformArgs, {
-    bool ipv6 = false,
     DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
     bool isCoreDevice = false,
   }) {
@@ -1326,6 +1341,10 @@ class DebuggingOptions {
     'enableEmbedderApi': enableEmbedderApi,
     'usingCISystem': usingCISystem,
     'debugLogsDirectoryPath': debugLogsDirectoryPath,
+    'enableDevTools': enableDevTools,
+    'ipv6': ipv6,
+    'google3WorkspaceRoot': google3WorkspaceRoot,
+    'printDtd': printDtd,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -1385,6 +1404,10 @@ class DebuggingOptions {
       enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
       usingCISystem: (json['usingCISystem'] as bool?) ?? false,
       debugLogsDirectoryPath: json['debugLogsDirectoryPath'] as String?,
+      enableDevTools: (json['enableDevTools'] as bool?) ?? true,
+      ipv6: (json['ipv6'] as bool?) ?? false,
+      google3WorkspaceRoot: json['google3WorkspaceRoot'] as String?,
+      printDtd: (json['printDtd'] as bool?) ?? false,
     );
 }
 
