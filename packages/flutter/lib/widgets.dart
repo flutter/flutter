@@ -149,6 +149,7 @@ export 'src/widgets/standard_component_type.dart';
 export 'src/widgets/status_transitions.dart';
 export 'src/widgets/system_context_menu.dart';
 export 'src/widgets/table.dart';
+export 'src/widgets/tap_outside_configuration.dart';
 export 'src/widgets/tap_region.dart';
 export 'src/widgets/text.dart';
 export 'src/widgets/text_editing_intents.dart';

@@ -54,6 +54,7 @@ import 'scrollable_helpers.dart';
 import 'shortcuts.dart';
 import 'size_changed_layout_notifier.dart';
 import 'spell_check.dart';
+import 'tap_outside_configuration.dart';
 import 'tap_region.dart';
 import 'text.dart';
 import 'text_editing_intents.dart';
@@ -5102,32 +5103,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// The `event` argument is the [PointerDownEvent] that caused the notification.
   void _defaultOnTapOutside(PointerDownEvent event) {
-    /// The focus dropping behavior is only present on desktop platforms
-    /// and mobile browsers.
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-      // On mobile platforms, we don't unfocus on touch events unless they're
-      // in the web browser, but we do unfocus for all other kinds of events.
-        switch (event.kind) {
-          case ui.PointerDeviceKind.touch:
-            if (kIsWeb) {
-              widget.focusNode.unfocus();
-            }
-          case ui.PointerDeviceKind.mouse:
-          case ui.PointerDeviceKind.stylus:
-          case ui.PointerDeviceKind.invertedStylus:
-          case ui.PointerDeviceKind.unknown:
-            widget.focusNode.unfocus();
-          case ui.PointerDeviceKind.trackpad:
-            throw UnimplementedError('Unexpected pointer down event for trackpad');
-        }
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        widget.focusNode.unfocus();
-    }
+    TapOutsideConfiguration.of(context).defaultOnTapOutside(event, widget.focusNode);
   }
 
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
