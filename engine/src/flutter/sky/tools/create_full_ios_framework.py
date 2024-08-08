@@ -143,11 +143,20 @@ def create_framework(  # pylint: disable=too-many-arguments
     print('Cannot find iOS simulator dylib at %s' % simulator_x64_dylib)
     return 1
 
+  # Compute dsym output paths, if enabled.
+  framework_dsym = None
+  simulator_dsym = None
+  if args.dsym:
+    framework_dsym = os.path.splitext(framework)[0] + '.dSYM'
+    simulator_dsym = os.path.splitext(simulator_framework)[0] + '.dSYM'
+
+  # Emit the framework for physical devices.
   shutil.rmtree(framework, True)
   shutil.copytree(arm64_framework, framework)
   framework_binary = os.path.join(framework, 'Flutter')
-  process_framework(args, dst, framework, framework_binary)
+  process_framework(args, dst, framework_binary, framework_dsym)
 
+  # Emit the framework for simulators.
   if args.simulator_arm64_out_dir is not None:
     shutil.rmtree(simulator_framework, True)
     shutil.copytree(simulator_arm64_framework, simulator_framework)
@@ -159,7 +168,7 @@ def create_framework(  # pylint: disable=too-many-arguments
         'lipo', simulator_x64_dylib, simulator_arm64_dylib, '-create', '-output',
         simulator_framework_binary
     ])
-    process_framework(args, dst, simulator_framework, simulator_framework_binary)
+    process_framework(args, dst, simulator_framework_binary, simulator_dsym)
   else:
     simulator_framework = simulator_x64_framework
 
@@ -167,14 +176,15 @@ def create_framework(  # pylint: disable=too-many-arguments
   # simulator frameworks, or just the x64 simulator framework if only that one
   # exists.
   xcframeworks = [simulator_framework, framework]
-  create_xcframework(location=dst, name='Flutter', frameworks=xcframeworks)
+  dsyms = [simulator_dsym, framework_dsym] if args.dsym else None
+  create_xcframework(location=dst, name='Flutter', frameworks=xcframeworks, dsyms=dsyms)
 
-  # Add the x64 simulator into the fat framework
+  # Add the x64 simulator into the fat framework.
   subprocess.check_call([
       'lipo', arm64_dylib, simulator_x64_dylib, '-create', '-output', framework_binary
   ])
 
-  process_framework(args, dst, framework, framework_binary)
+  process_framework(args, dst, framework_binary, framework_dsym)
   return 0
 
 
@@ -215,16 +225,14 @@ def zip_archive(dst):
     subprocess.check_call(['zip', '-r', 'extension_safe_Flutter.dSYM.zip', 'Flutter.dSYM'], cwd=dst)
 
 
-def process_framework(args, dst, framework, framework_binary):
-  if args.dsym:
-    dsym_out = os.path.splitext(framework)[0] + '.dSYM'
-    subprocess.check_call([DSYMUTIL, '-o', dsym_out, framework_binary])
+def process_framework(args, dst, framework_binary, dsym):
+  if dsym:
+    subprocess.check_call([DSYMUTIL, '-o', dsym, framework_binary])
 
   if args.strip:
     # copy unstripped
     unstripped_out = os.path.join(dst, 'Flutter.unstripped')
     shutil.copyfile(framework_binary, unstripped_out)
-
     subprocess.check_call(['strip', '-x', '-S', framework_binary])
 
 
