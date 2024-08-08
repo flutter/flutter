@@ -275,6 +275,10 @@ However, all engines instantiated with a FlutterEngineGroup share the same
 threads across the group. The engines have their own root isolate but share the
 same UI task runner, dart isolate group and source code.
 
+As a result engines in a FlutterEngineGroup will have a smaller memory
+footprint, faster startup latency, and better CPU core usage with shared threads
+and a shared thread pool for isolates.
+
 ### Current Platform Specific Threading Configurations
 
 As mentioned, the engine can support multiple threading configurations, the
