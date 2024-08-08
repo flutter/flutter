@@ -372,8 +372,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
 
     final Color effectiveFocusOverlayColor = widget.focusColor
       ?? HSLColor
-          .fromColor(effectiveActiveColor
-          .withOpacity(kCupertinoFocusColorOpacity))
+          .fromColor(effectiveActiveColor.withOpacity(kCupertinoFocusColorOpacity))
           .withLightness(kCupertinoFocusColorBrightness)
           .withSaturation(kCupertinoFocusColorSaturation)
           .toColor();

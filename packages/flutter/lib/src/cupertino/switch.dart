@@ -710,8 +710,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
               ..focusColor = CupertinoDynamicColor.resolve(
                   widget.focusColor ??
                   HSLColor
-                    .fromColor(activeColor
-                    .withOpacity(kCupertinoFocusColorOpacity))
+                    .fromColor(activeColor.withOpacity(kCupertinoFocusColorOpacity))
                     .withLightness(kCupertinoFocusColorBrightness)
                     .withSaturation(kCupertinoFocusColorSaturation)
                     .toColor(),

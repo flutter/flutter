@@ -286,8 +286,8 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     final Color effectiveFocusOutlineColor = widget.focusColor ??
       HSLColor
         .fromColor((backgroundColor ?? CupertinoColors.activeBlue)
-        .withOpacity(kCupertinoFocusColorOpacity))
-        .withLightness(kCupertinoFocusColorBrightness)
+          .withOpacity(kCupertinoFocusColorOpacity)
+        ).withLightness(kCupertinoFocusColorBrightness)
         .withSaturation(kCupertinoFocusColorSaturation)
         .toColor();
 
