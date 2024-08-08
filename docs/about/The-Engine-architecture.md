@@ -265,13 +265,15 @@ this task runner.
 
 There are two different ways to create Flutter engines which has ramifications
 on how threading is managed across multiple Flutter engines. Flutter engines can
-be instantiated directly or through the FlutterEngineGroup apis
+be instantiated directly or through the FlutterEngineGroup APIs
 [[ios](https://github.com/flutter/engine/blob/main/shell/platform/darwin/ios/framework/Headers/FlutterEngineGroup.h),
 [android](https://api.flutter.dev/javadoc/io/flutter/embedding/engine/FlutterEngineGroup.html)].
-If an engine is instantiated directly, it gets its own threads. However, all
-engines instantiated with a FlutterEngineGroup will share the same threads
-across that group.  Similarly, engines in a group will share a [dart isolate
+If an engine is instantiated directly, it gets its own engine threads and [dart isolate
 group](https://dart.dev/language/concurrency#performance-and-isolate-groups).
+
+However, all engines instantiated with a FlutterEngineGroup share the same
+threads across the group. The engines have their own root isolate sharing the
+same UI task runner and share a dart isolate group.
 
 ### Current Platform Specific Threading Configurations
 
