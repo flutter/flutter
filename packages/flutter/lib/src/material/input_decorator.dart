@@ -3692,8 +3692,10 @@ class InputDecoration {
       iconColor: iconColor ?? theme.iconColor,
       prefixStyle: prefixStyle ?? theme.prefixStyle,
       prefixIconColor: prefixIconColor ?? theme.prefixIconColor,
+      prefixIconConstraints: prefixIconConstraints ?? theme.prefixIconConstraints,
       suffixStyle: suffixStyle ?? theme.suffixStyle,
       suffixIconColor: suffixIconColor ?? theme.suffixIconColor,
+      suffixIconConstraints: suffixIconConstraints ?? theme.suffixIconConstraints,
       counterStyle: counterStyle ?? theme.counterStyle,
       filled: filled ?? theme.filled,
       fillColor: fillColor ?? theme.fillColor,
@@ -3921,8 +3923,10 @@ class InputDecorationTheme with Diagnosticable {
     this.iconColor,
     this.prefixStyle,
     this.prefixIconColor,
+    this.prefixIconConstraints,
     this.suffixStyle,
     this.suffixIconColor,
+    this.suffixIconConstraints,
     this.counterStyle,
     this.filled = false,
     this.fillColor,
@@ -4063,6 +4067,20 @@ class InputDecorationTheme with Diagnosticable {
   /// If null, defaults to the [ColorScheme.primary].
   final Color? prefixIconColor;
 
+  /// The constraints to use for [InputDecoration.prefixIconConstraints].
+  ///
+  /// This can be used to modify the [BoxConstraints] surrounding
+  /// [InputDecoration.prefixIcon].
+  ///
+  /// This property is particularly useful for getting the decoration's height
+  /// less than 48px. This can be achieved by setting [isDense] to true and
+  /// setting the constraints' minimum height and width to a value lower than
+  /// 48px.
+  ///
+  /// If null, [BoxConstraints] with a minimum width and height of 48px is
+  /// used.
+  final BoxConstraints? prefixIconConstraints;
+
   /// The style to use for the [InputDecoration.suffixText].
   ///
   /// If [suffixStyle] is a [WidgetStateTextStyle], then the effective
@@ -4080,6 +4098,20 @@ class InputDecorationTheme with Diagnosticable {
   ///
   /// If null, defaults to the [ColorScheme.primary].
   final Color? suffixIconColor;
+
+  /// The constraints to use for [InputDecoration.suffixIconConstraints].
+  ///
+  /// This can be used to modify the [BoxConstraints] surrounding
+  /// [InputDecoration.suffixIcon].
+  ///
+  /// This property is particularly useful for getting the decoration's height
+  /// less than 48px. This can be achieved by setting [isDense] to true and
+  /// setting the constraints' minimum height and width to a value lower than
+  /// 48px.
+  ///
+  /// If null, [BoxConstraints] with a minimum width and height of 48px is
+  /// used.
+  final BoxConstraints? suffixIconConstraints;
 
   /// The style to use for the [InputDecoration.counterText].
   ///
@@ -4332,8 +4364,10 @@ class InputDecorationTheme with Diagnosticable {
     Color? iconColor,
     TextStyle? prefixStyle,
     Color? prefixIconColor,
+    BoxConstraints? prefixIconConstraints,
     TextStyle? suffixStyle,
     Color? suffixIconColor,
+    BoxConstraints? suffixIconConstraints,
     TextStyle? counterStyle,
     bool? filled,
     Color? fillColor,
@@ -4367,8 +4401,10 @@ class InputDecorationTheme with Diagnosticable {
       isCollapsed: isCollapsed ?? this.isCollapsed,
       prefixStyle: prefixStyle ?? this.prefixStyle,
       prefixIconColor: prefixIconColor ?? this.prefixIconColor,
+      prefixIconConstraints: prefixIconConstraints ?? this.prefixIconConstraints,
       suffixStyle: suffixStyle ?? this.suffixStyle,
       suffixIconColor: suffixIconColor ?? this.suffixIconColor,
+      suffixIconConstraints: suffixIconConstraints ?? this.suffixIconConstraints,
       counterStyle: counterStyle ?? this.counterStyle,
       filled: filled ?? this.filled,
       fillColor: fillColor ?? this.fillColor,
@@ -4413,8 +4449,10 @@ class InputDecorationTheme with Diagnosticable {
       iconColor: iconColor ?? inputDecorationTheme.iconColor,
       prefixStyle: prefixStyle ?? inputDecorationTheme.prefixStyle,
       prefixIconColor: prefixIconColor ?? inputDecorationTheme.prefixIconColor,
+      prefixIconConstraints: prefixIconConstraints ?? inputDecorationTheme.prefixIconConstraints,
       suffixStyle: suffixStyle ?? inputDecorationTheme.suffixStyle,
       suffixIconColor: suffixIconColor ?? inputDecorationTheme.suffixIconColor,
+      suffixIconConstraints: suffixIconConstraints ?? inputDecorationTheme.suffixIconConstraints,
       counterStyle: counterStyle ?? inputDecorationTheme.counterStyle,
       fillColor: fillColor ?? inputDecorationTheme.fillColor,
       activeIndicatorBorder: activeIndicatorBorder ?? inputDecorationTheme.activeIndicatorBorder,
@@ -4448,11 +4486,13 @@ class InputDecorationTheme with Diagnosticable {
     iconColor,
     prefixStyle,
     prefixIconColor,
+    prefixIconConstraints,
     suffixStyle,
     suffixIconColor,
-    counterStyle,
-    filled,
+    suffixIconConstraints,
     Object.hash(
+      counterStyle,
+      filled,
       fillColor,
       activeIndicatorBorder,
       outlineBorder,
@@ -4493,8 +4533,10 @@ class InputDecorationTheme with Diagnosticable {
         && other.iconColor == iconColor
         && other.prefixStyle == prefixStyle
         && other.prefixIconColor == prefixIconColor
+        && other.prefixIconConstraints == prefixIconConstraints
         && other.suffixStyle == suffixStyle
         && other.suffixIconColor == suffixIconColor
+        && other.suffixIconConstraints == suffixIconConstraints
         && other.counterStyle == counterStyle
         && other.floatingLabelBehavior == floatingLabelBehavior
         && other.floatingLabelAlignment == floatingLabelAlignment
@@ -4534,8 +4576,10 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('isCollapsed', isCollapsed, defaultValue: defaultTheme.isCollapsed));
     properties.add(DiagnosticsProperty<Color>('iconColor', iconColor, defaultValue: defaultTheme.iconColor));
     properties.add(DiagnosticsProperty<Color>('prefixIconColor', prefixIconColor, defaultValue: defaultTheme.prefixIconColor));
+    properties.add(DiagnosticsProperty<BoxConstraints>('prefixIconConstraints', prefixIconConstraints, defaultValue: defaultTheme.prefixIconConstraints));
     properties.add(DiagnosticsProperty<TextStyle>('prefixStyle', prefixStyle, defaultValue: defaultTheme.prefixStyle));
     properties.add(DiagnosticsProperty<Color>('suffixIconColor', suffixIconColor, defaultValue: defaultTheme.suffixIconColor));
+    properties.add(DiagnosticsProperty<BoxConstraints>('suffixIconConstraints', suffixIconConstraints, defaultValue: defaultTheme.suffixIconConstraints));
     properties.add(DiagnosticsProperty<TextStyle>('suffixStyle', suffixStyle, defaultValue: defaultTheme.suffixStyle));
     properties.add(DiagnosticsProperty<TextStyle>('counterStyle', counterStyle, defaultValue: defaultTheme.counterStyle));
     properties.add(DiagnosticsProperty<bool>('filled', filled, defaultValue: defaultTheme.filled));
