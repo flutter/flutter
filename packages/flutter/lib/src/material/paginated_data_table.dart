@@ -20,7 +20,6 @@ import 'debug.dart';
 import 'dropdown.dart';
 import 'icon_button.dart';
 import 'icons.dart';
-import 'ink_decoration.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
 import 'progress_indicator.dart';
@@ -651,7 +650,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     //  https://github.com/flutter/flutter/issues/48522
                     height: 56.0,
                     child: Container(
-                      color: widget.footerBackgroundColor, // Set background color here, // Set background color footer here
+                      color: widget.footerBackgroundColor, // Set footer background color  here
                       child: SingleChildScrollView(
                         dragStartBehavior: widget.dragStartBehavior,
                         scrollDirection: Axis.horizontal,
