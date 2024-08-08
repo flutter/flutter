@@ -1024,6 +1024,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// The `clipBehavior` argument is used to clip the shape of the menu. Defaults to
 /// [Clip.none].
 ///
+/// The `requestFocus` argument specifies whether the menu should request focus
+/// when it appears. If it is null, [Navigator.requestFocus] is used instead.
+///
 /// See also:
 ///
 ///  * [PopupMenuItem], a popup menu entry for a single value.
