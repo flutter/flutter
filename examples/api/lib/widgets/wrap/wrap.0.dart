@@ -28,7 +28,48 @@ class WrapExample extends StatefulWidget {
 }
 
 class _WrapExampleState extends State<WrapExample> {
-  List<(WrapFit, String)> items = <(WrapFit, String)>[(WrapFit.loose, 'Item 0'), (WrapFit.loose, 'Item 1')];
+  static final List<WrapFit?> fits = <WrapFit?>[null, ...WrapFit.values];
+  List<(WrapFit?, String)> items = <(WrapFit?, String)>[(null, 'Item 0'), (null, 'Item 1')];
+
+  Widget buildItem(int index, WrapFit? fit, String content) {
+    final Widget button = FilledButton.icon(
+        onPressed: () {
+          setState(() {
+            items[index] = (fits[((fit?.index ?? - 1) + 2) % fits.length], content);
+          });
+        },
+        onLongPress: () {
+          setState(() {
+            items.removeAt(index);
+          });
+        },
+        icon: const Icon(Icons.switch_access_shortcut),
+        iconAlignment: IconAlignment.end,
+        label: Text(content),
+        style: TextButton.styleFrom(
+          backgroundColor: switch (fit) {
+            WrapFit.runTight => const Color.fromARGB(255, 243, 33, 33),
+            WrapFit.runLoose => const Color.fromARGB(255, 255, 146, 146),
+            WrapFit.runMaybeTight => const Color.fromARGB(255, 41, 182, 62),
+            WrapFit.tight => const Color.fromARGB(255, 3, 43, 244),
+            null => const Color.fromARGB(255, 34, 196, 255),
+          },
+          foregroundColor: fit?.isTight ?? false ? Colors.white : Colors.black,
+      ),
+    );
+
+    if (fit == null) {
+      return button;
+    } else {
+      return Wrapped(
+        fit: fit,
+        child: Tooltip(
+          message: fit.name,
+          child: button,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,38 +81,8 @@ class _WrapExampleState extends State<WrapExample> {
           runSpacing: 8,
           spacing: 8,
           children: <Widget>[
-            for (final (int index, (WrapFit fit, String content)) in items.indexed)
-              Wrapped(
-                fit: fit,
-                child: Tooltip(
-                  message: fit.name,
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      setState(() {
-                       items[index] = (WrapFit.values[(fit.index + 1) % WrapFit.values.length], content);
-                      });
-                    },
-                    onLongPress: () {
-                      setState(() {
-                        items.removeAt(index);
-                      });
-                    },
-                    icon: const Icon(Icons.switch_access_shortcut),
-                    iconAlignment: IconAlignment.end,
-                    label: Text(content),
-                    style: TextButton.styleFrom(
-                      backgroundColor: switch (fit) {
-                        WrapFit.runTight => const Color.fromARGB(255, 243, 33, 33),
-                        WrapFit.runLoose => const Color.fromARGB(255, 255, 146, 146),
-                        WrapFit.runMaybeTight => const Color.fromARGB(255, 41, 182, 62),
-                        WrapFit.tight => const Color.fromARGB(255, 3, 43, 244),
-                        WrapFit.loose => const Color.fromARGB(255, 34, 196, 255),
-                      },
-                      foregroundColor: fit.isTight ? Colors.white : Colors.black,
-                  ),
-                ),
-              ),
-            ),
+            for (final (int index, (WrapFit? fit, String content)) in items.indexed)
+              buildItem(index, fit, content),
             Wrapped(
               // If the child fits in the current run,
               // its max width is set to the remaining space.
@@ -85,7 +96,7 @@ class _WrapExampleState extends State<WrapExample> {
                 ),
                 onSubmitted: (String value) {
                   setState(() {
-                    items.add((WrapFit.loose, value));
+                    items.add((null, value));
                   });
                 },
               ),

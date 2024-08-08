@@ -1217,7 +1217,7 @@ void main() {
         ),
       ),
     );
-    expect(getParentData().fit, WrapFit.loose);
+    expect(getParentData().fit, isNull);
 
     await tester.pumpWidget(
       const Directionality(
