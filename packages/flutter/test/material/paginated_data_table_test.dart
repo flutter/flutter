@@ -1422,7 +1422,7 @@ void main() {
         footerStyle: const TextStyle(color: Color.fromARGB(255, 255, 0, 0)),
         showFirstLastButtons: true,
         header: const Text('Test table'),
-        rowsPerPage: 8,
+        rowsPerPage: 10,
         onRowsPerPageChanged: (int? rowsPerPage) { },
         source: source,
         columns: const <DataColumn>[
@@ -1453,7 +1453,7 @@ void main() {
         footerBackgroundColor: footerBackgroundColor,
         showFirstLastButtons: true,
         header: const Text('Test table'),
-        rowsPerPage: 8,
+        rowsPerPage: 10,
         onRowsPerPageChanged: (int? rowsPerPage) { },
         source: source,
         columns: const <DataColumn>[
