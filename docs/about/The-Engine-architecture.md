@@ -272,8 +272,8 @@ If an engine is instantiated directly, it gets its own engine threads and [dart 
 group](https://dart.dev/language/concurrency#performance-and-isolate-groups).
 
 However, all engines instantiated with a FlutterEngineGroup share the same
-threads across the group. The engines have their own root isolate sharing the
-same UI task runner and share a dart isolate group.
+threads across the group. The engines have their own root isolate but share the
+same UI task runner, dart isolate group and source code.
 
 ### Current Platform Specific Threading Configurations
 
