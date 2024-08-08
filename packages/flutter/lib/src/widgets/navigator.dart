@@ -165,8 +165,11 @@ abstract class Route<T> extends _RoutePlaceholder {
   ///
   /// If [requestFocus] is not provided, the value of [Navigator.requestFocus] is
   /// used instead.
-  Route({ RouteSettings? settings, bool? requestFocus }) : _settings = settings ?? const RouteSettings(),
-  _requestFocus = requestFocus {
+  Route({
+    RouteSettings? settings,
+    bool? requestFocus,
+  }) : _settings = settings ?? const RouteSettings(),
+       _requestFocus = requestFocus {
     if (kFlutterMemoryAllocationsEnabled) {
       FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: 'package:flutter/widgets.dart',
