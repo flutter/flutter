@@ -29,7 +29,11 @@
 #ifdef SHELL_ENABLE_METAL
 #include "third_party/skia/include/gpu/ganesh/mtl/GrMtlBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/mtl/GrMtlTypes.h"
-#endif
+#endif  // SHELL_ENABLE_METAL
+
+#ifdef SHELL_ENABLE_GL
+#include "flutter/testing/test_gl_surface.h"
+#endif  // SHELL_ENABLE_GL
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
 // NOLINTBEGIN(bugprone-unchecked-optional-access)
@@ -44,6 +48,10 @@ EmbedderTestBackingStoreProducer::EmbedderTestBackingStoreProducer(
     : context_(std::move(context)),
       type_(type),
       software_pixfmt_(software_pixfmt)
+#ifdef SHELL_ENABLE_GL
+      ,
+      test_egl_context_(nullptr)
+#endif
 #ifdef SHELL_ENABLE_METAL
       ,
       test_metal_context_(std::make_unique<TestMetalContext>())
@@ -66,6 +74,16 @@ EmbedderTestBackingStoreProducer::EmbedderTestBackingStoreProducer(
 
 EmbedderTestBackingStoreProducer::~EmbedderTestBackingStoreProducer() = default;
 
+#ifdef SHELL_ENABLE_GL
+void EmbedderTestBackingStoreProducer::SetEGLContext(
+    std::shared_ptr<TestEGLContext> context) {
+  // Ideally this would be set in the constructor, however we can't do that
+  // without introducing different constructors depending on different graphics
+  // APIs, which is a bit ugly.
+  test_egl_context_ = std::move(context);
+}
+#endif
+
 bool EmbedderTestBackingStoreProducer::Create(
     const FlutterBackingStoreConfig* config,
     FlutterBackingStore* renderer_out) {
@@ -79,6 +97,8 @@ bool EmbedderTestBackingStoreProducer::Create(
       return CreateTexture(config, renderer_out);
     case RenderTargetType::kOpenGLFramebuffer:
       return CreateFramebuffer(config, renderer_out);
+    case RenderTargetType::kOpenGLSurface:
+      return CreateSurface(config, renderer_out);
 #endif
 #ifdef SHELL_ENABLE_METAL
     case RenderTargetType::kMetalTexture:
@@ -130,16 +150,16 @@ bool EmbedderTestBackingStoreProducer::CreateFramebuffer(
     return false;
   }
 
+  auto user_data = new UserData(surface);
+
   backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
-  backing_store_out->user_data = surface.get();
+  backing_store_out->user_data = user_data;
   backing_store_out->open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
   backing_store_out->open_gl.framebuffer.target = framebuffer_info.fFormat;
   backing_store_out->open_gl.framebuffer.name = framebuffer_info.fFBOID;
-  // The balancing unref is in the destruction callback.
-  surface->ref();
-  backing_store_out->open_gl.framebuffer.user_data = surface.get();
+  backing_store_out->open_gl.framebuffer.user_data = user_data;
   backing_store_out->open_gl.framebuffer.destruction_callback =
-      [](void* user_data) { reinterpret_cast<SkSurface*>(user_data)->unref(); };
+      [](void* user_data) { delete reinterpret_cast<UserData*>(user_data); };
 
   return true;
 #else
@@ -183,17 +203,61 @@ bool EmbedderTestBackingStoreProducer::CreateTexture(
     return false;
   }
 
+  auto user_data = new UserData(surface);
+
   backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
-  backing_store_out->user_data = surface.get();
+  backing_store_out->user_data = user_data;
   backing_store_out->open_gl.type = kFlutterOpenGLTargetTypeTexture;
   backing_store_out->open_gl.texture.target = texture_info.fTarget;
   backing_store_out->open_gl.texture.name = texture_info.fID;
   backing_store_out->open_gl.texture.format = texture_info.fFormat;
-  // The balancing unref is in the destruction callback.
-  surface->ref();
-  backing_store_out->open_gl.texture.user_data = surface.get();
+  backing_store_out->open_gl.texture.user_data = user_data;
   backing_store_out->open_gl.texture.destruction_callback =
-      [](void* user_data) { reinterpret_cast<SkSurface*>(user_data)->unref(); };
+      [](void* user_data) { delete reinterpret_cast<UserData*>(user_data); };
+
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool EmbedderTestBackingStoreProducer::CreateSurface(
+    const FlutterBackingStoreConfig* config,
+    FlutterBackingStore* backing_store_out) {
+#ifdef SHELL_ENABLE_GL
+  FML_CHECK(test_egl_context_);
+  auto surface = std::make_unique<TestGLOnscreenOnlySurface>(
+      test_egl_context_,
+      SkSize::Make(config->size.width, config->size.height).toRound());
+
+  auto make_current = [](void* user_data, bool* invalidate_state) -> bool {
+    *invalidate_state = false;
+    return reinterpret_cast<UserData*>(user_data)->gl_surface->MakeCurrent();
+  };
+
+  auto clear_current = [](void* user_data, bool* invalidate_state) -> bool {
+    *invalidate_state = false;
+    // return
+    // reinterpret_cast<GLUserData*>(user_data)->gl_surface->ClearCurrent();
+    return true;
+  };
+
+  auto destruction_callback = [](void* user_data) {
+    delete reinterpret_cast<UserData*>(user_data);
+  };
+
+  auto sk_surface = surface->GetOnscreenSurface();
+
+  auto user_data = new UserData(sk_surface, nullptr, std::move(surface));
+
+  backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
+  backing_store_out->user_data = user_data;
+  backing_store_out->open_gl.type = kFlutterOpenGLTargetTypeSurface;
+  backing_store_out->open_gl.surface.user_data = user_data;
+  backing_store_out->open_gl.surface.make_current_callback = make_current;
+  backing_store_out->open_gl.surface.clear_current_callback = clear_current;
+  backing_store_out->open_gl.surface.destruction_callback =
+      destruction_callback;
 
   return true;
 #else
@@ -219,16 +283,16 @@ bool EmbedderTestBackingStoreProducer::CreateSoftware(
     return false;
   }
 
+  auto user_data = new UserData(surface);
+
   backing_store_out->type = kFlutterBackingStoreTypeSoftware;
-  backing_store_out->user_data = surface.get();
+  backing_store_out->user_data = user_data;
   backing_store_out->software.allocation = pixmap.addr();
   backing_store_out->software.row_bytes = pixmap.rowBytes();
   backing_store_out->software.height = pixmap.height();
-  // The balancing unref is in the destruction callback.
-  surface->ref();
-  backing_store_out->software.user_data = surface.get();
+  backing_store_out->software.user_data = user_data;
   backing_store_out->software.destruction_callback = [](void* user_data) {
-    reinterpret_cast<SkSurface*>(user_data)->unref();
+    delete reinterpret_cast<UserData*>(user_data);
   };
 
   return true;
@@ -256,19 +320,18 @@ bool EmbedderTestBackingStoreProducer::CreateSoftware2(
     return false;
   }
 
+  auto user_data = new UserData(surface);
+
   backing_store_out->type = kFlutterBackingStoreTypeSoftware2;
-  backing_store_out->user_data = surface.get();
+  backing_store_out->user_data = user_data;
   backing_store_out->software2.struct_size =
       sizeof(FlutterSoftwareBackingStore2);
-  backing_store_out->software2.user_data = surface.get();
   backing_store_out->software2.allocation = pixmap.writable_addr();
   backing_store_out->software2.row_bytes = pixmap.rowBytes();
   backing_store_out->software2.height = pixmap.height();
-  // The balancing unref is in the destruction callback.
-  surface->ref();
-  backing_store_out->software2.user_data = surface.get();
+  backing_store_out->software2.user_data = user_data;
   backing_store_out->software2.destruction_callback = [](void* user_data) {
-    reinterpret_cast<SkSurface*>(user_data)->unref();
+    delete reinterpret_cast<UserData*>(user_data);
   };
   backing_store_out->software2.pixel_format = software_pixfmt_;
 
@@ -374,21 +437,14 @@ bool EmbedderTestBackingStoreProducer::CreateVulkanImage(
 
   // Collect all allocated resources in the destruction_callback.
   {
-    UserData* user_data = new UserData();
-    user_data->image = image;
-    user_data->surface = surface.get();
-
+    auto user_data = new UserData(surface, image);
     backing_store_out->user_data = user_data;
     backing_store_out->vulkan.user_data = user_data;
     backing_store_out->vulkan.destruction_callback = [](void* user_data) {
       UserData* d = reinterpret_cast<UserData*>(user_data);
-      d->surface->unref();
       delete d->image;
       delete d;
     };
-
-    // The balancing unref is in the destruction callback.
-    surface->ref();
   }
 
   return true;

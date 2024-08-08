@@ -58,12 +58,29 @@ bool EmbedderTestCompositorGL::UpdateOffscrenComposition(
     SkIPoint canvas_offset = SkIPoint::Make(0, 0);
 
     switch (layer->type) {
-      case kFlutterLayerContentTypeBackingStore:
-        layer_image =
-            reinterpret_cast<SkSurface*>(layer->backing_store->user_data)
-                ->makeImageSnapshot();
+      case kFlutterLayerContentTypeBackingStore: {
+        auto gl_user_data =
+            reinterpret_cast<EmbedderTestBackingStoreProducer::UserData*>(
+                layer->backing_store->user_data);
 
+        if (gl_user_data->gl_surface != nullptr) {
+          // This backing store is a OpenGL Surface.
+          // We need to make it current so we can snapshot it.
+
+          gl_user_data->gl_surface->MakeCurrent();
+
+          // GetRasterSurfaceSnapshot() does two
+          // gl_surface->makeImageSnapshot()'s. Doing a single
+          // ->makeImageSnapshot() will not work.
+          layer_image = gl_user_data->gl_surface->GetRasterSurfaceSnapshot();
+        } else {
+          layer_image = gl_user_data->surface->makeImageSnapshot();
+        }
+
+        // We don't clear the current surface here because we need the
+        // EGL context to be current for surface->makeImageSnapshot() below.
         break;
+      }
       case kFlutterLayerContentTypePlatformView:
         layer_image =
             platform_view_renderer_callback_

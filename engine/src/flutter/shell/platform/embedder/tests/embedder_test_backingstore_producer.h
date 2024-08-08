@@ -21,14 +21,36 @@
 #include "flutter/testing/test_vulkan_context.h"  // nogncheck
 #endif
 
+#ifdef SHELL_ENABLE_GL
+#include "flutter/testing/test_gl_surface.h"
+#endif
+
 namespace flutter {
 namespace testing {
 
 class EmbedderTestBackingStoreProducer {
  public:
   struct UserData {
-    SkSurface* surface;
+    UserData() : surface(nullptr), image(nullptr){};
+
+    explicit UserData(sk_sp<SkSurface> surface)
+        : surface(std::move(surface)), image(nullptr){};
+
+    UserData(sk_sp<SkSurface> surface, FlutterVulkanImage* vk_image)
+        : surface(std::move(surface)), image(vk_image){};
+
+    sk_sp<SkSurface> surface;
     FlutterVulkanImage* image;
+#ifdef SHELL_ENABLE_GL
+    UserData(sk_sp<SkSurface> surface,
+             FlutterVulkanImage* vk_image,
+             std::unique_ptr<TestGLOnscreenOnlySurface> gl_surface)
+        : surface(std::move(surface)),
+          image(vk_image),
+          gl_surface(std::move(gl_surface)){};
+
+    std::unique_ptr<TestGLOnscreenOnlySurface> gl_surface;
+#endif
   };
 
   enum class RenderTargetType {
@@ -36,6 +58,7 @@ class EmbedderTestBackingStoreProducer {
     kSoftwareBuffer2,
     kOpenGLFramebuffer,
     kOpenGLTexture,
+    kOpenGLSurface,
     kMetalTexture,
     kVulkanImage,
   };
@@ -46,6 +69,10 @@ class EmbedderTestBackingStoreProducer {
                                        kFlutterSoftwarePixelFormatNative32);
   ~EmbedderTestBackingStoreProducer();
 
+#ifdef SHELL_ENABLE_GL
+  void SetEGLContext(std::shared_ptr<TestEGLContext> context);
+#endif
+
   bool Create(const FlutterBackingStoreConfig* config,
               FlutterBackingStore* renderer_out);
 
@@ -54,6 +81,9 @@ class EmbedderTestBackingStoreProducer {
                          FlutterBackingStore* renderer_out);
 
   bool CreateTexture(const FlutterBackingStoreConfig* config,
+                     FlutterBackingStore* renderer_out);
+
+  bool CreateSurface(const FlutterBackingStoreConfig* config,
                      FlutterBackingStore* renderer_out);
 
   bool CreateSoftware(const FlutterBackingStoreConfig* config,
@@ -71,6 +101,10 @@ class EmbedderTestBackingStoreProducer {
   sk_sp<GrDirectContext> context_;
   RenderTargetType type_;
   FlutterSoftwarePixelFormat software_pixfmt_;
+
+#ifdef SHELL_ENABLE_GL
+  std::shared_ptr<TestEGLContext> test_egl_context_;
+#endif
 
 #ifdef SHELL_ENABLE_METAL
   std::unique_ptr<TestMetalContext> test_metal_context_;

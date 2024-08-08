@@ -407,11 +407,17 @@ void EmbedderConfigBuilder::SetRenderTargetType(
     EmbedderTestBackingStoreProducer::RenderTargetType type,
     FlutterSoftwarePixelFormat software_pixfmt) {
   auto& compositor = context_.GetCompositor();
+
+  auto producer = std::make_unique<EmbedderTestBackingStoreProducer>(
+      compositor.GetGrContext(), type, software_pixfmt);
+
+#ifdef SHELL_ENABLE_GL
+  producer->SetEGLContext(context_.egl_context_);
+#endif
+
   // TODO(wrightgeorge): figure out a better way of plumbing through the
   // GrDirectContext
-  compositor.SetBackingStoreProducer(
-      std::make_unique<EmbedderTestBackingStoreProducer>(
-          compositor.GetGrContext(), type, software_pixfmt));
+  compositor.SetBackingStoreProducer(std::move(producer));
 }
 
 UniqueEngine EmbedderConfigBuilder::LaunchEngine() const {

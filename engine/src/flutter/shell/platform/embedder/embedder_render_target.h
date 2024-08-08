@@ -27,6 +27,20 @@ namespace flutter {
 ///
 class EmbedderRenderTarget {
  public:
+  struct SetCurrentResult {
+    /// This is true if the operation succeeded (even if it was a no-op),
+    /// false if the surface could not be made current / the current surface
+    /// could not be cleared.
+    bool success;
+
+    /// This is true if any native graphics API (e.g. GL, but not EGL) state has
+    /// changed and Skia/Impeller should not assume any GL state values are the
+    /// same as before the context change operation was attempted.
+    bool gl_state_trampled;
+  };
+
+  using MakeOrClearCurrentCallback = std::function<SetCurrentResult()>;
+
   //----------------------------------------------------------------------------
   /// @brief      Destroys this instance of the render target and invokes the
   ///             callback for the embedder to release its resource associated
@@ -76,6 +90,24 @@ class EmbedderRenderTarget {
   /// @return     The backing store.
   ///
   const FlutterBackingStore* GetBackingStore() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Make the render target current.
+  ///
+  ///             Sometimes render targets are actually (for example)
+  ///             EGL surfaces instead of framebuffers or textures.
+  ///             In that case, we can't fully wrap them as SkSurfaces, instead,
+  ///             the embedder will provide a callback that should be called
+  ///             when the target surface should be made current.
+  ///
+  /// @return     The result of the operation.
+  virtual SetCurrentResult MaybeMakeCurrent() const { return {true, false}; }
+
+  //----------------------------------------------------------------------------
+  /// @brief      Clear the current render target. @see MaybeMakeCurrent
+  ///
+  /// @return     The result of the operation.
+  virtual SetCurrentResult MaybeClearCurrent() const { return {true, false}; }
 
  protected:
   //----------------------------------------------------------------------------
