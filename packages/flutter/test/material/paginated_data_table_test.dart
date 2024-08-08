@@ -1422,6 +1422,7 @@ void main() {
         footerStyle: const TextStyle(color: Color.fromARGB(255, 255, 0, 0)),
         showFirstLastButtons: true,
         header: const Text('Test table'),
+        rowsPerPage: 8,
         source: source,
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
