@@ -2469,16 +2469,15 @@ void main() {
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
-    // All entries should be avaliable, and two buttons should be found for each entry.
+
+    // All entries should be available, and two buttons should be found for each entry.
     // One is layout for the _DropdownMenuBody, the other one is the real button item in the menu.
     for (final TestMenu menu in TestMenu.values) {
       expect(find.widgetWithText(MenuItemButton, menu.label), findsNWidgets(2));
     }
 
     // Text input would enable the filter.
-    await tester.enterText(find
-        .byType(TextField)
-        .first, 'Menu 1');
+    await tester.enterText(find.byType(TextField).first, 'Menu 1');
     await tester.pumpAndSettle();
     for (final TestMenu menu in TestMenu.values) {
       // 'Menu 1' should be 2, other items should only find one.
