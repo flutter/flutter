@@ -261,6 +261,18 @@ having the futures images and other resources be resolved in a timely manner.
 Even so, it is recommended that custom embedders set up a dedicated thread for
 this task runner.
 
+### Flutter Engine Groups
+
+There are two different ways to create Flutter engines which has ramifications
+on how threading is managed across multiple Flutter engines. Flutter engines can
+be instantiated directly or through the FlutterEngineGroup apis
+[[ios](https://github.com/flutter/engine/blob/main/shell/platform/darwin/ios/framework/Headers/FlutterEngineGroup.h),
+[android](https://api.flutter.dev/javadoc/io/flutter/embedding/engine/FlutterEngineGroup.html)].
+If an engine is instantiated directly, it gets its own threads. However, all
+engines instantiated with a FlutterEngineGroup will share the same threads
+across that group.  Similarly, engines in a group will share a [dart isolate
+group](https://dart.dev/language/concurrency#performance-and-isolate-groups).
+
 ### Current Platform Specific Threading Configurations
 
 As mentioned, the engine can support multiple threading configurations, the
