@@ -113,6 +113,7 @@ void main() {
 
     addTearDown(() {
       controller.removeListener(listener);
+      controller.dispose();
       entry.remove();
       entry.dispose();
     });
@@ -153,6 +154,7 @@ void main() {
 
     addTearDown(() {
       controller.removeListener(listener);
+      controller.dispose();
       entry.remove();
       entry.dispose();
     });

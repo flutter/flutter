@@ -1521,7 +1521,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
 /// [OverlayPortalController.show] and [OverlayPortalController.hide] can be
 /// called even before the controller is assigned to any [OverlayPortal], but
 /// they typically should not be called while the widget tree is being rebuilt.
-class OverlayPortalController implements Listenable {
+class OverlayPortalController extends ChangeNotifier {
   /// Creates an [OverlayPortalController], optionally with a String identifier
   /// `debugLabel`.
   OverlayPortalController({ String? debugLabel }) : _debugLabel = debugLabel;
@@ -1566,7 +1566,7 @@ class OverlayPortalController implements Listenable {
     final _OverlayPortalState? state = _attachTarget;
     if (state != null) {
       state.show(_now());
-      _notifyListeners();
+      notifyListeners();
     } else {
       _zOrderIndex = _now();
     }
@@ -1584,7 +1584,7 @@ class OverlayPortalController implements Listenable {
     final _OverlayPortalState? state = _attachTarget;
     if (state != null) {
       state.hide();
-      _notifyListeners();
+      notifyListeners();
     } else {
       assert(_zOrderIndex != null);
       _zOrderIndex = null;
@@ -1605,24 +1605,6 @@ class OverlayPortalController implements Listenable {
   /// This method should typically not be called while the widget tree is being
   /// rebuilt.
   void toggle() => isShowing ? hide() : show();
-
-  final List<VoidCallback> _listeners = <VoidCallback>[];
-
-  void _notifyListeners() {
-    for (final VoidCallback listener in _listeners) {
-      listener();
-    }
-  }
-
-  @override
-  void addListener(VoidCallback listener) {
-    _listeners.add(listener);
-  }
-
-  @override
-  void removeListener(VoidCallback listener) {
-    _listeners.remove(listener);
-  }
 
   @override
   String toString() {
