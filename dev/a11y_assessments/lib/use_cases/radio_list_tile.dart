@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class RadioListTileUseCase extends UseCase {
-
   @override
   String get name => 'RadioListTile';
 

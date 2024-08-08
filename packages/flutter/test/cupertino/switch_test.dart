@@ -1867,6 +1867,50 @@ void main() {
       imageProvider2.complete();
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('Switch uses inactive track color when set', (WidgetTester tester) async {
+        const Color inactiveTrackColor = Color(0xFF00FF00);
+
+        await tester.pumpWidget(
+          const Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: CupertinoSwitch(
+                value: false,
+                inactiveTrackColor: inactiveTrackColor,
+                dragStartBehavior: DragStartBehavior.down,
+                onChanged: null,
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byType(CupertinoSwitch), findsOneWidget);
+        expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).inactiveTrackColor, inactiveTrackColor);
+        expect(find.byType(CupertinoSwitch), paints..rrect(color: inactiveTrackColor));
+    });
+
+    testWidgets('Switch uses active track color when set', (WidgetTester tester) async {
+        const Color activeTrackColor = Color(0xFF00FF00);
+
+        await tester.pumpWidget(
+          const Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: CupertinoSwitch(
+                value: true,
+                activeTrackColor: activeTrackColor,
+                dragStartBehavior: DragStartBehavior.down,
+                onChanged: null,
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byType(CupertinoSwitch), findsOneWidget);
+        expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).activeTrackColor, activeTrackColor);
+        expect(find.byType(CupertinoSwitch), paints..rrect(color: activeTrackColor));
+    });
   });
 }
 
