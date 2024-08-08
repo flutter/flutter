@@ -25,6 +25,10 @@ static const char* vertex_shader_src =
 
 // Fragment shader to draw Flutter window contents.
 static const char* fragment_shader_src =
+    "#ifdef GL_ES\n"
+    "precision mediump float;\n"
+    "#endif\n"
+    "\n"
     "uniform sampler2D texture;\n"
     "varying vec2 texcoord;\n"
     "\n"
