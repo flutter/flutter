@@ -2456,6 +2456,7 @@ targets:
       task_name: embedded_android_views_integration_test
 
   - name: Linux_android_emu external_textures_integration_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/150838
     recipe: devicelab/devicelab_drone
     bringup: true # https://github.com/flutter/flutter/issues/152684
     timeout: 60
