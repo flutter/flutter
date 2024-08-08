@@ -329,7 +329,8 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
     final Color effectiveInactiveColor = _defaultOuterColor.resolve(inactiveStates);
 
     final Color effectiveFocusOverlayColor = widget.focusColor ?? HSLColor
-      .fromColor(effectiveActiveColor.withOpacity(kCupertinoFocusColorOpacity))
+      .fromColor(effectiveActiveColor
+      .withOpacity(kCupertinoFocusColorOpacity))
       .withLightness(kCupertinoFocusColorBrightness)
       .withSaturation(kCupertinoFocusColorSaturation)
       .toColor();
