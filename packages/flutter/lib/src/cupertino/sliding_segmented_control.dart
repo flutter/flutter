@@ -67,6 +67,8 @@ const double _kTouchYDistanceThreshold = 50.0 * 50.0;
 
 // The minimum opacity of an unselected segment, when the user presses on the
 // segment and it starts to fadeout.
+//
+// Inspected from iOS 17.5 simulator.
 const double _kContentPressedMinOpacity = 0.2;
 
 const Color _kDisabledContentColor = Color.fromARGB(115, 176, 176, 176);
