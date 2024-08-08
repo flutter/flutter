@@ -5231,6 +5231,21 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   }) {
     assert(owner.renderObject._semantics._cachedSemanticFragment == this);
     final bool cacheIsDirty = _shouldFormSemanticsNode != _formedSemanticsNode;
+    if (parentInfoChanged && (_formedSemanticsNode ?? false)) {
+      // Any node other than producedNode in _semanticsNodes are sibling nodes
+      // from children fragments. This fragment is responsible for updating
+      // their transform and tags as well as cleaning up.
+      //
+      // Clean up the properties now so that we don't have stale data in them
+      // after the compileSemanticsNodes.
+      assert(owner.cachedSemanticsNode != null);
+      for (final SemanticsNode node in _semanticsNodes) {
+        if (node != owner.cachedSemanticsNode) {
+          node.transform = null;
+          node.tags = null;
+        }
+      }
+    }
     if (cacheIsDirty) {
       _formedSemanticsNode = _shouldFormSemanticsNode;
       _semanticsNodes.clear();
@@ -5250,6 +5265,24 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
           parentPaintClipRect: parentPaintClipRect,
           elevationAdjustment: elevationAdjustment,
         );
+      }
+    }
+    if (parentInfoChanged && _formedSemanticsNode!) {
+      // Any node other than producedNode in _semanticsNodes are sibling nodes
+      // from children fragments, their rects are in the same coordinates as the
+      // producedNode.
+      //
+      // See _SemanticsGeometry._computeMergedGeometryFor for sibling node's
+      // geometry is calculated.
+      final SemanticsNode producedNode = owner.cachedSemanticsNode!;
+      for (final SemanticsNode node in _semanticsNodes) {
+        if (node != producedNode) {
+          node.transform = producedNode.transform;
+          if (_tagsForChildren != null) {
+            node.tags ??= <SemanticsTag>{};
+            node.tags!.addAll(_tagsForChildren!);
+          }
+        }
       }
     }
     result.addAll(_semanticsNodes);
@@ -5323,18 +5356,6 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       parentSemanticsClipRect: node.parentSemanticsClipRect,
       parentPaintClipRect: node.parentPaintClipRect,
     );
-    // Sibling node needs to attach to the parent of an explicit node.
-    for (final SemanticsNode siblingNode in siblingNodes) {
-      // sibling nodes are in the same coordinate of the immediate explicit node.
-      // They need to share the same transform if they are going to attach to the
-      // parent of the immediate explicit node.
-      assert(siblingNode.transform == null);
-      siblingNode.transform = node.transform;
-      if (_tagsForChildren != null) {
-        siblingNode.tags ??= <SemanticsTag>{};
-        siblingNode.tags!.addAll(_tagsForChildren!);
-      }
-    }
     _semanticsNodes.addAll(siblingNodes);
     siblingNodes.clear();
   }
@@ -5442,12 +5463,27 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
         .expand<SemanticsTag>((Set<SemanticsTag> tags) => tags)
         .toSet();
       final SemanticsNode node = entry.key;
+      assert(mergedGeometry.transform == null);
+      // This fragment is only allowed to add tags into the node instead of
+      // cleaning it since some of the tags may be added by the parent fragment
+      // who actually take these node as their siblings.
+      //
+      // It will be that fragment's responsibility to clean up the tags.
+      //
+      // This is the same for the transform as well.
+      //
+      // See _SwitchableFragment.compileSemanticsNodes
+      if (tags.isNotEmpty) {
+        if (node.tags == null) {
+          node.tags = tags;
+        } else {
+          node.tags!.addAll(tags);
+        }
+      }
       node
         ..rect = mergedGeometry.rect
-        ..transform = mergedGeometry.transform
         ..parentSemanticsClipRect = mergedGeometry.semanticsClipRect
         ..parentPaintClipRect = mergedGeometry.paintClipRect
-        ..tags = tags.isEmpty ? null : tags
         ..isMergedIntoParent = _mergeIntoParent;
     }
   }
@@ -5493,21 +5529,6 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       ..parentPaintClipRect = geometry.paintClipRect
       ..tags = _tagsForChildren
       ..isMergedIntoParent = _mergeIntoParent;
-    // Any node other than producedNode in _semanticsNodes are sibling nodes
-    // from children fragments, their rects are in the same coordinates as the
-    // producedNode.
-    //
-    // See _SemanticsGeometry._computeMergedGeometryFor for sibling node's
-    // geometry is calculated.
-    for (final SemanticsNode node in _semanticsNodes) {
-      if (node != producedNode) {
-        node.transform = geometry.transform;
-        if (_tagsForChildren != null) {
-          node.tags ??= <SemanticsTag>{};
-          node.tags!.addAll(_tagsForChildren!);
-        }
-      }
-    }
     if (visibilityChanged) {
       _ensureConfigIsWritable();
       _effectiveConfig.isHidden = geometry.markAsHidden;
