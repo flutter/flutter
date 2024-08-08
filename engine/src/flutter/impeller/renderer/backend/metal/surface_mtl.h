@@ -65,6 +65,9 @@ class SurfaceMTL final : public Surface {
     present_with_transaction_ = present_with_transaction;
   }
 
+  /// @brief Perform the final blit and trigger end of frame workloads.
+  bool PreparePresent();
+
   // |Surface|
   bool Present() const override;
 
@@ -82,6 +85,7 @@ class SurfaceMTL final : public Surface {
   std::optional<IRect> clip_rect_;
   bool frame_boundary_ = false;
   bool present_with_transaction_ = false;
+  bool prepared_ = false;
 
   static bool ShouldPerformPartialRepaint(std::optional<IRect> damage_rect);
 

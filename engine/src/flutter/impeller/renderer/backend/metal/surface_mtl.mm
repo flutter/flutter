@@ -222,8 +222,7 @@ IRect SurfaceMTL::coverage() const {
   return IRect::MakeSize(resolve_texture_->GetSize());
 }
 
-// |Surface|
-bool SurfaceMTL::Present() const {
+bool SurfaceMTL::PreparePresent() {
   auto context = context_.lock();
   if (!context) {
     return false;
@@ -260,6 +259,17 @@ bool SurfaceMTL::Present() const {
 #ifdef IMPELLER_DEBUG
   ContextMTL::Cast(context.get())->GetGPUTracer()->MarkFrameEnd();
 #endif  // IMPELLER_DEBUG
+  prepared_ = true;
+  return true;
+}
+
+// |Surface|
+bool SurfaceMTL::Present() const {
+  FML_CHECK(prepared_);
+  auto context = context_.lock();
+  if (!context) {
+    return false;
+  }
 
   if (drawable_) {
     id<MTLCommandBuffer> command_buffer =
