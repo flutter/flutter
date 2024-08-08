@@ -87,6 +87,7 @@ void main() {
             'pluginName': 'url_launcher_linux',
             'dartClass': 'UrlLauncherPluginLinux',
             'platform': 'linux',
+            'dartFileName': 'url_launcher_linux.dart'
           })
         );
         expect(resolutions[1].toMap(), equals(
@@ -94,6 +95,7 @@ void main() {
             'pluginName': 'url_launcher_macos',
             'dartClass': 'UrlLauncherPluginMacOS',
             'platform': 'macos',
+            'dartFileName': 'url_launcher_macos.dart',
           })
         );
       });
@@ -152,6 +154,7 @@ void main() {
               'pluginName': 'url_launcher_macos',
               'dartClass': 'UrlLauncherPluginMacOS',
               'platform': 'macos',
+              'dartFileName': 'url_launcher_macos.dart',
             }));
       });
 
@@ -203,6 +206,7 @@ void main() {
             'pluginName': 'url_launcher_macos',
             'dartClass': 'UrlLauncherPluginMacOS',
             'platform': 'macos',
+            'dartFileName': 'url_launcher_macos.dart',
           })
         );
         expect(resolutions[1].toMap(), equals(
@@ -210,6 +214,7 @@ void main() {
             'pluginName': 'transitive_dependency_plugin',
             'dartClass': 'UrlLauncherPluginWindows',
             'platform': 'windows',
+            'dartFileName': 'transitive_dependency_plugin.dart'
           })
         );
       });
@@ -246,6 +251,7 @@ void main() {
             'pluginName': 'url_launcher',
             'dartClass': 'UrlLauncherAndroid',
             'platform': 'android',
+            'dartFileName': 'url_launcher.dart',
           })
         );
         expect(resolutions[1].toMap(), equals(
@@ -253,6 +259,7 @@ void main() {
             'pluginName': 'url_launcher',
             'dartClass': 'UrlLauncherIos',
             'platform': 'ios',
+            'dartFileName': 'url_launcher.dart',
           })
         );
       });
@@ -363,16 +370,19 @@ void main() {
               'pluginName': 'url_launcher',
               'dartClass': 'UrlLauncherLinux',
               'platform': 'linux',
+              'dartFileName': 'url_launcher.dart',
             },
             <String, String>{
               'pluginName': 'url_launcher',
               'dartClass': 'UrlLauncherMacOS',
               'platform': 'macos',
+              'dartFileName': 'url_launcher.dart',
             },
             <String, String>{
               'pluginName': 'url_launcher',
               'dartClass': 'UrlLauncherWindows',
               'platform': 'windows',
+              'dartFileName': 'url_launcher.dart',
             },
           ])
         );
@@ -458,6 +468,7 @@ void main() {
             'pluginName': 'url_launcher_linux',
             'dartClass': 'UrlLauncherPluginLinux',
             'platform': 'linux',
+            'dartFileName': 'url_launcher_linux.dart',
           })
         );
       });
@@ -507,6 +518,7 @@ void main() {
             'pluginName': 'url_launcher_linux',
             'dartClass': 'UrlLauncherPluginLinux',
             'platform': 'linux',
+            'dartFileName': 'url_launcher_linux.dart'
           })
         );
       });
@@ -575,6 +587,7 @@ void main() {
             'pluginName': 'user_selected_url_launcher_implementation',
             'dartClass': 'UrlLauncherPluginLinux',
             'platform': 'linux',
+            'dartFileName': 'user_selected_url_launcher_implementation.dart',
           })
         );
       });
@@ -630,6 +643,7 @@ void main() {
               'pluginName': 'user_selected_url_launcher_implementation',
               'dartClass': 'UrlLauncherAndroid',
               'platform': 'android',
+              'dartFileName': 'user_selected_url_launcher_implementation.dart',
             })
         );
         expect(resolutions[1].toMap(), equals(
@@ -637,6 +651,7 @@ void main() {
               'pluginName': 'url_launcher',
               'dartClass': 'UrlLauncherIos',
               'platform': 'ios',
+              'dartFileName': 'url_launcher.dart'
             })
         );
       });
@@ -909,6 +924,7 @@ void main() {
               'pluginName': 'url_launcher_linux',
               'dartClass': 'UrlLauncherLinux',
               'platform': 'linux',
+              'dartFileName': 'url_launcher_linux.dart'
             })
         );
       });
