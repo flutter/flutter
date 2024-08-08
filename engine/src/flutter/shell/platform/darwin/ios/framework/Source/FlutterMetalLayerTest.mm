@@ -283,8 +283,11 @@
     [compositor commitTransaction];
 
     [self removeMetalLayer:layer];
+  }
+  CFTimeInterval start = CACurrentMediaTime();
+  while (weakLayer != nil && CACurrentMediaTime() - start < 1) {
     // Deallocating the layer after removing is not synchronous.
-    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.01, YES);
   }
 
   XCTAssertNil(weakLayer);
