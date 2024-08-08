@@ -20,6 +20,7 @@
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h"
+#include "third_party/skia/include/gpu/vk/GrVkTypes.h"
 #include "third_party/skia/include/gpu/vk/VulkanTypes.h"
 #include "vulkan/vulkan_core.h"
 #include "vulkan/vulkan_fuchsia.h"
