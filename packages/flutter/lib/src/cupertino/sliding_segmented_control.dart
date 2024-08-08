@@ -71,6 +71,17 @@ const double _kTouchYDistanceThreshold = 50.0 * 50.0;
 // Inspected from iOS 17.5 simulator.
 const double _kContentPressedMinOpacity = 0.2;
 
+// Inspected from iOS 17.5 simulator.
+const double _kFontSize = 13.0;
+
+// The value inspected from iOS 17.5 simulator is RegularG3, so `FontWeight.w500`
+// is eyeballed value which looks the most similar to RegularG3.
+const FontWeight _kFontWeight = FontWeight.w500;
+
+// The value inspected from iOS 17.5 simulator is MediumG3, so `FontWeight.w600`
+// is eyeballed value which looks the most similar to MediumG3.
+const FontWeight _kHighlightedFontWeight = FontWeight.w600;
+
 const Color _kDisabledContentColor = Color.fromARGB(115, 176, 176, 176);
 
 // The spring animation used when the thumb changes its rect.
@@ -182,8 +193,8 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
               style: DefaultTextStyle.of(context)
                 .style
                 .merge(TextStyle(
-                  fontWeight: widget.highlighted ? FontWeight.w600 : FontWeight.w500,
-                  fontSize: 13,
+                  fontWeight: widget.highlighted ? _kHighlightedFontWeight : _kFontWeight,
+                  fontSize: _kFontSize,
                   color: widget.enabled ? null : _kDisabledContentColor,
                 )),
               duration: _kHighlightAnimationDuration,
