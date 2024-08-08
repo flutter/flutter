@@ -299,7 +299,9 @@ class _ZoomPageTransition extends StatelessWidget {
         context,
         animation,
         secondaryAnimation,
-        child
+        child,
+        allowSnapshotting,
+        allowEnterRouteSnapshotting
       ),
     );
   }
@@ -690,10 +692,12 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   static const bool _kProfileForceDisableSnapshotting = bool.fromEnvironment('flutter.benchmarks.force_disable_snapshot');
 
   @override
-  DelegatedTransitionBuilder? get delegatedTransitionBuilder => delegateTransition;
+  DelegatedTransitionBuilder? get delegatedTransitionBuilder => (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
+    return delegateTransition(context, animation, secondaryAnimation, child, allowSnapshotting, allowEnterRouteSnapshotting);
+  };
 
   /// The delegated transition.
-  static Widget delegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
+  static Widget delegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child, bool allowSnapshotting, bool allowEnterRouteSnapshotting) {
     return DualTransitionBuilder(
       animation: ReverseAnimation(secondaryAnimation),
       forwardBuilder: (
@@ -703,7 +707,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
       ) {
         return _ZoomEnterTransition(
           animation: animation,
-          allowSnapshotting: true ,
+          allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting,
           reverse: true,
           child: child,
         );
@@ -715,7 +719,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
       ) {
         return _ZoomExitTransition(
           animation: animation,
-          allowSnapshotting: true,
+          allowSnapshotting: allowSnapshotting,
           child: child,
         );
       },
@@ -851,13 +855,21 @@ class PageTransitionsTheme with Diagnosticable {
   }
 
   /// Provide delegate transition for platform.
-  DelegatedTransitionBuilder? delegatedTransition(BuildContext context) {
+  DelegatedTransitionBuilder? delegatedTransition(BuildContext context, bool allowSnapshotting) {
     final TargetPlatform platform = Theme.of(context).platform;
 
     final PageTransitionsBuilder matchingBuilder =
       builders[platform] ?? const ZoomPageTransitionsBuilder();
 
-    return matchingBuilder.delegatedTransitionBuilder;
+    final PageTransitionsBuilder snapshotAwareBuilder =
+      matchingBuilder is ZoomPageTransitionsBuilder ?
+        ZoomPageTransitionsBuilder(
+          allowSnapshotting: (matchingBuilder as ZoomPageTransitionsBuilder).allowSnapshotting && allowSnapshotting,
+          allowEnterRouteSnapshotting: (matchingBuilder as ZoomPageTransitionsBuilder).allowEnterRouteSnapshotting
+        ) :
+        matchingBuilder;
+
+    return snapshotAwareBuilder.delegatedTransitionBuilder;
   }
 
   // Map the builders to a list with one PageTransitionsBuilder per platform for
