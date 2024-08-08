@@ -1417,7 +1417,7 @@ void main() {
   testWidgets('PaginatedDataTable footerStyle set properly', (WidgetTester tester) async {
     const Color footerStyleColor = Color.fromARGB(255, 255, 0, 0);
 
-    await tester.pumpAndSettle(MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       home: PaginatedDataTable(
         footerStyle: const TextStyle(color: Color.fromARGB(255, 255, 0, 0)),
         showFirstLastButtons: true,
@@ -1432,6 +1432,8 @@ void main() {
         ],
       ),
     ));
+
+      await tester.pump();
 
 
       expect(find.byWidgetPredicate((widget) => widget is Text && widget.data == 'Rows per page:'), findsOneWidget);
