@@ -413,13 +413,6 @@ std::shared_ptr<GlyphAtlas> TypographerContextSTB::CreateGlyphAtlas(
     return last_atlas;
   }
 
-  std::shared_ptr<CommandBuffer> cmd_buffer = context.CreateCommandBuffer();
-  std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
-
-  fml::ScopedCleanupClosure closure([&cmd_buffer, &context]() {
-    context.GetCommandQueue()->Submit({std::move(cmd_buffer)});
-  });
-
   // ---------------------------------------------------------------------------
   // Step 1: Determine if the atlas type and font glyph pairs are compatible
   //         with the current atlas and reuse if possible.
@@ -444,9 +437,17 @@ std::shared_ptr<GlyphAtlas> TypographerContextSTB::CreateGlyphAtlas(
       }
     }
   }
+
   if (last_atlas->GetType() == type && new_glyphs.size() == 0) {
     return last_atlas;
   }
+
+  std::shared_ptr<CommandBuffer> cmd_buffer = context.CreateCommandBuffer();
+  std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
+
+  fml::ScopedCleanupClosure closure([&cmd_buffer, &context]() {
+    context.GetCommandQueue()->Submit({std::move(cmd_buffer)});
+  });
 
   // ---------------------------------------------------------------------------
   // Step 2: Determine if the additional missing glyphs can be appended to the
