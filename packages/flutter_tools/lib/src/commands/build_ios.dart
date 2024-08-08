@@ -599,10 +599,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
             return 'release-testing';
           case 'development':
             return 'debugging';
-          case 'enterprise':
-            return 'enterprise';
-          default:
-            throwToolExit('Encountered invalid export-method input.');
         }
       }
       return method;
