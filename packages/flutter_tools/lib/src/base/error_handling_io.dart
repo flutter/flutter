@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -298,6 +299,15 @@ class ErrorHandlingFile
       platform: _platform,
       failureMessage: 'Flutter failed to create file at "${delegate.path}"',
       posixPermissionSuggestion: recursive ? null : _posixPermissionSuggestion(<String>[delegate.parent.path]),
+        additionalHandlers: <_ErrorHandler>[
+          if (recursive)
+            _ErrorHandler(
+              errorCode:
+                  kSystemCodeCannotFindFile, // TODO this might be too permissive.
+              operatingSystem: 'windows',
+              handler: (_, __, ___) => throwToolExit('you big dummy'),
+            )
+        ]
     );
   }
 
@@ -595,6 +605,7 @@ T _runSync<T>(T Function() op, {
   required Platform platform,
   String? failureMessage,
   String? posixPermissionSuggestion,
+  List<_ErrorHandler> additionalHandlers = const <_ErrorHandler>[],
 }) {
   try {
     return op();
@@ -605,7 +616,16 @@ T _runSync<T>(T Function() op, {
     rethrow;
   } on FileSystemException catch (e) {
     if (platform.isWindows) {
+      bool handled = false;
+      for (final _ErrorHandler handler in additionalHandlers) {
+        if (handler.errorCode == e.osError?.errorCode && handler.operatingSystem == 'windows') {
+          handler.handle(e, failureMessage, e.osError?.errorCode ?? 0); // TODOShould probably make error code nullable instead of lying with 0.
+          handled = true;
+        }
+      }
+      if (!handled) {
       _handleWindowsException(e, failureMessage, e.osError?.errorCode ?? 0);
+      }
     } else if (platform.isLinux || platform.isMacOS) {
       _handlePosixException(e, failureMessage, e.osError?.errorCode ?? 0, posixPermissionSuggestion);
     }
@@ -622,6 +642,21 @@ T _runSync<T>(T Function() op, {
   }
 }
 
+class _ErrorHandler {
+  _ErrorHandler({
+    required this.errorCode,
+    required this.operatingSystem,
+    required Null Function(Exception e, String? message, int errorCode) handler,
+  }) : _handler = handler;
+
+  final int errorCode;
+  final String operatingSystem;
+  final Null Function(Exception e, String? message, int errorCode) _handler;
+
+  void handle(Exception e, String? message, int errCode) {
+    _handler(e, message, errCode);
+  }
+}
 
 /// A [ProcessManager] that throws a [ToolExit] on certain errors.
 ///

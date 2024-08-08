@@ -568,7 +568,7 @@ void createIntellijDartPluginJar(String pluginJarPath, FileSystem fileSystem) {
 }
 
 // TODO(fujino): this should use the MemoryFileSystem and a
-// FileExceptionHandler, blocked by https://github.com/google/file.dart/issues/227.
+//  MutableFileSystemOpHandle, blocked by https://github.com/google/file.dart/issues/227.
 class _ThrowingFileSystem extends Fake implements FileSystem {
   _ThrowingFileSystem(this._exception);
 

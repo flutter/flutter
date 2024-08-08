@@ -894,8 +894,8 @@ void main() {
   });
 
   testWithoutContext('FlutterWebSdk uses tryToDelete to handle directory edge cases', () async {
-    final FileExceptionHandler handler = FileExceptionHandler();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+    final MutableFileSystemOpHandle fileSystemOpHandle = MutableFileSystemOpHandle();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: fileSystemOpHandle.opHandle);
     final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
     final Directory webCacheDirectory = cache.getWebSdkDirectory();
     final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
@@ -906,7 +906,11 @@ void main() {
       location.childFile('foo').createSync();
     };
     webCacheDirectory.childFile('bar').createSync(recursive: true);
-    handler.addError(webCacheDirectory, FileSystemOp.delete, const FileSystemException('', '', OSError('', 2)));
+    fileSystemOpHandle.setHandler(
+      webCacheDirectory,
+      FileSystemOp.delete,
+      () => throw const FileSystemException('', '', OSError('', 2)),
+    );
 
     await expectLater(() => webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils()), throwsToolExit(
       message: RegExp('Unable to delete file or directory at "cache/bin/cache/flutter_web_sdk"'),
@@ -914,7 +918,7 @@ void main() {
   });
 
   testWithoutContext('LegacyCanvasKitRemover removes old canvaskit artifacts if they exist', () async {
-    final FileExceptionHandler handler = FileExceptionHandler();
+    final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
     final File canvasKitWasm = fileSystem.file(fileSystem.path.join(
@@ -939,8 +943,8 @@ void main() {
   });
 
   testWithoutContext('Cache handles exception thrown if stamp file cannot be parsed', () {
-    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
-    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
+    final MutableFileSystemOpHandle fileSystemOpHandle = MutableFileSystemOpHandle();
+    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: fileSystemOpHandle.opHandle);
     final Logger logger = BufferLogger.test();
     final FakeCache cache = FakeCache(
       fileSystem: fileSystem,
@@ -954,10 +958,10 @@ void main() {
     expect(cache.getStampFor('foo'), null);
 
     file.createSync();
-    exceptionHandler.addError(
+    fileSystemOpHandle.setHandler(
       file,
       FileSystemOp.read,
-      const FileSystemException(),
+      () => throw const FileSystemException(),
     );
 
     expect(cache.getStampFor('foo'), null);
