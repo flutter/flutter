@@ -461,7 +461,7 @@ public class PlatformViewsControllerTest {
     // Simulate create call from the framework.
     createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
 
-    platformViewsController.initializePlatformViewIfNeeded(platformViewId);
+    assertTrue(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
 
     View resultAndroidView = platformViewsController.getPlatformViewById(platformViewId);
     assertNotNull(resultAndroidView);
@@ -647,11 +647,7 @@ public class PlatformViewsControllerTest {
         jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ false);
     assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
 
-    assertThrows(
-        IllegalStateException.class,
-        () -> {
-          platformViewsController.initializePlatformViewIfNeeded(platformViewId);
-        });
+    assertFalse(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
   }
 
   @Test
@@ -675,11 +671,7 @@ public class PlatformViewsControllerTest {
     createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
     assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
 
-    assertThrows(
-        IllegalStateException.class,
-        () -> {
-          platformViewsController.initializePlatformViewIfNeeded(platformViewId);
-        });
+    assertFalse(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
   }
 
   @Test
@@ -901,7 +893,7 @@ public class PlatformViewsControllerTest {
 
     // Simulate create call from the framework.
     createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
-    platformViewsController.initializePlatformViewIfNeeded(platformViewId);
+    assertTrue(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
 
     assertNotNull(androidView.getParent());
     assertTrue(androidView.getParent() instanceof FlutterMutatorView);
@@ -912,7 +904,7 @@ public class PlatformViewsControllerTest {
 
     // Simulate create call from the framework.
     createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
-    platformViewsController.initializePlatformViewIfNeeded(platformViewId);
+    assertTrue(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
 
     assertNotNull(androidView.getParent());
     assertTrue(androidView.getParent() instanceof FlutterMutatorView);
@@ -941,7 +933,7 @@ public class PlatformViewsControllerTest {
     // Simulate create call from the framework.
     createPlatformView(
         jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ false);
-    platformViewsController.initializePlatformViewIfNeeded(platformViewId);
+    assertTrue(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
 
     when(platformView.getView()).thenReturn(null);
 
@@ -1080,7 +1072,7 @@ public class PlatformViewsControllerTest {
 
     // Simulate create call from the framework.
     createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
-    platformViewsController.initializePlatformViewIfNeeded(platformViewId);
+    assertTrue(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
     assertEquals(flutterView.getChildCount(), 2);
 
     // Simulate first frame from the framework.

@@ -1115,14 +1115,13 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    *     testing.
    */
   @VisibleForTesting
-  void initializePlatformViewIfNeeded(int viewId) {
+  boolean initializePlatformViewIfNeeded(int viewId) {
     final PlatformView platformView = platformViews.get(viewId);
     if (platformView == null) {
-      throw new IllegalStateException(
-          "Platform view hasn't been initialized from the platform view channel.");
+      return false;
     }
     if (platformViewParent.get(viewId) != null) {
-      return;
+      return true;
     }
     final View embeddedView = platformView.getView();
     if (embeddedView == null) {
@@ -1160,6 +1159,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
     parentView.addView(embeddedView);
     flutterView.addView(parentView);
+    return true;
   }
 
   public void attachToFlutterRenderer(@NonNull FlutterRenderer flutterRenderer) {
@@ -1189,7 +1189,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       int viewHeight,
       @NonNull FlutterMutatorsStack mutatorsStack) {
     initializeRootImageViewIfNeeded();
-    initializePlatformViewIfNeeded(viewId);
+    if (!initializePlatformViewIfNeeded(viewId)) {
+      return;
+    }
 
     final FlutterMutatorView parentView = platformViewParent.get(viewId);
     parentView.readyToDisplay(mutatorsStack, x, y, width, height);
