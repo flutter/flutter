@@ -34,6 +34,12 @@ ImageType? detectImageType(Uint8List data) {
       }
     }
 
+    // If we detect a WebP image, check if it is animated.
+    if (format.imageType == ImageType.webp) {
+      if (_WebpHeaderReader(data.buffer.asByteData()).isAnimated()) {
+        return ImageType.animatedWebp;
+      }
+    }
     return format.imageType;
   }
 
@@ -61,9 +67,11 @@ enum ImageType {
   // animated. We should detect if they are actually animated by reading the
   // image headers, https://github.com/flutter/flutter/issues/151911.
   png(ImageFileType.png, isAnimated: false),
-  gif(ImageFileType.gif, isAnimated: true),
+  gif(ImageFileType.gif, isAnimated: false),
+  animatedGif(ImageFileType.gif, isAnimated: true),
   jpeg(ImageFileType.jpeg, isAnimated: false),
-  webp(ImageFileType.webp, isAnimated: true),
+  webp(ImageFileType.webp, isAnimated: false),
+  animatedWebp(ImageFileType.webp, isAnimated: true),
   bmp(ImageFileType.bmp, isAnimated: false),
   avif(ImageFileType.avif, isAnimated: false);
 
@@ -84,11 +92,11 @@ enum ImageFileSignature {
   ),
   gif87a(
     <int?>[0x47, 0x49, 0x46, 0x38, 0x37, 0x61],
-    ImageType.gif,
+    ImageType.animatedGif,
   ),
   gif89a(
     <int?>[0x47, 0x49, 0x46, 0x38, 0x39, 0x61],
-    ImageType.gif,
+    ImageType.animatedGif,
   ),
   jpeg(
     <int?>[0xFF, 0xD8, 0xFF],
@@ -172,4 +180,81 @@ bool isAvif(Uint8List data) {
     return true;
   }
   return false;
+}
+
+/// Reads the header of a WebP file to determine if it is animated or not.
+///
+/// See https://developers.google.com/speed/webp/docs/riff_container
+class _WebpHeaderReader {
+  _WebpHeaderReader(this.bytes);
+
+  final ByteData bytes;
+
+  /// The current position we are reading from in bytes.
+  int _position = 0;
+
+  /// Returns [true] if this WebP is animated.
+  bool isAnimated() {
+    final bool isWebP = _readWebpHeader();
+    if (!isWebP) {
+      return false;
+    }
+    // If this is an animated WebP, then it must have a 'VP8X' chunk header
+    // with the 'animation' bit set. See: https://developers.google.com/speed/webp/docs/riff_container#extended_file_format
+    final bool isVP8X = _readChunkHeader('VP8X');
+    if (!isVP8X) {
+      return false;
+    }
+
+    // If this is a VP8X style WebP, then the next byte will have a bit which
+    // indicates whether it is animated or not.
+    final int headerByte = _readUint8();
+    const int animatedMask = 1 << 1;
+    return headerByte & animatedMask != 0;
+  }
+
+  /// Reads a RIFF chunk header. Returns [false] if the header FourCC isn't
+  /// [expectedHeader].
+  bool _readChunkHeader(String expectedHeader) {
+    final String chunkFourCC = _readFourCC();
+    // Read chunk size.
+    _readUint32();
+    return chunkFourCC == expectedHeader;
+  }
+
+  /// Reads the WebP header. Returns [false] if this is not a valid WebP header.
+  bool _readWebpHeader() {
+    final String riffBytes = _readFourCC();
+
+    // Read file size byte.
+    _readUint32();
+
+    final String webpBytes = _readFourCC();
+    return riffBytes == 'RIFF' && webpBytes == 'WEBP';
+  }
+
+  int _readUint32() {
+    final int result = bytes.getUint32(_position, Endian.little);
+    _position += 4;
+    return result;
+  }
+
+  int _readUint8() {
+    final int result = bytes.getUint8(_position);
+    _position += 1;
+    return result;
+  }
+
+  /// A four-character code is a uint32 created by concatenating four ASCII
+  /// characters in little-endian order.
+  String _readFourCC() {
+    final List<int> chars = <int>[
+      bytes.getUint8(_position),
+      bytes.getUint8(_position + 1),
+      bytes.getUint8(_position + 2),
+      bytes.getUint8(_position + 3),
+    ];
+    _position += 4;
+    return String.fromCharCodes(chars);
+  }
 }
