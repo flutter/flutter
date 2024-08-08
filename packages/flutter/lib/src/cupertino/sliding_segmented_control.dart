@@ -106,8 +106,8 @@ class _Segment<T> extends StatefulWidget {
     required this.highlighted,
     required this.isDragging,
     required this.enabled,
-    required this.isLeftSegment,
-    required this.isRightSegment,
+    required this.isLeftmostSegment,
+    required this.isRightmostSegment,
   }) : super(key: key);
 
   final Widget child;
@@ -115,8 +115,8 @@ class _Segment<T> extends StatefulWidget {
   final bool pressed;
   final bool highlighted;
   final bool enabled;
-  final bool isLeftSegment;
-  final bool isRightSegment;
+  final bool isLeftmostSegment;
+  final bool isRightmostSegment;
 
   // Whether the thumb of the parent widget (CupertinoSlidingSegmentedControl)
   // is currently being dragged.
@@ -172,9 +172,9 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
   @override
   Widget build(BuildContext context) {
     Alignment scaleAlignment;
-    if (widget.isLeftSegment) {
+    if (widget.isLeftmostSegment) {
       scaleAlignment = Alignment.centerLeft;
-    } else if (widget.isRightSegment) {
+    } else if (widget.isRightmostSegment) {
       scaleAlignment = Alignment.centerRight;
     } else {
       scaleAlignment = Alignment.center;
@@ -733,12 +733,12 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
       }
 
       final TextDirection textDirection = Directionality.of(context);
-      final bool isLeftSegment = switch (textDirection) {
+      final bool isLeftmostSegment = switch (textDirection) {
         TextDirection.ltr => highlightedIndex == 0,
         TextDirection.rtl => highlightedIndex == children.length - 1
       };
 
-      final bool isRightSegment = switch (textDirection) {
+      final bool isRightmostSegment = switch (textDirection) {
         TextDirection.ltr => highlightedIndex == children.length - 1,
         TextDirection.rtl => highlightedIndex == 0
       };
@@ -757,8 +757,8 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
               pressed: pressed == entry.key,
               isDragging: isThumbDragging,
               enabled: enabled,
-              isLeftSegment: isLeftSegment,
-              isRightSegment: isRightSegment,
+              isLeftmostSegment: isLeftmostSegment,
+              isRightmostSegment: isRightmostSegment,
               child: entry.value,
             ),
           ),
