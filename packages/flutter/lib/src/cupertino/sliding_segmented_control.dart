@@ -7,6 +7,7 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
@@ -176,11 +177,9 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
           // the same and will always be greater than equal to that of the
           // visible child (at index 0), to keep the size of the entire
           // SegmentedControl widget consistent throughout the animation.
-          Offstage(
-            child: DefaultTextStyle.merge(
-              style: const TextStyle(fontWeight: FontWeight.w500),
-              child: widget.child,
-            ),
+          DefaultTextStyle.merge(
+            style: const TextStyle(fontWeight: FontWeight.w500),
+            child: widget.child,
           ),
         ],
       ),
@@ -323,6 +322,7 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
     this.thumbColor = _kThumbColor,
     this.padding = _kHorizontalItemPadding,
     this.backgroundColor = CupertinoColors.tertiarySystemFill,
+    this.isProportionalSegment = false,
   }) : assert(children.length >= 2),
        assert(
          groupValue == null || children.keys.contains(groupValue),
@@ -394,6 +394,14 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   /// The default value is [CupertinoColors.tertiarySystemFill]. The background
   /// will not be painted if null is specified.
   final Color backgroundColor;
+
+  /// Determine whether each segment has equal width or proportional width based
+  /// on the segment content. If this is false, each segment has equal width
+  /// and the width is determined by the longest segment; If this is true,
+  /// segments have their own width based on the content.
+  ///
+  /// Defaults to false.
+  final bool isProportionalSegment;
 
   /// The color used to paint the interior of the thumb that appears behind the
   /// currently selected item.
@@ -699,6 +707,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
               highlightedIndex: highlightedIndex,
               thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor, context),
               thumbScale: thumbScaleAnimation.value,
+              isProportionalSegment: widget.isProportionalSegment,
               state: this,
               children: children,
             );
@@ -716,12 +725,14 @@ class _SegmentedControlRenderWidget<T extends Object> extends MultiChildRenderOb
     required this.highlightedIndex,
     required this.thumbColor,
     required this.thumbScale,
+    required this.isProportionalSegment,
     required this.state,
   });
 
   final int? highlightedIndex;
   final Color thumbColor;
   final double thumbScale;
+  final bool isProportionalSegment;
   final _SegmentedControlState<T> state;
 
   @override
@@ -730,6 +741,7 @@ class _SegmentedControlRenderWidget<T extends Object> extends MultiChildRenderOb
       highlightedIndex: highlightedIndex,
       thumbColor: thumbColor,
       thumbScale: thumbScale,
+      isProportionalSegment: isProportionalSegment,
       state: state,
     );
   }
@@ -740,7 +752,8 @@ class _SegmentedControlRenderWidget<T extends Object> extends MultiChildRenderOb
     renderObject
       ..thumbColor = thumbColor
       ..thumbScale = thumbScale
-      ..highlightedIndex = highlightedIndex;
+      ..highlightedIndex = highlightedIndex
+      ..isProportionalSegment = isProportionalSegment;
   }
 }
 
@@ -785,10 +798,12 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     required int? highlightedIndex,
     required Color thumbColor,
     required double thumbScale,
+    required bool isProportionalSegment,
     required this.state,
   }) : _highlightedIndex = highlightedIndex,
        _thumbColor = thumbColor,
-       _thumbScale = thumbScale;
+       _thumbScale = thumbScale,
+       _isProportionalSegment = isProportionalSegment;
 
   final _SegmentedControlState<T> state;
 
@@ -838,6 +853,16 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
       return;
     }
     _thumbColor = value;
+    markNeedsPaint();
+  }
+
+  bool get isProportionalSegment => _isProportionalSegment;
+  bool _isProportionalSegment;
+  set isProportionalSegment(bool value) {
+    if (_isProportionalSegment == value) {
+      return;
+    }
+    _isProportionalSegment = value;
     markNeedsPaint();
   }
 
@@ -924,30 +949,55 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   }
 
   Size _calculateChildSize(BoxConstraints constraints) {
+    final double childWidth = _getMaxChildWidth(constraints);
+    final double maxHeight = _getMaxChildHeight(constraints, childWidth);
+    return Size(childWidth, maxHeight);
+  }
+
+  double _getMaxChildWidth(BoxConstraints constraints) {
     final int childCount = this.childCount ~/ 2 + 1;
     double childWidth = (constraints.minWidth - totalSeparatorWidth) / childCount;
-    double maxHeight = _kMinSegmentedControlHeight;
     RenderBox? child = firstChild;
     while (child != null) {
       childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity) + 2 * _kSegmentMinPadding);
       child = nonSeparatorChildAfter(child);
     }
-    childWidth = math.min(
+    return math.min(
       childWidth,
       (constraints.maxWidth - totalSeparatorWidth) / childCount,
     );
-    child = firstChild;
+  }
+
+  double _getMaxChildHeight(BoxConstraints constraints, double childWidth) {
+    double maxHeight = _kMinSegmentedControlHeight;
+    RenderBox? child = firstChild;
     while (child != null) {
       final double boxHeight = child.getMaxIntrinsicHeight(childWidth);
       maxHeight = math.max(maxHeight, boxHeight);
       child = nonSeparatorChildAfter(child);
     }
-    return Size(childWidth, maxHeight);
+    return maxHeight;
   }
 
-  Size _computeOverallSizeFromChildSize(Size childSize, BoxConstraints constraints) {
+  List<double> _getChildIntrinsicWidths(BoxConstraints constraints) {
+    final List<double> childWidths = <double>[];
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final double childWidth = child.getMaxIntrinsicWidth(double.infinity) + 2 * _kSegmentMinPadding;
+      child = nonSeparatorChildAfter(child);
+      childWidths.add(childWidth);
+    }
+    return childWidths;
+  }
+
+  Size _computeOverallSizeFromChildSize(BoxConstraints constraints) {
+    final double maxChildHeight = _getMaxChildHeight(constraints, double.infinity);
+    if (isProportionalSegment) {
+      return constraints.constrain(Size(_getChildIntrinsicWidths(constraints).sum + totalSeparatorWidth, maxChildHeight));
+    }
     final int childCount = this.childCount ~/ 2 + 1;
-    return constraints.constrain(Size(childSize.width * childCount + totalSeparatorWidth, childSize.height));
+    final double maxChildWidth = _getMaxChildWidth(constraints);
+    return constraints.constrain(Size(maxChildWidth * childCount + totalSeparatorWidth, maxChildHeight));
   }
 
   @override
@@ -964,21 +1014,27 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    final Size childSize = _calculateChildSize(constraints);
-    return _computeOverallSizeFromChildSize(childSize, constraints);
+    return _computeOverallSizeFromChildSize(constraints);
   }
 
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    final Size childSize = _calculateChildSize(constraints);
-    final BoxConstraints childConstraints = BoxConstraints.tight(childSize);
-    final BoxConstraints separatorConstraints = childConstraints.heightConstraints();
+    final List<double> childWidths;
+    if (isProportionalSegment) {
+      childWidths = _getChildIntrinsicWidths(constraints);
+    } else {
+      final Size childSize = _calculateChildSize(constraints);
+      childWidths = List<double>.filled(childCount, childSize.width);
+    }
 
+    final double childHeight = _getMaxChildHeight(constraints, double.infinity);
     RenderBox? child = firstChild;
     int index = 0;
     double start = 0;
     while (child != null) {
+      final BoxConstraints childConstraints = BoxConstraints.tight(Size(childWidths[index ~/ 2], childHeight));
+      final BoxConstraints separatorConstraints = childConstraints.heightConstraints();
       child.layout(index.isEven ? childConstraints : separatorConstraints, parentUsesSize: true);
       final _SegmentedControlContainerBoxParentData childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
       final Offset childOffset = Offset(start, 0);
@@ -991,8 +1047,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
       child = childAfter(child);
       index += 1;
     }
-
-    size = _computeOverallSizeFromChildSize(childSize, constraints);
+    size = _computeOverallSizeFromChildSize(constraints);
   }
 
   // This method is used to convert the original unscaled thumb rect painted in
@@ -1039,7 +1094,8 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
 
       final _SegmentedControlContainerBoxParentData childParentData = selectedChild.parentData! as _SegmentedControlContainerBoxParentData;
       final Rect newThumbRect = _kThumbInsets.inflateRect(childParentData.offset & selectedChild.size);
-
+print('selectedChild.size: ${selectedChild.size}');
+print('newThumbRect.width: ${newThumbRect.width}');
       // Update thumb animation's tween, in case the end rect changed (e.g., a
       // new segment is added during the animation).
       if (state.thumbController.isAnimating) {
