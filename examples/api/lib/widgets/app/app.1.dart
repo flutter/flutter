@@ -9,28 +9,29 @@ import 'package:flutter/material.dart';
 /// [Navigator]s.
 
 void main() async {
-  runApp(const MaterialAppExample());
+  runApp(const WidgetsAppExample());
 }
 
-class MaterialAppExample extends StatefulWidget {
-  const MaterialAppExample({
+class WidgetsAppExample extends StatefulWidget {
+  const WidgetsAppExample({
     super.key,
   });
 
   @override
-  State<MaterialAppExample> createState() => _MaterialAppExampleState();
+  State<WidgetsAppExample> createState() => _WidgetsAppExampleState();
 }
 
-class _MaterialAppExampleState extends State<MaterialAppExample> {
+class _WidgetsAppExampleState extends State<WidgetsAppExample> {
   final _MyRouteInformationParser _routeInformationParser = _MyRouteInformationParser();
   final _MyRouterDelegate _routerDelegate = _MyRouterDelegate();
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      theme: ThemeData(
-        useMaterial3: true,
-      ),
+    return WidgetsApp.router(
+      color: Colors.red,
+      localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultMaterialLocalizations.delegate,
+      ],
       title: 'MaterialApp.router Example',
       routeInformationParser: _routeInformationParser,
       routerDelegate: _routerDelegate,
