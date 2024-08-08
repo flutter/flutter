@@ -1191,7 +1191,11 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// Throws a [ToolExit] if the current set of options is not compatible with
   /// each other.
-  Future<BuildInfo> getBuildInfo({BuildMode? forcedBuildMode, File? forcedTargetFile}) async {
+  Future<BuildInfo> getBuildInfo({
+    BuildMode? forcedBuildMode,
+    File? forcedTargetFile,
+    bool? forcedUseLocalCanvasKit,
+  }) async {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
 
@@ -1308,9 +1312,12 @@ abstract class FlutterCommand extends Command<void> {
 
     final bool useCdn = !argParser.options.containsKey(FlutterOptions.kWebResourcesCdnFlag)
       || boolArg(FlutterOptions.kWebResourcesCdnFlag);
-    final bool useLocalWebSdk = argParser.options.containsKey(FlutterGlobalOptions.kLocalWebSDKOption)
-      && stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null;
-    final bool useLocalCanvasKit = !useCdn || useLocalWebSdk;
+    bool useLocalWebSdk = false;
+    if (globalResults?.wasParsed(FlutterGlobalOptions.kLocalWebSDKOption) ?? false) {
+      useLocalWebSdk = stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null;
+    }
+    final bool useLocalCanvasKit = forcedUseLocalCanvasKit
+      ?? (!useCdn || useLocalWebSdk);
 
     final String? defaultFlavor = project.manifest.defaultFlavor;
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
