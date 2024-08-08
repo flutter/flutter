@@ -22,15 +22,22 @@ def main():
       help='The framework paths used to create the XCFramework.',
       required=True
   )
+  parser.add_argument(
+      '--dsyms', nargs='+', help='The dSYM paths to be bundled in the XCFramework.', required=False
+  )
   parser.add_argument('--name', help='Name of the XCFramework', type=str, required=True)
   parser.add_argument('--location', help='Output directory', type=str, required=True)
 
   args = parser.parse_args()
 
-  create_xcframework(args.location, args.name, args.frameworks)
+  create_xcframework(args.location, args.name, args.frameworks, args.dsyms)
 
 
-def create_xcframework(location, name, frameworks):
+def create_xcframework(location, name, frameworks, dsyms=None):
+  if dsyms and len(frameworks) != len(dsyms):
+    print('Number of --dsyms must match number of --frameworks exactly.', file=sys.stderr)
+    sys.exit(1)
+
   output_dir = os.path.abspath(location)
   output_xcframework = os.path.join(output_dir, '%s.xcframework' % name)
 
@@ -45,10 +52,12 @@ def create_xcframework(location, name, frameworks):
   #                  -framework bar/baz.framework -output output/
   command = ['xcrun', 'xcodebuild', '-quiet', '-create-xcframework']
 
-  for framework in frameworks:
-    command.extend(['-framework', os.path.abspath(framework)])
-
   command.extend(['-output', output_xcframework])
+
+  for i in range(len(frameworks)):  # pylint: disable=consider-using-enumerate
+    command.extend(['-framework', os.path.abspath(frameworks[i])])
+    if dsyms:
+      command.extend(['-debug-symbols', os.path.abspath(dsyms[i])])
 
   subprocess.check_call(command, stdout=open(os.devnull, 'w'))
 
