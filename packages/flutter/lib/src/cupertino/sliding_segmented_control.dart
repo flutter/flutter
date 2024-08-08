@@ -204,7 +204,13 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
               ),
             ),
           ),
-          widget.child,
+          DefaultTextStyle.merge(
+            style: const TextStyle(
+              fontWeight: _kHighlightedFontWeight,
+              fontSize: _kFontSize,
+            ),
+            child: widget.child
+          ),
         ],
       ),
     );
