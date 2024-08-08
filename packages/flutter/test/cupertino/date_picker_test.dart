@@ -2536,7 +2536,7 @@ class _MockDefaultCupertinoLocalizations extends DefaultCupertinoLocalizations {
   String datePickerStandaloneMonth(int monthIndex) => _testMonths[monthIndex - 1];
 
   static Future<CupertinoLocalizations> load(Locale locale) async {
-    return  _MockDefaultCupertinoLocalizations();
+    return const _MockDefaultCupertinoLocalizations();
   }
 
   static const LocalizationsDelegate<CupertinoLocalizations> delegate =
