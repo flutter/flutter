@@ -988,8 +988,8 @@ void main() {
 
             // Test WrapFit.tight
             SizedBox(width: 200, height: 1),
-            Wrapped(fit: WrapFit.tight, child: SizedBox(width: 200, height: 1)),
-            Wrapped(fit: WrapFit.tight, child: SizedBox(width: 200, height: 1)),
+            Wrapped(fit: WrapFit.fillNext, child: SizedBox(width: 200, height: 1)),
+            Wrapped(fit: WrapFit.fillNext, child: SizedBox(width: 200, height: 1)),
 
             // Test WrapFit.runTight
             SizedBox(width: 200, height: 1), Wrapped(child: SizedBox(width: 600, height: 1)),
@@ -999,22 +999,22 @@ void main() {
             Wrapped(child: SizedBox(width: 200, height: 1)),
 
             // Test WrapFit.runLoose
-            SizedBox(width: 200, height: 1), Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 600, height: 1)),
-            SizedBox(width: 200, height: 1), Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 400, height: 1)), Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 200, height: 1)),
-            SizedBox(width: 200, height: 1), Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 400, height: 1)), Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 100, height: 1)),
+            SizedBox(width: 200, height: 1), Wrapped(fit: WrapFit.constrained, child: SizedBox(width: 600, height: 1)),
+            SizedBox(width: 200, height: 1), Wrapped(fit: WrapFit.constrained, child: SizedBox(width: 400, height: 1)), Wrapped(fit: WrapFit.constrained, child: SizedBox(width: 200, height: 1)),
+            SizedBox(width: 200, height: 1), Wrapped(fit: WrapFit.constrained, child: SizedBox(width: 400, height: 1)), Wrapped(fit: WrapFit.constrained, child: SizedBox(width: 100, height: 1)),
             SizedBox(width: 200, height: 1),
-            Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 601, height: 1)),
-            Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 200, height: 1)),
+            Wrapped(fit: WrapFit.constrained, child: SizedBox(width: 601, height: 1)),
+            Wrapped(fit: WrapFit.constrained, child: SizedBox(width: 200, height: 1)),
 
             SizedBox(width: 800, height: 1),
 
             // Test WrapFit.runMaybeTight
-            SizedBox(width: 200, height: 1), Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 600, height: 1)),
-            SizedBox(width: 200, height: 1), Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 300, height: 1)), SizedBox(width: 200, height: 1),
-            SizedBox(width: 200, height: 1), Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 500, height: 1)),
+            SizedBox(width: 200, height: 1), Wrapped(fit: WrapFit.mightFill, child: SizedBox(width: 600, height: 1)),
+            SizedBox(width: 200, height: 1), Wrapped(fit: WrapFit.mightFill, child: SizedBox(width: 300, height: 1)), SizedBox(width: 200, height: 1),
+            SizedBox(width: 200, height: 1), Wrapped(fit: WrapFit.mightFill, child: SizedBox(width: 500, height: 1)),
             SizedBox(width: 200, height: 1),
-            Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 601, height: 1)),
-            Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 200, height: 1)),
+            Wrapped(fit: WrapFit.mightFill, child: SizedBox(width: 601, height: 1)),
+            Wrapped(fit: WrapFit.mightFill, child: SizedBox(width: 200, height: 1)),
           ],
         ),
       ),
@@ -1101,8 +1101,8 @@ void main() {
 
             // Test WrapFit.tight
             SizedBox(width: 1, height: 200),
-            Wrapped(fit: WrapFit.tight, child: SizedBox(width: 1, height: 200)),
-            Wrapped(fit: WrapFit.tight, child: SizedBox(width: 1, height: 200)),
+            Wrapped(fit: WrapFit.fillNext, child: SizedBox(width: 1, height: 200)),
+            Wrapped(fit: WrapFit.fillNext, child: SizedBox(width: 1, height: 200)),
 
             // Test WrapFit.runTight
             SizedBox(width: 1, height: 200), Wrapped(child: SizedBox(width: 1, height: 400)),
@@ -1112,22 +1112,22 @@ void main() {
             Wrapped(child: SizedBox(width: 1, height: 200)),
 
             // Test WrapFit.runLoose
-            SizedBox(width: 1, height: 200), Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 1, height: 400)),
-            SizedBox(width: 1, height: 200), Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 1, height: 200)), Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 1, height: 200)),
-            SizedBox(width: 1, height: 200), Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 1, height: 200)), Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 1, height: 100)),
+            SizedBox(width: 1, height: 200), Wrapped(fit: WrapFit.constrained, child: SizedBox(width: 1, height: 400)),
+            SizedBox(width: 1, height: 200), Wrapped(fit: WrapFit.constrained, child: SizedBox(width: 1, height: 200)), Wrapped(fit: WrapFit.constrained, child: SizedBox(width: 1, height: 200)),
+            SizedBox(width: 1, height: 200), Wrapped(fit: WrapFit.constrained, child: SizedBox(width: 1, height: 200)), Wrapped(fit: WrapFit.constrained, child: SizedBox(width: 1, height: 100)),
             SizedBox(width: 1, height: 200),
-            Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 1, height: 401)),
-            Wrapped(fit: WrapFit.runLoose, child: SizedBox(width: 1, height: 200)),
+            Wrapped(fit: WrapFit.constrained, child: SizedBox(width: 1, height: 401)),
+            Wrapped(fit: WrapFit.constrained, child: SizedBox(width: 1, height: 200)),
 
             SizedBox(width: 1, height: 600),
 
             // Test WrapFit.runMaybeTight
-            SizedBox(width: 1, height: 200), Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 1, height: 400)),
-            SizedBox(width: 1, height: 200), Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 1, height: 100)), SizedBox(width: 1, height: 200),
-            SizedBox(width: 1, height: 200), Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 1, height: 300)),
+            SizedBox(width: 1, height: 200), Wrapped(fit: WrapFit.mightFill, child: SizedBox(width: 1, height: 400)),
+            SizedBox(width: 1, height: 200), Wrapped(fit: WrapFit.mightFill, child: SizedBox(width: 1, height: 100)), SizedBox(width: 1, height: 200),
+            SizedBox(width: 1, height: 200), Wrapped(fit: WrapFit.mightFill, child: SizedBox(width: 1, height: 300)),
             SizedBox(width: 1, height: 200),
-            Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 1, height: 401)),
-            Wrapped(fit: WrapFit.runMaybeTight, child: SizedBox(width: 1, height: 200)),
+            Wrapped(fit: WrapFit.mightFill, child: SizedBox(width: 1, height: 401)),
+            Wrapped(fit: WrapFit.mightFill, child: SizedBox(width: 1, height: 200)),
           ],
         ),
       ),
@@ -1201,7 +1201,7 @@ void main() {
 
   testWidgets('Wrapped', (WidgetTester tester) async {
 
-    expect(const Wrapped(child: SizedBox()).fit, WrapFit.runTight);
+    expect(const Wrapped(child: SizedBox()).fit, WrapFit.fillRun);
 
     WrapParentData getParentData(){
       return tester.renderObject(find.byType(SizedBox)).parentData! as WrapParentData;
@@ -1231,7 +1231,7 @@ void main() {
         ),
       ),
     );
-    expect(getParentData().fit, WrapFit.runTight);
+    expect(getParentData().fit, WrapFit.fillRun);
 
     await tester.pumpWidget(
       const Directionality(
@@ -1239,14 +1239,14 @@ void main() {
         child: Wrap(
           children: <Widget>[
             Wrapped(
-              fit: WrapFit.runLoose,
+              fit: WrapFit.constrained,
               child: SizedBox(),
             ),
           ],
         ),
       ),
     );
-    expect(getParentData().fit, WrapFit.runLoose);
+    expect(getParentData().fit, WrapFit.constrained);
 
     await tester.pumpWidget(
       const Directionality(
@@ -1254,14 +1254,14 @@ void main() {
         child: Wrap(
           children: <Widget>[
             Wrapped(
-              fit: WrapFit.tight,
+              fit: WrapFit.fillNext,
               child: SizedBox(),
             ),
           ],
         ),
       ),
     );
-    expect(getParentData().fit, WrapFit.tight);
+    expect(getParentData().fit, WrapFit.fillNext);
 
     await tester.pumpWidget(
       const Directionality(
@@ -1269,13 +1269,13 @@ void main() {
         child: Wrap(
           children: <Widget>[
             Wrapped(
-              fit: WrapFit.tight,
+              fit: WrapFit.fillNext,
               child: SizedBox(),
             ),
           ],
         ),
       ),
     );
-    expect(getParentData().fit, WrapFit.tight);
+    expect(getParentData().fit, WrapFit.fillNext);
   });
 }

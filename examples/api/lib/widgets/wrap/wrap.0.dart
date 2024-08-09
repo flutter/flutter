@@ -48,10 +48,10 @@ class _WrapExampleState extends State<WrapExample> {
         label: Text(content),
         style: TextButton.styleFrom(
           backgroundColor: switch (fit) {
-            WrapFit.runTight => const Color.fromARGB(255, 243, 33, 33),
-            WrapFit.runLoose => const Color.fromARGB(255, 255, 146, 146),
-            WrapFit.runMaybeTight => const Color.fromARGB(255, 41, 182, 62),
-            WrapFit.tight => const Color.fromARGB(255, 3, 43, 244),
+            WrapFit.fillRun => const Color.fromARGB(255, 243, 33, 33),
+            WrapFit.constrained => const Color.fromARGB(255, 255, 146, 146),
+            WrapFit.mightFill => const Color.fromARGB(255, 41, 182, 62),
+            WrapFit.fillNext => const Color.fromARGB(255, 3, 43, 244),
             null => const Color.fromARGB(255, 34, 196, 255),
           },
           foregroundColor: fit?.isTight ?? false ? Colors.white : Colors.black,
@@ -87,7 +87,7 @@ class _WrapExampleState extends State<WrapExample> {
               // If the child fits in the current run,
               // its max width is set to the remaining space.
               // Otherwise it may be as wide as the Wrap
-              fit: WrapFit.runLoose,
+              fit: WrapFit.constrained,
               child: TextField(
                 autofocus: true,
                 decoration: const InputDecoration(

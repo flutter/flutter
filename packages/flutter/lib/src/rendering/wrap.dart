@@ -183,7 +183,7 @@ enum WrapFit {
   /// This is the default fit of the [Wrapped] widget.
   ///
   /// This setting can be expensive (see [RenderBox.getMinIntrinsicWidth]).
-  runTight(true),
+  fillRun(true),
 
   /// Determines whether to place the child in the current or the
   /// next run, depending on its minimum intrinsic size.
@@ -192,19 +192,19 @@ enum WrapFit {
   /// new run (this does not apply if the [Wrap] is unconstrained).
   ///
   /// This setting can be expensive (see [RenderBox.getMinIntrinsicWidth]).
-  runMaybeTight(false),
+  mightFill(false),
 
   /// Determines whether to place the child in the current or the
   /// next run, depending on its minimum intrinsic size.
   ///
   /// This setting can be expensive (see [RenderBox.getMinIntrinsicWidth]).
-  runLoose(false),
+  constrained(false),
 
   /// The child is placed in a new run and stretched to fill the
   /// available space.
   ///
   /// (This does not apply if the [Wrap] is unconstrained.)
-  tight(true);
+  fillNext(true);
 
   const WrapFit(this.isTight);
 
@@ -714,25 +714,25 @@ class RenderWrap extends RenderBox
       // Downgrade the [WrapFit] in an unbound scenario.
       if (mainAxisLimit.isInfinite) {
         switch (fit) {
-          case WrapFit.runTight:
-          case WrapFit.runMaybeTight:
-            fit = WrapFit.runLoose;
-          case WrapFit.tight:
+          case WrapFit.fillRun:
+          case WrapFit.mightFill:
+            fit = WrapFit.constrained;
+          case WrapFit.fillNext:
             fit = null;
           case null:
-          case WrapFit.runLoose:
+          case WrapFit.constrained:
         }
       }
 
       final _AxisSize childSize;
 
       switch (fit) {
-        case WrapFit.tight:
+        case WrapFit.fillNext:
           childSize = _AxisSize.fromSize(size: layoutChild(child.current, childConstraintsTight), direction: direction);
         case null:
           childSize = _AxisSize.fromSize(size: layoutChild(child.current, childConstraintsLoose), direction: direction);
-        case WrapFit.runTight:
-        case WrapFit.runLoose:
+        case WrapFit.fillRun:
+        case WrapFit.constrained:
           if (currentRun != null && currentRun.axisSize.mainAxisExtent + childMinIntrinsicMainAxisExtent + spacing <= mainAxisLimit) {
             if (fit.isTight) {
               childSize = _AxisSize.fromSize(size: layoutChild(child.current, childConstraintsFittingTightInRun(mainAxisLimit - currentRun.axisSize.mainAxisExtent - spacing)), direction: direction);
@@ -746,7 +746,7 @@ class RenderWrap extends RenderBox
               childSize = _AxisSize.fromSize(size: layoutChild(child.current, childConstraintsFittingLooseInRun(mainAxisLimit)), direction: direction);
             }
           }
-        case WrapFit.runMaybeTight:
+        case WrapFit.mightFill:
           double runLimit;
           if (currentRun != null && currentRun.axisSize.mainAxisExtent != 0 && currentRun.axisSize.mainAxisExtent + childMinIntrinsicMainAxisExtent + spacing <= mainAxisLimit) {
             runLimit = mainAxisLimit - currentRun.axisSize.mainAxisExtent - spacing;

@@ -56,13 +56,13 @@ void main() {
       await tester.pumpWidget(const example.WrapExampleApp());
 
       expect(find.byType(Wrapped), findsOneWidget);
-      expect(find.byTooltip(WrapFit.runTight.name), findsNothing);
+      expect(find.byTooltip(WrapFit.fillRun.name), findsNothing);
 
       await tester.tap(find.bySubtype<FilledButton>().first);
       await tester.pump();
 
       expect(find.byType(Wrapped), findsNWidgets(2));
-      expect(find.byTooltip(WrapFit.runTight.name), findsOneWidget);
+      expect(find.byTooltip(WrapFit.fillRun.name), findsOneWidget);
     },
   );
 }

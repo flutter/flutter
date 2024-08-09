@@ -5602,7 +5602,7 @@ class Wrapped extends ParentDataWidget<WrapParentData>{
   /// Creates a widget that controls how a child of a [Wrap] is layed out.
   const Wrapped({
     super.key,
-    this.fit = WrapFit.runTight,
+    this.fit = WrapFit.fillRun,
     required super.child,
   });
 
