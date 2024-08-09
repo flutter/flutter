@@ -1,4 +1,4 @@
-Signature: 14a3f72364d36d4dd09c2c72d3c8146e
+Signature: ee340b638365be124b8567c430baf4f4
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9760,9 +9760,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../flutter/third_party/skia/gm/smallcircles.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/vk/vulkanmemoryallocator/VulkanMemoryAllocatorPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/transform/SkSLTransform.cpp + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/skia/gm/smallcircles.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/vk/vulkanmemoryallocator/VulkanMemoryAllocatorPriv.h
 FILE: ../../../flutter/third_party/skia/src/sksl/transform/SkSLTransform.cpp
 ----------------------------------------------------------------------------------------------------
