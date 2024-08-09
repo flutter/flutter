@@ -3089,9 +3089,10 @@ class InputDecoration {
   /// This can be used to modify the [BoxConstraints] surrounding [prefixIcon].
   ///
   /// This property is particularly useful for getting the decoration's height
-  /// less than 48px. This can be achieved by setting [isDense] to true and
-  /// setting the constraints' minimum height and width to a value lower than
-  /// 48px.
+  /// less than the minimum tappable height (which is 48px when the visual
+  /// density is set to [VisualDensity.standard]). This can be achieved by
+  /// setting [isDense] to true and setting the constraints' minimum height
+  /// and width to a value lower than the minimum tappable height.
   ///
   /// {@tool dartpad}
   /// This example shows the differences between two `TextField` widgets when
@@ -3263,9 +3264,10 @@ class InputDecoration {
   /// This can be used to modify the [BoxConstraints] surrounding [suffixIcon].
   ///
   /// This property is particularly useful for getting the decoration's height
-  /// less than 48px. This can be achieved by setting [isDense] to true and
-  /// setting the constraints' minimum height and width to a value lower than
-  /// 48px.
+  /// less than the minimum tappable height (which is 48px when the visual
+  /// density is set to [VisualDensity.standard]). This can be achieved by
+  /// setting [isDense] to true and setting the constraints' minimum height
+  /// and width to a value lower than the minimum tappable height.
   ///
   /// If null, a [BoxConstraints] with a minimum width and height of 48px is
   /// used.
@@ -4073,9 +4075,10 @@ class InputDecorationTheme with Diagnosticable {
   /// [InputDecoration.prefixIcon].
   ///
   /// This property is particularly useful for getting the decoration's height
-  /// less than 48px. This can be achieved by setting [isDense] to true and
-  /// setting the constraints' minimum height and width to a value lower than
-  /// 48px.
+  /// less than the minimum tappable height (which is 48px when the visual
+  /// density is set to [VisualDensity.standard]). This can be achieved by
+  /// setting [isDense] to true and setting the constraints' minimum height
+  /// and width to a value lower than the minimum tappable height.
   ///
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
   /// used.
@@ -4105,9 +4108,10 @@ class InputDecorationTheme with Diagnosticable {
   /// [InputDecoration.suffixIcon].
   ///
   /// This property is particularly useful for getting the decoration's height
-  /// less than 48px. This can be achieved by setting [isDense] to true and
-  /// setting the constraints' minimum height and width to a value lower than
-  /// 48px.
+  /// less than the minimum tappable height (which is 48px when the visual
+  /// density is set to [VisualDensity.standard]). This can be achieved by
+  /// setting [isDense] to true and setting the constraints' minimum height
+  /// and width to a value lower than the minimum tappable height.
   ///
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
   /// used.
