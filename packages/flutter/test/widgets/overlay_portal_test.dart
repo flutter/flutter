@@ -101,6 +101,88 @@ void main() {
     _PaintOrder.paintOrder.clear();
   });
 
+  testWidgets(
+      'OverlayPortalController notifies listeners when show() is called',
+      (WidgetTester tester) async {
+    final OverlayPortalController controller =
+        OverlayPortalController(debugLabel: 'local controller');
+    late final OverlayEntry entry;
+    bool didCallListener = false;
+    void listener() => didCallListener = true;
+    controller.addListener(listener);
+
+    addTearDown(() {
+      controller.removeListener(listener);
+      controller.dispose();
+      entry.remove();
+      entry.dispose();
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) {
+                return OverlayPortal(
+                  controller: controller,
+                  overlayChildBuilder: (BuildContext context) =>
+                      const SizedBox(),
+                  child: const SizedBox(),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    controller.hide();
+    expect(didCallListener, isTrue);
+  });
+
+  testWidgets(
+      'OverlayPortalController notifies listeners when show() is called',
+      (WidgetTester tester) async {
+    final OverlayPortalController controller =
+        OverlayPortalController(debugLabel: 'local controller');
+    late final OverlayEntry entry;
+    bool didCallListener = false;
+    void listener() => didCallListener = true;
+    controller.addListener(listener);
+
+    addTearDown(() {
+      controller.removeListener(listener);
+      controller.dispose();
+      entry.remove();
+      entry.dispose();
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) {
+                return OverlayPortal(
+                  controller: controller,
+                  overlayChildBuilder: (BuildContext context) =>
+                      const SizedBox(),
+                  child: const SizedBox(),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    controller.show();
+    expect(didCallListener, isTrue);
+  });
+
   testWidgets('The overlay child sees the right inherited widgets', (WidgetTester tester) async {
     int buildCount = 0;
     TextDirection? directionSeenByOverlayChild;
