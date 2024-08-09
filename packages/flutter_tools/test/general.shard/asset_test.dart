@@ -115,7 +115,7 @@ dependencies:
 ''');
 
         await assetBundle.build(
-          packagesPath: packagesPath,
+          packageConfigPath: packagesPath,
           manifestPath: manifestPath,
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.directory('main')),
         );
@@ -155,7 +155,7 @@ dependencies:
 
         await assetBundle.build(
           manifestPath: manifestPath, // file doesn't exist
-          packagesPath: packagesPath,
+          packageConfigPath: packagesPath,
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.file(manifestPath).parent),
         );
 
@@ -203,7 +203,7 @@ dependencies:
         );
 
         await assetBundle.build(
-          packagesPath: '.packages',
+          packageConfigPath: '.packages',
           targetPlatform: TargetPlatform.android_arm,
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         );
@@ -248,7 +248,7 @@ dependencies:
         );
 
         await assetBundle.build(
-          packagesPath: '.packages',
+          packageConfigPath: '.packages',
           targetPlatform: TargetPlatform.web_javascript,
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         );
