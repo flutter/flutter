@@ -31,6 +31,8 @@ void main() {
     expect(themeData.headerHeight, null);
     expect(themeData.headerTextStyle, null);
     expect(themeData.headerHintStyle, null);
+    expect(themeData.padding, null);
+    expect(themeData.barPadding, null);
     expect(themeData.dividerColor, null);
 
     const SearchViewTheme theme = SearchViewTheme(data: SearchViewThemeData(), child: SizedBox());
@@ -43,6 +45,8 @@ void main() {
     expect(theme.data.headerHeight, null);
     expect(theme.data.headerTextStyle, null);
     expect(theme.data.headerHintStyle, null);
+    expect(themeData.padding, null);
+    expect(themeData.barPadding, null);
     expect(theme.data.dividerColor, null);
   });
 
@@ -71,6 +75,8 @@ void main() {
       headerTextStyle: TextStyle(fontSize: 24.0),
       headerHintStyle: TextStyle(fontSize: 16.0),
       constraints: BoxConstraints(minWidth: 350, minHeight: 240),
+      padding: EdgeInsets.only(bottom: 32.0),
+      barPadding: EdgeInsets.zero,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -87,6 +93,8 @@ void main() {
     expect(description[6], 'headerTextStyle: TextStyle(inherit: true, size: 24.0)');
     expect(description[7], 'headerHintStyle: TextStyle(inherit: true, size: 16.0)');
     expect(description[8], 'constraints: BoxConstraints(350.0<=w<=Infinity, 240.0<=h<=Infinity)');
+    expect(description[9], 'padding: EdgeInsets(0.0, 0.0, 0.0, 32.0)');
+    expect(description[10], 'barPadding: EdgeInsets.zero');
   });
 
   group('[Theme, SearchViewTheme, SearchView properties overrides]', () {
