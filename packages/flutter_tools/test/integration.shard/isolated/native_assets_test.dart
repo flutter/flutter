@@ -687,11 +687,10 @@ import '${packageName}_bindings_generated.dart' as bindings;
   await dartFile.writeAsString(dartFileNew2);
 }
 
+/// Adds a native library to be built by the builder and link it into the
+/// main library.
 Future<void> addLinkedNativeLibrary(Directory packageDirectory) async {
-  // Add a native library that is built by the builder and link it into the
-  // main library.
-
-  // Add linked library source files.
+  // Add linked library source file.
   final Directory srcDirectory = packageDirectory.childDirectory('src');
   final File linkedLibrarySourceFile = srcDirectory.childFile('linked.c');
   await linkedLibrarySourceFile.writeAsString('''
