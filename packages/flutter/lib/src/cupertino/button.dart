@@ -98,7 +98,7 @@ class CupertinoButton extends StatefulWidget {
     this.sizeStyle = CupertinoButtonSize.large,
     this.padding,
     this.color,
-    this.disabledColor = CupertinoColors.quaternarySystemFill,
+    this.disabledColor = CupertinoColors.tertiarySystemFill,
     this.minSize,
     this.pressedOpacity = 0.4,
     this.borderRadius,
@@ -121,7 +121,7 @@ class CupertinoButton extends StatefulWidget {
     required this.child,
     this.sizeStyle = CupertinoButtonSize.large,
     this.padding,
-    this.disabledColor = CupertinoColors.quaternarySystemFill,
+    this.disabledColor = CupertinoColors.tertiarySystemFill,
     this.minSize,
     this.pressedOpacity = 0.4,
     this.borderRadius,
@@ -343,7 +343,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       ? themeData.primaryContrastingColor
       : enabled
         ? primaryColor
-        : CupertinoDynamicColor.resolve(CupertinoColors.placeholderText, context);
+        : CupertinoDynamicColor.resolve(CupertinoColors.tertiaryLabel, context);
 
     final Color effectiveFocusOutlineColor = widget.focusColor ??
       HSLColor
