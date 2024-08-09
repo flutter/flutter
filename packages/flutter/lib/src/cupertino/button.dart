@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'constants.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
@@ -435,8 +436,8 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
             button: true,
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minWidth: widget.minSize ?? kCupertinoButtonMinSize[widget.sizeStyle]!,
-                minHeight: widget.minSize ?? kCupertinoButtonMinSize[widget.sizeStyle]!,
+                minWidth: widget.minSize ?? kCupertinoButtonMinSize[widget.sizeStyle] ?? kMinInteractiveDimensionCupertino,
+                minHeight: widget.minSize ?? kCupertinoButtonMinSize[widget.sizeStyle] ?? kMinInteractiveDimensionCupertino,
               ),
               child: FadeTransition(
                 opacity: _opacityAnimation,

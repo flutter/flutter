@@ -524,6 +524,14 @@ void main() {
     expect(decoration.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
   });
 
+  testWidgets('All CupertinoButton const maps keys\' match the available style sizes', (WidgetTester tester) async {
+    for(final CupertinoButtonSize size in CupertinoButtonSize.values) {
+      expect(kCupertinoButtonPadding[size], isNotNull);
+      expect(kCupertinoButtonSizeBorderRadius[size], isNotNull);
+      expect(kCupertinoButtonMinSize[size], isNotNull);
+    }
+  });
+
   testWidgets('Hovering over Cupertino button updates cursor to clickable on Web', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
