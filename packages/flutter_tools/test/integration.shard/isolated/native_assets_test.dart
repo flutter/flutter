@@ -768,10 +768,17 @@ void main(List<String> args) async {
       sources: [
         'src/\$packageName.c',
       ],
-      flags: linkedLibraryUri == null ? [] : [
-        '-L\${linkedLibraryUri.resolve('./').toFilePath()}',
-        '-llinked',
-      ],
+      flags: linkedLibraryUri == null ? [] : switch (config.os) {
+        OS.windows => [
+          '/link',
+          '/I\${linkedLibraryUri.resolve('./').toFilePath()}',
+          'linked.lib',
+        ],
+        _ => [
+          '-L\${linkedLibraryUri.resolve('./').toFilePath()}',
+          '-llinked',
+        ]
+      },
       dartBuildFiles: ['hook/build.dart'],
     );
     await cbuilder.run(
