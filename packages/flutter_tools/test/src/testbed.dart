@@ -17,8 +17,8 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'context.dart';
 import 'fake_http_client.dart';
@@ -39,7 +39,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   ), // Allows reading logs and prevents stdout.
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   OutputPreferences: () => OutputPreferences.test(), // configures BufferLogger to avoid color codes.
-  Usage: () => TestUsage(), // prevent addition of analytics from burdening test mocks
+  Analytics: () => const NoOpAnalytics(), // Prevent addition of analytics from burdening test mocks.
   FlutterVersion: () => FakeFlutterVersion(), // prevent requirement to mock git for test runner.
   Signals: () => FakeSignals(),  // prevent registering actual signal handlers.
   Pub: () => ThrowingPub(), // prevent accidental invocations of pub.

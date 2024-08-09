@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/devfs.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -25,7 +24,6 @@ void main() {
       'flutter-sdk',
       false,
       'test-reason',
-      TestUsage(),
       const NoOpAnalytics(),
     );
   });

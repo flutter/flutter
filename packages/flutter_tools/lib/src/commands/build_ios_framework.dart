@@ -104,9 +104,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   FlutterVersion get flutterVersion => _injectedFlutterVersion ?? globals.flutterVersion;
   final FlutterVersion? _injectedFlutterVersion;
 
-  @override
-  bool get reportNullSafety => false;
-
   Future<List<BuildInfo>> getBuildInfos() async {
     return <BuildInfo>[
       if (boolArg('debug'))   await getBuildInfo(forcedBuildMode: BuildMode.debug),
@@ -453,7 +450,6 @@ end
           logger: globals.logger,
           processManager: globals.processManager,
           platform: globals.platform,
-          usage: globals.flutterUsage,
           analytics: globals.analytics,
           engineVersion: globals.artifacts!.isLocalEngine
               ? null

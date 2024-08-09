@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -33,7 +32,6 @@ void main() {
   late FakeProcessManager fakeProcessManager;
   late CocoaPods cocoaPodsUnderTest;
   late BufferLogger logger;
-  late TestUsage usage;
   late FakeAnalytics fakeAnalytics;
 
   void pretendPodVersionFails() {
@@ -75,7 +73,6 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     fakeProcessManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
-    usage = TestUsage();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
@@ -86,7 +83,6 @@ void main() {
       logger: logger,
       platform: FakePlatform(operatingSystem: 'macos'),
       xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-      usage: usage,
       analytics: fakeAnalytics,
     );
     fileSystem.file(fileSystem.path.join(
@@ -205,7 +201,6 @@ void main() {
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
         xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
-        usage: usage,
         analytics: fakeAnalytics,
       );
 
@@ -241,7 +236,6 @@ void main() {
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(isInstalled: false),
-        usage: usage,
         analytics: fakeAnalytics,
       );
 
@@ -1079,7 +1073,6 @@ end''');
             logger.errorText,
             contains('enable-libffi-alloc'),
           );
-          expect(usage.events, contains(const TestUsageEvent('pod-install-failure', 'arm-ffi')));
           expect(fakeAnalytics.sentEvents, contains(Event.appleUsageEvent(workflow: 'pod-install-failure', parameter: 'arm-ffi')));
         });
       }
@@ -1314,7 +1307,6 @@ end''');
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: fakeProcessManager, version: Version(14, 3, 0)),
-        usage: usage,
         analytics: fakeAnalytics,
       );
 
