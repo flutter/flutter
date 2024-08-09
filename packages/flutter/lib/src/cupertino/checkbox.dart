@@ -97,6 +97,11 @@ class CupertinoCheckbox extends StatefulWidget {
     this.tristate = false,
     required this.onChanged,
     this.activeColor,
+    @Deprecated(
+      'Use fillColor instead. '
+      'fillColor now manages the background color in all states. '
+      'This feature was deprecated after v3.24.0-0.2.pre.'
+    )
     this.inactiveColor,
     this.fillColor,
     this.checkColor,
@@ -184,15 +189,19 @@ class CupertinoCheckbox extends StatefulWidget {
   ///
   /// If [fillColor] resolves to null for the requested state, then the fill color
   /// falls back to [activeColor] if the state includes [WidgetState.selected],
-  /// or [inactiveColor] otherwise.
+  /// or [CupertinoColors.white] with 50% if the state includes [WidgetState.disabled],
+  /// or [CupertinoColors.white] otherwise.
   final WidgetStateProperty<Color?>? fillColor;
 
   /// The color used if the checkbox is inactive.
   ///
-  /// If [fillColor] returns a non-null color in the unselected
-  /// state, [fillColor] will be used instead of [inactiveColor].
-  ///
-  /// By default, [CupertinoColors.inactiveGray] is used.
+  /// Currently [inactiveColor] is not used, and instead [fillColor] controls the 
+  /// color of the background in all states, including when unselected.
+  @Deprecated(
+    'Use fillColor instead. '
+    'fillColor now manages the background color in all states. '
+    'This feature was deprecated after v3.24.0-0.2.pre.'
+  )
   final Color? inactiveColor;
 
   /// The color to use for the check icon when this checkbox is checked.

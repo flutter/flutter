@@ -264,4 +264,8 @@ void main() {
     trackColor: Colors.red,
   );
   Color? inactiveTrackColor =  cupertinoSwitch.trackColor;
+
+  // https://github.com/flutter/flutter/pull/152981
+  CupertinoCheckbox(inactiveColor: Colors.red);
+  CupertinoCheckbox(inactiveColor: Colors.red, fillColor: WidgetStatePropertyAll(CupertinoColors.white));
 }
