@@ -107,6 +107,48 @@ void main() {
     expect(context.clipBehavior, equals(Clip.hardEdge));
   });
 
+testWidgets('SingleChildScrollView ScrollViewKeyboardDismissBehavior.onDrag test', (WidgetTester tester) async {
+    final Widget testWidget = MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Column(
+            children: <Widget>[
+              Autocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (textEditingValue.text.isEmpty) {
+                    return const Iterable<String>.empty();
+                  }
+                  return<String>['apple', 'banana', 'cherry']
+                      .where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+              ),
+              Container(height: 5000.0),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(testWidget);
+    await tester.tap(find.byType(Autocomplete<String>));
+    await tester.pump();
+
+    await tester.enterText(find.byType(RawAutocomplete<String>),'a');
+    await tester.pump();
+
+    expect(find.text('apple'), findsOneWidget);
+    expect(find.text('banana'), findsOneWidget);
+
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -1000));
+    await tester.pump();
+
+    expect(find.text('apple'), findsNothing);
+    expect(find.text('banana'), findsNothing);
+  });
+
   testWidgets('SingleChildScrollView respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(SingleChildScrollView(child: Container(height: 2000.0)));
 
