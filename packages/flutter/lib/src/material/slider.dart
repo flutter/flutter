@@ -713,6 +713,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     if (focused != _focused) {
       setState(() { _focused = focused; });
     }
+    showValueIndicator();
   }
 
   bool _hovering = false;
