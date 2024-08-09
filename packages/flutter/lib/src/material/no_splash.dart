@@ -7,7 +7,6 @@
 /// @docImport 'theme.dart';
 library;
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'ink_well.dart';

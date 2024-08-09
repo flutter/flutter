@@ -9012,12 +9012,12 @@ void main() {
     // https://github.com/flutter/flutter/pull/57139#issuecomment-629048058
   }, skip: isBrowser); // [intended] see above.
 
-  testWidgets('TextField throws when not descended from a Material widget', (WidgetTester tester) async {
+  testWidgets('TextField throws when not descended from a SplashBox', (WidgetTester tester) async {
     const Widget textField = TextField();
     await tester.pumpWidget(textField);
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    expect(exception.toString(), startsWith('No Material widget found.'));
+    expect(exception.toString(), startsWith('No SplashController found.'));
   });
 
   testWidgets('TextField loses focus when disabled', (WidgetTester tester) async {

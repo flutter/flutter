@@ -321,6 +321,19 @@ void main() {
     expect(pressed, isTrue);
   });
 
+  testWidgets('Material.of(context) works with SplashBox', (WidgetTester tester) async {
+    Color? color;
+
+    await tester.pumpWidget(SplashBox(
+      color: Colors.cyan,
+      child: Builder(builder: (BuildContext context) {
+        color = Material.of(context).color;
+        return const SizedBox.shrink();
+      }),
+    ));
+    expect(color, Colors.cyan);
+  });
+
   group('Surface Tint Overlay', () {
     testWidgets('applyElevationOverlayColor does not effect anything with useMaterial3 set to true', (WidgetTester tester) async {
       const Color surfaceColor = Color(0xFF121212);
@@ -1199,13 +1212,13 @@ void main() {
       );
     });
 
-    testWidgets('hides Material from debugCheckHasMaterial', (WidgetTester tester) async {
+    testWidgets('hides Material from debugCheckSplash', (WidgetTester tester) async {
       await tester.pumpWidget(
         Material(
           child: LookupBoundary(
             child: Builder(
               builder: (BuildContext context) {
-                debugCheckHasMaterial(context);
+                debugCheckSplash(context);
                 return Container();
               },
             ),
@@ -1219,21 +1232,17 @@ void main() {
       expect(
         error.toStringDeep(), startsWith(
           'FlutterError\n'
-          '   No Material widget found within the closest LookupBoundary.\n'
-          '   There is an ancestor Material widget, but it is hidden by a\n'
+          '   No SplashController found within the closest LookupBoundary.\n'
+          "   There is an ancestor SplashController, but it's hidden by a\n"
           '   LookupBoundary.\n'
-          '   Builder widgets require a Material widget ancestor within the\n'
-          '   closest LookupBoundary.\n'
-          '   In Material Design, most widgets are conceptually "printed" on a\n'
-          "   sheet of material. In Flutter's material library, that material\n"
-          '   is represented by the Material widget. It is the Material widget\n'
-          '   that renders ink splashes, for instance. Because of this, many\n'
-          '   material library widgets require that there be a Material widget\n'
-          '   in the tree above them.\n'
-          '   To introduce a Material widget, you can either directly include\n'
-          '   one, or use a widget that contains Material itself, such as a\n'
-          '   Card, Dialog, Drawer, or Scaffold.\n'
-          '   The specific widget that could not find a Material ancestor was:\n'
+          '   Builder widgets use a SplashController to show Splash effects,\n'
+          '   and no SplashController ancestor was found within the closest\n'
+          '   LookupBoundary.\n'
+          '   A SplashController can be provided by an ancestor SplashBox;\n'
+          '   alternatively, there are several viable options from the Material\n'
+          '   libary, including Material, Card, Dialog, Drawer, and Scaffold.\n'
+          '   The specific widget that could not find a SplashController\n'
+          '   ancestor was:\n'
           '     Builder\n'
           '   The ancestors of this widget were:\n'
           '     LookupBoundary\n'

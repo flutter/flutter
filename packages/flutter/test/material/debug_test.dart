@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('debugCheckHasMaterial control test', (WidgetTester tester) async {
+  testWidgets('debugCheckSplash control test', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(child: Chip(label: Text('label'))));
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -17,9 +17,9 @@ void main() {
     expect(
       error.diagnostics[2].toStringDeep(),
       equalsIgnoringHashCodes(
-        'To introduce a Material widget, you can either directly include\n'
-        'one, or use a widget that contains Material itself, such as a\n'
-        'Card, Dialog, Drawer, or Scaffold.\n',
+        'A SplashController can be provided by an ancestor SplashBox;\n'
+        'alternatively, there are several viable options from the Material\n'
+        'libary, including Material, Card, Dialog, Drawer, and Scaffold.\n',
       ),
     );
     expect(error.diagnostics[3], isA<DiagnosticsProperty<Element>>());
@@ -27,23 +27,18 @@ void main() {
     expect(
       error.toStringDeep(), startsWith(
       'FlutterError\n'
-      '   No Material widget found.\n'
-      '   Chip widgets require a Material widget ancestor within the\n'
-      '   closest LookupBoundary.\n'
-      '   In Material Design, most widgets are conceptually "printed" on a\n'
-      "   sheet of material. In Flutter's material library, that material\n"
-      '   is represented by the Material widget. It is the Material widget\n'
-      '   that renders ink splashes, for instance. Because of this, many\n'
-      '   material library widgets require that there be a Material widget\n'
-      '   in the tree above them.\n'
-      '   To introduce a Material widget, you can either directly include\n'
-      '   one, or use a widget that contains Material itself, such as a\n'
-      '   Card, Dialog, Drawer, or Scaffold.\n'
-      '   The specific widget that could not find a Material ancestor was:\n'
+      '   No SplashController found.\n'
+      '   Chip widgets use a SplashController to show Splash effects, and\n'
+      '   no SplashController ancestor was found within the closest\n'
+      '   LookupBoundary.\n'
+      '   A SplashController can be provided by an ancestor SplashBox;\n'
+      '   alternatively, there are several viable options from the Material\n'
+      '   libary, including Material, Card, Dialog, Drawer, and Scaffold.\n'
+      '   The specific widget that could not find a SplashController\n'
+      '   ancestor was:\n'
       '     Chip\n'
       '   The ancestors of this widget were:\n'
       '     Center\n'
-      // End of ancestor chain omitted, not relevant for test.
     ));
   });
 
