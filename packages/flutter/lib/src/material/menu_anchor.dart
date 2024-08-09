@@ -3748,7 +3748,18 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor {
-    return ButtonStyleButton.allOrNull<Color>(Colors.transparent);
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.secondaryContainer;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.secondaryContainer;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.secondaryContainer;
+      }
+      return Colors.transparent;
+    });
   }
 
   // No default shadow color
@@ -3767,13 +3778,13 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
         return _colors.onSurface.withOpacity(0.38);
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.onSurface;
+        return _colors.onSecondaryContainer;
       }
       if (states.contains(MaterialState.hovered)) {
-        return _colors.onSurface;
+        return _colors.onSecondaryContainer;
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface;
+        return _colors.onSecondaryContainer;
       }
       return _colors.onSurface;
     });
