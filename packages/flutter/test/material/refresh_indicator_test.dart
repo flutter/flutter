@@ -1203,4 +1203,107 @@ void main() {
       await testColor(color);
     }
   });
+    testWidgets('RefreshIndicator default elevation value correctly',
+      (WidgetTester tester) async {
+    const List<double> positions = <double>[50.0, 100.0, 150.0];
+
+    Future<void> testElevation() async {
+      final AnimationController positionController =
+          AnimationController(vsync: const TestVSync());
+      addTearDown(positionController.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RefreshIndicator(
+            onRefresh: refresh,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const <Widget>[Text('X')],
+            ),
+          ),
+        ),
+      );
+
+      RefreshProgressIndicator getIndicator() {
+        return tester.widget<RefreshProgressIndicator>(
+          find.byType(RefreshProgressIndicator),
+        );
+      }
+
+      // Correspond to [_kDragContainerExtentPercentage].
+      final double maxPosition =
+          tester.view.physicalSize.height / tester.view.devicePixelRatio * 0.25;
+      for (final double position in positions) {
+        await tester.fling(find.text('X'), Offset(0.0, position), 1.0);
+        await tester.pump();
+        positionController.value = position / maxPosition;
+        expect(
+          getIndicator().elevation,
+          0,
+        );
+        // Wait until the fling finishes before starting the next fling.
+        await tester.pumpAndSettle();
+      }
+    }
+
+    testElevation();
+  });
+
+  testWidgets('RefreshIndicator custom elevation values correctly',
+      (WidgetTester tester) async {
+    const List<double> elevations = <double>[
+      0,
+      0.1,
+      1,
+      1.1,
+      1.59,
+    ];
+
+    const List<double> positions = <double>[50.0, 100.0, 150.0];
+
+    Future<void> testElevation(double elevation) async {
+      final AnimationController positionController =
+          AnimationController(vsync: const TestVSync());
+      addTearDown(positionController.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RefreshIndicator(
+            elevation: elevation,
+            onRefresh: refresh,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const <Widget>[Text('X')],
+            ),
+          ),
+        ),
+      );
+
+      RefreshProgressIndicator getIndicator() {
+        return tester.widget<RefreshProgressIndicator>(
+          find.byType(RefreshProgressIndicator),
+        );
+      }
+
+      // Correspond to [_kDragContainerExtentPercentage].
+      final double maxPosition =
+          tester.view.physicalSize.height / tester.view.devicePixelRatio * 0.25;
+      for (final double position in positions) {
+        await tester.fling(find.text('X'), Offset(0.0, position), 1.0);
+        await tester.pump();
+        positionController.value = position / maxPosition;
+        expect(
+          getIndicator().elevation,
+          elevation,
+        );
+        // Wait until the fling finishes before starting the next fling.
+        await tester.pumpAndSettle();
+      }
+    }
+
+    for (final double elevation in elevations) {
+      await testElevation(elevation);
+    }
+  });
+
 }
