@@ -20,6 +20,7 @@ import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -60,7 +61,9 @@ const Color kCupertinoModalBarrierColor = CupertinoDynamicColor.withBrightness(
 );
 
 // The duration of the transition used when a modal popup is shown.
-const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
+//
+// Extracted from simulator runtime argument.
+const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 404);
 
 // Offset from offscreen to the right to fully on screen.
 final Animatable<Offset> _kRightMiddleTween = Tween<Offset>(
@@ -79,6 +82,46 @@ final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
   begin: const Offset(0.0, 1.0),
   end: Offset.zero,
 );
+
+class _CupertinoSpringCurve extends Curve {
+  _CupertinoSpringCurve({
+    double mass = defaultMass,
+    double stiffness = defaultStiffness,
+  }) : _simulation = _createSimulation(mass, stiffness),
+       _endPosition = _createSimulation(mass, stiffness).x(_kEndTime * _kTimeFactor);
+
+  final SpringSimulation _simulation;
+  // The spring's position when time reaches the end, used to normalizes the
+  // output.
+  final double _endPosition;
+
+  @override
+  double transformInternal(double t) {
+    return _simulation.x(t * _kTimeFactor) / _endPosition;
+  }
+
+  static SpringSimulation _createSimulation(double mass, double stiffness) {
+    return SpringSimulation(
+      SpringDescription.withDampingRatio(mass: mass, stiffness: stiffness),
+      /*start*/ 0,
+      /* end */1,
+      /* velocity */0,
+    );
+  }
+
+  static const double _kEndTime = 1.0;
+
+  // The factor between the time unit used by Flutter's animations (0.0~1.0)
+  // and that by iOS's animations.
+  //
+  // Derived by manually comparing Flutter's curve versus iOS's curve.
+  static const double _kTimeFactor = 0.41;
+
+  // Default values of iOS's .spring animation. Extracted from simulator
+  // runtime arguments.
+  static const double defaultMass = 1;
+  static const double defaultStiffness = 522.35;
+}
 
 /// A mixin that replaces the entire screen with an iOS transition for a
 /// [PageRoute].
@@ -1123,11 +1166,8 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     assert(_animation == null);
     _animation = CurvedAnimation(
       parent: super.createAnimation(),
-
-      // These curves were initially measured from native iOS horizontal page
-      // route animations and seemed to be a good match here as well.
-      curve: Curves.linearToEaseOut,
-      reverseCurve: Curves.linearToEaseOut.flipped,
+      curve: _CupertinoSpringCurve(),
+      reverseCurve: _CupertinoSpringCurve().flipped,
     );
     _offsetTween = Tween<Offset>(
       begin: const Offset(0.0, 1.0),
