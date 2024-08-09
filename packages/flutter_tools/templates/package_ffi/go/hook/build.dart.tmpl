@@ -1,0 +1,33 @@
+import 'dart:io';
+
+import 'package:native_assets_cli/native_assets_cli.dart';
+import 'package:native_toolchain_go/go_native_toolchain.dart';
+import 'package:logging/logging.dart';
+
+const packageName = '{{projectName}}';
+
+void main(List<String> args) async {
+  try {
+    await build(args, (BuildConfig buildConfig, BuildOutput output) async {
+      final goBuilder = GoBuilder(
+      name: packageName,
+      assetName: 'bridge.gen.dart',
+      bridgePath: 'src/bridge',
+      sources: ['src/'],
+      dartBuildFiles: ['hook/build.dart'],
+    );
+
+    await goBuilder.run(
+      buildConfig: buildConfig,
+      buildOutput: output,
+      logger: Logger('')
+        ..level = Level.ALL
+        ..onRecord.listen((record) => print(record.message)),
+    );
+    });
+  } catch (e) {
+    // https://github.com/flutter/flutter/issues/147544
+    stdout.writeln(e);
+    exit(1);
+  }
+}
