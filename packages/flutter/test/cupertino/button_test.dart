@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -635,6 +636,43 @@ void main() {
     );
 
     expect(actualIconTheme?.size, givenIconTheme.size);
+  });
+
+  testWidgets('Button can be activated by keyboard shortcuts', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    bool value = true;
+    Widget buildApp({bool enabled = true}) {
+      return CupertinoApp(
+        home: Center(
+          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            return CupertinoButton(
+              onPressed: enabled ? () {
+                setState(() {
+                  value = !value;
+                });
+              } : null,
+              autofocus: true,
+              child: const Text('Button'),
+            );
+          }),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    // On web, buttons don't respond to the enter key.
+    expect(value, kIsWeb ? isTrue : isFalse);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(value, isFalse);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
   });
 }
 
