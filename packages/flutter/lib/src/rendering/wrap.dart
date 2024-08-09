@@ -767,7 +767,10 @@ class RenderWrap extends RenderBox
             tighten = true;
           }
 
-          childSize = _AxisSize.fromSize(size: layoutChild(child.current, (tighten ? childConstraintsFittingTightInRun : childConstraintsFittingLooseInRun)(runLimit)), direction: direction);
+          childSize = _AxisSize.fromSize(size: layoutChild(
+            child.current,
+            (tighten ? childConstraintsFittingTightInRun : childConstraintsFittingLooseInRun)(runLimit),
+          ), direction: direction);
       }
 
       final _RunMetrics? newRun = currentRun == null
