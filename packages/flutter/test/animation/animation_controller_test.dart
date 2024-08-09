@@ -288,6 +288,41 @@ void main() {
     controller.dispose();
   });
 
+  test('toggle() with different directions', () {
+    final AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 50),
+      reverseDuration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+
+    controller.toggle(forward: true);
+    tick(const Duration(milliseconds: 10));
+    tick(const Duration(milliseconds: 30));
+    expect(controller.value, moreOrLessEquals(0.4));
+    controller.toggle(forward: true);
+    tick(const Duration(milliseconds: 10));
+    tick(const Duration(milliseconds: 60));
+    expect(controller.value, moreOrLessEquals(1.0));
+    tick(const Duration(milliseconds: 90));
+    expect(controller.value, moreOrLessEquals(1.0));
+    controller.stop();
+
+    controller.toggle(forward: false);
+    tick(const Duration(milliseconds: 210));
+    tick(const Duration(milliseconds: 220));
+    expect(controller.value, moreOrLessEquals(0.9));
+    tick(const Duration(milliseconds: 230));
+    expect(controller.value, moreOrLessEquals(0.8));
+    tick(const Duration(milliseconds: 240));
+    expect(controller.value, moreOrLessEquals(0.7));
+    tick(const Duration(milliseconds: 260));
+    expect(controller.value, moreOrLessEquals(0.5));
+    tick(const Duration(milliseconds: 310));
+    expect(controller.value, moreOrLessEquals(0.0));
+    controller.stop();
+    controller.dispose();
+  });
+
   test('toggle() acts correctly based on the animation state', () {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
