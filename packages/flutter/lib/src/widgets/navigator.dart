@@ -33,6 +33,7 @@ import 'framework.dart';
 import 'heroes.dart';
 import 'notification_listener.dart';
 import 'overlay.dart';
+import 'pop_scope.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'routes.dart';
@@ -1564,6 +1565,7 @@ class Navigator extends StatefulWidget {
     this.restorationScopeId,
     this.routeTraversalEdgeBehavior = kDefaultRouteTraversalEdgeBehavior,
     this.onDidRemovePage,
+    this.handlesBacksWhenNested = true,
   });
 
   /// The list of pages with which to populate the history.
@@ -1631,6 +1633,28 @@ class Navigator extends StatefulWidget {
   /// is updated, if the given [Page] is still present, it will be interpreted
   /// as a new page to display.
   final DidRemovePageCallback? onDidRemovePage;
+
+  /// Whether this [Navigator] should handle back gestures in lieu of the root
+  /// [Navigator] when nested.
+  ///
+  /// In a typical [WidgetsApp], the root [Navigator] receives all system back
+  /// gestures. However, the user will expect the current route to be popped in
+  /// a system back gesture, and that route may not be in the root Navigator
+  /// when using one or more nested [Navigator]s.
+  ///
+  /// When this is true and the [Navigator] is nested, [PopScope] will be used
+  /// to handle system back gestures in lieu of its parent [Navigator].
+  ///
+  /// Defaults to true.
+  ///
+  /// See also:
+  ///
+  ///  * [NavigatorPopHandler], which can be used to manually handle system back
+  ///    gestures with a nested [Navigator].
+  ///  * [PopScope], which provides even more control over system back behavior.
+  ///  * [CupertinoTabView], which sets this parameter to false in order to
+  ///    provide custom back handling for its nested [Navigator]s.
+  final bool handlesBacksWhenNested;
 
   /// The delegate used for deciding how routes transition in or off the screen
   /// during the [pages] updates.
@@ -5637,8 +5661,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
     // Hides the HeroControllerScope for the widget subtree so that the other
     // nested navigator underneath will not pick up the hero controller above
-    // this level.
-    return HeroControllerScope.none(
+    final Widget child = HeroControllerScope.none(
       child: NotificationListener<NavigationNotification>(
         onNotification: (NavigationNotification notification) {
           // If the state of this Navigator does not change whether or not the
@@ -5681,6 +5704,22 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         ),
       ),
     );
+
+    // If this is a nested Navigator, handle system backs here so that the root
+    // Navigator doesn't get all of them.
+    if (widget.handlesBacksWhenNested && Navigator.maybeOf(context, rootNavigator: true) != this) {
+      return PopScope(
+        canPop: !canPop(),
+        onPopInvokedWithResult: (bool didPop, Object? result) {
+          if (didPop) {
+            return;
+          }
+          maybePop();
+        },
+        child: child,
+      );
+    }
+    return child;
   }
 }
 
