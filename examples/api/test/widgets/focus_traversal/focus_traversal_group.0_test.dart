@@ -8,9 +8,9 @@ import 'package:flutter_api_samples/widgets/focus_traversal/focus_traversal_grou
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-    bool hasFocus(WidgetTester tester, String text) {
-      return Focus.of(tester.element(find.text(text))).hasPrimaryFocus;
-    }
+  bool hasFocus(WidgetTester tester, String text) {
+    return Focus.of(tester.element(find.text(text))).hasPrimaryFocus;
+  }
 
   testWidgets('The focus updates should follow the focus traversal groups policy', (WidgetTester tester) async {
     await tester.pumpWidget(
