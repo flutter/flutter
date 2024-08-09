@@ -353,10 +353,21 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
   }
 
+  // Assigning an ID to every call of _onChangedField is necessary to avoid a
+  // situation where _options is updated by an older call when multiple
+  // _onChangedField calls are running simultaneously.
+  int _onChangedCallId = 0;
   // Called when _textEditingController changes.
   Future<void> _onChangedField() async {
+    _onChangedCallId += 1;
+    final int callId = _onChangedCallId;
     final TextEditingValue value = _textEditingController.value;
     final Iterable<T> options = await widget.optionsBuilder(value);
+
+    // Makes sure that previous call results do not replace new ones.
+    if (callId != _onChangedCallId) {
+      return;
+    }
     _options = options;
     _updateHighlight(_highlightedOptionIndex.value);
     final T? selection = _selection;
