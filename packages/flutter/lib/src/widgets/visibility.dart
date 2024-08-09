@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'animated_cross_fade.dart';
+/// @docImport 'animated_switcher.dart';
+/// @docImport 'implicit_animations.dart';
+/// @docImport 'navigator.dart';
+/// @docImport 'transitions.dart';
+library;
+
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';

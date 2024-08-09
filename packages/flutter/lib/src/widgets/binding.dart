@@ -2,6 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/animation.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
+///
+/// @docImport 'adapter.dart';
+/// @docImport 'app_lifecycle_listener.dart';
+/// @docImport 'basic.dart';
+/// @docImport 'focus_scope.dart';
+/// @docImport 'media_query.dart';
+/// @docImport 'navigator.dart';
+/// @docImport 'pop_scope.dart';
+library;
+
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui' show AccessibilityFeatures, AppExitResponse, AppLifecycleState,
@@ -1380,7 +1394,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 /// as soon as it is displayed again.
 /// {@endtemplate}
 ///
-/// To release resources more eagerly, establish a [platform channel](https://flutter.dev/platform-channels/)
+/// To release resources more eagerly, establish a [platform channel](https://flutter.dev/to/platform-channels)
 /// and use it to call [runApp] with a widget such as [SizedBox.shrink] when
 /// the framework should dispose of the active widget tree.
 ///
@@ -1440,7 +1454,7 @@ void runApp(Widget app) {
 ///
 /// {@macro flutter.widgets.runApp.dismissal}
 ///
-/// To release resources more eagerly, establish a [platform channel](https://flutter.dev/platform-channels/)
+/// To release resources more eagerly, establish a [platform channel](https://flutter.dev/to/platform-channels)
 /// and use it to remove the [View] whose widget resources should be released
 /// from the `app` widget tree provided to [runWidget].
 ///

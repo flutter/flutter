@@ -706,6 +706,7 @@ class AndroidDevice extends Device {
       List<String> arguments, {
       Map<String, String>? environment,
       bool silent = false,
+      bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
     }) {
     return eval(
       adbPath,
@@ -713,6 +714,7 @@ class AndroidDevice extends Device {
       environment: environment,
       printStdout: !silent,
       printStderr: !silent,
+      canFail: canFail,
     );
   }
 
@@ -735,7 +737,7 @@ class AndroidDevice extends Device {
   @override
   Future<void> startLoggingToSink(IOSink sink, {bool clear = true}) async {
     if (clear) {
-      await adb(<String>['logcat', '--clear'], silent: true);
+      await adb(<String>['logcat', '--clear'], silent: true, canFail: true);
     }
     _loggingProcess = await startProcess(
       adbPath,
@@ -770,7 +772,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<void> clearLogs() {
-    return adb(<String>['logcat', '-c']);
+    return adb(<String>['logcat', '-c'], canFail: true);
   }
 
   @override

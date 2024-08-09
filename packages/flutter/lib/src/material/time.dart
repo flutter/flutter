@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'time_picker.dart';
+library;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -45,7 +48,7 @@ enum DayPeriod {
 ///  * [DateTime], which represents date and time, and is subject to eras and
 ///    time zones.
 @immutable
-class TimeOfDay {
+class TimeOfDay implements Comparable<TimeOfDay> {
   /// Creates a time of day.
   ///
   /// The [hour] argument must be between 0 and 23, inclusive. The [minute]
@@ -110,6 +113,39 @@ class TimeOfDay {
       this,
       alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
     );
+  }
+
+  /// Whether this [TimeOfDay] occurs earlier than [other].
+  ///
+  /// Does not account for day or sub-minute differences. This means
+  /// that "00:00" of the next day is still before "23:00" of this day.
+  bool isBefore(TimeOfDay other) => compareTo(other) < 0;
+
+  /// Whether this [TimeOfDay] occurs later than [other].
+  ///
+  /// Does not account for day or sub-minute differences. This means
+  /// that "00:00" of the next day is still before "23:00" of this day.
+  bool isAfter(TimeOfDay other) => compareTo(other) > 0;
+
+  /// Whether this [TimeOfDay] occurs at the same time as [other].
+  ///
+  /// Does not account for day or sub-minute differences. This means
+  /// that "00:00" of the next day is still before "23:00" of this day.
+  bool isAtSameTimeAs(TimeOfDay other) => compareTo(other) == 0;
+
+  /// Compares this [TimeOfDay] object to [other] independent of date.
+  ///
+  /// Does not account for day or sub-minute differences. This means
+  /// that "00:00" of the next day is still before "23:00" of this day.
+  ///
+  /// A [compareTo] function returns:
+  ///  * a negative value if this TimeOfDay [isBefore] [other].
+  ///  * `0` if this DateTime [isAtSameTimeAs] [other], and
+  ///  * a positive value otherwise (when this TimeOfDay [isAfter] [other]).
+  @override
+  int compareTo(TimeOfDay other) {
+    final int hourComparison = hour.compareTo(other.hour);
+    return hourComparison == 0 ? minute.compareTo(other.minute) : hourComparison;
   }
 
   @override

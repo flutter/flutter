@@ -559,4 +559,15 @@ void main() {
     expect(localizations, isA<MaterialLocalizationZh>());
     expect(localizations.lookUpButtonLabel, '查询');
   });
+
+  // Regression test for https://github.com/flutter/flutter/pull/151364
+  testWidgets('ko-KR translation for cut, copy, paste label in ButtonLabel', (WidgetTester tester) async {
+    const Locale locale = Locale('ko');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    expect(localizations, isA<MaterialLocalizationKo>());
+    expect(localizations.cutButtonLabel, '잘라내기');
+    expect(localizations.copyButtonLabel, '복사');
+    expect(localizations.pasteButtonLabel, '붙여넣기');
+  });
 }

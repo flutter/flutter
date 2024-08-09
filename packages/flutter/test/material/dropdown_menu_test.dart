@@ -83,11 +83,9 @@ void main() {
     expect(material.textStyle?.height, 1.43);
   });
 
-  testWidgets('DropdownMenu can be disabled', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+  testWidgets('Inner TextField is disabled when DropdownMenu is disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: themeData,
         home: Scaffold(
           body: SafeArea(
             child: DropdownMenu<TestMenu>(
@@ -100,7 +98,7 @@ void main() {
     );
 
     final TextField textField = tester.widget(find.byType(TextField));
-    expect(textField.decoration?.enabled, false);
+    expect(textField.enabled, false);
     final Finder menuMaterial = find.ancestor(
       of: find.byType(SingleChildScrollView),
       matching: find.byType(Material),
@@ -114,6 +112,25 @@ void main() {
       matching: find.byType(Material),
     );
     expect(updatedMenuMaterial, findsNothing);
+  });
+
+  testWidgets('Inner IconButton is disabled when DropdownMenu is disabled', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/149598.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: DropdownMenu<TestMenu>(
+              enabled: false,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final IconButton trailingButton = tester.widget(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
+    expect(trailingButton.onPressed, null);
   });
 
   testWidgets('Material2 - The width of the text field should always be the same as the menu view',
@@ -331,6 +348,76 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
 
+    buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0'));
+    expect(buttonSize.width, parentWidth - 35.0 - 20.0);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/151769
+  testWidgets('expandedInsets can use EdgeInsets or EdgeInsetsDirectional', (WidgetTester tester) async {
+    const double parentWidth = 500.0;
+    final List<DropdownMenuEntry<ShortMenu>> shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
+    for (final ShortMenu value in ShortMenu.values) {
+      final DropdownMenuEntry<ShortMenu> entry = DropdownMenuEntry<ShortMenu>(value: value, label: value.label);
+      shortMenuItems.add(entry);
+    }
+    Widget buildMenuAnchor({EdgeInsetsGeometry? expandedInsets}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: parentWidth,
+            height: parentWidth,
+            child: DropdownMenu<ShortMenu>(
+              expandedInsets: expandedInsets,
+              dropdownMenuEntries: shortMenuItems,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // By default, the width of the text field is determined by the menu children.
+    await tester.pumpWidget(buildMenuAnchor());
+    RenderBox box = tester.firstRenderObject(find.byType(TextField));
+    expect(box.size.width, 136.0);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    Size buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0').hitTestable());
+    expect(buttonSize.width, 136.0);
+
+    // If expandedInsets is not zero, the width of the text field should be adjusted
+    // based on the EdgeInsets.left and EdgeInsets.right. The top and bottom values
+    // will be ignored.
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildMenuAnchor(expandedInsets: const EdgeInsets.only(left: 35.0, top: 50.0, right: 20.0)));
+    box = tester.firstRenderObject(find.byType(TextField));
+    expect(box.size.width, parentWidth - 35.0 - 20.0);
+    Rect containerRect = tester.getRect(find.byType(SizedBox).first);
+    Rect dropdownMenuRect = tester.getRect(find.byType(TextField));
+    expect(dropdownMenuRect.top, containerRect.top);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0'));
+    expect(buttonSize.width, parentWidth - 35.0 - 20.0);
+
+    // Regression test for https://github.com/flutter/flutter/issues/151769.
+    // If expandedInsets is not zero, the width of the text field should be adjusted
+    // based on the EdgeInsets.end and EdgeInsets.start. The top and bottom values
+    // will be ignored.
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildMenuAnchor(expandedInsets: const EdgeInsetsDirectional.only(start: 35.0, top: 50.0, end: 20.0)));
+    box = tester.firstRenderObject(find.byType(TextField));
+    expect(box.size.width, parentWidth - 35.0 - 20.0);
+    containerRect = tester.getRect(find.byType(SizedBox).first);
+    dropdownMenuRect = tester.getRect(find.byType(TextField));
+    expect(dropdownMenuRect.top, containerRect.top);
+
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
     buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0'));
     expect(buttonSize.width, parentWidth - 35.0 - 20.0);
   });
@@ -2379,6 +2466,63 @@ void main() {
 
     expect(fields[0].textAlign, TextAlign.start);
     expect(fields[1].textAlign, TextAlign.center);
+  });
+
+  testWidgets('DropdownMenu correctly sets keyboardType on TextField', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              keyboardType: TextInputType.number,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.keyboardType, TextInputType.number);
+  });
+
+  testWidgets('DropdownMenu keyboardType defaults to TextInputType.text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.keyboardType, TextInputType.text);
+  });
+
+  testWidgets('DropdownMenu passes an alignmentOffset to MenuAnchor', (WidgetTester tester) async {
+    const Offset alignmentOffset = Offset(0, 16);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<String>(
+            alignmentOffset: alignmentOffset,
+            dropdownMenuEntries: <DropdownMenuEntry<String>>[
+              DropdownMenuEntry<String>(value: '1', label: 'One'),
+              DropdownMenuEntry<String>(value: '2', label: 'Two'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final MenuAnchor menuAnchor = tester.widget<MenuAnchor>(find.byType(MenuAnchor));
+
+    expect(menuAnchor.alignmentOffset, alignmentOffset);
   });
 }
 

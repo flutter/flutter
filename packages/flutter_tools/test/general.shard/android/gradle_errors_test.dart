@@ -698,8 +698,7 @@ assembleProfile
           '│ Following this change, your app will not be available to users running Android SDKs below 21. │\n'
           '│ Consider searching for a version of this plugin that supports these lower versions of the     │\n'
           '│ Android SDK instead.                                                                          │\n'
-          '│ For more information, see:                                                                    │\n'
-          '│ https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration          │\n'
+          '│ For more information, see: https://flutter.dev/to/review-gradle-config                        │\n'
           '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
@@ -782,14 +781,61 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
           '│ To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle │\n'
           '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle  │\n'
           '└──────────────────────────────────────────────────────────────────────────────────────────┘\n'
-        )
-      );
+        ));
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     });
+  });
+
+  testUsingContext('generates correct gradle command for Unix-like environment',
+      () async {
+    await lockFileDepMissingHandler.handler(
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      usesAndroidX: true,
+      line: '',
+    );
+
+    expect(
+        testLogger.statusText,
+        contains('\n'
+            '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────┐\n'
+            '│ You need to update the lockfile, or disable Gradle dependency locking.                   │\n'
+            '│ To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle │\n'
+            '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle  │\n'
+            '└──────────────────────────────────────────────────────────────────────────────────────────┘\n'
+            ''));
+  }, overrides: <Type, Generator>{
+    GradleUtils: () => FakeGradleUtils(),
+    Platform: () => fakePlatform('linux'),
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+
+    testUsingContext('generates correct gradle command for windows environment',
+      () async {
+    await lockFileDepMissingHandler.handler(
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      usesAndroidX: true,
+      line: '',
+    );
+    expect(
+        testLogger.statusText,
+        contains('\n'
+            '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────┐\n'
+            '│ You need to update the lockfile, or disable Gradle dependency locking.                       │\n'
+            '│ To regenerate the lockfiles run: `.\\gradlew.bat :generateLockfiles` in /android/build.gradle │\n'
+            '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle      │\n'
+            '└──────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+            ''));
+  }, overrides: <Type, Generator>{
+    GradleUtils: () => FakeGradleUtils(),
+    Platform: () => fakePlatform('windows'),
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
   });
 
   group('Incompatible Kotlin version', () {
@@ -867,10 +913,10 @@ A problem occurred evaluating project ':app'.
           '│ To fix this issue, replace the following content:                                │\n'
           '│ /android/build.gradle:                                                           │\n'
           "│     - classpath 'com.android.tools.build:gradle:<current-version>'               │\n"
-          "│     + classpath 'com.android.tools.build:gradle:7.3.0'                           │\n"
+          "│     + classpath 'com.android.tools.build:gradle:$templateAndroidGradlePluginVersion'                           │\n"
           '│ /android/gradle/wrapper/gradle-wrapper.properties:                               │\n'
           '│     - https://services.gradle.org/distributions/gradle-<current-version>-all.zip │\n'
-          '│     + https://services.gradle.org/distributions/gradle-7.6.3-all.zip             │\n'
+          '│     + https://services.gradle.org/distributions/gradle-$templateDefaultGradleVersion-all.zip               │\n'
           '└──────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
@@ -1210,7 +1256,7 @@ Could not compile build file '…/example/android/build.gradle'.
       // Ensure the error notes the incompatible Gradle/AGP/Java versions, links to related resources,
       // and a portion of the path to where to change their gradle version.
       expect(testLogger.statusText, contains('Gradle version is incompatible with the Java version'));
-      expect(testLogger.statusText, contains('docs.flutter.dev/go/android-java-gradle-error'));
+      expect(testLogger.statusText, contains('flutter.dev/to/java-gradle-incompatibility'));
       expect(testLogger.statusText, contains('gradle-wrapper.properties'));
       expect(testLogger.statusText, contains('https://docs.gradle.org/current/userguide/compatibility.html#java'));
     }, overrides: <Type, Generator>{

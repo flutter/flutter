@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'constants.dart';
+/// @docImport 'radio.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -50,7 +54,7 @@ class RadioThemeData with Diagnosticable {
   /// {@macro flutter.material.radio.mouseCursor}
   ///
   /// If specified, overrides the default value of [Radio.mouseCursor]. The
-  /// default value is [MaterialStateMouseCursor.clickable].
+  /// default value is [WidgetStateMouseCursor.clickable].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
   /// {@macro flutter.material.radio.fillColor}

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'image_icon.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -209,7 +215,7 @@ class Icon extends StatelessWidget {
 
   /// Semantic label for the icon.
   ///
-  /// Announced in accessibility modes (e.g TalkBack/VoiceOver).
+  /// Announced by assistive technologies (e.g TalkBack/VoiceOver).
   /// This label does not show in the UI.
   ///
   ///  * [SemanticsProperties.label], which is set to [semanticLabel] in the

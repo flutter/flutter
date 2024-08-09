@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/ios/code_signing.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 const String kCertificates = '''
 1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
@@ -580,6 +581,59 @@ void main() {
       );
       expect(developmentTeam, isNull);
       expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('handles stdin pipe breaking on openssl process', () async {
+      final StreamSink<List<int>> stdinSink = ClosedStdinController();
+
+      final Completer<void> completer = Completer<void>();
+      const String certificates = '''
+1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
+    1 valid identities found''';
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['which', 'security'],
+        ),
+        const FakeCommand(
+          command: <String>['which', 'openssl'],
+        ),
+        const FakeCommand(
+          command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
+          stdout: certificates,
+        ),
+        const FakeCommand(
+          command: <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
+          stdout: 'This is a fake certificate',
+        ),
+        FakeCommand(
+          command: const <String>['openssl', 'x509', '-subject'],
+          stdin: IOSink(stdinSink),
+          stdout: 'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
+          completer: completer,
+        ),
+      ]);
+
+      Future<Map<String, String>?> getCodeSigningIdentities() => getCodeSigningIdentityDevelopmentTeamBuildSetting(
+        buildSettings: const <String, String>{
+          'bogus': 'bogus',
+        },
+        platform: macosPlatform,
+        processManager: processManager,
+        logger: logger,
+        config: testConfig,
+        terminal: testTerminal,
+      );
+
+      await expectLater(
+        () => getCodeSigningIdentities(),
+        throwsA(
+          const TypeMatcher<Exception>().having(
+            (Exception e) => e.toString(),
+            'message',
+            equals('Exception: Unexpected error when writing to openssl: SocketException: Bad pipe'),
+          ),
+        ),
+      );
     });
   });
 }

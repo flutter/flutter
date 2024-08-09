@@ -1060,8 +1060,162 @@ void main() {
     expect(fieldKey.currentState!.hasInteractedByUser, isFalse);
   });
 
-  testWidgets('Validator is nullified and error text behaves accordingly',
-      (WidgetTester tester) async {
+  testWidgets('forceErrorText forces an error state when first init', (WidgetTester tester) async {
+    const String forceErrorText = 'Forcing error.';
+
+    Widget builder(AutovalidateMode autovalidateMode) {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  autovalidateMode: autovalidateMode,
+                  child: TextFormField(
+                    forceErrorText: forceErrorText,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder(AutovalidateMode.disabled));
+    expect(find.text(forceErrorText), findsOne);
+  });
+
+  testWidgets(
+    'Validate returns false when forceErrorText is non-null even when validator returns a null value',
+    (WidgetTester tester) async {
+      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+      const String forceErrorText = 'Forcing error';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: Form(
+                    key: formKey,
+                    child: TextFormField(
+                      forceErrorText: forceErrorText,
+                      validator: (String? value) => null,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text(forceErrorText), findsOne);
+      final bool isValid = formKey.currentState!.validate();
+      expect(isValid, isFalse);
+
+      await tester.pump();
+      expect(find.text(forceErrorText), findsOne);
+
+  });
+
+  testWidgets('forceErrorText forces an error state only after setting it to a non-null value', (WidgetTester tester) async {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    const String errorText = 'Forcing Error Text';
+    Widget builder(AutovalidateMode autovalidateMode, String? forceErrorText) {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  key: formKey,
+                  autovalidateMode: autovalidateMode,
+                  child: TextFormField(
+                    forceErrorText: forceErrorText,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(builder(AutovalidateMode.disabled, null));
+    final bool isValid = formKey.currentState!.validate();
+    expect(isValid, true);
+    expect(find.text(errorText), findsNothing);
+    await tester.pumpWidget(builder(AutovalidateMode.disabled, errorText));
+    expect(find.text(errorText), findsOne);
+  });
+
+  testWidgets('Validator will not be called if forceErrorText is provided', (WidgetTester tester) async {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    const String forceErrorText = 'Forcing error.';
+    const String validatorErrorText = 'this error should not appear as we override it with forceErrorText';
+    bool didCallValidator = false;
+
+    Widget builder(AutovalidateMode autovalidateMode) {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  key: formKey,
+                  autovalidateMode: autovalidateMode,
+                  child: TextFormField(
+                    forceErrorText: forceErrorText,
+                    validator: (String? value) {
+                      didCallValidator = true;
+                      return validatorErrorText;
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Start off not autovalidating.
+    await tester.pumpWidget(builder(AutovalidateMode.disabled));
+    expect(find.text(forceErrorText), findsOne);
+    expect(find.text(validatorErrorText), findsNothing);
+
+    formKey.currentState!.reset();
+    await tester.pump();
+    expect(find.text(forceErrorText), findsNothing);
+    expect(find.text(validatorErrorText), findsNothing);
+
+    // We have to manually validate if we're not autovalidating.
+    formKey.currentState!.validate();
+    await tester.pump();
+
+    expect(didCallValidator, isFalse);
+    expect(find.text(forceErrorText), findsOne);
+    expect(find.text(validatorErrorText), findsNothing);
+
+    // Try again with autovalidation. Should validate immediately.
+    await tester.pumpWidget(builder(AutovalidateMode.always));
+
+    expect(didCallValidator, isFalse);
+    expect(find.text(forceErrorText), findsOne);
+    expect(find.text(validatorErrorText), findsNothing);
+  });
+
+  testWidgets('Validator is nullified and error text behaves accordingly', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     bool useValidator = false;
     late StateSetter setState;

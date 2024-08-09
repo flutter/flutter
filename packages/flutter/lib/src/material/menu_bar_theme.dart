@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'menu_button_theme.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'menu_anchor.dart';
@@ -93,7 +96,7 @@ class MenuBarTheme extends InheritedTheme {
   ///   return MenuTheme(
   ///     data: const MenuThemeData(
   ///       style: MenuStyle(
-  ///         backgroundColor: MaterialStatePropertyAll<Color?>(Colors.red),
+  ///         backgroundColor: WidgetStatePropertyAll<Color?>(Colors.red),
   ///       ),
   ///     ),
   ///     child: child,

@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.stylisticAlternates].
+/// Flutter code sample for [FontFeature.stylisticAlternates].
 
 void main() => runApp(const ExampleApp());
 

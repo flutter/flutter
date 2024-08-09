@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+library;
+
 import 'dart:async';
 import 'dart:collection' show HashMap;
 import 'dart:convert';
@@ -543,11 +546,11 @@ class _ScreenshotPaintingContext extends PaintingContext {
   /// size of [renderBounds] multiplied by [pixelRatio].
   ///
   /// To use [toImage], the render object must have gone through the paint phase
-  /// (i.e. [debugNeedsPaint] must be false).
+  /// (i.e. [RenderObject.debugNeedsPaint] must be false).
   ///
   /// The [pixelRatio] describes the scale between the logical pixels and the
   /// size of the output image. It is independent of the
-  /// [window.devicePixelRatio] for the device, so specifying 1.0 (the default)
+  /// [FlutterView.devicePixelRatio] for the device, so specifying 1.0 (the default)
   /// will give you a 1:1 mapping between logical pixels and the output pixels
   /// in the image.
   ///
@@ -737,11 +740,7 @@ class InspectorReferenceData {
 // Production implementation of [WidgetInspectorService].
 class _WidgetInspectorService with WidgetInspectorService {
   _WidgetInspectorService() {
-    selection.addListener(() {
-      if (selectionChangedCallback != null) {
-        selectionChangedCallback!();
-      }
-    });
+    selection.addListener(() => selectionChangedCallback?.call());
   }
 }
 
@@ -917,7 +916,7 @@ mixin WidgetInspectorService {
   /// `value` reflects the newly updated service extension value.
   ///
   /// This will be called automatically for service extensions registered via
-  /// [registerBoolServiceExtension].
+  /// [BindingBase.registerBoolServiceExtension].
   void _postExtensionStateChangedEvent(String name, Object? value) {
     postEvent(
       'Flutter.ServiceExtensionStateChanged',
@@ -1256,6 +1255,11 @@ mixin WidgetInspectorService {
       registerExtension: registerExtension,
     );
     registerServiceExtension(
+      name: WidgetInspectorServiceExtensions.getRootWidgetTree.name,
+      callback: _getRootWidgetTree,
+      registerExtension: registerExtension,
+    );
+    registerServiceExtension(
       name: WidgetInspectorServiceExtensions.getDetailsSubtree.name,
       callback: (Map<String, String> parameters) async {
         assert(parameters.containsKey('objectGroup'));
@@ -1586,22 +1590,15 @@ mixin WidgetInspectorService {
   /// API surface of methods called from the Flutter IntelliJ Plugin.
   @protected
   bool setSelection(Object? object, [ String? groupName ]) {
-    if (object is Element || object is RenderObject) {
-      if (object is Element) {
-        if (object == selection.currentElement) {
-          return false;
-        }
+    switch (object) {
+      case Element() when object != selection.currentElement:
         selection.currentElement = object;
         _sendInspectEvent(selection.currentElement);
-      } else {
-        if (object == selection.current) {
-          return false;
-        }
-        selection.current = object! as RenderObject;
+        return true;
+      case RenderObject() when object != selection.current:
+        selection.current = object;
         _sendInspectEvent(selection.current);
-      }
-
-      return true;
+        return true;
     }
     return false;
   }
@@ -1951,40 +1948,91 @@ mixin WidgetInspectorService {
     String groupName, {
     Map<String, Object>? Function(DiagnosticsNode, InspectorSerializationDelegate)? addAdditionalPropertiesCallback,
   }) {
-    return _nodeToJson(
-      WidgetsBinding.instance.rootElement?.toDiagnosticsNode(),
-      InspectorSerializationDelegate(
-        groupName: groupName,
-        subtreeDepth: 1000000,
-        summaryTree: true,
-        service: this,
-        addAdditionalPropertiesCallback: addAdditionalPropertiesCallback,
-      ),
+    return _getRootWidgetTreeImpl(
+      groupName: groupName,
+      isSummaryTree: true,
+      withPreviews: false,
+      addAdditionalPropertiesCallback: addAdditionalPropertiesCallback,
     );
   }
-
 
   Future<Map<String, Object?>> _getRootWidgetSummaryTreeWithPreviews(
     Map<String, String> parameters,
   ) {
     final String groupName = parameters['groupName']!;
-    final Map<String, Object?>? result = _getRootWidgetSummaryTree(
-      groupName,
-      addAdditionalPropertiesCallback: (DiagnosticsNode node, InspectorSerializationDelegate? delegate) {
-        final Map<String, Object> additionalJson = <String, Object>{};
-        final Object? value = node.value;
-        if (value is Element) {
-          final RenderObject? renderObject = value.renderObject;
-          if (renderObject is RenderParagraph) {
-            additionalJson['textPreview'] = renderObject.text.toPlainText();
-          }
-        }
-        return additionalJson;
-      },
+    final Map<String, Object?>? result = _getRootWidgetTreeImpl(
+      groupName: groupName,
+      isSummaryTree: true,
+      withPreviews: true,
     );
     return Future<Map<String, dynamic>>.value(<String, dynamic>{
       'result': result,
     });
+  }
+
+  Future<Map<String, Object?>> _getRootWidgetTree(
+    Map<String, String> parameters,
+  ) {
+    final String groupName = parameters['groupName']!;
+    final bool isSummaryTree = parameters['isSummaryTree'] == 'true';
+    final bool withPreviews = parameters['withPreviews'] == 'true';
+
+    final Map<String, Object?>? result = _getRootWidgetTreeImpl(
+      groupName: groupName,
+      isSummaryTree: isSummaryTree,
+      withPreviews: withPreviews,
+    );
+
+    return Future<Map<String, dynamic>>.value(<String, dynamic>{
+      'result': result,
+    });
+  }
+
+  Map<String, Object?>? _getRootWidgetTreeImpl({
+    required String groupName,
+    required bool isSummaryTree,
+    required bool withPreviews,
+    Map<String, Object>? Function(
+            DiagnosticsNode, InspectorSerializationDelegate)?
+        addAdditionalPropertiesCallback,
+  }) {
+    final bool shouldAddAdditionalProperties =
+        addAdditionalPropertiesCallback != null || withPreviews;
+
+    // Combine the given addAdditionalPropertiesCallback with logic to add text
+    // previews as well (if withPreviews is true):
+    Map<String, Object>? combinedAddAdditionalPropertiesCallback(
+      DiagnosticsNode node,
+      InspectorSerializationDelegate delegate,
+    ) {
+      final Map<String, Object> additionalPropertiesJson =
+          addAdditionalPropertiesCallback?.call(node, delegate) ??
+              <String, Object>{};
+      if (!withPreviews) {
+        return additionalPropertiesJson;
+      }
+      final Object? value = node.value;
+      if (value is Element) {
+        final RenderObject? renderObject = value.renderObject;
+        if (renderObject is RenderParagraph) {
+          additionalPropertiesJson['textPreview'] =
+              renderObject.text.toPlainText();
+        }
+      }
+      return additionalPropertiesJson;
+    }
+    return _nodeToJson(
+      WidgetsBinding.instance.rootElement?.toDiagnosticsNode(),
+      InspectorSerializationDelegate(
+        groupName: groupName,
+        subtreeDepth: 1000000,
+        summaryTree: isSummaryTree,
+        service: this,
+        addAdditionalPropertiesCallback: shouldAddAdditionalProperties
+            ? combinedAddAdditionalPropertiesCallback
+            : null,
+      ),
+    );
   }
 
   /// Returns a JSON representation of the subtree rooted at the
@@ -3407,7 +3455,9 @@ class _Location {
     required this.file,
     required this.line,
     required this.column,
-    // ignore: unused_element
+    // TODO(srawlins): `unused_element_parameter` is being separated from
+    // `unused_element`. Ignore both names until the separation is complete.
+    // ignore: unused_element, unused_element_parameter
     this.name,
   });
 
@@ -3870,7 +3920,7 @@ class _WidgetFactory {
 ///
 /// See also:
 ///
-/// * the documentation for [Track widget creation](https://docs.flutter.dev/development/tools/devtools/inspector#track-widget-creation).
+/// * the documentation for [Track widget creation](https://flutter.dev/to/track-widget-creation).
 // The below ignore is needed because the static type of the annotation is used
 // by the CFE kernel transformer that implements the instrumentation to
 // recognize the annotation.

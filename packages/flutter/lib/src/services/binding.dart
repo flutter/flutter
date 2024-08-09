@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'system_chrome.dart';
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -566,11 +573,11 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
     ByteData? message,
     ui.PlatformMessageResponseCallback? callback,
   ) async {
-    ui.channelBuffers.push(channel, message, (ByteData? data) {
-      if (callback != null) {
-        callback(data);
-      }
-    });
+    ui.channelBuffers.push(
+      channel,
+      message,
+      (ByteData? data) => callback?.call(data),
+    );
   }
 
   @override

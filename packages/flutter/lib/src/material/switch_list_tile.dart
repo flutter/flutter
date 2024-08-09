@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+///
+/// @docImport 'checkbox_list_tile.dart';
+/// @docImport 'color_scheme.dart';
+/// @docImport 'constants.dart';
+/// @docImport 'ink_well.dart';
+/// @docImport 'material.dart';
+/// @docImport 'radio_list_tile.dart';
+/// @docImport 'scaffold.dart';
+library;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
@@ -192,12 +203,13 @@ class SwitchListTile extends StatelessWidget {
     this.contentPadding,
     this.secondary,
     this.selected = false,
-    this.controlAffinity = ListTileControlAffinity.platform,
+    this.controlAffinity,
     this.shape,
     this.selectedTileColor,
     this.visualDensity,
     this.enableFeedback,
     this.hoverColor,
+    this.internalAddSemanticForOnTap = false,
   }) : _switchListTileType = _SwitchListTileType.material,
        applyCupertinoTheme = false,
        assert(activeThumbImage != null || onActiveThumbImageError == null),
@@ -249,12 +261,13 @@ class SwitchListTile extends StatelessWidget {
     this.contentPadding,
     this.secondary,
     this.selected = false,
-    this.controlAffinity = ListTileControlAffinity.platform,
+    this.controlAffinity,
     this.shape,
     this.selectedTileColor,
     this.visualDensity,
     this.enableFeedback,
     this.hoverColor,
+    this.internalAddSemanticForOnTap = false,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
        assert(!isThreeLine || subtitle != null),
        assert(activeThumbImage != null || onActiveThumbImageError == null),
@@ -333,9 +346,9 @@ class SwitchListTile extends StatelessWidget {
   /// The color of this switch's thumb.
   ///
   /// Resolved in the following states:
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.disabled].
   ///
   /// If null, then the value of [activeColor] is used in the selected state
   /// and [inactiveThumbColor] in the default state. If that is also null, then
@@ -346,9 +359,9 @@ class SwitchListTile extends StatelessWidget {
   /// The color of this switch's track.
   ///
   /// Resolved in the following states:
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.disabled].
   ///
   /// If null, then the value of [activeTrackColor] is used in the selected
   /// state and [inactiveTrackColor] in the default state. If that is also null,
@@ -369,9 +382,9 @@ class SwitchListTile extends StatelessWidget {
   /// The icon to use on the thumb of this switch
   ///
   /// Resolved in the following states:
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.disabled].
   ///
   /// If null, then the value of [SwitchThemeData.thumbIcon] is used. If this is
   /// also null, then the [Switch] does not have any icons on the thumb.
@@ -388,23 +401,23 @@ class SwitchListTile extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.disabled].
   ///
   /// If null, then the value of [SwitchThemeData.mouseCursor] is used. If that
-  /// is also null, then [MaterialStateMouseCursor.clickable] is used.
+  /// is also null, then [WidgetStateMouseCursor.clickable] is used.
   final MouseCursor? mouseCursor;
 
   /// The color for the switch's [Material].
   ///
   /// Resolves in the following states:
-  ///  * [MaterialState.pressed].
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
+  ///  * [WidgetState.pressed].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
   ///
   /// If null, then the value of [activeColor] with alpha [kRadialReactionAlpha]
   /// and [hoverColor] is used in the pressed and hovered state. If that is also
@@ -480,7 +493,7 @@ class SwitchListTile extends StatelessWidget {
   /// Defines the position of control and [secondary], relative to text.
   ///
   /// By default, the value of [controlAffinity] is [ListTileControlAffinity.platform].
-  final ListTileControlAffinity controlAffinity;
+  final ListTileControlAffinity? controlAffinity;
 
   /// {@macro flutter.material.ListTile.shape}
   final ShapeBorder? shape;
@@ -506,6 +519,12 @@ class SwitchListTile extends StatelessWidget {
   /// {@macro flutter.cupertino.CupertinoSwitch.applyTheme}
   final bool? applyCupertinoTheme;
 
+  /// Whether to add button:true to the semantics if onTap is provided.
+  /// This is a temporary flag to help changing the behavior of ListTile onTap semantics.
+  ///
+  // TODO(hangyujin): Remove this flag after fixing related g3 tests and flipping
+  // the default value to true.
+  final bool internalAddSemanticForOnTap;
   @override
   Widget build(BuildContext context) {
     final Widget control;
@@ -566,8 +585,11 @@ class SwitchListTile extends StatelessWidget {
         );
     }
 
+    final ListTileThemeData listTileTheme = ListTileTheme.of(context);
+    final ListTileControlAffinity effectiveControlAffinity =
+        controlAffinity ?? listTileTheme.controlAffinity ?? ListTileControlAffinity.platform;
     Widget? leading, trailing;
-    (leading, trailing) = switch (controlAffinity) {
+    (leading, trailing) = switch (effectiveControlAffinity) {
       ListTileControlAffinity.leading => (control, secondary),
       ListTileControlAffinity.trailing || ListTileControlAffinity.platform => (secondary, control),
     };
@@ -602,6 +624,7 @@ class SwitchListTile extends StatelessWidget {
         onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
         hoverColor: hoverColor,
+        internalAddSemanticForOnTap: internalAddSemanticForOnTap,
       ),
     );
   }

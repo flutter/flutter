@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'button.dart';
+/// @docImport 'switch.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -15,7 +22,7 @@ export 'package:flutter/foundation.dart' show Brightness;
 const _CupertinoThemeDefaults _kDefaultTheme = _CupertinoThemeDefaults(
   null,
   CupertinoColors.systemBlue,
-  CupertinoColors.systemBackground,
+  CupertinoColors.white,
   CupertinoDynamicColor.withBrightness(
     color: Color(0xF0F9F9F9),
     darkColor: Color(0xF01D1D1D),

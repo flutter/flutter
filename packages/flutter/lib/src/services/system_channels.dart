@@ -2,6 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:typed_data';
+///
+/// @docImport 'package:flutter/semantics.dart';
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'binding.dart';
+/// @docImport 'clipboard.dart';
+/// @docImport 'haptic_feedback.dart';
+/// @docImport 'platform_views.dart';
+/// @docImport 'raw_keyboard.dart';
+/// @docImport 'raw_keyboard_android.dart';
+/// @docImport 'raw_keyboard_fuchsia.dart';
+/// @docImport 'system_chrome.dart';
+/// @docImport 'system_navigator.dart';
+/// @docImport 'system_sound.dart';
+/// @docImport 'text_input.dart';
+library;
+
 import 'dart:ui';
 
 import 'message_codecs.dart';

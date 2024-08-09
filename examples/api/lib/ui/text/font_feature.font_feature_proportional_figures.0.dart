@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.proportionalFigures].
+/// Flutter code sample for [FontFeature.proportionalFigures].
 
 void main() => runApp(const ExampleApp());
 

@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'button_style.dart';
+/// @docImport 'ink_highlight.dart';
+/// @docImport 'ink_splash.dart';
+/// @docImport 'theme.dart';
+/// @docImport 'theme_data.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -226,10 +233,7 @@ class InkRipple extends InteractiveInkFeature {
   void paintFeature(Canvas canvas, Matrix4 transform) {
     final int alpha = _fadeInController.isAnimating ? _fadeIn.value : _fadeOut.value;
     final Paint paint = Paint()..color = color.withAlpha(alpha);
-    Rect? rect;
-    if (_clipCallback != null) {
-       rect = _clipCallback();
-    }
+    final Rect? rect = _clipCallback?.call();
     // Splash moves to the center of the reference box.
     final Offset center = Offset.lerp(
       _position,

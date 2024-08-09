@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'animated_cross_fade.dart';
+/// @docImport 'implicit_animations.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
@@ -375,10 +379,8 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
 
   @override
   void dispose() {
-    if (_currentEntry != null) {
-      _currentEntry!.controller.dispose();
-      _currentEntry!.animation.dispose();
-    }
+    _currentEntry?.controller.dispose();
+    _currentEntry?.animation.dispose();
     for (final _ChildEntry entry in _outgoingEntries) {
       entry.controller.dispose();
       entry.animation.dispose();

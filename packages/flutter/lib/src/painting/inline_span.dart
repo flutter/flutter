@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'placeholder_span.dart';
+library;
+
 import 'dart:ui' as ui show ParagraphBuilder, StringAttribute;
 
 import 'package:flutter/foundation.dart';
@@ -154,7 +161,7 @@ List<InlineSpanSemanticsInformation> combineSemanticsInfo(List<InlineSpanSemanti
 ///  * The subclass [TextSpan] specifies text and may contain child [InlineSpan]s.
 ///  * The subclass [PlaceholderSpan] represents a placeholder that may be
 ///    filled with non-text content. [PlaceholderSpan] itself defines a
-///    [ui.PlaceholderAlignment] and a [TextBaseline]. To be useful,
+///    [PlaceholderAlignment] and a [TextBaseline]. To be useful,
 ///    [PlaceholderSpan] must be extended to define content. An instance of
 ///    this is the [WidgetSpan] class in the widgets library.
 ///  * The subclass [WidgetSpan] specifies embedded inline widgets.

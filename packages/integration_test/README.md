@@ -85,8 +85,8 @@ flutter drive \
 
 ### Web
 
-Make sure you have [enabled web support](https://flutter.dev/docs/get-started/web#set-up)
-then [download and run](https://docs.flutter.dev/cookbook/testing/integration/introduction#5b-web)
+Make sure you have [enabled web support](https://flutter.dev/to/add-web-support)
+then [download and run](https://flutter.dev/to/integration-test-on-web)
 the web driver in another process.
 
 Use following command to execute the tests:

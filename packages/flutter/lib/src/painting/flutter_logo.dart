@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'box_decoration.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' as ui show Gradient, TextBox, lerpDouble;
 
@@ -138,9 +141,9 @@ class FlutterLogoDecoration extends Decoration {
   @override
   FlutterLogoDecoration? lerpFrom(Decoration? a, double t) {
     assert(debugAssertIsValid());
-    if (a == null || a is FlutterLogoDecoration) {
-      assert(a == null || a.debugAssertIsValid());
-      return FlutterLogoDecoration.lerp(a as FlutterLogoDecoration?, this, t);
+    if (a is FlutterLogoDecoration?) {
+      assert(a?.debugAssertIsValid() ?? true);
+      return FlutterLogoDecoration.lerp(a, this, t);
     }
     return super.lerpFrom(a, t) as FlutterLogoDecoration?;
   }
@@ -148,9 +151,9 @@ class FlutterLogoDecoration extends Decoration {
   @override
   FlutterLogoDecoration? lerpTo(Decoration? b, double t) {
     assert(debugAssertIsValid());
-    if (b == null || b is FlutterLogoDecoration) {
-      assert(b == null || b.debugAssertIsValid());
-      return FlutterLogoDecoration.lerp(this, b as FlutterLogoDecoration?, t);
+    if (b is FlutterLogoDecoration?) {
+      assert(b?.debugAssertIsValid() ?? true);
+      return FlutterLogoDecoration.lerp(this, b, t);
     }
     return super.lerpTo(b, t) as FlutterLogoDecoration?;
   }

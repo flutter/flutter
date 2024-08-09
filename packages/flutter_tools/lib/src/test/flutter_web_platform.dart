@@ -64,7 +64,7 @@ shelf.Handler createDirectoryHandler(Directory directory, { required bool crossO
         if (needsCrossOriginIsolated)
           ...<String, String>{
             'Cross-Origin-Opener-Policy': 'same-origin',
-            'Cross-Origin-Embedder-Policy': 'require-corp',
+            'Cross-Origin-Embedder-Policy': 'credentialless',
           },
       },
     );
@@ -175,16 +175,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   }) async {
     final shelf.Server server = await serverFactory();
     if (testPackageUri == null) {
-      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        fileSystem.file(fileSystem.path.join(
-          Cache.flutterRoot!,
-          'packages',
-          'flutter_tools',
-          '.dart_tool',
-          'package_config.json',
-        )),
-        logger: logger,
-      );
+      final PackageConfig packageConfig = await currentPackageConfig();
       testPackageUri = packageConfig['test']!.packageUriRoot;
     }
     final File testDartJs = fileSystem.file(fileSystem.path.join(
@@ -548,7 +539,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         if (webRenderer == WebRendererMode.skwasm)
           ...<String, String>{
             'Cross-Origin-Opener-Policy': 'same-origin',
-            'Cross-Origin-Embedder-Policy': 'require-corp',
+            'Cross-Origin-Embedder-Policy': 'credentialless',
           }
       });
     }

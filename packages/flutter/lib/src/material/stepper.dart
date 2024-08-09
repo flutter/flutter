@@ -222,6 +222,7 @@ class Stepper extends StatefulWidget {
     this.stepIconHeight,
     this.stepIconWidth,
     this.stepIconMargin,
+    this.clipBehavior = Clip.none,
   })  : assert(0 <= currentStep && currentStep < steps.length),
         assert(stepIconHeight == null || (stepIconHeight >= _kStepSize && stepIconHeight <= _kMaxStepSize),
             'stepIconHeight must be greater than $_kStepSize and less or equal to $_kMaxStepSize'),
@@ -339,8 +340,8 @@ class Stepper extends StatefulWidget {
   /// Customize connected lines colors.
   ///
   /// Resolves in the following states:
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.disabled].
   ///
   /// If not set then the widget will use default colors, primary for selected state
   /// and grey.shade400 for disabled state.
@@ -365,6 +366,15 @@ class Stepper extends StatefulWidget {
 
   /// Overrides the default step icon margin.
   final EdgeInsets? stepIconMargin;
+
+  /// The [Step.content] will be clipped to this Clip type.
+  ///
+  /// Defaults to [Clip.none].
+  ///
+  /// See also:
+  ///
+  ///  * [Clip], which explains how to use this property.
+  final Clip clipBehavior;
 
   @override
   State<Stepper> createState() => _StepperState();
@@ -795,7 +805,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             ),
             child: Column(
               children: <Widget>[
-                widget.steps[index].content,
+                ClipRect(
+                  clipBehavior: widget.clipBehavior,
+                  child: widget.steps[index].content,
+                ),
                 _buildVerticalControls(index),
               ],
             ),
@@ -888,7 +901,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         Visibility(
           maintainState: true,
           visible: i == widget.currentStep,
-          child: widget.steps[i].content,
+          child: ClipRect(
+            clipBehavior: widget.clipBehavior,
+            child: widget.steps[i].content,
+          ),
         ),
       );
     }

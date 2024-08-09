@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'events.dart';
+library;
 
 import 'dart:async';
 
@@ -103,7 +105,7 @@ class _GestureArena {
 ///
 /// The first member to accept or the last member to not reject wins.
 ///
-/// See <https://flutter.dev/gestures/#gesture-disambiguation> for more
+/// See <https://flutter.dev/to/gesture-disambiguation> for more
 /// information about the role this class plays in the gesture system.
 ///
 /// To debug problems with gestures, consider using

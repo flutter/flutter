@@ -2,8 +2,6 @@
 
 When you run `flutter update-packages`, we download the latest coverage data for `package:flutter` to `packages/flutter/coverage/lcov.info`. This data isn't synchronized to your git revision, so expect discrepancies between your git repo and the coverage file. Usually, this version skew isn't too harmful, but it's valuable to be aware that it might exist.
 
-⚠️ Currently, the latest test coverage data is stale by a few years because of [flutter#81803](https://github.com/flutter/flutter/issues/81803). You will need to [recompute this data manually](#how-recompute-test-coverage-slowly) to view test coverage.
-
 ### Visual Studio Code
 
 Here is how to show test coverage information in Visual Studio Code:

@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'page_storage.dart';
+/// @docImport 'scroll_controller.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'scrollable.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
@@ -147,7 +154,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
         this,
         simulation,
         context.vsync,
-        activity?.shouldIgnorePointer ?? true,
+        shouldIgnorePointer,
       ));
     } else {
       goIdle();

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter_driver/flutter_driver.dart';
+library;
+
 import 'enum_util.dart';
 import 'message.dart';
 

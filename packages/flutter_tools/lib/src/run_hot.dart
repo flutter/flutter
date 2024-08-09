@@ -86,7 +86,6 @@ class HotRunner extends ResidentRunner {
     super.projectRootPath,
     super.dillOutputPath,
     super.stayResident,
-    bool super.ipv6 = false,
     super.machine,
     super.devtoolsHandler,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
@@ -228,7 +227,6 @@ class HotRunner extends ResidentRunner {
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     bool allowExistingDdsInstance = false,
-    bool enableDevTools = false,
     bool needsFullRestart = true,
   }) async {
     _didAttach = true;
@@ -253,7 +251,8 @@ class HotRunner extends ResidentRunner {
       await enableObservatory();
     }
 
-    if (enableDevTools) {
+    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
+    if (debuggingOptions.enableDevTools) {
       // The method below is guaranteed never to return a failing future.
       unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
         devToolsServerAddress: debuggingOptions.devToolsServerAddress,
@@ -362,7 +361,6 @@ class HotRunner extends ResidentRunner {
   Future<int> run({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
-    bool enableDevTools = false,
     String? route,
   }) async {
     await _calculateTargetPlatform();
@@ -470,7 +468,6 @@ class HotRunner extends ResidentRunner {
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
-      enableDevTools: enableDevTools,
       needsFullRestart: false,
     );
   }
@@ -646,14 +643,6 @@ class HotRunner extends ResidentRunner {
         final Future<vm_service.Isolate?> reloadIsolate = device.vmService!
           .getIsolateOrNull(view.uiIsolate!.id!);
         operations.add(reloadIsolate.then((vm_service.Isolate? isolate) async {
-          // TODO(andrewkolos): this race is meant to assist in debugging
-          // https://github.com/flutter/flutter/issues/145812. When the issue
-          // is resolved, this trace (and probably all others added by
-          // the same PR) can be removed.
-          globals.logger.printTrace(
-            'Beginning of UI start paused handler. '
-            'uiIsolate = $isolate; isolate.pauseEvent.kind = ${isolate?.pauseEvent!.kind}',
-          );
           if ((isolate != null) && isPauseEvent(isolate.pauseEvent!.kind!)) {
             // The embedder requires that the isolate is unpaused, because the
             // runInView method requires interaction with dart engine APIs that
@@ -676,7 +665,6 @@ class HotRunner extends ResidentRunner {
             await Future.wait(breakpointAndExceptionRemoval);
             await device.vmService!.service.resume(view.uiIsolate!.id!);
           }
-          globals.logger.printTrace('End of UI start paused handler.');
         }));
       }
 
@@ -790,7 +778,11 @@ class HotRunner extends ResidentRunner {
       if (!silent) {
         globals.printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
       }
+      // TODO(bkonyi): remove when ready to serve DevTools from DDS.
       unawaited(residentDevtoolsHandler!.hotRestart(flutterDevices));
+      // for (final FlutterDevice? device in flutterDevices) {
+      //   unawaited(device?.handleHotRestart());
+      // }
       return result;
     }
     final OperationResult result = await _hotReloadHelper(

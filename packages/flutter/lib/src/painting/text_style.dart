@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:collection';
 import 'dart:ui' as ui show
   ParagraphStyle,
@@ -70,7 +73,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ### Opacity and Color
 ///
 /// Each line here is progressively more opaque. The base color is
-/// [material.Colors.black], and [Color.withOpacity] is used to create a
+/// [Colors.black], and [Color.withOpacity] is used to create a
 /// derivative color with the desired opacity. The root [TextSpan] for this
 /// [RichText] widget is explicitly given the ambient [DefaultTextStyle], since
 /// [RichText] does not do that automatically. The inner [TextStyle] objects are
@@ -270,7 +273,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// {@tool snippet}
 /// The [foreground] property also allows effects such as gradients to be
-/// applied to the text. Here we provide a [Paint] with a [ui.Gradient]
+/// applied to the text. Here we provide a [Paint] with a [Gradient]
 /// shader.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_gradient.png)
@@ -459,8 +462,8 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///  * [TextSpan], the class that wraps a [TextStyle] for the purposes of
 ///    passing it to a [RichText].
 ///  * [TextStyle](https://api.flutter.dev/flutter/dart-ui/TextStyle-class.html), the class in the [dart:ui] library.
-///  * Cookbook: [Use a custom font](https://flutter.dev/docs/cookbook/design/fonts)
-///  * Cookbook: [Use themes to share colors and font styles](https://flutter.dev/docs/cookbook/design/themes)
+///  * Cookbook: [Use a custom font](https://docs.flutter.dev/cookbook/design/fonts)
+///  * Cookbook: [Use themes to share colors and font styles](https://docs.flutter.dev/cookbook/design/themes)
 @immutable
 class TextStyle with Diagnosticable {
   /// Creates a text style.

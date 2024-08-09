@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/foundation.dart';
+library;
+
 import 'dart:io';
 
 /// Whether the test is running in a web browser compiled to JavaScript or WebAssembly.

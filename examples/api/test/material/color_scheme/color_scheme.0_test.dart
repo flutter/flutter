@@ -9,8 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('ColorScheme Smoke Test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: example.ColorSchemeExample()
-    ),
+      const example.ColorSchemeExample(),
     );
     expect(find.text('tonalSpot (Default)'), findsOneWidget);
 
@@ -19,7 +18,7 @@ void main() {
 
   testWidgets('Change color seed', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: example.ColorSchemeExample()),
+      const example.ColorSchemeExample(),
     );
 
     ColoredBox coloredBox() {
@@ -31,8 +30,9 @@ void main() {
       );
     }
     expect(coloredBox().color, const Color(0xff65558f));
-    await tester.tap(find.byIcon(Icons.settings));
+    await tester.tap(find.byType(example.SettingsButton));
     await tester.pumpAndSettle();
+    expect(find.text('Settings'), findsOneWidget);
     await tester.tap(find.byType(IconButton).at(6));
     await tester.pumpAndSettle();
 

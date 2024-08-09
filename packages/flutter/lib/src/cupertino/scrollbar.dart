@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -205,6 +208,14 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
     };
     if (axisPosition != _pressStartAxisPosition && axisVelocity.abs() < 10) {
       HapticFeedback.mediumImpact();
+    }
+  }
+
+  @override
+  void handleTrackTapDown(TapDownDetails details) {
+    // On iOS, tapping the track does not page towards the position of the tap.
+    if (ScrollConfiguration.of(context).getPlatform(context) != TargetPlatform.iOS) {
+      super.handleTrackTapDown(details);
     }
   }
 

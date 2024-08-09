@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'list_wheel_viewport.dart';
+/// @docImport 'sliver_fixed_extent_list.dart';
+/// @docImport 'sliver_grid.dart';
+/// @docImport 'sliver_list.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';

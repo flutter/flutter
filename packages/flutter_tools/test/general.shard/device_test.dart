@@ -932,13 +932,13 @@ void main() {
     testWithoutContext('Get launch arguments for physical device with iPv6 network connection', () {
       final DebuggingOptions original = DebuggingOptions.enabled(
         BuildInfo.debug,
+        ipv6: true,
       );
 
       final List<String> launchArguments = original.getIOSLaunchArguments(
         EnvironmentType.physical,
         null,
         <String, Object?>{},
-        ipv6: true,
         interfaceType: DeviceConnectionInterface.wireless,
       );
 

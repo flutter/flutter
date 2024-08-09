@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'scroll_activity.dart';
+/// @docImport 'scroll_configuration.dart';
+/// @docImport 'scroll_position.dart';
+/// @docImport 'scroll_position_with_single_context.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'scrollable.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';

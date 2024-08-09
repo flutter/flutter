@@ -1714,4 +1714,84 @@ void main() {
     expect(stateKey.currentState!.value,'initialValue');
     expect(value, 'initialValue');
   });
+
+  testWidgets(
+    'isValid returns false when forceErrorText is set and will change error display',
+    (WidgetTester tester) async {
+      final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
+      final GlobalKey<FormFieldState<String>> fieldKey2 = GlobalKey<FormFieldState<String>>();
+      const String forceErrorText = 'Forcing error.';
+      const String validString = 'Valid string';
+      String? validator(String? s) => s == validString ? null : 'Error text';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: Form(
+                    child: ListView(
+                      children: <Widget>[
+                        TextFormField(
+                          key: fieldKey1,
+                          initialValue: validString,
+                          validator: validator,
+                          autovalidateMode: AutovalidateMode.disabled,
+                        ),
+                        TextFormField(
+                          key: fieldKey2,
+                          initialValue: '',
+                          forceErrorText: forceErrorText,
+                          validator: validator,
+                          autovalidateMode: AutovalidateMode.disabled,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(fieldKey1.currentState!.isValid, isTrue);
+      expect(fieldKey1.currentState!.hasError, isFalse);
+      expect(fieldKey2.currentState!.isValid, isFalse);
+      expect(fieldKey2.currentState!.hasError, isTrue);
+  });
+
+  testWidgets('forceErrorText will override InputDecoration.error when both are provided', (WidgetTester tester) async {
+    const String forceErrorText = 'Forcing error';
+    const String decorationErrorText = 'Decoration';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  child: TextFormField(
+                    forceErrorText: forceErrorText,
+                    decoration: const InputDecoration(
+                      errorText: decorationErrorText,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(forceErrorText), findsOne);
+    expect(find.text(decorationErrorText), findsNothing);
+  });
 }

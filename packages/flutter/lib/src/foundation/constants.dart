@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'platform.dart';
+library;
+
 /// A constant that is true if the application was compiled in release mode.
 ///
 /// More specifically, this is a constant that is true if the application was
@@ -89,4 +92,4 @@ const bool kIsWeb = bool.fromEnvironment('dart.library.js_util');
 ///   in tests with [debugDefaultTargetPlatformOverride].
 /// * [dart:io.Platform], a way to find out the browser's platform that is not
 ///   overridable in tests.
-const bool kIsWasm = kIsWeb && bool.fromEnvironment('dart.library.ffi');
+const bool kIsWasm = bool.fromEnvironment('dart.tool.dart2wasm');

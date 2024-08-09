@@ -558,7 +558,7 @@ void main() {
     await tester.tap(find.text('push wrapped'));
     await tester.pumpAndSettle(); // route animation
     RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
-    expect(sliderBox, paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor));
+    expect(sliderBox, paints..rrect(color: inactiveTrackColor)..rrect(color: activeTrackColor));
     expect(sliderBox, paints..circle(color: thumbColor));
 
     Navigator.of(navigatorContext).pop();
@@ -567,7 +567,7 @@ void main() {
     await tester.tap(find.text('push unwrapped'));
     await tester.pumpAndSettle(); // route animation
     sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
-    expect(sliderBox, isNot(paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: inactiveTrackColor)..rrect(color: activeTrackColor)));
     expect(sliderBox, isNot(paints..circle(color: thumbColor)));
   });
 

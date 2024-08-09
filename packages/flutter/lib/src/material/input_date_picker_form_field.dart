@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'date_picker.dart';
+/// @docImport 'text_field.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'date.dart';

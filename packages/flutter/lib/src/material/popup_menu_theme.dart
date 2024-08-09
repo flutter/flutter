@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'popup_menu.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -47,6 +50,7 @@ class PopupMenuThemeData with Diagnosticable {
   const PopupMenuThemeData({
     this.color,
     this.shape,
+    this.menuPadding,
     this.elevation,
     this.shadowColor,
     this.surfaceTintColor,
@@ -64,6 +68,11 @@ class PopupMenuThemeData with Diagnosticable {
 
   /// The shape of the popup menu.
   final ShapeBorder? shape;
+
+  /// If specified, the padding of the popup menu.
+  ///
+  /// If [PopupMenuButton.menuPadding] is provided, [menuPadding] is ignored.
+  final EdgeInsetsGeometry? menuPadding;
 
   /// The elevation of the popup menu.
   final double? elevation;
@@ -108,6 +117,7 @@ class PopupMenuThemeData with Diagnosticable {
   PopupMenuThemeData copyWith({
     Color? color,
     ShapeBorder? shape,
+    EdgeInsetsGeometry? menuPadding,
     double? elevation,
     Color? shadowColor,
     Color? surfaceTintColor,
@@ -122,6 +132,7 @@ class PopupMenuThemeData with Diagnosticable {
     return PopupMenuThemeData(
       color: color ?? this.color,
       shape: shape ?? this.shape,
+      menuPadding: menuPadding ?? this.menuPadding,
       elevation: elevation ?? this.elevation,
       shadowColor: shadowColor ?? this.shadowColor,
       surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
@@ -147,6 +158,7 @@ class PopupMenuThemeData with Diagnosticable {
     return PopupMenuThemeData(
       color: Color.lerp(a?.color, b?.color, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
+      menuPadding: EdgeInsetsGeometry.lerp(a?.menuPadding, b?.menuPadding, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
@@ -164,6 +176,7 @@ class PopupMenuThemeData with Diagnosticable {
   int get hashCode => Object.hash(
     color,
     shape,
+    menuPadding,
     elevation,
     shadowColor,
     surfaceTintColor,
@@ -187,6 +200,7 @@ class PopupMenuThemeData with Diagnosticable {
     return other is PopupMenuThemeData
         && other.color == color
         && other.shape == shape
+        && other.menuPadding == menuPadding
         && other.elevation == elevation
         && other.shadowColor == shadowColor
         && other.surfaceTintColor == surfaceTintColor
@@ -204,6 +218,7 @@ class PopupMenuThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('menuPadding', menuPadding, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));

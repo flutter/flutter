@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/rendering.dart';
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'box_decoration.dart';
+/// @docImport 'image_resolution.dart';
+library;
+
 import 'dart:developer' as developer;
 import 'dart:math' as math;
 import 'dart:ui' as ui show FlutterView, Image;

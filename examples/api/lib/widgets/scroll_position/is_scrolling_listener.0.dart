@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-/// Flutter code sample for [IsScrollingListener].
+/// Flutter code sample for [ScrollPosition.isScrollingNotifier].
 void main() {
   runApp(const IsScrollingListenerApp());
 }

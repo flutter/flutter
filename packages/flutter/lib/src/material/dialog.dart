@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/semantics.dart';
+/// @docImport 'package:flutter/services.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'dart:ui' show clampDouble, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
@@ -86,6 +94,9 @@ class Dialog extends StatelessWidget {
   /// This sets the [Material.color] on this [Dialog]'s [Material].
   ///
   /// If `null`, [ColorScheme.surfaceContainerHigh] is used in Material 3.
+  /// Otherwise, defaults to [ThemeData.dialogBackgroundColor].
+  ///
+  /// If [Dialog.fullscreen] is used, defaults to [ColorScheme.surface].
   /// {@endtemplate}
   final Color? backgroundColor;
 
@@ -239,7 +250,7 @@ class Dialog extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 280.0),
           child: Material(
-            color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
+            color: backgroundColor ?? dialogTheme.backgroundColor ?? defaults.backgroundColor,
             elevation: elevation ?? dialogTheme.elevation ?? defaults.elevation!,
             shadowColor: shadowColor ?? dialogTheme.shadowColor ?? defaults.shadowColor,
             surfaceTintColor: surfaceTintColor ?? dialogTheme.surfaceTintColor ?? defaults.surfaceTintColor,
@@ -812,6 +823,7 @@ class AlertDialog extends StatelessWidget {
           style: contentTextStyle ?? dialogTheme.contentTextStyle ?? defaults.contentTextStyle!,
           child: Semantics(
             container: true,
+            explicitChildNodes: true,
             child: content,
           ),
         ),
@@ -1568,6 +1580,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     String? barrierLabel,
     bool useSafeArea = true,
     super.settings,
+    super.requestFocus,
     super.anchorPoint,
     super.traversalEdgeBehavior,
   }) : super(

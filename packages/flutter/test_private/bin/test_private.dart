@@ -32,7 +32,7 @@ void _usage() {
 Future<void> main(List<String> args) async {
   // TODO(gspencergoog): Convert to using the args package once it has been
   // converted to be non-nullable by default.
-  if (args.isNotEmpty && args[0] == '--help') {
+  if (args.firstOrNull == '--help') {
     _usage();
     exit(0);
   }

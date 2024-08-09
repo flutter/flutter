@@ -7,7 +7,7 @@ import 'timeline.dart';
 /// Event name for refresh rate related timeline events.
 const String kUIThreadVsyncProcessEvent = 'VsyncProcessCallback';
 
-/// A summary of [TimelineEvents]s corresponding to `kUIThreadVsyncProcessEvent` events.
+/// A summary of [TimelineEvent]s corresponding to `kUIThreadVsyncProcessEvent` events.
 ///
 /// `RefreshRate` is the time between the start of a vsync pulse and the target time of that vsync.
 class RefreshRateSummary {

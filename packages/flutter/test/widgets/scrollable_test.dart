@@ -453,6 +453,63 @@ void main() {
     expect(getScrollOffset(tester), 0.0);
   });
 
+  testWidgets('Engine is notified of ignored pointer signals (no scroll physics)', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride, scrollable: false);
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+
+    bool allowedPlatformDefault = false;
+    await tester.sendEventToBinding(
+      testPointer.scroll(
+        const Offset(0.0, 20.0),
+        onRespond: ({required bool allowPlatformDefault}) {
+          allowedPlatformDefault = allowPlatformDefault;
+        },
+      ));
+
+    expect(allowedPlatformDefault, isTrue,
+      reason: 'Engine should be notified of ignored scroll pointer signals.');
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Engine is notified of rejected scroll events (wrong direction)', (WidgetTester tester) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+    );
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+
+    // Horizontal input is accepted
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendEventToBinding(
+      testPointer.scroll(
+        const Offset(0.0, 10.0),
+        onRespond: ({required bool allowPlatformDefault}) {
+          fail('The engine should not be notified when the scroll is accepted.');
+        },
+      ));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pump();
+
+    // Vertical input not accepted
+    bool allowedPlatformDefault = false;
+    await tester.sendEventToBinding(
+      testPointer.scroll(
+        const Offset(0.0, 20.0),
+        onRespond: ({required bool allowPlatformDefault}) {
+          allowedPlatformDefault = allowPlatformDefault;
+        },
+      ));
+    expect(allowedPlatformDefault, isTrue,
+      reason: 'Engine should be notified when scroll is rejected by the scrollable.');
+  }, variant: TargetPlatformVariant.all());
+
   testWidgets('Holding scroll and Scroll pointer signal will update ScrollDirection.forward / ScrollDirection.reverse', (WidgetTester tester) async {
     ScrollDirection? lastUserScrollingDirection;
 

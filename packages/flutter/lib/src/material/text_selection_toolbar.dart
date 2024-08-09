@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'adaptive_text_selection_toolbar.dart';
+/// @docImport 'spell_check_suggestions_toolbar.dart';
+/// @docImport 'text_selection_toolbar_text_button.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -215,6 +220,7 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
             // The navButton that shows and hides the overflow menu is the
             // first child.
             _TextSelectionToolbarOverflowButton(
+              key: _overflowOpen ? StandardComponentType.backButton.key : StandardComponentType.moreButton.key,
               icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
               onPressed: () {
                 setState(() {
@@ -726,6 +732,7 @@ class _TextSelectionToolbarContainer extends StatelessWidget {
 // forward and back controls.
 class _TextSelectionToolbarOverflowButton extends StatelessWidget {
   const _TextSelectionToolbarOverflowButton({
+    super.key,
     required this.icon,
     this.onPressed,
     this.tooltip,

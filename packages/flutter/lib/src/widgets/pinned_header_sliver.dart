@@ -3,6 +3,13 @@
 // found in the LICENSE file.
 
 
+/// @docImport 'notification_listener.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'sliver_floating_header.dart';
+/// @docImport 'sliver_persistent_header.dart';
+/// @docImport 'sliver_resizing_header.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -23,12 +30,28 @@ import 'framework.dart';
 /// ** See code in examples/api/lib/widgets/sliver/pinned_header_sliver.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// A more elaborate example which creates an app bar that's similar to the one
+/// that appears in the iOS Settings app. In this example the pinned header
+/// starts out transparent and the first item in the list serves as the app's
+/// "Settings" title. When the title item has been scrolled completely behind
+/// the pinned header, the header animates its opacity from 0 to 1 and its
+/// (centered) "Settings" title appears. The fact that the header's opacity
+/// depends on the height of the title item - which is unknown until the list
+/// has been laid out - necessitates monitoring the title item's
+/// [SliverGeometry.scrollExtent] and the header's [SliverConstraints.scrollOffset]
+/// from a scroll [NotificationListener]. See the source code for more details.
+///
+/// ** See code in examples/api/lib/widgets/sliver/pinned_header_sliver.1.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [SliverResizingHeader] - which similarly pins the header at the top
 ///    of the [CustomScrollView] but reacts to scrolling by resizing the header
 ///    between its minimum and maximum extent limits.
+///  * [SliverFloatingHeader] - which animates the header in and out of view
+///    in response to downward and upwards scrolls.
 ///  * [SliverPersistentHeader] - a general purpose header that can be
 ///    configured as a pinned, resizing, or floating header.
 class PinnedHeaderSliver extends SingleChildRenderObjectWidget {

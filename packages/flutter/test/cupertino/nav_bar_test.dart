@@ -64,40 +64,97 @@ void main() {
       darkColor: Color(0xF3E5E5E5),
     );
 
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
     await tester.pumpWidget(
-      const CupertinoApp(
-        theme: CupertinoThemeData(brightness: Brightness.light),
-        home: CupertinoNavigationBar(
-          middle: Text('Title'),
-          backgroundColor: background,
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        home: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Title'),
+            backgroundColor: background,
+          ),
+          child: ListView(
+            controller: scrollController,
+            children: const <Widget>[
+              Placeholder(),
+            ],
+          ),
         ),
       ),
     );
-    expect(find.byType(BackdropFilter), findsNothing);
+
+    scrollController.jumpTo(100.0);
+    await tester.pump();
+
+    expect(
+      tester.widget(find.byType(BackdropFilter)),
+      isA<BackdropFilter>().having((BackdropFilter filter) => filter.enabled, 'filter enabled', false),
+    );
     expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.color));
 
     await tester.pumpWidget(
-      const CupertinoApp(
-        theme: CupertinoThemeData(brightness: Brightness.dark),
-        home: CupertinoNavigationBar(
-          middle: Text('Title'),
-          backgroundColor: background,
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Title'),
+            backgroundColor: background,
+          ),
+          child: ListView(
+            controller: scrollController,
+            children: const <Widget>[
+              Placeholder(),
+            ],
+          ),
         ),
       ),
     );
-    expect(find.byType(BackdropFilter), findsOneWidget);
+
+    scrollController.jumpTo(100.0);
+    await tester.pump();
+
+    expect(
+      tester.widget(find.byType(BackdropFilter)),
+      isA<BackdropFilter>().having((BackdropFilter f) => f.enabled, 'filter enabled', true),
+    );
     expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.darkColor));
   });
 
-  testWidgets('Non-opaque background adds blur effects', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const CupertinoApp(
-        home: CupertinoNavigationBar(
-          middle: Text('Title'),
+  testWidgets("Background doesn't add blur effect when no content is scrolled under", (WidgetTester test) async {
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    await test.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        home: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Title'),
+          ),
+          child: ListView(
+            controller: scrollController,
+            children: const <Widget>[
+              Placeholder(),
+            ],
+          ),
         ),
       ),
     );
-    expect(find.byType(BackdropFilter), findsOneWidget);
+
+    expect(
+      test.widget(find.byType(BackdropFilter)),
+      isA<BackdropFilter>().having((BackdropFilter filter) => filter.enabled, 'filter enabled', false),
+    );
+
+    scrollController.jumpTo(100.0);
+    await test.pump();
+
+    expect(
+      test.widget(find.byType(BackdropFilter)),
+      isA<BackdropFilter>().having((BackdropFilter filter) => filter.enabled, 'filter enabled', true),
+    );
   });
 
   testWidgets('Nav bar displays correctly', (WidgetTester tester) async {
@@ -781,6 +838,7 @@ void main() {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoNavigationBar(
+          automaticBackgroundVisibility: false,
           middle: Text('Title'),
           border: Border(
             bottom: BorderSide(
@@ -933,6 +991,7 @@ void main() {
           child: CustomScrollView(
             slivers: <Widget>[
               CupertinoSliverNavigationBar(
+                automaticBackgroundVisibility: false,
                 largeTitle: Text('Large Title'),
                 border: Border(
                   bottom: BorderSide(
@@ -1015,6 +1074,241 @@ void main() {
         find.byType(RepaintBoundary).last,
         matchesGoldenFile('nav_bar_test.large_title.png'),
       );
+    },
+  );
+
+  testWidgets(
+    'Nav bar background is transparent if `automaticBackgroundVisibility` is true and has no content scrolled under it',
+    (WidgetTester tester) async {
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            backgroundColor: const Color(0xFFFFFFFF),
+            navigationBar: const CupertinoNavigationBar(
+              backgroundColor: Color(0xFFE5E5E5),
+              border: Border(
+                bottom: BorderSide(
+                  color: Color(0xFFAABBCC),
+                  width: 0.0,
+                ),
+              ),
+              middle: Text('Title'),
+            ),
+            child: ListView(
+              controller: scrollController,
+              children: const <Widget>[
+                Placeholder(),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(scrollController.offset, 0.0);
+
+      final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+        of: find.byType(CupertinoNavigationBar),
+        matching: find.byType(DecoratedBox),
+      )).first as DecoratedBox;
+      expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+      final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+      final BorderSide side = decoration.border!.bottom;
+      expect(side.color.opacity, 0.0);
+
+      // Appears transparent since the background color is the same as the scaffold.
+      expect(find.byType(CupertinoNavigationBar), paints..rect(color: const Color(0xFFFFFFFF)));
+
+      scrollController.jumpTo(100.0);
+      await tester.pump();
+
+      final DecoratedBox decoratedBoxAfterSroll = tester.widgetList(find.descendant(
+        of: find.byType(CupertinoNavigationBar),
+        matching: find.byType(DecoratedBox),
+      )).first as DecoratedBox;
+      expect(decoratedBoxAfterSroll.decoration.runtimeType, BoxDecoration);
+
+      final BorderSide borderAfterScroll = (decoratedBoxAfterSroll.decoration as BoxDecoration).border!.bottom;
+
+      expect(borderAfterScroll.color.opacity, 1.0);
+
+      expect(find.byType(CupertinoNavigationBar), paints..rect(color: const Color(0xFFE5E5E5)));
+    },
+  );
+
+  testWidgets(
+    'automaticBackgroundVisibility parameter has no effect if nav bar is not a child of CupertinoPageScaffold',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: CupertinoNavigationBar(
+            backgroundColor: Color(0xFFE5E5E5),
+            border: Border(
+              bottom: BorderSide(
+                color: Color(0xFFAABBCC),
+                width: 0.0,
+              ),
+            ),
+            middle: Text('Title'),
+          ),
+        ),
+      );
+
+      final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+        of: find.byType(CupertinoNavigationBar),
+        matching: find.byType(DecoratedBox),
+      )).first as DecoratedBox;
+      expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+      final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+      final BorderSide side = decoration.border!.bottom;
+      expect(side.color, const Color(0xFFAABBCC));
+
+      expect(find.byType(CupertinoNavigationBar), paints..rect(color: const Color(0xFFE5E5E5)));
+    },
+  );
+
+  testWidgets(
+    'Nav bar background is always visible if `automaticBackgroundVisibility` is false',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(
+              automaticBackgroundVisibility: false,
+              backgroundColor: Color(0xFFE5E5E5),
+              border: Border(
+                bottom: BorderSide(
+                  color: Color(0xFFAABBCC),
+                  width: 0.0,
+                ),
+              ),
+              middle: Text('Title'),
+            ),
+            child: Placeholder(),
+          ),
+        ),
+      );
+
+      DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+        of: find.byType(CupertinoNavigationBar),
+        matching: find.byType(DecoratedBox),
+      )).first as DecoratedBox;
+      expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+      BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+      BorderSide side = decoration.border!.bottom;
+      expect(side.color, const Color(0xFFAABBCC));
+
+      expect(find.byType(CupertinoNavigationBar), paints..rect(color: const Color(0xFFE5E5E5)));
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                const CupertinoSliverNavigationBar(
+                  automaticBackgroundVisibility: false,
+                  backgroundColor: Color(0xFFE5E5E5),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Color(0xFFAABBCC),
+                      width: 0.0,
+                    ),
+                  ),
+                  largeTitle: Text('Title'),
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      decoratedBox = tester.widgetList(find.descendant(
+        of: find.byType(CupertinoSliverNavigationBar),
+        matching: find.byType(DecoratedBox),
+      )).first as DecoratedBox;
+      expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+      decoration = decoratedBox.decoration as BoxDecoration;
+      side = decoration.border!.bottom;
+      expect(side.color, const Color(0xFFAABBCC));
+
+      expect(find.byType(CupertinoSliverNavigationBar), paints..rect(color: const Color(0xFFE5E5E5)));
+    },
+  );
+
+  testWidgets(
+    'CupertinoSliverNavigationBar background is transparent if `automaticBackgroundVisibility` is true and has no content scrolled under it',
+    (WidgetTester tester) async {
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            backgroundColor: const Color(0xFFFFFFFF),
+            child: CustomScrollView(
+              controller: scrollController,
+              slivers: <Widget>[
+                const CupertinoSliverNavigationBar(
+                  backgroundColor: Color(0xFFE5E5E5),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Color(0xFFAABBCC),
+                      width: 0.0,
+                    ),
+                  ),
+                  largeTitle: Text('Title'),
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(scrollController.offset, 0.0);
+
+      final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+        of: find.byType(CupertinoSliverNavigationBar),
+        matching: find.byType(DecoratedBox),
+      )).first as DecoratedBox;
+      expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+      final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+      final BorderSide side = decoration.border!.bottom;
+      expect(side.color.opacity, 0.0);
+
+      // Appears transparent since the background color is the same as the scaffold.
+      expect(find.byType(CupertinoSliverNavigationBar), paints..rect(color: const Color(0xFFFFFFFF)));
+
+      scrollController.jumpTo(400.0);
+      await tester.pump();
+
+      final DecoratedBox decoratedBoxAfterSroll = tester.widgetList(find.descendant(
+        of: find.byType(CupertinoSliverNavigationBar),
+        matching: find.byType(DecoratedBox),
+      )).first as DecoratedBox;
+      expect(decoratedBoxAfterSroll.decoration.runtimeType, BoxDecoration);
+
+      final BorderSide borderAfterScroll = (decoratedBoxAfterSroll.decoration as BoxDecoration).border!.bottom;
+
+      expect(borderAfterScroll.color.opacity, 1.0);
+
+      expect(find.byType(CupertinoSliverNavigationBar), paints..rect(color: const Color(0xFFE5E5E5)));
     },
   );
 

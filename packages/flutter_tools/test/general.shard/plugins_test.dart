@@ -3,10 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
@@ -890,11 +893,12 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext("Registrant for web doesn't escape slashes in imports", () async {
-        flutterProject.isModule = true;
-        final Directory webPluginWithNestedFile =
-            fs.systemTempDirectory.createTempSync('flutter_web_plugin_with_nested.');
-        webPluginWithNestedFile.childFile('pubspec.yaml').writeAsStringSync('''
+      group('Build time plugin injection', () {
+        testUsingContext("Registrant for web doesn't escape slashes in imports", () async {
+          flutterProject.isModule = true;
+          final Directory webPluginWithNestedFile =
+          fs.systemTempDirectory.createTempSync('flutter_web_plugin_with_nested.');
+          webPluginWithNestedFile.childFile('pubspec.yaml').writeAsStringSync('''
   flutter:
     plugin:
       platforms:
@@ -902,30 +906,85 @@ dependencies:
           pluginClass: WebPlugin
           fileName: src/web_plugin.dart
   ''');
-        webPluginWithNestedFile
-          .childDirectory('lib')
-          .childDirectory('src')
-          .childFile('web_plugin.dart')
-          .createSync(recursive: true);
+          webPluginWithNestedFile
+              .childDirectory('lib')
+              .childDirectory('src')
+              .childFile('web_plugin.dart')
+              .createSync(recursive: true);
 
-        flutterProject.directory
-          .childFile('.packages')
-          .writeAsStringSync('''
+          flutterProject.directory
+              .childFile('.packages')
+              .writeAsStringSync('''
 web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri}
 ''');
 
-        final Directory destination = flutterProject.directory.childDirectory('lib');
-        await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: destination);
+          final Directory destination = flutterProject.directory.childDirectory('lib');
+          await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: destination);
 
-        final File registrant = flutterProject.directory
-            .childDirectory('lib')
-            .childFile('web_plugin_registrant.dart');
+          final File registrant = flutterProject.directory
+              .childDirectory('lib')
+              .childFile('web_plugin_registrant.dart');
 
-        expect(registrant.existsSync(), isTrue);
-        expect(registrant.readAsStringSync(), contains("import 'package:web_plugin_with_nested/src/web_plugin.dart';"));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
+          expect(registrant.existsSync(), isTrue);
+          expect(registrant.readAsStringSync(), contains("import 'package:web_plugin_with_nested/src/web_plugin.dart';"));
+        }, overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+        });
+
+        testUsingContext('user-selected implementation overrides inline implementation on web', () async {
+          final List<Directory> directories = createFakePlugins(fs, <String>[
+            'user_selected_url_launcher_implementation',
+            'url_launcher',
+          ]);
+
+          // Add inline web implementation to `user_selected_url_launcher_implementation`
+          directories[0].childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  plugin:
+    implements: url_launcher
+    platforms:
+      web:
+        pluginClass: UserSelectedUrlLauncherWeb
+        fileName: src/web_plugin.dart
+    ''');
+
+          // Add inline native implementation to `url_launcher`
+          directories[1].childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: InlineUrlLauncherWeb
+        fileName: src/web_plugin.dart
+    ''');
+
+          final FlutterManifest manifest = FlutterManifest.createFromString('''
+name: test
+version: 1.0.0
+
+dependencies:
+  url_launcher: ^1.0.0
+  user_selected_url_launcher_implementation: ^1.0.0
+    ''', logger: BufferLogger.test())!;
+
+          flutterProject.manifest = manifest;
+          flutterProject.isModule = true;
+
+          final Directory destination = flutterProject.directory.childDirectory('lib');
+          await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: destination);
+
+          final File registrant = flutterProject.directory
+              .childDirectory('lib')
+              .childFile('web_plugin_registrant.dart');
+
+          expect(registrant.existsSync(), isTrue);
+          expect(registrant.readAsStringSync(), contains("import 'package:user_selected_url_launcher_implementation/src/web_plugin.dart';"));
+          expect(registrant.readAsStringSync(),  isNot(contains("import 'package:url_launcher/src/web_plugin.dart';")));
+        }, overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+        });
       });
 
       testUsingContext('Injecting creates generated Android registrant, but does not include Dart-only plugins', () async {
@@ -1068,6 +1127,112 @@ flutter:
         expect(registrantHeader.existsSync(), isTrue);
         expect(registrantImpl.existsSync(), isTrue);
         expect(registrantImpl.readAsStringSync(), contains('some_plugin_register_with_registrar'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('user-selected implementation overrides inline implementation', () async {
+        final List<Directory> directories = createFakePlugins(fs, <String>[
+          'user_selected_url_launcher_implementation',
+          'url_launcher',
+        ]);
+
+        // Add inline native implementation to `user_selected_url_launcher_implementation`
+        directories[0].childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  plugin:
+    implements: url_launcher
+    platforms:
+      linux:
+        pluginClass: UserSelectedUrlLauncherLinux
+    ''');
+
+        // Add inline native implementation to `url_launcher`
+        directories[1].childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      linux:
+        pluginClass: InlineUrlLauncherLinux
+    ''');
+
+        final FlutterManifest manifest = FlutterManifest.createFromString('''
+name: test
+version: 1.0.0
+
+dependencies:
+  url_launcher: ^1.0.0
+  user_selected_url_launcher_implementation: ^1.0.0
+    ''', logger: BufferLogger.test())!;
+
+        flutterProject.manifest = manifest;
+
+        await injectPlugins(flutterProject, linuxPlatform: true);
+
+        final File registrantImpl = linuxProject.managedDirectory.childFile('generated_plugin_registrant.cc');
+
+        expect(registrantImpl.existsSync(), isTrue);
+        expect(registrantImpl.readAsStringSync(), contains('user_selected_url_launcher_linux_register_with_registrar'));
+        expect(registrantImpl.readAsStringSync(), isNot(contains('inline_url_launcher_linux_register_with_registrar')));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('user-selected implementation overrides default implementation', () async {
+        final List<Directory> directories = createFakePlugins(fs, <String>[
+          'user_selected_url_launcher_implementation',
+          'url_launcher',
+          'url_launcher_linux',
+        ]);
+
+        // Add inline native implementation to `user_selected_url_launcher_implementation`
+        directories[0].childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  plugin:
+    implements: url_launcher
+    platforms:
+      linux:
+        pluginClass: UserSelectedUrlLauncherLinux
+    ''');
+
+        // Add default native implementation to `url_launcher`
+        directories[1].childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      linux:
+        default_package: url_launcher_linux
+    ''');
+
+        // Add inline native implementation to `url_launcher_linux`
+        directories[1].childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      linux:
+        pluginClass: InlineUrlLauncherLinux
+    ''');
+
+        final FlutterManifest manifest = FlutterManifest.createFromString('''
+name: test
+version: 1.0.0
+
+dependencies:
+  url_launcher: ^1.0.0
+  user_selected_url_launcher_implementation: ^1.0.0
+    ''', logger: BufferLogger.test())!;
+
+        flutterProject.manifest = manifest;
+
+        await injectPlugins(flutterProject, linuxPlatform: true);
+
+        final File registrantImpl = linuxProject.managedDirectory.childFile('generated_plugin_registrant.cc');
+
+        expect(registrantImpl.existsSync(), isTrue);
+        expect(registrantImpl.readAsStringSync(), contains('user_selected_url_launcher_linux_register_with_registrar'));
+        expect(registrantImpl.readAsStringSync(), isNot(contains('inline_url_launcher_linux_register_with_registrar')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1660,6 +1825,7 @@ The Flutter Preview device does not support the following plugins from your pubs
         expect(plugin.pluginPodspecPath(fs, WindowsPlugin.kConfigKey), isNull);
       });
     });
+
     testWithoutContext('Symlink failures give developer mode instructions on recent versions of Windows', () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
       final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14972.1]');
@@ -1751,6 +1917,73 @@ The Flutter Preview device does not support the following plugins from your pubs
         returnsNormally,
       );
     });
+  });
+
+  testUsingContext('exits tool when deleting .plugin_symlinks fails', () async {
+    final FakeFlutterProject flutterProject = FakeFlutterProject()
+      ..directory = globals.fs.currentDirectory.childDirectory('app');
+    final FakeFlutterManifest flutterManifest = FakeFlutterManifest();
+    final Directory windowsManagedDirectory = flutterProject.directory
+        .childDirectory('windows')
+        .childDirectory('flutter');
+    final FakeWindowsProject windowsProject = FakeWindowsProject()
+      ..managedDirectory = windowsManagedDirectory
+      ..cmakeFile = windowsManagedDirectory.parent.childFile('CMakeLists.txt')
+      ..generatedPluginCmakeFile =
+          windowsManagedDirectory.childFile('generated_plugins.mk')
+      ..pluginSymlinkDirectory = windowsManagedDirectory
+          .childDirectory('ephemeral')
+          .childDirectory('.plugin_symlinks')
+      ..exists = true;
+
+    flutterProject
+      ..manifest = flutterManifest
+      ..flutterPluginsFile =
+          flutterProject.directory.childFile('.flutter-plugins')
+      ..flutterPluginsDependenciesFile =
+          flutterProject.directory.childFile('.flutter-plugins-dependencies')
+      ..windows = windowsProject;
+
+    flutterProject.directory.childFile('.packages').createSync(recursive: true);
+
+    createPluginSymlinks(
+      flutterProject,
+      force: true,
+      featureFlagsOverride: TestFeatureFlags(isWindowsEnabled: true),
+    );
+
+    expect(
+      () => createPluginSymlinks(
+        flutterProject,
+        force: true,
+        featureFlagsOverride: TestFeatureFlags(isWindowsEnabled: true),
+      ),
+      throwsToolExit(
+          message: RegExp('Unable to delete file or directory at '
+              r'"C:\\app\\windows\\flutter\\ephemeral\\\.plugin_symlinks"')),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () {
+      final FileExceptionHandler handle = FileExceptionHandler();
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        platform: FakePlatform(),
+        delegate: MemoryFileSystem.test(
+          style: FileSystemStyle.windows,
+          opHandle: handle.opHandle,
+        ),
+      );
+      const String symlinkDirectoryPath = r'C:\app\windows\flutter\ephemeral\.plugin_symlinks';
+      handle.addError(
+        fileSystem.directory(symlinkDirectoryPath),
+        FileSystemOp.delete,
+        const PathNotFoundException(
+          symlinkDirectoryPath,
+          OSError('The system cannot find the path specified.', 3),
+        ),
+      );
+      return fileSystem;
+    },
+    ProcessManager: () => FakeProcessManager.empty(),
   });
 }
 

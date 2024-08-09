@@ -47,12 +47,14 @@ void main() {
             onChanged: (bool value) { },
             title: const Text('AAA'),
             secondary: const Text('aaa'),
+            internalAddSemanticForOnTap: true,
           ),
           CheckboxListTile(
             value: true,
             onChanged: (bool? value) { },
             title: const Text('BBB'),
             secondary: const Text('bbb'),
+            internalAddSemanticForOnTap: true,
           ),
           RadioListTile<bool>(
             value: true,
@@ -60,6 +62,7 @@ void main() {
             onChanged: (bool? value) { },
             title: const Text('CCC'),
             secondary: const Text('ccc'),
+            internalAddSemanticForOnTap: true,
           ),
         ],
       ),
@@ -72,13 +75,14 @@ void main() {
           id: 1,
           rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           flags: <SemanticsFlag>[
+            SemanticsFlag.isButton,
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.hasToggledState,
             SemanticsFlag.isEnabled,
             SemanticsFlag.isFocusable,
             SemanticsFlag.isToggled,
           ],
-          actions: SemanticsAction.tap.index,
+          actions: SemanticsAction.tap.index | SemanticsAction.focus.index,
           label: 'aaa\nAAA',
         ),
         TestSemantics.rootChild(
@@ -86,13 +90,14 @@ void main() {
           rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: Matrix4.translationValues(0.0, 56.0, 0.0),
           flags: <SemanticsFlag>[
+            SemanticsFlag.isButton,
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.isChecked,
             SemanticsFlag.isEnabled,
             SemanticsFlag.isFocusable,
           ],
-          actions: SemanticsAction.tap.index,
+          actions: SemanticsAction.tap.index | SemanticsAction.focus.index,
           label: 'bbb\nBBB',
         ),
         TestSemantics.rootChild(
@@ -100,13 +105,14 @@ void main() {
           rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: Matrix4.translationValues(0.0, 112.0, 0.0),
           flags: <SemanticsFlag>[
+            SemanticsFlag.isButton,
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.isEnabled,
             SemanticsFlag.isFocusable,
             SemanticsFlag.isInMutuallyExclusiveGroup,
           ],
-          actions: SemanticsAction.tap.index,
+          actions: SemanticsAction.tap.index | SemanticsAction.focus.index,
           label: 'CCC\nccc',
         ),
       ],
@@ -1690,5 +1696,39 @@ void main() {
     await tester.pump();
     expect(Focus.of(firstChildKey.currentContext!).hasPrimaryFocus, isFalse);
     expect(Focus.of(secondChildKey.currentContext!).hasPrimaryFocus, isTrue);
+  });
+
+  testWidgets('SwitchListTile uses ListTileTheme controlAffinity', (WidgetTester tester) async {
+    Widget buildView(ListTileControlAffinity controlAffinity) {
+      return MaterialApp(
+        home: Material(
+          child: ListTileTheme(
+            data: ListTileThemeData(
+              controlAffinity: controlAffinity,
+            ),
+            child: SwitchListTile(
+              value: true,
+              title: const Text('SwitchListTile'),
+              onChanged: (bool value) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildView(ListTileControlAffinity.leading));
+    final Finder leading = find.text('SwitchListTile');
+    final Offset offsetLeading = tester.getTopLeft(leading);
+    expect(offsetLeading, const Offset(92.0, 16.0));
+
+    await tester.pumpWidget(buildView(ListTileControlAffinity.trailing));
+    final Finder trailing = find.text('SwitchListTile');
+    final Offset offsetTrailing = tester.getTopLeft(trailing);
+    expect(offsetTrailing, const Offset(16.0, 16.0));
+
+    await tester.pumpWidget(buildView(ListTileControlAffinity.platform));
+    final Finder platform = find.text('SwitchListTile');
+    final Offset offsetPlatform = tester.getTopLeft(platform);
+    expect(offsetPlatform, const Offset(16.0, 16.0));
   });
 }

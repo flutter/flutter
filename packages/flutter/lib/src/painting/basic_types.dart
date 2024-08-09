@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/rendering.dart';
+///
+/// @docImport 'text_span.dart';
+/// @docImport 'text_style.dart';
+library;
+
 import 'dart:ui' show TextDirection;
 
 export 'dart:ui' show
@@ -46,9 +53,7 @@ export 'dart:ui' show
   TextLeadingDistribution,
   TextPosition,
   TileMode,
-  VertexMode,
-  hashList,
-  hashValues;
+  VertexMode;
 
 export 'package:flutter/foundation.dart' show VoidCallback;
 

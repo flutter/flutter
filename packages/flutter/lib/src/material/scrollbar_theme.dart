@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'scrollbar.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -55,7 +58,7 @@ class ScrollbarThemeData with Diagnosticable {
   /// descendant [Scrollbar] widgets.
   ///
   /// Resolves in the following states:
-  ///  * [MaterialState.hovered] on web and desktop platforms.
+  ///  * [WidgetState.hovered] on web and desktop platforms.
   final MaterialStateProperty<double?>? thickness;
 
   /// Overrides the default value of [Scrollbar.trackVisibility] in all
@@ -74,22 +77,22 @@ class ScrollbarThemeData with Diagnosticable {
   /// [Scrollbar] widgets.
   ///
   /// Resolves in the following states:
-  ///  * [MaterialState.dragged].
-  ///  * [MaterialState.hovered] on web and desktop platforms.
+  ///  * [WidgetState.dragged].
+  ///  * [WidgetState.hovered] on web and desktop platforms.
   final MaterialStateProperty<Color?>? thumbColor;
 
   /// Overrides the default [Color] of the [Scrollbar] track when
   /// [trackVisibility] is true in all descendant [Scrollbar] widgets.
   ///
   /// Resolves in the following states:
-  ///  * [MaterialState.hovered] on web and desktop platforms.
+  ///  * [WidgetState.hovered] on web and desktop platforms.
   final MaterialStateProperty<Color?>? trackColor;
 
   /// Overrides the default [Color] of the [Scrollbar] track border when
   /// [trackVisibility] is true in all descendant [Scrollbar] widgets.
   ///
   /// Resolves in the following states:
-  ///  * [MaterialState.hovered] on web and desktop platforms.
+  ///  * [WidgetState.hovered] on web and desktop platforms.
   final MaterialStateProperty<Color?>? trackBorderColor;
 
   /// Overrides the default value of the [ScrollbarPainter.crossAxisMargin]

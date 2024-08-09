@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/rendering.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
@@ -278,12 +282,12 @@ class _NoopMouseCursorSession extends MouseCursorSession {
 
 /// A mouse cursor that doesn't change the cursor when activated.
 ///
-/// Although setting a region's cursor to [NoopMouseCursor] doesn't change the
+/// Although setting a region's cursor to [_NoopMouseCursor] doesn't change the
 /// cursor, it blocks regions behind it from changing the cursor, in contrast to
 /// setting the cursor to null. More information about the usage of this class
-/// can be found at [MouseCursors.uncontrolled].
+/// can be found at [MouseCursor.uncontrolled].
 ///
-/// To use this class, use [MouseCursors.uncontrolled]. Directly
+/// To use this class, use [MouseCursor.uncontrolled]. Directly
 /// instantiating this class is not allowed.
 class _NoopMouseCursor extends MouseCursor {
   // Application code shouldn't directly instantiate this class, since its only

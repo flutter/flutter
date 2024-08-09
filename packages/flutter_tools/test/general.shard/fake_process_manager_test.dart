@@ -174,6 +174,13 @@ void main() {
       expect(stderr, 'stderr'.codeUnits);
       expect(stdout, 'stdout'.codeUnits);
     });
+
+    testWithoutContext('stdin should be flushable (all data written is consumed)', () async {
+      final FakeProcess process = FakeProcess();
+      process.stdin.write('hello');
+      // If nothing is listening to the stdin stream, this test will never complete.
+      await process.stdin.flush();
+    });
   });
 
   group(FakeProcessManager, () {

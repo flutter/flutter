@@ -202,7 +202,7 @@ void main() {
         throwsToolExit(message: 'Unable to upgrade Flutter: Your Flutter checkout '
           'is currently not on a release branch.\n'
           'Use "flutter channel" to switch to an official channel, and retry. '
-          'Alternatively, re-install Flutter by going to https://flutter.dev/docs/get-started/install.'
+          'Alternatively, re-install Flutter by going to https://flutter.dev/setup.'
         ),
       );
       expect(processManager, hasNoRemainingExpectations);
@@ -230,7 +230,7 @@ void main() {
         () async => realCommandRunner.fetchLatestVersion(localVersion: FakeFlutterVersion()),
         throwsToolExit(message: 'Unable to upgrade Flutter: The current Flutter '
           'branch/channel is not tracking any remote repository.\n'
-          'Re-install Flutter by going to https://flutter.dev/docs/get-started/install.'
+          'Re-install Flutter by going to https://flutter.dev/setup.'
         ),
       );
       expect(processManager, hasNoRemainingExpectations);

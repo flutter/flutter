@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'package:meta/meta.dart';
 
 import 'basic_types.dart';
@@ -758,7 +761,7 @@ class FlutterErrorDetails with Diagnosticable {
 ///
 /// See also:
 ///
-///  * <https://flutter.dev/docs/testing/errors>, more information about error
+///  * <https://docs.flutter.dev/testing/errors>, more information about error
 ///    handling in Flutter.
 class FlutterError extends Error with DiagnosticableTreeMixin implements AssertionError {
   /// Create an error message from a string.
@@ -925,7 +928,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// See also:
   ///
-  ///  * <https://flutter.dev/docs/testing/errors>, more information about error
+  ///  * <https://docs.flutter.dev/testing/errors>, more information about error
   ///    handling in Flutter.
   static FlutterExceptionHandler? onError = presentError;
 

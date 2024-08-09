@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(bkonyi): remove this file when ready to serve DevTools from DDS.
+//
+// See https://github.com/flutter/flutter/issues/150044
+
 import 'dart:async';
 
 import 'package:browser_launcher/browser_launcher.dart';
@@ -110,18 +114,6 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       return;
     }
 
-    final Uri? devToolsUrl = _devToolsLauncher.devToolsUrl;
-    if (devToolsUrl != null) {
-      for (final FlutterDevice? device in flutterDevices) {
-        if (device == null) {
-          continue;
-        }
-        // Notify the DDS instances that there's a DevTools instance available so they can correctly
-        // redirect DevTools related requests.
-        device.device?.dds.setExternalDevToolsUri(devToolsUrl);
-      }
-    }
-
     Future<void> callServiceExtensions() async {
       final List<FlutterDevice?> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
       await Future.wait(
@@ -214,10 +206,12 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
         },
       );
     } on Exception catch (e) {
-      _logger.printError(
-        'Failed to set DevTools server address: $e. Deep links to'
-        ' DevTools will not show in Flutter errors.',
-      );
+      if (!_shutdown) {
+        _logger.printError(
+          'Failed to set DevTools server address: $e. Deep links to'
+          ' DevTools will not show in Flutter errors.',
+        );
+      }
     }
   }
 
@@ -266,11 +260,13 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
         },
       );
     } on Exception catch (e) {
-      _logger.printError(e.toString());
-      _logger.printError(
-        'Failed to set vm service URI: $e. Deep links to DevTools'
-        ' will not show in Flutter errors.',
-      );
+      if (!_shutdown) {
+        _logger.printError(e.toString());
+        _logger.printError(
+          'Failed to set vm service URI: $e. Deep links to DevTools'
+          ' will not show in Flutter errors.',
+        );
+      }
     }
   }
 
@@ -308,10 +304,10 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
   @override
   Future<void> shutdown() async {
-    if (_devToolsLauncher == null || _shutdown || !_served) {
+    _shutdown = true;
+    if (_devToolsLauncher == null || !_served) {
       return;
     }
-    _shutdown = true;
     _readyToAnnounce = false;
     await _devToolsLauncher.close();
   }

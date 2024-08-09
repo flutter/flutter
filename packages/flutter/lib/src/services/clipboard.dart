@@ -59,8 +59,8 @@ abstract final class Clipboard {
     return ClipboardData(text: result['text'] as String);
   }
 
-  /// Returns a future that resolves to true iff the clipboard contains string
-  /// data.
+  /// Returns a future that resolves to true, if (and only if)
+  /// the clipboard contains string data.
   ///
   /// See also:
   ///   * [The iOS hasStrings method](https://developer.apple.com/documentation/uikit/uipasteboard/1829416-hasstrings?language=objc).

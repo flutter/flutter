@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   const double kOpenScale = 1.15;
+  const double kMinScaleFactor = 1.02;
 
   Widget getChild() {
     return Container(
@@ -283,7 +284,7 @@ void main() {
       final BoxDecoration? boxDecoration = (tester.firstWidget(decoyChildDescendant) as Container).decoration as BoxDecoration?;
       const List<Color?> expectedColors = <Color?>[null, Color(0x00000000)];
 
-      // `Color(0x00000000)` -> Is `Colors.transparent`.
+      // `Color(0x00000000)` -> Is `CupertinoColors.transparent`.
       // `null`              -> Default when no color argument is given in `BoxDecoration`.
       // Any other color won't preserve the child's property.
       expect(expectedColors, contains(boxDecoration?.color));
@@ -688,6 +689,86 @@ void main() {
         // The value of the height is 80 because of the font and icon size.
         expect(tester.getSize(find.byWidget(action)).width, 250);
       }
+    });
+
+    testWidgets('CupertinoContextMenu minimizes scaling offscreen', (WidgetTester tester) async {
+      final Widget child = getChild();
+
+      // Pump a CupertinoContextMenu on the top-left of the screen and open it.
+      await tester.pumpWidget(getContextMenu(
+        alignment: Alignment.topLeft,
+        child: child,
+      ));
+      await tester.pump();
+      Rect childRect = tester.getRect(find.byWidget(child));
+      // Start a press on the child.
+      final TestGesture gesture1 = await tester.startGesture(childRect.center);
+      await tester.pump();
+
+      // The _DecoyChild is showing directly on top of the child.
+      expect(findDecoyChild(child), findsOneWidget);
+      Rect decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, equals(decoyChildRect));
+
+      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
+
+      // After a small delay, the _DecoyChild has begun to animate.
+      await tester.pump(const Duration(milliseconds: 400));
+      decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, isNot(equals(decoyChildRect)));
+
+      // Eventually the decoy fully scales. Since the context menu is fully
+      // top-left aligned, the minimum scale factor is used so that the menu
+      // animates minimally off the screen.
+      await tester.pump(const Duration(milliseconds: 900));
+      decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, isNot(equals(decoyChildRect)));
+      expect(decoyChildRect.width, childRect.width * kMinScaleFactor);
+
+      // Open and then close the CupertinoContextMenu.
+      await tester.pumpAndSettle();
+      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsNothing);
+
+      // Pump a CupertinoContextMenu on the bottom-right of the screen and open it.
+      await tester.pumpWidget(getContextMenu(
+        alignment: Alignment.bottomRight,
+        child: child,
+      ));
+      await tester.pump();
+      childRect = tester.getRect(find.byWidget(child));
+      // Start a press on the child.
+      final TestGesture gesture2 = await tester.startGesture(childRect.center);
+      await tester.pump();
+
+      // The _DecoyChild is showing directly on top of the child.
+      expect(findDecoyChild(child), findsOneWidget);
+      decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, equals(decoyChildRect));
+
+      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
+
+      // After a small delay, the _DecoyChild has begun to animate.
+      await tester.pump(const Duration(milliseconds: 400));
+      decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, isNot(equals(decoyChildRect)));
+
+      // Eventually the decoy fully scales. Since the context menu is fully
+      // bottom-right aligned, the minimum scale factor is used so that the menu
+      // animates minimally off the screen.
+      await tester.pump(const Duration(milliseconds: 900));
+      decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, isNot(equals(decoyChildRect)));
+      expect(decoyChildRect.width, childRect.width * kMinScaleFactor);
+
+      // Open and then close the CupertinoContextMenu.
+      await tester.pumpAndSettle();
+      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsNothing);
+      await gesture1.up();
+      await gesture2.up();
     });
 
     testWidgets("ContextMenu route animation doesn't throw exception on dismiss", (WidgetTester tester) async {

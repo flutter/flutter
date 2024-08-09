@@ -605,6 +605,38 @@ void main() {
     await tester.tap(find.byType(FittedBox), warnIfMissed: false);
     expect(tester.takeException(), isNull);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/135082
+  testWidgets('FittedBox with zero size child does not throw', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox(
+          height: 200.0,
+          width: 200.0,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: SizedBox.shrink(),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(
+      Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: 200.0,
+            maxHeight: 200.0,
+          ),
+          child: const FittedBox(
+            child: SizedBox.shrink(),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+  });
 }
 
 List<Type> getLayers() {

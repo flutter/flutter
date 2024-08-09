@@ -323,7 +323,7 @@ class EngineBuildPaths {
 
 /// Information about a local engine build (i.e. `--local-engine[-host]=...`).
 ///
-/// See https://github.com/flutter/flutter/wiki/The-flutter-tool#using-a-locally-built-engine-with-the-flutter-tool
+/// See https://github.com/flutter/flutter/blob/main/docs/tool/README.md#using-a-locally-built-engine-with-the-flutter-tool
 /// for more information about local engine builds.
 class LocalEngineInfo {
   /// Creates a reference to a local engine build.

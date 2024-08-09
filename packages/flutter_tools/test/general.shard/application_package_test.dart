@@ -113,11 +113,16 @@ void main() {
         project.android,
         androidSdk: sdk,
         processManager: fakeProcessManager,
-        userMessages:  UserMessages(),
+        userMessages: UserMessages(),
         processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
         logger: logger,
         fileSystem: fs,
-        buildInfo: const BuildInfo(BuildMode.debug, null, treeShakeIcons: false),
+        buildInfo: const BuildInfo(
+          BuildMode.debug,
+          null,
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
+        ),
       );
       expect(androidApk, isNotNull);
     }, overrides: overrides);
@@ -456,6 +461,19 @@ void main() {
         FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp?;
 
       expect(iosApp, null);
+    }, overrides: overrides);
+
+    testUsingContext('handles project paths with periods in app name', () async {
+      final BuildableIOSApp iosApp = BuildableIOSApp(
+        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        'com.foo.bar',
+        'Name.With.Dots',
+      );
+      expect(iosApp.name, 'Name.With.Dots');
+      expect(iosApp.archiveBundleOutputPath, 'build/ios/archive/Name.With.Dots.xcarchive');
+      expect(iosApp.deviceBundlePath, 'build/ios/iphoneos/Name.With.Dots.app');
+      expect(iosApp.simulatorBundlePath, 'build/ios/iphonesimulator/Name.With.Dots.app');
+      expect(iosApp.builtInfoPlistPathAfterArchive, 'build/ios/archive/Name.With.Dots.xcarchive/Products/Applications/Name.With.Dots.app/Info.plist');
     }, overrides: overrides);
 
     testUsingContext('returns project app icon dirname', () async {

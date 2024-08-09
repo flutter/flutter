@@ -75,7 +75,7 @@ class CrashReporter {
     final String similarIssuesURL = GitHubTemplateCreator.toolCrashSimilarIssuesURL(details.error.toString());
     _logger.printStatus('$similarIssuesURL\n', wrap: false);
     _logger.printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
-    _logger.printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
+    _logger.printStatus('https://flutter.dev/to/report-bugs\n', wrap: false);
 
     _logger.printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
 

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'nested_scroll_view.dart';
+/// @docImport 'scroll_physics.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'sliver_prototype_extent_list.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 

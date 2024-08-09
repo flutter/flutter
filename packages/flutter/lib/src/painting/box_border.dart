@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'box_decoration.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -113,9 +118,7 @@ abstract class BoxBorder extends ShapeBorder {
       return BorderDirectional.lerp(a, b, t);
     }
     if (b is Border && a is BorderDirectional) {
-      final BoxBorder c = b;
-      b = a;
-      a = c;
+      (a, b) = (b, a);
       t = 1.0 - t;
       // fall through to next case
     }

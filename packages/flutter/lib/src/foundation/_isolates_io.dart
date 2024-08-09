@@ -10,7 +10,7 @@ import 'isolates.dart' as isolates;
 
 export 'isolates.dart' show ComputeCallback;
 
-/// The dart:io implementation of [isolate.compute].
+/// The dart:io implementation of [isolates.compute].
 @pragma('vm:prefer-inline')
 Future<R> compute<M, R>(isolates.ComputeCallback<M, R> callback, M message, {String? debugLabel}) async {
   debugLabel ??= kReleaseMode ? 'compute' : callback.toString();

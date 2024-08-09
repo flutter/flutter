@@ -1372,4 +1372,103 @@ void main() {
       await tester.pumpWidget(createPageView(null));
     });
   });
+
+  testWidgets('Get the page value before the content dimension is determined,do not throw an assertion and return null', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/146986.
+    final PageController controller = PageController();
+    late String currentPage;
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            body: PageView(
+              controller: controller,
+              children: <Widget>[
+                Builder(
+                  builder: (BuildContext context) {
+                    currentPage = controller.page == null ? 'null' : 'not empty';
+                    return Center(child: Text(currentPage));
+                  },
+                ),
+              ],
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                setState(() {});
+              },
+            ),
+          );
+        }),
+      ),
+    ));
+    expect(find.text('null'), findsOneWidget);
+    expect(find.text('not empty'), findsNothing);
+    expect(currentPage, 'null');
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+    currentPage = controller.page == null ? 'null' : 'not empty';
+    expect(find.text('not empty'), findsOneWidget);
+    expect(find.text('null'), findsNothing);
+    expect(currentPage, 'not empty');
+  });
+
+  testWidgets('Does not crash when calling jumpToPage before layout', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/86222.
+    final PageController controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Navigator(
+          onDidRemovePage: (Page<Object?> page) {},
+          pages: <Page<void>>[
+            MaterialPage<void>(child: Scaffold(
+              body: PageView(
+                controller: controller,
+                children: const <Widget>[
+                  Scaffold(body: Text('One')),
+                  Scaffold(body: Text('Two')),
+                ],
+              ),
+            )),
+            const MaterialPage<void>(child: Scaffold()),
+          ],
+        ),
+      )
+    ));
+
+    controller.jumpToPage(1);
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('Does not crash when calling animateToPage before layout', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/86222.
+    final PageController controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Navigator(
+          onDidRemovePage: (Page<Object?> page) {},
+          pages: <Page<void>>[
+            MaterialPage<void>(child: Scaffold(
+              body: PageView(
+                controller: controller,
+                children: const <Widget>[
+                  Scaffold(body: Text('One')),
+                  Scaffold(body: Text('Two')),
+                ],
+              ),
+            )),
+            const MaterialPage<void>(child: Scaffold()),
+          ],
+        ),
+      )
+    ));
+
+    controller.animateToPage(1, duration: const Duration(milliseconds: 50), curve: Curves.bounceIn);
+    expect(tester.takeException(), null);
+  });
 }

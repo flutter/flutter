@@ -24,7 +24,7 @@ open source.
 
 * [Install Flutter](https://flutter.dev/get-started/)
 * [Flutter documentation](https://docs.flutter.dev/)
-* [Development wiki](https://github.com/flutter/flutter/wiki)
+* [Development wiki](./docs/README.md)
 * [Contributing to Flutter](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md)
 
 For announcements about new releases, follow the
@@ -100,7 +100,7 @@ Information on how to get started can be found in our
 [contributor guide](CONTRIBUTING.md).
 
 [flutter.dev]: https://flutter.dev
-[Discord instructions]: https://github.com/flutter/flutter/wiki/Chat
+[Discord instructions]: ./docs/contributing/Chat.md
 [Discord badge]: https://img.shields.io/discord/608014603317936148?logo=discord
 [Twitter handle]: https://img.shields.io/twitter/follow/flutterdev.svg?style=social&label=Follow
 [Twitter badge]: https://twitter.com/intent/follow?screen_name=flutterdev

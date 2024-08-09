@@ -1286,4 +1286,42 @@ void main() {
     labelTopRight = tester.getTopRight(find.byType(Container));
     expect(labelTopRight.dx, deleteIconCenter.dx - (iconSize / 2) - labelPadding);
   });
+
+  testWidgets('FilterChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
+    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+      enableAnimation: AnimationStyle.noAnimation,
+      selectAnimation: AnimationStyle(duration: Durations.extralong4),
+    );
+
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: FilterChip(
+          chipAnimationStyle: chipAnimationStyle,
+          onSelected: (bool value) { },
+          label: const Text('FilterChip'),
+        ),
+      ),
+    ));
+
+    expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
+  });
+
+  testWidgets('Elevated FilterChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
+    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+      enableAnimation: AnimationStyle.noAnimation,
+      selectAnimation: AnimationStyle(duration: Durations.extralong4),
+    );
+
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: FilterChip.elevated(
+          chipAnimationStyle: chipAnimationStyle,
+          onSelected: (bool value) { },
+          label: const Text('FilterChip'),
+        ),
+      ),
+    ));
+
+    expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
+  });
 }

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/rendering.dart';
+library;
+
 import 'dart:async';
 import 'dart:ui';
 
@@ -1532,7 +1536,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
-    if (_respondToWindowFocus) {
+    if (_respondToLifecycleChange) {
       _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
       WidgetsBinding.instance.addObserver(_appLifecycleListener!);
     }
@@ -1549,7 +1553,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// Until these are resolved, we won't be adding the listener to mobile platforms.
   /// https://github.com/flutter/flutter/issues/148475#issuecomment-2118407411
   /// https://github.com/flutter/flutter/pull/142930#issuecomment-1981750069
-  bool get _respondToWindowFocus => kIsWeb || switch (defaultTargetPlatform) {
+  bool get _respondToLifecycleChange => kIsWeb || switch (defaultTargetPlatform) {
     TargetPlatform.android || TargetPlatform.iOS => false,
     TargetPlatform.fuchsia || TargetPlatform.linux => true,
     TargetPlatform.windows || TargetPlatform.macOS => true,
@@ -1899,7 +1903,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// supported.
   @visibleForTesting
   void listenToApplicationLifecycleChangesIfSupported() {
-    if (_appLifecycleListener == null && _respondToWindowFocus) {
+    if (_appLifecycleListener == null && _respondToLifecycleChange) {
       _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
       WidgetsBinding.instance.addObserver(_appLifecycleListener!);
     }

@@ -200,7 +200,7 @@ void main() {
   renderObjectToWidgetElement.moveChildRenderObject(renderObject, object);
   renderObjectToWidgetElement.removeChildRenderObject(renderObject);
 
-  // Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  // Changes made in https://docs.flutter.dev/release/breaking-changes/clip-behavior
   ListWheelScrollView listWheelScrollView = ListWheelScrollView();
   listWheelScrollView = ListWheelScrollView(clipToSize: true);
   listWheelScrollView = ListWheelScrollView(clipToSize: false);
@@ -248,4 +248,20 @@ void main() {
 
   final PlatformMenuBar platformMenuBar = PlatformMenuBar(menus: <PlatformMenuItem>[], body: const SizedBox());
   final Widget bodyValue = platformMenuBar.body;
+
+  // Changes made in https://github.com/flutter/flutter/pull/151367
+  final cupertinoSwitch =  CupertinoSwitch(
+    value: value,
+    onChanged: onChanged,
+    activeColor: Colors.red,
+  );
+  Color? activeTrackColor =  cupertinoSwitch.activeColor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/151367
+  final cupertinoSwitch =  CupertinoSwitch(
+    value: value,
+    onChanged: onChanged,
+    trackColor: Colors.red,
+  );
+  Color? inactiveTrackColor =  cupertinoSwitch.trackColor;
 }

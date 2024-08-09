@@ -38,7 +38,7 @@ body:
       label: Changelog Description
       description: >-
         Explain this CP in less than 80 characters that is accessible to most Flutter developers
-        See https://github.com/flutter/flutter/wiki/Hotfix-Documentation-Best-Practices for examples
+        See https://github.com/flutter/flutter/blob/main/docs/releases/Hotfix-Documentation-Best-Practices.md for examples
     validations:
       required: true
   - type: input

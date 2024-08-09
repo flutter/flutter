@@ -37,32 +37,19 @@ class _SwitchExampleState extends State<SwitchExample> {
 
   @override
   Widget build(BuildContext context) {
-    final MaterialStateProperty<Color?> trackColor = MaterialStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) {
-        // Track color when the switch is selected.
-        if (states.contains(MaterialState.selected)) {
-          return Colors.amber;
-        }
-        // Otherwise return null to set default track color
-        // for remaining states such as when the switch is
-        // hovered, focused, or disabled.
-        return null;
+    // This object sets amber as the track color when the switch is selected.
+    // Otherwise, it resolves to null and defers to values from the theme data.
+    const WidgetStateProperty<Color?> trackColor = WidgetStateProperty<Color?>.fromMap(
+      <WidgetStatesConstraint, Color>{
+        WidgetState.selected: Colors.amber,
       },
     );
-    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) {
-        // Material color when switch is selected.
-        if (states.contains(MaterialState.selected)) {
-          return Colors.amber.withOpacity(0.54);
-        }
-        // Material color when switch is disabled.
-        if (states.contains(MaterialState.disabled)) {
-          return Colors.grey.shade400;
-        }
-        // Otherwise return null to set default material color
-        // for remaining states such as when the switch is
-        // hovered, or focused.
-        return null;
+    // This object sets the track color based on two WidgetState attributes.
+    // If neither state applies, it resolves to null.
+    final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty<Color?>.fromMap(
+      <WidgetState, Color>{
+        WidgetState.selected: Colors.amber.withOpacity(0.54),
+        WidgetState.disabled: Colors.grey.shade400,
       },
     );
 
@@ -71,7 +58,7 @@ class _SwitchExampleState extends State<SwitchExample> {
       value: light,
       overlayColor: overlayColor,
       trackColor: trackColor,
-      thumbColor: const MaterialStatePropertyAll<Color>(Colors.black),
+      thumbColor: const WidgetStatePropertyAll<Color>(Colors.black),
       onChanged: (bool value) {
         // This is called when the user toggles the switch.
         setState(() {

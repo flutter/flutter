@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'bottom_navigation_bar.dart';
+/// @docImport 'floating_action_button.dart';
+library;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -98,8 +102,8 @@ class SnackBarAction extends StatefulWidget {
   /// The button label color. If not provided, defaults to
   /// [SnackBarThemeData.actionTextColor].
   ///
-  /// If [textColor] is a [MaterialStateColor], then the text color will be
-  /// resolved against the set of [MaterialState]s that the action text
+  /// If [textColor] is a [WidgetStateColor], then the text color will be
+  /// resolved against the set of [WidgetState]s that the action text
   /// is in, thus allowing for different colors for states such as pressed,
   /// hovered and others.
   final Color? textColor;
@@ -107,8 +111,8 @@ class SnackBarAction extends StatefulWidget {
   /// The button background fill color. If not provided, defaults to
   /// [SnackBarThemeData.actionBackgroundColor].
   ///
-  /// If [backgroundColor] is a [MaterialStateColor], then the text color will
-  /// be resolved against the set of [MaterialState]s that the action text is
+  /// If [backgroundColor] is a [WidgetStateColor], then the text color will
+  /// be resolved against the set of [WidgetState]s that the action text is
   /// in, thus allowing for different colors for the states.
   final Color? backgroundColor;
 
@@ -439,8 +443,8 @@ class SnackBar extends StatefulWidget {
   /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
   /// inverse surface.
   ///
-  /// If [closeIconColor] is a [MaterialStateColor], then the icon color will be
-  /// resolved against the set of [MaterialState]s that the action text
+  /// If [closeIconColor] is a [WidgetStateColor], then the icon color will be
+  /// resolved against the set of [WidgetState]s that the action text
   /// is in, thus allowing for different colors for states such as pressed,
   /// hovered and others.
   final Color? closeIconColor;
@@ -674,6 +678,7 @@ class _SnackBarState extends State<SnackBar> {
 
     final IconButton? iconButton = showCloseIcon
         ? IconButton(
+            key: StandardComponentType.closeButton.key,
             icon: const Icon(Icons.close),
             iconSize: 24.0,
             color: widget.closeIconColor ?? snackBarTheme.closeIconColor ?? defaults.closeIconColor,

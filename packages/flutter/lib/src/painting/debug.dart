@@ -2,6 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:developer';
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter_test/flutter_test.dart';
+///
+/// @docImport 'borders.dart';
+/// @docImport 'box_decoration.dart';
+/// @docImport 'box_shadow.dart';
+/// @docImport 'image_provider.dart';
+/// @docImport 'shader_warm_up.dart';
+/// @docImport 'shape_decoration.dart';
+library;
+
 import 'dart:io';
 import 'dart:ui' show Image, Picture, Size;
 

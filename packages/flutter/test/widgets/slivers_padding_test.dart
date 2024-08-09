@@ -185,6 +185,7 @@ void main() {
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(100.0, 100.0));
     hitsText(result, 'padded');
+    expect(result.path.any((HitTestEntry entry) => entry.target is RenderSliverPadding), isTrue);
     result = tester.hitTestOnBinding(const Offset(100.0, 490.0));
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(10.0, 520.0));

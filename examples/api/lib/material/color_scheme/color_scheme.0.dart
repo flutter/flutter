@@ -40,26 +40,17 @@ class _ColorSchemeExampleState extends State<ColorSchemeExample> {
           seedColor: selectedColor,
           brightness: selectedBrightness,
           contrastLevel: selectedContrast,
-        )
+        ),
       ),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('ColorScheme'),
           actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: () {
-                showModalBottomSheet<void>(
-                  barrierColor: Colors.transparent,
-                  context: context,
-                  builder: (BuildContext context) => Settings(
-                    selectedColor: selectedColor,
-                    selectedBrightness: selectedBrightness,
-                    selectedContrast: selectedContrast,
-                    updateTheme: updateTheme
-                  )
-                );
-              },
+            SettingsButton(
+              selectedColor: selectedColor,
+              selectedBrightness: selectedBrightness,
+              selectedContrast: selectedContrast,
+              updateTheme: updateTheme,
             ),
           ],
         ),
@@ -118,7 +109,8 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: Theme.of(context).copyWith(colorScheme: ColorScheme.fromSeed(
+      data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.fromSeed(
         seedColor: selectedColor,
         contrastLevel: selectedContrast,
         brightness: selectedBrightness,
@@ -139,31 +131,31 @@ class _SettingsState extends State<Settings> {
                       setState(() {
                         selectedBrightness = value ? Brightness.light : Brightness.dark;
                       });
-                      widget.updateTheme.call(selectedBrightness, selectedColor, selectedContrast);
+                      widget.updateTheme(selectedBrightness, selectedColor, selectedContrast);
                     },
                   )
                 ],
               ),
-              Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: <Widget>[
-                  const Text('Seed color: '),
-                  ...List<Widget>.generate(ColorSeed.values.length, (int index) {
+              Wrap(crossAxisAlignment: WrapCrossAlignment.center, children: <Widget>[
+                const Text('Seed color: '),
+                ...List<Widget>.generate(
+                  ColorSeed.values.length,
+                  (int index) {
                     final Color itemColor = ColorSeed.values[index].color;
                     return IconButton(
                       icon: selectedColor == ColorSeed.values[index].color
-                        ? Icon(Icons.circle, color: itemColor)
-                        : Icon(Icons.circle_outlined, color: itemColor),
+                          ? Icon(Icons.circle, color: itemColor)
+                          : Icon(Icons.circle_outlined, color: itemColor),
                       onPressed: () {
                         setState(() {
                           selectedColor = itemColor;
                         });
-                        widget.updateTheme.call(selectedBrightness, selectedColor, selectedContrast);
+                        widget.updateTheme(selectedBrightness, selectedColor, selectedContrast);
                       },
                     );
-                  }),
-                ]
-              ),
+                  },
+                ),
+              ]),
               Row(
                 children: <Widget>[
                   const Text('Contrast level: '),
@@ -177,7 +169,7 @@ class _SettingsState extends State<Settings> {
                         setState(() {
                           selectedContrast = value;
                         });
-                        widget.updateTheme.call(selectedBrightness, selectedColor, selectedContrast);
+                        widget.updateTheme(selectedBrightness, selectedColor, selectedContrast);
                       },
                     ),
                   ),
@@ -230,7 +222,7 @@ class ColorSchemeVariantColumn extends StatelessWidget {
             ),
           ),
         ],
-      )
+      ),
     );
   }
 }
@@ -418,11 +410,47 @@ enum ColorSeed {
   orange('Orange', Colors.orange),
   deepOrange('Deep Orange', Colors.deepOrange),
   pink('Pink', Colors.pink),
-  brightBlue('Bright Blue',  Color(0xFF0000FF)),
-  brightGreen('Bright Green',  Color(0xFF00FF00)),
-  brightRed('Bright Red',  Color(0xFFFF0000));
+  brightBlue('Bright Blue', Color(0xFF0000FF)),
+  brightGreen('Bright Green', Color(0xFF00FF00)),
+  brightRed('Bright Red', Color(0xFFFF0000));
 
   const ColorSeed(this.label, this.color);
   final String label;
   final Color color;
+}
+
+class SettingsButton extends StatelessWidget {
+  const SettingsButton({
+    super.key,
+    required this.updateTheme,
+    required this.selectedBrightness,
+    required this.selectedContrast,
+    required this.selectedColor,
+  });
+
+  final Brightness selectedBrightness;
+  final double selectedContrast;
+  final Color selectedColor;
+
+  final void Function(Brightness, Color, double) updateTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.settings),
+      onPressed: () {
+        showModalBottomSheet<void>(
+          barrierColor: Colors.transparent,
+          context: context,
+          builder: (BuildContext context) {
+            return Settings(
+                selectedColor: selectedColor,
+                selectedBrightness: selectedBrightness,
+                selectedContrast: selectedContrast,
+                updateTheme: updateTheme);
+          },
+        );
+      },
+    );
+  }
 }

@@ -3497,6 +3497,134 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('Drag and drop - feedback matches pointer in scaled MaterialApp', (WidgetTester tester) async {
+    await tester.pumpWidget(Transform.scale(
+      scale: 0.5,
+      child: const MaterialApp(
+        home: Scaffold(
+          body: Draggable<int>(
+            data: 42,
+            feedback: Text('Feedback'),
+            child: Text('Source'),
+          ),
+        ),
+      ),
+    ));
+
+    final Offset location = tester.getTopLeft(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(location);
+    final Offset secondLocation = location + const Offset(100, 100);
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+    final Offset appTopLeft = tester.getTopLeft(find.byType(MaterialApp));
+    expect(tester.getTopLeft(find.text('Source')), appTopLeft);
+    expect(tester.getTopLeft(find.text('Feedback')), secondLocation);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pump();
+  });
+
+  testWidgets('Drag and drop - childDragAnchorStrategy works in scaled MaterialApp', (WidgetTester tester) async {
+    final Key sourceKey = UniqueKey();
+    final Key feedbackKey = UniqueKey();
+    await tester.pumpWidget(Transform.scale(
+      scale: 0.5,
+      child:  MaterialApp(
+        home: Scaffold(
+          body: Draggable<int>(
+            data: 42,
+            feedback: Text('Text', key: feedbackKey),
+            child: Text('Text', key: sourceKey),
+          ),
+        ),
+      ),
+    ));
+    final Finder source = find.byKey(sourceKey);
+    final Finder feedback = find.byKey(feedbackKey);
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(source));
+    await tester.pump();
+    expect(tester.getTopLeft(source), tester.getTopLeft(feedback));
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pump();
+  });
+
+  testWidgets('Drag and drop - feedback matches pointer in rotated MaterialApp', (WidgetTester tester) async {
+    await tester.pumpWidget(Transform.rotate(
+      angle: 1, // ~57 degrees
+      child: const MaterialApp(
+        home: Scaffold(
+          body: Draggable<int>(
+            data: 42,
+            feedback: Text('Feedback'),
+            child: Text('Source'),
+          ),
+        ),
+      ),
+    ));
+
+    final Offset location = tester.getTopLeft(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(location);
+    final Offset secondLocation = location + const Offset(100, 100);
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+    final Offset appTopLeft = tester.getTopLeft(find.byType(MaterialApp));
+    expect(tester.getTopLeft(find.text('Source')), appTopLeft);
+    final Offset feedbackTopLeft =  tester.getTopLeft(find.text('Feedback'));
+
+    // Different rotations can incur rounding errors, this makes it more robust
+    expect(feedbackTopLeft.dx, moreOrLessEquals(secondLocation.dx));
+    expect(feedbackTopLeft.dy, moreOrLessEquals(secondLocation.dy));
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pump();
+  });
+
+  testWidgets('Drag and drop - unmounting overlay ends drag gracefully', (WidgetTester tester) async {
+    final ValueNotifier<bool> mountedNotifier = ValueNotifier<bool>(true);
+    addTearDown(mountedNotifier.dispose);
+
+    await tester.pumpWidget(ValueListenableBuilder<bool>(
+      valueListenable: mountedNotifier,
+      builder: (_, bool value, __) => value
+          ? const MaterialApp(
+              home: Scaffold(
+                body: Draggable<int>(
+                  data: 42,
+                  feedback: Text('Feedback'),
+                  child: Text('Source'),
+                ),
+              ),
+            )
+          : Container(),
+    ));
+
+    final Offset location = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(location);
+    final Offset secondLocation = location + const Offset(100, 100);
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+    expect(find.text('Feedback'), findsOneWidget);
+
+    // Unmount overlay
+    mountedNotifier.value = false;
+    await tester.pump();
+
+    // This should not throw
+    await gesture.moveTo(location);
+
+    expect(find.byType(Container), findsOneWidget);
+    expect(find.text('Feedback'), findsNothing);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pump();
+  });
+
   testWidgets('configurable Draggable hit test behavior', (WidgetTester tester) async {
     const HitTestBehavior hitTestBehavior = HitTestBehavior.deferToChild;
 

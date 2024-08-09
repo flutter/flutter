@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.notationalForms].
+/// Flutter code sample for [FontFeature.notationalForms].
 
 void main() => runApp(const ExampleApp());
 

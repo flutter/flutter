@@ -7,19 +7,79 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('CardTheme copyWith, ==, hashCode basics', () {
-    expect(const CardTheme(), const CardTheme().copyWith());
-    expect(const CardTheme().hashCode, const CardTheme().copyWith().hashCode);
+  test('CardThemeData copyWith, ==, hashCode basics', () {
+    expect(const CardThemeData(), const CardThemeData().copyWith());
+    expect(const CardThemeData().hashCode, const CardThemeData().copyWith().hashCode);
   });
 
-  test('CardTheme lerp special cases', () {
-    expect(CardTheme.lerp(null, null, 0), const CardTheme());
-    const CardTheme theme = CardTheme();
-    expect(identical(CardTheme.lerp(theme, theme, 0.5), theme), true);
+  test('CardThemeData lerp special cases', () {
+    expect(CardThemeData.lerp(null, null, 0), const CardThemeData());
+    const CardThemeData theme = CardThemeData();
+    expect(identical(CardThemeData.lerp(theme, theme, 0.5), theme), true);
+  });
+
+  test('CardThemeData defaults', () {
+    const CardThemeData cardThemeData = CardThemeData();
+
+    expect(cardThemeData.clipBehavior, null);
+    expect(cardThemeData.color, null);
+    expect(cardThemeData.elevation, null);
+    expect(cardThemeData.margin, null);
+    expect(cardThemeData.shadowColor, null);
+    expect(cardThemeData.shape, null);
+    expect(cardThemeData.surfaceTintColor, null);
+
+    const CardTheme cardTheme = CardTheme(data: CardThemeData(), child: SizedBox());
+    expect(cardTheme.clipBehavior, null);
+    expect(cardTheme.color, null);
+    expect(cardTheme.elevation, null);
+    expect(cardTheme.margin, null);
+    expect(cardTheme.shadowColor, null);
+    expect(cardTheme.shape, null);
+    expect(cardTheme.surfaceTintColor, null);
+  });
+
+  testWidgets('Default CardThemeData debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const CardThemeData().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[]);
+  });
+
+  testWidgets('CardThemeData implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const CardThemeData(
+      clipBehavior: Clip.antiAlias,
+      color: Colors.amber,
+      elevation: 10.5,
+      margin: EdgeInsets.all(20.5),
+      shadowColor: Colors.green,
+      surfaceTintColor: Colors.purple,
+      shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20.5))),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description[0], 'clipBehavior: Clip.antiAlias');
+    expect(description[1], 'color: MaterialColor(primary value: Color(0xffffc107))');
+    expect(description[2], 'shadowColor: MaterialColor(primary value: Color(0xff4caf50))');
+    expect(description[3], 'surfaceTintColor: MaterialColor(primary value: Color(0xff9c27b0))');
+    expect(description[4], 'elevation: 10.5');
+    expect(description[5], 'margin: EdgeInsets.all(20.5)');
+    expect(description[6], 'shape: BeveledRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(20.5))');
   });
 
   testWidgets('Material3 - Passing no CardTheme returns defaults', (WidgetTester tester) async {

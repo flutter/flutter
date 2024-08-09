@@ -185,15 +185,18 @@ enum WebRendererMode implements CliEnum {
   skwasm;
 
   factory WebRendererMode.fromCliOption(String? webRendererString, {required bool useWasm}) {
-    final WebRendererMode mode = webRendererString != null
-      ? WebRendererMode.values.byName(webRendererString)
-      : WebRendererMode.auto;
-    if (mode == WebRendererMode.auto && useWasm) {
-      // Wasm defaults to skwasm
-      return WebRendererMode.skwasm;
+    if (webRendererString == null) {
+      return getDefault(useWasm: useWasm);
     }
-    return mode;
+    return WebRendererMode.values.byName(webRendererString);
   }
+
+  static WebRendererMode getDefault({required bool useWasm}) {
+    return useWasm ? defaultForWasm : defaultForJs;
+  }
+
+  static const WebRendererMode defaultForJs = WebRendererMode.canvaskit;
+  static const WebRendererMode defaultForWasm = WebRendererMode.skwasm;
 
   @override
   String get cliName => kebabCase(name);
@@ -210,22 +213,22 @@ enum WebRendererMode implements CliEnum {
       };
 
   Iterable<String> get dartDefines => switch (this) {
-        WebRendererMode.auto => <String>[
+        auto => <String>[
             'FLUTTER_WEB_AUTO_DETECT=true',
           ],
-        WebRendererMode.canvaskit => <String>[
+        canvaskit => <String>[
             'FLUTTER_WEB_AUTO_DETECT=false',
             'FLUTTER_WEB_USE_SKIA=true',
           ],
-        WebRendererMode.html => <String>[
+        html => <String>[
             'FLUTTER_WEB_AUTO_DETECT=false',
             'FLUTTER_WEB_USE_SKIA=false',
           ],
-        WebRendererMode.skwasm => <String>[
+        skwasm => <String>[
             'FLUTTER_WEB_AUTO_DETECT=false',
             'FLUTTER_WEB_USE_SKIA=false',
             'FLUTTER_WEB_USE_SKWASM=true',
-          ]
+          ],
       };
 
   List<String> updateDartDefines(List<String> inputDefines) {

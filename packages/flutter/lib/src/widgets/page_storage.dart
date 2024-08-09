@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'routes.dart';
+/// @docImport 'scroll_controller.dart';
+/// @docImport 'scroll_position.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'scrollable.dart';
+/// @docImport 'single_child_scroll_view.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';

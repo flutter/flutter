@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/semantics.dart';
+///
+/// @docImport 'actions.dart';
+/// @docImport 'container.dart';
+/// @docImport 'editable_text.dart';
+/// @docImport 'focus_traversal.dart';
+/// @docImport 'overlay.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
@@ -671,6 +682,15 @@ class _FocusState extends State<Focus> {
     Widget child = widget.child;
     if (widget.includeSemantics) {
       child = Semantics(
+        // Automatically request the focus for a focusable widget when it
+        // receives an input focus action from the semantics. Nothing is needed
+        // for losing the focus because if focus is lost, that means another
+        // node will gain focus and take focus from this widget.
+        // TODO(gspencergoog): Allow this to be set on iOS once the issue is
+        // addressed: https://github.com/flutter/flutter/issues/150030
+        onFocus: defaultTargetPlatform != TargetPlatform.iOS && _couldRequestFocus
+          ? focusNode.requestFocus
+          : null,
         focusable: _couldRequestFocus,
         focused: _hadPrimaryFocus,
         child: widget.child,

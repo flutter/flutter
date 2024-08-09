@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'input_decorator.dart';
+/// @docImport 'scaffold.dart';
+library;
+
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -1153,7 +1157,7 @@ class ColorScheme with Diagnosticable {
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   Color get onErrorContainer => _onErrorContainer ?? onError;
 
-  /// The background color for widgets like [Card].
+  /// The background color for widgets like [Scaffold].
   final Color surface;
 
   /// A color that's clearly legible when drawn on [surface].
@@ -1898,6 +1902,10 @@ class ColorScheme with Diagnosticable {
     DynamicSchemeVariant schemeVariant,
     double contrastLevel,
   ) {
+    assert(
+      contrastLevel >= -1.0 && contrastLevel <= 1.0,
+      'contrastLevel must be between -1.0 and 1.0 inclusive.',
+    );
     final bool isDark = brightness == Brightness.dark;
     final Hct sourceColor =  Hct.fromInt(seedColor.value);
     return switch (schemeVariant) {

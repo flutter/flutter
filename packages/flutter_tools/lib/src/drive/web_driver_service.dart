@@ -55,8 +55,7 @@ class WebDriverService extends DriverService {
   Future<void> start(
     BuildInfo buildInfo,
     Device device,
-    DebuggingOptions debuggingOptions,
-    bool ipv6, {
+    DebuggingOptions debuggingOptions, {
     File? applicationBinary,
     String? route,
     String? userIdentifier,
@@ -72,14 +71,13 @@ class WebDriverService extends DriverService {
     _residentRunner = webRunnerFactory!.createWebRunner(
       flutterDevice,
       target: mainPath,
-      ipv6: ipv6,
       debuggingOptions: buildInfo.isRelease ?
         DebuggingOptions.disabled(
           buildInfo,
           port: debuggingOptions.port,
           hostname: debuggingOptions.hostname,
           webRenderer: debuggingOptions.webRenderer,
-          webUseWasm: debuggingOptions.webUseWasm
+          webUseWasm: debuggingOptions.webUseWasm,
         )
         : DebuggingOptions.enabled(
           buildInfo,
@@ -171,7 +169,7 @@ class WebDriverService extends DriverService {
         'Unable to start a WebDriver session for web testing.\n'
         'Make sure you have the correct WebDriver server (e.g. chromedriver) running at $driverPort.\n'
         'For instructions on how to obtain and run a WebDriver server, see:\n'
-        'https://flutter.dev/docs/testing/integration-tests#running-in-a-browser\n'
+        'https://flutter.dev/to/integration-test-on-web\n'
       );
     }
 
@@ -195,7 +193,6 @@ class WebDriverService extends DriverService {
       _dartSdkPath,
       ...arguments,
       testFile,
-      '-rexpanded',
     ], environment: <String, String>{
       'VM_SERVICE_URL': _webUri.toString(),
       ..._additionalDriverEnvironment(webDriver, browserName, androidEmulator),
@@ -232,7 +229,7 @@ class WebDriverService extends DriverService {
   }
 
   @override
-  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions, bool ipv6) async {
+  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions) async {
     throwToolExit('--use-existing-app is not supported with flutter web driver');
   }
 }

@@ -14,7 +14,8 @@ class MagnifierExampleApp extends StatefulWidget {
 }
 
 class _MagnifierExampleAppState extends State<MagnifierExampleApp> {
-  Offset dragGesturePosition = Offset.zero;
+  static const double magnifierRadius = 50.0;
+  Offset dragGesturePosition = const Offset(100, 100);
 
   @override
   Widget build(BuildContext context) {
@@ -34,18 +35,23 @@ class _MagnifierExampleAppState extends State<MagnifierExampleApp> {
                           dragGesturePosition = details.localPosition;
                         },
                       ),
+                      onPanDown: (DragDownDetails details) => setState(
+                        () {
+                          dragGesturePosition = details.localPosition;
+                        },
+                      ),
                       child: const FlutterLogo(size: 200),
                     ),
                     Positioned(
-                      left: dragGesturePosition.dx,
-                      top: dragGesturePosition.dy,
+                      left: dragGesturePosition.dx - magnifierRadius,
+                      top: dragGesturePosition.dy - magnifierRadius,
                       child: const RawMagnifier(
                         decoration: MagnifierDecoration(
                           shape: CircleBorder(
                             side: BorderSide(color: Colors.pink, width: 3),
                           ),
                         ),
-                        size: Size(100, 100),
+                        size: Size(magnifierRadius * 2, magnifierRadius * 2),
                         magnificationScale: 2,
                       ),
                     )
