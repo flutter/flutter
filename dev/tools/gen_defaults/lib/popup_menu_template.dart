@@ -23,8 +23,7 @@ class _${blockName}DefaultsM3 extends PopupMenuThemeData {
 
   @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-    // TODO(quncheng): Update this hard-coded value to use the latest tokens.
-    final TextStyle style = _textTheme.labelLarge!;
+    final TextStyle style = ${textStyle('md.comp.list.list-item.label-text')}!;
       if (states.contains(MaterialState.disabled)) {
         return style.apply(color: ${componentColor('md.comp.list.list-item.disabled.label-text')});
       }
