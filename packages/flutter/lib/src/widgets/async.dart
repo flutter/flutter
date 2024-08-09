@@ -599,6 +599,8 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   /// or after widget reconfiguration to a new Future.
   Object? _activeCallbackIdentity;
   late AsyncSnapshot<T> _snapshot;
+  Future<T>? _future;
+  Widget? _lastWidget;
 
   @override
   void initState() {
@@ -623,7 +625,20 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.builder(context, _snapshot);
+  Widget build(BuildContext context) {
+    final Widget result;
+    if (_future == widget.future) {
+      result = widget.builder(context, _snapshot);
+      _lastWidget = result;
+    } else {
+      if (widget.initialData == null) {
+        result = _lastWidget ?? widget.builder(context, const AsyncSnapshot.nothing());
+      } else {
+        result = _lastWidget ?? widget.builder(context, AsyncSnapshot.withData(ConnectionState.none, widget.initialData as T));
+      }
+    }
+    return result;
+  }
 
   @override
   void dispose() {
@@ -632,21 +647,24 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   }
 
   void _subscribe() {
-    if (widget.future == null) {
+    final future = widget.future;
+    if (future == null) {
       // There is no future to subscribe to, do nothing.
       return;
     }
     final Object callbackIdentity = Object();
     _activeCallbackIdentity = callbackIdentity;
-    widget.future!.then<void>((T data) {
+    future.then<void>((T data) {
       if (_activeCallbackIdentity == callbackIdentity) {
         setState(() {
+          _future = future;
           _snapshot = AsyncSnapshot<T>.withData(ConnectionState.done, data);
         });
       }
     }, onError: (Object error, StackTrace stackTrace) {
       if (_activeCallbackIdentity == callbackIdentity) {
         setState(() {
+          _future = future;
           _snapshot = AsyncSnapshot<T>.withError(ConnectionState.done, error, stackTrace);
         });
       }

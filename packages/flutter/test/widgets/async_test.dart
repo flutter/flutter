@@ -212,6 +212,28 @@ void main() {
       expectSync(caughtError.isCompleted, isTrue);
       FutureBuilder.debugRethrowError = false;
     });
+    testWidgets('The variable captured by FutureBuilder should be equal to the return value of the future.', (WidgetTester tester) async {
+      final streamController = StreamController<Null>();
+      await tester.pumpWidget(StreamBuilder(
+        stream: streamController.stream,
+        builder: (BuildContext context, AsyncSnapshot<Null> snapshot) {
+          final identifier = Object();
+          return FutureBuilder(
+            initialData: identifier,
+            future: Future.value(identifier),
+            builder: (BuildContext context, AsyncSnapshot<Object> snapshot) {
+              expect(identifier, snapshot.data, reason: '“identifier” should be equal to “snapshot.data”.');
+              return Container();
+            },
+          );
+        },
+      ));
+      await tester.pump();
+      for (var i = 0; i < 10; i++) {
+        streamController.add(null);
+        await tester.pump();
+      }
+    });
   });
   group('StreamBuilder', () {
     testWidgets('gracefully handles transition from null stream', (WidgetTester tester) async {
