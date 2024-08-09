@@ -20,12 +20,10 @@ SyncSwitch::Handlers& SyncSwitch::Handlers::SetIfFalse(
   return *this;
 }
 
-SyncSwitch::SyncSwitch(bool value)
-    : mutex_(std::unique_ptr<fml::SharedMutex>(fml::SharedMutex::Create())),
-      value_(value) {}
+SyncSwitch::SyncSwitch(bool value) : value_(value) {}
 
 void SyncSwitch::Execute(const SyncSwitch::Handlers& handlers) const {
-  fml::SharedLock lock(*mutex_);
+  std::shared_lock lock(mutex_);
   if (value_) {
     handlers.true_handler();
   } else {
@@ -35,7 +33,7 @@ void SyncSwitch::Execute(const SyncSwitch::Handlers& handlers) const {
 
 void SyncSwitch::SetSwitch(bool value) {
   {
-    fml::UniqueLock lock(*mutex_);
+    std::unique_lock lock(mutex_);
     value_ = value;
   }
   for (Observer* observer : observers_) {
@@ -44,7 +42,7 @@ void SyncSwitch::SetSwitch(bool value) {
 }
 
 void SyncSwitch::AddObserver(Observer* observer) const {
-  fml::UniqueLock lock(*mutex_);
+  std::unique_lock lock(mutex_);
   if (std::find(observers_.begin(), observers_.end(), observer) ==
       observers_.end()) {
     observers_.push_back(observer);
@@ -52,7 +50,7 @@ void SyncSwitch::AddObserver(Observer* observer) const {
 }
 
 void SyncSwitch::RemoveObserver(Observer* observer) const {
-  fml::UniqueLock lock(*mutex_);
+  std::unique_lock lock(mutex_);
   observers_.erase(std::remove(observers_.begin(), observers_.end(), observer),
                    observers_.end());
 }

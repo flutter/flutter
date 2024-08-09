@@ -7,10 +7,10 @@
 
 #include <functional>
 #include <memory>
+#include <shared_mutex>
 #include <vector>
 
 #include "flutter/fml/macros.h"
-#include "flutter/fml/synchronization/shared_mutex.h"
 
 namespace fml {
 
@@ -70,7 +70,7 @@ class SyncSwitch {
   void RemoveObserver(Observer* observer) const;
 
  private:
-  mutable std::unique_ptr<fml::SharedMutex> mutex_;
+  mutable std::shared_mutex mutex_;
   mutable std::vector<Observer*> observers_;
   bool value_;
 

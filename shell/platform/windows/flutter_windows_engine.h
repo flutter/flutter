@@ -9,6 +9,7 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <shared_mutex>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -16,7 +17,6 @@
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
-#include "flutter/fml/synchronization/shared_mutex.h"
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 #include "flutter/shell/platform/common/app_lifecycle_state.h"
 #include "flutter/shell/platform/common/client_wrapper/binary_messenger_impl.h"
@@ -384,7 +384,7 @@ class FlutterWindowsEngine {
   // The platform thread acquires a shared lock to access the view.
   // The platform thread acquires an exclusive lock before adding
   // a view to the engine or after removing a view from the engine.
-  std::unique_ptr<fml::SharedMutex> views_mutex_;
+  mutable std::shared_mutex views_mutex_;
 
   // Task runner for tasks posted from the engine.
   std::unique_ptr<TaskRunner> task_runner_;
