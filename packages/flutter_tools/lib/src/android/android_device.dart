@@ -1162,63 +1162,64 @@ class AdbLogReader extends DeviceLogReader {
     if (_linesController.isClosed) {
       return;
     }
-    final Match? timeMatch = AndroidDevice._timeRegExp.firstMatch(line);
-    if (timeMatch == null || line.length == timeMatch.end) {
-      _acceptedLastLine = false;
-      return;
-    }
-    // Chop off the time.
-    line = line.substring(timeMatch.end + 1);
-    final Match? logMatch = _logFormat.firstMatch(line);
-    if (logMatch != null) {
-      bool acceptLine = false;
+    _linesController.add(line);
+    // final Match? timeMatch = AndroidDevice._timeRegExp.firstMatch(line);
+    // if (timeMatch == null || line.length == timeMatch.end) {
+    //   _acceptedLastLine = false;
+    //   return;
+    // }
+    // // Chop off the time.
+    // line = line.substring(timeMatch.end + 1);
+    // final Match? logMatch = _logFormat.firstMatch(line);
+    // if (logMatch != null) {
+    //   bool acceptLine = false;
 
-      if (_fatalCrash) {
-        // While a fatal crash is going on, only accept lines from the crash
-        // Otherwise the crash log in the console may get interrupted
+    //   if (_fatalCrash) {
+    //     // While a fatal crash is going on, only accept lines from the crash
+    //     // Otherwise the crash log in the console may get interrupted
 
-        final Match? fatalMatch = _tombstoneLine.firstMatch(line);
+    //     final Match? fatalMatch = _tombstoneLine.firstMatch(line);
 
-        if (fatalMatch != null) {
-          acceptLine = true;
+    //     if (fatalMatch != null) {
+    //       acceptLine = true;
 
-          line = fatalMatch[1]!;
+    //       line = fatalMatch[1]!;
 
-          if (_tombstoneTerminator.hasMatch(line)) {
-            // Hit crash terminator, stop logging the crash info
-            _fatalCrash = false;
-          }
-        }
-      } else if (appPid != null && int.parse(logMatch.group(1)!) == appPid) {
-        acceptLine = !_surfaceSyncerSpam.hasMatch(line);
+    //       if (_tombstoneTerminator.hasMatch(line)) {
+    //         // Hit crash terminator, stop logging the crash info
+    //         _fatalCrash = false;
+    //       }
+    //     }
+    //   } else if (appPid != null && int.parse(logMatch.group(1)!) == appPid) {
+    //     acceptLine = !_surfaceSyncerSpam.hasMatch(line);
 
-        if (_fatalLog.hasMatch(line)) {
-          // Hit fatal signal, app is now crashing
-          _fatalCrash = true;
-        }
-      } else {
-        // Filter on approved names and levels.
-        acceptLine = _allowedTags.any((RegExp re) => re.hasMatch(line));
-      }
+    //     if (_fatalLog.hasMatch(line)) {
+    //       // Hit fatal signal, app is now crashing
+    //       _fatalCrash = true;
+    //     }
+    //   } else {
+    //     // Filter on approved names and levels.
+    //     acceptLine = _allowedTags.any((RegExp re) => re.hasMatch(line));
+    //   }
 
-      if (acceptLine) {
-        _acceptedLastLine = true;
-        _linesController.add(line);
-        return;
-      }
-      _acceptedLastLine = false;
-    } else if (line == '--------- beginning of system' ||
-               line == '--------- beginning of main') {
-      // hide the ugly adb logcat log boundaries at the start
-      _acceptedLastLine = false;
-    } else {
-      // If it doesn't match the log pattern at all, then pass it through if we
-      // passed the last matching line through. It might be a multiline message.
-      if (_acceptedLastLine) {
-        _linesController.add(line);
-        return;
-      }
-    }
+    //   if (acceptLine) {
+    //     _acceptedLastLine = true;
+    //     _linesController.add(line);
+    //     return;
+    //   }
+    //   _acceptedLastLine = false;
+    // } else if (line == '--------- beginning of system' ||
+    //            line == '--------- beginning of main') {
+    //   // hide the ugly adb logcat log boundaries at the start
+    //   _acceptedLastLine = false;
+    // } else {
+    //   // If it doesn't match the log pattern at all, then pass it through if we
+    //   // passed the last matching line through. It might be a multiline message.
+    //   if (_acceptedLastLine) {
+    //     _linesController.add(line);
+    //     return;
+    //   }
+    // }
   }
 
   void _stop() {

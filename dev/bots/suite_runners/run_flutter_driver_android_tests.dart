@@ -21,6 +21,14 @@ import '../utils.dart';
 /// For debugging, it is recommended to instead just run and launch these tests
 /// individually _in_ the `dev/integration_tests/android_driver_test` directory.
 Future<void> runFlutterDriverAndroidTests() async {
+  for (int i = 0; i < 20; i++) {
+    await _runFlutterDriverAndroidTests();
+  }
+
+  // await _runFlutterDriverAndroidTests();
+}
+
+Future<void> _runFlutterDriverAndroidTests() async {
   print('Running Flutter Driver Android tests...');
 
   // Print out the results of `adb devices`, for uh, science:
