@@ -107,6 +107,7 @@ class DefaultTextStyle extends InheritedTheme {
     TextOverflow? overflow,
     int? maxLines,
     TextWidthBasis? textWidthBasis,
+    TextHeightBehavior? textHeightBehavior,
     required Widget child,
   }) {
     return Builder(
@@ -120,6 +121,7 @@ class DefaultTextStyle extends InheritedTheme {
           overflow: overflow ?? parent.overflow,
           maxLines: maxLines ?? parent.maxLines,
           textWidthBasis: textWidthBasis ?? parent.textWidthBasis,
+          textHeightBehavior: textHeightBehavior ?? parent.textHeightBehavior,
           child: child,
         );
       },
