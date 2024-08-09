@@ -42,6 +42,8 @@ class _MainWidget extends StatelessWidget {
                     Row(
                       children: <Widget>[
                         TextButton(
+                          key: const Key('OK Button'),
+                          autofocus: true,
                           onPressed: () {
                             Navigator.pop(context);
                           },
