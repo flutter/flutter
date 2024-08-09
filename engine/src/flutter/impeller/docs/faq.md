@@ -100,3 +100,139 @@
     as development progresses.
 * How do you run `impeller_unittests` with Playgrounds enabled?
   * Specify the `--enable_playground` command-line option.
+* Describe Impeller in a Tweet.
+  * "Impeller is ahead-of-time (AOT) mode for rendering."
+* Why did the Flutter team build Impeller?
+  * The short answer, for consistent performance, which could not be achieved
+    with Skia after years of effort by graphics experts. The longer answer...
+  * Flutter applications, via their use of Skia, were susceptible to the problem
+    of jank (user-perceptible stuttering/choppiness in animations and
+    interactions) due to shader compilation. Such problems were [reported as
+    early as 2015](https://github.com/flutter/flutter/issues/813).
+  * Shaders are tiny programs that run on the GPU when a specific combination of
+    rendering intent is requested by the application. Flutter's API is extremely
+    expressive. During the original design of Flutter's architecture, there was
+    an assumption that it was infeasible to statically determine ahead-of-time
+    the entire set of shaders an application might need. So, applications would
+    create and compile these shaders just-in-time. Once they were compiled, they
+    could be cached.
+  * But this led to the problem of jank during the initial run of performance
+    sensitive areas of the application when there were no cached shaders.
+  * Fortunately, early on, the team was able to predict the common shaders the
+    application was likely going to need. A generic ["warm
+    up"](https://github.com/flutter/flutter/pull/27660) phase was added where
+    these shaders were given a chance to be compiled and cached at the launch of
+    a Flutter application.
+  * As Flutter applications became more complex, the generic shader warmup was
+    no longer suitable for all apps. So the ability to specify shaders to warm
+    up was [exposed to end
+    users](https://api.flutter.dev/flutter/painting/ShaderWarmUp-class.html).
+  * But, this was exceedingly hard to do and also platform specific (iOS Metal,
+    Android OpenGL, Fuchsia Vulkan, etc.). So much so that only a handful of
+    engineers (who all worked on the Flutter Engine) could effectively build the
+    rendering intent that would warm up the right shaders. And these shaders
+    were specific to the app version. If the app was updated to add or remove
+    more features, the warmup routines were invalid and mostly just served to
+    slow down application startup.
+  * To make this process self-service, [a scheme was
+    devised](https://github.com/flutter/flutter/issues/53607) to run the
+    application and its tests during development in training phase, capture the
+    shaders, package them with the application, and during a new "warm up"
+    phase,  pre-compile the shaders.
+  * Remember, these shaders were platform specific. The scheme detailed above
+    unfortunately moved the burden to developers. It also made the application
+    sizes a lot bigger since the shaders now had to be packaged with the
+    application. Application launch times were delayed as well.
+  * Even developers who went through these steps weren't always guaranteed
+    freedom from shader compilation jank. If some screens (and thus, their
+    shaders) were missed during training runs due to incomplete automated or
+    manual testing, jank could be experienced. For complex applications where
+    certain flows were blocked behind authentication or other restrictions, this
+    was an easy situation to get into. Also, some animation frames could be
+    skipped during training because jank during previous frames in the training
+    run. So training runs not only had to be run over the entire app, but also
+    multiple times (on all platforms) to ensure success. Moreover, applications
+    that were really effective at training began to run into egregiously high
+    first-frame times ([some as high as 6
+    seconds](http://github.com/flutter/flutter/issues/97884)). Shaders captured
+    from training runs weren't fully guaranteed to be consistent across devices
+    on the same platform either and [bugs were
+    common](https://github.com/flutter/flutter/issues/102655#issuecomment-1115179271).
+    All the while the team was [desperately trying to
+    reduce](https://github.com/flutter/flutter/issues/84213) the number of
+    shader variants that might be required.
+  * Due to these reasons, developers abandoned this self-serve warmup mechanism.
+    For instance, no application in Google used this due to the all the problems
+    mentioned.
+  * Flutter began to get a reputation as being hard to write performant apps
+    with. Consistent performance that could be expected from frameworks like
+    UIKit on iOS. Sadly, this wasn't a completely unwarranted reputation at the
+    time. To us, the state of writing graphically performant apps with Flutter
+    wasn't good enough and frankly unacceptable. We needed to do better.
+  * Impeller was borne out the experience from these events. In additional to
+    the jank issues described above, there were other performance issues
+    inherent in the way Flutter held and used our original renderer. But, in
+    truth, the mandate to work on Impeller would never have materialized if it
+    weren't for the issue of shader compilation jank. In-spite of the massive
+    sunk cost of attempting all the workarounds shader complication jank that
+    prevented us from delivering our product requirement to deliver consistent
+    60fps even at first-run.
+  * A very early look at how Impeller avoids the problems in the previous
+    renderer are [discussed in this
+    tech-talk](https://www.youtube.com/watch?v=gKrYWC_SDxQ). Our current
+    renderer is way more advanced today but that talk describes the very early
+    thinking, motivations, and decisions.
+  * We turned on Impeller by default for iOS in early 2023, and it has been in
+    production in the majority of iOS apps since then. It's currently, as of
+    3.22 an opt-in option for Flutter on Android.
+  * Since we enabled Impeller on by default for iOS, we have seen the vast
+    majority of open issues around shader compilation causing jank to have been
+    fixed. We know there is more work to do, but we're encouraged by the results
+    we've been hearing from our customers.
+  * Today, Impeller outperforms the old renderer not only in worst-frame timed
+    benchmarks, but is also faster on average.
+* What makes Impeller different, compared to Skia, for Flutter?
+  * We want to start by saying Skia is amazing. We'd also never say Impeller is
+    better than Skia. It just works differently. The original design of Impeller
+    was based on collaboration with the Skia team and was greatly influenced by
+    their feedback. We also keep collaborating on an ongoing basis. Ideas such
+    as stencil-then-cover that Impeller now uses originated from Skia. Flutter
+    also continues to use Skia for text layout and its image codecs and has no
+    plans to migrate away from using those sub-components. We wholeheartedly
+    recommend Skia for most rendering needs.
+  * All of Impellers shaders are [manually authored and
+    compiled](https://github.com/flutter/engine/tree/0a8de3dd3285c0b64de47630a8218ae38b8e04e1/impeller#the-offline-shader-compilation-pipeline)
+    during build time and packaged with the Flutter engine. There is no runtime
+    shader generation, reflection, or compilation. Skia can and does generate
+    and compile shaders at runtime.
+  * By necessity, Impeller has a bounded set of shaders (< 50) that are known
+    ahead of time. Due to the way rendering intent is parameterized, Impeller
+    also needs way fewer shaders than Skia. All the graphics pipelines needed by
+    Impeller are ready well before the Flutter application's Dart isolate is
+    launched. Skia can generate and compile shaders during frame workloads
+    leading to worse worst-frame times.
+  * Because the processing of shaders in Impeller happens at build time when
+    compiling the engine, Impeller's binary size impact is a fraction as that of
+    Skia's. Since there is no shader compilation and reflection machinery at
+    runtime, Impeller [adds only around
+    100kb](https://github.com/flutter/flutter/issues/123741#issuecomment-1553382501)
+    of binary size at runtime (compressed) even when all the generated shaders
+    are packaged in a Flutter engine. Removing Skia GPU (which includes the SKSL
+    shader compilation machinery) [reduces the binary size of the Flutter engine
+    by 17%](https://github.com/flutter/engine/pull/52748). That is to say, the
+    machinery to generate, parse, compile, and reflect shaders is larger than
+    the backend specific shaders themselves. Using an Impeller-only build leads
+    to much smaller Flutter engines.
+  * Impeller doesn't have a software backend unlike Skia. Instead, software
+    rendering using Impeller can be achieved using a Vulkan or OpenGL
+    implementation running in software using projects like SwiftShader,
+    LLVMPipe, etc.
+* Where did Impeller get its name?
+  * Impeller began as a modest experiment to solve the problem of shader
+    compilation jank. After the theory of operation was settled on, the process
+    of hacking together a prototype began with a component tacked onto Flutter's
+    compositor. The compositor happens to be called "flow". Since impeller's
+    modify fluid flow, the name seemed apt. It's also an internal component and
+    perhaps 30 seconds were spent thinking of a name.
+  * Why Flutter's compositor is called "flow" is left as an exercise to the
+    reader.
