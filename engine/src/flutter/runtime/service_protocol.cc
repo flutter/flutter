@@ -59,8 +59,7 @@ ServiceProtocol::ServiceProtocol()
           kGetSkSLsExtensionName,
           kEstimateRasterCacheMemoryExtensionName,
           kReloadAssetFonts,
-      }),
-      handlers_mutex_(fml::SharedMutex::Create()) {}
+      }) {}
 
 ServiceProtocol::~ServiceProtocol() {
   ToggleHooks(false);
@@ -68,19 +67,19 @@ ServiceProtocol::~ServiceProtocol() {
 
 void ServiceProtocol::AddHandler(Handler* handler,
                                  const Handler::Description& description) {
-  fml::UniqueLock lock(*handlers_mutex_);
+  std::unique_lock lock(handlers_mutex_);
   handlers_.emplace(handler, description);
 }
 
 void ServiceProtocol::RemoveHandler(Handler* handler) {
-  fml::UniqueLock lock(*handlers_mutex_);
+  std::unique_lock lock(handlers_mutex_);
   handlers_.erase(handler);
 }
 
 void ServiceProtocol::SetHandlerDescription(
     Handler* handler,
     const Handler::Description& description) {
-  fml::SharedLock lock(*handlers_mutex_);
+  std::shared_lock lock(handlers_mutex_);
   auto it = handlers_.find(handler);
   if (it != handlers_.end()) {
     it->second.Store(description);
@@ -191,7 +190,7 @@ bool ServiceProtocol::HandleMessage(std::string_view method,
     return HandleListViewsMethod(response);
   }
 
-  fml::SharedLock lock(*handlers_mutex_);
+  std::shared_lock lock(handlers_mutex_);
 
   if (handlers_.empty()) {
     WriteServerErrorResponse(response,
@@ -262,7 +261,7 @@ void ServiceProtocol::Handler::Description::Write(
 
 bool ServiceProtocol::HandleListViewsMethod(
     rapidjson::Document* response) const {
-  fml::SharedLock lock(*handlers_mutex_);
+  std::shared_lock lock(handlers_mutex_);
   std::vector<std::pair<intptr_t, Handler::Description>> descriptions;
   descriptions.reserve(handlers_.size());
   for (const auto& handler : handlers_) {
