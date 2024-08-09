@@ -147,8 +147,8 @@ def create_framework(  # pylint: disable=too-many-arguments
   framework_dsym = None
   simulator_dsym = None
   if args.dsym:
-    framework_dsym = os.path.splitext(framework)[0] + '.dSYM'
-    simulator_dsym = os.path.splitext(simulator_framework)[0] + '.dSYM'
+    framework_dsym = framework + '.dSYM'
+    simulator_dsym = simulator_framework + '.dSYM'
 
   # Emit the framework for physical devices.
   shutil.rmtree(framework, True)
@@ -218,10 +218,25 @@ def zip_archive(dst):
       'extension_safe/Flutter.xcframework',
   ],
                         cwd=dst)
-  if os.path.exists(os.path.join(dst, 'Flutter.dSYM')):
+
+  # Generate Flutter.dSYM.zip for manual symbolification.
+  #
+  # Historically, the framework dSYM was named Flutter.dSYM, so in order to
+  # remain backward-compatible with existing instructions in docs/Crashes.md
+  # and existing tooling such as dart-lang/dart_ci, we rename back to that name
+  #
+  # TODO(cbracken): remove these archives and the upload steps once we bundle
+  # dSYMs in app archives. https://github.com/flutter/flutter/issues/116493
+  framework_dsym = os.path.join(dst, 'Flutter.framework.dSYM')
+  if os.path.exists(framework_dsym):
+    renamed_dsym = framework_dsym.replace('Flutter.framework.dSYM', 'Flutter.dSYM')
+    os.rename(framework_dsym, renamed_dsym)
     subprocess.check_call(['zip', '-r', 'Flutter.dSYM.zip', 'Flutter.dSYM'], cwd=dst)
 
-  if os.path.exists(os.path.join(dst, 'extension_safe', 'Flutter.dSYM')):
+  extension_safe_dsym = os.path.join(dst, 'extension_safe', 'Flutter.framework.dSYM')
+  if os.path.exists(extension_safe_dsym):
+    renamed_dsym = extension_safe_dsym.replace('Flutter.framework.dSYM', 'Flutter.dSYM')
+    os.rename(extension_safe_dsym, renamed_dsym)
     subprocess.check_call(['zip', '-r', 'extension_safe_Flutter.dSYM.zip', 'Flutter.dSYM'], cwd=dst)
 
 
