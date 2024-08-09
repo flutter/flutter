@@ -317,6 +317,16 @@ platform_properties:
         ]
       os: Windows-10
       device_type: "msm8952"
+  windows_mokey:
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      os: Windows-10
+      device_type: "mokey"
 
 targets:
   - name: Linux analyze
@@ -6153,74 +6163,81 @@ targets:
         ]
       task_name: platform_view_win_desktop__start_up
 
-  # windows motog4 test
-  - name: Windows_android basic_material_app_win__compile
+  # windows mokey test
+  - name: Windows_mokey basic_material_app_win__compile
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "windows"]
+        ["devicelab", "android", "windows", "mokey"]
       task_name: basic_material_app_win__compile
 
-  # windows motog4 test
-  - name: Windows_android channels_integration_test_win
+  # windows mokey test
+  - name: Windows_mokey channels_integration_test_win
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "windows"]
+        ["devicelab", "android", "windows", "mokey"]
       task_name: channels_integration_test_win
 
-  # windows motog4 test
-  - name: Windows_android flavors_test_win
+  # windows mokey test
+  - name: Windows_mokey flavors_test_win
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "windows"]
+        ["devicelab", "android", "windows", "mokey"]
       task_name: flavors_test
 
-  # windows motog4 test
-  - name: Windows_android flutter_gallery_win__compile
+  # windows mokey test
+  - name: Windows_mokey flutter_gallery_win__compile
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "windows"]
+        ["devicelab", "android", "windows", "mokey"]
       task_name: flutter_gallery_win__compile
 
-  # windows motog4 benchmark
-  - name: Windows_android hot_mode_dev_cycle_win__benchmark
+  # windows mokey benchmark
+  - name: Windows_mokey hot_mode_dev_cycle_win__benchmark
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "windows"]
+        ["devicelab", "android", "windows", "mokey"]
       task_name: hot_mode_dev_cycle_win__benchmark
 
-  # windows motog4 test
-  - name: Windows_android native_assets_android
+  # windows mokey test
+  - name: Windows_mokey native_assets_android
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "windows"]
+        ["devicelab", "android", "windows", "mokey"]
       task_name: native_assets_android
 
-  # windows motog4 test
-  - name: Windows_android windows_chrome_dev_mode
+  # windows mokey test
+  - name: Windows_mokey windows_chrome_dev_mode
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "windows"]
+        ["devicelab", "android", "windows", "mokey"]
       task_name: windows_chrome_dev_mode
 
   - name: Windows flutter_packaging_test
