@@ -79,6 +79,7 @@ class SwiftPackageManagerUtils {
         'io.flutter.devicelab',
         '-i',
         iosLanguage,
+        '--offline',
         ...options,
         appName,
       ],
