@@ -48,11 +48,11 @@ class _WrapExampleState extends State<WrapExample> {
         label: Text(content),
         style: TextButton.styleFrom(
           backgroundColor: switch (fit) {
-            WrapFit.fillRun => const Color.fromARGB(255, 243, 33, 33),
-            WrapFit.constrained => const Color.fromARGB(255, 255, 146, 146),
-            WrapFit.mightFill => const Color.fromARGB(255, 41, 182, 62),
-            WrapFit.fillNext => const Color.fromARGB(255, 3, 43, 244),
-            null => const Color.fromARGB(255, 34, 196, 255),
+            WrapFit.fillRun     => const Color(0xFFFF2020),
+            WrapFit.constrained => const Color(0xFFFF9292),
+            WrapFit.mightFill   => const Color(0xFF30B840),
+            WrapFit.fillNext    => const Color(0xFF002BF4),
+            null                => const Color(0xFF20C4FF),
           },
           foregroundColor: fit?.isTight ?? false ? Colors.white : Colors.black,
       ),
