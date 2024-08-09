@@ -48,6 +48,40 @@ StatefulBuilder setupSimpleSegmentedControl() {
   );
 }
 
+StatefulBuilder buildOneDisabledSegmentedControl({required int disabledIndex}) {
+  final Map<int, Widget> children = <int, Widget>{
+    0: const Text('Child 1'),
+    1: const Text('Child 2'),
+    2: const Text('Child 3'),
+  };
+  final Map<int, bool> segmentStates = <int, bool>{};
+  for (int i = 0; i < children.length; i++) {
+    if (i == disabledIndex) {
+      segmentStates[i] = false;
+    } else {
+      segmentStates[i] = true;
+    }
+  }
+  int sharedValue = 0;
+
+  return StatefulBuilder(
+    builder: (BuildContext context, StateSetter setState) {
+      return boilerplate(
+        child: CupertinoSegmentedControl<int>(
+          children: children,
+          segmentStates: segmentStates,
+          onValueChanged: (int newValue) {
+            setState(() {
+              sharedValue = newValue;
+            });
+          },
+          groupValue: sharedValue,
+        ),
+      );
+    },
+  );
+}
+
 Widget boilerplate({ required Widget child }) {
   return Directionality(
     textDirection: TextDirection.ltr,
@@ -1633,6 +1667,135 @@ void main() {
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+  });
+
+  testWidgets('The segment states length should not exceed children length', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{
+      0: const Text('Child 1'),
+      1: const Text('Child 2'),
+      2: const Text('Child 3'),
+    };
+    final Map<int, bool> segmentStates = <int, bool>{
+      0: true,
+      1: true,
+      2: true,
+      3: true,
+    };
+
+    await expectLater(
+      () => tester.pumpWidget(
+        boilerplate(
+          child: CupertinoSegmentedControl<int>(
+            children: children,
+            segmentStates: segmentStates,
+            onValueChanged: (int newValue) {},
+          ),
+        ),
+      ),
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('segmentStates.length'),
+      )),
+    );
+  });
+
+  testWidgets('Tap on disabled segment should not change its state', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{
+      0: const Text('Child 1'),
+      1: const Text('Child 2'),
+      2: const Text('Child 3'),
+    };
+
+    final Map<int, bool> segmentStates = <int, bool>{
+      0: true,
+      1: false,
+      2: true,
+    };
+
+    int sharedValue = 0;
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return boilerplate(
+            child: CupertinoSegmentedControl<int>(
+              key: const ValueKey<String>('Segmented Control'),
+              children: children,
+              segmentStates: segmentStates,
+              onValueChanged: (int newValue) {
+                setState(() {
+                  sharedValue = newValue;
+                });
+              },
+              groupValue: sharedValue,
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(sharedValue, 0);
+
+    await tester.tap(find.text('Child 2'));
+    await tester.pumpAndSettle();
+
+    expect(sharedValue, 0);
+  });
+
+  testWidgets('Background color of disabled segment should be different than enabled segment', (WidgetTester tester) async {
+      await tester.pumpWidget(buildOneDisabledSegmentedControl(disabledIndex: 0));
+
+      // Colors are different for disabled and enabled segments in initial state.
+      // Disabled segment should have a white background with 50% opacity by default.
+      expect(
+        getBackgroundColor(tester, 0),
+        isSameColorAs(CupertinoColors.white.withOpacity(0.5)),
+      );
+      expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
+
+      // Tap on disabled segment should not change its state
+      await tester.tap(find.text('Child 1'));
+      await tester.pumpAndSettle();
+
+      expect(
+        getBackgroundColor(tester, 0),
+        isSameColorAs(CupertinoColors.white.withOpacity(0.5)),
+      );
+  });
+
+  testWidgets('Custom disabled color of disabled segment is showing as desired', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{
+      0: const Text('Child 1'),
+      1: const Text('Child 2'),
+      2: const Text('Child 3'),
+    };
+
+    final Map<int, bool> segmentStates = <int, bool>{
+      0: false,
+      1: true,
+      2: true,
+    };
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return boilerplate(
+            child: CupertinoSegmentedControl<int>(
+              children: children,
+              segmentStates: segmentStates,
+              onValueChanged: (int newValue) {},
+              disabledColor: CupertinoColors.systemGrey2,
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(
+      getBackgroundColor(tester, 0),
+      isSameColorAs(CupertinoColors.systemGrey2),
     );
   });
 }
