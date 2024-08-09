@@ -1433,12 +1433,12 @@ void main() {
       ),
     ));
 
-      await tester.pump();
+      await tester.pumpAndSettle();
 
 
       expect(find.byWidgetPredicate((widget) => widget is Text && widget.data == 'Rows per page:'), findsOneWidget);
       final Text rowsPerPageText = tester.widget(find.byWidgetPredicate((widget) => widget is Text && widget.data == 'Rows per page:'));
-      final TextStyle selectedTextStyle = rowsPerPageText.style!;
+      final TextStyle? selectedTextStyle = rowsPerPageText.style;
       expect(selectedTextStyle.color, equals(footerStyleColor));
   });
 
