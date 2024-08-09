@@ -563,7 +563,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   }
 
   bool canRequestFocus() {
-    return widget.focusNode?.canRequestFocus ?? widget.requestFocusOnTap
+    return widget.requestFocusOnTap
       ?? switch (Theme.of(context).platform) {
         TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia => false,
         TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
@@ -814,9 +814,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         final Widget textField = TextField(
           key: _anchorKey,
           enabled: widget.enabled,
+          readOnly: !widget.enabled,
+          canRequestFocus: widget.enabled && canRequestFocus(),
           mouseCursor: effectiveMouseCursor,
           focusNode: widget.focusNode,
-          canRequestFocus: canRequestFocus(),
           enableInteractiveSelection: canRequestFocus(),
           keyboardType: widget.keyboardType,
           textAlign: widget.textAlign,
