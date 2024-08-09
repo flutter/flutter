@@ -173,7 +173,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/skia/third_party/vello', // not linked in
   r'flutter/third_party/skia/tools', // contains nothing that ends up in the binary executable
   r'flutter/third_party/stb',
-  r'flutter/third_party/swiftshader', // only used on hosts for tests
+  r'flutter/third_party/swiftshader/third_party', // See: https://github.com/flutter/flutter/issues/145726
   r'flutter/third_party/test_shaders', // for tests only
   r'flutter/third_party/tinygltf',
   r'flutter/third_party/txt/third_party/fonts',
