@@ -92,4 +92,27 @@ void runTests() {
     expect(tester.takeException().toString(),
         'HTTP request failed, statusCode: 200, https://www.example.com/images/frame3.png');
   });
+
+  testWidgets('loads an image using withCredentials true',
+      (WidgetTester tester) async {
+    if (!isCanvasKit) {
+      // The HTML renderer uses an `<img>` tag, it does not fetch the image via XMLHttpRequest.
+      return;
+    }
+    final TestHttpRequest testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..mockEvent = MockEvent('load', web.Event('test error'))
+      ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+
+    httpRequestFactory = () {
+      return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
+    };
+
+    final Image image = Image.network(
+      'https://www.example.com/images/frame4.png',
+    );
+
+    await tester.pumpWidget(image);
+    expect(testHttpRequest.getMock().withCredentials, true);
+  });
 }

@@ -139,6 +139,8 @@ extension type XMLHttpRequest._(JSObject _)
   external void send([JSAny? body]);
   external int get status;
   external set responseType(XMLHttpRequestResponseType value);
+  external set withCredentials(bool value);
+  external bool get withCredentials;
   external XMLHttpRequestResponseType get responseType;
   external JSAny? get response;
 }
