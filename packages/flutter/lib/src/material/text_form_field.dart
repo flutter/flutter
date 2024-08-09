@@ -182,6 +182,7 @@ class TextFormField extends FormField<String> {
     MaterialStatesController? statesController,
     Clip clipBehavior = Clip.hardEdge,
     bool scribbleEnabled = true,
+    bool stylusHandwritingEnabled = true,
     bool canRequestFocus = true,
   }) : assert(initialValue == null || controller == null),
        assert(obscuringCharacter.length == 1),
@@ -277,6 +278,7 @@ class TextFormField extends FormField<String> {
                contentInsertionConfiguration: contentInsertionConfiguration,
                clipBehavior: clipBehavior,
                scribbleEnabled: scribbleEnabled,
+               stylusHandwritingEnabled: stylusHandwritingEnabled,
                canRequestFocus: canRequestFocus,
              ),
            );
