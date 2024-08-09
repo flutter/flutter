@@ -5,6 +5,8 @@
 /// @docImport 'editable_text.dart';
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart'
@@ -157,7 +159,7 @@ List<SuggestionSpan> _correctSpellCheckResults(
       );
 
       // Start search for the next misspelled word at the end of currentSpan.
-      searchStart = currentSpan.range.end + 1 + offset;
+      searchStart = math.min(currentSpan.range.end + 1 + offset, newText.length);
       correctedSpellCheckResults.add(adjustedSpan);
     } else if (currentSpanFoundElsewhere) {
       // Word was pushed forward but not modified.
@@ -170,7 +172,7 @@ List<SuggestionSpan> _correctSpellCheckResults(
 
       // Start search for the next misspelled word at the end of the
       // adjusted currentSpan.
-      searchStart = adjustedSpanEnd + 1;
+      searchStart = math.min(adjustedSpanEnd + 1, newText.length);
       // Adjust offset to reflect the difference between where currentSpan
       // was positioned in resultsText versus in newText.
       offset = adjustedSpanStart - currentSpan.range.start;
