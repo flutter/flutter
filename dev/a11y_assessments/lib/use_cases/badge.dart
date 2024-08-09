@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class BadgeUseCase extends UseCase {
@@ -27,20 +27,24 @@ class MainWidget extends StatefulWidget {
 class MainWidgetState extends State<MainWidget> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Badge'),
-      ),
-      body: const Center(
-        child: Badge(
-          label: Text(
-            '5',
-            semanticsLabel: '5 new messages',
-            style: TextStyle(color: Colors.white),
+    return Title(
+      color: appSeedColor,
+      title: 'Badge Demo',
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: const Text('Badge'),
+        ),
+        body: const Center(
+          child: Badge(
+            label: Text(
+              '5',
+              semanticsLabel: '5 new messages',
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.green,
+            child: Icon(Icons.mail, semanticLabel: 'Messages'),
           ),
-          backgroundColor: Colors.green,
-          child: Icon(Icons.mail, semanticLabel: 'Messages'),
         ),
       ),
     );

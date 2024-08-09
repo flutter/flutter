@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class MaterialBannerUseCase extends UseCase {
@@ -57,15 +57,19 @@ class MainWidgetState extends State<MainWidget> {
         });
       };
     }
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('MaterialBanner'),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: onPress,
-          child: const Text('Show a MaterialBanner'),
+    return Title(
+      color: appSeedColor,
+      title: 'MaterialBanner Demo',
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: const Text('MaterialBanner'),
+        ),
+        body: Center(
+          child: ElevatedButton(
+            onPressed: onPress,
+            child: const Text('Show a MaterialBanner'),
+          ),
         ),
       ),
     );

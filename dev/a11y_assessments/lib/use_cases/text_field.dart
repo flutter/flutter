@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class TextFieldUseCase extends UseCase {
@@ -22,40 +22,44 @@ class _MainWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('TextField'),
-      ),
-      body: ListView(
-        children: <Widget>[
-          Semantics(
-            label: 'Input field with suffix @gmail.com',
-            child: const TextField(
-              key: Key('enabled text field'),
-              maxLines: null,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                suffixText: '@gmail.com',
-                hintText: 'Enter your email',
+    return Title(
+      color: appSeedColor,
+      title: 'TextField Demo',
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: const Text('TextField'),
+        ),
+        body: ListView(
+          children: <Widget>[
+            Semantics(
+              label: 'Input field with suffix @gmail.com',
+              child: const TextField(
+                key: Key('enabled text field'),
+                maxLines: null,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  suffixText: '@gmail.com',
+                  hintText: 'Enter your email',
+                ),
               ),
             ),
-          ),
-          Semantics(
-            label: 'Input field with suffix @gmail.com',
-            child: TextField(
-              key: const Key('disabled text field'),
-              maxLines: null,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                suffixText: '@gmail.com',
-                hintText: 'Enter your email',
+            Semantics(
+              label: 'Input field with suffix @gmail.com',
+              child: TextField(
+                key: const Key('disabled text field'),
+                maxLines: null,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  suffixText: '@gmail.com',
+                  hintText: 'Enter your email',
+                ),
+                enabled: false,
+                controller: TextEditingController(text: 'xyz'),
               ),
-              enabled: false,
-              controller: TextEditingController(text: 'xyz'),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

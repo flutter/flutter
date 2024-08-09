@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class SliderUseCase extends UseCase {
@@ -30,24 +30,28 @@ class MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Slider'),
-      ),
-      body: Center(
-        child: Semantics(
-          label: accessibilityLabel,
-          child: Slider(
-            value: currentSliderValue,
-            max: 100,
-            divisions: 5,
-            label: currentSliderValue.round().toString(),
-            onChanged: (double value) {
-              setState(() {
-                currentSliderValue = value;
-              });
-            },
+    return Title(
+      color: appSeedColor,
+      title: 'Slider Demo',
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: const Text('Slider'),
+        ),
+        body: Center(
+          child: Semantics(
+            label: accessibilityLabel,
+            child: Slider(
+              value: currentSliderValue,
+              max: 100,
+              divisions: 5,
+              label: currentSliderValue.round().toString(),
+              onChanged: (double value) {
+                setState(() {
+                  currentSliderValue = value;
+                });
+              },
+            ),
           ),
         ),
       ),
