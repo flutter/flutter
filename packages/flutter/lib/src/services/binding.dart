@@ -21,7 +21,7 @@ import 'asset_bundle.dart';
 import 'binary_messenger.dart';
 import 'debug.dart';
 import 'hardware_keyboard.dart';
-import 'message_codec.dart';
+import 'message_codecs.dart';
 import 'platform_channel.dart';
 import 'raw_keyboard.dart' show RawKeyboard;
 import 'restoration.dart';
@@ -88,6 +88,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   void _initKeyboard() {
     _keyboard = HardwareKeyboard();
     _keyEventManager = KeyEventManager(_keyboard, RawKeyboard.instance);
+    ui.channelBuffers.handleMessage(const StandardMethodCodec().encodeMethodCall(const MethodCall(
+      'resize',
+      <Object>['flutter/keydata', 0]
+    )));
+    ui.channelBuffers.handleMessage(const StandardMethodCodec().encodeMethodCall(const MethodCall(
+      'resize',
+      <Object>['flutter/keyevent', 0]
+    )));
     _keyboard.syncKeyboardState().then((_) {
       platformDispatcher.onKeyData = _keyEventManager.handleKeyData;
       SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
