@@ -479,86 +479,75 @@ class CupertinoDatePicker extends StatefulWidget {
     };
   }
 
-  // Estimate the minimum width that each column needs to layout its content.
-  static double _getColumnWidth(
-    _PickerColumnType columnType,
-    CupertinoLocalizations localizations,
-    BuildContext context,
-    bool showDayOfWeek, {
-    bool standaloneMonth = false,
-  }) {
-    String longestText = '';
+// Estimate the minimum width that each column needs to layout its content.
+static double _getColumnWidth(
+  _PickerColumnType columnType,
+  CupertinoLocalizations localizations,
+  BuildContext context,
+  bool showDayOfWeek, {
+  bool standaloneMonth = false,
+}) {
+  final List<String> longTexts = <String>[];
 
-    switch (columnType) {
-      case _PickerColumnType.date:
-        // Measuring the length of all possible date is impossible, so here
-        // just some dates are measured.
-        for (int i = 1; i <= 12; i++) {
-          // An arbitrary date.
-          final String date =
-              localizations.datePickerMediumDate(DateTime(2018, i, 25));
-          if (longestText.length < date.length) {
-            longestText = date;
-          }
+  switch (columnType) {
+    case _PickerColumnType.date:
+      for (int i = 1; i <= 12; i++) {
+        final String date =
+            localizations.datePickerMediumDate(DateTime(2018, i, 25));
+        longTexts.add(date);
+      }
+    case _PickerColumnType.hour:
+      for (int i = 0; i < 24; i++) {
+        final String hour = localizations.datePickerHour(i);
+        longTexts.add(hour);
+      }
+    case _PickerColumnType.minute:
+      for (int i = 0; i < 60; i++) {
+        final String minute = localizations.datePickerMinute(i);
+        longTexts.add(minute);
+      }
+    case _PickerColumnType.dayPeriod:
+      longTexts.add(localizations.anteMeridiemAbbreviation);
+      longTexts.add(localizations.postMeridiemAbbreviation);
+    case _PickerColumnType.dayOfMonth:
+      int longestDayOfMonth = 1;
+      for (int i = 1; i <= 31; i++) {
+        final String dayOfMonth = localizations.datePickerDayOfMonth(i);
+        longTexts.add(dayOfMonth);
+        longestDayOfMonth = i;
+      }
+      if (showDayOfWeek) {
+        for (int wd = 1; wd < DateTime.daysPerWeek; wd++) {
+          final String dayOfMonth =
+              localizations.datePickerDayOfMonth(longestDayOfMonth, wd);
+          longTexts.add(dayOfMonth);
         }
-      case _PickerColumnType.hour:
-        for (int i = 0; i < 24; i++) {
-          final String hour = localizations.datePickerHour(i);
-          if (longestText.length < hour.length) {
-            longestText = hour;
-          }
-        }
-      case _PickerColumnType.minute:
-        for (int i = 0; i < 60; i++) {
-          final String minute = localizations.datePickerMinute(i);
-          if (longestText.length < minute.length) {
-            longestText = minute;
-          }
-        }
-      case _PickerColumnType.dayPeriod:
-        longestText =
-          localizations.anteMeridiemAbbreviation.length > localizations.postMeridiemAbbreviation.length
-            ? localizations.anteMeridiemAbbreviation
-            : localizations.postMeridiemAbbreviation;
-      case _PickerColumnType.dayOfMonth:
-        int longestDayOfMonth = 1;
-        for (int i = 1; i <=31; i++) {
-          final String dayOfMonth = localizations.datePickerDayOfMonth(i);
-          if (longestText.length < dayOfMonth.length) {
-            longestText = dayOfMonth;
-            longestDayOfMonth = i;
-          }
-        }
-        if (showDayOfWeek) {
-          for (int wd = 1; wd < DateTime.daysPerWeek; wd++) {
-            final String dayOfMonth = localizations.datePickerDayOfMonth(longestDayOfMonth, wd);
-            if (longestText.length < dayOfMonth.length) {
-              longestText = dayOfMonth;
-            }
-          }
-        }
-      case _PickerColumnType.month:
-        for (int i = 1; i <= 12; i++) {
-          final String month = standaloneMonth
-              ? localizations.datePickerStandaloneMonth(i)
-              : localizations.datePickerMonth(i);
-          if (longestText.length < month.length) {
-            longestText = month;
-          }
-        }
-      case _PickerColumnType.year:
-        longestText = localizations.datePickerYear(2018);
-    }
+      }
+    case _PickerColumnType.month:
+      for (int i = 1; i <= 12; i++) {
+        final String month = standaloneMonth
+            ? localizations.datePickerStandaloneMonth(i)
+            : localizations.datePickerMonth(i);
+        longTexts.add(month);
+      }
+    case _PickerColumnType.year:
+      longTexts.add(localizations.datePickerYear(2018));
+  }
 
-    assert(longestText != '', 'column type is not appropriate');
+  assert(longTexts.isNotEmpty, 'column type is not appropriate');
 
-    return TextPainter.computeMaxIntrinsicWidth(
+  final List<String> texts = (List<String>.from(longTexts)
+      ..sort((String a, String b) => b.length.compareTo(a.length)))
+      .take(4)
+      .toList();
+
+  return texts.map((String text) => TextPainter.computeMaxIntrinsicWidth(
       text: TextSpan(
         style: _themeTextStyle(context),
-        text: longestText,
+        text: text,
       ),
       textDirection: Directionality.of(context),
-    );
+    )).reduce(math.max);
   }
 }
 
