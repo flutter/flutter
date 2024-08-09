@@ -18,7 +18,6 @@
 #include "flutter/fml/paths.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/paths_android.h"
-#include "flutter/fml/size.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/shell.h"
@@ -227,7 +226,7 @@ bool FlutterMain::Register(JNIEnv* env) {
     return false;
   }
 
-  return env->RegisterNatives(clazz, methods, fml::size(methods)) == 0;
+  return env->RegisterNatives(clazz, methods, std::size(methods)) == 0;
 }
 
 // static

@@ -23,7 +23,6 @@
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
-#include "flutter/fml/size.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/shell/common/run_configuration.h"
@@ -857,7 +856,7 @@ bool RegisterApi(JNIEnv* env) {
   };
 
   if (env->RegisterNatives(g_flutter_jni_class->obj(), flutter_jni_methods,
-                           fml::size(flutter_jni_methods)) != 0) {
+                           std::size(flutter_jni_methods)) != 0) {
     FML_LOG(ERROR) << "Failed to RegisterNatives with FlutterJNI";
     return false;
   }

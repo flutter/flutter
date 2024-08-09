@@ -8,7 +8,6 @@
 #include <utility>
 
 #include "flutter/fml/macros.h"
-#include "flutter/fml/size.h"
 #include "gtest/gtest.h"
 
 namespace fml {
@@ -198,7 +197,7 @@ TEST(CommandLineTest, CommmandLineFromIterators) {
   {
     static const char* const argv[] = {"my_program", "--flag=value", "arg"};
 
-    auto cl = CommandLineFromIterators(argv, argv + fml::size(argv));
+    auto cl = CommandLineFromIterators(argv, argv + std::size(argv));
     EXPECT_TRUE(cl.has_argv0());
     EXPECT_EQ(argv[0], cl.argv0());
     std::vector<CommandLine::Option> expected_options = {
@@ -212,7 +211,7 @@ TEST(CommandLineTest, CommmandLineFromIterators) {
 
 TEST(CommandLineTest, CommandLineFromArgcArgv) {
   static const char* const argv[] = {"my_program", "--flag=value", "arg"};
-  const int argc = static_cast<int>(fml::size(argv));
+  const int argc = static_cast<int>(std::size(argv));
 
   auto cl = CommandLineFromArgcArgv(argc, argv);
   EXPECT_TRUE(cl.has_argv0());
