@@ -28,7 +28,7 @@ class WrapExample extends StatefulWidget {
 }
 
 class _WrapExampleState extends State<WrapExample> {
-  static final List<WrapFit?> fits = <WrapFit?>[null, ...WrapFit.values];
+  static const List<WrapFit?> fits = <WrapFit?>[null, ...WrapFit.values];
   List<(WrapFit?, String)> items = <(WrapFit?, String)>[(null, 'Item 0'), (null, 'Item 1')];
 
   Widget buildItem(int index, WrapFit? fit, String content) {
