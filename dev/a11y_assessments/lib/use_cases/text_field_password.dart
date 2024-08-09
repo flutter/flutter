@@ -28,21 +28,27 @@ class _MainWidget extends StatelessWidget {
         title: const Text('TextField password'),
       ),
       body: ListView(
-        children: const <Widget>[
-          TextField(
-            key: Key('enabled password'),
-            decoration: InputDecoration(
-              labelText: 'Password',
+        children: <Widget>[
+          Semantics(
+            key: const Key('enabled password semantics wrapper'),
+            child: const TextField(
+              key: Key('enabled password'),
+              decoration: InputDecoration(
+                labelText: 'Password',
+              ),
+              obscureText: true,
             ),
-            obscureText: true,
           ),
-          TextField(
-            key: Key('disabled password'),
-            decoration: InputDecoration(
-              labelText: 'Password',
+          Semantics(
+            key: const Key('disabled password semantics wrapper'),
+            child: const TextField(
+              key: Key('disabled password'),
+              decoration: InputDecoration(
+                labelText: 'Password',
+              ),
+              enabled: false,
+              obscureText: true,
             ),
-            enabled: false,
-            obscureText: true,
           ),
         ],
       ),

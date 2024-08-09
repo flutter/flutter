@@ -50,4 +50,10 @@ void main() {
       expect(textField.decoration?.hintText, isNull);
     }
   });
+
+  testWidgets('disabled text field is disabled', (WidgetTester tester) async {
+    await pumpsUseCase(tester, TextFieldPasswordUseCase());
+    expect(find.byKey(const Key('enabled password semantics wrapper')), findsOneWidget);
+    expect(find.byKey(const Key('disabled password semantics wrapper')), findsOneWidget);
+  });
 }
