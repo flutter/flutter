@@ -124,9 +124,6 @@ states of completion:
   pre-compiled shaders themselves. Unlike Metal, backends like OpenGL ES and
   Vulkan don't have such a concept. For these backends, `//impeller/blobcat` is
   used to create a single shader library to be packaged with the engine.
-* **`//impeller/scene`**: Contains an experimental 3D model renderer. This is
-  currently only exposed via [a special build of the Flutter
-  Engine](https://github.com/flutter/flutter/wiki/Impeller-Scene).
 
 ## The Offline Shader Compilation Pipeline
 

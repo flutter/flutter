@@ -43,11 +43,6 @@
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/logging/dart_error.h"
 
-#ifdef IMPELLER_ENABLE_3D
-#include "flutter/lib/ui/painting/scene/scene_node.h"
-#include "flutter/lib/ui/painting/scene/scene_shader.h"
-#endif  // IMPELLER_ENABLE_3D
-
 using tonic::ToDart;
 
 namespace flutter {
@@ -308,24 +303,6 @@ typedef CanvasPath Path;
   V(SemanticsUpdate, dispose)                   \
   V(Vertices, dispose)
 
-#ifdef IMPELLER_ENABLE_3D
-
-#define FFI_FUNCTION_LIST_3D(V) \
-  V(SceneNode::Create)          \
-  V(SceneShader::Create)
-
-#define FFI_METHOD_LIST_3D(V)        \
-  V(SceneNode, initFromAsset)        \
-  V(SceneNode, initFromTransform)    \
-  V(SceneNode, AddChild)             \
-  V(SceneNode, SetTransform)         \
-  V(SceneNode, SetAnimationState)    \
-  V(SceneNode, SeekAnimation)        \
-  V(SceneShader, SetCameraTransform) \
-  V(SceneShader, Dispose)
-
-#endif  // IMPELLER_ENABLE_3D
-
 #define FFI_FUNCTION_INSERT(FUNCTION)           \
   g_function_dispatchers.insert(std::make_pair( \
       std::string_view(#FUNCTION),              \
@@ -352,11 +329,6 @@ void* ResolveFfiNativeFunction(const char* name, uintptr_t args) {
 void InitDispatcherMap() {
   FFI_FUNCTION_LIST(FFI_FUNCTION_INSERT)
   FFI_METHOD_LIST(FFI_METHOD_INSERT)
-
-#ifdef IMPELLER_ENABLE_3D
-  FFI_FUNCTION_LIST_3D(FFI_FUNCTION_INSERT)
-  FFI_METHOD_LIST_3D(FFI_METHOD_INSERT)
-#endif  // IMPELLER_ENABLE_3D
 }
 
 }  // anonymous namespace

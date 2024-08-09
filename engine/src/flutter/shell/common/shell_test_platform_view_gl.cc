@@ -11,10 +11,6 @@
 #include "flutter/shell/gpu/gpu_surface_gl_skia.h"
 #include "impeller/entity/gles/entity_shaders_gles.h"
 
-#if IMPELLER_ENABLE_3D
-#include "impeller/scene/shaders/gles/scene_shaders_gles.h"  // nogncheck
-#endif
-
 namespace flutter {
 namespace testing {
 
@@ -23,10 +19,6 @@ static std::vector<std::shared_ptr<fml::Mapping>> ShaderLibraryMappings() {
       std::make_shared<fml::NonOwnedMapping>(
           impeller_entity_shaders_gles_data,
           impeller_entity_shaders_gles_length),
-#if IMPELLER_ENABLE_3D
-      std::make_shared<fml::NonOwnedMapping>(
-          impeller_scene_shaders_gles_data, impeller_scene_shaders_gles_length),
-#endif
   };
 }
 
