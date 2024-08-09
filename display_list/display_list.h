@@ -140,12 +140,7 @@ namespace flutter {
   V(DrawShadowTransparentOccluder)
 
 #define DL_OP_TO_ENUM_VALUE(name) k##name,
-enum class DisplayListOpType {
-  FOR_EACH_DISPLAY_LIST_OP(DL_OP_TO_ENUM_VALUE)
-#ifdef IMPELLER_ENABLE_3D
-      DL_OP_TO_ENUM_VALUE(SetSceneColorSource)
-#endif  // IMPELLER_ENABLE_3D
-};
+enum class DisplayListOpType { FOR_EACH_DISPLAY_LIST_OP(DL_OP_TO_ENUM_VALUE) };
 #undef DL_OP_TO_ENUM_VALUE
 
 class DlOpReceiver;
