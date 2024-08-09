@@ -914,58 +914,64 @@ class _PageViewState extends State<PageView> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final AxisDirection axisDirection = _getDirection(context);
-    final ScrollPhysics physics = _ForceImplicitScrollPhysics(
-      allowImplicitScrolling: widget.allowImplicitScrolling,
-    ).applyTo(
-      widget.pageSnapping
-        ? _kPagePhysics.applyTo(widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context))
-        : widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
-    );
+Widget build(BuildContext context) {
+  final AxisDirection axisDirection = _getDirection(context);
+  final ScrollPhysics physics = _ForceImplicitScrollPhysics(
+    allowImplicitScrolling: widget.allowImplicitScrolling,
+  ).applyTo(
+    widget.pageSnapping
+      ? _kPagePhysics.applyTo(widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context))
+      : widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
+  );
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification notification) {
-        if (notification.depth == 0 && widget.onPageChanged != null && notification is ScrollUpdateNotification) {
-          final PageMetrics metrics = notification.metrics as PageMetrics;
-          final int currentPage = metrics.page!.round();
-          if (currentPage != _lastReportedPage) {
-            _lastReportedPage = currentPage;
-            widget.onPageChanged!(currentPage);
-          }
+  return NotificationListener<ScrollNotification>(
+    onNotification: (ScrollNotification notification) {
+      if (notification.depth == 0 && widget.onPageChanged != null && notification is ScrollUpdateNotification) {
+        final PageMetrics metrics = notification.metrics as PageMetrics;
+        final int currentPage = metrics.page!.round();
+        if (currentPage != _lastReportedPage) {
+          _lastReportedPage = currentPage;
+          widget.onPageChanged!(currentPage);
         }
-        return false;
+      }
+      return false;
+    },
+    child: Scrollable(
+      dragStartBehavior: widget.dragStartBehavior,
+      axisDirection: axisDirection,
+      controller: _controller,
+      physics: physics,
+      restorationId: widget.restorationId,
+      hitTestBehavior: widget.hitTestBehavior,
+      scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
+      viewportBuilder: (BuildContext context, ViewportOffset position) {
+        return ClipRect(
+          child: OverflowBox(
+            alignment: Alignment.topLeft,
+            maxWidth: double.infinity,
+            child: Viewport(
+              // TODO(dnfield): we should provide a way to set cacheExtent
+              // independent of implicit scrolling:
+              // https://github.com/flutter/flutter/issues/45632
+              cacheExtent: widget.allowImplicitScrolling ? 1.0 : 0.0,
+              cacheExtentStyle: CacheExtentStyle.viewport,
+              axisDirection: axisDirection,
+              offset: position,
+              clipBehavior: widget.clipBehavior,
+              slivers: <Widget>[
+                SliverFillViewport(
+                  viewportFraction: _controller.viewportFraction,
+                  delegate: widget.childrenDelegate,
+                  padEnds: widget.padEnds,
+                ),
+              ],
+            ),
+          ),
+        );
       },
-      child: Scrollable(
-        dragStartBehavior: widget.dragStartBehavior,
-        axisDirection: axisDirection,
-        controller: _controller,
-        physics: physics,
-        restorationId: widget.restorationId,
-        hitTestBehavior: widget.hitTestBehavior,
-        scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
-        viewportBuilder: (BuildContext context, ViewportOffset position) {
-          return Viewport(
-            // TODO(dnfield): we should provide a way to set cacheExtent
-            // independent of implicit scrolling:
-            // https://github.com/flutter/flutter/issues/45632
-            cacheExtent: widget.allowImplicitScrolling ? 1.0 : 0.0,
-            cacheExtentStyle: CacheExtentStyle.viewport,
-            axisDirection: axisDirection,
-            offset: position,
-            clipBehavior: widget.clipBehavior,
-            slivers: <Widget>[
-              SliverFillViewport(
-                viewportFraction: _controller.viewportFraction,
-                delegate: widget.childrenDelegate,
-                padEnds: widget.padEnds,
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
+    ),
+  );
+}
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
