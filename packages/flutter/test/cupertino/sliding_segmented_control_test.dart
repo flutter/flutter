@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// reduced-test-set:
+//   This file is run as part of a reduced test set in CI on Mac and Windows
+//   machines.
+@Tags(<String>['reduced-test-set'])
+library;
 import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
@@ -274,7 +279,7 @@ void main() {
 
       DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
 
-      expect(textStyle.style.fontWeight, FontWeight.w500);
+      expect(textStyle.style.fontWeight, FontWeight.w600);
 
       await tester.tap(find.byIcon(const IconData(1)));
       await tester.pump();
@@ -283,7 +288,7 @@ void main() {
       textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
 
       expect(groupValue, 1);
-      expect(textStyle.style.fontWeight, FontWeight.normal);
+      expect(textStyle.style.fontWeight, FontWeight.w500);
     },
   );
 
@@ -538,7 +543,7 @@ void main() {
     // to each child equally.
     final double childWidth = (segmentedControl.size.width - 8) / 3;
 
-    expect(childWidth, 200.0 + 9.25 * 2);
+    expect(childWidth, 200.0 + 10 * 2);
   });
 
   testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
@@ -570,7 +575,7 @@ void main() {
 
     expect(
       segmentedControl.size.width,
-      70 * 2 + 9.25 * 4 + 3 * 2 + 1, // 2 children + 4 child padding + 2 outer padding + 1 separator
+      70 * 2 + 10.0 * 4 + 3 * 2 + 1, // 2 children + 4 child padding + 2 outer padding + 1 separator
     );
   });
 
@@ -830,18 +835,30 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
 
-    // The thumb shrinks but does not moves towards left.
+    // The thumb shrinks but does not moves towards left; the shrink alignment
+    // is Alignment.centerRight, with ltr text direction because "Child 2" is
+    // the trailing item.
     expect(currentThumbScale(tester), lessThan(1));
+    double centerDelta = tester.getSize(find.text('Child 2')).width * (1 - currentThumbScale(tester)) / 2;
     expect(
-      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
-      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 2')), epsilon: 0.01),
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dy,
+      moreOrLessEquals(tester.getCenter(find.text('Child 2')).dy, epsilon: 0.01),
+    );
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dx,
+      moreOrLessEquals(tester.getCenter(find.text('Child 2')).dx - centerDelta, epsilon: 0.01),
     );
 
     await tester.pumpAndSettle();
     expect(currentThumbScale(tester), moreOrLessEquals(0.95, epsilon: 0.01));
+    centerDelta = tester.getSize(find.text('Child 2')).width * (1 - currentThumbScale(tester));
     expect(
-      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
-      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 2')), epsilon: 0.01),
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dy,
+      moreOrLessEquals(tester.getCenter(find.text('Child 2')).dy, epsilon: 0.01),
+    );
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dx,
+      moreOrLessEquals(tester.getCenter(find.text('Child 2')).dx - centerDelta / 2, epsilon: 0.01),
     );
 
     // Drag to Child 1.
@@ -858,9 +875,14 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(currentThumbScale(tester), moreOrLessEquals(0.95, epsilon: 0.01));
+    centerDelta = tester.getSize(find.text('Child 1')).width * (1 - currentThumbScale(tester));
     expect(
-      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
-      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 1')), epsilon: 0.01),
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dy,
+      moreOrLessEquals(tester.getCenter(find.text('Child 1')).dy, epsilon: 0.01),
+    );
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dx,
+      moreOrLessEquals(tester.getCenter(find.text('Child 1')).dx + centerDelta / 2, epsilon: 0.01),
     );
 
     await gesture.up();
@@ -1063,8 +1085,13 @@ void main() {
 
     // The ongoing drag gesture should veto the programmatic change.
     expect(
-      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
-      offsetMoreOrLessEquals(tester.getCenter(find.text('A')), epsilon: 0.01),
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dy,
+      moreOrLessEquals(tester.getCenter(find.text('A')).dy, epsilon: 0.01),
+    );
+    final  double centerDelta = tester.getSize(find.text('A')).width * (1 - currentThumbScale(tester)) / 2;
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dx,
+      moreOrLessEquals(tester.getCenter(find.text('A')).dx + centerDelta, epsilon: 0.01),
     );
 
     // Move the pointer to 'B'. The onValueChanged callback will be called but
@@ -1121,8 +1148,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
-      offsetMoreOrLessEquals(tester.getCenter(find.text('A')), epsilon: 0.01),
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dy,
+      moreOrLessEquals(tester.getCenter(find.text('A')).dy, epsilon: 0.01),
+    );
+    double centerDelta = tester.getSize(find.text('A')).width * (1 - currentThumbScale(tester)) / 2;
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dx,
+      moreOrLessEquals(tester.getCenter(find.text('A')).dx + centerDelta, epsilon: 0.01),
     );
 
     // A different drag.
@@ -1131,8 +1163,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
-      offsetMoreOrLessEquals(tester.getCenter(find.text('A')), epsilon: 0.01),
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dy,
+      moreOrLessEquals(tester.getCenter(find.text('A')).dy, epsilon: 0.01),
+    );
+    centerDelta = tester.getSize(find.text('A')).width * (1 - currentThumbScale(tester)) / 2;
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dx,
+      moreOrLessEquals(tester.getCenter(find.text('A')).dx + centerDelta, epsilon: 0.01),
     );
 
     await gesture.up();
@@ -1363,5 +1400,173 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
+  });
+
+  testWidgets('CupertinoSlidingSegmentedControl defaults - no selection', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
+
+    Widget buildSlidingSegmentedControl({ Brightness? brightness }) {
+      return CupertinoApp(
+        theme: CupertinoThemeData(
+          brightness: brightness ?? Brightness.light,
+        ),
+        home: CupertinoPageScaffold(
+          child: Center(
+            child: CupertinoSlidingSegmentedControl<int>(
+              children: children,
+              onValueChanged: defaultCallback,
+            ),
+          ),
+        )
+      );
+    }
+
+    // Light theme
+    await tester.pumpWidget(buildSlidingSegmentedControl());
+
+    await expectLater(
+      find.byType(CupertinoSlidingSegmentedControl<int>),
+      matchesGoldenFile('cupertino_sliding_segmented_control.light_theme.png'),
+    );
+
+    // Dark theme
+    await tester.pumpWidget(buildSlidingSegmentedControl(brightness: Brightness.dark));
+
+    await expectLater(
+      find.byType(CupertinoSlidingSegmentedControl<int>),
+      matchesGoldenFile('cupertino_sliding_segmented_control.dark_theme.png'),
+    );
+  });
+
+  testWidgets('CupertinoSlidingSegmentedControl defaults - group value is not null', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
+
+    Widget buildSlidingSegmentedControl({ Brightness? brightness }) {
+      return CupertinoApp(
+        theme: CupertinoThemeData(
+          brightness: brightness ?? Brightness.light,
+        ),
+        home: CupertinoPageScaffold(
+          child: Center(
+            child: CupertinoSlidingSegmentedControl<int>(
+              groupValue: 1,
+              children: children,
+              onValueChanged: defaultCallback,
+            ),
+          ),
+        )
+      );
+    }
+
+    // Light theme
+    await tester.pumpWidget(buildSlidingSegmentedControl());
+
+    await expectLater(
+      find.byType(CupertinoSlidingSegmentedControl<int>),
+      matchesGoldenFile('cupertino_sliding_segmented_control.with_selection.light_theme.png'),
+    );
+
+    // Dark theme
+    await tester.pumpWidget(buildSlidingSegmentedControl(brightness: Brightness.dark));
+
+    await expectLater(
+      find.byType(CupertinoSlidingSegmentedControl<int>),
+      matchesGoldenFile('cupertino_sliding_segmented_control.with_selection.dark_theme.png'),
+    );
+  });
+
+  testWidgets('CupertinoSlidingSegmentedControl defaults - disabled', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
+
+    Widget buildSlidingSegmentedControl({ Brightness? brightness }) {
+      return CupertinoApp(
+        theme: CupertinoThemeData(
+          brightness: brightness ?? Brightness.light,
+        ),
+        home: CupertinoPageScaffold(
+          child: Center(
+            child: CupertinoSlidingSegmentedControl<int>(
+              setEnabled: const <int, bool> {
+                0: false,
+              },
+              children: children,
+              onValueChanged: defaultCallback,
+            ),
+          ),
+        )
+      );
+    }
+
+    // Light theme
+    await tester.pumpWidget(buildSlidingSegmentedControl());
+
+    await expectLater(
+      find.byType(CupertinoSlidingSegmentedControl<int>),
+      matchesGoldenFile('cupertino_sliding_segmented_control.disabled.light_theme.png'),
+    );
+
+    // Dark theme
+    await tester.pumpWidget(buildSlidingSegmentedControl(brightness: Brightness.dark));
+
+    await expectLater(
+      find.byType(CupertinoSlidingSegmentedControl<int>),
+      matchesGoldenFile('cupertino_sliding_segmented_control.disabled.dark_theme.png'),
+    );
+  });
+
+  testWidgets('Segment can be disabled', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
+
+    groupValue = 1;
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            setEnabled: const <int, bool> {
+              0: false,
+            },
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      )
+    );
+
+    expect(getHighlightedIndex(tester), 1);
+
+    // Tap disabled segment
+    await tester.tap(find.text('A'));
+    await tester.pumpAndSettle();
+
+    expect(getHighlightedIndex(tester), 1); // The highlighted index doesn't change
+
+    // Tap enabled segment
+    await tester.tap(find.text('CCCC'));
+    await tester.pumpAndSettle();
+
+    expect(getHighlightedIndex(tester), 2);
+
+    // Tap disabled segment
+    await tester.tap(find.text('A'));
+    await tester.pumpAndSettle();
+
+    expect(getHighlightedIndex(tester), 2); // The highlighted index doesn't change
   });
 }
