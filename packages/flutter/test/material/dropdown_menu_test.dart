@@ -961,6 +961,29 @@ void main() {
     expect(item2material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
   }, variant: TargetPlatformVariant.desktop());
 
+  // Regression test for https://github.com/flutter/flutter/issues/151878.
+  testWidgets('Searching for non matching item does not crash', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          enableFilter: true,
+          dropdownMenuEntries: menuChildren,
+        ),
+      ),
+    ));
+
+    // Open the menu.
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+    await tester.enterText(find.byType(TextField).first, 'Me');
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'Meu');
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  }, variant: TargetPlatformVariant.desktop());
+
   testWidgets('The text input should match the label of the menu item '
       'while pressing down key on desktop platforms', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
@@ -2093,6 +2116,7 @@ void main() {
     await tester.enterText(find.byType(TextField), 'read');
     await tester.pump();
     checkExpectedHighlight(searchResult: 'Unread', otherItems: <String>['All', 'Read']); // Because "Unread" contains "read".
+    await tester.enterText(find.byType(TextField), '');
 
     // Test custom search algorithm.
     await tester.pumpWidget(dropdownMenu(
