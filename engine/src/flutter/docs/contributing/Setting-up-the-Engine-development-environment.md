@@ -26,7 +26,6 @@ Make sure you have the following dependencies available:
  * On macOS:
    - Install the latest Xcode.
    - On Apple Silicon arm64 Macs, install the Rosetta translation environment by running `softwareupdate --install-rosetta`.
-   - Install Oracle's Java JDK, version 1.8 or later.
 
 You do not need to install [Dart](https://www.dartlang.org/downloads/linux.html).
 A Dart toolchain is automatically downloaded as part of the "Getting the source"

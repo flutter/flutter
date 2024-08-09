@@ -799,7 +799,7 @@ deps = {
         'version': 'version:17'
        }
      ],
-     'condition': 'download_android_deps',
+     # Always download the JDK since java is required for running the formatter.
      'dep_type': 'cipd',
    },
 
