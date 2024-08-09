@@ -1413,4 +1413,60 @@ void main() {
     final BoxDecoration tableRowBoxDecoration = tableRow.decoration! as BoxDecoration;
     expect(tableRowBoxDecoration.color, headingRowColor.resolve(<MaterialState>{}));
   });
+
+  testWidgets('PaginatedDataTable footerStyle set properly', (WidgetTester tester) async {
+    const Color footerStyleColor = Color.fromARGB(255, 255, 0, 0);
+
+    await tester.pumpWidget(MaterialApp(
+      home: PaginatedDataTable(
+        footerStyle: const TextStyle(color: Color.fromARGB(255, 255, 0, 0)),
+        showFirstLastButtons: true,
+        header: const Text('Test table'),
+        rowsPerPage: 10,
+        onRowsPerPageChanged: (int? rowsPerPage) { },
+        source: source,
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
+        ],
+      ),
+    ));
+
+      await tester.pumpAndSettle();
+
+
+      expect(find.byWidgetPredicate((widget) => widget is Text && widget.data == 'Rows per page:'), findsOneWidget);
+      final Text rowsPerPageText = tester.widget(find.byWidgetPredicate((widget) => widget is Text && widget.data == 'Rows per page:'));
+      final TextStyle? selectedTextStyle = rowsPerPageText.style;
+      expect(selectedTextStyle.color, equals(footerStyleColor));
+  });
+
+  testWidgets('PaginatedDataTable headerBackgroundColor and footerBackgroundColor set properly', (WidgetTester tester) async {
+    const Color headerBackgroundColor = Color(0xFFF53935);
+
+    const Color footerBackgroundColor = Color(0xFFA53695);
+
+    await tester.pumpWidget(MaterialApp(
+      home: PaginatedDataTable(
+        headerBackgroundColor: headerBackgroundColor,
+        footerBackgroundColor: footerBackgroundColor,
+        showFirstLastButtons: true,
+        header: const Text('Test table'),
+        rowsPerPage: 10,
+        onRowsPerPageChanged: (int? rowsPerPage) { },
+        source: source,
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
+        ],
+      ),
+    ));
+
+    final Iterable<Container> containers = tester.widgetList(find.byType(Container));
+
+    expect(containers.elementAt(0).color, headerBackgroundColor);
+    expect(containers.elementAt(containers.length-1).color, footerBackgroundColor);
+  });
 }

@@ -20,7 +20,6 @@ import 'debug.dart';
 import 'dropdown.dart';
 import 'icon_button.dart';
 import 'icons.dart';
-import 'ink_decoration.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
 import 'progress_indicator.dart';
@@ -93,6 +92,9 @@ class PaginatedDataTable extends StatefulWidget {
   PaginatedDataTable({
     super.key,
     this.header,
+    this.headerBackgroundColor,
+    this.footerBackgroundColor,
+    this.footerStyle = const TextStyle(color: const Color.fromARGB(255,0, 0, 0)),
     this.actions,
     required this.columns,
     this.sortColumnIndex,
@@ -280,6 +282,15 @@ class PaginatedDataTable extends StatefulWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
+
+    //color of the header background
+  final Color? headerBackgroundColor;
+
+  //color of the footer background
+  final Color? footerBackgroundColor;
+
+  //footer text style
+  final TextStyle? footerStyle;
 
   /// Horizontal margin around the checkbox, if it is displayed.
   ///
@@ -487,7 +498,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     }
 
     // FOOTER
-    final TextStyle? footerTextStyle = themeData.textTheme.bodySmall;
+    final TextStyle? footerTextStyle = widget.footerStyle; //previous based on themeData.textTheme.bodySmall which is misleading, converted to widget level property
     final List<Widget> footerWidgets = <Widget>[];
     if (widget.onRowsPerPageChanged != null) {
       final List<Widget> availableRowsPerPage = widget.availableRowsPerPage
@@ -582,9 +593,9 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                       data: const IconThemeData(
                         opacity: 0.54,
                       ),
-                      child: Ink(
+                      child: Container(
                         height: 64.0,
-                        color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
+                        color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : widget.headerBackgroundColor,
                         child: Padding(
                           padding: const EdgeInsetsDirectional.only(start: 24, end: 14.0),
                           child: Row(
@@ -638,12 +649,15 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     // TODO(bkonyi): this won't handle text zoom correctly,
                     //  https://github.com/flutter/flutter/issues/48522
                     height: 56.0,
-                    child: SingleChildScrollView(
-                      dragStartBehavior: widget.dragStartBehavior,
-                      scrollDirection: Axis.horizontal,
-                      reverse: true,
-                      child: Row(
-                        children: footerWidgets,
+                    child: Container(
+                      color: widget.footerBackgroundColor, // Set footer background color  here
+                      child: SingleChildScrollView(
+                        dragStartBehavior: widget.dragStartBehavior,
+                        scrollDirection: Axis.horizontal,
+                        reverse: true,
+                        child: Row(
+                          children: footerWidgets,
+                        ),
                       ),
                     ),
                   ),
