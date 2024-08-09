@@ -152,9 +152,9 @@ void main() {
       buttonBox.size,
       const Size(40.0, 32.0),
     );
+
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       onPressed: null,
-      // sizeStyle: CupertinoButtonSize.large,
       child: child,
     )));
     expect(
@@ -480,7 +480,6 @@ void main() {
     );
     expect(textStyle.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
 
-
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
@@ -685,7 +684,7 @@ void main() {
 
     IconThemeData? actualIconTheme;
 
-    // large size
+    // Large size.
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(
@@ -709,7 +708,7 @@ void main() {
     );
     expect(actualIconTheme?.size, defaultIconTheme.size);
 
-    // small size
+    // Small size.
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(
