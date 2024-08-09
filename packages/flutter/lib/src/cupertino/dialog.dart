@@ -981,29 +981,16 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     );
     return ColoredBox(
       color: CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context),
-      child: _CupertinoAlertContentSection(
+      child: _ActionSheetContentSection(
         title: widget.title,
         message: widget.message,
         scrollController: _effectiveMessageScrollController,
-        titlePadding: EdgeInsets.only(
-          left: _kActionSheetContentHorizontalPadding,
-          right: _kActionSheetContentHorizontalPadding,
-          bottom: widget.message == null ? _kActionSheetContentVerticalPadding : 0.0,
-          top: _kActionSheetContentVerticalPadding,
-        ),
-        messagePadding: EdgeInsets.only(
-          left: _kActionSheetContentHorizontalPadding,
-          right: _kActionSheetContentHorizontalPadding,
-          bottom: _kActionSheetContentVerticalPadding,
-          top: widget.title == null ? _kActionSheetContentVerticalPadding : 0.0,
-        ),
         titleTextStyle: widget.message == null
             ? textStyle
             : textStyle.copyWith(fontWeight: FontWeight.w600),
         messageTextStyle: widget.title == null
             ? textStyle.copyWith(fontWeight: FontWeight.w600)
             : textStyle,
-        additionalPaddingBetweenTitleAndMessage: const EdgeInsets.only(top: 4.0),
       ),
     );
   }
@@ -1682,6 +1669,178 @@ class _ActionSheetMainSheet extends StatelessWidget {
   );
 }
 
+class _ContentStyle {
+  const _ContentStyle(
+    this.contextBodySize, {
+    required this.fontSize,
+    required this.lead,
+  });
+
+  final double contextBodySize;
+  final double fontSize;
+  final double lead;
+
+  _ContentStyle lerp(_ContentStyle other, double contextBodySize) {
+    final double ratio = (contextBodySize - this.contextBodySize)
+        / (other.contextBodySize - this.contextBodySize);
+    return _ContentStyle(contextBodySize,
+      fontSize: lerpDouble(fontSize, other.fontSize, ratio)!,
+      lead: lerpDouble(lead, other.lead, ratio)!,
+    );
+  }
+}
+
+// The "content section" of a CupertinoActionSheet.
+//
+// If title is missing, then only content is added. If content is
+// missing, then only title is added. If both are missing, then it returns
+// a SingleChildScrollView with a zero-sized Container.
+class _ActionSheetContentSection extends StatelessWidget {
+  const _ActionSheetContentSection({
+    this.title,
+    this.message,
+    required this.titleTextStyle,
+    required this.messageTextStyle,
+    this.scrollController,
+  });
+
+  // The (optional) title of the dialog is displayed in a large font at the top
+  // of the dialog.
+  //
+  // Typically a Text widget.
+  final Widget? title;
+
+  // The (optional) message of the dialog is displayed in the center of the
+  // dialog in a lighter font.
+  //
+  // Typically a Text widget.
+  final Widget? message;
+
+  // Text styles used for title and message.
+  final TextStyle titleTextStyle;
+  final TextStyle messageTextStyle;
+
+  // A scroll controller that can be used to control the scrolling of the
+  // content in the dialog.
+  //
+  // Defaults to null, and is typically not needed, since most alert contents
+  // are short.
+  final ScrollController? scrollController;
+
+  static const List<_ContentStyle> _kContentStyles = <_ContentStyle>[
+    // Smaller ones use the same style as "l".
+    /*  l*/_ContentStyle(17, fontSize: 13, lead: 18),
+    /* xl*/_ContentStyle(19, fontSize: 15, lead: 20),
+    /*xxl*/_ContentStyle(21, fontSize: 17, lead: 22),
+    /*3xl*/_ContentStyle(23, fontSize: 19, lead: 24),
+    /*ax1*/_ContentStyle(28, fontSize: 23, lead: 29),
+    /*ax2*/_ContentStyle(33, fontSize: 27, lead: 33),
+    /*ax3*/_ContentStyle(40, fontSize: 33, lead: 40),
+    /*ax4*/_ContentStyle(47, fontSize: 38, lead: 46),
+    /*ax5*/_ContentStyle(53, fontSize: 44, lead: 52),
+  ];
+
+  _ContentStyle _getContentStyle(BuildContext context) {
+    // The context scale factor is derived from the current body size and the
+    // standard body size in "large".
+    const double higLargeBodySize = 17.0;
+    final double contextBodySize = MediaQuery.textScalerOf(context).scale(higLargeBodySize);
+    if (contextBodySize <= _kContentStyles.first.contextBodySize) {
+      return _kContentStyles.first;
+    }
+    for (int larger = 1; larger < _kContentStyles.length; larger += 1) {
+      if (contextBodySize <= _kContentStyles[larger].contextBodySize) {
+        return _kContentStyles[larger - 1].lerp(_kContentStyles[larger], contextBodySize);
+      }
+    }
+    assert(contextBodySize >= _kContentStyles.last.contextBodySize);
+    return _kContentStyles.last;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (title == null && message == null) {
+      return SingleChildScrollView(
+        controller: scrollController,
+        child: const SizedBox.shrink(),
+      );
+    }
+
+    final _ContentStyle style = _getContentStyle(context);
+
+    // The context scale factor is derived from the current body size and the
+    // standard body size in "large".
+    const double higLargeBodySize = 17.0;
+    final double contextScaleFactor = MediaQuery.textScalerOf(context).scale(higLargeBodySize)
+        / higLargeBodySize;
+    // `Text` will scale the provided font size inside, so its parameter is
+    // unscaled first.
+    final double effectiveFontSize = style.fontSize / contextScaleFactor;
+    print('Font ${style.fontSize} lead ${style.lead}');
+
+    final double topMinPadding = 1.1 * style.lead - style.fontSize;
+    final double topMaxPadding = 1.1 * style.lead - 0.46 * style.fontSize;
+    final double optionalTopPadding = topMaxPadding - topMinPadding;
+    final double maxMiddlePadding = 1.5 * style.lead - topMinPadding - style.fontSize;
+    final List<Widget> titleContentGroup = <Widget>[
+      if (title != null)
+        // Expanded(child:
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: optionalTopPadding + maxMiddlePadding + style.fontSize,
+            ),
+            child:
+            Column(
+              children: <Widget>[
+                Spacer(flex: (optionalTopPadding * 100).round()),
+                // SizedBox(height: optionalTopPadding),
+                DefaultTextStyle(
+                            style: titleTextStyle.copyWith(fontSize: effectiveFontSize),
+                            textAlign: TextAlign.center,
+                            child: title!,
+                ),
+                // SizedBox(height: maxMiddlePadding),
+                Spacer(flex: (maxMiddlePadding * 100).round()),
+              ]
+            ),
+          ),
+        // ),
+      if (message != null)
+        DefaultTextStyle(
+          style: messageTextStyle.copyWith(fontSize: effectiveFontSize),
+          textAlign: TextAlign.center,
+          child: message!,
+        ),
+    ];
+
+    final double bottomPadding;
+    if (title != null && message != null) {
+      bottomPadding = 2.2 * style.lead - style.fontSize;
+    } else {
+      bottomPadding = topMaxPadding;
+    }
+
+    return CupertinoScrollbar(
+      controller: scrollController,
+      child: SingleChildScrollView(
+        controller: scrollController,
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: topMinPadding,
+            bottom: bottomPadding,
+            left: _kActionSheetButtonHorizontalPadding,
+            right: _kActionSheetButtonHorizontalPadding,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: titleContentGroup,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // The "content section" of a CupertinoAlertDialog.
 //
 // If title is missing, then only content is added. If content is
@@ -1696,7 +1855,6 @@ class _CupertinoAlertContentSection extends StatelessWidget {
     this.messagePadding,
     this.titleTextStyle,
     this.messageTextStyle,
-    this.additionalPaddingBetweenTitleAndMessage,
   }) : assert(title == null || titlePadding != null && titleTextStyle != null),
        assert(message == null || messagePadding != null && messageTextStyle != null);
 
@@ -1720,10 +1878,6 @@ class _CupertinoAlertContentSection extends StatelessWidget {
   // CupertinoAlertDialog and CupertinoActionSheet have different paddings.
   final EdgeInsets? titlePadding;
   final EdgeInsets? messagePadding;
-
-  // Additional padding to be inserted between title and message.
-  // Only used for CupertinoActionSheet.
-  final EdgeInsets? additionalPaddingBetweenTitleAndMessage;
 
   // Text styles used for title and message.
   // CupertinoAlertDialog and CupertinoActionSheet have different text styles.
@@ -1759,11 +1913,6 @@ class _CupertinoAlertContentSection extends StatelessWidget {
           ),
         ),
     ];
-
-    // Add padding between the widgets if necessary.
-    if (additionalPaddingBetweenTitleAndMessage != null && titleContentGroup.length > 1) {
-      titleContentGroup.insert(1, Padding(padding: additionalPaddingBetweenTitleAndMessage!));
-    }
 
     return CupertinoScrollbar(
       controller: scrollController,
@@ -2388,23 +2537,42 @@ class _RenderPriorityColumn extends RenderFlex {
 
   _TwoChildrenHeights _childrenHeights(double width, double maxHeight) {
     assert(childCount == 2);
-    final double topIntrinsic = firstChild!.getMinIntrinsicHeight(width);
-    final double bottomIntrinsic = lastChild!.getMinIntrinsicHeight(width);
-    // Try to layout both children as their intrinsic height.
-    if (topIntrinsic + bottomIntrinsic <= maxHeight) {
+    final double topMax = firstChild!.getMaxIntrinsicHeight(width);
+    final double topMin = firstChild!.getMinIntrinsicHeight(width);
+    final double bottomMax = lastChild!.getMaxIntrinsicHeight(width);
+    final double bottomMin = lastChild!.getMinIntrinsicHeight(width);
+    print('top ($topMax - $topMin) bottom ($bottomMax - $bottomMin)');
+    // Try to layout both children as their max intrinsic height.
+    if (topMax + bottomMax <= maxHeight) {
       return (
-        topChildHeight: topIntrinsic,
-        bottomChildHeight: bottomIntrinsic,
+        topChildHeight: topMax,
+        bottomChildHeight: bottomMax,
       );
     }
-    // _bottomMinHeight is only effective when bottom actually needs that much.
-    final double effectiveBottomMinHeight = math.min(_bottomMinHeight, bottomIntrinsic);
+    // If there isn't room for both max intrinsic height, but room for both min
+    // intrinsic height, then prioritize the remaining room to top.
+    if (topMax + bottomMin <= maxHeight) {
+      return (
+        topChildHeight: topMax,
+        bottomChildHeight: maxHeight - topMax,
+      );
+    }
+    if (topMin + bottomMin <= maxHeight) {
+      return (
+        topChildHeight: maxHeight - bottomMin,
+        bottomChildHeight: bottomMin,
+      );
+    }
+    // If there isn't room for both min intrinsic height, then one of them
+    // has to scroll, which is bottom. But bottom needs at least
+    // _bottomMinHeight (subject to its demand).
+    final double effectiveBottomMinHeight = math.min(_bottomMinHeight, bottomMin);
     // Try to layout top as intrinsics, as long as the bottom has at least
     // effectiveBottomMinHeight.
-    if (maxHeight - topIntrinsic >= effectiveBottomMinHeight) {
+    if (maxHeight - topMin >= effectiveBottomMinHeight) {
       return (
-        topChildHeight: topIntrinsic,
-        bottomChildHeight: maxHeight - topIntrinsic,
+        topChildHeight: topMin,
+        bottomChildHeight: maxHeight - topMin,
       );
     }
     // Try to layout bottom as effectiveBottomMinHeight, as long as top has at
