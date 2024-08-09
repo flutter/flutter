@@ -259,43 +259,6 @@ class DismissUpdateDetails {
   final double progress;
 }
 
-class _DismissibleClipper extends CustomClipper<Rect> {
-  _DismissibleClipper({
-    required this.axis,
-    required this.moveAnimation,
-  }) : super(reclip: moveAnimation);
-
-  final Axis axis;
-  final Animation<Offset> moveAnimation;
-
-  @override
-  Rect getClip(Size size) {
-    switch (axis) {
-      case Axis.horizontal:
-        final double offset = moveAnimation.value.dx * size.width;
-        if (offset < 0) {
-          return Rect.fromLTRB(size.width + offset, 0.0, size.width, size.height);
-        }
-        return Rect.fromLTRB(0.0, 0.0, offset, size.height);
-      case Axis.vertical:
-        final double offset = moveAnimation.value.dy * size.height;
-        if (offset < 0) {
-          return Rect.fromLTRB(0.0, size.height + offset, size.width, size.height);
-        }
-        return Rect.fromLTRB(0.0, 0.0, size.width, offset);
-    }
-  }
-
-  @override
-  Rect getApproximateClipRect(Size size) => getClip(size);
-
-  @override
-  bool shouldReclip(_DismissibleClipper oldClipper) {
-    return oldClipper.axis != axis
-        || oldClipper.moveAnimation.value != moveAnimation.value;
-  }
-}
-
 enum _FlingGestureKind { none, forward, reverse }
 
 class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
@@ -659,13 +622,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       content = Stack(children: <Widget>[
         if (!_moveAnimation.isDismissed)
           Positioned.fill(
-            child: ClipRect(
-              clipper: _DismissibleClipper(
-                axis: _directionIsXAxis ? Axis.horizontal : Axis.vertical,
-                moveAnimation: _moveAnimation,
-              ),
-              child: background,
-            ),
+            child: background,
           ),
         content,
       ]);
