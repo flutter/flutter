@@ -922,8 +922,8 @@ class PageTransitionsTheme with Diagnosticable {
     final PageTransitionsBuilder snapshotAwareBuilder =
       matchingBuilder is ZoomPageTransitionsBuilder ?
         ZoomPageTransitionsBuilder(
-          allowSnapshotting: (matchingBuilder as ZoomPageTransitionsBuilder).allowSnapshotting && allowSnapshotting,
-          allowEnterRouteSnapshotting: (matchingBuilder as ZoomPageTransitionsBuilder).allowEnterRouteSnapshotting
+          allowSnapshotting: matchingBuilder.allowSnapshotting && allowSnapshotting,
+          allowEnterRouteSnapshotting: matchingBuilder.allowEnterRouteSnapshotting
         ) :
         matchingBuilder;
 
