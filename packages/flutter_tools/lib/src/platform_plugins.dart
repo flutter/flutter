@@ -13,6 +13,9 @@ const String kPluginClass = 'pluginClass';
 /// Constant for 'dartPluginClass' key in plugin maps.
 const String kDartPluginClass = 'dartPluginClass';
 
+/// Constant for 'dartPluginFile' key in plugin maps.
+const String kDartFileName = 'dartFileName';
+
 /// Constant for 'ffiPlugin' key in plugin maps.
 const String kFfiPlugin = 'ffiPlugin';
 
@@ -68,7 +71,7 @@ abstract class DarwinPlugin {
 /// - an implementation consisting of:
 ///   - the [package] and [pluginClass] that will be the entry point to the
 ///     plugin's native code, and/or
-///   - the [dartPluginClass] that will be the entry point for the plugin's
+///   - the [dartPluginClass] with (optionally) [dartFileName] that will be the entry point for the plugin's
 ///     Dart code
 /// is required.
 class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
@@ -78,6 +81,7 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     this.package,
     this.pluginClass,
     this.dartPluginClass,
+    this.dartFileName,
     bool? ffiPlugin,
     this.defaultPackage,
     required FileSystem fileSystem,
@@ -89,6 +93,7 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
         package = yaml['package'] as String?,
         pluginClass = yaml[kPluginClass] as String?,
         dartPluginClass = yaml[kDartPluginClass] as String?,
+        dartFileName = yaml[kDartFileName] as String?,
         ffiPlugin = yaml[kFfiPlugin] as bool? ?? false,
         defaultPackage = yaml[kDefaultPackage] as String?,
         _fileSystem = fileSystem;
@@ -125,6 +130,9 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
   /// The Dart plugin main class defined in pubspec.yaml, if any.
   final String? dartPluginClass;
 
+  /// Path to file in which dartPluginClass defined, if any.
+  final String? dartFileName;
+
   /// Is FFI plugin defined in pubspec.yaml.
   final bool ffiPlugin;
 
@@ -141,6 +149,7 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
       if (package != null) 'package': package,
       if (pluginClass != null) 'class': pluginClass,
       if (dartPluginClass != null) kDartPluginClass : dartPluginClass,
+      if (dartFileName != null) kDartFileName: dartFileName,
       if (ffiPlugin) kFfiPlugin: true,
       if (defaultPackage != null) kDefaultPackage : defaultPackage,
       // Mustache doesn't support complex types.
@@ -233,6 +242,7 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
     required this.classPrefix,
     this.pluginClass,
     this.dartPluginClass,
+    this.dartFileName,
     bool? ffiPlugin,
     this.defaultPackage,
     bool? sharedDarwinSource,
@@ -244,6 +254,7 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
         classPrefix = '',
         pluginClass = yaml[kPluginClass] as String?,
         dartPluginClass = yaml[kDartPluginClass] as String?,
+        dartFileName = yaml[kDartFileName] as String?,
         ffiPlugin = yaml[kFfiPlugin] as bool? ?? false,
         defaultPackage = yaml[kDefaultPackage] as String?,
         sharedDarwinSource = yaml[kSharedDarwinSource] as bool? ?? false;
@@ -265,6 +276,7 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
   final String classPrefix;
   final String? pluginClass;
   final String? dartPluginClass;
+  final String? dartFileName;
   final bool ffiPlugin;
   final String? defaultPackage;
 
@@ -289,6 +301,7 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
       'prefix': classPrefix,
       if (pluginClass != null) 'class': pluginClass,
       if (dartPluginClass != null) kDartPluginClass : dartPluginClass,
+      if (dartFileName != null) kDartFileName : dartFileName,
       if (ffiPlugin) kFfiPlugin: true,
       if (sharedDarwinSource) kSharedDarwinSource: true,
       if (defaultPackage != null) kDefaultPackage : defaultPackage,
@@ -306,6 +319,7 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
     required this.name,
     this.pluginClass,
     this.dartPluginClass,
+    this.dartFileName,
     bool? ffiPlugin,
     this.defaultPackage,
     bool? sharedDarwinSource,
@@ -317,6 +331,7 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
         // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
         pluginClass = yaml[kPluginClass] == 'none' ? null : yaml[kPluginClass] as String?,
         dartPluginClass = yaml[kDartPluginClass] as String?,
+        dartFileName = yaml[kDartFileName] as String?,
         ffiPlugin = yaml[kFfiPlugin] as bool? ?? false,
         defaultPackage = yaml[kDefaultPackage] as String?,
         sharedDarwinSource = yaml[kSharedDarwinSource] as bool? ?? false;
@@ -334,6 +349,7 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
   final String name;
   final String? pluginClass;
   final String? dartPluginClass;
+  final String? dartFileName;
   final bool ffiPlugin;
   final String? defaultPackage;
 
@@ -357,6 +373,7 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
       'name': name,
       if (pluginClass != null) 'class': pluginClass,
       if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
+      if (dartFileName != null) kDartFileName: dartFileName,
       if (ffiPlugin) kFfiPlugin: true,
       if (sharedDarwinSource) kSharedDarwinSource: true,
       if (defaultPackage != null) kDefaultPackage: defaultPackage,
@@ -374,6 +391,7 @@ class WindowsPlugin extends PluginPlatform
     required this.name,
     this.pluginClass,
     this.dartPluginClass,
+    this.dartFileName,
     bool? ffiPlugin,
     this.defaultPackage,
     this.variants = const <PluginPlatformVariant>{},
@@ -409,6 +427,7 @@ class WindowsPlugin extends PluginPlatform
       name: name,
       pluginClass: pluginClass,
       dartPluginClass: yaml[kDartPluginClass] as String?,
+      dartFileName: yaml[kDartFileName] as String?,
       ffiPlugin: yaml[kFfiPlugin] as bool?,
       defaultPackage: yaml[kDefaultPackage] as String?,
       variants: variants,
@@ -427,6 +446,7 @@ class WindowsPlugin extends PluginPlatform
   final String name;
   final String? pluginClass;
   final String? dartPluginClass;
+  final String? dartFileName;
   final bool ffiPlugin;
   final String? defaultPackage;
   final Set<PluginPlatformVariant> variants;
@@ -450,6 +470,7 @@ class WindowsPlugin extends PluginPlatform
       if (pluginClass != null) 'class': pluginClass,
       if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass!),
       if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
+      if (dartFileName != null) kDartFileName: dartFileName,
       if (ffiPlugin) kFfiPlugin: true,
       if (defaultPackage != null) kDefaultPackage: defaultPackage,
     };
@@ -465,6 +486,7 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
     required this.name,
     this.pluginClass,
     this.dartPluginClass,
+    this.dartFileName,
     bool? ffiPlugin,
     this.defaultPackage,
   })  : ffiPlugin = ffiPlugin ?? false,
@@ -475,6 +497,7 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
         // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
         pluginClass = yaml[kPluginClass] == 'none' ? null : yaml[kPluginClass] as String?,
         dartPluginClass = yaml[kDartPluginClass] as String?,
+        dartFileName = yaml[kDartFileName] as String?,
         ffiPlugin = yaml[kFfiPlugin] as bool? ?? false,
         defaultPackage = yaml[kDefaultPackage] as String?;
 
@@ -490,6 +513,7 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   final String name;
   final String? pluginClass;
   final String? dartPluginClass;
+  final String? dartFileName;
   final bool ffiPlugin;
   final String? defaultPackage;
 
@@ -509,6 +533,7 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
       if (pluginClass != null) 'class': pluginClass,
       if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass!),
       if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
+      if (dartFileName != null) kDartFileName: dartFileName,
       if (ffiPlugin) kFfiPlugin: true,
       if (defaultPackage != null) kDefaultPackage: defaultPackage,
     };

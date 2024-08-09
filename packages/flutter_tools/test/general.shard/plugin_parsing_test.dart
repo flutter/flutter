@@ -265,10 +265,10 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    expect(plugin.pluginDartClassPlatforms, <String, String>{
-      'linux': 'LinuxClass',
-      'macos': 'MacOSClass',
-      'windows': 'WindowsClass',
+    expect(plugin.pluginDartClassPlatforms, <String, DartPluginClassAndFilePair>{
+      'linux':  const DartPluginClassAndFilePair('LinuxClass', 'test_plugin_name.dart'),
+      'macos':  const DartPluginClassAndFilePair('MacOSClass', 'test_plugin_name.dart'),
+      'windows':  const DartPluginClassAndFilePair('WindowsClass', 'test_plugin_name.dart'),
     });
   });
 
