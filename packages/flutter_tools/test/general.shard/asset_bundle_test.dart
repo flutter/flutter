@@ -40,7 +40,7 @@ void main() {
     testUsingContext('nonempty', () async {
       final AssetBundle ab = AssetBundleFactory.instance.createBundle();
       expect(await ab.build(packagesPath: '.packages'), 0);
-      expect(ab.entries.length, greaterThan(0));
+      expect(ab.entries, hasLength(greaterThan(0)));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       Platform: () => platform,
@@ -247,8 +247,8 @@ flutter:
       await bundle.build(packagesPath: '.packages', deferredComponentsEnabled: true);
       expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
         'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
-      expect(bundle.deferredComponentsEntries.length, 1);
-      expect(bundle.deferredComponentsEntries['component1']!.length, 2);
+      expect(bundle.deferredComponentsEntries, hasLength(1));
+      expect(bundle.deferredComponentsEntries['component1'], hasLength(2));
       expect(bundle.needsBuild(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -314,8 +314,8 @@ flutter:
       await bundle.build(packagesPath: '.packages', deferredComponentsEnabled: true);
       expect(bundle.entries.keys, unorderedEquals(<String>['assets/foo/bar.txt',
         'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']));
-      expect(bundle.deferredComponentsEntries.length, 1);
-      expect(bundle.deferredComponentsEntries['component1']!.length, 2);
+      expect(bundle.deferredComponentsEntries, hasLength(1));
+      expect(bundle.deferredComponentsEntries['component1'], hasLength(2));
       expect(bundle.needsBuild(), false);
 
       // Simulate modifying the files by updating the filestat time manually.
@@ -328,8 +328,8 @@ flutter:
 
       expect(bundle.entries.keys, unorderedEquals(<String>['assets/foo/bar.txt',
         'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']));
-      expect(bundle.deferredComponentsEntries.length, 1);
-      expect(bundle.deferredComponentsEntries['component1']!.length, 3);
+      expect(bundle.deferredComponentsEntries, hasLength(1));
+      expect(bundle.deferredComponentsEntries['component1'], hasLength(3));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       Platform: () => platform,
