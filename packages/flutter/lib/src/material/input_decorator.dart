@@ -3092,7 +3092,7 @@ class InputDecoration {
   /// less than the minimum tappable height (which is 48px when the visual
   /// density is set to [VisualDensity.standard]). This can be achieved by
   /// setting [isDense] to true and setting the constraints' minimum height
-  /// and width to a value lower than the minimum tappable height.
+  /// and width to a value lower than the minimum tappable size.
   ///
   /// {@tool dartpad}
   /// This example shows the differences between two `TextField` widgets when
@@ -3267,7 +3267,7 @@ class InputDecoration {
   /// less than the minimum tappable height (which is 48px when the visual
   /// density is set to [VisualDensity.standard]). This can be achieved by
   /// setting [isDense] to true and setting the constraints' minimum height
-  /// and width to a value lower than the minimum tappable height.
+  /// and width to a value lower than the minimum tappable size.
   ///
   /// If null, a [BoxConstraints] with a minimum width and height of 48px is
   /// used.
@@ -4078,7 +4078,7 @@ class InputDecorationTheme with Diagnosticable {
   /// less than the minimum tappable height (which is 48px when the visual
   /// density is set to [VisualDensity.standard]). This can be achieved by
   /// setting [isDense] to true and setting the constraints' minimum height
-  /// and width to a value lower than the minimum tappable height.
+  /// and width to a value lower than the minimum tappable size.
   ///
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
   /// used.
@@ -4111,7 +4111,7 @@ class InputDecorationTheme with Diagnosticable {
   /// less than the minimum tappable height (which is 48px when the visual
   /// density is set to [VisualDensity.standard]). This can be achieved by
   /// setting [isDense] to true and setting the constraints' minimum height
-  /// and width to a value lower than the minimum tappable height.
+  /// and width to a value lower than the minimum tappable size.
   ///
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
   /// used.
