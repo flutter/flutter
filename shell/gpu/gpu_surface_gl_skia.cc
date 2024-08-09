@@ -7,7 +7,6 @@
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/base32.h"
 #include "flutter/fml/logging.h"
-#include "flutter/fml/size.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/context_options.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"

@@ -11,7 +11,6 @@
 
 #include "flutter/fml/native_library.h"
 #include "flutter/fml/paths.h"
-#include "flutter/fml/size.h"
 #include "flutter/shell/version/version.h"
 
 // Include once for the default enum definition.
@@ -161,7 +160,7 @@ static std::vector<std::string> ParseCommaDelimited(const std::string& input) {
 }
 
 static bool IsAllowedDartVMFlag(const std::string& flag) {
-  for (uint32_t i = 0; i < fml::size(kAllowedDartFlags); ++i) {
+  for (uint32_t i = 0; i < std::size(kAllowedDartFlags); ++i) {
     const std::string& allowed = kAllowedDartFlags[i];
     // Check that the prefix of the flag matches one of the allowed flags. This
     // is to handle cases where flags take arguments, such as in
