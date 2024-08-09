@@ -83,11 +83,12 @@ const double kCupertinoFocusColorOpacity = 0.80,
 const double kCupertinoButtonTintedOpacityLight = 0.12,
              kCupertinoButtonTintedOpacityDark = 0.26;
 
-/// The default icon size for [IconThemeData.size] of [CupertinoButton.child].
+/// The default value for [IconThemeData.size] of [CupertinoButton.child].
+/// Set to match the most-frequent size of icons in iOS (matches md/lg).
 ///
 /// Used only when the [CupertinoTextThemeData.actionTextStyle] or [CupertinoTextThemeData.actionSmallTextStyle]
 /// has a null [TextStyle.fontSize].
-const double kCupertinoButtonMinDefaultIconSize = 15.0;
+const double kCupertinoButtonDefaultIconSize = 20.0;
 
 /// An iOS-style button.
 ///
@@ -411,7 +412,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     ).copyWith(color: foregroundColor);
     final IconThemeData iconTheme = IconTheme.of(context).copyWith(
       color: foregroundColor,
-      size: (textStyle.fontSize ?? kCupertinoButtonMinDefaultIconSize) * 1.2,
+      size: textStyle.fontSize != null
+        ? textStyle.fontSize! * 1.2
+        : kCupertinoButtonDefaultIconSize,
     );
 
     return MouseRegion(

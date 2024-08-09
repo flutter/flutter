@@ -673,7 +673,7 @@ void main() {
   });
 
   testWidgets('IconThemeData falls back to default value when the TextStyle has a null size', (WidgetTester tester) async {
-    const IconThemeData defaultIconTheme = IconThemeData(size: kCupertinoButtonMinDefaultIconSize * 1.2);
+    const IconThemeData defaultIconTheme = IconThemeData(size: kCupertinoButtonDefaultIconSize);
 
     IconThemeData? actualIconTheme;
 
