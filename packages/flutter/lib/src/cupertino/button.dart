@@ -13,7 +13,6 @@ import 'constants.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
-
 // Measured against iOS (17) [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS).
 
 /// The size of a [CupertinoButton].
@@ -27,42 +26,8 @@ enum CupertinoButtonSize {
   large,
 }
 
-/// The padding values for the different [CupertinoButtonSize]s.
-/// Based on the iOS (17) [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS).
-const Map<CupertinoButtonSize, EdgeInsetsGeometry> kCupertinoButtonPadding = <CupertinoButtonSize, EdgeInsetsGeometry>{
-  CupertinoButtonSize.small: EdgeInsets.symmetric(
-    vertical: 6,
-    horizontal: 12,
-  ),
-  CupertinoButtonSize.medium: EdgeInsets.symmetric(
-    vertical: 10,
-    horizontal: 15,
-  ),
-  CupertinoButtonSize.large: EdgeInsets.symmetric(
-    vertical: 16,
-    horizontal: 20,
-  ),
-};
-
-/// The border radius values for the different [CupertinoButtonSize]s.
-/// Based on the iOS (17) [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS).
-final Map<CupertinoButtonSize, BorderRadius> kCupertinoButtonSizeBorderRadius = <CupertinoButtonSize, BorderRadius>{
-  CupertinoButtonSize.small: BorderRadius.circular(40),
-  CupertinoButtonSize.medium: BorderRadius.circular(40),
-  CupertinoButtonSize.large: BorderRadius.circular(12),
-};
-
-/// The minimum size of a [CupertinoButton] based on the [CupertinoButtonSize].
-/// Based on the iOS (17) [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS).
-const Map<CupertinoButtonSize, double> kCupertinoButtonMinSize = <CupertinoButtonSize, double>{
-  CupertinoButtonSize.small: 28,
-  CupertinoButtonSize.medium: 32,
-  CupertinoButtonSize.large: 44,
-};
-
-
-
 /// The style of a [CupertinoButton] that changes the style of the button's background.
+///
 /// Based on the iOS Human Interface Guidelines (https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS).
 enum _CupertinoButtonStyle {
   /// No background or border, primary foreground color.
@@ -72,24 +37,6 @@ enum _CupertinoButtonStyle {
   /// Solid background, contrasting foreground color.
   filled,
 }
-
-
-
-/// The relative values needed to transform a color to it's equivalent focus outline color.
-const double kCupertinoFocusColorOpacity = 0.80,
-             kCupertinoFocusColorBrightness = 0.69,
-             kCupertinoFocusColorSaturation = 0.835;
-
-/// Opacity values for the background of a [CupertinoButton.tinted].
-const double kCupertinoButtonTintedOpacityLight = 0.12,
-             kCupertinoButtonTintedOpacityDark = 0.26;
-
-/// The default value for [IconThemeData.size] of [CupertinoButton.child].
-/// Set to match the most-frequent size of icons in iOS (matches md/lg).
-///
-/// Used only when the [CupertinoTextThemeData.actionTextStyle] or [CupertinoTextThemeData.actionSmallTextStyle]
-/// has a null [TextStyle.fontSize].
-const double kCupertinoButtonDefaultIconSize = 20.0;
 
 /// An iOS-style button.
 ///
