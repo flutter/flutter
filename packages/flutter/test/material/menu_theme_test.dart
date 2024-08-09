@@ -66,12 +66,13 @@ void main() {
                 ),
               ),
               child: MenuTheme(
-                data: const MenuThemeData(
+                data: MenuThemeData(
                   style: MenuStyle(
-                    backgroundColor: MaterialStatePropertyAll<Color?>(Colors.red),
-                    elevation: MaterialStatePropertyAll<double?>(15.0),
-                    shape: MaterialStatePropertyAll<OutlinedBorder?>(StadiumBorder()),
-                    padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
+                    sizeAnimationStyle: AnimationStyle.noAnimation,
+                    backgroundColor: const MaterialStatePropertyAll<Color?>(Colors.red),
+                    elevation: const MaterialStatePropertyAll<double?>(15.0),
+                    shape: const MaterialStatePropertyAll<OutlinedBorder?>(StadiumBorder()),
+                    padding: const MaterialStatePropertyAll<EdgeInsetsGeometry>(
                       EdgeInsetsDirectional.all(10.0),
                     ),
                   ),
@@ -221,6 +222,7 @@ List<Widget> createTestMenus({
     backgroundColor: menuBackground != null ? MaterialStatePropertyAll<Color>(menuBackground) : null,
     elevation: menuElevation != null ? MaterialStatePropertyAll<double>(menuElevation) : null,
     shape: menuShape != null ? MaterialStatePropertyAll<OutlinedBorder>(menuShape) : null,
+    sizeAnimationStyle: AnimationStyle.noAnimation,
   );
   final ButtonStyle itemStyle = ButtonStyle(
     padding: itemPadding != null ? MaterialStatePropertyAll<EdgeInsetsGeometry>(itemPadding) : null,
