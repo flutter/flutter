@@ -94,7 +94,10 @@ Future<void> setInstallNameDylib(
   final String fileName = dylibFile.basename;
   final String newInstallName = '@rpath/$fileName.framework/$fileName';
 
-  oldToNewInstallNames[await getInstallNameDylib(dylibFile)] = newInstallName;
+  final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
+  for (final String oldInstallName in oldInstallNames) {
+    oldToNewInstallNames[oldInstallName] = newInstallName;
+  }
 
   final ProcessResult installNameResult = await globals.processManager.run(
     <String>[
@@ -111,7 +114,7 @@ Future<void> setInstallNameDylib(
   }
 }
 
-Future<String> getInstallNameDylib(File dylibFile) async {
+Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
   final ProcessResult installNameResult = await globals.processManager.run(
     <String>[
       'otool',
@@ -125,8 +128,8 @@ Future<String> getInstallNameDylib(File dylibFile) async {
     );
   }
 
-  // The output of `otool -D` looks like below. For each architecture, there is
-  // a separate install name. We expect the install names to be the same.
+  // The output of `otool -D` looks like below. For each architecture, a
+  // separate install name is reported, which are not necessarily the same.
   //
   // /build/native_assets/ios/buz.framework/buz (architecture x86_64):
   // @rpath/libbuz.dylib
@@ -145,7 +148,7 @@ Future<String> getInstallNameDylib(File dylibFile) async {
     installNames.add(line.trim());
   }
 
-  return installNames.single;
+  return installNames;
 }
 
 Future<List<String>> getDependencyInstallNamesDylib(File dylibFile) async {
