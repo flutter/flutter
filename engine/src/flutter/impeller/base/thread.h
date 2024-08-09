@@ -10,9 +10,9 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
 #include <thread>
 
-#include "flutter/fml/synchronization/shared_mutex.h"
 #include "impeller/base/thread_safety.h"
 
 namespace impeller {
@@ -45,21 +45,20 @@ class IPLR_CAPABILITY("mutex") Mutex {
 
 class IPLR_CAPABILITY("mutex") RWMutex {
  public:
-  RWMutex()
-      : mutex_(std::unique_ptr<fml::SharedMutex>(fml::SharedMutex::Create())) {}
+  RWMutex() = default;
 
   ~RWMutex() = default;
 
-  void LockWriter() IPLR_ACQUIRE() { mutex_->Lock(); }
+  void LockWriter() IPLR_ACQUIRE() { mutex_.lock(); }
 
-  void UnlockWriter() IPLR_RELEASE() { mutex_->Unlock(); }
+  void UnlockWriter() IPLR_RELEASE() { mutex_.unlock(); }
 
-  void LockReader() IPLR_ACQUIRE_SHARED() { mutex_->LockShared(); }
+  void LockReader() IPLR_ACQUIRE_SHARED() { mutex_.lock_shared(); }
 
-  void UnlockReader() IPLR_RELEASE_SHARED() { mutex_->UnlockShared(); }
+  void UnlockReader() IPLR_RELEASE_SHARED() { mutex_.unlock_shared(); }
 
  private:
-  std::unique_ptr<fml::SharedMutex> mutex_;
+  std::shared_mutex mutex_;
 
   RWMutex(const RWMutex&) = delete;
 

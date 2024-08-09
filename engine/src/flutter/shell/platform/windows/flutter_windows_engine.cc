@@ -7,6 +7,7 @@
 #include <dwmapi.h>
 
 #include <filesystem>
+#include <shared_mutex>
 #include <sstream>
 
 #include "flutter/fml/logging.h"
@@ -150,7 +151,6 @@ FlutterWindowsEngine::FlutterWindowsEngine(
     : project_(std::make_unique<FlutterProjectBundle>(project)),
       windows_proc_table_(std::move(windows_proc_table)),
       aot_data_(nullptr, nullptr),
-      views_mutex_(fml::SharedMutex::Create()),
       lifecycle_manager_(std::make_unique<WindowsLifecycleManager>(this)) {
   if (windows_proc_table_ == nullptr) {
     windows_proc_table_ = std::make_shared<WindowsProcTable>();
@@ -505,7 +505,7 @@ std::unique_ptr<FlutterWindowsView> FlutterWindowsEngine::CreateView(
   {
     // Add the view to the embedder. This must happen before the engine
     // is notified the view exists and starts presenting to it.
-    fml::UniqueLock write_lock{*views_mutex_};
+    std::unique_lock write_lock(views_mutex_);
     FML_DCHECK(views_.find(view_id) == views_.end());
     views_[view_id] = view.get();
   }
@@ -554,7 +554,7 @@ std::unique_ptr<FlutterWindowsView> FlutterWindowsEngine::CreateView(
       // engine's state. This is unexpected and indicates a bug in the Windows
       // embedder.
       FML_LOG(ERROR) << "FlutterEngineAddView failed to add view";
-      fml::UniqueLock write_lock{*views_mutex_};
+      std::unique_lock write_lock(views_mutex_);
       views_.erase(view_id);
       return nullptr;
     }
@@ -618,7 +618,7 @@ void FlutterWindowsEngine::RemoveView(FlutterViewId view_id) {
   {
     // The engine no longer presents to the view. Remove the view from the
     // embedder.
-    fml::UniqueLock write_lock{*views_mutex_};
+    std::unique_lock write_lock(views_mutex_);
 
     FML_DCHECK(views_.find(view_id) != views_.end());
     views_.erase(view_id);
@@ -654,7 +654,7 @@ std::chrono::nanoseconds FlutterWindowsEngine::FrameInterval() {
 }
 
 FlutterWindowsView* FlutterWindowsEngine::view(FlutterViewId view_id) const {
-  fml::SharedLock read_lock{*views_mutex_};
+  std::shared_lock read_lock(views_mutex_);
 
   auto iterator = views_.find(view_id);
   if (iterator == views_.end()) {
@@ -884,7 +884,7 @@ bool FlutterWindowsEngine::DispatchSemanticsAction(
 
 void FlutterWindowsEngine::UpdateSemanticsEnabled(bool enabled) {
   if (engine_ && semantics_enabled_ != enabled) {
-    fml::SharedLock read_lock{*views_mutex_};
+    std::shared_lock read_lock(views_mutex_);
 
     semantics_enabled_ = enabled;
     embedder_api_.UpdateSemanticsEnabled(engine_, enabled);
@@ -951,7 +951,7 @@ void FlutterWindowsEngine::OnQuit(std::optional<HWND> hwnd,
 }
 
 void FlutterWindowsEngine::OnDwmCompositionChanged() {
-  fml::SharedLock read_lock{*views_mutex_};
+  std::shared_lock read_lock(views_mutex_);
 
   for (auto iterator = views_.begin(); iterator != views_.end(); iterator++) {
     iterator->second->OnDwmCompositionChanged();
@@ -987,7 +987,7 @@ bool FlutterWindowsEngine::Present(const FlutterPresentViewInfo* info) {
   // This runs on the raster thread. Lock the views map for the entirety of the
   // present operation to block the platform thread from destroying the
   // view during the present.
-  fml::SharedLock read_lock{*views_mutex_};
+  std::shared_lock read_lock(views_mutex_);
 
   auto iterator = views_.find(info->view_id);
   if (iterator == views_.end()) {

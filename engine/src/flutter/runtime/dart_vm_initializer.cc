@@ -7,7 +7,6 @@
 #include <atomic>
 
 #include "flutter/fml/logging.h"
-#include "flutter/fml/synchronization/shared_mutex.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_configuration.h"

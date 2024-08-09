@@ -7,12 +7,12 @@
 
 #include <map>
 #include <set>
+#include <shared_mutex>
 #include <string>
 #include <string_view>
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/synchronization/atomic_object.h"
-#include "flutter/fml/synchronization/shared_mutex.h"
 #include "flutter/fml/task_runner.h"
 #include "rapidjson/document.h"
 
@@ -75,7 +75,7 @@ class ServiceProtocol {
 
  private:
   const std::set<std::string_view> endpoints_;
-  std::unique_ptr<fml::SharedMutex> handlers_mutex_;
+  mutable std::shared_mutex handlers_mutex_;
   std::map<Handler*, fml::AtomicObject<Handler::Description>> handlers_;
 
   [[nodiscard]] static bool HandleMessage(const char* method,
