@@ -1078,7 +1078,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                         child: ListenableBuilder(
                           listenable: _listenable, // immutable
                           builder: (BuildContext context, Widget? child) {
-                            return widget.route.buildTransitions(
+                            return widget.route.buildFlexTransitions(
                               context,
                               widget.route.animation!,
                               widget.route.secondaryAnimation!,
@@ -1415,6 +1415,57 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     Widget child,
   ) {
     return child;
+  }
+
+  /// The delegated transition provided to the previous route.
+  DelegatedTransitionBuilder? get delegatedTransition => null;
+
+  /// The delegated transition received from an incoming route.
+  DelegatedTransitionBuilder? receivedTransition;
+
+  /// Transition that matches with the next route. Will be null if there is no
+  /// next route or a next route is not provided. If a non-null value exists,
+  /// then it will be used in place of [buildTransitions].
+  DelegatedTransitionBuilder? get nextRouteTransition {
+    if (receivedTransition != null) {
+      return receivedTransition;
+    } else {
+      return null;
+    }
+  }
+
+  /// Wraps the transitions of the route with a delegated transition received
+  /// from a route being pushed on top of the current route.
+  ///
+  /// This allows the current route to sync its exit transition with the
+  /// entrance transition of the incoming route.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows an app that uses three different page transitions, a
+  /// Material Zoom transition, the standard Cupertino sliding transition, and a
+  /// custom vertical transition. All of the page routes are able to inform the
+  /// previous page how to transition off the screen to sync with the new page.
+  ///
+  /// ** See code in examples/api/lib/widgets/routes/flexible_route_transitions.0.dart **
+  /// {@end-tool}
+  Widget buildFlexTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final Animation<double> proxyAnimation = ProxyAnimation();
+
+    final Animation<double> flexAnimation = (nextRouteTransition == null) ?
+      secondaryAnimation : proxyAnimation;
+
+    final Widget originalTransitions = buildTransitions(context, animation, flexAnimation, child);
+
+    if (nextRouteTransition != null) {
+      return nextRouteTransition!(context, animation, secondaryAnimation, originalTransitions);
+    } else {
+      return originalTransitions;
+    }
   }
 
   @override
@@ -1933,12 +1984,22 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
+    if (nextRoute is ModalRoute<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition != this.delegatedTransition) {
+      receivedTransition = nextRoute.delegatedTransition;
+    } else {
+      receivedTransition = null;
+    }
     super.didChangeNext(nextRoute);
     changedInternalState();
   }
 
   @override
   void didPopNext(Route<dynamic> nextRoute) {
+    if (nextRoute is ModalRoute<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition != this.delegatedTransition) {
+      receivedTransition = nextRoute.delegatedTransition;
+    } else {
+      receivedTransition = null;
+    }
     super.didPopNext(nextRoute);
     changedInternalState();
     _maybeDispatchNavigationNotification();

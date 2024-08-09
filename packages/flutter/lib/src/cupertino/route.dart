@@ -166,7 +166,9 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
-    return nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog;
+    return ((nextRoute is! PageRoute<T>) || !nextRoute.fullscreenDialog) &&
+      ((nextRoute is ModalRoute<T> && nextRoute.delegatedTransition != null) ||
+      nextRoute is CupertinoRouteTransitionMixin);
   }
 
   @override
@@ -291,6 +293,9 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
     assert(opaque);
   }
 
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition => CupertinoPageTransition.delegateTransition;
+
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
 
@@ -318,6 +323,9 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
   }) : super(settings: page) {
     assert(opaque);
   }
+
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition => this.fullscreenDialog ? null : CupertinoPageTransition.delegateTransition;
 
   CupertinoPage<T> get _page => settings as CupertinoPage<T>;
 
@@ -419,6 +427,24 @@ class CupertinoPageTransition extends StatefulWidget {
   ///  * `linearTransition` is whether to perform the transitions linearly.
   ///    Used to precisely track back gesture drags.
   final bool linearTransition;
+
+  /// The delegated transition.
+  static Widget delegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
+    final Animation<Offset> delegatedPositionAnimation =
+      CurvedAnimation(
+        parent: secondaryAnimation,
+        curve: Curves.linearToEaseOut,
+        reverseCurve: Curves.easeInToLinear,
+      ).drive(_kMiddleLeftTween);
+    assert(debugCheckHasDirectionality(context));
+    final TextDirection textDirection = Directionality.of(context);
+    return SlideTransition(
+      position: delegatedPositionAnimation,
+      textDirection: textDirection,
+      transformHitTests: false,
+      child: child,
+    );
+  }
 
   @override
   State<CupertinoPageTransition> createState() => _CupertinoPageTransitionState();

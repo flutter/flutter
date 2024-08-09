@@ -95,11 +95,24 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   @override
   String? get barrierLabel => null;
 
+  DelegatedTransitionBuilder? _delegatedTransition;
+
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition => _delegatedTransition;
+
+  set delegatedTransition(DelegatedTransitionBuilder? newTransition) {
+    _delegatedTransition = newTransition;
+  }
+
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
-    // Don't perform outgoing animation if the next route is a fullscreen dialog.
-    return (nextRoute is MaterialRouteTransitionMixin && !nextRoute.fullscreenDialog)
-      || (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog);
+    return ((nextRoute is! PageRoute<T>) || !nextRoute.fullscreenDialog)
+      && ((nextRoute is MaterialRouteTransitionMixin) || (nextRoute is ModalRoute<T> && nextRoute.delegatedTransition != null));
+  }
+
+  @override
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
+    return previousRoute is PageRoute;
   }
 
   @override
@@ -119,6 +132,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
+    delegatedTransition = theme.delegatedTransition(context, allowSnapshotting);
     return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 }
