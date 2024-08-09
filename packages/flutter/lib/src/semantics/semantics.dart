@@ -1855,6 +1855,15 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
   }
 
+  /// Whether is this node is hidden off-screen from parent's bounding box.
+  bool get isHidden => hasFlag(SemanticsFlag.isHidden);
+  set isHidden(bool value) {
+    if (hasFlag(SemanticsFlag.isHidden) != value) {
+      _flags = _flags ^ SemanticsFlag.isHidden.index;
+      _markDirty();
+    }
+  }
+
   /// The semantic clip from an ancestor that was applied to this node.
   ///
   /// Expressed in the coordinate system of the node. May be null if no clip has
@@ -1924,7 +1933,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// An invisible node can be safely dropped from the semantic tree without
   /// losing semantic information that is relevant for describing the content
   /// currently shown on screen.
-  bool get isInvisible => !isMergedIntoParent && rect.isEmpty;
+  bool get isInvisible => !isMergedIntoParent && (rect.isEmpty || (transform?.isZero() ?? false));
 
   // MERGING
 
@@ -1932,8 +1941,15 @@ class SemanticsNode with DiagnosticableTreeMixin {
   ///
   /// This value indicates whether this node has any ancestors with
   /// [mergeAllDescendantsIntoThisNode] set to true.
-  bool get isMergedIntoParent => parent != null && _isMergedIntoParent;
+  bool get isMergedIntoParent => _isMergedIntoParent;
   bool _isMergedIntoParent = false;
+  set isMergedIntoParent(bool value) {
+    if (_isMergedIntoParent == value) {
+      return;
+    }
+    _isMergedIntoParent = value;
+    parent?._markDirty();
+  }
 
   /// Whether the user can interact with this node in assistive technologies.
   ///
@@ -1970,6 +1986,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   // CHILDREN
 
   /// Contains the children in inverse hit test order (i.e. paint order).
+  List<SemanticsNode>? get children => _children;
   List<SemanticsNode>? _children;
 
   /// A snapshot of `newChildren` passed to [_replaceChildren] that we keep in
@@ -1977,6 +1994,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// of children.
   late List<SemanticsNode> _debugPreviousSnapshot;
 
+  /// Replace current children.
   void _replaceChildren(List<SemanticsNode> newChildren) {
     assert(!newChildren.any((SemanticsNode child) => child == this));
     assert(() {
@@ -2163,12 +2181,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
     assert(child.owner == owner);
     final bool childShouldMergeToParent = isPartOfNodeMerging;
 
-    if (childShouldMergeToParent == child._isMergedIntoParent) {
+    if (childShouldMergeToParent == child.isMergedIntoParent) {
       return;
     }
 
-    child._isMergedIntoParent = childShouldMergeToParent;
-    _markDirty();
+    child.isMergedIntoParent = childShouldMergeToParent;
 
     if (child.mergeAllDescendantsIntoThisNode) {
       // No need to update the descendants since `child` has the merge flag set.
@@ -2180,6 +2197,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   void _updateChildrenMergeFlags() {
     _children?.forEach(_updateChildMergeFlagRecursively);
   }
+
 
   void _adoptChild(SemanticsNode child) {
     assert(child._parent == null);
@@ -2196,6 +2214,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
       child.attach(_owner!);
     }
     _redepthChild(child);
+    // In most cases, child should have up to date `isMergedIntoParent` since
+    // it was set during _SwitchableSemanticsFragment.compileSemanticsNodes.
+    // However, it is still possible that this child was an extra node
+    // introduced in RenderObject.assembleSemanticsNode. We have to make sure
+    // their `isMergedIntoParent` is updated correctly.
     _updateChildMergeFlagRecursively(child);
   }
 
@@ -3540,7 +3563,7 @@ class SemanticsOwner extends ChangeNotifier {
       visitedNodes.addAll(localDirtyNodes);
       for (final SemanticsNode node in localDirtyNodes) {
         assert(node._dirty);
-        assert(node.parent == null || !node.parent!.isPartOfNodeMerging || node.isMergedIntoParent);
+        assert(node.parent == null || !node.parent!.isPartOfNodeMerging || node.isMergedIntoParent, 'node ${node.id}, node.parent?.isPartOfNodeMerging ${node.parent?.isPartOfNodeMerging}, node.isMergedIntoParent ${node.isMergedIntoParent}');
         if (node.isPartOfNodeMerging) {
           assert(node.mergeAllDescendantsIntoThisNode || node.parent != null);
           // If child node is merged into its parent, make sure the parent is marked as dirty
