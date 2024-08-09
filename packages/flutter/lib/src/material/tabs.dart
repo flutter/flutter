@@ -1791,7 +1791,7 @@ class _TabBarState extends State<TabBar> {
               wrappedTabs[index],
               Semantics(
                 selected: index == _currentIndex,
-                label: localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount),
+                label: localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount, selected: index == _currentIndex),
               ),
             ],
           ),
@@ -2413,7 +2413,7 @@ class _TabPageSelectorState extends State<TabPageSelector> {
       animation: _animation!,
       builder: (BuildContext context, Widget? child) {
         return Semantics(
-          label: localizations.tabLabel(tabIndex: _tabController.index + 1, tabCount: _tabController.length),
+          label: localizations.tabLabel(tabIndex: _tabController.index + 1, tabCount: _tabController.length, selected: true),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: List<Widget>.generate(_tabController.length, (int tabIndex) {

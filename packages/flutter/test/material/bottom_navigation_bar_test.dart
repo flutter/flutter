@@ -2106,7 +2106,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 3',
+        label: 'AC\nTab 1 of 3, selected',
         textDirection: TextDirection.ltr,
         isButton: true,
         isFocusable: true,
@@ -2118,7 +2118,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 3',
+        label: 'Alarm\nTab 2 of 3, unselected',
         textDirection: TextDirection.ltr,
         isButton: true,
         isFocusable: true,
@@ -2129,7 +2129,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Hot Tub')),
       matchesSemantics(
-        label: 'Hot Tub\nTab 3 of 3',
+        label: 'Hot Tub\nTab 3 of 3, unselected',
         textDirection: TextDirection.ltr,
         isButton: true,
         isFocusable: true,
@@ -2166,7 +2166,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 3',
+        label: 'AC\nTab 1 of 3, selected',
         textDirection: TextDirection.ltr,
         isButton: true,
         isFocusable: true,
@@ -2178,7 +2178,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 3',
+        label: 'Alarm\nTab 2 of 3, unselected',
         textDirection: TextDirection.ltr,
         isButton: true,
         isFocusable: true,
@@ -2189,7 +2189,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Hot Tub')),
       matchesSemantics(
-        label: 'Hot Tub\nTab 3 of 3',
+        label: 'Hot Tub\nTab 3 of 3, unselected',
         textDirection: TextDirection.ltr,
         isButton: true,
         isFocusable: true,
@@ -2522,7 +2522,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Red')),
       matchesSemantics(
-        label: 'Red\nTab 1 of 2',
+        label: 'Red\nTab 1 of 2, selected',
         textDirection: TextDirection.ltr,
         isButton: true,
         isFocusable: true,
@@ -2534,7 +2534,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Green')),
       matchesSemantics(
-        label: 'Green\nTab 2 of 2',
+        label: 'Green\nTab 2 of 2, unselected',
         textDirection: TextDirection.ltr,
         isButton: true,
         isFocusable: true,
@@ -2569,7 +2569,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Red')),
       matchesSemantics(
-        label: 'Red\nTab 1 of 2',
+        label: 'Red\nTab 1 of 2, selected',
         textDirection: TextDirection.ltr,
         isButton: true,
         isFocusable: true,
@@ -2581,7 +2581,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Green')),
       matchesSemantics(
-        label: 'Green\nTab 2 of 2',
+        label: 'Green\nTab 2 of 2, unselected',
         textDirection: TextDirection.ltr,
         isButton: true,
         isFocusable: true,
@@ -2769,7 +2769,7 @@ void main() {
                                 SemanticsFlag.isFocusable,
                               ],
                               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                              label: 'A\nTab 1 of 2',
+                              label: 'A\nTab 1 of 2, selected',
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
@@ -2778,7 +2778,7 @@ void main() {
                                 SemanticsFlag.isFocusable,
                               ],
                               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                              label: 'B\nTab 2 of 2',
+                              label: 'B\nTab 2 of 2, unselected',
                               textDirection: TextDirection.ltr,
                             ),
                           ],

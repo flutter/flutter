@@ -5664,19 +5664,19 @@ void main() {
     final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          label: 'Tab 1 of 2',
+          label: 'Tab 1 of 2, selected',
           id: 1,
           rect: TestSemantics.fullScreen,
           children: <TestSemantics>[
             TestSemantics(
-              label: 'TAB1\nTab 1 of 2',
+              label: 'TAB1\nTab 1 of 2, selected',
               flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.isSelected],
               id: 2,
               rect: TestSemantics.fullScreen,
               actions: 1 | SemanticsAction.focus.index,
             ),
             TestSemantics(
-              label: 'TAB2\nTab 2 of 2',
+              label: 'TAB2\nTab 2 of 2, unselected',
               flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
               id: 3,
               rect: TestSemantics.fullScreen,

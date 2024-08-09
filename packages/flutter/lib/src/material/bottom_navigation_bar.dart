@@ -1115,7 +1115,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         selected: i == widget.currentIndex,
         showSelectedLabels: widget.showSelectedLabels ?? bottomTheme.showSelectedLabels ?? true,
         showUnselectedLabels: widget.showUnselectedLabels ?? bottomTheme.showUnselectedLabels ?? _defaultShowUnselected,
-        indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
+        indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length, selected: i == widget.currentIndex),
         mouseCursor: effectiveMouseCursor,
         layout: layout,
       ));

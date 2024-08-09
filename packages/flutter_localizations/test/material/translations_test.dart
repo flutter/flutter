@@ -88,11 +88,11 @@ void main() {
       expect(localizations.pageRowsInfoTitle(1, 10, 100, false), isNot(contains(r'$lastRow')));
       expect(localizations.pageRowsInfoTitle(1, 10, 100, false), isNot(contains(r'$rowCount')));
 
-      expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNotNull);
-      expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNot(contains(r'$tabIndex')));
-      expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNot(contains(r'$tabCount')));
-      expect(() => localizations.tabLabel(tabIndex: 0, tabCount: 5), throwsAssertionError);
-      expect(() => localizations.tabLabel(tabIndex: 2, tabCount: 0), throwsAssertionError);
+      expect(localizations.tabLabel(tabIndex: 2, tabCount: 5, selected: false), isNotNull);
+      expect(localizations.tabLabel(tabIndex: 2, tabCount: 5, selected: false), isNot(contains(r'$tabIndex')));
+      expect(localizations.tabLabel(tabIndex: 2, tabCount: 5, selected: false), isNot(contains(r'$tabCount')));
+      expect(() => localizations.tabLabel(tabIndex: 0, tabCount: 5, selected: false), throwsAssertionError);
+      expect(() => localizations.tabLabel(tabIndex: 2, tabCount: 0, selected: false), throwsAssertionError);
 
       expect(localizations.formatHour(const TimeOfDay(hour: 10, minute: 0)), isNotNull);
       expect(localizations.formatMinute(const TimeOfDay(hour: 10, minute: 0)), isNotNull);
@@ -539,7 +539,7 @@ void main() {
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations, isA<MaterialLocalizationFi>());
-    expect(localizations.tabLabel(tabIndex: 1, tabCount: 2), 'Välilehti 1 kautta 2');
+    expect(localizations.tabLabel(tabIndex: 1, tabCount: 2, selected: false), 'Välilehti 1 kautta 2');
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/138728.

@@ -472,6 +472,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                             indexLabel: localizations.tabLabel(
                               tabIndex: i + 1,
                               tabCount: widget.destinations.length,
+                              selected: widget.selectedIndex == i,
                             ),
                             disabled: widget.destinations[i].disabled,
                           ),

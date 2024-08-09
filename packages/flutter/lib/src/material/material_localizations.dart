@@ -109,11 +109,11 @@ abstract class MaterialLocalizations {
 
   /// The accessibility label used on a tab in a [TabBar].
   ///
-  /// This message describes the index of the selected tab and how many tabs
-  /// there are, e.g. 'Tab 1 of 2' in United States English.
+  /// This message describes the index of the tab, whether it is selected or unselected, and how many tabs
+  /// there are, e.g. 'Tab 1 of 2, selected' in United States English.
   ///
   /// `tabIndex` and `tabCount` must be greater than or equal to one.
-  String tabLabel({ required int tabIndex, required int tabCount });
+  String tabLabel({ required int tabIndex, required int tabCount, required bool selected });
 
   /// Title for the [PaginatedDataTable]'s selected row count header.
   String selectedRowCountTitle(int selectedRowCount);
@@ -1178,10 +1178,15 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get rowsPerPageTitle => 'Rows per page:';
 
   @override
-  String tabLabel({ required int tabIndex, required int tabCount }) {
+  String tabLabel({ required int tabIndex, required int tabCount, required bool selected }) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
-    return 'Tab $tabIndex of $tabCount';
+
+    String selectedLabel = 'selected';
+    if (!selected) {
+      selectedLabel = 'unselected';
+    }
+    return 'Tab $tabIndex of $tabCount, $selectedLabel';
   }
 
   @override
