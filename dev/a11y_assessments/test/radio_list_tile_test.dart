@@ -14,4 +14,11 @@ void main() {
     expect(find.text('Lafayette'), findsOneWidget);
     expect(find.text('Jefferson'), findsOneWidget);
   });
+
+  testWidgets('radio button demo page has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, RadioListTileUseCase());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('Radio button demo');
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
+  });
 }

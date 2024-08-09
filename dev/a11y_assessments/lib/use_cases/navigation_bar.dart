@@ -32,7 +32,7 @@ class MainWidgetState extends State<MainWidget> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('NavigationBar'),
+        title: Semantics(headingLevel: 1, child: const Text('NavigationBar Demo')),
       ),
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
