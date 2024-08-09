@@ -721,6 +721,7 @@ sum(intptr_t a, intptr_t b) {
   linked();
 ''',
   );
+  await mainLibrarySourceFile.writeAsString(mainLibrarySource);
 
   // Add native library bindings file.
   final Directory libDirectory = packageDirectory.childDirectory('lib');
