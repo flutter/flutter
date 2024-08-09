@@ -45,7 +45,7 @@ void main() {
       output: IOSink(output.sink),
     ));
 
-    String result = (await output.stream.transform(utf8.decoder).join());
+    final String result = await output.stream.transform(utf8.decoder).join();
     expect(result.trim(), 'Hello, World');
   });
 
