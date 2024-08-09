@@ -43,9 +43,6 @@
 #include "impeller/renderer/context.h"                            // nogncheck
 #include "impeller/renderer/vk/compute_shaders_vk.h"              // nogncheck
 #include "shell/gpu/gpu_surface_vulkan_impeller.h"                // nogncheck
-#if IMPELLER_ENABLE_3D
-#include "impeller/scene/shaders/vk/scene_shaders_vk.h"  // nogncheck
-#endif                                                   // IMPELLER_ENABLE_3D
 
 static std::vector<std::shared_ptr<fml::Mapping>> ShaderLibraryMappings() {
   return {
@@ -56,10 +53,6 @@ static std::vector<std::shared_ptr<fml::Mapping>> ShaderLibraryMappings() {
       std::make_shared<fml::NonOwnedMapping>(
           impeller_framebuffer_blend_shaders_vk_data,
           impeller_framebuffer_blend_shaders_vk_length),
-#if IMPELLER_ENABLE_3D
-      std::make_shared<fml::NonOwnedMapping>(impeller_scene_shaders_vk_data,
-                                             impeller_scene_shaders_vk_length),
-#endif  // IMPELLER_ENABLE_3D
       std::make_shared<fml::NonOwnedMapping>(
           impeller_compute_shaders_vk_data, impeller_compute_shaders_vk_length),
   };

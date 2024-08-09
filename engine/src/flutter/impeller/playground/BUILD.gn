@@ -50,7 +50,6 @@ impeller_component("playground") {
     "../fixtures:modern_shader_fixtures",
     "../fixtures:shader_fixtures",
     "../renderer",
-    "../scene/shaders",
     "image:image_skia_backend",
     "imgui:imgui_impeller_backend",
     "//flutter/fml",

@@ -19,9 +19,6 @@ declare_args() {
   # Whether the Vulkan backend is enabled.
   impeller_enable_vulkan = (is_linux || is_win || is_android || is_mac ||
                             enable_unittests) && target_os != "fuchsia"
-
-  # Enable experimental 3D scene rendering.
-  impeller_enable_3d = false
 }
 
 # Arguments that are combinations of other arguments by default but which can
