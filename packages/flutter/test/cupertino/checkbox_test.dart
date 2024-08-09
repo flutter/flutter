@@ -707,7 +707,11 @@ void main() {
   testWidgets('Checkbox configures focus color', (WidgetTester tester) async {
     const Color defaultCheckColor = Color(0xffffffff);
     const Color defaultActiveFillColor = Color(0xff007aff);
-    const Color defaultFocusColor = Color(0xcc6eadf2);
+    final Color defaultFocusColor = HSLColor
+      .fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
+      .withLightness(kCupertinoFocusColorBrightness)
+      .withSaturation(kCupertinoFocusColorSaturation)
+      .toColor();
     const Color testFocusColor = Color(0xffaabbcc);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final FocusNode node = FocusNode();

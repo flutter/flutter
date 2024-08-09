@@ -493,11 +493,14 @@ void main() {
   testWidgets('Button can be focused and has default colors', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Button');
     addTearDown(focusNode.dispose);
-
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    const Border defaultFocusBorder = Border.fromBorderSide(
+    final Border defaultFocusBorder = Border.fromBorderSide(
       BorderSide(
-        color: Color(0xcc6eadf2),
+        color: HSLColor
+          .fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
+          .withLightness(kCupertinoFocusColorBrightness)
+          .withSaturation(kCupertinoFocusColorSaturation)
+          .toColor(),
         width: 3.5,
         strokeAlign: BorderSide.strokeAlignOutside,
       ),
