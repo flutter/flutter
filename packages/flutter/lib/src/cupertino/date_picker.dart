@@ -487,83 +487,67 @@ static double _getColumnWidth(
   bool showDayOfWeek, {
   bool standaloneMonth = false,
 }) {
-  // Helper function to measure the width of a given text.
-  double measureTextWidth(String text) {
-    final TextPainter textPainter = TextPainter(
+  final List<String> longTexts = <String>[];
+
+  switch (columnType) {
+    case _PickerColumnType.date:
+      for (int i = 1; i <= 12; i++) {
+        final String date =
+            localizations.datePickerMediumDate(DateTime(2018, i, 25));
+        longTexts.add(date);
+      }
+    case _PickerColumnType.hour:
+      for (int i = 0; i < 24; i++) {
+        final String hour = localizations.datePickerHour(i);
+        longTexts.add(hour);
+      }
+    case _PickerColumnType.minute:
+      for (int i = 0; i < 60; i++) {
+        final String minute = localizations.datePickerMinute(i);
+        longTexts.add(minute);
+      }
+    case _PickerColumnType.dayPeriod:
+      longTexts.add(localizations.anteMeridiemAbbreviation);
+      longTexts.add(localizations.postMeridiemAbbreviation);
+    case _PickerColumnType.dayOfMonth:
+      int longestDayOfMonth = 1;
+      for (int i = 1; i <= 31; i++) {
+        final String dayOfMonth = localizations.datePickerDayOfMonth(i);
+        longTexts.add(dayOfMonth);
+        longestDayOfMonth = i;
+      }
+      if (showDayOfWeek) {
+        for (int wd = 1; wd < DateTime.daysPerWeek; wd++) {
+          final String dayOfMonth =
+              localizations.datePickerDayOfMonth(longestDayOfMonth, wd);
+          longTexts.add(dayOfMonth);
+        }
+      }
+    case _PickerColumnType.month:
+      for (int i = 1; i <= 12; i++) {
+        final String month = standaloneMonth
+            ? localizations.datePickerStandaloneMonth(i)
+            : localizations.datePickerMonth(i);
+        longTexts.add(month);
+      }
+    case _PickerColumnType.year:
+      longTexts.add(localizations.datePickerYear(2018));
+  }
+
+  assert(longTexts.isNotEmpty, 'column type is not appropriate');
+
+  final List<String> texts = (List<String>.from(longTexts)
+      ..sort((String a, String b) => b.length.compareTo(a.length)))
+      .take(4)
+      .toList();
+
+  return texts.map((String text) => TextPainter.computeMaxIntrinsicWidth(
       text: TextSpan(
         style: _themeTextStyle(context),
         text: text,
       ),
       textDirection: Directionality.of(context),
-    )..layout();
-    return textPainter.size.width;
-  }
-
-  // Helper function to find the maximum width from a list of strings.
-  double maxTextWidth(List<String> texts) {
-    return texts.map(measureTextWidth).reduce((double a, double b) => a > b ? a : b);
-  }
-
-  switch (columnType) {
-    case _PickerColumnType.date:
-      final List<String> dates = <String>[
-        for (int i = 1; i <= 12; i++)
-          localizations.datePickerMediumDate(DateTime(2018, i, 25))
-      ];
-      return maxTextWidth(dates);
-
-    case _PickerColumnType.hour:
-      final List<String> hours = <String>[
-        for (int i = 0; i < 24; i++)
-          localizations.datePickerHour(i)
-      ];
-      return maxTextWidth(hours);
-
-    case _PickerColumnType.minute:
-      final List<String> minutes = <String>[
-        for (int i = 0; i < 60; i++)
-          localizations.datePickerMinute(i)
-      ];
-      return maxTextWidth(minutes);
-
-    case _PickerColumnType.dayPeriod:
-      final List<String> periods = <String>[
-        localizations.anteMeridiemAbbreviation,
-        localizations.postMeridiemAbbreviation,
-      ];
-      return maxTextWidth(periods);
-
-    case _PickerColumnType.dayOfMonth:
-      final List<String> daysOfMonth = <String>[
-        for (int i = 1; i <= 31; i++)
-          localizations.datePickerDayOfMonth(i)
-      ];
-
-      if (showDayOfWeek) {
-        final List<String> weekdays = <String>[
-          for (int wd = 1; wd < DateTime.daysPerWeek; wd++)
-            localizations.datePickerDayOfMonth(31, wd)
-        ];
-        daysOfMonth.addAll(weekdays);
-      }
-
-      return maxTextWidth(daysOfMonth);
-
-    case _PickerColumnType.month:
-      final List<String> months = <String>[
-        for (int i = 1; i <= 12; i++)
-          standaloneMonth
-            ? localizations.datePickerStandaloneMonth(i)
-            : localizations.datePickerMonth(i)
-      ];
-      return maxTextWidth(months);
-
-    case _PickerColumnType.year:
-      final List<String> years = <String>[
-        localizations.datePickerYear(2018)
-      ];
-      return maxTextWidth(years);
-    }
+    )).reduce(math.max);
   }
 }
 

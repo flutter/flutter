@@ -2448,9 +2448,7 @@ void main() {
       }),
     ));
 
-    // pump twice required for loading localization
-    await tester.pump();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     final BuildContext datePickerContext = tester.element(find.byType(CupertinoDatePicker));
 
