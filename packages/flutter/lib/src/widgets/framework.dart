@@ -65,8 +65,8 @@ class _DebugOnly {
 /// should be followed for a given field:
 ///
 /// ```dart
-/// class Foo {
-///   final bar = kDebugMode ? Object() : null;
+/// class Bar {
+///   final Object? bar = kDebugMode ? Object() : null;
 /// }
 /// ```
 const _DebugOnly _debugOnly = _DebugOnly();
