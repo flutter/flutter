@@ -27,15 +27,17 @@ class MainWidget extends StatefulWidget {
 class MainWidgetState extends State<MainWidget> {
   int currentPageIndex = 0;
 
+  String pageTitle = getUseCaseName(NavigationBarUseCase());
+
   @override
   Widget build(BuildContext context) {
     return Title(
-      color: Theme.of(context).colorScheme.primary,
-      title: 'NavigationBar Demo',
+      color: Theme.of(context).primaryColor,
+      title: '$pageTitle Demo',
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Semantics(headingLevel: 1, child: const Text('NavigationBar Demo')),
+          title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
         ),
         bottomNavigationBar: NavigationBar(
           onDestinationSelected: (int index) {

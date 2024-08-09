@@ -14,11 +14,14 @@ class DialogUseCase extends UseCase {
   String get route => '/dialog';
 
   @override
-  Widget build(BuildContext context) => const _MainWidget();
+  Widget build(BuildContext context) => _MainWidget();
 }
 
 class _MainWidget extends StatelessWidget {
-  const _MainWidget();
+  _MainWidget();
+
+  final String pageTitle = getUseCaseName(DialogUseCase());
+
   @override
   Widget build(BuildContext context) {
     setWebTitle('DatePicker Demo', Theme.of(context).colorScheme.primary.value);

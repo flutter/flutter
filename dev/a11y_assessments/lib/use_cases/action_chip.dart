@@ -26,11 +26,14 @@ class MainWidget extends StatefulWidget {
 
 class MainWidgetState extends State<MainWidget> {
   bool favorite = false;
+
+  String pageTitle = getUseCaseName(ActionChipUseCase());
+
   @override
   Widget build(BuildContext context) {
     return Title(
-      color: Theme.of(context).colorScheme.primary,
-      title: 'Action Chip Demo',
+      color: Theme.of(context).primaryColor,
+      title: '$pageTitle Demo',
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,

@@ -27,15 +27,18 @@ class SwitchListTileExample extends StatefulWidget {
 class _SwitchListTileExampleState extends State<SwitchListTileExample> {
   bool _lights1 = false;
   bool _lights2 = false;
+
+  String pageTitle = getUseCaseName(SwitchListTileUseCase());
+
   @override
   Widget build(BuildContext context) {
     return Title(
-      color: Theme.of(context).colorScheme.primary,
-      title: 'Switch List Demo',
+      color: Theme.of(context).primaryColor,
+      title: '$pageTitle Demo',
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Semantics(headingLevel: 1, child: const Text('SwitchListTile')),
+          title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
         ),
         body: Center(
           child: Column(

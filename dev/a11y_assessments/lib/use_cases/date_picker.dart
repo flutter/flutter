@@ -25,15 +25,18 @@ class _MainWidget extends StatefulWidget {
 }
 
 class _MainWidgetState extends State<_MainWidget> {
+
+  String pageTitle = getUseCaseName(DatePickerUseCase());
+
   @override
   Widget build(BuildContext context) {
     return Title(
-      color: Theme.of(context).colorScheme.primary,
-      title: 'DatePicker Demo',
+      color: Theme.of(context).primaryColor,
+      title: '$pageTitle Demo',
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Semantics(headingLevel: 1, child: const Text('DatePicker Demo')),
+          title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
         ),
         body: Center(
           child: TextButton(

@@ -14,21 +14,23 @@ class TextFieldUseCase extends UseCase {
   String get route => '/text-field';
 
   @override
-  Widget build(BuildContext context) => const _MainWidget();
+  Widget build(BuildContext context) => _MainWidget();
 }
 
 class _MainWidget extends StatelessWidget {
-  const _MainWidget();
+  _MainWidget();
+
+  final String pageTitle = getUseCaseName(TextFieldUseCase());
 
   @override
   Widget build(BuildContext context) {
     return Title(
-      color: Theme.of(context).colorScheme.primary,
-      title: 'TextField Demo',
+      color: Theme.of(context).primaryColor,
+      title: '$pageTitle Demo',
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Semantics(headingLevel: 1, child: const Text('TextField demo')),
+          title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
         ),
         body: ListView(
           children: <Widget>[

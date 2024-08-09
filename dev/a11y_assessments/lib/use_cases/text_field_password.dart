@@ -14,21 +14,23 @@ class TextFieldPasswordUseCase extends UseCase {
   String get route => '/text-field-password';
 
   @override
-  Widget build(BuildContext context) => const _MainWidget();
+  Widget build(BuildContext context) => _MainWidget();
 }
 
 class _MainWidget extends StatelessWidget {
-  const _MainWidget();
+  _MainWidget();
+
+  final String pageTitle = getUseCaseName(TextFieldPasswordUseCase());
 
   @override
   Widget build(BuildContext context) {
     return Title(
-      color: Theme.of(context).colorScheme.primary,
-      title: 'TextField Password Demo',
+      color: Theme.of(context).primaryColor,
+      title: '$pageTitle Demo',
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Semantics(headingLevel: 1, child: const Text('TextField password demo')),
+          title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
         ),
         body: ListView(
           children: const <Widget>[

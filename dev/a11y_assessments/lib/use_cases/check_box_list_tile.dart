@@ -25,14 +25,16 @@ class _MainWidget extends StatefulWidget {
 class _MainWidgetState extends State<_MainWidget> {
   bool _checked = false;
 
+  String pageTitle = getUseCaseName(CheckBoxListTile());
+
   @override
   Widget build(BuildContext context) {
     return Title(
-      color: Theme.of(context).colorScheme.primary,
-      title: 'CheckBox List Tile Demo',
+      color: Theme.of(context).primaryColor,
+      title: '$pageTitle Demo',
       child: Scaffold(
         appBar: AppBar(
-        title: Semantics(headingLevel: 1, child: const Text('CheckBoxListTile Demo')),
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
         ),
       body: ListView(
           children: <Widget>[

@@ -33,14 +33,16 @@ class _MainWidgetState extends State<_MainWidget> {
     });
   }
 
+  String pageTitle = getUseCaseName(RadioListTileUseCase());
+
   @override
   Widget build(BuildContext context) {
     return Title(
-      color: Theme.of(context).colorScheme.primary,
-      title: 'Radio Button Demo',
+      color: Theme.of(context).primaryColor,
+      title: '$pageTitle Demo',
       child: Scaffold(
         appBar: AppBar(
-        title: Semantics(headingLevel: 1, child: const Text('Radio button demo'))
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))
       ),
         body: ListView(
           children: <Widget>[

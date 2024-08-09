@@ -45,15 +45,17 @@ class _MainWidgetState extends State<_MainWidget> {
     );
   }
 
+  String pageTitle = getUseCaseName(AutoCompleteUseCase());
+
   @override
   Widget build(BuildContext context) {
     return Title(
-      color: Theme.of(context).colorScheme.primary,
-      title: 'Autocomplete Demo',
+      color: Theme.of(context).primaryColor,
+      title: '$pageTitle Demo',
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Semantics(headingLevel: 1, child: const Text('AutoComplete Demo')),
+          title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
         ),
         body: Center(
           child: Column(

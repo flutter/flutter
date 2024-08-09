@@ -3,5 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart';
+import './use_cases/use_cases.dart';
 
 Color appSeedColor = const Color(0xff6750a4);
+
+String getUseCaseName(UseCase useCase) => useCase.name;
