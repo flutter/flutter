@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
@@ -23,7 +24,6 @@ class ArchivePublisher {
     this.outputFile,
     this.dryRun, {
     ProcessManager? processManager,
-    bool subprocessOutput = true,
     required this.fs,
     this.platform = const LocalPlatform(),
   })  : assert(revision.length == 40),
@@ -31,7 +31,6 @@ class ArchivePublisher {
         metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
         _processRunner = ProcessRunner(
           processManager: processManager,
-          subprocessOutput: subprocessOutput,
         );
 
   final Platform platform;
@@ -129,13 +128,17 @@ class ArchivePublisher {
     // Windows wants to echo the commands that execute in gsutil.bat to the
     // stdout when we do that. So, we copy the file locally and then read it
     // back in.
-    final File metadataFile = fs.file(
+    final File localFile = fs.file(
       path.join(tempDir.absolute.path, getMetadataFilename(platform)),
     );
-    await _runGsUtil(<String>['cp', gsPath, metadataFile.absolute.path]);
+    final _MetadataFile metadataFile = await _MetadataFile.download(
+      remotePath: gsPath,
+      localFile: localFile,
+      publisher: this,
+    );
     Map<String, dynamic> jsonData = <String, dynamic>{};
     if (!dryRun) {
-      final String currentMetadata = metadataFile.readAsStringSync();
+      final String currentMetadata = metadataFile.localFile.readAsStringSync();
       if (currentMetadata.isEmpty) {
         throw PreparePackageException('Empty metadata received from server');
       }
@@ -151,7 +154,7 @@ class ArchivePublisher {
     jsonData = await _addRelease(jsonData);
 
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-    metadataFile.writeAsStringSync(encoder.convert(jsonData));
+    metadataFile.localFile.writeAsStringSync(encoder.convert(jsonData));
   }
 
   /// Publishes the metadata file to GCS.
@@ -226,4 +229,89 @@ class ArchivePublisher {
       dest,
     ]);
   }
+}
+
+class _MetadataFile {
+  const _MetadataFile._({
+    required this.remotePath,
+    required this.localFile,
+    required this.generation,
+  });
+
+  // Two attempts should be sufficient, as there are at most 2 builds (1
+  // per architecture) running concurrently that would edit the same OS
+  // metadata file.
+  static const int _kDownloadAttempts = 2;
+
+  static Future<_MetadataFile> download({
+    required String remotePath,
+    required File localFile,
+    required ArchivePublisher publisher,
+  }) async {
+    int? generation;
+    for (int attempt = 0; attempt < _kDownloadAttempts; attempt+= 1) {
+      String statOutput = await publisher._runGsUtil(<String>['stat', remotePath]);
+      final int firstGeneration = _parseGenerationFromStat(statOutput);
+
+      await publisher._runGsUtil(<String>['cp', remotePath, localFile.absolute.path]);
+
+      statOutput = await publisher._runGsUtil(<String>['stat', remotePath]);
+      final int secondGeneration = _parseGenerationFromStat(statOutput);
+
+      if (firstGeneration != secondGeneration) {
+        io.stderr.writeln(
+'''
+Error! The file $remotePath was at generation $firstGeneration before downloading,
+but generation $secondGeneration after on attempt $attempt.
+''');
+        continue;
+      }
+
+      generation = firstGeneration;
+      break;
+    }
+    if (generation == null) {
+      throw StateError('The generation number of the file $remotePath was changed by another process $_kDownloadAttempts');
+    }
+    return _MetadataFile._(
+      remotePath: remotePath,
+      localFile: localFile,
+      generation: generation,
+    );
+  }
+
+  static final RegExp _parseGenerationFromStatPattern = RegExp(r'^\s+Generation:\s+(\d+)$');
+
+  // $ gsutil.py stat gs://flutter_infra_release/releases/releases_macos.json
+  //
+  // gs://flutter_infra_release/releases/releases_macos.json:
+  //     Creation time:          Tue, 06 Aug 2024 19:33:19 GMT
+  //     Update time:            Tue, 06 Aug 2024 19:33:19 GMT
+  //     Storage class:          STANDARD
+  //     Content-Length:         267810
+  //     Content-Type:           application/json
+  //     Hash (crc32c):          tgFuZw==
+  //     Hash (md5):             xPUCBPIzd9nMUBpFfh6W2w==
+  //     ETag:                   CIWpkO2N4YcDEAE=
+  //     Generation:             1722972798981253
+  //     Metageneration:         1
+  static int _parseGenerationFromStat(String statOutput) {
+    final List<String> lines = statOutput.split('\n');
+    for (final String line in lines) {
+      final RegExpMatch? match = _parseGenerationFromStatPattern.firstMatch(line);
+      if (match == null) {
+        continue;
+      }
+      final int? maybeGeneration = int.tryParse(match.group(1) ?? '');
+      if (maybeGeneration == null) {
+        throw StateError('Could not parse the output of `gsutil.py stat`:\n\n$statOutput');
+      }
+      return maybeGeneration;
+    }
+    throw StateError('Could not parse the output of `gsutil.py stat`:\n\n$statOutput');
+  }
+
+  final String remotePath;
+  final File localFile;
+  final int generation;
 }
