@@ -90,6 +90,13 @@ class TaskResult {
   /// Explains the result in a human-readable format.
   final String? message;
 
+  /// Whether the task failed due to a transient infrastructure issue.
+  bool infraFailure = false;
+
+  /// When infraFailure is true, a String giving the reason that it is believed
+  /// that the task failed due to a transient infrastructure issue.
+  String? infraFailureReason;
+
   /// Serializes this task result to JSON format.
   ///
   /// The JSON format is as follows:

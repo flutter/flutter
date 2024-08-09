@@ -65,12 +65,7 @@ Future<void> runTasks(
         useEmulator: useEmulator,
       );
 
-      if (!result.succeeded) {
-        failureCount += 1;
-        if (exitOnFirstTestFailure) {
-          break;
-        }
-      } else {
+      if (result.succeeded) {
         section('Flaky status for "$taskName"');
         if (failureCount > 0) {
           print('Total ${failureCount+1} executions: $failureCount failures and 1 false positive.');
@@ -82,6 +77,16 @@ Future<void> runTasks(
           print('flaky: false');
         }
         break;
+      } else if (result.infraFailure) {
+        print(
+          'The test failed due to a transient infrastructure issue: '
+          '"${result.infraFailureReason}". Retrying.',
+        );
+      } else {
+        failureCount += 1;
+        if (exitOnFirstTestFailure) {
+          break;
+        }
       }
     }
 
@@ -144,6 +149,19 @@ Future<TaskResult> rerunTask(
   }
   return result;
 }
+
+// When a task fails with these strings in the output, it indicates that the
+// task failed due to a transient infrastructure issue, and that the task should
+// be retried without considering the code under test to be flaky. An example
+// would be a test running in a new version of the Android emulator, or a new
+// system image for the emulator, that is known to be flaky.
+//
+// In the future it may be desirable to make this a list of regular expressions,
+// but for today's use cases, checking that a line of output contains one of
+// these strings is sufficient.
+const List<String> _infraFailureOutput = <String>[
+  'adb: device offline',
+];
 
 /// Runs a task in a separate Dart VM and collects the result using the VM
 /// service protocol.
@@ -211,6 +229,8 @@ Future<TaskResult> runTask(
 
   final Completer<Uri> uri = Completer<Uri>();
 
+  bool infraFailure = false;
+  String? infraFailureReason;
   final StreamSubscription<String> stdoutSub = runner.stdout
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
@@ -221,6 +241,11 @@ Future<TaskResult> runTask(
         uri.complete(serviceUri);
       }
     }
+    final String infraMessage = _infraFailureOutput.firstWhere(line.contains, orElse: () => '');
+    if (infraMessage.isNotEmpty) {
+      infraFailure = true;
+      infraFailureReason = infraMessage;
+    }
     if (!silent) {
       stdout.writeln('[${DateTime.now()}] [STDOUT] $line');
     }
@@ -230,6 +255,11 @@ Future<TaskResult> runTask(
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
       .listen((String line) {
+    final String infraMessage = _infraFailureOutput.firstWhere(line.contains, orElse: () => '');
+    if (infraMessage.isNotEmpty) {
+      infraFailure = true;
+      infraFailureReason = infraMessage;
+    }
     stderr.writeln('[${DateTime.now()}] [STDERR] $line');
   });
 
@@ -244,6 +274,10 @@ Future<TaskResult> runTask(
       isolateId: result.isolate.id,
     )).json!;
     final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
+    taskResult.infraFailure = infraFailure;
+    if (infraFailure) {
+      taskResult.infraFailureReason = infraFailureReason;
+    }
     final int exitCode = await runner.exitCode;
     print('[$taskName] Process terminated with exit code $exitCode.');
     return taskResult;
