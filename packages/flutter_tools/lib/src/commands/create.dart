@@ -271,7 +271,7 @@ class CreateCommand extends CreateBase {
 
     if (!generateFfi && argResults!.wasParsed('native-language')){
       throwToolExit('The native-language option requires the template type to be '
-      '`package_ffi', exitCode: 2);
+      'package_ffi', exitCode: 2);
     }
 
     final String? language = stringArg('native-language');

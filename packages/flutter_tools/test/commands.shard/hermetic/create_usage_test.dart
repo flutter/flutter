@@ -83,7 +83,11 @@ void main() {
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'skeleton'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'module', 'common'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package'),
-          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package_ffi'),
+          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package_ffi', 'c'),
+          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package_ffi', 'cpp'),
+          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package_ffi', 'rust'),
+          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package_ffi', 'go'),
+          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package_shared'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_ffi'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_shared'),
@@ -224,6 +228,23 @@ void main() {
         isNativeAssetsEnabled: false, // ignore: avoid_redundant_argument_values, If we graduate the feature to true by default, don't break this test.
       ),
     });
+
+    testUsingContext('Disallow the native language flag outside package_ffi', () => testbed.run(() async {
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    expect(
+      runner.run(
+        <String>[
+          'create',
+          '--no-pub',
+          '--native-language=rust',
+          'my_rust_ffi_package'
+        ],
+      ),
+      throwsToolExit(message: 'The native-language option requires the template type to be package_ffi'),
+    );
+  }));
   });
 }
 
