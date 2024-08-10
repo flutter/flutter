@@ -18,8 +18,9 @@ void main() {
     DefaultTextStyle defaultTextStyle = const DefaultTextStyle.fallback();
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: DefaultTextStyle(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DefaultTextStyle(
           style: const TextStyle(color: Colors.black, fontSize: 20),
           textAlign: TextAlign.left,
           softWrap: false,
