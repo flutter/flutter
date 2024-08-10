@@ -1,6 +1,8 @@
 ## Symbolicating stack traces for engine crashes
 
-The easiest way to symbolicate stack traces for Android and iOS is running the [dart_ci symbolizer locally](https://github.com/dart-lang/dart_ci/blob/main/github-label-notifier/symbolizer/README.md#using-this-locally). If that is not an option, the steps below explain how to do it manually.
+iOS app archives produced using Flutter 3.24 or later embed engine debugging symbols and thus crashes are symbolicated by default.
+
+The easiest way to symbolicate stack traces for Android and older iOS apps is to run the [dart_ci symbolizer locally](https://github.com/dart-lang/dart_ci/blob/main/github-label-notifier/symbolizer/README.md#using-this-locally). If that is not an option, the steps below explain how to do it manually.
 
 ### Android
 
@@ -88,7 +90,25 @@ adb logcat | ~/dev/engine/src/third_party/android_tools/ndk/prebuilt/linux-x86_6
 
 ### iOS
 
-The dSYM file for `Flutter.framework` (which is the Flutter Engine) for ios-release builds can be downloaded from Google Cloud Storage. Follow the steps from the Android section in this guide, but in the last step use a download url following this schema: `https://storage.cloud.google.com/flutter_infra_release/flutter/38a646e14cc25f5a56a989c6a5787bf74e0ea386/ios-release/Flutter.dSYM.zip` (replace the engine hash with your hash).
+Since Flutter 3.24, symbols can be found in the Flutter framework's artifact
+cache, within the xcframework bundle at
+`bin/cache/artifacts/engine/ios-release/Flutter.xcframework`.
+
+  * Symbols for device builds are in the `ios-arm64/dSYMs/Flutter.framework.dSYM` bundle.
+  * Symbols for simulator builds are in the `ios-arm64_x86_64-simulator/dSYMs/Flutter.framework.dSYM` bundle.
+
+For versions prior to Flutter 3.24, the dSYM bundle can downloaded from Google
+Cloud Storage. Follow the steps from the Android section in this guide, but in
+the last step use a download url following this schema:
+`https://storage.cloud.google.com/flutter_infra_release/flutter/38a646e14cc25f5a56a989c6a5787bf74e0ea386/ios-release/Flutter.dSYM.zip`
+(replace the engine hash with your hash).
+
+For release since Flutter 3.24, these symbols are no longer uploaded as a
+separate archive and should be obtained from the artifact cache as described
+above. The artifact cache can be downloaded direcly using a URL following this
+schema:
+`https://storage.googleapis.com/flutter_infra_release/flutter/c11fe483947c95553610ab59210af643f031f5f4/ios-release/artifacts.zip`
+(replace the engine hash with your hash).
 
 #### Symbolicating local builds
 
