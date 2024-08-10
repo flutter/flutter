@@ -479,7 +479,7 @@
                     "--simulator-arm64-out-dir",
                     "out/ci/ios_debug_sim_arm64"
                 ],
-                "script": "flutter/sky/tools/create_full_ios_framework.py",
+                "script": "flutter/sky/tools/create_ios_framework.py",
                 "language": "python3"
             },
             {
@@ -494,7 +494,7 @@
                     "--simulator-arm64-out-dir",
                     "out/ci/ios_debug_sim_arm64"
                 ],
-                "script": "flutter/sky/tools/create_full_ios_framework.py",
+                "script": "flutter/sky/tools/create_ios_framework.py",
                 "language": "python3"
             },
             {
@@ -511,7 +511,7 @@
                     "--dsym",
                     "--strip"
                 ],
-                "script": "flutter/sky/tools/create_full_ios_framework.py",
+                "script": "flutter/sky/tools/create_ios_framework.py",
                 "language": "python3"
             },
             {
