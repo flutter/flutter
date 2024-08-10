@@ -665,7 +665,7 @@ class DlColorFilterImageFilter final : public DlImageFilter {
 class DlLocalMatrixImageFilter final : public DlImageFilter {
  public:
   explicit DlLocalMatrixImageFilter(const SkMatrix& matrix,
-                                    std::shared_ptr<DlImageFilter> filter)
+                                    std::shared_ptr<const DlImageFilter> filter)
       : matrix_(matrix), image_filter_(std::move(filter)) {}
   explicit DlLocalMatrixImageFilter(const DlLocalMatrixImageFilter* filter)
       : DlLocalMatrixImageFilter(filter->matrix_, filter->image_filter_) {}
@@ -682,7 +682,7 @@ class DlLocalMatrixImageFilter final : public DlImageFilter {
 
   const SkMatrix& matrix() const { return matrix_; }
 
-  const std::shared_ptr<DlImageFilter> image_filter() const {
+  const std::shared_ptr<const DlImageFilter> image_filter() const {
     return image_filter_;
   }
 
@@ -738,7 +738,7 @@ class DlLocalMatrixImageFilter final : public DlImageFilter {
 
  private:
   SkMatrix matrix_;
-  std::shared_ptr<DlImageFilter> image_filter_;
+  std::shared_ptr<const DlImageFilter> image_filter_;
 };
 
 }  // namespace flutter

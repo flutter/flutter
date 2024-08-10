@@ -600,7 +600,7 @@ void DlDispatcherBase::saveLayer(const SkRect& bounds,
                      ? ContentBoundsPromise::kMayClipContents
                      : ContentBoundsPromise::kContainsContents;
   std::optional<Rect> impeller_bounds;
-  if (!options.content_is_unbounded()) {
+  if (!options.content_is_unbounded() || options.bounds_from_caller()) {
     impeller_bounds = skia_conversions::ToRect(bounds);
   }
 
