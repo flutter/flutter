@@ -122,8 +122,8 @@ class _Segment<T> extends StatefulWidget {
   // is currently being dragged.
   final bool isDragging;
 
-  bool get shouldFadeoutContent => pressed && !highlighted;
-  bool get shouldScaleContent => pressed && highlighted && isDragging;
+  bool get shouldFadeoutContent => pressed && !highlighted && enabled;
+  bool get shouldScaleContent => pressed && highlighted && isDragging && enabled;
 
   @override
   _SegmentState<T> createState() => _SegmentState<T>();
@@ -350,7 +350,7 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
     super.key,
     required this.children,
     required this.onValueChanged,
-    this.setEnabled,
+    Set<T>? disabledChildren,
     this.groupValue,
     this.thumbColor = _kThumbColor,
     this.padding = _kHorizontalItemPadding,
@@ -360,7 +360,7 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
        assert(
          groupValue == null || children.keys.contains(groupValue),
          'The groupValue must be either null or one of the keys in the children map.',
-       );
+       ), disabledChildren = disabledChildren ?? <T>{};
 
   /// The identifying keys and corresponding widget values in the
   /// segmented control.
@@ -371,11 +371,16 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   /// The map must have more than one entry.
   final Map<T, Widget> children;
 
-  /// The identifying keys and the corresponding widget status whether the
-  /// segment is enabled or not.
+  /// A set to indicate disabled segments.
   ///
-  /// If this is null, all segments are selectable by default.
-  final Map<T, bool>? setEnabled;
+  /// Disabled children cannot be highlighted and don't show any animation
+  /// when they are tapped or long pressed. So if this set contains [groupValue],
+  /// [groupValue] cannot be highlighted until it is switched to an enabled
+  /// segment.
+  ///
+  /// By default, all segments are selectable. The default text color for
+  /// disabled segments is `Color.fromARGB(115, 176, 176, 176)`.
+  final Set<T> disabledChildren;
 
   /// The identifier of the widget that is currently selected.
   ///
@@ -478,6 +483,8 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
   final GlobalKey segmentedControlRenderWidgetKey = GlobalKey();
 
+  T? get groupValue => widget.disabledChildren.contains(widget.groupValue) ? null : widget.groupValue;
+
   @override
   void initState() {
     super.initState();
@@ -501,14 +508,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     // Empty callback to enable the long press recognizer.
     longPress.onLongPress = () { };
 
-    highlighted = widget.groupValue;
-    if (widget.setEnabled != null) {
-      // If `setEnabled` map contains the `groupValue` and the status is set to
-      // false, then this segment should not be highlighted.
-      if (widget.setEnabled!.containsKey(widget.groupValue) && !widget.setEnabled![widget.groupValue]!) {
-        highlighted = null;
-      }
-    }
+    highlighted = groupValue;
   }
 
   @override
@@ -518,17 +518,10 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     // Temporarily ignore highlight changes from the widget when the thumb is
     // being dragged. When the drag gesture finishes the widget will be forced
     // to build (see the onEnd method), and didUpdateWidget will be called again.
-    if (!isThumbDragging && highlighted != widget.groupValue) {
+    if (!isThumbDragging && highlighted != groupValue) {
       thumbController.animateWith(_kThumbSpringAnimationSimulation);
       thumbAnimatable = null;
-      if (widget.setEnabled != null) {
-        // If `setEnabled` map contains the `groupValue` and the status is set to
-        // false, then no update needed.
-        if (widget.setEnabled!.containsKey(widget.groupValue) && !widget.setEnabled![widget.groupValue]!) {
-          return;
-        }
-      }
-      highlighted = widget.groupValue;
+      highlighted = groupValue;
     }
   }
 
@@ -604,12 +597,10 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     if (highlighted == newValue) {
       return;
     }
-    if (widget.setEnabled != null) {
-      // If `setEnabled` map contains the `groupValue` and the status is set to
-      // false, then no update needed.
-      if (widget.setEnabled!.containsKey(newValue) && !widget.setEnabled![newValue]!) {
-        return;
-      }
+    // If `disabledChildren` set contains the `groupValue`, then no update
+    // needed.
+    if (widget.disabledChildren.contains(newValue)) {
+      return;
     }
     setState(() { highlighted = newValue; });
     // Additionally, start the thumb animation if the highlighted segment
@@ -623,6 +614,9 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   }
 
   void onPressedChangedByGesture(T? newValue) {
+    if (widget.disabledChildren.contains(newValue)) {
+      return;
+    }
     if (pressed != newValue) {
       setState(() { pressed = newValue; });
     }
@@ -635,12 +629,10 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     }
     final T segment = segmentForXPosition(details.localPosition.dx);
     onPressedChangedByGesture(null);
-    if (segment != widget.groupValue) {
-      if (widget.setEnabled != null) {
-        // When disabled segment is tapped, `onValueChanged` should not be called.
-        if (widget.setEnabled!.containsKey(segment) && !widget.setEnabled![segment]!) {
-          return;
-        }
+    if (segment != groupValue) {
+      // When disabled segment is tapped, `onValueChanged` should not be called.
+      if (widget.disabledChildren.contains(segment)) {
+        return;
       }
       widget.onValueChanged(segment);
     }
@@ -673,13 +665,13 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     final T? pressed = this.pressed;
     if (isThumbDragging) {
       _playThumbScaleAnimation(isExpanding: true);
-      if (highlighted != widget.groupValue) {
+      if (highlighted != groupValue) {
         widget.onValueChanged(highlighted);
       }
     } else if (pressed != null) {
       onHighlightChangedByGesture(pressed);
       assert(pressed == highlighted);
-      if (highlighted != widget.groupValue) {
+      if (highlighted != groupValue) {
         widget.onValueChanged(highlighted);
       }
     }
@@ -733,11 +725,6 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
         );
       }
 
-      bool enabled = true;
-      if (widget.setEnabled != null && widget.setEnabled!.containsKey(entry.key)) {
-        enabled = widget.setEnabled![entry.key]!;
-      }
-
       final TextDirection textDirection = Directionality.of(context);
       final bool isLeftmostSegment = switch (textDirection) {
         TextDirection.ltr => highlightedIndex == 0,
@@ -752,9 +739,14 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
       children.add(
         Semantics(
           button: true,
-          onTap: () { widget.onValueChanged(entry.key); },
+          onTap: () {
+            if (widget.disabledChildren.contains(entry.key)) {
+              return;
+            }
+            widget.onValueChanged(entry.key);
+           },
           inMutuallyExclusiveGroup: true,
-          selected: widget.groupValue == entry.key,
+          selected: groupValue == entry.key,
           child: MouseRegion(
             cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
             child: _Segment<T>(
@@ -762,7 +754,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
               highlighted: isHighlighted,
               pressed: pressed == entry.key,
               isDragging: isThumbDragging,
-              enabled: enabled,
+              enabled: !widget.disabledChildren.contains(entry.key),
               isLeftmostSegment: isLeftmostSegment,
               isRightmostSegment: isRightmostSegment,
               child: entry.value,

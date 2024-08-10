@@ -1889,9 +1889,7 @@ void main() {
         home: CupertinoPageScaffold(
           child: Center(
             child: CupertinoSlidingSegmentedControl<int>(
-              setEnabled: const <int, bool> {
-                0: false,
-              },
+              disabledChildren: const <int> { 0 },
               children: children,
               onValueChanged: defaultCallback,
             ),
@@ -1929,9 +1927,7 @@ void main() {
       boilerplate(
         builder: (BuildContext context) {
           return CupertinoSlidingSegmentedControl<int>(
-            setEnabled: const <int, bool> {
-              0: false,
-            },
+            disabledChildren: const <int> { 0 },
             children: children,
             groupValue: groupValue,
             onValueChanged: defaultCallback,
@@ -1959,5 +1955,46 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(getHighlightedIndex(tester), 2); // The highlighted index doesn't change
+  });
+
+  testWidgets('Several segments can be disabled', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
+
+    int onValueChangedCalled = 0;
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            disabledChildren: const <int> { 0, 1, 2 },
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: (int? value) {
+              onValueChangedCalled += 1;
+              defaultCallback.call(value);
+            },
+          );
+        },
+      )
+    );
+
+    // All segments are disabled, so onValueChangedCalled should always be 0.
+    await tester.tap(find.text('A'));
+    await tester.pumpAndSettle();
+
+    expect(onValueChangedCalled, 0);
+
+    await tester.tap(find.text('CCCC'));
+    await tester.pumpAndSettle();
+
+    expect(onValueChangedCalled, 0);
+
+    await tester.tap(find.text('BB'));
+    await tester.pumpAndSettle();
+
+    expect(onValueChangedCalled, 0);
   });
 }
