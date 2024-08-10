@@ -1162,6 +1162,7 @@ class AdbLogReader extends DeviceLogReader {
     if (_linesController.isClosed) {
       return;
     }
+    print(line);
     _linesController.add(line);
     // final Match? timeMatch = AndroidDevice._timeRegExp.firstMatch(line);
     // if (timeMatch == null || line.length == timeMatch.end) {
