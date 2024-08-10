@@ -1216,10 +1216,8 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     }
 
     final int? highlightedChildIndex = highlightedIndex;
-    final bool isLeadingChild = highlightedChildIndex != null
-      && highlightedChildIndex == 0;
-    final bool isTrailingChild = highlightedChildIndex != null
-      && highlightedChildIndex == children.length ~/ 2;
+    final bool isLeadingChild = highlightedChildIndex == 0;
+    final bool isTrailingChild = highlightedChildIndex == children.length ~/ 2;
     // Paint thumb if there's a highlighted segment.
     if (highlightedChildIndex != null) {
       final RenderBox selectedChild = children[highlightedChildIndex * 2];
