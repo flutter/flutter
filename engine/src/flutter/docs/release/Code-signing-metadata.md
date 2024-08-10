@@ -148,7 +148,7 @@ You can reference the
     [mac_host_engine.json](https://github.com/flutter/engine/blob/main/ci/builders/mac_host_engine.json)).
 
     The generator script related to iOS is located at
-    `sky/tools/create_full_ios_framework.py`, and generator script related to
+    `sky/tools/create_ios_framework.py`, and generator script related to
     macOS is located at `sky/tools/create_macos_framework.py`.
 
 2.  Add / Update the variables ending with `with_entitlements` /
@@ -156,7 +156,7 @@ You can reference the
     one.
 
     As an example, you can find variables `ios_file_without_entitlements` and
-    `ios_file_with_entitlements` in sky/tools/create_full_ios_framework.py; and
+    `ios_file_with_entitlements` in sky/tools/create_ios_framework.py; and
     find variables `filepath_without_entitlements` and
     `filepath_with_entitlements` in sky/tools/create_macos_framework.py
 
@@ -176,7 +176,7 @@ that exist in a zip bundle called `ios/artifacts.zip`.
 1.  Following step 1, in
     [mac_ios_engine.json](https://github.com/flutter/engine/blob/main/ci/builders/mac_ios_engine.json),
     it builds the artifact with the
-    `flutter/sky/tools/create_full_ios_framework.py` script.
+    `flutter/sky/tools/create_ios_framework.py` script.
 
 2.  Following step 2, since
     `Flutter.xcframework/ios-arm64/Flutter.framework/Flutter` shouldn't be code
@@ -185,7 +185,7 @@ that exist in a zip bundle called `ios/artifacts.zip`.
     `ios_file_without_entitlements` variable.
 
 You can reference the generator script
-[create_full_ios_framework.py](https://github.com/flutter/engine/blob/main/sky/tools/create_full_ios_framework.py).
+[create_ios_framework.py](https://github.com/flutter/engine/blob/main/sky/tools/create_ios_framework.py).
 
 ## Code signing artifacts other than flutter engine binaries
 

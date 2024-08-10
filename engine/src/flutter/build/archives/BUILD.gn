@@ -31,7 +31,7 @@ generated_file("artifacts_entitlement_config") {
 # gen_snapshot_x64 are used in its place).
 #
 # Target-specific iOS artifacts.zip are produced in:
-# //flutter/sky/tools/create_full_ios_framework.py
+# //flutter/sky/tools/create_ios_framework.py
 #
 # Target-specific Android archives are produced in:
 # //flutter/shell/platform/android:gen_snapshot
