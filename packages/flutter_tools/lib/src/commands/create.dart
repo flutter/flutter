@@ -759,7 +759,7 @@ Your $application code is in $relativeAppMain.
     templateContext['description'] = description;
     generatedCount += await renderMerged(
       <String>[
-        'package_shared',
+        'package_ffi/shared',
         globals.fs.path.join('package_ffi', language),
       ],
       directory,
