@@ -540,16 +540,6 @@
             "source": "out/release/artifacts.zip",
             "destination": "ios-release/artifacts.zip",
             "realm": "production"
-        },
-        {
-            "source": "out/release/Flutter.dSYM.zip",
-            "destination": "ios-release/Flutter.dSYM.zip",
-            "realm": "production"
-        },
-        {
-            "source": "out/release/extension_safe_Flutter.dSYM.zip",
-            "destination": "ios-release/extension_safe_Flutter.dSYM.zip",
-            "realm": "production"
         }
     ]
 }
