@@ -431,7 +431,7 @@ be relative to the checkout directory.
         "--simulator-arm64-out-dir",
         "out/ios_debug_sim_arm64"
     ],
-    "script": "flutter/sky/tools/create_full_ios_framework.py",
+    "script": "flutter/sky/tools/create_ios_framework.py",
     "language": "python3"
 }
 ```
@@ -657,7 +657,11 @@ copied verbatim from the executions details of the build.
 The following example will run the generator to create the ios artifacts:
 
 ```bash
-python3 flutter/sky/tools/create_full_ios_framework.py --dst out/release \
---arm64-out-dir out/ios_release --simulator-x64-out-dir out/ios_debug_sim \
---simulator-arm64-out-dir out/ios_debug_sim_arm64 --dsym --strip
+python3 flutter/sky/tools/create_ios_framework.py   \
+  --dst out/release                                 \
+  --arm64-out-dir out/ios_release                   \
+  --simulator-x64-out-dir out/ios_debug_sim         \
+  --simulator-arm64-out-dir out/ios_debug_sim_arm64 \
+  --dsym                                            \
+  --strip
 ```
