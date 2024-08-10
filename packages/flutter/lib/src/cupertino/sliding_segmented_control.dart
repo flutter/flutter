@@ -375,7 +375,7 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   ///
   /// Disabled children cannot be highlighted and don't show any animation
   /// when they are tapped or long pressed. So if this set contains [groupValue],
-  /// [groupValue] cannot be highlighted until it is switched to an enabled
+  /// there is no segment getting highlighted until it is switched to an enabled
   /// segment.
   ///
   /// By default, all segments are selectable. The default text color for
