@@ -19,12 +19,6 @@ const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
   horizontal: 64.0,
 );
 
-// The relative values needed to transform a color to it's equivalent focus
-// outline color.
-const double _kCupertinoFocusColorOpacity = 0.80;
-const double _kCupertinoFocusColorBrightness = 0.69;
-const double _kCupertinoFocusColorSaturation = 0.835;
-
 /// An iOS-style button.
 ///
 /// Takes in a text or an icon that fades out and in on touch. May optionally have a
@@ -292,9 +286,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     final Color effectiveFocusOutlineColor = widget.focusColor ??
       HSLColor
         .fromColor((backgroundColor ?? CupertinoColors.activeBlue)
-        .withOpacity(_kCupertinoFocusColorOpacity))
-        .withLightness(_kCupertinoFocusColorBrightness)
-        .withSaturation(_kCupertinoFocusColorSaturation)
+          .withOpacity(kCupertinoFocusColorOpacity)
+        ).withLightness(kCupertinoFocusColorBrightness)
+        .withSaturation(kCupertinoFocusColorSaturation)
         .toColor();
 
     final TextStyle textStyle = themeData.textTheme.textStyle.copyWith(color: foregroundColor);
