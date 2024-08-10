@@ -850,6 +850,12 @@ class _SegmentedControlRenderWidget<T extends Object> extends MultiChildRenderOb
 
 class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<RenderBox> { }
 
+enum _Location {
+  leftmost,
+  rightmost,
+  inbetween;
+}
+
 // The behavior of a UISegmentedControl as observed on iOS 13.1:
 //
 // 1. Tap up inside events will set the current selected index to the index of the
@@ -1216,8 +1222,6 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     }
 
     final int? highlightedChildIndex = highlightedIndex;
-    final bool isLeadingChild = highlightedChildIndex == 0;
-    final bool isTrailingChild = highlightedChildIndex == children.length ~/ 2;
     // Paint thumb if there's a highlighted segment.
     if (highlightedChildIndex != null) {
       final RenderBox selectedChild = children[highlightedChildIndex * 2];
@@ -1247,14 +1251,21 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
       final Rect unscaledThumbRect = state.thumbAnimatable?.evaluate(state.thumbController) ?? newThumbRect;
       currentThumbRect = unscaledThumbRect;
 
-      double delta = 0;
-      if (isLeadingChild) {
-        delta = unscaledThumbRect.width - unscaledThumbRect.width * thumbScale;
+      final _Location childLocation;
+      if (highlightedChildIndex == 0) {
+        childLocation = _Location.leftmost;
+      } else if (highlightedChildIndex == children.length ~/ 2) {
+        childLocation = _Location.rightmost;
+      } else {
+        childLocation = _Location.inbetween;
       }
 
-      if (isTrailingChild) {
-        delta = unscaledThumbRect.width * thumbScale - unscaledThumbRect.width;
-      }
+      final double delta = switch (childLocation) {
+        _Location.leftmost => unscaledThumbRect.width - unscaledThumbRect.width * thumbScale,
+        _Location.rightmost => unscaledThumbRect.width * thumbScale - unscaledThumbRect.width,
+        _Location.inbetween => 0,
+      };
+
       final Rect thumbRect = Rect.fromCenter(
         center: unscaledThumbRect.center - Offset(delta / 2, 0),
         width: unscaledThumbRect.width * thumbScale,
