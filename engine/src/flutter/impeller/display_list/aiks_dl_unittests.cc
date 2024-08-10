@@ -20,6 +20,7 @@
 #include "imgui.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/geometry/scalar.h"
+#include "include/core/SkMatrix.h"
 #include "include/core/SkRSXform.h"
 #include "include/core/SkRefCnt.h"
 
@@ -463,6 +464,338 @@ TEST_P(AiksTest, CanDrawPointsWithTextureMap) {
   builder.Translate(150, 0);
   builder.DrawPoints(DlCanvas::PointMode::kPoints, points.size(), points.data(),
                      paint_square);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, MipmapGenerationWorksCorrectly) {
+  TextureDescriptor texture_descriptor;
+  texture_descriptor.size = ISize{1024, 1024};
+  texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
+  texture_descriptor.storage_mode = StorageMode::kHostVisible;
+  texture_descriptor.mip_count = texture_descriptor.size.MipCount();
+
+  std::vector<uint8_t> bytes(4194304);
+  bool alternate = false;
+  for (auto i = 0u; i < 4194304; i += 4) {
+    if (alternate) {
+      bytes[i] = 255;
+      bytes[i + 1] = 0;
+      bytes[i + 2] = 0;
+      bytes[i + 3] = 255;
+    } else {
+      bytes[i] = 0;
+      bytes[i + 1] = 255;
+      bytes[i + 2] = 0;
+      bytes[i + 3] = 255;
+    }
+    alternate = !alternate;
+  }
+
+  ASSERT_EQ(texture_descriptor.GetByteSizeOfBaseMipLevel(), bytes.size());
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      bytes.data(),                                   // data
+      texture_descriptor.GetByteSizeOfBaseMipLevel()  // size
+  );
+  auto texture =
+      GetContext()->GetResourceAllocator()->CreateTexture(texture_descriptor);
+
+  auto device_buffer =
+      GetContext()->GetResourceAllocator()->CreateBufferWithCopy(*mapping);
+  auto command_buffer = GetContext()->CreateCommandBuffer();
+  auto blit_pass = command_buffer->CreateBlitPass();
+
+  blit_pass->AddCopy(DeviceBuffer::AsBufferView(std::move(device_buffer)),
+                     texture);
+  blit_pass->GenerateMipmap(texture);
+  EXPECT_TRUE(blit_pass->EncodeCommands(GetContext()->GetResourceAllocator()));
+  EXPECT_TRUE(GetContext()->GetCommandQueue()->Submit({command_buffer}).ok());
+
+  auto image = DlImageImpeller::Make(texture);
+
+  DisplayListBuilder builder;
+  builder.DrawImageRect(
+      image,
+      SkRect::MakeSize(
+          SkSize::Make(texture->GetSize().width, texture->GetSize().height)),
+      SkRect::MakeLTRB(0, 0, 100, 100), DlImageSampling::kMipmapLinear);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// https://github.com/flutter/flutter/issues/146648
+TEST_P(AiksTest, StrokedPathWithMoveToThenCloseDrawnCorrectly) {
+  SkPath path;
+  path.moveTo(0, 400)
+      .lineTo(0, 0)
+      .lineTo(400, 0)
+      // MoveTo implicitly adds a contour, ensure that close doesn't
+      // add another nearly-empty contour.
+      .moveTo(0, 400)
+      .close();
+
+  DisplayListBuilder builder;
+  builder.Translate(50, 50);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+  paint.setStrokeCap(DlStrokeCap::kRound);
+  paint.setStrokeWidth(10);
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  builder.DrawPath(path, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, SetContentsWithRegion) {
+  auto bridge = CreateTextureForFixture("bay_bridge.jpg");
+
+  // Replace part of the texture with a red rectangle.
+  std::vector<uint8_t> bytes(100 * 100 * 4);
+  for (auto i = 0u; i < bytes.size(); i += 4) {
+    bytes[i] = 255;
+    bytes[i + 1] = 0;
+    bytes[i + 2] = 0;
+    bytes[i + 3] = 255;
+  }
+  auto mapping =
+      std::make_shared<fml::NonOwnedMapping>(bytes.data(), bytes.size());
+  auto device_buffer =
+      GetContext()->GetResourceAllocator()->CreateBufferWithCopy(*mapping);
+  auto cmd_buffer = GetContext()->CreateCommandBuffer();
+  auto blit_pass = cmd_buffer->CreateBlitPass();
+  blit_pass->AddCopy(DeviceBuffer::AsBufferView(device_buffer), bridge,
+                     IRect::MakeLTRB(50, 50, 150, 150));
+
+  auto did_submit =
+      blit_pass->EncodeCommands(GetContext()->GetResourceAllocator()) &&
+      GetContext()->GetCommandQueue()->Submit({std::move(cmd_buffer)}).ok();
+  ASSERT_TRUE(did_submit);
+
+  auto image = DlImageImpeller::Make(bridge);
+
+  DisplayListBuilder builder;
+  builder.DrawImage(image, {0, 0}, {});
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/134678.
+TEST_P(AiksTest, ReleasesTextureOnTeardown) {
+  auto context = MakeContext();
+  std::weak_ptr<Texture> weak_texture;
+
+  {
+    auto texture = CreateTextureForFixture("table_mountain_nx.png");
+    weak_texture = texture;
+
+    DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
+    builder.Translate(100.0f, 100.0f);
+
+    DlPaint paint;
+    paint.setColorSource(std::make_shared<DlImageColorSource>(
+        DlImageImpeller::Make(texture), DlTileMode::kClamp, DlTileMode::kClamp,
+        DlImageSampling::kLinear, nullptr));
+
+    builder.DrawRect(SkRect::MakeXYWH(0, 0, 600, 600), paint);
+
+    ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+  }
+
+  // See https://github.com/flutter/flutter/issues/134751.
+  //
+  // If the fence waiter was working this may not be released by the end of the
+  // scope above. Adding a manual shutdown so that future changes to the fence
+  // waiter will not flake this test.
+  context->Shutdown();
+
+  // The texture should be released by now.
+  ASSERT_TRUE(weak_texture.expired()) << "When the texture is no longer in use "
+                                         "by the backend, it should be "
+                                         "released.";
+}
+
+TEST_P(AiksTest, MatrixImageFilterMagnify) {
+  Scalar scale = 2.0;
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("Scale", &scale, 1, 2);
+      ImGui::End();
+    }
+    DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
+    auto image = DlImageImpeller::Make(CreateTextureForFixture("airplane.jpg"));
+
+    builder.Translate(600, -200);
+
+    SkMatrix matrix = SkMatrix::Scale(scale, scale);
+    DlPaint paint;
+    paint.setImageFilter(
+        DlMatrixImageFilter::Make(matrix, DlImageSampling::kLinear));
+    builder.SaveLayer(nullptr, &paint);
+
+    DlPaint rect_paint;
+    rect_paint.setAlpha(0.5 * 255);
+    builder.DrawImage(image, {0, 0}, DlImageSampling::kLinear, &rect_paint);
+    builder.Restore();
+
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, ImageFilteredSaveLayerWithUnboundedContents) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  auto test = [&builder](const std::shared_ptr<const DlImageFilter>& filter) {
+    auto DrawLine = [&builder](const SkPoint& p0, const SkPoint& p1,
+                               const DlPaint& p) {
+      DlPaint paint = p;
+      paint.setDrawStyle(DlDrawStyle::kStroke);
+      builder.DrawPath(SkPath::Line(p0, p1), paint);
+    };
+    // Registration marks for the edge of the SaveLayer
+    DlPaint paint;
+    paint.setColor(DlColor::kWhite());
+    DrawLine(SkPoint::Make(75, 100), SkPoint::Make(225, 100), paint);
+    DrawLine(SkPoint::Make(75, 200), SkPoint::Make(225, 200), paint);
+    DrawLine(SkPoint::Make(100, 75), SkPoint::Make(100, 225), paint);
+    DrawLine(SkPoint::Make(200, 75), SkPoint::Make(200, 225), paint);
+
+    DlPaint save_paint;
+    save_paint.setImageFilter(filter);
+    SkRect bounds = SkRect::MakeLTRB(100, 100, 200, 200);
+    builder.SaveLayer(&bounds, &save_paint);
+
+    {
+      // DrawPaint to verify correct behavior when the contents are unbounded.
+      DlPaint paint;
+      paint.setColor(DlColor::kYellow());
+      builder.DrawPaint(paint);
+
+      // Contrasting rectangle to see interior blurring
+      paint.setColor(DlColor::kBlue());
+      builder.DrawRect(SkRect::MakeLTRB(125, 125, 175, 175), paint);
+    }
+    builder.Restore();
+  };
+
+  test(std::make_shared<DlBlurImageFilter>(10.0, 10.0, DlTileMode::kDecal));
+
+  builder.Translate(200.0, 0.0);
+
+  test(std::make_shared<DlDilateImageFilter>(10.0, 10.0));
+
+  builder.Translate(200.0, 0.0);
+
+  test(std::make_shared<DlErodeImageFilter>(10.0, 10.0));
+
+  builder.Translate(-400.0, 200.0);
+
+  SkMatrix sk_matrix = SkMatrix::RotateDeg(10);
+
+  auto rotate_filter = std::make_shared<DlMatrixImageFilter>(
+      sk_matrix, DlImageSampling::kLinear);
+  test(rotate_filter);
+
+  builder.Translate(200.0, 0.0);
+
+  const float m[20] = {
+      0, 1, 0, 0, 0,  //
+      0, 0, 1, 0, 0,  //
+      1, 0, 0, 0, 0,  //
+      0, 0, 0, 1, 0   //
+  };
+  auto rgb_swap_filter = std::make_shared<DlColorFilterImageFilter>(
+      std::make_shared<DlMatrixColorFilter>(m));
+  test(rgb_swap_filter);
+
+  builder.Translate(200.0, 0.0);
+
+  test(DlComposeImageFilter::Make(rotate_filter, rgb_swap_filter));
+
+  builder.Translate(-400.0, 200.0);
+
+  test(std::make_shared<DlLocalMatrixImageFilter>(
+      SkMatrix::Translate(25.0, 25.0), rotate_filter));
+
+  builder.Translate(200.0, 0.0);
+
+  test(std::make_shared<DlLocalMatrixImageFilter>(
+      SkMatrix::Translate(25.0, 25.0), rgb_swap_filter));
+
+  builder.Translate(200.0, 0.0);
+
+  test(std::make_shared<DlLocalMatrixImageFilter>(
+      SkMatrix::Translate(25.0, 25.0),
+      DlComposeImageFilter::Make(rotate_filter, rgb_swap_filter)));
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, MatrixBackdropFilter) {
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlack());
+  builder.DrawPaint(paint);
+  builder.SaveLayer(nullptr, nullptr);
+  {
+    DlPaint paint;
+    paint.setColor(DlColor::kGreen().withAlpha(0.5 * 255));
+    paint.setBlendMode(DlBlendMode::kPlus);
+    builder.DrawCircle(SkPoint::Make(200, 200), 100, paint);
+    // Should render a second circle, centered on the bottom-right-most edge of
+    // the circle.
+    SkMatrix matrix = SkMatrix::Translate((100 + 100 * k1OverSqrt2),
+                                          (100 + 100 * k1OverSqrt2)) *
+                      SkMatrix::Scale(0.5, 0.5) *
+                      SkMatrix::Translate(-100, -100);
+    auto backdrop_filter =
+        DlMatrixImageFilter::Make(matrix, DlImageSampling::kLinear);
+    builder.SaveLayer(nullptr, nullptr, backdrop_filter.get());
+    builder.Restore();
+  }
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, MatrixSaveLayerFilter) {
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlack());
+  builder.DrawPaint(paint);
+  builder.SaveLayer({}, nullptr);
+  {
+    paint.setColor(DlColor::kGreen().withAlpha(255 * 0.5));
+    paint.setBlendMode(DlBlendMode::kPlus);
+    builder.DrawCircle({200, 200}, 100, paint);
+    // Should render a second circle, centered on the bottom-right-most edge of
+    // the circle.
+
+    SkMatrix matrix = SkMatrix::Translate((200 + 100 * k1OverSqrt2),
+                                          (200 + 100 * k1OverSqrt2)) *
+                      SkMatrix::Scale(0.5, 0.5) *
+                      SkMatrix::Translate(-200, -200);
+    DlPaint save_paint;
+    save_paint.setImageFilter(
+        DlMatrixImageFilter::Make(matrix, DlImageSampling::kLinear));
+
+    builder.SaveLayer(nullptr, &save_paint);
+
+    DlPaint circle_paint;
+    circle_paint.setColor(DlColor::kGreen().withAlpha(255 * 0.5));
+    circle_paint.setBlendMode(DlBlendMode::kPlus);
+    builder.DrawCircle({200, 200}, 100, circle_paint);
+    builder.Restore();
+  }
+  builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

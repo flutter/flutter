@@ -222,7 +222,7 @@ IRect SurfaceMTL::coverage() const {
   return IRect::MakeSize(resolve_texture_->GetSize());
 }
 
-bool SurfaceMTL::PreparePresent() {
+bool SurfaceMTL::PreparePresent() const {
   auto context = context_.lock();
   if (!context) {
     return false;
@@ -265,7 +265,9 @@ bool SurfaceMTL::PreparePresent() {
 
 // |Surface|
 bool SurfaceMTL::Present() const {
-  FML_CHECK(prepared_);
+  if (!prepared_) {
+    PreparePresent();
+  }
   auto context = context_.lock();
   if (!context) {
     return false;
