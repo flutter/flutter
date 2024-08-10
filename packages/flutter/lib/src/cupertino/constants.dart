@@ -18,3 +18,16 @@ library;
 ///  * [kMinInteractiveDimension]
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/visual-design/adaptivity-and-layout/>
 const double kMinInteractiveDimensionCupertino = 44.0;
+
+/// The relative values needed to transform a color to it's equivalent focus
+/// outline color.
+///
+/// These are used to draw a focus ring around [CupertinoSwitch],
+/// [CupertinoCheckbox], [CupertinoRadio] and [CupertinoButton].
+///
+/// See also:
+///
+/// * <https://developer.apple.com/design/human-interface-guidelines/focus-and-selection/>
+const double kCupertinoFocusColorOpacity = 0.80,
+             kCupertinoFocusColorBrightness = 0.69,
+             kCupertinoFocusColorSaturation = 0.835;

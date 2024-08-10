@@ -718,7 +718,11 @@ void main() {
   testWidgets('Radio is focusable and has correct focus colors', (WidgetTester tester) async {
     const Color activeInnerColor = Color(0xffffffff);
     const Color activeOuterColor = Color(0xff007aff);
-    const Color defaultFocusColor = Color(0xcc6eadf2);
+    final Color defaultFocusColor = HSLColor
+      .fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
+      .withLightness(kCupertinoFocusColorBrightness)
+      .withSaturation(kCupertinoFocusColorSaturation)
+      .toColor();
     const double innerRadius = 2.975;
     const double outerRadius = 7.0;
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
