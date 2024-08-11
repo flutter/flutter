@@ -43,10 +43,8 @@ const CupertinoDynamicColor _kThumbColor = CupertinoDynamicColor.withBrightness(
   darkColor: Color(0xFF636366),
 );
 
-// The height of the separator.
-const double _kSeparatorHeight = 18.0;
 // The amount of space by which to inset each separator.
-const EdgeInsets _kSeparatorInset = EdgeInsets.symmetric(vertical: (_kMinSegmentedControlHeight - _kSeparatorHeight) / 2);
+const EdgeInsets _kSeparatorInset = EdgeInsets.symmetric(vertical: 5);
 const double _kSeparatorWidth = 1;
 const Radius _kSeparatorRadius = Radius.circular(_kSeparatorWidth / 2);
 
