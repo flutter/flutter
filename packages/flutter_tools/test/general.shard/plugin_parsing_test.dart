@@ -183,6 +183,79 @@ void main() {
     expect(windowsPlugin.dartPluginClass, 'WinSamplePlugin');
   });
 
+  testWithoutContext('Plugin parsing allows a dartFileName field with dartPluginClass', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' android:\n'
+      '  dartPluginClass: AndroidClass\n'
+      '  dartFileName: src/android_class.dart\n'
+      ' ios:\n'
+      '  dartPluginClass: IosClass\n'
+      '  dartFileName: src/ios_class.dart\n'
+      ' linux:\n'
+      '  dartPluginClass: LinuxClass\n'
+      '  dartFileName: src/linux_class.dart\n'
+      ' macos:\n'
+      '  dartPluginClass: MacOSClass\n'
+      '  dartFileName: src/macos_class.dart\n'
+      ' windows:\n'
+      '  dartPluginClass: WindowsClass\n'
+      '  dartFileName: src/windows_class.dart\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final Plugin plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      null,
+      const <String>[],
+      fileSystem: fileSystem,
+    );
+
+    expect(plugin.pluginDartClassPlatforms, <String, DartPluginClassAndFilePair>{
+      'android': const DartPluginClassAndFilePair('AndroidClass', 'src/android_class.dart'),
+      'ios': const DartPluginClassAndFilePair('IosClass', 'src/ios_class.dart'),
+      'linux':  const DartPluginClassAndFilePair('LinuxClass', 'src/linux_class.dart'),
+      'macos':  const DartPluginClassAndFilePair('MacOSClass', 'src/macos_class.dart'),
+      'windows':  const DartPluginClassAndFilePair('WindowsClass', 'src/windows_class.dart'),
+    });
+  });
+
+  testWithoutContext('dartFileName without dartPluginClass has no effect', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' android:\n'
+      '  package: com.example\n'
+      '  pluginClass: AndroidClass\n'
+      '  dartFileName: src/android_class.dart\n'
+      ' ios:\n'
+      '  pluginClass: IosClass\n'
+      '  dartFileName: src/ios_class.dart\n'
+      ' linux:\n'
+      '  pluginClass: LinuxClass\n'
+      '  dartFileName: src/linux_class.dart\n'
+      ' macos:\n'
+      '  pluginClass: MacOSClass\n'
+      '  dartFileName: src/macos_class.dart\n'
+      ' windows:\n'
+      '  pluginClass: WindowsClass\n'
+      '  dartFileName: src/windows_class.dart\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final Plugin plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      null,
+      const <String>[],
+      fileSystem: fileSystem,
+    );
+
+    expect(plugin.pluginDartClassPlatforms, <String, DartPluginClassAndFilePair>{});
+  });
+
   testWithoutContext('Plugin parsing of legacy format and multi-platform format together is not allowed '
     'and fatal error message contains plugin name', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
