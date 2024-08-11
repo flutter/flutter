@@ -30,6 +30,7 @@ const TextStyle _kDefaultTextStyle = TextStyle(
 // field.
 //
 // Values derived from https://developer.apple.com/design/resources/.
+// See [iOS 17 + iPadOS 17 UI Kit](https://www.figma.com/community/file/1248375255495415511) for details.
 const TextStyle _kDefaultActionTextStyle = TextStyle(
   inherit: false,
   fontFamily: 'CupertinoSystemText',
@@ -44,6 +45,7 @@ const TextStyle _kDefaultActionTextStyle = TextStyle(
 // field.
 //
 // Values derived from https://developer.apple.com/design/resources/.
+// See [iOS 17 + iPadOS 17 UI Kit](https://www.figma.com/community/file/1248375255495415511) for details.
 const TextStyle _kDefaultActionSmallTextStyle = TextStyle(
   inherit: false,
   fontFamily: 'CupertinoSystemText',
