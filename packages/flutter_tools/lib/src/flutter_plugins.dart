@@ -624,19 +624,19 @@ const String _dartPluginRegistryForNonWebTemplate = '''
 
 import 'dart:io'; // flutter_ignore: dart_io_import.
 {{#android}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
+import 'package:{{pluginName}}/{{dartFileName}}';
 {{/android}}
 {{#ios}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
+import 'package:{{pluginName}}/{{dartFileName}}';
 {{/ios}}
 {{#linux}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
+import 'package:{{pluginName}}/{{dartFileName}}';
 {{/linux}}
 {{#macos}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
+import 'package:{{pluginName}}/{{dartFileName}}';
 {{/macos}}
 {{#windows}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
+import 'package:{{pluginName}}/{{dartFileName}}';
 {{/windows}}
 
 @pragma('vm:entry-point')
@@ -1433,7 +1433,7 @@ bool _hasPluginInlineImpl(
 /// Determine if the plugin provides an inline Dart implementation.
 bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
   return plugin.pluginDartClassPlatforms[platformKey] != null &&
-      plugin.pluginDartClassPlatforms[platformKey] != 'none';
+      plugin.pluginDartClassPlatforms[platformKey]!.dartClass != 'none';
 }
 
 /// Get the resolved plugin [resolution] from the [candidates] serving as implementation for
