@@ -571,7 +571,12 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
       packageDirectory.childDirectory('example').childFile('pubspec.yaml'));
 
   await addLinkHookDependency(packageDirectory);
-  await addLinkedNativeLibrary(packageDirectory);
+
+  // TODO(blaugold): Enable for windows once CBuilder supports passing linker
+  // flags to MSVC compiler.
+  if (!platform.isWindows) {
+    await addLinkedNativeLibrary(packageDirectory);
+  }
 
   final ProcessResult result2 = await processManager.run(
     <String>[
@@ -769,20 +774,16 @@ void main(List<String> args) async {
         'src/\$packageName.c',
       ],
       flags: linkedLibraryUri == null ? [] : switch (config.targetOS) {
-        OS.windows => [
-          '/link',
-          '/I\${linkedLibraryUri.resolve('./').toFilePath()}',
-          'linked.lib',
-        ],
         OS.linux => [
           '-Wl,-rpath=\\\$ORIGIN/.',
           '-L\${linkedLibraryUri.resolve('./').toFilePath()}',
           '-llinked',
         ],
-        _ => [
+        OS.macos => [
           '-L\${linkedLibraryUri.resolve('./').toFilePath()}',
           '-llinked',
         ],
+        _ => throw UnimplementedError('Unsupported OS: \${config.targetOS}'),
       },
       dartBuildFiles: ['hook/build.dart'],
     );
