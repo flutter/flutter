@@ -1,0 +1,15 @@
+{{>head}}
+
+<div id="dartdoc-main-content" class="main-content">
+</div>
+
+<div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+  {{>search_sidebar}}
+  <h5 class="hidden-xs"><span class="package-name">{{self.name}}</span> <span class="package-kind">{{self.kind}}</span></h5>
+  {{>packages}}
+</div>
+
+<div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div>
+
+{{>footer}}

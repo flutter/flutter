@@ -1,0 +1,10 @@
+{{ #hasPublicMixedInTypes }}
+  <dt>Mixed in types</dt>
+  <dd>
+    <ul class="comma-separated {{ relationshipsClass }}">
+      {{ #publicMixedInTypes }}
+        <li>{{{ linkedName }}}</li>
+      {{ /publicMixedInTypes }}
+    </ul>
+  </dd>
+{{ /hasPublicMixedInTypes }}

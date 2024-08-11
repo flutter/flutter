@@ -1,0 +1,19 @@
+# Copyright (c) 2019, the Dart project authors.  Please see the AUTHORS file
+# for details. All rights reserved. Use of this source code is governed by a
+# BSD-style license that can be found in the LICENSE file.
+
+ffi_sdk_sources = [
+  "ffi.dart",
+
+  # The above file needs to be first as it lists the parts below.
+  "abi.dart",
+  "abi_specific.dart",
+  "allocation.dart",
+  "annotations.dart",
+  "c_type.dart",
+  "dynamic_library.dart",
+  "native_finalizer.dart",
+  "native_type.dart",
+  "struct.dart",
+  "union.dart",
+]

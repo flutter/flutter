@@ -1,0 +1,36 @@
+# Copyright (c) 2017, the Dart project authors.  Please see the AUTHORS file
+# for details. All rights reserved. Use of this source code is governed by a
+# BSD-style license that can be found in the LICENSE file.
+
+io_sdk_sources = [
+  "io.dart",
+
+  # The above file needs to be first if additional parts are added to the lib.
+  "common.dart",
+  "data_transformer.dart",
+  "directory.dart",
+  "directory_impl.dart",
+  "embedder_config.dart",
+  "eventhandler.dart",
+  "file.dart",
+  "file_impl.dart",
+  "file_system_entity.dart",
+  "io_resource_info.dart",
+  "io_service.dart",
+  "io_sink.dart",
+  "link.dart",
+  "namespace_impl.dart",
+  "network_profiling.dart",
+  "overrides.dart",
+  "platform.dart",
+  "platform_impl.dart",
+  "process.dart",
+  "secure_server_socket.dart",
+  "secure_socket.dart",
+  "security_context.dart",
+  "service_object.dart",
+  "socket.dart",
+  "stdio.dart",
+  "string_transformer.dart",
+  "sync_socket.dart",
+]

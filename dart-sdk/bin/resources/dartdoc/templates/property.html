@@ -1,0 +1,50 @@
+{{ >head }}
+
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="{{ aboveSidebarPath }}"
+    data-below-sidebar="{{ belowSidebarPath }}">
+  {{ #self }}
+    <div>{{ >source_link }}<h1><span class="kind-property">{{ name }}</span> {{ kind }} {{ >feature_set }}</h1></div>
+  {{ /self }}
+
+  {{ #self }}
+    {{ #hasNoGetterSetter }}
+      <section class="multi-line-signature">
+        {{ >annotations }}
+        {{{ modelType.linkedName }}}
+        {{ >name_summary }}
+        {{ >attributes }}
+      </section>
+      {{ >documentation }}
+      {{ >source_code }}
+    {{ /hasNoGetterSetter }}
+
+    {{ #hasGetterOrSetter }}
+      {{ #hasGetter }}
+        {{ >accessor_getter }}
+      {{ /hasGetter }}
+
+      {{ #hasSetter }}
+        {{ >accessor_setter }}
+      {{ /hasSetter }}
+    {{ /hasGetterOrSetter }}
+  {{ /self }}
+</div> <!-- /.main-content -->
+
+<div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+  {{ >search_sidebar }}
+  {{ #isParentExtension }}
+  <h5>{{ parent.name }} {{ parent.kind }} on {{{ parentAsExtension.extendedType.linkedName }}}</h5>
+  {{ /isParentExtension }}
+  {{ ^isParentExtension }}
+  <h5>{{ parent.name }} {{ parent.kind }}</h5>
+  {{ /isParentExtension }}
+  <div id="dartdoc-sidebar-left-content"></div>
+</div><!--/.sidebar-offcanvas-->
+
+<div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+
+{{ >footer }}

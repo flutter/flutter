@@ -1,0 +1,5 @@
+@media (-webkit-max-device-pixel-ratio: 1) {
+  * {
+    image-rendering: pixelated;
+  }
+}

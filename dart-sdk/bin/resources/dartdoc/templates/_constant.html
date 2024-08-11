@@ -1,0 +1,19 @@
+<dt id="{{ htmlId }}" class="constant">
+  {{ #isEnumValue }}
+    <span class="name {{ #isDeprecated }}deprecated{{ /isDeprecated }}">{{{ name }}}</span>
+  {{ /isEnumValue }}
+  {{ ^isEnumValue }}
+    <span class="name {{ #isDeprecated }}deprecated{{ /isDeprecated }}">{{{ linkedName }}}</span>
+  {{ /isEnumValue }}
+  <span class="signature">&#8594; const {{{ modelType.linkedName }}}</span>
+  {{ >categorization }}
+</dt>
+<dd>
+  {{{ oneLineDoc }}}
+  {{ >attributes }}
+  {{ #hasConstantValueForDisplay }}
+    <div>
+      <span class="signature"><code>{{{ constantValueTruncated }}}</code></span>
+    </div>
+  {{ /hasConstantValueForDisplay }}
+</dd>

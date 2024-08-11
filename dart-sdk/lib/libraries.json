@@ -1,0 +1,657 @@
+{
+  "comment:0": "NOTE: THIS FILE IS GENERATED. DO NOT EDIT.",
+  "comment:1": "Instead modify 'sdk/lib/libraries.yaml' and follow the instructions therein.",
+  "none": {
+    "libraries": {}
+  },
+  "vm_common": {
+    "libraries": {
+      "_builtin": {
+        "uri": "_internal/vm/bin/builtin.dart"
+      },
+      "_internal": {
+        "uri": "internal/internal.dart",
+        "patches": [
+          "_internal/vm/lib/internal_patch.dart"
+        ]
+      },
+      "async": {
+        "uri": "async/async.dart",
+        "patches": [
+          "_internal/vm/lib/async_patch.dart"
+        ]
+      },
+      "collection": {
+        "uri": "collection/collection.dart",
+        "patches": [
+          "_internal/vm_shared/lib/collection_patch.dart",
+          "_internal/vm_shared/lib/compact_hash.dart",
+          "_internal/vm/lib/hash_factories.dart"
+        ]
+      },
+      "convert": {
+        "uri": "convert/convert.dart",
+        "patches": "_internal/vm/lib/convert_patch.dart"
+      },
+      "core": {
+        "uri": "core/core.dart",
+        "patches": [
+          "_internal/vm/lib/array_patch.dart",
+          "_internal/vm/lib/core_patch.dart",
+          "_internal/vm_shared/lib/bigint_patch.dart",
+          "_internal/vm_shared/lib/bool_patch.dart",
+          "_internal/vm_shared/lib/date_patch.dart",
+          "_internal/vm_shared/lib/integers_patch.dart",
+          "_internal/vm_shared/lib/map_patch.dart",
+          "_internal/vm_shared/lib/null_patch.dart",
+          "_internal/vm_shared/lib/string_buffer_patch.dart"
+        ]
+      },
+      "developer": {
+        "uri": "developer/developer.dart",
+        "patches": [
+          "_internal/vm/lib/developer.dart"
+        ]
+      },
+      "ffi": {
+        "uri": "ffi/ffi.dart",
+        "patches": [
+          "_internal/vm/lib/ffi_patch.dart",
+          "_internal/vm/lib/ffi_allocation_patch.dart",
+          "_internal/vm/lib/ffi_dynamic_library_patch.dart",
+          "_internal/vm/lib/ffi_native_finalizer_patch.dart",
+          "_internal/vm/lib/ffi_native_type_patch.dart",
+          "_internal/vm/lib/ffi_struct_patch.dart"
+        ]
+      },
+      "_http": {
+        "uri": "_http/http.dart"
+      },
+      "io": {
+        "uri": "io/io.dart",
+        "patches": [
+          "_internal/vm/bin/common_patch.dart"
+        ]
+      },
+      "isolate": {
+        "uri": "isolate/isolate.dart",
+        "patches": [
+          "_internal/vm/lib/isolate_patch.dart"
+        ]
+      },
+      "math": {
+        "uri": "math/math.dart",
+        "patches": "_internal/vm/lib/math_patch.dart"
+      },
+      "mirrors": {
+        "uri": "mirrors/mirrors.dart",
+        "patches": [
+          "_internal/vm/lib/mirrors_patch.dart"
+        ]
+      },
+      "nativewrappers": {
+        "uri": "html/dartium/nativewrappers.dart"
+      },
+      "typed_data": {
+        "uri": "typed_data/typed_data.dart",
+        "patches": "_internal/vm/lib/typed_data_patch.dart"
+      },
+      "_vmservice": {
+        "uri": "vmservice/vmservice.dart"
+      },
+      "vmservice_io": {
+        "uri": "_internal/vm/bin/vmservice_io.dart"
+      }
+    }
+  },
+  "vm": {
+    "include": [
+      {
+        "target": "vm_common"
+      }
+    ],
+    "libraries": {
+      "cli": {
+        "uri": "cli/cli.dart"
+      }
+    }
+  },
+  "wasm": {
+    "include": [
+      {
+        "target": "wasm_common"
+      }
+    ],
+    "libraries": {
+      "core": {
+        "uri": "core/core.dart",
+        "patches": [
+          "_internal/vm_shared/lib/bigint_patch.dart",
+          "_internal/vm_shared/lib/bool_patch.dart",
+          "_internal/vm_shared/lib/date_patch.dart",
+          "_internal/vm_shared/lib/map_patch.dart",
+          "_internal/vm_shared/lib/null_patch.dart",
+          "_internal/wasm/lib/array_patch.dart",
+          "_internal/wasm/lib/boxed_double.dart",
+          "_internal/wasm/lib/boxed_int.dart",
+          "_internal/wasm/lib/boxed_int_to_string.dart",
+          "_internal/wasm/lib/core_patch.dart",
+          "_internal/wasm/lib/date_patch_patch.dart",
+          "_internal/wasm/lib/int_common_patch.dart",
+          "_internal/wasm/lib/int_patch.dart",
+          "_internal/wasm/lib/string_buffer_patch.dart",
+          "_internal/wasm/lib/string_patch.dart",
+          "_internal/wasm/lib/sync_star_patch.dart",
+          "_internal/wasm/lib/weak_patch.dart"
+        ]
+      },
+      "convert": {
+        "uri": "convert/convert.dart",
+        "patches": [
+          "_internal/wasm/lib/convert_patch.dart"
+        ]
+      },
+      "typed_data": {
+        "uri": "typed_data/typed_data.dart",
+        "patches": [
+          "_internal/wasm/lib/simd_patch.dart",
+          "_internal/wasm/lib/typed_data_patch.dart"
+        ]
+      },
+      "_string": {
+        "uri": "_internal/wasm/lib/js_string.dart",
+        "patches": "_internal/wasm/lib/string.dart"
+      },
+      "_typed_data": {
+        "uri": "_internal/wasm/lib/typed_data.dart"
+      },
+      "_js_helper": {
+        "uri": "_internal/wasm/lib/js_helper.dart",
+        "patches": [
+          "_internal/wasm/lib/js_helper_patch.dart"
+        ]
+      }
+    }
+  },
+  "wasm_js_compatibility": {
+    "include": [
+      {
+        "target": "wasm_common"
+      }
+    ],
+    "libraries": {
+      "convert": {
+        "uri": "convert/convert.dart",
+        "patches": [
+          "_internal/wasm_js_compatibility/lib/convert_patch.dart"
+        ]
+      },
+      "core": {
+        "uri": "core/core.dart",
+        "patches": [
+          "_internal/vm_shared/lib/bigint_patch.dart",
+          "_internal/vm_shared/lib/bool_patch.dart",
+          "_internal/vm_shared/lib/date_patch.dart",
+          "_internal/vm_shared/lib/map_patch.dart",
+          "_internal/vm_shared/lib/null_patch.dart",
+          "_internal/wasm/lib/array_patch.dart",
+          "_internal/wasm/lib/boxed_double.dart",
+          "_internal/wasm/lib/boxed_int.dart",
+          "_internal/wasm/lib/core_patch.dart",
+          "_internal/wasm/lib/date_patch_patch.dart",
+          "_internal/wasm/lib/int_common_patch.dart",
+          "_internal/wasm/lib/sync_star_patch.dart",
+          "_internal/wasm/lib/weak_patch.dart",
+          "_internal/wasm_js_compatibility/lib/boxed_int_to_string.dart",
+          "_internal/wasm_js_compatibility/lib/int_patch.dart",
+          "_internal/wasm_js_compatibility/lib/string_buffer_patch.dart",
+          "_internal/wasm_js_compatibility/lib/string_patch.dart"
+        ]
+      },
+      "typed_data": {
+        "uri": "typed_data/typed_data.dart",
+        "patches": [
+          "_internal/wasm/lib/simd_patch.dart",
+          "_internal/wasm_js_compatibility/lib/typed_data_patch.dart"
+        ]
+      },
+      "_string": {
+        "uri": "_internal/wasm/lib/js_string.dart"
+      },
+      "_js_helper": {
+        "uri": "_internal/wasm/lib/js_helper.dart",
+        "patches": [
+          "_internal/wasm_js_compatibility/lib/js_helper_patch.dart"
+        ]
+      }
+    }
+  },
+  "wasm_common": {
+    "libraries": {
+      "core": {
+        "uri": "core/core.dart",
+        "patches": [
+          "_internal/wasm/lib/boxed_double.dart",
+          "_internal/wasm/lib/boxed_int.dart",
+          "_internal/wasm/lib/int_common_patch.dart"
+        ]
+      },
+      "_error_utils": {
+        "uri": "_internal/wasm/lib/error_utils.dart"
+      },
+      "_http": {
+        "uri": "_http/http.dart"
+      },
+      "_internal": {
+        "uri": "internal/internal.dart",
+        "patches": [
+          "_internal/wasm/lib/internal_patch.dart"
+        ]
+      },
+      "_js_annotations": {
+        "uri": "js/_js_annotations.dart"
+      },
+      "_js_string_convert": {
+        "uri": "_internal/wasm/lib/js_string_convert.dart"
+      },
+      "_js_types": {
+        "uri": "_internal/wasm/lib/js_types.dart"
+      },
+      "_list": {
+        "uri": "_internal/wasm/lib/list.dart"
+      },
+      "_object_helper": {
+        "uri": "_internal/wasm/lib/object_helper.dart"
+      },
+      "_simd": {
+        "uri": "_internal/wasm/lib/simd.dart"
+      },
+      "_string_helper": {
+        "uri": "_internal/wasm/lib/string_helper.dart"
+      },
+      "_wasm": {
+        "uri": "_wasm/wasm_types.dart",
+        "patches": "_internal/wasm/lib/wasm_types_patch.dart"
+      },
+      "async": {
+        "uri": "async/async.dart",
+        "patches": [
+          "_internal/wasm/lib/async_patch.dart"
+        ]
+      },
+      "collection": {
+        "uri": "collection/collection.dart",
+        "patches": [
+          "_internal/vm_shared/lib/collection_patch.dart",
+          "_internal/wasm/lib/compact_hash.dart",
+          "_internal/wasm/lib/hash_factories.dart"
+        ]
+      },
+      "developer": {
+        "uri": "developer/developer.dart",
+        "patches": [
+          "_internal/js_runtime/lib/developer_patch.dart"
+        ]
+      },
+      "ffi": {
+        "uri": "ffi/ffi.dart",
+        "patches": [
+          "_internal/vm/lib/ffi_patch.dart",
+          "_internal/vm/lib/ffi_allocation_patch.dart",
+          "_internal/vm/lib/ffi_dynamic_library_patch.dart",
+          "_internal/vm/lib/ffi_native_type_patch.dart",
+          "_internal/vm/lib/ffi_struct_patch.dart"
+        ]
+      },
+      "nativewrappers": {
+        "uri": "html/dartium/nativewrappers.dart"
+      },
+      "io": {
+        "uri": "io/io.dart",
+        "patches": "_internal/wasm/lib/io_patch.dart",
+        "supported": false
+      },
+      "isolate": {
+        "uri": "isolate/isolate.dart",
+        "patches": [
+          "_internal/wasm/lib/isolate_patch.dart"
+        ]
+      },
+      "js": {
+        "uri": "js/js.dart",
+        "patches": "_internal/wasm/lib/js_patch.dart"
+      },
+      "js_interop": {
+        "uri": "js_interop/js_interop.dart",
+        "patches": "_internal/wasm/lib/js_interop_patch.dart"
+      },
+      "js_interop_unsafe": {
+        "uri": "js_interop_unsafe/js_interop_unsafe.dart",
+        "patches": "_internal/wasm/lib/js_interop_unsafe_patch.dart"
+      },
+      "js_util": {
+        "uri": "js_util/js_util.dart",
+        "patches": "_internal/wasm/lib/js_util_patch.dart"
+      },
+      "math": {
+        "uri": "math/math.dart",
+        "patches": "_internal/wasm/lib/math_patch.dart"
+      }
+    }
+  },
+  "dart2js": {
+    "include": [
+      {
+        "target": "_dart2js_common"
+      }
+    ],
+    "libraries": {
+      "html": {
+        "uri": "html/dart2js/html_dart2js.dart"
+      },
+      "html_common": {
+        "uri": "html/html_common/html_common_dart2js.dart"
+      },
+      "indexed_db": {
+        "uri": "indexed_db/dart2js/indexed_db_dart2js.dart"
+      },
+      "_js": {
+        "uri": "js/_js.dart",
+        "patches": "js/_js_client.dart"
+      },
+      "svg": {
+        "uri": "svg/dart2js/svg_dart2js.dart"
+      },
+      "web_audio": {
+        "uri": "web_audio/dart2js/web_audio_dart2js.dart"
+      },
+      "web_gl": {
+        "uri": "web_gl/dart2js/web_gl_dart2js.dart"
+      },
+      "_metadata": {
+        "uri": "html/html_common/metadata.dart"
+      }
+    }
+  },
+  "dart2js_server": {
+    "include": [
+      {
+        "target": "_dart2js_common"
+      }
+    ],
+    "libraries": {
+      "_js": {
+        "uri": "js/_js.dart",
+        "patches": "js/_js_server.dart"
+      }
+    }
+  },
+  "_dart2js_common": {
+    "libraries": {
+      "async": {
+        "uri": "async/async.dart",
+        "patches": "_internal/js_runtime/lib/async_patch.dart"
+      },
+      "collection": {
+        "uri": "collection/collection.dart",
+        "patches": "_internal/js_runtime/lib/collection_patch.dart"
+      },
+      "convert": {
+        "uri": "convert/convert.dart",
+        "patches": [
+          "_internal/js_shared/lib/convert_utf_patch.dart",
+          "_internal/js_runtime/lib/convert_patch.dart"
+        ]
+      },
+      "core": {
+        "uri": "core/core.dart",
+        "patches": [
+          "_internal/js_shared/lib/date_time_patch.dart",
+          "_internal/js_runtime/lib/core_patch.dart"
+        ]
+      },
+      "developer": {
+        "uri": "developer/developer.dart",
+        "patches": "_internal/js_runtime/lib/developer_patch.dart"
+      },
+      "_http": {
+        "uri": "_http/http.dart"
+      },
+      "io": {
+        "uri": "io/io.dart",
+        "patches": "_internal/js_runtime/lib/io_patch.dart",
+        "supported": false
+      },
+      "isolate": {
+        "uri": "isolate/isolate.dart",
+        "patches": "_internal/js_runtime/lib/isolate_patch.dart",
+        "supported": false
+      },
+      "js": {
+        "uri": "js/js.dart",
+        "patches": "_internal/js_runtime/lib/js_patch.dart"
+      },
+      "js_interop": {
+        "uri": "js_interop/js_interop.dart",
+        "patches": "_internal/js_shared/lib/js_interop_patch.dart"
+      },
+      "js_interop_unsafe": {
+        "uri": "js_interop_unsafe/js_interop_unsafe.dart",
+        "patches": "_internal/js_shared/lib/js_interop_unsafe_patch.dart"
+      },
+      "_js_annotations": {
+        "uri": "js/_js_annotations.dart"
+      },
+      "_js_types": {
+        "uri": "_internal/js_shared/lib/js_types.dart"
+      },
+      "js_util": {
+        "uri": "js_util/js_util.dart",
+        "patches": [
+          "_internal/js_shared/lib/js_util_patch.dart",
+          "_internal/js_runtime/lib/js_allow_interop_patch.dart"
+        ]
+      },
+      "math": {
+        "uri": "math/math.dart",
+        "patches": "_internal/js_runtime/lib/math_patch.dart"
+      },
+      "typed_data": {
+        "uri": "typed_data/typed_data.dart",
+        "patches": "_internal/js_runtime/lib/typed_data_patch.dart"
+      },
+      "_native_typed_data": {
+        "uri": "_internal/js_runtime/lib/native_typed_data.dart"
+      },
+      "_internal": {
+        "uri": "internal/internal.dart",
+        "patches": "_internal/js_runtime/lib/internal_patch.dart"
+      },
+      "_dart2js_only": {
+        "uri": "_internal/js_runtime/lib/dart2js_only.dart"
+      },
+      "_dart2js_runtime_metrics": {
+        "uri": "_internal/js_runtime/lib/dart2js_runtime_metrics.dart"
+      },
+      "_js_helper": {
+        "uri": "_internal/js_runtime/lib/js_helper.dart"
+      },
+      "_late_helper": {
+        "uri": "_internal/js_runtime/lib/late_helper.dart"
+      },
+      "_rti": {
+        "uri": "_internal/js_shared/lib/rti.dart"
+      },
+      "_interceptors": {
+        "uri": "_internal/js_runtime/lib/interceptors.dart"
+      },
+      "_foreign_helper": {
+        "uri": "_internal/js_runtime/lib/foreign_helper.dart"
+      },
+      "_js_names": {
+        "uri": "_internal/js_runtime/lib/js_names.dart"
+      },
+      "_js_primitives": {
+        "uri": "_internal/js_runtime/lib/js_primitives.dart"
+      },
+      "_js_embedded_names": {
+        "uri": "_internal/js_runtime/lib/synced/embedded_names.dart"
+      },
+      "_js_shared_embedded_names": {
+        "uri": "_internal/js_shared/lib/synced/embedded_names.dart"
+      },
+      "_async_status_codes": {
+        "uri": "_internal/js_runtime/lib/synced/async_status_codes.dart"
+      },
+      "_invocation_mirror_constants": {
+        "uri": "_internal/js_runtime/lib/synced/invocation_mirror_constants.dart"
+      },
+      "_load_library_priority": {
+        "uri": "_internal/js_runtime/lib/synced/load_library_priority.dart"
+      },
+      "_recipe_syntax": {
+        "uri": "_internal/js_shared/lib/synced/recipe_syntax.dart"
+      }
+    }
+  },
+  "dartdevc": {
+    "libraries": {
+      "_runtime": {
+        "uri": "_internal/js_dev_runtime/private/ddc_runtime/runtime.dart"
+      },
+      "_debugger": {
+        "uri": "_internal/js_dev_runtime/private/debugger.dart"
+      },
+      "_foreign_helper": {
+        "uri": "_internal/js_dev_runtime/private/foreign_helper.dart"
+      },
+      "_http": {
+        "uri": "_http/http.dart"
+      },
+      "_interceptors": {
+        "uri": "_internal/js_dev_runtime/private/interceptors.dart"
+      },
+      "_internal": {
+        "uri": "internal/internal.dart",
+        "patches": "_internal/js_dev_runtime/patch/internal_patch.dart"
+      },
+      "_isolate_helper": {
+        "uri": "_internal/js_dev_runtime/private/isolate_helper.dart"
+      },
+      "_js_annotations": {
+        "uri": "js/_js_annotations.dart"
+      },
+      "_js_shared_embedded_names": {
+        "uri": "_internal/js_shared/lib/synced/embedded_names.dart"
+      },
+      "_js_helper": {
+        "uri": "_internal/js_dev_runtime/private/js_helper.dart"
+      },
+      "_js_names": {
+        "uri": "_internal/js_dev_runtime/private/js_names.dart"
+      },
+      "_js_primitives": {
+        "uri": "_internal/js_dev_runtime/private/js_primitives.dart"
+      },
+      "_js_types": {
+        "uri": "_internal/js_shared/lib/js_types.dart"
+      },
+      "_metadata": {
+        "uri": "html/html_common/metadata.dart"
+      },
+      "_native_typed_data": {
+        "uri": "_internal/js_dev_runtime/private/native_typed_data.dart"
+      },
+      "_ddc_only": {
+        "uri": "_internal/js_dev_runtime/private/ddc_only.dart"
+      },
+      "_rti": {
+        "uri": "_internal/js_shared/lib/rti.dart"
+      },
+      "_recipe_syntax": {
+        "uri": "_internal/js_shared/lib/synced/recipe_syntax.dart"
+      },
+      "async": {
+        "uri": "async/async.dart",
+        "patches": "_internal/js_dev_runtime/patch/async_patch.dart"
+      },
+      "collection": {
+        "uri": "collection/collection.dart",
+        "patches": "_internal/js_dev_runtime/patch/collection_patch.dart"
+      },
+      "convert": {
+        "uri": "convert/convert.dart",
+        "patches": [
+          "_internal/js_shared/lib/convert_utf_patch.dart",
+          "_internal/js_dev_runtime/patch/convert_patch.dart"
+        ]
+      },
+      "core": {
+        "uri": "core/core.dart",
+        "patches": [
+          "_internal/js_shared/lib/date_time_patch.dart",
+          "_internal/js_dev_runtime/patch/core_patch.dart"
+        ]
+      },
+      "developer": {
+        "uri": "developer/developer.dart",
+        "patches": "_internal/js_dev_runtime/patch/developer_patch.dart"
+      },
+      "io": {
+        "uri": "io/io.dart",
+        "patches": "_internal/js_dev_runtime/patch/io_patch.dart",
+        "supported": false
+      },
+      "isolate": {
+        "uri": "isolate/isolate.dart",
+        "patches": "_internal/js_dev_runtime/patch/isolate_patch.dart",
+        "supported": false
+      },
+      "math": {
+        "uri": "math/math.dart",
+        "patches": "_internal/js_dev_runtime/patch/math_patch.dart"
+      },
+      "typed_data": {
+        "uri": "typed_data/typed_data.dart",
+        "patches": "_internal/js_dev_runtime/patch/typed_data_patch.dart"
+      },
+      "html": {
+        "uri": "html/dart2js/html_dart2js.dart"
+      },
+      "html_common": {
+        "uri": "html/html_common/html_common_dart2js.dart"
+      },
+      "indexed_db": {
+        "uri": "indexed_db/dart2js/indexed_db_dart2js.dart"
+      },
+      "js": {
+        "uri": "js/js.dart",
+        "patches": "_internal/js_dev_runtime/patch/js_patch.dart"
+      },
+      "js_interop": {
+        "uri": "js_interop/js_interop.dart",
+        "patches": "_internal/js_shared/lib/js_interop_patch.dart"
+      },
+      "js_interop_unsafe": {
+        "uri": "js_interop_unsafe/js_interop_unsafe.dart",
+        "patches": "_internal/js_shared/lib/js_interop_unsafe_patch.dart"
+      },
+      "js_util": {
+        "uri": "js_util/js_util.dart",
+        "patches": [
+          "_internal/js_shared/lib/js_util_patch.dart",
+          "_internal/js_dev_runtime/patch/js_allow_interop_patch.dart"
+        ]
+      },
+      "svg": {
+        "uri": "svg/dart2js/svg_dart2js.dart"
+      },
+      "web_audio": {
+        "uri": "web_audio/dart2js/web_audio_dart2js.dart"
+      },
+      "web_gl": {
+        "uri": "web_gl/dart2js/web_gl_dart2js.dart"
+      }
+    }
+  }
+}

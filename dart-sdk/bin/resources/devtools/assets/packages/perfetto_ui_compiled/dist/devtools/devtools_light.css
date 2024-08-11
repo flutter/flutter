@@ -1,0 +1,33 @@
+/**
+Copyright 2022 The Chromium Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
+**/
+
+@import "devtools_shared.css";
+
+:root {
+    /* Perfetto CSS variable overrides. */
+    /* Matches [lightColorScheme.surface] color from DevTools. */
+    --main-background-color: #ffffff !important;
+    /* Matches [lightColorScheme.onSurface] color from DevTools. */
+    --main-foreground-color: #1b1b1f !important;
+}
+
+.track-group-panel[collapsed=false], .track-group-panel[collapsed=false] .shell {
+    background-color: #f4fafb !important;
+    color: inherit !important;
+}
+
+.topbar .omnibox.command-mode {
+    background-color: var(--main-background-color) !important;
+    color: transparent !important;
+}
+
+.topbar .omnibox.command-mode input {
+    color: #3c4c5d !important;
+}
+
+.topbar .omnibox.command-mode:before {
+    color: #46c358 !important;
+}

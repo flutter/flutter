@@ -1,0 +1,65 @@
+{{ >head }}
+
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="{{ aboveSidebarPath }}"
+    data-below-sidebar="{{ belowSidebarPath }}">
+  {{ #self }}
+    <div>{{ >source_link }}<h1><span class="kind-class">{{{ nameWithGenerics }}}</span> {{ kind }} {{ >feature_set }} {{ >categorization }}</h1></div>
+  {{ /self }}
+
+  {{ #clazz }}
+    {{ >documentation }}
+
+    {{ #hasModifiers }}
+    <section>
+      <dl class="dl-horizontal">
+        {{ >super_chain }}
+        {{ >interfaces }}
+        {{ >mixed_in_types }}
+
+        {{ #hasPublicImplementers }}
+          <dt>Implementers</dt>
+          <dd><ul class="comma-separated clazz-relationships">
+            {{ #publicImplementersSorted }}
+              <li>{{{ linkedName }}}</li>
+            {{ /publicImplementersSorted }}
+          </ul></dd>
+        {{ /hasPublicImplementers }}
+
+        {{ #hasPotentiallyApplicableExtensions }}
+          <dt>Available Extensions</dt>
+          <dd><ul class="comma-separated clazz-relationships">
+            {{ #potentiallyApplicableExtensionsSorted }}
+              <li>{{{ linkedName }}}</li>
+            {{ /potentiallyApplicableExtensionsSorted }}
+          </ul></dd>
+        {{ /hasPotentiallyApplicableExtensions }}
+
+        {{ >container_annotations }}
+      </dl>
+    </section>
+    {{ /hasModifiers }}
+
+    {{ >constructors }}
+    {{ >instance_fields }}
+    {{ >instance_methods }}
+    {{ >instance_operators }}
+    {{ >static_properties }}
+    {{ >static_methods }}
+    {{ >static_constants }}
+  {{ /clazz }}
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    {{ >search_sidebar }}
+    <h5>{{ parent.name }} {{ parent.kind }}</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div>
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+{{ >footer }}

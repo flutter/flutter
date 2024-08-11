@@ -1,0 +1,27 @@
+{{>head}}
+
+  <div id="dartdoc-main-content" class="main-content">
+    <h1>404: Something's gone wrong :-(</h1>
+
+    <section class="desc">
+      <p>You've tried to visit a page that doesn't exist.  Luckily this site
+         has other <a href="index.html">pages</a>.</p>
+      <p>If you were looking for something specific, try searching:
+      <form class="search-body" role="search">
+        <input type="text" id="search-body" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+      </form>
+      </p>
+
+    </section>
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    {{>search_sidebar}}
+    <h5><span class="package-name">{{self.name}}</span> <span class="package-kind">{{self.kind}}</span></h5>
+    {{>packages}}
+  </div>
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div>
+
+{{>footer}}

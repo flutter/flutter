@@ -1,0 +1,23 @@
+</main>
+
+<footer>
+  <span class="no-break">
+    {{defaultPackage.name}}
+    {{#hasFooterVersion}}
+      {{defaultPackage.version}}
+    {{/hasFooterVersion}}
+  </span>
+
+  {{{ customInnerFooter }}}
+</footer>
+
+{{! TODO(jdkoren): unwrap ^useBaseHref sections when the option is removed.}}
+{{! **Update versions for static assets when changed to force browsers to refresh them.** }}
+<script src="{{^useBaseHref}}%%__HTMLBASE_dartdoc_internal__%%{{/useBaseHref}}static-assets/highlight.pack.js?v1"></script>
+<script src="{{^useBaseHref}}%%__HTMLBASE_dartdoc_internal__%%{{/useBaseHref}}static-assets/docs.dart.js"></script>
+
+{{{ customFooter }}}
+
+</body>
+
+</html>
