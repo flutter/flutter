@@ -779,7 +779,7 @@ void main(List<String> args) async {
           '-L\${linkedLibraryUri.resolve('./').toFilePath()}',
           '-llinked',
         ],
-        OS.macos => [
+        OS.macOS => [
           '-L\${linkedLibraryUri.resolve('./').toFilePath()}',
           '-llinked',
         ],
