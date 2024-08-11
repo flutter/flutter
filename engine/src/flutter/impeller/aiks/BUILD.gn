@@ -26,8 +26,6 @@ impeller_component("aiks") {
     "paint_pass_delegate.h",
     "picture.cc",
     "picture.h",
-    "picture_recorder.cc",
-    "picture_recorder.h",
   ]
 
   public_deps = [
