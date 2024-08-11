@@ -774,12 +774,12 @@ void main(List<String> args) async {
         'src/\$packageName.c',
       ],
       flags: linkedLibraryUri == null ? [] : switch (config.targetOS) {
-        OS.linux => [
+        OS.linux || OS.android => [
           '-Wl,-rpath=\\\$ORIGIN/.',
           '-L\${linkedLibraryUri.resolve('./').toFilePath()}',
           '-llinked',
         ],
-        OS.macOS => [
+        OS.macOS || OS.iOS => [
           '-L\${linkedLibraryUri.resolve('./').toFilePath()}',
           '-llinked',
         ],
