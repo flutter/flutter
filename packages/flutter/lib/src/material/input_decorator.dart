@@ -1749,6 +1749,7 @@ class InputDecorator extends StatefulWidget {
     this.isHovering = false,
     this.expands = false,
     this.isEmpty = false,
+    this.isHintNotCreatedOnInput = false,
     this.child,
   });
 
@@ -1828,6 +1829,11 @@ class InputDecorator extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool isEmpty;
+
+  /// Whether the hint view do not be created when there is input text.
+  ///
+  /// Defaults to false.
+  final bool? isHintNotCreatedOnInput;
 
   /// The widget below this widget in the tree.
   ///
@@ -2163,7 +2169,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final TextStyle hintStyle = _getInlineHintStyle(themeData, defaults);
     final String? hintText = decoration.hintText;
-    final Widget? hint = hintText == null ? null : AnimatedOpacity(
+    final bool isHintNotCreatedOnInput = !isEmpty && (widget.isHintNotCreatedOnInput ?? false);
+    final Widget? hint = (isHintNotCreatedOnInput || hintText == null) ? null : AnimatedOpacity(
       opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
       duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
       curve: _kTransitionCurve,

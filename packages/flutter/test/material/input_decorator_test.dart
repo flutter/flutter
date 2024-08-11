@@ -54,6 +54,7 @@ Widget buildInputDecorator({
   TextStyle? baseStyle,
   TextAlignVertical? textAlignVertical,
   VisualDensity? visualDensity,
+  bool? isHintNotCreatedOnInput,
   Widget child = const Text(
     inputText,
     // Use a text style compliant with M3 specification (which is bodyLarge for text fields).
@@ -68,6 +69,7 @@ Widget buildInputDecorator({
     isHovering: isHovering,
     baseStyle: baseStyle,
     textAlignVertical: textAlignVertical,
+    isHintNotCreatedOnInput: isHintNotCreatedOnInput,
     child: child,
   );
 
@@ -4504,6 +4506,21 @@ void main() {
       final Finder hintTextFinder = find.text(hintText);
       final Text hintTextWidget = tester.widget(hintTextFinder);
       expect(hintTextWidget.style!.overflow, decoration.hintStyle!.overflow);
+    });
+
+    testWidgets('hint view do not be created when there is input text.', (WidgetTester tester) async {
+      final String hintText = 'hint text' * 20;
+      final InputDecoration decoration = InputDecoration(
+        hintText: hintText,
+      );
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decoration,
+          isHintNotCreatedOnInput: true,
+        ),
+      );
+      expect(find.text(hintText), findsNothing);
     });
   });
 

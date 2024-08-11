@@ -336,6 +336,7 @@ class TextField extends StatefulWidget {
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
+    this.isHintNotCreatedOnInput,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
@@ -378,6 +379,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.groupId}
   final Object groupId;
+
+  /// Whether the hint view do not be created when there is input text.
+  final bool? isHintNotCreatedOnInput;
 
   /// Controls the text being edited.
   ///
@@ -1559,6 +1563,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             isFocused: focusNode.hasFocus,
             isEmpty: controller.value.text.isEmpty,
             expands: widget.expands,
+            isHintNotCreatedOnInput: widget.isHintNotCreatedOnInput,
             child: child,
           );
         },
