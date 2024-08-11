@@ -1066,7 +1066,19 @@ mixin SchedulerBinding on BindingBase {
 
   Duration? _firstRawTimeStampInEpoch;
   Duration _epochStart = Duration.zero;
-  Duration _lastRawTimeStamp = Duration.zero;
+
+  // TODO(tvolkert): this indirection was added to aid in tracking down
+  // https://github.com/flutter/flutter/issues/106277; remove the indirection
+  // once the issue has been resolved.
+  Duration __lastRawTimeStamp = Duration.zero;
+  Duration get _lastRawTimeStamp => __lastRawTimeStamp;
+  set _lastRawTimeStamp(Duration value) {
+    assert(
+      value >= __lastRawTimeStamp,
+      'Frame timestamp ($value) is before last known frame timestamp ($__lastRawTimeStamp)',
+    );
+    __lastRawTimeStamp = value;
+  }
 
   /// Prepares the scheduler for a non-monotonic change to how time stamps are
   /// calculated.

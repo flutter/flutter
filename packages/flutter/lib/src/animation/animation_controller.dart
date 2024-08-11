@@ -906,7 +906,10 @@ class AnimationController extends Animation<double>
   void _tick(Duration elapsed) {
     _lastElapsedDuration = elapsed;
     final double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
-    assert(elapsedInSeconds >= 0.0);
+    assert(
+      elapsedInSeconds >= 0.0,
+      'elapsedInSeconds was expected to be >= 0, but it was $elapsedInSeconds ($elapsed)',
+    );
     _value = clampDouble(_simulation!.x(elapsedInSeconds), lowerBound, upperBound);
     if (_simulation!.isDone(elapsedInSeconds)) {
       _status = (_direction == _AnimationDirection.forward) ?
