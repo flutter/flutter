@@ -494,6 +494,7 @@ class PluginInterfaceResolution {
 @immutable
 class DartPluginClassAndFilePair {
   const DartPluginClassAndFilePair(this.dartClass, this.dartFileName);
+
   final String dartClass;
   final String dartFileName;
 

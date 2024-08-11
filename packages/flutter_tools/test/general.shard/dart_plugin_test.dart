@@ -92,7 +92,7 @@ void main() {
             'pluginName': 'url_launcher_linux',
             'dartClass': 'UrlLauncherPluginLinux',
             'platform': 'linux',
-            'dartFileName': 'url_launcher_linux.dart'
+            'dartFileName': 'url_launcher_linux.dart',
           })
         );
         expect(resolutions[1].toMap(), equals(
@@ -219,7 +219,7 @@ void main() {
             'pluginName': 'transitive_dependency_plugin',
             'dartClass': 'UrlLauncherPluginWindows',
             'platform': 'windows',
-            'dartFileName': 'transitive_dependency_plugin.dart'
+            'dartFileName': 'transitive_dependency_plugin.dart',
           })
         );
       });
@@ -523,7 +523,7 @@ void main() {
             'pluginName': 'url_launcher_linux',
             'dartClass': 'UrlLauncherPluginLinux',
             'platform': 'linux',
-            'dartFileName': 'url_launcher_linux.dart'
+            'dartFileName': 'url_launcher_linux.dart',
           })
         );
       });
@@ -656,7 +656,7 @@ void main() {
               'pluginName': 'url_launcher',
               'dartClass': 'UrlLauncherIos',
               'platform': 'ios',
-              'dartFileName': 'url_launcher.dart'
+              'dartFileName': 'url_launcher.dart',
             })
         );
       });
@@ -929,7 +929,7 @@ void main() {
               'pluginName': 'url_launcher_linux',
               'dartClass': 'UrlLauncherLinux',
               'platform': 'linux',
-              'dartFileName': 'url_launcher_linux.dart'
+              'dartFileName': 'url_launcher_linux.dart',
             })
         );
       });
