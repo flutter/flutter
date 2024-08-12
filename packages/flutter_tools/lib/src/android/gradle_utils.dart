@@ -29,7 +29,7 @@ import 'android_sdk.dart';
 // Please see the README before changing any of these values.
 const String templateDefaultGradleVersion = '8.3';
 const String templateAndroidGradlePluginVersion = '8.1.0';
-const String templateAndroidGradlePluginVersionForModule = '7.3.0';
+const String templateAndroidGradlePluginVersionForModule = '8.1.0';
 const String templateKotlinGradlePluginVersion = '1.8.22';
 
 // The Flutter Gradle Plugin is only applied to app projects, and modules that
