@@ -264,7 +264,7 @@ void main() {
               '--sign',
               '-',
               if (buildMode == BuildMode.debug)
-              '--timestamp=none',
+                '--timestamp=none',
               '/build/native_assets/ios/bar.framework',
             ],
           ),
@@ -306,7 +306,7 @@ void main() {
               '--sign',
               '-',
               if (buildMode == BuildMode.debug)
-              '--timestamp=none',
+                '--timestamp=none',
               '/build/native_assets/ios/buz.framework',
             ],
           ),

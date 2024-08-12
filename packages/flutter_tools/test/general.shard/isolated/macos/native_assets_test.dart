@@ -322,7 +322,8 @@ void main() {
                   '--force',
                   '--sign',
                   '-',
-                  if (buildMode == BuildMode.debug) '--timestamp=none',
+                  if (buildMode == BuildMode.debug)
+                    '--timestamp=none',
                   signPathBar,
                 ],
               ),
@@ -366,7 +367,8 @@ void main() {
                   '--force',
                   '--sign',
                   '-',
-                  if (buildMode == BuildMode.debug) '--timestamp=none',
+                  if (buildMode == BuildMode.debug)
+                    '--timestamp=none',
                   signPathBuz,
                 ],
               ),
