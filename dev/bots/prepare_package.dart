@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show exit, stderr;
+import 'dart:io' show exit, stderr, stdout;
 
 import 'package:args/args.dart';
 import 'package:file/file.dart';
@@ -141,6 +141,8 @@ Future<void> main(List<String> rawArguments) async {
       outputFile,
       dryRun,
       fs: fs,
+      print: stdout.writeln,
+      printError: stderr.writeln,
     );
     await publisher.generateLocalMetadata();
     if (parsedArguments['publish'] as bool) {

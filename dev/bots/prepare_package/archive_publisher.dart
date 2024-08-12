@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
@@ -26,6 +25,8 @@ class ArchivePublisher {
     ProcessManager? processManager,
     required this.fs,
     this.platform = const LocalPlatform(),
+    this.print = _kDefaultPrint,
+    this.printError = _kDefaultPrintError,
   })  : assert(revision.length == 40),
         platformName = platform.operatingSystem.toLowerCase(),
         metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
@@ -44,6 +45,12 @@ class ArchivePublisher {
   final File outputFile;
   final ProcessRunner _processRunner;
   final bool dryRun;
+  final void Function([Object?]) print;
+  final void Function([Object?]) printError;
+
+  static void _kDefaultPrint([Object? msg]) {}
+  static void _kDefaultPrintError([Object? msg]) {}
+
   String get destinationArchivePath => '${branch.name}/$platformName/${path.basename(outputFile.path)}';
   static String getMetadataFilename(Platform platform) => 'releases_${platform.operatingSystem.toLowerCase()}.json';
 
@@ -135,6 +142,7 @@ class ArchivePublisher {
       remotePath: gsPath,
       localFile: localFile,
       publisher: this,
+      printError: printError,
     );
     Map<String, dynamic> jsonData = <String, dynamic>{};
     if (!dryRun) {
@@ -247,6 +255,7 @@ class _MetadataFile {
     required String remotePath,
     required File localFile,
     required ArchivePublisher publisher,
+    required void Function([Object? msg]) printError,
   }) async {
     int? generation;
     for (int attempt = 0; attempt < _kDownloadAttempts; attempt+= 1) {
@@ -259,7 +268,7 @@ class _MetadataFile {
       final int secondGeneration = _parseGenerationFromStat(statOutput);
 
       if (firstGeneration != secondGeneration) {
-        io.stderr.writeln(
+        printError(
 '''
 Error! The file $remotePath was at generation $firstGeneration before downloading,
 but generation $secondGeneration after on attempt $attempt.
