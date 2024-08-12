@@ -728,71 +728,57 @@ sum(intptr_t a, intptr_t b) {
   );
   await mainLibrarySourceFile.writeAsString(mainLibrarySource);
 
-  // Add native library bindings file.
-  final Directory libDirectory = packageDirectory.childDirectory('lib');
-  final File linkedLibraryBindingsFile = libDirectory.childFile('linked_bindings.dart');
-  await linkedLibraryBindingsFile.create();
-
   // Update builder to build the native library and link it into the main library.
-  const String builderSource = '''
+  const String builderSource = r'''
 import 'package:native_toolchain_c/native_toolchain_c.dart';
 import 'package:logging/logging.dart';
 import 'package:native_assets_cli/native_assets_cli.dart';
-
-const packageName = '$packageName';
 
 void main(List<String> args) async {
   await build(args, (config, output) async {
     final packageName = config.packageName;
 
+    final builders = [
+      CBuilder.library(
+        name: 'linked',
+        assetName: 'linked',
+        sources: ['src/linked.c'],
+      ),
+      CBuilder.library(
+        name: packageName,
+        assetName: '${packageName}_bindings_generated.dart',
+        sources: ['src/$packageName.c'],
+        flags: config.dynamicLinkingFlags('linked'),
+      ),
+    ];
+
     final logger = Logger('')
         ..level = Level.ALL
         ..onRecord.listen((record) => print(record.message));
 
-    final linkedCbuilder = CBuilder.library(
-      name: 'linked',
-      assetName: 'linked_bindings.dart',
-      sources: ['src/linked.c'],
-      dartBuildFiles: ['hook/build.dart'],
-    );
-    await linkedCbuilder.run(
-      config: config,
-      output: output,
-      logger: logger,
-    );
-
-    final linkedLibraryUri = output.assets
-        .whereType<NativeCodeAsset>()
-        .where((asset) => asset.id.endsWith('linked_bindings.dart'))
-        .map((asset) => asset.file)
-        .singleOrNull;
-
-    final cbuilder = CBuilder.library(
-      name: packageName,
-      assetName: '\${packageName}_bindings_generated.dart',
-      sources: [
-        'src/\$packageName.c',
-      ],
-      flags: linkedLibraryUri == null ? [] : switch (config.targetOS) {
-        OS.linux || OS.android => [
-          '-Wl,-rpath=\\\$ORIGIN/.',
-          '-L\${linkedLibraryUri.resolve('./').toFilePath()}',
-          '-llinked',
-        ],
-        OS.macOS || OS.iOS => [
-          '-L\${linkedLibraryUri.resolve('./').toFilePath()}',
-          '-llinked',
-        ],
-        _ => throw UnimplementedError('Unsupported OS: \${config.targetOS}'),
-      },
-      dartBuildFiles: ['hook/build.dart'],
-    );
-    await cbuilder.run(
-      config: config,
-      output: output,
-      logger: logger,
-    );
+    for (final builder in builders) {
+      await builder.run(
+        config: config,
+        output: output,
+        logger: logger,
+      );
+    }
   });
+}
+
+extension on BuildConfig {
+  List<String> dynamicLinkingFlags(String libraryName) => switch (targetOS) {
+        OS.macOS => [
+            '-L${outputDirectory.toFilePath()}',
+            '-l$libraryName',
+          ],
+        OS.linux => [
+            '-Wl,-rpath=$ORIGIN/.',
+            '-L${outputDirectory.toFilePath()}',
+            '-l$libraryName',
+          ],
+        _ => throw UnimplementedError('Unsupported OS: $targetOS'),
+      };
 }
 ''';
 
