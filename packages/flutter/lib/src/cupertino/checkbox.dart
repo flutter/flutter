@@ -19,12 +19,6 @@ import 'theme.dart';
 // bool _throwShotAway = false;
 // late StateSetter setState;
 
-// The relative values needed to transform a color to it's equivalent focus
-// outline color.
-const double _kCupertinoFocusColorOpacity = 0.80;
-const double _kCupertinoFocusColorBrightness = 0.69;
-const double _kCupertinoFocusColorSaturation = 0.835;
-
 // Eyeballed from a checkbox on a physical Macbook Pro running macOS version 14.5.
 const Color _kDisabledCheckColor = CupertinoDynamicColor.withBrightness(
   color: Color.fromARGB(64, 0, 0, 0),
@@ -378,9 +372,9 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
 
     final Color effectiveFocusOverlayColor = widget.focusColor
       ?? HSLColor
-          .fromColor(effectiveActiveColor.withOpacity(_kCupertinoFocusColorOpacity))
-          .withLightness(_kCupertinoFocusColorBrightness)
-          .withSaturation(_kCupertinoFocusColorSaturation)
+          .fromColor(effectiveActiveColor.withOpacity(kCupertinoFocusColorOpacity))
+          .withLightness(kCupertinoFocusColorBrightness)
+          .withSaturation(kCupertinoFocusColorSaturation)
           .toColor();
 
     return Semantics(
