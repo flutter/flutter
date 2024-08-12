@@ -6,6 +6,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -300,6 +301,13 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     }
   }
 
+  void _handleTap([Intent? _]) {
+    if (widget.onPressed != null) {
+      widget.onPressed!();
+      context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
+    }
+  }
+
   void _animate() {
     if (_animationController.isAnimating) {
       return;
@@ -320,6 +328,10 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       isFocused = showHighlight;
     });
   }
+
+  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleTap),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -368,6 +380,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     return MouseRegion(
       cursor: enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
       child: FocusableActionDetector(
+        actions: _actionMap,
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         onFocusChange: widget.onFocusChange,
