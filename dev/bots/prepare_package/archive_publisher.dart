@@ -144,7 +144,7 @@ class ArchivePublisher {
       publisher: this,
       printError: printError,
     );
-    Map<String, dynamic> jsonData = <String, dynamic>{};
+    Map<String, Object?> jsonData = <String, Object?>{};
     if (!dryRun) {
       final String currentMetadata = metadataFile.localFile.readAsStringSync();
       if (currentMetadata.isEmpty) {
