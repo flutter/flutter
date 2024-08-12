@@ -236,7 +236,7 @@ void main() {
               'x64/libbar.dylib',
             ],
           ),
-            FakeCommand(
+          FakeCommand(
             command: const <Pattern>[
               'otool',
               '-D',
@@ -278,7 +278,7 @@ void main() {
               'x64/libbuz.dylib',
             ],
           ),
-            FakeCommand(
+          FakeCommand(
             command: const <Pattern>[
               'otool',
               '-D',

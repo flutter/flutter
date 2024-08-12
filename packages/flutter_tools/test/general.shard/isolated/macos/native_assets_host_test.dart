@@ -122,7 +122,7 @@ void main() {
         parseOtoolArchitectureSections(
 '''
 /build/native_assets/ios/buz.framework/buz (architecture x86_64):
-  @rpath/libfoo.dylib 
+  @rpath/libfoo.dylib
 '''
         ),
         <Architecture, List<String>>{

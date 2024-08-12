@@ -122,7 +122,59 @@ void main() {
     'NativeAssets with an asset',
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager.list(
+        <FakeCommand>[
+          const FakeCommand(
+            command: <Pattern>[
+              'lipo',
+              '-create',
+              '-output',
+              '/build/native_assets/ios/foo.framework/foo',
+              'foo.framework/foo',
+            ],
+          ),
+          FakeCommand(
+            command: const <Pattern>[
+              'otool',
+              '-D',
+              '/build/native_assets/ios/foo.framework/foo',
+            ],
+            stdout: <String>[
+              '/build/native_assets/ios/foo.framework/foo (architecture x86_64):',
+              '@rpath/libfoo.dylib',
+              '/build/native_assets/ios/foo.framework/foo (architecture arm64):',
+              '@rpath/libfoo.dylib',
+            ].join('\n'),
+          ),
+          const FakeCommand(
+            command: <Pattern>[
+              'install_name_tool',
+              '-id',
+              '@rpath/foo.framework/foo',
+              '/build/native_assets/ios/foo.framework/foo'
+            ],
+          ),
+          const FakeCommand(
+            command: <Pattern>[
+              'codesign',
+              '--force',
+              '--sign',
+              '-',
+                '--timestamp=none',
+              '/build/native_assets/ios/foo.framework',
+            ],
+          ),
+          const FakeCommand(
+            command: <Pattern>[
+              'install_name_tool',
+              '-change',
+              '@rpath/libfoo.dylib',
+              '@rpath/foo.framework/foo',
+              '/build/native_assets/ios/foo.framework/foo',
+            ],
+          ),
+        ],
+      ),
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     },
     () async {

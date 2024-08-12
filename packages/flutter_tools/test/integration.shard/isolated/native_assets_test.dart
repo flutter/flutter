@@ -767,11 +767,11 @@ void main(List<String> args) async {
 
 extension on BuildConfig {
   List<String> dynamicLinkingFlags(String libraryName) => switch (targetOS) {
-        OS.macOS => [
+        OS.macOS || OS.iOS => [
             '-L${outputDirectory.toFilePath()}',
             '-l$libraryName',
           ],
-        OS.linux => [
+        OS.linux || OS.android => [
             '-Wl,-rpath=\$ORIGIN/.',
             '-L${outputDirectory.toFilePath()}',
             '-l$libraryName',
