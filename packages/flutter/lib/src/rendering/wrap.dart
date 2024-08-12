@@ -706,9 +706,8 @@ class RenderWrap extends RenderBox
       final ({RenderBox current, RenderBox? next}) finalChild = child;
       // This lazily evaluates the min extent of the current child and uses the cache, if there is one.
       // Evaluating this lazily allows us to avoid calculating the min intrinsic size if it's not needed.
-      late final double childMinExtent =
-          cachedChildMinExtent ??
-              getChildMinIntrinsicSize(finalChild.current, double.infinity);
+      late final double childMinExtent = cachedChildMinExtent
+          ?? getChildMinIntrinsicSize(finalChild.current, double.infinity);
 
       final WrapParentData childParentData = child.current.parentData! as WrapParentData;
       WrapFit? fit = childParentData.fit;
