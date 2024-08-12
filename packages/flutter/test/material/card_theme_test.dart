@@ -313,9 +313,11 @@ void main() {
               margin: localMargin,
               shape: localShape,
             ),
-            child: SizedBox(
-              width: 200,
-              height: 200,
+            child: Card(
+              child: SizedBox(
+                width: 200,
+                height: 200,
+              ),
             ),
           ),
         ),
