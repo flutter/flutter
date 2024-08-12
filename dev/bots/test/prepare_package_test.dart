@@ -43,7 +43,10 @@ gs://flutter_infra_release/releases/releases_macos.json:
   test('Throws on missing executable', () async {
     // Uses a *real* process manager, since we want to know what happens if
     // it can't find an executable.
-    final ProcessRunner processRunner = ProcessRunner(subprocessOutput: false);
+    final ProcessRunner processRunner = ProcessRunner(
+      subprocessOutput: false,
+      printError: ([Object? _]) {},
+    );
     expect(
         expectAsync1((List<String> commandLine) async {
           return processRunner.runProcess(commandLine);
@@ -76,7 +79,11 @@ gs://flutter_infra_release/releases/releases_macos.json:
           ),
         ]);
         final ProcessRunner processRunner = ProcessRunner(
-            subprocessOutput: false, platform: platform, processManager: fakeProcessManager);
+          subprocessOutput: false,
+          platform: platform,
+          processManager: fakeProcessManager,
+          printError: ([Object? _]) {},
+        );
         final String output = await processRunner.runProcess(<String>['echo', 'test']);
         expect(output, equals('output'));
       });
@@ -90,7 +97,11 @@ gs://flutter_infra_release/releases/releases_macos.json:
           ),
         ]);
         final ProcessRunner processRunner = ProcessRunner(
-            subprocessOutput: false, platform: platform, processManager: fakeProcessManager);
+          subprocessOutput: false,
+          platform: platform,
+          processManager: fakeProcessManager,
+          printError: ([Object? _]) {},
+        );
         expect(
             expectAsync1((List<String> commandLine) async {
               return processRunner.runProcess(commandLine);

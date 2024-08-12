@@ -33,6 +33,7 @@ class ArchivePublisher {
         metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
         _processRunner = ProcessRunner(
           processManager: processManager,
+          printError: printError,
         );
 
   final Platform platform;
@@ -279,7 +280,13 @@ but generation $secondGeneration after on attempt $attempt.
   }
 
   Future<void> upload(Future<String> Function({required String src, required String dest, int? cacheSeconds}) cloudCopy) async {
-    publisher.print();
+    // Print the contents to the log should uploading fail, so that it can be
+    // manually recovered.
+    publisher.print('''
+Uploading ${localFile.path} to $remotePath with contents:
+
+${localFile.readAsStringSync()}
+''');
     await cloudCopy(
       src: localFile.absolute.path,
       dest: remotePath,
@@ -288,7 +295,6 @@ but generation $secondGeneration after on attempt $attempt.
       // site.
       cacheSeconds: shortCacheSeconds,
     );
-
   }
 
   static final RegExp _parseGenerationFromStatPattern = RegExp(r'^\s+Generation:\s+(\d+)$');

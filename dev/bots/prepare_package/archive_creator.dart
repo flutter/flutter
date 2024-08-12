@@ -41,12 +41,14 @@ class ArchiveCreator {
     ProcessManager? processManager,
     bool strict = true,
     bool subprocessOutput = true,
+    void Function([Object?]) printError = _noOpPrint,
   }) {
     final Directory flutterRoot = fs.directory(path.join(tempDir.path, 'flutter'));
     final ProcessRunner processRunner = ProcessRunner(
       processManager: processManager,
       subprocessOutput: subprocessOutput,
       platform: platform,
+      printError: printError,
     )..environment['PUB_CACHE'] = path.join(
       tempDir.path, '.pub-cache',
     );
@@ -534,3 +536,5 @@ class ArchiveCreator {
     ], workingDirectory: fs.directory(path.dirname(source.absolute.path)));
   }
 }
+
+void _noOpPrint([Object? _]) {}

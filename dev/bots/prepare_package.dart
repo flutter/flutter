@@ -127,6 +127,7 @@ Future<void> main(List<String> rawArguments) async {
     branch,
     fs: fs,
     strict: publish && !dryRun,
+    printError: stderr.writeln,
   );
   int exitCode = 0;
   late String message;
