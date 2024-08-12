@@ -5616,10 +5616,7 @@ class Wrapped extends ParentDataWidget<WrapParentData>{
     final WrapParentData parentData = renderObject.parentData! as WrapParentData;
     if (parentData.fit != fit) {
       parentData.fit = fit;
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent is RenderObject) {
-        targetParent.markNeedsLayout();
-      }
+      renderObject.parent?.markNeedsLayout();
     }
   }
 
