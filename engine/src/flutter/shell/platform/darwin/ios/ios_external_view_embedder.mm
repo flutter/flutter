@@ -59,7 +59,8 @@ PostPrerollResult IOSExternalViewEmbedder::PostPrerollAction(
     const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::PostPrerollAction");
   FML_CHECK(platform_views_controller_);
-  PostPrerollResult result = platform_views_controller_->PostPrerollAction(raster_thread_merger);
+  PostPrerollResult result = platform_views_controller_->PostPrerollAction(
+      raster_thread_merger, ios_context_->GetBackend() != IOSRenderingBackend::kSkia);
   return result;
 }
 
@@ -91,7 +92,8 @@ void IOSExternalViewEmbedder::EndFrame(
     bool should_resubmit_frame,
     const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::EndFrame");
-  platform_views_controller_->EndFrame(should_resubmit_frame, raster_thread_merger);
+  platform_views_controller_->EndFrame(should_resubmit_frame, raster_thread_merger,
+                                       ios_context_->GetBackend() != IOSRenderingBackend::kSkia);
 }
 
 // |ExternalViewEmbedder|
@@ -100,7 +102,7 @@ bool IOSExternalViewEmbedder::SupportsDynamicThreadMerging() {
 #if FML_OS_IOS_SIMULATOR
   return true;
 #else
-  return false;
+  return ios_context_->GetBackend() == IOSRenderingBackend::kSkia;
 #endif  // FML_OS_IOS_SIMULATOR
 }
 
