@@ -3046,6 +3046,37 @@ void main() {
     expect(opacityWidget.opacity, 0.38);
   });
 
+  testWidgets('SearchAnchor tap failed when disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Center(
+        child: Material(
+          child: SearchAnchor(
+            isFullScreen: true,
+            enabled: false,
+            builder: (BuildContext context, SearchController controller) {
+              return const Icon(Icons.search);
+            },
+            headerHeight: 32,
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    ));
+
+    final Finder searchBarFinder = find.byType(SearchAnchor);
+    expect(searchBarFinder, findsOneWidget);
+    bool tapFailed = false;
+
+    try {
+      await tester.tap(searchBarFinder);
+    } catch (_) {
+      tapFailed = true;
+    }
+    expect(tapFailed, isTrue);
+  });
+
   testWidgets('SearchAnchor respects headerHeight', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Center(
