@@ -28,8 +28,8 @@ void main() {
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
       buttonBox.size,
-      // 1 10px character + 16px * 2 is smaller than the default 44px minimum.
-      const Size.square(44.0),
+      // 1 10px character + 20px * 2 = 50.0
+      const Size(50.0, 44.0),
     );
   });
 
@@ -45,7 +45,7 @@ void main() {
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
       buttonBox.size,
-      // 1 10px character + 16px * 2 is smaller than defined 60.0px minimum
+      // 1 10px character + 20px * 2 = 50.0 (is smaller than minSize: 60.0)
       const Size.square(minSize),
     );
   });
@@ -60,8 +60,8 @@ void main() {
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
       buttonBox.size.width,
-      // 4 10px character + 16px * 2 = 72.
-      72.0,
+      // 4 10px character + 20px * 2 = 80.0
+      80.0,
     );
   });
 
@@ -130,17 +130,37 @@ void main() {
     expect(align.alignment, Alignment.centerLeft);
   });
 
-  testWidgets('Button with background is wider', (WidgetTester tester) async {
+  testWidgets('Button size changes depending on size property', (WidgetTester tester) async {
+    const Widget child = Text('X', style: testStyle);
+
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       onPressed: null,
-      color: Color(0xFFFFFFFF),
-      child: Text('X', style: testStyle),
+      sizeStyle: CupertinoButtonSize.small,
+      child: child,
     )));
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
-      buttonBox.size.width,
-      // 1 10px character + 64 * 2 = 138 for buttons with background.
-      138.0,
+      buttonBox.size,
+      const Size(34.0, 28.0)
+    );
+
+    await tester.pumpWidget(boilerplate(child: const CupertinoButton(
+      onPressed: null,
+      sizeStyle: CupertinoButtonSize.medium,
+      child: child,
+    )));
+    expect(
+      buttonBox.size,
+      const Size(40.0, 32.0),
+    );
+
+    await tester.pumpWidget(boilerplate(child: const CupertinoButton(
+      onPressed: null,
+      child: child,
+    )));
+    expect(
+      buttonBox.size,
+      const Size(50.0, 44.0),
     );
   });
 
@@ -405,8 +425,27 @@ void main() {
         ),
       ),
     );
+    expect(textStyle.color, isSameColorAs(CupertinoColors.activeBlue));
 
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoButton.tinted(
+          onPressed: () { },
+          child: Builder(builder: (BuildContext context) {
+            textStyle = DefaultTextStyle.of(context).style;
+            return const Placeholder();
+          }),
+        ),
+      ),
+    );
     expect(textStyle.color, CupertinoColors.activeBlue);
+    BoxDecoration decoration = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(CupertinoButton),
+        matching: find.byType(DecoratedBox),
+      ),
+    ).decoration as BoxDecoration;
+    expect(decoration.color, isSameColorAs(CupertinoColors.activeBlue.withOpacity(0.12)));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -419,15 +458,14 @@ void main() {
         ),
       ),
     );
-
     expect(textStyle.color, isSameColorAs(CupertinoColors.white));
-    BoxDecoration decoration = tester.widget<DecoratedBox>(
+    decoration = tester.widget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoButton),
         matching: find.byType(DecoratedBox),
       ),
     ).decoration as BoxDecoration;
-    expect(decoration.color, CupertinoColors.activeBlue);
+    expect(decoration.color, isSameColorAs(CupertinoColors.activeBlue));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -442,6 +480,27 @@ void main() {
       ),
     );
     expect(textStyle.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoButton.tinted(
+          onPressed: () { },
+          child: Builder(builder: (BuildContext context) {
+            textStyle = DefaultTextStyle.of(context).style;
+            return const Placeholder();
+          }),
+        ),
+      ),
+    );
+    expect(textStyle.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
+    decoration = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(CupertinoButton),
+        matching: find.byType(DecoratedBox),
+      ),
+    ).decoration as BoxDecoration;
+    expect(decoration.color, isSameColorAs(CupertinoColors.activeBlue.darkColor.withOpacity(0.26)));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -463,6 +522,14 @@ void main() {
       ),
     ).decoration as BoxDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
+  });
+
+  testWidgets("All CupertinoButton const maps keys' match the available style sizes", (WidgetTester tester) async {
+    for (final CupertinoButtonSize size in CupertinoButtonSize.values) {
+      expect(kCupertinoButtonPadding[size], isNotNull);
+      expect(kCupertinoButtonSizeBorderRadius[size], isNotNull);
+      expect(kCupertinoButtonMinSize[size], isNotNull);
+    }
   });
 
   testWidgets('Hovering over Cupertino button updates cursor to clickable on Web', (WidgetTester tester) async {
@@ -613,32 +680,57 @@ void main() {
     expect(focusNode.hasFocus, isFalse);
   });
 
-  testWidgets('IconThemeData is not replaced by CupertinoButton', (WidgetTester tester) async {
-    const IconThemeData givenIconTheme = IconThemeData(size: 12.0);
+  testWidgets('IconThemeData falls back to default value when the TextStyle has a null size', (WidgetTester tester) async {
+    const IconThemeData defaultIconTheme = IconThemeData(size: kCupertinoButtonDefaultIconSize);
 
     IconThemeData? actualIconTheme;
 
+    // Large size.
     await tester.pumpWidget(
       CupertinoApp(
+        theme: const CupertinoThemeData(
+          textTheme: CupertinoTextThemeData(
+            actionTextStyle: TextStyle(),
+          ),
+        ),
         home: Center(
-          child: IconTheme(
-            data: givenIconTheme,
-            child: CupertinoButton(
-              onPressed: () {},
-              child: Builder(
-                  builder: (BuildContext context) {
-                    actualIconTheme = IconTheme.of(context);
+          child: CupertinoButton(
+            onPressed: () {},
+            child: Builder(
+                builder: (BuildContext context) {
+                  actualIconTheme = IconTheme.of(context);
 
-                    return const Placeholder();
-                  }
-              ),
+                  return const Placeholder();
+                }
             ),
           ),
         ),
       ),
     );
+    expect(actualIconTheme?.size, defaultIconTheme.size);
 
-    expect(actualIconTheme?.size, givenIconTheme.size);
+    // Small size.
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          textTheme: CupertinoTextThemeData(
+            actionSmallTextStyle: TextStyle(),
+          ),
+        ),
+        home: Center(
+          child: CupertinoButton(
+            onPressed: () {},
+            child: Builder(
+                builder: (BuildContext context) {
+                  actualIconTheme = IconTheme.of(context);
+
+                  return const Placeholder();
+                }
+            ),
+          ),
+        ),
+      ),
+    );
   });
 
   testWidgets('Button can be activated by keyboard shortcuts', (WidgetTester tester) async {
