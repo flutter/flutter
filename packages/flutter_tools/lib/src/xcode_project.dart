@@ -190,7 +190,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
       (EnvironmentType.physical, _) when isWatch => XcodeSdk.WatchOS,
       (EnvironmentType.simulator, _) when isWatch => XcodeSdk.WatchSimulator,
       (EnvironmentType.physical, IosProject _) => XcodeSdk.IPhoneOS,
-      (EnvironmentType.simulator, IosProject _) => XcodeSdk.WatchSimulator,
+      (EnvironmentType.simulator, IosProject _) => XcodeSdk.IPhoneSimulator,
       (EnvironmentType.physical, MacOSProject _) => XcodeSdk.MacOSX,
       (_, _) => throw ArgumentError('Unsupported SDK')
     };

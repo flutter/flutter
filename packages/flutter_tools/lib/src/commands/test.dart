@@ -356,7 +356,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final List<String> plainNames = stringsArg('plain-name');
     final String? tags = stringArg('tags');
     final String? excludeTags = stringArg('exclude-tags');
-    final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
+    final BuildInfo buildInfo = await getBuildInfo(
+      forcedBuildMode: BuildMode.debug,
+      forcedUseLocalCanvasKit: true
+    );
 
     TestTimeRecorder? testTimeRecorder;
     if (verbose) {
@@ -414,7 +417,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       webRenderer: webRenderer,
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
       webUseWasm: useWasm,
-      webUseLocalCanvaskit: true,
     );
 
     String? testAssetDirectory;
