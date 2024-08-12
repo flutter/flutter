@@ -286,6 +286,19 @@ static const SkIRect FlutterRectToSkIRect(FlutterRect flutter_rect) {
 #define GL_BGRA8_EXT 0x93A1
 #endif
 
+static std::optional<SkColorType> FlutterFormatToSkColorType(uint32_t format) {
+  switch (format) {
+    case GL_BGRA8_EXT:
+      return kBGRA_8888_SkColorType;
+    case GL_RGBA8:
+      return kRGBA_8888_SkColorType;
+    default:
+      FML_LOG(ERROR) << "Cannot convert format " << format
+                     << " to SkColorType.";
+      return std::nullopt;
+  }
+}
+
 #endif
 
 static inline flutter::Shell::CreateCallback<flutter::PlatformView>
@@ -769,12 +782,18 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
 
   SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
 
+  std::optional<SkColorType> color_type =
+      FlutterFormatToSkColorType(texture->format);
+  if (!color_type) {
+    return nullptr;
+  }
+
   auto surface = SkSurfaces::WrapBackendTexture(
       context,                      // context
       backend_texture,              // back-end texture
       kBottomLeft_GrSurfaceOrigin,  // surface origin
       1,                            // sample count
-      kN32_SkColorType,             // color type
+      color_type.value(),           // color type
       SkColorSpace::MakeSRGB(),     // color space
       &surface_properties,          // surface properties
       static_cast<SkSurfaces::TextureReleaseProc>(
@@ -812,11 +831,17 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
 
   SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
 
+  std::optional<SkColorType> color_type =
+      FlutterFormatToSkColorType(framebuffer->target);
+  if (!color_type) {
+    return nullptr;
+  }
+
   auto surface = SkSurfaces::WrapBackendRenderTarget(
       context,                      //  context
       backend_render_target,        // backend render target
       kBottomLeft_GrSurfaceOrigin,  // surface origin
-      kN32_SkColorType,             // color type
+      color_type.value(),           // color type
       SkColorSpace::MakeSRGB(),     // color space
       &surface_properties,          // surface properties
       static_cast<SkSurfaces::RenderTargetReleaseProc>(
