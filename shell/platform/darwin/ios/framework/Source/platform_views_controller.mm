@@ -15,13 +15,11 @@
 
 namespace {
 
-#ifdef FML_OS_IOS_SIMULATOR
 // The number of frames the rasterizer task runner will continue
 // to run on the platform thread after no platform view is rendered.
 //
 // Note: this is an arbitrary number.
 static const int kDefaultMergedLeaseDuration = 10;
-#endif  // FML_OS_IOS_SIMULATOR
 
 static constexpr NSUInteger kFlutterClippingMaskViewPoolCapacity = 5;
 
@@ -291,43 +289,52 @@ void PlatformViewsController::CancelFrame() {
 }
 
 PostPrerollResult PlatformViewsController::PostPrerollAction(
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger,
+    bool impeller_enabled) {
   // TODO(jonahwilliams): remove this once Software backend is removed for iOS Sim.
 #ifdef FML_OS_IOS_SIMULATOR
-  if (composition_order_.empty()) {
-    return PostPrerollResult::kSuccess;
-  }
-  if (!raster_thread_merger->IsMerged()) {
-    // The raster thread merger may be disabled if the rasterizer is being
-    // created or teared down.
-    //
-    // In such cases, the current frame is dropped, and a new frame is attempted
-    // with the same layer tree.
-    //
-    // Eventually, the frame is submitted once this method returns `kSuccess`.
-    // At that point, the raster tasks are handled on the platform thread.
-    CancelFrame();
-    return PostPrerollResult::kSkipAndRetryFrame;
-  }
-  // If the post preroll action is successful, we will display platform views in the current frame.
-  // In order to sync the rendering of the platform views (quartz) with skia's rendering,
-  // We need to begin an explicit CATransaction. This transaction needs to be submitted
-  // after the current frame is submitted.
-  raster_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
-  return PostPrerollResult::kSuccess;
+  const bool merge_threads = true;
 #else
-  return PostPrerollResult::kSuccess;
+  const bool merge_threads = !impeller_enabled;
 #endif  // FML_OS_IOS_SIMULATOR
+
+  if (merge_threads) {
+    if (composition_order_.empty()) {
+      return PostPrerollResult::kSuccess;
+    }
+    if (!raster_thread_merger->IsMerged()) {
+      // The raster thread merger may be disabled if the rasterizer is being
+      // created or teared down.
+      //
+      // In such cases, the current frame is dropped, and a new frame is attempted
+      // with the same layer tree.
+      //
+      // Eventually, the frame is submitted once this method returns `kSuccess`.
+      // At that point, the raster tasks are handled on the platform thread.
+      CancelFrame();
+      return PostPrerollResult::kSkipAndRetryFrame;
+    }
+    // If the post preroll action is successful, we will display platform views in the current
+    // frame. In order to sync the rendering of the platform views (quartz) with skia's rendering,
+    // We need to begin an explicit CATransaction. This transaction needs to be submitted
+    // after the current frame is submitted.
+    raster_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
+  }
+  return PostPrerollResult::kSuccess;
 }
 
 void PlatformViewsController::EndFrame(
     bool should_resubmit_frame,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger,
+    bool impeller_enabled) {
 #if FML_OS_IOS_SIMULATOR
-  if (should_resubmit_frame) {
+  bool run_check = true;
+#else
+  bool run_check = !impeller_enabled;
+#endif  // FML_OS_IOS_SIMULATOR
+  if (run_check && should_resubmit_frame) {
     raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
   }
-#endif  // FML_OS_IOS_SIMULATOR
 }
 
 void PlatformViewsController::PushFilterToVisitedPlatformViews(
