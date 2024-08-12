@@ -553,8 +553,10 @@ gs://flutter_infra_release/releases/releases_macos.json:
         fs.file(jsonPath).writeAsStringSync(releasesJson);
         fs.file(archivePath).writeAsStringSync('archive contents');
         final List<(String, ProcessResult?)> calls = <(String, ProcessResult?)>[
-          // This process fails because the file does NOT already exist
+          ('$gsutilCall -- stat $gsJsonPath', kStatOutputValid),
           ('$gsutilCall -- cp $gsJsonPath $jsonPath', null),
+          ('$gsutilCall -- stat $gsJsonPath', kStatOutputValid),
+          // This process fails because the file does NOT already exist
           ('$gsutilCall -- stat $gsArchivePath', ProcessResult(0, 1, '', '')),
           ('$gsutilCall -- rm $gsArchivePath', null),
           ('$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath', null),
