@@ -641,37 +641,35 @@ void main() {
   testWidgets('Button can be activated by keyboard shortcuts', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool value = true;
-    Widget buildApp({bool enabled = true}) {
-      return CupertinoApp(
+    await tester.pumpWidget(CupertinoApp(
         home: Center(
           child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
             return CupertinoButton(
-              onPressed: enabled ? () {
+              onPressed: () {
                 setState(() {
                   value = !value;
                 });
-              } : null,
+              },
               autofocus: true,
-              child: const Text('Button'),
+              child: const Text('Tap me'),
             );
           }),
         ),
-      );
-    }
-    await tester.pumpWidget(buildApp());
-    await tester.pumpAndSettle();
+      ),
+    );
+    await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pumpAndSettle();
+    await tester.pump();
     // On web, buttons don't respond to the enter key.
     expect(value, kIsWeb ? isTrue : isFalse);
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(value, isTrue);
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(value, isFalse);
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(value, isTrue);
   });
 }
