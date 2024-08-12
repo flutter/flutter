@@ -772,6 +772,7 @@ gs://flutter_infra_release/releases/releases_macos.json:
           remotePath: gsArchivePath,
           localFile: outputFile,
           generation: 1,
+          publisher: publisher,
         );
         expect(() async => publisher.publishArchive(file), throwsException);
       });

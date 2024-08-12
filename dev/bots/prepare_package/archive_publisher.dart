@@ -142,7 +142,6 @@ class ArchivePublisher {
       remotePath: gsPath,
       localFile: localFile,
       publisher: this,
-      printError: printError,
     );
     Map<String, Object?> jsonData = <String, Object?>{};
     if (!dryRun) {
@@ -164,21 +163,6 @@ class ArchivePublisher {
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     metadataFile.localFile.writeAsStringSync(encoder.convert(jsonData));
     return metadataFile;
-  }
-
-  /// Publishes the metadata file to GCS.
-  Future<void> _publishMetadata(String gsPath) async {
-    final File metadataFile = fs.file(
-      path.join(tempDir.absolute.path, getMetadataFilename(platform)),
-    );
-    await _cloudCopy(
-      src: metadataFile.absolute.path,
-      dest: gsPath,
-      // This metadata file is used by the website, so we don't want a long
-      // latency between publishing a release and it being available on the
-      // site.
-      cacheSeconds: shortCacheSeconds,
-    );
   }
 
   Future<String> _runGsUtil(
@@ -240,12 +224,15 @@ class ArchivePublisher {
   }
 }
 
+/// An abstraction over the release metadata file the Flutter website uses to
+/// track releases.
 class MetadataFile {
   @visibleForTesting
   const MetadataFile({
     required this.remotePath,
     required this.localFile,
     required this.generation,
+    required this.publisher,
   });
 
   // Two attempts should be sufficient, as there are at most 2 builds (1
@@ -257,7 +244,6 @@ class MetadataFile {
     required String remotePath,
     required File localFile,
     required ArchivePublisher publisher,
-    required void Function([Object? msg]) printError,
   }) async {
     int? generation;
     for (int attempt = 0; attempt < _kDownloadAttempts; attempt+= 1) {
@@ -270,7 +256,7 @@ class MetadataFile {
       final int secondGeneration = _parseGenerationFromStat(statOutput);
 
       if (firstGeneration != secondGeneration) {
-        printError(
+        publisher.printError(
 '''
 Error! The file $remotePath was at generation $firstGeneration before downloading,
 but generation $secondGeneration after on attempt $attempt.
@@ -288,10 +274,12 @@ but generation $secondGeneration after on attempt $attempt.
       remotePath: remotePath,
       localFile: localFile,
       generation: generation,
+      publisher: publisher,
     );
   }
 
   Future<void> upload(Future<String> Function({required String src, required String dest, int? cacheSeconds}) cloudCopy) async {
+    publisher.print();
     await cloudCopy(
       src: localFile.absolute.path,
       dest: remotePath,
@@ -337,4 +325,5 @@ but generation $secondGeneration after on attempt $attempt.
   final String remotePath;
   final File localFile;
   final int generation;
+  final ArchivePublisher publisher;
 }
