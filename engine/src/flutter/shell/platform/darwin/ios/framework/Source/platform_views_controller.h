@@ -84,14 +84,16 @@ class PlatformViewsController {
   ///
   /// Called from the raster thread.
   PostPrerollResult PostPrerollAction(
-      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger);
+      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger,
+      bool impeller_enabled);
 
   /// @brief Mark the end of a compositor frame.
   ///
   /// May determine changes are required to the thread merging state.
   /// Called from the raster thread.
   void EndFrame(bool should_resubmit_frame,
-                const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger);
+                const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger,
+                bool impeller_enabled);
 
   /// @brief Returns the Canvas for the overlay slice for the given platform view.
   ///
