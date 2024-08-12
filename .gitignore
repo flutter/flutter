@@ -113,11 +113,13 @@ unlinked_spec.ds
 **/xcuserdata/
 
 # Windows
+**/windows/flutter/ephemeral/
 **/windows/flutter/generated_plugin_registrant.cc
 **/windows/flutter/generated_plugin_registrant.h
 **/windows/flutter/generated_plugins.cmake
 
 # Linux
+**/linux/flutter/ephemeral/
 **/linux/flutter/generated_plugin_registrant.cc
 **/linux/flutter/generated_plugin_registrant.h
 **/linux/flutter/generated_plugins.cmake
