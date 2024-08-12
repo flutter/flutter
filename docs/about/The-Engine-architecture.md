@@ -273,7 +273,7 @@ group](https://dart.dev/language/concurrency#performance-and-isolate-groups).
 
 However, all engines instantiated with a FlutterEngineGroup share the same
 threads across the group. Each engine has their own root isolate but share the
-same UI task runner, dart isolate group and source code.
+same UI task runner, Dart isolate group and source code.
 
 As a result engines in a FlutterEngineGroup will have a smaller memory
 footprint, faster startup latency, and better CPU core usage with shared threads
