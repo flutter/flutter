@@ -439,6 +439,7 @@
 ../../../flutter/sky/tools/create_xcframework.py
 ../../../flutter/sky/tools/dist_dart_pkg.py
 ../../../flutter/sky/tools/install_framework_headers.py
+../../../flutter/sky/tools/sky_utils.py
 ../../../flutter/testing
 ../../../flutter/third_party/.clang-tidy
 ../../../flutter/third_party/.gitignore
