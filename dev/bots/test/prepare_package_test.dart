@@ -877,6 +877,7 @@ gs://flutter_infra_release/releases/releases_macos.json:
           'dartSdkVersion': '3.2.1',
           'dartTargetArch': 'x64',
         };
+        final StringBuffer errorBuffer = StringBuffer();
         final ArchivePublisher publisher = ArchivePublisher(
           tempDir,
           testRef,
@@ -887,6 +888,7 @@ gs://flutter_infra_release/releases/releases_macos.json:
           fs: fs,
           processManager: processManager,
           platform: platform,
+          printError: errorBuffer.writeln,
         );
         final String archivePath = path.join(tempDir.absolute.path, archiveName);
         final String jsonPath = path.join(tempDir.absolute.path, releasesName);
@@ -947,6 +949,13 @@ gs://flutter_infra_release/releases/releases_macos.json:
         expect(firstRelease['version'], newVersion['frameworkVersionFromGit']);
         expect(firstRelease['dart_sdk_version'], newVersion['dartSdkVersion']);
         expect(firstRelease['dart_sdk_arch'], newVersion['dartTargetArch']);
+        expect(
+          errorBuffer.toString(),
+          contains(RegExp(
+            'Error! The file $gsJsonPath was at generation 1 before downloading,\\s+'
+            'but generation 2 after on attempt 0',
+          )),
+        );
       });
 
       test('ArchivePublisher throws StateError if the generation of the remote metadata file changes twice', () async {
