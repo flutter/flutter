@@ -273,7 +273,7 @@ Future<void> _copyNativeAssetsIOS(
     }
 
     for (final File dylibFile in dylibFiles) {
-      await rewriteDependencyInstallNamesDylib(dylibFile, oldToNewInstallNames);
+      await changeDependencyInstallNamesDylib(dylibFile, oldToNewInstallNames);
     }
 
     globals.logger.printTrace('Copying native assets done.');
