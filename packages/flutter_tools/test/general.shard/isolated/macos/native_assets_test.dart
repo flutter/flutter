@@ -375,32 +375,15 @@ void main() {
             if (!flutterTester)
               FakeCommand(
                 command: <Pattern>[
-                  'otool',
-                  '-L',
+                  'install_name_tool',
+                  '-change',
+                  '@rpath/libbar.dylib',
+                  '@rpath/bar.framework/bar',
+                  '-change',
+                  '@rpath/libbuz.dylib',
+                  '@rpath/buz.framework/buz',
                   dylibPathBar,
                 ],
-                stdout: <String>[
-                  '$dylibPathBar (architecture x86_64):',
-                  '        @rpath/bar.framework/bar (compatibility version 0.0.0, current version 0.0.0)',
-                  '$dylibPathBar (architecture arm64):',
-                  '        @rpath/bar.framework/bar (compatibility version 0.0.0, current version 0.0.0)',
-                ].join('\n'),
-              ),
-            if (!flutterTester)
-              FakeCommand(
-                command: <Pattern>[
-                  'otool',
-                  '-L',
-                  dylibPathBuz,
-                ],
-                stdout: <String>[
-                  '$dylibPathBuz (architecture x86_64):',
-                  '        @rpath/buz.framework/buz (compatibility version 0.0.0, current version 0.0.0)',
-                  '        @rpath/libbar.dylib (compatibility version 0.0.0, current version 0.0.0)',
-                  '$dylibPathBuz (architecture arm64):',
-                  '        @rpath/buz.framework/buz (compatibility version 0.0.0, current version 0.0.0)',
-                  '        @rpath/libbar.dylib (compatibility version 0.0.0, current version 0.0.0)',
-                ].join('\n'),
               ),
             if (!flutterTester)
               FakeCommand(
@@ -409,6 +392,9 @@ void main() {
                   '-change',
                   '@rpath/libbar.dylib',
                   '@rpath/bar.framework/bar',
+                  '-change',
+                  '@rpath/libbuz.dylib',
+                  '@rpath/buz.framework/buz',
                   dylibPathBuz,
                 ],
               ),

@@ -310,33 +310,17 @@ void main() {
               '/build/native_assets/ios/buz.framework',
             ],
           ),
-          FakeCommand(
-            command: const <Pattern>[
-              'otool',
-              '-L',
+          const FakeCommand(
+            command: <Pattern>[
+              'install_name_tool',
+              '-change',
+              '@rpath/libbar.dylib',
+              '@rpath/bar.framework/bar',
+              '-change',
+              '@rpath/libbuz.dylib',
+              '@rpath/buz.framework/buz',
               '/build/native_assets/ios/bar.framework/bar',
             ],
-            stdout: <String>[
-              '/build/native_assets/ios/bar.framework/bar (architecture x86_64):',
-              '        @rpath/bar.framework/bar (compatibility version 0.0.0, current version 0.0.0)',
-              '/build/native_assets/ios/bar.framework/bar (architecture arm64):',
-              '        @rpath/bar.framework/bar (compatibility version 0.0.0, current version 0.0.0)',
-            ].join('\n'),
-          ),
-          FakeCommand(
-            command: const <Pattern>[
-              'otool',
-              '-L',
-              '/build/native_assets/ios/buz.framework/buz',
-            ],
-            stdout: <String>[
-              '/build/native_assets/ios/buz.framework/buz (architecture x86_64):',
-              '        @rpath/buz.framework/buz (compatibility version 0.0.0, current version 0.0.0)',
-              '        @rpath/libbar.dylib (compatibility version 0.0.0, current version 0.0.0)',
-              '/build/native_assets/ios/buz.framework/buz (architecture arm64):',
-              '        @rpath/buz.framework/buz (compatibility version 0.0.0, current version 0.0.0)',
-              '        @rpath/libbar.dylib (compatibility version 0.0.0, current version 0.0.0)',
-            ].join('\n'),
           ),
           const FakeCommand(
             command: <Pattern>[
@@ -344,6 +328,9 @@ void main() {
               '-change',
               '@rpath/libbar.dylib',
               '@rpath/bar.framework/bar',
+              '-change',
+              '@rpath/libbuz.dylib',
+              '@rpath/buz.framework/buz',
               '/build/native_assets/ios/buz.framework/buz',
             ],
           ),
