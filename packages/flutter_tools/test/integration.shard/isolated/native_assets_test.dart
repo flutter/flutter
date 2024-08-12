@@ -572,8 +572,8 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
 
   await addLinkHookDependency(packageDirectory);
 
-  // TODO(blaugold): Enable for windows once CBuilder supports passing linker
-  // flags to MSVC compiler.
+  // TODO(blaugold): Enable for windows once CBuilder has option to dynamically
+  // link to libraries. https://github.com/dart-lang/native/issues/1419
   if (!platform.isWindows) {
     await addDynamicallyLinkedNativeLibrary(packageDirectory);
   }
