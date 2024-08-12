@@ -1958,6 +1958,54 @@ TEST(FlutterTextInputPluginTest, TestSendActionDoNotInsertNewLine) {
   ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testSendActionDoNotInsertNewLine]);
 }
 
+TEST(FlutterTextInputPluginTest, TestAttributedSubstringOutOfRange) {
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+
+  FlutterTextInputPlugin* plugin =
+      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"enableDeltaModel" : @"true",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
+                    result:^(id){
+                    }];
+
+  FlutterMethodCall* call = [FlutterMethodCall methodCallWithMethodName:@"TextInput.setEditingState"
+                                                              arguments:@{
+                                                                @"text" : @"Text",
+                                                                @"selectionBase" : @(0),
+                                                                @"selectionExtent" : @(0),
+                                                                @"composingBase" : @(-1),
+                                                                @"composingExtent" : @(-1),
+                                                              }];
+
+  [plugin handleMethodCall:call
+                    result:^(id){
+                    }];
+
+  NSRange out;
+  NSAttributedString* text = [plugin attributedSubstringForProposedRange:NSMakeRange(1, 10)
+                                                             actualRange:&out];
+  EXPECT_TRUE([text.string isEqualToString:@"ext"]);
+  EXPECT_EQ(out.location, 1u);
+  EXPECT_EQ(out.length, 3u);
+
+  text = [plugin attributedSubstringForProposedRange:NSMakeRange(4, 10) actualRange:&out];
+  EXPECT_EQ(text, nil);
+}
+
 TEST(FlutterTextInputPluginTest, CanWorkWithFlutterTextField) {
   FlutterEngine* engine = CreateTestEngine();
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
