@@ -235,6 +235,7 @@
                 "--unoptimized",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
+                "--enable-impeller-3d",
                 "--rbe",
                 "--no-goma",
                 "--xcode-symlinks"
