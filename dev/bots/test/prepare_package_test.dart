@@ -21,7 +21,7 @@ import 'common.dart';
 void main() {
   const String testRef = 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeef';
 
-  final ProcessResult kStatOutputValid = ProcessResult(
+  ProcessResult generateStatOutput([int generation = 1722972798981253]) => ProcessResult(
     0,
     0,
     '''
@@ -34,7 +34,7 @@ gs://flutter_infra_release/releases/releases_macos.json:
     Hash (crc32c):          tgFuZw==
     Hash (md5):             xPUCBPIzd9nMUBpFfh6W2w==
     ETag:                   CIWpkO2N4YcDEAE=
-    Generation:             1722972798981253
+    Generation:             $generation
     Metageneration:         1
 ''',
     '',
@@ -463,9 +463,9 @@ gs://flutter_infra_release/releases/releases_macos.json:
         fs.file(jsonPath).writeAsStringSync(releasesJson);
         fs.file(archivePath).writeAsStringSync('archive contents');
         final List<(String, ProcessResult?)> calls = <(String, ProcessResult?)>[
-          ('$gsutilCall -- stat $gsJsonPath', kStatOutputValid),
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput()),
           ('$gsutilCall -- cp $gsJsonPath $jsonPath', null),
-          ('$gsutilCall -- stat $gsJsonPath', kStatOutputValid),
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput()),
           // This process fails because the file does NOT already exist
           ('$gsutilCall -- stat $gsArchivePath', ProcessResult(0, 1, '', '')),
           ('$gsutilCall -- rm $gsArchivePath', null),
@@ -566,9 +566,9 @@ gs://flutter_infra_release/releases/releases_macos.json:
         fs.file(jsonPath).writeAsStringSync(releasesJson);
         fs.file(archivePath).writeAsStringSync('archive contents');
         final List<(String, ProcessResult?)> calls = <(String, ProcessResult?)>[
-          ('$gsutilCall -- stat $gsJsonPath', kStatOutputValid),
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput()),
           ('$gsutilCall -- cp $gsJsonPath $jsonPath', null),
-          ('$gsutilCall -- stat $gsJsonPath', kStatOutputValid),
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput()),
           // This process fails because the file does NOT already exist
           ('$gsutilCall -- stat $gsArchivePath', ProcessResult(0, 1, '', '')),
           ('$gsutilCall -- rm $gsArchivePath', null),
@@ -634,9 +634,9 @@ gs://flutter_infra_release/releases/releases_macos.json:
         fs.file(archivePath).writeAsStringSync('archive contents');
         final List<(String, ProcessResult?)> calls = <(String, ProcessResult?)>[
           // This process fails because the file does NOT already exist
-          ('$gsutilCall -- stat $gsJsonPath', kStatOutputValid),
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput()),
           ('$gsutilCall -- cp $gsJsonPath $jsonPath', null),
-          ('$gsutilCall -- stat $gsJsonPath', kStatOutputValid),
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput()),
           ('$gsutilCall -- stat $gsArchivePath', ProcessResult(0, 1, '', '')),
           ('$gsutilCall -- rm $gsArchivePath', null),
           ('$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath', null),
@@ -716,9 +716,9 @@ gs://flutter_infra_release/releases/releases_macos.json:
         fs.file(jsonPath).writeAsStringSync(releasesJson);
         fs.file(archivePath).writeAsStringSync('archive contents');
         final List<(String, ProcessResult?)> calls = <(String, ProcessResult?)>[
-          ('$gsutilCall -- stat $gsJsonPath', kStatOutputValid),
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput()),
           ('$gsutilCall -- cp $gsJsonPath $jsonPath', null),
-          ('$gsutilCall -- stat $gsJsonPath', kStatOutputValid),
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput()),
           // This process fails because the file does NOT already exist
           ('$gsutilCall -- stat $gsArchivePath', ProcessResult(0, 1, '', '')),
           ('$gsutilCall -- rm $gsArchivePath', null),
@@ -785,7 +785,15 @@ gs://flutter_infra_release/releases/releases_macos.json:
           generation: 1,
           publisher: publisher,
         );
-        expect(() async => publisher.publishArchive(file), throwsException);
+        await expectLater(
+          () => publisher.publishArchive(file),
+          throwsA(isA<Exception>().having(
+            (Exception exc) => exc.toString(),
+            'message',
+            contains('already exists on cloud storage!'),
+          )),
+        );
+        print('done');
       });
 
       test('publishArchive does not throw if forceUpload is true and artifact already exists on cloud storage', () async {
@@ -847,9 +855,9 @@ gs://flutter_infra_release/releases/releases_macos.json:
         fs.file(jsonPath).writeAsStringSync(releasesJson);
         fs.file(archivePath).writeAsStringSync('archive contents');
         final List<(String, ProcessResult?)> calls = <(String, ProcessResult?)>[
-          ('$gsutilCall -- stat $gsJsonPath', kStatOutputValid),
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput()),
           ('$gsutilCall -- cp $gsJsonPath $jsonPath', null),
-          ('$gsutilCall -- stat $gsJsonPath', kStatOutputValid),
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput()),
           ('$gsutilCall -- rm $gsArchivePath', null),
           ('$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath', null),
           ('$gsutilCall -- rm $gsJsonPath', null),
@@ -859,6 +867,128 @@ gs://flutter_infra_release/releases/releases_macos.json:
         assert(tempDir.existsSync());
         final MetadataFile file = await publisher.generateLocalMetadata();
         await publisher.publishArchive(file, true);
+      });
+
+      test('ArchivePublisher will retry once if the generation of the remote metadata file changes', () async {
+        final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
+        final File outputFile = fs.file(path.join(tempDir.absolute.path, archiveName));
+        const Map<String, String> newVersion = <String, String>{
+          'frameworkVersionFromGit': 'v1.2.3',
+          'dartSdkVersion': '3.2.1',
+          'dartTargetArch': 'x64',
+        };
+        final ArchivePublisher publisher = ArchivePublisher(
+          tempDir,
+          testRef,
+          Branch.stable,
+          newVersion,
+          outputFile,
+          false,
+          fs: fs,
+          processManager: processManager,
+          platform: platform,
+        );
+        final String archivePath = path.join(tempDir.absolute.path, archiveName);
+        final String jsonPath = path.join(tempDir.absolute.path, releasesName);
+        final String gsJsonPath = 'gs://flutter_infra_release/releases/$releasesName';
+        final String releasesJson = '''
+{
+  "base_url": "https://storage.googleapis.com/flutter_infra_release/releases",
+  "current_release": {
+    "beta": "3ea4d06340a97a1e9d7cae97567c64e0569dcaa2",
+    "beta": "5a58b36e36b8d7aace89d3950e6deb307956a6a0"
+  },
+  "releases": [
+    {
+      "hash": "5a58b36e36b8d7aace89d3950e6deb307956a6a0",
+      "channel": "beta",
+      "version": "v0.2.3",
+      "release_date": "2018-03-20T01:47:02.851729Z",
+      "archive": "beta/$platformName/flutter_${platformName}_v0.2.3-beta.zip",
+      "sha256": "4fe85a822093e81cb5a66c7fc263f68de39b5797b294191b6d75e7afcc86aff8"
+    },
+    {
+      "hash": "b9bd51cc36b706215915711e580851901faebb40",
+      "channel": "beta",
+      "version": "v0.2.2",
+      "release_date": "2018-03-16T18:48:13.375013Z",
+      "archive": "beta/$platformName/flutter_${platformName}_v0.2.2-beta.zip",
+      "sha256": "6073331168cdb37a4637a5dc073d6a7ef4e466321effa2c529fa27d2253a4d4b"
+    },
+    {
+      "hash": "$testRef",
+      "channel": "stable",
+      "version": "v0.0.0",
+      "release_date": "2018-03-20T01:47:02.851729Z",
+      "archive": "stable/$platformName/flutter_${platformName}_v0.0.0-beta.zip",
+      "sha256": "5dd34873b3a3e214a32fd30c2c319a0f46e608afb72f0d450b2d621a6d02aebd"
+    }
+  ]
+}
+''';
+        fs.file(jsonPath).writeAsStringSync(releasesJson);
+        fs.file(archivePath).writeAsStringSync('archive contents');
+        final List<(String, ProcessResult?)> calls = <(String, ProcessResult?)>[
+          // First attempt
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput(1)),
+          ('$gsutilCall -- cp $gsJsonPath $jsonPath', null),
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput(2)),
+          // Second attempt
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput(2)),
+          ('$gsutilCall -- cp $gsJsonPath $jsonPath', null),
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput(2)),
+        ];
+        processManager.addCommands(convertResults(calls));
+        final MetadataFile metadataFile = await publisher.generateLocalMetadata();
+        expect(processManager, hasNoRemainingExpectations);
+        final String metadataContents = metadataFile.localFile.readAsStringSync();
+        final List<Object?> releases = (jsonDecode(metadataContents) as Map<String, Object?>)['releases']! as List<Object?>;
+        final Map<String, Object?> firstRelease = releases.first! as Map<String, Object?>;
+        expect(firstRelease['version'], newVersion['frameworkVersionFromGit']);
+        expect(firstRelease['dart_sdk_version'], newVersion['dartSdkVersion']);
+        expect(firstRelease['dart_sdk_arch'], newVersion['dartTargetArch']);
+      });
+
+      test('ArchivePublisher throws StateError if the generation of the remote metadata file changes twice', () async {
+        final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
+        final File outputFile = fs.file(path.join(tempDir.absolute.path, archiveName));
+        final ArchivePublisher publisher = ArchivePublisher(
+          tempDir,
+          testRef,
+          Branch.stable,
+          const <String, String>{
+            'frameworkVersionFromGit': 'v1.2.3',
+            'dartSdkVersion': '3.2.1',
+            'dartTargetArch': 'x64',
+          },
+          outputFile,
+          false,
+          fs: fs,
+          processManager: processManager,
+          platform: platform,
+        );
+        final String jsonPath = path.join(tempDir.absolute.path, releasesName);
+        final String gsJsonPath = 'gs://flutter_infra_release/releases/$releasesName';
+        final List<(String, ProcessResult?)> calls = <(String, ProcessResult?)>[
+          // First attempt
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput(1)),
+          ('$gsutilCall -- cp $gsJsonPath $jsonPath', null),
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput(2)),
+          // Second attempt
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput(2)),
+          ('$gsutilCall -- cp $gsJsonPath $jsonPath', null),
+          ('$gsutilCall -- stat $gsJsonPath', generateStatOutput(3)),
+        ];
+        processManager.addCommands(convertResults(calls));
+        await expectLater(
+          () => publisher.generateLocalMetadata(),
+          throwsA(isA<StateError>().having(
+            (StateError exc) => exc.message,
+            'message',
+            contains('The generation number of the file $gsJsonPath was changed by another process'),
+          )),
+        );
+        expect(processManager, hasNoRemainingExpectations);
       });
     });
   }
