@@ -86,7 +86,7 @@ class _WrapExampleState extends State<WrapExample> {
             Wrapped(
               // If the child fits in the current run,
               // its max width is set to the remaining space.
-              // Otherwise it may be as wide as the Wrap
+              // Otherwise it can be as wide as the Wrap.
               fit: WrapFit.constrained,
               child: TextField(
                 autofocus: true,
