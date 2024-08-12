@@ -20,6 +20,14 @@
 
 #include "third_party/skia/include/core/SkShader.h"
 
+#ifdef IMPELLER_ENABLE_3D
+#include "impeller/geometry/matrix.h"  // nogncheck
+#include "impeller/scene/node.h"       // nogncheck
+namespace flutter {
+class DlSceneColorSource;
+}
+#endif  // IMPELLER_ENABLE_3D
+
 namespace flutter {
 
 class DlColorColorSource;
@@ -48,6 +56,9 @@ enum class DlColorSourceType {
   kConicalGradient,
   kSweepGradient,
   kRuntimeEffect,
+#ifdef IMPELLER_ENABLE_3D
+  kScene,
+#endif  // IMPELLER_ENABLE_3D
 };
 
 class DlColorSource : public DlAttribute<DlColorSource, DlColorSourceType> {
@@ -153,6 +164,10 @@ class DlColorSource : public DlAttribute<DlColorSource, DlColorSourceType> {
   virtual const DlRuntimeEffectColorSource* asRuntimeEffect() const {
     return nullptr;
   }
+
+#ifdef IMPELLER_ENABLE_3D
+  virtual const DlSceneColorSource* asScene() const { return nullptr; }
+#endif  // IMPELLER_ENABLE_3D
 
  protected:
   DlColorSource() = default;
@@ -691,6 +706,48 @@ class DlRuntimeEffectColorSource final : public DlColorSource {
 
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(DlRuntimeEffectColorSource);
 };
+
+#ifdef IMPELLER_ENABLE_3D
+class DlSceneColorSource final : public DlColorSource {
+ public:
+  DlSceneColorSource(std::shared_ptr<impeller::scene::Node> node,
+                     impeller::Matrix camera_matrix)
+      : node_(std::move(node)), camera_matrix_(camera_matrix) {}
+
+  bool isUIThreadSafe() const override { return true; }
+
+  const DlSceneColorSource* asScene() const override { return this; }
+
+  std::shared_ptr<DlColorSource> shared() const override {
+    return std::make_shared<DlSceneColorSource>(node_, camera_matrix_);
+  }
+
+  DlColorSourceType type() const override { return DlColorSourceType::kScene; }
+  size_t size() const override { return sizeof(*this); }
+
+  bool is_opaque() const override { return false; }
+
+  std::shared_ptr<impeller::scene::Node> scene_node() const { return node_; }
+
+  impeller::Matrix camera_matrix() const { return camera_matrix_; }
+
+ protected:
+  bool equals_(DlColorSource const& other) const override {
+    FML_DCHECK(other.type() == DlColorSourceType::kScene);
+    auto that = static_cast<DlSceneColorSource const*>(&other);
+    if (node_ != that->node_) {
+      return false;
+    }
+    return true;
+  }
+
+ private:
+  std::shared_ptr<impeller::scene::Node> node_;
+  impeller::Matrix camera_matrix_;  // the view-projection matrix of the scene.
+
+  FML_DISALLOW_COPY_ASSIGN_AND_MOVE(DlSceneColorSource);
+};
+#endif  // IMPELLER_ENABLE_3D
 
 }  // namespace flutter
 

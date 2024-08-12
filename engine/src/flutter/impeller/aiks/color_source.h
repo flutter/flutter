@@ -17,6 +17,10 @@
 #include "impeller/geometry/point.h"
 #include "impeller/runtime_stage/runtime_stage.h"
 
+#if IMPELLER_ENABLE_3D
+#include "impeller/scene/node.h"  // nogncheck
+#endif                            // IMPELLER_ENABLE_3D
+
 namespace impeller {
 
 struct Paint;
@@ -74,12 +78,22 @@ struct RuntimeEffectData {
   std::vector<RuntimeEffectContents::TextureInput> texture_inputs;
 };
 
+#if IMPELLER_ENABLE_3D
+struct SceneData {
+  std::shared_ptr<scene::Node> scene_node;
+  Matrix camera_transform;
+};
+#endif  // IMPELLER_ENABLE_3D
+
 using ColorSourceData = std::variant<LinearGradientData,
                                      RadialGradientData,
                                      ConicalGradientData,
                                      SweepGradientData,
                                      ImageData,
                                      RuntimeEffectData,
+#if IMPELLER_ENABLE_3D
+                                     SceneData,
+#endif  // IMPELLER_ENABLE_3D
                                      std::monostate>;
 
 class ColorSource {
@@ -92,6 +106,7 @@ class ColorSource {
     kConicalGradient,
     kSweepGradient,
     kRuntimeEffect,
+    kScene,
   };
 
   ColorSource() noexcept;
@@ -141,6 +156,11 @@ class ColorSource {
       std::shared_ptr<RuntimeStage> runtime_stage,
       std::shared_ptr<std::vector<uint8_t>> uniform_data,
       std::vector<RuntimeEffectContents::TextureInput> texture_inputs);
+
+#if IMPELLER_ENABLE_3D
+  static ColorSource MakeScene(std::shared_ptr<scene::Node> scene_node,
+                               Matrix camera_transform);
+#endif  // IMPELLER_ENABLE_3D
 
   Type GetType() const;
 
