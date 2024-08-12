@@ -575,7 +575,7 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   // TODO(blaugold): Enable for windows once CBuilder supports passing linker
   // flags to MSVC compiler.
   if (!platform.isWindows) {
-    await addLinkedNativeLibrary(packageDirectory);
+    await addDynamicallyLinkedNativeLibrary(packageDirectory);
   }
 
   final ProcessResult result2 = await processManager.run(
@@ -692,20 +692,31 @@ import '${packageName}_bindings_generated.dart' as bindings;
   await dartFile.writeAsString(dartFileNew2);
 }
 
-/// Adds a native library to be built by the builder and link it into the
-/// main library.
-Future<void> addLinkedNativeLibrary(Directory packageDirectory) async {
-  // Add linked library source file.
+/// Adds a native library to be built by the builder and dynamically link it to
+/// the  main library.
+Future<void> addDynamicallyLinkedNativeLibrary(Directory packageDirectory) async {
+  // Add linked library source files.
   final Directory srcDirectory = packageDirectory.childDirectory('src');
-  final File linkedLibrarySourceFile = srcDirectory.childFile('linked.c');
-  await linkedLibrarySourceFile.writeAsString('''
+  final File linkedLibraryHeaderFile = srcDirectory.childFile('add.h');
+  await linkedLibraryHeaderFile.writeAsString('''
+#include <stdint.h>
+
 #if _WIN32
 #define FFI_PLUGIN_EXPORT __declspec(dllexport)
 #else
 #define FFI_PLUGIN_EXPORT
 #endif
 
-FFI_PLUGIN_EXPORT void linked() {}
+FFI_PLUGIN_EXPORT intptr_t add(intptr_t a, intptr_t b);
+'''
+  );
+  final File linkedLibrarySourceFile = srcDirectory.childFile('add.c');
+  await linkedLibrarySourceFile.writeAsString('''
+#include "add.h"
+
+FFI_PLUGIN_EXPORT intptr_t add(intptr_t a, intptr_t b) {
+  return a + b;
+}
 ''');
 
   // Update main library to include call to linked library.
@@ -715,17 +726,10 @@ FFI_PLUGIN_EXPORT void linked() {}
     '#include "$packageName.h"',
 '''
 #include "$packageName.h"
-
-extern void linked();
+#include "add.h"
 ''',
   );
-  mainLibrarySource = mainLibrarySource.replaceFirst(
-    'sum(intptr_t a, intptr_t b) {',
-    '''
-sum(intptr_t a, intptr_t b) {
-  linked();
-''',
-  );
+  mainLibrarySource = mainLibrarySource.replaceFirst('a + b;', 'add(a, b);');
   await mainLibrarySourceFile.writeAsString(mainLibrarySource);
 
   // Update builder to build the native library and link it into the main library.
@@ -740,15 +744,15 @@ void main(List<String> args) async {
 
     final builders = [
       CBuilder.library(
-        name: 'linked',
-        assetName: 'linked',
-        sources: ['src/linked.c'],
+        name: 'add',
+        assetName: 'add',
+        sources: ['src/add.c'],
       ),
       CBuilder.library(
         name: packageName,
         assetName: '${packageName}_bindings_generated.dart',
         sources: ['src/$packageName.c'],
-        flags: config.dynamicLinkingFlags('linked'),
+        flags: config.dynamicLinkingFlags('add'),
       ),
     ];
 
