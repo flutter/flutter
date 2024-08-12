@@ -571,12 +571,7 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
       packageDirectory.childDirectory('example').childFile('pubspec.yaml'));
 
   await addLinkHookDependency(packageDirectory);
-
-  // TODO(blaugold): Enable for windows once CBuilder has option to dynamically
-  // link to libraries. https://github.com/dart-lang/native/issues/1419
-  if (!platform.isWindows) {
-    await addDynamicallyLinkedNativeLibrary(packageDirectory);
-  }
+  await addDynamicallyLinkedNativeLibrary(packageDirectory);
 
   final ProcessResult result2 = await processManager.run(
     <String>[
@@ -780,6 +775,9 @@ extension on BuildConfig {
             '-Wl,-rpath=\$ORIGIN/.',
             '-L${outputDirectory.toFilePath()}',
             '-l$libraryName',
+          ],
+        OS.windows => [
+            outputDirectory.resolve('$libraryName.lib').toFilePath()
           ],
         _ => throw UnimplementedError('Unsupported OS: $targetOS'),
       };
