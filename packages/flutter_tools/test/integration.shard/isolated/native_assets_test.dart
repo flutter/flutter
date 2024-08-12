@@ -773,7 +773,7 @@ extension on BuildConfig {
             '-l$libraryName',
           ],
         OS.linux => [
-            '-Wl,-rpath=$ORIGIN/.',
+            '-Wl,-rpath=\$ORIGIN/.',
             '-L${outputDirectory.toFilePath()}',
             '-l$libraryName',
           ],
