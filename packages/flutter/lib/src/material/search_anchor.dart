@@ -137,6 +137,7 @@ class SearchAnchor extends StatefulWidget {
     required this.suggestionsBuilder,
     this.textInputAction,
     this.keyboardType,
+    this.enabled = true,
   });
 
   /// Create a [SearchAnchor] that has a [SearchBar] which opens a search view.
@@ -350,6 +351,9 @@ class SearchAnchor extends StatefulWidget {
   /// Defaults to the default value specified in [TextField].
   final TextInputType? keyboardType;
 
+  /// If false the widget is "disabled" so the SearchAnchor will ignore taps.
+  final bool enabled;
+
   @override
   State<SearchAnchor> createState() => _SearchAnchorState();
 }
@@ -454,11 +458,14 @@ class _SearchAnchorState extends State<SearchAnchor> {
   Widget build(BuildContext context) {
     return AnimatedOpacity(
       key: _anchorKey,
-      opacity: _anchorIsVisible ? 1.0 : 0.0,
+      opacity: widget.enabled ? _anchorIsVisible ? 1.0 : 0.0 : _kDisableSearchBarOpacity,
       duration: _kAnchorFadeDuration,
-      child: GestureDetector(
-        onTap: _openView,
-        child: widget.builder(context, _searchController),
+      child: IgnorePointer(
+        ignoring: !widget.enabled,
+        child: GestureDetector(
+          onTap: _openView,
+          child: widget.builder(context, _searchController),
+        ),
       ),
     );
   }

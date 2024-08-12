@@ -3016,6 +3016,36 @@ void main() {
     expect(opacityWidget.opacity, 0.38);
   });
 
+  testWidgets('Check SearchAnchor opacity when disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Center(
+        child: Material(
+          child: SearchAnchor(
+            isFullScreen: true,
+            enabled: false,
+            builder: (BuildContext context, SearchController controller) {
+              return const Icon(Icons.search);
+            },
+            headerHeight: 32,
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    ));
+
+    final Finder searchBarFinder = find.byType(SearchAnchor);
+    expect(searchBarFinder, findsOneWidget);
+    final Finder opacityFinder = find.descendant(
+      of: searchBarFinder,
+      matching: find.byType(AnimatedOpacity),
+    );
+    expect(opacityFinder, findsOneWidget);
+    final AnimatedOpacity opacityWidget = tester.widget<AnimatedOpacity>(opacityFinder);
+    expect(opacityWidget.opacity, 0.38);
+  });
+
   testWidgets('SearchAnchor respects headerHeight', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Center(
