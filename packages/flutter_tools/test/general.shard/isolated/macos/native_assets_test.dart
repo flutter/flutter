@@ -282,17 +282,60 @@ void main() {
         FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
         ProcessManager: () => FakeProcessManager.list(
           <FakeCommand>[
-            FakeCommand(
-              command: <Pattern>[
-                'lipo',
-                '-create',
-                '-output',
-                dylibPathBar,
-                'arm64/libbar.dylib',
-                'x64/libbar.dylib',
-              ],
-            ),
-            if (!flutterTester)
+            if (flutterTester) ...<FakeCommand>[
+              FakeCommand(
+                command: <Pattern>[
+                  'lipo',
+                  '-create',
+                  '-output',
+                  dylibPathBar,
+                  'arm64/libbar.dylib',
+                  'x64/libbar.dylib',
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'codesign',
+                  '--force',
+                  '--sign',
+                  '-',
+                  if (buildMode == BuildMode.debug)
+                    '--timestamp=none',
+                  signPathBar,
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'lipo',
+                  '-create',
+                  '-output',
+                  dylibPathBuz,
+                  'arm64/libbuz.dylib',
+                  'x64/libbuz.dylib',
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'codesign',
+                  '--force',
+                  '--sign',
+                  '-',
+                  if (buildMode == BuildMode.debug)
+                    '--timestamp=none',
+                  signPathBuz,
+                ],
+              ),
+            ] else ...<FakeCommand>[
+              FakeCommand(
+                command: <Pattern>[
+                  'lipo',
+                  '-create',
+                  '-output',
+                  dylibPathBar,
+                  'arm64/libbar.dylib',
+                  'x64/libbar.dylib',
+                ],
+              ),
               FakeCommand(
                 command: <Pattern>[
                   'otool',
@@ -306,7 +349,6 @@ void main() {
                   '@rpath/libbar.dylib',
                 ].join('\n'),
               ),
-            if (!flutterTester)
               FakeCommand(
                 command: <Pattern>[
                   'install_name_tool',
@@ -315,29 +357,16 @@ void main() {
                   dylibPathBar,
                 ],
               ),
-            if (flutterTester)
               FakeCommand(
                 command: <Pattern>[
-                  'codesign',
-                  '--force',
-                  '--sign',
-                  '-',
-                  if (buildMode == BuildMode.debug)
-                    '--timestamp=none',
-                  signPathBar,
+                  'lipo',
+                  '-create',
+                  '-output',
+                  dylibPathBuz,
+                  'arm64/libbuz.dylib',
+                  'x64/libbuz.dylib',
                 ],
               ),
-            FakeCommand(
-              command: <Pattern>[
-                'lipo',
-                '-create',
-                '-output',
-                dylibPathBuz,
-                'arm64/libbuz.dylib',
-                'x64/libbuz.dylib',
-              ],
-            ),
-            if (!flutterTester)
               FakeCommand(
                 command: <Pattern>[
                   'otool',
@@ -351,7 +380,6 @@ void main() {
                   '@rpath/libbuz.dylib',
                 ].join('\n'),
               ),
-            if (!flutterTester)
               FakeCommand(
                 command: <Pattern>[
                   'install_name_tool',
@@ -360,19 +388,6 @@ void main() {
                   dylibPathBuz,
                 ],
               ),
-            if (flutterTester)
-              FakeCommand(
-                command: <Pattern>[
-                  'codesign',
-                  '--force',
-                  '--sign',
-                  '-',
-                  if (buildMode == BuildMode.debug)
-                    '--timestamp=none',
-                  signPathBuz,
-                ],
-              ),
-            if (!flutterTester)
               FakeCommand(
                 command: <Pattern>[
                   'install_name_tool',
@@ -385,7 +400,6 @@ void main() {
                   dylibPathBar,
                 ],
               ),
-            if (!flutterTester)
               FakeCommand(
                 command: <Pattern>[
                   'install_name_tool',
@@ -398,6 +412,7 @@ void main() {
                   dylibPathBuz,
                 ],
               ),
+            ],
           ],
         ),
       }, () async {
