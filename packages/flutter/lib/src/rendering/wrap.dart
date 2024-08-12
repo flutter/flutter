@@ -759,11 +759,7 @@ class RenderWrap extends RenderBox
           final RenderBox? nextChild = child.next;
           if (nextChild != null) {
             nextChildMinExtent = getChildMinIntrinsicSize(nextChild, double.infinity);
-            if (childMinExtent + nextChildMinExtent + spacing <= runLimit) {
-              tighten = false;
-            } else {
-              tighten = true;
-            }
+            tighten = (childMinExtent + nextChildMinExtent + spacing) > runLimit;
           } else {
             tighten = true;
           }
