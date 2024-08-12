@@ -166,5 +166,14 @@ void main() {
           await channel.invokeMethod('test') as List<Object?>;
       expect(_findColor(result, <double>[0.0, 1.0, 0.0]), isTrue);
     });
+    testWidgets('draw container with wide gamut works', (WidgetTester tester) async {
+      app.run(app.Setup.container);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      const MethodChannel channel = MethodChannel('flutter/screenshot');
+      final List<Object?> result =
+          await channel.invokeMethod('test') as List<Object?>;
+      expect(_findColor(result, _deepRed), isTrue);
+    });
   });
 }
