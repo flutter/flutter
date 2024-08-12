@@ -710,6 +710,9 @@ def to_gn_args(args):
     gn_args['dart_use_mallinfo2'] = args.use_mallinfo2
 
   # Impeller flags.
+  if args.enable_impeller_3d:
+    gn_args['impeller_enable_3d'] = True
+
   malioc_path = args.malioc_path
   if not malioc_path:
     malioc_path = os.environ.get('MALIOC_PATH')
@@ -1138,6 +1141,12 @@ def parse_args(args):
   )
 
   # Impeller flags.
+  parser.add_argument(
+      '--enable-impeller-3d',
+      default=False,
+      action='store_true',
+      help='Enables experimental 3d support.'
+  )
 
   parser.add_argument('--malioc-path', type=str, help='The path to the malioc tool.')
 
