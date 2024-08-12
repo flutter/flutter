@@ -144,9 +144,9 @@ Future<void> main(List<String> rawArguments) async {
       print: stdout.writeln,
       printError: stderr.writeln,
     );
-    await publisher.generateLocalMetadata();
+    final MetadataFile metadataFile = await publisher.generateLocalMetadata();
     if (parsedArguments['publish'] as bool) {
-      await publisher.publishArchive(parsedArguments['force'] as bool);
+      await publisher.publishArchive(metadataFile, parsedArguments['force'] as bool);
     }
   } on PreparePackageException catch (e) {
     exitCode = e.exitCode;

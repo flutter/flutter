@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show LocalPlatform, Platform;
 import 'package:process/process.dart';
@@ -70,7 +71,7 @@ class ArchivePublisher {
   ///
   /// This method will throw if the target archive already exists on cloud
   /// storage.
-  Future<void> publishArchive([bool forceUpload = false]) async {
+  Future<void> publishArchive(MetadataFile metadataFile, [bool forceUpload = false]) async {
     final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
     if (!forceUpload) {
       if (await _cloudPathExists(destGsPath) && !dryRun) {
@@ -84,13 +85,12 @@ class ArchivePublisher {
       dest: destGsPath,
     );
     assert(tempDir.existsSync());
-    final String gcsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}';
-    await _publishMetadata(gcsPath);
+    await metadataFile.upload(_cloudCopy);
   }
 
   /// Downloads and updates the metadata file without publishing it.
-  Future<void> generateLocalMetadata() async {
-    await _updateMetadata('$gsReleaseFolder/${getMetadataFilename(platform)}');
+  Future<MetadataFile> generateLocalMetadata() {
+    return _updateMetadata('$gsReleaseFolder/${getMetadataFilename(platform)}');
   }
 
   Future<Map<String, dynamic>> _addRelease(Map<String, dynamic> jsonData) async {
@@ -130,7 +130,7 @@ class ArchivePublisher {
     return jsonData;
   }
 
-  Future<void> _updateMetadata(String gsPath) async {
+  Future<MetadataFile> _updateMetadata(String gsPath) async {
     // We can't just cat the metadata from the server with 'gsutil cat', because
     // Windows wants to echo the commands that execute in gsutil.bat to the
     // stdout when we do that. So, we copy the file locally and then read it
@@ -138,7 +138,7 @@ class ArchivePublisher {
     final File localFile = fs.file(
       path.join(tempDir.absolute.path, getMetadataFilename(platform)),
     );
-    final _MetadataFile metadataFile = await _MetadataFile.download(
+    final MetadataFile metadataFile = await MetadataFile.download(
       remotePath: gsPath,
       localFile: localFile,
       publisher: this,
@@ -163,6 +163,7 @@ class ArchivePublisher {
 
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     metadataFile.localFile.writeAsStringSync(encoder.convert(jsonData));
+    return metadataFile;
   }
 
   /// Publishes the metadata file to GCS.
@@ -239,8 +240,9 @@ class ArchivePublisher {
   }
 }
 
-class _MetadataFile {
-  const _MetadataFile._({
+class MetadataFile {
+  @visibleForTesting
+  const MetadataFile({
     required this.remotePath,
     required this.localFile,
     required this.generation,
@@ -251,7 +253,7 @@ class _MetadataFile {
   // metadata file.
   static const int _kDownloadAttempts = 2;
 
-  static Future<_MetadataFile> download({
+  static Future<MetadataFile> download({
     required String remotePath,
     required File localFile,
     required ArchivePublisher publisher,
@@ -282,11 +284,23 @@ but generation $secondGeneration after on attempt $attempt.
     if (generation == null) {
       throw StateError('The generation number of the file $remotePath was changed by another process $_kDownloadAttempts');
     }
-    return _MetadataFile._(
+    return MetadataFile(
       remotePath: remotePath,
       localFile: localFile,
       generation: generation,
     );
+  }
+
+  Future<void> upload(Future<String> Function({required String src, required String dest, int? cacheSeconds}) cloudCopy) async {
+    await cloudCopy(
+      src: localFile.absolute.path,
+      dest: remotePath,
+      // This metadata file is used by the website, so we don't want a long
+      // latency between publishing a release and it being available on the
+      // site.
+      cacheSeconds: shortCacheSeconds,
+    );
+
   }
 
   static final RegExp _parseGenerationFromStatPattern = RegExp(r'^\s+Generation:\s+(\d+)$');

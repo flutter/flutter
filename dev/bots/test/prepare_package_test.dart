@@ -482,8 +482,8 @@ gs://flutter_infra_release/releases/releases_macos.json:
           platform: platform,
         );
         assert(tempDir.existsSync());
-        await publisher.generateLocalMetadata();
-        await publisher.publishArchive();
+        final MetadataFile file = await publisher.generateLocalMetadata();
+        await publisher.publishArchive(file);
 
         final File releaseFile = fs.file(jsonPath);
         expect(releaseFile.existsSync(), isTrue);
@@ -585,8 +585,8 @@ gs://flutter_infra_release/releases/releases_macos.json:
           platform: platform,
         );
         assert(tempDir.existsSync());
-        await publisher.generateLocalMetadata();
-        await publisher.publishArchive();
+        final MetadataFile file = await publisher.generateLocalMetadata();
+        await publisher.publishArchive(file);
 
         final File releaseFile = fs.file(jsonPath);
         expect(releaseFile.existsSync(), isTrue);
@@ -652,8 +652,8 @@ gs://flutter_infra_release/releases/releases_macos.json:
           platform: platform,
         );
         assert(tempDir.existsSync());
-        await publisher.generateLocalMetadata();
-        await publisher.publishArchive();
+        final MetadataFile file = await publisher.generateLocalMetadata();
+        await publisher.publishArchive(file);
 
         final File releaseFile = fs.file(jsonPath);
         expect(releaseFile.existsSync(), isTrue);
@@ -735,8 +735,8 @@ gs://flutter_infra_release/releases/releases_macos.json:
           platform: platform,
         );
         assert(tempDir.existsSync());
-        await publisher.generateLocalMetadata();
-        await publisher.publishArchive();
+        final MetadataFile file = await publisher.generateLocalMetadata();
+        await publisher.publishArchive(file);
 
         final File releaseFile = fs.file(jsonPath);
         expect(releaseFile.existsSync(), isTrue);
@@ -768,7 +768,12 @@ gs://flutter_infra_release/releases/releases_macos.json:
           ('$gsutilCall -- stat $gsArchivePath', ProcessResult(0, 0, '', '')),
         ];
         processManager.addCommands(convertResults(calls));
-        expect(() async => publisher.publishArchive(), throwsException);
+        final MetadataFile file = MetadataFile(
+          remotePath: gsArchivePath,
+          localFile: outputFile,
+          generation: 1,
+        );
+        expect(() async => publisher.publishArchive(file), throwsException);
       });
 
       test('publishArchive does not throw if forceUpload is true and artifact already exists on cloud storage', () async {
@@ -840,8 +845,8 @@ gs://flutter_infra_release/releases/releases_macos.json:
  ];
         processManager.addCommands(convertResults(calls));
         assert(tempDir.existsSync());
-        await publisher.generateLocalMetadata();
-        await publisher.publishArchive(true);
+        final MetadataFile file = await publisher.generateLocalMetadata();
+        await publisher.publishArchive(file, true);
       });
     });
   }
