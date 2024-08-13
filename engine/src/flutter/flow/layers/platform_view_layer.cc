@@ -13,17 +13,6 @@ PlatformViewLayer::PlatformViewLayer(const SkPoint& offset,
                                      int64_t view_id)
     : offset_(offset), size_(size), view_id_(view_id) {}
 
-void PlatformViewLayer::Diff(DiffContext* context, const Layer* old_layer) {
-  DiffContext::AutoSubtreeRestore subtree(context);
-  // Ensure that Diff is called again even if this layer is in retained subtree.
-  context->MarkSubtreeHasVolatileLayer();
-  // Partial repaint is disabled when platform view is present. This will also
-  // set whole frame as the layer paint region, which will ensure full repaint
-  // when the layer is removed.
-  context->RepaintEntireFrame();
-  context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
-}
-
 void PlatformViewLayer::Preroll(PrerollContext* context) {
   set_paint_bounds(SkRect::MakeXYWH(offset_.x(), offset_.y(), size_.width(),
                                     size_.height()));
