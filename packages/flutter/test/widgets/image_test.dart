@@ -2123,6 +2123,57 @@ void main() {
 
     codec.dispose();
   });
+
+  testWidgets('Do not clean up rendered images if the Image Provider is not updated', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    final _TestImageProvider imageProvider1 = _TestImageProvider();
+    await tester.pumpWidget(
+      Container(
+        key: key,
+        child: Image(
+          image: imageProvider1,
+          excludeFromSemantics: true,
+        ),
+      ),
+      phase: EnginePhase.layout,
+    );
+
+    imageProvider1.complete(image10x10);
+    await tester.idle();
+    await tester.pump(null, EnginePhase.layout);
+
+    RenderImage renderImage = key.currentContext!.findRenderObject()! as RenderImage;
+    expect(renderImage.image, isNotNull);
+
+    await tester.pumpWidget(
+      Container(
+        key: key,
+        child: Image(
+          image: imageProvider1,
+          excludeFromSemantics: true,
+        ),
+      ),
+      phase: EnginePhase.layout,
+    );
+
+    renderImage = key.currentContext!.findRenderObject()! as RenderImage;
+    expect(renderImage.image, isNotNull);
+    
+    final _TestImageProvider imageProvider2 = _TestImageProvider();
+    await tester.pumpWidget(
+      Container(
+        key: key,
+        child: Image(
+          image: imageProvider2,
+          excludeFromSemantics: true,
+        ),
+      ),
+      phase: EnginePhase.layout,
+    );
+
+    renderImage = key.currentContext!.findRenderObject()! as RenderImage;
+    expect(renderImage.image, isNull);
+  });
 }
 
 @immutable
