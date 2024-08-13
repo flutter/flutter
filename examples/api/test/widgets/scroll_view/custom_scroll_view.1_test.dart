@@ -12,26 +12,22 @@ void main() {
     await tester.pumpWidget(const example.CustomScrollViewExampleApp());
 
     expect(find.byType(Scaffold), findsOne);
-    expect(
-        find.descendant(
+    expect(find.descendant(
           of: find.byType(Scaffold),
           matching: find.byType(AppBar),
         ),
         findsOne);
-    expect(
-        find.descendant(
+    expect(find.descendant(
           of: find.byType(AppBar),
           matching: find.byType(IconButton),
         ),
         findsOne);
-    expect(
-        find.descendant(
+    expect(find.descendant(
           of: find.byType(Scaffold),
           matching: find.byType(CustomScrollView),
         ),
         findsOne);
-    expect(
-        find.descendant(
+    expect(find.descendant(
           of: find.byType(CustomScrollView),
           matching: find.byType(SliverList),
         ),
