@@ -58,12 +58,27 @@ Future<void> testMain() async {
         'stoplight.webp',
       ];
 
+      // GIF files which are known to be animated.
+      const List<String> animatedGifFiles = <String>[
+        'alphabetAnim.gif',
+        'colorTables.gif',
+        'flightAnim.gif',
+        'gif-transparent-index.gif',
+        'randPixelsAnim.gif',
+        'randPixelsAnim2.gif',
+        'required.gif',
+        'test640x479.gif',
+        'xOffsetTooBig.gif',
+      ];
+
       final String testFileExtension =
           testFile.substring(testFile.lastIndexOf('.') + 1);
       final ImageType? expectedImageType = switch (testFileExtension) {
         'jpg' => ImageType.jpeg,
         'jpeg' => ImageType.jpeg,
-        'gif' => ImageType.animatedGif,
+        'gif' => animatedGifFiles.contains(testFile)
+            ? ImageType.animatedGif
+            : ImageType.gif,
         'webp' => animatedWebpFiles.contains(testFile)
             ? ImageType.animatedWebp
             : ImageType.webp,
