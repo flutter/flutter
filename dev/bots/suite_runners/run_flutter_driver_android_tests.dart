@@ -59,20 +59,19 @@ Future<void> _writeAndroidEmulatorCrashLogs() async {
   );
 
   // Run crashreport -l to list crash logs.
-  final io.ProcessResult result = await io.Process.run(
+  final io.ProcessResult listCrashes = await io.Process.run(
     crashReportPath,
     <String>[
       '-u',
     ],
   );
-  if (result.exitCode != 0) {
-    print('Failed to list crash logs: ${result.stderr}');
+  if (listCrashes.exitCode != 0) {
+    print('Failed to list crash logs: ${listCrashes.stderr}');
     return;
   }
 
   print('Crash logs:');
-  print(result.stdout);
-  print(result.stderr);
+  print(listCrashes.stdout);
 }
 
 Future<void> _runFlutterDriverAndroidTests() async {
