@@ -225,6 +225,157 @@ void main() {
     });
   });
 
+  group('Configurator', () {
+    late MemoryFileSystem fs;
+    late FakeProcessManager fakeProcessManager;
+    late Directory publishRoot;
+    late Directory packageRoot;
+    late Directory docsRoot;
+    late File searchTemplate;
+    late apidocs.Configurator configurator;
+    late FakePlatform fakePlatform;
+    late apidocs.FlutterInformation flutterInformation;
+
+    void setUpWithEnvironment(Map<String, String> environment) {
+      fakePlatform = FakePlatform(environment: environment);
+      flutterInformation = apidocs.FlutterInformation(
+        filesystem: fs,
+        processManager: fakeProcessManager,
+        platform: fakePlatform,
+      );
+      apidocs.FlutterInformation.instance = flutterInformation;
+    }
+
+    setUp(() {
+      fs = MemoryFileSystem.test();
+      publishRoot = fs.directory('/path/to/publish');
+      packageRoot = fs.directory('/path/to/package');
+      docsRoot = fs.directory('/path/to/docs');
+      searchTemplate = docsRoot.childDirectory('lib').childFile('opensearch.xml');
+      fs.directory('/home/user/flutter/packages').createSync(recursive: true);
+      fakeProcessManager = FakeProcessManager.empty();
+      setUpWithEnvironment(<String, String>{});
+      publishRoot.createSync(recursive: true);
+      packageRoot.createSync(recursive: true);
+      docsRoot.createSync(recursive: true);
+      final List<String> files = <String>[
+        'README.md',
+        'analysis_options.yaml',
+        'dartdoc_options.yaml',
+        searchTemplate.path,
+        publishRoot.childFile('opensearch.xml').path,
+      ];
+      for (final String file in files) {
+        docsRoot.childFile(file).createSync(recursive: true);
+      }
+      searchTemplate.writeAsStringSync('{SITE_URL}');
+      configurator = apidocs.Configurator(
+        docsRoot: docsRoot,
+        packageRoot: packageRoot,
+        publishRoot: publishRoot,
+        filesystem: fs,
+        processManager: fakeProcessManager,
+        platform: fakePlatform,
+      );
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['flutter', '--version', '--machine'],
+          stdout: testVersionInfo,
+        ),
+        const FakeCommand(
+          command: <Pattern>['git', 'status', '-b', '--porcelain'],
+          stdout: '## $branchName',
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+        ),
+        const FakeCommand(
+          command: <String>['/flutter/bin/flutter', 'pub', 'global', 'list'],
+        ),
+        FakeCommand(
+          command: <Pattern>[
+            '/flutter/bin/flutter',
+            'pub',
+            'global',
+            'run',
+            '--enable-asserts',
+            'dartdoc',
+            '--output',
+            '/path/to/publish/flutter',
+            '--allow-tools',
+            '--json',
+            '--validate-links',
+            '--link-to-source-excludes',
+            '/flutter/bin/cache',
+            '--link-to-source-root',
+            '/flutter',
+            '--link-to-source-uri-template',
+            'https://github.com/flutter/flutter/blob/main/%f%#L%l%',
+            '--inject-html',
+            '--use-base-href',
+            '--header',
+            '/path/to/docs/styles.html',
+            '--header',
+            '/path/to/docs/analytics-header.html',
+            '--header',
+            '/path/to/docs/survey.html',
+            '--header',
+            '/path/to/docs/snippets.html',
+            '--header',
+            '/path/to/docs/opensearch.html',
+            '--footer',
+            '/path/to/docs/analytics-footer.html',
+            '--footer-text',
+            '/path/to/package/footer.html',
+            '--allow-warnings-in-packages',
+            // match package names
+            RegExp(r'^(\w+,)+(\w+)$'),
+            '--exclude-packages',
+            RegExp(r'^(\w+,)+(\w+)$'),
+            '--exclude',
+            // match dart package URIs
+            RegExp(r'^([\w\/:.]+,)+([\w\/:.]+)$'),
+            '--favicon',
+            '/path/to/docs/favicon.ico',
+            '--package-order',
+            'flutter,Dart,${apidocs.kPlatformIntegrationPackageName},flutter_test,flutter_driver',
+            '--auto-include-dependencies',
+          ],
+        ),
+      ]);
+    });
+
+    test('.generateConfiguration generates pubspec.yaml', () async {
+      configurator.generateConfiguration();
+      expect(packageRoot.childFile('pubspec.yaml').existsSync(), isTrue);
+      expect(packageRoot.childFile('pubspec.yaml').readAsStringSync(), contains('flutter_gpu:'));
+      expect(packageRoot.childFile('pubspec.yaml').readAsStringSync(), contains('dependency_overrides:'));
+      expect(packageRoot.childFile('pubspec.yaml').readAsStringSync(), contains('platform_integration:'));
+    });
+
+    test('.generateConfiguration generates fake lib', () async {
+      configurator.generateConfiguration();
+      expect(packageRoot.childDirectory('lib').existsSync(), isTrue);
+      expect(packageRoot.childDirectory('lib').childFile('temp_doc.dart').existsSync(), isTrue);
+      expect(packageRoot.childDirectory('lib').childFile('temp_doc.dart').readAsStringSync(), contains('library temp_doc;'));
+      expect(packageRoot.childDirectory('lib').childFile('temp_doc.dart').readAsStringSync(), contains("import 'package:flutter_gpu/gpu.dart';"));
+    });
+
+    test('.generateConfiguration generates page footer', () async {
+      configurator.generateConfiguration();
+      expect(packageRoot.childFile('footer.html').existsSync(), isTrue);
+      expect(packageRoot.childFile('footer.html').readAsStringSync(), contains('<script src="footer.js">'));
+      expect(publishRoot.childDirectory('flutter').childFile('footer.js').existsSync(), isTrue);
+      expect(publishRoot.childDirectory('flutter').childFile('footer.js').readAsStringSync(), contains(RegExp(r'Flutter 2.5.0 •.*• stable')));
+    });
+
+    test('.generateConfiguration generates search metadata', () async {
+      configurator.generateConfiguration();
+      expect(publishRoot.childFile('opensearch.xml').existsSync(), isTrue);
+      expect(publishRoot.childFile('opensearch.xml').readAsStringSync(), contains('https://api.flutter.dev/'));
+    });
+  });
+
   group('DartDocGenerator', () {
     late apidocs.DartdocGenerator generator;
     late MemoryFileSystem fs;
