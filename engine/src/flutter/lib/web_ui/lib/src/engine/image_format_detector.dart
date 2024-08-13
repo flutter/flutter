@@ -40,6 +40,16 @@ ImageType? detectImageType(Uint8List data) {
         return ImageType.animatedWebp;
       }
     }
+
+    // We conservatively detected an animated GIF. Check if the GIF is actually
+    // animated by reading the bytes.
+    if (format.imageType == ImageType.animatedGif) {
+      if (_GifHeaderReader(data.buffer.asByteData()).isAnimated()) {
+        return ImageType.animatedGif;
+      } else {
+        return ImageType.gif;
+      }
+    }
     return format.imageType;
   }
 
@@ -217,8 +227,8 @@ class _WebpHeaderReader {
   /// [expectedHeader].
   bool _readChunkHeader(String expectedHeader) {
     final String chunkFourCC = _readFourCC();
-    // Read chunk size.
-    _readUint32();
+    // Skip reading chunk size.
+    _position += 4;
     return chunkFourCC == expectedHeader;
   }
 
@@ -226,17 +236,11 @@ class _WebpHeaderReader {
   bool _readWebpHeader() {
     final String riffBytes = _readFourCC();
 
-    // Read file size byte.
-    _readUint32();
+    // Skip reading file size bytes.
+    _position += 4;
 
     final String webpBytes = _readFourCC();
     return riffBytes == 'RIFF' && webpBytes == 'WEBP';
-  }
-
-  int _readUint32() {
-    final int result = bytes.getUint32(_position, Endian.little);
-    _position += 4;
-    return result;
   }
 
   int _readUint8() {
@@ -256,5 +260,242 @@ class _WebpHeaderReader {
     ];
     _position += 4;
     return String.fromCharCodes(chars);
+  }
+}
+
+/// Reads the header of a GIF file to determine if it is animated or not.
+///
+/// See https://www.w3.org/Graphics/GIF/spec-gif89a.txt
+class _GifHeaderReader {
+  _GifHeaderReader(this.bytes);
+
+  final ByteData bytes;
+
+  /// The current position we are reading from in bytes.
+  int _position = 0;
+
+  /// Returns [true] if this GIF is animated.
+  ///
+  /// We say a GIF is animated if it has more than one image frame.
+  bool isAnimated() {
+    final bool isGif = _readGifHeader();
+    if (!isGif) {
+      return false;
+    }
+
+    // Read the logical screen descriptor block.
+
+    // Advance 4 bytes to skip over the screen width and height.
+    _position += 4;
+
+    final int logicalScreenDescriptorFields = _readUint8();
+    const int globalColorTableFlagMask = 1 << 7;
+    final bool hasGlobalColorTable =
+        logicalScreenDescriptorFields & globalColorTableFlagMask != 0;
+
+    // Skip over the background color index and pixel aspect ratio.
+    _position += 2;
+
+    if (hasGlobalColorTable) {
+      // Skip past the global color table.
+      const int globalColorTableSizeMask = 1 << 2 | 1 << 1 | 1;
+      final int globalColorTableSize =
+          logicalScreenDescriptorFields & globalColorTableSizeMask;
+      // This is 3 * 2^(Global Color Table Size + 1).
+      final int globalColorTableSizeInBytes =
+          3 * (1 << (globalColorTableSize + 1));
+      _position += globalColorTableSizeInBytes;
+    }
+
+    int framesFound = 0;
+    // Read the GIF until we either find 2 frames or reach the end of the GIF.
+    while (true) {
+      final bool isTrailer = _checkForTrailer();
+      if (isTrailer) {
+        return framesFound > 1;
+      }
+
+      // If we haven't reached the end, then the next block must either be a
+      // graphic block or a special-purpose block (comment extension or
+      // application extension).
+      final bool isSpecialPurposeBlock = _checkForSpecialPurposeBlock();
+      if (isSpecialPurposeBlock) {
+        _skipSpecialPurposeBlock();
+        continue;
+      }
+
+      // If the next block isn't a special-purpose block, it must be a graphic
+      // block. Increase the frame count, skip the graphic block, and keep
+      // looking for more.
+      if (framesFound >= 1) {
+        // We've found multiple frames, this is an animated GIF.
+        return true;
+      }
+      _skipGraphicBlock();
+      framesFound++;
+    }
+  }
+
+  /// Reads the GIF header. Returns [false] if this is not a valid GIF header.
+  bool _readGifHeader() {
+    final String signature = _readCharCode();
+    final String version = _readCharCode();
+
+    return signature == 'GIF' && (version == '89a' || version == '87a');
+  }
+
+  /// Returns [true] if the next block is a trailer.
+  bool _checkForTrailer() {
+    final int nextByte = bytes.getUint8(_position);
+    return nextByte == 0x3b;
+  }
+
+  /// Returns [true] if the next block is a Special-Purpose Block (either a
+  /// Comment Extension or an Application Extension).
+  bool _checkForSpecialPurposeBlock() {
+    final int extensionIntroducer = bytes.getUint8(_position);
+    if (extensionIntroducer != 0x21) {
+      return false;
+    }
+
+    final int extensionLabel = bytes.getUint8(_position + 1);
+
+    // The Comment Extension label is 0xFE, the Application Extension Label is
+    // 0xFF.
+    return extensionLabel == 0xfe || extensionLabel == 0xff;
+  }
+
+  /// Skips past the current control block.
+  void _skipSpecialPurposeBlock() {
+    assert(_checkForSpecialPurposeBlock());
+
+    // Skip the extension introducer.
+    _position += 1;
+
+    // Read the extension label to determine if this is a comment block or
+    // application block.
+    final int extensionLabel = _readUint8();
+    if (extensionLabel == 0xfe) {
+      // This is a Comment Extension. Just skip past data sub-blocks.
+      _skipDataBlocks();
+    } else {
+      assert(extensionLabel == 0xff);
+      // This is an Application Extension. Skip past the application identifier
+      // bytes and then skip past the data sub-blocks.
+
+      // Skip the application identifier.
+      _position += 12;
+
+      _skipDataBlocks();
+    }
+  }
+
+  /// Skip past the graphic block.
+  void _skipGraphicBlock() {
+    // Check for the optional Graphic Control Extension.
+    if (_checkForGraphicControlExtension()) {
+      _skipGraphicControlExtension();
+    }
+
+    // Check if the Graphic Block is a Plain Text Extension.
+    if (_checkForPlainTextExtension()) {
+      _skipPlainTextExtension();
+      return;
+    }
+
+    // This is a Table-Based Image block.
+    assert(bytes.getUint8(_position) == 0x2c);
+
+    // Skip to the packed fields to check if there is a local color table.
+    _position += 9;
+
+    final int packedImageDescriptorFields = _readUint8();
+    const int localColorTableFlagMask = 1 << 7;
+    final bool hasLocalColorTable =
+        packedImageDescriptorFields & localColorTableFlagMask != 0;
+    if (hasLocalColorTable) {
+      // Skip past the local color table.
+      const int localColorTableSizeMask = 1 << 2 | 1 << 1 | 1;
+      final int localColorTableSize =
+          packedImageDescriptorFields & localColorTableSizeMask;
+      // This is 3 * 2^(Local Color Table Size + 1).
+      final int localColorTableSizeInBytes =
+          3 * (1 << (localColorTableSize + 1));
+      _position += localColorTableSizeInBytes;
+    }
+    // Skip LZW minimum code size byte.
+    _position += 1;
+    _skipDataBlocks();
+  }
+
+  /// Returns [true] if the next block is a Graphic Control Extension block.
+  bool _checkForGraphicControlExtension() {
+    final int nextByte = bytes.getUint8(_position);
+    if (nextByte != 0x21) {
+      // This is not an extension block.
+      return false;
+    }
+
+    final int extensionLabel = bytes.getUint8(_position + 1);
+    // The Graphic Control Extension label is 0xF9.
+    return extensionLabel == 0xf9;
+  }
+
+  /// Skip past the Graphic Control Extension block.
+  void _skipGraphicControlExtension() {
+    assert(_checkForGraphicControlExtension());
+    // The Graphic Control Extension block is 8 bytes.
+    _position += 8;
+  }
+
+  /// Check if the next block is a Plain Text Extension block.
+  bool _checkForPlainTextExtension() {
+    final int nextByte = bytes.getUint8(_position);
+    if (nextByte != 0x21) {
+      // This is not an extension block.
+      return false;
+    }
+
+    final int extensionLabel = bytes.getUint8(_position + 1);
+    // The Plain Text Extension label is 0x01.
+    return extensionLabel == 0x01;
+  }
+
+  /// Skip the Plain Text Extension block.
+  void _skipPlainTextExtension() {
+    assert(_checkForPlainTextExtension());
+    // Skip the 15 bytes before the data sub-blocks.
+    _position += 15;
+
+    _skipDataBlocks();
+  }
+
+  /// Skip past any data sub-blocks and the block terminator.
+  void _skipDataBlocks() {
+    while (true) {
+      final int blockSize = _readUint8();
+      if (blockSize == 0) {
+        // This is a block terminator.
+        return;
+      }
+      _position += blockSize;
+    }
+  }
+
+  /// Read a 3 digit character code.
+  String _readCharCode() {
+    final List<int> chars = <int>[
+      bytes.getUint8(_position),
+      bytes.getUint8(_position + 1),
+      bytes.getUint8(_position + 2),
+    ];
+    _position += 3;
+    return String.fromCharCodes(chars);
+  }
+
+  int _readUint8() {
+    final int result = bytes.getUint8(_position);
+    _position += 1;
+    return result;
   }
 }
