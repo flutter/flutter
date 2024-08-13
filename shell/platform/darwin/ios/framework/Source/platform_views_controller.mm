@@ -679,7 +679,12 @@ bool PlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
     overlay_id++;
   }
 
-  background_frame->set_submit_info({.present_with_transaction = true});
+  auto previous_submit_info = background_frame->submit_info();
+  background_frame->set_submit_info({
+      .frame_damage = previous_submit_info.frame_damage,
+      .buffer_damage = previous_submit_info.buffer_damage,
+      .present_with_transaction = true,
+  });
   background_frame->Encode();
   surface_frames.push_back(std::move(background_frame));
 
