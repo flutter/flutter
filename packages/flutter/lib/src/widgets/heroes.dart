@@ -840,15 +840,25 @@ class HeroController extends NavigatorObserver {
     if (previousTopRoute == null) {
       return;
     }
+    // Don't trigger another flight when a pop is committed as a user gesture
+    // back swipe is snapped.
     if (!navigator!.userGestureInProgress) {
-      _maybeStartHeroTransition(previousTopRoute, topRoute, false);
+      _maybeStartHeroTransition(
+        fromRoute: previousTopRoute,
+        toRoute: topRoute,
+        isUserGestureTransition: false,
+      );
     }
   }
 
   @override
   void didStartUserGesture(Route<dynamic> route, Route<dynamic>? previousRoute) {
     assert(navigator != null);
-    _maybeStartHeroTransition(route, previousRoute, true);
+    _maybeStartHeroTransition(
+      fromRoute: route,
+      toRoute: previousRoute,
+      isUserGestureTransition: true,
+    );
   }
 
   @override
@@ -881,11 +891,11 @@ class HeroController extends NavigatorObserver {
 
   // If we're transitioning between different page routes, start a hero transition
   // after the toRoute has been laid out with its animation's value at 1.0.
-  void _maybeStartHeroTransition(
-    Route<dynamic>? fromRoute,
-    Route<dynamic>? toRoute,
-    bool isUserGestureTransition,
-  ) {
+  void _maybeStartHeroTransition({
+    required Route<dynamic>? fromRoute,
+    required Route<dynamic>? toRoute,
+    required bool isUserGestureTransition,
+  }) {
     if (toRoute == fromRoute ||
         toRoute is! PageRoute<dynamic> ||
         fromRoute is! PageRoute<dynamic>) {
