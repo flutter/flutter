@@ -7,6 +7,7 @@
 #include "flutter/impeller/geometry/matrix.h"
 
 #include "flutter/impeller/geometry/geometry_asserts.h"
+#include "impeller/geometry/constants.h"
 
 namespace impeller {
 namespace testing {
@@ -158,6 +159,22 @@ TEST(MatrixTest, TransformHomogenous) {
   );
   EXPECT_EQ(matrix.TransformHomogenous({1.0f, -1.0f}),
             Vector3(32.0f, 33.0f, 41.0f));
+}
+
+// Verifies a translate scale matrix doesn't need to compute sqrt(pow(scale, 2))
+TEST(MatrixTest, GetMaxBasisXYWithLargeAndSmallScalingFactor) {
+  Matrix m = Matrix::MakeScale({2.625e+20, 2.625e+20, 1});
+  EXPECT_NEAR(m.GetMaxBasisLengthXY(), 2.625e+20, 1e+20);
+
+  m = Matrix::MakeScale({2.625e-20, 2.625e-20, 1});
+  EXPECT_NEAR(m.GetMaxBasisLengthXY(), 2.625e-20, 1e-20);
+}
+
+TEST(MatrixTest, GetMaxBasisXYWithLargeAndSmallScalingFactorNonScaleTranslate) {
+  Matrix m = Matrix::MakeScale({2.625e+20, 2.625e+20, 1});
+  m.e[0][1] = 2;
+
+  EXPECT_TRUE(std::isinf(m.GetMaxBasisLengthXY()));
 }
 
 }  // namespace testing
