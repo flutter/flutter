@@ -85,7 +85,7 @@ const Duration _kHighlightAnimationDuration = Duration(milliseconds: 200);
 
 class _Segment<T> extends StatefulWidget {
   const _Segment({
-    required ValueKey<T> key,
+    required GlobalKey key,
     required this.child,
     required this.pressed,
     required this.highlighted,
@@ -432,10 +432,12 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   final TapGestureRecognizer tap = TapGestureRecognizer();
   final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
   final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
+  late final List<GlobalKey> segmentKeys;
 
   @override
   void initState() {
     super.initState();
+    segmentKeys = List<GlobalKey>.generate(widget.children.length, (int index) => GlobalKey());
     // If the long press or horizontal drag recognizer gets accepted, we know for
     // sure the gesture is meant for the segmented control. Hand everything to
     // the drag gesture recognizer.
@@ -495,13 +497,39 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   // them from interfering with the active drag gesture.
   bool get isThumbDragging => _startedOnSelectedSegment ?? false;
 
-  // Converts local coordinate to segments. This method assumes each segment has
-  // the same width.
+  double? _getSegmentWidth(GlobalKey key) {
+    final BuildContext? context = key.currentContext;
+    if (context != null) {
+      final RenderBox box = context.findRenderObject()! as RenderBox;
+      return box.hasSize ? box.size.width : null;
+    }
+    return null;
+  }
+
+  // Converts local coordinate to segments. If `widget.isProportionalSegment` is
+  // false, this method assumes each segment has the same width; if it is true,
+  // this method assumes segments have their own width based on their contents.
   T segmentForXPosition(double dx) {
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
     final int numOfChildren = widget.children.length;
     assert(renderBox.hasSize);
     assert(numOfChildren >= 2);
+    if (widget.isProportionalSegment) {
+      double subtotalWidth = 0;
+      for (int i = 0; i < widget.children.length; i++) {
+        final int ltrIndex = switch (Directionality.of(context)) {
+          TextDirection.ltr => i,
+          TextDirection.rtl => numOfChildren - 1 - i,
+        };
+
+        final double segmentWidth = _getSegmentWidth(segmentKeys[ltrIndex]) ?? 0.0;
+        subtotalWidth += segmentWidth;
+        if (dx <= subtotalWidth) {
+          return widget.children.keys.elementAt(ltrIndex);
+        }
+      }
+    }
+
     int index = (dx ~/ (renderBox.size.width / numOfChildren)).clamp(0, numOfChildren - 1);
 
     switch (Directionality.of(context)) {
@@ -668,7 +696,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
           child: MouseRegion(
             cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
             child: _Segment<T>(
-              key: ValueKey<T>(entry.key),
+              key: segmentKeys[index],
               highlighted: isHighlighted,
               pressed: pressed == entry.key,
               isDragging: isThumbDragging,
