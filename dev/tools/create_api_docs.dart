@@ -341,14 +341,16 @@ class Configurator {
     if (assetsDir.existsSync()) {
       assetsDir.deleteSync(recursive: true);
     }
-    copyDirectorySync(
-      docsRoot.childDirectory('assets'),
-      assetsDir,
-      onFileCopied: (File src, File dest) {
-        print('Copied ${path.canonicalize(src.absolute.path)} to ${path.canonicalize(dest.absolute.path)}');
-      },
-      filesystem: filesystem,
-    );
+    if (assetSource.existsSync()) {
+      copyDirectorySync(
+        assetSource,
+        assetsDir,
+        onFileCopied: (File src, File dest) {
+          print('Copied ${path.canonicalize(src.absolute.path)} to ${path.canonicalize(dest.absolute.path)}');
+        },
+        filesystem: filesystem,
+      );
+    }
   }
 
   /// Generates an OpenSearch XML description that can be used to add a custom
@@ -727,6 +729,9 @@ class DartdocGenerator {
           .childDirectory('flutter_driver')
           .childDirectory('FlutterDriver')
           .childFile('FlutterDriver.connectedTo.html'),
+      flutterDirectory
+          .childDirectory('flutter_gpu')
+          .childFile('flutter_gpu-library.html'),
       flutterDirectory.childDirectory('flutter_test').childDirectory('WidgetTester').childFile('pumpWidget.html'),
       flutterDirectory.childDirectory('material').childFile('Material-class.html'),
       flutterDirectory.childDirectory('material').childFile('Tooltip-class.html'),
