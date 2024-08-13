@@ -1438,8 +1438,8 @@ void main() {
 
       expect(find.byWidgetPredicate((widget) => widget is Text && widget.data == 'Rows per page:'), findsOneWidget);
       final Text rowsPerPageText = tester.widget(find.byWidgetPredicate((widget) => widget is Text && widget.data == 'Rows per page:'));
-      final TextStyle selectedTextStyle = rowsPerPageText.style;
-      expect(selectedTextStyle?.color, equals(footerStyleColor));
+      final TextStyle? selectedTextStyle = rowsPerPageText.style;
+      expect(selectedTextStyle.color, equals(footerStyleColor));
   });
 
   testWidgets('PaginatedDataTable headerBackgroundColor and footerBackgroundColor set properly', (WidgetTester tester) async {
