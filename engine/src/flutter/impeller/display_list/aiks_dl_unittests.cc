@@ -800,5 +800,46 @@ TEST_P(AiksTest, MatrixSaveLayerFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// Regression test for flutter/flutter#152780
+TEST_P(AiksTest, CanDrawScaledPointsSmallScaleLargeRadius) {
+  std::vector<SkPoint> point = {
+      {0, 0},  //
+  };
+
+  DlPaint paint;
+  paint.setStrokeCap(DlStrokeCap::kRound);
+  paint.setColor(DlColor::kRed());
+  paint.setStrokeWidth(100 * 1000000);
+
+  DisplayListBuilder builder(GetCullRect(GetWindowSize()));
+  builder.Translate(200, 200);
+  builder.Scale(0.000001, 0.000001);
+
+  builder.DrawPoints(DlCanvas::PointMode::kPoints, point.size(), point.data(),
+                     paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Regression test for flutter/flutter#152780
+TEST_P(AiksTest, CanDrawScaledPointsLargeScaleSmallRadius) {
+  std::vector<SkPoint> point = {
+      {0, 0},  //
+  };
+
+  DlPaint paint;
+  paint.setStrokeCap(DlStrokeCap::kRound);
+  paint.setColor(DlColor::kRed());
+  paint.setStrokeWidth(100 * 0.000001);
+
+  DisplayListBuilder builder(GetCullRect(GetWindowSize()));
+  builder.Translate(200, 200);
+  builder.Scale(1000000, 1000000);
+
+  builder.DrawPoints(DlCanvas::PointMode::kPoints, point.size(), point.data(),
+                     paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller
