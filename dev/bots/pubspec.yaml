@@ -7,7 +7,7 @@ environment:
 dependencies:
   analyzer: 6.8.0
   args: 2.5.0
-  crypto: 3.0.3
+  crypto: 3.0.4
   intl: 0.19.0
   file: 7.0.0
   flutter_devicelab:
@@ -77,4 +77,4 @@ dependencies:
 dev_dependencies:
   test_api: 0.7.3
 
-# PUBSPEC CHECKSUM: 22ac
+# PUBSPEC CHECKSUM: 84ad
