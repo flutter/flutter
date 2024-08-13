@@ -72,14 +72,13 @@ const double _kContentPressedMinOpacity = 0.2;
 // Inspected from iOS 17.5 simulator.
 const double _kFontSize = 13.0;
 
-// The value inspected from iOS 17.5 simulator is RegularG3, so `FontWeight.w500`
-// is eyeballed value which looks the most similar to RegularG3.
+// Inspected from iOS 17.5 simulator.
 const FontWeight _kFontWeight = FontWeight.w500;
 
-// The value inspected from iOS 17.5 simulator is MediumG3, so `FontWeight.w600`
-// is eyeballed value which looks the most similar to MediumG3.
+// Inspected from iOS 17.5 simulator.
 const FontWeight _kHighlightedFontWeight = FontWeight.w600;
 
+// Inspected from iOS 17.5 simulator
 const Color _kDisabledContentColor = Color.fromARGB(115, 176, 176, 176);
 
 // The spring animation used when the thumb changes its rect.
