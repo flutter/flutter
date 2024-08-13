@@ -53,44 +53,43 @@ Future<void> _writeAndroidEmulatorCrashLogs() async {
     return;
   }
 
-  final String crashReportPath = path.join(
-    androidSdkRoot,
-    'emulator',
-    'crashreport',
-  );
-
-  // Check if the tool exists, if not, we can't do anything.
-  if (!io.File(crashReportPath).existsSync()) {
-    print('Failed to find crashreport tool at $crashReportPath');
-
-    // Print out the contents of the directory to help debug.
-    final io.Directory emulatorDir = io.Directory(path.join(androidSdkRoot, 'emulator'));
-    if (emulatorDir.existsSync()) {
-      print('Contents of emulator directory:');
-      print(emulatorDir.listSync());
-    } else {
-      print('Failed to find emulator directory at $emulatorDir');
-      print('Contents of Android SDK root:');
-      print(io.Directory(androidSdkRoot).listSync());
-    }
-
-    return;
-  }
-
-  // Run crashreport -l to list crash logs.
-  final io.ProcessResult listCrashes = await io.Process.run(
-    crashReportPath,
+  final String emulatorBin = path.join(androidSdkRoot, 'emulator');
+  final io.ProcessResult emulatorResult = await io.Process.run(
+    emulatorBin,
     <String>[
-      '-u',
+      '-list-avds',
     ],
   );
-  if (listCrashes.exitCode != 0) {
-    print('Failed to list crash logs: ${listCrashes.stderr}');
+  if (emulatorResult.exitCode != 0) {
+    print('Failed to list AVDs: ${emulatorResult.stderr}');
     return;
   }
 
-  print('Crash logs:');
-  print(listCrashes.stdout);
+  // Parse stdout of 'Storing crashdata in: /tmp/android-xxx/emu-crash-34.2.15.db,' to get the crash log path.
+  final RegExp crashLogPathPattern = RegExp(r'Storing crashdata in: (.+),');
+  final String? crashLogPath = crashLogPathPattern.firstMatch(emulatorResult.stdout as String)?.group(1);
+  if (crashLogPath == null) {
+    print('Failed to find crash log path.');
+    return;
+  }
+
+  final io.Directory crashLogDir = io.Directory(path.join(crashLogPath, 'reports'));
+  if (!crashLogDir.existsSync()) {
+    print('Crash log directory does not exist: $crashLogDir');
+    return;
+  }
+
+  // Write each crash log to stdout.
+  for (final io.FileSystemEntity entity in crashLogDir.listSync(recursive: true)) {
+    if (entity is io.File) {
+      final io.File file = entity;
+      print('----------------------------------------------------------------');
+      print('Crash log: ${file.path}');
+      print(file.readAsStringSync());
+      print('----------------------------------------------------------------');
+      print('');
+    }
+  }
 }
 
 Future<void> _runFlutterDriverAndroidTests() async {
