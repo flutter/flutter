@@ -104,8 +104,7 @@ class _Segment<T> extends StatefulWidget {
     required this.highlighted,
     required this.isDragging,
     required this.enabled,
-    required this.isLeftmostSegment,
-    required this.isRightmostSegment,
+    required this.segmentLocation,
   }) : super(key: key);
 
   final Widget child;
@@ -113,8 +112,7 @@ class _Segment<T> extends StatefulWidget {
   final bool pressed;
   final bool highlighted;
   final bool enabled;
-  final bool isLeftmostSegment;
-  final bool isRightmostSegment;
+  final _SegmentLocation segmentLocation;
 
   // Whether the thumb of the parent widget (CupertinoSlidingSegmentedControl)
   // is currently being dragged.
@@ -169,14 +167,12 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
 
   @override
   Widget build(BuildContext context) {
-    final Alignment scaleAlignment;
-    if (widget.isLeftmostSegment) {
-      scaleAlignment = Alignment.centerLeft;
-    } else if (widget.isRightmostSegment) {
-      scaleAlignment = Alignment.centerRight;
-    } else {
-      scaleAlignment = Alignment.center;
-    }
+    final Alignment scaleAlignment = switch (widget.segmentLocation) {
+      _SegmentLocation.leftmost => Alignment.centerLeft,
+      _SegmentLocation.rightmost => Alignment.centerRight,
+      _SegmentLocation.inbetween => Alignment.center,
+    };
+
     return MetaData(
       // Expand the hitTest area of this widget.
       behavior: HitTestBehavior.opaque,
@@ -348,7 +344,7 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
     super.key,
     required this.children,
     required this.onValueChanged,
-    Set<T>? disabledChildren,
+    this.disabledChildren = const <Never>{},
     this.groupValue,
     this.thumbColor = _kThumbColor,
     this.padding = _kHorizontalItemPadding,
@@ -358,7 +354,7 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
        assert(
          groupValue == null || children.keys.contains(groupValue),
          'The groupValue must be either null or one of the keys in the children map.',
-       ), disabledChildren = disabledChildren ?? <T>{};
+       );
 
   /// The identifying keys and corresponding widget values in the
   /// segmented control.
@@ -724,14 +720,12 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
       }
 
       final TextDirection textDirection = Directionality.of(context);
-      final bool isLeftmostSegment = switch (textDirection) {
-        TextDirection.ltr => highlightedIndex == 0,
-        TextDirection.rtl => highlightedIndex == children.length - 1
-      };
-
-      final bool isRightmostSegment = switch (textDirection) {
-        TextDirection.ltr => highlightedIndex == children.length - 1,
-        TextDirection.rtl => highlightedIndex == 0
+      final _SegmentLocation segmentLocation = switch (textDirection) {
+        TextDirection.ltr when index == 0 => _SegmentLocation.leftmost,
+        TextDirection.ltr when index == widget.children.length - 1 => _SegmentLocation.rightmost,
+        TextDirection.rtl when index == widget.children.length - 1 => _SegmentLocation.leftmost,
+        TextDirection.rtl when index == 0 => _SegmentLocation.rightmost,
+        TextDirection.ltr || TextDirection.rtl => _SegmentLocation.inbetween,
       };
 
       children.add(
@@ -753,8 +747,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
               pressed: pressed == entry.key,
               isDragging: isThumbDragging,
               enabled: !widget.disabledChildren.contains(entry.key),
-              isLeftmostSegment: isLeftmostSegment,
-              isRightmostSegment: isRightmostSegment,
+              segmentLocation: segmentLocation,
               child: entry.value,
             ),
           ),
@@ -848,7 +841,7 @@ class _SegmentedControlRenderWidget<T extends Object> extends MultiChildRenderOb
 
 class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<RenderBox> { }
 
-enum _Location {
+enum _SegmentLocation {
   leftmost,
   rightmost,
   inbetween;
@@ -1249,19 +1242,19 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
       final Rect unscaledThumbRect = state.thumbAnimatable?.evaluate(state.thumbController) ?? newThumbRect;
       currentThumbRect = unscaledThumbRect;
 
-      final _Location childLocation;
+      final _SegmentLocation childLocation;
       if (highlightedChildIndex == 0) {
-        childLocation = _Location.leftmost;
+        childLocation = _SegmentLocation.leftmost;
       } else if (highlightedChildIndex == children.length ~/ 2) {
-        childLocation = _Location.rightmost;
+        childLocation = _SegmentLocation.rightmost;
       } else {
-        childLocation = _Location.inbetween;
+        childLocation = _SegmentLocation.inbetween;
       }
 
       final double delta = switch (childLocation) {
-        _Location.leftmost => unscaledThumbRect.width - unscaledThumbRect.width * thumbScale,
-        _Location.rightmost => unscaledThumbRect.width * thumbScale - unscaledThumbRect.width,
-        _Location.inbetween => 0,
+        _SegmentLocation.leftmost => unscaledThumbRect.width - unscaledThumbRect.width * thumbScale,
+        _SegmentLocation.rightmost => unscaledThumbRect.width * thumbScale - unscaledThumbRect.width,
+        _SegmentLocation.inbetween => 0,
       };
 
       final Rect thumbRect = Rect.fromCenter(
