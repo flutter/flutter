@@ -11,3 +11,7 @@
 # files, and then running `rm buildscript-gradle.lockfile && ./gradlew :generateLockfiles` from
 # its android subdirectory.
 - dev/integration_tests/gradle_deprecated_settings/android
+
+# hello_world uses a Kotlin Gradle settings file (settings.gradle.kts). We don't have a template
+# Kotlin Gradle settings file (only a groovy one), so we currently can't generate it.
+- examples/hello_world/android
