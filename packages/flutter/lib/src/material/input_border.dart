@@ -428,12 +428,7 @@ class OutlineInputBorder extends InputBorder {
   @override
   bool get preferPaintInterior => true;
 
-  Path _gapBorderPath(Canvas canvas, RRect center, double start, double extent) {
-    // When the corner radii on any side add up to be greater than the
-    // given height, each radius has to be scaled to not exceed the
-    // size of the width/height of the RRect.
-    final RRect scaledRRect = center.scaleRadii();
-
+  Path _gapBorderPath(Canvas canvas, RRect scaledRRect, double start, double extent, double gapPercentage) {
     final Rect tlCorner = Rect.fromLTWH(
       scaledRRect.left,
       scaledRRect.top,
@@ -463,10 +458,9 @@ class OutlineInputBorder extends InputBorder {
     // Currently, BorderRadius only supports circular radii.
     const double cornerArcSweep = math.pi / 2.0;
     final Path path = Path();
-
     // Top left corner
     if (scaledRRect.tlRadius != Radius.zero) {
-      final double tlCornerArcSweep = math.acos(clampDouble(1 - start / scaledRRect.tlRadiusX, 0.0, 1.0));
+      final double tlCornerArcSweep = math.acos(clampDouble((1 - start / scaledRRect.tlRadiusX) * gapPercentage, 0.0, 1.0));
       path.addArc(tlCorner, math.pi, tlCornerArcSweep);
     } else {
       // Because the path is painted with Paint.strokeCap = StrokeCap.butt, horizontal coordinate is moved
@@ -483,14 +477,14 @@ class OutlineInputBorder extends InputBorder {
     const double trCornerArcStart = (3 * math.pi) / 2.0;
     const double trCornerArcSweep = cornerArcSweep;
     if (start + extent < scaledRRect.width - scaledRRect.trRadiusX) {
-      path.moveTo(scaledRRect.left + start + extent, scaledRRect.top);
+      path.moveTo(scaledRRect.left + scaledRRect.trRadiusX + start + extent, scaledRRect.top);
       path.lineTo(scaledRRect.right - scaledRRect.trRadiusX, scaledRRect.top);
       if (scaledRRect.trRadius != Radius.zero) {
         path.addArc(trCorner, trCornerArcStart, trCornerArcSweep);
       }
     } else if (start + extent < scaledRRect.width) {
       final double dx = scaledRRect.width - (start + extent);
-      final double sweep = math.asin(clampDouble(1 - dx / scaledRRect.trRadiusX, 0.0, 1.0));
+      final double sweep = math.asin(clampDouble((1 - dx / scaledRRect.trRadiusX) * gapPercentage, 0.0, 1.0));
       path.addArc(trCorner, trCornerArcStart + sweep, trCornerArcSweep - sweep);
     }
 
@@ -541,12 +535,17 @@ class OutlineInputBorder extends InputBorder {
     if (gapStart == null || gapExtent <= 0.0 || gapPercentage == 0.0) {
       canvas.drawRRect(center, paint);
     } else {
-      final double extent = lerpDouble(0.0, gapExtent + gapPadding * 2.0, gapPercentage)!;
+      // When the corner radii on any side add up to be greater than the
+      // given height, each radius has to be scaled to not exceed the
+      // size of the width/height of the RRect.
+      final RRect scaledRRect = center.scaleRadii();
+
+      final double extent = lerpDouble(0.0, gapExtent + gapPadding * 2.0 - scaledRRect.trRadiusX, gapPercentage)!;
       final double start = switch (textDirection!) {
         TextDirection.rtl => gapStart + gapPadding - extent,
         TextDirection.ltr => gapStart - gapPadding,
       };
-      final Path path = _gapBorderPath(canvas, center, math.max(0.0, start), extent);
+      final Path path = _gapBorderPath(canvas, scaledRRect, start * gapPercentage, extent, gapPercentage);
       canvas.drawPath(path, paint);
     }
   }
