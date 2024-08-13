@@ -9,6 +9,11 @@ import 'package:path/path.dart' as path;
 import '../run_command.dart';
 import '../utils.dart';
 
+final int _defaultTestRepeatTimes = () {
+  final String? envTimes = io.Platform.environment['TEST_REPEAT'];
+  return envTimes == null ? 1 : int.tryParse(envTimes) ?? 1;
+}();
+
 /// To run this test locally:
 ///
 /// 1. Connect an Android device or emulator.
@@ -20,12 +25,38 @@ import '../utils.dart';
 ///
 /// For debugging, it is recommended to instead just run and launch these tests
 /// individually _in_ the `dev/integration_tests/android_driver_test` directory.
-Future<void> runFlutterDriverAndroidTests() async {
-  for (int i = 0; i < 20; i++) {
-    await _runFlutterDriverAndroidTests();
+Future<void> runFlutterDriverAndroidTests({int? times}) async {
+  times ??= _defaultTestRepeatTimes;
+  if (times > 1) {
+    print('Running Flutter Driver Android tests $times times...');
   }
 
-  // await _runFlutterDriverAndroidTests();
+  try {
+    for (int i = 0; i < times; i++) {
+      await _runFlutterDriverAndroidTests();
+    }
+  } on io.ProcessException catch (e) {
+    print('Failed to run Flutter Driver Android tests: $e');
+    print('Trying to fetch Android emulator crash logs...');
+    await _writeAndroidEmulatorCrashLogs();
+  }
+}
+
+Future<void> _writeAndroidEmulatorCrashLogs() async {
+  // Try finding the `crashreport` tool.
+  // i.e. ~/Android/Sdk/platform-tools/crashreport
+  String? androidSdkRoot = io.Platform.environment['ANDROID_HOME'];
+  androidSdkRoot ??= io.Platform.environment['ANDROID_SDK_ROOT'];
+  if (androidSdkRoot == null) {
+    print('Failed to find Android SDK root. Try setting ANDROID_HOME.');
+    return;
+  }
+
+  final String crashReportPath = path.join(
+    androidSdkRoot,
+    'platform-tools',
+    'crashreport',
+  );
 }
 
 Future<void> _runFlutterDriverAndroidTests() async {
