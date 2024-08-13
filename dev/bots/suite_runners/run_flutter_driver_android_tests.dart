@@ -36,7 +36,7 @@ Future<void> runFlutterDriverAndroidTests({int? times}) async {
     for (int i = 0; i < times; i++) {
       await _runFlutterDriverAndroidTests();
     }
-  } on io.ProcessException catch (e) {
+  } on Object catch (e) {
     print('Failed to run Flutter Driver Android tests: $e');
     print('Trying to fetch Android emulator crash logs...');
     await _writeAndroidEmulatorCrashLogs();
@@ -95,11 +95,10 @@ Future<void> _runFlutterDriverAndroidTests() async {
   await _configureForScreenshotTesting();
 
   // TODO(matanlurey): Should we be using another instrumentation method?
-  await runCommand(
+  final CommandResult result = await runCommand(
     'flutter',
     <String>[
       'drive',
-      '--verbose',
       // There are no reason to enable development flags for this test.
       // Disable them to work around flakiness issues, and in general just
       // make less things start up unnecessarily.
@@ -114,6 +113,10 @@ Future<void> _runFlutterDriverAndroidTests() async {
       'android_driver_test',
     ),
   );
+
+  if (result.exitCode != 0) {
+    throw StateError('Failed to run Flutter Driver Android tests: ${result.flattenedStderr}');
+  }
 }
 
 // TODO(matanlurey): Move this code into flutter_driver instead of here.
