@@ -289,7 +289,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
             child: _CupertinoPickerSemantics(
               scrollController: controller,
               child: ListWheelScrollView.useDelegate(
-                controller: widget.scrollController ?? _controller,
+                controller: controller,
                 physics: const FixedExtentScrollPhysics(),
                 diameterRatio: widget.diameterRatio,
                 offAxisFraction: widget.offAxisFraction,
@@ -302,12 +302,16 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
                 childDelegate: _CupertinoPickerListWheelChildDelegateWrapper(
                   widget.childDelegate,
                   onTappedChild: (int index) {
-                    // Curve and duration eyeballed from an iOS 17.5 simulator.
-                    controller.animateToItem(
-                      index,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
+                    // If a controller is provided for this widget, it is
+                    // expected to handle its own tap to scroll behavior.
+                    if (controller != widget.scrollController) {
+                      // Curve and duration eyeballed from an iOS 17.5 simulator.
+                      controller.animateToItem(
+                        index,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    }
                   },
                 ),
               ),
