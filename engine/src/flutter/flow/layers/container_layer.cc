@@ -78,7 +78,7 @@ void ContainerLayer::DiffChildren(DiffContext* context,
       auto prev_layer = prev_layers[i_prev];
       auto paint_region = context->GetOldLayerPaintRegion(prev_layer.get());
       if (layer == prev_layer && !paint_region.has_readback() &&
-          !paint_region.has_volatile_layer()) {
+          !paint_region.has_texture()) {
         // for retained layers, stop processing the subtree and add existing
         // region; We know current subtree is not dirty (every ancestor up to
         // here matches) so the retained subtree will render identically to

@@ -107,17 +107,13 @@ class DiffContext {
 
   bool IsSubtreeDirty() const { return state_.dirty; }
 
-  // Marks that current subtree contains a volatile layer. A volatile layer will
-  // do diffing even if it is a retained subtree. Necessary for TextureLayer
-  // and PlatformViewLayer.
-  void MarkSubtreeHasVolatileLayer();
+  // Marks that current subtree contains a TextureLayer. This is needed to
+  // ensure that we'll Diff the TextureLayer even if inside retained layer.
+  void MarkSubtreeHasTextureLayer();
 
   // Add layer bounds to current paint region; rect is in "local" (layer)
   // coordinates.
   void AddLayerBounds(const SkRect& rect);
-
-  // Marks entire frame as dirty.
-  void RepaintEntireFrame();
 
   // Add entire paint region of retained layer for current subtree. This can
   // only be used in subtrees that are not dirty, otherwise ancestor transforms
@@ -235,7 +231,7 @@ class DiffContext {
     bool has_filter_bounds_adjustment = false;
 
     // Whether there is a texture layer in this subtree.
-    bool has_volatile_layer = false;
+    bool has_texture = false;
   };
 
   void MakeTransformIntegral(DisplayListMatrixClipState& matrix_clip);

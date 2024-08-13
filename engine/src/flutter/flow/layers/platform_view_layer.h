@@ -16,7 +16,6 @@ class PlatformViewLayer : public Layer {
  public:
   PlatformViewLayer(const SkPoint& offset, const SkSize& size, int64_t view_id);
 
-  void Diff(DiffContext* context, const Layer* old_layer) override;
   void Preroll(PrerollContext* context) override;
   void Paint(PaintContext& context) const override;
 

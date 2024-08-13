@@ -34,7 +34,7 @@ void TextureLayer::Diff(DiffContext* context, const Layer* old_layer) {
   // TextureLayer is inside retained layer.
   // See ContainerLayer::DiffChildren
   // https://github.com/flutter/flutter/issues/92925
-  context->MarkSubtreeHasVolatileLayer();
+  context->MarkSubtreeHasTextureLayer();
   context->AddLayerBounds(SkRect::MakeXYWH(offset_.x(), offset_.y(),
                                            size_.width(), size_.height()));
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
