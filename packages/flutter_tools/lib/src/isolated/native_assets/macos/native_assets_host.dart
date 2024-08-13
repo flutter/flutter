@@ -65,14 +65,14 @@ Future<void> createInfoPlist(
 /// The dylibs must have different architectures. E.g. a dylib targeting
 /// arm64 ios simulator cannot be combined with a dylib targeting arm64
 /// ios device or macos arm64.
-Future<void> lipoDylibs(File target, List<Uri> sources) async {
+Future<void> lipoDylibs(File target, List<File> sources) async {
   final ProcessResult lipoResult = await globals.processManager.run(
     <String>[
       'lipo',
       '-create',
       '-output',
       target.path,
-      for (final Uri source in sources) source.toFilePath(),
+      for (final File source in sources) source.path,
     ],
   );
   if (lipoResult.exitCode != 0) {

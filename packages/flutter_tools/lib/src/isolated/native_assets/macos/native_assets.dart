@@ -297,8 +297,8 @@ Future<void> _copyNativeAssetsMacOS(
     for (final MapEntry<KernelAssetPath, List<AssetImpl>> assetMapping
         in assetTargetLocations.entries) {
       final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
-      final List<Uri> sources = <Uri>[
-        for (final AssetImpl source in assetMapping.value) source.file!,
+      final List<File> sources = <File>[
+        for (final AssetImpl source in assetMapping.value) fileSystem.file(source.file),
       ];
       final Uri targetUri = buildUri.resolveUri(target);
       final String name = targetUri.pathSegments.last;
@@ -378,8 +378,8 @@ Future<void> _copyNativeAssetsMacOSFlutterTester(
     for (final MapEntry<KernelAssetPath, List<AssetImpl>> assetMapping
         in assetTargetLocations.entries) {
       final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
-      final List<Uri> sources = <Uri>[
-        for (final AssetImpl source in assetMapping.value) source.file!,
+      final List<File> sources = <File>[
+        for (final AssetImpl source in assetMapping.value) fileSystem.file(source.file),
       ];
       final Uri targetUri = buildUri.resolveUri(target);
       final File dylibFile = fileSystem.file(targetUri);
