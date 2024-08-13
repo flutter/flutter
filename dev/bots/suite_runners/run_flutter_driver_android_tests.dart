@@ -59,6 +59,24 @@ Future<void> _writeAndroidEmulatorCrashLogs() async {
     'crashreport',
   );
 
+  // Check if the tool exists, if not, we can't do anything.
+  if (!io.File(crashReportPath).existsSync()) {
+    print('Failed to find crashreport tool at $crashReportPath');
+
+    // Print out the contents of the directory to help debug.
+    final io.Directory emulatorDir = io.Directory(path.join(androidSdkRoot, 'emulator'));
+    if (emulatorDir.existsSync()) {
+      print('Contents of emulator directory:');
+      print(emulatorDir.listSync());
+    } else {
+      print('Failed to find emulator directory at $emulatorDir');
+      print('Contents of Android SDK root:');
+      print(io.Directory(androidSdkRoot).listSync());
+    }
+
+    return;
+  }
+
   // Run crashreport -l to list crash logs.
   final io.ProcessResult listCrashes = await io.Process.run(
     crashReportPath,
