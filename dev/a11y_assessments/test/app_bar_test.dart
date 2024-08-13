@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_utils.dart';
 
 void main() {
-  testWidgets('navigation bar can run', (WidgetTester tester) async {
+  testWidgets('app bar can run', (WidgetTester tester) async {
     await pumpsUseCase(tester, AppBarUseCase());
     expect(find.text('AppBar'), findsOneWidget);
   });

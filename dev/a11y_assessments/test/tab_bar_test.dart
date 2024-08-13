@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_utils.dart';
 
 void main() {
-  testWidgets('navigation bar can run', (WidgetTester tester) async {
+  testWidgets('tab bar can run', (WidgetTester tester) async {
     await pumpsUseCase(tester, TabBarUseCase());
     expect(find.byType(TabBar), findsOneWidget);
   });
