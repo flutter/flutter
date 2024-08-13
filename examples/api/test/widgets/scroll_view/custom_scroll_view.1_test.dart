@@ -15,23 +15,19 @@ void main() {
     expect(find.descendant(
           of: find.byType(Scaffold),
           matching: find.byType(AppBar),
-        ),
-        findsOne);
+        ), findsOne);
     expect(find.descendant(
           of: find.byType(AppBar),
           matching: find.byType(IconButton),
-        ),
-        findsOne);
+        ), findsOne);
     expect(find.descendant(
           of: find.byType(Scaffold),
           matching: find.byType(CustomScrollView),
-        ),
-        findsOne);
+        ), findsOne);
     expect(find.descendant(
           of: find.byType(CustomScrollView),
           matching: find.byType(SliverList),
-        ),
-        findsOne);
+        ), findsOne);
     expect(find.byType(SliverList), findsOne);
     // Initial state should present only "Item: 0" on the SliverList.
     expect(find.widgetWithText(SliverList, 'Item: 0'), findsOne);
