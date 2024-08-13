@@ -790,7 +790,7 @@ void main() {
   });
 
   testWidgets('Can update Column.spacing value', (WidgetTester tester) async {
-    Widget buildRow({ required double spacing }) {
+    Widget buildColumn({ required double spacing }) {
       return Center(
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -818,13 +818,13 @@ void main() {
         ),
       );
     }
-    await tester.pumpWidget(buildRow(spacing: 8.0));
+    await tester.pumpWidget(buildColumn(spacing: 8.0));
 
     expect(tester.widget<Column>(find.byType(Column)).spacing, equals(8.0));
     expect(tester.getSize(find.byType(Column)).width, equals(100.0));
     expect(tester.getSize(find.byType(Column)).height, equals(316.0));
 
-    await tester.pumpWidget(buildRow(spacing: 18.0));
+    await tester.pumpWidget(buildColumn(spacing: 18.0));
 
     expect(tester.widget<Column>(find.byType(Column)).spacing, equals(18.0));
     expect(tester.getSize(find.byType(Column)).width, equals(100.0));
