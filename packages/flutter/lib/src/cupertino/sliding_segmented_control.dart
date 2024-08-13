@@ -177,9 +177,11 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
           // the same and will always be greater than equal to that of the
           // visible child (at index 0), to keep the size of the entire
           // SegmentedControl widget consistent throughout the animation.
-          DefaultTextStyle.merge(
-            style: const TextStyle(fontWeight: FontWeight.w500),
-            child: widget.child,
+          Offstage(
+            child: DefaultTextStyle.merge(
+              style: const TextStyle(fontWeight: FontWeight.w500),
+              child: widget.child,
+            ),
           ),
         ],
       ),
@@ -1094,8 +1096,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
 
       final _SegmentedControlContainerBoxParentData childParentData = selectedChild.parentData! as _SegmentedControlContainerBoxParentData;
       final Rect newThumbRect = _kThumbInsets.inflateRect(childParentData.offset & selectedChild.size);
-print('selectedChild.size: ${selectedChild.size}');
-print('newThumbRect.width: ${newThumbRect.width}');
+
       // Update thumb animation's tween, in case the end rect changed (e.g., a
       // new segment is added during the animation).
       if (state.thumbController.isAnimating) {
