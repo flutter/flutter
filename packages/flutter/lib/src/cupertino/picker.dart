@@ -66,7 +66,8 @@ class CupertinoPicker extends StatefulWidget {
   ///
   /// The [scrollController] argument can be used to specify a custom
   /// [FixedExtentScrollController] for programmatically reading or changing
-  /// the current picker index or for selecting an initial index value.
+  /// the current picker index, selecting an initial index value, or handling
+  /// custom tap-to-scroll behavior.
   ///
   /// The [looping] argument decides whether the child list loops and can be
   /// scrolled infinitely. If set to true, scrolling past the end of the list
@@ -161,6 +162,10 @@ class CupertinoPicker extends StatefulWidget {
 
   /// A [FixedExtentScrollController] to read and control the current item, and
   /// to set the initial item.
+  ///
+  /// By default, a [CupertinoPicker] will scroll to tapped items. However, if
+  /// this parameter is provided, it is expected to handle the picker's own
+  /// tap-to-scroll behavior.
   ///
   /// If null, an implicit one will be created internally.
   final FixedExtentScrollController? scrollController;
@@ -258,6 +263,15 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     widget.onSelectedItemChanged?.call(index);
   }
 
+  void _handleChildTap(int index, FixedExtentScrollController controller) {
+    // Animation curve and duration eyeballed from an iOS 17.5 simulator.
+    controller.animateToItem(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
   /// Draws the selectionOverlay.
   Widget _buildSelectionOverlay(Widget selectionOverlay) {
     final double height = widget.itemExtent * widget.magnification;
@@ -301,18 +315,11 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
                 onSelectedItemChanged: _handleSelectedItemChanged,
                 childDelegate: _CupertinoPickerListWheelChildDelegateWrapper(
                   widget.childDelegate,
-                  onTappedChild: (int index) {
-                    // If a controller is provided for this widget, it is
-                    // expected to handle its own tap to scroll behavior.
-                    if (controller != widget.scrollController) {
-                      // Curve and duration eyeballed from an iOS 17.5 simulator.
-                      controller.animateToItem(
-                        index,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    }
-                  },
+                  // If a controller is provided for this widget, it is
+                  // expected to handle its own tap to scroll behavior.
+                  onTappedChild: (widget.scrollController == null)
+                    ? (int index) => _handleChildTap(index, controller)
+                    : null,
                 ),
               ),
             ),
@@ -534,18 +541,18 @@ class _CupertinoPickerListWheelChildDelegateWrapper implements ListWheelChildDel
     required this.onTappedChild,
   });
   final ListWheelChildDelegate _wrapped;
-  final void Function(int index) onTappedChild;
+  final void Function(int index)? onTappedChild;
 
   @override
   Widget? build(BuildContext context, int index) {
     final Widget? child = _wrapped.build(context, index);
-    if (child == null) {
-      return null;
+    if (child == null || onTappedChild == null) {
+      return child;
     }
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       excludeFromSemantics: true,
-      onTap: () => onTappedChild(index),
+      onTap: () => onTappedChild!(index),
       child: child,
     );
   }
