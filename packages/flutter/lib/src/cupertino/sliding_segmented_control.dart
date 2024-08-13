@@ -372,8 +372,7 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   /// there is no segment getting highlighted until it is switched to an enabled
   /// segment.
   ///
-  /// By default, all segments are selectable. The default text color for
-  /// disabled segments is `Color.fromARGB(115, 176, 176, 176)`.
+  /// By default, all segments are selectable.
   final Set<T> disabledChildren;
 
   /// The identifier of the widget that is currently selected.
