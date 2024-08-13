@@ -238,8 +238,8 @@ EllipticalVertexGenerator Tessellator::FilledCircle(
     const Matrix& view_transform,
     const Point& center,
     Scalar radius) {
-  auto divisions =
-      ComputeQuadrantDivisions(view_transform.GetMaxBasisLength() * radius);
+  size_t divisions =
+      ComputeQuadrantDivisions(view_transform.GetMaxBasisLengthXY() * radius);
   return EllipticalVertexGenerator(Tessellator::GenerateFilledCircle,
                                    GetTrigsForDivisions(divisions),
                                    PrimitiveType::kTriangleStrip, 4,
@@ -257,7 +257,7 @@ EllipticalVertexGenerator Tessellator::StrokedCircle(
     Scalar half_width) {
   if (half_width > 0) {
     auto divisions = ComputeQuadrantDivisions(
-        view_transform.GetMaxBasisLength() * radius + half_width);
+        view_transform.GetMaxBasisLengthXY() * radius + half_width);
     return EllipticalVertexGenerator(Tessellator::GenerateStrokedCircle,
                                      GetTrigsForDivisions(divisions),
                                      PrimitiveType::kTriangleStrip, 8,
@@ -280,7 +280,7 @@ EllipticalVertexGenerator Tessellator::RoundCapLine(
   auto length = along.GetLength();
   if (length > kEhCloseEnough) {
     auto divisions =
-        ComputeQuadrantDivisions(view_transform.GetMaxBasisLength() * radius);
+        ComputeQuadrantDivisions(view_transform.GetMaxBasisLengthXY() * radius);
     return EllipticalVertexGenerator(Tessellator::GenerateRoundCapLine,
                                      GetTrigsForDivisions(divisions),
                                      PrimitiveType::kTriangleStrip, 4,
@@ -302,8 +302,8 @@ EllipticalVertexGenerator Tessellator::FilledEllipse(
                         bounds.GetWidth() * 0.5f);
   }
   auto max_radius = bounds.GetSize().MaxDimension();
-  auto divisions =
-      ComputeQuadrantDivisions(view_transform.GetMaxBasisLength() * max_radius);
+  auto divisions = ComputeQuadrantDivisions(
+      view_transform.GetMaxBasisLengthXY() * max_radius);
   auto center = bounds.GetCenter();
   return EllipticalVertexGenerator(Tessellator::GenerateFilledEllipse,
                                    GetTrigsForDivisions(divisions),
@@ -323,7 +323,7 @@ EllipticalVertexGenerator Tessellator::FilledRoundRect(
       radii.height * 2 < bounds.GetHeight()) {
     auto max_radius = radii.MaxDimension();
     auto divisions = ComputeQuadrantDivisions(
-        view_transform.GetMaxBasisLength() * max_radius);
+        view_transform.GetMaxBasisLengthXY() * max_radius);
     auto upper_left = bounds.GetLeftTop() + radii;
     auto lower_right = bounds.GetRightBottom() - radii;
     return EllipticalVertexGenerator(Tessellator::GenerateFilledRoundRect,

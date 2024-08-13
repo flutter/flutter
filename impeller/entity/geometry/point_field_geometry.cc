@@ -4,7 +4,7 @@
 
 #include "impeller/entity/geometry/point_field_geometry.h"
 
-#include "impeller/core/vertex_buffer.h"
+#include "impeller/core/formats.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/renderer/command_buffer.h"
 
@@ -22,18 +22,17 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
   if (radius_ < 0.0) {
     return {};
   }
-  Matrix transform = entity.GetTransform();
-  Scalar determinant = transform.GetDeterminant();
-  if (determinant == 0) {
+  const Matrix& transform = entity.GetTransform();
+
+  Scalar max_basis = transform.GetMaxBasisLengthXY();
+  if (max_basis == 0) {
     return {};
   }
-
-  Scalar min_size = 1.0f / sqrt(std::abs(determinant));
+  Scalar min_size = 0.5f / max_basis;
   Scalar radius = std::max(radius_, min_size);
 
   HostBuffer& host_buffer = renderer.GetTransientsBuffer();
   VertexBufferBuilder<SolidFillVertexShader::PerVertexData> vtx_builder;
-
   if (round_) {
     // Get triangulation relative to {0, 0} so we can translate it to each
     // point in turn.
