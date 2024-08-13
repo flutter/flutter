@@ -9,9 +9,10 @@ import 'package:path/path.dart' as path;
 import '../run_command.dart';
 import '../utils.dart';
 
+const int _kTimes = 20;
 final int _defaultTestRepeatTimes = () {
   final String? envTimes = io.Platform.environment['TEST_REPEAT'];
-  return envTimes == null ? 1 : int.tryParse(envTimes) ?? 1;
+  return envTimes == null ? _kTimes : int.tryParse(envTimes) ?? _kTimes;
 }();
 
 /// To run this test locally:
