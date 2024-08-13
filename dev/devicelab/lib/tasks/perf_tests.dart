@@ -105,6 +105,7 @@ TaskFunction createAndroidTextureScrollPerfTest({bool? enableImpeller}) {
     testDriver: 'test_driver/scroll_perf_test.dart',
     needsFullTimeline: false,
     enableImpeller: enableImpeller,
+    enableMergedPlatformThread: true,
   ).run;
 }
 
@@ -114,6 +115,7 @@ TaskFunction createAndroidViewScrollPerfTest() {
     'test_driver/android_view_scroll_perf.dart',
     'platform_views_scroll_perf_hybrid_composition',
     testDriver: 'test_driver/scroll_perf_test.dart',
+    enableMergedPlatformThread: true,
   ).run;
 }
 
@@ -896,6 +898,13 @@ void _addMetadataToManifest(String testDirectory, List<(String, String)> keyPair
   file.writeAsStringSync(xmlDoc.toXmlString(pretty: true, indent: '    '));
 }
 
+void _addMergedPlatformThreadSupportToManifest(String testDirectory) {
+    final List<(String, String)> keyPairs = <(String, String)>[
+    ('io.flutter.embedding.android.EnableMergedPlatformUIThread', 'true'),
+  ];
+  _addMetadataToManifest(testDirectory, keyPairs);
+}
+
 /// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
 /// <meta-data
 ///   android:name="io.flutter.embedding.android.EnableVulkanGPUTracing"
@@ -1389,6 +1398,9 @@ class PerfTest {
           if (forceOpenGLES ?? false) {
             _addOpenGLESToManifest(testDirectory);
           }
+          if (enableMergedPlatformThread) {
+            _addMergedPlatformThreadSupportToManifest(testDirectory);
+          }
         }
         if (disablePartialRepaint || enableMergedPlatformThread) {
           changedPlist = true;
@@ -1460,7 +1472,7 @@ class PerfTest {
         case DeviceOperatingSystem.android:
         case DeviceOperatingSystem.androidArm:
         case DeviceOperatingSystem.androidArm64:
-          recordGPU = enableImpeller ?? false;
+          recordGPU = true;
         case DeviceOperatingSystem.fake:
         case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.linux:
@@ -2160,6 +2172,7 @@ class DevToolsMemoryTest {
 
       await flutter(
         'drive',
+        driveWithDds: true,
         options: <String>[
           '-d', _device.deviceId,
           '--profile',
