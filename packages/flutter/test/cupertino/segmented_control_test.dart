@@ -337,7 +337,7 @@ void main() {
       DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
       IconThemeData iconTheme = IconTheme.of(tester.element(find.byIcon(const IconData(1))));
 
-      expect(textStyle.style.color, isSameColorAs(CupertinoColors.black));
+      expect(textStyle.style.color, isSameColorAs(CupertinoColors.white));
       expect(iconTheme.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
 
       await tester.tap(find.byIcon(const IconData(1)));
@@ -348,7 +348,7 @@ void main() {
       iconTheme = IconTheme.of(tester.element(find.byIcon(const IconData(1))));
 
       expect(textStyle.style.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
-      expect(iconTheme.color, isSameColorAs(CupertinoColors.black));
+      expect(iconTheme.color, isSameColorAs(CupertinoColors.white));
     },
   );
 

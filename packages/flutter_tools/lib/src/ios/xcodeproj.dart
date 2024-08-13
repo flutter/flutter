@@ -211,7 +211,7 @@ class XcodeProjectInterpreter {
         ...<String>['-configuration', configuration],
       if (target != null)
         ...<String>['-target', target],
-      if (buildContext.sdk == XcodeSdk.IPhoneSimulator || buildContext.sdk == XcodeSdk.WatchSimulator)
+      if (buildContext.sdk == XcodeSdk.IPhoneSimulator)
         ...<String>['-sdk', 'iphonesimulator'],
       '-destination',
       if (deviceId != null)

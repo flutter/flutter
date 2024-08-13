@@ -4,6 +4,7 @@
 
 /// @docImport 'package:flutter/material.dart';
 /// @docImport 'package:flutter/rendering.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
 ///
 /// @docImport 'actions.dart';
 /// @docImport 'focus_manager.dart';
