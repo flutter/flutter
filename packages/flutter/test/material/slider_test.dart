@@ -4554,13 +4554,8 @@ void main() {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp() {
       return MaterialApp(
-        theme: ThemeData(
-          sliderTheme: const SliderThemeData(
-            showValueIndicator: ShowValueIndicator.always,
-          ),
-        ),
         home: Material(
           child: Center(
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -4569,13 +4564,12 @@ void main() {
                 focusNode: focusNode,
                 divisions: 5,
                 label: value.toStringAsFixed(1),
-                onChanged: enabled
-                  ? (double newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    }
-                  : null,
+                onChanged:
+                  (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  }
               );
             }),
           ),
