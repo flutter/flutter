@@ -365,7 +365,8 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   /// The map must have more than one entry.
   final Map<T, Widget> children;
 
-  /// A set to indicate disabled segments.
+  /// The set of identifying keys that correspond to the segments that should be
+  /// disabled.
   ///
   /// Disabled children cannot be highlighted and don't show any animation
   /// when they are tapped or long pressed. So if this set contains [groupValue],
