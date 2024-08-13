@@ -30,7 +30,7 @@ class _MainWidgetState extends State<_MainWidget> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('DatePicker'),
+        title: Semantics(headingLevel: 1, child: const Text('DatePicker Demo')),
       ),
       body: Center(
         child: TextButton(

@@ -26,4 +26,11 @@ void main() {
         find.bySemanticsLabel('Accessibility Test Slider');
     expect(semanticsWidget, findsOneWidget);
   });
+
+  testWidgets('slider demo page has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, SliderUseCase());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('Slider demo');
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
+  });
 }

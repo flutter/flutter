@@ -28,4 +28,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('This is a typical dialog.'), findsNothing);
   });
+
+  testWidgets('dialog has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, DialogUseCase());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('Dialog Demo');
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
+  });
 }
