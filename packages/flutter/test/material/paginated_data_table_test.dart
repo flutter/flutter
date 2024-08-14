@@ -70,6 +70,35 @@ void main() {
   setUp(() => source = TestDataSource());
   tearDown(() => source.dispose());
 
+   testWidgets('PaginatedDataTable headerBackgroundColor and footerBackgroundColor set properly', (WidgetTester tester) async {
+    const Color headerBackgroundColor = Color(0xFFF53935);
+
+    const Color footerBackgroundColor = Color(0xFFA53695);
+
+    await tester.pumpWidget(MaterialApp(
+      home: PaginatedDataTable(
+        headerBackgroundColor: headerBackgroundColor,
+        footerBackgroundColor: footerBackgroundColor,
+        showFirstLastButtons: true,
+        header: const Text('Test table'),
+        rowsPerPage: 10,
+        onRowsPerPageChanged: (int? rowsPerPage) { },
+        source: source,
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
+        ],
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+    final Iterable<Container> containers = tester.widgetList(find.byType(Container));
+
+    expect(containers.elementAt(0).color, headerBackgroundColor);
+    expect(containers.elementAt(containers.length-1).color, footerBackgroundColor); // last container is the footer
+  });
+
   testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
@@ -1467,6 +1496,6 @@ void main() {
     final Iterable<Container> containers = tester.widgetList(find.byType(Container));
 
     expect(containers.elementAt(0).color, headerBackgroundColor);
-    expect((tester.widget(find.byType(Container)).last).color, footerBackgroundColor); // last container is the footer
+    expect(containers.elementAt(containers.length-1).color, footerBackgroundColor); // last container is the footer
   });
 }
