@@ -1428,9 +1428,10 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
             result = _updateSelectionEdgeByTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getWordBoundaryAtPosition);
           case TextGranularity.paragraph:
             result = _updateSelectionEdgeByMultiSelectableTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getParagraphBoundaryAtPosition, getClampedTextBoundary: _getClampedParagraphBoundaryAtPosition);
-          case TextGranularity.document:
           case TextGranularity.line:
-            assert(false, 'Moving the selection edge by line or document is not supported.');
+            result = _updateSelectionEdgeByMultiSelectableTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getLineBoundaryAtPosition, getClampedTextBoundary: _getClampedLineBoundaryAtPosition);
+          case TextGranularity.document:
+            assert(false, 'Moving the selection edge by document is not supported.');
         }
       case SelectionEventType.clear:
         result = _handleClearSelection();
@@ -1447,6 +1448,15 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           _selectableContainsOriginTextBoundary = true;
         } else {
           result = _handleSelectParagraph(selectParagraph.globalPosition);
+        }
+      case SelectionEventType.selectLine:
+        final SelectLineSelectionEvent selectLine = event as SelectLineSelectionEvent;
+        if (selectLine.absorb) {
+          _handleSelectAll();
+          result = SelectionResult.next;
+          _selectableContainsOriginTextBoundary = true;
+        } else {
+          result = _handleSelectLine(selectLine.globalPosition);
         }
       case SelectionEventType.granularlyExtendSelection:
         final GranularlyExtendSelectionEvent granularlyExtendSelection = event as GranularlyExtendSelectionEvent;
@@ -2734,6 +2744,13 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return _handleSelectMultiFragmentTextBoundary(paragraphBoundary);
   }
 
+  SelectionResult _handleSelectLine(Offset globalPosition) {
+    final Offset localPosition = paragraph.globalToLocal(globalPosition);
+    final TextPosition position = paragraph.getPositionForOffset(localPosition);
+    final _TextBoundaryRecord lineBoundary = _getLineBoundaryAtPosition(position, fullText);
+    return _handleSelectMultiFragmentTextBoundary(lineBoundary);
+  }
+
   TextPosition _getPositionInParagraph(RenderParagraph targetParagraph) {
     final Matrix4 transform = paragraph.getTransformTo(targetParagraph);
     final Offset localCenter = paragraph.paintBounds.centerLeft;
@@ -2764,6 +2781,30 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     final TextRange paragraphRange = TextRange(start: paragraphStart, end: paragraphEnd);
     assert(paragraphRange.isNormalized);
     return _adjustTextBoundaryAtPosition(paragraphRange, position);
+  }
+
+  _TextBoundaryRecord _getLineBoundaryAtPosition(TextPosition position, String text) {
+    final LineBoundary lineBoundary = LineBoundary(this);
+    // Use position.offset - 1 when `position` is at the end of the selectable to retrieve
+    // the previous text boundary's location.
+    final int lineStart = lineBoundary.getLeadingTextBoundaryAt(position.offset == text.length || position.affinity == TextAffinity.upstream ? position.offset - 1 : position.offset) ?? 0;
+    final int lineEnd = lineBoundary.getTrailingTextBoundaryAt(position.offset) ?? text.length;
+    final TextRange lineRange = TextRange(start: lineStart, end: lineEnd);
+    assert(lineRange.isNormalized);
+    return _adjustTextBoundaryAtPosition(lineRange, position);
+  }
+
+  _TextBoundaryRecord _getClampedLineBoundaryAtPosition(TextPosition position) {
+    final LineBoundary lineBoundary = LineBoundary(this);
+    // Use position.offset - 1 when `position` is at the end of the selectable to retrieve
+    // the previous text boundary's location.
+    int lineStart = lineBoundary.getLeadingTextBoundaryAt(position.offset == fullText.length || position.affinity == TextAffinity.upstream ? position.offset - 1 : position.offset) ?? 0;
+    int lineEnd = lineBoundary.getTrailingTextBoundaryAt(position.offset) ?? fullText.length;
+    lineStart = lineStart < range.start ? range.start : lineStart > range.end ? range.end : lineStart;
+    lineEnd = lineEnd > range.end ? range.end : lineEnd < range.start ? range.start : lineEnd;
+    final TextRange lineRange = TextRange(start: lineStart, end: lineEnd);
+    assert(lineRange.isNormalized);
+    return _adjustTextBoundaryAtPosition(lineRange, position);
   }
 
   SelectionResult _handleDirectionallyExtendSelection(double horizontalBaseline, bool isExtent, SelectionExtendDirection movement) {

@@ -309,6 +309,12 @@ enum SelectionEventType {
   /// Used by [SelectParagraphSelectionEvent].
   selectParagraph,
 
+  /// An event to select a paragraph at the location
+  /// [SelectLineSelectionEvent.globalPosition].
+  ///
+  /// Used by [SelectLineSelectionEvent].
+  selectLine,
+
   /// An event that extends the selection by a specific [TextGranularity].
   granularlyExtendSelection,
 
@@ -395,6 +401,21 @@ class SelectParagraphSelectionEvent extends SelectionEvent {
 
   /// Whether the selectable receiving the event should be absorbed into
   /// an encompassing paragraph.
+  final bool absorb;
+}
+
+/// Selects the entire line at the location.
+///
+/// This event can be sent as the result of a triple click to select on Linux.
+class SelectLineSelectionEvent extends SelectionEvent {
+  /// Creates a select line event at the [globalPosition].
+  const SelectLineSelectionEvent({required this.globalPosition, this.absorb = false}): super._(SelectionEventType.selectLine);
+
+  /// The position in global coordinates to select paragraph at.
+  final Offset globalPosition;
+
+  /// Whether the selectable receiving the event should be absorbed into
+  /// an encompassing line.
   final bool absorb;
 }
 
