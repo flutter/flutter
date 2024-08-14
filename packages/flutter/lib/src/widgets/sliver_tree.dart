@@ -872,6 +872,12 @@ class _TreeSliverState<T> extends State<TreeSliver<T>> with TickerProviderStateM
         _currentAnimationForParent[node]!.animation.dispose();
       }
 
+      if ( widget.toggleAnimationStyle == AnimationStyle.noAnimation) {
+        // No animation, just update the active nodes.
+        _unpackActiveNodes();
+        return;
+      }
+
       final AnimationController controller = _currentAnimationForParent[node]?.controller
         ?? AnimationController(
           value: node._expanded ? 0.0 : 1.0,
@@ -886,6 +892,14 @@ class _TreeSliverState<T> extends State<TreeSliver<T>> with TickerProviderStateM
               _currentAnimationForParent[node]!.controller.dispose();
               _currentAnimationForParent.remove(node);
               _updateActiveAnimations();
+              // If the node is collapsing, we need to rebuild the active nodes
+              // to reflect the new state.
+              // This is because the node's children are no longer active.
+              if (!node._expanded) {
+                setState(() {
+                   _unpackActiveNodes();
+                });
+              }
             case AnimationStatus.forward:
             case AnimationStatus.reverse:
           }
@@ -922,9 +936,7 @@ class _TreeSliverState<T> extends State<TreeSliver<T>> with TickerProviderStateM
           controller.forward();
         case false:
           // Collapsing
-          controller.reverse().then((_) {
-            _unpackActiveNodes();
-          });
+          controller.reverse();
       }
     });
   }
