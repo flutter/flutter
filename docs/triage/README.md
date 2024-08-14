@@ -322,6 +322,12 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 - [Windows PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-windows+sort%3Aupdated-asc)
 - [Windows PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-windows+sort%3Aupdated-asc)
 
+### Accessibility team (`team-accessibility`)
+
+- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-accessibility%2Cfyi-accessibility+-label%3Atriaged-accessibility+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+)
+- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-accessibility+label%3AP0+sort%3Aupdated-asc+)
+- [Package PRs](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+accessibility%22+sort%3Aupdated-asc+-is%3Adraft+)
+
 ## Adding a new team
 
 To add a team:
