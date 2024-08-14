@@ -2524,6 +2524,49 @@ void main() {
 
     expect(menuAnchor.alignmentOffset, alignmentOffset);
   });
+
+  testWidgets('DropdownMenu filter is disabled until text input', (WidgetTester tester) async{
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
+          enableFilter: true,
+          initialSelection: menuChildren[0].value,
+          dropdownMenuEntries: menuChildren,
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+
+    // All entries should be available, and two buttons should be found for each entry.
+    // One is layout for the _DropdownMenuBody, the other one is the real button item in the menu.
+    for (final TestMenu menu in TestMenu.values) {
+      expect(find.widgetWithText(MenuItemButton, menu.label), findsNWidgets(2));
+    }
+
+    // Text input would enable the filter.
+    await tester.enterText(find.byType(TextField).first, 'Menu 1');
+    await tester.pumpAndSettle();
+    for (final TestMenu menu in TestMenu.values) {
+      // 'Menu 1' should be 2, other items should only find one.
+      if (menu.label == TestMenu.mainMenu1.label) {
+        expect(find.widgetWithText(MenuItemButton, menu.label), findsNWidgets(2));
+      } else {
+        expect(find.widgetWithText(MenuItemButton, menu.label), findsOneWidget);
+      }
+    }
+
+    // Selecting an item would disable filter again.
+    await tester.tap(find.widgetWithText(MenuItemButton, 'Menu 1').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+    for (final TestMenu menu in TestMenu.values) {
+      expect(find.widgetWithText(MenuItemButton, menu.label), findsNWidgets(2));
+    }
+  });
 }
 
 enum TestMenu {
