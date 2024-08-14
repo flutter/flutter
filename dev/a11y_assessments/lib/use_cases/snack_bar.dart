@@ -30,7 +30,7 @@ class MainWidgetState extends State<MainWidget> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('SnackBar'),
+        title: Semantics(headingLevel: 1, child: const Text('SnackBar')),
       ),
       body: Center(
         child: Column(

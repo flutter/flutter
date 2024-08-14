@@ -17,7 +17,6 @@ class ExpansionTileUseCase extends UseCase {
   Widget build(BuildContext context) => const ExpansionTileExample();
 }
 
-
 class ExpansionTileExample extends StatefulWidget {
   const ExpansionTileExample({super.key});
 
@@ -33,7 +32,7 @@ class _ExpansionTileExampleState extends State<ExpansionTileExample> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('ExpansionTile'),
+        title: Semantics(headingLevel: 1, child: const Text('ExpansionTile')),
       ),
       body: Column(
         children: <Widget>[
@@ -48,7 +47,9 @@ class _ExpansionTileExampleState extends State<ExpansionTileExample> {
             title: const Text('ExpansionTile 2'),
             subtitle: const Text('Custom expansion arrow icon'),
             trailing: Icon(
-              _customTileExpanded ? Icons.arrow_drop_down_circle : Icons.arrow_drop_down,
+              _customTileExpanded
+                  ? Icons.arrow_drop_down_circle
+                  : Icons.arrow_drop_down,
             ),
             children: const <Widget>[
               ListTile(title: Text('This is tile number 2')),
