@@ -58,12 +58,19 @@ Future<void> _writeAndroidEmulatorCrashLogs() async {
   // Write each crash log to stdout.
   for (final io.FileSystemEntity entity in crashLogDir.listSync(recursive: true)) {
     if (entity is io.File) {
+      final String contents;
+      try {
+        contents = entity.readAsStringSync();
+      } on io.FileSystemException catch (e) {
+        print('Could not read file: ${entity.path}')
+        continue;
+      }
       final io.File file = entity;
       print('----------------------------------------------------------------');
       print('Crash log: ${file.path}');
-      print(file.readAsStringSync());
       print('----------------------------------------------------------------');
       print('');
+      print(contents);
     }
   }
 }
