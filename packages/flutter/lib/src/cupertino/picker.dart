@@ -562,7 +562,7 @@ class _CupertinoPickerListWheelChildDelegateWrapper implements ListWheelChildDel
 
   @override
   bool shouldRebuild(covariant _CupertinoPickerListWheelChildDelegateWrapper oldDelegate) => _wrapped.shouldRebuild(oldDelegate._wrapped);
-  
+
   @override
   int trueIndexOf(int index) => _wrapped.trueIndexOf(index);
 }
