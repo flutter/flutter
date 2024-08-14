@@ -1467,6 +1467,6 @@ void main() {
     final Iterable<Container> containers = tester.widgetList(find.byType(Container));
 
     expect(containers.elementAt(0).color, headerBackgroundColor);
-    expect((tester.widgetList(find.byType(Container)).last).color, footerBackgroundColor); // last container is the footer
+    expect((tester.widget(find.byType(Container)).last).color, footerBackgroundColor); // last container is the footer
   });
 }
