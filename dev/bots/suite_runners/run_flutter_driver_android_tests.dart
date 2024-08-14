@@ -49,7 +49,7 @@ Future<void> _writeAndroidEmulatorCrashLogs() async {
   // the test environment will have a more robust way to handle this:
   // https://chromium-review.googlesource.com/c/chromium/src/+/5731675/2..3
   const String crashLogPath = '/tmp/android-unknown/emu-crash-34.2.14.db';
-  final io.Directory crashLogDir = io.Directory(path.join(crashLogPath, 'reports'));
+  final io.Directory crashLogDir = io.Directory(crashLogPath);
   if (!crashLogDir.existsSync()) {
     print('Crash log directory does not exist: $crashLogDir');
     return;
