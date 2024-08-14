@@ -724,7 +724,7 @@ FFI_PLUGIN_EXPORT intptr_t add(intptr_t a, intptr_t b) {
 #include "add.h"
 ''',
   );
-  mainLibrarySource = mainLibrarySource.replaceFirst('a + b;', 'add(a, b);');
+  mainLibrarySource = mainLibrarySource.replaceAll('a + b', 'add(a, b)');
   await mainLibrarySourceFile.writeAsString(mainLibrarySource);
 
   // Update builder to build the native library and link it into the main library.
