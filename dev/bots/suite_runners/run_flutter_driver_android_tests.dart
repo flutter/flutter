@@ -61,8 +61,8 @@ Future<void> _writeAndroidEmulatorCrashLogs() async {
       final String contents;
       try {
         contents = entity.readAsStringSync();
-      } on io.FileSystemException catch (e) {
-        print('Could not read file: ${entity.path}')
+      } on io.FileSystemException catch (_) {
+        print('Could not read file: ${entity.path}');
         continue;
       }
       final io.File file = entity;
