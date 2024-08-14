@@ -82,10 +82,10 @@ class SearchViewThemeData with Diagnosticable {
   final BoxConstraints? constraints;
 
   /// Overrides the value of the padding for [SearchAnchor.viewPadding].
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
 
   /// Overrides the value of the padding for [SearchAnchor.viewBarPadding]
-  final EdgeInsets? barPadding;
+  final EdgeInsetsGeometry? barPadding;
 
   /// Overrides the value of the divider color for [SearchAnchor.dividerColor].
   final Color? dividerColor;
@@ -102,8 +102,8 @@ class SearchViewThemeData with Diagnosticable {
     TextStyle? headerTextStyle,
     TextStyle? headerHintStyle,
     BoxConstraints? constraints,
-    EdgeInsets? padding,
-    EdgeInsets? barPadding,
+    EdgeInsetsGeometry? padding,
+    EdgeInsetsGeometry? barPadding,
     Color? dividerColor,
   }) {
     return SearchViewThemeData(
@@ -137,8 +137,8 @@ class SearchViewThemeData with Diagnosticable {
       headerTextStyle: TextStyle.lerp(a?.headerTextStyle, b?.headerTextStyle, t),
       headerHintStyle: TextStyle.lerp(a?.headerTextStyle, b?.headerTextStyle, t),
       constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
-      padding: EdgeInsets.lerp(a?.padding, b?.padding, t),
-      barPadding: EdgeInsets.lerp(a?.barPadding, b?.barPadding, t),
+      padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
+      barPadding: EdgeInsetsGeometry.lerp(a?.barPadding, b?.barPadding, t),
       dividerColor: Color.lerp(a?.dividerColor, b?.dividerColor, t),
     );
   }
@@ -194,8 +194,8 @@ class SearchViewThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle?>('headerTextStyle', headerTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle?>('headerHintStyle', headerHintStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsets?>('padding', padding, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsets?>('barPadding', barPadding, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry?>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry?>('barPadding', barPadding, defaultValue: null));
     properties.add(DiagnosticsProperty<Color?>('dividerColor', dividerColor, defaultValue: null));
   }
 
