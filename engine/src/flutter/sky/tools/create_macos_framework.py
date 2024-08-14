@@ -5,13 +5,22 @@
 # found in the LICENSE file.
 
 import argparse
+import platform
 import subprocess
 import shutil
 import sys
 import os
 
 from create_xcframework import create_xcframework  # pylint: disable=import-error
-import sky_utils  # pylint: disable=import-error
+
+buildroot_dir = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..', '..'))
+
+ARCH_SUBPATH = 'mac-arm64' if platform.processor() == 'arm' else 'mac-x64'
+DSYMUTIL = os.path.join(
+    os.path.dirname(__file__), '..', '..', 'buildtools', ARCH_SUBPATH, 'clang', 'bin', 'dsymutil'
+)
+
+out_dir = os.path.join(buildroot_dir, 'out')
 
 
 def main():
@@ -24,18 +33,19 @@ def main():
   parser.add_argument('--x64-out-dir', type=str, required=True)
   parser.add_argument('--strip', action='store_true', default=False)
   parser.add_argument('--dsym', action='store_true', default=False)
+  # TODO(godofredoc): Remove after recipes v2 have landed.
   parser.add_argument('--zip', action='store_true', default=False)
 
   args = parser.parse_args()
 
-  dst = args.dst if os.path.isabs(args.dst) else sky_utils.buildroot_relative_path(args.dst)
+  dst = (args.dst if os.path.isabs(args.dst) else os.path.join(buildroot_dir, args.dst))
   arm64_out_dir = (
-      args.arm64_out_dir if os.path.isabs(args.arm64_out_dir) else
-      sky_utils.buildroot_relative_path(args.arm64_out_dir)
+      args.arm64_out_dir
+      if os.path.isabs(args.arm64_out_dir) else os.path.join(buildroot_dir, args.arm64_out_dir)
   )
   x64_out_dir = (
       args.x64_out_dir
-      if os.path.isabs(args.x64_out_dir) else sky_utils.buildroot_relative_path(args.x64_out_dir)
+      if os.path.isabs(args.x64_out_dir) else os.path.join(buildroot_dir, args.x64_out_dir)
   )
 
   fat_framework_bundle = os.path.join(dst, 'FlutterMacOS.framework')
@@ -61,15 +71,21 @@ def main():
     print('Cannot find macOS x64 dylib at %s' % x64_dylib)
     return 1
 
-  sky_utils.copy_tree(arm64_framework, fat_framework_bundle, symlinks=True)
+  if not os.path.isfile(DSYMUTIL):
+    print('Cannot find dsymutil at %s' % DSYMUTIL)
+    return 1
+
+  shutil.rmtree(fat_framework_bundle, True)
+  shutil.copytree(arm64_framework, fat_framework_bundle, symlinks=True)
 
   regenerate_symlinks(fat_framework_bundle)
 
   fat_framework_binary = os.path.join(fat_framework_bundle, 'Versions', 'A', 'FlutterMacOS')
 
   # Create the arm64/x64 fat framework.
-  sky_utils.lipo([arm64_dylib, x64_dylib], fat_framework_binary)
-
+  subprocess.check_call([
+      'lipo', arm64_dylib, x64_dylib, '-create', '-output', fat_framework_binary
+  ])
   # Make the framework readable and executable: u=rwx,go=rx.
   subprocess.check_call(['chmod', '755', fat_framework_bundle])
 
@@ -91,8 +107,7 @@ def main():
   xcframeworks = [fat_framework_bundle]
   create_xcframework(location=dst, name='FlutterMacOS', frameworks=xcframeworks)
 
-  if args.zip:
-    zip_framework(dst)
+  zip_framework(dst, args)
 
   return 0
 
@@ -128,78 +143,108 @@ def regenerate_symlinks(fat_framework_bundle):
   )
 
 
+def embed_codesign_configuration(config_path, content):
+  with open(config_path, 'w') as file:
+    file.write(content)
+
+
 def process_framework(dst, args, fat_framework_bundle, fat_framework_binary):
   if args.dsym:
     dsym_out = os.path.splitext(fat_framework_bundle)[0] + '.dSYM'
-    sky_utils.extract_dsym(fat_framework_binary, dsym_out)
+    subprocess.check_call([DSYMUTIL, '-o', dsym_out, fat_framework_binary])
     if args.zip:
       dsym_dst = os.path.join(dst, 'FlutterMacOS.dSYM')
-      sky_utils.create_zip(dsym_dst, 'FlutterMacOS.dSYM.zip', ['.'], symlinks=True)
+      subprocess.check_call(['zip', '-r', '-y', 'FlutterMacOS.dSYM.zip', '.'], cwd=dsym_dst)
       # Double zip to make it consistent with legacy artifacts.
       # TODO(fujino): remove this once https://github.com/flutter/flutter/issues/125067 is resolved
-      sky_utils.create_zip(dsym_dst, 'FlutterMacOS.dSYM_.zip', ['FlutterMacOS.dSYM.zip'])
-
-      # Overwrite the FlutterMacOS.dSYM.zip with the double-zipped archive.
+      subprocess.check_call([
+          'zip',
+          '-y',
+          'FlutterMacOS.dSYM_.zip',
+          'FlutterMacOS.dSYM.zip',
+      ],
+                            cwd=dsym_dst)
+      # Use doubled zipped file.
       dsym_final_src_path = os.path.join(dsym_dst, 'FlutterMacOS.dSYM_.zip')
       dsym_final_dst_path = os.path.join(dst, 'FlutterMacOS.dSYM.zip')
       shutil.move(dsym_final_src_path, dsym_final_dst_path)
 
   if args.strip:
+    # copy unstripped
     unstripped_out = os.path.join(dst, 'FlutterMacOS.unstripped')
-    sky_utils.strip_binary(fat_framework_binary, unstripped_out)
+    shutil.copyfile(fat_framework_binary, unstripped_out)
+
+    subprocess.check_call(['strip', '-x', '-S', fat_framework_binary])
 
 
-def zip_framework(dst):
-  framework_dst = os.path.join(dst, 'FlutterMacOS.framework')
-  sky_utils.write_codesign_config(os.path.join(framework_dst, 'entitlements.txt'), [])
-  sky_utils.write_codesign_config(
-      os.path.join(framework_dst, 'without_entitlements.txt'),
-      [
-          # TODO(cbracken): Remove the zip file from the path when outer zip is removed.
-          'FlutterMacOS.framework.zip/Versions/A/FlutterMacOS'
-      ]
-  )
-  sky_utils.create_zip(framework_dst, 'FlutterMacOS.framework.zip', ['.'], symlinks=True)
+def zip_framework(dst, args):
+  # Zip FlutterMacOS.framework.
+  if args.zip:
+    filepath_with_entitlements = ''
 
-  # Double zip to make it consistent with legacy artifacts.
-  # TODO(fujino): remove this once https://github.com/flutter/flutter/issues/125067 is resolved
-  sky_utils.create_zip(
-      framework_dst,
-      'FlutterMacOS.framework_.zip',
-      [
-          'FlutterMacOS.framework.zip',
-          # TODO(cbracken): Move these files to inner zip before removing the outer zip.
-          'entitlements.txt',
-          'without_entitlements.txt',
-      ],
-      symlinks=True
-  )
+    framework_dst = os.path.join(dst, 'FlutterMacOS.framework')
+    # TODO(xilaizhang): Remove the zip file from the path when outer zip is removed.
+    filepath_without_entitlements = 'FlutterMacOS.framework.zip/Versions/A/FlutterMacOS'
 
-  # Overwrite the FlutterMacOS.framework.zip with the double-zipped archive.
-  final_src_path = os.path.join(framework_dst, 'FlutterMacOS.framework_.zip')
-  final_dst_path = os.path.join(dst, 'FlutterMacOS.framework.zip')
-  shutil.move(final_src_path, final_dst_path)
+    embed_codesign_configuration(
+        os.path.join(framework_dst, 'entitlements.txt'), filepath_with_entitlements
+    )
 
-  zip_xcframework_archive(dst)
+    embed_codesign_configuration(
+        os.path.join(framework_dst, 'without_entitlements.txt'), filepath_without_entitlements
+    )
+    subprocess.check_call([
+        'zip',
+        '-r',
+        '-y',
+        'FlutterMacOS.framework.zip',
+        '.',
+    ],
+                          cwd=framework_dst)
+    # Double zip to make it consistent with legacy artifacts.
+    # TODO(fujino): remove this once https://github.com/flutter/flutter/issues/125067 is resolved
+    subprocess.check_call(
+        [
+            'zip',
+            '-y',
+            'FlutterMacOS.framework_.zip',
+            'FlutterMacOS.framework.zip',
+            # TODO(xilaizhang): Move these files to inner zip before removing the outer zip.
+            'entitlements.txt',
+            'without_entitlements.txt',
+        ],
+        cwd=framework_dst
+    )
+    # Use doubled zipped file.
+    final_src_path = os.path.join(framework_dst, 'FlutterMacOS.framework_.zip')
+    final_dst_path = os.path.join(dst, 'FlutterMacOS.framework.zip')
+    shutil.move(final_src_path, final_dst_path)
+
+    zip_xcframework_archive(dst)
 
 
 def zip_xcframework_archive(dst):
-  sky_utils.write_codesign_config(os.path.join(dst, 'entitlements.txt'), [])
+  filepath_with_entitlements = ''
+  filepath_without_entitlements = (
+      'FlutterMacOS.xcframework/macos-arm64_x86_64/'
+      'FlutterMacOS.framework/Versions/A/FlutterMacOS'
+  )
+  embed_codesign_configuration(os.path.join(dst, 'entitlements.txt'), filepath_with_entitlements)
 
-  sky_utils.write_codesign_config(
-      os.path.join(dst, 'without_entitlements.txt'), [
-          'FlutterMacOS.xcframework/macos-arm64_x86_64/'
-          'FlutterMacOS.framework/Versions/A/FlutterMacOS'
-      ]
+  embed_codesign_configuration(
+      os.path.join(dst, 'without_entitlements.txt'), filepath_without_entitlements
   )
 
-  sky_utils.create_zip(
-      dst, 'framework.zip', [
-          'FlutterMacOS.xcframework',
-          'entitlements.txt',
-          'without_entitlements.txt',
-      ]
-  )
+  subprocess.check_call([
+      'zip',
+      '-r',
+      '-y',
+      'framework.zip',
+      'FlutterMacOS.xcframework',
+      'entitlements.txt',
+      'without_entitlements.txt',
+  ],
+                        cwd=dst)
 
 
 if __name__ == '__main__':

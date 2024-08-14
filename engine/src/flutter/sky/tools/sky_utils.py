@@ -37,20 +37,17 @@ def copy_binary(source_path, destination_path):
   shutil.copy2(source_path, destination_path)
 
 
-def copy_tree(source_path, destination_path, symlinks=False):
+def copy_tree(source_path, destination_path):
   """Performs a recursive copy of a directory.
   If the destination path is present, it is deleted first."""
   assert_directory(source_path, 'directory to copy')
   shutil.rmtree(destination_path, True)
-  shutil.copytree(source_path, destination_path, symlinks=symlinks)
+  shutil.copytree(source_path, destination_path)
 
 
-def create_zip(cwd, zip_filename, paths, symlinks=False):
+def create_zip(cwd, zip_filename, paths):
   """Creates a zip archive in cwd, containing a set of cwd-relative files."""
-  options = ['-r']
-  if symlinks:
-    options.append('-y')
-  subprocess.check_call(['zip'] + options + [zip_filename] + paths, cwd=cwd)
+  subprocess.check_call(['zip', '-r', zip_filename] + paths, cwd=cwd)
 
 
 def _dsymutil_path():
@@ -89,5 +86,4 @@ def strip_binary(binary_path, unstripped_copy_path):
 def write_codesign_config(output_path, paths):
   """Writes an Apple codesign configuration file containing the specified paths."""
   with open(output_path, mode='w', encoding='utf-8') as file:
-    if paths:
-      file.write('\n'.join(paths) + '\n')
+    file.write('\n'.join(paths) + '\n')
