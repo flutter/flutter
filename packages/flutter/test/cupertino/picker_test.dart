@@ -611,7 +611,7 @@ void main() {
         ),
       ),
     );
-    
+
     expect(selectedItem, equals(0));
     // Tap on the item at index 1.
     await tester.tap(find.text('1'));
