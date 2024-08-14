@@ -290,7 +290,7 @@ class PaginatedDataTable extends StatefulWidget {
   final Color? footerBackgroundColor;
 
   //footer text style
-  final TextStyle? footerStyle;
+  final TextStyle footerStyle;
 
   /// Horizontal margin around the checkbox, if it is displayed.
   ///
@@ -498,7 +498,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     }
 
     // FOOTER
-    final TextStyle? footerTextStyle = widget.footerStyle; //previous based on themeData.textTheme.bodySmall which is misleading, converted to widget level property
+    final TextStyle footerTextStyle = widget.footerStyle; //previous based on themeData.textTheme.bodySmall which is misleading, converted to widget level property
     final List<Widget> footerWidgets = <Widget>[];
     if (widget.onRowsPerPageChanged != null) {
       final List<Widget> availableRowsPerPage = widget.availableRowsPerPage
