@@ -179,6 +179,15 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
       compileSdk flutter.compileSdkVersion
       ndkVersion flutter.ndkVersion
 
+      compileOptions {
+          sourceCompatibility = JavaVersion.VERSION_1_8
+          targetCompatibility = JavaVersion.VERSION_1_8
+      }
+
+      kotlinOptions {
+          jvmTarget = JavaVersion.VERSION_1_8
+      }
+
       sourceSets {
           main.java.srcDirs += 'src/main/kotlin'
       }
