@@ -1719,6 +1719,42 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(getGeneratedFileContent(locale: 'ja'), contains('intl.DateFormat.MMMMd(localeName)'));
       });
 
+      testWithoutContext('handle ordinary formatted date and arbitrary formatted date', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "@@locale": "en",
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "MMMd"
+      }
+    }
+  }
+}''',
+          'ja': '''
+{
+  "@@locale": "ja",
+  "springBegins": "春が始まるのは{springStartDate}",
+  "@springBegins": {
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "立春",
+        "isCustomDateFormat": "true"
+      }
+    }
+  }
+}'''
+        });
+
+        expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.MMMd(localeName)'));
+        expect(getGeneratedFileContent(locale: 'ja'), contains(r"DateFormat('立春', localeName)"));
+      });
+
       testWithoutContext('handle arbitrary formatted date with multiple locale', () {
         setupLocalizations(<String, String>{
           'en': '''
@@ -2474,6 +2510,44 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           contains('"invalid" is not a supported language code.'),
         )),
       );
+    });
+      
+    testWithoutContext('handle number with multiple locale', () {
+      setupLocalizations(<String, String>{
+        'en': '''
+{
+"@@locale": "en",
+"money": "Sum {number}",
+"@money": {
+  "placeholders": {
+    "number": {
+      "type": "int",
+      "format": "currency"
+    }
+  }
+}
+}''',
+        'ja': '''
+{
+"@@locale": "ja",
+"money": "合計 {number}",
+"@money": {
+  "placeholders": {
+    "number": {
+      "type": "int",
+      "format": "decimalPatternDigits",
+      "optionalParameters": {
+        "decimalDigits": 3
+      }
+    }
+  }
+}
+}'''
+      });
+
+      expect(getGeneratedFileContent(locale: 'en'), contains('intl.NumberFormat.currency('));
+      expect(getGeneratedFileContent(locale: 'ja'), contains('intl.NumberFormat.decimalPatternDigits('));
+      expect(getGeneratedFileContent(locale: 'ja'), contains('decimalDigits: 3'));
     });
   });
 
