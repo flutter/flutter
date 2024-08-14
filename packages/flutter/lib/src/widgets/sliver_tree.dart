@@ -872,8 +872,11 @@ class _TreeSliverState<T> extends State<TreeSliver<T>> with TickerProviderStateM
         _currentAnimationForParent[node]!.animation.dispose();
       }
 
-      if ( widget.toggleAnimationStyle == AnimationStyle.noAnimation) {
-        // No animation, just update the active nodes.
+      // If animation is disabled or the duration is zero, we skip the animation
+      // and immediately update the active nodes. This prevents the app from freezing
+      // due to the tree being incorrectly updated when the animation duration is zero.
+      // This is because, in this case, the node's children are no longer active.
+      if (widget.toggleAnimationStyle == AnimationStyle.noAnimation || widget.toggleAnimationStyle?.duration == Duration.zero) {
         _unpackActiveNodes();
         return;
       }
