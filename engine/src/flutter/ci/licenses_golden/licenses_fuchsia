@@ -1,4 +1,4 @@
-Signature: f984e81c5eaae88a7578f6a7f6097d28
+Signature: 6d66d0adeed543c49d8c306e11cc1699
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -14521,8 +14521,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/compon
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/service.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/internal.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/protocol.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/globals.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/include/lib/component/outgoing/cpp/globals.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/completer.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/driver_base.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/driver_export.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -14628,8 +14626,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/componen
 FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/service.h
 FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/internal.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/protocol.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/globals.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/include/lib/component/outgoing/cpp/globals.h
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/completer.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/driver_base.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/driver_export.h
