@@ -140,4 +140,11 @@ void main() {
     expect(appScheme.inversePrimary.value,
         MaterialDynamicColors.inversePrimary.getArgb(highContrastScheme));
   });
+
+  testWidgets('a11y assessments home page has one h1 tag', (WidgetTester tester) async {
+    await tester.pumpWidget(const App());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('Accessibility Assessments');
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
+  });
 }

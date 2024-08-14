@@ -407,11 +407,11 @@ targets:
       tags: >
         ["framework","hostonly","linux"]
       task_name: android_views
+      presubmit_max_attempts: "2"
     timeout: 60
 
   - name: Linux_android_emu_34 android views
     recipe: devicelab/devicelab_drone
-    bringup: true
     properties:
       tags: >
         ["framework","hostonly","linux"]
@@ -1339,10 +1339,10 @@ targets:
         [
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
         ]
+      presubmit_max_attempts: "2"
 
   - name: Linux_android_emu_34 flutter_driver_android_test
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       shard: flutter_driver_android
@@ -2084,10 +2084,10 @@ targets:
       tags: >
         ["devicelab", "linux"]
       task_name: android_defines_test
+      presubmit_max_attempts: "2"
 
   - name: Linux_android_emu_34 android_defines_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2523,10 +2523,10 @@ targets:
       tags: >
         ["devicelab", "linux"]
       task_name: external_textures_integration_test
+      presubmit_max_attempts: "2"
 
   - name: Linux_android_emu_34 external_textures_integration_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     # Functionally the same as "presubmit: false", except that we will run on
     # presubmit during engine rolls. This test is the *only* automated e2e
