@@ -345,6 +345,7 @@ class Message {
       value = _value(templateBundle.resources, resourceId),
       description = _description(templateBundle.resources, resourceId, isResourceAttributeRequired),
       placeholders = _placeholders(templateBundle.resources, resourceId, isResourceAttributeRequired),
+      localePlaceholders = <LocaleInfo, Map<String, Placeholder>>{},
       messages = <LocaleInfo, String?>{},
       parsedMessages = <LocaleInfo, Node?>{} {
     // Filenames for error handling.
@@ -354,6 +355,9 @@ class Message {
       filenames[bundle.locale] = bundle.file.basename;
       final String? translation = bundle.translationFor(resourceId);
       messages[bundle.locale] = translation;
+      
+      localePlaceholders[bundle.locale] = _placeholders(bundle.resources, resourceId, false);
+
       List<String>? validPlaceholders;
       if (useRelaxedSyntax) {
         validPlaceholders = placeholders.entries.map((MapEntry<String, Placeholder> e) => e.key).toList();
@@ -383,6 +387,7 @@ class Message {
   final String? description;
   late final Map<LocaleInfo, String?> messages;
   final Map<LocaleInfo, Node?> parsedMessages;
+  final Map<LocaleInfo, Map<String, Placeholder>> localePlaceholders;
   final Map<String, Placeholder> placeholders;
   final bool useEscaping;
   final bool useRelaxedSyntax;

@@ -134,20 +134,30 @@ List<String> generateMethodArguments(Message message) {
   return message.placeholders.values.map((Placeholder placeholder) => placeholder.name).toList();
 }
 
-String generateDateFormattingLogic(Message message) {
+Placeholder? _localePlaceholder(Message message, LocaleInfo locale, String placeholderName) {
+  final Map<String, Placeholder>? placeholders = message.localePlaceholders[locale];
+  if (placeholders != null) {
+    return placeholders[placeholderName];
+  }
+  return null;
+}
+
+String generateDateFormattingLogic(Message message, LocaleInfo locale) {
   if (message.placeholders.isEmpty || !message.placeholdersRequireFormatting) {
     return '@(none)';
   }
 
   final Iterable<String> formatStatements = message.placeholders.values
     .where((Placeholder placeholder) => placeholder.requiresDateFormatting)
-    .map((Placeholder placeholder) {
+    .map((Placeholder templatePlaceholder) {
+      final String placeholderName = templatePlaceholder.name;
+      final Placeholder placeholder = _localePlaceholder(message, locale, placeholderName) ?? templatePlaceholder;
       final String? placeholderFormat = placeholder.format;
       if (placeholderFormat == null) {
         throw L10nException(
-          'The placeholder, ${placeholder.name}, has its "type" resource attribute set to '
-          'the "${placeholder.type}" type. To properly resolve for the right '
-          '${placeholder.type} format, the "format" attribute needs to be set '
+          'The placeholder, $placeholderName, has its "type" resource attribute set to '
+          'the "${templatePlaceholder.type}" type. To properly resolve for the right '
+          '${templatePlaceholder.type} format, the "format" attribute needs to be set '
           'to determine which DateFormat to use. \n'
           "Check the intl library's DateFormat class constructors for allowed "
           'date formats.'
@@ -158,7 +168,7 @@ String generateDateFormattingLogic(Message message) {
           && (isCustomDateFormat == null || !isCustomDateFormat)) {
         throw L10nException(
           'Date format "$placeholderFormat" for placeholder '
-          '${placeholder.name} does not have a corresponding DateFormat '
+          '$placeholderName does not have a corresponding DateFormat '
           "constructor\n. Check the intl library's DateFormat class "
           'constructors for allowed date formats, or set "isCustomDateFormat" attribute '
           'to "true".'
@@ -166,29 +176,31 @@ String generateDateFormattingLogic(Message message) {
       }
       if (placeholder.hasValidDateFormat) {
         return dateFormatTemplate
-          .replaceAll('@(placeholder)', placeholder.name)
+          .replaceAll('@(placeholder)', placeholderName)
           .replaceAll('@(format)', placeholderFormat);
       }
       return dateFormatCustomTemplate
-        .replaceAll('@(placeholder)', placeholder.name)
+        .replaceAll('@(placeholder)', placeholderName)
         .replaceAll('@(format)', "'${generateString(placeholderFormat)}'");
     });
 
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join();
 }
 
-String generateNumberFormattingLogic(Message message) {
+String generateNumberFormattingLogic(Message message, LocaleInfo locale) {
   if (message.placeholders.isEmpty || !message.placeholdersRequireFormatting) {
     return '@(none)';
   }
 
   final Iterable<String> formatStatements = message.placeholders.values
     .where((Placeholder placeholder) => placeholder.requiresNumFormatting)
-    .map((Placeholder placeholder) {
+    .map((Placeholder templatePlaceholder) {
+      final String placeholderName = templatePlaceholder.name;
+      final Placeholder placeholder = _localePlaceholder(message, locale, placeholderName) ?? templatePlaceholder;
       final String? placeholderFormat = placeholder.format;
       if (!placeholder.hasValidNumberFormat || placeholderFormat == null) {
         throw L10nException(
-          'Number format $placeholderFormat for the ${placeholder.name} '
+          'Number format $placeholderFormat for the $placeholderName '
           'placeholder does not have a corresponding NumberFormat constructor.\n'
           "Check the intl library's NumberFormat class constructors for allowed "
           'number formats.'
@@ -206,12 +218,12 @@ String generateNumberFormattingLogic(Message message) {
 
       if (placeholder.hasNumberFormatWithParameters) {
         return numberFormatNamedTemplate
-            .replaceAll('@(placeholder)', placeholder.name)
+            .replaceAll('@(placeholder)', placeholderName)
             .replaceAll('@(format)', placeholderFormat)
             .replaceAll('@(parameters)', parameters.join(',\n      '));
       } else {
         return numberFormatPositionalTemplate
-            .replaceAll('@(placeholder)', placeholder.name)
+            .replaceAll('@(placeholder)', placeholderName)
             .replaceAll('@(format)', placeholderFormat);
       }
     });
@@ -1321,8 +1333,8 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
       return (useNamedParameters ? methodWithNamedParameterTemplate : methodTemplate)
                 .replaceAll('@(name)', message.resourceId)
                 .replaceAll('@(parameters)', generateMethodParameters(message, useNamedParameters).join(', '))
-                .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
-                .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+                .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message, locale))
+                .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message, locale))
                 .replaceAll('@(tempVars)', tempVarLines)
                 .replaceAll('@(message)', messageString)
                 .replaceAll('@(none)\n', '');
