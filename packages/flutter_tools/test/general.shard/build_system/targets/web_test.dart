@@ -1042,7 +1042,7 @@ void main() {
                     '--extra-compiler-option=--depfile=${depFile.absolute.path}',
                     '-O$level',
                     if (strip && buildMode == 'release') '--strip-wasm' else '--no-strip-wasm',
-                    if (!sourceMaps) '--extra-compiler-option=--no-source-maps',
+                    if (!sourceMaps) '--no-source-maps',
                     if (buildMode == 'debug') '--extra-compiler-option=--enable-asserts',
                     '-o',
                     environment.buildDir.childFile('main.dart.wasm').absolute.path,
