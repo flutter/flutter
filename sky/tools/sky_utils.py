@@ -45,6 +45,67 @@ def copy_tree(source_path, destination_path, symlinks=False):
   shutil.copytree(source_path, destination_path, symlinks=symlinks)
 
 
+def create_fat_macos_framework(fat_framework, arm64_framework, x64_framework):
+  """Creates a fat framework from two arm64 and x64 frameworks."""
+  # Clone the arm64 framework bundle as a starting point.
+  copy_tree(arm64_framework, fat_framework, symlinks=True)
+  _regenerate_symlinks(fat_framework)
+  lipo([get_framework_dylib_path(arm64_framework),
+        get_framework_dylib_path(x64_framework)], get_framework_dylib_path(fat_framework))
+  _set_framework_permissions(fat_framework)
+
+
+def _regenerate_symlinks(framework_path):
+  """Regenerates the framework symlink structure.
+
+  When building on the bots, the framework is produced in one shard, uploaded
+  to LUCI's content-addressable storage cache (CAS), then pulled down in
+  another shard. When that happens, symlinks are dereferenced, resulting a
+  corrupted framework. This regenerates the expected symlink farm.
+  """
+  # If the dylib is symlinked, assume symlinks are all fine and bail out.
+  # The shutil.rmtree calls below only work on directories, and fail on symlinks.
+  framework_name = get_framework_name(framework_path)
+  framework_binary = get_framework_dylib_path(framework_path)
+  if os.path.islink(os.path.join(framework_path, framework_name)):
+    return
+
+  # Delete any existing files/directories.
+  os.remove(framework_binary)
+  shutil.rmtree(os.path.join(framework_path, 'Headers'), True)
+  shutil.rmtree(os.path.join(framework_path, 'Modules'), True)
+  shutil.rmtree(os.path.join(framework_path, 'Resources'), True)
+  current_version_path = os.path.join(framework_path, 'Versions', 'Current')
+  shutil.rmtree(current_version_path, True)
+
+  # Recreate the expected framework symlinks.
+  os.symlink('A', current_version_path)
+  os.symlink(os.path.join(current_version_path, framework_name), framework_binary)
+  os.symlink(os.path.join(current_version_path, 'Headers'), os.path.join(framework_path, 'Headers'))
+  os.symlink(os.path.join(current_version_path, 'Modules'), os.path.join(framework_path, 'Modules'))
+  os.symlink(
+      os.path.join(current_version_path, 'Resources'), os.path.join(framework_path, 'Resources')
+  )
+
+
+def _set_framework_permissions(framework_dir):
+  """Sets framework contents to be world readable, and world executable if user-executable."""
+  # Make the framework readable and executable: u=rwx,go=rx.
+  subprocess.check_call(['chmod', '755', framework_dir])
+
+  # Add group and other readability to all files.
+  subprocess.check_call(['chmod', '-R', 'og+r', framework_dir])
+
+  # Find all the files below the target dir with owner execute permission and
+  # set og+x where it had the execute permission set for the owner.
+  find_subprocess = subprocess.Popen(['find', framework_dir, '-perm', '-100', '-print0'],
+                                     stdout=subprocess.PIPE)
+  xargs_subprocess = subprocess.Popen(['xargs', '-0', 'chmod', 'og+x'],
+                                      stdin=find_subprocess.stdout)
+  find_subprocess.wait()
+  xargs_subprocess.wait()
+
+
 def create_zip(cwd, zip_filename, paths, symlinks=False):
   """Creates a zip archive in cwd, containing a set of cwd-relative files."""
   options = ['-r']
@@ -58,6 +119,16 @@ def _dsymutil_path():
   arch_subpath = 'mac-arm64' if platform.processor() == 'arm' else 'mac-x64'
   dsymutil_path = os.path.join('flutter', 'buildtools', arch_subpath, 'clang', 'bin', 'dsymutil')
   return buildroot_relative_path(dsymutil_path)
+
+
+def get_framework_name(framework_dir):
+  """Returns Foo given /path/to/Foo.framework."""
+  return os.path.splitext(os.path.basename(framework_dir))[0]
+
+
+def get_framework_dylib_path(framework_dir):
+  """Returns /path/to/Foo.framework/Versions/A/Foo given /path/to/Foo.framework."""
+  return os.path.join(framework_dir, 'Versions', 'A', get_framework_name(framework_dir))
 
 
 def extract_dsym(binary_path, dsym_out_path):
