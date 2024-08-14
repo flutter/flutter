@@ -44,35 +44,11 @@ Future<void> runFlutterDriverAndroidTests({int? times}) async {
 }
 
 Future<void> _writeAndroidEmulatorCrashLogs() async {
-  // Try finding the `crashreport` tool.
-  // i.e. ~/Android/Sdk/platform-tools/crashreport
-  String? androidSdkRoot = io.Platform.environment['ANDROID_HOME'];
-  androidSdkRoot ??= io.Platform.environment['ANDROID_SDK_ROOT'];
-  if (androidSdkRoot == null) {
-    print('Failed to find Android SDK root. Try setting ANDROID_HOME.');
-    return;
-  }
-
-  final String emulatorBin = path.join(androidSdkRoot, 'emulator');
-  final io.ProcessResult emulatorResult = await io.Process.run(
-    emulatorBin,
-    <String>[
-      '-list-avds',
-    ],
-  );
-  if (emulatorResult.exitCode != 0) {
-    print('Failed to list AVDs: ${emulatorResult.stderr}');
-    return;
-  }
-
-  // Parse stdout of 'Storing crashdata in: /tmp/android-xxx/emu-crash-34.2.15.db,' to get the crash log path.
-  final RegExp crashLogPathPattern = RegExp(r'Storing crashdata in: (.+),');
-  final String? crashLogPath = crashLogPathPattern.firstMatch(emulatorResult.stdout as String)?.group(1);
-  if (crashLogPath == null) {
-    print('Failed to find crash log path.');
-    return;
-  }
-
+  // This is clearly not good to hardcode, but it's the only way to get the
+  // crash logs from the emulator in our current setup; future versions of
+  // the test environment will have a more robust way to handle this:
+  // https://chromium-review.googlesource.com/c/chromium/src/+/5731675/2..3
+  const String crashLogPath = '/tmp/android-unknown/emu-crash-34.2.14.db';
   final io.Directory crashLogDir = io.Directory(path.join(crashLogPath, 'reports'));
   if (!crashLogDir.existsSync()) {
     print('Crash log directory does not exist: $crashLogDir');
