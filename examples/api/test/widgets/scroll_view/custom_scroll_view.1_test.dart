@@ -25,15 +25,14 @@ void main() {
   testWidgets('IconButton click and scroll adds elements to the screen.', (WidgetTester tester) async {
     await tester.pumpWidget(const example.CustomScrollViewExampleApp());
 
-    // Only 'Item: 0' is visible
-    expect(find.widgetWithText(SliverList, 'Item: 0'), findsOne);
-    expect(find.widgetWithText(SliverList, 'Item: -1'), findsNothing);
-    expect(find.widgetWithText(SliverList, 'Item: 1'), findsNothing);
-
     await tester.tap(find.byType(IconButton));
     await tester.pump();
 
-    // Scroll updated screen
+    // 'Item: -1' is invisible before scrolling
+    expect(find.widgetWithText(SliverList, 'Item: -1'), findsNothing);
+    expect(find.widgetWithText(SliverList, 'Item: 1'), findsOne);
+
+    // Scroll the updated screen
     final Offset location = tester.getCenter(find.byType(CustomScrollView));
     final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
     testPointer.hover(location);
