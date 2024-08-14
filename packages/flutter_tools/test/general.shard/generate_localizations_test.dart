@@ -1683,6 +1683,78 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           )),
         );
       });
+      
+      testWithoutContext('handle date with multiple locale', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "@@locale": "en",
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "MMMd"
+      }
+    }
+  }
+}''',
+          'ja': '''
+{
+  "@@locale": "ja",
+  "springBegins": "春が始まるのは{springStartDate}",
+  "@springBegins": {
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "MMMMd"
+      }
+    }
+  }
+}'''
+        });
+
+        expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.MMMd(localeName)'));
+        expect(getGeneratedFileContent(locale: 'ja'), contains('intl.DateFormat.MMMMd(localeName)'));
+      });
+
+      testWithoutContext('handle arbitrary formatted date with multiple locale', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "@@locale": "en",
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "asdf o'clock",
+        "isCustomDateFormat": "true"
+      }
+    }
+  }
+}''',
+          'ja': '''
+{
+  "@@locale": "ja",
+  "springBegins": "春が始まるのは{springStartDate}",
+  "@springBegins": {
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "立春",
+        "isCustomDateFormat": "true"
+      }
+    }
+  }
+}'''
+        });
+
+        expect(getGeneratedFileContent(locale: 'en'), contains(r"DateFormat('asdf o\'clock', localeName)"));
+        expect(getGeneratedFileContent(locale: 'ja'), contains(r"DateFormat('立春', localeName)"));
+      });
     });
 
     group('NumberFormat tests', () {
