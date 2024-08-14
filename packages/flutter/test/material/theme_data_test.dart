@@ -272,7 +272,7 @@ void main() {
     expect(theme.colorScheme.primary, const Color(0xff6750a4));
     expect(theme.colorScheme.onPrimary, const Color(0xffffffff));
     expect(theme.colorScheme.primaryContainer, const Color(0xffeaddff));
-    expect(theme.colorScheme.onPrimaryContainer, const Color(0xff21005d));
+    expect(theme.colorScheme.onPrimaryContainer, const Color(0xff4f378b));
     expect(theme.colorScheme.primaryFixed, const Color(0xffeaddff));
     expect(theme.colorScheme.primaryFixedDim, const Color(0xffd0bcff));
     expect(theme.colorScheme.onPrimaryFixed, const Color(0xff21005d));
@@ -280,7 +280,7 @@ void main() {
     expect(theme.colorScheme.secondary, const Color(0xff625b71));
     expect(theme.colorScheme.onSecondary, const Color(0xffffffff));
     expect(theme.colorScheme.secondaryContainer, const Color(0xffe8def8));
-    expect(theme.colorScheme.onSecondaryContainer, const Color(0xff1d192b));
+    expect(theme.colorScheme.onSecondaryContainer, const Color(0xff4a4458));
     expect(theme.colorScheme.secondaryFixed, const Color(0xffe8def8));
     expect(theme.colorScheme.secondaryFixedDim, const Color(0xffccc2dc));
     expect(theme.colorScheme.onSecondaryFixed, const Color(0xff1d192b));
@@ -288,7 +288,7 @@ void main() {
     expect(theme.colorScheme.tertiary, const Color(0xff7d5260));
     expect(theme.colorScheme.onTertiary, const Color(0xffffffff));
     expect(theme.colorScheme.tertiaryContainer, const Color(0xffffd8e4));
-    expect(theme.colorScheme.onTertiaryContainer, const Color(0xff31111d));
+    expect(theme.colorScheme.onTertiaryContainer, const Color(0xff633b48));
     expect(theme.colorScheme.tertiaryFixed, const Color(0xffffd8e4));
     expect(theme.colorScheme.tertiaryFixedDim, const Color(0xffefb8c8));
     expect(theme.colorScheme.onTertiaryFixed, const Color(0xff31111d));
@@ -296,7 +296,7 @@ void main() {
     expect(theme.colorScheme.error, const Color(0xffb3261e));
     expect(theme.colorScheme.onError, const Color(0xffffffff));
     expect(theme.colorScheme.errorContainer, const Color(0xfff9dedc));
-    expect(theme.colorScheme.onErrorContainer, const Color(0xff410e0b));
+    expect(theme.colorScheme.onErrorContainer, const Color(0xff8c1d18));
     expect(theme.colorScheme.outline, const Color(0xff79747e));
     expect(theme.colorScheme.background, const Color(0xfffef7ff));
     expect(theme.colorScheme.onBackground, const Color(0xff1d1b20));
@@ -335,7 +335,7 @@ void main() {
     expect(theme.colorScheme.primary, const Color(0xff6750a4));
     expect(theme.colorScheme.onPrimary, const Color(0xffffffff));
     expect(theme.colorScheme.primaryContainer, const Color(0xffeaddff));
-    expect(theme.colorScheme.onPrimaryContainer, const Color(0xff21005d));
+    expect(theme.colorScheme.onPrimaryContainer, const Color(0xff4f378b));
     expect(theme.colorScheme.primaryFixed, const Color(0xffeaddff));
     expect(theme.colorScheme.primaryFixedDim, const Color(0xffd0bcff));
     expect(theme.colorScheme.onPrimaryFixed, const Color(0xff21005d));
@@ -343,7 +343,7 @@ void main() {
     expect(theme.colorScheme.secondary, const Color(0xff625b71));
     expect(theme.colorScheme.onSecondary, const Color(0xffffffff));
     expect(theme.colorScheme.secondaryContainer, const Color(0xffe8def8));
-    expect(theme.colorScheme.onSecondaryContainer, const Color(0xff1d192b));
+    expect(theme.colorScheme.onSecondaryContainer, const Color(0xff4a4458));
     expect(theme.colorScheme.secondaryFixed, const Color(0xffe8def8));
     expect(theme.colorScheme.secondaryFixedDim, const Color(0xffccc2dc));
     expect(theme.colorScheme.onSecondaryFixed, const Color(0xff1d192b));
@@ -351,7 +351,7 @@ void main() {
     expect(theme.colorScheme.tertiary, const Color(0xff7d5260));
     expect(theme.colorScheme.onTertiary, const Color(0xffffffff));
     expect(theme.colorScheme.tertiaryContainer, const Color(0xffffd8e4));
-    expect(theme.colorScheme.onTertiaryContainer, const Color(0xff31111d));
+    expect(theme.colorScheme.onTertiaryContainer, const Color(0xff633b48));
     expect(theme.colorScheme.tertiaryFixed, const Color(0xffffd8e4));
     expect(theme.colorScheme.tertiaryFixedDim, const Color(0xffefb8c8));
     expect(theme.colorScheme.onTertiaryFixed, const Color(0xff31111d));
@@ -359,7 +359,7 @@ void main() {
     expect(theme.colorScheme.error, const Color(0xffb3261e));
     expect(theme.colorScheme.onError, const Color(0xffffffff));
     expect(theme.colorScheme.errorContainer, const Color(0xfff9dedc));
-    expect(theme.colorScheme.onErrorContainer, const Color(0xff410e0b));
+    expect(theme.colorScheme.onErrorContainer, const Color(0xff8c1d18));
     expect(theme.colorScheme.outline, const Color(0xff79747e));
     expect(theme.colorScheme.background, const Color(0xfffef7ff));
     expect(theme.colorScheme.onBackground, const Color(0xff1d1b20));
