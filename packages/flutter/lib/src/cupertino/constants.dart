@@ -87,3 +87,15 @@ const Map<CupertinoButtonSize, double> kCupertinoButtonMinSize = <CupertinoButto
   CupertinoButtonSize.medium: 32,
   CupertinoButtonSize.large: 44,
 };
+
+/// The duration of the tap-to-scroll gesture's animation when an item in a
+/// [CupertinoPicker] is tapped.
+///
+/// Eyeballed from an iPhone 15 Pro simulator running iOS 17.5.
+const Duration kCupertinoPickerTapToScrollDuration = Duration(milliseconds: 300);
+
+/// The curve of the tap-to-scroll gesture's animation when an item in a
+/// [CupertinoPicker] is tapped.
+///
+/// Eyeballed from an iPhone 15 Pro simulator running iOS 17.5.
+const Curve kCupertinoPickerTapToScrollCurve = Curves.easeInOut;

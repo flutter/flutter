@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'constants.dart';
 import 'theme.dart';
 
 // Eyeballed values comparing with a native picker to produce the right
@@ -264,11 +265,10 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   }
 
   void _handleChildTap(int index, FixedExtentScrollController controller) {
-    // Animation curve and duration eyeballed from an iOS 17.5 simulator.
     controller.animateToItem(
       index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
+      duration: kCupertinoPickerTapToScrollDuration,
+      curve: kCupertinoPickerTapToScrollCurve,
     );
   }
 
