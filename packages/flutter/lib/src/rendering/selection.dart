@@ -133,27 +133,19 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 class SelectedContentRange {
   /// Creates a [SelectedContentRange] with the given values.
   const SelectedContentRange({
-    this.selectableId,
     required this.contentLength,
     required this.startOffset,
     required this.endOffset,
-    this.children,
   });
 
-  /// An optional identifier for the [Selectable] that created the range.
-  ///
-  /// This ID can be used to map a given [SelectedContentRange] to
-  /// the widget that created it. For example, when a [Text] widget
-  /// is given a [Key], that [Key] will be the [selectableId] used
-  /// in the [SelectedContentRange] that it provides to represent
-  /// its active selection.
-  ///
-  /// See also:
-  ///
-  ///   * [SelectionListener], which provides a concrete example
-  ///   of using [selectableId] to map [SelectedContentRange]s
-  ///   to your widget tree.
-  final Object? selectableId;
+  /// A selected content range that contains nothing.
+  static SelectedContentRange empty({int? contentLength}) {
+    return SelectedContentRange(
+      startOffset: -1,
+      endOffset: -1,
+      contentLength: contentLength ?? -1,
+    );
+  }
 
   /// The length of the content.
   ///
@@ -205,12 +197,6 @@ class SelectedContentRange {
   /// {@macro flutter.rendering.selection.SelectedContentRange.selectionOffsets}
   final int endOffset;
 
-  /// Additional ranges to include as children.
-  ///
-  /// Children of a given range enable more granular modification of the
-  /// selection.
-  final List<SelectedContentRange>? children;
-
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
@@ -220,32 +206,26 @@ class SelectedContentRange {
       return false;
     }
     return other is SelectedContentRange
-        && other.selectableId == selectableId
         && other.contentLength == contentLength
         && other.startOffset == startOffset
-        && other.endOffset == endOffset
-        && listEquals(other.children, children);
+        && other.endOffset == endOffset;
   }
 
   @override
   int get hashCode {
     return Object.hash(
-      selectableId,
       contentLength,
       startOffset,
       endOffset,
-      children,
     );
   }
 
   @override
   String toString() {
     return 'SelectedContentRange(\n'
-           '  selectableId: $selectableId,\n'
            '  contentLength: $contentLength,\n'
            '  startOffset: $startOffset,\n'
            '  endOffset: $endOffset,\n'
-           '  children: $children,\n'
            ')';
   }
 }

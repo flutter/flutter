@@ -2604,13 +2604,8 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Copies the selections of all [Selectable]s.
   @override
   List<SelectedContentRange> getSelections() {
-    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
-      return <SelectedContentRange>[];
-    }
-    final int selectionStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
-    final int selectionEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
     final List<SelectedContentRange> selections = <SelectedContentRange>[];
-    for (int index = selectionStart; index <= selectionEnd; index += 1) {
+    for (int index = 0; index < selectables.length; index += 1) {
       final List<SelectedContentRange> selectedContentRanges = selectables[index].getSelections();
       if (selectedContentRanges.isNotEmpty) {
         selections.addAll(selectedContentRanges);
@@ -3172,7 +3167,12 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
     final SelectionGeometry lastSelectionGeometry = value;
     final SelectionResult result = super.dispatchSelectionEvent(event);
+    if (value.status == SelectionStatus.none) {
+      debugPrint('selection is undefined');
+      return result;
+    }
     if (lastSelectionGeometry != value) {
+      debugPrint('super final: ${_calculateGlobalOffsets()}');
       onSelectionChanged.call(_getDetails());
     }
     // A selection finalized selection event will not affect the selection
@@ -3181,11 +3181,50 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
     if (event is SelectionFinalizedSelectionEvent) {
       final SelectionDetails currentFinalizedDetails = _getDetails();
       if (_lastFinalizedDetails != currentFinalizedDetails) {
+        debugPrint('super final: ${_calculateGlobalOffsets()}');
         onSelectionChanged.call(currentFinalizedDetails);
         _lastFinalizedDetails = currentFinalizedDetails;
       }
     }
     return result;
+  }
+
+  ({int startOffset, int endOffset}) _calculateGlobalOffsets() {
+    int startOffset = 0;
+    int endOffset = 0;
+    Selectable? startingSelectable;
+    // Determining forward selection may be innacurate if currentSelectionStartIndex == currentSelectionEndIndex.
+    // This is because the a selectable may have many children selectables, and depending if their is RTL
+    // mixed in with LTR text, there may be backwards selections mixed with forward selections.
+    bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
+    for (int index = 0; index < selectables.length; index++) {
+      final Selectable selectable = selectables[index];
+      final List<SelectedContentRange> ranges = selectable.getSelections();
+      final int previousStart = startOffset;
+      if (ranges.isNotEmpty) {
+        for (int rangeIndex = 0; rangeIndex < ranges.length; rangeIndex++) {
+          final SelectedContentRange range = ranges[rangeIndex];
+          if (range.startOffset == -1 && range.endOffset == -1) {
+            if (startingSelectable != null) {
+              return (startOffset: forwardSelection ? startOffset : endOffset, endOffset: forwardSelection ? endOffset : startOffset);
+            }
+            startOffset += range.contentLength;
+            endOffset = startOffset;
+            continue;
+          }
+          final int selectionStartNormalized = min(range.startOffset, range.endOffset);
+          final int selectionEndNormalized = max(range.startOffset, range.endOffset);
+          if (startingSelectable == null) {
+            startOffset += selectionStartNormalized;
+            endOffset += selectionEndNormalized;
+            startingSelectable = selectable;
+          } else {
+            endOffset += selectionEndNormalized;
+          }
+        }
+      }
+    }
+    return (startOffset: forwardSelection ? startOffset : endOffset, endOffset: forwardSelection ? endOffset : startOffset);
   }
 
   SelectionDetails _getDetails() {
