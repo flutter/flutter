@@ -30,11 +30,27 @@ const TextStyle _kDefaultTextStyle = TextStyle(
 // field.
 //
 // Values derived from https://developer.apple.com/design/resources/.
+// See [iOS 17 + iPadOS 17 UI Kit](https://www.figma.com/community/file/1248375255495415511) for details.
 const TextStyle _kDefaultActionTextStyle = TextStyle(
   inherit: false,
   fontFamily: 'CupertinoSystemText',
   fontSize: 17.0,
   letterSpacing: -0.41,
+  color: CupertinoColors.activeBlue,
+  decoration: TextDecoration.none,
+);
+
+// Please update _TextThemeDefaultsBuilder accordingly after changing the default
+// color here, as their implementation depends on the default value of the color
+// field.
+//
+// Values derived from https://developer.apple.com/design/resources/.
+// See [iOS 17 + iPadOS 17 UI Kit](https://www.figma.com/community/file/1248375255495415511) for details.
+const TextStyle _kDefaultActionSmallTextStyle = TextStyle(
+  inherit: false,
+  fontFamily: 'CupertinoSystemText',
+  fontSize: 15.0,
+  letterSpacing: -0.23,
   color: CupertinoColors.activeBlue,
   decoration: TextDecoration.none,
 );
@@ -131,6 +147,7 @@ class CupertinoTextThemeData with Diagnosticable {
     Color primaryColor = CupertinoColors.systemBlue,
     TextStyle? textStyle,
     TextStyle? actionTextStyle,
+    TextStyle? actionSmallTextStyle,
     TextStyle? tabLabelTextStyle,
     TextStyle? navTitleTextStyle,
     TextStyle? navLargeTitleTextStyle,
@@ -142,6 +159,7 @@ class CupertinoTextThemeData with Diagnosticable {
          primaryColor,
          textStyle,
          actionTextStyle,
+         actionSmallTextStyle,
          tabLabelTextStyle,
          navTitleTextStyle,
          navLargeTitleTextStyle,
@@ -155,6 +173,7 @@ class CupertinoTextThemeData with Diagnosticable {
     this._primaryColor,
     this._textStyle,
     this._actionTextStyle,
+    this._actionSmallTextStyle,
     this._tabLabelTextStyle,
     this._navTitleTextStyle,
     this._navLargeTitleTextStyle,
@@ -174,6 +193,12 @@ class CupertinoTextThemeData with Diagnosticable {
   /// The [TextStyle] of interactive text content such as text in a button without background.
   TextStyle get actionTextStyle {
     return _actionTextStyle ?? _defaults.actionTextStyle(primaryColor: _primaryColor);
+  }
+
+  final TextStyle? _actionSmallTextStyle;
+  /// The [TextStyle] of interactive text content such as text in a small button.
+  TextStyle get actionSmallTextStyle {
+    return _actionSmallTextStyle ?? _defaults.actionSmallTextStyle(primaryColor: _primaryColor);
   }
 
   final TextStyle? _tabLabelTextStyle;
@@ -216,6 +241,7 @@ class CupertinoTextThemeData with Diagnosticable {
       CupertinoDynamicColor.maybeResolve(_primaryColor, context),
       _resolveTextStyle(_textStyle, context),
       _resolveTextStyle(_actionTextStyle, context),
+      _resolveTextStyle(_actionSmallTextStyle, context),
       _resolveTextStyle(_tabLabelTextStyle, context),
       _resolveTextStyle(_navTitleTextStyle, context),
       _resolveTextStyle(_navLargeTitleTextStyle, context),
@@ -231,6 +257,7 @@ class CupertinoTextThemeData with Diagnosticable {
     Color? primaryColor,
     TextStyle? textStyle,
     TextStyle? actionTextStyle,
+    TextStyle? actionSmallTextStyle,
     TextStyle? tabLabelTextStyle,
     TextStyle? navTitleTextStyle,
     TextStyle? navLargeTitleTextStyle,
@@ -243,6 +270,7 @@ class CupertinoTextThemeData with Diagnosticable {
       primaryColor ?? _primaryColor,
       textStyle ?? _textStyle,
       actionTextStyle ?? _actionTextStyle,
+      actionSmallTextStyle ?? _actionSmallTextStyle,
       tabLabelTextStyle ?? _tabLabelTextStyle,
       navTitleTextStyle ?? _navTitleTextStyle,
       navLargeTitleTextStyle ?? _navLargeTitleTextStyle,
@@ -258,6 +286,7 @@ class CupertinoTextThemeData with Diagnosticable {
     const CupertinoTextThemeData defaultData = CupertinoTextThemeData();
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: defaultData.textStyle));
     properties.add(DiagnosticsProperty<TextStyle>('actionTextStyle', actionTextStyle, defaultValue: defaultData.actionTextStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('actionSmallTextStyle', actionSmallTextStyle, defaultValue: defaultData.actionSmallTextStyle));
     properties.add(DiagnosticsProperty<TextStyle>('tabLabelTextStyle', tabLabelTextStyle, defaultValue: defaultData.tabLabelTextStyle));
     properties.add(DiagnosticsProperty<TextStyle>('navTitleTextStyle', navTitleTextStyle, defaultValue: defaultData.navTitleTextStyle));
     properties.add(DiagnosticsProperty<TextStyle>('navLargeTitleTextStyle', navLargeTitleTextStyle, defaultValue: defaultData.navLargeTitleTextStyle));
@@ -279,6 +308,7 @@ class CupertinoTextThemeData with Diagnosticable {
       && other._primaryColor == _primaryColor
       && other._textStyle == _textStyle
       && other._actionTextStyle == _actionTextStyle
+      && other._actionSmallTextStyle == _actionSmallTextStyle
       && other._tabLabelTextStyle == _tabLabelTextStyle
       && other._navTitleTextStyle == _navTitleTextStyle
       && other._navLargeTitleTextStyle == _navLargeTitleTextStyle
@@ -293,6 +323,7 @@ class CupertinoTextThemeData with Diagnosticable {
     _primaryColor,
     _textStyle,
     _actionTextStyle,
+    _actionSmallTextStyle,
     _tabLabelTextStyle,
     _navTitleTextStyle,
     _navLargeTitleTextStyle,
@@ -327,6 +358,7 @@ class _TextThemeDefaultsBuilder {
   TextStyle get dateTimePickerTextStyle => _applyLabelColor(_kDefaultDateTimePickerTextStyle, labelColor);
 
   TextStyle actionTextStyle({ Color? primaryColor }) => _kDefaultActionTextStyle.copyWith(color: primaryColor);
+  TextStyle actionSmallTextStyle({ Color? primaryColor }) => _kDefaultActionSmallTextStyle.copyWith(color: primaryColor);
   TextStyle navActionTextStyle({ Color? primaryColor }) => actionTextStyle(primaryColor: primaryColor);
 
   _TextThemeDefaultsBuilder resolveFrom(BuildContext context) {

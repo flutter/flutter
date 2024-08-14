@@ -55,20 +55,20 @@ export 'package:flutter/rendering.dart' show RenderBox, RenderObject, debugDumpL
 // Future<Directory> getApplicationDocumentsDirectory() async => Directory('');
 // late AnimationController animation;
 
-// An annotation used by test_analysis package to verify patterns are followed
-// that allow for tree-shaking of both fields and their initializers. This
-// annotation has no impact on code by itself, but indicates the following pattern
-// should be followed for a given field:
-//
-// ```dart
-// class Foo {
-//   final bar = kDebugMode ? Object() : null;
-// }
-// ```
 class _DebugOnly {
   const _DebugOnly();
 }
 
+/// An annotation used by test_analysis package to verify patterns are followed
+/// that allow for tree-shaking of both fields and their initializers. This
+/// annotation has no impact on code by itself, but indicates the following pattern
+/// should be followed for a given field:
+///
+/// ```dart
+/// class Bar {
+///   final Object? bar = kDebugMode ? Object() : null;
+/// }
+/// ```
 const _DebugOnly _debugOnly = _DebugOnly();
 
 // KEYS

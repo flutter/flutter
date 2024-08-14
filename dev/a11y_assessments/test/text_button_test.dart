@@ -27,4 +27,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Clicked 2 time(s).'), findsOneWidget);
   });
+
+  testWidgets('text button demo page has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, TextButtonUseCase());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('TextButton Demo');
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
+  });
 }
