@@ -117,6 +117,7 @@ distributionUrl=https\://services.gradle.org/distributions/gradle-GRADLE_REPLACE
 ''';
 
 const String gradleReplacementString = 'GRADLE_REPLACE_ME';
+const String flutterCompileSdkString = 'flutter.compileSdkVersion';
 
 class VersionTuple {
 
@@ -141,6 +142,7 @@ class VersionTuple {
 /// ProcessResult.
 Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
   required VersionTuple versions,
+  String? compileSdkOverride,
   required Directory tempDir,}) async {
   // Create a new flutter project.
   final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
@@ -153,6 +155,14 @@ Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
   expect(result, const ProcessResultMatcher());
 
   final Directory app = Directory(fileSystem.path.join(tempDir.path, 'dependency_checker_app'));
+
+  if (compileSdkOverride != null) {
+    final File appGradleBuild = File(fileSystem.path.join(
+        app.path, 'android', 'app', 'build.gradle'));
+    final String appBuildContent = appGradleBuild.readAsStringSync()
+        .replaceFirst(flutterCompileSdkString, compileSdkOverride);
+    appGradleBuild.writeAsStringSync(appBuildContent);
+  }
 
   // Modify gradle version to passed in version.
   final File gradleWrapperProperties = File(fileSystem.path.join(
