@@ -269,7 +269,7 @@ Uri frameworkUri(String fileName, Set<String> alreadyTakenNames) {
   return Uri(path: '$fileName.framework/$fileName');
 }
 
-Map<Architecture, List<String>> parseOtoolArchitectureSections(String output) {
+Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
   // The output of `otool -D`, for example, looks like below. For each
   // architecture, there is a separate section.
   //
@@ -277,33 +277,41 @@ Map<Architecture, List<String>> parseOtoolArchitectureSections(String output) {
   // @rpath/libbuz.dylib
   // /build/native_assets/ios/buz.framework/buz (architecture arm64):
   // @rpath/libbuz.dylib
+  //
+  // Some versions of `otool` don't print the architecture name if the
+  // binary only has one architecture:
+  //
+  // /build/native_assets/ios/buz.framework/buz:
+  // @rpath/libbuz.dylib
 
   const Map<String, Architecture> outputArchitectures = <String, Architecture>{
     'arm': Architecture.arm,
     'arm64': Architecture.arm64,
     'x86_64': Architecture.x64,
   };
-  final RegExp architectureHeaderPattern = RegExp(r'^.+\(architecture (.+)\):$');
+  final RegExp architectureHeaderPattern = RegExp(r'^[^(]+( \(architecture (.+)\))?:$');
   final Iterator<String> lines = output.trim().split('\n').iterator;
   Architecture? currentArchitecture;
-  final Map<Architecture, List<String>> architectureSections =
-      <Architecture, List<String>>{};
+  final Map<Architecture?, List<String>> architectureSections =
+      <Architecture?, List<String>>{};
 
   while (lines.moveNext()) {
     final String line = lines.current;
     final Match? architectureHeader = architectureHeaderPattern.firstMatch(line);
     if (architectureHeader != null) {
-      final String architectureString = architectureHeader.group(1)!;
-      currentArchitecture = outputArchitectures[architectureString];
-      if (currentArchitecture == null) {
-        throwToolExit('Unknown architecture in otool output: $architectureString');
+      if (architectureSections.containsKey(null)) {
+        throwToolExit('Expected a single architecture section in otool output: $output');
+      }
+      final String? architectureString = architectureHeader.group(2);
+      if (architectureString != null) {
+        currentArchitecture = outputArchitectures[architectureString];
+        if (currentArchitecture == null) {
+          throwToolExit('Unknown architecture in otool output: $architectureString');
+        }
       }
       architectureSections[currentArchitecture] = <String>[];
       continue;
     } else {
-      if (currentArchitecture == null) {
-        throwToolExit('Failed to parse otool output: $output');
-      }
       architectureSections[currentArchitecture]!.add(line.trim());
     }
   }

@@ -82,6 +82,20 @@ void main() {
       );
     });
 
+    test('single architecture but not specified', () {
+      expect(
+        parseOtoolArchitectureSections(
+'''
+/build/native_assets/ios/buz.framework/buz:
+@rpath/libfoo.dylib
+'''
+        ),
+        <Architecture?, List<String>>{
+          null: <String>['@rpath/libfoo.dylib'],
+        },
+      );
+    });
+
     test('multiple architectures', () {
       expect(
         parseOtoolArchitectureSections(
