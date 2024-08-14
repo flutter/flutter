@@ -31,13 +31,16 @@ void main() {
     await tester.pump();
 
     expect(find.text('Background Color'), findsOneWidget);
+    expect(find.text(example.MenuEntry.colorRed.label), findsOneWidget);
+    expect(find.text(example.MenuEntry.colorGreen.label), findsOneWidget);
+    expect(find.text(example.MenuEntry.colorBlue.label), findsOneWidget);
 
     await tester.tap(find.text('Background Color'));
     await tester.pump();
 
-    expect(find.text(example.MenuEntry.colorRed.label), findsOneWidget);
-    expect(find.text(example.MenuEntry.colorGreen.label), findsOneWidget);
-    expect(find.text(example.MenuEntry.colorBlue.label), findsOneWidget);
+    expect(find.text(example.MenuEntry.colorRed.label), findsNothing);
+    expect(find.text(example.MenuEntry.colorGreen.label), findsNothing);
+    expect(find.text(example.MenuEntry.colorBlue.label), findsNothing);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
