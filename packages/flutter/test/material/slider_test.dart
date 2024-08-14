@@ -4484,12 +4484,12 @@ void main() {
       ),
     );
 
-    // Slider does not show value indicator initially.
+    // Slider shows value indicator initially on focus.
     await tester.pumpAndSettle();
     RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
     expect(
       valueIndicatorBox,
-      isNot(paints..scale()..path(color: theme.colorScheme.primary)),
+      paints..scale()..path(color: theme.colorScheme.primary),
     );
 
     // Right arrow (increase)
@@ -4546,6 +4546,56 @@ void main() {
     expect(
       valueIndicatorBox,
       paints..scale()..path(color: theme.colorScheme.primary),
+    );
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('Value indicator label is shown when focused', (WidgetTester tester) async {
+    double value = 0.5;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    Widget buildApp() {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Slider(
+                value: value,
+                focusNode: focusNode,
+                divisions: 5,
+                label: value.toStringAsFixed(1),
+                onChanged:
+                  (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  }
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+
+    // Slider does not show value indicator without focus.
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, false);
+    RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      isNot(paints..path(color: const Color(0xff000000))..paragraph()),
+    );
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+
+    // Slider shows value indicator when focused.
+    valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints..path(color: const Color(0xff000000))..paragraph(),
     );
   }, variant: TargetPlatformVariant.desktop());
 }
