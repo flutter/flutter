@@ -31,6 +31,11 @@ void main() {
     final DeferredComponentsProject project = DeferredComponentsProject(BasicDeferredComponentsConfig());
     await project.setUpIn(tempDir);
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result2 = await processManager.run(<String>[
+      'cat',
+      'android/component1/build.gradle'
+    ], workingDirectory: tempDir.path);
+    print(result2.stdout);
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
