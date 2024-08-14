@@ -510,7 +510,7 @@ void main() {
     );
   });
 
-  testWidgets('Width of each segmented control segment is determined by widest widget', (WidgetTester tester) async {
+  testWidgets('Width of each segmented control segment is determined by widest widget by default', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
       0: Container(constraints: const BoxConstraints.tightFor(width: 50.0)),
       1: Container(constraints: const BoxConstraints.tightFor(width: 100.0)),
@@ -539,6 +539,53 @@ void main() {
     final double childWidth = (segmentedControl.size.width - 8) / 3;
 
     expect(childWidth, 200.0 + 9.25 * 2);
+  });
+
+  testWidgets('If isProportionalSegment is true, the width of each segmented '
+  'control segment is determined by its own content', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{
+      0: const SizedBox(width: 50, child: Text('First')),
+      1: const SizedBox(width: 100, child: Text('Second')),
+      2: const SizedBox(width: 70, child: Text('Third')),
+    };
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            groupValue: groupValue,
+            isProportionalSegment: true,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    final Size firstChildSize = tester.getSize(
+      find.ancestor(
+        of: find.byWidget(children[0]!),
+        matching: find.byType(MetaData)
+      )
+    );
+    expect(firstChildSize.width, 50 + 9.25 * 2);
+
+    final Size secondChildSize = tester.getSize(
+      find.ancestor(
+        of: find.byWidget(children[1]!),
+        matching: find.byType(MetaData)
+      )
+    );
+    expect(secondChildSize.width, 100 + 9.25 * 2);
+
+    final Size thirdChildSize = tester.getSize(
+      find.ancestor(
+        of: find.byWidget(children[2]!),
+        matching: find.byType(MetaData)
+      )
+    );
+    expect(thirdChildSize.width, 70 + 9.25 * 2);
   });
 
   testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
