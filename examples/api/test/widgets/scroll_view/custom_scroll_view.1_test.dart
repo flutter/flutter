@@ -8,25 +8,12 @@ import 'package:flutter_api_samples/widgets/scroll_view/custom_scroll_view.1.dar
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('What should be visible or not visible in the initial state.', (WidgetTester tester) async {
+  testWidgets('What should be visible in the initial state.', (WidgetTester tester) async {
     await tester.pumpWidget(const example.CustomScrollViewExampleApp());
 
-    expect(find.byType(Scaffold), findsOne);
     expect(find.descendant(
-          of: find.byType(Scaffold),
-          matching: find.byType(AppBar),
-        ), findsOne);
-    expect(find.descendant(
-          of: find.byType(AppBar),
-          matching: find.byType(IconButton),
-        ), findsOne);
-    expect(find.descendant(
-          of: find.byType(Scaffold),
-          matching: find.byType(CustomScrollView),
-        ), findsOne);
-    expect(find.descendant(
-          of: find.byType(CustomScrollView),
-          matching: find.byType(SliverList),
+          of: find.byType(IconButton),
+          matching: find.byIcon(Icons.add),
         ), findsOne);
     expect(find.byType(SliverList), findsOne);
     // Initial state should present only "Item: 0" on the SliverList.
@@ -37,6 +24,11 @@ void main() {
 
   testWidgets('IconButton click and scroll adds elements to the screen.', (WidgetTester tester) async {
     await tester.pumpWidget(const example.CustomScrollViewExampleApp());
+
+    // Only 'Item: 0' is visible
+    expect(find.widgetWithText(SliverList, 'Item: 0'), findsOne);
+    expect(find.widgetWithText(SliverList, 'Item: -1'), findsNothing);
+    expect(find.widgetWithText(SliverList, 'Item: 1'), findsNothing);
 
     await tester.tap(find.byType(IconButton));
     await tester.pump();
