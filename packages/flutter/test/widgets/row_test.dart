@@ -1146,4 +1146,57 @@ void main() {
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(0.0));
   });
+
+  testWidgets('Default Row.spacing value', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(),
+      ),
+    );
+
+    expect(tester.widget<Row>(find.byType(Row)).spacing, 0.0);
+  });
+
+  testWidgets('Can update Row.spacing value', (WidgetTester tester) async {
+    Widget buildRow({ required double spacing }) {
+      return Center(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            spacing: spacing,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                height: 100.0,
+                width: 100.0,
+                color: const Color(0xFFFF0000),
+              ),
+              Container(
+                height: 100.0,
+                width: 100.0,
+                color: const Color(0xFF0000FF),
+              ),
+              Container(
+                height: 100.0,
+                width: 100.0,
+                color: const Color(0xff00FF00),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildRow(spacing: 8.0));
+
+    expect(tester.widget<Row>(find.byType(Row)).spacing, equals(8.0));
+    expect(tester.getSize(find.byType(Row)).width, equals(316.0));
+    expect(tester.getSize(find.byType(Row)).height, equals(100.0));
+
+    await tester.pumpWidget(buildRow(spacing: 18.0));
+
+    expect(tester.widget<Row>(find.byType(Row)).spacing, equals(18.0));
+    expect(tester.getSize(find.byType(Row)).width, equals(336.0));
+    expect(tester.getSize(find.byType(Row)).height, equals(100.0));
+  });
 }
