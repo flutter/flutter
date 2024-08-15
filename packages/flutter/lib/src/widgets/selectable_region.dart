@@ -1868,10 +1868,6 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
   /// this method is called.
   @protected
   void updateInternalSelectionStateForBoundaryEvents() {
-    assert(
-      currentSelectionStartIndex != -1 && currentSelectionEndIndex != -1,
-      'This method should only be called after determining the selection as a result of a [SelectionEvent] that selects a boundary.',
-    );
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
       return;
     }
