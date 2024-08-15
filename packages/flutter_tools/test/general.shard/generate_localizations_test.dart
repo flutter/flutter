@@ -1719,6 +1719,111 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(getGeneratedFileContent(locale: 'ja'), contains('intl.DateFormat.MMMMd(localeName)'));
       });
 
+      testWithoutContext('handle date with multiple locale when only template has placeholders', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "@@locale": "en",
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "MMMd"
+      }
+    }
+  }
+}''',
+          'ja': '''
+{
+  "@@locale": "ja",
+  "springBegins": "春が始まるのは{springStartDate}"
+}'''
+        });
+
+        expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.MMMd(localeName)'));
+        expect(getGeneratedFileContent(locale: 'ja'), contains('intl.DateFormat.MMMd(localeName)'));
+      });
+
+      testWithoutContext('handle date with multiple locale when there is unused placeholder', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "@@locale": "en",
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "MMMd"
+      }
+    }
+  }
+}''',
+          'ja': '''
+{
+  "@@locale": "ja",
+  "springBegins": "春が始まるのは{springStartDate}",
+  "@springBegins": {
+    "description": "The first day of spring",
+    "placeholders": {
+      "notUsed": {
+        "type": "DateTime",
+        "format": "MMMMd"
+      }
+    }
+  }
+}'''
+        });
+
+        expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.MMMd(localeName)'));
+        expect(getGeneratedFileContent(locale: 'ja'), contains('intl.DateFormat.MMMd(localeName)'));
+        expect(getGeneratedFileContent(locale: 'ja'), isNot(contains('notUsed')));
+      });
+
+      testWithoutContext('handle date with multiple locale when placeholders are incompatible', () {
+        expect(
+          () {
+            setupLocalizations(<String, String>{
+              'en': '''
+    {
+      "@@locale": "en",
+      "springBegins": "Spring begins on {springStartDate}",
+      "@springBegins": {
+        "description": "The first day of spring",
+        "placeholders": {
+          "springStartDate": {
+            "type": "DateTime",
+            "format": "MMMd"
+          }
+        }
+      }
+    }''',
+              'ja': '''
+    {
+      "@@locale": "ja",
+      "springBegins": "春が始まるのは{springStartDate}",
+      "@springBegins": {
+        "description": "The first day of spring",
+        "placeholders": {
+          "springStartDate": {
+            "type": "String"
+          }
+        }
+      }
+    }'''
+            });
+          },
+          throwsA(isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains('The placeholder, springStartDate, has its "type" resource attribute set to the "DateTime" type.'),
+          )),
+        );
+      });
+
       testWithoutContext('handle ordinary formatted date and arbitrary formatted date', () {
         setupLocalizations(<String, String>{
           'en': '''
