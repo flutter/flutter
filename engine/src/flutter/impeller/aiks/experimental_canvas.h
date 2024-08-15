@@ -31,6 +31,12 @@ struct LazyRenderingConfig {
     inline_pass_context =
         std::make_unique<InlinePassContext>(renderer, *entity_pass_target, 0);
   }
+
+  LazyRenderingConfig(ContentContext& renderer,
+                      std::unique_ptr<EntityPassTarget> entity_pass_target,
+                      std::unique_ptr<InlinePassContext> inline_pass_context)
+      : entity_pass_target(std::move(entity_pass_target)),
+        inline_pass_context(std::move(inline_pass_context)) {}
 };
 
 /// This Canvas attempts to translate from display lists to draw calls directly.
@@ -65,7 +71,8 @@ class ExperimentalCanvas : public Canvas {
                  const std::shared_ptr<ImageFilter>& backdrop_filter,
                  ContentBoundsPromise bounds_promise,
                  uint32_t total_content_depth,
-                 bool can_distribute_opacity) override;
+                 bool can_distribute_opacity,
+                 bool bounds_from_caller) override;
 
   bool Restore() override;
 

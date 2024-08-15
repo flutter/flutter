@@ -75,10 +75,7 @@ bool AiksPlayground::ImGuiBegin(const char* name,
 
 bool AiksPlayground::OpenPlaygroundHere(
     const sk_sp<flutter::DisplayList>& list) {
-  DlDispatcher dispatcher;
-  list->Dispatch(dispatcher);
-  Picture picture = dispatcher.EndRecordingAsPicture();
-  return OpenPlaygroundHere(std::move(picture));
+  return OpenPlaygroundHere([list]() { return list; });
 }
 
 bool AiksPlayground::OpenPlaygroundHere(
@@ -91,12 +88,28 @@ bool AiksPlayground::OpenPlaygroundHere(
 
   return Playground::OpenPlaygroundHere(
       [&renderer, &callback](RenderTarget& render_target) -> bool {
+#if EXPERIMENTAL_CANVAS
+        auto display_list = callback();
+        TextFrameDispatcher collector(renderer.GetContentContext(), Matrix());
+        display_list->Dispatch(collector);
+
+        ExperimentalDlDispatcher impeller_dispatcher(
+            renderer.GetContentContext(), render_target,
+            display_list->root_has_backdrop_filter(),
+            display_list->max_root_blend_mode(), IRect::MakeMaximum());
+        display_list->Dispatch(impeller_dispatcher);
+        impeller_dispatcher.FinishRecording();
+        renderer.GetContentContext().GetTransientsBuffer().Reset();
+        renderer.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
+        return true;
+#else
         auto display_list = callback();
         DlDispatcher dispatcher;
         display_list->Dispatch(dispatcher);
         Picture picture = dispatcher.EndRecordingAsPicture();
 
         return renderer.Render(picture, render_target, true);
+#endif  // EXPERIMENTAL_CANVAS
       });
 }
 

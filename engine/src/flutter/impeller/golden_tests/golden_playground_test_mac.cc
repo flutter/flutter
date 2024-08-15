@@ -24,8 +24,6 @@
 #define GLFW_INCLUDE_NONE
 #include "third_party/glfw/include/GLFW/glfw3.h"
 
-#define EXPERIMENTAL_CANVAS false
-
 namespace impeller {
 
 namespace {
@@ -91,18 +89,18 @@ std::shared_ptr<Texture> DisplayListToTexture(
     );
   }
 
+  SkIRect sk_cull_rect = SkIRect::MakeWH(size.width, size.height);
   impeller::TextFrameDispatcher collector(context.GetContentContext(),
                                           impeller::Matrix());
-  display_list->Dispatch(
-      collector, SkIRect::MakeSize(SkISize::Make(size.width, size.height)));
+  display_list->Dispatch(collector, sk_cull_rect);
   impeller::ExperimentalDlDispatcher impeller_dispatcher(
       context.GetContentContext(), target,
       display_list->root_has_backdrop_filter(),
       display_list->max_root_blend_mode(), impeller::IRect::MakeSize(size));
-  display_list->Dispatch(impeller_dispatcher, SkIRect::MakeSize(SkISize::Make(
-                                                  size.width, size.height)));
+  display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
   impeller_dispatcher.FinishRecording();
 
+  context.GetContentContext().GetTransientsBuffer().Reset();
   context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
 
   return target.GetRenderTargetTexture();

@@ -37,7 +37,7 @@ declare_args() {
   slimpeller = false
 
   # Opt into new DL dispatcher that skips AIKS layer
-  experimental_canvas = false
+  experimental_canvas = true
 }
 
 # feature_defines_list ---------------------------------------------------------

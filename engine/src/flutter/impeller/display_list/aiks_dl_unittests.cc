@@ -748,6 +748,12 @@ TEST_P(AiksTest, MatrixBackdropFilter) {
     DlPaint paint;
     paint.setColor(DlColor::kGreen().withAlpha(0.5 * 255));
     paint.setBlendMode(DlBlendMode::kPlus);
+
+    DlPaint rect_paint;
+    rect_paint.setColor(DlColor::kRed());
+    rect_paint.setStrokeWidth(4);
+    rect_paint.setDrawStyle(DlDrawStyle::kStroke);
+    builder.DrawRect(SkRect::MakeLTRB(0, 0, 300, 300), rect_paint);
     builder.DrawCircle(SkPoint::Make(200, 200), 100, paint);
     // Should render a second circle, centered on the bottom-right-most edge of
     // the circle.
@@ -771,7 +777,7 @@ TEST_P(AiksTest, MatrixSaveLayerFilter) {
   DlPaint paint;
   paint.setColor(DlColor::kBlack());
   builder.DrawPaint(paint);
-  builder.SaveLayer({}, nullptr);
+  builder.SaveLayer(nullptr, nullptr);
   {
     paint.setColor(DlColor::kGreen().withAlpha(255 * 0.5));
     paint.setBlendMode(DlBlendMode::kPlus);

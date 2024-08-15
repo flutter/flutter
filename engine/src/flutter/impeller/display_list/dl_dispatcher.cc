@@ -627,9 +627,18 @@ void DlDispatcherBase::saveLayer(const SkRect& bounds,
     impeller_bounds = skia_conversions::ToRect(bounds);
   }
 
+  // Empty bounds on a save layer that contains a BDF or destructive blend
+  // should be treated as unbounded. All other empty bounds can be skipped.
+  if (impeller_bounds.has_value() && impeller_bounds->IsEmpty() &&
+      (backdrop != nullptr ||
+       Entity::IsBlendModeDestructive(paint.blend_mode))) {
+    impeller_bounds = std::nullopt;
+  }
+
   GetCanvas().SaveLayer(paint, impeller_bounds, ToImageFilter(backdrop),
                         promise, total_content_depth,
-                        options.can_distribute_opacity());
+                        options.can_distribute_opacity(),
+                        options.bounds_from_caller());
 }
 
 // |flutter::DlOpReceiver|
@@ -1125,6 +1134,7 @@ void DlDispatcherBase::drawTextBlob(const sk_sp<SkTextBlob> blob,
   UNIMPLEMENTED;
 }
 
+// |flutter::DlOpReceiver|
 void DlDispatcherBase::drawTextFrame(
     const std::shared_ptr<TextFrame>& text_frame,
     SkScalar x,
@@ -1324,7 +1334,9 @@ void TextFrameDispatcher::drawTextFrame(
     properties.stroke_width = paint_.stroke_width;
   }
   if (text_frame->HasColor()) {
-    properties.color = paint_.color;
+    // Alpha is always applied when rendering, remove it here so
+    // we do not double-apply the alpha.
+    properties.color = paint_.color.WithAlpha(1.0);
   }
   auto scale =
       (matrix_ * Matrix::MakeTranslation(Point(x, y))).GetMaxBasisLengthXY();
@@ -1340,8 +1352,11 @@ void TextFrameDispatcher::drawDisplayList(
     SkScalar opacity) {
   [[maybe_unused]] size_t stack_depth = stack_.size();
   save();
+  Paint old_paint = paint_;
+  paint_ = Paint{};
   display_list->Dispatch(*this);
   restore();
+  paint_ = old_paint;
   FML_DCHECK(stack_depth == stack_.size());
 }
 
