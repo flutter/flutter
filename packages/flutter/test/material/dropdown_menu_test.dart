@@ -2567,6 +2567,36 @@ void main() {
       expect(find.widgetWithText(MenuItemButton, menu.label), findsNWidgets(2));
     }
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/147076.
+  testWidgets('scrollToHighlight does not scroll parent', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ListView(
+            controller: controller,
+            children: <Widget>[
+              ListView(
+                shrinkWrap: true,
+                children: <Widget>[DropdownMenu<TestMenu>(
+                  initialSelection: menuChildren.last.value,
+                  dropdownMenuEntries: menuChildren,
+                )],
+              ),
+              const SizedBox(height: 1000.0),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField).first);
+    await tester.pumpAndSettle();
+    expect(controller.offset, 0.0);
+  });
 }
 
 enum TestMenu {
