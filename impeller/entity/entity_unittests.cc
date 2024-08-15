@@ -39,6 +39,7 @@
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/geometry/point_field_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
+#include "impeller/entity/geometry/superellipse_geometry.h"
 #include "impeller/entity/render_target_cache.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/geometry_asserts.h"
@@ -2585,6 +2586,37 @@ TEST_P(EntityTest, CanRenderEmptyPathsWithoutCrashing) {
   entity.SetContents(contents);
 
   ASSERT_TRUE(OpenPlaygroundHere(std::move(entity)));
+}
+
+TEST_P(EntityTest, DrawSuperEllipse) {
+  auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
+    // UI state.
+    static float alpha = 10;
+    static float beta = 10;
+    static float radius = 40;
+    static int degree = 4;
+    static Color color = Color::Red();
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SliderFloat("Alpha", &alpha, 0, 100);
+    ImGui::SliderFloat("Beta", &beta, 0, 100);
+    ImGui::SliderInt("Degreee", &degree, 1, 20);
+    ImGui::SliderFloat("Radius", &radius, 0, 400);
+    ImGui::ColorEdit4("Color", reinterpret_cast<float*>(&color));
+    ImGui::End();
+
+    auto contents = std::make_shared<SolidColorContents>();
+    contents->SetColor(color);
+    contents->SetGeometry(std::make_shared<SuperellipseGeometry>(
+        Point{400, 400}, radius, degree, alpha, beta));
+
+    Entity entity;
+    entity.SetContents(contents);
+
+    return entity.Render(context, pass);
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 }  // namespace testing
