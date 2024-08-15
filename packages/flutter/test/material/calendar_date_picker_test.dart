@@ -1104,8 +1104,11 @@ void main() {
 
         // Year mode drop down button.
         expect(tester.getSemantics(find.text('January 2016')), matchesSemantics(
-          label: 'Select year',
+          label: 'Select year\nJanuary 2016',
           isButton: true,
+          hasTapAction: true,
+          hasFocusAction: true,
+          isFocusable: true,
         ));
 
         // Year grid only shows 2010 - 2024.
