@@ -4217,10 +4217,22 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// method, as in `super.mount(parent, newSlot)`.
   @mustCallSuper
   void mount(Element? parent, Object? newSlot) {
-    assert(_lifecycleState == _ElementLifecycle.initial);
-    assert(_parent == null);
-    assert(parent == null || parent._lifecycleState == _ElementLifecycle.active);
-    assert(slot == null);
+    assert(
+      _lifecycleState == _ElementLifecycle.initial,
+      'This element is no longer in its initial state (${_lifecycleState.name})',
+    );
+    assert(
+      _parent == null,
+      "This element already has a parent ($_parent) and it shouldn't have one yet.",
+    );
+    assert(
+      parent == null || parent._lifecycleState == _ElementLifecycle.active,
+      'Parent ($parent) should be null or in the active state (${parent._lifecycleState.name})',
+    );
+    assert(
+      slot == null,
+      "This element already has a slot ($slot) and it shouldn't",
+    );
     _parent = parent;
     _slot = newSlot;
     _lifecycleState = _ElementLifecycle.active;
