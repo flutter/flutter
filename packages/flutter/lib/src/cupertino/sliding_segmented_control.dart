@@ -85,7 +85,8 @@ const Duration _kHighlightAnimationDuration = Duration(milliseconds: 200);
 
 class _Segment<T> extends StatefulWidget {
   const _Segment({
-    required GlobalKey key,
+    required ValueKey<T> key,
+    required this.globalKey,
     required this.child,
     required this.pressed,
     required this.highlighted,
@@ -93,6 +94,7 @@ class _Segment<T> extends StatefulWidget {
   }) : super(key: key);
 
   final Widget child;
+  final GlobalKey globalKey;
 
   final bool pressed;
   final bool highlighted;
@@ -432,12 +434,13 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   final TapGestureRecognizer tap = TapGestureRecognizer();
   final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
   final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
-  late final List<GlobalKey> segmentKeys;
+  Map<T, GlobalKey> segmentToKeys = <T, GlobalKey>{};
 
   @override
   void initState() {
     super.initState();
-    segmentKeys = List<GlobalKey>.generate(widget.children.length, (int index) => GlobalKey());
+    _updateSegmentToKeys();
+
     // If the long press or horizontal drag recognizer gets accepted, we know for
     // sure the gesture is meant for the segmented control. Hand everything to
     // the drag gesture recognizer.
@@ -463,6 +466,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   @override
   void didUpdateWidget(CupertinoSlidingSegmentedControl<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _updateSegmentToKeys();
 
     // Temporarily ignore highlight changes from the widget when the thumb is
     // being dragged. When the drag gesture finishes the widget will be forced
@@ -497,6 +501,15 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   // them from interfering with the active drag gesture.
   bool get isThumbDragging => _startedOnSelectedSegment ?? false;
 
+  void _updateSegmentToKeys() {
+    for (final MapEntry<T, Widget> entry in widget.children.entries) {
+      if (segmentToKeys.containsKey(entry.key)) {
+        continue;
+      }
+      segmentToKeys[entry.key] = GlobalKey();
+    }
+  }
+
   double? _getSegmentWidth(GlobalKey key) {
     final BuildContext? context = key.currentContext;
     if (context != null) {
@@ -522,7 +535,8 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
           TextDirection.rtl => numOfChildren - 1 - i,
         };
 
-        final double segmentWidth = _getSegmentWidth(segmentKeys[ltrIndex]) ?? 0.0;
+        final GlobalKey key = segmentToKeys[widget.children.keys.elementAt(ltrIndex)]!;
+        final double segmentWidth = _getSegmentWidth(key) ?? 0.0;
         subtotalWidth += segmentWidth;
         if (dx <= subtotalWidth) {
           return widget.children.keys.elementAt(ltrIndex);
@@ -696,7 +710,8 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
           child: MouseRegion(
             cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
             child: _Segment<T>(
-              key: segmentKeys[index],
+              key: ValueKey<T>(entry.key),
+              globalKey: segmentToKeys[entry.key]!,
               highlighted: isHighlighted,
               pressed: pressed == entry.key,
               isDragging: isThumbDragging,
