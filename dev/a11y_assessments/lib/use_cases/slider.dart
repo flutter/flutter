@@ -14,7 +14,7 @@ class SliderUseCase extends UseCase {
   String get route => '/slider';
 
   @override
-  Widget build(BuildContext context) => const MainWidget();
+  Widget get mainWidget => const MainWidget();
 }
 
 class MainWidget extends StatefulWidget {
@@ -32,28 +32,24 @@ class MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Title(
-      color: Theme.of(context).primaryColor,
-      title: '$pageTitle Demo',
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Semantics(headingLevel: 1, child: Text('$pageTitle demo')),
-        ),
-        body: Center(
-          child: Semantics(
-            label: accessibilityLabel,
-            child: Slider(
-              value: currentSliderValue,
-              max: 100,
-              divisions: 5,
-              label: currentSliderValue.round().toString(),
-              onChanged: (double value) {
-                setState(() {
-                  currentSliderValue = value;
-                });
-              },
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle demo')),
+      ),
+      body: Center(
+        child: Semantics(
+          label: accessibilityLabel,
+          child: Slider(
+            value: currentSliderValue,
+            max: 100,
+            divisions: 5,
+            label: currentSliderValue.round().toString(),
+            onChanged: (double value) {
+              setState(() {
+                currentSliderValue = value;
+              });
+            },
           ),
         ),
       ),

@@ -14,7 +14,7 @@ class SnackBarUseCase extends UseCase {
   String get route => '/snack-bar';
 
   @override
-  Widget build(BuildContext context) => const MainWidget();
+  Widget get mainWidget => const MainWidget();
 }
 
 class MainWidget extends StatefulWidget {
@@ -30,43 +30,39 @@ class MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Title(
-      color: Theme.of(context).primaryColor,
-      title: '$pageTitle Demo',
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-        ),
-        body: Center(
-          child: Column(
-            children: <Widget>[
-              ElevatedButton(
-                child: const Text('Show Snackbar'),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Awesome Snackbar!'),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
+      ),
+      body: Center(
+        child: Column(
+          children: <Widget>[
+            ElevatedButton(
+              child: const Text('Show Snackbar'),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Awesome Snackbar!'),
+                  ),
+                );
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Show Snackbar with action '),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Awesome Snackbar!'),
+                    action: SnackBarAction(
+                      label: 'Action',
+                      onPressed: () {},
                     ),
-                  );
-                },
-              ),
-              ElevatedButton(
-                child: const Text('Show Snackbar with action '),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('Awesome Snackbar!'),
-                      action: SnackBarAction(
-                        label: 'Action',
-                        onPressed: () {},
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

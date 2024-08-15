@@ -14,7 +14,7 @@ class CheckBoxListTile extends UseCase {
   String get route => '/check-box-list-tile';
 
   @override
-  Widget build(BuildContext context) => _MainWidget();
+  Widget get mainWidget => _MainWidget();
 }
 
 class _MainWidget extends StatefulWidget {
@@ -29,36 +29,32 @@ class _MainWidgetState extends State<_MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Title(
-      color: Theme.of(context).primaryColor,
-      title: '$pageTitle Demo',
-      child: Scaffold(
-        appBar: AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-        ),
+      ),
       body: ListView(
-          children: <Widget>[
-            CheckboxListTile(
-              value: _checked,
-              onChanged: (bool? value) {
-                setState(() {
-                  _checked = value!;
-                });
-              },
-              title: const Text('a check box list title'),
-            ),
-            CheckboxListTile(
-              value: _checked,
-              onChanged: (bool? value) {
-                setState(() {
-                  _checked = value!;
-                });
-              },
-              title: const Text('a disabled check box list title'),
-              enabled: false,
-            ),
-          ],
-        ),
+        children: <Widget>[
+          CheckboxListTile(
+            value: _checked,
+            onChanged: (bool? value) {
+              setState(() {
+                _checked = value!;
+              });
+            },
+            title: const Text('a check box list title'),
+          ),
+          CheckboxListTile(
+            value: _checked,
+            onChanged: (bool? value) {
+              setState(() {
+                _checked = value!;
+              });
+            },
+            title: const Text('a disabled check box list title'),
+            enabled: false,
+          ),
+        ],
       ),
     );
   }

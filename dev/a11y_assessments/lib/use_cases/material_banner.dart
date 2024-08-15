@@ -14,7 +14,7 @@ class MaterialBannerUseCase extends UseCase {
   String get route => '/material_banner';
 
   @override
-  Widget build(BuildContext context) => const MainWidget();
+  Widget get mainWidget => const MainWidget();
 }
 
 class MainWidget extends StatefulWidget {

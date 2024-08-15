@@ -14,7 +14,7 @@ class TextFieldPasswordUseCase extends UseCase {
   String get route => '/text-field-password';
 
   @override
-  Widget build(BuildContext context) => _MainWidget();
+  Widget get mainWidget => _MainWidget();
 }
 
 class _MainWidget extends StatelessWidget {
@@ -24,33 +24,29 @@ class _MainWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Title(
-      color: Theme.of(context).primaryColor,
-      title: '$pageTitle Demo',
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-        ),
-        body: ListView(
-          children: const <Widget>[
-            TextField(
-              key: Key('enabled password'),
-              decoration: InputDecoration(
-                labelText: 'Password',
-              ),
-              obscureText: true,
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
+      ),
+      body: ListView(
+        children: const <Widget>[
+          TextField(
+            key: Key('enabled password'),
+            decoration: InputDecoration(
+              labelText: 'Password',
             ),
-            TextField(
-              key: Key('disabled password'),
-              decoration: InputDecoration(
-                labelText: 'Password',
-              ),
-              enabled: false,
-              obscureText: true,
+            obscureText: true,
+          ),
+          TextField(
+            key: Key('disabled password'),
+            decoration: InputDecoration(
+              labelText: 'Password',
             ),
-          ],
-        ),
+            enabled: false,
+            obscureText: true,
+          ),
+        ],
       ),
     );
   }

@@ -37,11 +37,46 @@ class App extends StatelessWidget {
       useCases.map((UseCase useCase) =>
           MapEntry<String, WidgetBuilder>(useCase.route, useCase.build)),
     );
+
     return MaterialApp(
       title: 'Accessibility Assessments Home Page',
       theme: lightTheme,
       darkTheme: darkTheme,
-      routes: <String, WidgetBuilder>{'/': (_) => const HomePage(), ...routes},
+      routes: <String, WidgetBuilder>{
+        '/': (_) => const AppWrapper(child: HomePage()),
+        ...routes
+      },
+    );
+  }
+}
+
+class AppWrapper extends StatelessWidget {
+
+  const AppWrapper({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return DynamicTitle(
+      title: 'Accessibility Assessments Home Page',
+      child: child,
+    );
+  }
+}
+
+class DynamicTitle extends StatelessWidget {
+  const DynamicTitle({super.key, required this.title, required this.child});
+
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Title(
+      title: title,
+      color: Theme.of(context).colorScheme.primary,
+      child: child,
     );
   }
 }
@@ -68,7 +103,7 @@ class HomePageState extends State<HomePage> {
         child: Builder(builder: (BuildContext context) {
           return TextButton(
             key: Key(useCase.name),
-            onPressed: () => Navigator.of(context).pushNamed(useCase.route),
+            onPressed: () => Navigator.of(context).pushNamed(useCase.route, arguments: useCase.name),
             child: Text(useCase.name),
           );
         }));
@@ -77,20 +112,16 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
 
-    return Title(
-      color: Theme.of(context).colorScheme.primary,
-      title: 'Accessibility Assessments Home Page',
-      child: Scaffold(
-        appBar: AppBar(
-        title: Semantics(headingLevel: 1, child: const Text('Accessibility Assessments')),
-        ),
+    return Scaffold(
+      appBar: AppBar(
+      title: Semantics(headingLevel: 1, child: const Text('Accessibility Assessments')),
+      ),
       body: Center(
-          child: ListView(
-            controller: scrollController,
-            children: List<Widget>.generate(
-              useCases.length,
-              (int index) => _buildUseCaseItem(index, useCases[index]),
-            ),
+        child: ListView(
+          controller: scrollController,
+          children: List<Widget>.generate(
+            useCases.length,
+            (int index) => _buildUseCaseItem(index, useCases[index]),
           ),
         ),
       ),

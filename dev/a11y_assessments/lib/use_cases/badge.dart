@@ -14,7 +14,7 @@ class BadgeUseCase extends UseCase {
   String get route => '/badge';
 
   @override
-  Widget build(BuildContext context) => const MainWidget();
+  Widget get mainWidget => const MainWidget();
 }
 
 class MainWidget extends StatefulWidget {
@@ -29,24 +29,20 @@ class MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Title(
-      color: Theme.of(context).primaryColor,
-      title: '$pageTitle Demo',
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-        ),
-        body: const Center(
-          child: Badge(
-            label: Text(
-              '5',
-              semanticsLabel: '5 new messages',
-              style: TextStyle(color: Colors.white),
-            ),
-            backgroundColor: Colors.green,
-            child: Icon(Icons.mail, semanticLabel: 'Messages'),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
+      ),
+      body: const Center(
+        child: Badge(
+          label: Text(
+            '5',
+            semanticsLabel: '5 new messages',
+            style: TextStyle(color: Colors.white),
           ),
+          backgroundColor: Colors.green,
+          child: Icon(Icons.mail, semanticLabel: 'Messages'),
         ),
       ),
     );

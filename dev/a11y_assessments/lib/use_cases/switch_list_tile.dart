@@ -14,7 +14,7 @@ class SwitchListTileUseCase extends UseCase {
   String get route => '/switch-list-tile';
 
   @override
-  Widget build(BuildContext context) => const SwitchListTileExample();
+  Widget get mainWidget => const SwitchListTileExample();
 }
 
 class SwitchListTileExample extends StatefulWidget {
@@ -32,40 +32,36 @@ class _SwitchListTileExampleState extends State<SwitchListTileExample> {
 
   @override
   Widget build(BuildContext context) {
-    return Title(
-      color: Theme.of(context).primaryColor,
-      title: '$pageTitle Demo',
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-        ),
-        body: Center(
-          child: Column(
-            children: <Widget>[
-              SwitchListTile(
-                title: const Text('Lights'),
-                value: _lights1,
-                onChanged: (bool value) {
-                  setState(() {
-                    _lights1 = value;
-                  });
-                },
-                secondary: const Icon(Icons.lightbulb_outline),
-              ),
-              SwitchListTile(
-                title: const Text('Lights'),
-                subtitle: const Text('Subtitle'),
-                value: _lights2,
-                onChanged: (bool value) {
-                  setState(() {
-                    _lights2 = value;
-                  });
-                },
-                secondary: const Icon(Icons.lightbulb_outline),
-              ),
-            ],
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
+      ),
+      body: Center(
+        child: Column(
+          children: <Widget>[
+            SwitchListTile(
+              title: const Text('Lights'),
+              value: _lights1,
+              onChanged: (bool value) {
+                setState(() {
+                  _lights1 = value;
+                });
+              },
+              secondary: const Icon(Icons.lightbulb_outline),
+            ),
+            SwitchListTile(
+              title: const Text('Lights'),
+              subtitle: const Text('Subtitle'),
+              value: _lights2,
+              onChanged: (bool value) {
+                setState(() {
+                  _lights2 = value;
+                });
+              },
+              secondary: const Icon(Icons.lightbulb_outline),
+            ),
+          ],
         ),
       ),
     );

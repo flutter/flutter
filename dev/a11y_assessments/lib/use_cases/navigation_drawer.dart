@@ -33,7 +33,7 @@ class NavigationDrawerUseCase extends UseCase {
   String get route => '/navigation-drawer';
 
   @override
-  Widget build(BuildContext context) => const NavigationDrawerExample();
+  Widget get mainWidget => const NavigationDrawerExample();
 }
 
 class NavigationDrawerExample extends StatefulWidget {
@@ -63,57 +63,53 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
   String pageTitle = getUseCaseName(NavigationDrawerUseCase());
 
   Widget buildDrawerScaffold(BuildContext context) {
-    return Title(
-      color: Theme.of(context).primaryColor,
-      title: '$pageTitle Demo',
-      child: Scaffold(
-        key: scaffoldKey,
-        appBar: AppBar(
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
+    return Scaffold(
+      key: scaffoldKey,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
       ),
-        body: SafeArea(
-          bottom: false,
-          top: false,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Text('Page Index = $screenIndex'),
-                ElevatedButton(
-                  onPressed: openDrawer,
-                  child: const Text('Open Drawer'),
-                ),
-              ],
-            ),
+      body: SafeArea(
+        bottom: false,
+        top: false,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Text('Page Index = $screenIndex'),
+              ElevatedButton(
+                onPressed: openDrawer,
+                child: const Text('Open Drawer'),
+              ),
+            ],
           ),
         ),
-        endDrawer: NavigationDrawer(
-          onDestinationSelected: handleScreenChanged,
-          selectedIndex: screenIndex,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(28, 16, 16, 10),
-              child: Text(
-                'Header',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
+      ),
+      endDrawer: NavigationDrawer(
+        onDestinationSelected: handleScreenChanged,
+        selectedIndex: screenIndex,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(28, 16, 16, 10),
+            child: Text(
+              'Header',
+              style: Theme.of(context).textTheme.titleSmall,
             ),
-            ...destinations.map(
-              (ExampleDestination destination) {
-                return NavigationDrawerDestination(
-                  label: Text(destination.label),
-                  icon: destination.icon,
-                  selectedIcon: destination.selectedIcon,
-                );
-              },
-            ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
-              child: Divider(),
-            ),
-          ],
-        ),
+          ),
+          ...destinations.map(
+            (ExampleDestination destination) {
+              return NavigationDrawerDestination(
+                label: Text(destination.label),
+                icon: destination.icon,
+                selectedIcon: destination.selectedIcon,
+              );
+            },
+          ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
+            child: Divider(),
+          ),
+        ],
       ),
     );
   }

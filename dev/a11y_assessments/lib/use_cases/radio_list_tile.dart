@@ -14,7 +14,7 @@ class RadioListTileUseCase extends UseCase {
   String get route => '/radio-list-tile';
 
   @override
-  Widget build(BuildContext context) => _MainWidget();
+  Widget get mainWidget => _MainWidget();
 }
 
 class _MainWidget extends StatefulWidget {
@@ -37,29 +37,25 @@ class _MainWidgetState extends State<_MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Title(
-      color: Theme.of(context).primaryColor,
-      title: '$pageTitle Demo',
-      child: Scaffold(
-        appBar: AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))
       ),
-        body: ListView(
-          children: <Widget>[
-            RadioListTile<SingingCharacter>(
-              title: const Text('Lafayette'),
-              value: SingingCharacter.lafayette,
-              groupValue: _value,
-              onChanged: _onChanged,
-            ),
-            RadioListTile<SingingCharacter>(
-              title: const Text('Jefferson'),
-              value: SingingCharacter.jefferson,
-              groupValue: _value,
-              onChanged: _onChanged,
-            ),
-          ],
-        ),
+      body: ListView(
+        children: <Widget>[
+          RadioListTile<SingingCharacter>(
+            title: const Text('Lafayette'),
+            value: SingingCharacter.lafayette,
+            groupValue: _value,
+            onChanged: _onChanged,
+          ),
+          RadioListTile<SingingCharacter>(
+            title: const Text('Jefferson'),
+            value: SingingCharacter.jefferson,
+            groupValue: _value,
+            onChanged: _onChanged,
+          ),
+        ],
       ),
     );
   }
