@@ -963,7 +963,7 @@ class _DatePickerHeader extends StatelessWidget {
       case Orientation.landscape:
         return Semantics(
           container: true,
-          child: SizedBox(
+          child:SizedBox(
             width: _datePickerHeaderLandscapeWidth,
             child: Material(
               color: backgroundColor,
