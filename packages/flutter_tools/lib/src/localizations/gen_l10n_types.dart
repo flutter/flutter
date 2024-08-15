@@ -355,7 +355,7 @@ class Message {
       filenames[bundle.locale] = bundle.file.basename;
       final String? translation = bundle.translationFor(resourceId);
       messages[bundle.locale] = translation;
-      
+
       localePlaceholders[bundle.locale] = _placeholders(bundle.resources, resourceId, false);
 
       List<String>? validPlaceholders;

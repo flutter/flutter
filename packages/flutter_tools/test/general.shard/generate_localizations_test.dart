@@ -1683,7 +1683,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           )),
         );
       });
-      
+
       testWithoutContext('handle date with multiple locale', () {
         setupLocalizations(<String, String>{
           'en': '''
@@ -2616,7 +2616,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         )),
       );
     });
-      
+
     testWithoutContext('handle number with multiple locale', () {
       setupLocalizations(<String, String>{
         'en': '''
