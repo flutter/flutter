@@ -397,10 +397,16 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   /// will not be painted if null is specified.
   final Color backgroundColor;
 
-  /// Determine whether each segment has equal width or proportional width based
-  /// on the segment content. If this is false, each segment has equal width
-  /// and the width is determined by the longest segment; If this is true,
-  /// segments have their own width based on the content.
+  /// Determine whether segments have equal widths or proportional widths based
+  /// on their content. If false, all segment will have the same width, determined
+  /// by the longest segment. If true, each segment's width will be determined
+  /// by its individual content.
+  ///
+  /// If the max width of parent constraints is smaller than the width that the
+  /// segmented control needs, The segment widths will scale down proportionally
+  /// to ensure the segment control fits within the boundaries; similarly, if
+  /// the min width of parent constraints is larger, the segment width will scales
+  /// up to meet the min width requirement.
   ///
   /// Defaults to false.
   final bool isProportionalSegment;
