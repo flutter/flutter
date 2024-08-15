@@ -381,7 +381,7 @@ class FlutterPlugin implements Plugin<Project> {
                     shrinkResources(isBuiltAsApp(project))
                     // Fallback to `android/app/proguard-rules.pro`.
                     // This way, custom Proguard rules can be configured as needed.
-                    proguardFiles(project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro")
+                    proguardFiles(project.android.getDefaultProguardFile("proguard-android-optimize.txt"), flutterProguardRules, "proguard-rules.pro")
                 }
             }
         }
