@@ -586,6 +586,14 @@ void main() {
       )
     );
     expect(thirdChildSize.width, 70 + 9.25 * 2);
+
+    // Overall segment control width is the sum of the segment widths + horizontal paddings + 2 separator width.
+    final RenderBox segmentedControl = tester.renderObject(
+      find.byKey(const ValueKey<String>('Segmented Control')),
+    );
+
+    final double childWidthSum = firstChildSize.width + secondChildSize.width + thirdChildSize.width;
+    expect(segmentedControl.size.width, childWidthSum + 6.0 + 2.0);
   });
 
   testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
