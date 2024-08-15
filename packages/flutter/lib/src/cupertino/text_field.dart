@@ -234,6 +234,7 @@ class CupertinoTextField extends StatefulWidget {
     this.prefix,
     this.prefixMode = OverlayVisibilityMode.always,
     this.suffix,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
     this.suffixMode = OverlayVisibilityMode.always,
     this.clearButtonMode = OverlayVisibilityMode.never,
     this.clearButtonSemanticLabel,
@@ -361,6 +362,7 @@ class CupertinoTextField extends StatefulWidget {
     this.prefix,
     this.prefixMode = OverlayVisibilityMode.always,
     this.suffix,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
     this.suffixMode = OverlayVisibilityMode.always,
     this.clearButtonMode = OverlayVisibilityMode.never,
     this.clearButtonSemanticLabel,
@@ -499,6 +501,13 @@ class CupertinoTextField extends StatefulWidget {
 
   /// An optional [Widget] to display after the text.
   final Widget? suffix;
+
+  /// The vertical aligment of [suffix] and [prefix] widget in relation to content.
+  ///
+  /// Defaults to [Alignment.centerRight].
+  ///
+  /// Has no effect when [suffix] is null.
+  final CrossAxisAlignment crossAxisAlignment;
 
   /// Controls the visibility of the [suffix] widget based on the state of
   /// text entry when the [suffix] argument is not null.
@@ -843,6 +852,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextStyle>('placeholderStyle', placeholderStyle));
     properties.add(DiagnosticsProperty<OverlayVisibilityMode>('prefix', prefix == null ? null : prefixMode));
     properties.add(DiagnosticsProperty<OverlayVisibilityMode>('suffix', suffix == null ? null : suffixMode));
+    properties.add(DiagnosticsProperty<CrossAxisAlignment>('crossAxisAlignment', crossAxisAlignment));
     properties.add(DiagnosticsProperty<OverlayVisibilityMode>('clearButtonMode', clearButtonMode));
     properties.add(DiagnosticsProperty<String>('clearButtonSemanticLabel', clearButtonSemanticLabel));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
@@ -1205,28 +1215,31 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
           (true, true) => widget.suffix ?? _buildClearButton(),
           (false, true) => _buildClearButton(),
         };
-        return Row(children: <Widget>[
-          // Insert a prefix at the front if the prefix visibility mode matches
-          // the current text state.
-          if (prefixWidget != null) prefixWidget,
-          // In the middle part, stack the placeholder on top of the main EditableText
-          // if needed.
-          Expanded(
-            child: Stack(
-              // Ideally this should be baseline aligned. However that comes at
-              // the cost of the ability to compute the intrinsic dimensions of
-              // this widget.
-              // See also https://github.com/flutter/flutter/issues/13715.
-              alignment: AlignmentDirectional.center,
-              textDirection: widget.textDirection,
-              children: <Widget>[
-                if (placeholder != null) placeholder,
-                editableText,
-              ],
+        return Row(
+            crossAxisAlignment: widget.crossAxisAlignment,
+            children: <Widget>[
+            // Insert a prefix at the front if the prefix visibility mode matches
+            // the current text state.
+            if (prefixWidget != null) prefixWidget,
+            // In the middle part, stack the placeholder on top of the main EditableText
+            // if needed.
+            Expanded(
+              child: Stack(
+                // Ideally this should be baseline aligned. However that comes at
+                // the cost of the ability to compute the intrinsic dimensions of
+                // this widget.
+                // See also https://github.com/flutter/flutter/issues/13715.
+                alignment: AlignmentDirectional.center,
+                textDirection: widget.textDirection,
+                children: <Widget>[
+                  if (placeholder != null) placeholder,
+                  editableText,
+                ],
+              ),
             ),
-          ),
-          if (suffixWidget != null) suffixWidget
-        ]);
+            if (suffixWidget != null) suffixWidget
+          ],
+        );
       },
     );
   }
