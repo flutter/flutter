@@ -892,115 +892,19 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
 
   @override
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
-    final SelectionResult result = _handleSelectParagraph(event);
+    final SelectionResult result = _handleSelectMultiSelectableBoundary(event);
     _updateInternalSelectionStateForBoundaryEvents();
     return result;
   }
 
   @override
   SelectionResult handleSelectLine(SelectLineSelectionEvent event) {
-    final SelectionResult result = _handleSelectLine(event);
+    final SelectionResult result = _handleSelectMultiSelectableBoundary(event);
     _updateInternalSelectionStateForBoundaryEvents();
     return result;
   }
 
-  SelectionResult _handleSelectLine(SelectLineSelectionEvent event) {
-    if (event.absorb) {
-      for (int index = 0; index < selectables.length; index += 1) {
-        dispatchSelectionEventToChild(selectables[index], event);
-      }
-      currentSelectionStartIndex = 0;
-      currentSelectionEndIndex = selectables.length - 1;
-      return SelectionResult.next;
-    }
-
-    // First pass, if the position is on a placeholder then dispatch the selection
-    // event to the [Selectable] at the location and terminate.
-    for (int index = 0; index < selectables.length; index += 1) {
-      final bool selectableIsPlaceholder = !paragraph.selectableBelongsToParagraph(selectables[index]);
-      if (selectableIsPlaceholder && selectables[index].boundingBoxes.isNotEmpty) {
-        for (final Rect rect in selectables[index].boundingBoxes) {
-          final Rect globalRect = MatrixUtils.transformRect(selectables[index].getTransformTo(null), rect);
-          if (globalRect.contains(event.globalPosition)) {
-            currentSelectionStartIndex = currentSelectionEndIndex = index;
-            return dispatchSelectionEventToChild(selectables[index], event);
-          }
-        }
-      }
-    }
-
-    SelectionResult? lastSelectionResult;
-    bool foundStart = false;
-    int? lastNextIndex;
-    for (int index = 0; index < selectables.length; index += 1) {
-      if (!paragraph.selectableBelongsToParagraph(selectables[index])) {
-        if (foundStart) {
-          final SelectionEvent synthesizedEvent = SelectLineSelectionEvent(globalPosition: event.globalPosition, absorb: true);
-          final SelectionResult result = dispatchSelectionEventToChild(selectables[index], synthesizedEvent);
-          if (selectables.length - 1 == index) {
-            currentSelectionEndIndex = index;
-            _flushInactiveSelections();
-            return result;
-          }
-        }
-        continue;
-      }
-      final SelectionGeometry existingGeometry = selectables[index].value;
-      lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
-      if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
-        if (foundStart) {
-          currentSelectionEndIndex = index;
-        } else {
-          currentSelectionStartIndex = currentSelectionEndIndex = index;
-        }
-        return SelectionResult.next;
-      }
-      if (lastSelectionResult == SelectionResult.next) {
-        if (selectables[index].value == existingGeometry && !foundStart) {
-          lastNextIndex = index;
-        }
-        if (selectables[index].value != existingGeometry && !foundStart) {
-          assert(selectables[index].boundingBoxes.isNotEmpty);
-          assert(selectables[index].value.selectionRects.isNotEmpty);
-          final bool selectionAtStartOfSelectable = selectables[index].boundingBoxes[0].overlaps(selectables[index].value.selectionRects[0]);
-          int startIndex = 0;
-          if (lastNextIndex != null && selectionAtStartOfSelectable) {
-            startIndex = lastNextIndex + 1;
-          } else {
-            startIndex = lastNextIndex == null && selectionAtStartOfSelectable ? 0 : index;
-          }
-          for (int i = startIndex; i < index; i += 1) {
-            final SelectionEvent synthesizedEvent = SelectLineSelectionEvent(globalPosition: event.globalPosition, absorb: true);
-            dispatchSelectionEventToChild(selectables[i], synthesizedEvent);
-          }
-          currentSelectionStartIndex = startIndex;
-          foundStart = true;
-        }
-        continue;
-      }
-      if (index == 0 && lastSelectionResult == SelectionResult.previous) {
-        return SelectionResult.previous;
-      }
-      if (selectables[index].value != existingGeometry) {
-        if (!foundStart && lastNextIndex == null) {
-          currentSelectionStartIndex = 0;
-          for (int i = 0; i < index; i += 1) {
-            final SelectionEvent synthesizedEvent = SelectLineSelectionEvent(globalPosition: event.globalPosition, absorb: true);
-            dispatchSelectionEventToChild(selectables[i], synthesizedEvent);
-          }
-        }
-        currentSelectionEndIndex = index;
-        // Geometry has changed as a result of select paragraph, need to clear the
-        // selection of other selectables to keep selection in sync.
-        _flushInactiveSelections();
-      }
-      return SelectionResult.end;
-    }
-    assert(lastSelectionResult == null);
-    return SelectionResult.end;
-  }
-
-  SelectionResult _handleSelectParagraph(SelectParagraphSelectionEvent event) {
+  SelectionResult _handleSelectMultiSelectableBoundary(SelectMultiSelectableBoundarySelectionEvent event) {
     if (event.absorb) {
       for (int index = 0; index < selectables.length; index += 1) {
         dispatchSelectionEventToChild(selectables[index], event);

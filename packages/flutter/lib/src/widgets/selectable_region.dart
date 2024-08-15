@@ -2536,28 +2536,14 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return SelectionResult.none;
   }
 
-  SelectionResult _handleSelectBoundary(SelectionEvent event) {
-    assert(
-      event is SelectWordSelectionEvent
-      || event is SelectParagraphSelectionEvent
-      || event is SelectLineSelectionEvent,
-      'This method should only be given selection events that select text boundaries.',
-    );
-    late final Offset effectiveGlobalPosition;
-    if (event.type == SelectionEventType.selectWord) {
-      effectiveGlobalPosition = (event as SelectWordSelectionEvent).globalPosition;
-    } else if (event.type == SelectionEventType.selectParagraph) {
-      effectiveGlobalPosition = (event as SelectParagraphSelectionEvent).globalPosition;
-    } else if (event.type == SelectionEventType.selectLine) {
-      effectiveGlobalPosition = (event as SelectLineSelectionEvent).globalPosition;
-    }
+  SelectionResult _handleSelectBoundary(SelectBoundarySelectionEvent event) {
     SelectionResult? lastSelectionResult;
     for (int index = 0; index < selectables.length; index += 1) {
       bool globalRectsContainPosition = false;
       if (selectables[index].boundingBoxes.isNotEmpty) {
         for (final Rect rect in selectables[index].boundingBoxes) {
           final Rect globalRect = MatrixUtils.transformRect(selectables[index].getTransformTo(null), rect);
-          if (globalRect.contains(effectiveGlobalPosition)) {
+          if (globalRect.contains(event.globalPosition)) {
             globalRectsContainPosition = true;
             break;
           }
