@@ -372,10 +372,18 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   /// there is no segment getting highlighted until it is switched to an enabled
   /// segment.
   ///
+  /// [onValueChanged] will not be called if the segment is disabled. However, if
+  /// an enabled segment is "highlighted" by dragging gesture and becomes disabled
+  /// before dragging stops, [onValueChanged] will be triggered when release finger.
+  ///
   /// By default, all segments are selectable.
   final Set<T> disabledChildren;
 
   /// The identifier of the widget that is currently selected.
+  ///
+  /// When there is no highlighted segment in the segmented control, but the [groupValue]
+  /// is not null, it means this this segment was highlighted before but it is
+  /// disabled; if [groupValue] is null, it means no segment is highlighted.
   ///
   /// This must be one of the keys in the [Map] of [children].
   /// If this attribute is null, no widget will be initially selected.
