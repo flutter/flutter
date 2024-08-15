@@ -145,6 +145,20 @@ of the single parameter `rebase_path()`.
 
 ## Troubleshooting
 
+### Error obtaining credentials
+
+If you get the following error while running `et build`:
+
+```shell
+E0815 09:30:03.169505 1413247 main.go:147] Error obtaining credentials: application default credentials were invalid: could not get valid Application Default Credentials token: oauth2: cannot fetch token: 400 Bad Request
+```
+
+Check your `${HOME}/.config/gcloud/application_default_credentials.json` to see if you are signed into another project / account. Run the following to reset the default credentials:
+
+```shell
+gcloud auth application-default login
+```
+
 ### Slow builds
 
 RBE builds can be slow for a few different reasons. The most common reason is
