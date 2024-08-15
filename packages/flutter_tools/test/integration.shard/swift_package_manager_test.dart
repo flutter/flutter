@@ -680,8 +680,10 @@ void main() {
       expect(generatedManifestFile.existsSync(), isTrue);
 
       generatedManifest = generatedManifestFile.readAsStringSync();
+      const String emptyDependencies = 'dependencies: [\n        \n    ],\n';
 
       expect(generatedManifest.contains(generatedSwiftDependency), isFalse);
+      expect(generatedManifest.contains(emptyDependencies), isTrue);
     } finally {
       await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
       ErrorHandlingFileSystem.deleteIfExists(
