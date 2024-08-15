@@ -400,6 +400,34 @@ void main() {
     expect(getHighlightedIndex(tester), null);
   });
 
+  testWidgets('Non-null but disabled input for value results in no child initially selected', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+      2: Text('Child 3'),
+    };
+
+    groupValue = 0;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return boilerplate(
+            builder: (BuildContext context) {
+              return CupertinoSlidingSegmentedControl<int>(
+                children: children,
+                disabledChildren: const <int>{0},
+                groupValue: groupValue,
+                onValueChanged: defaultCallback,
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    expect(getHighlightedIndex(tester), null);
+  });
+
   testWidgets('Long press not-selected child interactions', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
@@ -1421,7 +1449,7 @@ void main() {
       currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dy,
       moreOrLessEquals(tester.getCenter(find.text('A')).dy, epsilon: 0.01),
     );
-    final  double centerDelta = tester.getSize(find.text('A')).width * (1 - currentThumbScale(tester)) / 2;
+    final double centerDelta = tester.getSize(find.text('A')).width * (1 - currentThumbScale(tester)) / 2;
     expect(
       currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dx,
       moreOrLessEquals(tester.getCenter(find.text('A')).dx + centerDelta, epsilon: 0.01),
@@ -1442,6 +1470,109 @@ void main() {
     );
 
     expect(callbackCalled, isFalse);
+  });
+
+  testWidgets('Disable "highlighted" segment during drag, highlight disappears', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('B'),
+      2: Text('C'),
+    };
+    Set<int> disabledChildren = <int>{};
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            disabledChildren: disabledChildren,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    // Start dragging.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('A')));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Move pointer to B.
+    await gesture.moveTo(tester.getCenter(find.text('B')));
+    await tester.pumpAndSettle();
+
+    // Disable B.
+    setState!(() { disabledChildren = <int>{ 1 }; });
+    await tester.pumpAndSettle();
+
+    // During dragging, we can still see the "highlighted" segment.
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
+      offsetMoreOrLessEquals(tester.getCenter(find.text('B')), epsilon: 0.01),
+    );
+
+    await gesture.up();
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // When dragging stops, highlight disappears.
+    expect(getHighlightedIndex(tester), null);
+  });
+
+  testWidgets('Disable "highlighted" segment during drag, onValueChanged is still called', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('B'),
+      2: Text('C'),
+    };
+    Set<int> disabledChildren = <int>{};
+
+    int callbackCalled = 0;
+
+    void onValueChanged(int? newValue) {
+      callbackCalled += 1;
+      setState!(() { groupValue = newValue; });
+    }
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            disabledChildren: disabledChildren,
+            groupValue: groupValue,
+            onValueChanged: onValueChanged,
+          );
+        },
+      ),
+    );
+
+    // Start dragging.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('A')));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Drag to B.
+    await gesture.moveTo(tester.getCenter(find.text('B')));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // Disable B.
+    setState!(() { disabledChildren = <int>{ 1 }; });
+    await tester.pumpAndSettle();
+
+    // Stop dragging.
+    await gesture.up();
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getHighlightedIndex(tester), null);
+    expect(callbackCalled, 1);
   });
 
   testWidgets('Dragging out of bound does not cause out of range exception', (WidgetTester tester) async {
