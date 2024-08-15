@@ -1367,7 +1367,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///
   /// If the line is already in the current selection, selection won't
   /// change. One call [clearSelection] first if the selection needs to be
-  /// updated even if the paragraph is already covered by the current selection.
+  /// updated even if the line is already covered by the current selection.
   ///
   /// One can also use [_selectEndTo] or [_selectStartTo] to adjust the selection
   /// edges after calling this method.
