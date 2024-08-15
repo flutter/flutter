@@ -66,7 +66,7 @@ class NativeAssets extends Target {
       final Uri projectUri = environment.projectDir.uri;
 
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        environment.fileSystem.file(environment.packageConfigPath),
+        fileSystem.file(environment.packageConfigPath),
         logger: environment.logger,
       );
       final NativeAssetsBuildRunner buildRunner = _buildRunner ??

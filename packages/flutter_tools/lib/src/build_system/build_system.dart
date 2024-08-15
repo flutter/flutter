@@ -462,8 +462,9 @@ class Environment {
   /// The [Source] value which is substituted with the path to [projectDir].
   static const String kProjectDirectory = '{PROJECT_DIR}';
 
-  /// The [Source] value which is substituted with the path to the parent of
-  /// [buildInfo.packageConfigPath].
+  /// The [Source] value which is substituted with the path to the directory
+  /// that contains `.dart_tool/package_config.json1`.
+  /// That is the grand-parent of [BuildInfo.packageConfigPath].
   static const String kWorkspaceDirectory = '{WORKSPACE_DIR}';
 
   /// The [Source] value which is substituted with the path to [buildDir].

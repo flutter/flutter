@@ -268,7 +268,7 @@ class _DefaultPub implements Pub {
     // finding .dart_tool/package_config.json we will not mistakenly find a
     // package_config.json from outside the workspace.
     //
-    // TODO(sigurdm): avoid relying on pubs private parts somehow?
+    // TODO(sigurdm): avoid relying on pubs implementation details somehow?
     final File workspaceRefFile = project
         .dartTool
         .childDirectory('pub').childFile('workspace_ref.json');
@@ -336,7 +336,7 @@ class _DefaultPub implements Pub {
           pubspecYaml.lastModifiedSync().isBefore(packageConfigFile.lastModifiedSync()) &&
           lastVersion.existsSync() &&
           lastVersion.readAsStringSync() == currentVersion.readAsStringSync()) {
-      _logger.printTrace('Skipping pub get: version match.');
+        _logger.printTrace('Skipping pub get: version match.');
         return;
       }
     }
@@ -731,7 +731,7 @@ class _DefaultPub implements Pub {
     }
 
     if (!_fileSystem.path.equals(packageConfigFile.parent.parent.path, project.directory.path)) {
-      throwToolExit('`generate: true` is not supported in with workspaces.');
+      throwToolExit('`generate: true` is not supported within workspaces.');
     }
     if (packageConfig.packages.any((Package package) => package.name == 'flutter_gen')) {
       return;

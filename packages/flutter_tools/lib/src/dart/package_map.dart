@@ -21,25 +21,26 @@ Future<PackageConfig> currentPackageConfig() async {
 /// Searches [dir] and all parent directories.
 ///
 /// Returns `null` if no package_config.json was found.
+// TODO(sigurdm): Only call this once per run - and read in from BuildInfo.
 File? findPackageConfigFile(Directory dir) {
   final FileSystem fileSystem = dir.fileSystem;
 
-  String candidateDir = fileSystem.path.absolute(dir.path);
+  Directory candidateDir = fileSystem.directory(dir.path).absolute;
   while (true) {
-    final File candidatePackageConfigFile = fileSystem.file(
-      fileSystem.path.join(candidateDir, '.dart_tool', 'package_config.json'),
-    );
-    if (fileSystem.file(candidatePackageConfigFile).existsSync()) {
+    final File candidatePackageConfigFile = candidateDir
+        .childDirectory('.dart_tool')
+        .childFile('package_config.json');
+    if (candidatePackageConfigFile.existsSync()) {
       return candidatePackageConfigFile;
     }
     // TODO(sigurdm): we should not need to check this file, it is obsolete,
     // https://github.com/flutter/flutter/issues/150908.
-    final File candidatePackagesFile = fileSystem.file(fileSystem.path.join(candidateDir, '.packages'));
-    if (fileSystem.file(candidatePackagesFile).existsSync()) {
+    final File candidatePackagesFile = candidateDir.childFile('.packages');
+    if (candidatePackagesFile.existsSync()) {
       return candidatePackagesFile;
     }
-    final String parentDir = fileSystem.path.dirname(candidateDir);
-    if (fileSystem.identicalSync(parentDir, candidateDir)) {
+    final Directory parentDir = candidateDir.parent;
+    if (fileSystem.identicalSync(parentDir.path, candidateDir.path)) {
       return null;
     }
     candidateDir = parentDir;

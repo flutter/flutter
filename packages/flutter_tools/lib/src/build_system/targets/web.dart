@@ -54,7 +54,6 @@ class WebEntrypointTarget extends Target {
   Future<void> build(Environment environment) async {
     final String? targetFile = environment.defines[kTargetFile];
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
-    // TODO(zanderso): support configuration of this file.
     final File packageConfigFile = findPackageConfigFileOrDefault(environment.projectDir);
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
