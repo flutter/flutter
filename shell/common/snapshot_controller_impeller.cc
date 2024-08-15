@@ -48,7 +48,6 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
 #if EXPERIMENTAL_CANVAS
   // Do not use the render target cache as the lifecycle of this texture
   // will outlive a particular frame.
-  impeller::ISize impeller_size = impeller::ISize(size.width(), size.height());
   impeller::RenderTargetAllocator render_target_allocator =
       impeller::RenderTargetAllocator(
           context->GetContext()->GetResourceAllocator());
@@ -56,7 +55,7 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
   if (context->GetContext()->GetCapabilities()->SupportsOffscreenMSAA()) {
     target = render_target_allocator.CreateOffscreenMSAA(
         *context->GetContext(),  // context
-        impeller_size,           // size
+        render_target_size,      // size
         /*mip_count=*/1,
         "Picture Snapshot MSAA",  // label
         impeller::RenderTarget::
@@ -65,7 +64,7 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
   } else {
     target = render_target_allocator.CreateOffscreen(
         *context->GetContext(),  // context
-        impeller_size,           // size
+        render_target_size,      // size
         /*mip_count=*/1,
         "Picture Snapshot",  // label
         impeller::RenderTarget::
@@ -80,7 +79,7 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
       context->GetContentContext(), target,
       display_list->root_has_backdrop_filter(),
       display_list->max_root_blend_mode(),
-      impeller::IRect::MakeSize(impeller_size));
+      impeller::IRect::MakeSize(render_target_size));
   display_list->Dispatch(impeller_dispatcher, SkIRect::MakeSize(size));
   impeller_dispatcher.FinishRecording();
 
