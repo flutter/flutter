@@ -973,6 +973,46 @@ void main() {
     expect(groupValue, 1);
   });
 
+  testWidgets('Non-centered taps work on propotional segments', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{};
+    children[0] = const SizedBox(width: 50, height: 30);
+    children[1] = const SizedBox();
+    children[2] = const SizedBox(width: 100, height: 30);
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            isProportionalSegment: true,
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    expect(groupValue, 0);
+
+    final Rect firstChild = tester.getRect(find.ancestor(of: find.byWidget(children[0]!), matching: find.byType(MetaData)));
+    expect(firstChild.width, 50.0 + 9.25 * 2);
+
+    final Rect secondChild = tester.getRect(find.ancestor(of: find.byWidget(children[1]!), matching: find.byType(MetaData)));
+    expect(secondChild.width, 0.0 + 9.25 * 2);
+
+    final Rect thirdChild = tester.getRect(find.ancestor(of: find.byWidget(children[2]!), matching: find.byType(MetaData)));
+    expect(thirdChild.width, 100.0  + 9.25 * 2);
+
+    final Finder child0 = find.ancestor(of: find.byWidget(children[0]!), matching: find.byType(MetaData));
+    final Offset centerOfChild0 = tester.getCenter(child0);
+    await tester.tapAt(centerOfChild0 + Offset(firstChild.width / 2 + 1, 0));
+    expect(groupValue, 1);
+
+    await tester.tapAt(centerOfChild0 + Offset(firstChild.width / 2 + 1 + secondChild.width + 1, 0));
+    expect(groupValue, 2);
+  });
+
   testWidgets('Hit-tests report accurate local position in segments', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     late TapDownDetails tapDownDetails;
@@ -988,6 +1028,39 @@ void main() {
         builder: (BuildContext context) {
           return CupertinoSlidingSegmentedControl<int>(
             key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    expect(groupValue, 0);
+
+    final Offset segment0GlobalOffset = tester.getTopLeft(find.byWidget(children[0]!));
+    await tester.tapAt(segment0GlobalOffset + const Offset(7, 11));
+
+    expect(tapDownDetails.localPosition, const Offset(7, 11));
+    expect(tapDownDetails.globalPosition, segment0GlobalOffset + const Offset(7, 11));
+  });
+
+  testWidgets('Hit-tests report accurate local position in proportional segments', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{};
+    late TapDownDetails tapDownDetails;
+    children[0] = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (TapDownDetails details) { tapDownDetails = details; },
+      child: const SizedBox(width: 200, height: 200),
+    );
+    children[1] = const Text('Child 2');
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            isProportionalSegment: true,
             children: children,
             groupValue: groupValue,
             onValueChanged: defaultCallback,

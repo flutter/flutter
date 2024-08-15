@@ -510,7 +510,6 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
 
   double? _getSegmentWidth(GlobalKey key) {
     final BuildContext? context = key.currentContext;
-    print('context is null? ${context == null}');
     if (context != null) {
       final RenderBox box = context.findRenderObject()! as RenderBox;
       return box.hasSize ? box.size.width : null;
@@ -537,13 +536,13 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
         final GlobalKey key = segmentToKeys[widget.children.keys.elementAt(ltrIndex)]!;
         final double segmentWidth = _getSegmentWidth(key) ?? 0.0;
         subtotalWidth += segmentWidth;
-        print('dx: $dx, subtotal: $subtotalWidth, ltrIndex: $ltrIndex');
+
         if (dx <= subtotalWidth) {
           return widget.children.keys.elementAt(ltrIndex);
         }
       }
     }
-print('ERROR: should not come here');
+
     int index = (dx ~/ (renderBox.size.width / numOfChildren)).clamp(0, numOfChildren - 1);
 
     switch (Directionality.of(context)) {
