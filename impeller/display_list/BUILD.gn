@@ -55,6 +55,7 @@ template("display_list_unittests_component") {
     "aiks_dl_atlas_unittests.cc",
     "aiks_dl_basic_unittests.cc",
     "aiks_dl_blend_unittests.cc",
+    "aiks_dl_blur_unittests.cc",
     "aiks_dl_clip_unittests.cc",
     "aiks_dl_gradient_unittests.cc",
     "aiks_dl_opacity_unittests.cc",
