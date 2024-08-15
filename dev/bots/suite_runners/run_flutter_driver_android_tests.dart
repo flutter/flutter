@@ -32,61 +32,13 @@ Future<void> runFlutterDriverAndroidTests({int? times}) async {
     print('Running Flutter Driver Android tests $times times...');
   }
 
-  try {
-    for (int i = 0; i < times; i++) {
-      await _runFlutterDriverAndroidTests();
-    }
-  } on Object catch (e) {
-    print('Failed to run Flutter Driver Android tests: $e');
-    print('Trying to fetch Android emulator crash logs...');
-    await _writeAndroidEmulatorCrashLogs();
-  }
-}
-
-Future<void> _writeAndroidEmulatorCrashLogs() async {
-  // This is clearly not good to hardcode, but it's the only way to get the
-  // crash logs from the emulator in our current setup; future versions of
-  // the test environment will have a more robust way to handle this:
-  // https://chromium-review.googlesource.com/c/chromium/src/+/5731675/2..3
-  const String crashLogPath = '/tmp/android-unknown/emu-crash-34.2.14.db';
-  final io.Directory crashLogDir = io.Directory(crashLogPath);
-  if (!crashLogDir.existsSync()) {
-    print('Crash log directory does not exist: $crashLogDir');
-    return;
-  }
-
-  // Write each crash log to stdout.
-  for (final io.FileSystemEntity entity in crashLogDir.listSync(recursive: true)) {
-    if (entity is io.File) {
-      final String contents;
-      try {
-        contents = entity.readAsStringSync();
-      } on io.FileSystemException catch (_) {
-        print('Could not read file: ${entity.path}');
-        continue;
-      }
-      final io.File file = entity;
-      print('----------------------------------------------------------------');
-      print('Crash log: ${file.path}');
-      print('----------------------------------------------------------------');
-      print('');
-      print(contents);
-    }
+  for (int i = 0; i < times; i++) {
+    await _runFlutterDriverAndroidTests();
   }
 }
 
 Future<void> _runFlutterDriverAndroidTests() async {
   print('Running Flutter Driver Android tests...');
-
-  // Print out the results of `adb devices`, for uh, science:
-  print('Listing devices...');
-  final io.ProcessResult devices = await _adb(
-    <String>[
-      'devices',
-    ],
-  );
-  print(devices.stdout);
-  print(devices.stderr);
 
   // We need to configure the emulator to disable confirmations before the
   // application starts. Some of these configuration options won't work once
