@@ -1317,6 +1317,25 @@ flutter:
     ProcessManager: () => processManager,
   });
 
+  testUsingContext('Successfully turns HttpException into ToolExit',
+      () async {
+    final BufferLogger logger = BufferLogger.test();
+    final ResidentRunner residentWebRunner =
+        setUpResidentRunner(flutterDevice, logger: logger);
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    setupMocks();
+    webDevFS.exception = const HttpException(
+      'Connection closed before full header was received',
+    );
+
+    await expectLater(residentWebRunner.run, throwsToolExit());
+    expect(logger.errorText, contains('HttpException'));
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
   testUsingContext('Successfully turns AppConnectionException into ToolExit',
       () async {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
