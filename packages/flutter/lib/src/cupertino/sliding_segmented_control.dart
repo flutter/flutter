@@ -1025,12 +1025,32 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   }
 
   List<double> _getChildIntrinsicWidths(BoxConstraints constraints) {
-    final List<double> childWidths = <double>[];
+  List<double> childWidths = <double>[];
     RenderBox? child = firstChild;
     while (child != null) {
       final double childWidth = child.getMaxIntrinsicWidth(double.infinity) + 2 * _kSegmentMinPadding;
       child = nonSeparatorChildAfter(child);
       childWidths.add(childWidth);
+    }
+
+    final double totalWidth = childWidths.sum;
+
+    // If the sum of the children's width is larger than the allowed max width,
+    // each segment width should scale down until the overall size can fit in
+    // the parent constraints.
+    final double allowedMaxWidth = constraints.maxWidth - totalSeparatorWidth;
+    if (totalWidth > allowedMaxWidth) {
+      final double scale = allowedMaxWidth / totalWidth;
+      childWidths = childWidths.map<double>((double width) => width * scale).toList();
+    }
+
+    // If the sum of the children's width is smaller than the allowed min width,
+    // each segment width should scale up until the overall size can fit in
+    // the parent constraints.
+    final double allowedMinWidth = constraints.minWidth - totalSeparatorWidth;
+    if (totalWidth < allowedMinWidth) {
+      final double scale = allowedMinWidth / totalWidth;
+      childWidths = childWidths.map<double>((double width) => width * scale).toList();
     }
     return childWidths;
   }

@@ -590,6 +590,171 @@ void main() {
     expect(segmentedControl.size.width, childWidthSum + 6.0 + 2.0);
   });
 
+  testWidgets('If isProportionalSegment is true, the width of each segmented '
+  'control segment is updated when children change', (WidgetTester tester) async {
+    Map<int, Widget> children = <int, Widget>{
+      0: const SizedBox(width: 50, child: Text('First')),
+      1: const SizedBox(width: 100, child: Text('Second')),
+      2: const SizedBox(width: 70, child: Text('Third')),
+    };
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            groupValue: groupValue,
+            isProportionalSegment: true,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    Size getChildSize(int index) {
+      return tester.getSize(
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
+      );
+    }
+
+    Size firstChildSize = getChildSize(0);
+    expect(firstChildSize.width, 50 + 9.25 * 2);
+
+    Size secondChildSize = getChildSize(1);
+    expect(secondChildSize.width, 100 + 9.25 * 2);
+
+    Size thirdChildSize = getChildSize(2);
+    expect(thirdChildSize.width, 70 + 9.25 * 2);
+
+    setState!(() {
+      children = <int, Widget>{
+        0: const SizedBox(),
+        1: const SizedBox(width: 220, child: Text('Second')),
+        2: const SizedBox(width: 170, child: Text('Third')),
+      };
+    });
+    await tester.pump();
+
+    firstChildSize = getChildSize(0);
+    expect(firstChildSize.width, 0 + 9.25 * 2);
+
+    secondChildSize = getChildSize(1);
+    expect(secondChildSize.width, 220 + 9.25 * 2);
+
+    thirdChildSize = getChildSize(2);
+    expect(thirdChildSize.width, 170 + 9.25 * 2);
+    // // Overall segment control width is the sum of the segment widths + horizontal paddings + 2 separator width.
+    // final RenderBox segmentedControl = tester.renderObject(
+    //   find.byKey(const ValueKey<String>('Segmented Control')),
+    // );
+
+    // final double childWidthSum = firstChildSize.width + secondChildSize.width + thirdChildSize.width;
+    // expect(segmentedControl.size.width, childWidthSum + 6.0 + 2.0);
+  });
+
+
+  testWidgets('If isProportionalSegment is true and the overall segment control width '
+  'is larger than the max width of the parent constraints, each segment scales down', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{
+      0: const SizedBox(width: 50, child: Text('First')),
+      1: const SizedBox(width: 100, child: Text('Second')),
+      2: const SizedBox(width: 200, child: Text('Third')),
+    };
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 200),
+            child: CupertinoSlidingSegmentedControl<int>(
+              key: const ValueKey<String>('Segmented Control'),
+              children: children,
+              groupValue: groupValue,
+              isProportionalSegment: true,
+              onValueChanged: defaultCallback,
+            ),
+          );
+        },
+      ),
+    );
+
+    Size getChildSize(int index) {
+      return tester.getSize(
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
+      );
+    }
+
+    // Without constraints, the overall size should be 405.5:  50 + 100 + 200
+    // + 9.25 * 6(horizontal padding). To fit in 194(allowed max width - padding),
+    // each segment width should scale down to original width * (194 - separator) / 413.5.
+    final Size firstChildSize = getChildSize(0);
+    const double maxAllowedTotal = 200 - 6 - 2;
+    const double originalTotal = 405.5;
+    expect(firstChildSize.width, (50 + 9.25 * 2) * maxAllowedTotal / originalTotal);
+
+    final Size secondChildSize = getChildSize(1);
+    expect(secondChildSize.width, (100 + 9.25 * 2) * maxAllowedTotal / originalTotal);
+
+    final Size thirdChildSize = getChildSize(2);
+    expect(thirdChildSize.width, (200 + 9.25 * 2) * maxAllowedTotal / originalTotal);
+  });
+
+  testWidgets('If isProportionalSegment is true and the overall segment control width '
+  'is smaller than the min width of the parent constraints, each segment scales up', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{
+      0: const SizedBox(width: 20, child: Text('First')),
+      1: const SizedBox(width: 30, child: Text('Second')),
+      2: const SizedBox(width: 50, child: Text('Third')),
+    };
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 200),
+            child: CupertinoSlidingSegmentedControl<int>(
+              key: const ValueKey<String>('Segmented Control'),
+              children: children,
+              groupValue: groupValue,
+              isProportionalSegment: true,
+              onValueChanged: defaultCallback,
+            ),
+          );
+        },
+      ),
+    );
+
+    Size getChildSize(int index) {
+      return tester.getSize(
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
+      );
+    }
+
+    // Without constraints, the overall size should be 155.5:  20 + 30 + 50
+    // + 9.25 * 6(horizontal padding). To fit in 194(allowed max width - padding),
+    // each segment width should scale up to original width * (194 - separator) / 155.5.
+    final Size firstChildSize = getChildSize(0);
+    const double constraintsMinWidth = 200 - 6 - 2;
+    const double originalTotal = 155.5;
+    expect(firstChildSize.width, moreOrLessEquals((20 + 9.25 * 2) * constraintsMinWidth / originalTotal));
+
+    final Size secondChildSize = getChildSize(1);
+    expect(secondChildSize.width, moreOrLessEquals((30 + 9.25 * 2) * constraintsMinWidth / originalTotal));
+
+    final Size thirdChildSize = getChildSize(2);
+    expect(thirdChildSize.width, moreOrLessEquals((50 + 9.25 * 2) * constraintsMinWidth / originalTotal));
+  });
+
   testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: SizedBox(width: 50),
