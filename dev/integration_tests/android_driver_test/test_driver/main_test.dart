@@ -22,7 +22,7 @@ final bool _isLuciCi = io.Platform.environment['LUCI_CI'] == 'True';
 
 Future<void> _main() async {
   // To generate golden files locally, uncomment the following line.
-  // autoUpdateGoldenFiles = true;
+  autoUpdateGoldenFiles = !_isLuciCi;
 
   FlutterDriver? flutterDriver;
   NativeDriver? nativeDriver;
