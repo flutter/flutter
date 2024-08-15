@@ -2568,7 +2568,7 @@ void main() {
     }
   });
 
-  // This is a regression test for https://github.com/flutter/flutter/issues/147076.
+  // This is a regression test for https://github.com/flutter/flutter/issues/151854.
   testWidgets('scrollToHighlight does not scroll parent', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
