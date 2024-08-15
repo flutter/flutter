@@ -563,28 +563,22 @@ void main() {
       ),
     );
 
-    final Size firstChildSize = tester.getSize(
-      find.ancestor(
-        of: find.byWidget(children[0]!),
-        matching: find.byType(MetaData)
-      )
-    );
+    Size getChildSize(int index) {
+      return tester.getSize(
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
+      );
+    }
+
+    final Size firstChildSize = getChildSize(0);
     expect(firstChildSize.width, 50 + 9.25 * 2);
 
-    final Size secondChildSize = tester.getSize(
-      find.ancestor(
-        of: find.byWidget(children[1]!),
-        matching: find.byType(MetaData)
-      )
-    );
+    final Size secondChildSize = getChildSize(1);
     expect(secondChildSize.width, 100 + 9.25 * 2);
 
-    final Size thirdChildSize = tester.getSize(
-      find.ancestor(
-        of: find.byWidget(children[2]!),
-        matching: find.byType(MetaData)
-      )
-    );
+    final Size thirdChildSize = getChildSize(2);
     expect(thirdChildSize.width, 70 + 9.25 * 2);
 
     // Overall segment control width is the sum of the segment widths + horizontal paddings + 2 separator width.
