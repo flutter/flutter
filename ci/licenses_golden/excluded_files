@@ -2731,6 +2731,7 @@
 ../../../flutter/third_party/skia/include/utils/BUILD.bazel
 ../../../flutter/third_party/skia/include/utils/mac/BUILD.bazel
 ../../../flutter/third_party/skia/infra
+../../../flutter/third_party/skia/modules/audioplayer/BUILD.bazel
 ../../../flutter/third_party/skia/modules/bentleyottmann/BUILD.bazel
 ../../../flutter/third_party/skia/modules/bentleyottmann/include/BUILD.bazel
 ../../../flutter/third_party/skia/modules/bentleyottmann/src/BUILD.bazel
@@ -2909,7 +2910,9 @@
 ../../../flutter/third_party/skia/third_party/README
 ../../../flutter/third_party/skia/third_party/etc1/BUILD.bazel
 ../../../flutter/third_party/skia/third_party/etc1/README.google
+../../../flutter/third_party/skia/third_party/expat/include/BUILD.bazel
 ../../../flutter/third_party/skia/third_party/freetype2
+../../../flutter/third_party/skia/third_party/harfbuzz/BUILD.bazel
 ../../../flutter/third_party/skia/third_party/harfbuzz/README
 ../../../flutter/third_party/skia/third_party/icu
 ../../../flutter/third_party/skia/third_party/libgrapheme/generate_headers.py
