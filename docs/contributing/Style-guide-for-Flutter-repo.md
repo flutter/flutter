@@ -1547,9 +1547,9 @@ String capitalize(String s) {
 ```dart
 // GOOD:
 List<Color> get favorites => <Color>[
-  Color(0xFF80FFFF),
-  Color(0xFF00FFF0),
-  Color(0xFF4000FF),
+  const Color(0xFF80FFFF),
+  const Color(0xFF00FFF0),
+  const Color(0xFF4000FF),
   _mysteryColor(),
 ];
 
