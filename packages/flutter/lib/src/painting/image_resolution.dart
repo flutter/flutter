@@ -252,7 +252,7 @@ class AssetImage extends AssetBundleImageProvider {
 
   /// The name used to generate the key to obtain the asset. For local assets
   /// this is [assetName], and for assets from packages the [assetName] is
-  /// prefixed 'packages/<package_name>/'.
+  /// prefixed `packages/<package_name>/`.
   String get keyName => package == null ? assetName : 'packages/$package/$assetName';
 
   /// The bundle from which the image will be obtained.
