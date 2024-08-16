@@ -1045,7 +1045,9 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     final double allowedMaxWidth = constraints.maxWidth - totalSeparatorWidth;
     if (totalWidth > allowedMaxWidth) {
       final double scale = allowedMaxWidth / totalWidth;
-      childWidths = childWidths.map<double>((double width) => width * scale).toList();
+      for (int i = 0; i < childWidths.length; i++) {
+        childWidths[i] = childWidths[i] * scale;
+      }
     }
 
     // If the sum of the children's width is smaller than the allowed min width,
@@ -1054,7 +1056,9 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     final double allowedMinWidth = constraints.minWidth - totalSeparatorWidth;
     if (totalWidth < allowedMinWidth) {
       final double scale = allowedMinWidth / totalWidth;
-      childWidths = childWidths.map<double>((double width) => width * scale).toList();
+      for (int i = 0; i < childWidths.length; i++) {
+        childWidths[i] = childWidths[i] * scale;
+      }
     }
     return childWidths;
   }
