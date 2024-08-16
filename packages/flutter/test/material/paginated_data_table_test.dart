@@ -1415,16 +1415,15 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable footerStyle set properly', (WidgetTester tester) async {
-    final TextStyle footerStyle = TextStyle(color: Color(0xFFF53935), fontSize: 16);
+    final TextStyle footerStyle = const TextStyle(color: const Color(0xFFF53935), fontSize: 16);
 
     await tester.pumpWidget(MaterialApp(
       home:Scaffold(
         body: SingleChildScrollView(
           child: PaginatedDataTable(
-          footerStyle: TextStyle(color: Color(0xFFF53935), fontSize: 16),
+          footerStyle: const TextStyle(color: const Color(0xFFF53935), fontSize: 16),
           showFirstLastButtons: true,
           header: const Text('Test table'),
-          rowsPerPage: 10,
           onRowsPerPageChanged: (int? rowsPerPage) { },
           source: source,
           columns: const <DataColumn>[
@@ -1437,7 +1436,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      final Finder footerTextStyleFinder = find.byKey(Key('footerTextStyle'));
+      final Finder footerTextStyleFinder = find.byKey(const Key('footerTextStyle'));
       expect(footerTextStyleFinder, findsOneWidget);
 
       final DefaultTextStyle footerTextStyle = tester.widget<DefaultTextStyle>(footerTextStyleFinder);
@@ -1457,7 +1456,6 @@ void main() {
             footerBackgroundColor: footerBackgroundColor,
             showFirstLastButtons: true,
             header: const Text('Test table'),
-            rowsPerPage: 10,
             onRowsPerPageChanged: (int? rowsPerPage) { },
             source: source,
             columns: const <DataColumn>[
