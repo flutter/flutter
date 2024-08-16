@@ -94,7 +94,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.header,
     this.headerBackgroundColor,
     this.footerBackgroundColor,
-    this.footerStyle = TextStyle(color: Color.fromARGB(255,0, 0, 0)), //default text style
+    this.footerStyle, //default text style
     this.actions,
     required this.columns,
     this.sortColumnIndex,
@@ -498,7 +498,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     }
 
     // FOOTER
-    final TextStyle footerTextStyle = widget.footerStyle; //previous based on themeData.textTheme.bodySmall which is misleading, converted to widget level property
+    final TextStyle footerTextStyle = widget.footerStyle == null ?? themeData.textTheme.bodySmall : widget.footerStyle; //previous based on themeData.textTheme.bodySmall which is misleading, converted to widget level property
     final List<Widget> footerWidgets = <Widget>[];
     if (widget.onRowsPerPageChanged != null) {
       final List<Widget> availableRowsPerPage = widget.availableRowsPerPage
