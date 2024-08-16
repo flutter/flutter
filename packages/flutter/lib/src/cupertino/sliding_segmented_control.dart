@@ -912,7 +912,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
       return;
     }
     _isProportionalSegment = value;
-    markNeedsPaint();
+    markNeedsLayout();
   }
 
   @override
