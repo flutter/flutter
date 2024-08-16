@@ -1478,7 +1478,7 @@ void main() {
 
      final Finder footerFinder = find.descendant(
       of: find.byType(PaginatedDataTable),
-      matching: find.byWidgetPredicate((Widget widget) =>{
+      matching: find.byWidgetPredicate((Widget widget) {
         if (widget is Container && widget.child is SingleChildScrollView) {
           final singleChildScrollView = widget.child as SingleChildScrollView;
           return singleChildScrollView.child is Row;
