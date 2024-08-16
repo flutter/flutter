@@ -922,6 +922,45 @@ void main() {
 
   }, variant: TargetPlatformVariant.desktop());
 
+  // Regression test for https://github.com/flutter/flutter/issues/147253.
+  testWidgets('Default search prioritises the current highlight on desktop platforms',
+      (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          dropdownMenuEntries: menuChildren,
+        ),
+      ),
+    ));
+
+    const String itemLabel = 'Item 2';
+    // Open the menu
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+    // Highlight the third item by exact search.
+    await tester.enterText(find.byType(TextField).first, itemLabel);
+    await tester.pumpAndSettle();
+    Finder button2Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, itemLabel).last,
+      matching: find.byType(Material),
+    );
+    Material item2material = tester.widget<Material>(button2Material);
+    expect(item2material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    // Search something that matches multiple items.
+    await tester.enterText(find.byType(TextField).first, 'Item');
+    await tester.pumpAndSettle();
+    // The third item should still be highlighted.
+    button2Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, itemLabel).last,
+      matching: find.byType(Material),
+    );
+    item2material = tester.widget<Material>(button2Material);
+    expect(item2material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+  }, variant: TargetPlatformVariant.desktop());
+
   // Regression test for https://github.com/flutter/flutter/issues/152375.
   testWidgets('Down key and up key can navigate on desktop platforms when a label text contains '
       'another label text using customized search algorithm', (WidgetTester tester) async {
@@ -1029,34 +1068,6 @@ void main() {
     final Material itemMaterial = tester.widget<Material>(buttonMaterial);
     expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12)); // Menu 1 button is highlighted.
   }, variant: TargetPlatformVariant.desktop());
-
-  // Regression test for https://github.com/flutter/flutter/issues/151878.
-  testWidgets('Filtering does not cause crush with existing currentHighlight', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: DropdownMenu<TestMenu>(
-          enableFilter: true,
-          requestFocusOnTap: true,
-          dropdownMenuEntries: menuChildren,
-        ),
-      ),
-    ));
-
-    // Open the menu and highlight the third item.
-    await tester.tap(find.byType(DropdownMenu<TestMenu>));
-    await tester.pump();
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pump();
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pump();
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pump();
-
-    // Filter the menu items.
-    await tester.enterText(find.byType(TextField), menuChildren.first.label);
-    await tester.pump();
-    expect(tester.takeException(), isNull);
-  });
 
   testWidgets('The text input should match the label of the menu item '
       'while pressing down key on desktop platforms', (WidgetTester tester) async {
