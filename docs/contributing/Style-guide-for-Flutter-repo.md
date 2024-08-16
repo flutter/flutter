@@ -1477,7 +1477,7 @@ foo(<String>[
   'list item 1',
   'list item 2',
   'list item 3',
-});
+]);
 
 Future.delayed(Durations.short1, () {
   if (mounted && _shouldOpenDrawer) {
