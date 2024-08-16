@@ -72,7 +72,7 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 - If it's about the release process or tooling (e.g., `conductor`), add `team-release`.
 - If it's about the Flutter team's CI or infrastructure, add `team-infra`.
 - If it's about Impeller, add `team-engine`.
-- If it's about accessibility(e.g. `Semantics`, `talkBack`, `voiceOver`), add `team-accessibility`.
+- If it's about accessibility (e.g. `Semantics`, `talkBack`, `voiceOver`), add `team-accessibility`.
   - If it's specific to a single platform, also add that platform's fyi label.
 - If it's about Cupertino or Material Design, add `team-design`.
 - If it's about text fields or other user-facing text input issues, add `team-text-input`.
