@@ -19,12 +19,6 @@ import 'theme.dart';
 // bool _throwShotAway = false;
 // late StateSetter setState;
 
-// The relative values needed to transform a color to it's equivalent focus
-// outline color.
-const double _kCupertinoFocusColorOpacity = 0.80;
-const double _kCupertinoFocusColorBrightness = 0.69;
-const double _kCupertinoFocusColorSaturation = 0.835;
-
 // Eyeballed from a checkbox on a physical Macbook Pro running macOS version 14.5.
 const Color _kDisabledCheckColor = CupertinoDynamicColor.withBrightness(
   color: Color.fromARGB(64, 0, 0, 0),
@@ -103,6 +97,11 @@ class CupertinoCheckbox extends StatefulWidget {
     this.tristate = false,
     required this.onChanged,
     this.activeColor,
+    @Deprecated(
+      'Use fillColor instead. '
+      'fillColor now manages the background color in all states. '
+      'This feature was deprecated after v3.24.0-0.2.pre.'
+    )
     this.inactiveColor,
     this.fillColor,
     this.checkColor,
@@ -190,15 +189,19 @@ class CupertinoCheckbox extends StatefulWidget {
   ///
   /// If [fillColor] resolves to null for the requested state, then the fill color
   /// falls back to [activeColor] if the state includes [WidgetState.selected],
-  /// or [inactiveColor] otherwise.
+  /// [CupertinoColors.white] at 50% opacity if checkbox is disabled,
+  /// and [CupertinoColors.white] otherwise.
   final WidgetStateProperty<Color?>? fillColor;
 
   /// The color used if the checkbox is inactive.
   ///
-  /// If [fillColor] returns a non-null color in the unselected
-  /// state, [fillColor] will be used instead of [inactiveColor].
-  ///
-  /// By default, [CupertinoColors.inactiveGray] is used.
+  /// Currently [inactiveColor] is not used. Instead, [fillColor] controls the
+  /// color of the background in all states, including when unselected.
+  @Deprecated(
+    'Use fillColor instead. '
+    'fillColor now manages the background color in all states. '
+    'This feature was deprecated after v3.24.0-0.2.pre.'
+  )
   final Color? inactiveColor;
 
   /// The color to use for the check icon when this checkbox is checked.
@@ -378,9 +381,9 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
 
     final Color effectiveFocusOverlayColor = widget.focusColor
       ?? HSLColor
-          .fromColor(effectiveActiveColor.withOpacity(_kCupertinoFocusColorOpacity))
-          .withLightness(_kCupertinoFocusColorBrightness)
-          .withSaturation(_kCupertinoFocusColorSaturation)
+          .fromColor(effectiveActiveColor.withOpacity(kCupertinoFocusColorOpacity))
+          .withLightness(kCupertinoFocusColorBrightness)
+          .withSaturation(kCupertinoFocusColorSaturation)
           .toColor();
 
     return Semantics(

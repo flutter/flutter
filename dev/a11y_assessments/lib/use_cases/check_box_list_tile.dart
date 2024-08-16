@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class CheckBoxListTile extends UseCase {
-
   @override
   String get name => 'CheckBoxListTile';
 
@@ -29,7 +28,9 @@ class _MainWidgetState extends State<_MainWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('CheckBoxListTile')),
+      appBar: AppBar(
+        title: Semantics(headingLevel: 1, child: const Text('CheckBoxListTile Demo')),
+      ),
       body: ListView(
         children: <Widget>[
           CheckboxListTile(

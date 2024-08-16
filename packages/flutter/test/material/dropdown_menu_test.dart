@@ -352,6 +352,76 @@ void main() {
     expect(buttonSize.width, parentWidth - 35.0 - 20.0);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/151769
+  testWidgets('expandedInsets can use EdgeInsets or EdgeInsetsDirectional', (WidgetTester tester) async {
+    const double parentWidth = 500.0;
+    final List<DropdownMenuEntry<ShortMenu>> shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
+    for (final ShortMenu value in ShortMenu.values) {
+      final DropdownMenuEntry<ShortMenu> entry = DropdownMenuEntry<ShortMenu>(value: value, label: value.label);
+      shortMenuItems.add(entry);
+    }
+    Widget buildMenuAnchor({EdgeInsetsGeometry? expandedInsets}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: parentWidth,
+            height: parentWidth,
+            child: DropdownMenu<ShortMenu>(
+              expandedInsets: expandedInsets,
+              dropdownMenuEntries: shortMenuItems,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // By default, the width of the text field is determined by the menu children.
+    await tester.pumpWidget(buildMenuAnchor());
+    RenderBox box = tester.firstRenderObject(find.byType(TextField));
+    expect(box.size.width, 136.0);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    Size buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0').hitTestable());
+    expect(buttonSize.width, 136.0);
+
+    // If expandedInsets is not zero, the width of the text field should be adjusted
+    // based on the EdgeInsets.left and EdgeInsets.right. The top and bottom values
+    // will be ignored.
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildMenuAnchor(expandedInsets: const EdgeInsets.only(left: 35.0, top: 50.0, right: 20.0)));
+    box = tester.firstRenderObject(find.byType(TextField));
+    expect(box.size.width, parentWidth - 35.0 - 20.0);
+    Rect containerRect = tester.getRect(find.byType(SizedBox).first);
+    Rect dropdownMenuRect = tester.getRect(find.byType(TextField));
+    expect(dropdownMenuRect.top, containerRect.top);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0'));
+    expect(buttonSize.width, parentWidth - 35.0 - 20.0);
+
+    // Regression test for https://github.com/flutter/flutter/issues/151769.
+    // If expandedInsets is not zero, the width of the text field should be adjusted
+    // based on the EdgeInsets.end and EdgeInsets.start. The top and bottom values
+    // will be ignored.
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildMenuAnchor(expandedInsets: const EdgeInsetsDirectional.only(start: 35.0, top: 50.0, end: 20.0)));
+    box = tester.firstRenderObject(find.byType(TextField));
+    expect(box.size.width, parentWidth - 35.0 - 20.0);
+    containerRect = tester.getRect(find.byType(SizedBox).first);
+    dropdownMenuRect = tester.getRect(find.byType(TextField));
+    expect(dropdownMenuRect.top, containerRect.top);
+
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+    buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0'));
+    expect(buttonSize.width, parentWidth - 35.0 - 20.0);
+  });
+
   testWidgets('Material2 - The menuHeight property can be used to show a shorter scrollable menu list instead of the complete list',
     (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(useMaterial3: false);
@@ -2453,6 +2523,49 @@ void main() {
     final MenuAnchor menuAnchor = tester.widget<MenuAnchor>(find.byType(MenuAnchor));
 
     expect(menuAnchor.alignmentOffset, alignmentOffset);
+  });
+
+  testWidgets('DropdownMenu filter is disabled until text input', (WidgetTester tester) async{
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
+          enableFilter: true,
+          initialSelection: menuChildren[0].value,
+          dropdownMenuEntries: menuChildren,
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+
+    // All entries should be available, and two buttons should be found for each entry.
+    // One is layout for the _DropdownMenuBody, the other one is the real button item in the menu.
+    for (final TestMenu menu in TestMenu.values) {
+      expect(find.widgetWithText(MenuItemButton, menu.label), findsNWidgets(2));
+    }
+
+    // Text input would enable the filter.
+    await tester.enterText(find.byType(TextField).first, 'Menu 1');
+    await tester.pumpAndSettle();
+    for (final TestMenu menu in TestMenu.values) {
+      // 'Menu 1' should be 2, other items should only find one.
+      if (menu.label == TestMenu.mainMenu1.label) {
+        expect(find.widgetWithText(MenuItemButton, menu.label), findsNWidgets(2));
+      } else {
+        expect(find.widgetWithText(MenuItemButton, menu.label), findsOneWidget);
+      }
+    }
+
+    // Selecting an item would disable filter again.
+    await tester.tap(find.widgetWithText(MenuItemButton, 'Menu 1').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+    for (final TestMenu menu in TestMenu.values) {
+      expect(find.widgetWithText(MenuItemButton, menu.label), findsNWidgets(2));
+    }
   });
 }
 
