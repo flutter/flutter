@@ -290,7 +290,7 @@ class PaginatedDataTable extends StatefulWidget {
   final Color? footerBackgroundColor;
 
   //footer text style
-  final TextStyle footerStyle;
+  final TextStyle? footerStyle;
 
   /// Horizontal margin around the checkbox, if it is displayed.
   ///
