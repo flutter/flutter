@@ -1450,6 +1450,42 @@ foo1(
 foo2(bar, baz);
 ```
 
+If one of the items is a multi-line callback, collection literal,
+or switch expression, it can be added without a trailing comma.
+
+```dart
+// GOOD:
+foo(
+  bar,
+  baz,
+  switch (value) {
+    true  => ScrollDirection.forward,
+    false => ScrollDirection.reverse,
+    null  => ScrollDirection.idle,
+  },
+);
+
+// also GOOD:
+foo(bar, baz, switch (value) {
+  true  => ScrollDirection.forward,
+  false => ScrollDirection.reverse,
+  null  => ScrollDirection.idle,
+});
+
+// The same applies to collection literals and callbacks:
+foo(<String>[
+  'list item 1',
+  'list item 2',
+  'list item 3',
+});
+
+Future.delayed(Durations.short1, () {
+  if (mounted && _shouldOpenDrawer) {
+    _drawerController.forward();
+  }
+});
+```
+
 Whether to put things all on one line or whether to have one line per item is an aesthetic choice. We prefer whatever ends up being most readable. Typically this means that when everything would fit on one line, put it all on one line, otherwise, split it one item to a line.
 
 However, there are exceptions. For example, if there are six back-to-back lists and all but one of them need multiple lines, then one would not want to have the single case that does fit on one line use a different style than the others.
@@ -1506,14 +1542,49 @@ String capitalize(String s) {
 }
 ```
 
-### Use `=>` for inline callbacks that just return literals or switch expressions
+### Use `=>` for getters and callbacks that just return literals or switch expressions
 
-If your code is passing an inline closure that merely returns a list or
-map literal, or a switch expression, or is merely calling another function,
-then if the argument is on its own line, then rather than using braces and a
-`return` statement, you can instead use the `=>` form. When doing this, the
-closing `]`, `}`, or `)` bracket will line up with the argument name, for
-named arguments, or the `(` of the argument list, for positional arguments.
+```dart
+// GOOD:
+List<Color> get favorites => <Color>[
+  Color(0xFF80FFFF),
+  Color(0xFF00FFF0),
+  Color(0xFF4000FF),
+  _mysteryColor(),
+];
+
+// GOOD:
+bool get isForwardOrCompleted => switch (status) {
+  AnimationStatus.forward || AnimationStatus.completed => true,
+  AnimationStatus.reverse || AnimationStatus.dismissed => false,
+};
+```
+
+It's important to use discretion, since there are cases where a function body
+is easier to visually parse:
+
+```dart
+// OKAY, but the code is more dense than it could be:
+String? get validated => switch(input[_inputIndex]?.trim()) {
+  final String value when value.isNotEmpty => value,
+  _ => null,
+}
+
+// BETTER (more verbose, but also more readable):
+String? get validated {
+  final String? value = input[_inputIndex]?.trim();
+
+  if (value != null && value.isNotEmpty) {
+    return value;
+  }
+  return null;
+}
+```
+
+If your code is passing an inline closure containing only a `return` statement,
+you can instead use the `=>` form.\
+When doing this, the closing `]`, `}`, or `)` bracket will have the same
+indentation as the line where the callback starts.
 
 For example:
 
