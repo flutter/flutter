@@ -283,13 +283,16 @@ class PaginatedDataTable extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
-    //color of the header background
+  ///Defines the color of header background
+  ///
   final Color? headerBackgroundColor;
 
-  //color of the footer background
+  ///Defines the color of footer background
+  ///
   final Color? footerBackgroundColor;
 
-  //footer text style
+  ///Defines the footer text style
+  ///
   final TextStyle footerStyle;
 
   /// Horizontal margin around the checkbox, if it is displayed.
