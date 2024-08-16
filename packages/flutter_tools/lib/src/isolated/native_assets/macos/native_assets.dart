@@ -366,10 +366,10 @@ Future<void> _copyNativeAssetsMacOS(
 /// For `flutter run -release` a multi-architecture solution is needed. So,
 /// `lipo` is used to combine all target architectures into a single file.
 ///
-/// The install name is set so that it matches with the place the flutter tester
-/// will load native assets from. Install names that are referenced in dependent
-/// libraries are updated to match the new install name, so that the referenced
-/// library can be found the dynamic linker.
+/// The install names are set to the absolute paths from which the
+/// flutter_tester executable with load them. Install names that are
+/// referenced in dependent libraries are updated to match the new install name,
+/// so that the referenced library can be found the dynamic linker.
 ///
 /// Code signing is also done here.
 Future<void> _copyNativeAssetsMacOSFlutterTester(
@@ -401,9 +401,7 @@ Future<void> _copyNativeAssetsMacOSFlutterTester(
         await targetParent.create(recursive: true);
       }
       await lipoDylibs(dylibFile, sources);
-
-      final String newInstallName = '@rpath/${dylibFile.basename}';
-      await setInstallNameDylib(dylibFile, newInstallName, oldToNewInstallNames);
+      await setInstallNameDylib(dylibFile, dylibFile.path, oldToNewInstallNames);
     }
 
     for (final File dylibFile in dylibFiles) {
