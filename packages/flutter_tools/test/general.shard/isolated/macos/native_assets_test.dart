@@ -295,6 +295,70 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
+                  'otool',
+                  '-D',
+                  dylibPathBar,
+                ],
+                stdout: <String>[
+                  '$dylibPathBar (architecture x86_64):',
+                  '@rpath/libbar.dylib',
+                  '$dylibPathBar (architecture arm64):',
+                  '@rpath/libbar.dylib',
+                ].join('\n'),
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'install_name_tool',
+                  '-id',
+                  '@rpath/libbar.dylib',
+                  dylibPathBar,
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'lipo',
+                  '-create',
+                  '-output',
+                  dylibPathBuz,
+                  'arm64/libbuz.dylib',
+                  'x64/libbuz.dylib',
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'otool',
+                  '-D',
+                  dylibPathBuz,
+                ],
+                stdout: <String>[
+                  '$dylibPathBuz (architecture x86_64):',
+                  '@rpath/libbuz.dylib',
+                  '$dylibPathBuz (architecture arm64):',
+                  '@rpath/libbuz.dylib',
+                ].join('\n'),
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'install_name_tool',
+                  '-id',
+                  '@rpath/libbuz.dylib',
+                  dylibPathBuz,
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'install_name_tool',
+                  '-change',
+                  '@rpath/libbar.dylib',
+                  '@rpath/libbar.dylib',
+                  '-change',
+                  '@rpath/libbuz.dylib',
+                  '@rpath/libbuz.dylib',
+                  dylibPathBar,
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
                   'codesign',
                   '--force',
                   '--sign',
@@ -306,12 +370,14 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
-                  'lipo',
-                  '-create',
-                  '-output',
-                  dylibPathBuz,
-                  'arm64/libbuz.dylib',
-                  'x64/libbuz.dylib',
+                  'install_name_tool',
+                  '-change',
+                  '@rpath/libbar.dylib',
+                  '@rpath/libbar.dylib',
+                  '-change',
+                  '@rpath/libbuz.dylib',
+                  '@rpath/libbuz.dylib',
+                  signPathBuz,
                 ],
               ),
               FakeCommand(

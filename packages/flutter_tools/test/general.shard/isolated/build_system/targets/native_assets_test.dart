@@ -156,21 +156,21 @@ void main() {
           ),
           const FakeCommand(
             command: <Pattern>[
-              'codesign',
-              '--force',
-              '--sign',
-              '-',
-                '--timestamp=none',
-              '/build/native_assets/ios/foo.framework',
-            ],
-          ),
-          const FakeCommand(
-            command: <Pattern>[
               'install_name_tool',
               '-change',
               '@rpath/libfoo.dylib',
               '@rpath/foo.framework/foo',
               '/build/native_assets/ios/foo.framework/foo',
+            ],
+          ),
+          const FakeCommand(
+            command: <Pattern>[
+              'codesign',
+              '--force',
+              '--sign',
+              '-',
+              '--timestamp=none',
+              '/build/native_assets/ios/foo.framework',
             ],
           ),
         ],

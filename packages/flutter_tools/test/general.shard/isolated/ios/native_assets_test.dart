@@ -257,17 +257,6 @@ void main() {
               '/build/native_assets/ios/bar.framework/bar'
             ],
           ),
-          FakeCommand(
-            command: <Pattern>[
-              'codesign',
-              '--force',
-              '--sign',
-              '-',
-              if (buildMode == BuildMode.debug)
-                '--timestamp=none',
-              '/build/native_assets/ios/bar.framework',
-            ],
-          ),
           const FakeCommand(
             command: <Pattern>[
               'lipo',
@@ -299,17 +288,6 @@ void main() {
               '/build/native_assets/ios/buz.framework/buz'
             ],
           ),
-          FakeCommand(
-            command: <Pattern>[
-              'codesign',
-              '--force',
-              '--sign',
-              '-',
-              if (buildMode == BuildMode.debug)
-                '--timestamp=none',
-              '/build/native_assets/ios/buz.framework',
-            ],
-          ),
           const FakeCommand(
             command: <Pattern>[
               'install_name_tool',
@@ -322,6 +300,17 @@ void main() {
               '/build/native_assets/ios/bar.framework/bar',
             ],
           ),
+          FakeCommand(
+            command: <Pattern>[
+              'codesign',
+              '--force',
+              '--sign',
+              '-',
+              if (buildMode == BuildMode.debug)
+                '--timestamp=none',
+              '/build/native_assets/ios/bar.framework',
+            ],
+          ),
           const FakeCommand(
             command: <Pattern>[
               'install_name_tool',
@@ -332,6 +321,17 @@ void main() {
               '@rpath/libbuz.dylib',
               '@rpath/buz.framework/buz',
               '/build/native_assets/ios/buz.framework/buz',
+            ],
+          ),
+          FakeCommand(
+            command: <Pattern>[
+              'codesign',
+              '--force',
+              '--sign',
+              '-',
+              if (buildMode == BuildMode.debug)
+                '--timestamp=none',
+              '/build/native_assets/ios/buz.framework',
             ],
           ),
         ],
