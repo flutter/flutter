@@ -498,7 +498,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     }
 
     // FOOTER
-    final TextStyle footerTextStyle = widget.footerStyle == null ?? themeData.textTheme.bodySmall : widget.footerStyle; //previous based on themeData.textTheme.bodySmall which is misleading, converted to widget level property
+    final TextStyle footerTextStyle = widget.footerStyle == null ?? themeData.textTheme.bodySmall; //previous based on themeData.textTheme.bodySmall which is misleading, converted to widget level property
     final List<Widget> footerWidgets = <Widget>[];
     if (widget.onRowsPerPageChanged != null) {
       final List<Widget> availableRowsPerPage = widget.availableRowsPerPage
