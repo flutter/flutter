@@ -1419,7 +1419,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home:Scaffold(
-        child: SingleChildScrollView(
+        body: SingleChildScrollView(
           child: PaginatedDataTable(
           footerStyle: TextStyle(color: Color(0xFFF53935), fontSize: 16),
           showFirstLastButtons: true,
@@ -1451,7 +1451,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home:Scaffold(
-        child: SingleChildScrollView(
+        body: SingleChildScrollView(
           child: PaginatedDataTable(
             headerBackgroundColor: headerBackgroundColor,
             footerBackgroundColor: footerBackgroundColor,
