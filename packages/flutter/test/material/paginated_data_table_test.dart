@@ -1415,11 +1415,11 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable footerStyle set properly', (WidgetTester tester) async {
-    final TextStyle footerStyle = TextStyle(color: Colors.red, fontSize: 16);
+    final TextStyle footerStyle = TextStyle(color: Color(0xFFF53935), fontSize: 16);
 
     await tester.pumpWidget(MaterialApp(
       home: PaginatedDataTable(
-        footerStyle: TextStyle(color: Colors.red, fontSize: 16),
+        footerStyle: TextStyle(color: Color(0xFFF53935), fontSize: 16),
         showFirstLastButtons: true,
         header: const Text('Test table'),
         rowsPerPage: 10,
@@ -1439,7 +1439,7 @@ void main() {
       of: find.byType(PaginatedDataTable),
       matching: find.byWidgetPredicate((widget) => 
         widget is DefaultTextStyle &&
-        widget.style == TextStyle(color: Colors.red, fontSize: 16) &&
+        widget.style == TextStyle(color: Color(0xFFF53935), fontSize: 16) &&
         widget.child is IconTheme &&
         (widget.child as IconTheme).child is SizedBox
       ),
