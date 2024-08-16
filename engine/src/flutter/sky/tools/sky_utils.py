@@ -25,6 +25,79 @@ def assert_file(path, what):
     sys.exit(os.EX_NOINPUT)
 
 
+def assert_valid_codesign_config(framework_dir, zip_contents, entitlements, without_entitlements):
+  """Exits with exit code 1 if the codesign configuration contents are incorrect.
+  All Mach-O binaries found within zip_contents exactly must be listed in
+  either entitlements or without_entitlements."""
+  if _contains_duplicates(entitlements):
+    log_error('ERROR: duplicate value(s) found in entitlements.txt')
+    sys.exit(os.EX_DATAERR)
+
+  if _contains_duplicates(without_entitlements):
+    log_error('ERROR: duplicate value(s) found in without_entitlements.txt')
+    sys.exit(os.EX_DATAERR)
+
+  if _contains_duplicates(entitlements + without_entitlements):
+    log_error('ERROR: value(s) found in both entitlements and without_entitlements.txt')
+    sys.exit(os.EX_DATAERR)
+
+  binaries = set()
+  for zip_content_path in zip_contents:
+    # If file, check if Mach-O binary.
+    if _is_macho_binary(os.path.join(framework_dir, zip_content_path)):
+      binaries.add(zip_content_path)
+    # If directory, check transitive closure of files for Mach-O binaries.
+    for root, _, files in os.walk(os.path.join(framework_dir, zip_content_path)):
+      for file in [os.path.join(root, f) for f in files]:
+        if _is_macho_binary(file):
+          binaries.add(os.path.relpath(file, framework_dir))
+
+  # Verify that all Mach-O binaries are listed in either entitlements or without_entitlements.
+  listed_binaries = set(entitlements + without_entitlements)
+  if listed_binaries != binaries:
+    log_error(
+        'ERROR: binaries listed in entitlements.txt and without_entitlements.txt do not '
+        'match the set of binaries in the files to be zipped'
+    )
+    log_error('Binaries found in files to be zipped:')
+    for file in sorted(binaries):
+      log_error('    ' + file)
+
+    not_listed = sorted(binaries - listed_binaries)
+    if not_listed:
+      log_error('Binaries NOT LISTED in entitlements.txt/without_entitlements.txt:')
+      for file in not_listed:
+        log_error('    ' + file)
+
+    not_found = sorted(listed_binaries - binaries)
+    if not_found:
+      log_error('Binaries listed in entitlements.txt/without_entitlements.txt but NOT FOUND:')
+      for file in not_found:
+        log_error('    ' + file)
+    sys.exit(os.EX_NOINPUT)
+
+
+def _contains_duplicates(strings):
+  """Returns true if the list of strings contains a duplicate value."""
+  return len(strings) != len(set(strings))
+
+
+def _is_macho_binary(filename):
+  """Returns True if the specified path is file and a Mach-O binary."""
+  if not os.path.isfile(filename):
+    return False
+
+  with open(filename, 'rb') as file:
+    chunk = file.read(4)
+    return chunk in (
+        b'\xca\xfe\xba\xbe',  # Mach-O Universal Big Endian
+        b'\xce\xfa\xed\xfe',  # Mach-O Little Endian (32-bit)
+        b'\xcf\xfa\xed\xfe',  # Mach-O Little Endian (64-bit)
+        b'\xfe\xed\xfa\xce',  # Mach-O Big Endian (32-bit)
+        b'\xfe\xed\xfa\xcf',  # Mach-O Big Endian (64-bit)
+    )
+
+
 def buildroot_relative_path(path):
   """Returns the absolute path to the specified buildroot-relative path."""
   buildroot_dir = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..', '..'))

@@ -91,7 +91,7 @@ def main():
     gen_snapshot = os.path.join(x64_out_dir, 'gen_snapshot_x64')
     sky_utils.copy_binary(gen_snapshot, os.path.join(dst, 'gen_snapshot_x64'))
 
-  zip_archive(dst)
+  zip_archive(dst, args)
   return 0
 
 
@@ -163,27 +163,39 @@ def create_framework(  # pylint: disable=too-many-arguments
   return 0
 
 
-def zip_archive(dst):
-  sky_utils.write_codesign_config(os.path.join(dst, 'entitlements.txt'), ['gen_snapshot_arm64'])
+def zip_archive(dst, args):
+  # pylint: disable=line-too-long
+  with_entitlements = ['gen_snapshot_arm64']
+  with_entitlements_file = os.path.join(dst, 'entitlements.txt')
+  sky_utils.write_codesign_config(with_entitlements_file, with_entitlements)
 
-  sky_utils.write_codesign_config(
-      os.path.join(dst, 'without_entitlements.txt'), [
-          'Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
-          'Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
-          'extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
-          'extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter'
-      ]
-  )
+  without_entitlements = [
+      'Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+      'Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+      'extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+      'extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+  ]
+  if args.dsym:
+    without_entitlements.extend([
+        'Flutter.xcframework/ios-arm64/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
+        'Flutter.xcframework/ios-arm64_x86_64-simulator/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
+        'extension_safe/Flutter.xcframework/ios-arm64/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
+        'extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
+    ])
 
-  sky_utils.create_zip(
-      dst, 'artifacts.zip', [
-          'gen_snapshot_arm64',
-          'Flutter.xcframework',
-          'entitlements.txt',
-          'without_entitlements.txt',
-          'extension_safe/Flutter.xcframework',
-      ]
-  )
+  without_entitlements_file = os.path.join(dst, 'without_entitlements.txt')
+  sky_utils.write_codesign_config(without_entitlements_file, without_entitlements)
+  # pylint: enable=line-too-long
+
+  zip_contents = [
+      'gen_snapshot_arm64',
+      'Flutter.xcframework',
+      'entitlements.txt',
+      'without_entitlements.txt',
+      'extension_safe/Flutter.xcframework',
+  ]
+  sky_utils.assert_valid_codesign_config(dst, zip_contents, with_entitlements, without_entitlements)
+  sky_utils.create_zip(dst, 'artifacts.zip', zip_contents)
 
 
 def process_framework(args, dst, framework_binary, dsym):
