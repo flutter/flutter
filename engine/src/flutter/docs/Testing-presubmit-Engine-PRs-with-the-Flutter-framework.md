@@ -2,23 +2,31 @@
 
 This documentation describes how to run flutter/flutter presubmit checks on flutter/engine PRs before submitting them.
 
-# Overview
+## Overview
 
-1. Wait for all presubmit checks on your flutter/engine PR to be green.
-2. Determine the commit hash for your flutter/engine PR.
-3. Create and upload a flutter/flutter PR, (OR run tests locally).
-4. Wait for flutter/flutter presubmits/tests to run ☕.
+1. Enable the web SDK presubmits.
+2. Wait for all presubmit checks on your flutter/engine PR to be green.
+3. Determine the commit hash for your flutter/engine PR.
+4. Create and upload a flutter/flutter PR, (OR run tests locally).
+5. Wait for flutter/flutter presubmits/tests to run ☕.
+6. Edit `.ci.yaml` to uncomment the `runIf` block you commented out above.
 
-Step (1) is the usual flutter/engine workflow.
+## 1. Edit .ci.yaml
 
-# 2. The commit hash
+Edit [`.ci.yaml`](https://github.com/flutter/engine/blob/main/.ci.yaml) to comment out the `runIf:` block in `linux_web_engine`. This will ensure Flutter Web artifacts build, otherwise most framework tests will fail during precache.
+
+## 2. Wait
+
+Contemplate the nature of the universe or why it is that this workflow was necessary for your situation. Could tests have been added to the engine? If not, get youself some coffee and a cookie. You'll need them.
+
+## 3. The commit hash
 
 1. Go to the "Commits" tab in the GitHub UI for you Engine PR.
 1. Click the button to copy the most recent commit hash to your clipboard.
 
 <img width="1128" alt="Screenshot 2023-08-04 at 12 54 55 PM" src="https://github.com/flutter/flutter/assets/6343103/491be0dd-e29b-4057-a077-3a28d3beec9e">
 
-# 3. Create and upload a flutter/flutter PR.
+## 4. Create and upload a flutter/flutter PR.
 
 Edit your flutter/flutter checkout as follows:
 
@@ -29,7 +37,7 @@ To run flutter/flutter presubmits on CI, you can accomplish these two edits dire
 
 You can also build apps, and run tests locally at this point.
 
-# 4. Wait for flutter/flutter presubmits to run ☕.
+## 5. Wait for flutter/flutter presubmits to run ☕.
 
 The flutter/flutter presubmit checks will run. There will be at least two failures:
 1. A Flutter CLI test will ensure that a PR with a non-empty `engine.realm` file will fail a presubmit check.
@@ -37,7 +45,7 @@ The flutter/flutter presubmit checks will run. There will be at least two failur
 
 Any other failures are possibly due to the changes to flutter/engine, so deflake and examine them carefully.
 
-# 5. Devicelab tests
+## 6. Devicelab tests
 
 A subset of devicelab tests are available for optionally running in presubmit on flutter/flutter PRs. They are the tests listed in the flutter/flutter [.ci.yaml](https://github.com/flutter/flutter/blob/main/.ci.yaml) file that are prefixed with `Linux_android`, `Mac_android`, and `Mac_ios`.
 
