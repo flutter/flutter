@@ -23,7 +23,7 @@ import 'radio_list_tile.dart';
 import 'slider.dart';
 import 'snack_bar.dart';
 import 'switch_list_tile.dart';
-import 'tab_bar.dart';
+import 'tab_bar_view.dart';
 import 'text_button.dart';
 import 'text_field.dart';
 import 'text_field_password.dart';

@@ -9,10 +9,10 @@ import 'use_cases.dart';
 class TabBarViewUseCase extends UseCase {
 
   @override
-  String get name => 'TabBar';
+  String get name => 'TabBarView';
 
   @override
-  String get route => '/tab-bar';
+  String get route => '/tab-bar-view';
 
   @override
   Widget build(BuildContext context) => const TabBarViewExample();
@@ -29,7 +29,7 @@ class TabBarViewExample extends StatelessWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Semantics(headingLevel: 1, child: const Text('TabBar Sample')),
+          title: Semantics(headingLevel: 1, child: const Text('TabBarView Sample')),
           bottom: const TabBar(
             tabs: <Widget>[
               Tab(
