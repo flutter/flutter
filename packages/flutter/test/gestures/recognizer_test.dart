@@ -87,11 +87,13 @@ void main() {
     testGesture('cleans up state after winning arena', (GestureTester tester) {
       final List<String> resolutions = <String>[];
       final IndefiniteGestureRecognizer indefinite = IndefiniteGestureRecognizer();
+      addTearDown(indefinite.dispose);
       final TestPrimaryPointerGestureRecognizer<PointerUpEvent> accepting = TestPrimaryPointerGestureRecognizer<PointerUpEvent>(
         GestureDisposition.accepted,
         onAcceptGesture: () => resolutions.add('accepted'),
         onRejectGesture: () => resolutions.add('rejected'),
       );
+      addTearDown(accepting.dispose);
       expect(accepting.state, GestureRecognizerState.ready);
       expect(accepting.primaryPointer, isNull);
       expect(accepting.initialPosition, isNull);
@@ -118,11 +120,13 @@ void main() {
     testGesture('cleans up state after losing arena', (GestureTester tester) {
       final List<String> resolutions = <String>[];
       final IndefiniteGestureRecognizer indefinite = IndefiniteGestureRecognizer();
+      addTearDown(indefinite.dispose);
       final TestPrimaryPointerGestureRecognizer<PointerMoveEvent> rejecting = TestPrimaryPointerGestureRecognizer<PointerMoveEvent>(
         GestureDisposition.rejected,
         onAcceptGesture: () => resolutions.add('accepted'),
         onRejectGesture: () => resolutions.add('rejected'),
       );
+      addTearDown(rejecting.dispose);
       expect(rejecting.state, GestureRecognizerState.ready);
       expect(rejecting.primaryPointer, isNull);
       expect(rejecting.initialPosition, isNull);
@@ -156,6 +160,7 @@ void main() {
     testGesture('works properly when recycled', (GestureTester tester) {
       final List<String> resolutions = <String>[];
       final IndefiniteGestureRecognizer indefinite = IndefiniteGestureRecognizer();
+      addTearDown(indefinite.dispose);
       final TestPrimaryPointerGestureRecognizer<PointerUpEvent> accepting = TestPrimaryPointerGestureRecognizer<PointerUpEvent>(
         GestureDisposition.accepted,
         preAcceptSlopTolerance: 15,
@@ -163,6 +168,7 @@ void main() {
         onAcceptGesture: () => resolutions.add('accepted'),
         onRejectGesture: () => resolutions.add('rejected'),
       );
+      addTearDown(accepting.dispose);
 
       // Send one complete pointer sequence
       indefinite.addPointer(down);

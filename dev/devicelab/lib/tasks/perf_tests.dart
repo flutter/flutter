@@ -74,6 +74,17 @@ TaskFunction createUiKitViewScrollPerfAdBannersTest({bool? enableImpeller}) {
   ).run;
 }
 
+TaskFunction createUiKitViewScrollPerfBottomAdBannerTest({bool? enableImpeller}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    'test_driver/uikit_view_scroll_perf_bottom_ad_banner.dart',
+    'platform_views_scroll_perf_bottom_ad_banner',
+    testDriver: 'test_driver/scroll_perf_bottom_ad_banner_test.dart',
+    needsFullTimeline: false,
+    enableImpeller: enableImpeller,
+  ).run;
+}
+
 TaskFunction createUiKitViewScrollPerfNonIntersectingTest({bool? enableImpeller}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
@@ -662,6 +673,21 @@ TaskFunction createAnimatedAdvancedBlendPerfTest({
     enableImpeller: enableImpeller,
     forceOpenGLES: forceOpenGLES,
     testDriver: 'test_driver/animated_advanced_blend_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
+TaskFunction createRRectBlurPerfTest({
+  bool? enableImpeller,
+  bool? forceOpenGLES,
+}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'rrect_blur_perf',
+    enableImpeller: enableImpeller,
+    forceOpenGLES: forceOpenGLES,
+    testDriver: 'test_driver/rrect_blur_perf_test.dart',
     saveTraceFile: true,
   ).run;
 }
@@ -1309,6 +1335,10 @@ class PerfTest {
       final String? localEngineSrcPath = localEngineSrcPathFromEnv;
 
       if (createPlatforms.isNotEmpty) {
+        // Ensure that the platform-specific manifests are freshly created and
+        // do not contain any settings from previous runs.
+        await exec('git', <String>['clean', '-f', testDirectory]);
+
         await flutter('create', options: <String>[
           '--platforms',
           createPlatforms.join(','),
@@ -1440,9 +1470,6 @@ class PerfTest {
           'average_vsync_transitions_missed',
           '90th_percentile_vsync_transitions_missed',
           '99th_percentile_vsync_transitions_missed',
-          'average_frame_request_pending_latency',
-          '90th_percentile_frame_request_pending_latency',
-          '99th_percentile_frame_request_pending_latency',
           if (measureCpuGpu && !isAndroid) ...<String>[
             // See https://github.com/flutter/flutter/issues/68888
             if (data['average_cpu_usage'] != null) 'average_cpu_usage',
@@ -1488,22 +1515,6 @@ const List<String> _kCommonScoreKeys = <String>[
   'worst_frame_rasterizer_time_millis',
   '90th_percentile_frame_rasterizer_time_millis',
   '99th_percentile_frame_rasterizer_time_millis',
-  'average_layer_cache_count',
-  '90th_percentile_layer_cache_count',
-  '99th_percentile_layer_cache_count',
-  'worst_layer_cache_count',
-  'average_layer_cache_memory',
-  '90th_percentile_layer_cache_memory',
-  '99th_percentile_layer_cache_memory',
-  'worst_layer_cache_memory',
-  'average_picture_cache_count',
-  '90th_percentile_picture_cache_count',
-  '99th_percentile_picture_cache_count',
-  'worst_picture_cache_count',
-  'average_picture_cache_memory',
-  '90th_percentile_picture_cache_memory',
-  '99th_percentile_picture_cache_memory',
-  'worst_picture_cache_memory',
   'old_gen_gc_count',
 ];
 
@@ -1953,11 +1964,12 @@ class CompileTest {
 
 /// Measure application memory usage.
 class MemoryTest {
-  MemoryTest(this.project, this.test, this.package);
+  MemoryTest(this.project, this.test, this.package, {this.requiresTapToStart = false});
 
   final String project;
   final String test;
   final String package;
+  final bool requiresTapToStart;
 
   /// Completes when the log line specified in the last call to
   /// [prepareForNextMessage] is seen by `adb logcat`.
@@ -2046,6 +2058,38 @@ class MemoryTest {
     await receivedNextMessage;
   }
 
+  /// Taps the application and looks for acknowldgement.
+  ///
+  /// This is used by several tests to ensure scrolling gestures are installed.
+  Future<void> tapNotification() async {
+    // Keep "tapping" the device till it responds with the string we expect,
+    // or throw an error instead of tying up the infrastructure for 30 minutes.
+    prepareForNextMessage('TAPPED');
+    bool tapped = false;
+    int tapCount = 0;
+    await Future.any(<Future<void>>[
+      () async {
+        while (true) {
+          if (tapped) {
+            break;
+          }
+          tapCount += 1;
+          print('tapping device... [$tapCount]');
+          await device!.tap(100, 100);
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+        }
+      }(),
+      () async {
+        print('awaiting "tapped" message... (timeout: 10 seconds)');
+        try {
+          await receivedNextMessage?.timeout(const Duration(seconds: 10));
+        } finally {
+          tapped = true;
+        }
+      }(),
+    ]);
+  }
+
   /// To change the behavior of the test, override this.
   ///
   /// Make sure to call recordStart() and recordEnd() once each in that order.
@@ -2055,10 +2099,11 @@ class MemoryTest {
   Future<void> useMemory() async {
     await launchApp();
     await recordStart();
+    if (requiresTapToStart) {
+      await tapNotification();
+    }
 
     prepareForNextMessage('DONE');
-    print('tapping device...');
-    await device!.tap(100, 100);
     print('awaiting "done" message...');
     await receivedNextMessage;
 

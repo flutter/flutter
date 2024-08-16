@@ -13,11 +13,7 @@ void main() {
       return tester.widget<TextButton>(find.widgetWithText(TextButton, text));
     }
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: example.ToggleButtonsExampleApp(),
-        ),
-      ),
+      const example.ToggleButtonsExampleApp(),
     );
 
     TextButton firstButton = findButton('Apple');
@@ -51,11 +47,7 @@ void main() {
       return tester.widget<TextButton>(find.widgetWithText(TextButton, text));
     }
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: example.ToggleButtonsExampleApp(),
-        ),
-      ),
+      const example.ToggleButtonsExampleApp(),
     );
 
     TextButton firstButton = findButton('Tomatoes');
@@ -90,11 +82,7 @@ void main() {
       return tester.widget<TextButton>(find.widgetWithIcon(TextButton, iconData));
     }
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: example.ToggleButtonsExampleApp(),
-        ),
-      ),
+      const example.ToggleButtonsExampleApp(),
     );
 
     TextButton firstButton = findButton(Icons.sunny);

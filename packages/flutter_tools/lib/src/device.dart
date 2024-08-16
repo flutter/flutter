@@ -16,6 +16,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
+import 'device_vm_service_discovery_for_attach.dart';
 import 'project.dart';
 import 'vmservice.dart';
 import 'web/compile.dart';
@@ -581,23 +582,19 @@ enum DeviceConnectionInterface {
 
 /// Returns the `DeviceConnectionInterface` enum based on its string name.
 DeviceConnectionInterface getDeviceConnectionInterfaceForName(String name) {
-  switch (name) {
-    case 'attached':
-      return DeviceConnectionInterface.attached;
-    case 'wireless':
-      return DeviceConnectionInterface.wireless;
-  }
-  throw Exception('Unsupported DeviceConnectionInterface name "$name"');
+  return switch (name) {
+    'attached' => DeviceConnectionInterface.attached,
+    'wireless' => DeviceConnectionInterface.wireless,
+    _ => throw Exception('Unsupported DeviceConnectionInterface name "$name"'),
+  };
 }
 
 /// Returns a `DeviceConnectionInterface`'s string name.
 String getNameForDeviceConnectionInterface(DeviceConnectionInterface connectionInterface) {
-  switch (connectionInterface) {
-    case DeviceConnectionInterface.attached:
-      return 'attached';
-    case DeviceConnectionInterface.wireless:
-      return 'wireless';
-  }
+  return switch (connectionInterface) {
+    DeviceConnectionInterface.attached => 'attached',
+    DeviceConnectionInterface.wireless => 'wireless',
+  };
 }
 
 /// A device is a physical hardware that can run a Flutter application.
@@ -606,10 +603,11 @@ String getNameForDeviceConnectionInterface(DeviceConnectionInterface connectionI
 /// the host operating system in the case of Flutter Desktop.
 abstract class Device {
   Device(this.id, {
+    required Logger logger,
     required this.category,
     required this.platformType,
     required this.ephemeral,
-  });
+  }) : dds = DartDevelopmentService(logger: logger);
 
   final String id;
 
@@ -736,10 +734,39 @@ abstract class Device {
   DevicePortForwarder? get portForwarder;
 
   /// Get the DDS instance for this device.
-  final DartDevelopmentService dds = DartDevelopmentService();
+  final DartDevelopmentService dds;
 
   /// Clear the device's logs.
   void clearLogs();
+
+  /// Get the [VMServiceDiscoveryForAttach] instance for this device, which
+  /// discovers, and forwards any necessary ports to the vm service uri of a
+  /// running app on the device.
+  ///
+  /// If `appId` is specified, on supported platforms, the service discovery
+  /// will only return the VM service URI from the given app.
+  ///
+  /// If `fuchsiaModule` is specified, this will only return the VM service uri
+  /// from the specified Fuchsia module.
+  ///
+  /// If `filterDevicePort` is specified, this will only return the VM service
+  /// uri that matches the given port on the device.
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) =>
+      LogScanningVMServiceDiscoveryForAttach(
+        Future<DeviceLogReader>.value(getLogReader()),
+        portForwarder: portForwarder,
+        devicePort: filterDevicePort,
+        hostPort: expectedHostPort,
+        ipv6: ipv6,
+        logger: logger,
+      );
 
   /// Start an app package on the current device.
   ///
@@ -752,7 +779,6 @@ abstract class Device {
     required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs,
     bool prebuiltApplication = false,
-    bool ipv6 = false,
     String? userIdentifier,
   });
 
@@ -916,12 +942,11 @@ enum ImpellerStatus {
 
   const ImpellerStatus._(this.asBool);
 
-  factory ImpellerStatus.fromBool(bool? b) {
-    if (b == null) {
-      return platformDefault;
-    }
-    return b ? enabled : disabled;
-  }
+  factory ImpellerStatus.fromBool(bool? b) => switch (b) {
+    true  => enabled,
+    false => disabled,
+    null  => platformDefault,
+  };
 
   final bool? asBool;
 }
@@ -967,7 +992,9 @@ class DebuggingOptions {
     this.webEnableExpressionEvaluation = false,
     this.webHeaders = const <String, String>{},
     this.webLaunchUrl,
-    this.webRenderer = WebRendererMode.auto,
+    WebRendererMode? webRenderer,
+    this.webUseWasm = false,
+    this.webUseLocalCanvaskit = false,
     this.vmserviceOutFile,
     this.fastStart = false,
     this.nullAssertions = false,
@@ -980,7 +1007,12 @@ class DebuggingOptions {
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
-   }) : debuggingEnabled = true;
+    this.enableDevTools = true,
+    this.ipv6 = false,
+    this.google3WorkspaceRoot,
+    this.printDtd = false,
+   }) : debuggingEnabled = true,
+        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
 
   DebuggingOptions.disabled(this.buildInfo, {
       this.dartEntrypointArgs = const <String>[],
@@ -997,7 +1029,9 @@ class DebuggingOptions {
       this.webBrowserFlags = const <String>[],
       this.webLaunchUrl,
       this.webHeaders = const <String, String>{},
-      this.webRenderer = WebRendererMode.auto,
+      WebRendererMode? webRenderer,
+      this.webUseWasm = false,
+      this.webUseLocalCanvaskit = false,
       this.cacheSkSL = false,
       this.traceAllowlist,
       this.enableImpeller = ImpellerStatus.platformDefault,
@@ -1034,7 +1068,12 @@ class DebuggingOptions {
       webEnableExpressionEvaluation = false,
       nullAssertions = false,
       nativeNullAssertions = false,
-      serveObservatory = false;
+      serveObservatory = false,
+      enableDevTools = false,
+      ipv6 = false,
+      google3WorkspaceRoot = null,
+      printDtd = false,
+      webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
 
   DebuggingOptions._({
     required this.buildInfo,
@@ -1078,6 +1117,8 @@ class DebuggingOptions {
     required this.webHeaders,
     required this.webLaunchUrl,
     required this.webRenderer,
+    required this.webUseWasm,
+    required this.webUseLocalCanvaskit,
     required this.vmserviceOutFile,
     required this.fastStart,
     required this.nullAssertions,
@@ -1090,6 +1131,10 @@ class DebuggingOptions {
     required this.enableEmbedderApi,
     required this.usingCISystem,
     required this.debugLogsDirectoryPath,
+    required this.enableDevTools,
+    required this.ipv6,
+    required this.google3WorkspaceRoot,
+    required this.printDtd,
   });
 
   final bool debuggingEnabled;
@@ -1134,6 +1179,10 @@ class DebuggingOptions {
   final bool enableEmbedderApi;
   final bool usingCISystem;
   final String? debugLogsDirectoryPath;
+  final bool enableDevTools;
+  final bool ipv6;
+  final String? google3WorkspaceRoot;
+  final bool printDtd;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1165,6 +1214,12 @@ class DebuggingOptions {
   /// Which web renderer to use for the debugging session
   final WebRendererMode webRenderer;
 
+  /// Whether to compile to webassembly
+  final bool webUseWasm;
+
+  /// If true, serve CanvasKit assets locally rather than using the CDN.
+  final bool webUseLocalCanvaskit;
+
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;
   final bool fastStart;
@@ -1181,7 +1236,6 @@ class DebuggingOptions {
     EnvironmentType environmentType,
     String? route,
     Map<String, Object?> platformArgs, {
-    bool ipv6 = false,
     DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
     bool isCoreDevice = false,
   }) {
@@ -1274,6 +1328,8 @@ class DebuggingOptions {
     'webLaunchUrl': webLaunchUrl,
     'webHeaders': webHeaders,
     'webRenderer': webRenderer.name,
+    'webUseWasm': webUseWasm,
+    'webUseLocalCanvaskit': webUseLocalCanvaskit,
     'vmserviceOutFile': vmserviceOutFile,
     'fastStart': fastStart,
     'nullAssertions': nullAssertions,
@@ -1285,6 +1341,10 @@ class DebuggingOptions {
     'enableEmbedderApi': enableEmbedderApi,
     'usingCISystem': usingCISystem,
     'debugLogsDirectoryPath': debugLogsDirectoryPath,
+    'enableDevTools': enableDevTools,
+    'ipv6': ipv6,
+    'google3WorkspaceRoot': google3WorkspaceRoot,
+    'printDtd': printDtd,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -1330,6 +1390,8 @@ class DebuggingOptions {
       webHeaders: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
       webLaunchUrl: json['webLaunchUrl'] as String?,
       webRenderer: WebRendererMode.values.byName(json['webRenderer']! as String),
+      webUseWasm: json['webUseWasm']! as bool,
+      webUseLocalCanvaskit: json['webUseLocalCanvaskit']! as bool,
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
       fastStart: json['fastStart']! as bool,
       nullAssertions: json['nullAssertions']! as bool,
@@ -1342,6 +1404,10 @@ class DebuggingOptions {
       enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
       usingCISystem: (json['usingCISystem'] as bool?) ?? false,
       debugLogsDirectoryPath: json['debugLogsDirectoryPath'] as String?,
+      enableDevTools: (json['enableDevTools'] as bool?) ?? true,
+      ipv6: (json['ipv6'] as bool?) ?? false,
+      google3WorkspaceRoot: json['google3WorkspaceRoot'] as String?,
+      printDtd: (json['printDtd'] as bool?) ?? false,
     );
 }
 

@@ -564,10 +564,6 @@ end
             '-resultBundlePath',
             resultBundlePath,
             'test',
-            'CODE_SIGNING_ALLOWED=NO',
-            'CODE_SIGNING_REQUIRED=NO',
-            'CODE_SIGN_IDENTITY=-',
-            'EXPANDED_CODE_SIGN_IDENTITY=-',
             'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
           workingDirectory: objectiveCHostApp.path,
@@ -707,13 +703,7 @@ Future<bool> _isAppAotBuild(Directory app) async {
     'App',
   );
 
-  final String symbolTable = await eval(
-    'nm',
-    <String> [
-      '-gU',
-      binary,
-    ],
-  );
+  final String symbolTable = await dumpSymbolTable(binary);
 
   return symbolTable.contains('kDartIsolateSnapshotInstructions');
 }

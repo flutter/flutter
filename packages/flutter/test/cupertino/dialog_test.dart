@@ -19,6 +19,69 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
+  testWidgets('Overall appearance is correct for the light theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestScaffoldApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        dialog: CupertinoAlertDialog(
+          content: const Text('The content'),
+          actions: <Widget>[
+            CupertinoDialogAction(child: const Text('One'), onPressed: () {}),
+            CupertinoDialogAction(child: const Text('Two'), onPressed: () {}),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('One')));
+    await tester.pumpAndSettle();
+    // This golden file also verifies the structure of an alert dialog that
+    // has a content, no title, and no overscroll for any sections (in contrast
+    // to cupertinoAlertDialog.dark-theme.png).
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('cupertinoAlertDialog.overall-light-theme.png'),
+    );
+
+    await gesture.up();
+  });
+
+  testWidgets('Overall appearance is correct for the dark theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestScaffoldApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        dialog: CupertinoAlertDialog(
+          title: const Text('The title'),
+          content: const Text('The content'),
+          actions: List<Widget>.generate(20, (int i) =>
+            CupertinoDialogAction(
+              onPressed: () {},
+              child: Text('Button $i'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button 0')));
+    await tester.pumpAndSettle();
+    // This golden file also verifies the structure of an action sheet that
+    // has both a message and a title, and an overscrolled action section (in
+    // contrast to cupertinoAlertDialog.light-theme.png).
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('cupertinoAlertDialog.overall-dark-theme.png'),
+    );
+
+    await gesture.up();
+  });
+
   testWidgets('Alert dialog control test', (WidgetTester tester) async {
     bool didDelete = false;
 
@@ -140,6 +203,7 @@ void main() {
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
     expect(widget.style.color!.withAlpha(255), CupertinoColors.systemGreen.color);
+    expect(widget.style.fontFamily, 'CupertinoSystemText');
   });
 
   testWidgets('Dialog dark theme', (WidgetTester tester) async {
@@ -180,8 +244,8 @@ void main() {
 
   testWidgets('Has semantic annotations', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    await tester.pumpWidget(const MaterialApp(home: Material(
-      child: CupertinoAlertDialog(
+    await tester.pumpWidget(const CupertinoApp(
+      home: CupertinoAlertDialog(
         title: Text('The Title'),
         content: Text('Content'),
         actions: <Widget>[
@@ -189,7 +253,7 @@ void main() {
           CupertinoDialogAction(child: Text('OK')),
         ],
       ),
-    )));
+    ));
 
     expect(
       semantics,
@@ -346,7 +410,7 @@ void main() {
     // regular font. However, when using the test font, "Cancel" becomes 2 lines which
     // is why the height we're verifying for "Cancel" is larger than "OK".
 
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(tester.getSize(find.text('The Title')), equals(const Size(270.0, 132.0)));
     }
     expect(tester.getTopLeft(find.text('The Title')), equals(const Offset(265.0, 80.0 + 24.0)));
@@ -505,7 +569,7 @@ void main() {
 
     // Check that the title/message section is not displayed
     expect(actionScrollController.offset, 0.0);
-    expect(tester.getTopLeft(find.widgetWithText(CupertinoDialogAction, 'One')).dy, equals(277.5));
+    expect(tester.getTopLeft(find.widgetWithText(CupertinoDialogAction, 'One')).dy, equals(270.75));
 
     // Check that the button's vertical size is the same.
     expect(
@@ -701,10 +765,7 @@ void main() {
 
     final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
 
-    expect(
-      actionsSectionBox.size.height,
-      67.80000000000001,
-    );
+    expect(actionsSectionBox.size.height, 67.8);
   });
 
   testWidgets('Actions section height for 2 stacked buttons without enough room and large accessibility font is 50% of dialog height.', (WidgetTester tester) async {
@@ -794,166 +855,102 @@ void main() {
     );
   });
 
-  testWidgets('Actions section overscroll is painted white.', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
-    addTearDown(scrollController.dispose);
+  testWidgets('Actions section correctly renders overscrolls', (WidgetTester tester) async {
+    // Verifies that when the actions section overscrolls, the overscroll part
+    // is correctly covered with background.
+    final ScrollController actionScrollController = ScrollController();
+    addTearDown(actionScrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return CupertinoAlertDialog(
-            title: const Text('The Title'),
-            content: const Text('The message'),
-            actions: const <Widget>[
+            actions: List<Widget>.generate(12, (int i) =>
               CupertinoDialogAction(
-                child: Text('Option 1'),
+                onPressed: () {},
+                child: Text('Button ${'*' * i}'),
               ),
-              CupertinoDialogAction(
-                child: Text('Option 2'),
-              ),
-              CupertinoDialogAction(
-                child: Text('Option 3'),
-              ),
-            ],
-            scrollController: scrollController,
+            ),
           );
         },
       ),
     );
 
     await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button *')));
+    await tester.pumpAndSettle();
+    // The button should be pressed now, since the scrolling gesture has not
+    // taken over.
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('cupertinoAlertDialog.overscroll.0.png'),
+    );
+    // The dragging gesture must be dispatched in at least two segments.
+    // After the first movement, the gesture is started, but the delta is still
+    // zero. The second movement gives the delta.
+    await gesture.moveBy(const Offset(0, 40));
+    await tester.pumpAndSettle();
+    await gesture.moveBy(const Offset(0, 100));
+    // Test the top overscroll. Use `pump` not `pumpAndSettle` to verify the
+    // rendering result of the immediate next frame.
     await tester.pump();
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('cupertinoAlertDialog.overscroll.1.png'),
+    );
 
-    final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
-
-    // The way that overscroll white is accomplished in a scrollable action
-    // section is that the custom RenderBox that lays out the buttons and draws
-    // the dividers also paints a white background the size of Rect.largest.
-    // That background ends up being clipped by the containing ScrollView.
-    //
-    // Here we test that the Rect(0.0, 0.0, renderBox.size.width, renderBox.size.height)
-    // is contained within the painted Path.
-    // We don't test for exclusion because for some reason the Path is reporting
-    // that even points beyond Rect.largest are within the Path. That's not an
-    // issue for our use-case, so we don't worry about it.
-    expect(actionsSectionBox, paints..path(
-      includes: <Offset>[
-        Offset.zero,
-        Offset(actionsSectionBox.size.width, actionsSectionBox.size.height),
-      ],
-    ));
+    await gesture.moveBy(const Offset(0, -300));
+    // Test the bottom overscroll. Use `pump` not `pumpAndSettle` to verify the
+    // rendering result of the immediate next frame.
+    await tester.pump();
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('cupertinoAlertDialog.overscroll.2.png'),
+    );
+    await gesture.up();
   });
 
-  testWidgets('Pressed button changes appearance and dividers disappear.', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
-    addTearDown(scrollController.dispose);
-    const double dividerThickness = 0.3;
+  testWidgets('Actions section correctly renders overscrolls with very far scrolls', (WidgetTester tester) async {
+    // When the scroll is really far, the overscroll might be longer than the
+    // actions section, causing overflow if not controlled.
+    final ScrollController actionScrollController = ScrollController();
+    addTearDown(actionScrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return CupertinoAlertDialog(
-            title: const Text('The Title'),
-            content: const Text('The message'),
-            actions: const <Widget>[
-              CupertinoDialogAction(
-                child: Text('Option 1'),
+            content: Text('content' * 1000),
+            actions: List<Widget>.generate(4, (int i) =>
+              CupertinoActionSheetAction(
+                onPressed: () {},
+                child: Text('Button $i'),
               ),
-              CupertinoDialogAction(
-                child: Text('Option 2'),
-              ),
-              CupertinoDialogAction(
-                child: Text('Option 3'),
-              ),
-            ],
-            scrollController: scrollController,
+            ),
           );
         },
       ),
     );
 
     await tester.tap(find.text('Go'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    const Color normalButtonBackgroundColor = Color(0xCCF2F2F2);
-    const Color pressedButtonBackgroundColor = Color(0xFFE1E1E1);
-    final RenderBox firstButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 1');
-    final RenderBox secondButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 2');
-    final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
-
-    final Offset pressedButtonCenter = Offset(
-      secondButtonBox.size.width / 2.0,
-      firstButtonBox.size.height + dividerThickness + (secondButtonBox.size.height / 2.0),
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button 0')));
+    await tester.pumpAndSettle();
+    await gesture.moveBy(const Offset(0, 40)); // A short drag to start the gesture.
+    await tester.pumpAndSettle();
+    // The drag is far enough to make the overscroll longer than the section.
+    await gesture.moveBy(const Offset(0, 1000));
+    await tester.pumpAndSettle();
+    // The buttons should be out of the screen
+    expect(
+      tester.getTopLeft(find.text('Button 0')).dy,
+      greaterThan(tester.getBottomLeft(find.byType(ClipRRect)).dy)
     );
-    final Offset topDividerCenter = Offset(
-      secondButtonBox.size.width / 2.0,
-      firstButtonBox.size.height + (0.5 * dividerThickness),
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('cupertinoAlertDialog.long-overscroll.0.png'),
     );
-    final Offset bottomDividerCenter = Offset(
-      secondButtonBox.size.width / 2.0,
-      firstButtonBox.size.height +
-          dividerThickness +
-          secondButtonBox.size.height +
-          (0.5 * dividerThickness),
-    );
-
-    // Before pressing the button, verify following expectations:
-    // - Background includes the button that will be pressed
-    // - Background excludes the divider above and below the button that will be pressed
-    // - Pressed button background does NOT include the button that will be pressed
-    expect(actionsSectionBox, paints
-      ..path(
-        color: normalButtonBackgroundColor,
-        includes: <Offset>[
-          pressedButtonCenter,
-        ],
-        excludes: <Offset>[
-          topDividerCenter,
-          bottomDividerCenter,
-        ],
-      )
-      ..path(
-        color: pressedButtonBackgroundColor,
-        excludes: <Offset>[
-          pressedButtonCenter,
-        ],
-      ),
-    );
-
-    // Press down on the button.
-    final TestGesture gesture = await tester.press(find.widgetWithText(CupertinoDialogAction, 'Option 2'));
-    await tester.pump();
-
-    // While pressing the button, verify following expectations:
-    // - Background excludes the pressed button
-    // - Background includes the divider above and below the pressed button
-    // - Pressed button background includes the pressed
-    expect(actionsSectionBox, paints
-      ..path(
-        color: normalButtonBackgroundColor,
-        // The background should contain the divider above and below the pressed
-        // button. While pressed, surrounding dividers disappear, which means
-        // they become part of the background.
-        includes: <Offset>[
-          topDividerCenter,
-          bottomDividerCenter,
-        ],
-        // The background path should not include the tapped button background...
-        excludes: <Offset>[
-          pressedButtonCenter,
-        ],
-      )
-      // For a pressed button, a dedicated path is painted with a pressed button
-      // background color...
-      ..path(
-        color: pressedButtonBackgroundColor,
-        includes: <Offset>[
-          pressedButtonCenter,
-        ],
-      ),
-    );
-
-    // We must explicitly cause an "up" gesture to avoid a crash.
-    // TODO(mattcarroll): remove this call, https://github.com/flutter/flutter/issues/19540
-    await gesture.up();
   });
 
   testWidgets('ScaleTransition animation for showCupertinoDialog()', (WidgetTester tester) async {
@@ -1159,7 +1156,7 @@ void main() {
 
   testWidgets('Dialog widget insets by MediaQuery viewInsets', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      const CupertinoApp(
         home: MediaQuery(
           data: MediaQueryData(),
           child: CupertinoAlertDialog(content: Placeholder(fallbackHeight: 200.0)),
@@ -1170,7 +1167,7 @@ void main() {
     final Rect placeholderRectWithoutInsets = tester.getRect(find.byType(Placeholder));
 
     await tester.pumpWidget(
-      const MaterialApp(
+      const CupertinoApp(
         home: MediaQuery(
           data: MediaQueryData(viewInsets: EdgeInsets.fromLTRB(40.0, 30.0, 20.0, 10.0)),
           child: CupertinoAlertDialog(content: Placeholder(fallbackHeight: 200.0)),
@@ -1185,70 +1182,6 @@ void main() {
 
     // once animation settles the dialog is padded by the new viewInsets
     expect(tester.getRect(find.byType(Placeholder)), placeholderRectWithoutInsets.translate(10, 10));
-  });
-
-  testWidgets('Material2 - Default cupertino dialog golden', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      createAppWithButtonThatLaunchesDialog(
-        useMaterial3: false,
-        dialogBuilder: (BuildContext context) {
-          return MediaQuery.withClampedTextScaling(
-            minScaleFactor: 3.0,
-            maxScaleFactor: 3.0,
-            child: const RepaintBoundary(
-              child: CupertinoAlertDialog(
-                title: Text('Title'),
-                content: Text('text'),
-                actions: <Widget>[
-                  CupertinoDialogAction(child: Text('No')),
-                  CupertinoDialogAction(child: Text('OK')),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-
-    await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
-
-    await expectLater(
-      find.byType(CupertinoAlertDialog),
-      matchesGoldenFile('m2_dialog_test.cupertino.default.png'),
-    );
-  });
-
-  testWidgets('Material3 - Default cupertino dialog golden', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      createAppWithButtonThatLaunchesDialog(
-        useMaterial3: true,
-        dialogBuilder: (BuildContext context) {
-          return MediaQuery.withClampedTextScaling(
-            minScaleFactor: 3.0,
-            maxScaleFactor: 3.0,
-            child: const RepaintBoundary(
-              child: CupertinoAlertDialog(
-                title: Text('Title'),
-                content: Text('text'),
-                actions: <Widget>[
-                  CupertinoDialogAction(child: Text('No')),
-                  CupertinoDialogAction(child: Text('OK')),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-
-    await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
-
-    await expectLater(
-      find.byType(CupertinoAlertDialog),
-      matchesGoldenFile('m3_dialog_test.cupertino.default.png'),
-    );
   });
 
   testWidgets('showCupertinoDialog - custom barrierLabel', (WidgetTester tester) async {
@@ -1362,7 +1295,7 @@ void main() {
   testWidgets('CupertinoAlertDialog scrollbars controllers should be different', (WidgetTester tester) async {
     // https://github.com/flutter/flutter/pull/81278
     await tester.pumpWidget(
-      const MaterialApp(
+      const CupertinoApp(
         home: MediaQuery(
           data: MediaQueryData(),
           child: CupertinoAlertDialog(
@@ -1564,24 +1497,20 @@ RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
 
 Widget createAppWithButtonThatLaunchesDialog({
   required WidgetBuilder dialogBuilder,
-  bool? useMaterial3,
 }) {
-  return MaterialApp(
-    theme: ThemeData(useMaterial3: useMaterial3),
-    home: Material(
-      child: Center(
-        child: Builder(builder: (BuildContext context) {
-          return ElevatedButton(
-            onPressed: () {
-              showDialog<void>(
-                context: context,
-                builder: dialogBuilder,
-              );
-            },
-            child: const Text('Go'),
-          );
-        }),
-      ),
+  return CupertinoApp(
+    home: Center(
+      child: Builder(builder: (BuildContext context) {
+        return CupertinoButton(
+          onPressed: () {
+            showCupertinoDialog<void>(
+              context: context,
+              builder: dialogBuilder,
+            );
+          },
+          child: const Text('Go'),
+        );
+      }),
     ),
   );
 }
@@ -1594,13 +1523,11 @@ Widget boilerplate(Widget child) {
 }
 
 Widget createAppWithCenteredButton(Widget child) {
-  return MaterialApp(
-    home: Material(
-      child: Center(
-        child: ElevatedButton(
-          onPressed: null,
-          child: child,
-        ),
+  return CupertinoApp(
+    home: Center(
+      child: CupertinoButton(
+        onPressed: null,
+        child: child,
       ),
     ),
   );
@@ -1639,6 +1566,55 @@ class _RestorableDialogTestWidget extends StatelessWidget {
         },
         child: const Text('X'),
       )),
+    );
+  }
+}
+
+// Shows an app that has a button with text "Go", and clicking this button
+// displays the `dialog` and hides the button.
+//
+// The `theme` will be applied to the app and determines the background.
+class TestScaffoldApp extends StatefulWidget {
+  const TestScaffoldApp({super.key, required this.theme, required this.dialog});
+  final CupertinoThemeData theme;
+  final Widget dialog;
+
+  @override
+  TestScaffoldAppState createState() => TestScaffoldAppState();
+}
+
+class TestScaffoldAppState extends State<TestScaffoldApp> {
+  bool _pressedButton = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoApp(
+      // Hide the debug banner. Because this CupertinoApp is captured in golden
+      // test as a whole. The debug banner contains tilted text, whose
+      // anti-alias might cause false negative result.
+      // https://github.com/flutter/flutter/pull/150442
+      debugShowCheckedModeBanner: false,
+      theme: widget.theme,
+      home: Builder(builder: (BuildContext context) =>
+        CupertinoPageScaffold(
+          child: Center(
+            child: _pressedButton ? Container() : CupertinoButton(
+              onPressed: () {
+                setState(() {
+                  _pressedButton = true;
+                });
+                showCupertinoDialog<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return widget.dialog;
+                  },
+                );
+              },
+              child: const Text('Go'),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

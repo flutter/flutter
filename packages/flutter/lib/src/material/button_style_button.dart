@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'menu_anchor.dart';
+/// @docImport 'text_button_theme.dart';
+/// @docImport 'text_theme.dart';
+/// @docImport 'theme.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -116,9 +122,9 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// Customizes this button's appearance.
   ///
   /// Non-null properties of this style override the corresponding
-  /// properties in [themeStyleOf] and [defaultStyleOf]. [MaterialStateProperty]s
+  /// properties in [themeStyleOf] and [defaultStyleOf]. [WidgetStateProperty]s
   /// that resolve to non-null values will similarly override the corresponding
-  /// [MaterialStateProperty]s in [themeStyleOf] and [defaultStyleOf].
+  /// [WidgetStateProperty]s in [themeStyleOf] and [defaultStyleOf].
   ///
   /// Null by default.
   final ButtonStyle? style;
@@ -166,7 +172,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// [TextButtonTheme].
   ///
   /// Concrete button subclasses should return a ButtonStyle that
-  /// has no null properties, and where all of the [MaterialStateProperty]
+  /// has no null properties, and where all of the [WidgetStateProperty]
   /// properties resolve to non-null values.
   ///
   /// See also:
@@ -206,7 +212,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
   }
 
-  /// Returns null if [value] is null, otherwise `MaterialStatePropertyAll<T>(value)`.
+  /// Returns null if [value] is null, otherwise `WidgetStatePropertyAll<T>(value)`.
   ///
   /// A convenience method for subclasses.
   static MaterialStateProperty<T>? allOrNull<T>(T? value) => value == null ? null : MaterialStatePropertyAll<T>(value);
@@ -602,6 +608,20 @@ class _RenderInputPadding extends RenderShiftedBox {
       constraints: constraints,
       layoutChild: ChildLayoutHelper.dryLayoutChild,
     );
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final double? result = child.getDryBaseline(constraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(constraints);
+    return result + Alignment.center.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
   }
 
   @override

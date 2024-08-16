@@ -250,7 +250,7 @@ void main([List<String> args = const <String>[]]) {
           await driver.requestData('isTestingReplyOnly') == 'true';
 
       if (args.contains('--with_semantics')) {
-        stdout.writeln('Enabeling semantics...');
+        stdout.writeln('Enabling semantics...');
         await driver.setSemantics(true);
       }
 

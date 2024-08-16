@@ -2,11 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'slider.dart';
+/// @docImport 'switch.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'constants.dart';
-import 'toggleable.dart';
 
 // Examples can assume:
 // bool _throwShotAway = false;
@@ -35,6 +40,12 @@ const double _kCupertinoFocusColorSaturation = 0.835;
 /// component is needed on iOS, the HIG encourages the developer to use switches
 /// ([CupertinoSwitch] in Flutter) instead, or to find a creative custom
 /// solution.
+///
+/// {@tool dartpad}
+/// This example shows a toggleable [CupertinoCheckbox].
+///
+/// ** See code in examples/api/lib/cupertino/checkbox/cupertino_checkbox.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -70,6 +81,7 @@ class CupertinoCheckbox extends StatefulWidget {
     this.autofocus = false,
     this.side,
     this.shape,
+    this.semanticLabel,
   }) : assert(tristate || value != null);
 
   /// Whether this checkbox is checked.
@@ -160,6 +172,13 @@ class CupertinoCheckbox extends StatefulWidget {
   /// [RoundedRectangleBorder] with a circular corner radius of 4.0.
   final OutlinedBorder? shape;
 
+  /// The semantic label for the checkbox that will be announced by screen readers.
+  ///
+  /// This is announced by assistive technologies (e.g TalkBack/VoiceOver).
+  ///
+  /// This label does not show in the UI.
+  final String? semanticLabel;
+
   /// The width of a checkbox widget.
   static const double width = 18.0;
 
@@ -227,6 +246,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
       ?? CupertinoColors.white;
 
     return Semantics(
+      label: widget.semanticLabel,
       checked: widget.value ?? false,
       mixed: widget.tristate ? widget.value == null : null,
       child: buildToggleable(

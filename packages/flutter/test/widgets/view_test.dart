@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
@@ -346,8 +347,7 @@ void main() {
   });
 
   testWidgets('correctly switches between view configurations',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // Leaking by design as contains deprecated items.
   (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapWithView: false,
@@ -514,6 +514,178 @@ void main() {
     final RenderBox child = renderView.child!;
     expect(child.debugCanParentUseSize, isTrue);
     expect(child.size, const Size(100, 200));
+  });
+
+  testWidgets('ViewFocusEvents cause unfocusing and refocusing', (WidgetTester tester) async {
+    late FlutterView view;
+    late FocusNode focusNode;
+    await tester.pumpWidget(
+      Focus(
+        child: Builder(
+          builder: (BuildContext context) {
+            view = View.of(context);
+            focusNode = Focus.of(context);
+            return Container();
+          },
+        ),
+      ),
+    );
+
+    final ViewFocusEvent unfocusEvent = ViewFocusEvent(
+      viewId: view.viewId,
+      state: ViewFocusState.unfocused,
+      direction: ViewFocusDirection.forward,
+    );
+
+    final ViewFocusEvent focusEvent = ViewFocusEvent(
+      viewId: view.viewId,
+      state: ViewFocusState.focused,
+      direction: ViewFocusDirection.backward,
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(FocusManager.instance.rootScope.hasPrimaryFocus, isFalse);
+
+    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(unfocusEvent);
+    await tester.pump();
+
+    expect(focusNode.hasPrimaryFocus, isFalse);
+    expect(FocusManager.instance.rootScope.hasPrimaryFocus, isTrue);
+
+    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(focusEvent);
+    await tester.pump();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(FocusManager.instance.rootScope.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('View notifies engine that a view should have focus when a widget focus change occurs.', (WidgetTester tester) async {
+    final FocusNode nodeA = FocusNode(debugLabel: 'a');
+    addTearDown(nodeA.dispose);
+
+    FlutterView? view;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(
+          children: <Widget>[
+            Focus(focusNode: nodeA, child: const Text('a')),
+            Builder(builder: (BuildContext context) {
+              view = View.of(context);
+              return const SizedBox.shrink();
+            }),
+          ],
+        ),
+      ),
+    );
+    int notifyCount = 0;
+    void handleFocusChange() {
+      notifyCount++;
+    }
+    tester.binding.focusManager.addListener(handleFocusChange);
+    addTearDown(() => tester.binding.focusManager.removeListener(handleFocusChange));
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+    nodeA.requestFocus();
+    await tester.pump();
+    final List<ViewFocusEvent> events = tester.binding.platformDispatcher.testFocusEvents;
+    expect(events.length, equals(1));
+    expect(events.last.viewId, equals(view?.viewId));
+    expect(events.last.direction, equals(ViewFocusDirection.forward));
+    expect(events.last.state, equals(ViewFocusState.focused));
+    expect(nodeA.hasPrimaryFocus, isTrue);
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+  });
+
+  testWidgets('Switching focus between views yields the correct events.', (WidgetTester tester) async {
+    final FocusNode nodeA = FocusNode(debugLabel: 'a');
+    addTearDown(nodeA.dispose);
+
+    FlutterView? view;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(
+          children: <Widget>[
+            Focus(focusNode: nodeA, child: const Text('a')),
+            Builder(builder: (BuildContext context) {
+              view = View.of(context);
+              return const SizedBox.shrink();
+            }),
+          ],
+        ),
+      ),
+    );
+    int notifyCount = 0;
+    void handleFocusChange() {
+      notifyCount++;
+    }
+    tester.binding.focusManager.addListener(handleFocusChange);
+    addTearDown(() => tester.binding.focusManager.removeListener(handleFocusChange));
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+    // Focus and make sure engine is notified.
+    nodeA.requestFocus();
+    await tester.pump();
+    List<ViewFocusEvent> events = tester.binding.platformDispatcher.testFocusEvents;
+    expect(events.length, equals(1));
+    expect(events.last.viewId, equals(view?.viewId));
+    expect(events.last.direction, equals(ViewFocusDirection.forward));
+    expect(events.last.state, equals(ViewFocusState.focused));
+    expect(nodeA.hasPrimaryFocus, isTrue);
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+    // Unfocus all views.
+    tester.binding.platformDispatcher.onViewFocusChange?.call(
+      ViewFocusEvent(
+        viewId: view!.viewId,
+        state: ViewFocusState.unfocused,
+        direction: ViewFocusDirection.forward,
+      ),
+    );
+    await tester.pump();
+    expect(nodeA.hasFocus, isFalse);
+    expect(tester.binding.platformDispatcher.testFocusEvents, isEmpty);
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+    // Focus another view.
+    tester.binding.platformDispatcher.onViewFocusChange?.call(
+      const ViewFocusEvent(
+        viewId: 100,
+        state: ViewFocusState.focused,
+        direction: ViewFocusDirection.forward,
+      ),
+    );
+
+    // Focusing another view should unfocus this node without notifying the
+    // engine to unfocus.
+    await tester.pump();
+    expect(nodeA.hasFocus, isFalse);
+    expect(tester.binding.platformDispatcher.testFocusEvents, isEmpty);
+    expect(notifyCount, equals(0));
+    notifyCount = 0;
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+    // Re-focusing the node should notify the engine that this view is focused.
+    nodeA.requestFocus();
+    await tester.pump();
+    expect(nodeA.hasPrimaryFocus, isTrue);
+    events = tester.binding.platformDispatcher.testFocusEvents;
+    expect(events.length, equals(1));
+    expect(events.last.viewId, equals(view?.viewId));
+    expect(events.last.direction, equals(ViewFocusDirection.forward));
+    expect(events.last.state, equals(ViewFocusState.focused));
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
   });
 }
 

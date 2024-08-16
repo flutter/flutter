@@ -1370,7 +1370,7 @@ void main() {
     expect(firstToggleButtonDy, secondToggleButtonDy);
     expect(firstToggleButtonDy, closeTo(elevatedButtonDy - 1.7, 0.1));
     expect(firstToggleButtonDy, closeTo(textDy - 9.7, 0.1));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Directionality test', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -2117,6 +2117,7 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
               rect: const Rect.fromLTRB(0.0, 0.0, 87.0, 48.0),
             ),
@@ -2130,6 +2131,7 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
               rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0)
             ),
@@ -2143,6 +2145,7 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
               rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
             ),
@@ -2188,6 +2191,7 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
             ),
             TestSemantics(
@@ -2201,6 +2205,7 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
             ),
           ],

@@ -11,33 +11,23 @@ class DividerDemo extends StatelessWidget {
 
   final DividerDemoType type;
 
-  String _title(BuildContext context) {
-    switch (type) {
-      case DividerDemoType.horizontal:
-        return GalleryLocalizations.of(context)!.demoDividerTitle;
-      case DividerDemoType.vertical:
-        return GalleryLocalizations.of(context)!.demoVerticalDividerTitle;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    late Widget dividers;
-    switch (type) {
-      case DividerDemoType.horizontal:
-        dividers = _HorizontalDividerDemo();
-      case DividerDemoType.vertical:
-        dividers = _VerticalDividerDemo();
-    }
-
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(
-          _title(context),
+          switch (type) {
+            DividerDemoType.horizontal => localizations.demoDividerTitle,
+            DividerDemoType.vertical   => localizations.demoVerticalDividerTitle,
+          },
         ),
       ),
-      body: dividers,
+      body: switch (type) {
+        DividerDemoType.horizontal => _HorizontalDividerDemo(),
+        DividerDemoType.vertical   => _VerticalDividerDemo(),
+      },
     );
   }
 }

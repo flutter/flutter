@@ -20,6 +20,23 @@ void main() {
     expect(value.resolve(<WidgetState>{WidgetState.error}), WidgetState.error);
   });
 
+  test('WidgetStateProperty.map()', () {
+    final WidgetStatesConstraint active = WidgetState.hovered | WidgetState.focused | WidgetState.pressed;
+    final WidgetStateProperty<String?> value = WidgetStateProperty<String?>.fromMap(
+      <WidgetStatesConstraint, String?>{
+        active & WidgetState.error: 'active error',
+        WidgetState.disabled | WidgetState.error: 'kinda sus',
+        ~(WidgetState.dragged | WidgetState.selected) & ~active: 'this is boring',
+        active: 'active',
+      },
+    );
+    expect(value.resolve(<WidgetState>{WidgetState.focused, WidgetState.error}), 'active error');
+    expect(value.resolve(<WidgetState>{WidgetState.scrolledUnder}), 'this is boring');
+    expect(value.resolve(<WidgetState>{WidgetState.disabled}), 'kinda sus');
+    expect(value.resolve(<WidgetState>{WidgetState.hovered}), 'active');
+    expect(value.resolve(<WidgetState>{WidgetState.dragged}),  null);
+  });
+
   test('WidgetStateProperty.all()', () {
     final WidgetStateProperty<int> value = WidgetStateProperty.all<int>(123);
     expect(value.resolve(<WidgetState>{WidgetState.hovered}), 123);
@@ -85,6 +102,48 @@ void main() {
       TextStyle.lerp,
     )!.resolve(enabled)!;
     expect(textStyle.fontSize, 20.0);
+  });
+
+  test('WidgetStateBorderSide.lerp()', () {
+    const WidgetStateProperty<BorderSide?> borderSide1 =  WidgetStatePropertyAll<BorderSide?>(
+      BorderSide(
+        color: Color(0xffff0000),
+        width: 4.0,
+      ),
+    );
+    const WidgetStateProperty<BorderSide?> borderSide2 = WidgetStatePropertyAll<BorderSide?>(
+      BorderSide(
+        color: Color(0xff0000ff),
+        width: 12.0,
+      ),
+    );
+
+    // Using `0.0` interpolation value.
+    BorderSide borderSide = WidgetStateBorderSide.lerp(
+      borderSide1,
+      borderSide2,
+      0.0,
+    )!.resolve(enabled)!;
+    expect(borderSide.color, const Color(0xffff0000));
+    expect(borderSide.width, 4.0);
+
+    // Using `0.5` interpolation value.
+    borderSide = WidgetStateBorderSide.lerp(
+      borderSide1,
+      borderSide2,
+      0.5,
+    )!.resolve(enabled)!;
+    expect(borderSide.color, const Color(0xff7f007f));
+    expect(borderSide.width, 8.0);
+
+    // Using `1.0` interpolation value.
+    borderSide = WidgetStateBorderSide.lerp(
+      borderSide1,
+      borderSide2,
+      1.0,
+    )!.resolve(enabled)!;
+    expect(borderSide.color, const Color(0xff0000ff));
+    expect(borderSide.width, 12.0);
   });
 }
 

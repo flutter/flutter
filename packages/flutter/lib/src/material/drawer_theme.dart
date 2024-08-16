@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'drawer.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -43,6 +46,7 @@ class DrawerThemeData with Diagnosticable {
     this.shape,
     this.endShape,
     this.width,
+    this.clipBehavior,
   });
 
   /// Overrides the default value of [Drawer.backgroundColor].
@@ -69,6 +73,9 @@ class DrawerThemeData with Diagnosticable {
   /// Overrides the default value of [Drawer.width].
   final double? width;
 
+  /// Overrides the default value of [Drawer.clipBehavior].
+  final Clip? clipBehavior;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   DrawerThemeData copyWith({
@@ -80,6 +87,7 @@ class DrawerThemeData with Diagnosticable {
     ShapeBorder? shape,
     ShapeBorder? endShape,
     double? width,
+    Clip? clipBehavior,
   }) {
     return DrawerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -90,6 +98,7 @@ class DrawerThemeData with Diagnosticable {
       shape: shape ?? this.shape,
       endShape: endShape ?? this.endShape,
       width: width ?? this.width,
+      clipBehavior: clipBehavior ?? this.clipBehavior,
     );
   }
 
@@ -111,6 +120,7 @@ class DrawerThemeData with Diagnosticable {
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       endShape: ShapeBorder.lerp(a?.endShape, b?.endShape, t),
       width: lerpDouble(a?.width, b?.width, t),
+      clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
     );
   }
 
@@ -124,6 +134,7 @@ class DrawerThemeData with Diagnosticable {
     shape,
     endShape,
     width,
+    clipBehavior,
   );
 
   @override
@@ -142,7 +153,8 @@ class DrawerThemeData with Diagnosticable {
         && other.surfaceTintColor == surfaceTintColor
         && other.shape == shape
         && other.endShape == endShape
-        && other.width == width;
+        && other.width == width
+        && other.clipBehavior == clipBehavior;
   }
 
   @override
@@ -156,6 +168,7 @@ class DrawerThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('endShape', endShape, defaultValue: null));
     properties.add(DoubleProperty('width', width, defaultValue: null));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
   }
 }
 

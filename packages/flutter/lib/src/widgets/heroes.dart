@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'basic.dart';
 import 'binding.dart';
@@ -73,7 +76,7 @@ enum HeroFlightDirection {
 }
 
 /// A widget that marks its child as being a candidate for
-/// [hero animations](https://flutter.dev/docs/development/ui/animations/hero-animations).
+/// [hero animations](https://docs.flutter.dev/ui/animations/hero-animations).
 ///
 /// When a [PageRoute] is pushed or popped with the [Navigator], the entire
 /// screen's content is replaced. An old route disappears and a new route
@@ -425,7 +428,6 @@ class _HeroState extends State<Hero> {
 }
 
 // Everything known about a hero flight that's to be started or diverted.
-@immutable
 class _HeroFlightManifest {
   _HeroFlightManifest({
     required this.type,
@@ -455,8 +457,10 @@ class _HeroFlightManifest {
 
   Object get tag => fromHero.widget.tag;
 
+  CurvedAnimation? _animation;
+
   Animation<double> get animation {
-    return CurvedAnimation(
+    return _animation ??= CurvedAnimation(
       parent: (type == HeroFlightDirection.push) ? toRoute.animation! : fromRoute.animation!,
       curve: Curves.fastOutSlowIn,
       reverseCurve: isDiverted ? null : Curves.fastOutSlowIn.flipped,
@@ -505,6 +509,11 @@ class _HeroFlightManifest {
     return '_HeroFlightManifest($type tag: $tag from route: ${fromRoute.settings} '
         'to route: ${toRoute.settings} with hero: $fromHero to $toHero)${isValid ? '' : ', INVALID'}';
   }
+
+  @mustCallSuper
+  void dispose() {
+    _animation?.dispose();
+  }
 }
 
 // Builds the in-flight hero widget.
@@ -531,7 +540,13 @@ class _HeroFlight {
   late ProxyAnimation _proxyAnimation;
   // The manifest will be available once `start` is called, throughout the
   // flight's lifecycle.
-  late _HeroFlightManifest manifest;
+  _HeroFlightManifest? _manifest;
+  _HeroFlightManifest get manifest => _manifest!;
+  set manifest (_HeroFlightManifest value) {
+    _manifest?.dispose();
+    _manifest = value;
+  }
+
   OverlayEntry? overlayEntry;
   bool _aborted = false;
 
@@ -571,7 +586,7 @@ class _HeroFlight {
   }
 
   void _performAnimationUpdate(AnimationStatus status) {
-    if (status == AnimationStatus.completed || status == AnimationStatus.dismissed) {
+    if (!status.isAnimating) {
       _proxyAnimation.parent = null;
 
       assert(overlayEntry != null);
@@ -583,8 +598,8 @@ class _HeroFlight {
       // fromHero hidden. If [AnimationStatus.dismissed], the animation is
       // triggered but canceled before it finishes. In this case, we keep toHero
       // hidden instead.
-      manifest.fromHero.endFlight(keepPlaceholder: status == AnimationStatus.completed);
-      manifest.toHero.endFlight(keepPlaceholder: status == AnimationStatus.dismissed);
+      manifest.fromHero.endFlight(keepPlaceholder: status.isCompleted);
+      manifest.toHero.endFlight(keepPlaceholder: status.isDismissed);
       onFlightEnded(this);
       _proxyAnimation.removeListener(onTick);
     }
@@ -634,6 +649,7 @@ class _HeroFlight {
       _proxyAnimation.removeListener(onTick);
       _proxyAnimation.removeStatusListener(_handleAnimationUpdate);
     }
+    _manifest?.dispose();
   }
 
   void onTick() {

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'animated_cross_fade.dart';
+/// @docImport 'implicit_animations.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
@@ -340,7 +344,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       controller: controller,
     );
     animation.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed) {
+      if (status.isDismissed) {
         setState(() {
           assert(mounted);
           assert(_outgoingEntries.contains(entry));

@@ -853,7 +853,7 @@ class ManifestAssetBundle implements AssetBundle {
   /// - assets/bar
   ///
   /// This will return:
-  /// ```
+  /// ```none
   /// {
   ///   asset: packages/test_package/assets/foo: [
   ///     asset: packages/test_package/assets/foo,

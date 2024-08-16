@@ -11,6 +11,7 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart';
+import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
@@ -205,7 +206,10 @@ class IconTreeShaker {
                        'using codepoints $codePointsString');
     final Process fontSubsetProcess = await _processManager.start(cmd);
     try {
-      fontSubsetProcess.stdin.writeln(codePointsString);
+      await ProcessUtils.writelnToStdinUnsafe(
+        stdin: fontSubsetProcess.stdin,
+        line: codePointsString,
+      );
       await fontSubsetProcess.stdin.flush();
       await fontSubsetProcess.stdin.close();
     } on Exception {
@@ -327,15 +331,25 @@ class IconTreeShaker {
       final Object? package = iconDataMap['fontPackage'];
       final Object? fontFamily = iconDataMap['fontFamily'];
       final Object? codePoint = iconDataMap['codePoint'];
-      if ((package ?? '') is! String || // Null is ok here.
-          fontFamily is! String ||
+      if ((package ?? '') is! String ||
+          (fontFamily ?? '') is! String ||
           codePoint is! num) {
         throw IconTreeShakerException._(
           'Invalid ConstFinder result. Expected "fontPackage" to be a String, '
           '"fontFamily" to be a String, and "codePoint" to be an int, '
           'got: $iconDataMap.');
       }
-      final String family = fontFamily;
+      if (fontFamily == null) {
+        _logger.printTrace(
+          'Expected to find fontFamily for constant IconData with codepoint: '
+          '$codePoint, but found fontFamily: $fontFamily. This usually means '
+          'you are relying on the system font. Alternatively, font families in '
+          'an IconData class can be provided in the assets section of your '
+          'pubspec.yaml, or you are missing "uses-material-design: true".',
+        );
+        continue;
+      }
+      final String family = fontFamily as String;
       final String key = package == null
         ? family
         : 'packages/$package/$family';

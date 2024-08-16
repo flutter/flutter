@@ -2773,6 +2773,27 @@ void main() {
       });
     });
 
+    testWidgets('Does not throw when no child is laid out',
+        (WidgetTester tester) async {
+      final TwoDimensionalChildBuilderDelegate delegate =
+          TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 50,
+        maxYIndex: 50,
+        addAutomaticKeepAlives: false,
+        addRepaintBoundaries: false,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          if (vicinity.xIndex > 10) {
+            return const SizedBox.square(dimension: 200);
+          }
+          return null;
+        },
+      );
+      addTearDown(delegate.dispose);
+
+      await tester.pumpWidget(simpleBuilderTest(delegate: delegate));
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('correctly reorders children and wont throw assertion failure',
         (WidgetTester tester) async {
       final TwoDimensionalChildBuilderDelegate delegate1 =
@@ -2782,13 +2803,11 @@ void main() {
               addAutomaticKeepAlives: false,
               addRepaintBoundaries: false,
               builder: (BuildContext context, ChildVicinity vicinity) {
-                ValueKey<int>? key;
-                if (vicinity == const ChildVicinity(xIndex: 1, yIndex: 1)) {
-                  key = const ValueKey<int>(1);
-                } else if (vicinity ==
-                    const ChildVicinity(xIndex: 1, yIndex: 2)) {
-                  key = const ValueKey<int>(2);
-                }
+                final ValueKey<int>? key = switch (vicinity) {
+                  ChildVicinity(xIndex: 1, yIndex: 1) => const ValueKey<int>(1),
+                  ChildVicinity(xIndex: 1, yIndex: 2) => const ValueKey<int>(2),
+                  _ => null,
+                };
                 return SizedBox.square(key: key, dimension: 200);
               });
       final TwoDimensionalChildBuilderDelegate delegate2 =
@@ -2830,13 +2849,11 @@ void main() {
               addAutomaticKeepAlives: false,
               addRepaintBoundaries: false,
               builder: (BuildContext context, ChildVicinity vicinity) {
-                ValueKey<int>? key;
-                if (vicinity == const ChildVicinity(xIndex: 1, yIndex: 1)) {
-                  key = const ValueKey<int>(1);
-                } else if (vicinity ==
-                    const ChildVicinity(xIndex: 1, yIndex: 2)) {
-                  key = const ValueKey<int>(2);
-                }
+                final ValueKey<int>? key = switch (vicinity) {
+                  ChildVicinity(xIndex: 0, yIndex: 0) => const ValueKey<int>(1),
+                  ChildVicinity(xIndex: 1, yIndex: 1) => const ValueKey<int>(2),
+                  _ => null,
+                };
                 return Checkbox(key: key, value: false, onChanged: (_) {});
               });
       final TwoDimensionalChildBuilderDelegate delegate2 =

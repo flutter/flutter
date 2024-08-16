@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'drawer.dart';
+/// @docImport 'list_tile_theme.dart';
+library;
+
 import 'dart:developer' show Flow, Timeline;
 import 'dart:io' show Platform;
 
@@ -590,8 +594,8 @@ class _PackagesViewState extends State<_PackagesView> {
                       child: Material(
                         color: Theme.of(context).cardColor,
                         elevation: 4.0,
-                        child: Container(
-                          constraints: BoxConstraints.loose(const Size.fromWidth(600.0)),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 600.0),
                           child: _packagesList(context, selectedId, snapshot.data!, widget.isLateral),
                         ),
                       ),
@@ -887,8 +891,8 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
           child: Material(
             color: theme.cardColor,
             elevation: 4.0,
-            child: Container(
-              constraints: BoxConstraints.loose(const Size.fromWidth(600.0)),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600.0),
               child: Localizations.override(
                 locale: const Locale('en', 'US'),
                 context: context,
@@ -1012,7 +1016,7 @@ typedef _MasterViewBuilder = Widget Function(BuildContext context, bool isLatera
 /// sheet in the lateral UI. Otherwise, it is null.
 typedef _DetailPageBuilder = Widget Function(BuildContext context, Object? arguments, ScrollController? scrollController);
 
-/// Signature for the builder callback used by [_MasterDetailFlow.actionBuilder].
+/// Signature for the builder callback used by [_MasterDetailScaffold.actionBuilder].
 ///
 /// Builds the actions that go in the app bars constructed for the master and
 /// lateral UI pages. actionLevel indicates the intended destination of the
@@ -1043,7 +1047,6 @@ enum _Focus { master, detail }
 
 /// A Master Detail Flow widget. Depending on screen width it builds either a
 /// lateral or nested navigation flow between a master view and a detail page.
-/// bloc pattern.
 ///
 /// If focus is on detail view, then switching to nested navigation will
 /// populate the navigation history with the master page and the detail page on
@@ -1061,7 +1064,7 @@ class _MasterDetailFlow extends StatefulWidget {
 
   /// Builder for the master view for lateral navigation.
   ///
-  /// If [masterPageBuilder] is not supplied the master page required for nested navigation, also
+  /// This builder builds the master page required for nested navigation, also
   /// builds the master view inside a [Scaffold] with an [AppBar].
   final _MasterViewBuilder masterViewBuilder;
 
@@ -1230,9 +1233,9 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
   }
 
   MaterialPageRoute<void> _detailPageRoute(Object? arguments) {
-    return MaterialPageRoute<dynamic>(builder: (BuildContext context) {
-      return PopScope(
-        onPopInvoked: (bool didPop) {
+    return MaterialPageRoute<void>(builder: (BuildContext context) {
+      return PopScope<void>(
+        onPopInvokedWithResult: (bool didPop, void result) {
           // No need for setState() as rebuild happens on navigation pop.
           focus = _Focus.master;
         },
@@ -1361,17 +1364,19 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
               preferredSize: const Size.fromHeight(kToolbarHeight),
               child: Row(
                 children: <Widget>[
-                  ConstrainedBox(
-                    constraints: BoxConstraints.tightFor(width: masterViewWidth),
+                  SizedBox(
+                    width: masterViewWidth,
                     child: IconTheme(
                       data: Theme.of(context).primaryIconTheme,
-                      child: Container(
-                        alignment: AlignmentDirectional.centerEnd,
+                      child: Padding(
                         padding: const EdgeInsets.all(8),
-                        child: OverflowBar(
-                          spacing: 8,
-                          overflowAlignment: OverflowBarAlignment.end,
-                          children: widget.actionBuilder!(context, _ActionLevel.view),
+                        child: Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: OverflowBar(
+                            spacing: 8,
+                            overflowAlignment: OverflowBarAlignment.end,
+                            children: widget.actionBuilder!(context, _ActionLevel.view),
+                          ),
                         ),
                       ),
                     ),
@@ -1405,9 +1410,8 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
                       child,
                     ),
                   duration: const Duration(milliseconds: 500),
-                  child: Container(
+                  child: SizedBox.expand(
                     key: ValueKey<Object?>(value ?? widget.initialArguments),
-                    constraints: const BoxConstraints.expand(),
                     child: _DetailView(
                       builder: widget.detailPageBuilder,
                       arguments: value ?? widget.initialArguments,

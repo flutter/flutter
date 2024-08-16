@@ -11,13 +11,13 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_ios.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -30,10 +30,12 @@ import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
-  FakeXcodeProjectInterpreterWithBuildSettings({ this.overrides = const <String, String>{} });
+  FakeXcodeProjectInterpreterWithBuildSettings({
+    this.overrides = const <String, String>{},
+    Version? version,
+  }) : version = version ?? Version(14, 0, 0);
 
   final Map<String, String> overrides;
-
   @override
   Future<Map<String, String>> getBuildSettings(
     String projectPath, {
@@ -46,6 +48,9 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
       'DEVELOPMENT_TEAM': 'abc',
     };
   }
+
+  @override
+  final Version version;
 }
 
 final Platform macosPlatform = FakePlatform(
@@ -72,8 +77,7 @@ class FakePlistUtils extends Fake implements PlistParser {
 }
 
 void main() {
-  late FileSystem fileSystem;
-  late TestUsage usage;
+  late MemoryFileSystem fileSystem;
   late FakeProcessManager fakeProcessManager;
   late ProcessUtils processUtils;
   late FakePlistUtils plistUtils;
@@ -88,7 +92,6 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     artifacts = Artifacts.test(fileSystem: fileSystem);
-    usage = TestUsage();
     fakeProcessManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     processUtils = ProcessUtils(
@@ -413,6 +416,172 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
+  testUsingContext('ipa build uses new "debugging" export method when on Xcode versions > 15.3', () async {
+    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
+    ]);
+    createMinimalMockProjectFiles();
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'ipa','--export-method', 'development', '--no-pub']
+    );
+
+    const String expectedIpaPlistContents = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>method</key>
+        <string>debugging</string>
+        <key>uploadBitcode</key>
+        <false/>
+    </dict>
+</plist>
+''';
+
+    final String actualIpaPlistContents = fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+
+    expect(actualIpaPlistContents, expectedIpaPlistContents);
+    expect(logger.statusText, contains('Building debugging IPA'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+  });
+
+  testUsingContext('ipa build uses new "release-testing" export method when on Xcode versions > 15.3', () async {
+    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
+    ]);
+    createMinimalMockProjectFiles();
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'ipa','--export-method', 'ad-hoc', '--no-pub']
+    );
+
+    const String expectedIpaPlistContents = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>method</key>
+        <string>release-testing</string>
+        <key>uploadBitcode</key>
+        <false/>
+    </dict>
+</plist>
+''';
+
+    final String actualIpaPlistContents = fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+
+    expect(actualIpaPlistContents, expectedIpaPlistContents);
+    expect(logger.statusText, contains('Building release-testing IPA'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+  });
+
+  testUsingContext('ipa build uses new "app-store-connect" export method when on Xcode versions > 15.3', () async {
+    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
+    ]);
+    createMinimalMockProjectFiles();
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'ipa','--export-method', 'app-store', '--no-pub']
+    );
+
+    const String expectedIpaPlistContents = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>method</key>
+        <string>app-store-connect</string>
+        <key>uploadBitcode</key>
+        <false/>
+    </dict>
+</plist>
+''';
+
+    final String actualIpaPlistContents = fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+
+    expect(actualIpaPlistContents, expectedIpaPlistContents);
+    expect(logger.statusText, contains('Building App Store IPA'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+  });
+
+  testUsingContext('ipa build accepts legacy methods when on Xcode versions <= 15.3', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+    createMinimalMockProjectFiles();
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'ipa','--export-method', 'app-store', '--no-pub']
+    );
+    expect(logger.statusText, contains('Building App Store IPA'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 3, null)),
+  });
+
   testUsingContext('ipa build reports method from --export-options-plist when used', () async {
     final File exportOptions = fileSystem.file('/ExportOptions.plist')
       ..createSync();
@@ -485,14 +654,18 @@ void main() {
     ]);
     createMinimalMockProjectFiles();
 
+    fileSystem.directory('build/ios/archive/Runner.xcarchive').createSync(recursive: true);
+
     await createTestCommandRunner(command).run(
       const <String>['build', 'ipa', '--no-pub']
     );
 
-    expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(logger.statusText, contains('Built build/ios/archive/Runner.xcarchive'));
     expect(logger.statusText, contains('Building App Store IPA'));
     expect(logger.errorText, contains('Encountered error while creating the IPA:'));
     expect(logger.errorText, contains('error: exportArchive: "Runner.app" requires a provisioning profile.'));
+    expect(logger.errorText, contains('Try distributing the app in Xcode:'));
+    expect(logger.errorText, contains('open /build/ios/archive/Runner.xcarchive'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -869,9 +1042,6 @@ void main() {
 
     expect(logger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
     expect(logger.statusText, contains('dart devtools --appSizeBase='));
-    expect(usage.events, contains(
-      const TestUsageEvent('code-size-analysis', 'ios'),
-    ));
     expect(fakeProcessManager, hasNoRemainingExpectations);
     expect(fakeAnalytics.sentEvents, contains(
       Event.codeSizeAnalysis(platform: 'ios')
@@ -882,7 +1052,6 @@ void main() {
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
-    Usage: () => usage,
     Analytics: () => fakeAnalytics,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -1066,7 +1235,7 @@ void main() {
   });
 
 
-  testUsingContext('Extra error message for provision profile issue in xcresulb bundle.', () async {
+  testUsingContext('Extra error message for provision profile issue in xcresult bundle.', () async {
     final BuildCommand command = BuildCommand(
       artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
@@ -1147,7 +1316,7 @@ void main() {
     ));
     expect(
       logger.statusText,
-      contains('To update the settings, please refer to https://docs.flutter.dev/deployment/ios')
+      contains('To update the settings, please refer to https://flutter.dev/to/ios-deploy')
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1206,7 +1375,7 @@ void main() {
     );
     expect(
       logger.statusText,
-      contains('To update the settings, please refer to https://docs.flutter.dev/deployment/ios')
+      contains('To update the settings, please refer to https://flutter.dev/to/ios-deploy')
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1264,7 +1433,7 @@ void main() {
     );
     expect(
       logger.statusText,
-      contains('To update the settings, please refer to https://docs.flutter.dev/deployment/ios'),
+      contains('To update the settings, please refer to https://flutter.dev/to/ios-deploy'),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

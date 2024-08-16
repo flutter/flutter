@@ -147,6 +147,7 @@ Future<void> writeBundle(
   required Artifacts artifacts,
   required Logger logger,
   required Directory projectDir,
+  required BuildMode buildMode,
 }) async {
   if (bundleDir.existsSync()) {
     try {
@@ -178,6 +179,7 @@ Future<void> writeBundle(
     processManager: processManager,
     fileSystem: fileSystem,
     dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
+    buildMode: buildMode,
   );
 
   // Limit number of open files to avoid running out of file descriptors.
@@ -207,10 +209,12 @@ Future<void> writeBundle(
               outputPath: file.path,
               workingDirectory: projectDir.path,
               transformerEntries: entry.value.transformers,
+              logger: logger,
             );
             doCopy = false;
             if (failure != null) {
-              throwToolExit(failure.message);
+              throwToolExit('User-defined transformation of asset "${entry.key}" failed.\n'
+                  '${failure.message}');
             }
             case AssetKind.font:
               break;

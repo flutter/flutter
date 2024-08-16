@@ -337,22 +337,14 @@ class _HighlightSpan {
   }
 
   TextStyle? textStyle(SyntaxHighlighterStyle? style) {
-    if (type == _HighlightType.number) {
-      return style!.numberStyle;
-    } else if (type == _HighlightType.comment) {
-      return style!.commentStyle;
-    } else if (type == _HighlightType.keyword) {
-      return style!.keywordStyle;
-    } else if (type == _HighlightType.string) {
-      return style!.stringStyle;
-    } else if (type == _HighlightType.punctuation) {
-      return style!.punctuationStyle;
-    } else if (type == _HighlightType.klass) {
-      return style!.classStyle;
-    } else if (type == _HighlightType.constant) {
-      return style!.constantStyle;
-    } else {
-      return style!.baseStyle;
-    }
+    return switch (type) {
+      _HighlightType.number      => style!.numberStyle,
+      _HighlightType.comment     => style!.commentStyle,
+      _HighlightType.keyword     => style!.keywordStyle,
+      _HighlightType.string      => style!.stringStyle,
+      _HighlightType.punctuation => style!.punctuationStyle,
+      _HighlightType.klass       => style!.classStyle,
+      _HighlightType.constant    => style!.constantStyle,
+    };
   }
 }

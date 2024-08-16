@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'bottom_navigation_bar.dart';
+/// @docImport 'navigation_rail.dart';
+/// @docImport 'scaffold.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -332,7 +337,7 @@ class NavigationDestination extends StatelessWidget {
   /// selected.
   ///
   /// The icon will use [NavigationBarThemeData.iconTheme] with
-  /// [MaterialState.selected]. If this is null, the default [IconThemeData]
+  /// [WidgetState.selected]. If this is null, the default [IconThemeData]
   /// would use a size of 24.0 and [ColorScheme.onSurface].
   final Widget? selectedIcon;
 
@@ -403,7 +408,7 @@ class NavigationDestination extends StatelessWidget {
             _StatusTransitionWidgetBuilder(
               animation: animation,
               builder: (BuildContext context, Widget? child) {
-                return _isForwardOrCompleted(animation)
+                return animation.isForwardOrCompleted
                   ? selectedIconWidget
                   : unselectedIconWidget;
               },
@@ -420,7 +425,7 @@ class NavigationDestination extends StatelessWidget {
           ?? defaults.labelTextStyle!.resolve(disabledState);
 
         final TextStyle? textStyle = enabled
-          ? _isForwardOrCompleted(animation)
+          ? animation.isForwardOrCompleted
             ? effectiveSelectedLabelTextStyle
             : effectiveUnselectedLabelTextStyle
           : effectiveDisabledLabelTextStyle;
@@ -778,7 +783,7 @@ class NavigationIndicator extends StatelessWidget {
         animation: animation,
         builder: (BuildContext context, Widget? child) {
           return _SelectableAnimatedBuilder(
-            isSelected: _isForwardOrCompleted(animation),
+            isSelected: animation.isForwardOrCompleted,
             duration: const Duration(milliseconds: 100),
             alwaysDoFullAnimation: true,
             builder: (BuildContext context, Animation<double> fadeAnimation) {
@@ -903,9 +908,7 @@ class _DestinationLayoutAnimationBuilder extends StatelessWidget {
           animation: info.selectedAnimation,
           curve: Curves.easeInOutCubicEmphasized,
           reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
-          builder: (BuildContext context, Animation<double> curvedAnimation) {
-            return builder(context, curvedAnimation);
-          },
+          builder: builder,
         );
     }
   }
@@ -940,7 +943,7 @@ class _NavigationBarDestinationSemantics extends StatelessWidget {
       animation: destinationInfo.selectedAnimation,
       builder: (BuildContext context, Widget? child) {
         return Semantics(
-          selected: _isForwardOrCompleted(destinationInfo.selectedAnimation),
+          selected: destinationInfo.selectedAnimation.isForwardOrCompleted,
           container: true,
           child: child,
         );
@@ -1226,8 +1229,8 @@ class _SelectableAnimatedBuilderState extends State<_SelectableAnimatedBuilder>
 /// Watches [animation] and calls [builder] with the appropriate [Curve]
 /// depending on the direction of the [animation] status.
 ///
-/// If [animation.status] is forward or complete, [curve] is used. If
-/// [animation.status] is reverse or dismissed, [reverseCurve] is used.
+/// If [Animation.status] is forward or complete, [curve] is used. If
+/// [Animation.status] is reverse or dismissed, [reverseCurve] is used.
 ///
 /// If the [animation] changes direction while it is already running, the curve
 /// used will not change, this will keep the animations smooth until it
@@ -1301,13 +1304,6 @@ class _CurvedAnimationBuilderState extends State<_CurvedAnimationBuilder> {
 
     return widget.builder(context, curvedAnimation);
   }
-}
-
-/// Returns `true` if this animation is ticking forward, or has completed,
-/// based on [status].
-bool _isForwardOrCompleted(Animation<double> animation) {
-  return animation.status == AnimationStatus.forward
-      || animation.status == AnimationStatus.completed;
 }
 
 NavigationBarThemeData _defaultsFor(BuildContext context) {

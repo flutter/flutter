@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'elevated_button.dart';
+/// @docImport 'filled_button.dart';
+/// @docImport 'material.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -95,6 +101,8 @@ class OutlinedButton extends ButtonStyleButton {
     Key? key,
     required VoidCallback? onPressed,
     VoidCallback? onLongPress,
+    ValueChanged<bool>? onHover,
+    ValueChanged<bool>? onFocusChange,
     ButtonStyle? style,
     FocusNode? focusNode,
     bool? autofocus,
@@ -109,6 +117,8 @@ class OutlinedButton extends ButtonStyleButton {
         key: key,
         onPressed: onPressed,
         onLongPress: onLongPress,
+        onHover: onHover,
+        onFocusChange: onFocusChange,
         style: style,
         focusNode: focusNode,
         autofocus: autofocus ?? false,
@@ -121,6 +131,8 @@ class OutlinedButton extends ButtonStyleButton {
       key: key,
       onPressed: onPressed,
       onLongPress: onLongPress,
+      onHover: onHover,
+      onFocusChange: onFocusChange,
       style: style,
       focusNode: focusNode,
       autofocus: autofocus ?? false,
@@ -136,11 +148,11 @@ class OutlinedButton extends ButtonStyleButton {
   /// [ButtonStyle] given simple values.
   ///
   /// The [foregroundColor] and [disabledForegroundColor] colors are used
-  /// to create a [MaterialStateProperty] [ButtonStyle.foregroundColor], and
+  /// to create a [WidgetStateProperty] [ButtonStyle.foregroundColor], and
   /// a derived [ButtonStyle.overlayColor] if [overlayColor] isn't specified.
   ///
   /// The [backgroundColor] and [disabledBackgroundColor] colors are
-  /// used to create a [MaterialStateProperty] [ButtonStyle.backgroundColor].
+  /// used to create a [WidgetStateProperty] [ButtonStyle.backgroundColor].
   ///
   /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
   /// parameters are used to construct [ButtonStyle.mouseCursor] and
@@ -149,11 +161,11 @@ class OutlinedButton extends ButtonStyleButton {
   ///
   /// If [overlayColor] is specified and its value is [Colors.transparent]
   /// then the pressed/focused/hovered highlights are effectively defeated.
-  /// Otherwise a [MaterialStateProperty] with the same opacities as the
+  /// Otherwise a [WidgetStateProperty] with the same opacities as the
   /// default is created.
   ///
   /// All of the other parameters are either used directly or used to
-  /// create a [MaterialStateProperty] with a single value for all
+  /// create a [WidgetStateProperty] with a single value for all
   /// states.
   ///
   /// All parameters default to null, by default this method returns
@@ -265,7 +277,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// All of the ButtonStyle's defaults appear below. In this list
   /// "Theme.foo" is shorthand for `Theme.of(context).foo`. Color
   /// scheme values like "onSurface(0.38)" are shorthand for
-  /// `onSurface.withOpacity(0.38)`. [MaterialStateProperty] valued
+  /// `onSurface.withOpacity(0.38)`. [WidgetStateProperty] valued
   /// properties that are not followed by a sublist have the same
   /// value for all states, otherwise the values are as specified for
   /// each state and "others" means all other states.
@@ -345,7 +357,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `splashFactory` - Theme.splashFactory
   ///
   /// For the [OutlinedButton.icon] factory, the start (generally the left) value of
-  /// [padding] is reduced from 24 to 16.
+  /// [ButtonStyle.padding] is reduced from 24 to 16.
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -454,6 +466,8 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
     super.key,
     required super.onPressed,
     super.onLongPress,
+    super.onHover,
+    super.onFocusChange,
     super.style,
     super.focusNode,
     bool? autofocus,

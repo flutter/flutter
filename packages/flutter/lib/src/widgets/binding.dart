@@ -2,9 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/animation.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'adapter.dart';
+/// @docImport 'app_lifecycle_listener.dart';
+/// @docImport 'basic.dart';
+/// @docImport 'focus_scope.dart';
+/// @docImport 'media_query.dart';
+/// @docImport 'navigator.dart';
+/// @docImport 'pop_scope.dart';
+library;
+
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AccessibilityFeatures, AppExitResponse, AppLifecycleState, FrameTiming, Locale, PlatformDispatcher, TimingsCallback;
+import 'dart:ui' show AccessibilityFeatures, AppExitResponse, AppLifecycleState,
+  FrameTiming, Locale, PlatformDispatcher, TimingsCallback, ViewFocusEvent;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -320,6 +334,18 @@ abstract mixin class WidgetsBindingObserver {
   ///  * [AppLifecycleListener], an alternative API for responding to
   ///    application lifecycle changes.
   void didChangeAppLifecycleState(AppLifecycleState state) { }
+
+  /// Called whenever the [PlatformDispatcher] receives a notification that the
+  /// focus state on a view has changed.
+  ///
+  /// The [event] contains the view ID for the view that changed its focus
+  /// state.
+  ///
+  /// The view ID of the [FlutterView] in which a particular [BuildContext]
+  /// resides can be retrieved with `View.of(context).viewId`, so that it may be
+  /// compared with the view ID in the `event` to see if the event pertains to
+  /// the given context.
+  void didChangeViewFocus(ViewFocusEvent event) { }
 
   /// Called when a request is received from the system to exit the application.
   ///
@@ -830,13 +856,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// {@endtemplate}
   @protected
   @visibleForTesting
-  Future<void> handlePopRoute() async {
+  Future<bool> handlePopRoute() async {
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPopRoute()) {
-        return;
+        return true;
       }
     }
     SystemNavigator.pop();
+    return false;
   }
 
   // The observer that is currently handling an active predictive back gesture.
@@ -870,7 +897,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       // back gesture occurs but no predictive back route transition exists to
       // handle it. The back gesture should still cause normal pop even if it
       // doesn't cause a predictive transition.
-      return handlePopRoute();
+      await handlePopRoute();
+      return;
     }
     _backGestureObserver?.handleCommitBackGesture();
   }
@@ -896,33 +924,36 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   @visibleForTesting
-  Future<void> handlePushRoute(String route) async {
+  Future<bool> handlePushRoute(String route) async {
     final RouteInformation routeInformation = RouteInformation(uri: Uri.parse(route));
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPushRouteInformation(routeInformation)) {
-        return;
+        return true;
       }
     }
+    return false;
   }
 
-  Future<void> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
+  Future<bool> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
     final RouteInformation routeInformation = RouteInformation(
       uri: Uri.parse(routeArguments['location'] as String),
       state: routeArguments['state'] as Object?,
     );
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPushRouteInformation(routeInformation)) {
-        return;
+        return true;
       }
     }
+    return false;
   }
 
-  Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) {
+  Future<bool> _handleNavigationInvocation(MethodCall methodCall) {
     return switch (methodCall.method) {
       'popRoute' => handlePopRoute(),
       'pushRoute' => handlePushRoute(methodCall.arguments as String),
       'pushRouteInformation' => _handlePushRouteInformation(methodCall.arguments as Map<dynamic, dynamic>),
-      _ => Future<dynamic>.value(),
+      // Return false for unhandled method.
+      _ => Future<bool>.value(false),
     };
   }
 
@@ -943,6 +974,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     super.handleAppLifecycleStateChanged(state);
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeAppLifecycleState(state);
+    }
+  }
+
+  @override
+  void handleViewFocusChanged(ViewFocusEvent event) {
+    super.handleViewFocusChanged(event);
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+      observer.didChangeViewFocus(event);
     }
   }
 
@@ -1354,7 +1393,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 /// as soon as it is displayed again.
 /// {@endtemplate}
 ///
-/// To release resources more eagerly, establish a [platform channel](https://flutter.dev/platform-channels/)
+/// To release resources more eagerly, establish a [platform channel](https://flutter.dev/to/platform-channels)
 /// and use it to call [runApp] with a widget such as [SizedBox.shrink] when
 /// the framework should dispose of the active widget tree.
 ///
@@ -1412,11 +1451,9 @@ void runApp(Widget app) {
 /// calling [runWidget] with a [ViewCollection] that does not specify any
 /// [ViewCollection.views].
 ///
-/// ## Dismissing Flutter UI via platform native methods
-///
 /// {@macro flutter.widgets.runApp.dismissal}
 ///
-/// To release resources more eagerly, establish a [platform channel](https://flutter.dev/platform-channels/)
+/// To release resources more eagerly, establish a [platform channel](https://flutter.dev/to/platform-channels)
 /// and use it to remove the [View] whose widget resources should be released
 /// from the `app` widget tree provided to [runWidget].
 ///

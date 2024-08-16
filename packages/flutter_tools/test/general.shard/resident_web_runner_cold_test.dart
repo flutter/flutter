@@ -29,7 +29,7 @@ import '../src/test_build_system.dart';
 void main() {
   late FakeFlutterDevice mockFlutterDevice;
   late FakeWebDevFS mockWebDevFS;
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -50,7 +50,6 @@ void main() {
       mockFlutterDevice,
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -81,7 +80,6 @@ void main() {
       mockFlutterDevice,
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -107,7 +105,6 @@ void main() {
       mockFlutterDevice,
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -132,7 +129,6 @@ void main() {
       mockFlutterDevice,
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -162,7 +158,6 @@ void main() {
       mockFlutterDevice,
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),

@@ -28,7 +28,6 @@ const String kFlushUIThreadTasksMethod = '_flutter.flushUIThreadTasks';
 const String kRunInViewMethod = '_flutter.runInView';
 const String kListViewsMethod = '_flutter.listViews';
 const String kScreenshotSkpMethod = '_flutter.screenshotSkp';
-const String kRenderFrameWithRasterStatsMethod = '_flutter.renderFrameWithRasterStats';
 const String kReloadAssetFonts = '_flutter.reloadAssetFonts';
 
 const String kFlutterToolAlias = 'Flutter Tools';
@@ -571,9 +570,14 @@ class FlutterVmService {
   }) async {
     try {
       await service.streamListen(vm_service.EventStreams.kIsolate);
-    } on vm_service.RPCError {
-      // Do nothing, since the tool is already subscribed.
+    } on vm_service.RPCError catch (e) {
+      // Do nothing if the tool is already subscribed.
+      const int streamAlreadySubscribed = 103;
+      if (e.code != streamAlreadySubscribed) {
+        rethrow;
+      }
     }
+
     final Future<void> onRunnable = service.onIsolateEvent.firstWhere((vm_service.Event event) {
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
@@ -586,26 +590,6 @@ class FlutterVmService {
       },
     );
     await onRunnable;
-  }
-
-  /// Renders the last frame with additional raster tracing enabled.
-  ///
-  /// When a frame is rendered using this method it will incur additional cost
-  /// for rasterization which is not reflective of how long the frame takes in
-  /// production. This is primarily intended to be used to identify the layers
-  /// that result in the most raster perf degradation.
-  Future<Map<String, Object?>?> renderFrameWithRasterStats({
-    required String? viewId,
-    required String? uiIsolateId,
-  }) async {
-    final vm_service.Response? response = await callMethodWrapper(
-      kRenderFrameWithRasterStatsMethod,
-      isolateId: uiIsolateId,
-      args: <String, String?>{
-        'viewId': viewId,
-      },
-    );
-    return response?.json;
   }
 
   Future<String> flutterDebugDumpApp({
@@ -977,6 +961,9 @@ class FlutterVmService {
         }
       }
       return await extensionAdded.future;
+    } on vm_service.RPCError {
+      // Translate this exception into something the outer layer understands
+      throw VmServiceDisappearedException();
     } finally {
       await isolateEvents.cancel();
       try {
@@ -993,14 +980,11 @@ class FlutterVmService {
       throw VmServiceDisappearedException();
     }
 
-    final List<vm_service.IsolateRef> refs = <vm_service.IsolateRef>[];
-    for (final FlutterView flutterView in flutterViews) {
-      final vm_service.IsolateRef? uiIsolate = flutterView.uiIsolate;
-      if (uiIsolate != null) {
-        refs.add(uiIsolate);
-      }
-    }
-    return refs;
+    return <vm_service.IsolateRef>[
+      for (final FlutterView flutterView in flutterViews)
+        if (flutterView.uiIsolate case final vm_service.IsolateRef uiIsolate)
+          uiIsolate,
+    ];
   }
 
   /// Attempt to retrieve the isolate with id [isolateId], or `null` if it has

@@ -9,6 +9,7 @@ import 'package:dds/dap.dart' hide PidTracker;
 import 'package:vm_service/vm_service.dart' as vm;
 
 import '../base/io.dart';
+import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals show fs;
@@ -328,7 +329,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     final int id = _flutterRequestId++;
     _flutterRequestCompleters[id] = completer;
 
-    sendFlutterMessage(<String, Object?>{
+    await sendFlutterMessage(<String, Object?>{
       'id': id,
       'method': method,
       'params': params,
@@ -340,7 +341,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   /// Sends a message to the Flutter run daemon.
   ///
   /// Throws `DebugAdapterException` if a Flutter process is not yet running.
-  void sendFlutterMessage(Map<String, Object?> message) {
+  Future<void> sendFlutterMessage(Map<String, Object?> message) async {
     final Process? process = this.process;
     if (process == null) {
       throw DebugAdapterException('Flutter process has not yet started');
@@ -350,7 +351,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     // Flutter requests are always wrapped in brackets as an array.
     final String payload = '[$messageString]\n';
     _logTraffic('==> [Flutter] $payload');
-    process.stdin.writeln(payload);
+    await ProcessUtils.writelnToStdinUnsafe(stdin: process.stdin, line: payload);
   }
 
   /// Called by [terminateRequest] to request that we gracefully shut down the app being run (or in the case of an attach, disconnect).
@@ -385,14 +386,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
         // debugger we send this ourselves, to allow clients to connect to the
         // VM Service for things like starting DevTools, even if debugging is
         // not available.
-        // TODO(dantup): Switch this to call `sendDebuggerUris()` on the base
-        //   adapter once rolled into Flutter.
-        sendEvent(
-          RawEventBody(<String, Object?>{
-            'vmServiceUri': vmServiceUri.toString(),
-          }),
-          eventType: 'dart.debuggerUris',
-        );
+        sendDebuggerUris(vmServiceUri);
       }
   }
 
@@ -452,6 +446,22 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     );
   }
 
+  /// Handles the app.stop event from Flutter.
+  Future<void> _handleAppStop(Map<String, Object?> params) async {
+    // It's possible to get an app.stop without ever having an app.start in the
+    // case of an error, so we may need to clean up the launch progress.
+    // https://github.com/Dart-Code/Dart-Code/issues/5124
+    // https://github.com/flutter/flutter/issues/149258
+    launchProgress?.end();
+    launchProgress = null;
+
+    // If the stop had an error attached, be sure to pass it to the client.
+    final Object? error = params['error'];
+    if (error is String) {
+      sendConsoleOutput(error);
+    }
+  }
+
   /// Handles the daemon.connected event, recording the pid of the flutter_tools process.
   void _handleDaemonConnected(Map<String, Object?> params) {
     // On Windows, the pid from the process we spawn is the shell running
@@ -498,6 +508,8 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
         _handleAppProgress(params);
       case 'app.started':
         _handleAppStarted();
+      case 'app.stop':
+        _handleAppStop(params);
     }
 
     if (_eventsToForwardToClient.contains(event)) {
@@ -523,8 +535,8 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     Map<String, Object?>? params,
   ) {
     /// A helper to send a client response to Flutter.
-    void sendResponseToFlutter(Object? id, Object? value, { bool error = false }) {
-      sendFlutterMessage(<String, Object?>{
+    Future<void> sendResponseToFlutter(Object? id, Object? value, { bool error = false }) async {
+      await sendFlutterMessage(<String, Object?>{
         'id': id,
         if (error)
           'error': value

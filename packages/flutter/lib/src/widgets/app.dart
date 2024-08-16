@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'heroes.dart';
+/// @docImport 'overlay.dart';
+/// @docImport 'view.dart';
+library;
+
 import 'dart:collection' show HashMap;
 
 import 'package:flutter/foundation.dart';
@@ -330,8 +338,6 @@ class WidgetsApp extends StatefulWidget {
     this.localeResolutionCallback,
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.showPerformanceOverlay = false,
-    this.checkerboardRasterCacheImages = false,
-    this.checkerboardOffscreenLayers = false,
     this.showSemanticsDebugger = false,
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
@@ -430,8 +436,6 @@ class WidgetsApp extends StatefulWidget {
     this.localeResolutionCallback,
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.showPerformanceOverlay = false,
-    this.checkerboardRasterCacheImages = false,
-    this.checkerboardOffscreenLayers = false,
     this.showSemanticsDebugger = false,
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
@@ -661,7 +665,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// When a named route is pushed with [Navigator.pushNamed], the route name is
   /// looked up in this map. If the name is present, the associated
-  /// [widgets.WidgetBuilder] is used to construct a [PageRoute] specified by
+  /// [WidgetBuilder] is used to construct a [PageRoute] specified by
   /// [pageRouteBuilder] to perform an appropriate transition, including [Hero]
   /// animations, to the new route.
   ///
@@ -1008,18 +1012,8 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://flutter.dev/debugging/#performance-overlay>
+  ///  * <https://flutter.dev/to/performance-overlay>
   final bool showPerformanceOverlay;
-
-  /// Checkerboards raster cache images.
-  ///
-  /// See [PerformanceOverlay.checkerboardRasterCacheImages].
-  final bool checkerboardRasterCacheImages;
-
-  /// Checkerboards layers rendered to offscreen bitmaps.
-  ///
-  /// See [PerformanceOverlay.checkerboardOffscreenLayers].
-  final bool checkerboardOffscreenLayers;
 
   /// Turns on an overlay that shows the accessibility information
   /// reported by the framework.
@@ -1365,7 +1359,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   AppLifecycleState? _appLifecycleState;
 
-  /// The default value for [onNavigationNotification].
+  /// The default value for [WidgetsApp.onNavigationNotification].
   ///
   /// Does nothing and stops bubbling if the app is detached. Otherwise, updates
   /// the platform with [NavigationNotification.canHandlePop] and stops
@@ -1670,7 +1664,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           ),
           ErrorSpacer(),
           ErrorDescription(
-            'See https://flutter.dev/tutorials/internationalization/ for more '
+            'See https://flutter.dev/to/internationalization/ for more '
             "information about configuring an app's locale, supportedLocales, "
             'and localizationsDelegates parameters.',
           ),
@@ -1740,25 +1734,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       );
     }
 
-    PerformanceOverlay? performanceOverlay;
-    // We need to push a performance overlay if any of the display or checkerboarding
-    // options are set.
     if (widget.showPerformanceOverlay || WidgetsApp.showPerformanceOverlayOverride) {
-      performanceOverlay = PerformanceOverlay.allEnabled(
-        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-      );
-    } else if (widget.checkerboardRasterCacheImages || widget.checkerboardOffscreenLayers) {
-      performanceOverlay = PerformanceOverlay(
-        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-      );
-    }
-    if (performanceOverlay != null) {
       result = Stack(
         children: <Widget>[
           result,
-          Positioned(top: 0.0, left: 0.0, right: 0.0, child: performanceOverlay),
+          Positioned(top: 0.0, left: 0.0, right: 0.0, child: PerformanceOverlay.allEnabled()),
         ],
       );
     }

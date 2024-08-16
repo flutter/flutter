@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker/leak_tracker.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -166,6 +167,10 @@ void main() {
     );
   }
 
+  RenderObject getOverlayColor(WidgetTester tester) {
+    return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+  }
+
   testWidgets('Menu responds to density changes', (WidgetTester tester) async {
     Widget buildMenu({VisualDensity? visualDensity = VisualDensity.standard}) {
       return MaterialApp(
@@ -251,13 +256,13 @@ void main() {
     expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(105.0, 0.0, 695.0, 72.0)));
     expect(
       tester.getRect(find.widgetWithText(MenuItemButton, TestMenu.subMenu10.label)),
-      equals(const Rect.fromLTRB(249.0, 80.0, 483.0, 136.0)),
+      equals(const Rect.fromLTRB(257.0, 80.0, 491.0, 136.0)),
     );
     expect(
       tester.getRect(
         find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1),
       ),
-      equals(const Rect.fromLTRB(241.0, 64.0, 491.0, 264.0)),
+      equals(const Rect.fromLTRB(249.0, 64.0, 499.0, 264.0)),
     );
   });
 
@@ -662,7 +667,7 @@ void main() {
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(0, 0, 800, 48)));
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(124.0, 73.0, 278.0, 87.0)),
+        equals(const Rect.fromLTRB(124.0, 73.0, 314.0, 87.0)),
       );
       expect(
         tester.getRect(
@@ -730,7 +735,7 @@ void main() {
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(0, 0, 800, 48)));
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(522.0, 73.0, 676.0, 87.0)),
+        equals(const Rect.fromLTRB(486.0, 73.0, 676.0, 87.0)),
       );
       expect(
         tester.getRect(
@@ -941,7 +946,7 @@ void main() {
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(22.0, 22.0, 778.0, 70.0)));
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(146.0, 95.0, 300.0, 109.0)),
+        equals(const Rect.fromLTRB(146.0, 95.0, 336.0, 109.0)),
       );
       expect(
         tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),
@@ -997,7 +1002,7 @@ void main() {
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(22.0, 22.0, 778.0, 70.0)));
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(500.0, 95.0, 654.0, 109.0)),
+        equals(const Rect.fromLTRB(464.0, 95.0, 654.0, 109.0)),
       );
       expect(
         tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),
@@ -2070,7 +2075,7 @@ void main() {
       expect(closed, unorderedEquals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
       expect(opened, isEmpty);
     });
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
 
   group('MenuItemButton', () {
     testWidgets('Shortcut mnemonics are displayed', (WidgetTester tester) async {
@@ -2191,7 +2196,62 @@ void main() {
       expect(mnemonic1.data, equals('Fn'));
       mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
       expect(mnemonic2.data, equals('↵'));
-    }, variant: TargetPlatformVariant.all());
+    },
+      variant: TargetPlatformVariant.all(),
+      skip: kIsWeb && !isCanvasKit, // https://github.com/flutter/flutter/issues/145527
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/145040.
+    testWidgets('CharacterActivator shortcut mnemonics include modifiers', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: createTestMenus(
+                shortcuts: <TestMenu, MenuSerializableShortcut>{
+                  TestMenu.subSubMenu110: const CharacterActivator('A', control: true),
+                  TestMenu.subSubMenu111: const CharacterActivator('B', alt: true),
+                  TestMenu.subSubMenu112: const CharacterActivator('C', meta: true),
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open a menu initially.
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
+      await tester.pump();
+
+      await tester.tap(find.text(TestMenu.subMenu11.label));
+      await tester.pump();
+
+      final Text mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
+      final Text mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
+      final Text mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+          expect(mnemonic0.data, equals('Ctrl+A'));
+          expect(mnemonic1.data, equals('Alt+B'));
+          expect(mnemonic2.data, equals('Meta+C'));
+        case TargetPlatform.windows:
+          expect(mnemonic0.data, equals('Ctrl+A'));
+          expect(mnemonic1.data, equals('Alt+B'));
+          expect(mnemonic2.data, equals('Win+C'));
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(mnemonic0.data, equals('⌃ A'));
+          expect(mnemonic1.data, equals('⌥ B'));
+          expect(mnemonic2.data, equals('⌘ C'));
+      }
+    },
+      variant: TargetPlatformVariant.all(),
+      skip: kIsWeb && !isCanvasKit, // https://github.com/flutter/flutter/issues/145527
+    );
 
     testWidgets('leadingIcon is used when set', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -2221,6 +2281,45 @@ void main() {
       expect(find.text('leadingIcon'), findsOneWidget);
     });
 
+    testWidgets('autofocus is used when set and widget is enabled',
+        (WidgetTester tester) async {
+
+      listenForFocusChanges();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                MenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    MenuItemButton(
+                      autofocus: true,
+                      // Required for clickability.
+                      onPressed: () {},
+                      child: Text(TestMenu.mainMenu0.label),
+                    ),
+                    MenuItemButton(
+                      onPressed: () {},
+                      child: Text(TestMenu.mainMenu1.label),
+                    ),
+                  ],
+                ),
+                const Expanded(child: Placeholder()),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pump();
+
+      expect(controller.isOpen, equals(true));
+      expect(focusedMenu, equals('MenuItemButton(Text("${TestMenu.mainMenu0.label}"))'));
+    });
+
     testWidgets('trailingIcon is used when set', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -2247,7 +2346,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('trailingIcon'), findsOneWidget);
-    });
+    }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
 
     testWidgets('SubmenuButton uses supplied controller', (WidgetTester tester) async {
       final MenuController submenuController = MenuController();
@@ -2435,6 +2534,111 @@ void main() {
       await tester.tap(find.text('Button 1'));
       await tester.pump();
       expect(find.byType(MenuItemButton), findsNWidgets(1));
+    });
+
+    // This is a regression test for https://github.com/flutter/flutter/issues/129439.
+    testWidgets('MenuItemButton does not overflow when child is long', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 200,
+            child: MenuItemButton(
+              overflowAxis: Axis.vertical,
+              onPressed: () {},
+              child: const Text('MenuItem Button does not overflow when child is long'),
+            ),
+          ),
+        ),
+      ));
+
+      // No exception should be thrown.
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('MenuItemButton layout is updated by overflowAxis', (WidgetTester tester) async {
+      Widget buildMenuButton({ required Axis overflowAxis, bool constrainedLayout = false }) {
+        return MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: constrainedLayout ? 200 : null,
+              child: MenuItemButton(
+                overflowAxis: overflowAxis,
+                onPressed: () {},
+                child: const Text('This is a very long text that will wrap to the multiple lines.'),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Test a long MenuItemButton in an unconstrained layout with vertical overflow axis.
+      await tester.pumpWidget(buildMenuButton(overflowAxis: Axis.vertical));
+      expect(tester.getSize(find.byType(MenuItemButton)), const Size(800.0, 48.0));
+
+      // Test a long MenuItemButton in an unconstrained layout with horizontal overflow axis.
+      await tester.pumpWidget(buildMenuButton(overflowAxis: Axis.horizontal));
+      expect(tester.getSize(find.byType(MenuItemButton)), const Size(800.0, 48.0));
+
+      // Test a long MenuItemButton in a constrained layout with vertical overflow axis.
+      await tester.pumpWidget(buildMenuButton(overflowAxis: Axis.vertical, constrainedLayout: true));
+      expect(tester.getSize(find.byType(MenuItemButton)), const Size(200.0, 120.0));
+
+      // Test a long MenuItemButton in a constrained layout with horizontal overflow axis.
+      await tester.pumpWidget(buildMenuButton(overflowAxis: Axis.horizontal, constrainedLayout: true));
+      expect(tester.getSize(find.byType(MenuItemButton)), const Size(200.0, 48.0));
+      // This should throw an error.
+      final AssertionError exception = tester.takeException() as AssertionError;
+      expect(exception, isAssertionError);
+    }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+
+    testWidgets('MenuItemButton.styleFrom overlayColor overrides default overlay color', (WidgetTester tester) async {
+      const Color overlayColor = Color(0xffff0000);
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: MenuItemButton(
+            style: MenuItemButton.styleFrom(overlayColor: overlayColor),
+            onPressed: () {},
+            child: const Text('MenuItem'),
+          ),
+        ),
+      ));
+
+      // Hovered.
+      final Offset center = tester.getCenter(find.byType(MenuItemButton));
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.addPointer();
+      await gesture.moveTo(center);
+      await tester.pumpAndSettle();
+      expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.08)));
+
+      // Highlighted (pressed).
+      await gesture.down(center);
+      await tester.pumpAndSettle();
+      expect(
+        getOverlayColor(tester),
+        paints
+          ..rect(color: overlayColor.withOpacity(0.08))
+          ..rect(color: overlayColor.withOpacity(0.08))
+          ..rect(color: overlayColor.withOpacity(0.1)),
+      );
+    });
+
+    testWidgets('MenuItemButton can build when its child is null', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 200,
+              child: MenuItemButton(),
+            ),
+          ),
+        ),
+      );
+
+      // exception `Null check operator used on a null value` would be thrown.
+      expect(tester.takeException(), isNull);
     });
   });
 
@@ -3029,7 +3233,7 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(161.0, 0.0, 639.0, 40.0),
           Rect.fromLTRB(265.0, 40.0, 467.0, 160.0),
-          Rect.fromLTRB(467.0, 72.0, 707.0, 232.0),
+          Rect.fromLTRB(467.0, 80.0, 707.0, 240.0),
         ]),
       );
     });
@@ -3045,7 +3249,7 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(161.0, 0.0, 639.0, 40.0),
           Rect.fromLTRB(333.0, 40.0, 535.0, 160.0),
-          Rect.fromLTRB(93.0, 72.0, 333.0, 232.0),
+          Rect.fromLTRB(93.0, 80.0, 333.0, 240.0),
         ]),
       );
     });
@@ -3159,7 +3363,7 @@ void main() {
       expect(find.text(allExpected), findsOneWidget);
       expect(find.text(charExpected), findsOneWidget);
     }, variant: TargetPlatformVariant.all());
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
 
   group('CheckboxMenuButton', () {
     testWidgets('tapping toggles checkbox', (WidgetTester tester) async {
@@ -3309,6 +3513,7 @@ void main() {
               TestSemantics.rootChild(
                 actions: <SemanticsAction>[
                   SemanticsAction.tap,
+                  SemanticsAction.focus,
                 ],
                 label: 'ABC',
                 rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
@@ -3328,6 +3533,27 @@ void main() {
 
       semantics.dispose();
     });
+
+   testWidgets('MenuItemButton semantics respects label', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: MenuItemButton(
+              semanticsLabel: 'TestWidget',
+              shortcut: const SingleActivator(LogicalKeyboardKey.comma),
+              style: MenuItemButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
+              onPressed: () {},
+              child: const Text('ABC'),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.bySemanticsLabel('TestWidget'), findsOneWidget);
+      semantics.dispose();
+    }, variant: TargetPlatformVariant.desktop());
+
 
     testWidgets('SubMenuButton is not a semantic button', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
@@ -3418,7 +3644,7 @@ void main() {
                               SemanticsFlag.hasExpandedState,
                               SemanticsFlag.isExpanded,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: 'ABC',
                             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                           ),
@@ -3440,7 +3666,7 @@ void main() {
                                       SemanticsFlag.isEnabled,
                                       SemanticsFlag.isFocusable,
                                     ],
-                                    actions: <SemanticsAction>[SemanticsAction.tap],
+                                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                                   ),
                                 ],
                               ),
@@ -3488,7 +3714,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: 'ABC',
                             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                           ),
@@ -3566,7 +3792,7 @@ void main() {
     expect(material.textStyle?.fontStyle, menuTextStyle.fontStyle);
     expect(material.textStyle?.wordSpacing, menuTextStyle.wordSpacing);
     expect(material.textStyle?.decoration, menuTextStyle.decoration);
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
 
   testWidgets('SubmenuButton.onFocusChange is respected', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -3605,6 +3831,115 @@ void main() {
     expect(focusNode.hasFocus, false);
     expect(onFocusChangeCalled, 2);
   });
+
+  testWidgets('Horizontal _MenuPanel wraps children with IntrinsicWidth', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: MenuBar(
+            children: <Widget>[
+              MenuItemButton(
+                onPressed: () {},
+                child: const Text('Menu Item'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Horizontal _MenuPanel wraps children with IntrinsicWidth to ensure MenuItemButton
+    // with vertical overflow axis is as wide as the widest child.
+    final Finder intrinsicWidthFinder = find.ancestor(
+      of: find.byType(MenuItemButton),
+      matching: find.byType(IntrinsicWidth),
+    );
+    expect(intrinsicWidthFinder, findsOneWidget);
+  });
+
+  testWidgets('SubmenuButton.styleFrom overlayColor overrides default overlay color', (WidgetTester tester) async {
+    const Color overlayColor = Color(0xffff00ff);
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SubmenuButton(
+          style: SubmenuButton.styleFrom(overlayColor: overlayColor),
+          menuChildren: <Widget>[
+            MenuItemButton(
+              onPressed: () {},
+              child: const Text('MenuItemButton'),
+            ),
+          ],
+          child: const Text('Submenu'),
+        ),
+      ),
+    ));
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(SubmenuButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.08)));
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(
+      getOverlayColor(tester),
+      paints
+        ..rect(color: overlayColor.withOpacity(0.08))
+        ..rect(color: overlayColor.withOpacity(0.08))
+        ..rect(color: overlayColor.withOpacity(0.1)),
+    );
+  });
+
+  testWidgets('Garbage collector destroys child _MenuAnchorState after parent is closed', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/149584
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MenuAnchor(
+            controller: controller,
+            menuChildren: const <Widget>[
+              SubmenuButton(
+                menuChildren: <Widget>[],
+                child: Text(''),
+              )
+            ],
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pump();
+
+      final WeakReference<State> state =
+        WeakReference<State>(
+          tester.firstState<State<SubmenuButton>>(
+            find.byType(SubmenuButton),
+          ),
+        );
+      expect(state.target, isNotNull);
+
+      controller.close();
+      await tester.pump();
+
+      controller.open();
+      await tester.pump();
+
+      controller.close();
+      await tester.pump();
+
+      // Garbage collect. 1 should be enough, but 3 prevents flaky tests.
+      await tester.runAsync<void>(() async {
+        await forceGC(fullGcCycles: 3);
+      });
+
+      expect(state.target, isNull);
+    }, skip: kIsWeb // [intended] ForceGC does not work in web and in release mode. See https://api.flutter.dev/flutter/package-leak_tracker_leak_tracker/forceGC.html
+  );
 }
 
 List<Widget> createTestMenus({

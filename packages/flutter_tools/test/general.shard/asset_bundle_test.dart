@@ -610,7 +610,8 @@ flutter:
       fileSystem: globals.fs,
       artifacts: globals.artifacts!,
       logger: testLogger,
-      projectDir: globals.fs.currentDirectory
+      projectDir: globals.fs.currentDirectory,
+      buildMode: BuildMode.debug,
     );
 
     expect(testLogger.warningText, contains('Expected Error Text'));
@@ -737,6 +738,7 @@ flutter:
         artifacts: globals.artifacts!,
         logger: testLogger,
         projectDir: globals.fs.currentDirectory,
+        buildMode: BuildMode.debug,
       );
 
     }, overrides: <Type, Generator>{
@@ -789,6 +791,7 @@ flutter:
         artifacts: globals.artifacts!,
         logger: testLogger,
         projectDir: globals.fs.currentDirectory,
+        buildMode: BuildMode.debug,
       );
 
     }, overrides: <Type, Generator>{
@@ -876,6 +879,7 @@ flutter:
         artifacts: globals.artifacts!,
         logger: testLogger,
         projectDir: globals.fs.currentDirectory,
+        buildMode: BuildMode.debug,
       );
       expect((globals.processManager as FakeProcessManager).hasRemainingExpectations, false);
     }, overrides: <Type, Generator>{

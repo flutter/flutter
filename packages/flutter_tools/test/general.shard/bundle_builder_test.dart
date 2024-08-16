@@ -71,8 +71,8 @@ void main() {
               artifacts.getArtifactPath(Artifact.engineDartBinary),
               'run',
               'increment',
-              '--input=/.tmp_rand0/my-asset.txt-transformOutput0.txt',
-              '--output=/.tmp_rand0/my-asset.txt-transformOutput1.txt'
+              '--input=/.tmp_rand0/rand0/my-asset.txt-transformOutput0.txt',
+              '--output=/.tmp_rand0/rand0/my-asset.txt-transformOutput1.txt'
             ],
             onRun: (List<String> command) {
               final ArgResults argParseResults = (ArgParser()
@@ -119,6 +119,7 @@ void main() {
       artifacts: artifacts,
       logger: BufferLogger.test(),
       projectDir: fileSystem.currentDirectory,
+      buildMode: BuildMode.debug,
     );
 
     final File outputAssetFile = fileSystem.file('build/flutter_assets/my-asset.txt');
@@ -174,6 +175,7 @@ void main() {
         fileSystemScheme: 'test7',
         dartDefines: <String>['test8', 'test9'],
         treeShakeIcons: true,
+        packageConfigPath: '.dart_tool/package_config.json',
       ),
       project: project,
       mainPath: mainPath,

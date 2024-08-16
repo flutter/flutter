@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'date_picker.dart';
+/// @docImport 'time_picker.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
@@ -211,18 +215,12 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     _vibrate();
     setState(() {
       _mode = mode;
-      if (_selectedDate != null) {
-        if (_mode == DatePickerMode.day) {
-          SemanticsService.announce(
-            _localizations.formatMonthYear(_selectedDate!),
-            _textDirection,
-          );
-        } else {
-          SemanticsService.announce(
-            _localizations.formatYear(_selectedDate!),
-            _textDirection,
-          );
-        }
+      if (_selectedDate case final DateTime selected) {
+        final String message = switch (mode) {
+          DatePickerMode.day  => _localizations.formatMonthYear(selected),
+          DatePickerMode.year => _localizations.formatYear(selected),
+        };
+        SemanticsService.announce(message, _textDirection);
       }
     });
   }
@@ -331,10 +329,10 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
         _DatePickerModeToggleButton(
           mode: _mode,
           title: _localizations.formatMonthYear(_currentDisplayedMonthDate),
-          onTitlePressed: () {
-            // Toggle the day/year mode.
-            _handleModeChanged(_mode == DatePickerMode.day ? DatePickerMode.year : DatePickerMode.day);
-          },
+          onTitlePressed: () => _handleModeChanged(switch (_mode) {
+            DatePickerMode.day => DatePickerMode.year,
+            DatePickerMode.year => DatePickerMode.day,
+          }),
         ),
       ],
     );
@@ -399,52 +397,54 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
     final TextTheme textTheme = Theme.of(context).textTheme;
     final Color controlColor = colorScheme.onSurface.withOpacity(0.60);
 
-    return Container(
-      padding: const EdgeInsetsDirectional.only(start: 16, end: 4),
+    return SizedBox(
       height: _subHeaderHeight,
-      child: Row(
-        children: <Widget>[
-          Flexible(
-            child: Semantics(
-              label: MaterialLocalizations.of(context).selectYearSemanticsLabel,
-              excludeSemantics: true,
-              button: true,
-              container: true,
-              child: SizedBox(
-                height: _subHeaderHeight,
-                child: InkWell(
-                  onTap: widget.onTitlePressed,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      children: <Widget>[
-                        Flexible(
-                          child: Text(
-                            widget.title,
-                            overflow: TextOverflow.ellipsis,
-                            style: textTheme.titleSmall?.copyWith(
+      child: Padding(
+        padding: const EdgeInsetsDirectional.only(start: 16, end: 4),
+        child: Row(
+          children: <Widget>[
+            Flexible(
+              child: Semantics(
+                label: MaterialLocalizations.of(context).selectYearSemanticsLabel,
+                excludeSemantics: true,
+                button: true,
+                container: true,
+                child: SizedBox(
+                  height: _subHeaderHeight,
+                  child: InkWell(
+                    onTap: widget.onTitlePressed,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Row(
+                        children: <Widget>[
+                          Flexible(
+                            child: Text(
+                              widget.title,
+                              overflow: TextOverflow.ellipsis,
+                              style: textTheme.titleSmall?.copyWith(
+                                color: controlColor,
+                              ),
+                            ),
+                          ),
+                          RotationTransition(
+                            turns: _controller,
+                            child: Icon(
+                              Icons.arrow_drop_down,
                               color: controlColor,
                             ),
                           ),
-                        ),
-                        RotationTransition(
-                          turns: _controller,
-                          child: Icon(
-                            Icons.arrow_drop_down,
-                            color: controlColor,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          if (widget.mode == DatePickerMode.day)
-            // Give space for the prev/next month buttons that are underneath this row
-            const SizedBox(width: _monthNavButtonsWidth),
-        ],
+            if (widget.mode == DatePickerMode.day)
+              // Give space for the prev/next month buttons that are underneath this row
+              const SizedBox(width: _monthNavButtonsWidth),
+          ],
+        ),
       ),
     );
   }
@@ -761,25 +761,27 @@ class _MonthPickerState extends State<_MonthPicker> {
     return Semantics(
       child: Column(
         children: <Widget>[
-          Container(
-            padding: const EdgeInsetsDirectional.only(start: 16, end: 4),
+          SizedBox(
             height: _subHeaderHeight,
-            child: Row(
-              children: <Widget>[
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.chevron_left),
-                  color: controlColor,
-                  tooltip: _isDisplayingFirstMonth ? null : _localizations.previousMonthTooltip,
-                  onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.chevron_right),
-                  color: controlColor,
-                  tooltip: _isDisplayingLastMonth ? null : _localizations.nextMonthTooltip,
-                  onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsetsDirectional.only(start: 16, end: 4),
+              child: Row(
+                children: <Widget>[
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left),
+                    color: controlColor,
+                    tooltip: _isDisplayingFirstMonth ? null : _localizations.previousMonthTooltip,
+                    onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right),
+                    color: controlColor,
+                    tooltip: _isDisplayingLastMonth ? null : _localizations.nextMonthTooltip,
+                    onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
+                  ),
+                ],
+              ),
             ),
           ),
           Expanded(
@@ -960,7 +962,7 @@ class _DayPickerState extends State<_DayPicker> {
     while (day < daysInMonth) {
       day++;
       if (day < 1) {
-        dayItems.add(Container());
+        dayItems.add(const SizedBox.shrink());
       } else {
         final DateTime dayToBuild = DateTime(year, month, day);
         final bool isDisabled =
@@ -1297,12 +1299,11 @@ class _YearPickerState extends State<YearPicker> {
         decoration: decoration,
         height: decorationHeight,
         width: decorationWidth,
-        child: Center(
-          child: Semantics(
-            selected: isSelected,
-            button: true,
-            child: Text(year.toString(), style: itemStyle),
-          ),
+        alignment: Alignment.center,
+        child: Semantics(
+          selected: isSelected,
+          button: true,
+          child: Text(year.toString(), style: itemStyle),
         ),
       ),
     );

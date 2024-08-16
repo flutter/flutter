@@ -534,8 +534,11 @@ void main() {
                           SemanticsFlag.hasEnabledState,
                           SemanticsFlag.isEnabled,
                         ],
-                        actions: <SemanticsAction>[SemanticsAction.tap,
-                          SemanticsAction.didGainAccessibilityFocus,],
+                        actions: <SemanticsAction>[
+                          SemanticsAction.tap,
+                          SemanticsAction.focus,
+                          SemanticsAction.didGainAccessibilityFocus,
+                        ],
                         textDirection: TextDirection.ltr,
                       ),
                     ],
@@ -906,6 +909,91 @@ void main() {
         decoration.border!.bottom.color.value,
         0x33FFFFFF,
       );
+    },
+  );
+
+  testWidgets(
+    'The second CupertinoTextField is clicked, triggers the onTapOutside callback of the previous CupertinoTextField',
+        (WidgetTester tester) async {
+      final GlobalKey keyA = GlobalKey();
+      final GlobalKey keyB = GlobalKey();
+      final GlobalKey keyC = GlobalKey();
+      bool outsideClickA = false;
+      bool outsideClickB = false;
+      bool outsideClickC = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: Column(
+              children: <Widget>[
+                const Text('Outside'),
+                Material(
+                  child: CupertinoTextField(
+                    key: keyA,
+                    groupId: 'Group A',
+                    onTapOutside: (PointerDownEvent event) {
+                      outsideClickA = true;
+                    },
+                  ),
+                ),
+                Material(
+                  child: CupertinoTextField(
+                    key: keyB,
+                    groupId: 'Group B',
+                    onTapOutside: (PointerDownEvent event) {
+                      outsideClickB = true;
+                    },
+                  ),
+                ),
+                Material(
+                  child: CupertinoTextField(
+                    key: keyC,
+                    groupId: 'Group C',
+                    onTapOutside: (PointerDownEvent event) {
+                      outsideClickC = true;
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      Future<void> click(Finder finder) async {
+        await tester.tap(finder);
+        await tester.enterText(finder, 'Hello');
+        await tester.pump();
+      }
+
+      expect(outsideClickA, false);
+      expect(outsideClickB, false);
+      expect(outsideClickC, false);
+
+      await click(find.byKey(keyA));
+      await tester.showKeyboard(find.byKey(keyA));
+      await tester.idle();
+      expect(outsideClickA, false);
+      expect(outsideClickB, false);
+      expect(outsideClickC, false);
+
+      await click(find.byKey(keyB));
+      expect(outsideClickA, true);
+      expect(outsideClickB, false);
+      expect(outsideClickC, false);
+
+      await click(find.byKey(keyC));
+      expect(outsideClickA, true);
+      expect(outsideClickB, true);
+      expect(outsideClickC, false);
+
+      await tester.tap(find.text('Outside'));
+      expect(outsideClickA, true);
+      expect(outsideClickB, true);
+      expect(outsideClickC, true);
     },
   );
 
@@ -2536,7 +2624,7 @@ void main() {
       ),
     );
 
-    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
+    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus])));
 
     semantics.dispose();
   });
@@ -5923,17 +6011,14 @@ void main() {
     // If the position we tap during a drag start is on the collapsed selection, then
     // we can move the cursor with a drag.
     // Here we tap on '|a', where our selection was previously, and attempt move
-    // to '|g'. The cursor will not move because the `VerticalDragGestureRecognizer`
-    // in the scrollable will beat the `TapAndHorizontalDragGestureRecognizer`
-    // in the TextField. This is because moving from `|a` to `|g` is a completely
-    // vertical movement.
+    // to '|g'.
     await gesture.down(aPos);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pumpAndSettle();
 
     expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.baseOffset, testValue.indexOf('g'));
 
     // Release the pointer.
     await gesture.up();
@@ -5941,11 +6026,8 @@ void main() {
 
     // If the position we tap during a drag start is on the collapsed selection, then
     // we can move the cursor with a drag.
-    // Here we tap on '|a', where our selection was previously, and move to '|i'.
-    // Unlike our previous attempt to drag to `|g`, this works because moving
-    // to `|i` includes a horizontal movement so the `TapAndHorizontalDragGestureRecognizer`
-    // in TextField can beat the `VerticalDragGestureRecognizer` in the scrollable.
-    await gesture.down(aPos);
+    // Here we tap on '|g', where our selection was previously, and move to '|i'.
+    await gesture.down(gPos);
     await tester.pump();
     await gesture.moveTo(iPos);
     await tester.pumpAndSettle();
@@ -7892,6 +7974,7 @@ void main() {
         isEnabled: true,
         hasEnabledState: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -8315,6 +8398,34 @@ void main() {
     expect(
       decoration.color!.value,
       0xFF050505,
+    );
+  });
+
+  testWidgets('Disabled widget does not override background color', (WidgetTester tester) async {
+    const Color backgroundColor = Color(0x0000000A);
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            enabled: false,
+            decoration: BoxDecoration(color: backgroundColor),
+          ),
+        ),
+      ),
+    );
+
+    final BoxDecoration decoration = tester
+        .widget<DecoratedBox>(
+          find.descendant(
+            of: find.byType(CupertinoTextField),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .decoration as BoxDecoration;
+
+    expect(
+      decoration.color!.value,
+      backgroundColor.value,
     );
   });
 
@@ -10173,4 +10284,163 @@ void main() {
   },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
+
+  testWidgets('when enabled listens to onFocus events and gains focus', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTextField(focusNode: focusNode),
+      ),
+    );
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 2,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 3,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 4,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isTextField,
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isEnabled,
+                        ],
+                        actions: <SemanticsAction>[
+                          SemanticsAction.tap,
+                          SemanticsAction.focus,
+                          if (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.macOS)
+                            SemanticsAction.didGainAccessibilityFocus,
+                          // TODO(gspencergoog): also test for the presence of SemanticsAction.focus when
+                          // this iOS issue is addressed: https://github.com/flutter/flutter/issues/150030
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    expect(focusNode.hasFocus, isFalse);
+    semanticsOwner.performAction(4, SemanticsAction.focus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    semantics.dispose();
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('when disabled does not listen to onFocus events or gain focus', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTextField(focusNode: focusNode, enabled: false),
+      ),
+    );
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 2,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 3,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 4,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isTextField,
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isReadOnly,
+                        ],
+                        actions: <SemanticsAction>[
+                          if (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.macOS)
+                            SemanticsAction.didGainAccessibilityFocus,
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    expect(focusNode.hasFocus, isFalse);
+    semanticsOwner.performAction(4, SemanticsAction.focus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isFalse);
+    semantics.dispose();
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('when receives SemanticsAction.focus while already focused, shows keyboard', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTextField(focusNode: focusNode),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    tester.testTextInput.log.clear();
+    expect(focusNode.hasFocus, isTrue);
+    semanticsOwner.performAction(4, SemanticsAction.focus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    expect(tester.testTextInput.log.single.method, 'TextInput.show');
+
+    semantics.dispose();
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('when receives SemanticsAction.focus while focused but read-only, does not show keyboard', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTextField(focusNode: focusNode, readOnly: true),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    tester.testTextInput.log.clear();
+    expect(focusNode.hasFocus, isTrue);
+    semanticsOwner.performAction(4, SemanticsAction.focus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    expect(tester.testTextInput.log, isEmpty);
+
+    semantics.dispose();
+  }, variant: TargetPlatformVariant.all());
 }

@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app.dart';
+/// @docImport 'drawer.dart';
+/// @docImport 'popup_menu.dart';
+/// @docImport 'snack_bar.dart';
+/// @docImport 'text_button.dart';
+/// @docImport 'text_field.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -92,13 +100,6 @@ class _PreferredAppBarSize extends Size {
 /// appears in the toolbar when the writing language is left-to-right (e.g.
 /// English):
 ///
-/// The [AppBar] insets its content based on the ambient [MediaQuery]'s padding,
-/// to avoid system UI intrusions. It's taken care of by [Scaffold] when used in
-/// the [Scaffold.appBar] property. When animating an [AppBar], unexpected
-/// [MediaQuery] changes (as is common in [Hero] animations) may cause the content
-/// to suddenly jump. Wrap the [AppBar] in a [MediaQuery] widget, and adjust its
-/// padding such that the animation is smooth.
-///
 /// ![The leading widget is in the top left, the actions are in the top right,
 /// the title is between them. The bottom is, naturally, at the bottom, and the
 /// flexibleSpace is behind all of them.](https://flutter.github.io/assets-for-api-docs/assets/material/app_bar.png)
@@ -109,6 +110,13 @@ class _PreferredAppBarSize extends Size {
 /// instead. This behavior can be turned off by setting the [automaticallyImplyLeading]
 /// to false. In that case a null leading widget will result in the middle/title widget
 /// stretching to start.
+///
+/// The [AppBar] insets its content based on the ambient [MediaQuery]'s padding,
+/// to avoid system UI intrusions. It's taken care of by [Scaffold] when used in
+/// the [Scaffold.appBar] property. When animating an [AppBar], unexpected
+/// [MediaQuery] changes (as is common in [Hero] animations) may cause the content
+/// to suddenly jump. Wrap the [AppBar] in a [MediaQuery] widget, and adjust its
+/// padding such that the animation is smooth.
 ///
 /// {@tool dartpad}
 /// This sample shows an [AppBar] with two simple actions. The first action
@@ -172,7 +180,7 @@ class _PreferredAppBarSize extends Size {
 ///    can expand and collapse.
 ///  * <https://material.io/design/components/app-bars-top.html>
 ///  * <https://m3.material.io/components/top-app-bar>
-///  * Cookbook: [Place a floating app bar above a list](https://flutter.dev/docs/cookbook/lists/floating-app-bar)
+///  * Cookbook: [Place a floating app bar above a list](https://docs.flutter.dev/cookbook/lists/floating-app-bar)
 class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a Material Design app bar.
   ///
@@ -479,6 +487,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// zero.
   /// {@endtemplate}
   ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to implement a custom app bar shape for the
+  /// [shape] property.
+  ///
+  /// ** See code in examples/api/lib/material/app_bar/app_bar.4.dart **
+  /// {@end-tool}
   /// See also:
   ///
   ///  * [elevation], which defines the size of the shadow below the app bar.
@@ -497,8 +511,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// In Material v3 (i.e., when [ThemeData.useMaterial3] is true),
   /// then [AppBar] uses the overall theme's [ColorScheme.surface]
   ///
-  /// If this color is a [MaterialStateColor] it will be resolved against
-  /// [MaterialState.scrolledUnder] when the content of the app's
+  /// If this color is a [WidgetStateColor] it will be resolved against
+  /// [WidgetState.scrolledUnder] when the content of the app's
   /// primary scrollable overlaps the app bar.
   /// {@endtemplate}
   ///
@@ -2078,6 +2092,21 @@ class _RenderAppBarTitleBox extends RenderAligningShiftedBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final BoxConstraints innerConstraints = constraints.copyWith(maxHeight: double.infinity);
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final double? result = child.getDryBaseline(innerConstraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(innerConstraints);
+    return result + resolvedAlignment.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints innerConstraints = constraints.copyWith(maxHeight: double.infinity);
     child!.layout(innerConstraints, parentUsesSize: true);
@@ -2253,28 +2282,11 @@ class _RenderExpandedTitleBox extends RenderShiftedBox {
     return child == null ? 0.0 : child.getMinIntrinsicWidth(double.infinity) + padding.horizontal;
   }
 
-  Size _computeSize(BoxConstraints constraints, ChildLayouter layoutChild) {
-    final RenderBox? child = this.child;
-    if (child == null) {
-      return Size.zero;
-    }
-    layoutChild(child, constraints.widthConstraints().deflate(padding));
-    return constraints.biggest;
-  }
-
   @override
-  Size computeDryLayout(BoxConstraints constraints) => _computeSize(constraints, ChildLayoutHelper.dryLayoutChild);
+  Size computeDryLayout(BoxConstraints constraints) => child == null ? Size.zero : constraints.biggest;
 
-  @override
-  void performLayout() {
-    final RenderBox? child = this.child;
-    if (child == null) {
-      this.size = constraints.smallest;
-      return;
-    }
-    final Size size = this.size = _computeSize(constraints, ChildLayoutHelper.layoutChild);
-    final Size childSize = child.size;
-
+  Offset _childOffsetFromSize(Size childSize, Size size) {
+    assert(child != null);
     assert(padding.isNonNegative);
     assert(titleAlignment.y == 1.0);
     // yAdjustment is the minimum additional y offset to shift the child in
@@ -2284,11 +2296,34 @@ class _RenderExpandedTitleBox extends RenderShiftedBox {
     // top padding is basically ignored since the expanded title is
     // bottom-aligned).
     final double yAdjustment = clampDouble(childSize.height + padding.bottom - maxExtent, 0, padding.bottom);
-    final double offsetY = size.height - childSize.height - padding.bottom + yAdjustment;
     final double offsetX = (titleAlignment.x + 1) / 2 * (size.width - padding.horizontal - childSize.width) + padding.left;
+    final double offsetY = size.height - childSize.height - padding.bottom + yAdjustment;
+    return Offset(offsetX, offsetY);
+  }
 
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = constraints.widthConstraints().deflate(padding);
+    final BaselineOffset result = BaselineOffset(child.getDryBaseline(childConstraints, baseline))
+      + _childOffsetFromSize(child.getDryLayout(childConstraints), getDryLayout(constraints)).dy;
+    return result.offset;
+  }
+
+  @override
+  void performLayout() {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      size = constraints.smallest;
+      return;
+    }
+    size = constraints.biggest;
+    child.layout(constraints.widthConstraints().deflate(padding), parentUsesSize: true);
     final BoxParentData childParentData = child.parentData! as BoxParentData;
-    childParentData.offset = Offset(offsetX, offsetY);
+    childParentData.offset = _childOffsetFromSize(child.size, size);
   }
 }
 

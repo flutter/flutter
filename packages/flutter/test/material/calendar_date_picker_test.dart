@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'feedback_tester.dart';
+import '../widgets/feedback_tester.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -864,6 +864,7 @@ void main() {
           tooltip: 'Previous month',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -872,6 +873,7 @@ void main() {
           tooltip: 'Next month',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -882,90 +884,105 @@ void main() {
           label: '1, Friday, January 1, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('2')), matchesSemantics(
           label: '2, Saturday, January 2, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('3')), matchesSemantics(
           label: '3, Sunday, January 3, 2016, Today',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('4')), matchesSemantics(
           label: '4, Monday, January 4, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('5')), matchesSemantics(
           label: '5, Tuesday, January 5, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('6')), matchesSemantics(
           label: '6, Wednesday, January 6, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('7')), matchesSemantics(
           label: '7, Thursday, January 7, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('8')), matchesSemantics(
           label: '8, Friday, January 8, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('9')), matchesSemantics(
           label: '9, Saturday, January 9, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('10')), matchesSemantics(
           label: '10, Sunday, January 10, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('11')), matchesSemantics(
           label: '11, Monday, January 11, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('12')), matchesSemantics(
           label: '12, Tuesday, January 12, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('13')), matchesSemantics(
           label: '13, Wednesday, January 13, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('14')), matchesSemantics(
           label: '14, Thursday, January 14, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('15')), matchesSemantics(
           label: '15, Friday, January 15, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isSelected: true,
           isFocusable: true,
         ));
@@ -973,90 +990,105 @@ void main() {
           label: '16, Saturday, January 16, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('17')), matchesSemantics(
           label: '17, Sunday, January 17, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('18')), matchesSemantics(
           label: '18, Monday, January 18, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('19')), matchesSemantics(
           label: '19, Tuesday, January 19, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('20')), matchesSemantics(
           label: '20, Wednesday, January 20, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('21')), matchesSemantics(
           label: '21, Thursday, January 21, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('22')), matchesSemantics(
           label: '22, Friday, January 22, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('23')), matchesSemantics(
           label: '23, Saturday, January 23, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('24')), matchesSemantics(
           label: '24, Sunday, January 24, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('25')), matchesSemantics(
           label: '25, Monday, January 25, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('26')), matchesSemantics(
           label: '26, Tuesday, January 26, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('27')), matchesSemantics(
           label: '27, Wednesday, January 27, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('28')), matchesSemantics(
           label: '28, Thursday, January 28, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('29')), matchesSemantics(
           label: '29, Friday, January 29, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('30')), matchesSemantics(
           label: '30, Saturday, January 30, 2016',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
         semantics.dispose();
@@ -1081,6 +1113,7 @@ void main() {
           expect(tester.getSemantics(find.text('$year')), matchesSemantics(
             label: '$year',
             hasTapAction: true,
+            hasFocusAction: true,
             isSelected: year == 2016,
             isFocusable: true,
             isButton: true,

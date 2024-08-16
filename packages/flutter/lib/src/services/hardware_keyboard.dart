@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -625,14 +629,13 @@ class HardwareKeyboard {
   }
 
   List<String> _debugPressedKeysDetails() {
-    if (_pressedKeys.isEmpty) {
-      return <String>['Empty'];
-    }
-    final List<String> details = <String>[];
-    for (final PhysicalKeyboardKey physicalKey in _pressedKeys.keys) {
-      details.add('$physicalKey: ${_pressedKeys[physicalKey]}');
-    }
-    return details;
+    return <String>[
+      if (_pressedKeys.isEmpty)
+        'Empty'
+      else
+        for (final PhysicalKeyboardKey physicalKey in _pressedKeys.keys)
+          '$physicalKey: ${_pressedKeys[physicalKey]}',
+    ];
   }
 
   /// Process a new [KeyEvent] by recording the state changes and dispatching

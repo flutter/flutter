@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'primary_scroll_controller.dart';
+/// @docImport 'scrollable.dart';
+/// @docImport 'two_dimensional_scroll_view.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
@@ -1318,7 +1324,9 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         }
     }
     _lastChild = previousChild;
-    parentDataOf(_lastChild!)._nextSibling = null;
+    if (_lastChild != null) {
+      parentDataOf(_lastChild!)._nextSibling = null;
+    }
     // Reset for next layout pass.
     _leadingXIndex = null;
     _trailingXIndex = null;

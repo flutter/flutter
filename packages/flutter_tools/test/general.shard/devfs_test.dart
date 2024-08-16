@@ -135,6 +135,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
     expect(() async => devFS.create(), throwsA(isA<DevFSException>()));
   });
@@ -160,6 +161,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     expect(await devFS.create(), isNotNull);
@@ -210,6 +212,7 @@ void main() {
       uploadRetryThrottle: Duration.zero,
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
     await devFS.create();
 
@@ -245,6 +248,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -287,6 +291,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -331,6 +336,7 @@ void main() {
       httpClient: HttpClient(),
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -382,6 +388,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -461,6 +468,7 @@ void main() {
       }),
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -507,6 +515,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -612,7 +621,8 @@ void main() {
         httpClient: FakeHttpClient.any(),
         config: Config.test(),
         processManager: FakeProcessManager.empty(),
-        artifacts: Artifacts.test(),
+      artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
       );
 
       await devFS.create();
@@ -670,7 +680,8 @@ void main() {
         httpClient: FakeHttpClient.any(),
         config: Config.test(),
         processManager: FakeProcessManager.empty(),
-        artifacts: Artifacts.test(),
+      artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
       );
 
       await devFS.create();
@@ -722,8 +733,8 @@ void main() {
               artifacts.getArtifactPath(Artifact.engineDartBinary),
               'run',
               'increment',
-              '--input=/.tmp_rand0/retransformerInput-asset.txt-transformOutput0.txt',
-              '--output=/.tmp_rand0/retransformerInput-asset.txt-transformOutput1.txt',
+              '--input=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput0.txt',
+              '--output=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput1.txt',
             ],
             onRun: (List<String> command) {
               final ArgResults argParseResults = (ArgParser()
@@ -763,6 +774,7 @@ void main() {
         config: Config.test(),
         processManager: processManager,
         artifacts: artifacts,
+        buildMode: BuildMode.debug,
       );
 
       await devFS.create();
@@ -819,8 +831,8 @@ void main() {
               artifacts.getArtifactPath(Artifact.engineDartBinary),
               'run',
               'increment',
-              '--input=/.tmp_rand0/retransformerInput-asset.txt-transformOutput0.txt',
-              '--output=/.tmp_rand0/retransformerInput-asset.txt-transformOutput1.txt',
+              '--input=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput0.txt',
+              '--output=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput1.txt',
             ],
             exitCode: 1,
           ),
@@ -843,6 +855,7 @@ void main() {
         config: Config.test(),
         processManager: processManager,
         artifacts: artifacts,
+        buildMode: BuildMode.debug,
       );
 
       await devFS.create();
@@ -882,10 +895,9 @@ void main() {
       expect(devFSWriter.entries, isNull, reason: 'DevFS should not have written anything since the update failed.');
       expect(
         logger.errorText,
-        'User-defined transformation of asset "/.tmp_rand0/retransformerInput-asset.txt" failed.\n'
         'Transformer process terminated with non-zero exit code: 1\n'
         'Transformer package: increment\n'
-        'Full command: Artifact.engineDartBinary run increment --input=/.tmp_rand0/retransformerInput-asset.txt-transformOutput0.txt --output=/.tmp_rand0/retransformerInput-asset.txt-transformOutput1.txt\n'
+        'Full command: Artifact.engineDartBinary run increment --input=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput0.txt --output=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput1.txt\n'
         'stdout:\n'
         '\n'
         'stderr:\n'

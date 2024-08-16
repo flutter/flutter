@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app_bar.dart';
+/// @docImport 'bottom_app_bar.dart';
+/// @docImport 'bottom_navigation_bar.dart';
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'floating_action_button.dart';
+/// @docImport 'list_tile.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -937,6 +945,18 @@ abstract class FloatingActionButtonAnimator {
   /// the animation from the beginning, regardless of the original state of the animation.
   double getAnimationRestart(double previousValue) => 0.0;
 
+  /// Creates an instance of [FloatingActionButtonAnimator] where the [FloatingActionButton]
+  /// does not animate on entrance and exit when [FloatingActionButtonLocation] is shown
+  /// or hidden and when transitioning between [FloatingActionButtonLocation]s.
+  ///
+  /// {@tool dartpad}
+  /// This sample showcases how to override [FloatingActionButton] entrance and exit animations
+  /// using [FloatingActionButtonAnimator.noAnimation] in [Scaffold.floatingActionButtonAnimator].
+  ///
+  /// ** See code in examples/api/lib/material/scaffold/scaffold.floating_action_button_animator.0.dart **
+  /// {@end-tool}
+  static const FloatingActionButtonAnimator noAnimation = _NoAnimationFabMotionAnimator();
+
   @override
   String toString() => objectRuntimeType(this, 'FloatingActionButtonAnimator');
 }
@@ -993,9 +1013,28 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
   double getAnimationRestart(double previousValue) => math.min(1.0 - previousValue, previousValue);
 }
 
+class _NoAnimationFabMotionAnimator extends FloatingActionButtonAnimator {
+  const _NoAnimationFabMotionAnimator();
+
+  @override
+  Offset getOffset({required Offset begin, required Offset end, required double progress}) {
+    return end;
+  }
+
+  @override
+  Animation<double> getRotationAnimation({required Animation<double> parent}) {
+    return const AlwaysStoppedAnimation<double>(1.0);
+  }
+
+  @override
+  Animation<double> getScaleAnimation({required Animation<double> parent}) {
+    return const AlwaysStoppedAnimation<double>(1.0);
+  }
+}
+
 /// An animation that swaps from one animation to the next when the [parent] passes [swapThreshold].
 ///
-/// The [value] of this animation is the value of [first] when [parent.value] < [swapThreshold]
+/// The [value] of this animation is the value of [first] when `parent.value` < [swapThreshold]
 /// and the value of [next] otherwise.
 class _AnimationSwap<T> extends CompoundAnimation<T> {
   /// Creates an [_AnimationSwap].

@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport '_goldens_io.dart';
+/// @docImport 'binding.dart';
+/// @docImport 'matchers.dart';
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -84,7 +92,7 @@ abstract class GoldenFileComparator {
   /// historical golden files.
   ///
   /// Version numbers are used in golden file tests for package:flutter. You can
-  /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
+  /// learn more about these tests [here](https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md).
   Uri getTestUri(Uri key, int? version) {
     if (version == null) {
       return key;
@@ -120,18 +128,73 @@ abstract class GoldenFileComparator {
 ///
 /// Callers may choose to override the default comparator by setting this to a
 /// custom comparator during test set-up (or using directory-level test
-/// configuration). For example, some projects may wish to install a comparator
-/// with tolerance levels for allowable differences.
+/// configuration).
+///
+/// {@tool snippet}
+/// For example, some projects may wish to install a comparator with tolerance
+/// levels for allowable differences:
+///
+/// ```dart
+/// void main() {
+///   testWidgets('matches golden file with a 0.01 tolerance', (WidgetTester tester) async {
+///     final GoldenFileComparator previousGoldenFileComparator = goldenFileComparator;
+///     goldenFileComparator = _TolerantGoldenFileComparator(
+///       Uri.parse('test/my_widget_test.dart'),
+///       precisionTolerance: 0.01,
+///     );
+///     addTearDown(() => goldenFileComparator = previousGoldenFileComparator);
+///
+///     await tester.pumpWidget(const ColoredBox(color: Color(0xff00ff00)));
+///
+///     await expectLater(
+///       find.byType(ColoredBox),
+///       matchesGoldenFile('my_golden.png'),
+///     );
+///   });
+/// }
+///
+/// class _TolerantGoldenFileComparator extends LocalFileComparator {
+///   _TolerantGoldenFileComparator(
+///     super.testFile, {
+///     required double precisionTolerance,
+///   })  : assert(
+///         0 <= precisionTolerance && precisionTolerance <= 1,
+///         'precisionTolerance must be between 0 and 1',
+///         ),
+///         _precisionTolerance = precisionTolerance;
+///
+///   /// How much the golden image can differ from the test image.
+///   ///
+///   /// It is expected to be between 0 and 1. Where 0 is no difference (the same image)
+///   /// and 1 is the maximum difference (completely different images).
+///   final double _precisionTolerance;
+///
+///   @override
+///   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+///     final ComparisonResult result = await GoldenFileComparator.compareLists(
+///       imageBytes,
+///       await getGoldenBytes(golden),
+///     );
+///
+///     final bool passed = result.passed || result.diffPercent <= _precisionTolerance;
+///     if (passed) {
+///       result.dispose();
+///       return true;
+///     }
+///
+///     final String error = await generateFailureOutput(result, golden, basedir);
+///     result.dispose();
+///     throw FlutterError(error);
+///   }
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [flutter_test] for more information about how to configure tests at the
 ///    directory-level.
-GoldenFileComparator get goldenFileComparator => _goldenFileComparator;
-GoldenFileComparator _goldenFileComparator = const TrivialComparator._();
-set goldenFileComparator(GoldenFileComparator value) {
-  _goldenFileComparator = value;
-}
+GoldenFileComparator goldenFileComparator = const TrivialComparator._();
 
 /// Compares image pixels against a golden image file.
 ///
@@ -145,7 +208,7 @@ set goldenFileComparator(GoldenFileComparator value) {
 /// fake async constraints that are normally imposed on widget tests (i.e. the
 /// need or the ability to call [WidgetTester.pump] to advance the microtask
 /// queue). Prior to the invocation, the test framework will render only the
-/// [widgets.Element] to be compared on the screen.
+/// [Element] to be compared on the screen.
 ///
 /// See also:
 ///
@@ -220,7 +283,7 @@ abstract class WebGoldenComparator {
   /// historical golden files.
   ///
   /// Version numbers are used in golden file tests for package:flutter. You can
-  /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
+  /// learn more about these tests [here](https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md).
   Uri getTestUri(Uri key, int? version) {
     if (version == null) {
       return key;

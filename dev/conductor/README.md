@@ -1,7 +1,7 @@
 # Flutter Conductor
 
 Command-line tool for managing a release of the Flutter SDK. Also see
-https://github.com/flutter/flutter/wiki/Release-process for more information on
+[Release Process](../../docs/releases/Release-process.md) for more information on
 the release process.
 
 ## Requirements
@@ -35,7 +35,7 @@ All available commands can be seen via:
 
 Releases are initialized with the `start` sub-command, like:
 
-```
+```sh
 conductor start \
   --candidate-branch=flutter-2.2-candidate.10 \
   --release-channel=beta \

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:collection';
 import 'dart:math' as math show pi;
 import 'dart:ui' as ui;
@@ -276,7 +279,30 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     markNeedsPaint();
   }
 
-  bool get isAbove => anchorAbove.dy >= (child?.size.height ?? 0.0) - _kToolbarArrowSize.height * 2;
+  bool _isAbove(double childHeight) => anchorAbove.dy >= childHeight - _kToolbarArrowSize.height * 2;
+
+  BoxConstraints _constraintsForChild(BoxConstraints constraints) {
+    return BoxConstraints(
+      minWidth: _kToolbarArrowSize.width + _kToolbarBorderRadius.x * 2,
+    ).enforce(constraints.loosen());
+  }
+
+  Offset _computeChildOffset(Size childSize) {
+    return Offset(0.0, _isAbove(childSize.height) ? -_kToolbarArrowSize.height : 0.0);
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints enforcedConstraint = _constraintsForChild(constraints);
+    final double? result = child.getDryBaseline(enforcedConstraint, baseline);
+    return result == null
+      ? null
+      : result + _computeChildOffset(child.getDryLayout(enforcedConstraint)).dy;
+  }
 
   @override
   void performLayout() {
@@ -285,11 +311,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
       return;
     }
 
-    final BoxConstraints enforcedConstraint = BoxConstraints(
-      minWidth: _kToolbarArrowSize.width + _kToolbarBorderRadius.x * 2,
-    ).enforce(constraints.loosen());
-    child.layout(enforcedConstraint, parentUsesSize: true);
-
+    child.layout(_constraintsForChild(constraints), parentUsesSize: true);
     // The buttons are padded on both top and bottom sufficiently to have
     // the arrow clipped out of it on either side. By
     // using this approach, the buttons don't need any special padding that
@@ -297,10 +319,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     // The height of one arrow will be clipped off of the child, so adjust the
     // size and position to remove that piece from the layout.
     final BoxParentData childParentData = child.parentData! as BoxParentData;
-    childParentData.offset = Offset(
-      0.0,
-      isAbove ? -_kToolbarArrowSize.height : 0.0,
-    );
+    childParentData.offset = _computeChildOffset(child.size);
     size = Size(
       child.size.width,
       child.size.height - _kToolbarArrowSize.height,
@@ -362,6 +381,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
       return path..addRRect(rrect);
     }
 
+    final bool isAbove = _isAbove(child.size.height);
     final Offset localAnchor = globalToLocal(isAbove ? _anchorAbove : _anchorBelow);
     final double arrowTipX = clampDouble(
       localAnchor.dx,
@@ -448,7 +468,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
         ..shader = ui.Gradient.linear(
           Offset.zero,
           const Offset(10.0, 10.0),
-          const <Color>[Color(0x00000000), Color(0xFFFF00FF), Color(0xFFFF00FF), Color(0x00000000)],
+          const <Color>[CupertinoColors.transparent, Color(0xFFFF00FF), Color(0xFFFF00FF), CupertinoColors.transparent],
           const <double>[0.25, 0.25, 0.75, 0.75],
           TileMode.repeated,
         )
@@ -551,7 +571,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
   }
 
   void _statusListener(AnimationStatus status) {
-    if (status != AnimationStatus.dismissed) {
+    if (!status.isDismissed) {
       return;
     }
 
@@ -870,13 +890,12 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     _mountChild(toolbarItems.nextButton, _CupertinoTextSelectionToolbarItemsSlot.nextButton);
 
     // Mount list children.
-    _children = List<Element>.filled(toolbarItems.children.length, _NullElement.instance);
     Element? previousChild;
-    for (int i = 0; i < _children.length; i += 1) {
-      final Element newChild = inflateWidget(toolbarItems.children[i], IndexedSlot<Element?>(i, previousChild));
-      _children[i] = newChild;
-      previousChild = newChild;
-    }
+    _children = List<Element>.generate(toolbarItems.children.length, (int i) {
+      final Element result = inflateWidget(toolbarItems.children[i], IndexedSlot<Element?>(i, previousChild));
+      previousChild = result;
+      return result;
+    }, growable: false);
   }
 
   @override
@@ -1255,20 +1274,4 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
 enum _CupertinoTextSelectionToolbarItemsSlot {
   backButton,
   nextButton,
-}
-
-class _NullElement extends Element {
-  _NullElement() : super(const _NullWidget());
-
-  static _NullElement instance = _NullElement();
-
-  @override
-  bool get debugDoingBuild => throw UnimplementedError();
-}
-
-class _NullWidget extends Widget {
-  const _NullWidget();
-
-  @override
-  Element createElement() => throw UnimplementedError();
 }

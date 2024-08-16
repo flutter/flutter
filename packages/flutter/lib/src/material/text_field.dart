@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'input_border.dart';
+/// @docImport 'material.dart';
+/// @docImport 'scaffold.dart';
+/// @docImport 'text_form_field.dart';
+/// @docImport 'text_theme.dart';
+library;
+
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/cupertino.dart';
@@ -15,7 +22,6 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'desktop_text_selection.dart';
-import 'feedback.dart';
 import 'input_decorator.dart';
 import 'magnifier.dart';
 import 'material_localizations.dart';
@@ -126,9 +132,14 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// disposed.
 /// {@endtemplate}
 ///
-/// Remember to call [TextEditingController.dispose] of the [TextEditingController]
+/// Remember to call [TextEditingController.dispose] on the [TextEditingController]
 /// when it is no longer needed. This will ensure we discard any resources used
 /// by the object.
+///
+/// If this field is part of a scrolling container that lazily constructs its
+/// children, like a [ListView] or a [CustomScrollView], then a [controller]
+/// should be specified. The controller's lifetime should be managed by a
+/// stateful widget ancestor of the scrolling container.
 ///
 /// ## Obscured Input
 ///
@@ -204,10 +215,10 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///    you are implementing an entirely different design language, such as
 ///    Cupertino.
 ///  * <https://material.io/design/components/text-fields.html>
-///  * Cookbook: [Create and style a text field](https://flutter.dev/docs/cookbook/forms/text-input)
-///  * Cookbook: [Handle changes to a text field](https://flutter.dev/docs/cookbook/forms/text-field-changes)
-///  * Cookbook: [Retrieve the value of a text field](https://flutter.dev/docs/cookbook/forms/retrieve-input)
-///  * Cookbook: [Focus and text fields](https://flutter.dev/docs/cookbook/forms/focus)
+///  * Cookbook: [Create and style a text field](https://docs.flutter.dev/cookbook/forms/text-input)
+///  * Cookbook: [Handle changes to a text field](https://docs.flutter.dev/cookbook/forms/text-field-changes)
+///  * Cookbook: [Retrieve the value of a text field](https://docs.flutter.dev/cookbook/forms/retrieve-input)
+///  * Cookbook: [Focus and text fields](https://docs.flutter.dev/cookbook/forms/focus)
 class TextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///
@@ -255,6 +266,7 @@ class TextField extends StatefulWidget {
   ///    characters" and how it may differ from the intuitive meaning.
   const TextField({
     super.key,
+    this.groupId = EditableText,
     this.controller,
     this.focusNode,
     this.undoController,
@@ -364,6 +376,9 @@ class TextField extends StatefulWidget {
   /// {@end-tool}
   final TextMagnifierConfiguration? magnifierConfiguration;
 
+  /// {@macro flutter.widgets.editableText.groupId}
+  final Object groupId;
+
   /// Controls the text being edited.
   ///
   /// If null, this widget will create its own [TextEditingController].
@@ -460,23 +475,23 @@ class TextField extends StatefulWidget {
   final bool autofocus;
 
   /// Represents the interactive "state" of this widget in terms of a set of
-  /// [MaterialState]s, including [MaterialState.disabled], [MaterialState.hovered],
-  /// [MaterialState.error], and [MaterialState.focused].
+  /// [WidgetState]s, including [WidgetState.disabled], [WidgetState.hovered],
+  /// [WidgetState.error], and [WidgetState.focused].
   ///
   /// Classes based on this one can provide their own
-  /// [MaterialStatesController] to which they've added listeners.
-  /// They can also update the controller's [MaterialStatesController.value]
+  /// [WidgetStatesController] to which they've added listeners.
+  /// They can also update the controller's [WidgetStatesController.value]
   /// however, this may only be done when it's safe to call
   /// [State.setState], like in an event handler.
   ///
-  /// The controller's [MaterialStatesController.value] represents the set of
-  /// states that a widget's visual properties, typically [MaterialStateProperty]
+  /// The controller's [WidgetStatesController.value] represents the set of
+  /// states that a widget's visual properties, typically [WidgetStateProperty]
   /// values, are resolved against. It is _not_ the intrinsic state of the widget.
   /// The widget is responsible for ensuring that the controller's
-  /// [MaterialStatesController.value] tracks its intrinsic state. For example
-  /// one cannot request the keyboard focus for a widget by adding [MaterialState.focused]
+  /// [WidgetStatesController.value] tracks its intrinsic state. For example
+  /// one cannot request the keyboard focus for a widget by adding [WidgetState.focused]
   /// to its controller. When the widget gains the or loses the focus it will
-  /// [MaterialStatesController.update] its controller's [MaterialStatesController.value]
+  /// [WidgetStatesController.update] its controller's [WidgetStatesController.value]
   /// and notify listeners of the change.
   final MaterialStatesController? statesController;
 
@@ -725,15 +740,15 @@ class TextField extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.error].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.error].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
   ///
-  /// If this property is null, [MaterialStateMouseCursor.textable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.textable] will be used.
   ///
   /// The [mouseCursor] is the only property of [TextField] that controls the
   /// appearance of the mouse pointer. All other properties related to "cursor"
@@ -1495,6 +1510,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           onEditingComplete: widget.onEditingComplete,
           onSubmitted: widget.onSubmitted,
           onAppPrivateCommand: widget.onAppPrivateCommand,
+          groupId: widget.groupId,
           onSelectionHandleTapped: _handleSelectionHandleTapped,
           onTapOutside: widget.onTapOutside,
           inputFormatters: formatters,
@@ -1585,6 +1601,35 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                 },
                 onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
                 onDidLoseAccessibilityFocus: handleDidLoseAccessibilityFocus,
+                onFocus: _isEnabled
+                  ? () {
+                      assert(
+                        _effectiveFocusNode.canRequestFocus,
+                        'Received SemanticsAction.focus from the engine. However, the FocusNode '
+                        'of this text field cannot gain focus. This likely indicates a bug. '
+                        'If this text field cannot be focused (e.g. because it is not '
+                        'enabled), then its corresponding semantics node must be configured '
+                        'such that the assistive technology cannot request focus on it.'
+                      );
+
+                      if (_effectiveFocusNode.canRequestFocus && !_effectiveFocusNode.hasFocus) {
+                        _effectiveFocusNode.requestFocus();
+                      } else if (!widget.readOnly) {
+                        // If the platform requested focus, that means that previously the
+                        // platform believed that the text field did not have focus (even
+                        // though Flutter's widget system believed otherwise). This likely
+                        // means that the on-screen keyboard is hidden, or more generally,
+                        // there is no current editing session in this field. To correct
+                        // that, keyboard must be requested.
+                        //
+                        // A concrete scenario where this can happen is when the user
+                        // dismisses the keyboard on the web. The editing session is
+                        // closed by the engine, but the text field widget stays focused
+                        // in the framework.
+                        _requestKeyboard();
+                      }
+                    }
+                  : null,
                 child: child,
               );
             },

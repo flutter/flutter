@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'raw_keyboard.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;

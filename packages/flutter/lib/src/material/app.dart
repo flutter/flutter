@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app_bar.dart';
+/// @docImport 'color_scheme.dart';
+/// @docImport 'dialog.dart';
+/// @docImport 'drawer.dart';
+/// @docImport 'material.dart';
+/// @docImport 'popup_menu.dart';
+/// @docImport 'scaffold.dart';
+library;
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
@@ -192,7 +201,7 @@ enum ThemeMode {
 ///  * [MaterialPageRoute], which defines an app page that transitions in a material-specific way.
 ///  * [WidgetsApp], which defines the basic app elements but does not depend on the material library.
 ///  * The Flutter Internationalization Tutorial,
-///    <https://flutter.dev/tutorials/internationalization/>.
+///    <https://flutter.dev/to/internationalization/>.
 class MaterialApp extends StatefulWidget {
   /// Creates a MaterialApp.
   ///
@@ -327,7 +336,7 @@ class MaterialApp extends StatefulWidget {
   ///
   /// When a named route is pushed with [Navigator.pushNamed], the route name is
   /// looked up in this map. If the name is present, the associated
-  /// [widgets.WidgetBuilder] is used to construct a [MaterialPageRoute] that
+  /// [WidgetBuilder] is used to construct a [MaterialPageRoute] that
   /// performs an appropriate transition, including [Hero] animations, to the
   /// new route.
   ///
@@ -610,7 +619,7 @@ class MaterialApp extends StatefulWidget {
   ///  * [GlobalMaterialLocalizations], a [localizationsDelegates] value
   ///    which provides material localizations for many languages.
   ///  * The Flutter Internationalization Tutorial,
-  ///    <https://flutter.dev/tutorials/internationalization/>.
+  ///    <https://flutter.dev/to/internationalization/>.
   final Iterable<LocalizationsDelegate<dynamic>>? localizationsDelegates;
 
   /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
@@ -634,14 +643,14 @@ class MaterialApp extends StatefulWidget {
   ///  * [GlobalMaterialLocalizations], a [localizationsDelegates] value
   ///    which provides material localizations for many languages.
   ///  * The Flutter Internationalization Tutorial,
-  ///    <https://flutter.dev/tutorials/internationalization/>.
+  ///    <https://flutter.dev/to/internationalization/>.
   final Iterable<Locale> supportedLocales;
 
   /// Turns on a performance overlay.
   ///
   /// See also:
   ///
-  ///  * <https://flutter.dev/debugging/#performance-overlay>
+  ///  * <https://flutter.dev/to/performance-overlay>
   final bool showPerformanceOverlay;
 
   /// Turns on checkerboarding of raster cache images.
@@ -1028,8 +1037,6 @@ class _MaterialAppState extends State<MaterialApp> {
         localeListResolutionCallback: widget.localeListResolutionCallback,
         supportedLocales: widget.supportedLocales,
         showPerformanceOverlay: widget.showPerformanceOverlay,
-        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
         showSemanticsDebugger: widget.showSemanticsDebugger,
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
         inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
@@ -1064,8 +1071,6 @@ class _MaterialAppState extends State<MaterialApp> {
       localeListResolutionCallback: widget.localeListResolutionCallback,
       supportedLocales: widget.supportedLocales,
       showPerformanceOverlay: widget.showPerformanceOverlay,
-      checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-      checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
       showSemanticsDebugger: widget.showSemanticsDebugger,
       debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
       inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,

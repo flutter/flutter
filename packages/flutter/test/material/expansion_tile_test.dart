@@ -707,10 +707,12 @@ void main() {
           children: <Widget>[
             ExpansionTile(
               title: Text('First Expansion Tile'),
+              internalAddSemanticForOnTap: true,
             ),
             ExpansionTile(
               initiallyExpanded: true,
               title: Text('Second Expansion Tile'),
+              internalAddSemanticForOnTap: true,
             ),
           ],
         ),
@@ -727,7 +729,9 @@ void main() {
     expect(
       tester.getSemantics(find.byType(ListTile).first),
       matchesSemantics(
+        isButton: true,
         hasTapAction: true,
+        hasFocusAction: true,
         hasEnabledState: true,
         isEnabled: true,
         isFocused: true,
@@ -741,7 +745,9 @@ void main() {
     expect(
       tester.getSemantics(find.byType(ListTile).last),
       matchesSemantics(
+        isButton: true,
         hasTapAction: true,
+        hasFocusAction: true,
         hasEnabledState: true,
         isEnabled: true,
         isFocusable: true,
@@ -1149,7 +1155,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Override the animation curve.
-    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(curve: Easing.emphasizedDecelerate)));
+    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(
+      curve: Easing.emphasizedDecelerate,
+      reverseCurve: Easing.emphasizedAccelerate,
+    )));
     await tester.pumpAndSettle();
 
     // Test the overridden animation curve.
@@ -1167,8 +1176,20 @@ void main() {
 
     expect(getHeight(expansionTileKey), 158.0);
 
-    // Tap to collapse the ExpansionTile.
+    // Test the overridden reverse (collapse) animation curve.
     await tester.tap(find.text('title'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 1/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(98.6, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 2/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(73.4, 0.1));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(getHeight(expansionTileKey), 58.0);
 
     // Test no animation.
     await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle.noAnimation));
@@ -1531,5 +1552,73 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Child 0'), findsOneWidget);
     expect(controller.isExpanded, isTrue);
+  });
+
+  testWidgets('ExpansionTile does not include the default trailing icon when showTrailingIcon: false (#145268)', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          enabled: false,
+          tilePadding: EdgeInsets.zero,
+          title: ColoredBox(color: Colors.red, child: Text('Title')),
+          showTrailingIcon: false,
+        ),
+      ),
+    ));
+
+    final Size materialAppSize = tester.getSize(find.byType(MaterialApp));
+    final Size titleSize = tester.getSize(find.byType(ColoredBox));
+
+    expect(titleSize.width, materialAppSize.width);
+  });
+
+  testWidgets('ExpansionTile with smaller trailing widget allocates at least 32.0 units of space (preserves original behavior) (#145268)', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          enabled: false,
+          tilePadding: EdgeInsets.zero,
+          title: ColoredBox(color: Colors.red, child: Text('Title')),
+          trailing: SizedBox.shrink(),
+        ),
+      ),
+    ));
+
+    final Size materialAppSize = tester.getSize(find.byType(MaterialApp));
+    final Size titleSize = tester.getSize(find.byType(ColoredBox));
+
+    expect(titleSize.width, materialAppSize.width - 32.0);
+  });
+
+  testWidgets('ExpansionTile uses ListTileTheme controlAffinity', (WidgetTester tester) async {
+    Widget buildView(ListTileControlAffinity controlAffinity) {
+      return MaterialApp(
+        home: ListTileTheme(
+          data: ListTileThemeData(
+            controlAffinity: controlAffinity,
+          ),
+          child: const Material(
+            child: ExpansionTile(
+              title: Text('ExpansionTile'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildView(ListTileControlAffinity.leading));
+    final Finder leading = find.text('ExpansionTile');
+    final Offset offsetLeading = tester.getTopLeft(leading);
+    expect(offsetLeading, const Offset(56.0, 17.0));
+
+    await tester.pumpWidget(buildView(ListTileControlAffinity.trailing));
+    final Finder trailing = find.text('ExpansionTile');
+    final Offset offsetTrailing = tester.getTopLeft(trailing);
+    expect(offsetTrailing, const Offset(16.0, 17.0));
+
+    await tester.pumpWidget(buildView(ListTileControlAffinity.platform));
+    final Finder platform = find.text('ExpansionTile');
+    final Offset offsetPlatform = tester.getTopLeft(platform);
+    expect(offsetPlatform, const Offset(16.0, 17.0));
   });
 }

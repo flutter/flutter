@@ -8,7 +8,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'feedback_tester.dart';
+
+import '../widgets/feedback_tester.dart';
 
 Widget wrap({ required Widget child }) {
   return MediaQuery(
@@ -1179,15 +1180,18 @@ void main() {
         onChanged: (bool? value) { log.add(value); },
         title: const Text('Hello'),
         checkboxSemanticLabel: 'there',
+        internalAddSemanticForOnTap: true,
       ),
     ));
 
     expect(tester.getSemantics(find.byType(CheckboxListTile)), matchesSemantics(
+      isButton: true,
       hasCheckedState: true,
       isChecked: true,
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      hasFocusAction: true,
       isFocusable: true,
       label: 'Hello\nthere',
     ));
@@ -1228,6 +1232,39 @@ void main() {
     await tester.pump();
     expect(Focus.of(firstChildKey.currentContext!).hasPrimaryFocus, isFalse);
     expect(Focus.of(secondChildKey.currentContext!).hasPrimaryFocus, isTrue);
+  });
+
+  testWidgets('CheckboxListTile uses ListTileTheme controlAffinity', (WidgetTester tester) async {
+    Widget buildListTile(ListTileControlAffinity controlAffinity) {
+      return MaterialApp(
+        home: Material(
+          child: ListTileTheme(
+            data: ListTileThemeData(
+              controlAffinity: controlAffinity,
+            ),
+            child: CheckboxListTile(
+              value: false,
+              onChanged: (bool? value) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildListTile(ListTileControlAffinity.trailing));
+    final Finder trailing = find.byType(Checkbox);
+    final Offset offsetTrailing = tester.getTopLeft(trailing);
+    expect(offsetTrailing, const Offset(736.0, 8.0));
+
+    await tester.pumpWidget(buildListTile(ListTileControlAffinity.leading));
+    final Finder leading = find.byType(Checkbox);
+    final Offset offsetLeading = tester.getTopLeft(leading);
+    expect(offsetLeading, const Offset(16.0, 8.0));
+
+    await tester.pumpWidget(buildListTile(ListTileControlAffinity.platform));
+    final Finder platform = find.byType(Checkbox);
+    final Offset offsetPlatform = tester.getTopLeft(platform);
+    expect(offsetPlatform, const Offset(736.0, 8.0));
   });
 }
 

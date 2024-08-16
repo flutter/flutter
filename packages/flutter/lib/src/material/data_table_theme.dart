@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'data_table.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -57,6 +60,7 @@ class DataTableThemeData with Diagnosticable {
     this.checkboxHorizontalMargin,
     this.headingCellCursor,
     this.dataRowCursor,
+    this.headingRowAlignment,
   }) : assert(dataRowMinHeight == null || dataRowMaxHeight == null || dataRowMaxHeight >= dataRowMinHeight),
        assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
          'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.'),
@@ -114,6 +118,9 @@ class DataTableThemeData with Diagnosticable {
   /// If specified, overrides the default value of [DataRow.mouseCursor].
   final MaterialStateProperty<MouseCursor?>? dataRowCursor;
 
+  /// If specified, overrides the default value of [DataColumn.headingRowAlignment].
+  final MainAxisAlignment? headingRowAlignment;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DataTableThemeData copyWith({
@@ -136,6 +143,7 @@ class DataTableThemeData with Diagnosticable {
     double? checkboxHorizontalMargin,
     MaterialStateProperty<MouseCursor?>? headingCellCursor,
     MaterialStateProperty<MouseCursor?>? dataRowCursor,
+    MainAxisAlignment? headingRowAlignment,
   }) {
     assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
       'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.');
@@ -157,6 +165,7 @@ class DataTableThemeData with Diagnosticable {
       checkboxHorizontalMargin: checkboxHorizontalMargin ?? this.checkboxHorizontalMargin,
       headingCellCursor: headingCellCursor ?? this.headingCellCursor,
       dataRowCursor: dataRowCursor ?? this.dataRowCursor,
+      headingRowAlignment: headingRowAlignment ?? this.headingRowAlignment,
     );
   }
 
@@ -182,6 +191,7 @@ class DataTableThemeData with Diagnosticable {
       checkboxHorizontalMargin: lerpDouble(a.checkboxHorizontalMargin, b.checkboxHorizontalMargin, t),
       headingCellCursor: t < 0.5 ? a.headingCellCursor : b.headingCellCursor,
       dataRowCursor: t < 0.5 ? a.dataRowCursor : b.dataRowCursor,
+      headingRowAlignment: t < 0.5 ? a.headingRowAlignment : b.headingRowAlignment,
     );
   }
 
@@ -201,6 +211,7 @@ class DataTableThemeData with Diagnosticable {
     checkboxHorizontalMargin,
     headingCellCursor,
     dataRowCursor,
+    headingRowAlignment,
   );
 
   @override
@@ -225,7 +236,8 @@ class DataTableThemeData with Diagnosticable {
       && other.dividerThickness == dividerThickness
       && other.checkboxHorizontalMargin == checkboxHorizontalMargin
       && other.headingCellCursor == headingCellCursor
-      && other.dataRowCursor == dataRowCursor;
+      && other.dataRowCursor == dataRowCursor
+      && other.headingRowAlignment == headingRowAlignment;
   }
 
   @override
@@ -245,6 +257,7 @@ class DataTableThemeData with Diagnosticable {
     properties.add(DoubleProperty('checkboxHorizontalMargin', checkboxHorizontalMargin, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>?>('headingCellCursor', headingCellCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>?>('dataRowCursor', dataRowCursor, defaultValue: null));
+    properties.add(EnumProperty<MainAxisAlignment>('headingRowAlignment', headingRowAlignment, defaultValue: null));
   }
 }
 

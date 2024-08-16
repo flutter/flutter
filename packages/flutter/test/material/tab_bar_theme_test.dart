@@ -7,10 +7,15 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'package:flutter/gestures.dart';
+import 'dart:math' as math;
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'tabs_utils.dart';
 
 const String _tab1Text = 'tab 1';
 const String _tab2Text = 'tab 2';
@@ -102,6 +107,8 @@ void main() {
     expect(const TabBarTheme().splashFactory, null);
     expect(const TabBarTheme().mouseCursor, null);
     expect(const TabBarTheme().tabAlignment, null);
+    expect(const TabBarTheme().textScaler, null);
+    expect(const TabBarTheme().indicatorAnimation, null);
   });
 
   test('TabBarTheme lerp special cases', () {
@@ -1538,5 +1545,159 @@ void main() {
       expect(unselectedTabIcon.color, unselectedColor);
       expect(selectedTextStyle.color, selectedColor);
       expect(unselectedTextStyle.color, unselectedColor);
+  });
+
+  testWidgets('TabBarTheme.textScaler overrides tab label text scale, textScaleFactor = noScaling, 1.75, 2.0', (WidgetTester tester) async {
+    final List<String> tabs = <String>['Tab 1', 'Tab 2'];
+
+    Widget buildTabs({ TextScaler? textScaler }) {
+      return MaterialApp(
+        theme: ThemeData(
+          tabBarTheme: TabBarTheme(
+            textScaler: textScaler,
+          ),
+        ),
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(3.0)),
+          child: DefaultTabController(
+            length: tabs.length,
+            child: Scaffold(
+              appBar: AppBar(
+                bottom: TabBar(
+                  tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabs(textScaler: TextScaler.noScaling));
+
+    Size labelSize = tester.getSize(find.text('Tab 1'));
+    expect(labelSize, equals(const Size(70.5, 20.0)));
+
+    await tester.pumpWidget(buildTabs(textScaler: const TextScaler.linear(1.75)));
+    await tester.pumpAndSettle();
+
+    labelSize = tester.getSize(find.text('Tab 1'));
+    expect(labelSize, equals(const Size(123.0, 35.0)));
+
+    await tester.pumpWidget(buildTabs(textScaler: const TextScaler.linear(2.0)));
+    await tester.pumpAndSettle();
+
+    labelSize = tester.getSize(find.text('Tab 1'));
+    expect(labelSize, equals(const Size(140.5, 40.0)));
+  }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/87543
+
+  testWidgets('TabBarTheme indicatorAnimation can customize tab indicator animation', (WidgetTester tester) async {
+    const double indicatorWidth = 50.0;
+    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      return Tab(
+        key: ValueKey<int>(index),
+        child: const SizedBox(width: indicatorWidth),
+      );
+    });
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTab({ TabIndicatorAnimation? indicatorAnimation }) {
+      return MaterialApp(
+        theme: ThemeData(
+          tabBarTheme: TabBarTheme(
+            indicatorAnimation: indicatorAnimation,
+          ),
+        ),
+        home: Material(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test tab indicator animation with TabIndicatorAnimation.linear.
+    await tester.pumpWidget(buildTab(indicatorAnimation: TabIndicatorAnimation.linear));
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+
+    // Idle at tab 0.
+    expect(
+      tabBarBox,
+      paints..rrect(rrect: RRect.fromLTRBAndCorners(
+        75.0, 45.0, 125.0, 48.0,
+        topLeft: const Radius.circular(3.0),
+        topRight: const Radius.circular(3.0),
+      ),
+    ));
+
+    // Start moving tab indicator.
+    controller.offset = 0.2;
+    await tester.pump();
+
+    expect(
+      tabBarBox,
+      paints..rrect(rrect: RRect.fromLTRBAndCorners(
+        115.0, 45.0, 165.0, 48.0,
+        topLeft: const Radius.circular(3.0),
+        topRight: const Radius.circular(3.0),
+      ),
+    ));
+
+    // Reset tab controller offset.
+    controller.offset = 0.0;
+
+    // Test tab indicator animation with TabIndicatorAnimation.elastic.
+    await tester.pumpWidget(buildTab(indicatorAnimation: TabIndicatorAnimation.elastic));
+    await tester.pumpAndSettle();
+
+    // Ease in sine (accelerating).
+    double accelerateIntepolation(double fraction) {
+      return 1.0 - math.cos((fraction * math.pi) / 2.0);
+    }
+
+    void expectIndicatorAttrs(
+      RenderBox tabBarBox, {
+      required Rect rect,
+      required Rect targetRect,
+    }) {
+      const double indicatorWeight = 3.0;
+      final double tabChangeProgress =  (controller.index - controller.animation!.value).abs();
+      final double leftFraction = accelerateIntepolation(tabChangeProgress);
+      final double rightFraction = accelerateIntepolation(tabChangeProgress);
+
+      final RRect rrect = RRect.fromLTRBAndCorners(
+        lerpDouble(rect.left, targetRect.left, leftFraction)!,
+        tabBarBox.size.height - indicatorWeight,
+        lerpDouble(rect.right, targetRect.right, rightFraction)!,
+        tabBarBox.size.height,
+        topLeft: const Radius.circular(3.0),
+        topRight: const Radius.circular(3.0),
+      );
+
+      expect(tabBarBox, paints..rrect(rrect: rrect));
+    }
+
+    Rect rect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    Rect targetRect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+
+    // Idle at tab 0.
+    expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
+
+    // Start moving tab indicator.
+    controller.offset = 0.2;
+    await tester.pump();
+
+    rect = const Rect.fromLTRB(115.0, 0.0, 165.0, 48.0);
+    targetRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
+    expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
   });
 }

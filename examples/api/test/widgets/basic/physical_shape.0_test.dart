@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('PhysicalShape is an ancestor of the text widget', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: example.PhysicalShapeApp()),
+      const example.PhysicalShapeApp(),
     );
 
     final PhysicalShape physicalShape = tester.widget<PhysicalShape>(

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'range_slider.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show Path, lerpDouble;
 
@@ -1117,6 +1120,11 @@ abstract class SliderTrackShape {
     bool isDiscrete,
     required TextDirection textDirection,
   });
+
+  /// Whether the track shape is rounded.
+  ///
+  /// This is used to determine the correct position of the thumb in relation to the track.
+  bool get isRounded => false;
 }
 
 /// Base class for [RangeSlider] thumb shapes.
@@ -1534,6 +1542,10 @@ mixin BaseSliderTrackShape {
     // If the parentBox's size less than slider's size the trackRight will be less than trackLeft, so switch them.
     return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackBottom);
   }
+
+  /// Whether the track shape is rounded. This is used to determine the correct
+  /// position of the thumb in relation to the track. Defaults to false.
+  bool get isRounded => false;
 }
 
 /// A [Slider] track that's a simple rectangle.
@@ -1619,20 +1631,18 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
     }
 
-    final bool showSecondaryTrack = (secondaryOffset != null) &&
-        ((textDirection == TextDirection.ltr)
-            ? (secondaryOffset.dx > thumbCenter.dx)
-            : (secondaryOffset.dx < thumbCenter.dx));
+    final bool showSecondaryTrack = secondaryOffset != null && switch (textDirection) {
+      TextDirection.rtl => secondaryOffset.dx < thumbCenter.dx,
+      TextDirection.ltr => secondaryOffset.dx > thumbCenter.dx,
+    };
 
     if (showSecondaryTrack) {
       final ColorTween secondaryTrackColorTween = ColorTween(begin: sliderTheme.disabledSecondaryActiveTrackColor, end: sliderTheme.secondaryActiveTrackColor);
       final Paint secondaryTrackPaint = Paint()..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
-      final Rect secondaryTrackSegment = Rect.fromLTRB(
-        (textDirection == TextDirection.ltr) ? thumbCenter.dx : secondaryOffset.dx,
-        trackRect.top,
-        (textDirection == TextDirection.ltr) ? secondaryOffset.dx : thumbCenter.dx,
-        trackRect.bottom,
-      );
+      final Rect secondaryTrackSegment = switch (textDirection) {
+        TextDirection.rtl => Rect.fromLTRB(secondaryOffset.dx, trackRect.top, thumbCenter.dx, trackRect.bottom),
+        TextDirection.ltr => Rect.fromLTRB(thumbCenter.dx, trackRect.top, secondaryOffset.dx, trackRect.bottom),
+      };
       if (!secondaryTrackSegment.isEmpty) {
         context.canvas.drawRect(secondaryTrackSegment, secondaryTrackPaint);
       }
@@ -1716,39 +1726,45 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     );
     final Radius trackRadius = Radius.circular(trackRect.height / 2);
     final Radius activeTrackRadius = Radius.circular((trackRect.height + additionalActiveTrackHeight) / 2);
+    final bool isLTR = textDirection == TextDirection.ltr;
+    final bool isRTL = textDirection == TextDirection.rtl;
 
-    context.canvas.drawRRect(
-      RRect.fromLTRBAndCorners(
-        trackRect.left,
-        (textDirection == TextDirection.ltr) ? trackRect.top - (additionalActiveTrackHeight / 2): trackRect.top,
-        thumbCenter.dx,
-        (textDirection == TextDirection.ltr) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
-        topLeft: (textDirection == TextDirection.ltr) ? activeTrackRadius : trackRadius,
-        bottomLeft: (textDirection == TextDirection.ltr) ? activeTrackRadius: trackRadius,
-      ),
-      leftTrackPaint,
-    );
-    context.canvas.drawRRect(
-      RRect.fromLTRBAndCorners(
-        thumbCenter.dx,
-        (textDirection == TextDirection.rtl) ? trackRect.top - (additionalActiveTrackHeight / 2) : trackRect.top,
-        trackRect.right,
-        (textDirection == TextDirection.rtl) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
-        topRight: (textDirection == TextDirection.rtl) ? activeTrackRadius : trackRadius,
-        bottomRight: (textDirection == TextDirection.rtl) ? activeTrackRadius : trackRadius,
-      ),
-      rightTrackPaint,
-    );
+    final bool drawInactiveTrack = thumbCenter.dx < (trackRect.right - (sliderTheme.trackHeight! / 2));
+    if (drawInactiveTrack) {
+      // Draw the inactive track segment.
+      context.canvas.drawRRect(
+        RRect.fromLTRBR(
+          thumbCenter.dx - (sliderTheme.trackHeight! / 2),
+          isRTL ? trackRect.top - (additionalActiveTrackHeight / 2) : trackRect.top,
+          trackRect.right,
+          isRTL ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
+          isLTR ? trackRadius : activeTrackRadius,
+        ),
+        rightTrackPaint,
+      );
+    }
+    final bool drawActiveTrack = thumbCenter.dx > (trackRect.left + (sliderTheme.trackHeight! / 2));
+    if (drawActiveTrack) {
+      // Draw the active track segment.
+      context.canvas.drawRRect(
+        RRect.fromLTRBR(
+          trackRect.left,
+          isLTR ? trackRect.top - (additionalActiveTrackHeight / 2): trackRect.top,
+          thumbCenter.dx + (sliderTheme.trackHeight! / 2),
+          isLTR ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
+          isLTR ? activeTrackRadius : trackRadius,
+        ),
+        leftTrackPaint,
+      );
+    }
 
     final bool showSecondaryTrack = (secondaryOffset != null) &&
-        ((textDirection == TextDirection.ltr)
-            ? (secondaryOffset.dx > thumbCenter.dx)
-            : (secondaryOffset.dx < thumbCenter.dx));
+        (isLTR ? (secondaryOffset.dx > thumbCenter.dx) : (secondaryOffset.dx < thumbCenter.dx));
 
     if (showSecondaryTrack) {
       final ColorTween secondaryTrackColorTween = ColorTween(begin: sliderTheme.disabledSecondaryActiveTrackColor, end: sliderTheme.secondaryActiveTrackColor);
       final Paint secondaryTrackPaint = Paint()..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
-      if (textDirection == TextDirection.ltr) {
+      if (isLTR) {
         context.canvas.drawRRect(
           RRect.fromLTRBAndCorners(
             thumbCenter.dx,
@@ -1775,6 +1791,9 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       }
     }
   }
+
+  @override
+  bool get isRounded => true;
 }
 
 
@@ -2228,7 +2247,7 @@ class _EmptySliderTickMarkShape extends SliderTickMarkShape {
 ///
 /// This class is used to create a special instance of a [SliderComponentShape]
 /// that will not paint any component shape. A static reference is stored in
-/// [SliderTickMarkShape.noThumb] and [SliderTickMarkShape.noOverlay]. When this value
+/// [SliderComponentShape.noThumb] and [SliderComponentShape.noOverlay]. When this value
 /// is specified for [SliderThemeData.thumbShape], the thumb painting is
 /// skipped. When this value is specified for [SliderThemeData.overlayShape],
 /// the overlay painting is skipped.
@@ -3487,7 +3506,6 @@ class _DropSliderValueIndicatorPathPainter {
       return;
     }
     assert(!sizeWithOverflow.isEmpty);
-
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale);
     final double horizontalShift = getHorizontalShift(
       parentBox: parentBox,

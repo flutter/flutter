@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'editable_text.dart';
+/// @docImport 'text.dart';
+library;
+
 import 'dart:ui' as ui show ParagraphBuilder, PlaceholderAlignment;
 
 import 'package:flutter/foundation.dart';
@@ -377,6 +381,12 @@ class _RenderScaledInlineWidget extends RenderBox with RenderObjectWithChildMixi
       null => super.computeDistanceToActualBaseline(baseline),
       final double childBaseline => scale * childBaseline,
     };
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final double? distance = child?.getDryBaseline(BoxConstraints(maxWidth: constraints.maxWidth / scale), baseline);
+    return distance == null ? null : scale * distance;
   }
 
   @override

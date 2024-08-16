@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'elevated_button.dart';
+/// @docImport 'ink_well.dart';
+/// @docImport 'material.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -266,19 +271,20 @@ class FloatingActionButton extends StatelessWidget {
 
   /// The default foreground color for icons and text within the button.
   ///
-  /// If this property is null, then the
-  /// [FloatingActionButtonThemeData.foregroundColor] of
-  /// [ThemeData.floatingActionButtonTheme] is used. If that property is also
-  /// null, then the [ColorScheme.onSecondary] color of [ThemeData.colorScheme]
-  /// is used.
+  /// If this property is null, then the [FloatingActionButtonThemeData.foregroundColor]
+  /// of [ThemeData.floatingActionButtonTheme] is used. If that property is also
+  /// null, then the [ColorScheme.onPrimaryContainer] color of [ThemeData.colorScheme]
+  /// is used. If [ThemeData.useMaterial3] is set to false, then the
+  /// [ColorScheme.onSecondary] color of [ThemeData.colorScheme] is used.
   final Color? foregroundColor;
 
   /// The button's background color.
   ///
-  /// If this property is null, then the
-  /// [FloatingActionButtonThemeData.backgroundColor] of
-  /// [ThemeData.floatingActionButtonTheme] is used. If that property is also
-  /// null, then the [Theme]'s [ColorScheme.secondary] color is used.
+  /// If this property is null, then the [FloatingActionButtonThemeData.backgroundColor]
+  /// of [ThemeData.floatingActionButtonTheme] is used. If that property is also
+  /// null, then the [ColorScheme.primaryContainer] color of [ThemeData.colorScheme]
+  /// is used. If [ThemeData.useMaterial3] is set to false, then the
+  /// [ColorScheme.secondary] color of [ThemeData.colorScheme] is used.
   final Color? backgroundColor;
 
   /// The color to use for filling the button when the button has input focus.
@@ -322,7 +328,7 @@ class FloatingActionButton extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// The z-coordinate at which to place this button relative to its parent.
@@ -420,7 +426,7 @@ class FloatingActionButton extends StatelessWidget {
 
   /// True if this is an "extended" floating action button.
   ///
-  /// Typically [extended] buttons have a [StadiumBorder] [shape]
+  /// Typically "extended" buttons have a [StadiumBorder] [shape]
   /// and have been created with the [FloatingActionButton.extended]
   /// constructor.
   ///

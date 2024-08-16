@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'ink_well.dart';
+/// @docImport 'material.dart';
+/// @docImport 'menu_button_theme.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -34,9 +39,9 @@ import 'theme_data.dart';
 ///
 /// All of the [MenuStyle] properties are null by default.
 ///
-/// Many of the [MenuStyle] properties are [MaterialStateProperty] objects which
+/// Many of the [MenuStyle] properties are [WidgetStateProperty] objects which
 /// resolve to different values depending on the menu's state. For example the
-/// [Color] properties are defined with `MaterialStateProperty<Color>` and can
+/// [Color] properties are defined with `WidgetStateProperty<Color>` and can
 /// resolve to different colors depending on if the menu is pressed, hovered,
 /// focused, disabled, etc.
 ///
@@ -48,9 +53,9 @@ import 'theme_data.dart';
 /// ```dart
 /// SubmenuButton(
 ///   menuStyle: MenuStyle(
-///     backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-///       (Set<MaterialState> states) {
-///         if (states.contains(MaterialState.focused)) {
+///     backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+///       (Set<WidgetState> states) {
+///         if (states.contains(WidgetState.focused)) {
 ///           return Theme.of(context).colorScheme.primary.withOpacity(0.5);
 ///         }
 ///         return null; // Use the component's default.
@@ -69,7 +74,7 @@ import 'theme_data.dart';
 /// ```dart
 /// const SubmenuButton(
 ///   menuStyle: MenuStyle(
-///     backgroundColor: MaterialStatePropertyAll<Color>(Colors.green),
+///     backgroundColor: WidgetStatePropertyAll<Color>(Colors.green),
 ///   ),
 ///   menuChildren: <Widget>[ /* ... */ ],
 ///   child: Text('Let me play among the stars'),
@@ -83,7 +88,7 @@ import 'theme_data.dart';
 /// MaterialApp(
 ///   theme: ThemeData(
 ///     menuTheme: const MenuThemeData(
-///       style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.red)),
+///       style: MenuStyle(backgroundColor: WidgetStatePropertyAll<Color>(Colors.red)),
 ///     ),
 ///   ),
 ///   home: const MyAppHome(),
@@ -316,7 +321,7 @@ class MenuStyle with Diagnosticable {
       minimumSize: MaterialStateProperty.lerp<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
       fixedSize: MaterialStateProperty.lerp<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
       maximumSize: MaterialStateProperty.lerp<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
-      side: _LerpSides(a?.side, b?.side, t),
+      side: MaterialStateBorderSide.lerp(a?.side, b?.side, t),
       shape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
@@ -340,31 +345,5 @@ class MenuStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
-  }
-}
-
-/// A required helper class because [BorderSide.lerp] doesn't support passing or
-/// returning null values.
-class _LerpSides implements MaterialStateProperty<BorderSide?> {
-  const _LerpSides(this.a, this.b, this.t);
-
-  final MaterialStateProperty<BorderSide?>? a;
-  final MaterialStateProperty<BorderSide?>? b;
-  final double t;
-
-  @override
-  BorderSide? resolve(Set<MaterialState> states) {
-    final BorderSide? resolvedA = a?.resolve(states);
-    final BorderSide? resolvedB = b?.resolve(states);
-    if (resolvedA == null && resolvedB == null) {
-      return null;
-    }
-    if (resolvedA == null) {
-      return BorderSide.lerp(BorderSide(width: 0, color: resolvedB!.color.withAlpha(0)), resolvedB, t);
-    }
-    if (resolvedB == null) {
-      return BorderSide.lerp(resolvedA, BorderSide(width: 0, color: resolvedA.color.withAlpha(0)), t);
-    }
-    return BorderSide.lerp(resolvedA, resolvedB, t);
   }
 }

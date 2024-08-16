@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:developer';
 import 'dart:ui' as ui;
 
@@ -49,7 +52,7 @@ import 'debug.dart';
 ///
 ///  * [PaintingBinding.shaderWarmUp], the actual instance of [ShaderWarmUp]
 ///    that's used to warm up the shaders.
-///  * <https://flutter.dev/docs/perf/rendering/shader>
+///  * <https://docs.flutter.dev/perf/shader>
 abstract class ShaderWarmUp {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -87,7 +90,7 @@ abstract class ShaderWarmUp {
     await warmUpOnCanvas(canvas);
     final ui.Picture picture = recorder.endRecording();
     assert(debugCaptureShaderWarmUpPicture(picture));
-    if (!kIsWeb || isCanvasKit) { // Picture.toImage is not yet implemented on the web.
+    if (!kIsWeb || isSkiaWeb) { // Picture.toImage is not implemented on the html renderer.
       TimelineTask? debugShaderWarmUpTask;
       if (!kReleaseMode) {
         debugShaderWarmUpTask = TimelineTask()..start('Warm-up shader');
