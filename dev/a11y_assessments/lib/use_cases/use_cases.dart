@@ -56,5 +56,5 @@ final List<UseCase> useCases = <UseCase>[
   NavigationDrawerUseCase(),
   NavigationRailUseCase(),
   AppBarUseCase(),
-  TabBarUseCase(),
+  TabBarViewUseCase(),
 ];

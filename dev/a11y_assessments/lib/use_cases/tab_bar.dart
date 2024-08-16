@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'use_cases.dart';
 
-class TabBarUseCase extends UseCase {
+class TabBarViewUseCase extends UseCase {
 
   @override
   String get name => 'TabBar';
@@ -15,12 +15,12 @@ class TabBarUseCase extends UseCase {
   String get route => '/tab-bar';
 
   @override
-  Widget build(BuildContext context) => const TabBarExample();
+  Widget build(BuildContext context) => const TabBarViewExample();
 }
 
 
-class TabBarExample extends StatelessWidget {
-  const TabBarExample({super.key});
+class TabBarViewExample extends StatelessWidget {
+  const TabBarViewExample({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -10,7 +10,7 @@ import 'test_utils.dart';
 
 void main() {
   testWidgets('tab bar can run', (WidgetTester tester) async {
-    await pumpsUseCase(tester, TabBarUseCase());
+    await pumpsUseCase(tester, TabBarViewUseCase());
     expect(find.byType(TabBar), findsOneWidget);
   });
 }
