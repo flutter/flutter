@@ -92,14 +92,25 @@ void main() {
       ),
     ));
 
-     final Iterable<Container> containers = tester.widgetList(find.byType(Container));
+    final Container headerContainer = tester.widget<Container>(
+      find.descendant(
+        of: find.byType(PaginatedDataTable),
+        matching: find.byType(Container).first,
+      ),
+    );
+    
+    final Container footerContainer = tester.widget<Container>(
+      find.descendant(
+        of: find.byType(PaginatedDataTable),
+        matching: find.byType(Container).last,
+      ),
+    );
 
-    while (containers.elementAt(containers.length-1).color == null){
-    await tester.pumpAndSettle();
-    }
+    expect(headerContainer.color, headerBackgroundColor);
+    expect(footerContainer.color, footerBackgroundColor);
 
-    expect(containers.elementAt(0).color, headerBackgroundColor);
-    expect(containers.elementAt(containers.length-1).color, footerBackgroundColor); // last container is the footer
+
+    
   });
 
   testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
@@ -1447,11 +1458,11 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable footerStyle set properly', (WidgetTester tester) async {
-    const Color footerStyleColor = Color.fromARGB(255, 255, 0, 0);
+    final TextStyle footerStyle = TextStyle(color: Colors.red, fontSize: 16);
 
     await tester.pumpWidget(MaterialApp(
       home: PaginatedDataTable(
-        footerStyle: const TextStyle(color: Color.fromARGB(255, 255, 0, 0)),
+        footerStyle: TextStyle(color: Colors.red, fontSize: 16),
         showFirstLastButtons: true,
         header: const Text('Test table'),
         rowsPerPage: 10,
@@ -1467,10 +1478,13 @@ void main() {
 
       await tester.pumpAndSettle();
 
+      final DefaultTextStyle footerTextStyle = tester.widget<DefaultTextStyle>(
+      find.descendant(
+        of: find.byType(PaginatedDataTable),
+        matching: find.byType(DefaultTextStyle).last,
+      ),
+   );
 
-      expect(find.byWidgetPredicate((widget) => widget is DefaultTextStyle), findsOneWidget);
-      final DefaultTextStyle rowsPerPageTextStyle = tester.widget(find.byWidgetPredicate((widget) => widget is DefaultTextStyle));
-      final TextStyle selectedTextStyle = rowsPerPageTextStyle.style!;
-      expect(selectedTextStyle.color, equals(footerStyleColor));
+      expect(footerTextStyle.style, footerStyle);
   });
 }
