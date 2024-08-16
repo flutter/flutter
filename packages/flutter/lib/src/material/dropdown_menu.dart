@@ -825,6 +825,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           focusNode: widget.focusNode,
           canRequestFocus: canRequestFocus(),
           enableInteractiveSelection: canRequestFocus(),
+          readOnly: !canRequestFocus(),
           keyboardType: widget.keyboardType,
           textAlign: widget.textAlign,
           textAlignVertical: TextAlignVertical.center,
