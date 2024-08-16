@@ -319,6 +319,7 @@ class NavigationDestination extends StatelessWidget {
     required this.label,
     this.tooltip,
     this.enabled = true,
+    this.semanticsLabel,
   });
 
   /// The [Widget] (usually an [Icon]) that's displayed for this
@@ -357,6 +358,11 @@ class NavigationDestination extends StatelessWidget {
   /// Defaults to null, in which case the [label] text will be used.
   final String? tooltip;
 
+  /// The text to display in the aria-label for this [NavigationDestination].
+  ///
+  /// If [semanticsLabel] is an empty string, the [label] text be used.
+  final String? semanticsLabel;
+
   /// Indicates that this destination is selectable.
   ///
   /// Defaults to true.
@@ -377,6 +383,7 @@ class NavigationDestination extends StatelessWidget {
       label: label,
       tooltip: tooltip,
       enabled: enabled,
+      semanticsLabel: semanticsLabel,
       buildIcon: (BuildContext context) {
         final IconThemeData selectedIconTheme =
           navigationBarTheme.iconTheme?.resolve(selectedState)
@@ -430,15 +437,18 @@ class NavigationDestination extends StatelessWidget {
             : effectiveUnselectedLabelTextStyle
           : effectiveDisabledLabelTextStyle;
 
-        return Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: MediaQuery.withClampedTextScaling(
-            // Set maximum text scale factor to _kMaxLabelTextScaleFactor for the
-            // label to keep the visual hierarchy the same even with larger font
-            // sizes. To opt out, wrap the [label] widget in a [MediaQuery] widget
-            // with a different `TextScaler`.
-            maxScaleFactor: _kMaxLabelTextScaleFactor,
-            child: Text(label, style: textStyle),
+        return Semantics(
+          label: semanticsLabel ?? label,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: MediaQuery.withClampedTextScaling(
+              // Set maximum text scale factor to _kMaxLabelTextScaleFactor for the
+              // label to keep the visual hierarchy the same even with larger font
+              // sizes. To opt out, wrap the [label] widget in a [MediaQuery] widget
+              // with a different `TextScaler`.
+              maxScaleFactor: _kMaxLabelTextScaleFactor,
+              child: Text(label, style: textStyle),
+            ),
           ),
         );
       },
@@ -465,6 +475,7 @@ class _NavigationDestinationBuilder extends StatefulWidget {
     required this.buildLabel,
     required this.label,
     this.tooltip,
+    this.semanticsLabel,
     this.enabled = true,
   });
 
@@ -503,6 +514,11 @@ class _NavigationDestinationBuilder extends StatefulWidget {
   ///
   /// Defaults to null, in which case the [label] text will be used.
   final String? tooltip;
+
+  /// The text to display in the aria-label for this [NavigationDestination].
+  ///
+  /// If [semanticsLabel] is an empty string, the [label] text will be used.
+  final String? semanticsLabel;
 
   /// Indicates that this destination is selectable.
   ///
@@ -1133,7 +1149,7 @@ class _StatusTransitionWidgetBuilder extends StatusTransitionWidget {
 //     return AnimatedIcon(
 //       icon: AnimatedIcons.menu_arrow,
 //       progress: animation,
-//       semanticLabel: 'Show menu',
+//       semanticsLabel: 'Show menu',
 //     );
 //   }
 // )

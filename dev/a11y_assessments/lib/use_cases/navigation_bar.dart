@@ -27,12 +27,34 @@ class MainWidget extends StatefulWidget {
 class MainWidgetState extends State<MainWidget> {
   int currentPageIndex = 0;
 
+  final List<NavigationDestination> destinations = <NavigationDestination>[
+    const NavigationDestination(
+      icon: Icon(Icons.home_outlined),
+      selectedIcon: Icon(Icons.home),
+      label: 'Home',
+    ),
+    const NavigationDestination(
+      icon: Icon(Icons.business),
+      label: 'Business',
+    ),
+    const NavigationDestination(
+      icon: Icon(Icons.school_outlined),
+      selectedIcon: Icon(Icons.school),
+      label: 'School',
+    ),
+  ];
+
+  String _getSemanticsLabel(int index) {
+    return ' ${currentPageIndex == index ? '(selected)' : ''}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: const Text('NavigationBar Demo')),
+        title:
+ Semantics(headingLevel: 1, child: const Text('NavigationBar Demo')),
       ),
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
@@ -42,22 +64,12 @@ class MainWidgetState extends State<MainWidget> {
         },
         indicatorColor: Colors.amber[800],
         selectedIndex: currentPageIndex,
-        destinations: const <Widget>[
-          NavigationDestination(
-            selectedIcon: Icon(Icons.home),
-            icon: Icon(Icons.home_outlined),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.business),
-            label: 'Business',
-          ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.school),
-            icon: Icon(Icons.school_outlined),
-            label: 'School',
-          ),
-        ],
+        destinations: destinations.map((NavigationDestination destination) => NavigationDestination(
+          icon: destination.icon,
+          selectedIcon: destination.selectedIcon,
+          label: destination.label,
+          semanticsLabel: _getSemanticsLabel(destinations.indexOf(destination)),
+        )).toList(),
       ),
       body: <Widget>[
         Container(
