@@ -31,8 +31,8 @@ class _DrawerExampleState extends State<DrawerExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Drawer Example'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Semantics(headingLevel: 1, child: const Text('Drawer Demo')),
       ),
       endDrawer: Drawer(
         child: ListView(

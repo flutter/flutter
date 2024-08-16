@@ -157,7 +157,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
     return <String>[
       '-O$optimizationLevel',
       '--${stripSymbols ? '' : 'no-'}strip-wasm',
-      if (!sourceMaps) '--extra-compiler-option=--no-source-maps',
+      if (!sourceMaps) '--no-source-maps',
       if (buildMode == BuildMode.debug) '--extra-compiler-option=--enable-asserts',
     ];
   }
