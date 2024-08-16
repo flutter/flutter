@@ -922,9 +922,88 @@ void main() {
 
   }, variant: TargetPlatformVariant.desktop());
 
-  // Regression test for https://github.com/flutter/flutter/issues/147253.
-  testWidgets('Default search prioritises the current highlight on desktop platforms',
-      (WidgetTester tester) async {
+  // Regression test for https://github.com/flutter/flutter/issues/152375.
+  testWidgets('Down key and up key can navigate on desktop platforms when a label text contains '
+      'another label text using customized search algorithm', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: DropdownMenu<int>(
+          searchCallback: (List<DropdownMenuEntry<int>> entries, String query) {
+            if (query.isEmpty) {
+              return null;
+            }
+            final int index = entries.indexWhere(
+              (DropdownMenuEntry<int> entry) => entry.label.contains(query),
+            );
+            return index != -1 ? index : null;
+          },
+          dropdownMenuEntries: const <DropdownMenuEntry<int>>[
+            DropdownMenuEntry<int>(
+              value: 0,
+              label: 'ABC'
+            ),
+            DropdownMenuEntry<int>(
+              value: 1,
+              label: 'AB'
+            ),
+            DropdownMenuEntry<int>(
+              value: 2,
+              label: 'ABCD'
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(DropdownMenu<int>));
+    await tester.pump();
+
+    final Finder button0Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, 'ABC').last,
+      matching: find.byType(Material),
+    );
+    final Finder button1Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, 'AB').last,
+      matching: find.byType(Material),
+    );
+    final Finder button2Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, 'ABCD').last,
+      matching: find.byType(Material),
+    );
+
+    // Press down key three times, the highlight should move to the next item each time.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    Material item0Material = tester.widget<Material>(button0Material);
+    expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    Material item1Material = tester.widget<Material>(button1Material);
+    expect(item1Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    final Material item2Material = tester.widget<Material>(button2Material);
+    expect(item2Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    // Press up key two times, the highlight should up each time.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    item1Material = tester.widget<Material>(button1Material);
+    expect(item1Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    item0Material = tester.widget<Material>(button0Material);
+    expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+  }, variant: TargetPlatformVariant.desktop());
+
+  // Regression test for https://github.com/flutter/flutter/issues/152375.
+  testWidgets('Searching can hightlight entry after keyboard navigation', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
@@ -935,31 +1014,49 @@ void main() {
       ),
     ));
 
-    const String itemLabel = 'Item 2';
-    // Open the menu
+    // Open the menu and highlight the first item.
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
-    await tester.pumpAndSettle();
-    // Highlight the third item by exact search.
-    await tester.enterText(find.byType(TextField).first, itemLabel);
-    await tester.pumpAndSettle();
-    Finder button2Material = find.descendant(
-      of: find.widgetWithText(MenuItemButton, itemLabel).last,
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    // Search for the last item.
+    await tester.enterText(find.byType(TextField).first, menuChildren.last.label);
+    await tester.pump();
+    final Finder buttonMaterial = find.descendant(
+      of: find.widgetWithText(MenuItemButton, menuChildren.last.label).last,
       matching: find.byType(Material),
     );
-    Material item2material = tester.widget<Material>(button2Material);
-    expect(item2material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
-
-    // Search something that matches multiple items.
-    await tester.enterText(find.byType(TextField).first, 'Item');
-    await tester.pumpAndSettle();
-    // The third item should still be highlighted.
-    button2Material = find.descendant(
-      of: find.widgetWithText(MenuItemButton, itemLabel).last,
-      matching: find.byType(Material),
-    );
-    item2material = tester.widget<Material>(button2Material);
-    expect(item2material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    final Material itemMaterial = tester.widget<Material>(buttonMaterial);
+    expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12)); // Menu 1 button is highlighted.
   }, variant: TargetPlatformVariant.desktop());
+
+  // Regression test for https://github.com/flutter/flutter/issues/151878.
+  testWidgets('Filtering does not cause crush with existing currentHighlight', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          enableFilter: true,
+          requestFocusOnTap: true,
+          dropdownMenuEntries: menuChildren,
+        ),
+      ),
+    ));
+
+    // Open the menu and highlight the third item.
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+
+    // Filter the menu items.
+    await tester.enterText(find.byType(TextField), menuChildren.first.label);
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('The text input should match the label of the menu item '
       'while pressing down key on desktop platforms', (WidgetTester tester) async {
