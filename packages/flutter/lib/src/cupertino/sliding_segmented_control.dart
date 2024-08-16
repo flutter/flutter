@@ -1102,12 +1102,12 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     }
 
     final double childHeight = _getMaxChildHeight(constraints, double.infinity);
+    final BoxConstraints separatorConstraints = BoxConstraints(minHeight: childHeight, maxHeight: childHeight);
     RenderBox? child = firstChild;
     int index = 0;
     double start = 0;
     while (child != null) {
       final BoxConstraints childConstraints = BoxConstraints.tight(Size(childWidths[index ~/ 2], childHeight));
-      final BoxConstraints separatorConstraints = childConstraints.heightConstraints();
       child.layout(index.isEven ? childConstraints : separatorConstraints, parentUsesSize: true);
       final _SegmentedControlContainerBoxParentData childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
       final Offset childOffset = Offset(start, 0);
