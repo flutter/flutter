@@ -97,11 +97,9 @@ Future<void> lipoDylibs(File target, List<File> sources) async {
 /// names set to update the install names of dependencies.
 Future<void> setInstallNameDylib(
   File dylibFile,
+  String newInstallName,
   Map<String, String> oldToNewInstallNames,
 ) async {
-  final String fileName = dylibFile.basename;
-  final String newInstallName = '@rpath/$fileName.framework/$fileName';
-
   final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
   for (final String oldInstallName in oldInstallNames) {
     oldToNewInstallNames[oldInstallName] = newInstallName;
@@ -111,7 +109,7 @@ Future<void> setInstallNameDylib(
     <String>[
       'install_name_tool',
       '-id',
-      '@rpath/$fileName.framework/$fileName',
+      newInstallName,
       dylibFile.path,
     ],
   );

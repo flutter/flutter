@@ -232,8 +232,10 @@ final KernelAssetPath kernelAssetPath;
 /// For `flutter run -release` a multi-architecture solution is needed. So,
 /// `lipo` is used to combine all target architectures into a single file.
 ///
-/// The install name is set so that it matches what the place it will
-/// be bundled in the final app.
+/// The install name is set so that it matches with the place it will
+/// be bundled in the final app. Install names that are referenced in dependent
+/// libraries are updated to match the new install name, so that the referenced
+/// library can be found the dynamic linker.
 ///
 /// Code signing is also done here, so that it doesn't have to be done in
 /// in xcode_backend.dart.
@@ -249,7 +251,7 @@ Future<void> _copyNativeAssetsIOS(
         .printTrace('Copying native assets to ${buildUri.toFilePath()}.');
 
     final Map<String, String> oldToNewInstallNames = <String, String>{};
-    final List<File> dylibFiles = <File>[];
+    final List<(File, Directory)> dylibs = <(File, Directory)>[];
 
     for (final MapEntry<KernelAssetPath, List<AssetImpl>> assetMapping
         in assetTargetLocations.entries) {
@@ -259,21 +261,25 @@ Future<void> _copyNativeAssetsIOS(
       ];
       final Uri targetUri = buildUri.resolveUri(target);
       final File dylibFile = fileSystem.file(targetUri);
-      dylibFiles.add(dylibFile);
       final Directory frameworkDir = dylibFile.parent;
+      dylibs.add((dylibFile, frameworkDir));
       if (!await frameworkDir.exists()) {
         await frameworkDir.create(recursive: true);
       }
       await lipoDylibs(dylibFile, sources);
-      await setInstallNameDylib(dylibFile, oldToNewInstallNames);
+
+      final String dylibFileName = dylibFile.basename;
+      final String newInstallName = '@rpath/$dylibFileName.framework/$dylibFileName';
+      await setInstallNameDylib(dylibFile, newInstallName, oldToNewInstallNames);
+
       // TODO(knopp): Wire the value once there is a way to configure that in the hook.
       // https://github.com/dart-lang/native/issues/1133
       await createInfoPlist(targetUri.pathSegments.last, frameworkDir, minimumIOSVersion: '12.0');
-      await codesignDylib(codesignIdentity, buildMode, frameworkDir);
     }
 
-    for (final File dylibFile in dylibFiles) {
+    for (final (File dylibFile, Directory frameworkDir) in dylibs) {
       await changeDependencyInstallNamesDylib(dylibFile, oldToNewInstallNames);
+      await codesignDylib(codesignIdentity, buildMode, frameworkDir);
     }
 
     globals.logger.printTrace('Copying native assets done.');
