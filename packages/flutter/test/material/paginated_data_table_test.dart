@@ -1480,7 +1480,7 @@ void main() {
       of: find.byType(PaginatedDataTable),
       matching: find.byWidgetPredicate((Widget widget) {
         if (widget is Container && widget.child is SingleChildScrollView) {
-          final singleChildScrollView = widget.child as SingleChildScrollView;
+          final Widget singleChildScrollView = widget.child! as SingleChildScrollView;
           return singleChildScrollView.child is Row;
         }
         return false;
