@@ -1435,19 +1435,11 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      final Finder footerTextStyleFinder = find.descendant(
-      of: find.byType(PaginatedDataTable),
-      matching: find.byWidgetPredicate((widget) => 
-        widget is DefaultTextStyle &&
-        widget.style == TextStyle(color: Color(0xFFF53935), fontSize: 16) &&
-        widget.child is IconTheme &&
-        (widget.child as IconTheme).child is SizedBox
-      ),
-    );
-    expect(footerTextStyleFinder, findsOneWidget);
+      final Finder footerTextStyleFinder = find.byKey(Key('footerTextStyle'));
+      expect(footerTextStyleFinder, findsOneWidget);
 
-    final DefaultTextStyle footerTextStyle = tester.widget<DefaultTextStyle>(footerTextStyleFinder);
-    expect(footerTextStyle.style, footerStyle);
+      final DefaultTextStyle footerTextStyle = tester.widget<DefaultTextStyle>(footerTextStyleFinder);
+      expect(footerTextStyle.style, footerStyle);
   });
 
   testWidgets('PaginatedDataTable headerBackgroundColor and footerBackgroundColor set properly', (WidgetTester tester) async {
