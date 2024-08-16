@@ -70,49 +70,6 @@ void main() {
   setUp(() => source = TestDataSource());
   tearDown(() => source.dispose());
 
-   testWidgets('PaginatedDataTable headerBackgroundColor and footerBackgroundColor set properly', (WidgetTester tester) async {
-    const Color headerBackgroundColor = Color(0xFFF53935);
-
-    const Color footerBackgroundColor = Color(0xFFA53695);
-
-    await tester.pumpWidget(MaterialApp(
-      home: PaginatedDataTable(
-        headerBackgroundColor: headerBackgroundColor,
-        footerBackgroundColor: footerBackgroundColor,
-        showFirstLastButtons: true,
-        header: const Text('Test table'),
-        rowsPerPage: 10,
-        onRowsPerPageChanged: (int? rowsPerPage) { },
-        source: source,
-        columns: const <DataColumn>[
-          DataColumn(label: Text('Name')),
-          DataColumn(label: Text('Calories'), numeric: true),
-          DataColumn(label: Text('Generation')),
-        ],
-      ),
-    ));
-
-    final Container headerContainer = tester.widget<Container>(
-      find.descendant(
-        of: find.byType(PaginatedDataTable),
-        matching: find.byType(Container).first,
-      ),
-    );
-    
-    final Container footerContainer = tester.widget<Container>(
-      find.descendant(
-        of: find.byType(PaginatedDataTable),
-        matching: find.byType(Container).last,
-      ),
-    );
-
-    expect(headerContainer.color, headerBackgroundColor);
-    expect(footerContainer.color, footerBackgroundColor);
-
-
-    
-  });
-
   testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
@@ -1478,13 +1435,65 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      final DefaultTextStyle footerTextStyle = tester.widget<DefaultTextStyle>(
+      final Finder footerTextStyleFinder = find.descendant(
+      of: find.byType(PaginatedDataTable),
+      matching: find.byWidgetPredicate((widget) => 
+        widget is DefaultTextStyle &&
+        widget.style == footerStyle
+      ),
+    );
+    expect(footerTextStyleFinder, findsOneWidget);
+
+    final DefaultTextStyle footerTextStyle = tester.widget<DefaultTextStyle>(footerTextStyleFinder);
+    expect(footerTextStyle.style, footerStyle);
+  });
+
+  testWidgets('PaginatedDataTable headerBackgroundColor and footerBackgroundColor set properly', (WidgetTester tester) async {
+    const Color headerBackgroundColor = Color(0xFFF53935);
+
+    const Color footerBackgroundColor = Color(0xFFA53695);
+
+    await tester.pumpWidget(MaterialApp(
+      home: PaginatedDataTable(
+        headerBackgroundColor: headerBackgroundColor,
+        footerBackgroundColor: footerBackgroundColor,
+        showFirstLastButtons: true,
+        header: const Text('Test table'),
+        rowsPerPage: 10,
+        onRowsPerPageChanged: (int? rowsPerPage) { },
+        source: source,
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
+        ],
+      ),
+    ));
+
+    final Container headerContainer = tester.widget<Container>(
       find.descendant(
         of: find.byType(PaginatedDataTable),
-        matching: find.byType(DefaultTextStyle).last,
+        matching: find.byType(Container).first,
       ),
-   );
+    );
+    expect(headerContainer.color, headerBackgroundColor);
 
-      expect(footerTextStyle.style, footerStyle);
+     final Finder footerFinder = find.descendant(
+      of: find.byType(PaginatedDataTable),
+      matching: find.byWidgetPredicate((widget) => 
+        widget is Container && 
+        widget.child is SingleChildScrollView &&
+        (widget.child as SingleChildScrollView).child is Row
+      ),
+    );
+    expect(footerFinder, findsOneWidget);
+
+    final Container footerContainer = tester.widget<Container>(footerFinder);
+
+    
+    expect(footerContainer.color, footerBackgroundColor);
+
+
+    
   });
 }
