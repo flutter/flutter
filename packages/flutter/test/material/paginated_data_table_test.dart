@@ -92,8 +92,11 @@ void main() {
       ),
     ));
 
+     final Iterable<Container> containers = tester.widgetList(find.byType(Container));
+
+    while (containers.elementAt(containers.length-1).color == null){
     await tester.pumpAndSettle();
-    final Iterable<Container> containers = tester.widgetList(find.byType(Container));
+    }
 
     expect(containers.elementAt(0).color, headerBackgroundColor);
     expect(containers.elementAt(containers.length-1).color, footerBackgroundColor); // last container is the footer
@@ -1465,9 +1468,9 @@ void main() {
       await tester.pumpAndSettle();
 
 
-      expect(find.byWidgetPredicate((widget) => widget is Text && widget.data == 'Rows per page:'), findsOneWidget);
-      final Text rowsPerPageText = tester.widget(find.byWidgetPredicate((widget) => widget is Text && widget.data == 'Rows per page:'));
-      final TextStyle selectedTextStyle = rowsPerPageText.style!;
+      expect(find.byWidgetPredicate((widget) => widget is DefaultTextStyle), findsOneWidget);
+      final DefaultTextStyle rowsPerPageTextStyle = tester.widget(find.byWidgetPredicate((widget) => widget is DefaultTextStyle));
+      final TextStyle selectedTextStyle = rowsPerPageTextStyle.style!;
       expect(selectedTextStyle.color, equals(footerStyleColor));
   });
 
