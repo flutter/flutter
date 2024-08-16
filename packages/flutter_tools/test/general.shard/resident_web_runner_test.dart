@@ -1317,20 +1317,27 @@ flutter:
     ProcessManager: () => processManager,
   });
 
-  testUsingContext('Successfully turns HttpException into ToolExit',
-      () async {
+  testUsingContext('Successfully turns HttpException into ToolExit', () async {
     final BufferLogger logger = BufferLogger.test();
-    final ResidentRunner residentWebRunner =
-        setUpResidentRunner(flutterDevice, logger: logger);
+    final ResidentRunner residentWebRunner = setUpResidentRunner(
+      flutterDevice,
+      logger: logger,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     setupMocks();
     webDevFS.exception = const HttpException(
       'Connection closed before full header was received',
     );
 
-    await expectLater(residentWebRunner.run, throwsToolExit());
+    await expectLater(
+      residentWebRunner.run,
+      throwsToolExit(
+        message:
+            'Failed to establish connection with the application instance in Chrome.',
+      ),
+    );
     expect(logger.errorText, contains('HttpException'));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
