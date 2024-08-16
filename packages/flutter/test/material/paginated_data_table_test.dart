@@ -1415,13 +1415,13 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable footerStyle set properly', (WidgetTester tester) async {
-    final TextStyle footerStyle = const TextStyle(color: const Color(0xFFF53935), fontSize: 16);
+    const TextStyle footerStyle = const TextStyle(color: Color(0xFFF53935), fontSize: 16);
 
     await tester.pumpWidget(MaterialApp(
       home:Scaffold(
         body: SingleChildScrollView(
           child: PaginatedDataTable(
-          footerStyle: const TextStyle(color: const Color(0xFFF53935), fontSize: 16),
+          footerStyle: const TextStyle(color: Color(0xFFF53935), fontSize: 16),
           showFirstLastButtons: true,
           header: const Text('Test table'),
           onRowsPerPageChanged: (int? rowsPerPage) { },
@@ -1478,7 +1478,7 @@ void main() {
 
      final Finder footerFinder = find.descendant(
       of: find.byType(PaginatedDataTable),
-      matching: find.byWidgetPredicate((widget) =>
+      matching: find.byWidgetPredicate((Widget widget) =>
         widget is Container &&
         widget.child is SingleChildScrollView &&
         (widget.child as SingleChildScrollView).child is Row

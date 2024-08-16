@@ -94,7 +94,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.header,
     this.headerBackgroundColor,
     this.footerBackgroundColor,
-    this.footerStyle = const TextStyle(color: const Color.fromARGB(255,0, 0, 0)), //default text style
+    this.footerStyle = const TextStyle(color: Color.fromARGB(255,0, 0, 0)), //default text style
     this.actions,
     required this.columns,
     this.sortColumnIndex,
