@@ -1448,7 +1448,8 @@ void main() {
     const Color footerBackgroundColor = Color(0xFFA53695);
 
     await tester.pumpWidget(MaterialApp(
-      home: PaginatedDataTable(
+      home: SingleChildScrollView(
+      child: PaginatedDataTable(
         headerBackgroundColor: headerBackgroundColor,
         footerBackgroundColor: footerBackgroundColor,
         showFirstLastButtons: true,
@@ -1462,7 +1463,7 @@ void main() {
           DataColumn(label: Text('Generation')),
         ],
       ),
-    ));
+    )));
 
     final Container headerContainer = tester.widget<Container>(
       find.descendant(
@@ -1474,20 +1475,14 @@ void main() {
 
      final Finder footerFinder = find.descendant(
       of: find.byType(PaginatedDataTable),
-      matching: find.byWidgetPredicate((widget) => 
-        widget is Container && 
+      matching: find.byWidgetPredicate((widget) =>
+        widget is Container &&
         widget.child is SingleChildScrollView &&
         (widget.child as SingleChildScrollView).child is Row
       ),
     );
     expect(footerFinder, findsOneWidget);
-
     final Container footerContainer = tester.widget<Container>(footerFinder);
-
-    
     expect(footerContainer.color, footerBackgroundColor);
-
-
-    
   });
 }
