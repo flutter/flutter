@@ -3309,9 +3309,6 @@ ORIGIN: ../../../flutter/third_party/skia/src/pdf/SkPDFBitmap.cpp + ../../../flu
 ORIGIN: ../../../flutter/third_party/skia/src/pdf/SkPDFBitmap.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/pdf/SkPDFMetadata.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/pdf/SkPDFMetadata.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/ports/SkOSLibrary.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/ports/SkOSLibrary_posix.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/ports/SkOSLibrary_win.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/shaders/SkImageShader.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/shaders/SkImageShader.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/svg/SkSVGCanvas.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -3590,9 +3587,6 @@ FILE: ../../../flutter/third_party/skia/src/pdf/SkPDFBitmap.cpp
 FILE: ../../../flutter/third_party/skia/src/pdf/SkPDFBitmap.h
 FILE: ../../../flutter/third_party/skia/src/pdf/SkPDFMetadata.cpp
 FILE: ../../../flutter/third_party/skia/src/pdf/SkPDFMetadata.h
-FILE: ../../../flutter/third_party/skia/src/ports/SkOSLibrary.h
-FILE: ../../../flutter/third_party/skia/src/ports/SkOSLibrary_posix.cpp
-FILE: ../../../flutter/third_party/skia/src/ports/SkOSLibrary_win.cpp
 FILE: ../../../flutter/third_party/skia/src/shaders/SkImageShader.cpp
 FILE: ../../../flutter/third_party/skia/src/shaders/SkImageShader.h
 FILE: ../../../flutter/third_party/skia/src/svg/SkSVGCanvas.cpp
