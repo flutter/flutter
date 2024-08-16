@@ -1415,7 +1415,7 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable footerStyle set properly', (WidgetTester tester) async {
-    const TextStyle footerStyle = const TextStyle(color: Color(0xFFF53935), fontSize: 16);
+    const TextStyle footerStyle = TextStyle(color: Color(0xFFF53935), fontSize: 16);
 
     await tester.pumpWidget(MaterialApp(
       home:Scaffold(
@@ -1481,7 +1481,7 @@ void main() {
       matching: find.byWidgetPredicate((Widget widget) =>
         widget is Container &&
         widget.child is SingleChildScrollView &&
-        (widget.child as SingleChildScrollView).child is Row
+        widget.child.child is Row
       ),
     );
     expect(footerFinder, findsOneWidget);
