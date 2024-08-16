@@ -1476,9 +1476,17 @@ void main() {
     );
     expect(headerContainer.color, headerBackgroundColor);
 
-    final Finder footerFinder = find.byKey(const Key('footerContainer'));
+     final Finder footerFinder = find.descendant(
+      of: find.byType(PaginatedDataTable),
+      matching: find.byWidgetPredicate((Widget widget) =>{
+        if (widget is Container && widget.child is SingleChildScrollView) {
+          final singleChildScrollView = widget.child as SingleChildScrollView;
+          return singleChildScrollView.child is Row;
+        }
+        return false;
+      }),
+    );
     expect(footerFinder, findsOneWidget);
-
     final Container footerContainer = tester.widget<Container>(footerFinder);
     expect(footerContainer.color, footerBackgroundColor);
   });
