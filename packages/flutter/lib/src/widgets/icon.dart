@@ -87,9 +87,14 @@ class Icon extends StatelessWidget {
     this.textDirection,
     this.applyTextScaling,
     this.foreground,
-  }) : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
-       assert(weight == null || (0.0 < weight)),
-       assert(opticalSize == null || (0.0 < opticalSize));
+  })  : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
+        assert(weight == null || (0.0 < weight)),
+        assert(opticalSize == null || (0.0 < opticalSize)),
+        assert(
+          color == null || foreground == null,
+          'Cannot provide both a color and a foreground. The color argument '
+          'is just a shorthand for "foreground: Paint()..color = color".',
+        );
 
   /// The icon to display. The available icons are described in [Icons].
   ///
@@ -251,8 +256,6 @@ class Icon extends StatelessWidget {
   /// The paint object to use for the icon's foreground.
   ///
   /// This is useful for applying effects like blur or color filters to the icon.
-  ///
-  /// Foreground's color will be set by icon's color if it is not set.
   final Paint? foreground;
 
   @override
@@ -287,17 +290,13 @@ class Icon extends StatelessWidget {
     }
 
     final double iconOpacity = iconTheme.opacity ?? 1.0;
-    Color? iconColor = color ?? iconTheme.color!;
+    Color? iconColor = color ?? foreground?.color ?? iconTheme.color!;
     if (iconOpacity != 1.0) {
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
     }
-
-    // Cannot provide both a color and a foreground. The color argument is just
-    // a shorthand for "foreground: Paint()..color = color".
     if (foreground != null) {
-      if (foreground!.color == null) {
-        foreground!.color = iconColor;
-      }
+      foreground!.color = iconColor;
+      // Cannot provide both a color and a foreground.
       iconColor = null;
     }
 
@@ -315,7 +314,7 @@ class Icon extends StatelessWidget {
       package: icon.fontPackage,
       fontFamilyFallback: icon.fontFamilyFallback,
       shadows: iconShadows,
-      height: 1.0,  // Makes sure the font's body is vertically centered within the iconSize x iconSize square.
+      height: 1.0, // Makes sure the font's body is vertically centered within the iconSize x iconSize square.
       leadingDistribution: TextLeadingDistribution.even,
       foreground: foreground,
     );

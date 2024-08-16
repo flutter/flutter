@@ -442,18 +442,26 @@ void main() {
     ]);
   });
 
-  testWidgets("TextStyle's foreground is exposed and its color will be used", (WidgetTester tester) async {
-    final Paint foreground = Paint()..color = Color(0xFF666666);
+  testWidgets("TextStyle's foreground is exposed and its color will be used with opacity", (WidgetTester tester) async {
+    final Paint foreground = Paint()..color = const Color(0xFF666666);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: Icon(const IconData(0x41), foreground: foreground)),
+        child: Center(
+          child: IconTheme(
+            data: const IconThemeData(opacity: 0.5),
+            child: Icon(
+              const IconData(0x41),
+              foreground: foreground,
+            ),
+          ),
+        ),
       ),
     );
 
     final RichText richText = tester.firstWidget(find.byType(RichText));
     expect(richText.text.style?.color, isNull);
-    expect(richText.text.style?.foreground?.color, equals(const Color(0xFF666666)));
+    expect(richText.text.style?.foreground?.color, equals(const Color(0x7F666666)));
   });
 
   test('Throws if given invalid values', () {
