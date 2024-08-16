@@ -319,7 +319,7 @@ class NavigationDestination extends StatelessWidget {
     required this.label,
     this.tooltip,
     this.enabled = true,
-    this.semanticsLabel,
+    // this.semanticsLabel,
   });
 
   /// The [Widget] (usually an [Icon]) that's displayed for this
@@ -361,7 +361,7 @@ class NavigationDestination extends StatelessWidget {
   /// The text to display in the aria-label for this [NavigationDestination].
   ///
   /// If [semanticsLabel] is an empty string, the [label] text be used.
-  final String? semanticsLabel;
+  // final String? semanticsLabel;
 
   /// Indicates that this destination is selectable.
   ///
@@ -383,7 +383,7 @@ class NavigationDestination extends StatelessWidget {
       label: label,
       tooltip: tooltip,
       enabled: enabled,
-      semanticsLabel: semanticsLabel,
+      // semanticsLabel: semanticsLabel,
       buildIcon: (BuildContext context) {
         final IconThemeData selectedIconTheme =
           navigationBarTheme.iconTheme?.resolve(selectedState)
@@ -437,8 +437,10 @@ class NavigationDestination extends StatelessWidget {
             : effectiveUnselectedLabelTextStyle
           : effectiveDisabledLabelTextStyle;
 
+        final String ariaLabel = info.selectedIndex == info.index ? '$label (selected)' : '';
+
         return Semantics(
-          label: semanticsLabel ?? label,
+          label: ariaLabel,
           child: Padding(
             padding: const EdgeInsets.only(top: 4),
             child: MediaQuery.withClampedTextScaling(
@@ -475,7 +477,7 @@ class _NavigationDestinationBuilder extends StatefulWidget {
     required this.buildLabel,
     required this.label,
     this.tooltip,
-    this.semanticsLabel,
+    // this.semanticsLabel,
     this.enabled = true,
   });
 
@@ -518,7 +520,7 @@ class _NavigationDestinationBuilder extends StatefulWidget {
   /// The text to display in the aria-label for this [NavigationDestination].
   ///
   /// If [semanticsLabel] is an empty string, the [label] text will be used.
-  final String? semanticsLabel;
+  // final String? semanticsLabel;
 
   /// Indicates that this destination is selectable.
   ///

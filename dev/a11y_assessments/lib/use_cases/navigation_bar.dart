@@ -44,10 +44,6 @@ class MainWidgetState extends State<MainWidget> {
     ),
   ];
 
-  String _getSemanticsLabel(int index) {
-    return ' ${currentPageIndex == index ? '(selected)' : ''}';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,7 +64,6 @@ class MainWidgetState extends State<MainWidget> {
           icon: destination.icon,
           selectedIcon: destination.selectedIcon,
           label: destination.label,
-          semanticsLabel: _getSemanticsLabel(destinations.indexOf(destination)),
         )).toList(),
       ),
       body: <Widget>[
