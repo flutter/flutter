@@ -1418,20 +1418,22 @@ void main() {
     final TextStyle footerStyle = TextStyle(color: Color(0xFFF53935), fontSize: 16);
 
     await tester.pumpWidget(MaterialApp(
-      home: PaginatedDataTable(
-        footerStyle: TextStyle(color: Color(0xFFF53935), fontSize: 16),
-        showFirstLastButtons: true,
-        header: const Text('Test table'),
-        rowsPerPage: 10,
-        onRowsPerPageChanged: (int? rowsPerPage) { },
-        source: source,
-        columns: const <DataColumn>[
-          DataColumn(label: Text('Name')),
-          DataColumn(label: Text('Calories'), numeric: true),
-          DataColumn(label: Text('Generation')),
-        ],
-      ),
-    ));
+      home:Scaffold(
+        child: SingleChildScrollView(
+          child: PaginatedDataTable(
+          footerStyle: TextStyle(color: Color(0xFFF53935), fontSize: 16),
+          showFirstLastButtons: true,
+          header: const Text('Test table'),
+          rowsPerPage: 10,
+          onRowsPerPageChanged: (int? rowsPerPage) { },
+          source: source,
+          columns: const <DataColumn>[
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Calories'), numeric: true),
+            DataColumn(label: Text('Generation')),
+          ],
+        ),
+    ))));
 
       await tester.pumpAndSettle();
 
@@ -1448,22 +1450,25 @@ void main() {
     const Color footerBackgroundColor = Color(0xFFA53695);
 
     await tester.pumpWidget(MaterialApp(
-      home: SingleChildScrollView(
-      child: PaginatedDataTable(
-        headerBackgroundColor: headerBackgroundColor,
-        footerBackgroundColor: footerBackgroundColor,
-        showFirstLastButtons: true,
-        header: const Text('Test table'),
-        rowsPerPage: 10,
-        onRowsPerPageChanged: (int? rowsPerPage) { },
-        source: source,
-        columns: const <DataColumn>[
-          DataColumn(label: Text('Name')),
-          DataColumn(label: Text('Calories'), numeric: true),
-          DataColumn(label: Text('Generation')),
-        ],
-      ),
-    )));
+      home:Scaffold(
+        child: SingleChildScrollView(
+          child: PaginatedDataTable(
+            headerBackgroundColor: headerBackgroundColor,
+            footerBackgroundColor: footerBackgroundColor,
+            showFirstLastButtons: true,
+            header: const Text('Test table'),
+            rowsPerPage: 10,
+            onRowsPerPageChanged: (int? rowsPerPage) { },
+            source: source,
+            columns: const <DataColumn>[
+              DataColumn(label: Text('Name')),
+              DataColumn(label: Text('Calories'), numeric: true),
+              DataColumn(label: Text('Generation')),
+            ],
+          ),
+        )
+      )
+    ));
 
     final Container headerContainer = tester.widget<Container>(
       find.descendant(
