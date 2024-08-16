@@ -263,6 +263,7 @@ class IosProject extends XcodeBasedProject {
   static const String _kProductBundleIdVariable = '\$($kProductBundleIdKey)';
 
   static final RegExp _associatedDomainPattern = RegExp(r'^applinks:(.*)');
+  static final RegExp _associatedDomainPatternWithParam = RegExp(r'^applinks:(.*)\?(.*)');
 
   Directory get ephemeralModuleDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
@@ -470,8 +471,10 @@ class IosProject extends XcodeBasedProject {
           if (domains != null) {
             return <String>[
               for (final String domain in domains)
-                if (_associatedDomainPattern.firstMatch(domain) case final RegExpMatch match)
-                  match.group(1)!,
+                 if (_associatedDomainPatternWithParam.firstMatch(domain) case final RegExpMatch match)
+                   match.group(1)!
+                 else if (_associatedDomainPattern.firstMatch(domain) case final RegExpMatch match)
+                 match.group(1)!,
             ];
           }
         }
