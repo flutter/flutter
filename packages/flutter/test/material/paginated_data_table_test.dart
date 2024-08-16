@@ -1439,8 +1439,8 @@ void main() {
       of: find.byType(PaginatedDataTable),
       matching: find.byWidgetPredicate((widget) => 
         widget is DefaultTextStyle &&
-        widget.child is IconTheme &&
-        (widget.child as IconTheme).child is SizedBox
+        widget.child is IconTheme.merge() &&
+        (widget.child as IconTheme.merge()).child is SizedBox
       ),
     );
     expect(footerTextStyleFinder, findsOneWidget);
