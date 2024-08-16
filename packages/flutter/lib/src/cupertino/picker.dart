@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'constants.dart';
 import 'theme.dart';
 
 // Eyeballed values comparing with a native picker to produce the right
@@ -24,6 +23,13 @@ const double _kSqueeze = 1.45;
 // Opacity fraction value that dims the wheel above and below the "magnifier"
 // lens.
 const double _kOverAndUnderCenterOpacity = 0.447;
+
+// The duration and curve of the tap-to-scroll gesture's animation when a picker
+// item is tapped.
+//
+// Eyeballed from an iPhone 15 Pro simulator running iOS 17.5.
+const Duration _kCupertinoPickerTapToScrollDuration = Duration(milliseconds: 300);
+const Curve _kCupertinoPickerTapToScrollCurve = Curves.easeInOut;
 
 /// An iOS-styled picker.
 ///
@@ -267,8 +273,8 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   void _handleChildTap(int index, FixedExtentScrollController controller) {
     controller.animateToItem(
       index,
-      duration: kCupertinoPickerTapToScrollDuration,
-      curve: kCupertinoPickerTapToScrollCurve,
+      duration: _kCupertinoPickerTapToScrollDuration,
+      curve: _kCupertinoPickerTapToScrollCurve,
     );
   }
 
