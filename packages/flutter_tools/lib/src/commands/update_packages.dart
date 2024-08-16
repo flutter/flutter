@@ -524,8 +524,6 @@ class UpdatePackagesCommand extends FlutterCommand {
 
     // Run "pub get" on it in order to force the download of any
     // needed packages to the pub cache, upgrading if requested.
-    // TODO(ianh): If this fails, the tool exits silently.
-    // It can fail, e.g., if --cherry-pick-version is invalid.
     await pub.get(
       context: PubContext.updatePackages,
       project: FlutterProject.fromDirectory(syntheticPackageDir),

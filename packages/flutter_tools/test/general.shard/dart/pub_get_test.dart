@@ -629,6 +629,57 @@ exit code: 66
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext('pub get with failing exit code shows stderr message', () {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+
+    final FakeProcessManager processManager =
+        FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'bin/cache/dart-sdk/bin/dart',
+          'pub',
+          '--suppress-analytics',
+          '--directory',
+          '.',
+          'get',
+          '--example',
+        ],
+        exitCode: 1,
+        stderr: '===pub get failed stderr here===',
+        stdout: 'out1\nout2\nout3\n',
+        environment: <String, String>{
+          'FLUTTER_ROOT': '',
+          'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'
+        },
+      ),
+    ]);
+
+    final FakeStdio stdio = FakeStdio();
+    final Pub pub = Pub.test(
+      platform: FakePlatform(),
+      fileSystem: fileSystem,
+      logger: logger,
+      usage: TestUsage(),
+      botDetector: const BotDetectorAlwaysNo(),
+      stdio: stdio,
+      processManager: processManager,
+    );
+
+    expect(
+      () => pub.get(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        context: PubContext.flutterTests,
+      ),
+      throwsToolExit(
+        message: 'Failed to update packages',
+      ),
+    );
+    expect(logger.statusText, isEmpty);
+    expect(stdio.stderr.getAndClear(), '===pub get failed stderr here===');
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   testWithoutContext('pub get shows working directory on process exception',
       () async {
     final BufferLogger logger = BufferLogger.test();
