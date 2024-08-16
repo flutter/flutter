@@ -676,7 +676,6 @@ skia_component("skia") {
     sources += [
       "$_skia_root/src/ports/SkDebug_win.cpp",
       "$_skia_root/src/ports/SkImageGeneratorWIC.cpp",
-      "$_skia_root/src/ports/SkOSLibrary_win.cpp",
     ]
     libs += [
       "Ole32.lib",
@@ -691,10 +690,7 @@ skia_component("skia") {
       ]
     }
   } else {
-    sources += [
-      "$_skia_root/src/ports/SkOSFile_posix.cpp",
-      "$_skia_root/src/ports/SkOSLibrary_posix.cpp",
-    ]
+    sources += [ "$_skia_root/src/ports/SkOSFile_posix.cpp" ]
     libs += [ "dl" ]
   }
 
