@@ -18,7 +18,7 @@ See also:
 2. [Archive of design documents][] from before the [`design doc`][]
    GitHub issue label was introduced.
 
-[`design doc`]: https://github.com/flutter/flutter/issues/151486
+[`design doc`]: https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22design+doc%22
 [Archive of design documents]: https://github.com/flutter/flutter/issues/151486
 
 ## Purpose of design docs
