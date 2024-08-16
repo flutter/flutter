@@ -94,7 +94,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.header,
     this.headerBackgroundColor,
     this.footerBackgroundColor,
-    this.footerStyle = const TextStyle(color: const Color.fromARGB(255,0, 0, 0)), //default text style
+    this.footerStyle = TextStyle(color: Color.fromARGB(255,0, 0, 0)), //default text style
     this.actions,
     required this.columns,
     this.sortColumnIndex,
@@ -640,8 +640,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                 SizedBox(
                     height: (widget.dataRowMaxHeight ?? kMinInteractiveDimension) * (widget.rowsPerPage - _rowCount + _firstRowIndex).clamp(0, widget.rowsPerPage)),
               DefaultTextStyle(
-                key: Key('footerTextStyle'), //key added to find footer text style widget
-                style: footerTextStyle!,
+                key: const Key('footerTextStyle'), //key added to find footer text style widget
+                style: footerTextStyle,
                 child: IconTheme.merge(
                   data: const IconThemeData(
                     opacity: 0.54,
