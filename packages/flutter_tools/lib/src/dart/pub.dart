@@ -92,13 +92,16 @@ class PubContext {
 }
 
 /// Describes the amount of output that should get printed from a `pub` command.
-/// [PubOutputMode.all] indicates that the complete output is printed. This is
-/// typically the default.
-/// [PubOutputMode.none] indicates that no output should be printed.
-/// [PubOutputMode.summaryOnly] indicates that only summary information should be printed.
 enum PubOutputMode {
-  none,
+  /// No normal output should be printed.
+  ///
+  /// If the command were to fail, failures are still printed.
+  failuresOnly,
+
+  /// The complete output should be printed; this is typically the default.
   all,
+
+  /// Only summary information should be printed.
   summaryOnly,
 }
 
@@ -358,7 +361,7 @@ class _DefaultPub implements Pub {
 
     String? pubStderr;
     try {
-      if (outputMode != PubOutputMode.none) {
+      if (outputMode != PubOutputMode.failuresOnly) {
         final io.Stdio? stdio = _stdio;
         if (stdio == null) {
           // Let pub inherit stdio and output directly to the tool's stdout and

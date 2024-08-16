@@ -629,12 +629,11 @@ exit code: 66
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('pub get with failing exit code shows stderr message', () {
+  testWithoutContext('pub get with failing exit code even with OutputMode == failuresOnly', () async {
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
 
-    final FakeProcessManager processManager =
-        FakeProcessManager.list(<FakeCommand>[
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
@@ -650,33 +649,39 @@ exit code: 66
         stdout: 'out1\nout2\nout3\n',
         environment: <String, String>{
           'FLUTTER_ROOT': '',
-          'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'
+          'PUB_ENVIRONMENT': 'flutter_cli:update_packages'
         },
       ),
     ]);
 
-    final FakeStdio stdio = FakeStdio();
-    final Pub pub = Pub.test(
+    // Intentionally not using pub.test to simulate a real environment, but
+    // we are using non-inherited I/O to avoid printing to the console.
+    final Pub pub = Pub(
       platform: FakePlatform(),
       fileSystem: fileSystem,
       logger: logger,
       usage: TestUsage(),
       botDetector: const BotDetectorAlwaysNo(),
-      stdio: stdio,
       processManager: processManager,
     );
 
-    expect(
+    await expectLater(
       () => pub.get(
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        context: PubContext.flutterTests,
+        context: PubContext.updatePackages,
+        outputMode: PubOutputMode.failuresOnly,
       ),
       throwsToolExit(
         message: 'Failed to update packages',
       ),
     );
     expect(logger.statusText, isEmpty);
-    expect(stdio.stderr.getAndClear(), '===pub get failed stderr here===');
+    expect(logger.errorText, contains('===pub get failed stderr here==='));
+    expect(
+      logger.warningText,
+      contains('git remote set-url upstream'),
+      reason: 'When update-packages fails, it is often because of missing an upsteam remote.',
+    );
     expect(processManager, hasNoRemainingExpectations);
   });
 
@@ -796,7 +801,7 @@ exit code: 66
       await pub.get(
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         context: PubContext.flutterTests,
-        outputMode: PubOutputMode.none,
+        outputMode: PubOutputMode.failuresOnly,
       );
     } on ToolExit {
       // Ignore.
