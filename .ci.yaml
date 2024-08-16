@@ -37,7 +37,10 @@ platform_properties:
       device_type: none
   # The current android emulator config names can be found here:
   # https://chromium.googlesource.com/chromium/src.git/+/HEAD/tools/android/avd/proto
-  # You may use those names for the android_virtual_device version.
+  # You may use those names for the android_virtual_device version. You may find the
+  # avd_cipd_version by clicking on the latest available instance and looking for the
+  # build_id:<Identifier#> here:
+  # https://chrome-infra-packages.appspot.com/p/chromium/tools/android/avd/linux-amd64.
   linux_android_emu:
     properties:
       contexts: >-
@@ -47,8 +50,25 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8739520057779466577"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      os: Ubuntu
+      cores: "8"
+      device_type: none
+      kvm: "1"
+  linux_android_emu_34:
+    properties:
+      contexts: >-
+        [
+          "android_virtual_device"
+        ]
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "android_virtual_device", "version": "android_34_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8759428741582061553"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8739520057779466577"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       os: Ubuntu
@@ -314,6 +334,16 @@ platform_properties:
         ]
       os: Windows-10
       device_type: "msm8952"
+  windows_mokey:
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      os: Windows-10
+      device_type: "mokey"
 
 targets:
   - name: Linux analyze
@@ -372,6 +402,15 @@ targets:
         ]
 
   - name: Linux_android_emu android views
+    recipe: devicelab/devicelab_drone
+    properties:
+      tags: >
+        ["framework","hostonly","linux"]
+      task_name: android_views
+      presubmit_max_attempts: "2"
+    timeout: 60
+
+  - name: Linux_android_emu_34 android views
     recipe: devicelab/devicelab_drone
     properties:
       tags: >
@@ -1215,6 +1254,40 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Linux android_java11_dependency_smoke_tests
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:11"}
+        ]
+      task_name: android_java11_dependency_smoke_tests
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      test_timeout_secs: "2700"
+
+  - name: Linux android_java17_dependency_smoke_tests
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      task_name: android_java17_dependency_smoke_tests
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      test_timeout_secs: "2700"
+
   - name: Linux tool_tests_commands
     recipe: flutter/flutter_drone
     timeout: 60
@@ -1258,11 +1331,27 @@ targets:
   - name: Linux_android_emu flutter_driver_android_test
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       shard: flutter_driver_android
       tags: >
          ["framework", "hostonly", "shard", "linux"]
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+      presubmit_max_attempts: "2"
+
+  - name: Linux_android_emu_34 flutter_driver_android_test
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: flutter_driver_android
+      tags: >
+         ["framework", "hostonly", "shard", "linux"]
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
 
   - name: Linux realm_checker
     recipe: flutter/flutter_drone
@@ -1995,6 +2084,15 @@ targets:
       tags: >
         ["devicelab", "linux"]
       task_name: android_defines_test
+      presubmit_max_attempts: "2"
+
+  - name: Linux_android_emu_34 android_defines_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "linux"]
+      task_name: android_defines_test
 
   - name: Linux_pixel_7pro android_obfuscate_test
     recipe: devicelab/devicelab_drone
@@ -2425,6 +2523,21 @@ targets:
       tags: >
         ["devicelab", "linux"]
       task_name: external_textures_integration_test
+      presubmit_max_attempts: "2"
+
+  - name: Linux_android_emu_34 external_textures_integration_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    # Functionally the same as "presubmit: false", except that we will run on
+    # presubmit during engine rolls. This test is the *only* automated e2e
+    # test for external textures for the engine, it should never break.
+    runIf:
+      - bin/internal/engine.version
+      - .ci.yaml
+    properties:
+      tags: >
+        ["devicelab", "linux"]
+      task_name: external_textures_integration_test
 
   # linux mokey benchmark
   - name: Linux_mokey fading_child_animation_perf__timeline_summary
@@ -2807,11 +2920,11 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: flutter_gallery__transition_perf
       artifact: gallery__transition_perf
       drone_dimensions: >
-        ["device_os=N","os=Linux", "device_type=msm8952"]
+        ["device_os=U","os=Linux", "device_type=mokey"]
 
   - name: Linux_build_test flutter_gallery__transition_perf_e2e
     recipe: devicelab/devicelab_drone_build_test
@@ -2819,11 +2932,11 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: flutter_gallery__transition_perf_e2e
       artifact: gallery__transition_perf_e2e
       drone_dimensions: >
-        ["device_os=N","os=Linux", "device_type=msm8952"]
+        ["device_os=U","os=Linux", "device_type=mokey"]
 
   - name: Linux_build_test flutter_gallery__transition_perf_hybrid
     recipe: devicelab/devicelab_drone_build_test
@@ -2831,11 +2944,11 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: flutter_gallery__transition_perf_hybrid
       artifact: gallery__transition_perf_hybrid
       drone_dimensions: >
-        ["device_os=N","os=Linux", "device_type=msm8952"]
+        ["device_os=U","os=Linux", "device_type=mokey"]
 
   # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__transition_perf_with_semantics
@@ -3830,6 +3943,7 @@ targets:
       task_name: hello_world_macos__compile
 
   - name: Mac integration_ui_test_test_macos
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/152212
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4297,7 +4411,6 @@ targets:
   # mac mokey test
   - name: Mac_arm64_mokey entrypoint_dart_registrant
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
@@ -4313,7 +4426,6 @@ targets:
   # mac mokey benchmark
   - name: Mac_mokey hello_world_android__compile
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
@@ -4324,7 +4436,6 @@ targets:
   # mac mokey test
   - name: Mac_arm64_mokey hello_world_android__compile
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
@@ -4335,7 +4446,6 @@ targets:
   # mac mokey benchmark
   - name: Mac_mokey hot_mode_dev_cycle__benchmark
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
@@ -4346,7 +4456,6 @@ targets:
   # mac mokey test
   - name: Mac_mokey integration_test_test
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
@@ -4357,7 +4466,6 @@ targets:
   # mac mokey test
   - name: Mac_arm64_mokey integration_test_test
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
@@ -4368,7 +4476,6 @@ targets:
   # mac mokey test
   - name: Mac_arm64_mokey integration_ui_frame_number
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
@@ -4379,7 +4486,6 @@ targets:
   # mac mokey benchmark
   - name: Mac_mokey microbenchmarks
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
@@ -4390,7 +4496,6 @@ targets:
   # mac mokey test
   - name: Mac_arm64_mokey native_assets_android
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     timeout: 60
     properties:
@@ -4401,7 +4506,6 @@ targets:
   # mac mokey test
   - name: Mac_mokey run_debug_test_android
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     runIf:
       - .ci.yaml
@@ -4415,7 +4519,6 @@ targets:
   # mac mokey test
   - name: Mac_arm64_mokey run_debug_test_android
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     runIf:
       - .ci.yaml
@@ -4429,7 +4532,6 @@ targets:
   # mac mokey test
   - name: Mac_mokey run_release_test
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     runIf:
       - .ci.yaml
@@ -4443,7 +4545,6 @@ targets:
   # mac mokey test
   - name: Mac_arm64_mokey run_release_test
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     presubmit: false
     runIf:
       - .ci.yaml
@@ -5068,7 +5169,6 @@ targets:
       - .ci.yaml
 
   - name: Mac channels_integration_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/151881
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -5695,7 +5795,6 @@ targets:
   - name: Windows tool_integration_tests_1_7
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -5720,7 +5819,6 @@ targets:
   - name: Windows tool_integration_tests_2_7
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -5743,7 +5841,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_3_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5768,7 +5865,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_4_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5793,7 +5889,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_5_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5818,7 +5913,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_6_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5843,7 +5937,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_7_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -6133,74 +6226,74 @@ targets:
         ]
       task_name: platform_view_win_desktop__start_up
 
-  # windows motog4 test
-  - name: Windows_android basic_material_app_win__compile
+  # windows mokey test
+  - name: Windows_mokey basic_material_app_win__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "windows"]
+        ["devicelab", "android", "windows", "mokey"]
       task_name: basic_material_app_win__compile
 
-  # windows motog4 test
-  - name: Windows_android channels_integration_test_win
+  # windows mokey test
+  - name: Windows_mokey channels_integration_test_win
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "windows"]
+        ["devicelab", "android", "windows", "mokey"]
       task_name: channels_integration_test_win
 
-  # windows motog4 test
-  - name: Windows_android flavors_test_win
+  # windows mokey test
+  - name: Windows_mokey flavors_test_win
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "windows"]
+        ["devicelab", "android", "windows", "mokey"]
       task_name: flavors_test
 
-  # windows motog4 test
-  - name: Windows_android flutter_gallery_win__compile
+  # windows mokey test
+  - name: Windows_mokey flutter_gallery_win__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "windows"]
+        ["devicelab", "android", "windows", "mokey"]
       task_name: flutter_gallery_win__compile
 
-  # windows motog4 benchmark
-  - name: Windows_android hot_mode_dev_cycle_win__benchmark
+  # windows mokey benchmark
+  - name: Windows_mokey hot_mode_dev_cycle_win__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "windows"]
+        ["devicelab", "android", "windows", "mokey"]
       task_name: hot_mode_dev_cycle_win__benchmark
 
-  # windows motog4 test
-  - name: Windows_android native_assets_android
+  # windows mokey test
+  - name: Windows_mokey native_assets_android
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "windows"]
+        ["devicelab", "android", "windows", "mokey"]
       task_name: native_assets_android
 
-  # windows motog4 test
-  - name: Windows_android windows_chrome_dev_mode
+  # windows mokey test
+  - name: Windows_mokey windows_chrome_dev_mode
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "windows"]
+        ["devicelab", "android", "windows", "mokey"]
       task_name: windows_chrome_dev_mode
 
   - name: Windows flutter_packaging_test

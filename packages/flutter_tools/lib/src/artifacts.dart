@@ -22,6 +22,7 @@ enum Artifact {
   /// The flutter tester binary.
   flutterTester,
   flutterFramework,
+  flutterFrameworkDsym,
   flutterXcframework,
   /// The framework directory of the macOS desktop.
   flutterMacOSFramework,
@@ -181,6 +182,8 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
       return 'flutter_tester$exe';
     case Artifact.flutterFramework:
       return 'Flutter.framework';
+      case Artifact.flutterFrameworkDsym:
+        return 'Flutter.framework.dSYM';
     case Artifact.flutterXcframework:
       return 'Flutter.xcframework';
     case Artifact.flutterMacOSFramework:
@@ -623,6 +626,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.constFinder:
       case Artifact.flutterFramework:
+      case Artifact.flutterFrameworkDsym:
       case Artifact.flutterMacOSFramework:
       case Artifact.flutterMacOSXcframework:
       case Artifact.flutterPatchedSdkPath:
@@ -656,7 +660,10 @@ class CachedArtifacts implements Artifacts {
         return _fileSystem.path.join(engineDir, artifactFileName);
       case Artifact.flutterFramework:
         final String engineDir = _getEngineArtifactsPath(platform, mode)!;
-        return _getIosEngineArtifactPath(engineDir, environmentType, _fileSystem, _platform);
+        return _getIosFrameworkPath(engineDir, environmentType, _fileSystem, _platform);
+      case Artifact.flutterFrameworkDsym:
+        final String engineDir = _getEngineArtifactsPath(platform, mode)!;
+        return _getIosFrameworkDsymPath(engineDir, environmentType, _fileSystem, _platform);
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
       case Artifact.engineDartAotRuntime:
@@ -713,6 +720,7 @@ class CachedArtifacts implements Artifacts {
         return _fileSystem.path.join(root, runtime, artifactFileName);
       case Artifact.constFinder:
       case Artifact.flutterFramework:
+      case Artifact.flutterFrameworkDsym:
       case Artifact.flutterMacOSFramework:
       case Artifact.flutterMacOSXcframework:
       case Artifact.flutterTester:
@@ -814,6 +822,7 @@ class CachedArtifacts implements Artifacts {
                      .childFile(_artifactToFileName(artifact, _platform, mode)!)
                      .path;
       case Artifact.flutterFramework:
+      case Artifact.flutterFrameworkDsym:
       case Artifact.flutterXcframework:
       case Artifact.fuchsiaFlutterRunner:
       case Artifact.fuchsiaKernelCompiler:
@@ -882,8 +891,16 @@ TargetPlatform _currentHostPlatform(Platform platform, OperatingSystemUtils oper
   throw UnimplementedError('Host OS not supported.');
 }
 
-String _getIosEngineArtifactPath(String engineDirectory,
-    EnvironmentType? environmentType, FileSystem fileSystem, Platform hostPlatform) {
+/// Returns the Flutter.xcframework platform directory for the specified environment type.
+///
+/// `Flutter.xcframework` contains target environment/architecture-specific
+/// subdirectories containing the appropriate `Flutter.framework` and
+/// `dSYMs/Flutter.framework.dSYMs` bundles for that target architecture.
+Directory _getIosFlutterFrameworkPlatformDirectory(
+    String engineDirectory,
+    EnvironmentType? environmentType,
+    FileSystem fileSystem,
+    Platform hostPlatform) {
   final Directory xcframeworkDirectory = fileSystem
       .directory(engineDirectory)
       .childDirectory(_artifactToFileName(Artifact.flutterXcframework, hostPlatform)!);
@@ -891,9 +908,7 @@ String _getIosEngineArtifactPath(String engineDirectory,
   if (!xcframeworkDirectory.existsSync()) {
     throwToolExit('No xcframework found at ${xcframeworkDirectory.path}. Try running "flutter precache --ios".');
   }
-  Directory? flutterFrameworkSource;
-  for (final Directory platformDirectory
-      in xcframeworkDirectory.listSync().whereType<Directory>()) {
+  for (final Directory platformDirectory in xcframeworkDirectory.listSync().whereType<Directory>()) {
     if (!platformDirectory.basename.startsWith('ios-')) {
       continue;
     }
@@ -901,15 +916,44 @@ String _getIosEngineArtifactPath(String engineDirectory,
     final bool simulatorDirectory = platformDirectory.basename.endsWith('-simulator');
     if ((environmentType == EnvironmentType.simulator && simulatorDirectory) ||
         (environmentType == EnvironmentType.physical && !simulatorDirectory)) {
-      flutterFrameworkSource = platformDirectory;
+      return platformDirectory;
     }
   }
-  if (flutterFrameworkSource == null) {
-    throwToolExit('No iOS frameworks found in ${xcframeworkDirectory.path}');
-  }
+  throwToolExit('No iOS frameworks found in ${xcframeworkDirectory.path}');
+}
 
-  return flutterFrameworkSource
+/// Returns the path to Flutter.framework.
+String _getIosFrameworkPath(
+    String engineDirectory,
+    EnvironmentType? environmentType,
+    FileSystem fileSystem,
+    Platform hostPlatform) {
+  final Directory platformDir = _getIosFlutterFrameworkPlatformDirectory(
+    engineDirectory,
+    environmentType,
+    fileSystem,
+    hostPlatform,
+  );
+  return platformDir
       .childDirectory(_artifactToFileName(Artifact.flutterFramework, hostPlatform)!)
+      .path;
+}
+
+/// Returns the path to Flutter.framework.dSYM.
+String _getIosFrameworkDsymPath(
+    String engineDirectory,
+    EnvironmentType? environmentType,
+    FileSystem fileSystem,
+    Platform hostPlatform) {
+  final Directory platformDir = _getIosFlutterFrameworkPlatformDirectory(
+    engineDirectory,
+    environmentType,
+    fileSystem,
+    hostPlatform,
+  );
+  return platformDir
+      .childDirectory('dSYMs')
+      .childDirectory(_artifactToFileName(Artifact.flutterFrameworkDsym, hostPlatform)!)
       .path;
 }
 
@@ -1108,7 +1152,10 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.platformLibrariesJson:
         return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode), 'lib', artifactFileName);
       case Artifact.flutterFramework:
-        return _getIosEngineArtifactPath(
+        return _getIosFrameworkPath(
+            localEngineInfo.targetOutPath, environmentType, _fileSystem, _platform);
+      case Artifact.flutterFrameworkDsym:
+        return _getIosFrameworkDsymPath(
             localEngineInfo.targetOutPath, environmentType, _fileSystem, _platform);
       case Artifact.flutterMacOSFramework:
         return _getMacOSEngineArtifactPath(
@@ -1291,6 +1338,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.genSnapshot:
         case Artifact.flutterTester:
         case Artifact.flutterFramework:
+        case Artifact.flutterFrameworkDsym:
         case Artifact.flutterXcframework:
         case Artifact.flutterMacOSFramework:
         case Artifact.flutterMacOSXcframework:
