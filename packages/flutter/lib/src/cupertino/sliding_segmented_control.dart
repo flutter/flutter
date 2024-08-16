@@ -1029,7 +1029,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   }
 
   List<double> _getChildIntrinsicWidths(BoxConstraints constraints) {
-  List<double> childWidths = <double>[];
+    List<double> childWidths = <double>[];
     RenderBox? child = firstChild;
     while (child != null) {
       final double childWidth = child.getMaxIntrinsicWidth(double.infinity) + 2 * _kSegmentMinPadding;
