@@ -461,7 +461,7 @@ void main() {
 
     final RichText richText = tester.firstWidget(find.byType(RichText));
     expect(richText.text.style?.color, isNull);
-    expect(richText.text.style?.foreground?.color, equals(const Color(0x7F666666)));
+    expect(richText.text.style?.foreground?.color, equals(const Color(0x80666666)));
   });
 
   test('Throws if given invalid values', () {
