@@ -778,13 +778,8 @@ class _AppBarState extends State<AppBar> {
     _scrollNotificationObserver?.removeListener(_handleScrollNotification);
     final ScaffoldState? scaffoldState = Scaffold.maybeOf(context);
 
-    if (scaffoldState != null) {
-      final bool isDrawerOpen = scaffoldState.hasDrawer && scaffoldState.isDrawerOpen;
-      final bool isEndDrawerOpen = scaffoldState.hasEndDrawer && scaffoldState.isEndDrawerOpen;
-
-      if (isDrawerOpen || isEndDrawerOpen) {
-        return;
-      }
+    if (scaffoldState != null && (scaffoldState.isDrawerOpen || scaffoldState.isEndDrawerOpen)) {
+      return;
     }
     _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
     _scrollNotificationObserver?.addListener(_handleScrollNotification);
@@ -810,11 +805,13 @@ class _AppBarState extends State<AppBar> {
     if (notification is ScrollUpdateNotification && widget.notificationPredicate(notification)) {
       // Check if any scroll positions on the vertical axis have been updated.
       // If any have, then the app bar should not be scrolled under.
-      if (_scrollPositions.isNotEmpty && notification.metrics.axis == Axis.vertical) {
-        if (_scrollPositions.values.toList().any((double element) => element > 0) && _scrolledUnder) {
-          return;
-        }
-      }
+
+      // TODO(Mairramer): - Back later
+      // if (_scrollPositions.isNotEmpty && notification.metrics.axis == Axis.vertical) {
+      //   if (_scrollPositions.values.toList().any((double element) => element > 0) && _scrolledUnder) {
+      //     return;
+      //   }
+      // }
 
       final bool oldScrolledUnder = _scrolledUnder;
       final ScrollMetrics metrics = notification.metrics;
