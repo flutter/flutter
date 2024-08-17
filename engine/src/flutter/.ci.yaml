@@ -217,7 +217,6 @@ targets:
 
   - name: Linux linux_fuchsia_tests
     recipe: engine_v2/engine_v2
-    bringup: true
     timeout: 90
     properties:
       # TODO(zanderso): Add this back when this issue is closed:
