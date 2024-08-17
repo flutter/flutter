@@ -146,6 +146,7 @@ Widget _wrapWithBackground({
   Brightness? brightness,
   required Widget child,
   bool updateSystemUiOverlay = true,
+  bool disableBackgroundFilterBlur = false,
 }) {
   Widget result = child;
   if (updateSystemUiOverlay) {
@@ -182,7 +183,7 @@ Widget _wrapWithBackground({
 
   return ClipRect(
     child: BackdropFilter(
-      enabled: backgroundColor.alpha != 0xFF,
+      enabled: backgroundColor.alpha != 0xFF && !disableBackgroundFilterBlur,
       filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
       child: childWithBackground,
     ),
@@ -266,6 +267,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.border = _kDefaultNavBarBorder,
     this.backgroundColor,
     this.automaticBackgroundVisibility = true,
+    this.disableBackgroundFilterBlur = false,
     this.brightness,
     this.padding,
     this.transitionBetweenRoutes = true,
@@ -417,6 +419,19 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final bool transitionBetweenRoutes;
 
+  /// {@template flutter.cupertino.CupertinoNavigationBar.disableBackgroundFilterBlur}
+  /// Whether to have blur effect with transparent color.
+  ///
+  /// If the [CupertinoNavigationBar] is not a child of a [CupertinoPageScaffold],
+  /// this has no effect.
+  ///
+  /// When [disableBackgroundFilterBlur] is set to true. The blur effect will be
+  /// disabled.
+  ///
+  /// This value defaults to false.
+  /// {@endtemplate}
+  final bool disableBackgroundFilterBlur;
+
   /// {@template flutter.cupertino.CupertinoNavigationBar.heroTag}
   /// Tag for the navigation bar's Hero widget if [transitionBetweenRoutes] is true.
   ///
@@ -552,6 +567,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       border: effectiveBorder,
       backgroundColor: effectiveBackgroundColor,
       brightness: widget.brightness,
+      disableBackgroundFilterBlur: widget.disableBackgroundFilterBlur,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
         child: _PersistentNavigationBar(
@@ -676,6 +692,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.border = _kDefaultNavBarBorder,
     this.backgroundColor,
     this.automaticBackgroundVisibility = true,
+    this.disableBackgroundFilterBlur = false,
     this.brightness,
     this.padding,
     this.transitionBetweenRoutes = true,
@@ -760,6 +777,9 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// {@macro flutter.cupertino.CupertinoNavigationBar.automaticBackgroundVisibility}
   final bool automaticBackgroundVisibility;
 
+  /// {@macro flutter.cupertino.CupertinoNavigationBar.disableBackgroundFilterBlur}
+  final bool disableBackgroundFilterBlur;
+
   /// {@macro flutter.cupertino.CupertinoNavigationBar.brightness}
   final Brightness? brightness;
 
@@ -840,6 +860,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           persistentHeight: _kNavBarPersistentHeight + MediaQuery.paddingOf(context).top,
           alwaysShowMiddle: widget.alwaysShowMiddle && widget.middle != null,
           stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
+          disableBackgroundFilterBlur: widget.disableBackgroundFilterBlur,
         ),
       ),
     );
@@ -863,6 +884,7 @@ class _LargeTitleNavigationBarSliverDelegate
     required this.persistentHeight,
     required this.alwaysShowMiddle,
     required this.stretchConfiguration,
+    required this.disableBackgroundFilterBlur,
   });
 
   final _NavigationBarStaticComponentsKeys keys;
@@ -878,6 +900,7 @@ class _LargeTitleNavigationBarSliverDelegate
   final Object heroTag;
   final double persistentHeight;
   final bool alwaysShowMiddle;
+  final bool disableBackgroundFilterBlur;
 
   @override
   double get minExtent => persistentHeight;
@@ -922,6 +945,7 @@ class _LargeTitleNavigationBarSliverDelegate
       border: effectiveBorder,
       backgroundColor: effectiveBackgroundColor,
       brightness: brightness,
+      disableBackgroundFilterBlur: disableBackgroundFilterBlur,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
         child: Stack(
@@ -1014,7 +1038,8 @@ class _LargeTitleNavigationBarSliverDelegate
         || transitionBetweenRoutes != oldDelegate.transitionBetweenRoutes
         || persistentHeight != oldDelegate.persistentHeight
         || alwaysShowMiddle != oldDelegate.alwaysShowMiddle
-        || heroTag != oldDelegate.heroTag;
+        || heroTag != oldDelegate.heroTag
+        || disableBackgroundFilterBlur!=oldDelegate.disableBackgroundFilterBlur;
   }
 }
 
