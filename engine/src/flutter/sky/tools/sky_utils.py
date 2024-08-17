@@ -118,6 +118,62 @@ def copy_tree(source_path, destination_path, symlinks=False):
   shutil.copytree(source_path, destination_path, symlinks=symlinks)
 
 
+def create_fat_macos_framework(fat_framework, arm64_framework, x64_framework):
+  copy_tree(arm64_framework, fat_framework, symlinks=True)
+  _regenerate_symlinks(fat_framework)
+
+  fat_framework_binary = os.path.join(fat_framework, 'Versions', 'A', 'FlutterMacOS')
+
+  # Create the arm64/x64 fat framework.
+  arm64_dylib = os.path.join(arm64_framework, 'FlutterMacOS')
+  x64_dylib = os.path.join(x64_framework, 'FlutterMacOS')
+  lipo([arm64_dylib, x64_dylib], fat_framework_binary)
+  _set_framework_permissions(fat_framework)
+
+
+def _regenerate_symlinks(framework_dir):
+  """Regenerates the symlinks structure.
+
+  Recipes V2 upload artifacts in CAS before integration and CAS follows symlinks.
+  This logic regenerates the symlinks in the expected structure.
+  """
+  if os.path.islink(os.path.join(framework_dir, 'FlutterMacOS')):
+    return
+  os.remove(os.path.join(framework_dir, 'FlutterMacOS'))
+  shutil.rmtree(os.path.join(framework_dir, 'Headers'), True)
+  shutil.rmtree(os.path.join(framework_dir, 'Modules'), True)
+  shutil.rmtree(os.path.join(framework_dir, 'Resources'), True)
+  current_version_path = os.path.join(framework_dir, 'Versions', 'Current')
+  shutil.rmtree(current_version_path, True)
+  os.symlink('A', current_version_path)
+  os.symlink(
+      os.path.join('Versions', 'Current', 'FlutterMacOS'),
+      os.path.join(framework_dir, 'FlutterMacOS')
+  )
+  os.symlink(os.path.join('Versions', 'Current', 'Headers'), os.path.join(framework_dir, 'Headers'))
+  os.symlink(os.path.join('Versions', 'Current', 'Modules'), os.path.join(framework_dir, 'Modules'))
+  os.symlink(
+      os.path.join('Versions', 'Current', 'Resources'), os.path.join(framework_dir, 'Resources')
+  )
+
+
+def _set_framework_permissions(framework_dir):
+  # Make the framework readable and executable: u=rwx,go=rx.
+  subprocess.check_call(['chmod', '755', framework_dir])
+
+  # Add group and other readability to all files.
+  versions_path = os.path.join(framework_dir, 'Versions')
+  subprocess.check_call(['chmod', '-R', 'og+r', versions_path])
+  # Find all the files below the target dir with owner execute permission
+  find_subprocess = subprocess.Popen(['find', versions_path, '-perm', '-100', '-print0'],
+                                     stdout=subprocess.PIPE)
+  # Add execute permission for other and group for all files that had it for owner.
+  xargs_subprocess = subprocess.Popen(['xargs', '-0', 'chmod', 'og+x'],
+                                      stdin=find_subprocess.stdout)
+  find_subprocess.wait()
+  xargs_subprocess.wait()
+
+
 def create_zip(cwd, zip_filename, paths):
   """Creates a zip archive in cwd, containing a set of cwd-relative files.
 
