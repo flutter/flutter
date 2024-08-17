@@ -85,7 +85,7 @@ const Duration _kHighlightAnimationDuration = Duration(milliseconds: 200);
 
 class _Segment<T> extends StatefulWidget {
   const _Segment({
-    required GlobalKey key,
+    required ValueKey<T> key,
     required this.child,
     required this.pressed,
     required this.highlighted,
@@ -438,12 +438,11 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   final TapGestureRecognizer tap = TapGestureRecognizer();
   final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
   final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
-  Map<T, GlobalKey> segmentToKeys = <T, GlobalKey>{};
+  GlobalKey segmentedControlRenderWidgetKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-    _updateSegmentToKeys();
 
     // If the long press or horizontal drag recognizer gets accepted, we know for
     // sure the gesture is meant for the segmented control. Hand everything to
@@ -470,7 +469,6 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   @override
   void didUpdateWidget(CupertinoSlidingSegmentedControl<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _updateSegmentToKeys();
 
     // Temporarily ignore highlight changes from the widget when the thumb is
     // being dragged. When the drag gesture finishes the widget will be forced
@@ -505,53 +503,26 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   // them from interfering with the active drag gesture.
   bool get isThumbDragging => _startedOnSelectedSegment ?? false;
 
-  void _updateSegmentToKeys() {
-    for (final MapEntry<T, Widget> entry in widget.children.entries) {
-      if (segmentToKeys.containsKey(entry.key)) {
-        continue;
-      }
-      segmentToKeys[entry.key] = GlobalKey();
-    }
-  }
-
-  double? _getSegmentWidth(GlobalKey key) {
-    final BuildContext? context = key.currentContext;
-    if (context != null) {
-      final RenderBox box = context.findRenderObject()! as RenderBox;
-      return box.hasSize ? box.size.width : null;
-    }
-    return null;
-  }
-
   // Converts local coordinate to segments. If `widget.isProportionalSegment` is
   // false, this method assumes each segment has the same width; if it is true,
   // this method assumes segments have their own width based on their contents.
   T segmentForXPosition(double dx) {
-    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    final TextDirection textDirection = Directionality.of(context);
+    final BuildContext currentContext = segmentedControlRenderWidgetKey.currentContext!;
+    final _RenderSegmentedControl<T> renderBox = currentContext.findRenderObject()! as _RenderSegmentedControl<T>;
+
+    if (widget.isProportionalSegment) {
+      final int? segmentIndex = renderBox.getSegmentIndex(dx, textDirection);
+      assert(segmentIndex != null);
+      return widget.children.keys.elementAt(segmentIndex!);
+    }
+
     final int numOfChildren = widget.children.length;
     assert(renderBox.hasSize);
     assert(numOfChildren >= 2);
-    if (widget.isProportionalSegment) {
-      double subtotalWidth = 0;
-      for (int i = 0; i < widget.children.length; i++) {
-        final int ltrIndex = switch (Directionality.of(context)) {
-          TextDirection.ltr => i,
-          TextDirection.rtl => numOfChildren - 1 - i,
-        };
-
-        final GlobalKey key = segmentToKeys[widget.children.keys.elementAt(ltrIndex)]!;
-        final double segmentWidth = _getSegmentWidth(key) ?? 0.0;
-        subtotalWidth += segmentWidth;
-
-        if (dx <= subtotalWidth) {
-          return widget.children.keys.elementAt(ltrIndex);
-        }
-      }
-    }
-
     int index = (dx ~/ (renderBox.size.width / numOfChildren)).clamp(0, numOfChildren - 1);
 
-    switch (Directionality.of(context)) {
+    switch (textDirection) {
       case TextDirection.ltr:
         break;
       case TextDirection.rtl:
@@ -715,7 +686,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
           child: MouseRegion(
             cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
             child: _Segment<T>(
-              key: segmentToKeys[entry.key]!,
+              key: ValueKey<T>(entry.key),
               highlighted: isHighlighted,
               pressed: pressed == entry.key,
               isDragging: isThumbDragging,
@@ -753,6 +724,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
           animation: thumbScaleAnimation,
           builder: (BuildContext context, Widget? child) {
             return _SegmentedControlRenderWidget<T>(
+              key: segmentedControlRenderWidgetKey,
               highlightedIndex: highlightedIndex,
               thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor, context),
               thumbScale: thumbScaleAnimation.value,
@@ -930,6 +902,23 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
 
   double get totalSeparatorWidth => (_kSeparatorInset.horizontal + _kSeparatorWidth) * (childCount ~/ 2);
 
+  List<double> childWidths = <double>[];
+  int? getSegmentIndex(double dx, TextDirection textDirection) {
+    double subtotalWidth = 0;
+    for (int i = 0; i < childWidths.length; i++) {
+      final double segmentWidth = childWidths[i];
+      subtotalWidth += segmentWidth;
+
+      if (dx <= subtotalWidth) {
+        return switch (textDirection) {
+          TextDirection.ltr => i,
+          TextDirection.rtl => childWidths.length - 1 - i,
+        };
+      }
+    }
+    return null;
+  }
+
   RenderBox? nonSeparatorChildAfter(RenderBox child) {
     final RenderBox? nextChild = childAfter(child);
     return nextChild == null ? null : childAfter(nextChild);
@@ -1093,7 +1082,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    final List<double> childWidths;
+
     if (isProportionalSegment) {
       childWidths = _getChildIntrinsicWidths(constraints);
     } else {
