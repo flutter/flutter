@@ -397,7 +397,7 @@ void main() {
         '    ! App icon is set to the default placeholder icon. Replace with unique icons.\n',
         '    ! App icon is using the incorrect size (e.g. Icon-App-20x20@1x.png).\n',
         '    ! Launch image is set to the default placeholder icon. Replace with unique launch image.\n',
-        'To update the settings, please refer to https://docs.flutter.dev/deployment/ios\n',
+        'To update the settings, please refer to https://flutter.dev/to/ios-deploy\n',
       ];
       expect(expectedValidationMessages, unorderedEquals(expectedValidationMessages));
 
@@ -422,10 +422,16 @@ void main() {
           .whereType<Directory>()
           .singleWhere((Directory directory) => fileSystem.path.extension(directory.path) == '.app');
 
+      final Directory flutterFrameworkDir = fileSystem.directory(
+        fileSystem.path.join(
+          appBundle.path,
+          'Frameworks',
+          'Flutter.framework',
+        ),
+      );
+
       final String flutterFramework = fileSystem.path.join(
-        appBundle.path,
-        'Frameworks',
-        'Flutter.framework',
+        flutterFrameworkDir.path,
         'Flutter',
       );
 
@@ -456,6 +462,10 @@ void main() {
         ],
       );
       expect(appCodesign, const ProcessResultMatcher());
+
+      // Check read/write permissions are being correctly set.
+      final String statString = flutterFrameworkDir.statSync().mode.toRadixString(8);
+      expect(statString, '40755');
     });
   }, skip: !platform.isMacOS, // [intended] only makes sense for macos platform.
      timeout: const Timeout(Duration(minutes: 10))

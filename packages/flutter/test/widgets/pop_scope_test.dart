@@ -47,7 +47,7 @@ void main() {
               builder: (BuildContext buildContext, StateSetter stateSetter) {
                 context = buildContext;
                 setState = stateSetter;
-                return PopScope(
+                return PopScope<Object?>(
                   canPop: canPop,
                   child: const Center(
                     child: Column(
@@ -75,6 +75,94 @@ void main() {
       expect(lastFrameworkHandlesBack, isFalse);
     }
     expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.bubble);
+  },
+    variant: TargetPlatformVariant.all(),
+  );
+
+  testWidgets('pop scope can receive result', (WidgetTester tester) async {
+    Object? receivedResult;
+    final Object poppedResult = Object();
+    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        initialRoute: '/',
+        navigatorKey: nav,
+        home: Scaffold(
+          body: PopScope<Object?>(
+            canPop: false,
+            onPopInvokedWithResult: (bool didPop, Object? result) {
+              receivedResult = result;
+            },
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text('Home/PopScope Page'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    nav.currentState!.maybePop(poppedResult);
+    await tester.pumpAndSettle();
+    expect(receivedResult, poppedResult);
+  },
+    variant: TargetPlatformVariant.all(),
+  );
+
+  testWidgets('pop scope can have Object? generic type while route has stricter generic type', (WidgetTester tester) async {
+    Object? receivedResult;
+    const int poppedResult = 13;
+    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        initialRoute: '/',
+        navigatorKey: nav,
+        home: Scaffold(
+          body: PopScope<Object?>(
+            canPop: false,
+            onPopInvokedWithResult: (bool didPop, Object? result) {
+              receivedResult = result;
+            },
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text('Home/PopScope Page'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    nav.currentState!.push(
+      MaterialPageRoute<int>(
+        builder: (BuildContext context) {
+          return Scaffold(
+            body: PopScope<Object?>(
+              canPop: false,
+              onPopInvokedWithResult: (bool didPop, Object? result) {
+                receivedResult = result;
+              },
+              child: const Center(
+                child: Text('new page'),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('new page'), findsOneWidget);
+
+    nav.currentState!.maybePop(poppedResult);
+    await tester.pumpAndSettle();
+    expect(receivedResult, poppedResult);
   },
     variant: TargetPlatformVariant.all(),
   );
@@ -115,9 +203,9 @@ void main() {
               builder: (BuildContext context, StateSetter stateSetter) {
                 oneContext = context;
                 setState = stateSetter;
-                return PopScope(
+                return PopScope<Object?>(
                   canPop: canPop,
-                  onPopInvoked: (bool didPop) {
+                  onPopInvokedWithResult: (bool didPop, Object? result) {
                     lastPopSuccess = didPop;
                   },
                   child: const Center(
@@ -271,7 +359,7 @@ void main() {
                 if (!usePopScope) {
                   return child;
                 }
-                return const PopScope(
+                return const PopScope<Object?>(
                   canPop: false,
                   child: child,
                 );
@@ -314,12 +402,12 @@ void main() {
               return Column(
                 children: <Widget>[
                   if (usePopScope1)
-                    const PopScope(
+                    const PopScope<Object?>(
                       canPop: false,
                       child: Text('hello'),
                     ),
                   if (usePopScope2)
-                    const PopScope(
+                    const PopScope<Object?>(
                       canPop: false,
                       child: Text('hello'),
                     ),

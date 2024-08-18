@@ -30,7 +30,7 @@ jobs:
         run: |
           echo "COMMIT_SHA=$(echo ${{ github.event.pull_request.merge_commit_sha }})" >> $GITHUB_ENV
       - name: Checkout Flutter Repo
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
         with:
           repository: flutteractionsbot/flutter
           path: flutter
@@ -53,7 +53,7 @@ jobs:
       # TODO(xilaizhang): remove this step once the template is available on release branches.
       - name: Get CP Template
         run: |
-          curl -o PULL_REQUEST_CP_TEMPLATE.md https://raw.githubusercontent.com/flutter/flutter/master/.github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md
+          curl -o PULL_REQUEST_CP_TEMPLATE.md https://raw.githubusercontent.com/flutter/flutter/main/.github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md
       - name: Create PR on CP success
         if: ${{ steps.attempt-cp.conclusion == 'success' }}
         working-directory: ./flutter
@@ -81,7 +81,7 @@ jobs:
         if: ${{ failure() && steps.attempt-cp.conclusion == 'failure' }}
         run: |
           FAILURE_MSG="Failed to create CP due to merge conflicts.<br>"
-          FAILURE_MSG+="You will need to create the PR manually. See [the cherrypick wiki](https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process) for more info."
+          FAILURE_MSG+="You will need to create the PR manually. See [the cherrypick wiki](https://github.com/flutter/flutter/blob/main/docs/releases/Flutter-Cherrypick-Process.md) for more info."
           gh pr comment ${{ github.event.pull_request.number }} -R flutter/flutter -b "${FAILURE_MSG}"
         env:
           GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}

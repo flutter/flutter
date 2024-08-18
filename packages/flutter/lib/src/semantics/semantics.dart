@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/rendering.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag, SemanticsUpdate, SemanticsUpdateBuilder, StringAttribute, TextDirection;
 
@@ -446,6 +452,7 @@ class SemanticsData with Diagnosticable {
     required this.platformViewId,
     required this.maxValueLength,
     required this.currentValueLength,
+    required this.headingLevel,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -454,7 +461,8 @@ class SemanticsData with Diagnosticable {
        assert(attributedValue.string == '' || textDirection != null, 'A SemanticsData object with value "${attributedValue.string}" had a null textDirection.'),
        assert(attributedDecreasedValue.string == '' || textDirection != null, 'A SemanticsData object with decreasedValue "${attributedDecreasedValue.string}" had a null textDirection.'),
        assert(attributedIncreasedValue.string == '' || textDirection != null, 'A SemanticsData object with increasedValue "${attributedIncreasedValue.string}" had a null textDirection.'),
-       assert(attributedHint.string == '' || textDirection != null, 'A SemanticsData object with hint "${attributedHint.string}" had a null textDirection.');
+       assert(attributedHint.string == '' || textDirection != null, 'A SemanticsData object with hint "${attributedHint.string}" had a null textDirection.'),
+       assert(headingLevel >= 0 && headingLevel <= 6, 'Heading level must be between 0 and 6');
 
   /// A bit field of [SemanticsFlag]s that apply to this node.
   final int flags;
@@ -546,6 +554,12 @@ class SemanticsData with Diagnosticable {
   ///
   /// The reading direction is given by [textDirection].
   final String tooltip;
+
+  /// Indicates that this subtree represents a heading.
+  ///
+  /// A value of 0 indicates that it is not a heading. The value should be a
+  /// number between 1 and 6, indicating the hierarchical level as a heading.
+  final int headingLevel;
 
   /// The reading direction for the text in [label], [value],
   /// [increasedValue], [decreasedValue], and [hint].
@@ -719,6 +733,7 @@ class SemanticsData with Diagnosticable {
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
+    properties.add(IntProperty('headingLevel', headingLevel, defaultValue: 0));
   }
 
   @override
@@ -748,6 +763,7 @@ class SemanticsData with Diagnosticable {
         && other.transform == transform
         && other.elevation == elevation
         && other.thickness == thickness
+        && other.headingLevel == headingLevel
         && _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds);
   }
 
@@ -778,6 +794,7 @@ class SemanticsData with Diagnosticable {
       transform,
       elevation,
       thickness,
+      headingLevel,
       customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
     ),
   );
@@ -892,6 +909,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.button,
     this.link,
     this.header,
+    this.headingLevel,
     this.textField,
     this.slider,
     this.keyboardKey,
@@ -943,13 +961,15 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onSetText,
     this.onDidGainAccessibilityFocus,
     this.onDidLoseAccessibilityFocus,
+    this.onFocus,
     this.onDismiss,
     this.customSemanticsActions,
   }) : assert(label == null || attributedLabel == null, 'Only one of label or attributedLabel should be provided'),
        assert(value == null || attributedValue == null, 'Only one of value or attributedValue should be provided'),
        assert(increasedValue == null || attributedIncreasedValue == null, 'Only one of increasedValue or attributedIncreasedValue should be provided'),
        assert(decreasedValue == null || attributedDecreasedValue == null, 'Only one of decreasedValue or attributedDecreasedValue should be provided'),
-       assert(hint == null || attributedHint == null, 'Only one of hint or attributedHint should be provided');
+       assert(hint == null || attributedHint == null, 'Only one of hint or attributedHint should be provided'),
+       assert(headingLevel == null || (headingLevel > 0 && headingLevel <= 6), 'Heading level must be between 1 and 6');
 
   /// If non-null, indicates that this subtree represents something that can be
   /// in an enabled or disabled state.
@@ -1361,6 +1381,17 @@ class SemanticsProperties extends DiagnosticableTree {
   /// [Directionality] or an explicit [textDirection] should be provided.
   final String? tooltip;
 
+  /// The heading level in the DOM document structure.
+  ///
+  /// This is only applied to web semantics and is ignored on other platforms.
+  ///
+  /// Screen readers will use this value to determine which part of the page
+  /// structure this heading represents. A level 1 heading, indicated
+  /// with aria-level="1", usually indicates the main heading of a page,
+  /// a level 2 heading, defined with aria-level="2" the first subsection,
+  /// a level 3 is a subsection of that, and so on.
+  final int? headingLevel;
+
   /// Provides hint values which override the default hints on supported
   /// platforms.
   ///
@@ -1605,6 +1636,8 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
   ///    focus is removed from the node.
+  ///  * [onFocus], which is invoked when the assistive technology requests that
+  ///    the input focus is gained by a widget.
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   final VoidCallback? onDidGainAccessibilityFocus;
 
@@ -1626,6 +1659,30 @@ class SemanticsProperties extends DiagnosticableTree {
   ///    accessibility focus.
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   final VoidCallback? onDidLoseAccessibilityFocus;
+
+  /// {@template flutter.semantics.SemanticsProperties.onFocus}
+  /// The handler for [SemanticsAction.focus].
+  ///
+  /// This handler is invoked when the assistive technology requests that the
+  /// focusable widget corresponding to this semantics node gain input focus.
+  /// The [FocusNode] that manages the focus of the widget must gain focus. The
+  /// widget must begin responding to relevant key events. For example:
+  ///
+  /// * Buttons must respond to tap/click events produced via keyboard shortcuts.
+  /// * Text fields must become focused and editable, showing an on-screen
+  ///   keyboard, if necessary.
+  /// * Checkboxes, switches, and radio buttons must become togglable using
+  ///   keyboard shortcuts.
+  ///
+  /// Focus behavior is specific to the platform and to the assistive technology
+  /// used. See the documentation of [SemanticsAction.focus] for more detail.
+  ///
+  /// See also:
+  ///
+  ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
+  ///    accessibility focus.
+  /// {@endtemplate}
+  final VoidCallback? onFocus;
 
   /// The handler for [SemanticsAction.dismiss].
   ///
@@ -2209,7 +2266,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
         || _maxValueLength != config._maxValueLength
         || _currentValueLength != config._currentValueLength
         || _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants
-        || _areUserActionsBlocked != config.isBlockingUserActions;
+        || _areUserActionsBlocked != config.isBlockingUserActions
+        || _headingLevel != config._headingLevel;
   }
 
   // TAGS, LABELS, ACTIONS
@@ -2513,7 +2571,14 @@ class SemanticsNode with DiagnosticableTreeMixin {
   int? get currentValueLength => _currentValueLength;
   int? _currentValueLength;
 
-  bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
+  /// The level of the widget as a heading within the structural hierarchy
+  /// of the screen. A value of 1 indicates the highest level of structural
+  /// hierarchy. A value of 2 indicates the next level, and so on.
+  int get headingLevel => _headingLevel;
+  int _headingLevel = _kEmptyConfig._headingLevel;
+
+  bool _canPerformAction(SemanticsAction action) =>
+      _actions.containsKey(action);
 
   static final SemanticsConfiguration _kEmptyConfig = SemanticsConfiguration();
 
@@ -2571,6 +2636,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _maxValueLength = config._maxValueLength;
     _currentValueLength = config._currentValueLength;
     _areUserActionsBlocked = config.isBlockingUserActions;
+    _headingLevel = config._headingLevel;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     if (mergeAllDescendantsIntoThisNodeValueChanged) {
@@ -2616,6 +2682,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     int? platformViewId = _platformViewId;
     int? maxValueLength = _maxValueLength;
     int? currentValueLength = _currentValueLength;
+    int headingLevel = _headingLevel;
     final double elevation = _elevation;
     double thickness = _thickness;
     final Set<int> customSemanticsActionIds = <int>{};
@@ -2655,6 +2722,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
         platformViewId ??= node._platformViewId;
         maxValueLength ??= node._maxValueLength;
         currentValueLength ??= node._currentValueLength;
+        headingLevel = node._headingLevel;
+
         if (identifier == '') {
           identifier = node._identifier;
         }
@@ -2738,6 +2807,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       maxValueLength: maxValueLength,
       currentValueLength: currentValueLength,
       customSemanticsActionIds: customSemanticsActionIds.toList()..sort(),
+      headingLevel: headingLevel,
     );
   }
 
@@ -2813,6 +2883,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
+      headingLevel: data.headingLevel,
     );
     _dirty = false;
   }
@@ -3652,7 +3723,7 @@ class SemanticsConfiguration {
   ///
   /// See also:
   ///
-  ///  * [addAction] to add an action.
+  ///  * [_addAction] to add an action.
   final Map<SemanticsAction, SemanticsActionHandler> _actions = <SemanticsAction, SemanticsActionHandler>{};
 
   int get _effectiveActionsAsBits => isBlockingUserActions ? _actionsAsBits & _kUnblockedUserActions : _actionsAsBits;
@@ -3813,9 +3884,8 @@ class SemanticsConfiguration {
   /// This is a request to increase the value represented by the widget. For
   /// example, this action might be recognized by a slider control.
   ///
-  /// If [this.value] is set, [increasedValue] must also be provided and
-  /// [onIncrease] must ensure that [this.value] will be set to
-  /// [increasedValue].
+  /// If [value] is set, [increasedValue] must also be provided and
+  /// [onIncrease] must ensure that [value] will be set to [increasedValue].
   ///
   /// VoiceOver users on iOS can trigger this action by swiping up with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
@@ -3832,9 +3902,8 @@ class SemanticsConfiguration {
   /// This is a request to decrease the value represented by the widget. For
   /// example, this action might be recognized by a slider control.
   ///
-  /// If [this.value] is set, [decreasedValue] must also be provided and
-  /// [onDecrease] must ensure that [this.value] will be set to
-  /// [decreasedValue].
+  /// If [value] is set, [decreasedValue] must also be provided and
+  /// [onDecrease] must ensure that [value] will be set to [decreasedValue].
   ///
   /// VoiceOver users on iOS can trigger this action by swiping down with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
@@ -4062,6 +4131,14 @@ class SemanticsConfiguration {
   set onDidLoseAccessibilityFocus(VoidCallback? value) {
     _addArgumentlessAction(SemanticsAction.didLoseAccessibilityFocus, value!);
     _onDidLoseAccessibilityFocus = value;
+  }
+
+  /// {@macro flutter.semantics.SemanticsProperties.onFocus}
+  VoidCallback? get onFocus => _onFocus;
+  VoidCallback? _onFocus;
+  set onFocus(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.focus, value!);
+    _onFocus = value;
   }
 
   /// A delegate that decides how to handle [SemanticsConfiguration]s produced
@@ -4676,6 +4753,21 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isHeader, value);
   }
 
+  /// Indicates the heading level in the document structure.
+  ///
+  /// This is only used for web semantics, and is ignored on other platforms.
+  int get headingLevel => _headingLevel;
+  int _headingLevel = 0;
+
+  set headingLevel(int value) {
+    assert(value >= 0 && value <= 6);
+    if (value == headingLevel) {
+      return;
+    }
+    _headingLevel = value;
+    _hasBeenAnnotated = true;
+  }
+
   /// Whether the owning [RenderObject] is a slider (true) or not (false).
   bool get isSlider => _hasFlag(SemanticsFlag.isSlider);
   set isSlider(bool value) {
@@ -4724,11 +4816,11 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isReadOnly, value);
   }
 
-  /// Whether [this.value] should be obscured.
+  /// Whether [value] should be obscured.
   ///
   /// This option is usually set in combination with [isTextField] to indicate
   /// that the text field contains a password (or other sensitive information).
-  /// Doing so instructs screen readers to not read out [this.value].
+  /// Doing so instructs screen readers to not read out [value].
   bool get isObscured => _hasFlag(SemanticsFlag.isObscured);
   set isObscured(bool value) {
     _setFlag(SemanticsFlag.isObscured, value);
@@ -4756,7 +4848,7 @@ class SemanticsConfiguration {
   }
 
   /// The currently selected text (or the position of the cursor) within
-  /// [this.value] if this node represents a text field.
+  /// [value] if this node represents a text field.
   TextSelection? get textSelection => _textSelection;
   TextSelection? _textSelection;
   set textSelection(TextSelection? value) {
@@ -5009,7 +5101,8 @@ class SemanticsConfiguration {
       .._currentValueLength = _currentValueLength
       .._actions.addAll(_actions)
       .._customSemanticsActions.addAll(_customSemanticsActions)
-      ..isBlockingUserActions = isBlockingUserActions;
+      ..isBlockingUserActions = isBlockingUserActions
+      .._headingLevel = _headingLevel;
   }
 }
 

@@ -50,10 +50,7 @@ void main() {
     );
     framework = FrameworkRepository(
       checkouts,
-      mirrorRemote: const Remote(
-        name: RemoteName.mirror,
-        url: mirrorUrl,
-      ),
+      mirrorRemote: const Remote.mirror(mirrorUrl),
     );
 
     autoroller = PackageAutoroller(

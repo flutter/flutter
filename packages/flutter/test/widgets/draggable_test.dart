@@ -14,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
@@ -2541,10 +2540,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/6128.
-  testWidgets('Draggable plays nice with onTap',
-  // TODO(polina-c): fix the leaking ImmediateMultiDragGestureRecognizer https://github.com/flutter/flutter/pull/144396 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('Draggable plays nice with onTap', (WidgetTester tester) async {
     late final OverlayEntry entry;
     addTearDown(() => entry..remove()..dispose());
 
@@ -2578,6 +2574,7 @@ void main() {
 
     await firstGesture.moveBy(const Offset(100.0, 0.0));
     await secondGesture.up();
+    await firstGesture.up();
   });
 
   testWidgets('DragTarget does not set state when remove from the tree', (WidgetTester tester) async {
@@ -3104,6 +3101,92 @@ void main() {
       );
     });
 
+  testWidgets('Drag feedback is put on root overlay with [rootOverlay] flag', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> childNavigatorKey = GlobalKey<NavigatorState>();
+    // Create a [MaterialApp], with a nested [Navigator], which has the
+    // [Draggable].
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: rootNavigatorKey,
+      home: Column(
+        children: <Widget>[
+          SizedBox(
+            height: 200.0,
+            child: Navigator(
+              key: childNavigatorKey,
+              onGenerateRoute: (RouteSettings settings) {
+                if (settings.name == '/') {
+                  return MaterialPageRoute<void>(
+                    settings: settings,
+                    builder: (BuildContext context) => const LongPressDraggable<int>(
+                      data: 1,
+                      feedback: Text('Dragging'),
+                      rootOverlay: true,
+                      child: Text('Source'),
+                    ),
+                  );
+                }
+                throw UnsupportedError('Unsupported route: $settings');
+              },
+            ),
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return const SizedBox(
+                  height: 300.0, child: Center(child: Text('Target 1')),
+              );
+            },
+          ),
+        ],
+      ),
+    ));
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture =
+        await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump(kLongPressTimeout);
+
+    final Offset secondLocation = tester.getCenter(find.text('Target 1'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    // Expect that the feedback widget is a descendant of the root overlay,
+    // but not a descendant of the child overlay.
+    expect(
+      find.descendant(
+        of: find.byType(Overlay).first,
+        matching: find.text('Dragging'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(Overlay).last,
+        matching: find.text('Dragging'),
+      ),
+      findsNothing,
+    );
+  });
+
+  testWidgets('configurable DragTarget hit test behavior', (WidgetTester tester) async {
+    const HitTestBehavior hitTestBehavior = HitTestBehavior.opaque;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Column(
+          children: <Widget>[
+            LongPressDraggable<int>(
+              hitTestBehavior: hitTestBehavior,
+              feedback: SizedBox(),
+              child: SizedBox(),
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(tester.widget<Listener>(find.descendant(of: find.byType(Column), matching: find.byType(Listener))).behavior, hitTestBehavior);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/72483
   testWidgets('Drag and drop - DragTarget<Object> can accept Draggable<int> data', (WidgetTester tester) async {
     final List<Object> accepted = <Object>[];
@@ -3414,6 +3497,133 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('Drag and drop - feedback matches pointer in scaled MaterialApp', (WidgetTester tester) async {
+    await tester.pumpWidget(Transform.scale(
+      scale: 0.5,
+      child: const MaterialApp(
+        home: Scaffold(
+          body: Draggable<int>(
+            data: 42,
+            feedback: Text('Feedback'),
+            child: Text('Source'),
+          ),
+        ),
+      ),
+    ));
+
+    final Offset location = tester.getTopLeft(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(location);
+    final Offset secondLocation = location + const Offset(100, 100);
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+    final Offset appTopLeft = tester.getTopLeft(find.byType(MaterialApp));
+    expect(tester.getTopLeft(find.text('Source')), appTopLeft);
+    expect(tester.getTopLeft(find.text('Feedback')), secondLocation);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pump();
+  });
+
+  testWidgets('Drag and drop - childDragAnchorStrategy works in scaled MaterialApp', (WidgetTester tester) async {
+    final Key sourceKey = UniqueKey();
+    final Key feedbackKey = UniqueKey();
+    await tester.pumpWidget(Transform.scale(
+      scale: 0.5,
+      child:  MaterialApp(
+        home: Scaffold(
+          body: Draggable<int>(
+            data: 42,
+            feedback: Text('Text', key: feedbackKey),
+            child: Text('Text', key: sourceKey),
+          ),
+        ),
+      ),
+    ));
+    final Finder source = find.byKey(sourceKey);
+    final Finder feedback = find.byKey(feedbackKey);
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(source));
+    await tester.pump();
+    expect(tester.getTopLeft(source), tester.getTopLeft(feedback));
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pump();
+  });
+
+  testWidgets('Drag and drop - feedback matches pointer in rotated MaterialApp', (WidgetTester tester) async {
+    await tester.pumpWidget(Transform.rotate(
+      angle: 1, // ~57 degrees
+      child: const MaterialApp(
+        home: Scaffold(
+          body: Draggable<int>(
+            data: 42,
+            feedback: Text('Feedback'),
+            child: Text('Source'),
+          ),
+        ),
+      ),
+    ));
+
+    final Offset location = tester.getTopLeft(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(location);
+    final Offset secondLocation = location + const Offset(100, 100);
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+    final Offset appTopLeft = tester.getTopLeft(find.byType(MaterialApp));
+    expect(tester.getTopLeft(find.text('Source')), appTopLeft);
+    final Offset feedbackTopLeft =  tester.getTopLeft(find.text('Feedback'));
+
+    // Different rotations can incur rounding errors, this makes it more robust
+    expect(feedbackTopLeft.dx, moreOrLessEquals(secondLocation.dx));
+    expect(feedbackTopLeft.dy, moreOrLessEquals(secondLocation.dy));
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pump();
+  });
+
+  testWidgets('Drag and drop - unmounting overlay ends drag gracefully', (WidgetTester tester) async {
+    final ValueNotifier<bool> mountedNotifier = ValueNotifier<bool>(true);
+
+    await tester.pumpWidget(ValueListenableBuilder<bool>(
+      valueListenable: mountedNotifier,
+      builder: (_, bool value, __) => value
+          ? const MaterialApp(
+              home: Scaffold(
+                body: Draggable<int>(
+                  data: 42,
+                  feedback: Text('Feedback'),
+                  child: Text('Source'),
+                ),
+              ),
+            )
+          : Container(),
+    ));
+
+    final Offset location = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(location);
+    final Offset secondLocation = location + const Offset(100, 100);
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+    expect(find.text('Feedback'), findsOneWidget);
+
+    // Unmount overlay
+    mountedNotifier.value = false;
+    await tester.pump();
+
+    // This should not throw
+    await gesture.moveTo(location);
+
+    expect(find.byType(Container), findsOneWidget);
+    expect(find.text('Feedback'), findsNothing);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pump();
+  });
+
   testWidgets('configurable Draggable hit test behavior', (WidgetTester tester) async {
     const HitTestBehavior hitTestBehavior = HitTestBehavior.deferToChild;
 
@@ -3434,10 +3644,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/92083
-  testWidgets('feedback respect the MouseRegion cursor configure',
-  // TODO(polina-c): fix the leaking ImmediateMultiDragGestureRecognizer https://github.com/flutter/flutter/pull/144396 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('feedback respect the MouseRegion cursor configure', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Column(
@@ -3463,6 +3670,7 @@ void main() {
     await tester.pump();
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grabbing);
+    gesture.up();
   });
 
   testWidgets('configurable feedback ignore pointer behavior', (WidgetTester tester) async {

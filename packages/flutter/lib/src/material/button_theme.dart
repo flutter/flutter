@@ -238,7 +238,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [getPadding], which is used to calculate padding for the [button]'s
+  ///  * [getPadding], which is used to calculate padding for the button's
   ///    child (typically the button's label).
   EdgeInsetsGeometry get padding {
     return _padding ?? switch (textTheme) {
@@ -261,7 +261,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [getShape], which is used to calculate the shape of the [button]'s
+  ///  * [getShape], which is used to calculate the shape of the button's
   ///    [Material].
   ShapeBorder get shape {
     return _shape ?? switch (textTheme) {

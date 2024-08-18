@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'refresh.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
@@ -939,11 +942,45 @@ class _RenderLargeTitle extends RenderShiftedBox {
 
   double _scale = 1.0;
 
+  static double _computeTitleScale(Size childSize, BoxConstraints constraints) {
+    const double maxHeight = _kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding;
+    final double scale = 1.0 + 0.03 * (constraints.maxHeight - maxHeight) / maxHeight;
+    final double maxScale = childSize.width != 0.0
+      ? clampDouble(constraints.maxWidth / childSize.width, 1.0, 1.1)
+      : 1.1;
+    return clampDouble(scale, 1.0, maxScale);
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    final double? distance = child?.getDistanceToActualBaseline(baseline);
+    if (distance == null) {
+      return null;
+    }
+    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+    return childParentData.offset.dy + distance * _scale;
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = constraints.widthConstraints().loosen();
+    final double? result = child.getDryBaseline(childConstraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(childConstraints);
+    final double scale = _computeTitleScale(childSize, constraints);
+    final Size scaledChildSize = childSize * scale;
+    return result * scale + alignment.alongOffset(constraints.biggest - scaledChildSize as Offset).dy;
+  }
+
   @override
   void performLayout() {
     final RenderBox? child = this.child;
-    Size childSize = Size.zero;
-
     size = constraints.biggest;
 
     if (child == null) {
@@ -952,19 +989,9 @@ class _RenderLargeTitle extends RenderShiftedBox {
 
     final BoxConstraints childConstraints = constraints.widthConstraints().loosen();
     child.layout(childConstraints, parentUsesSize: true);
-
-    final double maxScale = child.size.width != 0.0
-      ? clampDouble(constraints.maxWidth / child.size.width, 1.0, 1.1)
-      : 1.1;
-    _scale = clampDouble(
-      1.0 + (constraints.maxHeight - (_kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding)) / (_kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding) * 0.03,
-      1.0,
-      maxScale,
-    );
-
-    childSize = child.size * _scale;
+    _scale = _computeTitleScale(child.size, constraints);
     final BoxParentData childParentData = child.parentData! as BoxParentData;
-    childParentData.offset = alignment.alongOffset(size - childSize as Offset);
+    childParentData.offset = alignment.alongOffset(size - (child.size * _scale) as Offset);
   }
 
   @override
@@ -1669,12 +1696,13 @@ class _TransitionableNavigationBar extends StatelessWidget {
 /// Similarly, the `bottomNavBar` parameter is the nav bar that was at the
 /// bottom regardless of the push/pop direction.
 ///
-/// If [MediaQuery.padding] is still present in this widget's [BuildContext],
-/// that padding will become part of the transitional navigation bar as well.
+/// If [MediaQueryData.padding] is still present in this widget's
+/// [BuildContext], that padding will become part of the transitional navigation
+/// bar as well.
 ///
-/// [MediaQuery.padding] should be consistent between the from/to routes and
-/// the Hero overlay. Inconsistent [MediaQuery.padding] will produce undetermined
-/// results.
+/// [MediaQueryData.padding] should be consistent between the from/to routes and
+/// the Hero overlay. Inconsistent [MediaQueryData.padding] will produce
+/// undetermined results.
 class _NavigationBarTransition extends StatelessWidget {
   _NavigationBarTransition({
     required this.animation,

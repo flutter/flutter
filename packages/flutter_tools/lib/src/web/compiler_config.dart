@@ -22,7 +22,7 @@ sealed class WebCompilerConfig {
 
   /// The compiler optimization level.
   ///
-  /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
+  /// Valid values are O0 (lowest, debug default) to O4 (highest, release default).
   final int optimizationLevel;
 
   /// Returns which target this compiler outputs (js or wasm)
@@ -38,6 +38,7 @@ sealed class WebCompilerConfig {
 
   Map<String, dynamic> get _buildKeyMap => <String, dynamic>{
     'optimizationLevel': optimizationLevel,
+    'webRenderer': renderer.name,
   };
 }
 
@@ -50,7 +51,7 @@ class JsCompilerConfig extends WebCompilerConfig {
     super.optimizationLevel = WebCompilerConfig.kDefaultOptimizationLevel,
     this.noFrequencyBasedMinification = false,
     this.sourceMaps = true,
-    super.renderer = WebRendererMode.auto,
+    super.renderer = WebRendererMode.defaultForJs,
   });
 
   /// Instantiates [JsCompilerConfig] suitable for the `flutter run` command.
@@ -135,7 +136,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
   const WasmCompilerConfig({
     super.optimizationLevel = WebCompilerConfig.kDefaultOptimizationLevel,
     this.stripWasm = true,
-    super.renderer = WebRendererMode.auto,
+    super.renderer = WebRendererMode.defaultForWasm,
   });
 
   /// Build environment for [stripWasm].
@@ -151,7 +152,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
     final bool stripSymbols = buildMode == BuildMode.release && stripWasm;
     return <String>[
       '-O$optimizationLevel',
-      '--${stripSymbols ? 'no-' : ''}name-section',
+      '--${stripSymbols ? '' : 'no-'}strip-wasm',
     ];
   }
 

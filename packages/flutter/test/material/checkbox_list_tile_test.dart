@@ -8,7 +8,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'feedback_tester.dart';
+
+import '../widgets/feedback_tester.dart';
 
 Widget wrap({ required Widget child }) {
   return MediaQuery(
@@ -1188,6 +1189,7 @@ void main() {
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      hasFocusAction: true,
       isFocusable: true,
       label: 'Hello\nthere',
     ));

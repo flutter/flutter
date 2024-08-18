@@ -13,42 +13,29 @@ class ButtonDemo extends StatelessWidget {
 
   String _title(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    switch (type) {
-      case ButtonDemoType.text:
-        return localizations.demoTextButtonTitle;
-      case ButtonDemoType.elevated:
-        return localizations.demoElevatedButtonTitle;
-      case ButtonDemoType.outlined:
-        return localizations.demoOutlinedButtonTitle;
-      case ButtonDemoType.toggle:
-        return localizations.demoToggleButtonTitle;
-      case ButtonDemoType.floating:
-        return localizations.demoFloatingButtonTitle;
-    }
+    return switch (type) {
+      ButtonDemoType.text     => localizations.demoTextButtonTitle,
+      ButtonDemoType.elevated => localizations.demoElevatedButtonTitle,
+      ButtonDemoType.outlined => localizations.demoOutlinedButtonTitle,
+      ButtonDemoType.toggle   => localizations.demoToggleButtonTitle,
+      ButtonDemoType.floating => localizations.demoFloatingButtonTitle,
+    };
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget? buttons;
-    switch (type) {
-      case ButtonDemoType.text:
-        buttons = _TextButtonDemo();
-      case ButtonDemoType.elevated:
-        buttons = _ElevatedButtonDemo();
-      case ButtonDemoType.outlined:
-        buttons = _OutlinedButtonDemo();
-      case ButtonDemoType.toggle:
-        buttons = _ToggleButtonsDemo();
-      case ButtonDemoType.floating:
-        buttons = _FloatingActionButtonDemo();
-    }
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(_title(context)),
       ),
-      body: buttons,
+      body: switch (type) {
+        ButtonDemoType.text     => _TextButtonDemo(),
+        ButtonDemoType.elevated => _ElevatedButtonDemo(),
+        ButtonDemoType.outlined => _OutlinedButtonDemo(),
+        ButtonDemoType.toggle   => _ToggleButtonsDemo(),
+        ButtonDemoType.floating => _FloatingActionButtonDemo(),
+      },
     );
   }
 }

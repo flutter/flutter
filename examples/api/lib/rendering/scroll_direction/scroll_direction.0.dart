@@ -37,33 +37,17 @@ class _MyWidgetState extends State<MyWidget> {
   AxisDirection _axisDirection = AxisDirection.down;
 
   Widget _getArrows() {
-    final Widget arrow;
-    switch (_axisDirection) {
-      case AxisDirection.up:
-        arrow = const Icon(Icons.arrow_upward_rounded);
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[arrow, arrow],
-        );
-      case AxisDirection.down:
-        arrow = const Icon(Icons.arrow_downward_rounded);
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[arrow, arrow],
-        );
-      case AxisDirection.left:
-        arrow = const Icon(Icons.arrow_back_rounded);
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[arrow, arrow],
-        );
-      case AxisDirection.right:
-        arrow = const Icon(Icons.arrow_forward_rounded);
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[arrow, arrow],
-        );
-    }
+    final Widget arrow = switch (_axisDirection) {
+      AxisDirection.up    => const Icon(Icons.arrow_upward_rounded),
+      AxisDirection.down  => const Icon(Icons.arrow_downward_rounded),
+      AxisDirection.left  => const Icon(Icons.arrow_back_rounded),
+      AxisDirection.right => const Icon(Icons.arrow_forward_rounded),
+    };
+    return Flex(
+      direction: flipAxis(axisDirectionToAxis(_axisDirection)),
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[arrow, arrow],
+    );
   }
 
   void _onAxisDirectionChanged(AxisDirection? axisDirection) {

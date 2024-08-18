@@ -39,8 +39,12 @@ MaterialApp _appWithDialog(WidgetTester tester, Widget dialog, { ThemeData? them
 
 final Key _painterKey = UniqueKey();
 
-Material _getMaterialFromDialog(WidgetTester tester) {
+Material _getMaterialAlertDialog(WidgetTester tester) {
   return tester.widget<Material>(find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
+}
+
+Material _getMaterialDialog(WidgetTester tester) {
+  return tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)));
 }
 
 RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
@@ -73,6 +77,7 @@ void main() {
       actionsPadding: EdgeInsets.all(8.0),
       barrierColor: Color(0xff000005),
       insetPadding: EdgeInsets.all(20.0),
+      clipBehavior: Clip.antiAlias,
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
@@ -89,6 +94,7 @@ void main() {
       'actionsPadding: EdgeInsets.all(8.0)',
       'barrierColor: Color(0xff000005)',
       'insetPadding: EdgeInsets.all(20.0)',
+      'clipBehavior: Clip.antiAlias'
     ]);
   });
 
@@ -104,7 +110,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final Material materialWidget = _getMaterialFromDialog(tester);
+    final Material materialWidget = _getMaterialAlertDialog(tester);
     expect(materialWidget.color, customColor);
   });
 
@@ -130,7 +136,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final Material materialWidget = _getMaterialFromDialog(tester);
+    final Material materialWidget = _getMaterialAlertDialog(tester);
     expect(materialWidget.elevation, customElevation);
     expect(materialWidget.shadowColor, shadowColor);
     expect(materialWidget.surfaceTintColor, surfaceTintColor);
@@ -151,7 +157,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final Material materialWidget = _getMaterialFromDialog(tester);
+    final Material materialWidget = _getMaterialAlertDialog(tester);
     expect(materialWidget.shape, customBorder);
   });
 
@@ -196,7 +202,7 @@ void main() {
       find.descendant(of: find.byType(Dialog), matching: find.byType(Material)),
     );
     expect(bottomLeft.dx, 480.0);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(bottomLeft.dy, 124.0);
     }
   });
@@ -547,5 +553,60 @@ void main() {
         screenRect.bottom - dialogTheme.insetPadding!.bottom,
       ),
     );
+  });
+
+  testWidgets('DialogTheme.clipBehavior updates the dialogs clip behavior', (WidgetTester tester) async {
+    const DialogTheme dialogTheme = DialogTheme(clipBehavior: Clip.hardEdge);
+    const Dialog dialog = Dialog(child: Placeholder());
+
+    await tester.pumpWidget(_appWithDialog(
+      tester,
+      dialog,
+      theme: ThemeData(dialogTheme: dialogTheme),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = _getMaterialDialog(tester);
+    expect(materialWidget.clipBehavior, dialogTheme.clipBehavior);
+  });
+
+  testWidgets('Dialog.clipBehavior takes priority over theme', (WidgetTester tester) async {
+    const Dialog dialog = Dialog(
+      clipBehavior: Clip.antiAlias,
+      child: Placeholder(),
+    );
+    final ThemeData theme = ThemeData(
+      dialogTheme: const DialogTheme(clipBehavior: Clip.hardEdge),
+    );
+
+    await tester.pumpWidget(
+      _appWithDialog(tester, dialog, theme: theme),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = _getMaterialDialog(tester);
+    expect(materialWidget.clipBehavior, Clip.antiAlias);
+  });
+
+  testWidgets('Material2 - Dialog.clipBehavior takes priority over theme', (WidgetTester tester) async {
+    const Dialog dialog = Dialog(
+      clipBehavior: Clip.antiAlias,
+      child: Placeholder(),
+    );
+    final ThemeData theme = ThemeData(
+      useMaterial3: false,
+      dialogTheme: const DialogTheme(clipBehavior: Clip.hardEdge),
+    );
+
+    await tester.pumpWidget(
+      _appWithDialog(tester, dialog, theme: theme),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = _getMaterialDialog(tester);
+    expect(materialWidget.clipBehavior, Clip.antiAlias);
   });
 }

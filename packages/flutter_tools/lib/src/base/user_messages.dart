@@ -22,16 +22,16 @@ class UserMessages {
       'Flutter version $version on channel $channel at $flutterRoot';
   String get flutterUnknownChannel =>
     'Currently on an unknown channel. Run `flutter channel` to switch to an official channel.\n'
-    "If that doesn't fix the issue, reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.";
+    "If that doesn't fix the issue, reinstall Flutter by following instructions at https://flutter.dev/setup.";
   String get flutterUnknownVersion =>
     'Cannot resolve current version, possibly due to local changes.\n'
-    'Reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.';
+    'Reinstall Flutter by following instructions at https://flutter.dev/setup.';
   String flutterRevision(String revision, String age, String date) =>
     'Framework revision $revision ($age), $date';
   String flutterUpstreamRepositoryUrl(String url) => 'Upstream repository $url';
   String get flutterUpstreamRepositoryUnknown =>
     'Unknown upstream repository.\n'
-    'Reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.';
+    'Reinstall Flutter by following instructions at https://flutter.dev/setup.';
   String flutterUpstreamRepositoryUrlEnvMismatch(String url) => 'Upstream repository $url is not the same as FLUTTER_GIT_URL';
   String flutterUpstreamRepositoryUrlNonStandard(String url) =>
     'Upstream repository $url is not a standard remote.\n'
@@ -65,7 +65,7 @@ class UserMessages {
   String intellijStatusInfo(String version) => 'version $version';
   String get intellijPluginInfo =>
       'For information about installing plugins, see\n'
-      'https://flutter.dev/intellij-setup/#installing-the-plugins';
+      'https://flutter.dev/to/intellij-setup';
   String intellijMinimumVersion(String minVersion) =>
       'This install is older than the minimum recommended version of $minVersion.';
   String intellijLocation(String installPath) => 'IntelliJ at $installPath';
@@ -193,19 +193,19 @@ class UserMessages {
   String cocoaPodsMissing(String consequence, String installInstructions) =>
       'CocoaPods not installed.\n'
       '$consequence\n'
-      'To install $installInstructions';
+      'For installation instructions, $installInstructions';
   String cocoaPodsUnknownVersion(String consequence, String upgradeInstructions) =>
       'Unknown CocoaPods version installed.\n'
       '$consequence\n'
-      'To upgrade $upgradeInstructions';
+      'To update CocoaPods, $upgradeInstructions';
   String cocoaPodsOutdated(String currentVersion, String recVersion, String consequence, String upgradeInstructions) =>
       'CocoaPods $currentVersion out of date ($recVersion is recommended).\n'
       '$consequence\n'
-      'To upgrade $upgradeInstructions';
+      'To update CocoaPods, $upgradeInstructions';
   String cocoaPodsBrokenInstall(String consequence, String reinstallInstructions) =>
       'CocoaPods installed but not working.\n'
       '$consequence\n'
-      'To re-install $reinstallInstructions';
+      'For re-installation instructions, $reinstallInstructions';
 
   // Messages used in VisualStudioValidator
   String visualStudioVersion(String name, String version) => '$name version $version';
@@ -343,16 +343,15 @@ class UserMessages {
       'https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html\n';
 
   String androidSdkInstallUrl(Platform platform) {
-    const String baseUrl = 'https://flutter.dev/docs/get-started/install';
-    const String fragment = '#android-setup';
+    const String baseUrl = 'https://flutter.dev/to/';
     if (platform.isMacOS) {
-      return '$baseUrl/macos$fragment';
+      return '${baseUrl}macos-android-setup';
     } else if (platform.isLinux) {
-      return '$baseUrl/linux$fragment';
+      return '${baseUrl}linux-android-setup';
     } else if (platform.isWindows) {
-      return '$baseUrl/windows$fragment';
+      return '${baseUrl}windows-android-setup';
     } else {
-      return baseUrl;
+      return '${baseUrl}android-setup';
     }
   }
 }

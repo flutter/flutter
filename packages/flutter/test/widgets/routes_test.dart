@@ -1736,7 +1736,7 @@ void main() {
       semantics.dispose();
     }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
 
-    testWidgets('focus traverse correct when pop multiple page simultaneously', (WidgetTester tester) async {
+    testWidgets('focus traversal is correct when popping multiple pages simultaneously', (WidgetTester tester) async {
       // Regression test: https://github.com/flutter/flutter/issues/48903
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(MaterialApp(

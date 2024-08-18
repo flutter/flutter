@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class HoverClient extends StatefulWidget {
   const HoverClient({
@@ -1838,8 +1837,6 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/67044
   testWidgets('Handle mouse events should ignore the detached MouseTrackerAnnotation',
-  // TODO(polina-c): dispose gesture recognizers https://github.com/flutter/flutter/issues/145605 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Center(
@@ -1866,7 +1863,51 @@ void main() {
 
     // Continue drag mouse should not trigger any assert.
     await gesture.moveBy(const Offset(10.0, 10.0));
+
+     // Dispose gesture
+    await gesture.cancel();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('stylus input works', (WidgetTester tester) async {
+    bool onEnter = false;
+    bool onExit = false;
+    bool onHover = false;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: MouseRegion(
+          onEnter: (_) => onEnter = true,
+          onExit: (_) => onExit = true,
+          onHover: (_) => onHover = true,
+          child: const SizedBox(
+            width: 10.0,
+            height: 10.0,
+          ),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.stylus);
+    await gesture.addPointer(location: const Offset(20.0, 20.0));
+    await tester.pump();
+
+    expect(onEnter, false);
+    expect(onHover, false);
+    expect(onExit, false);
+
+    await gesture.moveTo(const Offset(5.0, 5.0));
+    await tester.pump();
+
+    expect(onEnter, true);
+    expect(onHover, true);
+    expect(onExit, false);
+
+    await gesture.moveTo(const Offset(20.0, 20.0));
+    await tester.pump();
+
+    expect(onEnter, true);
+    expect(onHover, true);
+    expect(onExit, true);
   });
 }
 

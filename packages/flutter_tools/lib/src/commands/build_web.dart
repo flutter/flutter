@@ -8,7 +8,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
-import '../project.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../web/compile.dart';
@@ -64,7 +63,7 @@ class BuildWebCommand extends BuildSubCommand {
       help:
           'Sets the optimization level used for Dart compilation to JavaScript/Wasm.',
       defaultsTo: '${WebCompilerConfig.kDefaultOptimizationLevel}',
-      allowed: const <String>['1', '2', '3', '4'],
+      allowed: const <String>['0', '1', '2', '3', '4'],
     );
 
     //
@@ -102,7 +101,7 @@ class BuildWebCommand extends BuildSubCommand {
     argParser.addSeparator('WebAssembly compilation options');
     argParser.addFlag(
       FlutterOptions.kWebWasmFlag,
-      help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
+      help: 'Compile to WebAssembly (with fallback to JavaScript).\n$kWasmMoreInfo',
       negatable: false,
     );
     argParser.addFlag(
@@ -142,9 +141,14 @@ class BuildWebCommand extends BuildSubCommand {
         ? int.parse(dart2jsOptimizationLevelValue.substring(1))
         : optimizationLevel;
 
+    final String? webRendererString = stringArg(FlutterOptions.kWebRendererFlag);
+    final WebRendererMode? webRenderer = webRendererString == null
+        ? null
+        : WebRendererMode.values.byName(webRendererString);
+
     final List<WebCompilerConfig> compilerConfigs;
-    if (boolArg('wasm')) {
-      if (stringArg(FlutterOptions.kWebRendererFlag) != argParser.defaultFor(FlutterOptions.kWebRendererFlag)) {
+    if (boolArg(FlutterOptions.kWebWasmFlag)) {
+      if (webRenderer != null) {
         throwToolExit('"--${FlutterOptions.kWebRendererFlag}" cannot be combined with "--${FlutterOptions.kWebWasmFlag}"');
       }
       globals.logger.printBox(
@@ -158,7 +162,6 @@ class BuildWebCommand extends BuildSubCommand {
         WasmCompilerConfig(
           optimizationLevel: optimizationLevel,
           stripWasm: boolArg('strip-wasm'),
-          renderer: WebRendererMode.skwasm,
         ),
         JsCompilerConfig(
           csp: boolArg('csp'),
@@ -167,13 +170,8 @@ class BuildWebCommand extends BuildSubCommand {
           nativeNullAssertions: boolArg('native-null-assertions'),
           noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
           sourceMaps: boolArg('source-maps'),
-          renderer: WebRendererMode.canvaskit,
         )];
     } else {
-      WebRendererMode webRenderer = WebRendererMode.auto;
-      if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
-        webRenderer = WebRendererMode.values.byName(stringArg(FlutterOptions.kWebRendererFlag)!);
-      }
       compilerConfigs = <WebCompilerConfig>[JsCompilerConfig(
         csp: boolArg('csp'),
         optimizationLevel: jsOptimizationLevel,
@@ -181,11 +179,10 @@ class BuildWebCommand extends BuildSubCommand {
         nativeNullAssertions: boolArg('native-null-assertions'),
         noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
         sourceMaps: boolArg('source-maps'),
-        renderer: webRenderer,
+        renderer: webRenderer ?? WebRendererMode.defaultForJs,
       )];
     }
 
-    final FlutterProject flutterProject = FlutterProject.current();
     final String target = stringArg('target')!;
     final BuildInfo buildInfo = await getBuildInfo();
     if (buildInfo.isDebug) {
@@ -198,7 +195,7 @@ class BuildWebCommand extends BuildSubCommand {
         '--base-href should start and end with /',
       );
     }
-    if (!flutterProject.web.existsSync()) {
+    if (!project.web.existsSync()) {
       throwToolExit('Missing index.html.');
     }
     if (!_fileSystem.currentDirectory
@@ -228,7 +225,7 @@ class BuildWebCommand extends BuildSubCommand {
       analytics: globals.analytics,
     );
     await webBuilder.buildWeb(
-      flutterProject,
+      project,
       target,
       buildInfo,
       ServiceWorkerStrategy.fromCliName(stringArg('pwa-strategy')),

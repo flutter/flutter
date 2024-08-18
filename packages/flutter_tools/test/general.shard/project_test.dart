@@ -211,13 +211,13 @@ void main() {
         // android:name="flutterEmbedding" android:value="2" />.
 
         project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore);
-        expect(testLogger.statusText, isNot(contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects')));
+        expect(testLogger.statusText, isNot(contains('https://github.com/flutter/flutter/blob/main/docs/platforms/android/Upgrading-pre-1.12-Android-projects.md')));
       });
       _testInMemory('Android plugin project does not throw v1 embedding deprecation warning', () async {
         final FlutterProject project = await aPluginProject();
 
         project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.exit);
-        expect(testLogger.statusText, isNot(contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects')));
+        expect(testLogger.statusText, isNot(contains('https://github.com/flutter/flutter/blob/main/docs/platforms/android/Upgrading-pre-1.12-Android-projects.md')));
         expect(testLogger.statusText, isNot(contains('No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in ')));
       });
       _testInMemory('Android plugin without example app does not show a warning', () async {
@@ -225,7 +225,7 @@ void main() {
         project.example.directory.deleteSync();
 
         await project.regeneratePlatformSpecificTooling();
-        expect(testLogger.statusText, isNot(contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects')));
+        expect(testLogger.statusText, isNot(contains('https://github.com/flutter/flutter/blob/main/docs/platforms/android/Upgrading-pre-1.12-Android-projects.md')));
       });
       _testInMemory('updates local properties for Android', () async {
         final FlutterProject project = await someProject();
@@ -372,6 +372,91 @@ void main() {
         final FlutterProject project = await someProject();
         expect(project.isPlugin, isFalse);
         expect(project.hasExampleApp, isFalse);
+      });
+    });
+
+    group('usesSwiftPackageManager', () {
+      testUsingContext('is true when iOS project exists', () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final Directory projectDirectory = fs.directory('path');
+        projectDirectory.childDirectory('ios').createSync(recursive: true);
+        final FlutterManifest manifest = FakeFlutterManifest();
+        final FlutterProject project = FlutterProject(projectDirectory, manifest, manifest);
+        expect(project.usesSwiftPackageManager, isTrue);
+      }, overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+      });
+
+      testUsingContext('is true when macOS project exists', () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final Directory projectDirectory = fs.directory('path');
+        projectDirectory.childDirectory('macos').createSync(recursive: true);
+        final FlutterManifest manifest = FakeFlutterManifest();
+        final FlutterProject project = FlutterProject(projectDirectory, manifest, manifest);
+        expect(project.usesSwiftPackageManager, isTrue);
+      }, overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+      });
+
+      testUsingContext('is false when disabled via manifest', () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final Directory projectDirectory = fs.directory('path');
+        projectDirectory.childDirectory('ios').createSync(recursive: true);
+        final FlutterManifest manifest = FakeFlutterManifest(disabledSwiftPackageManager: true);
+        final FlutterProject project = FlutterProject(projectDirectory, manifest, manifest);
+        expect(project.usesSwiftPackageManager, isFalse);
+      }, overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+      });
+
+      testUsingContext("is false when iOS and macOS project don't exist", () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final Directory projectDirectory = fs.directory('path');
+        final FlutterManifest manifest = FakeFlutterManifest();
+        final FlutterProject project = FlutterProject(projectDirectory, manifest, manifest);
+        expect(project.usesSwiftPackageManager, isFalse);
+      }, overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+      });
+
+      testUsingContext('is false when Xcode is less than 15', () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final Directory projectDirectory = fs.directory('path');
+        projectDirectory.childDirectory('ios').createSync(recursive: true);
+        final FlutterManifest manifest = FakeFlutterManifest();
+        final FlutterProject project = FlutterProject(projectDirectory, manifest, manifest);
+        expect(project.usesSwiftPackageManager, isFalse);
+      }, overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(14, 0, 0)),
+      });
+
+      testUsingContext('is false when Swift Package Manager feature is not enabled', () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final Directory projectDirectory = fs.directory('path');
+        projectDirectory.childDirectory('ios').createSync(recursive: true);
+        final FlutterManifest manifest = FakeFlutterManifest();
+        final FlutterProject project = FlutterProject(projectDirectory, manifest, manifest);
+        expect(project.usesSwiftPackageManager, isFalse);
+      }, overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+      });
+
+      testUsingContext('is false when project is a module', () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final Directory projectDirectory = fs.directory('path');
+        projectDirectory.childDirectory('ios').createSync(recursive: true);
+        final FlutterManifest manifest = FakeFlutterManifest(isModule: true);
+        final FlutterProject project = FlutterProject(projectDirectory, manifest, manifest);
+        expect(project.usesSwiftPackageManager, isFalse);
+      }, overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
       });
     });
 
@@ -730,6 +815,28 @@ plugins {
         FlutterProjectFactory: () => flutterProjectFactory,
       });
 
+    testUsingContext('kotlin host app language with Gradle Kotlin DSL and typesafe plugin id', () async {
+      final FlutterProject project = await someProject();
+
+        addAndroidGradleFile(project.directory,
+          kotlinDsl: true,
+          gradleFileContent: () {
+            return '''
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    dev.flutter.`flutter-gradle-plugin`
+}
+''';
+        });
+        expect(project.android.isKotlin, isTrue);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        FlutterProjectFactory: () => flutterProjectFactory,
+      });
+
     testUsingContext('Gradle Groovy files are preferred to Gradle Kotlin files', () async {
       final FlutterProject project = await someProject();
 
@@ -1002,7 +1109,7 @@ plugins {
             IosProject.kProductBundleIdKey: 'io.flutter.someProject',
           };
           xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Free'], logger);
-          const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false);
+          const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
 
           expect(await project.ios.productBundleIdentifier(buildInfo), 'io.flutter.someProject');
         });
@@ -1011,7 +1118,7 @@ plugins {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
           xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
-          const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false);
+          const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
 
           await expectToolExitLater(
             project.ios.productBundleIdentifier(buildInfo),
@@ -1044,6 +1151,31 @@ plugins {
             return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
           });
           expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
+        });
+      });
+
+      group('flutterSwiftPackageInProjectSettings', () {
+        testWithMocks('is false if pbxproj missing', () async {
+          final FlutterProject project = await someProject();
+          expect(project.ios.xcodeProjectInfoFile.existsSync(), isFalse);
+          expect(project.ios.flutterPluginSwiftPackageInProjectSettings, isFalse);
+        });
+
+        testWithMocks('is false if pbxproj does not contain FlutterGeneratedPluginSwiftPackage in build process', () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProjectInfoFile.createSync(recursive: true);
+          expect(project.ios.xcodeProjectInfoFile.existsSync(), isTrue);
+          expect(project.ios.flutterPluginSwiftPackageInProjectSettings, isFalse);
+        });
+
+        testWithMocks('is true if pbxproj does contain FlutterGeneratedPluginSwiftPackage in build process', () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProjectInfoFile.createSync(recursive: true);
+          project.ios.xcodeProjectInfoFile.writeAsStringSync('''
+'		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };';
+''');
+          expect(project.ios.xcodeProjectInfoFile.existsSync(), isTrue);
+          expect(project.ios.flutterPluginSwiftPackageInProjectSettings, isTrue);
         });
       });
     });
@@ -1724,6 +1856,10 @@ File androidPluginRegistrant(Directory parent) {
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
+  FakeXcodeProjectInterpreter({
+    this.version,
+  });
+
   final Map<XcodeProjectBuildContext, Map<String, String>> buildSettingsByBuildContext = <XcodeProjectBuildContext, Map<String, String>>{};
   late XcodeProjectInfo xcodeProjectInfo;
 
@@ -1745,6 +1881,9 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   bool get isInstalled => true;
+
+  @override
+  Version? version;
 }
 
 class FakeAndroidSdkWithDir extends Fake implements AndroidSdk {
@@ -1754,4 +1893,17 @@ class FakeAndroidSdkWithDir extends Fake implements AndroidSdk {
 
   @override
   Directory get directory => _directory;
+}
+
+class FakeFlutterManifest extends Fake implements FlutterManifest {
+  FakeFlutterManifest({
+    this.disabledSwiftPackageManager = false,
+    this.isModule = false,
+  });
+
+  @override
+  bool disabledSwiftPackageManager;
+
+  @override
+  bool isModule;
 }

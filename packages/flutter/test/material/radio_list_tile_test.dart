@@ -9,8 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
 
 Widget wrap({Widget? child}) {
   return MediaQuery(
@@ -411,7 +411,7 @@ void main() {
                 SemanticsFlag.isInMutuallyExclusiveGroup,
                 SemanticsFlag.isFocusable,
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               label: 'Title',
               textDirection: TextDirection.ltr,
             ),
@@ -448,7 +448,7 @@ void main() {
                 SemanticsFlag.isInMutuallyExclusiveGroup,
                 SemanticsFlag.isFocusable,
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               label: 'Title',
               textDirection: TextDirection.ltr,
             ),
@@ -483,6 +483,7 @@ void main() {
                 SemanticsFlag.isInMutuallyExclusiveGroup,
                 SemanticsFlag.isFocusable,
               ],
+              actions: <SemanticsAction>[SemanticsAction.focus],
               label: 'Title',
               textDirection: TextDirection.ltr,
             ),

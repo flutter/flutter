@@ -12,8 +12,8 @@ import 'ticker_provider.dart';
 /// duration whenever the given child's size changes.
 ///
 /// {@tool dartpad}
-/// This example makes a [Container] react to being touched, causing the child
-/// of the [AnimatedSize] widget, here a [FlutterLogo], to animate.
+/// This example defines a widget that uses [AnimatedSize] to change the size of
+/// the [SizedBox] on tap.
 ///
 /// ** See code in examples/api/lib/widgets/animated_size/animated_size.0.dart **
 /// {@end-tool}

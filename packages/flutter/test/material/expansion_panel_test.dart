@@ -211,6 +211,7 @@ void main() {
       isEnabled: true,
       isFocusable: true,
       hasTapAction: true,
+      hasFocusAction: true,
     ));
 
     // Check custom header widget semantics is preserved.
@@ -261,6 +262,7 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           hasTapAction: true,
+          hasFocusAction: true,
         ),
       ],
     ));
@@ -1099,6 +1101,7 @@ void main() {
       isEnabled: true,
       isFocusable: true,
       hasTapAction: true,
+      hasFocusAction: true,
       onTapHint: localizations.expandedIconTapHint,
     ));
 
@@ -1123,6 +1126,7 @@ void main() {
       isEnabled: true,
       isFocusable: true,
       hasTapAction: true,
+      hasFocusAction: true,
       onTapHint: localizations.collapsedIconTapHint,
     ));
 
@@ -1187,6 +1191,7 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           hasTapAction: true,
+          hasFocusAction: true,
         ),
       ],
     ));
@@ -1215,6 +1220,7 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           hasTapAction: true,
+          hasFocusAction: true,
         ),
       ],
     ));
@@ -1268,6 +1274,7 @@ void main() {
       isFocusable: true,
       hasEnabledState: true,
       hasTapAction: true,
+      hasFocusAction: true,
     ));
 
     expect(tester.getSemantics(find.byKey(collapsedKey)), matchesSemantics(
@@ -1276,6 +1283,7 @@ void main() {
       isFocusable: true,
       hasEnabledState: true,
       hasTapAction: true,
+      hasFocusAction: true,
     ));
 
     handle.dispose();
@@ -1946,5 +1954,110 @@ void main() {
         expect(e.size, 16);
       }
     }
+  });
+
+  testWidgets('Ensure IconButton splashColor and highlightColor are correctly set when canTapOnHeader is false', (WidgetTester tester) async {
+    const Color expectedSplashColor = Colors.green;
+    const Color expectedHighlightColor = Colors.yellow;
+
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList(
+          children: <ExpansionPanel>[
+            ExpansionPanel(
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return const ListTile(title: Text('Panel 1'));
+              },
+              body: const ListTile(title: Text('Content for Panel 1')),
+              splashColor: expectedSplashColor,
+              highlightColor: expectedHighlightColor,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('Panel 1'));
+    await tester.pumpAndSettle();
+
+    final IconButton iconButton = tester.widget(find.byType(IconButton).first);
+    expect(iconButton.splashColor, expectedSplashColor);
+    expect(iconButton.highlightColor, expectedHighlightColor);
+  });
+
+  testWidgets('Ensure InkWell splashColor and highlightColor are correctly set when canTapOnHeader is true', (WidgetTester tester) async {
+    const Color expectedSplashColor = Colors.green;
+    const Color expectedHighlightColor = Colors.yellow;
+
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList(
+          children: <ExpansionPanel>[
+            ExpansionPanel(
+              canTapOnHeader: true,
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  alignment: Alignment.centerLeft,
+                  child: const Text('Panel 1'),
+                );
+              },
+              body: const ListTile(title: Text('Content for Panel 1')),
+              splashColor: expectedSplashColor,
+              highlightColor: expectedHighlightColor,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+
+    final Finder inkWellFinder = find.descendant(
+      of: find.byType(ExpansionPanelList),
+      matching: find.byWidgetPredicate((Widget widget) =>
+        widget is InkWell && widget.onTap != null)
+    );
+
+    final InkWell inkWell = tester.widget<InkWell>(inkWellFinder);
+    expect(inkWell.splashColor, expectedSplashColor);
+    expect(inkWell.highlightColor, expectedHighlightColor);
+  });
+
+  testWidgets('ExpandIcon.disabledColor uses expandIconColor color when canTapOnHeader is true', (WidgetTester tester) async {
+    const Color expandIconColor = Color(0xff0000ff);
+
+    Widget buildWidget({ bool canTapOnHeader = false }) {
+      return MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            expandIconColor: expandIconColor,
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                canTapOnHeader: canTapOnHeader,
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const ListTile(title: Text('Panel'));
+                },
+                body: const ListTile(title: Text('Content for Panel')),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget());
+
+    await tester.tap(find.text('Panel'));
+    await tester.pumpAndSettle();
+
+    ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
+    expect(expandIcon.disabledColor, isNull);
+
+    await tester.pumpWidget(buildWidget(canTapOnHeader: true));
+    await tester.pumpAndSettle();
+
+    expandIcon = tester.widget(find.byType(ExpandIcon));
+    expect(expandIcon.disabledColor, expandIconColor);
   });
 }

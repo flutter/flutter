@@ -48,6 +48,7 @@ void main() {
         matchesSemantics(
           label: 'button',
           hasTapAction: true,
+          hasFocusAction: true,
           isButton: true,
           isFocusable: true,
           hasEnabledState: true,

@@ -51,8 +51,6 @@ android {
     dependencies {
         // TODO(egarciad): These dependencies should not be added to release builds.
         // https://github.com/flutter/flutter/issues/56591
-        testImplementation 'androidx.test.ext:junit:1.1.4-alpha07'
-        testImplementation 'org.robolectric:robolectric:4.11'
         testImplementation 'junit:junit:4.13.2'
         testImplementation 'org.mockito:mockito-inline:5.1.0'
 

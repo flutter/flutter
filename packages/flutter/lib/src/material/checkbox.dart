@@ -12,7 +12,6 @@ import 'debug.dart';
 import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
-import 'toggleable.dart';
 
 // Examples can assume:
 // bool _throwShotAway = false;
@@ -444,6 +443,9 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   @override
   bool? get value => widget.value;
 
+  @override
+  Duration? get reactionAnimationDuration => kRadialReactionDuration;
+
   MaterialStateProperty<Color?> get _widgetFillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
@@ -765,10 +767,10 @@ class _CheckboxPainter extends ToggleablePainter {
 
     final Paint strokePaint = _createStrokePaint();
     final Offset origin = size / 2.0 - const Size.square(_kEdgeSize) / 2.0 as Offset;
-    final AnimationStatus status = position.status;
-    final double tNormalized = status == AnimationStatus.forward || status == AnimationStatus.completed
-      ? position.value
-      : 1.0 - position.value;
+    final double tNormalized = switch (position.status) {
+      AnimationStatus.forward || AnimationStatus.completed => position.value,
+      AnimationStatus.reverse || AnimationStatus.dismissed => 1.0 - position.value,
+    };
 
     // Four cases: false to null, false to true, null to false, true to false
     if (previousValue == false || value == false) {

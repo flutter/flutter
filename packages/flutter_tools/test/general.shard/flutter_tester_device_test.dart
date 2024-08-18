@@ -266,6 +266,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
         BuildMode.debug,
         '',
         treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
       ),
       hostVmServicePort: 1234,
       dartEntrypointArgs: dartEntrypointArgs,

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:collection';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -945,6 +948,18 @@ class _RenderSegmentedControl<T> extends RenderBox
   Size _computeOverallSizeFromChildSize(Size childSize, BoxConstraints constraints) {
     final int childCount = this.childCount ~/ 2 + 1;
     return constraints.constrain(Size(childSize.width * childCount + totalSeparatorWidth, childSize.height));
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final Size childSize = _calculateChildSize(constraints);
+    final BoxConstraints childConstraints = BoxConstraints.tight(childSize);
+
+    BaselineOffset baselineOffset = BaselineOffset.noBaseline;
+    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
+      baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDryBaseline(childConstraints, baseline)));
+    }
+    return baselineOffset.offset;
   }
 
   @override

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show FontFeature, FontVariation, ParagraphStyle, Shadow, TextStyle;
+import 'dart:ui' as ui show FontFeature, FontVariation, ParagraphStyle, Shadow, TextStyle, lerpDouble;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -409,6 +409,27 @@ void main() {
     expect(c.hashCode, isNot(d.hashCode));
   });
 
+
+  test('TextStyle shadows', () {
+    const ui.Shadow shadow1 = ui.Shadow(blurRadius: 1.0, offset: Offset(1.0, 1.0));
+    const ui.Shadow shadow2 = ui.Shadow(blurRadius: 2.0, color: Color(0xFF111111), offset: Offset(2.0, 2.0));
+    const ui.Shadow shadow3 = ui.Shadow(blurRadius: 3.0, color: Color(0xFF222222), offset: Offset(3.0, 3.0));
+    const ui.Shadow shadow4 = ui.Shadow(blurRadius: 4.0, color: Color(0xFF333333), offset: Offset(4.0, 4.0));
+
+    const TextStyle s1 = TextStyle(shadows: <ui.Shadow>[shadow1, shadow2]);
+    const TextStyle s2 = TextStyle(shadows: <ui.Shadow>[shadow3, shadow4]);
+
+    final TextStyle lerp12 = TextStyle.lerp(s1, s2, 0.5)!;
+
+    expect(lerp12.shadows, hasLength(2));
+    expect(lerp12.shadows?[0].blurRadius, ui.lerpDouble(shadow1.blurRadius, shadow3.blurRadius, 0.5));
+    expect(lerp12.shadows?[0].color, Color.lerp(shadow1.color, shadow3.color, 0.5));
+    expect(lerp12.shadows?[0].offset, Offset.lerp(shadow1.offset, shadow3.offset, 0.5));
+    expect(lerp12.shadows?[1].blurRadius, ui.lerpDouble(shadow2.blurRadius, shadow4.blurRadius, 0.5));
+    expect(lerp12.shadows?[1].color, Color.lerp(shadow2.color, shadow4.color, 0.5));
+    expect(lerp12.shadows?[1].offset, Offset.lerp(shadow2.offset, shadow4.offset, 0.5));
+  });
+
   test('TextStyle foreground and color combos', () {
     const Color red = Color.fromARGB(255, 255, 0, 0);
     const Color blue = Color.fromARGB(255, 0, 0, 255);
@@ -548,6 +569,11 @@ void main() {
     expect(
       style.apply(leadingDistribution: TextLeadingDistribution.proportional).leadingDistribution,
       TextLeadingDistribution.proportional,
+    );
+
+    expect(
+      const TextStyle(height: kTextHeightNone).apply(heightFactor: 1000, heightDelta: 1000).height,
+      kTextHeightNone,
     );
   });
 

@@ -112,7 +112,7 @@ class Net {
         _logger.printError(error.toString());
         throwToolExit(
           'The value of $kFlutterStorageBaseUrl ($overrideUrl) could not be '
-          'parsed as a valid url. Please see https://flutter.dev/community/china '
+          'parsed as a valid url. Please see https://flutter.dev/to/use-mirror-site '
           'for an example of how to use it.\n'
           'Full URL: $url',
           exitCode: kNetworkProblemExitCode,

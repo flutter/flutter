@@ -844,7 +844,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       parent: _state.valueIndicatorController,
       curve: Curves.fastOutSlowIn,
     )..addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed) {
+      if (status.isDismissed) {
         _state.overlayEntry?.remove();
         _state.overlayEntry?.dispose();
         _state.overlayEntry = null;
@@ -1230,11 +1230,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       // a tap, it consists of a call to onChangeStart with the previous value and
       // a call to onChangeEnd with the new value.
       final RangeValues currentValues = _discretizeRangeValues(values);
-      if (_lastThumbSelection == Thumb.start) {
-        _newValues = RangeValues(tapValue, currentValues.end);
-      } else if (_lastThumbSelection == Thumb.end) {
-        _newValues = RangeValues(currentValues.start, tapValue);
-      }
+      _newValues = switch (_lastThumbSelection!) {
+        Thumb.start => RangeValues(tapValue, currentValues.end),
+        Thumb.end   => RangeValues(currentValues.start, tapValue),
+      };
       _updateLabelPainter(_lastThumbSelection!);
 
       onChangeStart?.call(currentValues);
@@ -1248,7 +1247,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         _state.interactionTimer =
           Timer(_minimumInteractionTime * timeDilation, () {
             _state.interactionTimer = null;
-            if (!_active && _state.valueIndicatorController.status == AnimationStatus.completed) {
+            if (!_active && _state.valueIndicatorController.isCompleted) {
               _state.valueIndicatorController.reverse();
             }
           });
@@ -1286,11 +1285,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       }
       final double currentDragValue = _discretize(dragValue);
 
-      if (_lastThumbSelection == Thumb.start) {
-        _newValues = RangeValues(math.min(currentDragValue, currentValues.end - _minThumbSeparationValue), currentValues.end);
-      } else if (_lastThumbSelection == Thumb.end) {
-        _newValues = RangeValues(currentValues.start, math.max(currentDragValue, currentValues.start + _minThumbSeparationValue));
-      }
+      _newValues = switch (_lastThumbSelection!) {
+        Thumb.start => RangeValues(math.min(currentDragValue, currentValues.end - _minThumbSeparationValue), currentValues.end),
+        Thumb.end   => RangeValues(currentValues.start, math.max(currentDragValue, currentValues.start + _minThumbSeparationValue)),
+      };
       onChanged!(_newValues);
     }
   }
@@ -1789,7 +1787,7 @@ class _RenderValueIndicator extends RenderBox with RelayoutWhenSystemFontsChange
     );
   }
 
-  late Animation<double> _valueIndicatorAnimation;
+  late CurvedAnimation _valueIndicatorAnimation;
   late _RangeSliderState _state;
 
   @override
@@ -1820,5 +1818,11 @@ class _RenderValueIndicator extends RenderBox with RelayoutWhenSystemFontsChange
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     return constraints.smallest;
+  }
+
+  @override
+  void dispose() {
+    _valueIndicatorAnimation.dispose();
+    super.dispose();
   }
 }

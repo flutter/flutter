@@ -6,7 +6,7 @@
 library;
 
 import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
-import '../test.dart';
+import '../suite_runners/run_verify_binaries_codesigned_tests.dart';
 import './common.dart';
 
 void main() async {

@@ -546,6 +546,12 @@ class ChipThemeData with Diagnosticable {
     if (a == null && b == null) {
       return null;
     }
+    if (a is MaterialStateBorderSide) {
+      a = a.resolve(<WidgetState>{});
+    }
+    if (b is MaterialStateBorderSide) {
+      b = b.resolve(<WidgetState>{});
+    }
     if (a == null) {
       return BorderSide.lerp(BorderSide(width: 0, color: b!.color.withAlpha(0)), b, t);
     }

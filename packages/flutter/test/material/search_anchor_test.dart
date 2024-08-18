@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -3228,6 +3229,50 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(suggestionsBuilderCalledCount, 2);
+  });
+
+  testWidgets('Suggestions gets refreshed after long API call', (WidgetTester tester) async {
+    Timer? debounceTimer;
+    const Duration apiCallDuration = Duration(seconds: 1);
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: SearchAnchor(
+            builder: (BuildContext context, SearchController controller) {
+              return const Icon(Icons.search);
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) async {
+              final Completer<List<String>> completer = Completer<List<String>>();
+              debounceTimer?.cancel();
+              debounceTimer = Timer(apiCallDuration, () {
+                completer.complete(List<String>.generate(10, (int index) => 'Item - $index'));
+              });
+              final List<String> options = await completer.future;
+
+              final List<Widget> suggestions = List<Widget>.generate(options.length, (int index) {
+                final String item = options[index];
+                return ListTile(
+                  title: Text(item),
+                );
+              });
+              return suggestions;
+            },
+          ),
+        ),
+      ),
+    ));
+    await tester.tap(find.byIcon(Icons.search)); // Open search view.
+    await tester.pumpAndSettle();
+
+    // Simulate the keyboard opening resizing the view.
+    tester.view.viewInsets = const FakeViewPadding(bottom: 500.0);
+    addTearDown(tester.view.reset);
+
+    // Show the keyboard.
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.pumpAndSettle(apiCallDuration);
+
+    expect(find.text('Item - 1'), findsOneWidget);
   });
 }
 

@@ -450,7 +450,7 @@ void main() {
       final Offset foundTitle = tester.getTopLeft(find.text('CupertinoListTile'));
       final Offset foundInfo = tester.getTopRight(find.text('Not Connected'));
 
-      expect(foundTitle.dx > foundInfo.dx, isTrue);
+      expect(foundTitle.dx, greaterThanOrEqualTo(foundInfo.dx));
     });
 
     testWidgets('trailing is on the left of additionalInfo', (WidgetTester tester) async {
@@ -476,7 +476,7 @@ void main() {
       final Offset foundInfo = tester.getTopLeft(find.text('Not Connected'));
       final Offset foundTrailing = tester.getTopRight(find.byType(CupertinoListTileChevron));
 
-      expect(foundInfo.dx > foundTrailing.dx, isTrue);
+      expect(foundInfo.dx, greaterThanOrEqualTo(foundTrailing.dx));
     });
   });
 

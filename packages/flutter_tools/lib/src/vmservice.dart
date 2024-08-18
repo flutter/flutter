@@ -571,9 +571,14 @@ class FlutterVmService {
   }) async {
     try {
       await service.streamListen(vm_service.EventStreams.kIsolate);
-    } on vm_service.RPCError {
-      // Do nothing, since the tool is already subscribed.
+    } on vm_service.RPCError catch (e) {
+      // Do nothing if the tool is already subscribed.
+      const int streamAlreadySubscribed = 103;
+      if (e.code != streamAlreadySubscribed) {
+        rethrow;
+      }
     }
+
     final Future<void> onRunnable = service.onIsolateEvent.firstWhere((vm_service.Event event) {
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
@@ -977,6 +982,9 @@ class FlutterVmService {
         }
       }
       return await extensionAdded.future;
+    } on vm_service.RPCError {
+      // Translate this exception into something the outer layer understands
+      throw VmServiceDisappearedException();
     } finally {
       await isolateEvents.cancel();
       try {
@@ -993,14 +1001,11 @@ class FlutterVmService {
       throw VmServiceDisappearedException();
     }
 
-    final List<vm_service.IsolateRef> refs = <vm_service.IsolateRef>[];
-    for (final FlutterView flutterView in flutterViews) {
-      final vm_service.IsolateRef? uiIsolate = flutterView.uiIsolate;
-      if (uiIsolate != null) {
-        refs.add(uiIsolate);
-      }
-    }
-    return refs;
+    return <vm_service.IsolateRef>[
+      for (final FlutterView flutterView in flutterViews)
+        if (flutterView.uiIsolate case final vm_service.IsolateRef uiIsolate)
+          uiIsolate,
+    ];
   }
 
   /// Attempt to retrieve the isolate with id [isolateId], or `null` if it has

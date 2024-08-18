@@ -111,11 +111,28 @@ BuildApp() {
   if [[ -n "$LOCAL_ENGINE_HOST" ]]; then
     flutter_args+=("--local-engine-host=${LOCAL_ENGINE_HOST}")
   fi
+
+  local architectures="${ARCHS}"
+  if [[ -n "$1" && "$1" == "prepare" ]]; then
+    # The "prepare" command runs in a pre-action script, which doesn't always
+    # filter the "ARCHS" build setting to only the active arch. To workaround,
+    # if "ONLY_ACTIVE_ARCH" is true and the "NATIVE_ARCH" is arm, assume the
+    # active arch is also arm to improve caching. If this assumption is
+    # incorrect, it will later be corrected by the "build" command.
+    if [[ -n "$ONLY_ACTIVE_ARCH" && "$ONLY_ACTIVE_ARCH" == "YES" && -n "$NATIVE_ARCH" ]]; then
+      if [[ "$NATIVE_ARCH" == *"arm"*  ]]; then
+        architectures="arm64"
+      else
+        architectures="x86_64"
+      fi
+    fi
+  fi
+
   flutter_args+=(
     "assemble"
     "--no-version-check"
     "-dTargetPlatform=darwin"
-    "-dDarwinArchs=${ARCHS}"
+    "-dDarwinArchs=${architectures}"
     "-dTargetFile=${target_path}"
     "-dBuildMode=${build_mode}"
     "-dTreeShakeIcons=${TREE_SHAKE_ICONS}"
@@ -132,6 +149,19 @@ BuildApp() {
     "--output=${BUILT_PRODUCTS_DIR}"
   )
 
+  local target="${build_mode}_macos_bundle_flutter_assets";
+  if [[ -n "$1" && "$1" == "prepare" ]]; then
+    # The "prepare" command only targets the UnpackMacOS target, which copies the
+    # FlutterMacOS framework to the BUILT_PRODUCTS_DIR.
+    target="${build_mode}_unpack_macos"
+
+    # Use the PreBuildAction define flag to force the tool to use a different
+    # filecache file for the "prepare" command. This will make the environment
+    # buildPrefix for the "prepare" command unique from the "build" command.
+    # This will improve caching since the "build" command has more target dependencies.
+    flutter_args+=("-dPreBuildAction=PrepareFramework")
+  fi
+
   if [[ -n "$FLAVOR" ]]; then
     flutter_args+=("-dFlavor=${FLAVOR}")
   fi
@@ -144,9 +174,19 @@ BuildApp() {
   if [[ -n "$CODE_SIZE_DIRECTORY" ]]; then
     flutter_args+=("-dCodeSizeDirectory=${CODE_SIZE_DIRECTORY}")
   fi
-  flutter_args+=("${build_mode}_macos_bundle_flutter_assets")
+
+  flutter_args+=("${target}")
 
   RunCommand "${flutter_args[@]}"
+}
+
+PrepareFramework() {
+  # The "prepare" command runs in a pre-action script, which also runs when
+  # using the Xcode/xcodebuild clean command. Skip if cleaning.
+  if [[ $ACTION == "clean" ]]; then
+    exit 0
+  fi
+  BuildApp "prepare"
 }
 
 # Adds the App.framework as an embedded binary, the flutter_assets as
@@ -179,6 +219,12 @@ EmbedFrameworks() {
   local native_assets_path="${project_path}/${FLUTTER_BUILD_DIR}/native_assets/macos/"
   if [[ -d "$native_assets_path" ]]; then
     RunCommand rsync -av --filter "- .DS_Store" --filter "- native_assets.yaml" "${native_assets_path}" "${xcode_frameworks_dir}"
+
+    # Iterate through all .frameworks in native assets directory.
+    for native_asset in "${native_assets_path}"*.framework; do
+      # Codesign the framework inside the app bundle.
+      RunCommand codesign --force --verbose --sign "${EXPANDED_CODE_SIGN_IDENTITY}" -- "${xcode_frameworks_dir}/$(basename "$native_asset")"
+    done
   fi
 }
 
@@ -192,5 +238,7 @@ else
       BuildApp ;;
     "embed")
       EmbedFrameworks ;;
+    "prepare")
+      PrepareFramework ;;
   esac
 fi

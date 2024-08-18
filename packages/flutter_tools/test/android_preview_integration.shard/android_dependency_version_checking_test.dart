@@ -67,8 +67,10 @@ void main() {
     tryToDelete(tempDir as FileSystemEntity);
   });
 
-  testUsingContext(
-      'AGP version out of "warn" support band prints warning but still builds', () async {
+  Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
+    required String gradleVersion,
+    required String agpVersion,
+    required String kgpVersion}) async {
     // Create a new flutter project.
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     ProcessResult result = await processManager.run(<String>[
@@ -78,9 +80,6 @@ void main() {
       '--platforms=android',
     ], workingDirectory: tempDir.path);
     expect(result, const ProcessResultMatcher());
-    const String gradleVersion = '7.5';
-    const String agpVersion = '4.2.0';
-    const String kgpVersion = '1.7.10';
 
     final Directory app = Directory(fileSystem.path.join(tempDir.path, 'dependency_checker_app'));
 
@@ -108,101 +107,45 @@ void main() {
       'apk',
       '--debug',
     ], workingDirectory: app.path);
+    return result;
+  }
+
+  testUsingContext(
+      'AGP version out of "warn" support band but in "error" band builds '
+          'successfully and prints warning', () async {
+
+    final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
+        gradleVersion: '7.5',
+        agpVersion: '7.0.0',
+        kgpVersion: '1.7.10'
+    );
     expect(result, const ProcessResultMatcher());
-    expect(result.stderr, contains('Please upgrade your Android Gradle '
-        'Plugin version'));
+    expect(result.stderr, contains('Please upgrade your Android Gradle Plugin version'));
   });
 
   testUsingContext(
-      'Gradle version out of "warn" support band prints warning but still builds', () async {
+      'Gradle version out of "warn" support band but in "error" band builds '
+          'successfully and prints warning', () async {
     // Create a new flutter project.
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    ProcessResult result = await processManager.run(<String>[
-      flutterBin,
-      'create',
-      'dependency_checker_app',
-      '--platforms=android',
-    ], workingDirectory: tempDir.path);
-    expect(result, const ProcessResultMatcher());
-    const String gradleVersion = '7.0';
-    const String agpVersion = '4.2.0';
-    const String kgpVersion = '1.7.10';
-
-    final Directory app = Directory(fileSystem.path.join(tempDir.path, 'dependency_checker_app'));
-
-    // Modify gradle version to passed in version.
-    final File gradleWrapperProperties = File(fileSystem.path.join(
-        app.path, 'android', 'gradle', 'wrapper', 'gradle-wrapper.properties'));
-    final String propertyContent = gradleWrapperPropertiesFileContent.replaceFirst(
-      gradleReplacementString,
-      gradleVersion,
+    final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
+        gradleVersion: '7.0.2',
+        agpVersion: '7.0.0',
+        kgpVersion: '1.7.10'
     );
-    await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
-
-    final File gradleSettings = File(fileSystem.path.join(
-        app.path, 'android', 'settings.gradle'));
-    final String settingsContent = gradleSettingsFileContent
-        .replaceFirst(agpReplacementString, agpVersion)
-        .replaceFirst(kgpReplacementString, kgpVersion);
-    await gradleSettings.writeAsString(settingsContent, flush: true);
-
-
-    // Ensure that gradle files exists from templates.
-    result = await processManager.run(<String>[
-      flutterBin,
-      'build',
-      'apk',
-      '--debug',
-    ], workingDirectory: app.path);
     expect(result, const ProcessResultMatcher());
     expect(result.stderr, contains('Please upgrade your Gradle version'));
   });
 
   testUsingContext(
-      'Kotlin version out of "warn" support band prints warning but still builds', () async {
-    // Create a new flutter project.
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    ProcessResult result = await processManager.run(<String>[
-      flutterBin,
-      'create',
-      'dependency_checker_app',
-      '--platforms=android',
-    ], workingDirectory: tempDir.path);
-    expect(result, const ProcessResultMatcher());
-    const String gradleVersion = '7.5';
-    const String agpVersion = '7.4.0';
-    const String kgpVersion = '1.4.10';
-
-    final Directory app = Directory(fileSystem.path.join(tempDir.path, 'dependency_checker_app'));
-
-    // Modify gradle version to passed in version.
-    final File gradleWrapperProperties = File(fileSystem.path.join(
-        app.path, 'android', 'gradle', 'wrapper', 'gradle-wrapper.properties'));
-    final String propertyContent = gradleWrapperPropertiesFileContent.replaceFirst(
-      gradleReplacementString,
-      gradleVersion,
+      'Kotlin version out of "warn" support band but in "error" band builds '
+          'successfully and prints warning', () async {
+    final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
+        gradleVersion: '7.5',
+        agpVersion: '7.4.0',
+        kgpVersion: '1.7.0'
     );
-    await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
-    final File gradleSettings = File(fileSystem.path.join(
-        app.path, 'android', 'settings.gradle'));
-    final String settingsContent = gradleSettingsFileContent
-        .replaceFirst(agpReplacementString, agpVersion)
-        .replaceFirst(kgpReplacementString, kgpVersion);
-    await gradleSettings.writeAsString(settingsContent, flush: true);
-
-
-    // Ensure that gradle files exists from templates.
-    result = await processManager.run(<String>[
-      flutterBin,
-      'build',
-      'apk',
-      '--debug',
-    ], workingDirectory: app.path);
     expect(result, const ProcessResultMatcher());
     expect(result.stderr, contains('Please upgrade your Kotlin version'));
   });
-
-  // TODO(gmackall): Add tests for build blocking when the
-  // corresponding error versions are enabled.
 }

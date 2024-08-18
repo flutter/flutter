@@ -136,6 +136,7 @@ Future<void> main(List<String> args) async {
           // So that we don't animate anything before calling applyFeatureFlags, default
           // the animations to disabled in real apps.
           defaultCliAnimationEnabled: false,
+          shutdownHooks: globals.shutdownHooks,
         );
         // runner.run calls "terminal.applyFeatureFlags()"
       },

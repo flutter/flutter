@@ -77,7 +77,7 @@ class _AnimatedDigitState extends State<AnimatedDigit> with SingleTickerProvider
   }
 
   void handleAnimationCompleted(AnimationStatus status) {
-    if (status == AnimationStatus.completed) {
+    if (status.isCompleted) {
       if (pendingValues.isNotEmpty) {
         // Display the next pending value. The duration was scaled down
         // in didUpdateWidget by the total number of pending values so

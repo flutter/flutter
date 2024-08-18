@@ -8,6 +8,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'box.dart';
 import 'object.dart';
 import 'sliver.dart';
+import 'sliver_fixed_extent_list.dart';
 
 /// A delegate used by [RenderSliverMultiBoxAdaptor] to manage its children.
 ///

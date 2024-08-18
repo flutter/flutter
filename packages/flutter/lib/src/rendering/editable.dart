@@ -4,7 +4,7 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, LineMetrics, PlaceholderAlignment, TextBox;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, LineMetrics, TextBox;
 
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
@@ -777,7 +777,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _textPainter.text = value;
     _cachedAttributedValue = null;
     _cachedCombinedSemanticsInfos = null;
-    _canComputeIntrinsicsCached = null;
     markNeedsLayout();
     markNeedsSemanticsUpdate();
   }
@@ -1453,25 +1452,21 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
           ..sortKey = OrdinalSortKey(ordinal++)
           ..textDirection = initialDirection
           ..attributedLabel = AttributedString(info.semanticsLabel ?? info.text, attributes: info.stringAttributes);
-        final GestureRecognizer? recognizer = info.recognizer;
-        if (recognizer != null) {
-          if (recognizer is TapGestureRecognizer) {
-            if (recognizer.onTap != null) {
-              configuration.onTap = recognizer.onTap;
+        switch (info.recognizer) {
+          case TapGestureRecognizer(onTap: final VoidCallback? onTap):
+          case DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? onTap):
+            if (onTap != null) {
+              configuration.onTap = onTap;
               configuration.isLink = true;
             }
-          } else if (recognizer is DoubleTapGestureRecognizer) {
-            if (recognizer.onDoubleTap != null) {
-              configuration.onTap = recognizer.onDoubleTap;
-              configuration.isLink = true;
+          case LongPressGestureRecognizer(onLongPress: final GestureLongPressCallback? onLongPress):
+            if (onLongPress != null) {
+              configuration.onLongPress = onLongPress;
             }
-          } else if (recognizer is LongPressGestureRecognizer) {
-            if (recognizer.onLongPress != null) {
-              configuration.onLongPress = recognizer.onLongPress;
-            }
-          } else {
-            assert(false, '${recognizer.runtimeType} is not supported.');
-          }
+          case null:
+            break;
+          default:
+            assert(false, '${info.recognizer.runtimeType} is not supported.');
         }
         if (node.parentPaintClipRect != null) {
           final Rect paintRect = node.parentPaintClipRect!.intersect(currentRect);
@@ -1769,8 +1764,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///    for a [TextPainter] object.
   TextPosition getPositionForPoint(Offset globalPosition) {
     _computeTextMetricsIfNeeded();
-    globalPosition += -_paintOffset;
-    return _textPainter.getPositionForOffset(globalToLocal(globalPosition));
+    return _textPainter.getPositionForOffset(globalToLocal(globalPosition) - _paintOffset);
   }
 
   /// Returns the [Rect] in local coordinates for the caret at the given text
@@ -1794,13 +1788,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final double caretX = clampDouble(caretRect.left, 0, math.max(scrollableWidth - _caretMargin, 0));
     caretRect = Offset(caretX, caretRect.top) & caretRect.size;
 
-    final double caretHeight = cursorHeight;
+    final double fullHeight = _textPainter.getFullHeightForCaret(caretPosition, caretPrototype);
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        final double fullHeight = _textPainter.getFullHeightForCaret(caretPosition, caretPrototype);
-        final double heightDiff = fullHeight - caretRect.height;
         // Center the caret vertically along the text.
+        final double heightDiff = fullHeight - caretRect.height;
         caretRect = Rect.fromLTWH(
           caretRect.left,
           caretRect.top + heightDiff / 2,
@@ -1813,10 +1806,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       case TargetPlatform.windows:
         // Override the height to take the full height of the glyph at the TextPosition
         // when not on iOS. iOS has special handling that creates a taller caret.
-        // TODO(garyq): See the TODO for _computeCaretPrototype().
+        // TODO(garyq): see https://github.com/flutter/flutter/issues/120836.
+        final double caretHeight = cursorHeight;
+        // Center the caret vertically along the text.
+        final double heightDiff = fullHeight - caretHeight;
         caretRect = Rect.fromLTWH(
           caretRect.left,
-          caretRect.top - _kCaretHeightOffset,
+          caretRect.top - _kCaretHeightOffset + heightDiff / 2,
           caretRect.width,
           caretHeight,
         );
@@ -1828,10 +1824,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    if (!_canComputeIntrinsics) {
-      return 0.0;
-    }
-    final List<PlaceholderDimensions> placeholderDimensions = layoutInlineChildren(double.infinity, (RenderBox child, BoxConstraints constraints) => Size(child.getMinIntrinsicWidth(double.infinity), 0.0));
+    final List<PlaceholderDimensions> placeholderDimensions = layoutInlineChildren(
+      double.infinity,
+      (RenderBox child, BoxConstraints constraints) => Size(child.getMinIntrinsicWidth(double.infinity), 0.0),
+      ChildLayoutHelper.getDryBaseline,
+    );
     final (double minWidth, double maxWidth) = _adjustConstraints();
     return (_textIntrinsics
       ..setPlaceholderDimensions(placeholderDimensions)
@@ -1841,14 +1838,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    if (!_canComputeIntrinsics) {
-      return 0.0;
-    }
     final List<PlaceholderDimensions> placeholderDimensions = layoutInlineChildren(
       double.infinity,
       // Height and baseline is irrelevant as all text will be laid
       // out in a single line. Therefore, using 0.0 as a dummy for the height.
       (RenderBox child, BoxConstraints constraints) => Size(child.getMaxIntrinsicWidth(double.infinity), 0.0),
+      ChildLayoutHelper.getDryBaseline,
     );
     final (double minWidth, double maxWidth) = _adjustConstraints();
     return (_textIntrinsics
@@ -1926,10 +1921,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (!_canComputeIntrinsics) {
-      return 0.0;
-    }
-    _textIntrinsics.setPlaceholderDimensions(layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild));
+    _textIntrinsics.setPlaceholderDimensions(
+      layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getDryBaseline),
+    );
     return _preferredHeight(width);
   }
 
@@ -2071,10 +2065,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// to the [TextSelection.extentOffset].
   void selectPositionAt({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     _computeTextMetricsIfNeeded();
-    final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
+    final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from) - _paintOffset);
     final TextPosition? toPosition = to == null
       ? null
-      : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
+      : _textPainter.getPositionForOffset(globalToLocal(to) - _paintOffset);
 
     final int baseOffset = fromPosition.offset;
     final int extentOffset = toPosition?.offset ?? fromPosition.offset;
@@ -2108,9 +2102,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// {@macro flutter.rendering.RenderEditable.selectPosition}
   void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     _computeTextMetricsIfNeeded();
-    final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
+    final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from) - _paintOffset);
     final TextSelection fromWord = getWordAtOffset(fromPosition);
-    final TextPosition toPosition = to == null ? fromPosition : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
+    final TextPosition toPosition = to == null ? fromPosition : _textPainter.getPositionForOffset(globalToLocal(to) - _paintOffset);
     final TextSelection toWord = toPosition == fromPosition ? fromWord : getWordAtOffset(toPosition);
     final bool isFromWordBeforeToWord = fromWord.start < toWord.end;
 
@@ -2130,7 +2124,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   void selectWordEdge({ required SelectionChangedCause cause }) {
     _computeTextMetricsIfNeeded();
     assert(_lastTapDownPosition != null);
-    final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition! - _paintOffset));
+    final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition!) - _paintOffset);
     final TextRange word = _textPainter.getWordBoundary(position);
     late TextSelection newSelection;
     if (position.offset <= word.start) {
@@ -2291,35 +2285,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       );
   }
 
-  bool _canComputeDryLayoutForInlineWidgets() {
-    return text?.visitChildren((InlineSpan span) {
-      return (span is! PlaceholderSpan) || switch (span.alignment) {
-        ui.PlaceholderAlignment.baseline ||
-        ui.PlaceholderAlignment.aboveBaseline ||
-        ui.PlaceholderAlignment.belowBaseline => false,
-        ui.PlaceholderAlignment.top ||
-        ui.PlaceholderAlignment.middle ||
-        ui.PlaceholderAlignment.bottom => true,
-      };
-    }) ?? true;
-  }
-
-  bool? _canComputeIntrinsicsCached;
-  bool get _canComputeIntrinsics => _canComputeIntrinsicsCached ??= _canComputeDryLayoutForInlineWidgets();
-
   @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
-    if (!_canComputeIntrinsics) {
-      assert(debugCannotComputeDryLayout(
-        reason: 'Dry layout not available for alignments that require baseline.',
-      ));
-      return Size.zero;
-    }
-
     final (double minWidth, double maxWidth) = _adjustConstraints(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     _textIntrinsics
-      ..setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild))
+      ..setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getDryBaseline))
       ..layout(minWidth: minWidth, maxWidth: maxWidth);
     final double width = forceLine
       ? constraints.maxWidth
@@ -2328,27 +2299,28 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   @override
+  double computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final (double minWidth, double maxWidth) = _adjustConstraints(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _textIntrinsics
+      ..setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getDryBaseline))
+      ..layout(minWidth: minWidth, maxWidth: maxWidth);
+    return _textIntrinsics.computeDistanceToActualBaseline(baseline);
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    _placeholderDimensions = layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.layoutChild);
+    _placeholderDimensions = layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.layoutChild, ChildLayoutHelper.getBaseline);
     final (double minWidth, double maxWidth) = _adjustConstraints(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     _textPainter
       ..setPlaceholderDimensions(_placeholderDimensions)
       ..layout(minWidth: minWidth, maxWidth: maxWidth);
     positionInlineChildren(_textPainter.inlinePlaceholderBoxes!);
     _computeCaretPrototype();
-    // We grab _textPainter.size here because assigning to `size` on the next
-    // line will trigger us to validate our intrinsic sizes, which will change
-    // _textPainter's layout because the intrinsic size calculations are
-    // destructive, which would mean we would get different results if we later
-    // used properties on _textPainter in this method.
-    // Other _textPainter state like didExceedMaxLines will also be affected,
-    // though we currently don't use those here.
-    // See also RenderParagraph which has a similar issue.
-    final Size textPainterSize = _textPainter.size;
+
     final double width = forceLine
       ? constraints.maxWidth
-      : constraints.constrainWidth(_textPainter.size.width + _caretMargin);
+      : constraints.constrainWidth(_textPainter.width + _caretMargin);
     assert(maxLines != 1 || _textPainter.maxLines == 1);
     final double preferredHeight = switch (maxLines) {
       null => math.max(_textPainter.height, preferredLineHeight * (minLines ?? 0)),
@@ -2361,7 +2333,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     };
 
     size = Size(width, constraints.constrainHeight(preferredHeight));
-    final Size contentSize = Size(textPainterSize.width + _caretMargin, textPainterSize.height);
+    final Size contentSize = Size(_textPainter.width + _caretMargin, _textPainter.height);
 
     final BoxConstraints painterConstraints = BoxConstraints.tight(contentSize);
 

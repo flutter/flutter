@@ -69,13 +69,10 @@ class _DefaultShutdownHooks implements ShutdownHooks {
     );
     _shutdownHooksRunning = true;
     try {
-      final List<Future<dynamic>> futures = <Future<dynamic>>[];
-      for (final ShutdownHook shutdownHook in registeredHooks) {
-        final FutureOr<dynamic> result = shutdownHook();
-        if (result is Future<dynamic>) {
-          futures.add(result);
-        }
-      }
+      final List<Future<dynamic>> futures = <Future<dynamic>>[
+        for (final ShutdownHook shutdownHook in registeredHooks)
+          if (shutdownHook() case final Future<dynamic> result) result,
+      ];
       await Future.wait<dynamic>(futures);
     } finally {
       _shutdownHooksRunning = false;
@@ -247,31 +244,83 @@ abstract class ProcessUtils {
   /// ```
   ///
   /// However it did not catch a [SocketException] on Linux.
+  ///
+  /// As part of making sure errors are caught, this function will call [flush]
+  /// on [stdin] to ensure that [line] is written to the pipe before this
+  /// function returns. This means completion will be blocked if the kernel
+  /// buffer of the pipe is full.
   static Future<void> writelnToStdinGuarded({
     required IOSink stdin,
     required String line,
     required void Function(Object, StackTrace) onError,
   }) async {
+    await _writeToStdinGuarded(
+      stdin: stdin,
+      content: line,
+      onError: onError,
+      isLine: true,
+    );
+  }
+
+  /// Please see [writelnToStdinGuarded].
+  ///
+  /// This calls `stdin.write` instead of `stdin.writeln`.
+  static Future<void> writeToStdinGuarded({
+    required IOSink stdin,
+    required String content,
+    required void Function(Object, StackTrace) onError,
+  }) async {
+    await _writeToStdinGuarded(
+      stdin: stdin,
+      content: content,
+      onError: onError,
+      isLine: false,
+    );
+  }
+
+  static Future<void> _writeToStdinGuarded({
+    required IOSink stdin,
+    required String content,
+    required void Function(Object, StackTrace) onError,
+    required bool isLine,
+  }) async {
     final Completer<void> completer = Completer<void>();
 
+    void handleError(Object error, StackTrace stackTrace) {
+      try {
+        onError(error, stackTrace);
+        completer.complete();
+      } on Exception catch (e) {
+        completer.completeError(e);
+      }
+    }
+
     void writeFlushAndComplete() {
-      stdin.writeln(line);
-      stdin.flush().whenComplete(() {
-        if (!completer.isCompleted) {
+      if (isLine) {
+        stdin.writeln(content);
+      } else {
+        stdin.write(content);
+      }
+      stdin.flush().then(
+        (_) {
           completer.complete();
-        }
-      });
+        },
+        onError: handleError,
+      );
     }
 
     runZonedGuarded(
       writeFlushAndComplete,
       (Object error, StackTrace stackTrace) {
-        onError(error, stackTrace);
+        handleError(error, stackTrace);
+
+        // We may have already completed with an error in `handleError`.
         if (!completer.isCompleted) {
           completer.complete();
         }
       },
     );
+
     return completer.future;
   }
 }

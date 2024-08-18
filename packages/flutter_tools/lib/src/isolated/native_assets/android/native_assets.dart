@@ -50,14 +50,25 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsAndroidInternal(
   const OSImpl targetOS = OSImpl.android;
 
   globals.logger.printTrace('Dry running native assets for $targetOS.');
-  final DryRunResult dryRunResult = await buildRunner.dryRun(
+  final BuildDryRunResult buildDryRunResult = await buildRunner.buildDryRun(
     linkModePreference: LinkModePreferenceImpl.dynamic,
     targetOS: targetOS,
     workingDirectory: projectUri,
     includeParentEnvironment: true,
   );
-  ensureNativeAssetsBuildSucceed(dryRunResult);
-  final List<AssetImpl> nativeAssets = dryRunResult.assets;
+  ensureNativeAssetsBuildDryRunSucceed(buildDryRunResult);
+  final LinkDryRunResult linkDryRunResult = await buildRunner.linkDryRun(
+    linkModePreference: LinkModePreferenceImpl.dynamic,
+    targetOS: targetOS,
+    workingDirectory: projectUri,
+    includeParentEnvironment: true,
+    buildDryRunResult: buildDryRunResult,
+  );
+  ensureNativeAssetsLinkDryRunSucceed(linkDryRunResult);
+  final List<AssetImpl> nativeAssets = <AssetImpl>[
+    ...buildDryRunResult.assets,
+    ...linkDryRunResult.assets,
+  ];
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   final Map<AssetImpl, KernelAsset> assetTargetLocations =
@@ -97,7 +108,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
   final List<AssetImpl> nativeAssets = <AssetImpl>[];
   final Set<Uri> dependencies = <Uri>{};
   for (final Target target in targets) {
-    final BuildResult result = await buildRunner.build(
+    final BuildResult buildResult = await buildRunner.build(
       linkModePreference: LinkModePreferenceImpl.dynamic,
       target: target,
       buildMode: buildModeCli,
@@ -106,9 +117,22 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
       cCompilerConfig: await buildRunner.ndkCCompilerConfigImpl,
       targetAndroidNdkApi: targetAndroidNdkApi,
     );
-    ensureNativeAssetsBuildSucceed(result);
-    nativeAssets.addAll(result.assets);
-    dependencies.addAll(result.dependencies);
+    ensureNativeAssetsBuildSucceed(buildResult);
+    nativeAssets.addAll(buildResult.assets);
+    dependencies.addAll(buildResult.dependencies);
+    final LinkResult linkResult = await buildRunner.link(
+      linkModePreference: LinkModePreferenceImpl.dynamic,
+      target: target,
+      buildMode: buildModeCli,
+      workingDirectory: projectUri,
+      includeParentEnvironment: true,
+      cCompilerConfig: await buildRunner.ndkCCompilerConfigImpl,
+      targetAndroidNdkApi: targetAndroidNdkApi,
+      buildResult: buildResult,
+    );
+    ensureNativeAssetsLinkSucceed(linkResult);
+    nativeAssets.addAll(linkResult.assets);
+    dependencies.addAll(linkResult.dependencies);
   }
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
@@ -156,34 +180,24 @@ Future<void> _copyNativeAssetsAndroid(
 
 /// Get the [Target] for [androidArch].
 Target _getNativeTarget(AndroidArch androidArch) {
-  switch (androidArch) {
-    case AndroidArch.armeabi_v7a:
-      return Target.androidArm;
-    case AndroidArch.arm64_v8a:
-      return Target.androidArm64;
-    case AndroidArch.x86:
-      return Target.androidIA32;
-    case AndroidArch.x86_64:
-      return Target.androidX64;
-  }
+  return switch (androidArch) {
+    AndroidArch.armeabi_v7a => Target.androidArm,
+    AndroidArch.arm64_v8a   => Target.androidArm64,
+    AndroidArch.x86         => Target.androidIA32,
+    AndroidArch.x86_64      => Target.androidX64,
+  };
 }
 
 /// Get the [AndroidArch] for [target].
 AndroidArch _getAndroidArch(Target target) {
-  switch (target) {
-    case Target.androidArm:
-      return AndroidArch.armeabi_v7a;
-    case Target.androidArm64:
-      return AndroidArch.arm64_v8a;
-    case Target.androidIA32:
-      return AndroidArch.x86;
-    case Target.androidX64:
-      return AndroidArch.x86_64;
-    case Target.androidRiscv64:
-      throwToolExit('Android RISC-V not yet supported.');
-    default:
-      throwToolExit('Invalid target: $target.');
-  }
+  return switch (target) {
+    Target.androidArm   => AndroidArch.armeabi_v7a,
+    Target.androidArm64 => AndroidArch.arm64_v8a,
+    Target.androidIA32  => AndroidArch.x86,
+    Target.androidX64   => AndroidArch.x86_64,
+    Target.androidRiscv64 => throwToolExit('Android RISC-V not yet supported.'),
+    _ => throwToolExit('Invalid target: $target.'),
+  };
 }
 
 Map<AssetImpl, KernelAsset> _assetTargetLocations(

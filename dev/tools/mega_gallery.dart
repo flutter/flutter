@@ -148,17 +148,13 @@ void _copy(Directory source, Directory target) {
   for (final FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
 
-    if (entity is Directory) {
-      if (name == 'build' || name.startsWith('.')) {
-        continue;
-      }
-      _copy(entity, Directory(path.join(target.path, name)));
-    } else if (entity is File) {
-      if (name == '.packages' || name == 'pubspec.lock') {
-        continue;
-      }
-      final File dest = File(path.join(target.path, name));
-      dest.writeAsBytesSync(entity.readAsBytesSync());
+    switch (entity) {
+      case Directory() when name != 'build' && !name.startsWith('.'):
+        _copy(entity, Directory(path.join(target.path, name)));
+
+      case File() when name != '.packages' && name != 'pubspec.lock':
+        final File dest = File(path.join(target.path, name));
+        dest.writeAsBytesSync(entity.readAsBytesSync());
     }
   }
 }

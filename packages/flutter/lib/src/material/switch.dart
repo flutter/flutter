@@ -18,7 +18,6 @@ import 'shadows.dart';
 import 'switch_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
-import 'toggleable.dart';
 
 // Examples can assume:
 // bool _giveVerse = true;
@@ -138,10 +137,10 @@ class Switch extends StatelessWidget {
   /// is iOS or macOS, otherwise a Material Design switch is created.
   ///
   /// To provide a custom switch theme that's only used by this factory
-  /// constructor, add a custom `Adaptation<SwitchThemeData>` class to
-  /// [ThemeData.adaptations]. This can be useful in situations where you don't
-  /// want the overall [ThemeData.switchTheme] to apply when this adaptive
-  /// constructor is used.
+  /// constructor, pass a custom `Adaptation<SwitchThemeData>` class to the
+  /// `adaptations` parameter of [ThemeData]. This can be useful in situations
+  /// where you don't want the overall [ThemeData.switchTheme] to apply when
+  /// this adaptive constructor is used.
   ///
   /// {@tool dartpad}
   /// This sample shows how to create and use subclasses of [Adaptation] that
@@ -746,6 +745,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
   @override
   bool? get value => widget.value;
 
+  @override
+  Duration? get reactionAnimationDuration => kRadialReactionDuration;
+
   void updateCurve() {
     if (Theme.of(context).useMaterial3) {
       position
@@ -1066,8 +1068,13 @@ class _SwitchPainter extends ToggleablePainter {
       return;
     }
     _positionController = value;
+    _colorAnimation?.dispose();
+    _colorAnimation = CurvedAnimation(parent: positionController, curve: Curves.easeOut, reverseCurve: Curves.easeIn);
     notifyListeners();
   }
+
+  CurvedAnimation? _colorAnimation;
+
 
   Icon? get activeIcon => _activeIcon;
   Icon? _activeIcon;
@@ -1516,7 +1523,7 @@ class _SwitchPainter extends ToggleablePainter {
     final double inset = thumbOffset == null ? 0 : 1.0 - (currentValue - thumbOffset!).abs() * 2.0;
     thumbSize = Size(thumbSize!.width - inset, thumbSize.height - inset);
 
-    final double colorValue = CurvedAnimation(parent: positionController, curve: Curves.easeOut, reverseCurve: Curves.easeIn).value;
+    final double colorValue = _colorAnimation!.value;
     final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, colorValue)!;
     final Color? trackOutlineColor = inactiveTrackOutlineColor == null || activeTrackOutlineColor == null ? null
         : Color.lerp(inactiveTrackOutlineColor, activeTrackOutlineColor, colorValue);
@@ -1737,6 +1744,7 @@ class _SwitchPainter extends ToggleablePainter {
     _cachedThumbColor = null;
     _cachedThumbImage = null;
     _cachedThumbErrorListener = null;
+    _colorAnimation?.dispose();
     super.dispose();
   }
 }

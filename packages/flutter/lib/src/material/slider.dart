@@ -817,6 +817,11 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         ?? MaterialStateProperty.resolveAs<Color?>(defaults.overlayColor, states);
     }
 
+    TextStyle valueIndicatorTextStyle = sliderTheme.valueIndicatorTextStyle ?? defaults.valueIndicatorTextStyle!;
+    if (MediaQuery.boldTextOf(context)) {
+      valueIndicatorTextStyle = valueIndicatorTextStyle.merge(const TextStyle(fontWeight: FontWeight.bold));
+    }
+
     sliderTheme = sliderTheme.copyWith(
       trackHeight: sliderTheme.trackHeight ?? defaults.trackHeight,
       activeTrackColor: widget.activeColor ?? sliderTheme.activeTrackColor ?? defaults.activeTrackColor,
@@ -839,7 +844,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       overlayShape: sliderTheme.overlayShape ?? defaultOverlayShape,
       valueIndicatorShape: valueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
-      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? defaults.valueIndicatorTextStyle,
+      valueIndicatorTextStyle: valueIndicatorTextStyle,
     );
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
       ?? sliderTheme.mouseCursor?.resolve(states)
@@ -1110,7 +1115,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       parent: _state.valueIndicatorController,
       curve: Curves.fastOutSlowIn,
     )..addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed) {
+      if (status.isDismissed) {
         _state.overlayEntry?.remove();
         _state.overlayEntry?.dispose();
         _state.overlayEntry = null;
@@ -1140,9 +1145,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   double get _minPreferredTrackHeight => _sliderTheme.trackHeight!;
 
   final _SliderState _state;
-  late Animation<double> _overlayAnimation;
-  late Animation<double> _valueIndicatorAnimation;
-  late Animation<double> _enableAnimation;
+  late CurvedAnimation _overlayAnimation;
+  late CurvedAnimation _valueIndicatorAnimation;
+  late CurvedAnimation _enableAnimation;
   final TextPainter _labelPainter = TextPainter();
   late HorizontalDragGestureRecognizer _drag;
   late TapGestureRecognizer _tap;
@@ -1451,6 +1456,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _drag.dispose();
     _tap.dispose();
     _labelPainter.dispose();
+    _enableAnimation.dispose();
+    _valueIndicatorAnimation.dispose();
+    _overlayAnimation.dispose();
     super.dispose();
   }
 
@@ -1506,7 +1514,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           _state.interactionTimer?.cancel();
           _state.interactionTimer = Timer(_minimumInteractionTime * timeDilation, () {
             _state.interactionTimer = null;
-            if (!_active && _state.valueIndicatorController.status == AnimationStatus.completed) {
+            if (!_active && _state.valueIndicatorController.isCompleted) {
               _state.valueIndicatorController.reverse();
             }
           });
@@ -1712,7 +1720,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (isInteractive && label != null && !_valueIndicatorAnimation.isDismissed) {
       if (showValueIndicator) {
         _state.paintValueIndicator = (PaintingContext context, Offset offset) {
-          if (attached) {
+          if (attached && _labelPainter.text != null) {
             _sliderTheme.valueIndicatorShape!.paint(
               context,
               offset + thumbCenter,
@@ -1865,7 +1873,7 @@ class _RenderValueIndicator extends RenderBox with RelayoutWhenSystemFontsChange
       curve: Curves.fastOutSlowIn,
     );
   }
-  late Animation<double> _valueIndicatorAnimation;
+  late CurvedAnimation _valueIndicatorAnimation;
   _SliderState _state;
 
   @override
@@ -1893,6 +1901,12 @@ class _RenderValueIndicator extends RenderBox with RelayoutWhenSystemFontsChange
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     return constraints.smallest;
+  }
+
+  @override
+  void dispose() {
+    _valueIndicatorAnimation.dispose();
+    super.dispose();
   }
 }
 
@@ -1952,6 +1966,7 @@ class _SliderDefaultsM2 extends SliderThemeData {
   SliderComponentShape? get valueIndicatorShape => const RectangularSliderValueIndicatorShape();
 }
 
+// TODO(quncheng): Update M3 defaults to match the latest specs.
 // BEGIN GENERATED TOKEN PROPERTIES - Slider
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and

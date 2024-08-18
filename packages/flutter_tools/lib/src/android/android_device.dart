@@ -18,6 +18,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
+import '../device_vm_service_discovery_for_attach.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import 'android.dart';
@@ -777,7 +778,12 @@ class AndroidDevice extends Device {
 
   @override
   void clearLogs() {
-    _processUtils.runSync(adbCommandForDevice(<String>['logcat', '-c']));
+     final RunResult result = _processUtils.runSync(adbCommandForDevice(<String>['logcat', '-c']));
+     // Do not log to standard error because that causes test to fail.
+     if (result.exitCode != 0) {
+      _logger.printTrace('"adb logcat -c" failed: exitCode: ${result.exitCode}'
+        ' stdout: ${result.stdout} stderr: ${result.stderr}');
+    }
   }
 
   @override
@@ -799,6 +805,26 @@ class AndroidDevice extends Device {
       );
     }
   }
+
+  @override
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) =>
+      LogScanningVMServiceDiscoveryForAttach(
+        // If it's an Android device, attaching relies on past log searching
+        // to find the service protocol.
+        Future<DeviceLogReader>.value(getLogReader(includePastLogs: true)),
+        portForwarder: portForwarder,
+        ipv6: ipv6,
+        devicePort: filterDevicePort,
+        hostPort: expectedHostPort,
+        logger: logger,
+      );
 
   @override
   late final DevicePortForwarder? portForwarder = () {
@@ -877,7 +903,7 @@ Map<String, String> parseAdbDeviceProperties(String str) {
 ///
 /// Example output:
 ///
-/// ```
+/// ```none
 /// Applications Memory Usage (in Kilobytes):
 /// Uptime: 441088659 Realtime: 521464097
 ///

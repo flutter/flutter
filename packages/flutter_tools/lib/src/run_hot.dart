@@ -646,6 +646,14 @@ class HotRunner extends ResidentRunner {
         final Future<vm_service.Isolate?> reloadIsolate = device.vmService!
           .getIsolateOrNull(view.uiIsolate!.id!);
         operations.add(reloadIsolate.then((vm_service.Isolate? isolate) async {
+          // TODO(andrewkolos): this race is meant to assist in debugging
+          // https://github.com/flutter/flutter/issues/145812. When the issue
+          // is resolved, this trace (and probably all others added by
+          // the same PR) can be removed.
+          globals.logger.printTrace(
+            'Beginning of UI start paused handler. '
+            'uiIsolate = $isolate; isolate.pauseEvent.kind = ${isolate?.pauseEvent!.kind}',
+          );
           if ((isolate != null) && isPauseEvent(isolate.pauseEvent!.kind!)) {
             // The embedder requires that the isolate is unpaused, because the
             // runInView method requires interaction with dart engine APIs that
@@ -668,6 +676,7 @@ class HotRunner extends ResidentRunner {
             await Future.wait(breakpointAndExceptionRemoval);
             await device.vmService!.service.resume(view.uiIsolate!.id!);
           }
+          globals.logger.printTrace('End of UI start paused handler.');
         }));
       }
 
@@ -703,7 +712,7 @@ class HotRunner extends ResidentRunner {
       }
     }
     await Future.wait(operations);
-
+    globals.printTrace('Finished waiting on operations.');
     await _launchFromDevFS();
     restartTimer.stop();
     globals.printTrace('Hot restart performed in ${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
@@ -1511,24 +1520,16 @@ String _describePausedIsolates(int pausedIsolatesFound, String serviceEventKind)
     message.write('$pausedIsolatesFound isolates are ');
     plural = true;
   }
-  switch (serviceEventKind) {
-    case vm_service.EventKind.kPauseStart:
-      message.write('paused (probably due to --start-paused)');
-    case vm_service.EventKind.kPauseExit:
-      message.write('paused because ${ plural ? 'they have' : 'it has' } terminated');
-    case vm_service.EventKind.kPauseBreakpoint:
-      message.write('paused in the debugger on a breakpoint');
-    case vm_service.EventKind.kPauseInterrupted:
-      message.write('paused due in the debugger');
-    case vm_service.EventKind.kPauseException:
-      message.write('paused in the debugger after an exception was thrown');
-    case vm_service.EventKind.kPausePostRequest:
-      message.write('paused');
-    case '':
-      message.write('paused for various reasons');
-    default:
-      message.write('paused');
-  }
+  message.write(switch (serviceEventKind) {
+    vm_service.EventKind.kPauseStart       => 'paused (probably due to --start-paused)',
+    vm_service.EventKind.kPauseExit        => 'paused because ${ plural ? 'they have' : 'it has' } terminated',
+    vm_service.EventKind.kPauseBreakpoint  => 'paused in the debugger on a breakpoint',
+    vm_service.EventKind.kPauseInterrupted => 'paused due in the debugger',
+    vm_service.EventKind.kPauseException   => 'paused in the debugger after an exception was thrown',
+    vm_service.EventKind.kPausePostRequest => 'paused',
+    '' => 'paused for various reasons',
+    _  => 'paused',
+  });
   return message.toString();
 }
 

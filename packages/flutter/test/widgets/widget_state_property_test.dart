@@ -86,6 +86,48 @@ void main() {
     )!.resolve(enabled)!;
     expect(textStyle.fontSize, 20.0);
   });
+
+  test('WidgetStateBorderSide.lerp()', () {
+    const WidgetStateProperty<BorderSide?> borderSide1 =  WidgetStatePropertyAll<BorderSide?>(
+      BorderSide(
+        color: Color(0xffff0000),
+        width: 4.0,
+      ),
+    );
+    const WidgetStateProperty<BorderSide?> borderSide2 = WidgetStatePropertyAll<BorderSide?>(
+      BorderSide(
+        color: Color(0xff0000ff),
+        width: 12.0,
+      ),
+    );
+
+    // Using `0.0` interpolation value.
+    BorderSide borderSide = WidgetStateBorderSide.lerp(
+      borderSide1,
+      borderSide2,
+      0.0,
+    )!.resolve(enabled)!;
+    expect(borderSide.color, const Color(0xffff0000));
+    expect(borderSide.width, 4.0);
+
+    // Using `0.5` interpolation value.
+    borderSide = WidgetStateBorderSide.lerp(
+      borderSide1,
+      borderSide2,
+      0.5,
+    )!.resolve(enabled)!;
+    expect(borderSide.color, const Color(0xff7f007f));
+    expect(borderSide.width, 8.0);
+
+    // Using `1.0` interpolation value.
+    borderSide = WidgetStateBorderSide.lerp(
+      borderSide1,
+      borderSide2,
+      1.0,
+    )!.resolve(enabled)!;
+    expect(borderSide.color, const Color(0xff0000ff));
+    expect(borderSide.width, 12.0);
+  });
 }
 
 Set<WidgetState> enabled = <WidgetState>{};
