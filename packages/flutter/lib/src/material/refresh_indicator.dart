@@ -102,6 +102,12 @@ enum _IndicatorType { material, adaptive, noSpinner }
 /// ** See code in examples/api/lib/material/refresh_indicator/refresh_indicator.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to use [RefreshIndicator] without the spinner.
+///
+/// ** See code in examples/api/lib/material/refresh_indicator/refresh_indicator.2.dart **
+/// {@end-tool}
+///
 /// ## Troubleshooting
 ///
 /// ### Refresh indicator does not show up
@@ -190,13 +196,10 @@ class RefreshIndicator extends StatefulWidget {
   })  : _indicatorType = _IndicatorType.adaptive,
         onStatusChange = null;
 
-  /// {@tool dartpad}
-  /// Creates [RefreshIndicator] with no spinner and calls `onRefresh` when
-  /// successfully armed by drag event. Events can be optionally listened
-  /// by using `onStatusChange` callback.
+  /// Creates a [RefreshIndicator] with no spinner and calls `onRefresh` when
+  /// successfully armed by a drag event.
   ///
-  /// ** See code in examples/api/lib/material/refresh_indicator/refresh_indicator.2.dart **
-  /// {@end-tool}
+  /// Events can be optionally listened by using the `onStatusChange` callback.
   const RefreshIndicator.noSpinner({
     super.key,
     required this.child,
@@ -207,8 +210,9 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
   })  : _indicatorType = _IndicatorType.noSpinner,
-        // these parameters aren't used for [_IndicatorType.noSpinner],
-        // setting default values
+        // The following parameters aren't used because [_IndicatorType.noSpinner] is being used,
+        // which involves showing no spinner, hence the following parameters are useless since
+        // their only use is to change the spinner's appearance.
         displacement = 0.0,
         edgeOffset = 0.0,
         color = null,
@@ -253,13 +257,9 @@ class RefreshIndicator extends StatefulWidget {
   /// [Future] must complete when the refresh operation is finished.
   final RefreshCallback onRefresh;
 
-  /// An optional callback function used to get current status of
-  /// [RefreshIndicator] to update UI as required, while using
-  /// [RefreshIndicator.noSpinner].
+  /// Called to get the current status of the [RefreshIndicator] to update the UI as needed.
   /// This is an optional parameter, used to fine tune app cases.
-  ///
-  /// Returns value of type: [RefreshIndicatorStatus]
-  final void Function(RefreshIndicatorStatus? status)? onStatusChange;
+  final ValueChanged<RefreshIndicatorStatus?>? onStatusChange;
 
   /// The progress indicator's foreground color. The current theme's
   /// [ColorScheme.primary] by default.
@@ -322,27 +322,35 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   late Animation<double> _value;
   late Animation<Color?> _valueColor;
 
-  RefreshIndicatorStatus? _mode;
+  RefreshIndicatorStatus? _status;
   late Future<void> _pendingRefreshFuture;
   bool? _isIndicatorAtTop;
   double? _dragOffset;
-  late Color _effectiveValueColor =
-      widget.color ?? Theme.of(context).colorScheme.primary;
+  late Color _effectiveValueColor = widget.color ?? Theme.of(context).colorScheme.primary;
 
-  static final Animatable<double> _threeQuarterTween =
-      Tween<double>(begin: 0.0, end: 0.75);
-  static final Animatable<double> _kDragSizeFactorLimitTween =
-      Tween<double>(begin: 0.0, end: _kDragSizeFactorLimit);
-  static final Animatable<double> _oneToZeroTween =
-      Tween<double>(begin: 1.0, end: 0.0);
+  static final Animatable<double> _threeQuarterTween = Tween<double>(
+    begin: 0.0,
+    end: 0.75
+  );
+
+  static final Animatable<double> _kDragSizeFactorLimitTween = Tween<double>(
+    begin: 0.0,
+    end: _kDragSizeFactorLimit
+  );
+
+  static final Animatable<double> _oneToZeroTween = Tween<double>(
+    begin: 1.0,
+    end: 0.0
+  );
 
   @override
   void initState() {
     super.initState();
     _positionController = AnimationController(vsync: this);
     _positionFactor = _positionController.drive(_kDragSizeFactorLimitTween);
-    _value = _positionController.drive(
-        _threeQuarterTween); // The "value" of the circular progress indicator during a drag.
+
+    // The "value" of the circular progress indicator during a drag.
+    _value = _positionController.drive(_threeQuarterTween);
 
     _scaleController = AnimationController(vsync: this);
     _scaleFactor = _scaleController.drive(_oneToZeroTween);
@@ -371,8 +379,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
 
   void _setupColorTween() {
     // Reset the current value color.
-    _effectiveValueColor =
-        widget.color ?? Theme.of(context).colorScheme.primary;
+    _effectiveValueColor = widget.color ?? Theme.of(context).colorScheme.primary;
     final Color color = _effectiveValueColor;
     if (color.alpha == 0x00) {
       // Set an always stopped animation instead of a driven tween.
@@ -396,17 +403,26 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     // If the notification.dragDetails is null, this scroll is not triggered by
     // user dragging. It may be a result of ScrollController.jumpTo or ballistic scroll.
     // In this case, we don't want to trigger the refresh indicator.
-    return ((notification is ScrollStartNotification &&
-                notification.dragDetails != null) ||
-            (notification is ScrollUpdateNotification &&
-                notification.dragDetails != null &&
-                widget.triggerMode == RefreshIndicatorTriggerMode.anywhere)) &&
-        ((notification.metrics.axisDirection == AxisDirection.up &&
-                notification.metrics.extentAfter == 0.0) ||
-            (notification.metrics.axisDirection == AxisDirection.down &&
-                notification.metrics.extentBefore == 0.0)) &&
-        _mode == null &&
-        _start(notification.metrics.axisDirection);
+    return (
+            (
+              notification is ScrollStartNotification
+              && notification.dragDetails != null
+            ) || (
+              notification is ScrollUpdateNotification
+              && notification.dragDetails != null
+              && widget.triggerMode == RefreshIndicatorTriggerMode.anywhere
+            )
+          )
+          && (
+            (
+              notification.metrics.axisDirection == AxisDirection.up
+              && notification.metrics.extentAfter == 0.0
+            ) || (
+              notification.metrics.axisDirection == AxisDirection.down
+              && notification.metrics.extentBefore == 0.0
+            )
+          )
+          && _status == null && _start(notification.metrics.axisDirection);
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
@@ -415,8 +431,8 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     }
     if (_shouldStart(notification)) {
       setState(() {
-        _mode = RefreshIndicatorStatus.drag;
-        widget.onStatusChange?.call(_mode);
+        _status = RefreshIndicatorStatus.drag;
+        widget.onStatusChange?.call(_status);
       });
       return false;
     }
@@ -425,13 +441,13 @@ class RefreshIndicatorState extends State<RefreshIndicator>
       AxisDirection.left || AxisDirection.right => null,
     };
     if (indicatorAtTopNow != _isIndicatorAtTop) {
-      if (_mode == RefreshIndicatorStatus.drag ||
-          _mode == RefreshIndicatorStatus.armed) {
+      if (_status == RefreshIndicatorStatus.drag ||
+          _status == RefreshIndicatorStatus.armed) {
         _dismiss(RefreshIndicatorStatus.canceled);
       }
     } else if (notification is ScrollUpdateNotification) {
-      if (_mode == RefreshIndicatorStatus.drag ||
-          _mode == RefreshIndicatorStatus.armed) {
+      if (_status == RefreshIndicatorStatus.drag ||
+          _status == RefreshIndicatorStatus.armed) {
         if (notification.metrics.axisDirection == AxisDirection.down) {
           _dragOffset = _dragOffset! - notification.scrollDelta!;
         } else if (notification.metrics.axisDirection == AxisDirection.up) {
@@ -439,7 +455,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         }
         _checkDragOffset(notification.metrics.viewportDimension);
       }
-      if (_mode == RefreshIndicatorStatus.armed &&
+      if (_status == RefreshIndicatorStatus.armed &&
           notification.dragDetails == null) {
         // On iOS start the refresh when the Scrollable bounces back from the
         // overscroll (ScrollNotification indicating this don't have dragDetails
@@ -447,8 +463,8 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         _show();
       }
     } else if (notification is OverscrollNotification) {
-      if (_mode == RefreshIndicatorStatus.drag ||
-          _mode == RefreshIndicatorStatus.armed) {
+      if (_status == RefreshIndicatorStatus.drag ||
+          _status == RefreshIndicatorStatus.armed) {
         if (notification.metrics.axisDirection == AxisDirection.down) {
           _dragOffset = _dragOffset! - notification.overscroll;
         } else if (notification.metrics.axisDirection == AxisDirection.up) {
@@ -457,7 +473,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         _checkDragOffset(notification.metrics.viewportDimension);
       }
     } else if (notification is ScrollEndNotification) {
-      switch (_mode) {
+      switch (_status) {
         case RefreshIndicatorStatus.armed:
           if (_positionController.value < 1.0) {
             _dismiss(RefreshIndicatorStatus.canceled);
@@ -478,12 +494,11 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     return false;
   }
 
-  bool _handleIndicatorNotification(
-      OverscrollIndicatorNotification notification) {
+  bool _handleIndicatorNotification(OverscrollIndicatorNotification notification) {
     if (notification.depth != 0 || !notification.leading) {
       return false;
     }
-    if (_mode == RefreshIndicatorStatus.drag) {
+    if (_status == RefreshIndicatorStatus.drag) {
       notification.disallowIndicator();
       return true;
     }
@@ -491,7 +506,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   }
 
   bool _start(AxisDirection direction) {
-    assert(_mode == null);
+    assert(_status == null);
     assert(_isIndicatorAtTop == null);
     assert(_dragOffset == null);
     switch (direction) {
@@ -511,19 +526,18 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   }
 
   void _checkDragOffset(double containerExtent) {
-    assert(_mode == RefreshIndicatorStatus.drag ||
-        _mode == RefreshIndicatorStatus.armed);
-    double newValue =
-        _dragOffset! / (containerExtent * _kDragContainerExtentPercentage);
-    if (_mode == RefreshIndicatorStatus.armed) {
+    assert(
+      _status == RefreshIndicatorStatus.drag
+      || _status == RefreshIndicatorStatus.armed
+    );
+    double newValue = _dragOffset! / (containerExtent * _kDragContainerExtentPercentage);
+    if (_status == RefreshIndicatorStatus.armed) {
       newValue = math.max(newValue, 1.0 / _kDragSizeFactorLimit);
     }
-    _positionController.value =
-        clampDouble(newValue, 0.0, 1.0); // this triggers various rebuilds
-    if (_mode == RefreshIndicatorStatus.drag &&
-        _valueColor.value!.alpha == _effectiveValueColor.alpha) {
-      _mode = RefreshIndicatorStatus.armed;
-      widget.onStatusChange?.call(_mode);
+    _positionController.value = clampDouble(newValue, 0.0, 1.0); // This triggers various rebuilds
+    if (_status == RefreshIndicatorStatus.drag && _valueColor.value!.alpha == _effectiveValueColor.alpha) {
+      _status = RefreshIndicatorStatus.armed;
+      widget.onStatusChange?.call(_status);
     }
   }
 
@@ -536,10 +550,10 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     assert(newMode == RefreshIndicatorStatus.canceled ||
         newMode == RefreshIndicatorStatus.done);
     setState(() {
-      _mode = newMode;
-      widget.onStatusChange?.call(_mode);
+      _status = newMode;
+      widget.onStatusChange?.call(_status);
     });
-    switch (_mode!) {
+    switch (_status!) {
       case RefreshIndicatorStatus.done:
         await _scaleController.animateTo(1.0,
             duration: _kIndicatorScaleDuration);
@@ -552,35 +566,35 @@ class RefreshIndicatorState extends State<RefreshIndicator>
       case RefreshIndicatorStatus.snap:
         assert(false);
     }
-    if (mounted && _mode == newMode) {
+    if (mounted && _status == newMode) {
       _dragOffset = null;
       _isIndicatorAtTop = null;
       setState(() {
-        _mode = null;
+        _status = null;
       });
     }
   }
 
   void _show() {
-    assert(_mode != RefreshIndicatorStatus.refresh);
-    assert(_mode != RefreshIndicatorStatus.snap);
+    assert(_status != RefreshIndicatorStatus.refresh);
+    assert(_status != RefreshIndicatorStatus.snap);
     final Completer<void> completer = Completer<void>();
     _pendingRefreshFuture = completer.future;
-    _mode = RefreshIndicatorStatus.snap;
-    widget.onStatusChange?.call(_mode);
+    _status = RefreshIndicatorStatus.snap;
+    widget.onStatusChange?.call(_status);
     _positionController
         .animateTo(1.0 / _kDragSizeFactorLimit,
             duration: _kIndicatorSnapDuration)
         .then<void>((void value) {
-      if (mounted && _mode == RefreshIndicatorStatus.snap) {
+      if (mounted && _status == RefreshIndicatorStatus.snap) {
         setState(() {
           // Show the indeterminate progress indicator.
-          _mode = RefreshIndicatorStatus.refresh;
+          _status = RefreshIndicatorStatus.refresh;
         });
 
         final Future<void> refreshResult = widget.onRefresh();
         refreshResult.whenComplete(() {
-          if (mounted && _mode == RefreshIndicatorStatus.refresh) {
+          if (mounted && _status == RefreshIndicatorStatus.refresh) {
             completer.complete();
             _dismiss(RefreshIndicatorStatus.done);
           }
@@ -606,9 +620,9 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   /// actual scroll view. It defaults to showing the indicator at the top. To
   /// show it at the bottom, set `atTop` to false.
   Future<void> show({bool atTop = true}) {
-    if (_mode != RefreshIndicatorStatus.refresh &&
-        _mode != RefreshIndicatorStatus.snap) {
-      if (_mode == null) {
+    if (_status != RefreshIndicatorStatus.refresh &&
+        _status != RefreshIndicatorStatus.snap) {
+      if (_status == null) {
         _start(atTop ? AxisDirection.down : AxisDirection.up);
       }
       _show();
@@ -627,7 +641,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
       ),
     );
     assert(() {
-      if (_mode == null) {
+      if (_status == null) {
         assert(_dragOffset == null);
         assert(_isIndicatorAtTop == null);
       } else {
@@ -638,13 +652,13 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     }());
 
     final bool showIndeterminateIndicator =
-        _mode == RefreshIndicatorStatus.refresh ||
-            _mode == RefreshIndicatorStatus.done;
+        _status == RefreshIndicatorStatus.refresh ||
+            _status == RefreshIndicatorStatus.done;
 
     return Stack(
       children: <Widget>[
         child,
-        if (_mode != null)
+        if (_status != null)
           Positioned(
             top: _isIndicatorAtTop! ? widget.edgeOffset : null,
             bottom: !_isIndicatorAtTop! ? widget.edgeOffset : null,

@@ -12,7 +12,7 @@ void main() {
       const example.RefreshIndicatorExampleApp(),
     );
 
-    // Pull the first item
+    // Pull the first item.
     await tester.fling(find.text('Pull down here').first, const Offset(0.0, 300.0), 1000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -21,6 +21,6 @@ void main() {
     expect(find.byType(RefreshProgressIndicator), findsNothing);
     expect(find.bySemanticsLabel('Circular progress indicator'), findsOneWidget);
 
-    await tester.pumpAndSettle(); // Advance pending time
+    await tester.pumpAndSettle(); // Advance pending time.
   });
 }

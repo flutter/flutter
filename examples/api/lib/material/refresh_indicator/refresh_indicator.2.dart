@@ -19,7 +19,6 @@ class RefreshIndicatorExampleApp extends StatelessWidget {
   }
 }
 
-
 class RefreshIndicatorExample extends StatefulWidget {
   const RefreshIndicatorExample({super.key});
 
@@ -49,15 +48,15 @@ class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
               }
             },
 
-            // Callback that gets called whenever the user pulls down to refresh
+            // Callback that gets called whenever the user pulls down to refresh.
             onRefresh: () async {
-              // This can be also done in onStatusChange when the status is RefreshIndicatorStatus.refresh
+              // This can be also done in onStatusChange when the status is RefreshIndicatorStatus.refresh.
               setState(() {
                 _isRefreshing = true;
               });
 
               // Replace this delay with the code to be executed during refresh
-              // and return asynchronous code
+              // and return asynchronous code.
               return Future<void>.delayed(const Duration(seconds: 3));
             },
 
@@ -77,7 +76,7 @@ class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
             ),
           ),
 
-          // Shows an overlay with a CircularProgressIndicator when refreshing
+          // Shows an overlay with a CircularProgressIndicator when refreshing.
           if (_isRefreshing)
             ColoredBox(
               color: Colors.black45,
