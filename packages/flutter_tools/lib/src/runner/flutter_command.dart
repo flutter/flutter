@@ -489,7 +489,7 @@ abstract class FlutterCommand extends Command<void> {
       defaultsTo: true,
       help: 'Enable (or disable, with "--no-$kEnableDevTools") the launching of the '
             'Flutter DevTools debugger and profiler. '
-            'If specified, "--$kDevToolsServerAddress" is ignored.'
+            'If "--no-$kEnableDevTools" is specified, "--$kDevToolsServerAddress" is ignored.'
     );
     argParser.addOption(
       kDevToolsServerAddress,
@@ -707,11 +707,28 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  // This option is deprecated and is no longer publicly supported, and
+  // therefore is hidden.
+  //
+  // The option still exists for internal testing, and to give existing users
+  // time to migrate off the HTML renderer, but it is no longer advertised as a
+  // supported mode.
+  //
+  // See also:
+  //   * https://github.com/flutter/flutter/issues/151786
+  //   * https://github.com/flutter/flutter/issues/145954
   void usesWebRendererOption() {
     argParser.addOption(
+      hide: true,
       FlutterOptions.kWebRendererFlag,
       allowed: WebRendererMode.values.map((WebRendererMode e) => e.name),
-      help: 'The renderer implementation to use when building for the web.',
+      help: 'This option is deprecated and will be removed in a future Flutter '
+            'release.\n'
+            'Selects the renderer implementation to use when building for the '
+            'web. The supported renderers are "canvaskit" when compiling to '
+            'JavaScript, and "skwasm" when compiling to WebAssembly. Other '
+            'renderer and compiler combinations are no longer supported. '
+            'Consider migrating your app to a supported renderer.',
       allowedHelp: CliEnum.allowedHelp(WebRendererMode.values)
     );
   }
@@ -1174,7 +1191,11 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// Throws a [ToolExit] if the current set of options is not compatible with
   /// each other.
-  Future<BuildInfo> getBuildInfo({BuildMode? forcedBuildMode, File? forcedTargetFile}) async {
+  Future<BuildInfo> getBuildInfo({
+    BuildMode? forcedBuildMode,
+    File? forcedTargetFile,
+    bool? forcedUseLocalCanvasKit,
+  }) async {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
 
@@ -1291,9 +1312,12 @@ abstract class FlutterCommand extends Command<void> {
 
     final bool useCdn = !argParser.options.containsKey(FlutterOptions.kWebResourcesCdnFlag)
       || boolArg(FlutterOptions.kWebResourcesCdnFlag);
-    final bool useLocalWebSdk = argParser.options.containsKey(FlutterGlobalOptions.kLocalWebSDKOption)
-      && stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null;
-    final bool useLocalCanvasKit = !useCdn || useLocalWebSdk;
+    bool useLocalWebSdk = false;
+    if (globalResults?.wasParsed(FlutterGlobalOptions.kLocalWebSDKOption) ?? false) {
+      useLocalWebSdk = stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null;
+    }
+    final bool useLocalCanvasKit = forcedUseLocalCanvasKit
+      ?? (!useCdn || useLocalWebSdk);
 
     final String? defaultFlavor = project.manifest.defaultFlavor;
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;

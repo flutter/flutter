@@ -411,23 +411,19 @@ class _DefaultPub implements Pub {
 
         exitCode = result.exitCode;
       }
-    // The exception is rethrown, so don't catch only Exceptions.
-    } catch (exception) { // ignore: avoid_catches_without_on_clauses
-      if (exception is io.ProcessException) {
-        final StringBuffer buffer = StringBuffer('${exception.message}\n');
-        final String directoryExistsMessage = _fileSystem.directory(directory).existsSync()
-            ? 'exists'
-            : 'does not exist';
-        buffer.writeln('Working directory: "$directory" ($directoryExistsMessage)');
-        buffer.write(_stringifyPubEnv(pubEnvironment));
-        throw io.ProcessException(
-          exception.executable,
-          exception.arguments,
-          buffer.toString(),
-          exception.errorCode,
-        );
-      }
-      rethrow;
+    } on io.ProcessException catch (exception) {
+      final StringBuffer buffer = StringBuffer('${exception.message}\n');
+      final String directoryExistsMessage = _fileSystem.directory(directory).existsSync()
+          ? 'exists'
+          : 'does not exist';
+      buffer.writeln('Working directory: "$directory" ($directoryExistsMessage)');
+      buffer.write(_stringifyPubEnv(pubEnvironment));
+      throw io.ProcessException(
+        exception.executable,
+        exception.arguments,
+        buffer.toString(),
+        exception.errorCode,
+      );
     }
 
     final int code = exitCode;

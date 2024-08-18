@@ -1459,7 +1459,7 @@ class TestRunCommandForUsageValues extends RunCommand {
   }
 
   @override
-  Future<BuildInfo> getBuildInfo({FlutterProject? project, BuildMode? forcedBuildMode, File? forcedTargetFile}) async {
+  Future<BuildInfo> getBuildInfo({FlutterProject? project, BuildMode? forcedBuildMode, File? forcedTargetFile, bool? forcedUseLocalCanvasKit}) async {
     return const BuildInfo(BuildMode.debug, null, treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
   }
 }
@@ -1544,16 +1544,13 @@ class CapturingAppDomain extends AppDomain {
     String? projectRootPath,
     String? packagesFilePath,
     String? dillOutputPath,
-    bool ipv6 = false,
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
-    bool enableDevTools = true,
-    String? flavor,
-    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
+    required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     this.userIdentifier = userIdentifier;
-    this.enableDevTools = enableDevTools;
+    enableDevTools = options.enableDevTools;
     throwToolExit('');
   }
 }
