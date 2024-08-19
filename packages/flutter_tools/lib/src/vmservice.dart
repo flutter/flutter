@@ -506,6 +506,10 @@ class FlutterVmService {
       if (e.code == RPCErrorCodes.kServiceDisappeared) {
         return null;
       }
+      if (e.code == RPCErrorCodes.kServerError &&
+          e.message == 'Service connection disposed') {
+        return null;
+      }
       rethrow;
     }
   }
