@@ -156,6 +156,23 @@ const int kHorizontalMiterDiamondPointCount =
     (sizeof(kHorizontalMiterDiamondPoints) /
      sizeof(kHorizontalMiterDiamondPoints[0]));
 
+namespace {
+constexpr uint8_t toC(DlScalar fComp) {
+  return round(fComp * 255);
+}
+
+constexpr uint32_t PremultipliedArgb(const DlColor& color) {
+  if (color.isOpaque()) {
+    return color.argb();
+  }
+  DlScalar f = color.getAlphaF();
+  return (color.argb() & 0xFF000000) |      //
+         toC(color.getRedF() * f) << 16 |   //
+         toC(color.getGreenF() * f) << 8 |  //
+         toC(color.getBlueF() * f);
+}
+}  // namespace
+
 class SkImageSampling {
  public:
   static constexpr SkSamplingOptions kNearestNeighbor =
@@ -2526,7 +2543,7 @@ class CanvasCompareTester {
                           const SkRect ref_bounds,
                           const std::string& info,
                           const DlColor bg = DlColor::kTransparent()) {
-    uint32_t untouched = bg.premultipliedArgb();
+    uint32_t untouched = PremultipliedArgb(bg);
     int pixels_touched = 0;
     int pixels_oob = 0;
     SkIRect i_bounds = ref_bounds.roundOut();
@@ -2611,7 +2628,7 @@ class CanvasCompareTester {
                                  int width = kTestWidth,
                                  int height = kTestHeight,
                                  bool printMismatches = false) {
-    uint32_t untouched = bg.premultipliedArgb();
+    uint32_t untouched = PremultipliedArgb(bg);
     ASSERT_EQ(test_result->width(), width) << info;
     ASSERT_EQ(test_result->height(), height) << info;
     SkIRect i_bounds =
