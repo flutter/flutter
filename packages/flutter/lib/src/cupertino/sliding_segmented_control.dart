@@ -324,7 +324,7 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
     this.thumbColor = _kThumbColor,
     this.padding = _kHorizontalItemPadding,
     this.backgroundColor = CupertinoColors.tertiarySystemFill,
-    this.isProportionalSegment = false,
+    this.proportionalWidth = false,
   }) : assert(children.length >= 2),
        assert(
          groupValue == null || children.keys.contains(groupValue),
@@ -397,10 +397,10 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   /// will not be painted if null is specified.
   final Color backgroundColor;
 
-  /// Determine whether segments have equal widths or proportional widths based
-  /// on their content. If false, all segment will have the same width, determined
-  /// by the longest segment. If true, each segment's width will be determined
-  /// by its individual content.
+  /// Determine whether segments have proportional widths based on their content.
+  /// If false, all segments will have the same width, determined by the longest
+  /// segment. If true, each segment's width will be determined by its individual
+  /// content.
   ///
   /// If the max width of parent constraints is smaller than the width that the
   /// segmented control needs, The segment widths will scale down proportionally
@@ -409,7 +409,7 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   /// up to meet the min width requirement.
   ///
   /// Defaults to false.
-  final bool isProportionalSegment;
+  final bool proportionalWidth;
 
   /// The color used to paint the interior of the thumb that appears behind the
   /// currently selected item.
@@ -503,7 +503,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   // them from interfering with the active drag gesture.
   bool get isThumbDragging => _startedOnSelectedSegment ?? false;
 
-  // Converts local coordinate to segments. If `widget.isProportionalSegment` is
+  // Converts local coordinate to segments. If `widget.proportionalWidth` is
   // false, this method assumes each segment has the same width; if it is true,
   // this method assumes segments have their own width based on their contents.
   T segmentForXPosition(double dx) {
@@ -511,7 +511,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     final BuildContext currentContext = segmentedControlRenderWidgetKey.currentContext!;
     final _RenderSegmentedControl<T> renderBox = currentContext.findRenderObject()! as _RenderSegmentedControl<T>;
 
-    if (widget.isProportionalSegment) {
+    if (widget.proportionalWidth) {
       final int? segmentIndex = renderBox.getSegmentIndex(dx, textDirection);
       assert(segmentIndex != null);
       return widget.children.keys.elementAt(segmentIndex!);
@@ -728,7 +728,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
               highlightedIndex: highlightedIndex,
               thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor, context),
               thumbScale: thumbScaleAnimation.value,
-              isProportionalSegment: widget.isProportionalSegment,
+              proportionalWidth: widget.proportionalWidth,
               state: this,
               children: children,
             );
@@ -746,14 +746,14 @@ class _SegmentedControlRenderWidget<T extends Object> extends MultiChildRenderOb
     required this.highlightedIndex,
     required this.thumbColor,
     required this.thumbScale,
-    required this.isProportionalSegment,
+    required this.proportionalWidth,
     required this.state,
   });
 
   final int? highlightedIndex;
   final Color thumbColor;
   final double thumbScale;
-  final bool isProportionalSegment;
+  final bool proportionalWidth;
   final _SegmentedControlState<T> state;
 
   @override
@@ -762,7 +762,7 @@ class _SegmentedControlRenderWidget<T extends Object> extends MultiChildRenderOb
       highlightedIndex: highlightedIndex,
       thumbColor: thumbColor,
       thumbScale: thumbScale,
-      isProportionalSegment: isProportionalSegment,
+      proportionalWidth: proportionalWidth,
       state: state,
     );
   }
@@ -774,7 +774,7 @@ class _SegmentedControlRenderWidget<T extends Object> extends MultiChildRenderOb
       ..thumbColor = thumbColor
       ..thumbScale = thumbScale
       ..highlightedIndex = highlightedIndex
-      ..isProportionalSegment = isProportionalSegment;
+      ..proportionalWidth = proportionalWidth;
   }
 }
 
@@ -819,12 +819,12 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     required int? highlightedIndex,
     required Color thumbColor,
     required double thumbScale,
-    required bool isProportionalSegment,
+    required bool proportionalWidth,
     required this.state,
   }) : _highlightedIndex = highlightedIndex,
        _thumbColor = thumbColor,
        _thumbScale = thumbScale,
-       _isProportionalSegment = isProportionalSegment;
+       _proportionalWidth = proportionalWidth;
 
   final _SegmentedControlState<T> state;
 
@@ -877,13 +877,13 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     markNeedsPaint();
   }
 
-  bool get isProportionalSegment => _isProportionalSegment;
-  bool _isProportionalSegment;
-  set isProportionalSegment(bool value) {
-    if (_isProportionalSegment == value) {
+  bool get proportionalWidth => _proportionalWidth;
+  bool _proportionalWidth;
+  set proportionalWidth(bool value) {
+    if (_proportionalWidth == value) {
       return;
     }
-    _isProportionalSegment = value;
+    _proportionalWidth = value;
     markNeedsLayout();
   }
 
@@ -1054,7 +1054,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
 
   Size _computeOverallSizeFromChildSize(BoxConstraints constraints) {
     final double maxChildHeight = _getMaxChildHeight(constraints, constraints.maxWidth);
-    if (isProportionalSegment) {
+    if (proportionalWidth) {
       return constraints.constrain(Size(_getChildIntrinsicWidths(constraints).sum + totalSeparatorWidth, maxChildHeight));
     }
     final int childCount = this.childCount ~/ 2 + 1;
@@ -1083,7 +1083,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
 
-    if (isProportionalSegment) {
+    if (proportionalWidth) {
       childWidths = _getChildIntrinsicWidths(constraints);
     } else {
       final Size childSize = _calculateChildSize(constraints);

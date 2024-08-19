@@ -541,7 +541,7 @@ void main() {
     expect(childWidth, 200.0 + 9.25 * 2);
   });
 
-  testWidgets('If isProportionalSegment is true, the width of each segmented '
+  testWidgets('If proportionalWidth is true, the width of each segmented '
   'control segment is determined by its own content', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
       0: const SizedBox(width: 50, child: Text('First')),
@@ -556,7 +556,7 @@ void main() {
             key: const ValueKey<String>('Segmented Control'),
             children: children,
             groupValue: groupValue,
-            isProportionalSegment: true,
+            proportionalWidth: true,
             onValueChanged: defaultCallback,
           );
         },
@@ -590,7 +590,7 @@ void main() {
     expect(segmentedControl.size.width, childWidthSum + 6.0 + 2.0);
   });
 
-  testWidgets('If isProportionalSegment is true, the width of each segmented '
+  testWidgets('If proportionalWidth is true, the width of each segmented '
   'control segment is updated when children change', (WidgetTester tester) async {
     Map<int, Widget> children = <int, Widget>{
       0: const SizedBox(width: 50, child: Text('First')),
@@ -605,7 +605,7 @@ void main() {
             key: const ValueKey<String>('Segmented Control'),
             children: children,
             groupValue: groupValue,
-            isProportionalSegment: true,
+            proportionalWidth: true,
             onValueChanged: defaultCallback,
           );
         },
@@ -650,7 +650,7 @@ void main() {
   });
 
 
-  testWidgets('If isProportionalSegment is true and the overall segment control width '
+  testWidgets('If proportionalWidth is true and the overall segment control width '
   'is larger than the max width of the parent constraints, each segment scales down', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
       0: const SizedBox(width: 50, child: Text('First')),
@@ -667,7 +667,7 @@ void main() {
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               groupValue: groupValue,
-              isProportionalSegment: true,
+              proportionalWidth: true,
               onValueChanged: defaultCallback,
             ),
           );
@@ -699,7 +699,7 @@ void main() {
     expect(thirdChildSize.width, (200 + 9.25 * 2) * maxAllowedTotal / originalTotal);
   });
 
-  testWidgets('If isProportionalSegment is true and the overall segment control width '
+  testWidgets('If proportionalWidth is true and the overall segment control width '
   'is smaller than the min width of the parent constraints, each segment scales up', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
       0: const SizedBox(width: 20, child: Text('First')),
@@ -716,7 +716,7 @@ void main() {
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               groupValue: groupValue,
-              isProportionalSegment: true,
+              proportionalWidth: true,
               onValueChanged: defaultCallback,
             ),
           );
@@ -977,7 +977,7 @@ void main() {
         builder: (BuildContext context) {
           return CupertinoSlidingSegmentedControl<int>(
             key: const ValueKey<String>('Segmented Control'),
-            isProportionalSegment: true,
+            proportionalWidth: true,
             children: children,
             groupValue: groupValue,
             onValueChanged: defaultCallback,
@@ -1053,7 +1053,7 @@ void main() {
         builder: (BuildContext context) {
           return CupertinoSlidingSegmentedControl<int>(
             key: const ValueKey<String>('Segmented Control'),
-            isProportionalSegment: true,
+            proportionalWidth: true,
             children: children,
             groupValue: groupValue,
             onValueChanged: defaultCallback,
