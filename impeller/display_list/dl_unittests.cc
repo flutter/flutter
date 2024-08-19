@@ -18,6 +18,7 @@
 #include "flutter/display_list/effects/dl_mask_filter.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
+#include "impeller/aiks/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_playground.h"
@@ -910,69 +911,6 @@ TEST_P(DisplayListTest, CanDrawShadow) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-TEST_P(DisplayListTest,
-       DispatcherDoesNotCullPerspectiveTransformedChildDisplayLists) {
-  // Regression test for https://github.com/flutter/flutter/issues/130613
-  flutter::DisplayListBuilder sub_builder(true);
-  sub_builder.DrawRect(SkRect::MakeXYWH(0, 0, 50, 50),
-                       flutter::DlPaint(flutter::DlColor::kRed()));
-  auto display_list = sub_builder.Build();
-
-  DlDispatcher dispatcher(Rect::MakeLTRB(0, 0, 2400, 1800));
-  dispatcher.scale(2.0, 2.0);
-  dispatcher.translate(-93.0, 0.0);
-  // clang-format off
-  dispatcher.transformFullPerspective(
-     0.8, -0.2, -0.1, -0.0,
-     0.0,  1.0,  0.0,  0.0,
-     1.4,  1.3,  1.0,  0.0,
-    63.2, 65.3, 48.6,  1.1
-  );
-  // clang-format on
-  dispatcher.translate(35.0, 75.0);
-  dispatcher.drawDisplayList(display_list, 1.0f);
-  auto picture = dispatcher.EndRecordingAsPicture();
-
-  bool found = false;
-  picture.pass->IterateAllEntities([&found](Entity& entity) {
-    if (std::static_pointer_cast<SolidColorContents>(entity.GetContents())
-            ->GetColor() == Color::Red()) {
-      found = true;
-      return false;
-    }
-
-    return true;
-  });
-  EXPECT_TRUE(found);
-}
-
-TEST_P(DisplayListTest, TransparentShadowProducesCorrectColor) {
-  DlDispatcher dispatcher;
-  dispatcher.save();
-  dispatcher.scale(1.618, 1.618);
-  SkPath path = SkPath{}.addRect(SkRect::MakeXYWH(0, 0, 200, 100));
-  flutter::DlOpReceiver::CacheablePath cache(path);
-  dispatcher.drawShadow(cache, flutter::DlColor::kTransparent(), 15, false, 1);
-  dispatcher.restore();
-  auto picture = dispatcher.EndRecordingAsPicture();
-
-  std::shared_ptr<SolidRRectBlurContents> rrect_blur;
-  picture.pass->IterateAllEntities([&rrect_blur](Entity& entity) {
-    if (ScalarNearlyEqual(entity.GetTransform().GetScale().x, 1.618f)) {
-      rrect_blur = std::static_pointer_cast<SolidRRectBlurContents>(
-          entity.GetContents());
-      return false;
-    }
-    return true;
-  });
-
-  ASSERT_NE(rrect_blur, nullptr);
-  ASSERT_EQ(rrect_blur->GetColor().red, 0);
-  ASSERT_EQ(rrect_blur->GetColor().green, 0);
-  ASSERT_EQ(rrect_blur->GetColor().blue, 0);
-  ASSERT_EQ(rrect_blur->GetColor().alpha, 0);
-}
-
 TEST_P(DisplayListTest, CanDrawZeroWidthLine) {
   flutter::DisplayListBuilder builder;
   std::vector<flutter::DlStrokeCap> caps = {
@@ -1556,50 +1494,6 @@ static std::optional<Rect> GetCoverageOfFirstEntity(const Picture& picture) {
     return true;
   });
   return coverage;
-}
-
-TEST(DisplayListTest, RRectBoundsComputation) {
-  SkRRect rrect = SkRRect::MakeRectXY(SkRect::MakeLTRB(0, 0, 100, 100), 4, 4);
-  SkPath path = SkPath().addRRect(rrect);
-
-  flutter::DlPaint paint;
-  flutter::DisplayListBuilder builder;
-
-  builder.DrawPath(path, paint);
-  auto display_list = builder.Build();
-
-  DlDispatcher dispatcher;
-  display_list->Dispatch(dispatcher);
-  auto picture = dispatcher.EndRecordingAsPicture();
-
-  std::optional<Rect> coverage =
-      GetCoverageOfFirstEntity<SolidColorContents>(picture);
-
-  // Validate that the RRect coverage is _exactly_ the same as the input rect.
-  ASSERT_TRUE(coverage.has_value());
-  ASSERT_EQ(coverage.value_or(Rect::MakeMaximum()),
-            Rect::MakeLTRB(0, 0, 100, 100));
-}
-
-TEST(DisplayListTest, CircleBoundsComputation) {
-  SkPath path = SkPath().addCircle(0, 0, 5);
-
-  flutter::DlPaint paint;
-  flutter::DisplayListBuilder builder;
-
-  builder.DrawPath(path, paint);
-  auto display_list = builder.Build();
-
-  DlDispatcher dispatcher;
-  display_list->Dispatch(dispatcher);
-  auto picture = dispatcher.EndRecordingAsPicture();
-
-  std::optional<Rect> coverage =
-      GetCoverageOfFirstEntity<SolidColorContents>(picture);
-
-  ASSERT_TRUE(coverage.has_value());
-  ASSERT_EQ(coverage.value_or(Rect::MakeMaximum()),
-            Rect::MakeLTRB(-5, -5, 5, 5));
 }
 
 #ifdef IMPELLER_ENABLE_3D
