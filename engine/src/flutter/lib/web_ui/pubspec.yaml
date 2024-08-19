@@ -3,7 +3,7 @@ publish_to: none
 
 # Keep the SDK version range in sync with pubspecs under web_sdk
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: '>=3.6.0-0 <4.0.0'
 
 dependencies:
   js: 0.6.4
@@ -27,7 +27,6 @@ dev_dependencies:
   http: 1.1.0
   http_multi_server: any
   image: 3.0.1
-  matcher: 0.12.16
   package_config: any
   path: 1.8.0
   pool: any
@@ -42,7 +41,6 @@ dev_dependencies:
   test_api: any
   test_core: any
   typed_data: any
-  uuid: 4.1.0
   watcher: 1.1.0
   web_socket_channel: any
   webdriver: 3.0.3
