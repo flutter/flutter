@@ -90,6 +90,9 @@ vars = {
   # Checkout Android dependencies only on platforms where we build for Android targets.
   'download_android_deps': 'host_os == "mac" or (host_os == "linux" and host_cpu == "x64")',
 
+  # Checkout Java dependencies only on platforms that do not have java installed on path.
+  'download_jdk': True,
+
   # Checkout Windows dependencies only if we are building on Windows.
   'download_windows_deps' : 'host_os == "win"',
 

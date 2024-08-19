@@ -7,6 +7,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
+                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -36,6 +37,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
+                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -65,6 +67,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
+                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -110,6 +113,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
+                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -139,6 +143,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
+                "download_jdk": false,
                 "run_fuchsia_emu": true,
                 "use_rbe": true
             },
@@ -169,6 +174,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
+                "download_jdk": false,
                 "run_fuchsia_emu": true,
                 "use_rbe": true
             },
