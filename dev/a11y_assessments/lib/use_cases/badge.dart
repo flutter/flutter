@@ -14,7 +14,7 @@ class BadgeUseCase extends UseCase {
   String get route => '/badge';
 
   @override
-  Widget get mainWidget => const MainWidget();
+  Widget build(BuildContext context) => const MainWidget();
 }
 
 class MainWidget extends StatefulWidget {

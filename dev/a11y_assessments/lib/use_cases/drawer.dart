@@ -14,7 +14,7 @@ class DrawerUseCase extends UseCase {
   String get route => '/drawer';
 
   @override
-  Widget get mainWidget => const DrawerExample();
+  Widget build(BuildContext context) => const DrawerExample();
 }
 
 class DrawerExample extends StatefulWidget {

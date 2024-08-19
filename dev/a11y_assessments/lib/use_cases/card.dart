@@ -14,7 +14,7 @@ class CardUseCase extends UseCase {
   String get route => '/card';
 
   @override
-  Widget get mainWidget => const MainWidget();
+  Widget build(BuildContext context) => const MainWidget();
 }
 
 class MainWidget extends StatefulWidget {

@@ -35,48 +35,14 @@ class App extends StatelessWidget {
     final Map<String, WidgetBuilder> routes =
         Map<String, WidgetBuilder>.fromEntries(
       useCases.map((UseCase useCase) =>
-          MapEntry<String, WidgetBuilder>(useCase.route, useCase.build)),
+          MapEntry<String, WidgetBuilder>(useCase.route, (BuildContext context) => useCase.myActualBuild(context))),
     );
 
     return MaterialApp(
       title: 'Accessibility Assessments Home Page',
       theme: lightTheme,
       darkTheme: darkTheme,
-      routes: <String, WidgetBuilder>{
-        '/': (_) => const AppWrapper(child: HomePage()),
-        ...routes
-      },
-    );
-  }
-}
-
-class AppWrapper extends StatelessWidget {
-
-  const AppWrapper({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return DynamicTitle(
-      title: 'Accessibility Assessments Home Page',
-      child: child,
-    );
-  }
-}
-
-class DynamicTitle extends StatelessWidget {
-  const DynamicTitle({super.key, required this.title, required this.child});
-
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Title(
-      title: title,
-      color: Theme.of(context).colorScheme.primary,
-      child: child,
+      routes: <String, WidgetBuilder>{'/': (_) => const HomePage(), ...routes},
     );
   }
 }

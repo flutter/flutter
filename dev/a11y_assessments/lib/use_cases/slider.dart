@@ -14,7 +14,7 @@ class SliderUseCase extends UseCase {
   String get route => '/slider';
 
   @override
-  Widget get mainWidget => const MainWidget();
+  Widget build(BuildContext context) => const MainWidget();
 }
 
 class MainWidget extends StatefulWidget {

@@ -14,7 +14,7 @@ class SwitchListTileUseCase extends UseCase {
   String get route => '/switch-list-tile';
 
   @override
-  Widget get mainWidget => const SwitchListTileExample();
+  Widget build(BuildContext context) => const SwitchListTileExample();
 }
 
 class SwitchListTileExample extends StatefulWidget {

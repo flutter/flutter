@@ -14,7 +14,7 @@ class ActionChipUseCase extends UseCase {
   String get route => '/action-chip';
 
   @override
-  Widget get mainWidget => const MainWidget();
+  Widget build(BuildContext context) => const MainWidget();
 }
 
 class MainWidget extends StatefulWidget {

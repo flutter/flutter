@@ -14,7 +14,7 @@ class NavigationBarUseCase extends UseCase {
   String get route => '/navigation-bar';
 
   @override
-  Widget get mainWidget => const MainWidget();
+  Widget build(BuildContext context) => const MainWidget();
 }
 
 class MainWidget extends StatefulWidget {

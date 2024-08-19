@@ -14,7 +14,7 @@ class SnackBarUseCase extends UseCase {
   String get route => '/snack-bar';
 
   @override
-  Widget get mainWidget => const MainWidget();
+  Widget build(BuildContext context) => const MainWidget();
 }
 
 class MainWidget extends StatefulWidget {

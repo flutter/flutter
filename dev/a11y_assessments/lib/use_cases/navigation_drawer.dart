@@ -33,7 +33,7 @@ class NavigationDrawerUseCase extends UseCase {
   String get route => '/navigation-drawer';
 
   @override
-  Widget get mainWidget => const NavigationDrawerExample();
+  Widget build(BuildContext context) => const NavigationDrawerExample();
 }
 
 class NavigationDrawerExample extends StatefulWidget {

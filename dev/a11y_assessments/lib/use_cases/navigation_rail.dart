@@ -14,7 +14,7 @@ class NavigationRailUseCase extends UseCase {
   String get route => '/navigation-rail';
 
   @override
-  Widget get mainWidget => const NavRailExample();
+  Widget build(BuildContext context) => const NavRailExample();
 }
 
 class NavRailExample extends StatefulWidget {

@@ -14,7 +14,7 @@ class DialogUseCase extends UseCase {
   String get route => '/dialog';
 
   @override
-  Widget get mainWidget => _MainWidget();
+ Widget build(BuildContext context) => _MainWidget();
 }
 
 class _MainWidget extends StatelessWidget {

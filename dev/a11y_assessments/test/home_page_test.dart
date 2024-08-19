@@ -168,9 +168,11 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    if (methodCall.method == 'SystemChrome.setApplicationSwitcherDescription') {
       log.add(methodCall);
-      return null;
-    });
+    }
+    return null;
+  });
 
     await tester.pumpWidget(Title(
       color: const Color(0xFF00FF00),
@@ -183,10 +185,14 @@ void main() {
     ));
 
     await pumpsUseCase(tester, AutoCompleteUseCase());
-    expect(log[2], isMethodCall(
+    print('home_page_test file log');
+    print(log);
+    expect(log[1], isMethodCall(
       'SystemChrome.setApplicationSwitcherDescription',
       arguments: <String, dynamic>{'label': 'AutoComplete', 'primaryColor': 4284960932},
     ));
+    print('home_page_test file log');
+    print(log);
 
     await pumpsUseCase(tester, ActionChipUseCase());
     expect(log[6], isMethodCall(
@@ -301,6 +307,7 @@ void main() {
       'SystemChrome.setApplicationSwitcherDescription',
       arguments: <String, dynamic>{'label': 'drawer', 'primaryColor': 4284960932},
     ));
+
 
   });
 

@@ -14,7 +14,7 @@ class DatePickerUseCase extends UseCase {
   String get route => '/date-picker';
 
   @override
-  Widget get mainWidget => const _MainWidget();
+  Widget build(BuildContext context) => const _MainWidget();
 }
 
 class _MainWidget extends StatefulWidget {

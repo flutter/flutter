@@ -14,7 +14,7 @@ class RadioListTileUseCase extends UseCase {
   String get route => '/radio-list-tile';
 
   @override
-  Widget get mainWidget => _MainWidget();
+  Widget build(BuildContext context) => _MainWidget();
 }
 
 class _MainWidget extends StatefulWidget {

@@ -14,7 +14,7 @@ class ExpansionTileUseCase extends UseCase {
   String get route => '/expansion-tile';
 
   @override
-  Widget get mainWidget => const ExpansionTileExample();
+  Widget build(BuildContext context) => const ExpansionTileExample();
 }
 
 class ExpansionTileExample extends StatefulWidget {

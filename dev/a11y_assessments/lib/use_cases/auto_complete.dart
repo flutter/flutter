@@ -14,7 +14,7 @@ class AutoCompleteUseCase extends UseCase {
   String get route => '/auto-complete';
 
   @override
-  Widget get mainWidget => const _MainWidget();
+  Widget build(BuildContext context) => const _MainWidget();
 }
 
 class _MainWidget extends StatefulWidget {

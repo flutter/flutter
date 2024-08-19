@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../main.dart';
+import '../common/dynamic_title.dart';
 import 'action_chip.dart';
 import 'auto_complete.dart';
 import 'badge.dart';
@@ -29,14 +29,16 @@ import 'text_field_password.dart';
 abstract class UseCase {
   String get name;
   String get route;
-  Widget get mainWidget;
+  // Widget get mainWidget;
 
-  Widget build(BuildContext context) {
-    return DynamicTitle(
+  Widget myActualBuild(BuildContext context) {
+      return DynamicTitle(
       title: name,
-      child: mainWidget
+      child: build(context),
     );
   }
+
+  Widget build(BuildContext context);
 }
 
 final List<UseCase> useCases = <UseCase>[

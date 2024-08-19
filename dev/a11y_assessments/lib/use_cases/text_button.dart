@@ -14,7 +14,7 @@ class TextButtonUseCase extends UseCase {
   String get route => '/text-button';
 
   @override
-  Widget get mainWidget => const MainWidget();
+  Widget build(BuildContext context) => const MainWidget();
 }
 
 class MainWidget extends StatefulWidget {
