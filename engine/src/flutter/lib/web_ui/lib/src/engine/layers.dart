@@ -543,11 +543,22 @@ class PlatformViewStyling {
 sealed class PlatformViewClip {
   PlatformViewClip positioned(PlatformViewPosition position);
 
-  ui.Rect get boundingRect;
+  /// The largest rectangle that is entirely inside the clip region. All
+  /// inside of this region is unclipped.
+  ui.Rect get innerRect;
 
-  bool covers(ui.Rect rect);
+  /// The bounding rectangle of the clip region. All content outside of this
+  /// region is clipped.
+  ui.Rect get outerRect;
 
   ScenePath get toPath;
+
+  static bool rectCovers(ui.Rect covering, ui.Rect covered) {
+    return covering.left <= covered.left &&
+      covering.right >= covered.right &&
+      covering.top <= covered.top &&
+      covering.bottom >= covered.bottom;
+  }
 
   static PlatformViewClip combine(PlatformViewClip outer, PlatformViewClip inner) {
     if (outer is PlatformViewNoClip) {
@@ -557,18 +568,17 @@ sealed class PlatformViewClip {
       return outer;
     }
 
-    if (outer.covers(inner.boundingRect)) {
-      return outer;
-    }
-
-    if (inner.covers(outer.boundingRect)) {
+    if (rectCovers(outer.innerRect, inner.outerRect)) {
       return inner;
     }
 
-    final ScenePath path = ui.Path() as ScenePath;
-    path.addPath(outer.toPath, ui.Offset.zero);
-    path.addPath(inner.toPath, ui.Offset.zero);
-    return PlatformViewPathClip(path);
+    if (rectCovers(inner.innerRect, outer.outerRect)) {
+      return outer;
+    }
+
+    return PlatformViewPathClip(
+      ui.Path.combine(ui.PathOperation.intersect, outer.toPath, inner.toPath) as ScenePath
+    );
   }
 }
 
@@ -584,20 +594,18 @@ class PlatformViewNoClip implements PlatformViewClip {
   ScenePath get toPath => ui.Path() as ScenePath;
 
   @override
-  ui.Rect get boundingRect => ui.Rect.zero;
-
-  @override
-  bool covers(ui.Rect rect) {
-    return false;
-  }
-
-  @override
   bool operator ==(Object other) {
     return identical(this, other) || (other.runtimeType == PlatformViewNoClip);
   }
 
   @override
   int get hashCode => runtimeType.hashCode;
+
+  @override
+  ui.Rect get innerRect => ui.Rect.zero;
+
+  @override
+  ui.Rect get outerRect => ui.Rect.zero;
 }
 
 class PlatformViewRectClip implements PlatformViewClip {
@@ -622,17 +630,6 @@ class PlatformViewRectClip implements PlatformViewClip {
   ScenePath get toPath => (ui.Path() as ScenePath)..addRect(rect);
 
   @override
-  ui.Rect get boundingRect => rect;
-
-  @override
-  bool covers(ui.Rect other) {
-    return rect.left <= other.left &&
-      rect.right >= other.right &&
-      rect.top <= other.top &&
-      rect.bottom >= other.bottom;
-  }
-
-  @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
@@ -642,6 +639,12 @@ class PlatformViewRectClip implements PlatformViewClip {
 
   @override
   int get hashCode => Object.hash(runtimeType, rect);
+
+  @override
+  ui.Rect get innerRect => rect;
+
+  @override
+  ui.Rect get outerRect => rect;
 }
 
 class PlatformViewRRectClip implements PlatformViewClip {
@@ -666,18 +669,6 @@ class PlatformViewRRectClip implements PlatformViewClip {
   ScenePath get toPath => (ui.Path() as ScenePath)..addRRect(rrect);
 
   @override
-  ui.Rect get boundingRect => throw UnimplementedError();
-
-  @override
-  bool covers(ui.Rect other) {
-    final ui.Rect rect = rrect.safeInnerRect;
-    return rect.left <= other.left &&
-      rect.right >= other.right &&
-      rect.top <= other.top &&
-      rect.bottom >= other.bottom;
-  }
-
-  @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
@@ -687,6 +678,12 @@ class PlatformViewRRectClip implements PlatformViewClip {
 
   @override
   int get hashCode => Object.hash(runtimeType, rrect);
+
+  @override
+  ui.Rect get innerRect => rrect.safeInnerRect;
+
+  @override
+  ui.Rect get outerRect => rrect.outerRect;
 }
 
 class PlatformViewPathClip implements PlatformViewClip {
@@ -712,16 +709,6 @@ class PlatformViewPathClip implements PlatformViewClip {
   ScenePath get toPath => path;
 
   @override
-  ui.Rect get boundingRect => path.getBounds();
-
-  @override
-  bool covers(ui.Rect rect) {
-    // There is no way of determining if an arbitrary path fully covers a rectangle
-    // so we always conservatively return false here.
-    return false;
-  }
-
-  @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
@@ -731,6 +718,12 @@ class PlatformViewPathClip implements PlatformViewClip {
 
   @override
   int get hashCode => Object.hash(runtimeType, path);
+
+  @override
+  ui.Rect get innerRect => ui.Rect.zero;
+
+  @override
+  ui.Rect get outerRect => path.getBounds();
 }
 
 class LayerBuilder {
