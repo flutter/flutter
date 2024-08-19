@@ -170,11 +170,11 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-    if (methodCall.method == 'SystemChrome.setApplicationSwitcherDescription') {
-      log.add(methodCall);
-    }
-    return null;
-  });
+      if (methodCall.method == 'SystemChrome.setApplicationSwitcherDescription') {
+        log.add(methodCall);
+      }
+      return null;
+    });
 
     await tester.pumpWidget(Title(
       color: const Color(0xFF00FF00),
