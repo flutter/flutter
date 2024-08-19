@@ -139,7 +139,6 @@ class FlutterTesterDevice extends Device {
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
-    final FlutterProject project = FlutterProject.current();
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
     if (!buildInfo.isDebug) {
       _logger.printError('This device only supports debug mode.');
@@ -154,6 +153,7 @@ class FlutterTesterDevice extends Device {
     );
 
     // Build assets and perform initial compilation.
+    final FlutterProject project = FlutterProject.current();
     await BundleBuilder().build(
       project: project,
       buildInfo: buildInfo,
