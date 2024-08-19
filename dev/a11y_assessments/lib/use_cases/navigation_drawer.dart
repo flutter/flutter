@@ -62,8 +62,8 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
-        title: const Text('Navigation Drawer Example'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Semantics(headingLevel: 1, child: const Text('Navigation Drawer Demo')),
       ),
       body: SafeArea(
         bottom: false,

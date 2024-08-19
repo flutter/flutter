@@ -60,7 +60,7 @@ class MainWidgetState extends State<MainWidget> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('MaterialBanner'),
+        title: Semantics(headingLevel: 1, child: const Text('MaterialBanner Demo')),
       ),
       body: Center(
         child: ElevatedButton(
