@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:a11y_assessments/use_cases/navigation_bar.dart';
+// import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_utils.dart';
@@ -26,5 +29,31 @@ void main() {
     final Finder findHeadingLevelOnes = find.bySemanticsLabel('NavigationBar Demo');
     await tester.pumpAndSettle();
     expect(findHeadingLevelOnes, findsOne);
+  });
+
+  // testWidgets('navigation bar has one selected tab', (WidgetTester tester) async {
+  //   await pumpsUseCase(tester, NavigationBarUseCase());
+  //   final Finder findHeadingLevelOnes = find.bySemanticsLabel('NavigationBar Demo');
+  //   await tester.pumpAndSettle();
+  //   expect(findHeadingLevelOnes, findsOne);
+  // });
+
+  testWidgets('navigation bar has one selected tab with correct aria-label', (WidgetTester tester) async {
+    await pumpsUseCase(tester, NavigationBarUseCase());
+    await tester.pumpAndSettle();
+
+    final Finder selectedTabFinder = find.descendant(
+      of: find.byType(NavigationBar),
+      matching: find.byWidgetPredicate((Widget widget) {
+        if (widget is Semantics) {
+          final SemanticsData semanticsData = widget.toDiagnosticsNode().value! as SemanticsData;
+          return semanticsData.label!.contains('selected');
+        }
+        return false;
+      }),
+    );
+
+    expect(selectedTabFinder, findsOneWidget);
+    debugDumpRenderTree();
   });
 }
