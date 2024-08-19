@@ -298,6 +298,41 @@ Future<void> testMain() async {
     await matchGoldenFile('platformview_cliprrect.png', region: region);
   });
 
+  test('platformview covered clip', () async {
+    await _createPlatformView(1, platformViewType);
+
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(recorder);
+    canvas.drawCircle(
+      const ui.Offset(50, 50),
+      50,
+      ui.Paint()
+        ..style = ui.PaintingStyle.fill
+        ..color = const ui.Color(0xFFFF0000)
+    );
+
+    final ui.SceneBuilder sb = ui.SceneBuilder();
+    sb.pushOffset(50, 50);
+
+    // The rrect should completely cover the rect for this test case.
+    sb.pushClipRRect(
+      const ui.RRect.fromLTRBXY(50, 50, 110, 110, 5, 10),
+      clipBehavior: ui.Clip.antiAlias
+    );
+    sb.pushClipRect(const ui.Rect.fromLTRB(60, 60, 100, 100));
+
+    sb.addPicture(const ui.Offset(50, 50), recorder.endRecording());
+    sb.addPlatformView(
+      1,
+      offset: const ui.Offset(75, 75),
+      width: 50,
+      height: 50,
+    );
+    await renderScene(sb.build());
+
+    await matchGoldenFile('platformview_covered_clip.png', region: region);
+  });
+
   test('platformview clippath', () async {
     await _createPlatformView(1, platformViewType);
 
