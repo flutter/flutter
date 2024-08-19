@@ -26,7 +26,8 @@ class NavigationExample extends StatefulWidget {
 
 class _NavigationExampleState extends State<NavigationExample> {
   int currentPageIndex = 0;
-  NavigationDestinationLabelBehavior labelBehavior = NavigationDestinationLabelBehavior.alwaysShow;
+  NavigationDestinationLabelBehavior labelBehavior =
+      NavigationDestinationLabelBehavior.alwaysShow;
 
   @override
   Widget build(BuildContext context) {
@@ -40,14 +41,8 @@ class _NavigationExampleState extends State<NavigationExample> {
           });
         },
         destinations: const <Widget>[
-          NavigationDestination(
-            icon: Icon(Icons.explore),
-            label: 'Explore',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.commute),
-            label: 'Commute',
-          ),
+          NavigationDestination(icon: Icon(Icons.explore), label: 'Explore'),
+          NavigationDestination(icon: Icon(Icons.commute), label: 'Commute'),
           NavigationDestination(
             selectedIcon: Icon(Icons.bookmark),
             icon: Icon(Icons.bookmark_border),
@@ -61,35 +56,24 @@ class _NavigationExampleState extends State<NavigationExample> {
           children: <Widget>[
             Text('Label behavior: ${labelBehavior.name}'),
             const SizedBox(height: 10),
-            OverflowBar(
-              spacing: 10.0,
-              children: <Widget>[
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      labelBehavior = NavigationDestinationLabelBehavior.alwaysShow;
-                    });
-                  },
-                  child: const Text('alwaysShow'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      labelBehavior = NavigationDestinationLabelBehavior.onlyShowSelected;
-                    });
-                  },
-                  child: const Text('onlyShowSelected'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      labelBehavior = NavigationDestinationLabelBehavior.alwaysHide;
-                    });
-                  },
-                  child: const Text('alwaysHide'),
-                ),
-              ],
-            ),
+            OverflowBar(spacing: 10.0, children: <Widget>[
+              ElevatedButton(onPressed: () {
+                setState(() {
+                  labelBehavior = NavigationDestinationLabelBehavior.alwaysShow;
+                });
+              }, child: const Text('alwaysShow')),
+              ElevatedButton(onPressed: () {
+                setState(() {
+                  labelBehavior =
+                      NavigationDestinationLabelBehavior.onlyShowSelected;
+                });
+              }, child: const Text('onlyShowSelected')),
+              ElevatedButton(onPressed: () {
+                setState(() {
+                  labelBehavior = NavigationDestinationLabelBehavior.alwaysHide;
+                });
+              }, child: const Text('alwaysHide')),
+            ]),
           ],
         ),
       ),

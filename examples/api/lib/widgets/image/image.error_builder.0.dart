@@ -14,11 +14,7 @@ class ErrorBuilderExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: ErrorBuilderExample(),
-        ),
-      ),
+      home: Scaffold(body: Center(child: ErrorBuilderExample())),
     );
   }
 }
@@ -36,7 +32,11 @@ class ErrorBuilderExample extends StatelessWidget {
       ),
       child: Image.network(
         'https://example.does.not.exist/image.jpg',
-        errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+        errorBuilder: (
+          BuildContext context,
+          Object exception,
+          StackTrace? stackTrace,
+        ) {
           // Appropriate logging or analytics, e.g.
           // myAnalytics.recordError(
           //   'An error occurred loading "https://example.does.not.exist/image.jpg"',

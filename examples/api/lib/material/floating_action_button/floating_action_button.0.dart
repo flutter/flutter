@@ -11,7 +11,7 @@ void main() {
 }
 
 class FloatingActionButtonExampleApp extends StatelessWidget {
-  const FloatingActionButtonExampleApp({ super.key });
+  const FloatingActionButtonExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,28 +23,29 @@ class FloatingActionButtonExampleApp extends StatelessWidget {
 }
 
 class FloatingActionButtonExample extends StatefulWidget {
-  const FloatingActionButtonExample({ super.key });
+  const FloatingActionButtonExample({super.key});
 
   @override
-  State<FloatingActionButtonExample> createState() => _FloatingActionButtonExampleState();
+  State<FloatingActionButtonExample> createState() =>
+      _FloatingActionButtonExampleState();
 }
 
-class _FloatingActionButtonExampleState extends State<FloatingActionButtonExample> {
+class _FloatingActionButtonExampleState
+    extends State<FloatingActionButtonExample> {
   // The FAB's foregroundColor, backgroundColor, and shape
-  static const List<(Color?, Color? background, ShapeBorder?)> customizations = <(Color?, Color?, ShapeBorder?)>[
-    (null, null, null), // The FAB uses its default for null parameters.
-    (null, Colors.green, null),
-    (Colors.white, Colors.green, null),
-    (Colors.white, Colors.green, CircleBorder()),
-  ];
+  static const List<(Color?, Color? background, ShapeBorder?)> customizations =
+      <(Color?, Color?, ShapeBorder?)>[
+        (null, null, null), // The FAB uses its default for null parameters.
+        (null, Colors.green, null),
+        (Colors.white, Colors.green, null),
+        (Colors.white, Colors.green, CircleBorder()),
+      ];
   int index = 0; // Selects the customization.
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('FloatingActionButton Sample'),
-      ),
+      appBar: AppBar(title: const Text('FloatingActionButton Sample')),
       body: const Center(child: Text('Press the button below!')),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

@@ -14,28 +14,35 @@ class AnimatedListSeparatedSample extends StatefulWidget {
   const AnimatedListSeparatedSample({super.key});
 
   @override
-  State<AnimatedListSeparatedSample> createState() => _AnimatedListSeparatedSampleState();
+  State<AnimatedListSeparatedSample> createState() =>
+      _AnimatedListSeparatedSampleState();
 }
 
-class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSample> {
+class _AnimatedListSeparatedSampleState
+    extends State<AnimatedListSeparatedSample> {
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   late ListModel<int> _list;
   int? _selectedItem;
-  late int _nextItem; // The next item inserted when the user presses the '+' button.
+  late int
+  _nextItem; // The next item inserted when the user presses the '+' button.
 
   @override
   void initState() {
     super.initState();
-    _list = ListModel<int>(
-      listKey: _listKey,
-      initialItems: <int>[0, 1, 2],
-      removedItemBuilder: _buildRemovedItem,
-    );
+    _list = ListModel<int>(listKey: _listKey, initialItems: <int>[
+      0,
+      1,
+      2,
+    ], removedItemBuilder: _buildRemovedItem);
     _nextItem = 3;
   }
 
   // Used to build list items that haven't been removed.
-  Widget _buildItem(BuildContext context, int index, Animation<double> animation) {
+  Widget _buildItem(
+    BuildContext context,
+    int index,
+    Animation<double> animation,
+  ) {
     return CardItem(
       animation: animation,
       item: _list[index],
@@ -49,11 +56,12 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
   }
 
   // Used to build separators for items that haven't been removed.
-  Widget _buildSeparator(BuildContext context, int index, Animation<double> animation) {
-    return ItemSeparator(
-      animation: animation,
-      item: _list[index],
-    );
+  Widget _buildSeparator(
+    BuildContext context,
+    int index,
+    Animation<double> animation,
+  ) {
+    return ItemSeparator(animation: animation, item: _list[index]);
   }
 
   /// The builder function used to build items that have been removed.
@@ -63,7 +71,11 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
   /// completed (even though it's gone as far as this ListModel is concerned).
   /// The widget will be used by the [AnimatedListState.removeItem] method's
   /// `itemBuilder` parameter.
-  Widget _buildRemovedItem(int item, BuildContext context, Animation<double> animation) {
+  Widget _buildRemovedItem(
+    int item,
+    BuildContext context,
+    Animation<double> animation,
+  ) {
     return CardItem(
       animation: animation,
       item: item,
@@ -81,19 +93,21 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
   ///
   /// The item parameter is null, because the corresponding item will
   /// have been removed from the list model by the time this builder is called.
-  Widget _buildRemovedSeparator(BuildContext context, int index, Animation<double> animation) {
+  Widget _buildRemovedSeparator(
+    BuildContext context,
+    int index,
+    Animation<double> animation,
+  ) {
     return SizeTransition(
       sizeFactor: animation,
-      child: ItemSeparator(
-        animation: animation,
-        item: null,
-      )
+      child: ItemSeparator(animation: animation, item: null),
     );
   }
 
   // Insert the "next item" into the list model.
   void _insert() {
-    final int index = _selectedItem == null ? _list.length : _list.indexOf(_selectedItem!);
+    final int index =
+        _selectedItem == null ? _list.length : _list.indexOf(_selectedItem!);
     _list.insert(index, _nextItem);
     _nextItem++;
   }
@@ -112,21 +126,19 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('AnimatedList.separated'),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.add_circle),
-              onPressed: _insert,
-              tooltip: 'insert a new item',
-            ),
-            IconButton(
-              icon: const Icon(Icons.remove_circle),
-              onPressed: _remove,
-              tooltip: 'remove the selected item',
-            ),
-          ],
-        ),
+        appBar: AppBar(title: const Text('AnimatedList.separated'), actions:
+            <Widget>[
+              IconButton(
+                icon: const Icon(Icons.add_circle),
+                onPressed: _insert,
+                tooltip: 'insert a new item',
+              ),
+              IconButton(
+                icon: const Icon(Icons.remove_circle),
+                onPressed: _remove,
+                tooltip: 'remove the selected item',
+              ),
+            ]),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: AnimatedList.separated(
@@ -142,7 +154,8 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
   }
 }
 
-typedef RemovedItemBuilder<T> = Widget Function(T item, BuildContext context, Animation<double> animation);
+typedef RemovedItemBuilder<T> =
+    Widget Function(T item, BuildContext context, Animation<double> animation);
 
 /// Keeps a Dart [List] in sync with an [AnimatedList.separated].
 ///
@@ -174,12 +187,12 @@ class ListModel<E> {
   E removeAt(int index) {
     final E removedItem = _items.removeAt(index);
     if (removedItem != null) {
-      _animatedList!.removeItem(
-        index,
-        (BuildContext context, Animation<double> animation) {
-          return removedItemBuilder(removedItem, context, animation);
-        },
-      );
+      _animatedList!.removeItem(index, (
+        BuildContext context,
+        Animation<double> animation,
+      ) {
+        return removedItemBuilder(removedItem, context, animation);
+      });
     }
     return removedItem;
   }
@@ -228,9 +241,7 @@ class CardItem extends StatelessWidget {
             height: 80.0,
             child: Card(
               color: Colors.primaries[item % Colors.primaries.length],
-              child: Center(
-                child: Text('Item $item', style: textStyle),
-              ),
+              child: Center(child: Text('Item $item', style: textStyle)),
             ),
           ),
         ),
@@ -247,11 +258,8 @@ class CardItem extends StatelessWidget {
 /// This widget's height is based on the [animation] parameter, it
 /// varies from 0 to 40 as the animation varies from 0.0 to 1.0.
 class ItemSeparator extends StatelessWidget {
-  const ItemSeparator({
-    super.key,
-    required this.animation,
-    required this.item,
-  }) : assert(item == null || item >= 0);
+  const ItemSeparator({super.key, required this.animation, required this.item})
+    : assert(item == null || item >= 0);
 
   final Animation<double> animation;
   final int? item;
@@ -266,9 +274,15 @@ class ItemSeparator extends StatelessWidget {
         child: SizedBox(
           height: 40.0,
           child: Card(
-            color: item == null ? Colors.grey : Colors.primaries[item! % Colors.primaries.length],
+            color:
+                item == null
+                    ? Colors.grey
+                    : Colors.primaries[item! % Colors.primaries.length],
             child: Center(
-              child: Text(item == null ? 'Removing separator' : 'Separator $item', style: textStyle),
+              child: Text(
+                item == null ? 'Removing separator' : 'Separator $item',
+                style: textStyle,
+              ),
             ),
           ),
         ),

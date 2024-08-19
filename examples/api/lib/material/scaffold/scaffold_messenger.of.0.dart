@@ -16,9 +16,7 @@ class OfExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ScaffoldMessenger.of Sample')),
-        body: const Center(
-          child: OfExample(),
-        ),
+        body: const Center(child: OfExample()),
       ),
     );
   }
@@ -29,15 +27,10 @@ class OfExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      child: const Text('SHOW A SNACKBAR'),
-      onPressed: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Have a snack!'),
-          ),
-        );
-      },
-    );
+    return ElevatedButton(child: const Text('SHOW A SNACKBAR'), onPressed: () {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Have a snack!')));
+    });
   }
 }

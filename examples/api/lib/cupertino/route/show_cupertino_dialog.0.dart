@@ -27,44 +27,35 @@ class CupertinoDialogExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Home'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('Home')),
       child: Center(
-        child: CupertinoButton(
-          onPressed: () {
-            Navigator.of(context).restorablePush(_dialogBuilder);
-          },
-          child: const Text('Open Dialog'),
-        ),
+        child: CupertinoButton(onPressed: () {
+          Navigator.of(context).restorablePush(_dialogBuilder);
+        }, child: const Text('Open Dialog')),
       ),
     );
   }
 
   @pragma('vm:entry-point')
-  static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
-    return CupertinoDialogRoute<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: const Text('Title'),
-          content: const Text('Content'),
-          actions: <Widget>[
-            CupertinoDialogAction(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Yes'),
-            ),
-            CupertinoDialogAction(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('No'),
-            ),
-          ],
-        );
-      },
-    );
+  static Route<Object?> _dialogBuilder(
+    BuildContext context,
+    Object? arguments,
+  ) {
+    return CupertinoDialogRoute<void>(context: context, builder: (
+      BuildContext context,
+    ) {
+      return CupertinoAlertDialog(
+        title: const Text('Title'),
+        content: const Text('Content'),
+        actions: <Widget>[
+          CupertinoDialogAction(onPressed: () {
+            Navigator.pop(context);
+          }, child: const Text('Yes')),
+          CupertinoDialogAction(onPressed: () {
+            Navigator.pop(context);
+          }, child: const Text('No')),
+        ],
+      );
+    });
   }
 }

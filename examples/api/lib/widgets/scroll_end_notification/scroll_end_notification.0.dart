@@ -12,24 +12,24 @@ void main() {
 }
 
 class ScrollEndNotificationApp extends StatelessWidget {
-  const ScrollEndNotificationApp({ super.key });
+  const ScrollEndNotificationApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: ScrollEndNotificationExample(),
-    );
+    return const MaterialApp(home: ScrollEndNotificationExample());
   }
 }
 
 class ScrollEndNotificationExample extends StatefulWidget {
-  const ScrollEndNotificationExample({ super.key });
+  const ScrollEndNotificationExample({super.key});
 
   @override
-  State<ScrollEndNotificationExample> createState() => _ScrollEndNotificationExampleState();
+  State<ScrollEndNotificationExample> createState() =>
+      _ScrollEndNotificationExampleState();
 }
 
-class _ScrollEndNotificationExampleState extends State<ScrollEndNotificationExample> {
+class _ScrollEndNotificationExampleState
+    extends State<ScrollEndNotificationExample> {
   static const int itemCount = 25;
   static const double itemExtent = 100;
 
@@ -60,10 +60,13 @@ class _ScrollEndNotificationExampleState extends State<ScrollEndNotificationExam
     }
     if (notification is ScrollEndNotification) {
       final ScrollMetrics m = notification.metrics;
-      final int lastIndex = ((m.extentBefore + m.extentInside) ~/ itemExtent).clamp(0, itemCount - 1);
-      final double alignedScrollOffset = itemExtent * (lastIndex + 1) - m.extentInside;
+      final int lastIndex = ((m.extentBefore + m.extentInside) ~/ itemExtent)
+          .clamp(0, itemCount - 1);
+      final double alignedScrollOffset =
+          itemExtent * (lastIndex + 1) - m.extentInside;
       final double scrollOffset = scrollController.position.pixels;
-      if (scrollOffset > 0 && (scrollOffset - lastScrollOffset).abs() > itemExtent) {
+      if (scrollOffset > 0 &&
+          (scrollOffset - lastScrollOffset).abs() > itemExtent) {
         SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
           scrollController.animateTo(
             alignedScrollOffset,
@@ -87,23 +90,26 @@ class _ScrollEndNotificationExampleState extends State<ScrollEndNotificationExam
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: NotificationListener<ScrollNotification>(
               onNotification: handleScrollNotification,
-              child: CustomScrollView(
-                controller: scrollController,
-                slivers: <Widget>[
-                  SliverFixedExtentList(
-                    itemExtent: itemExtent,
-                    delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) {
+              child: CustomScrollView(controller: scrollController, slivers:
+                  <Widget>[
+                    SliverFixedExtentList(
+                      itemExtent: itemExtent,
+                      delegate: SliverChildBuilderDelegate((
+                        BuildContext context,
+                        int index,
+                      ) {
                         return Item(
                           title: 'Item $index',
-                          color: Color.lerp(Colors.red, Colors.blue, index / itemCount)!
+                          color:
+                              Color.lerp(
+                                Colors.red,
+                                Colors.blue,
+                                index / itemCount,
+                              )!,
                         );
-                      },
-                      childCount: itemCount,
+                      }, childCount: itemCount),
                     ),
-                  ),
-                ],
-              ),
+                  ]),
             ),
           ),
         ),
@@ -113,7 +119,7 @@ class _ScrollEndNotificationExampleState extends State<ScrollEndNotificationExam
 }
 
 class Item extends StatelessWidget {
-  const Item({ super.key, required this.title, required this.color });
+  const Item({super.key, required this.title, required this.color});
 
   final String title;
   final Color color;
@@ -122,10 +128,7 @@ class Item extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: color,
-      child: ListTile(
-        textColor: Colors.white,
-        title: Text(title),
-      ),
+      child: ListTile(textColor: Colors.white, title: Text(title)),
     );
   }
 }

@@ -31,9 +31,7 @@ class TextFieldExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Obscured Textfield')),
-        body: const Center(
-          child: ObscuredTextFieldSample(),
-        ),
+        body: const Center(child: ObscuredTextFieldSample()),
       ),
     );
   }

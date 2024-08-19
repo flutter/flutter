@@ -9,9 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Checkbox can be checked', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.CheckboxExampleApp(),
-    );
+    await tester.pumpWidget(const example.CheckboxExampleApp());
 
     Checkbox checkbox = tester.widget(find.byType(Checkbox));
     expect(checkbox.value, isFalse);
@@ -30,19 +28,11 @@ void main() {
   });
 
   testWidgets('Checkbox color can be changed', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.CheckboxExampleApp(),
-    );
+    await tester.pumpWidget(const example.CheckboxExampleApp());
     final Checkbox checkbox = tester.widget(find.byType(Checkbox));
 
-    expect(
-      checkbox.checkColor,
-      Colors.white,
-    );
-    expect(
-      checkbox.fillColor!.resolve(<MaterialState>{}),
-      Colors.red,
-    );
+    expect(checkbox.checkColor, Colors.white);
+    expect(checkbox.fillColor!.resolve(<MaterialState>{}), Colors.red);
     expect(
       checkbox.fillColor!.resolve(<MaterialState>{MaterialState.pressed}),
       Colors.blue,

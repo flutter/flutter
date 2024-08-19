@@ -19,9 +19,7 @@ class CupertinoRadioApp extends StatelessWidget {
         navigationBar: CupertinoNavigationBar(
           middle: Text('CupertinoRadio Example'),
         ),
-        child: SafeArea(
-          child: CupertinoRadioExample(),
-        ),
+        child: SafeArea(child: CupertinoRadioExample()),
       ),
     );
   }
@@ -41,33 +39,31 @@ class _CupertinoRadioExampleState extends State<CupertinoRadioExample> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoListSection(
-      children: <Widget>[
-        CupertinoListTile(
-          title: const Text('Lafayette'),
-          leading: CupertinoRadio<SingingCharacter>(
-            value: SingingCharacter.lafayette,
-            groupValue: _character,
-            onChanged: (SingingCharacter? value) {
-              setState(() {
-                _character = value;
-              });
-            },
-          ),
+    return CupertinoListSection(children: <Widget>[
+      CupertinoListTile(
+        title: const Text('Lafayette'),
+        leading: CupertinoRadio<SingingCharacter>(
+          value: SingingCharacter.lafayette,
+          groupValue: _character,
+          onChanged: (SingingCharacter? value) {
+            setState(() {
+              _character = value;
+            });
+          },
         ),
-        CupertinoListTile(
-          title: const Text('Thomas Jefferson'),
-          leading: CupertinoRadio<SingingCharacter>(
-            value: SingingCharacter.jefferson,
-            groupValue: _character,
-            onChanged: (SingingCharacter? value) {
-              setState(() {
-                _character = value;
-              });
-            },
-          ),
+      ),
+      CupertinoListTile(
+        title: const Text('Thomas Jefferson'),
+        leading: CupertinoRadio<SingingCharacter>(
+          value: SingingCharacter.jefferson,
+          groupValue: _character,
+          onChanged: (SingingCharacter? value) {
+            setState(() {
+              _character = value;
+            });
+          },
         ),
-      ],
-    );
+      ),
+    ]);
   }
 }

@@ -40,31 +40,27 @@ class LinkedLabelCheckbox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: padding,
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: RichText(
-              text: TextSpan(
-                text: label,
-                style: const TextStyle(
-                  color: Colors.blueAccent,
-                  decoration: TextDecoration.underline,
-                ),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () {
-                    debugPrint('Label has been tapped.');
-                  },
+      child: Row(children: <Widget>[
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              text: label,
+              style: const TextStyle(
+                color: Colors.blueAccent,
+                decoration: TextDecoration.underline,
               ),
+              recognizer:
+                  TapGestureRecognizer()
+                    ..onTap = () {
+                      debugPrint('Label has been tapped.');
+                    },
             ),
           ),
-          Checkbox(
-            value: value,
-            onChanged: (bool? newValue) {
-              onChanged(newValue!);
-            },
-          ),
-        ],
-      ),
+        ),
+        Checkbox(value: value, onChanged: (bool? newValue) {
+          onChanged(newValue!);
+        }),
+      ]),
     );
   }
 }

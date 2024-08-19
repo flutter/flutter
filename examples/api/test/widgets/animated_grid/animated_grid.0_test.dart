@@ -9,9 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('AnimatedGrid example', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.AnimatedGridSample(),
-    );
+    await tester.pumpWidget(const example.AnimatedGridSample());
 
     expect(find.text('1'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);

@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_api_samples/widgets/slotted_render_object_widget/slotted_multi_child_render_object_widget_mixin.0.dart' as example;
+import 'package:flutter_api_samples/widgets/slotted_render_object_widget/slotted_multi_child_render_object_widget_mixin.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('shows two widgets arranged diagonally', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.ExampleWidget(),
-    );
+  testWidgets('shows two widgets arranged diagonally', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.ExampleWidget());
 
     expect(find.text('topLeft'), findsOneWidget);
     expect(find.text('bottomRight'), findsOneWidget);

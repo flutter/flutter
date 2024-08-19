@@ -13,9 +13,7 @@ class RestorablePushExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: RestorablePushExample(),
-    );
+    return const MaterialApp(home: RestorablePushExample());
   }
 }
 
@@ -37,9 +35,7 @@ class _RestorablePushExampleState extends State<RestorablePushExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sample Code'),
-      ),
+      appBar: AppBar(title: const Text('Sample Code')),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.restorablePush(context, _myRouteBuilder),
         tooltip: 'Increment Counter',

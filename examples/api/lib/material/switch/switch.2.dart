@@ -17,9 +17,7 @@ class SwitchApp extends StatelessWidget {
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
         appBar: AppBar(title: const Text('Switch Sample')),
-        body: const Center(
-          child: SwitchExample(),
-        ),
+        body: const Center(child: SwitchExample()),
       ),
     );
   }
@@ -36,36 +34,26 @@ class _SwitchExampleState extends State<SwitchExample> {
   bool light0 = true;
   bool light1 = true;
 
-  static const WidgetStateProperty<Icon> thumbIcon = WidgetStateProperty<Icon>.fromMap(
-    <WidgetStatesConstraint, Icon>{
-      WidgetState.selected: Icon(Icons.check),
-      WidgetState.any:      Icon(Icons.close),
-    },
-  );
+  static const WidgetStateProperty<Icon> thumbIcon =
+      WidgetStateProperty<Icon>.fromMap(<WidgetStatesConstraint, Icon>{
+        WidgetState.selected: Icon(Icons.check),
+        WidgetState.any: Icon(Icons.close),
+      });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Switch(
-          value: light0,
-          onChanged: (bool value) {
+    return Column(mainAxisAlignment: MainAxisAlignment.center, children:
+        <Widget>[
+          Switch(value: light0, onChanged: (bool value) {
             setState(() {
               light0 = value;
             });
-          },
-        ),
-        Switch(
-          thumbIcon: thumbIcon,
-          value: light1,
-          onChanged: (bool value) {
+          }),
+          Switch(thumbIcon: thumbIcon, value: light1, onChanged: (bool value) {
             setState(() {
               light1 = value;
             });
-          },
-        ),
-      ],
-    );
+          }),
+        ]);
   }
 }

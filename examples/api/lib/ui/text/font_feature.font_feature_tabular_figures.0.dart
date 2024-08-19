@@ -14,7 +14,8 @@ class ExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WidgetsApp(
-      builder: (BuildContext context, Widget? navigator) => const ExampleWidget(),
+      builder:
+          (BuildContext context, Widget? navigator) => const ExampleWidget(),
       color: const Color(0xffffffff),
     );
   }
@@ -29,12 +30,9 @@ class ExampleWidget extends StatelessWidget {
     // (https://www.google.com/fonts).
     return const Text(
       'Call 311-555-2368 now!',
-      style: TextStyle(
-        fontFamily: 'Piazzolla',
-        fontFeatures: <FontFeature>[
-          FontFeature.tabularFigures(),
-        ],
-      ),
+      style: TextStyle(fontFamily: 'Piazzolla', fontFeatures: <FontFeature>[
+        FontFeature.tabularFigures(),
+      ]),
     );
   }
 }

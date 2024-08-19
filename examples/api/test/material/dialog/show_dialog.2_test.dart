@@ -3,15 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/dialog/show_dialog.2.dart' as example;
+import 'package:flutter_api_samples/material/dialog/show_dialog.2.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Show dialog', (WidgetTester tester) async {
     const String dialogTitle = 'Basic dialog title';
-    await tester.pumpWidget(
-      const example.ShowDialogExampleApp(),
-    );
+    await tester.pumpWidget(const example.ShowDialogExampleApp());
 
     expect(find.text(dialogTitle), findsNothing);
 

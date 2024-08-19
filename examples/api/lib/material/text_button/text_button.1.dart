@@ -34,7 +34,9 @@ class _SelectableButtonState extends State<SelectableButton> {
   @override
   void initState() {
     super.initState();
-    statesController = WidgetStatesController(<WidgetState>{if (widget.selected) WidgetState.selected});
+    statesController = WidgetStatesController(<WidgetState>{
+      if (widget.selected) WidgetState.selected,
+    });
   }
 
   @override
@@ -81,16 +83,12 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: SelectableButton(
-          selected: selected,
-          style: style,
-          onPressed: () {
-            setState(() {
-              selected = !selected;
-            });
-          },
-          child: const Text('toggle selected'),
-        ),
+        child: SelectableButton(selected: selected, style: style, onPressed:
+            () {
+              setState(() {
+                selected = !selected;
+              });
+            }, child: const Text('toggle selected')),
       ),
     );
   }

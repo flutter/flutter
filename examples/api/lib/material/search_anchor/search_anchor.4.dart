@@ -23,9 +23,7 @@ class SearchAnchorAsyncExampleApp extends StatelessWidget {
         appBar: AppBar(
           title: const Text('SearchAnchor - async and debouncing'),
         ),
-        body: const Center(
-          child: _AsyncSearchAnchor(),
-        ),
+        body: const Center(child: _AsyncSearchAnchor()),
       ),
     );
   }
@@ -35,10 +33,10 @@ class _AsyncSearchAnchor extends StatefulWidget {
   const _AsyncSearchAnchor();
 
   @override
-  State<_AsyncSearchAnchor > createState() => _AsyncSearchAnchorState();
+  State<_AsyncSearchAnchor> createState() => _AsyncSearchAnchorState();
 }
 
-class _AsyncSearchAnchorState extends State<_AsyncSearchAnchor > {
+class _AsyncSearchAnchorState extends State<_AsyncSearchAnchor> {
   // The query currently being searched for. If null, there is no pending
   // request.
   String? _currentQuery;
@@ -75,26 +73,24 @@ class _AsyncSearchAnchorState extends State<_AsyncSearchAnchor > {
   Widget build(BuildContext context) {
     return SearchAnchor(
       builder: (BuildContext context, SearchController controller) {
-        return IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: () {
-            controller.openView();
-          },
-        );
+        return IconButton(icon: const Icon(Icons.search), onPressed: () {
+          controller.openView();
+        });
       },
-      suggestionsBuilder: (BuildContext context, SearchController controller) async {
-        final List<String>? options = (await _debouncedSearch(controller.text))?.toList();
+      suggestionsBuilder: (
+        BuildContext context,
+        SearchController controller,
+      ) async {
+        final List<String>? options =
+            (await _debouncedSearch(controller.text))?.toList();
         if (options == null) {
           return _lastOptions;
         }
         _lastOptions = List<ListTile>.generate(options.length, (int index) {
           final String item = options[index];
-          return ListTile(
-            title: Text(item),
-            onTap: () {
-              debugPrint('You just selected $item');
-            },
-          );
+          return ListTile(title: Text(item), onTap: () {
+            debugPrint('You just selected $item');
+          });
         });
 
         return _lastOptions;

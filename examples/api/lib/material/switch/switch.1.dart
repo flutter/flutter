@@ -17,9 +17,7 @@ class SwitchApp extends StatelessWidget {
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
         appBar: AppBar(title: const Text('Switch Sample')),
-        body: const Center(
-          child: SwitchExample(),
-        ),
+        body: const Center(child: SwitchExample()),
       ),
     );
   }
@@ -39,19 +37,17 @@ class _SwitchExampleState extends State<SwitchExample> {
   Widget build(BuildContext context) {
     // This object sets amber as the track color when the switch is selected.
     // Otherwise, it resolves to null and defers to values from the theme data.
-    const WidgetStateProperty<Color?> trackColor = WidgetStateProperty<Color?>.fromMap(
-      <WidgetStatesConstraint, Color>{
-        WidgetState.selected: Colors.amber,
-      },
-    );
+    const WidgetStateProperty<Color?> trackColor =
+        WidgetStateProperty<Color?>.fromMap(<WidgetStatesConstraint, Color>{
+          WidgetState.selected: Colors.amber,
+        });
     // This object sets the track color based on two WidgetState attributes.
     // If neither state applies, it resolves to null.
-    final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty<Color?>.fromMap(
-      <WidgetState, Color>{
-        WidgetState.selected: Colors.amber.withOpacity(0.54),
-        WidgetState.disabled: Colors.grey.shade400,
-      },
-    );
+    final WidgetStateProperty<Color?> overlayColor =
+        WidgetStateProperty<Color?>.fromMap(<WidgetState, Color>{
+          WidgetState.selected: Colors.amber.withOpacity(0.54),
+          WidgetState.disabled: Colors.grey.shade400,
+        });
 
     return Switch(
       // This bool value toggles the switch.

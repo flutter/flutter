@@ -14,7 +14,8 @@ class ExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WidgetsApp(
-      builder: (BuildContext context, Widget? navigator) => const ExampleWidget(),
+      builder:
+          (BuildContext context, Widget? navigator) => const ExampleWidget(),
       color: const Color(0xffffffff),
     );
   }
@@ -29,12 +30,9 @@ class ExampleWidget extends StatelessWidget {
     // (https://www.google.com/fonts).
     return const Text(
       'Fractions: 1/2 2/3 3/4 4/5',
-      style: TextStyle(
-        fontFamily: 'Ubuntu Mono',
-        fontFeatures: <FontFeature>[
-          FontFeature.fractions(),
-        ],
-      ),
+      style: TextStyle(fontFamily: 'Ubuntu Mono', fontFeatures: <FontFeature>[
+        FontFeature.fractions(),
+      ]),
     );
   }
 }

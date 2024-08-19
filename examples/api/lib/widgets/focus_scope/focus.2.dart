@@ -13,9 +13,7 @@ class FocusExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: FocusExample(),
-    );
+    return const MaterialApp(home: FocusExample());
   }
 }
 
@@ -49,35 +47,32 @@ class _FocusExampleState extends State<FocusExample> {
   void _addChild() {
     // Calling requestFocus here creates a deferred request for focus, since the
     // node is not yet part of the focus tree.
-    childFocusNodes.add(FocusNode(debugLabel: 'Child ${children.length}')..requestFocus());
+    childFocusNodes.add(
+      FocusNode(debugLabel: 'Child ${children.length}')..requestFocus(),
+    );
 
-    children.add(Padding(
-      padding: const EdgeInsets.all(2.0),
-      child: ActionChip(
-        focusNode: childFocusNodes.last,
-        label: Text('CHILD ${children.length}'),
-        onPressed: () {},
+    children.add(
+      Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: ActionChip(
+          focusNode: childFocusNodes.last,
+          label: Text('CHILD ${children.length}'),
+          onPressed: () {},
+        ),
       ),
-    ));
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Wrap(
-          children: children,
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            focusedChild = children.length;
-            _addChild();
-          });
-        },
-        child: const Icon(Icons.add),
-      ),
+      body: Center(child: Wrap(children: children)),
+      floatingActionButton: FloatingActionButton(onPressed: () {
+        setState(() {
+          focusedChild = children.length;
+          _addChild();
+        });
+      }, child: const Icon(Icons.add)),
     );
   }
 }

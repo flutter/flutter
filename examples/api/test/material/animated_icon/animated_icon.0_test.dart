@@ -9,9 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('AnimatedIcon animates', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.AnimatedIconApp(),
-    );
+    await tester.pumpWidget(const example.AnimatedIconApp());
 
     // Test the AnimatedIcon size.
     final Size iconSize = tester.getSize(find.byType(AnimatedIcon));

@@ -38,48 +38,45 @@ class _CupertinoSliderExampleState extends State<CupertinoSliderExample> {
         middle: Text('CupertinoSlider Sample'),
       ),
       child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            // Display the current slider value.
-            Text('$_currentSliderValue'),
-            CupertinoSlider(
-              key: const Key('slider'),
-              value: _currentSliderValue,
-              // This allows the slider to jump between divisions.
-              // If null, the slide movement is continuous.
-              divisions: 5,
-              // The maximum slider value
-              max: 100,
-              activeColor: CupertinoColors.systemPurple,
-              thumbColor: CupertinoColors.systemPurple,
-              // This is called when sliding is started.
-              onChangeStart: (double value) {
-                setState(() {
-                  _sliderStatus = 'Sliding';
-                });
-              },
-              // This is called when sliding has ended.
-              onChangeEnd: (double value) {
-                setState(() {
-                  _sliderStatus = 'Finished sliding';
-                });
-              },
-              // This is called when slider value is changed.
-              onChanged: (double value) {
-                setState(() {
-                  _currentSliderValue = value;
-                });
-              },
-            ),
-            Text(
-              _sliderStatus ?? '',
-              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                    fontSize: 12,
-                  ),
-            ),
-          ],
-        ),
+        child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+          // Display the current slider value.
+          Text('$_currentSliderValue'),
+          CupertinoSlider(
+            key: const Key('slider'),
+            value: _currentSliderValue,
+            // This allows the slider to jump between divisions.
+            // If null, the slide movement is continuous.
+            divisions: 5,
+            // The maximum slider value
+            max: 100,
+            activeColor: CupertinoColors.systemPurple,
+            thumbColor: CupertinoColors.systemPurple,
+            // This is called when sliding is started.
+            onChangeStart: (double value) {
+              setState(() {
+                _sliderStatus = 'Sliding';
+              });
+            },
+            // This is called when sliding has ended.
+            onChangeEnd: (double value) {
+              setState(() {
+                _sliderStatus = 'Finished sliding';
+              });
+            },
+            // This is called when slider value is changed.
+            onChanged: (double value) {
+              setState(() {
+                _currentSliderValue = value;
+              });
+            },
+          ),
+          Text(
+            _sliderStatus ?? '',
+            style: CupertinoTheme.of(
+              context,
+            ).textTheme.textStyle.copyWith(fontSize: 12),
+          ),
+        ]),
       ),
     );
   }

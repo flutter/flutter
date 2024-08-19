@@ -13,9 +13,7 @@ class FocusTraversalGroupExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: FocusTraversalGroupExample(),
-    );
+    return const MaterialApp(home: FocusTraversalGroupExample());
   }
 }
 
@@ -121,58 +119,59 @@ class FocusTraversalGroupExample extends StatelessWidget {
       color: Colors.white,
       child: FocusTraversalGroup(
         policy: OrderedTraversalPolicy(),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            // A group that is ordered with a numerical order, from left to right.
-            FocusTraversalGroup(
-              policy: OrderedTraversalPolicy(),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List<Widget>.generate(3, (int index) {
-                  return OrderedButton<num>(
-                    name: 'num: $index',
-                    // TRY THIS: change this to "3 - index" and see how the order changes.
-                    order: index,
-                  );
-                }),
-              ),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: <
+          Widget
+        >[
+          // A group that is ordered with a numerical order, from left to right.
+          FocusTraversalGroup(
+            policy: OrderedTraversalPolicy(),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List<Widget>.generate(3, (int index) {
+                return OrderedButton<num>(
+                  name: 'num: $index',
+                  // TRY THIS: change this to "3 - index" and see how the order changes.
+                  order: index,
+                );
+              }),
             ),
-            // A group that is ordered with a lexical order, from right to left.
-            FocusTraversalGroup(
-              policy: OrderedTraversalPolicy(),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List<Widget>.generate(3, (int index) {
-                  // Order as "C" "B", "A".
-                  final String order = String.fromCharCode('A'.codeUnitAt(0) + (2 - index));
-                  return OrderedButton<String>(
-                    name: 'String: $order',
-                    order: order,
-                  );
-                }),
-              ),
+          ),
+          // A group that is ordered with a lexical order, from right to left.
+          FocusTraversalGroup(
+            policy: OrderedTraversalPolicy(),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List<Widget>.generate(3, (int index) {
+                // Order as "C" "B", "A".
+                final String order = String.fromCharCode(
+                  'A'.codeUnitAt(0) + (2 - index),
+                );
+                return OrderedButton<String>(
+                  name: 'String: $order',
+                  order: order,
+                );
+              }),
             ),
-            // A group that orders in widget order, regardless of what the order is set to.
-            FocusTraversalGroup(
-              // Because this is NOT an OrderedTraversalPolicy, the
-              // assigned order of these OrderedButtons is ignored, and they
-              // are traversed in widget order. TRY THIS: change this to
-              // "OrderedTraversalPolicy()" and see that it now follows the
-              // numeric order set on them instead of the widget order.
-              policy: WidgetOrderTraversalPolicy(),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List<Widget>.generate(3, (int index) {
-                  return OrderedButton<num>(
-                    name: 'ignored num: ${3 - index}',
-                    order: 3 - index,
-                  );
-                }),
-              ),
+          ),
+          // A group that orders in widget order, regardless of what the order is set to.
+          FocusTraversalGroup(
+            // Because this is NOT an OrderedTraversalPolicy, the
+            // assigned order of these OrderedButtons is ignored, and they
+            // are traversed in widget order. TRY THIS: change this to
+            // "OrderedTraversalPolicy()" and see that it now follows the
+            // numeric order set on them instead of the widget order.
+            policy: WidgetOrderTraversalPolicy(),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List<Widget>.generate(3, (int index) {
+                return OrderedButton<num>(
+                  name: 'ignored num: ${3 - index}',
+                  order: 3 - index,
+                );
+              }),
             ),
-          ],
-        ),
+          ),
+        ]),
       ),
     );
   }

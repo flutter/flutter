@@ -15,10 +15,10 @@ void main() {
     return example.SharedObject.of(context);
   }
 
-  testWidgets('Verify correct labels are displayed', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.SharedAppDataExampleApp(),
-    );
+  testWidgets('Verify correct labels are displayed', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.SharedAppDataExampleApp());
 
     final example.SharedObject sharedObject = getSharedObject(tester);
 
@@ -27,9 +27,7 @@ void main() {
   });
 
   testWidgets('Button tap resets SharedObject', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.SharedAppDataExampleApp(),
-    );
+    await tester.pumpWidget(const example.SharedAppDataExampleApp());
 
     for (int i = 0; i < 10; i++) {
       final example.SharedObject sharedObject = getSharedObject(tester);

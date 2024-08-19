@@ -3,14 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/dropdown_menu/dropdown_menu.0.dart' as example;
+import 'package:flutter_api_samples/material/dropdown_menu/dropdown_menu.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('DropdownMenu', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.DropdownMenuExample(),
-    );
+    await tester.pumpWidget(const example.DropdownMenuExample());
 
     expect(find.text('You selected a Blue Smile'), findsNothing);
 
@@ -53,10 +52,10 @@ void main() {
     expect(find.text('You selected a Blue Smile'), findsOneWidget);
   });
 
-  testWidgets('DropdownMenu has focus when tapping on the text field', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.DropdownMenuExample(),
-    );
+  testWidgets('DropdownMenu has focus when tapping on the text field', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.DropdownMenuExample());
 
     // Make sure the dropdown menus are there.
     final Finder colorMenu = find.byType(DropdownMenu<example.ColorLabel>);

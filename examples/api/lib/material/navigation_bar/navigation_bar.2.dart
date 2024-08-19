@@ -46,29 +46,30 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   void initState() {
     super.initState();
 
-    navigatorKeys = List<GlobalKey<NavigatorState>>.generate(
-      allDestinations.length,
-      (int index) => GlobalKey(),
-    ).toList();
+    navigatorKeys =
+        List<GlobalKey<NavigatorState>>.generate(
+          allDestinations.length,
+          (int index) => GlobalKey(),
+        ).toList();
 
-    destinationFaders = List<AnimationController>.generate(
-      allDestinations.length,
-      (int index) => buildFaderController(),
-    ).toList();
+    destinationFaders =
+        List<AnimationController>.generate(
+          allDestinations.length,
+          (int index) => buildFaderController(),
+        ).toList();
     destinationFaders[selectedIndex].value = 1.0;
 
     final CurveTween tween = CurveTween(curve: Curves.fastOutSlowIn);
-    destinationViews = allDestinations.map<Widget>(
-      (Destination destination) {
-        return FadeTransition(
-          opacity: destinationFaders[destination.index].drive(tween),
-          child: DestinationView(
-            destination: destination,
-            navigatorKey: navigatorKeys[destination.index],
-          ),
-        );
-      },
-    ).toList();
+    destinationViews =
+        allDestinations.map<Widget>((Destination destination) {
+          return FadeTransition(
+            opacity: destinationFaders[destination.index].drive(tween),
+            child: DestinationView(
+              destination: destination,
+              navigatorKey: navigatorKeys[destination.index],
+            ),
+          );
+        }).toList();
   }
 
   @override
@@ -83,7 +84,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   Widget build(BuildContext context) {
     return NavigatorPopHandler(
       onPop: () {
-        final NavigatorState navigator = navigatorKeys[selectedIndex].currentState!;
+        final NavigatorState navigator =
+            navigatorKeys[selectedIndex].currentState!;
         navigator.pop();
       },
       child: Scaffold(
@@ -91,22 +93,21 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
           top: false,
           child: Stack(
             fit: StackFit.expand,
-            children: allDestinations.map(
-              (Destination destination) {
-                final int index = destination.index;
-                final Widget view = destinationViews[index];
-                if (index == selectedIndex) {
-                  destinationFaders[index].forward();
-                  return Offstage(offstage: false, child: view);
-                } else {
-                  destinationFaders[index].reverse();
-                  if (destinationFaders[index].isAnimating) {
-                    return IgnorePointer(child: view);
+            children:
+                allDestinations.map((Destination destination) {
+                  final int index = destination.index;
+                  final Widget view = destinationViews[index];
+                  if (index == selectedIndex) {
+                    destinationFaders[index].forward();
+                    return Offstage(offstage: false, child: view);
+                  } else {
+                    destinationFaders[index].reverse();
+                    if (destinationFaders[index].isAnimating) {
+                      return IgnorePointer(child: view);
+                    }
+                    return Offstage(child: view);
                   }
-                  return Offstage(child: view);
-                }
-              },
-            ).toList(),
+                }).toList(),
           ),
         ),
         bottomNavigationBar: NavigationBar(
@@ -116,14 +117,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
               selectedIndex = index;
             });
           },
-          destinations: allDestinations.map<NavigationDestination>(
-            (Destination destination) {
-              return NavigationDestination(
-                icon: Icon(destination.icon, color: destination.color),
-                label: destination.title,
-              );
-            },
-          ).toList(),
+          destinations:
+              allDestinations.map<NavigationDestination>((
+                Destination destination,
+              ) {
+                return NavigationDestination(
+                  icon: Icon(destination.icon, color: destination.color),
+                  label: destination.title,
+                );
+              }).toList(),
         ),
       ),
     );
@@ -144,17 +146,12 @@ class RootPage extends StatelessWidget {
   final Destination destination;
 
   Widget _buildDialog(BuildContext context) {
-    return AlertDialog(
-      title: Text('${destination.title} AlertDialog'),
-      actions: <Widget>[
-        TextButton(
-          onPressed: () {
+    return AlertDialog(title: Text('${destination.title} AlertDialog'), actions:
+        <Widget>[
+          TextButton(onPressed: () {
             Navigator.pop(context);
-          },
-          child: const Text('OK'),
-        ),
-      ],
-    );
+          }, child: const Text('OK')),
+        ]);
   }
 
   @override
@@ -176,69 +173,47 @@ class RootPage extends StatelessWidget {
       ),
       backgroundColor: destination.color[50],
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ElevatedButton(
-              style: buttonStyle,
-              onPressed: () {
-                Navigator.pushNamed(context, '/list');
-              },
-              child: const Text('Push /list'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              style: buttonStyle,
-              onPressed: () {
-                showDialog<void>(
-                  context: context,
-                  useRootNavigator: false,
-                  builder: _buildDialog,
+        child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+          ElevatedButton(style: buttonStyle, onPressed: () {
+            Navigator.pushNamed(context, '/list');
+          }, child: const Text('Push /list')),
+          const SizedBox(height: 16),
+          ElevatedButton(style: buttonStyle, onPressed: () {
+            showDialog<void>(
+              context: context,
+              useRootNavigator: false,
+              builder: _buildDialog,
+            );
+          }, child: const Text('Local Dialog')),
+          const SizedBox(height: 16),
+          ElevatedButton(style: buttonStyle, onPressed: () {
+            showDialog<void>(
+              context: context,
+              useRootNavigator: true, // ignore: avoid_redundant_argument_values
+              builder: _buildDialog,
+            );
+          }, child: const Text('Root Dialog')),
+          const SizedBox(height: 16),
+          Builder(builder: (BuildContext context) {
+            return ElevatedButton(style: buttonStyle, onPressed: () {
+              showBottomSheet(context: context, builder: (
+                BuildContext context,
+              ) {
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  width: double.infinity,
+                  child: Text(
+                    '${destination.title} BottomSheet\n'
+                    'Tap the back button to dismiss',
+                    style: headlineSmall,
+                    softWrap: true,
+                    textAlign: TextAlign.center,
+                  ),
                 );
-              },
-              child: const Text('Local Dialog'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              style: buttonStyle,
-              onPressed: () {
-                showDialog<void>(
-                  context: context,
-                  useRootNavigator: true, // ignore: avoid_redundant_argument_values
-                  builder: _buildDialog,
-                );
-              },
-              child: const Text('Root Dialog'),
-            ),
-            const SizedBox(height: 16),
-            Builder(
-              builder: (BuildContext context) {
-                return ElevatedButton(
-                  style: buttonStyle,
-                  onPressed: () {
-                    showBottomSheet(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return Container(
-                          padding: const EdgeInsets.all(16),
-                          width: double.infinity,
-                          child: Text(
-                            '${destination.title} BottomSheet\n'
-                            'Tap the back button to dismiss',
-                            style: headlineSmall,
-                            softWrap: true,
-                            textAlign: TextAlign.center,
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  child: const Text('Local BottomSheet'),
-                );
-              },
-            ),
-          ],
-        ),
+              });
+            }, child: const Text('Local BottomSheet'));
+          }),
+        ]),
       ),
     );
   }
@@ -256,9 +231,7 @@ class ListPage extends StatelessWidget {
     final ButtonStyle buttonStyle = OutlinedButton.styleFrom(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: BorderSide(
-          color: colorScheme.onSurface.withOpacity(0.12),
-        ),
+        side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
       ),
       foregroundColor: destination.color,
       fixedSize: const Size.fromHeight(64),
@@ -272,29 +245,29 @@ class ListPage extends StatelessWidget {
       ),
       backgroundColor: destination.color[50],
       body: SizedBox.expand(
-        child: ListView.builder(
-          itemCount: itemCount,
-          itemBuilder: (BuildContext context, int index) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-              child: OutlinedButton(
-                style: buttonStyle.copyWith(
-                  backgroundColor: WidgetStatePropertyAll<Color>(
-                    Color.lerp(
-                      destination.color[100],
-                      Colors.white,
-                      index / itemCount
-                    )!,
-                  ),
+        child: ListView.builder(itemCount: itemCount, itemBuilder: (
+          BuildContext context,
+          int index,
+        ) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            child: OutlinedButton(
+              style: buttonStyle.copyWith(
+                backgroundColor: WidgetStatePropertyAll<Color>(
+                  Color.lerp(
+                    destination.color[100],
+                    Colors.white,
+                    index / itemCount,
+                  )!,
                 ),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/text');
-                },
-                child: Text('Push /text [$index]'),
               ),
-            );
-          },
-        ),
+              onPressed: () {
+                Navigator.pushNamed(context, '/text');
+              },
+              child: Text('Push /text [$index]'),
+            ),
+          );
+        }),
       ),
     );
   }
@@ -373,25 +346,23 @@ class DestinationView extends StatefulWidget {
 class _DestinationViewState extends State<DestinationView> {
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      key: widget.navigatorKey,
-      onGenerateRoute: (RouteSettings settings) {
-        return MaterialPageRoute<void>(
-          settings: settings,
-          builder: (BuildContext context) {
-            switch (settings.name) {
-              case '/':
-                return RootPage(destination: widget.destination);
-              case '/list':
-                return ListPage(destination: widget.destination);
-              case '/text':
-                return TextPage(destination: widget.destination);
-            }
-            assert(false);
-            return const SizedBox();
-          },
-        );
-      },
-    );
+    return Navigator(key: widget.navigatorKey, onGenerateRoute: (
+      RouteSettings settings,
+    ) {
+      return MaterialPageRoute<void>(settings: settings, builder: (
+        BuildContext context,
+      ) {
+        switch (settings.name) {
+          case '/':
+            return RootPage(destination: widget.destination);
+          case '/list':
+            return ListPage(destination: widget.destination);
+          case '/text':
+            return TextPage(destination: widget.destination);
+        }
+        assert(false);
+        return const SizedBox();
+      });
+    });
   }
 }

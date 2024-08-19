@@ -15,11 +15,7 @@ class ExtendedAnimationExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: MyNavigationRail(),
-      ),
-    );
+    return const MaterialApp(home: Scaffold(body: MyNavigationRail()));
   }
 }
 
@@ -36,56 +32,52 @@ class _MyNavigationRailState extends State<MyNavigationRail> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        NavigationRail(
-          selectedIndex: _selectedIndex,
-          extended: _extended,
-          leading: MyNavigationRailFab(onPressed: () {
-            setState(() {
-              _extended = !_extended;
-            });
-          }),
-          onDestinationSelected: (int index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-          labelType: NavigationRailLabelType.none,
-          destinations: const <NavigationRailDestination>[
-            NavigationRailDestination(
-              icon: Icon(Icons.favorite_border),
-              selectedIcon: Icon(Icons.favorite),
-              label: Text('First'),
-            ),
-            NavigationRailDestination(
-              icon: Icon(Icons.bookmark_border),
-              selectedIcon: Icon(Icons.book),
-              label: Text('Second'),
-            ),
-            NavigationRailDestination(
-              icon: Icon(Icons.star_border),
-              selectedIcon: Icon(Icons.star),
-              label: Text('Third'),
-            ),
-          ],
-        ),
-        const VerticalDivider(thickness: 1, width: 1),
-        // This is the main content.
-        Expanded(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
+    return Row(children: <Widget>[
+      NavigationRail(
+        selectedIndex: _selectedIndex,
+        extended: _extended,
+        leading: MyNavigationRailFab(onPressed: () {
+          setState(() {
+            _extended = !_extended;
+          });
+        }),
+        onDestinationSelected: (int index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        labelType: NavigationRailLabelType.none,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('First'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.book),
+            label: Text('Second'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.star_border),
+            selectedIcon: Icon(Icons.star),
+            label: Text('Third'),
+          ),
+        ],
+      ),
+      const VerticalDivider(thickness: 1, width: 1),
+      // This is the main content.
+      Expanded(
+        child: Center(
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+              <Widget>[
                 const Text('Tap on FloatingActionButton to expand'),
                 const SizedBox(height: 20),
                 Text('selectedIndex: $_selectedIndex'),
-              ],
-            ),
-          ),
+              ]),
         ),
-      ],
-    );
+      ),
+    ]);
   }
 }
 
@@ -96,22 +88,26 @@ class MyNavigationRailFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = NavigationRail.extendedAnimation(context);
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (BuildContext context, Widget? child) {
-        // The extended fab has a shorter height than the regular fab.
-        return Container(
-          height: 56,
-          padding: EdgeInsets.symmetric(
-            vertical: lerpDouble(0, 6, animation.value)!,
-          ),
-          child: animation.value == 0
-              ? FloatingActionButton(
+    final Animation<double> animation = NavigationRail.extendedAnimation(
+      context,
+    );
+    return AnimatedBuilder(animation: animation, builder: (
+      BuildContext context,
+      Widget? child,
+    ) {
+      // The extended fab has a shorter height than the regular fab.
+      return Container(
+        height: 56,
+        padding: EdgeInsets.symmetric(
+          vertical: lerpDouble(0, 6, animation.value)!,
+        ),
+        child:
+            animation.value == 0
+                ? FloatingActionButton(
                   onPressed: onPressed,
                   child: const Icon(Icons.add),
                 )
-              : Align(
+                : Align(
                   alignment: AlignmentDirectional.centerStart,
                   widthFactor: animation.value,
                   child: Padding(
@@ -123,8 +119,7 @@ class MyNavigationRailFab extends StatelessWidget {
                     ),
                   ),
                 ),
-        );
-      },
-    );
+      );
+    });
   }
 }

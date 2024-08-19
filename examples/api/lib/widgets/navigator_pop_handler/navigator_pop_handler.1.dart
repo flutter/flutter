@@ -7,17 +7,10 @@
 import 'package:flutter/material.dart';
 
 // There are three possible tabs.
-enum _Tab {
-  home,
-  one,
-  two,
-}
+enum _Tab { home, one, two }
 
 // Each tab has two possible pages.
-enum _TabPage {
-  home,
-  one,
-}
+enum _TabPage { home, one }
 
 typedef _TabPageCallback = void Function(List<_TabPage> pages);
 
@@ -28,13 +21,9 @@ class NavigatorPopHandlerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      initialRoute: '/home',
-      routes: <String, WidgetBuilder>{
-        '/home': (BuildContext context) => const _BottomNavPage(
-        ),
-      },
-    );
+    return MaterialApp(initialRoute: '/home', routes: <String, WidgetBuilder>{
+      '/home': (BuildContext context) => const _BottomNavPage(),
+    });
   }
 }
 
@@ -126,9 +115,7 @@ class _BottomNavPageState extends State<_BottomNavPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: _getPage(_tab),
-      ),
+      body: Center(child: _getPage(_tab)),
       bottomNavigationBar: BottomNavigationBar(
         items: _Tab.values.map(_itemForPage).toList(),
         currentIndex: _Tab.values.indexOf(_tab),
@@ -169,56 +156,54 @@ class _BottomNavTabState extends State<_BottomNavTab> {
       child: Navigator(
         key: _navigatorKey,
         onDidRemovePage: (Page<Object?> page) {
-          widget.onChangedPages(<_TabPage>[
-            ...widget.pages,
-          ]..removeLast());
+          widget.onChangedPages(<_TabPage>[...widget.pages]..removeLast());
         },
-        pages: widget.pages.map((_TabPage page) {
-          switch (page) {
-            case _TabPage.home:
-              return MaterialPage<void>(
-                child: _LinksPage(
-                  title: 'Bottom nav - tab ${widget.title} - route $page',
-                  backgroundColor: widget.color,
-                  buttons: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        widget.onChangedPages(<_TabPage>[
-                          ...widget.pages,
-                          _TabPage.one,
-                        ]);
-                      },
-                      child: const Text('Go to another route in this nested Navigator'),
+        pages:
+            widget.pages.map((_TabPage page) {
+              switch (page) {
+                case _TabPage.home:
+                  return MaterialPage<void>(
+                    child: _LinksPage(
+                      title: 'Bottom nav - tab ${widget.title} - route $page',
+                      backgroundColor: widget.color,
+                      buttons: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            widget.onChangedPages(<_TabPage>[
+                              ...widget.pages,
+                              _TabPage.one,
+                            ]);
+                          },
+                          child: const Text(
+                            'Go to another route in this nested Navigator',
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              );
-            case _TabPage.one:
-              return MaterialPage<void>(
-                child: _LinksPage(
-                  backgroundColor: widget.color,
-                  title: 'Bottom nav - tab ${widget.title} - route $page',
-                  buttons: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        widget.onChangedPages(<_TabPage>[
-                          ...widget.pages,
-                        ]..removeLast());
-                      },
-                      child: const Text('Go back'),
+                  );
+                case _TabPage.one:
+                  return MaterialPage<void>(
+                    child: _LinksPage(
+                      backgroundColor: widget.color,
+                      title: 'Bottom nav - tab ${widget.title} - route $page',
+                      buttons: <Widget>[
+                        TextButton(onPressed: () {
+                          widget.onChangedPages(
+                            <_TabPage>[...widget.pages]..removeLast(),
+                          );
+                        }, child: const Text('Go back')),
+                      ],
                     ),
-                  ],
-                ),
-              );
-          }
-        }).toList(),
+                  );
+              }
+            }).toList(),
       ),
     );
   }
 }
 
 class _LinksPage extends StatelessWidget {
-  const _LinksPage ({
+  const _LinksPage({
     required this.backgroundColor,
     this.buttons = const <Widget>[],
     required this.title,
@@ -233,13 +218,8 @@ class _LinksPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(title),
-            ...buttons,
-          ],
-        ),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+            <Widget>[Text(title), ...buttons]),
       ),
     );
   }

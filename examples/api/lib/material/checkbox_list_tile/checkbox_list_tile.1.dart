@@ -24,7 +24,8 @@ class CheckboxListTileExample extends StatefulWidget {
   const CheckboxListTileExample({super.key});
 
   @override
-  State<CheckboxListTileExample> createState() => _CheckboxListTileExampleState();
+  State<CheckboxListTileExample> createState() =>
+      _CheckboxListTileExampleState();
 }
 
 class _CheckboxListTileExampleState extends State<CheckboxListTileExample> {
@@ -36,46 +37,46 @@ class _CheckboxListTileExampleState extends State<CheckboxListTileExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('CheckboxListTile Sample')),
-      body: Column(
-        children: <Widget>[
-          CheckboxListTile(
-            value: checkboxValue1,
-            onChanged: (bool? value) {
-              setState(() {
-                checkboxValue1 = value!;
-              });
-            },
-            title: const Text('Headline'),
-            subtitle: const Text('Supporting text'),
+      body: Column(children: <Widget>[
+        CheckboxListTile(
+          value: checkboxValue1,
+          onChanged: (bool? value) {
+            setState(() {
+              checkboxValue1 = value!;
+            });
+          },
+          title: const Text('Headline'),
+          subtitle: const Text('Supporting text'),
+        ),
+        const Divider(height: 0),
+        CheckboxListTile(
+          value: checkboxValue2,
+          onChanged: (bool? value) {
+            setState(() {
+              checkboxValue2 = value!;
+            });
+          },
+          title: const Text('Headline'),
+          subtitle: const Text(
+            'Longer supporting text to demonstrate how the text wraps and the checkbox is centered vertically with the text.',
           ),
-          const Divider(height: 0),
-          CheckboxListTile(
-            value: checkboxValue2,
-            onChanged: (bool? value) {
-              setState(() {
-                checkboxValue2 = value!;
-              });
-            },
-            title: const Text('Headline'),
-            subtitle: const Text(
-                'Longer supporting text to demonstrate how the text wraps and the checkbox is centered vertically with the text.'),
+        ),
+        const Divider(height: 0),
+        CheckboxListTile(
+          value: checkboxValue3,
+          onChanged: (bool? value) {
+            setState(() {
+              checkboxValue3 = value!;
+            });
+          },
+          title: const Text('Headline'),
+          subtitle: const Text(
+            "Longer supporting text to demonstrate how the text wraps and how setting 'CheckboxListTile.isThreeLine = true' aligns the checkbox to the top vertically with the text.",
           ),
-          const Divider(height: 0),
-          CheckboxListTile(
-            value: checkboxValue3,
-            onChanged: (bool? value) {
-              setState(() {
-                checkboxValue3 = value!;
-              });
-            },
-            title: const Text('Headline'),
-            subtitle: const Text(
-                "Longer supporting text to demonstrate how the text wraps and how setting 'CheckboxListTile.isThreeLine = true' aligns the checkbox to the top vertically with the text."),
-            isThreeLine: true,
-          ),
-          const Divider(height: 0),
-        ],
-      ),
+          isThreeLine: true,
+        ),
+        const Divider(height: 0),
+      ]),
     );
   }
 }

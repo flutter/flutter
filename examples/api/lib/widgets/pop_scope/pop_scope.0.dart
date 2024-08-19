@@ -14,13 +14,10 @@ class NavigatorPopHandlerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      initialRoute: '/home',
-      routes: <String, WidgetBuilder>{
-        '/home': (BuildContext context) => const _HomePage(),
-        '/two': (BuildContext context) => const _PageTwo(),
-      },
-    );
+    return MaterialApp(initialRoute: '/home', routes: <String, WidgetBuilder>{
+      '/home': (BuildContext context) => const _HomePage(),
+      '/two': (BuildContext context) => const _PageTwo(),
+    });
   }
 }
 
@@ -32,23 +29,17 @@ class _HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<_HomePage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('Page One'),
-            TextButton(
-              onPressed: () {
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+            <Widget>[
+              const Text('Page One'),
+              TextButton(onPressed: () {
                 Navigator.of(context).pushNamed('/two');
-              },
-              child: const Text('Next page'),
-            ),
-          ],
-        ),
+              }, child: const Text('Next page')),
+            ]),
       ),
     );
   }
@@ -68,70 +59,60 @@ class _PageTwoState extends State<_PageTwo> {
   /// A return value of null indicates a desire not to pop, such as when the
   /// user has dismissed the modal without tapping a button.
   Future<bool?> _showBackDialog() {
-    return showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Are you sure?'),
-          content: const Text(
-            'Are you sure you want to leave this page?',
+    return showDialog<bool>(context: context, builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Are you sure?'),
+        content: const Text('Are you sure you want to leave this page?'),
+        actions: <Widget>[
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text('Nevermind'),
+            onPressed: () {
+              Navigator.pop(context, false);
+            },
           ),
-          actions: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: const Text('Nevermind'),
-              onPressed: () {
-                Navigator.pop(context, false);
-              },
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
             ),
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: const Text('Leave'),
-              onPressed: () {
-                Navigator.pop(context, true);
-              },
-            ),
-          ],
-        );
-      },
-    );
+            child: const Text('Leave'),
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+          ),
+        ],
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('Page Two'),
-            PopScope<Object?>(
-              canPop: false,
-              onPopInvokedWithResult: (bool didPop, Object? result) async {
-                if (didPop) {
-                  return;
-                }
-                final bool shouldPop = await _showBackDialog() ?? false;
-                if (context.mounted && shouldPop) {
-                  Navigator.pop(context);
-                }
-              },
-              child: TextButton(
-                onPressed: () async {
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+            <Widget>[
+              const Text('Page Two'),
+              PopScope<Object?>(
+                canPop: false,
+                onPopInvokedWithResult: (bool didPop, Object? result) async {
+                  if (didPop) {
+                    return;
+                  }
                   final bool shouldPop = await _showBackDialog() ?? false;
                   if (context.mounted && shouldPop) {
                     Navigator.pop(context);
                   }
                 },
-                child: const Text('Go back'),
+                child: TextButton(onPressed: () async {
+                  final bool shouldPop = await _showBackDialog() ?? false;
+                  if (context.mounted && shouldPop) {
+                    Navigator.pop(context);
+                  }
+                }, child: const Text('Go back')),
               ),
-            ),
-          ],
-        ),
+            ]),
       ),
     );
   }

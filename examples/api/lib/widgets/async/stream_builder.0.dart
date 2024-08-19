@@ -17,17 +17,12 @@ class StreamBuilderExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: StreamBuilderExample(delay: delay),
-    );
+    return const MaterialApp(home: StreamBuilderExample(delay: delay));
   }
 }
 
 class StreamBuilderExample extends StatefulWidget {
-  const StreamBuilderExample({
-    required this.delay,
-    super.key,
-  });
+  const StreamBuilderExample({required this.delay, super.key});
 
   final Duration delay;
 
@@ -36,21 +31,20 @@ class StreamBuilderExample extends StatefulWidget {
 }
 
 class _StreamBuilderExampleState extends State<StreamBuilderExample> {
-  late final StreamController<int> _controller = StreamController<int>(
-    onListen: () async {
-      await Future<void>.delayed(widget.delay);
+  late final StreamController<int> _controller = StreamController<int>(onListen:
+      () async {
+        await Future<void>.delayed(widget.delay);
 
-      if (!_controller.isClosed) {
-        _controller.add(1);
-      }
+        if (!_controller.isClosed) {
+          _controller.add(1);
+        }
 
-      await Future<void>.delayed(widget.delay);
+        await Future<void>.delayed(widget.delay);
 
-      if (!_controller.isClosed) {
-        _controller.close();
-      }
-    },
-  );
+        if (!_controller.isClosed) {
+          _controller.close();
+        }
+      });
 
   Stream<int> get _bids => _controller.stream;
 
@@ -77,101 +71,84 @@ class _StreamBuilderExampleState extends State<StreamBuilderExample> {
 }
 
 class BidsStatus extends StatelessWidget {
-  const BidsStatus({
-    required this.bids,
-    super.key,
-  });
+  const BidsStatus({required this.bids, super.key});
 
   final Stream<int>? bids;
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<int>(
-      stream: bids,
-      builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-        List<Widget> children;
-        if (snapshot.hasError) {
-          children = <Widget>[
-            const Icon(
-              Icons.error_outline,
-              color: Colors.red,
-              size: 60,
+    return StreamBuilder<int>(stream: bids, builder: (
+      BuildContext context,
+      AsyncSnapshot<int> snapshot,
+    ) {
+      List<Widget> children;
+      if (snapshot.hasError) {
+        children = <Widget>[
+          const Icon(Icons.error_outline, color: Colors.red, size: 60),
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Text('Error: ${snapshot.error}'),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              'Stack trace: ${snapshot.stackTrace}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 16),
-              child: Text('Error: ${snapshot.error}'),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(
-                'Stack trace: ${snapshot.stackTrace}',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+          ),
+        ];
+      } else {
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+            children = const <Widget>[
+              Icon(Icons.info, color: Colors.blue, size: 60),
+              Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: Text('Select a lot'),
               ),
-            ),
-          ];
-        } else {
-          switch (snapshot.connectionState) {
-            case ConnectionState.none:
-              children = const <Widget>[
-                Icon(
-                  Icons.info,
-                  color: Colors.blue,
-                  size: 60,
+            ];
+          case ConnectionState.waiting:
+            children = const <Widget>[
+              SizedBox(
+                width: 60,
+                height: 60,
+                child: CircularProgressIndicator(),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: Text('Awaiting bids...'),
+              ),
+            ];
+          case ConnectionState.active:
+            children = <Widget>[
+              const Icon(
+                Icons.check_circle_outline,
+                color: Colors.green,
+                size: 60,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Text('\$${snapshot.data}'),
+              ),
+            ];
+          case ConnectionState.done:
+            children = <Widget>[
+              const Icon(Icons.info, color: Colors.blue, size: 60),
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Text(
+                  snapshot.hasData ? '\$${snapshot.data} (closed)' : '(closed)',
                 ),
-                Padding(
-                  padding: EdgeInsets.only(top: 16),
-                  child: Text('Select a lot'),
-                ),
-              ];
-            case ConnectionState.waiting:
-              children = const <Widget>[
-                SizedBox(
-                  width: 60,
-                  height: 60,
-                  child: CircularProgressIndicator(),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 16),
-                  child: Text('Awaiting bids...'),
-                ),
-              ];
-            case ConnectionState.active:
-              children = <Widget>[
-                const Icon(
-                  Icons.check_circle_outline,
-                  color: Colors.green,
-                  size: 60,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Text('\$${snapshot.data}'),
-                ),
-              ];
-            case ConnectionState.done:
-              children = <Widget>[
-                const Icon(
-                  Icons.info,
-                  color: Colors.blue,
-                  size: 60,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Text(
-                    snapshot.hasData
-                        ? '\$${snapshot.data} (closed)'
-                        : '(closed)',
-                  ),
-                ),
-              ];
-          }
+              ),
+            ];
         }
+      }
 
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: children,
-        );
-      },
-    );
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: children,
+      );
+    });
   }
 }

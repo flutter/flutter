@@ -16,13 +16,15 @@ class DatePickerApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         datePickerTheme: DatePickerThemeData(
-          todayBackgroundColor: const WidgetStatePropertyAll<Color>(Colors.amber),
-          todayForegroundColor: const WidgetStatePropertyAll<Color>(Colors.black),
+          todayBackgroundColor: const WidgetStatePropertyAll<Color>(
+            Colors.amber,
+          ),
+          todayForegroundColor: const WidgetStatePropertyAll<Color>(
+            Colors.black,
+          ),
           todayBorder: const BorderSide(width: 2),
           dayShape: WidgetStatePropertyAll<OutlinedBorder>(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.0),
@@ -46,18 +48,15 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: OutlinedButton(
-          onPressed: () {
-            showDatePicker(
-              context: context,
-              initialDate: DateTime(2021, 1, 20),
-              currentDate: DateTime(2021, 1, 15),
-              firstDate: DateTime(2021),
-              lastDate: DateTime(2022),
-            );
-          },
-          child: const Text('Open Date Picker'),
-        ),
+        child: OutlinedButton(onPressed: () {
+          showDatePicker(
+            context: context,
+            initialDate: DateTime(2021, 1, 20),
+            currentDate: DateTime(2021, 1, 15),
+            firstDate: DateTime(2021),
+            lastDate: DateTime(2022),
+          );
+        }, child: const Text('Open Date Picker')),
       ),
     );
   }

@@ -30,7 +30,8 @@ class PageViewExample extends StatefulWidget {
   State<PageViewExample> createState() => _PageViewExampleState();
 }
 
-class _PageViewExampleState extends State<PageViewExample> with TickerProviderStateMixin {
+class _PageViewExampleState extends State<PageViewExample>
+    with TickerProviderStateMixin {
   late PageController _pageViewController;
   late TabController _tabController;
   int _currentPageIndex = 0;
@@ -53,34 +54,25 @@ class _PageViewExampleState extends State<PageViewExample> with TickerProviderSt
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
-    return Stack(
-      alignment: Alignment.bottomCenter,
-      children: <Widget>[
-        PageView(
-          /// [PageView.scrollDirection] defaults to [Axis.horizontal].
-          /// Use [Axis.vertical] to scroll vertically.
-          controller: _pageViewController,
-          onPageChanged: _handlePageViewChanged,
-          children: <Widget>[
-            Center(
-              child: Text('First Page', style: textTheme.titleLarge),
-            ),
-            Center(
-              child: Text('Second Page', style: textTheme.titleLarge),
-            ),
-            Center(
-              child: Text('Third Page', style: textTheme.titleLarge),
-            ),
-          ],
-        ),
-        PageIndicator(
-          tabController: _tabController,
-          currentPageIndex: _currentPageIndex,
-          onUpdateCurrentPageIndex: _updateCurrentPageIndex,
-          isOnDesktopAndWeb: _isOnDesktopAndWeb,
-        ),
-      ],
-    );
+    return Stack(alignment: Alignment.bottomCenter, children: <Widget>[
+      PageView(
+        /// [PageView.scrollDirection] defaults to [Axis.horizontal].
+        /// Use [Axis.vertical] to scroll vertically.
+        controller: _pageViewController,
+        onPageChanged: _handlePageViewChanged,
+        children: <Widget>[
+          Center(child: Text('First Page', style: textTheme.titleLarge)),
+          Center(child: Text('Second Page', style: textTheme.titleLarge)),
+          Center(child: Text('Third Page', style: textTheme.titleLarge)),
+        ],
+      ),
+      PageIndicator(
+        tabController: _tabController,
+        currentPageIndex: _currentPageIndex,
+        onUpdateCurrentPageIndex: _updateCurrentPageIndex,
+        isOnDesktopAndWeb: _isOnDesktopAndWeb,
+      ),
+    ]);
   }
 
   void _handlePageViewChanged(int currentPageIndex) {
@@ -150,44 +142,36 @@ class PageIndicator extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          IconButton(
-            splashRadius: 16.0,
-            padding: EdgeInsets.zero,
-            onPressed: () {
-              if (currentPageIndex == 0) {
-                return;
-              }
-              onUpdateCurrentPageIndex(currentPageIndex - 1);
-            },
-            icon: const Icon(
-              Icons.arrow_left_rounded,
-              size: 32.0,
+      child: Row(mainAxisAlignment: MainAxisAlignment.center, children:
+          <Widget>[
+            IconButton(
+              splashRadius: 16.0,
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                if (currentPageIndex == 0) {
+                  return;
+                }
+                onUpdateCurrentPageIndex(currentPageIndex - 1);
+              },
+              icon: const Icon(Icons.arrow_left_rounded, size: 32.0),
             ),
-          ),
-          TabPageSelector(
-            controller: tabController,
-            color: colorScheme.surface,
-            selectedColor: colorScheme.primary,
-          ),
-          IconButton(
-            splashRadius: 16.0,
-            padding: EdgeInsets.zero,
-            onPressed: () {
-              if (currentPageIndex == 2) {
-                return;
-              }
-              onUpdateCurrentPageIndex(currentPageIndex + 1);
-            },
-            icon: const Icon(
-              Icons.arrow_right_rounded,
-              size: 32.0,
+            TabPageSelector(
+              controller: tabController,
+              color: colorScheme.surface,
+              selectedColor: colorScheme.primary,
             ),
-          ),
-        ],
-      ),
+            IconButton(
+              splashRadius: 16.0,
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                if (currentPageIndex == 2) {
+                  return;
+                }
+                onUpdateCurrentPageIndex(currentPageIndex + 1);
+              },
+              icon: const Icon(Icons.arrow_right_rounded, size: 32.0),
+            ),
+          ]),
     );
   }
 }

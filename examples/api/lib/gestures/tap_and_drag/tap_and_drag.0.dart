@@ -18,11 +18,7 @@ class TapAndDragToZoomApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       home: Scaffold(
-        body: Center(
-          child: TapAndDragToZoomWidget(
-            child: MyBoxWidget(),
-          ),
-        ),
+        body: Center(child: TapAndDragToZoomWidget(child: MyBoxWidget())),
       ),
     );
   }
@@ -33,11 +29,7 @@ class MyBoxWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.blueAccent,
-      height: 100.0,
-      width: 100.0,
-    );
+    return Container(color: Colors.blueAccent, height: 100.0, width: 100.0);
   }
 }
 
@@ -72,8 +64,10 @@ class _TapAndDragToZoomWidgetState extends State<TapAndDragToZoomWidget> {
   }
 
   void _zoomLogic(Offset currentDragPosition) {
-    final double dx = (_previousDragPosition!.dx - currentDragPosition.dx).abs();
-    final double dy = (_previousDragPosition!.dy - currentDragPosition.dy).abs();
+    final double dx =
+        (_previousDragPosition!.dx - currentDragPosition.dx).abs();
+    final double dy =
+        (_previousDragPosition!.dy - currentDragPosition.dy).abs();
 
     if (dx > dy) {
       // Ignore horizontal drags.
@@ -99,40 +93,35 @@ class _TapAndDragToZoomWidgetState extends State<TapAndDragToZoomWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return RawGestureDetector(
-      gestures: <Type, GestureRecognizerFactory>{
-        TapAndPanGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
-          () => TapAndPanGestureRecognizer(),
-          (TapAndPanGestureRecognizer instance) {
-            instance
-              ..onTapDown = (TapDragDownDetails details) {
-                _previousDragPosition = details.globalPosition;
-              }
-              ..onDragStart = (TapDragStartDetails details) {
-                if (details.consecutiveTapCount == 2) {
-                  _zoomLogic(details.globalPosition);
+    return RawGestureDetector(gestures: <Type, GestureRecognizerFactory>{
+      TapAndPanGestureRecognizer:
+          GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
+            () => TapAndPanGestureRecognizer(),
+            (TapAndPanGestureRecognizer instance) {
+              instance
+                ..onTapDown = (TapDragDownDetails details) {
+                  _previousDragPosition = details.globalPosition;
                 }
-              }
-              ..onDragUpdate = (TapDragUpdateDetails details) {
-                if (details.consecutiveTapCount == 2) {
-                  _zoomLogic(details.globalPosition);
+                ..onDragStart = (TapDragStartDetails details) {
+                  if (details.consecutiveTapCount == 2) {
+                    _zoomLogic(details.globalPosition);
+                  }
                 }
-              }
-              ..onDragEnd = (TapDragEndDetails details) {
-                if (details.consecutiveTapCount == 2) {
-                  setState(() {
-                    _currentScale = 1.0;
-                  });
-                  _previousDragPosition = null;
+                ..onDragUpdate = (TapDragUpdateDetails details) {
+                  if (details.consecutiveTapCount == 2) {
+                    _zoomLogic(details.globalPosition);
+                  }
                 }
-              };
-          }
-        ),
-      },
-      child: Transform.scale(
-        scale: _currentScale,
-        child: widget.child,
-      ),
-    );
+                ..onDragEnd = (TapDragEndDetails details) {
+                  if (details.consecutiveTapCount == 2) {
+                    setState(() {
+                      _currentScale = 1.0;
+                    });
+                    _previousDragPosition = null;
+                  }
+                };
+            },
+          ),
+    }, child: Transform.scale(scale: _currentScale, child: widget.child));
   }
 }

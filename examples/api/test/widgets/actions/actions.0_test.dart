@@ -22,9 +22,7 @@ void main() {
   }
 
   testWidgets('Increments and decrements value', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.ActionsExampleApp(),
-    );
+    await tester.pumpWidget(const example.ActionsExampleApp());
 
     int value = 0;
 
@@ -50,9 +48,7 @@ void main() {
   });
 
   testWidgets('SaveButton indicates dirty status', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.ActionsExampleApp(),
-    );
+    await tester.pumpWidget(const example.ActionsExampleApp());
 
     // Verify that initial color is green, as the value is not marked as dirty.
     Color? saveButtonColor = getSaveButtonColor(tester);
@@ -77,7 +73,9 @@ void main() {
     expect(saveButtonColor, equals(Colors.red));
   });
 
-  testWidgets('SaveButton tap resets dirty status and adds log', (WidgetTester tester) async {
+  testWidgets('SaveButton tap resets dirty status and adds log', (
+    WidgetTester tester,
+  ) async {
     final List<String?> log = <String?>[];
 
     final DebugPrintCallback originalDebugPrint = debugPrint;
@@ -85,9 +83,7 @@ void main() {
       log.add(message);
     };
 
-    await tester.pumpWidget(
-      const example.ActionsExampleApp(),
-    );
+    await tester.pumpWidget(const example.ActionsExampleApp());
 
     // Verify that value is not marked as dirty.
     Color? saveButtonColor = getSaveButtonColor(tester);

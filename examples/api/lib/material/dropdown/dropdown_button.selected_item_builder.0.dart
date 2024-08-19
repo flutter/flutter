@@ -43,43 +43,46 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text('Select a city:', style: Theme.of(context).textTheme.bodyLarge),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: DropdownButton<String>(
-              value: selectedItem,
-              onChanged: (String? value) {
-                // This is called when the user selects an item.
-                setState(() => selectedItem = value!);
-              },
-              selectedItemBuilder: (BuildContext context) {
-                return cities.values.map<Widget>((String item) {
-                  // This is the widget that will be shown when you select an item.
-                  // Here custom text style, alignment and layout size can be applied
-                  // to selected item string.
-                  return Container(
-                    alignment: Alignment.centerLeft,
-                    constraints: const BoxConstraints(minWidth: 100),
-                    child: Text(
-                      item,
-                      style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
+      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: <
+        Widget
+      >[
+        Text('Select a city:', style: Theme.of(context).textTheme.bodyLarge),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: DropdownButton<String>(
+            value: selectedItem,
+            onChanged: (String? value) {
+              // This is called when the user selects an item.
+              setState(() => selectedItem = value!);
+            },
+            selectedItemBuilder: (BuildContext context) {
+              return cities.values.map<Widget>((String item) {
+                // This is the widget that will be shown when you select an item.
+                // Here custom text style, alignment and layout size can be applied
+                // to selected item string.
+                return Container(
+                  alignment: Alignment.centerLeft,
+                  constraints: const BoxConstraints(minWidth: 100),
+                  child: Text(
+                    item,
+                    style: const TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.w600,
                     ),
-                  );
-                }).toList();
-              },
-              items: cities.keys.map<DropdownMenuItem<String>>((String item) {
-                return DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(item),
+                  ),
                 );
-              }).toList(),
-            ),
+              }).toList();
+            },
+            items:
+                cities.keys.map<DropdownMenuItem<String>>((String item) {
+                  return DropdownMenuItem<String>(
+                    value: item,
+                    child: Text(item),
+                  );
+                }).toList(),
           ),
-        ],
-      ),
+        ),
+      ]),
     );
   }
 }

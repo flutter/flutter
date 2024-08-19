@@ -67,7 +67,7 @@ class _ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
       slivers: <Widget>[
         SliverList.separated(
           itemCount: 50,
-          itemBuilder: (_,int index) {
+          itemBuilder: (_, int index) {
             return Padding(
               padding: const EdgeInsets.symmetric(
                 vertical: 8.0,
@@ -76,11 +76,8 @@ class _ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
               child: Text('Item $index'),
             );
           },
-          separatorBuilder: (_, __) => const Divider(
-            indent: 20,
-            endIndent: 20,
-            thickness: 2,
-          ),
+          separatorBuilder:
+              (_, __) => const Divider(indent: 20, endIndent: 20, thickness: 2),
         ),
       ],
     );
@@ -108,26 +105,25 @@ class _ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                if (!_useController) Text('Last notification: ${_lastNotification.runtimeType}'),
+                if (!_useController)
+                  Text('Last notification: ${_lastNotification.runtimeType}'),
                 if (!_useController) const SizedBox.square(dimension: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    const Text('with:'),
-                    Radio<bool>(
-                      value: true,
-                      groupValue: _useController,
-                      onChanged: _handleRadioChange,
-                    ),
-                    const Text('ScrollController'),
-                    Radio<bool>(
-                      value: false,
-                      groupValue: _useController,
-                      onChanged: _handleRadioChange,
-                    ),
-                    const Text('NotificationListener'),
-                  ],
-                ),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children:
+                    <Widget>[
+                      const Text('with:'),
+                      Radio<bool>(
+                        value: true,
+                        groupValue: _useController,
+                        onChanged: _handleRadioChange,
+                      ),
+                      const Text('ScrollController'),
+                      Radio<bool>(
+                        value: false,
+                        groupValue: _useController,
+                        onChanged: _handleRadioChange,
+                      ),
+                      const Text('NotificationListener'),
+                    ]),
               ],
             ),
           ),

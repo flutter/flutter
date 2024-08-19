@@ -16,9 +16,7 @@ class CharacterActivatorExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('CharacterActivator Sample')),
-        body: const Center(
-          child: CharacterActivatorExample(),
-        ),
+        body: const Center(child: CharacterActivatorExample()),
       ),
     );
   }
@@ -32,7 +30,8 @@ class CharacterActivatorExample extends StatefulWidget {
   const CharacterActivatorExample({super.key});
 
   @override
-  State<CharacterActivatorExample> createState() => _CharacterActivatorExampleState();
+  State<CharacterActivatorExample> createState() =>
+      _CharacterActivatorExampleState();
 }
 
 class _CharacterActivatorExampleState extends State<CharacterActivatorExample> {
@@ -44,22 +43,20 @@ class _CharacterActivatorExampleState extends State<CharacterActivatorExample> {
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
-          HelpMenuIntent: CallbackAction<HelpMenuIntent>(
-            onInvoke: (HelpMenuIntent intent) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Keep calm and carry on!')),
-              );
-              return null;
-            },
-          ),
+          HelpMenuIntent: CallbackAction<HelpMenuIntent>(onInvoke: (
+            HelpMenuIntent intent,
+          ) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Keep calm and carry on!')),
+            );
+            return null;
+          }),
         },
         child: const Focus(
           autofocus: true,
-          child: Column(
-            children: <Widget>[
-              Text('Press question mark for help'),
-            ],
-          ),
+          child: Column(children: <Widget>[
+            Text('Press question mark for help'),
+          ]),
         ),
       ),
     );

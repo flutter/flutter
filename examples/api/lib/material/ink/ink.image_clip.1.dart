@@ -7,16 +7,20 @@ import 'package:flutter/material.dart';
 /// Flutter code sample for [Image.frameBuilder].
 
 void main() {
-  runApp(MaterialApp(
-    home: Scaffold(
-      appBar: AppBar(title: const Text('Image.frameBuilder Sample')),
-      body: const Center(
-        child: ImageClipExample(
-          image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg'),
+  runApp(
+    MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Image.frameBuilder Sample')),
+        body: const Center(
+          child: ImageClipExample(
+            image: NetworkImage(
+              'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
+            ),
+          ),
         ),
       ),
     ),
-  ));
+  );
 }
 
 class ImageClipExample extends StatelessWidget {
@@ -35,7 +39,9 @@ class ImageClipExample extends StatelessWidget {
           height: 300,
           image: image,
           child: InkWell(
-            onTap: () {/* ... */},
+            onTap: () {
+              /* ... */
+            },
             child: const Align(
               child: Padding(
                 padding: EdgeInsets.all(10.0),

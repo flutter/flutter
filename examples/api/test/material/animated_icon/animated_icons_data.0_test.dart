@@ -9,12 +9,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Show all the animated icons', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.AnimatedIconApp(),
-    );
+    await tester.pumpWidget(const example.AnimatedIconApp());
 
     // Check if the total number of AnimatedIcons matches the icons list.
-    expect(find.byType(AnimatedIcon, skipOffstage: false), findsNWidgets(example.iconsList.length));
+    expect(
+      find.byType(AnimatedIcon, skipOffstage: false),
+      findsNWidgets(example.iconsList.length),
+    );
 
     // Test the AnimatedIcon size.
     final Size iconSize = tester.getSize(find.byType(AnimatedIcon).first);

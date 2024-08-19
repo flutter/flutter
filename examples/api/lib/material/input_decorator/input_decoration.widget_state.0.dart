@@ -35,7 +35,7 @@ class MaterialStateExample extends StatelessWidget {
         prefixIconColor: WidgetStateColor.fromMap(
           <WidgetStatesConstraint, Color>{
             WidgetState.focused: Colors.green,
-            WidgetState.any:     Colors.grey,
+            WidgetState.any: Colors.grey,
           },
         ),
       ),

@@ -20,23 +20,20 @@ void main() {
     }
   }
 
-  testWidgets('Verify correct labels are displayed', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.LogicalKeySetExampleApp(),
-    );
+  testWidgets('Verify correct labels are displayed', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.LogicalKeySetExampleApp());
 
     expect(find.text('LogicalKeySet Sample'), findsOneWidget);
-    expect(
-      find.text('Add to the counter by pressing Ctrl+C'),
-      findsOneWidget,
-    );
+    expect(find.text('Add to the counter by pressing Ctrl+C'), findsOneWidget);
     expect(find.text('count: 0'), findsOneWidget);
   });
 
-  testWidgets('CtrlLeft+C or C+CtrlLeft key combination updates counter', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.LogicalKeySetExampleApp(),
-    );
+  testWidgets('CtrlLeft+C or C+CtrlLeft key combination updates counter', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.LogicalKeySetExampleApp());
 
     for (int counter = 0; counter < 10; counter++) {
       expect(find.text('count: $counter'), findsOneWidget);
@@ -44,11 +41,11 @@ void main() {
       await sendKeyCombination(
         tester,
         counter.isEven
-          ? <LogicalKeyboardKey>[
+            ? <LogicalKeyboardKey>[
               LogicalKeyboardKey.controlLeft,
               LogicalKeyboardKey.keyC,
             ]
-          : <LogicalKeyboardKey>[
+            : <LogicalKeyboardKey>[
               LogicalKeyboardKey.keyC,
               LogicalKeyboardKey.controlLeft,
             ],
@@ -57,61 +54,52 @@ void main() {
     }
   });
 
-  testWidgets('CtrlRight+C key combination updates counter', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.LogicalKeySetExampleApp(),
-    );
+  testWidgets('CtrlRight+C key combination updates counter', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.LogicalKeySetExampleApp());
 
     for (int counter = 0; counter < 10; counter++) {
       expect(find.text('count: $counter'), findsOneWidget);
 
-      await sendKeyCombination(
-        tester,
-        <LogicalKeyboardKey>[
-          LogicalKeyboardKey.controlRight,
-          LogicalKeyboardKey.keyC,
-        ],
-      );
+      await sendKeyCombination(tester, <LogicalKeyboardKey>[
+        LogicalKeyboardKey.controlRight,
+        LogicalKeyboardKey.keyC,
+      ]);
       await tester.pump();
     }
   });
 
-  testWidgets('CtrlLeft+A+C key combination does not update counter', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.LogicalKeySetExampleApp(),
-    );
+  testWidgets('CtrlLeft+A+C key combination does not update counter', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.LogicalKeySetExampleApp());
 
     for (int counter = 0; counter < 10; counter++) {
       expect(find.text('count: 0'), findsOneWidget);
 
-      await sendKeyCombination(
-        tester,
-        <LogicalKeyboardKey>[
-          LogicalKeyboardKey.controlLeft,
-          LogicalKeyboardKey.keyA,
-          LogicalKeyboardKey.keyC,
-        ],
-      );
+      await sendKeyCombination(tester, <LogicalKeyboardKey>[
+        LogicalKeyboardKey.controlLeft,
+        LogicalKeyboardKey.keyA,
+        LogicalKeyboardKey.keyC,
+      ]);
       await tester.pump();
     }
   });
 
-  testWidgets('CtrlRight+A+C key combination does not update counter', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.LogicalKeySetExampleApp(),
-    );
+  testWidgets('CtrlRight+A+C key combination does not update counter', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.LogicalKeySetExampleApp());
 
     for (int counter = 0; counter < 10; counter++) {
       expect(find.text('count: 0'), findsOneWidget);
 
-      await sendKeyCombination(
-        tester,
-        <LogicalKeyboardKey>[
-          LogicalKeyboardKey.controlRight,
-          LogicalKeyboardKey.keyA,
-          LogicalKeyboardKey.keyC,
-        ],
-      );
+      await sendKeyCombination(tester, <LogicalKeyboardKey>[
+        LogicalKeyboardKey.controlRight,
+        LogicalKeyboardKey.keyA,
+        LogicalKeyboardKey.keyC,
+      ]);
       await tester.pump();
     }
   });

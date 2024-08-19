@@ -13,9 +13,7 @@ class PopupRouteApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: PopupRouteExample(),
-    );
+    return const MaterialApp(home: PopupRouteExample());
   }
 }
 
@@ -26,13 +24,10 @@ class PopupRouteExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: OutlinedButton(
-          onPressed: () {
-            // This shows a dismissible dialog.
-            Navigator.of(context).push(DismissibleDialog<void>());
-          },
-          child: const Text('Open DismissibleDialog'),
-        ),
+        child: OutlinedButton(onPressed: () {
+          // This shows a dismissible dialog.
+          Navigator.of(context).push(DismissibleDialog<void>());
+        }, child: const Text('Open DismissibleDialog')),
       ),
     );
   }
@@ -54,7 +49,11 @@ class DismissibleDialog<T> extends PopupRoute<T> {
   Duration get transitionDuration => const Duration(milliseconds: 300);
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
     return Center(
       // Provide DefaultTextStyle to ensure that the dialog's text style
       // matches the rest of the text in the app.
@@ -69,13 +68,14 @@ class DismissibleDialog<T> extends PopupRoute<T> {
               borderRadius: BorderRadius.circular(10),
               color: Colors.white,
             ),
-            child: Column(
-              children: <Widget>[
-                Text('Dismissible Dialog', style: Theme.of(context).textTheme.headlineSmall),
-                const SizedBox(height: 20),
-                const Text('Tap in the scrim or press escape key to dismiss.'),
-              ],
-            ),
+            child: Column(children: <Widget>[
+              Text(
+                'Dismissible Dialog',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 20),
+              const Text('Tap in the scrim or press escape key to dismiss.'),
+            ]),
           ),
         ),
       ),

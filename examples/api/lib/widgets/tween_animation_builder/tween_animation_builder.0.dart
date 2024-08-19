@@ -15,12 +15,8 @@ class TweenAnimationBuilderExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('TweenAnimationBuilder Sample'),
-        ),
-        body: const Center(
-          child: TweenAnimationBuilderExample(),
-        ),
+        appBar: AppBar(title: const Text('TweenAnimationBuilder Sample')),
+        body: const Center(child: TweenAnimationBuilderExample()),
       ),
     );
   }

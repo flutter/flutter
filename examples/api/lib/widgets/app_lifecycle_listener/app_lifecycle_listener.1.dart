@@ -18,9 +18,7 @@ class AppLifecycleListenerExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: ApplicationExitControl()),
-    );
+    return const MaterialApp(home: Scaffold(body: ApplicationExitControl()));
   }
 }
 
@@ -39,9 +37,7 @@ class _ApplicationExitControlState extends State<ApplicationExitControl> {
   @override
   void initState() {
     super.initState();
-    _listener = AppLifecycleListener(
-      onExitRequested: _handleExitRequest,
-    );
+    _listener = AppLifecycleListener(onExitRequested: _handleExitRequest);
   }
 
   @override
@@ -51,12 +47,14 @@ class _ApplicationExitControlState extends State<ApplicationExitControl> {
   }
 
   Future<void> _quit() async {
-    final AppExitType exitType = _shouldExit ? AppExitType.required : AppExitType.cancelable;
+    final AppExitType exitType =
+        _shouldExit ? AppExitType.required : AppExitType.cancelable;
     await ServicesBinding.instance.exitApplication(exitType);
   }
 
   Future<AppExitResponse> _handleExitRequest() async {
-    final AppExitResponse response = _shouldExit ? AppExitResponse.exit : AppExitResponse.cancel;
+    final AppExitResponse response =
+        _shouldExit ? AppExitResponse.exit : AppExitResponse.cancel;
     setState(() {
       _lastExitResponse = 'App responded ${response.name} to exit request';
     });
@@ -78,30 +76,24 @@ class _ApplicationExitControlState extends State<ApplicationExitControl> {
     return Center(
       child: SizedBox(
         width: 300,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            RadioListTile<bool>(
-              title: const Text('Do Not Allow Exit'),
-              groupValue: _shouldExit,
-              value: false,
-              onChanged: _radioChanged,
-            ),
-            RadioListTile<bool>(
-              title: const Text('Allow Exit'),
-              groupValue: _shouldExit,
-              value: true,
-              onChanged: _radioChanged,
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: _quit,
-              child: const Text('Quit'),
-            ),
-            const SizedBox(height: 30),
-            Text('Exit Request: $_lastExitResponse'),
-          ],
-        ),
+        child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+          RadioListTile<bool>(
+            title: const Text('Do Not Allow Exit'),
+            groupValue: _shouldExit,
+            value: false,
+            onChanged: _radioChanged,
+          ),
+          RadioListTile<bool>(
+            title: const Text('Allow Exit'),
+            groupValue: _shouldExit,
+            value: true,
+            onChanged: _radioChanged,
+          ),
+          const SizedBox(height: 30),
+          ElevatedButton(onPressed: _quit, child: const Text('Quit')),
+          const SizedBox(height: 30),
+          Text('Exit Request: $_lastExitResponse'),
+        ]),
       ),
     );
   }

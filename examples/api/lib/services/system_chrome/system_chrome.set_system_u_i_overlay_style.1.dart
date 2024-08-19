@@ -17,10 +17,7 @@ class SystemOverlayStyleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.light,
-      ),
+      theme: ThemeData(useMaterial3: true, brightness: Brightness.light),
       home: const SystemOverlayStyleExample(),
     );
   }
@@ -30,7 +27,8 @@ class SystemOverlayStyleExample extends StatefulWidget {
   const SystemOverlayStyleExample({super.key});
 
   @override
-  State<SystemOverlayStyleExample> createState() => _SystemOverlayStyleExampleState();
+  State<SystemOverlayStyleExample> createState() =>
+      _SystemOverlayStyleExampleState();
 }
 
 class _SystemOverlayStyleExampleState extends State<SystemOverlayStyleExample> {
@@ -57,26 +55,24 @@ class _SystemOverlayStyleExampleState extends State<SystemOverlayStyleExample> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: _currentStyle,
       child: Scaffold(
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'SystemUiOverlayStyle Sample',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-            Expanded(
-              child: Center(
-                child: ElevatedButton(
-                  onPressed: _changeColor,
-                  child: const Text('Change Color'),
+        body: Column(crossAxisAlignment: CrossAxisAlignment.start, children:
+            <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'SystemUiOverlayStyle Sample',
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
-            ),
-          ],
-        ),
+              Expanded(
+                child: Center(
+                  child: ElevatedButton(
+                    onPressed: _changeColor,
+                    child: const Text('Change Color'),
+                  ),
+                ),
+              ),
+            ]),
       ),
     );
   }

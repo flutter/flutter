@@ -19,9 +19,7 @@ class DraggableScrollableSheetExampleApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade100),
       ),
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('DraggableScrollableSheet Sample'),
-        ),
+        appBar: AppBar(title: const Text('DraggableScrollableSheet Sample')),
         body: const DraggableScrollableSheetExample(),
       ),
     );
@@ -32,10 +30,12 @@ class DraggableScrollableSheetExample extends StatefulWidget {
   const DraggableScrollableSheetExample({super.key});
 
   @override
-  State<DraggableScrollableSheetExample> createState() => _DraggableScrollableSheetExampleState();
+  State<DraggableScrollableSheetExample> createState() =>
+      _DraggableScrollableSheetExampleState();
 }
 
-class _DraggableScrollableSheetExampleState extends State<DraggableScrollableSheetExample> {
+class _DraggableScrollableSheetExampleState
+    extends State<DraggableScrollableSheetExample> {
   double _sheetPosition = 0.5;
   final double _dragSensitivity = 600;
 
@@ -43,46 +43,41 @@ class _DraggableScrollableSheetExampleState extends State<DraggableScrollableShe
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    return DraggableScrollableSheet(
-      initialChildSize: _sheetPosition,
-      builder: (BuildContext context, ScrollController scrollController) {
-        return ColoredBox(
-          color: colorScheme.primary,
-          child: Column(
-            children: <Widget>[
-              Grabber(
-                onVerticalDragUpdate: (DragUpdateDetails details) {
-                  setState(() {
-                    _sheetPosition -= details.delta.dy / _dragSensitivity;
-                    if (_sheetPosition < 0.25) {
-                      _sheetPosition = 0.25;
-                    }
-                    if (_sheetPosition > 1.0) {
-                      _sheetPosition = 1.0;
-                    }
-                  });
-                },
-                isOnDesktopAndWeb: _isOnDesktopAndWeb,
-              ),
-              Flexible(
-                child: ListView.builder(
-                  controller: _isOnDesktopAndWeb ? null : scrollController,
-                  itemCount: 25,
-                  itemBuilder: (BuildContext context, int index) {
-                    return ListTile(
-                      title: Text(
-                        'Item $index',
-                        style: TextStyle(color: colorScheme.surface),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+    return DraggableScrollableSheet(initialChildSize: _sheetPosition, builder: (
+      BuildContext context,
+      ScrollController scrollController,
+    ) {
+      return ColoredBox(
+        color: colorScheme.primary,
+        child: Column(children: <Widget>[
+          Grabber(onVerticalDragUpdate: (DragUpdateDetails details) {
+            setState(() {
+              _sheetPosition -= details.delta.dy / _dragSensitivity;
+              if (_sheetPosition < 0.25) {
+                _sheetPosition = 0.25;
+              }
+              if (_sheetPosition > 1.0) {
+                _sheetPosition = 1.0;
+              }
+            });
+          }, isOnDesktopAndWeb: _isOnDesktopAndWeb),
+          Flexible(
+            child: ListView.builder(
+              controller: _isOnDesktopAndWeb ? null : scrollController,
+              itemCount: 25,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text(
+                    'Item $index',
+                    style: TextStyle(color: colorScheme.surface),
+                  ),
+                );
+              },
+            ),
           ),
-        );
-      },
-    );
+        ]),
+      );
+    });
   }
 
   bool get _isOnDesktopAndWeb {

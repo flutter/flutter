@@ -13,17 +13,21 @@ class StandardFabLocationExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: StandardFabLocationExample(),
-    );
+    return const MaterialApp(home: StandardFabLocationExample());
   }
 }
 
-class AlmostEndFloatFabLocation extends StandardFabLocation with FabEndOffsetX, FabFloatOffsetY {
+class AlmostEndFloatFabLocation extends StandardFabLocation
+    with FabEndOffsetX, FabFloatOffsetY {
   @override
-  double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-    final double directionalAdjustment = scaffoldGeometry.textDirection == TextDirection.ltr ? -50.0 : 50.0;
-    return super.getOffsetX(scaffoldGeometry, adjustment) + directionalAdjustment;
+  double getOffsetX(
+    ScaffoldPrelayoutGeometry scaffoldGeometry,
+    double adjustment,
+  ) {
+    final double directionalAdjustment =
+        scaffoldGeometry.textDirection == TextDirection.ltr ? -50.0 : 50.0;
+    return super.getOffsetX(scaffoldGeometry, adjustment) +
+        directionalAdjustment;
   }
 }
 
@@ -33,16 +37,10 @@ class StandardFabLocationExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home page'),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          debugPrint('FAB pressed.');
-        },
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
+      appBar: AppBar(title: const Text('Home page')),
+      floatingActionButton: FloatingActionButton(onPressed: () {
+        debugPrint('FAB pressed.');
+      }, tooltip: 'Increment', child: const Icon(Icons.add)),
       floatingActionButtonLocation: AlmostEndFloatFabLocation(),
     );
   }

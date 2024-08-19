@@ -34,9 +34,7 @@ class AspectRatioExample extends StatelessWidget {
       height: 100.0,
       child: AspectRatio(
         aspectRatio: 16 / 9,
-        child: Container(
-          color: Colors.green,
-        ),
+        child: Container(color: Colors.green),
       ),
     );
   }

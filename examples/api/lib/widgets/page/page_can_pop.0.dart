@@ -21,21 +21,22 @@ class _PageApiExampleAppState extends State<PageApiExampleApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      routerDelegate: delegate,
-    );
+    return MaterialApp.router(routerDelegate: delegate);
   }
 }
 
-class MyRouterDelegate extends RouterDelegate<Object> with PopNavigatorRouterDelegateMixin<Object>, ChangeNotifier {
+class MyRouterDelegate extends RouterDelegate<Object>
+    with PopNavigatorRouterDelegateMixin<Object>, ChangeNotifier {
   // This example doesn't use RouteInformationProvider.
   @override
-  Future<void> setNewRoutePath(Object configuration) async => throw UnimplementedError();
+  Future<void> setNewRoutePath(Object configuration) async =>
+      throw UnimplementedError();
 
   @override
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-  static MyRouterDelegate of(BuildContext context) => Router.of(context).routerDelegate as MyRouterDelegate;
+  static MyRouterDelegate of(BuildContext context) =>
+      Router.of(context).routerDelegate as MyRouterDelegate;
 
   bool get showDetailPage => _showDetailPage;
   bool _showDetailPage = false;
@@ -49,28 +50,21 @@ class MyRouterDelegate extends RouterDelegate<Object> with PopNavigatorRouterDel
 
   Future<bool> _showConfirmDialog() async {
     return await showDialog<bool>(
-      context: navigatorKey.currentContext!,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Are you sure?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-            ),
-            TextButton(
-              child: const Text('Confirm'),
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-            ),
-          ],
-        );
-      },
-    ) ?? false;
+          context: navigatorKey.currentContext!,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(title: const Text('Are you sure?'), actions:
+                <Widget>[
+                  TextButton(child: const Text('Cancel'), onPressed: () {
+                    Navigator.of(context).pop(false);
+                  }),
+                  TextButton(child: const Text('Confirm'), onPressed: () {
+                    Navigator.of(context).pop(true);
+                  }),
+                ]);
+          },
+        ) ??
+        false;
   }
 
   Future<void> _handlePopDetails(bool didPop, void result) async {
@@ -86,7 +80,10 @@ class MyRouterDelegate extends RouterDelegate<Object> with PopNavigatorRouterDel
 
   List<Page<Object?>> _getPages() {
     return <Page<Object?>>[
-      const MaterialPage<void>(key: ValueKey<String>('home'), child: _HomePage()),
+      const MaterialPage<void>(
+        key: ValueKey<String>('home'),
+        child: _HomePage(),
+      ),
       if (showDetailPage)
         MaterialPage<void>(
           key: const ValueKey<String>('details'),
@@ -99,14 +96,12 @@ class MyRouterDelegate extends RouterDelegate<Object> with PopNavigatorRouterDel
 
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      key: navigatorKey,
-      pages: _getPages(),
-      onDidRemovePage: (Page<Object?> page) {
-        assert(page.key == const ValueKey<String>('details'));
-        showDetailPage = false;
-      },
-    );
+    return Navigator(key: navigatorKey, pages: _getPages(), onDidRemovePage: (
+      Page<Object?> page,
+    ) {
+      assert(page.key == const ValueKey<String>('details'));
+      showDetailPage = false;
+    });
   }
 }
 
@@ -118,18 +113,14 @@ class _HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<_HomePage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Home')),
       body: Center(
-        child: TextButton(
-          onPressed: () {
-            MyRouterDelegate.of(context).showDetailPage = true;
-          },
-          child: const Text('Go to details'),
-        ),
+        child: TextButton(onPressed: () {
+          MyRouterDelegate.of(context).showDetailPage = true;
+        }, child: const Text('Go to details')),
       ),
     );
   }
@@ -148,12 +139,9 @@ class _DetailsPageState extends State<_DetailsPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Details')),
       body: Center(
-        child: TextButton(
-          onPressed: () {
-            Navigator.of(context).maybePop();
-          },
-          child: const Text('Go back'),
-        ),
+        child: TextButton(onPressed: () {
+          Navigator.of(context).maybePop();
+        }, child: const Text('Go back')),
       ),
     );
   }

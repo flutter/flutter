@@ -3,14 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_api_samples/widgets/layout_builder/layout_builder.0.dart' as example;
+import 'package:flutter_api_samples/widgets/layout_builder/layout_builder.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('has two containers when wide', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.LayoutBuilderExampleApp(),
-    );
+    await tester.pumpWidget(const example.LayoutBuilderExampleApp());
 
     final Finder containerFinder = find.byType(Container);
     expect(containerFinder, findsNWidgets(2));

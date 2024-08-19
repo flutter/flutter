@@ -122,75 +122,74 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: GridView(
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 350,
-                mainAxisSpacing: 4,
-                mainAxisExtent: 200,
-                crossAxisSpacing: 4,
-              ),
-              children: <Widget>[
-                EnumCard<TimePickerEntryMode>(
-                  choices: TimePickerEntryMode.values,
-                  value: entryMode,
-                  onChanged: _entryModeChanged,
-                ),
-                EnumCard<ThemeMode>(
-                  choices: ThemeMode.values,
-                  value: widget.themeMode,
-                  onChanged: _themeModeChanged,
-                ),
-                EnumCard<TextDirection>(
-                  choices: TextDirection.values,
-                  value: textDirection,
-                  onChanged: _textDirectionChanged,
-                ),
-                EnumCard<MaterialTapTargetSize>(
-                  choices: MaterialTapTargetSize.values,
-                  value: tapTargetSize,
-                  onChanged: _tapTargetSizeChanged,
-                ),
-                ChoiceCard<Orientation?>(
-                  choices: const <Orientation?>[...Orientation.values, null],
-                  value: orientation,
-                  title: '$Orientation',
-                  choiceLabels: <Orientation?, String>{
-                    for (final Orientation choice in Orientation.values) choice: choice.name,
-                    null: 'from MediaQuery',
-                  },
-                  onChanged: _orientationChanged,
-                ),
-                ChoiceCard<bool>(
-                  choices: const <bool>[false, true],
-                  value: use24HourTime,
-                  onChanged: _use24HourTimeChanged,
-                  title: 'Time Mode',
-                  choiceLabels: const <bool, String>{
-                    false: '12-hour am/pm time',
-                    true: '24-hour time',
-                  },
-                ),
-                ChoiceCard<bool>(
-                  choices: const <bool>[false, true],
-                  value: widget.useMaterial3,
-                  onChanged: widget.setUseMaterial3,
-                  title: 'Material Version',
-                  choiceLabels: const <bool, String>{
-                    false: 'Material 2',
-                    true: 'Material 3',
-                  },
-                ),
-              ],
+      child: Column(children: <Widget>[
+        Expanded(
+          child: GridView(
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 350,
+              mainAxisSpacing: 4,
+              mainAxisExtent: 200,
+              crossAxisSpacing: 4,
             ),
+            children: <Widget>[
+              EnumCard<TimePickerEntryMode>(
+                choices: TimePickerEntryMode.values,
+                value: entryMode,
+                onChanged: _entryModeChanged,
+              ),
+              EnumCard<ThemeMode>(
+                choices: ThemeMode.values,
+                value: widget.themeMode,
+                onChanged: _themeModeChanged,
+              ),
+              EnumCard<TextDirection>(
+                choices: TextDirection.values,
+                value: textDirection,
+                onChanged: _textDirectionChanged,
+              ),
+              EnumCard<MaterialTapTargetSize>(
+                choices: MaterialTapTargetSize.values,
+                value: tapTargetSize,
+                onChanged: _tapTargetSizeChanged,
+              ),
+              ChoiceCard<Orientation?>(
+                choices: const <Orientation?>[...Orientation.values, null],
+                value: orientation,
+                title: '$Orientation',
+                choiceLabels: <Orientation?, String>{
+                  for (final Orientation choice in Orientation.values)
+                    choice: choice.name,
+                  null: 'from MediaQuery',
+                },
+                onChanged: _orientationChanged,
+              ),
+              ChoiceCard<bool>(
+                choices: const <bool>[false, true],
+                value: use24HourTime,
+                onChanged: _use24HourTimeChanged,
+                title: 'Time Mode',
+                choiceLabels: const <bool, String>{
+                  false: '12-hour am/pm time',
+                  true: '24-hour time',
+                },
+              ),
+              ChoiceCard<bool>(
+                choices: const <bool>[false, true],
+                value: widget.useMaterial3,
+                onChanged: widget.setUseMaterial3,
+                title: 'Material Version',
+                choiceLabels: const <bool, String>{
+                  false: 'Material 2',
+                  true: 'Material 3',
+                },
+              ),
+            ],
           ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children:
+              <Widget>[
                 Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: ElevatedButton(
@@ -208,9 +207,9 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
                           // rarely necessary, because the default values are
                           // usually used as-is.
                           return Theme(
-                            data: Theme.of(context).copyWith(
-                              materialTapTargetSize: tapTargetSize,
-                            ),
+                            data: Theme.of(
+                              context,
+                            ).copyWith(materialTapTargetSize: tapTargetSize),
                             child: Directionality(
                               textDirection: textDirection,
                               child: MediaQuery(
@@ -229,12 +228,11 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
                     },
                   ),
                 ),
-                if (selectedTime != null) Text('Selected time: ${selectedTime!.format(context)}'),
-              ],
-            ),
-          ),
-        ],
-      ),
+                if (selectedTime != null)
+                  Text('Selected time: ${selectedTime!.format(context)}'),
+              ]),
+        ),
+      ]),
     );
   }
 }
@@ -269,10 +267,7 @@ class ChoiceCard<T extends Object?> extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(title),
-                ),
+                Padding(padding: const EdgeInsets.all(8.0), child: Text(title)),
                 for (final T choice in choices)
                   RadioSelection<T>(
                     value: choice,
@@ -306,13 +301,14 @@ class EnumCard<T extends Enum> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChoiceCard<T>(
-        value: value,
-        choices: choices,
-        onChanged: onChanged,
-        choiceLabels: <T, String>{
-          for (final T choice in choices) choice: choice.name,
-        },
-        title: value.runtimeType.toString());
+      value: value,
+      choices: choices,
+      onChanged: onChanged,
+      choiceLabels: <T, String>{
+        for (final T choice in choices) choice: choice.name,
+      },
+      title: value.runtimeType.toString(),
+    );
   }
 }
 
@@ -339,19 +335,19 @@ class RadioSelection<T extends Object?> extends StatefulWidget {
 class _RadioSelectionState<T extends Object?> extends State<RadioSelection<T>> {
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsetsDirectional.only(end: 8),
-          child: Radio<T>(
-            groupValue: widget.groupValue,
-            value: widget.value,
-            onChanged: widget.onChanged,
-          ),
+    return Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+      Padding(
+        padding: const EdgeInsetsDirectional.only(end: 8),
+        child: Radio<T>(
+          groupValue: widget.groupValue,
+          value: widget.value,
+          onChanged: widget.onChanged,
         ),
-        GestureDetector(onTap: () => widget.onChanged(widget.value), child: widget.child),
-      ],
-    );
+      ),
+      GestureDetector(
+        onTap: () => widget.onChanged(widget.value),
+        child: widget.child,
+      ),
+    ]);
   }
 }

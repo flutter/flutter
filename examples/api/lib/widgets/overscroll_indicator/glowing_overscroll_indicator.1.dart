@@ -33,18 +33,16 @@ class GlowingOverscrollIndicatorExample extends StatelessWidget {
           SliverAppBar(title: Text('Custom NestedScrollViews')),
         ];
       },
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverToBoxAdapter(
-            child: Container(
-              color: Colors.amberAccent,
-              height: 100,
-              child: const Center(child: Text('Glow all day!')),
-            ),
+      body: CustomScrollView(slivers: <Widget>[
+        SliverToBoxAdapter(
+          child: Container(
+            color: Colors.amberAccent,
+            height: 100,
+            child: const Center(child: Text('Glow all day!')),
           ),
-          const SliverFillRemaining(child: FlutterLogo()),
-        ],
-      ),
+        ),
+        const SliverFillRemaining(child: FlutterLogo()),
+      ]),
     );
   }
 }

@@ -3,20 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/scroll_end_notification/scroll_end_notification.0.dart' as example;
+import 'package:flutter_api_samples/widgets/scroll_end_notification/scroll_end_notification.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('IsScrollingListenerApp smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.ScrollEndNotificationApp(),
-    );
+    await tester.pumpWidget(const example.ScrollEndNotificationApp());
 
     expect(find.byType(CustomScrollView), findsOneWidget);
     expect(find.byType(Scrollbar), findsOneWidget);
 
     ScrollPosition getScrollPosition() {
-      return tester.widget<CustomScrollView>(find.byType(CustomScrollView)).controller!.position;
+      return tester
+          .widget<CustomScrollView>(find.byType(CustomScrollView))
+          .controller!
+          .position;
     }
 
     // Viewport is 600 pixels high, each item's height is 100, 6 items are visible.

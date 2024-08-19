@@ -17,9 +17,7 @@ void main() {
   });
 
   testWidgets('Has nonexistent url', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.ErrorBuilderExampleApp(),
-    );
+    await tester.pumpWidget(const example.ErrorBuilderExampleApp());
     await tester.pumpAndSettle();
 
     final Image image = tester.widget<Image>(find.byType(Image));
@@ -31,10 +29,10 @@ void main() {
     );
   });
 
-  testWidgets('errorBuilder returns text with emoji', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.ErrorBuilderExampleApp(),
-    );
+  testWidgets('errorBuilder returns text with emoji', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.ErrorBuilderExampleApp());
     await tester.pumpAndSettle();
 
     final Image image = tester.widget<Image>(find.byType(Image));

@@ -9,15 +9,17 @@ import 'package:flutter_api_samples/material/segmented_button/segmented_button.0
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Segmented button can be used with a single selection', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.SegmentedButtonApp(),
-    );
+  testWidgets('Segmented button can be used with a single selection', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.SegmentedButtonApp());
 
     void expectOneCalendarButton(example.Calendar period) {
       expect(
         find.byWidgetPredicate(
-          (Widget widget) => widget is SegmentedButton<example.Calendar> && setEquals(widget.selected, <example.Calendar>{period}),
+          (Widget widget) =>
+              widget is SegmentedButton<example.Calendar> &&
+              setEquals(widget.selected, <example.Calendar>{period}),
         ),
         findsOne,
       );
@@ -62,15 +64,17 @@ void main() {
     expectOneCalendarButton(example.Calendar.day);
   });
 
-  testWidgets('Segmented button can be used with a multiple selection', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.SegmentedButtonApp(),
-    );
+  testWidgets('Segmented button can be used with a multiple selection', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.SegmentedButtonApp());
 
     void expectSizeButtons(Set<example.Sizes> sizes) {
       expect(
         find.byWidgetPredicate(
-          (Widget widget) => widget is SegmentedButton<example.Sizes> && setEquals(widget.selected, sizes),
+          (Widget widget) =>
+              widget is SegmentedButton<example.Sizes> &&
+              setEquals(widget.selected, sizes),
         ),
         findsOne,
       );
@@ -83,7 +87,10 @@ void main() {
     expect(find.text('L'), findsOne);
     expect(find.text('XL'), findsOne);
 
-    expectSizeButtons(const <example.Sizes>{example.Sizes.large, example.Sizes.extraLarge});
+    expectSizeButtons(const <example.Sizes>{
+      example.Sizes.large,
+      example.Sizes.extraLarge,
+    });
 
     // Select everything.
     await tester.tap(find.text('XS'));

@@ -7,12 +7,12 @@ import 'package:flutter_api_samples/material/tooltip/tooltip.3.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Tooltip is visible when tapping button', (WidgetTester tester) async {
+  testWidgets('Tooltip is visible when tapping button', (
+    WidgetTester tester,
+  ) async {
     const String tooltipText = 'I am a Tooltip';
 
-    await tester.pumpWidget(
-      const example.TooltipExampleApp(),
-    );
+    await tester.pumpWidget(const example.TooltipExampleApp());
 
     // Tooltip is not visible before tapping the button.
     expect(find.text(tooltipText), findsNothing);

@@ -13,9 +13,7 @@ class AlignTransitionExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: AlignTransitionExample(),
-    );
+    return const MaterialApp(home: AlignTransitionExample());
   }
 }
 
@@ -28,7 +26,8 @@ class AlignTransitionExample extends StatefulWidget {
 
 /// [AnimationController]s can be created with `vsync: this` because of
 /// [TickerProviderStateMixin].
-class _AlignTransitionExampleState extends State<AlignTransitionExample> with TickerProviderStateMixin {
+class _AlignTransitionExampleState extends State<AlignTransitionExample>
+    with TickerProviderStateMixin {
   // Using `late final` for lazy initialization. See
   // https://dart.dev/null-safety/understanding-null-safety#lazy-initialization.
   late final AnimationController _controller = AnimationController(
@@ -38,12 +37,7 @@ class _AlignTransitionExampleState extends State<AlignTransitionExample> with Ti
   late final Animation<AlignmentGeometry> _animation = Tween<AlignmentGeometry>(
     begin: Alignment.bottomLeft,
     end: Alignment.center,
-  ).animate(
-    CurvedAnimation(
-      parent: _controller,
-      curve: Curves.decelerate,
-    ),
-  );
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.decelerate));
 
   @override
   void dispose() {

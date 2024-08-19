@@ -24,7 +24,8 @@ class ListenableBuilderExample extends StatefulWidget {
   const ListenableBuilderExample({super.key});
 
   @override
-  State<ListenableBuilderExample> createState() => _ListenableBuilderExampleState();
+  State<ListenableBuilderExample> createState() =>
+      _ListenableBuilderExampleState();
 }
 
 class _ListenableBuilderExampleState extends State<ListenableBuilderExample> {
@@ -53,22 +54,20 @@ class CounterBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          const Text('Current counter value:'),
-          // Thanks to the ListenableBuilder, only the widget displaying the
-          // current count is rebuilt when counterValueNotifier notifies its
-          // listeners. The Text widget above and CounterBody itself aren't
-          // rebuilt.
-          ListenableBuilder(
-            listenable: counterNotifier,
-            builder: (BuildContext context, Widget? child) {
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+          <Widget>[
+            const Text('Current counter value:'),
+            // Thanks to the ListenableBuilder, only the widget displaying the
+            // current count is rebuilt when counterValueNotifier notifies its
+            // listeners. The Text widget above and CounterBody itself aren't
+            // rebuilt.
+            ListenableBuilder(listenable: counterNotifier, builder: (
+              BuildContext context,
+              Widget? child,
+            ) {
               return Text('${counterNotifier.count}');
-            },
-          ),
-        ],
-      ),
+            }),
+          ]),
     );
   }
 }

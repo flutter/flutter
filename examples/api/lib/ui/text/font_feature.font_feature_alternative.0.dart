@@ -14,7 +14,8 @@ class ExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WidgetsApp(
-      builder: (BuildContext context, Widget? navigator) => const ExampleWidget(),
+      builder:
+          (BuildContext context, Widget? navigator) => const ExampleWidget(),
       color: const Color(0xffffffff),
     );
   }
@@ -29,12 +30,9 @@ class ExampleWidget extends StatelessWidget {
     // (https://www.google.com/fonts).
     return const Text(
       'The infamous Tuna Torture.',
-      style: TextStyle(
-        fontFamily: 'Raleway',
-        fontFeatures: <FontFeature>[
-          FontFeature.alternative(1), // or 2, or 3, or...
-        ],
-      ),
+      style: TextStyle(fontFamily: 'Raleway', fontFeatures: <FontFeature>[
+        FontFeature.alternative(1), // or 2, or 3, or...
+      ]),
     );
   }
 }

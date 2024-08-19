@@ -18,17 +18,16 @@ class AutocompleteExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Autocomplete - async'),
-        ),
+        appBar: AppBar(title: const Text('Autocomplete - async')),
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text('Type below to autocomplete the following possible results: ${_FakeAPI._kOptions}.'),
-              const _AsyncAutocomplete(),
-            ],
-          ),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: <
+            Widget
+          >[
+            Text(
+              'Type below to autocomplete the following possible results: ${_FakeAPI._kOptions}.',
+            ),
+            const _AsyncAutocomplete(),
+          ]),
         ),
       ),
     );
@@ -39,10 +38,10 @@ class _AsyncAutocomplete extends StatefulWidget {
   const _AsyncAutocomplete();
 
   @override
-  State<_AsyncAutocomplete > createState() => _AsyncAutocompleteState();
+  State<_AsyncAutocomplete> createState() => _AsyncAutocompleteState();
 }
 
-class _AsyncAutocompleteState extends State<_AsyncAutocomplete > {
+class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
   // The query currently being searched for. If null, there is no pending
   // request.
   String? _searchingWithQuery;
@@ -55,7 +54,9 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete > {
     return Autocomplete<String>(
       optionsBuilder: (TextEditingValue textEditingValue) async {
         _searchingWithQuery = textEditingValue.text;
-        final Iterable<String> options = await _FakeAPI.search(_searchingWithQuery!);
+        final Iterable<String> options = await _FakeAPI.search(
+          _searchingWithQuery!,
+        );
 
         // If another search happened after this one, throw away these options.
         // Use the previous options instead and wait for the newer request to

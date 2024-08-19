@@ -22,24 +22,20 @@ class _MagnifierExampleAppState extends State<MagnifierExampleApp> {
     return MaterialApp(
       home: Scaffold(
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const Text('Drag on the logo!'),
-              RepaintBoundary(
-                child: Stack(
-                  children: <Widget>[
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+              <Widget>[
+                const Text('Drag on the logo!'),
+                RepaintBoundary(
+                  child: Stack(children: <Widget>[
                     GestureDetector(
-                      onPanUpdate: (DragUpdateDetails details) => setState(
-                        () {
-                          dragGesturePosition = details.localPosition;
-                        },
-                      ),
-                      onPanDown: (DragDownDetails details) => setState(
-                        () {
-                          dragGesturePosition = details.localPosition;
-                        },
-                      ),
+                      onPanUpdate:
+                          (DragUpdateDetails details) => setState(() {
+                            dragGesturePosition = details.localPosition;
+                          }),
+                      onPanDown:
+                          (DragDownDetails details) => setState(() {
+                            dragGesturePosition = details.localPosition;
+                          }),
                       child: const FlutterLogo(size: 200),
                     ),
                     Positioned(
@@ -54,12 +50,10 @@ class _MagnifierExampleAppState extends State<MagnifierExampleApp> {
                         size: Size(magnifierRadius * 2, magnifierRadius * 2),
                         magnificationScale: 2,
                       ),
-                    )
-                  ],
+                    ),
+                  ]),
                 ),
-              ),
-            ],
-          ),
+              ]),
         ),
       ),
     );

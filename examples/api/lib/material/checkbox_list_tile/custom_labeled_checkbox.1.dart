@@ -42,17 +42,12 @@ class LabeledCheckbox extends StatelessWidget {
       },
       child: Padding(
         padding: padding,
-        child: Row(
-          children: <Widget>[
-            Expanded(child: Text(label)),
-            Checkbox(
-              value: value,
-              onChanged: (bool? newValue) {
-                onChanged(newValue!);
-              },
-            ),
-          ],
-        ),
+        child: Row(children: <Widget>[
+          Expanded(child: Text(label)),
+          Checkbox(value: value, onChanged: (bool? newValue) {
+            onChanged(newValue!);
+          }),
+        ]),
       ),
     );
   }

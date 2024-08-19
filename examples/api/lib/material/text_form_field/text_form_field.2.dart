@@ -15,9 +15,7 @@ class TextFormFieldExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: TextFormFieldExample(),
-    );
+    return const MaterialApp(home: TextFormFieldExample());
   }
 }
 
@@ -95,28 +93,23 @@ class _TextFormFieldExampleState extends State<TextFormFieldExample> {
         child: Center(
           child: Form(
             key: formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                TextFormField(
-                  forceErrorText: forceErrorText,
-                  controller: controller,
-                  decoration: const InputDecoration(
-                    hintText: 'Please write a username',
+            child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+                <Widget>[
+                  TextFormField(
+                    forceErrorText: forceErrorText,
+                    controller: controller,
+                    decoration: const InputDecoration(
+                      hintText: 'Please write a username',
+                    ),
+                    validator: validator,
+                    onChanged: onChanged,
                   ),
-                  validator: validator,
-                  onChanged: onChanged,
-                ),
-                const SizedBox(height: 40.0),
-                if (isLoading)
-                  const CircularProgressIndicator()
-                else
-                  TextButton(
-                    onPressed: onSave,
-                    child: const Text('Save'),
-                  ),
-              ],
-            ),
+                  const SizedBox(height: 40.0),
+                  if (isLoading)
+                    const CircularProgressIndicator()
+                  else
+                    TextButton(onPressed: onSave, child: const Text('Save')),
+                ]),
           ),
         ),
       ),

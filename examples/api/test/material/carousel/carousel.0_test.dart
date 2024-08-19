@@ -5,11 +5,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/carousel/carousel.0.dart' as example;
+import 'package:flutter_api_samples/material/carousel/carousel.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-
   // The app being tested loads images via HTTP which the test
   // framework defeats by default.
   setUpAll(() {
@@ -17,15 +17,19 @@ void main() {
   });
 
   testWidgets('Carousel Smoke Test', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.CarouselExampleApp(),
-    );
+    await tester.pumpWidget(const example.CarouselExampleApp());
 
-    expect(find.widgetWithText(example.HeroLayoutCard, 'Through the Pane'), findsOneWidget);
+    expect(
+      find.widgetWithText(example.HeroLayoutCard, 'Through the Pane'),
+      findsOneWidget,
+    );
     final Finder firstCarousel = find.byType(CarouselView).first;
     await tester.drag(firstCarousel, const Offset(150, 0));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(example.HeroLayoutCard, 'The Flow'), findsOneWidget);
+    expect(
+      find.widgetWithText(example.HeroLayoutCard, 'The Flow'),
+      findsOneWidget,
+    );
 
     await tester.drag(firstCarousel, const Offset(0, -200));
     await tester.pumpAndSettle();
@@ -35,7 +39,10 @@ void main() {
     expect(find.widgetWithText(CarouselView, 'Climate'), findsOneWidget);
     expect(find.widgetWithText(CarouselView, 'Wifi'), findsOneWidget);
 
-    await tester.drag(find.widgetWithText(CarouselView, 'Cameras'), const Offset(0, -200));
+    await tester.drag(
+      find.widgetWithText(CarouselView, 'Cameras'),
+      const Offset(0, -200),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Uncontained layout'), findsOneWidget);

@@ -39,21 +39,17 @@ class _PageScaffoldExampleState extends State<PageScaffoldExample> {
         middle: Text('CupertinoPageScaffold Sample'),
       ),
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Center(
-              child: Text('You have pressed the button $_count times.'),
-            ),
-            const SizedBox(height: 20.0),
-            Center(
-              child: CupertinoButton.filled(
-                onPressed: () => setState(() => _count++),
-                child: const Icon(CupertinoIcons.add),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+            <Widget>[
+              Center(child: Text('You have pressed the button $_count times.')),
+              const SizedBox(height: 20.0),
+              Center(
+                child: CupertinoButton.filled(
+                  onPressed: () => setState(() => _count++),
+                  child: const Icon(CupertinoIcons.add),
+                ),
               ),
-            ),
-          ],
-        ),
+            ]),
       ),
     );
   }

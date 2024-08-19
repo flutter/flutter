@@ -35,22 +35,20 @@ class _TimerPickerExampleState extends State<TimerPickerExample> {
   void _showDialog(Widget child) {
     showCupertinoModalPopup<void>(
       context: context,
-      builder: (BuildContext context) => Container(
-        height: 216,
-        padding: const EdgeInsets.only(top: 6.0),
-        // The bottom margin is provided to align the popup above the system
-        // navigation bar.
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        // Provide a background color for the popup.
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        // Use a SafeArea widget to avoid system overlaps.
-        child: SafeArea(
-          top: false,
-          child: child,
-        ),
-      ),
+      builder:
+          (BuildContext context) => Container(
+            height: 216,
+            padding: const EdgeInsets.only(top: 6.0),
+            // The bottom margin is provided to align the popup above the system
+            // navigation bar.
+            margin: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            // Provide a background color for the popup.
+            color: CupertinoColors.systemBackground.resolveFrom(context),
+            // Use a SafeArea widget to avoid system overlaps.
+            child: SafeArea(top: false, child: child),
+          ),
     );
   }
 
@@ -66,39 +64,34 @@ class _TimerPickerExampleState extends State<TimerPickerExample> {
           fontSize: 22.0,
         ),
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              _TimerPickerItem(
-                children: <Widget>[
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+              <Widget>[
+                _TimerPickerItem(children: <Widget>[
                   const Text('Timer'),
                   CupertinoButton(
                     // Display a CupertinoTimerPicker with hour/minute mode.
-                    onPressed: () => _showDialog(
-                      CupertinoTimerPicker(
-                        mode: CupertinoTimerPickerMode.hm,
-                        initialTimerDuration: duration,
-                        // This is called when the user changes the timer's
-                        // duration.
-                        onTimerDurationChanged: (Duration newDuration) {
-                          setState(() => duration = newDuration);
-                        },
-                      ),
-                    ),
+                    onPressed:
+                        () => _showDialog(
+                          CupertinoTimerPicker(
+                            mode: CupertinoTimerPickerMode.hm,
+                            initialTimerDuration: duration,
+                            // This is called when the user changes the timer's
+                            // duration.
+                            onTimerDurationChanged: (Duration newDuration) {
+                              setState(() => duration = newDuration);
+                            },
+                          ),
+                        ),
                     // In this example, the timer's value is formatted manually.
                     // You can use the intl package to format the value based on
                     // the user's locale settings.
                     child: Text(
                       '$duration',
-                      style: const TextStyle(
-                        fontSize: 22.0,
-                      ),
+                      style: const TextStyle(fontSize: 22.0),
                     ),
                   ),
-                ],
-              ),
-            ],
-          ),
+                ]),
+              ]),
         ),
       ),
     );
@@ -116,14 +109,8 @@ class _TimerPickerItem extends StatelessWidget {
     return DecoratedBox(
       decoration: const BoxDecoration(
         border: Border(
-          top: BorderSide(
-            color: CupertinoColors.inactiveGray,
-            width: 0.0,
-          ),
-          bottom: BorderSide(
-            color: CupertinoColors.inactiveGray,
-            width: 0.0,
-          ),
+          top: BorderSide(color: CupertinoColors.inactiveGray, width: 0.0),
+          bottom: BorderSide(color: CupertinoColors.inactiveGray, width: 0.0),
         ),
       ),
       child: Padding(

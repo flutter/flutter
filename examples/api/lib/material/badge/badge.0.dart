@@ -28,27 +28,25 @@ class BadgeExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          IconButton(
-            icon: const Badge(
-              label: Text('Your label'),
-              backgroundColor: Colors.blueAccent,
-              child: Icon(Icons.receipt),
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+          <Widget>[
+            IconButton(
+              icon: const Badge(
+                label: Text('Your label'),
+                backgroundColor: Colors.blueAccent,
+                child: Icon(Icons.receipt),
+              ),
+              onPressed: () {},
             ),
-            onPressed: () {},
-          ),
-          const SizedBox(height: 20),
-          IconButton(
-            icon: Badge.count(
-              count: 9999,
-              child: const Icon(Icons.notifications),
+            const SizedBox(height: 20),
+            IconButton(
+              icon: Badge.count(
+                count: 9999,
+                child: const Icon(Icons.notifications),
+              ),
+              onPressed: () {},
             ),
-            onPressed: () {},
-          ),
-        ],
-      ),
+          ]),
     );
   }
 }

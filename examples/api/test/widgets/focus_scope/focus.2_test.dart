@@ -27,10 +27,12 @@ void main() {
 
     for (int i = 0; i <= 10; i += 1) {
       expect(find.text('CHILD $i'), findsOneWidget);
-      final ActionChip chip = tester.widget<ActionChip>(find.ancestor(
-        of: find.text('CHILD $i'),
-        matching: find.byType(ActionChip)
-      ));
+      final ActionChip chip = tester.widget<ActionChip>(
+        find.ancestor(
+          of: find.text('CHILD $i'),
+          matching: find.byType(ActionChip),
+        ),
+      );
       expect(chip.focusNode, isNotNull);
       expect(chip.focusNode!.hasPrimaryFocus, isTrue);
       expect(chip.focusNode!.debugLabel, 'Child $i');

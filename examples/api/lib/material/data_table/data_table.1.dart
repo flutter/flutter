@@ -37,15 +37,13 @@ class _DataTableExampleState extends State<DataTableExample> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: DataTable(
-        columns: const <DataColumn>[
-          DataColumn(
-            label: Text('Number'),
-          ),
-        ],
+        columns: const <DataColumn>[DataColumn(label: Text('Number'))],
         rows: List<DataRow>.generate(
           numItems,
           (int index) => DataRow(
-            color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+            color: WidgetStateProperty.resolveWith<Color?>((
+              Set<WidgetState> states,
+            ) {
               // All rows will have the same selected color.
               if (states.contains(WidgetState.selected)) {
                 return Theme.of(context).colorScheme.primary.withOpacity(0.08);

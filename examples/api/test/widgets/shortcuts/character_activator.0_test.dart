@@ -11,43 +11,38 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('CharacterActivatorExampleApp', () {
     testWidgets('displays correct labels', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const example.CharacterActivatorExampleApp(),
-      );
+      await tester.pumpWidget(const example.CharacterActivatorExampleApp());
 
       expect(find.text('CharacterActivator Sample'), findsOneWidget);
       expect(find.text('Press question mark for help'), findsOneWidget);
     });
 
-    testWidgets(
-      'shows snack bar on question key pressed',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          const example.CharacterActivatorExampleApp(),
-        );
+    testWidgets('shows snack bar on question key pressed', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const example.CharacterActivatorExampleApp());
 
-        final Finder snackBarFinder = find.ancestor(
-          of: find.text('Keep calm and carry on!'),
-          matching: find.byType(SnackBar),
-        );
+      final Finder snackBarFinder = find.ancestor(
+        of: find.text('Keep calm and carry on!'),
+        matching: find.byType(SnackBar),
+      );
 
-        expect(snackBarFinder, findsNothing);
+      expect(snackBarFinder, findsNothing);
 
-        await tester.sendKeyEvent(LogicalKeyboardKey.slash, character: '?');
+      await tester.sendKeyEvent(LogicalKeyboardKey.slash, character: '?');
 
-        // Advance the SnackBar entrance animation to the end.
-        await tester.pumpAndSettle();
+      // Advance the SnackBar entrance animation to the end.
+      await tester.pumpAndSettle();
 
-        expect(snackBarFinder, findsOneWidget);
+      expect(snackBarFinder, findsOneWidget);
 
-        // Advance time by default SnackBar display duration.
-        await tester.pump(const Duration(milliseconds: 4000));
+      // Advance time by default SnackBar display duration.
+      await tester.pump(const Duration(milliseconds: 4000));
 
-        // Advance the SnackBar exit animation to the end.
-        await tester.pumpAndSettle();
+      // Advance the SnackBar exit animation to the end.
+      await tester.pumpAndSettle();
 
-        expect(snackBarFinder, findsNothing);
-      },
-    );
+      expect(snackBarFinder, findsNothing);
+    });
   });
 }

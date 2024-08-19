@@ -14,7 +14,9 @@ class TooltipExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(tooltipTheme: const TooltipThemeData(preferBelow: false)),
+      theme: ThemeData(
+        tooltipTheme: const TooltipThemeData(preferBelow: false),
+      ),
       home: const TooltipSample(title: 'Tooltip Sample'),
     );
   }
@@ -42,13 +44,10 @@ class TooltipSample extends StatelessWidget {
           child: const Text('Tap on the FAB'),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // Show Tooltip programmatically on button tap.
-          tooltipkey.currentState?.ensureTooltipVisible();
-        },
-        label: const Text('Show Tooltip'),
-      ),
+      floatingActionButton: FloatingActionButton.extended(onPressed: () {
+        // Show Tooltip programmatically on button tap.
+        tooltipkey.currentState?.ensureTooltipVisible();
+      }, label: const Text('Show Tooltip')),
     );
   }
 }

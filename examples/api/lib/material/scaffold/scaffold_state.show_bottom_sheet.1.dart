@@ -23,11 +23,13 @@ class ShowBottomSheetExampleApp extends StatelessWidget {
 }
 
 enum AnimationStyles { defaultStyle, custom, none }
-const List<(AnimationStyles, String)> animationStyleSegments = <(AnimationStyles, String)>[
-  (AnimationStyles.defaultStyle, 'Default'),
-  (AnimationStyles.custom, 'Custom'),
-  (AnimationStyles.none, 'None'),
-];
+
+const List<(AnimationStyles, String)> animationStyleSegments =
+    <(AnimationStyles, String)>[
+      (AnimationStyles.defaultStyle, 'Default'),
+      (AnimationStyles.custom, 'Custom'),
+      (AnimationStyles.none, 'None'),
+    ];
 
 class ShowBottomSheetExample extends StatefulWidget {
   const ShowBottomSheetExample({super.key});
@@ -37,40 +39,43 @@ class ShowBottomSheetExample extends StatefulWidget {
 }
 
 class _ShowBottomSheetExampleState extends State<ShowBottomSheetExample> {
-  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{AnimationStyles.defaultStyle};
+  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{
+    AnimationStyles.defaultStyle,
+  };
   AnimationStyle? _animationStyle;
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          SegmentedButton<AnimationStyles>(
-            selected: _animationStyleSelection,
-            onSelectionChanged: (Set<AnimationStyles> styles) {
-              setState(() {
-                _animationStyle = switch (styles.first) {
-                  AnimationStyles.defaultStyle => null,
-                  AnimationStyles.custom => AnimationStyle(
-                    duration: const Duration(seconds: 3),
-                    reverseDuration: const Duration(seconds: 1),
-                  ),
-                  AnimationStyles.none => AnimationStyle.noAnimation,
-                };
-                _animationStyleSelection = styles;
-              });
-            },
-            segments: animationStyleSegments
-              .map<ButtonSegment<AnimationStyles>>(((AnimationStyles, String) shirt) {
-                return ButtonSegment<AnimationStyles>(value: shirt.$1, label: Text(shirt.$2));
-              })
-              .toList(),
-          ),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            child: const Text('showBottomSheet'),
-            onPressed: () {
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+          <Widget>[
+            SegmentedButton<AnimationStyles>(
+              selected: _animationStyleSelection,
+              onSelectionChanged: (Set<AnimationStyles> styles) {
+                setState(() {
+                  _animationStyle = switch (styles.first) {
+                    AnimationStyles.defaultStyle => null,
+                    AnimationStyles.custom => AnimationStyle(
+                      duration: const Duration(seconds: 3),
+                      reverseDuration: const Duration(seconds: 1),
+                    ),
+                    AnimationStyles.none => AnimationStyle.noAnimation,
+                  };
+                  _animationStyleSelection = styles;
+                });
+              },
+              segments:
+                  animationStyleSegments.map<ButtonSegment<AnimationStyles>>((
+                    (AnimationStyles, String) shirt,
+                  ) {
+                    return ButtonSegment<AnimationStyles>(
+                      value: shirt.$1,
+                      label: Text(shirt.$2),
+                    );
+                  }).toList(),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(child: const Text('showBottomSheet'), onPressed: () {
               Scaffold.of(context).showBottomSheet(
                 sheetAnimationStyle: _animationStyle,
                 (BuildContext context) {
@@ -82,22 +87,18 @@ class _ShowBottomSheetExampleState extends State<ShowBottomSheetExample> {
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           const Text('BottomSheet'),
-                          ElevatedButton(
-                            child: const Text('Close'),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                          ),
+                          ElevatedButton(child: const Text('Close'), onPressed:
+                              () {
+                                Navigator.pop(context);
+                              }),
                         ],
                       ),
                     ),
                   );
                 },
               );
-            },
-          ),
-        ],
-      ),
+            }),
+          ]),
     );
   }
 }

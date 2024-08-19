@@ -11,11 +11,11 @@ void main() {
   testWidgets('Tooltip wait and show duration', (WidgetTester tester) async {
     const String tooltipText = 'I am a Tooltip';
 
-    await tester.pumpWidget(
-      const example.TooltipExampleApp(),
-    );
+    await tester.pumpWidget(const example.TooltipExampleApp());
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
     addTearDown(() async {
       return gesture.removePointer();
     });

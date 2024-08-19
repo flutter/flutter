@@ -13,9 +13,7 @@ class FocusScopeExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: FocusScopeExample(),
-    );
+    return const MaterialApp(home: FocusScopeExample());
   }
 }
 
@@ -42,23 +40,18 @@ class Pane extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: backgroundColor,
-      child: Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          Center(
-            child: child,
+      child: Stack(fit: StackFit.expand, children: <Widget>[
+        Center(child: child),
+        Align(
+          alignment: Alignment.topLeft,
+          child: IconButton(
+            autofocus: true,
+            focusNode: focusNode,
+            onPressed: onPressed,
+            icon: icon,
           ),
-          Align(
-            alignment: Alignment.topLeft,
-            child: IconButton(
-              autofocus: true,
-              focusNode: focusNode,
-              onPressed: onPressed,
-              icon: icon,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ]),
     );
   }
 }
@@ -142,7 +135,10 @@ class _FocusScopeExampleState extends State<FocusScopeExample> {
             // TRY THIS: Try changing this to Colors.green.withOpacity(0.8) to see for
             // yourself that the hidden components do/don't get focus.
             backgroundColor: Colors.green,
-            onPressed: backdropIsVisible ? null : () => setState(() => backdropIsVisible = true),
+            onPressed:
+                backdropIsVisible
+                    ? null
+                    : () => setState(() => backdropIsVisible = true),
             child: DefaultTextStyle(
               style: Theme.of(context).textTheme.displayMedium!,
               child: const Text('FOREGROUND'),

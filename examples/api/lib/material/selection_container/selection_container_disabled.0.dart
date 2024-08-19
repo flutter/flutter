@@ -18,14 +18,14 @@ class SelectionContainerDisabledExampleApp extends StatelessWidget {
         appBar: AppBar(title: const Text('SelectionContainer.disabled Sample')),
         body: const Center(
           child: SelectionArea(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text('Selectable text'),
-                SelectionContainer.disabled(child: Text('Non-selectable text')),
-                Text('Selectable text'),
-              ],
-            ),
+            child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+                <Widget>[
+                  Text('Selectable text'),
+                  SelectionContainer.disabled(
+                    child: Text('Non-selectable text'),
+                  ),
+                  Text('Selectable text'),
+                ]),
           ),
         ),
       ),

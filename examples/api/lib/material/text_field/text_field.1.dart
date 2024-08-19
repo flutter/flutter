@@ -13,9 +13,7 @@ class TextFieldExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: TextFieldExample(),
-    );
+    return const MaterialApp(home: TextFieldExample());
   }
 }
 
@@ -45,28 +43,25 @@ class _TextFieldExampleState extends State<TextFieldExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: TextField(
-          controller: _controller,
-          onSubmitted: (String value) async {
-            await showDialog<void>(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text('Thanks!'),
-                  content: Text('You typed "$value", which has length ${value.characters.length}.'),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('OK'),
-                    ),
-                  ],
-                );
-              },
+        child: TextField(controller: _controller, onSubmitted: (
+          String value,
+        ) async {
+          await showDialog<void>(context: context, builder: (
+            BuildContext context,
+          ) {
+            return AlertDialog(
+              title: const Text('Thanks!'),
+              content: Text(
+                'You typed "$value", which has length ${value.characters.length}.',
+              ),
+              actions: <Widget>[
+                TextButton(onPressed: () {
+                  Navigator.pop(context);
+                }, child: const Text('OK')),
+              ],
             );
-          },
-        ),
+          });
+        }),
       ),
     );
   }

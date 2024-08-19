@@ -15,9 +15,7 @@ class TextInputControlExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: TextInputControlExample(),
-    );
+    return const MaterialApp(home: TextInputControlExample());
   }
 }
 
@@ -100,16 +98,14 @@ class MyVirtualKeyboardState extends State<MyVirtualKeyboard> {
           child: FocusScope(
             canRequestFocus: false,
             child: TextFieldTapRegion(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  for (final String key in <String>['A', 'B', 'C'])
-                    ElevatedButton(
-                      child: Text(key),
-                      onPressed: () => _handleKeyPress(key),
-                    ),
-                ],
-              ),
+              child: Row(mainAxisAlignment: MainAxisAlignment.center, children:
+                  <Widget>[
+                    for (final String key in <String>['A', 'B', 'C'])
+                      ElevatedButton(
+                        child: Text(key),
+                        onPressed: () => _handleKeyPress(key),
+                      ),
+                  ]),
             ),
           ),
         );

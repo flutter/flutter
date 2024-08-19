@@ -27,7 +27,8 @@ class GlowingOverscrollIndicatorExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double leadingPaintOffset = MediaQuery.of(context).padding.top + AppBar().preferredSize.height;
+    final double leadingPaintOffset =
+        MediaQuery.of(context).padding.top + AppBar().preferredSize.height;
     return NotificationListener<OverscrollIndicatorNotification>(
       onNotification: (OverscrollIndicatorNotification notification) {
         if (notification.leading) {
@@ -35,19 +36,17 @@ class GlowingOverscrollIndicatorExample extends StatelessWidget {
         }
         return false;
       },
-      child: CustomScrollView(
-        slivers: <Widget>[
-          const SliverAppBar(title: Text('Custom PaintOffset')),
-          SliverToBoxAdapter(
-            child: Container(
-              color: Colors.amberAccent,
-              height: 100,
-              child: const Center(child: Text('Glow all day!')),
-            ),
+      child: CustomScrollView(slivers: <Widget>[
+        const SliverAppBar(title: Text('Custom PaintOffset')),
+        SliverToBoxAdapter(
+          child: Container(
+            color: Colors.amberAccent,
+            height: 100,
+            child: const Center(child: Text('Glow all day!')),
           ),
-          const SliverFillRemaining(child: FlutterLogo()),
-        ],
-      ),
+        ),
+        const SliverFillRemaining(child: FlutterLogo()),
+      ]),
     );
   }
 }

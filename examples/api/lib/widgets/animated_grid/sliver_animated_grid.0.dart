@@ -12,30 +12,41 @@ class SliverAnimatedGridSample extends StatefulWidget {
   const SliverAnimatedGridSample({super.key});
 
   @override
-  State<SliverAnimatedGridSample> createState() => _SliverAnimatedGridSampleState();
+  State<SliverAnimatedGridSample> createState() =>
+      _SliverAnimatedGridSampleState();
 }
 
 class _SliverAnimatedGridSampleState extends State<SliverAnimatedGridSample> {
-  final GlobalKey<SliverAnimatedGridState> _listKey = GlobalKey<SliverAnimatedGridState>();
+  final GlobalKey<SliverAnimatedGridState> _listKey =
+      GlobalKey<SliverAnimatedGridState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
   late ListModel<int> _list;
   int? _selectedItem;
-  late int _nextItem; // The next item inserted when the user presses the '+' button.
+  late int
+  _nextItem; // The next item inserted when the user presses the '+' button.
 
   @override
   void initState() {
     super.initState();
-    _list = ListModel<int>(
-      listKey: _listKey,
-      initialItems: <int>[0, 1, 2, 3, 4, 5],
-      removedItemBuilder: _buildRemovedItem,
-    );
+    _list = ListModel<int>(listKey: _listKey, initialItems: <int>[
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+    ], removedItemBuilder: _buildRemovedItem);
     _nextItem = 6;
   }
 
   // Used to build list items that haven't been removed.
-  Widget _buildItem(BuildContext context, int index, Animation<double> animation) {
+  Widget _buildItem(
+    BuildContext context,
+    int index,
+    Animation<double> animation,
+  ) {
     return CardItem(
       animation: animation,
       item: _list[index],
@@ -54,17 +65,18 @@ class _SliverAnimatedGridSampleState extends State<SliverAnimatedGridSample> {
   // concerned). The widget will be used by the
   // [AnimatedGridState.removeItem] method's
   // [AnimatedGridRemovedItemBuilder] parameter.
-  Widget _buildRemovedItem(int item, BuildContext context, Animation<double> animation) {
-    return CardItem(
-      animation: animation,
-      removing: true,
-      item: item,
-    );
+  Widget _buildRemovedItem(
+    int item,
+    BuildContext context,
+    Animation<double> animation,
+  ) {
+    return CardItem(animation: animation, removing: true, item: item);
   }
 
   // Insert the "next item" into the list model.
   void _insert() {
-    final int index = _selectedItem == null ? _list.length : _list.indexOf(_selectedItem!);
+    final int index =
+        _selectedItem == null ? _list.length : _list.indexOf(_selectedItem!);
     _list.insert(index, _nextItem++);
   }
 
@@ -87,49 +99,53 @@ class _SliverAnimatedGridSampleState extends State<SliverAnimatedGridSample> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         key: _scaffoldKey,
-        body: CustomScrollView(
-          slivers: <Widget>[
-            SliverAppBar(
-              title: const Text(
-                'SliverAnimatedGrid',
-                style: TextStyle(fontSize: 30),
-              ),
-              expandedHeight: 60,
-              centerTitle: true,
-              backgroundColor: Colors.amber[900],
-              leading: IconButton(
-                icon: const Icon(Icons.remove_circle),
-                onPressed: _remove,
-                tooltip: 'Remove the selected item, or the last item if none selected.',
+        body: CustomScrollView(slivers: <Widget>[
+          SliverAppBar(
+            title: const Text(
+              'SliverAnimatedGrid',
+              style: TextStyle(fontSize: 30),
+            ),
+            expandedHeight: 60,
+            centerTitle: true,
+            backgroundColor: Colors.amber[900],
+            leading: IconButton(
+              icon: const Icon(Icons.remove_circle),
+              onPressed: _remove,
+              tooltip:
+                  'Remove the selected item, or the last item if none selected.',
+              iconSize: 32,
+            ),
+            actions: <Widget>[
+              IconButton(
+                icon: const Icon(Icons.add_circle),
+                onPressed: _insert,
+                tooltip: 'Insert a new item.',
                 iconSize: 32,
               ),
-              actions: <Widget>[
-                IconButton(
-                  icon: const Icon(Icons.add_circle),
-                  onPressed: _insert,
-                  tooltip: 'Insert a new item.',
-                  iconSize: 32,
-                ),
-              ],
+            ],
+          ),
+          SliverAnimatedGrid(
+            key: _listKey,
+            initialItemCount: _list.length,
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 100.0,
+              mainAxisSpacing: 10.0,
+              crossAxisSpacing: 10.0,
             ),
-            SliverAnimatedGrid(
-              key: _listKey,
-              initialItemCount: _list.length,
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 100.0,
-                mainAxisSpacing: 10.0,
-                crossAxisSpacing: 10.0,
-              ),
-              itemBuilder: _buildItem,
-            ),
-          ],
-        ),
+            itemBuilder: _buildItem,
+          ),
+        ]),
       ),
     );
   }
 }
 
-typedef RemovedItemBuilder = Widget Function(int item, BuildContext context, Animation<double> animation);
+typedef RemovedItemBuilder =
+    Widget Function(
+      int item,
+      BuildContext context,
+      Animation<double> animation,
+    );
 
 // Keeps a Dart [List] in sync with an [AnimatedGrid].
 //
@@ -163,7 +179,8 @@ class ListModel<E> {
     if (removedItem != null) {
       _animatedGrid.removeItem(
         index,
-        (BuildContext context, Animation<double> animation) => removedItemBuilder(index, context, animation),
+        (BuildContext context, Animation<double> animation) =>
+            removedItemBuilder(index, context, animation),
       );
     }
     return removedItem;
@@ -201,19 +218,21 @@ class CardItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(
-        left: 2.0,
-        right: 2.0,
-        top: 2.0,
-      ),
+      padding: const EdgeInsets.only(left: 2.0, right: 2.0, top: 2.0),
       child: ScaleTransition(
-        scale: CurvedAnimation(parent: animation, curve: removing ? Curves.easeInOut : Curves.bounceOut),
+        scale: CurvedAnimation(
+          parent: animation,
+          curve: removing ? Curves.easeInOut : Curves.bounceOut,
+        ),
         child: GestureDetector(
           onTap: onTap,
           child: SizedBox(
             height: 80.0,
             child: Card(
-              color: selected ? Colors.black12 : Colors.primaries[item % Colors.primaries.length],
+              color:
+                  selected
+                      ? Colors.black12
+                      : Colors.primaries[item % Colors.primaries.length],
               child: Center(
                 child: Text(
                   (item + 1).toString(),

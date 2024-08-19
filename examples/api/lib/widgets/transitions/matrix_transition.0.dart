@@ -15,9 +15,7 @@ class MatrixTransitionExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: MatrixTransitionExample(),
-    );
+    return const MaterialApp(home: MatrixTransitionExample());
   }
 }
 
@@ -25,12 +23,14 @@ class MatrixTransitionExample extends StatefulWidget {
   const MatrixTransitionExample({super.key});
 
   @override
-  State<MatrixTransitionExample> createState() => _MatrixTransitionExampleState();
+  State<MatrixTransitionExample> createState() =>
+      _MatrixTransitionExampleState();
 }
 
 /// [AnimationController]s can be created with `vsync: this` because of
 /// [TickerProviderStateMixin].
-class _MatrixTransitionExampleState extends State<MatrixTransitionExample> with TickerProviderStateMixin {
+class _MatrixTransitionExampleState extends State<MatrixTransitionExample>
+    with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -41,10 +41,7 @@ class _MatrixTransitionExampleState extends State<MatrixTransitionExample> with 
       duration: const Duration(seconds: 2),
       vsync: this,
     )..repeat();
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.linear,
-    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.linear);
   }
 
   @override

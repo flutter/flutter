@@ -15,12 +15,8 @@ class AutocompleteExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('RawAutocomplete Basic'),
-        ),
-        body: const Center(
-          child: AutocompleteBasicExample(),
-        ),
+        appBar: AppBar(title: const Text('RawAutocomplete Basic')),
+        body: const Center(child: AutocompleteBasicExample()),
       ),
     );
   }
@@ -73,14 +69,9 @@ class AutocompleteBasicExample extends StatelessWidget {
                 itemCount: options.length,
                 itemBuilder: (BuildContext context, int index) {
                   final String option = options.elementAt(index);
-                  return GestureDetector(
-                    onTap: () {
-                      onSelected(option);
-                    },
-                    child: ListTile(
-                      title: Text(option),
-                    ),
-                  );
+                  return GestureDetector(onTap: () {
+                    onSelected(option);
+                  }, child: ListTile(title: Text(option)));
                 },
               ),
             ),

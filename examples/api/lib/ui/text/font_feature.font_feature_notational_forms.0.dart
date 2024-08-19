@@ -14,7 +14,8 @@ class ExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WidgetsApp(
-      builder: (BuildContext context, Widget? navigator) => const ExampleWidget(),
+      builder:
+          (BuildContext context, Widget? navigator) => const ExampleWidget(),
       color: const Color(0xffffffff),
     );
   }
@@ -29,12 +30,9 @@ class ExampleWidget extends StatelessWidget {
     // (https://www.google.com/fonts).
     return const Text(
       'abc 123',
-      style: TextStyle(
-        fontFamily: 'Gothic A1',
-        fontFeatures: <FontFeature>[
-          FontFeature.notationalForms(3), // circled letters and digits
-        ],
-      ),
+      style: TextStyle(fontFamily: 'Gothic A1', fontFeatures: <FontFeature>[
+        FontFeature.notationalForms(3), // circled letters and digits
+      ]),
     );
   }
 }

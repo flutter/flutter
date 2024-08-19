@@ -9,9 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('animated digit example', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.AnimatedDigitApp(),
-    );
+    await tester.pumpWidget(const example.AnimatedDigitApp());
 
     Finder findVisibleDigit(int digit) {
       return find.descendant(
@@ -31,7 +29,9 @@ void main() {
     expect(findVisibleDigit(2), findsOneWidget);
 
     await tester.tap(find.byType(FloatingActionButton));
-    await tester.pump(const Duration(milliseconds: 100)); // Animation duration is 300ms
+    await tester.pump(
+      const Duration(milliseconds: 100),
+    ); // Animation duration is 300ms
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
     expect(findVisibleDigit(4), findsOneWidget);

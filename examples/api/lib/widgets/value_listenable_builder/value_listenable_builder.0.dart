@@ -13,9 +13,7 @@ class ValueListenableBuilderExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: ValueListenableBuilderExample(),
-    );
+    return const MaterialApp(home: ValueListenableBuilderExample());
   }
 }
 
@@ -23,51 +21,46 @@ class ValueListenableBuilderExample extends StatefulWidget {
   const ValueListenableBuilderExample({super.key});
 
   @override
-  State<ValueListenableBuilderExample> createState() => _ValueListenableBuilderExampleState();
+  State<ValueListenableBuilderExample> createState() =>
+      _ValueListenableBuilderExampleState();
 }
 
-class _ValueListenableBuilderExampleState extends State<ValueListenableBuilderExample> {
+class _ValueListenableBuilderExampleState
+    extends State<ValueListenableBuilderExample> {
   final ValueNotifier<int> _counter = ValueNotifier<int>(0);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ValueListenableBuilder Sample'),
-      ),
+      appBar: AppBar(title: const Text('ValueListenableBuilder Sample')),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            ValueListenableBuilder<int>(
-              builder: (BuildContext context, int value, Widget? child) {
-                // This builder will only get called when the _counter
-                // is updated.
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    CountDisplay(count: value),
-                    child!,
-                  ],
-                );
-              },
-              valueListenable: _counter,
-              // The child parameter is most helpful if the child is
-              // expensive to build and does not depend on the value from
-              // the notifier.
-              child: const Padding(
-                padding: EdgeInsets.all(10.0),
-                child: SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: FlutterLogo(size: 40),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+            <Widget>[
+              const Text('You have pushed the button this many times:'),
+              ValueListenableBuilder<int>(
+                builder: (BuildContext context, int value, Widget? child) {
+                  // This builder will only get called when the _counter
+                  // is updated.
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[CountDisplay(count: value), child!],
+                  );
+                },
+                valueListenable: _counter,
+                // The child parameter is most helpful if the child is
+                // expensive to build and does not depend on the value from
+                // the notifier.
+                child: const Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: FlutterLogo(size: 40),
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ]),
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.plus_one),

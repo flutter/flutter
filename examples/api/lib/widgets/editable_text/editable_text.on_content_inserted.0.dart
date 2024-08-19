@@ -15,9 +15,7 @@ class KeyboardInsertedContentApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: KeyboardInsertedContentDemo(),
-    );
+    return const MaterialApp(home: KeyboardInsertedContentDemo());
   }
 }
 
@@ -25,10 +23,12 @@ class KeyboardInsertedContentDemo extends StatefulWidget {
   const KeyboardInsertedContentDemo({super.key});
 
   @override
-  State<KeyboardInsertedContentDemo> createState() => _KeyboardInsertedContentDemoState();
+  State<KeyboardInsertedContentDemo> createState() =>
+      _KeyboardInsertedContentDemoState();
 }
 
-class _KeyboardInsertedContentDemoState extends State<KeyboardInsertedContentDemo> {
+class _KeyboardInsertedContentDemoState
+    extends State<KeyboardInsertedContentDemo> {
   final TextEditingController _controller = TextEditingController();
   Uint8List? bytes;
 
@@ -42,27 +42,29 @@ class _KeyboardInsertedContentDemoState extends State<KeyboardInsertedContentDem
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Keyboard Inserted Content Sample')),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          const Text("Here's a text field that supports inserting only png or gif content:"),
-          TextField(
-            controller: _controller,
-            contentInsertionConfiguration: ContentInsertionConfiguration(
-              allowedMimeTypes: const <String>['image/png', 'image/gif'],
-              onContentInserted: (KeyboardInsertedContent data) async {
-                if (data.data != null) {
-                  setState(() {
-                    bytes = data.data;
-                  });
-                }
-              },
-            ),
+      body: Column(mainAxisAlignment: MainAxisAlignment.center, children: <
+        Widget
+      >[
+        const Text(
+          "Here's a text field that supports inserting only png or gif content:",
+        ),
+        TextField(
+          controller: _controller,
+          contentInsertionConfiguration: ContentInsertionConfiguration(
+            allowedMimeTypes: const <String>['image/png', 'image/gif'],
+            onContentInserted: (KeyboardInsertedContent data) async {
+              if (data.data != null) {
+                setState(() {
+                  bytes = data.data;
+                });
+              }
+            },
           ),
-          if (bytes != null) const Text("Here's the most recently inserted content:"),
-          if (bytes != null) Image.memory(bytes!),
-        ],
-      ),
+        ),
+        if (bytes != null)
+          const Text("Here's the most recently inserted content:"),
+        if (bytes != null) Image.memory(bytes!),
+      ]),
     );
   }
 }

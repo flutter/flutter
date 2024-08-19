@@ -11,7 +11,7 @@ void main() {
 }
 
 class SliverAutoScrollExampleApp extends StatelessWidget {
-  const SliverAutoScrollExampleApp({ super.key });
+  const SliverAutoScrollExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,10 +20,11 @@ class SliverAutoScrollExampleApp extends StatelessWidget {
 }
 
 class SliverAutoScrollExample extends StatefulWidget {
-  const SliverAutoScrollExample({ super.key });
+  const SliverAutoScrollExample({super.key});
 
   @override
-  State<SliverAutoScrollExample> createState() => _SliverAutoScrollExampleState();
+  State<SliverAutoScrollExample> createState() =>
+      _SliverAutoScrollExampleState();
 }
 
 class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
@@ -61,12 +62,14 @@ class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
     final SliverGeometry geometry = alignedItem.geometry!;
     final double sliverOffset = constraints.scrollOffset;
 
-    if ((scrollController.offset - lastScrollOffset).abs() <= geometry.maxPaintExtent) {
+    if ((scrollController.offset - lastScrollOffset).abs() <=
+        geometry.maxPaintExtent) {
       // Ignore scrolls that are smaller than the aligned item's extent.
       return;
     }
     final double overflow = geometry.maxPaintExtent - geometry.paintExtent;
-    if (overflow > 0 && overflow < geometry.scrollExtent) { // indicates partial visibility
+    if (overflow > 0 && overflow < geometry.scrollExtent) {
+      // indicates partial visibility
       if (sliverOffset > 0) {
         autoScrollTo(constraints.precedingScrollExtent); // top
       } else if (sliverOffset == 0) {
@@ -85,7 +88,8 @@ class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
     if (notification is ScrollEndNotification) {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         final RenderSliver? sliver =
-          alignedItemKey.currentContext?.findAncestorRenderObjectOfType<RenderSliver>();
+            alignedItemKey.currentContext
+                ?.findAncestorRenderObjectOfType<RenderSliver>();
         if (sliver != null && sliver.geometry != null) {
           maybeAutoScrollAlignedItem(sliver);
         }
@@ -107,23 +111,21 @@ class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
             child: Scrollbar(
               controller: scrollController,
               thumbVisibility: true,
-              child: CustomScrollView(
-                controller: scrollController,
-                slivers: <Widget>[
-                  const SliverPadding(
-                    padding: horizontalPadding,
-                    sliver: ItemList(itemCount: 15),
-                  ),
-                  SliverPadding(
-                    padding: horizontalPadding,
-                    sliver: BigOrangeSliver(sliverChildKey: alignedItemKey),
-                  ),
-                  const SliverPadding(
-                    padding: horizontalPadding,
-                    sliver: ItemList(itemCount: 25),
-                  ),
-                ],
-              ),
+              child: CustomScrollView(controller: scrollController, slivers:
+                  <Widget>[
+                    const SliverPadding(
+                      padding: horizontalPadding,
+                      sliver: ItemList(itemCount: 15),
+                    ),
+                    SliverPadding(
+                      padding: horizontalPadding,
+                      sliver: BigOrangeSliver(sliverChildKey: alignedItemKey),
+                    ),
+                    const SliverPadding(
+                      padding: horizontalPadding,
+                      sliver: ItemList(itemCount: 25),
+                    ),
+                  ]),
             ),
           ),
         ),
@@ -136,7 +138,7 @@ class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
 // the aligned sliver's child so that we can find the this item's RenderSliver
 // later with BuildContext.findAncestorRenderObjectOfType.
 class BigOrangeSliver extends StatelessWidget {
-  const BigOrangeSliver({ super.key, required this.sliverChildKey });
+  const BigOrangeSliver({super.key, required this.sliverChildKey});
 
   final Key sliverChildKey;
 
@@ -154,7 +156,7 @@ class BigOrangeSliver extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: 32),
               child: Text('Aligned Item'),
             ),
-          )
+          ),
         ),
       ),
     );
@@ -163,7 +165,7 @@ class BigOrangeSliver extends StatelessWidget {
 
 // A placeholder SliverList of 50 items.
 class ItemList extends StatelessWidget {
-  const ItemList({ super.key, this.itemCount = 50 });
+  const ItemList({super.key, this.itemCount = 50});
 
   final int itemCount;
 
@@ -171,18 +173,18 @@ class ItemList extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (BuildContext context, int index) {
-          return Card(
-            color: colorScheme.onSecondary,
-            child: SizedBox(width: 100, child: ListTile(
+      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+        return Card(
+          color: colorScheme.onSecondary,
+          child: SizedBox(
+            width: 100,
+            child: ListTile(
               textColor: colorScheme.secondary,
               title: Text('Item $index.$itemCount'),
-            )),
-          );
-        },
-        childCount: itemCount,
-      ),
+            ),
+          ),
+        );
+      }, childCount: itemCount),
     );
   }
 }

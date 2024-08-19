@@ -11,20 +11,14 @@ import 'package:flutter/services.dart';
 void main() => runApp(const FormApp());
 
 class FormApp extends StatelessWidget {
-  const FormApp({
-    super.key,
-  });
+  const FormApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Confirmation Dialog Example'),
-        ),
-        body: Center(
-          child: _SaveableForm(),
-        ),
+        appBar: AppBar(title: const Text('Confirmation Dialog Example')),
+        body: Center(child: _SaveableForm()),
       ),
     );
   }
@@ -68,29 +62,21 @@ class _SaveableFormState extends State<_SaveableForm> {
   /// A return value of null indicates a desire not to pop, such as when the
   /// user has dismissed the modal without tapping a button.
   Future<bool?> _showDialog() {
-    return showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Are you sure?'),
-          content: const Text('Any unsaved changes will be lost!'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Yes, discard my changes'),
-              onPressed: () {
+    return showDialog<bool>(context: context, builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Are you sure?'),
+        content: const Text('Any unsaved changes will be lost!'),
+        actions: <Widget>[
+          TextButton(child: const Text('Yes, discard my changes'), onPressed:
+              () {
                 Navigator.pop(context, true);
-              },
-            ),
-            TextButton(
-              child: const Text('No, continue editing'),
-              onPressed: () {
-                Navigator.pop(context, false);
-              },
-            ),
-          ],
-        );
-      },
-    );
+              }),
+          TextButton(child: const Text('No, continue editing'), onPressed: () {
+            Navigator.pop(context, false);
+          }),
+        ],
+      );
+    });
   }
 
   void _save(String? value) {
@@ -104,69 +90,60 @@ class _SaveableFormState extends State<_SaveableForm> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          const Text('If the field below is unsaved, a confirmation dialog will be shown on back.'),
-          const SizedBox(height: 20.0),
-          Form(
-            canPop: !_isDirty,
-            onPopInvokedWithResult: (bool didPop, Object? result) async {
-              if (didPop) {
-                return;
-              }
-              final bool shouldPop = await _showDialog() ?? false;
-              if (shouldPop) {
-                // Since this is the root route, quit the app where possible by
-                // invoking the SystemNavigator. If this wasn't the root route,
-                // then Navigator.maybePop could be used instead.
-                // See https://github.com/flutter/flutter/issues/11490
-                SystemNavigator.pop();
-              }
-            },
-            autovalidateMode: AutovalidateMode.always,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                TextFormField(
-                  controller: _controller,
-                  onFieldSubmitted: (String? value) {
-                    _save(value);
-                  },
-                ),
-                TextButton(
-                  onPressed: () {
-                    _save(_controller.text);
-                  },
-                  child: Row(
-                    children: <Widget>[
-                      const Text('Save'),
-                      if (_controller.text.isNotEmpty)
-                        Icon(
-                          _isDirty ? Icons.warning : Icons.check,
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              final bool shouldPop = !_isDirty || (await _showDialog() ?? false);
-              if (!shouldPop) {
-                return;
-              }
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: <
+        Widget
+      >[
+        const Text(
+          'If the field below is unsaved, a confirmation dialog will be shown on back.',
+        ),
+        const SizedBox(height: 20.0),
+        Form(
+          canPop: !_isDirty,
+          onPopInvokedWithResult: (bool didPop, Object? result) async {
+            if (didPop) {
+              return;
+            }
+            final bool shouldPop = await _showDialog() ?? false;
+            if (shouldPop) {
               // Since this is the root route, quit the app where possible by
               // invoking the SystemNavigator. If this wasn't the root route,
               // then Navigator.maybePop could be used instead.
               // See https://github.com/flutter/flutter/issues/11490
               SystemNavigator.pop();
-            },
-            child: const Text('Go back'),
-          ),
-        ],
-      ),
+            }
+          },
+          autovalidateMode: AutovalidateMode.always,
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+              <Widget>[
+                TextFormField(controller: _controller, onFieldSubmitted: (
+                  String? value,
+                ) {
+                  _save(value);
+                }),
+                TextButton(
+                  onPressed: () {
+                    _save(_controller.text);
+                  },
+                  child: Row(children: <Widget>[
+                    const Text('Save'),
+                    if (_controller.text.isNotEmpty)
+                      Icon(_isDirty ? Icons.warning : Icons.check),
+                  ]),
+                ),
+              ]),
+        ),
+        TextButton(onPressed: () async {
+          final bool shouldPop = !_isDirty || (await _showDialog() ?? false);
+          if (!shouldPop) {
+            return;
+          }
+          // Since this is the root route, quit the app where possible by
+          // invoking the SystemNavigator. If this wasn't the root route,
+          // then Navigator.maybePop could be used instead.
+          // See https://github.com/flutter/flutter/issues/11490
+          SystemNavigator.pop();
+        }, child: const Text('Go back')),
+      ]),
     );
   }
 }

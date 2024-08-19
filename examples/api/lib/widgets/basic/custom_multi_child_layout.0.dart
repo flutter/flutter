@@ -18,9 +18,7 @@ class CustomMultiChildLayoutApp extends StatelessWidget {
         // TRY THIS: Try changing the direction here and hot-reloading to
         // see the layout change.
         textDirection: TextDirection.ltr,
-        child: Scaffold(
-          body: CustomMultiChildLayoutExample(),
-        ),
+        child: Scaffold(body: CustomMultiChildLayoutExample()),
       ),
     );
   }
@@ -64,10 +62,16 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
       switch (textDirection) {
         case TextDirection.rtl:
           positionChild(color, childPosition - Offset(currentSize.width, 0));
-          childPosition += Offset(-currentSize.width, currentSize.height - overlap);
+          childPosition += Offset(
+            -currentSize.width,
+            currentSize.height - overlap,
+          );
         case TextDirection.ltr:
           positionChild(color, childPosition);
-          childPosition += Offset(currentSize.width, currentSize.height - overlap);
+          childPosition += Offset(
+            currentSize.width,
+            currentSize.height - overlap,
+          );
       }
     }
   }
@@ -78,7 +82,8 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
   // automatically cause a relayout, like any other widget.
   @override
   bool shouldRelayout(_CascadeLayoutDelegate oldDelegate) {
-    return oldDelegate.textDirection != textDirection || oldDelegate.overlap != overlap;
+    return oldDelegate.textDirection != textDirection ||
+        oldDelegate.overlap != overlap;
   }
 }
 

@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/radio_list_tile/custom_labeled_radio.0.dart' as example;
+import 'package:flutter_api_samples/material/radio_list_tile/custom_labeled_radio.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('LinkedLabelRadio contains RichText and Radio', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.LabeledRadioApp(),
-    );
+  testWidgets('LinkedLabelRadio contains RichText and Radio', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.LabeledRadioApp());
 
     // Label text is in a RichText widget with the correct text.
     final RichText richText = tester.widget(find.byType(RichText).first);

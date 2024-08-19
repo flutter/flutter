@@ -15,9 +15,7 @@ class SharedAppDataExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: SharedAppDataExample(),
-    );
+    return const MaterialApp(home: SharedAppDataExample());
   }
 }
 
@@ -38,46 +36,35 @@ class _SharedAppDataExampleState extends State<SharedAppDataExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('SharedAppData Sample'),
-      ),
+      appBar: AppBar(title: const Text('SharedAppData Sample')),
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            const ShowSharedValue(appDataKey: 'foo'),
-            const SizedBox(height: 16),
-            const ShowSharedValue(appDataKey: 'bar'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              child: const Text('change foo'),
-              onPressed: () {
-                _fooVersion += 1;
-                // Changing the SharedAppData's value for 'foo' key causes the
-                // widgets that depend on 'foo' key to be rebuilt.
-                SharedAppData.setValue<String, String?>(
-                  context,
-                  'foo',
-                  'FOO $_fooVersion',
-                ); // No need to call setState().
-              },
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              child: const Text('change bar'),
-              onPressed: () {
-                _barVersion += 1;
-                // Changing the SharedAppData's value for 'bar' key causes the
-                // widgets that depend on 'bar' key to be rebuilt.
-                SharedAppData.setValue<String, String?>(
-                  context,
-                  'bar',
-                  'BAR $_barVersion',
-                ); // No need to call setState().
-              },
-            ),
-          ],
-        ),
+        child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+          const ShowSharedValue(appDataKey: 'foo'),
+          const SizedBox(height: 16),
+          const ShowSharedValue(appDataKey: 'bar'),
+          const SizedBox(height: 16),
+          ElevatedButton(child: const Text('change foo'), onPressed: () {
+            _fooVersion += 1;
+            // Changing the SharedAppData's value for 'foo' key causes the
+            // widgets that depend on 'foo' key to be rebuilt.
+            SharedAppData.setValue<String, String?>(
+              context,
+              'foo',
+              'FOO $_fooVersion',
+            ); // No need to call setState().
+          }),
+          const SizedBox(height: 16),
+          ElevatedButton(child: const Text('change bar'), onPressed: () {
+            _barVersion += 1;
+            // Changing the SharedAppData's value for 'bar' key causes the
+            // widgets that depend on 'bar' key to be rebuilt.
+            SharedAppData.setValue<String, String?>(
+              context,
+              'bar',
+              'BAR $_barVersion',
+            ); // No need to call setState().
+          }),
+        ]),
       ),
     );
   }

@@ -16,9 +16,7 @@ class MaterialStateBorderSideExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('MaterialStateBorderSide Sample')),
-        body: const Center(
-          child: MaterialStateBorderSideExample(),
-        ),
+        body: const Center(child: MaterialStateBorderSideExample()),
       ),
     );
   }
@@ -28,10 +26,12 @@ class MaterialStateBorderSideExample extends StatefulWidget {
   const MaterialStateBorderSideExample({super.key});
 
   @override
-  State<MaterialStateBorderSideExample> createState() => _MaterialStateBorderSideExampleState();
+  State<MaterialStateBorderSideExample> createState() =>
+      _MaterialStateBorderSideExampleState();
 }
 
-class _MaterialStateBorderSideExampleState extends State<MaterialStateBorderSideExample> {
+class _MaterialStateBorderSideExampleState
+    extends State<MaterialStateBorderSideExample> {
   bool isSelected = true;
 
   @override

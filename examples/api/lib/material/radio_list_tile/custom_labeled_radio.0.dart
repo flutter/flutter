@@ -45,30 +45,27 @@ class LinkedLabelRadio extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: padding,
-      child: Row(
-        children: <Widget>[
-          Radio<bool>(
-            groupValue: groupValue,
-            value: value,
-            onChanged: (bool? newValue) {
-              onChanged(newValue!);
-            },
-          ),
-          RichText(
-            text: TextSpan(
-              text: label,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                decoration: TextDecoration.underline,
-              ),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  debugPrint('Label has been tapped.');
-                },
+      child: Row(children: <Widget>[
+        Radio<bool>(groupValue: groupValue, value: value, onChanged: (
+          bool? newValue,
+        ) {
+          onChanged(newValue!);
+        }),
+        RichText(
+          text: TextSpan(
+            text: label,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              decoration: TextDecoration.underline,
             ),
+            recognizer:
+                TapGestureRecognizer()
+                  ..onTap = () {
+                    debugPrint('Label has been tapped.');
+                  },
           ),
-        ],
-      ),
+        ),
+      ]),
     );
   }
 }
@@ -86,33 +83,31 @@ class _LabeledRadioExampleState extends State<LabeledRadioExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          LinkedLabelRadio(
-            label: 'First tappable label text',
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            value: true,
-            groupValue: _isRadioSelected,
-            onChanged: (bool newValue) {
-              setState(() {
-                _isRadioSelected = newValue;
-              });
-            },
-          ),
-          LinkedLabelRadio(
-            label: 'Second tappable label text',
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            value: false,
-            groupValue: _isRadioSelected,
-            onChanged: (bool newValue) {
-              setState(() {
-                _isRadioSelected = newValue;
-              });
-            },
-          ),
-        ],
-      ),
+      body: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+          <Widget>[
+            LinkedLabelRadio(
+              label: 'First tappable label text',
+              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+              value: true,
+              groupValue: _isRadioSelected,
+              onChanged: (bool newValue) {
+                setState(() {
+                  _isRadioSelected = newValue;
+                });
+              },
+            ),
+            LinkedLabelRadio(
+              label: 'Second tappable label text',
+              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+              value: false,
+              groupValue: _isRadioSelected,
+              onChanged: (bool newValue) {
+                setState(() {
+                  _isRadioSelected = newValue;
+                });
+              },
+            ),
+          ]),
     );
   }
 }

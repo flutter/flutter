@@ -30,31 +30,18 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
     return MenuAnchor(
       childFocusNode: _buttonFocusNode,
       menuChildren: <Widget>[
-        MenuItemButton(
-          onPressed: () {},
-          child: const Text('Revert'),
-        ),
-        MenuItemButton(
-          onPressed: () {},
-          child: const Text('Setting'),
-        ),
-        MenuItemButton(
-          onPressed: () {},
-          child: const Text('Send Feedback'),
-        ),
+        MenuItemButton(onPressed: () {}, child: const Text('Revert')),
+        MenuItemButton(onPressed: () {}, child: const Text('Setting')),
+        MenuItemButton(onPressed: () {}, child: const Text('Send Feedback')),
       ],
       builder: (_, MenuController controller, Widget? child) {
-        return IconButton(
-          focusNode: _buttonFocusNode,
-          onPressed: () {
-            if (controller.isOpen) {
-              controller.close();
-            } else {
-              controller.open();
-            }
-          },
-          icon: const Icon(Icons.more_vert),
-        );
+        return IconButton(focusNode: _buttonFocusNode, onPressed: () {
+          if (controller.isOpen) {
+            controller.close();
+          } else {
+            controller.open();
+          }
+        }, icon: const Icon(Icons.more_vert));
       },
     );
   }
@@ -69,12 +56,8 @@ class SimpleCascadingMenuApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('MenuAnchor Simple Example'),
-          actions: const <Widget>[
-            MyCascadingMenu(),
-          ],
-        ),
+        appBar: AppBar(title: const Text('MenuAnchor Simple Example'), actions:
+            const <Widget>[MyCascadingMenu()]),
       ),
     );
   }

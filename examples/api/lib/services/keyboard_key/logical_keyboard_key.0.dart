@@ -52,7 +52,8 @@ class _MyKeyExampleState extends State<MyKeyExample> {
         _message = 'Pressed the "Q" key!';
       } else {
         if (kReleaseMode) {
-          _message = 'Not a Q: Pressed 0x${event.logicalKey.keyId.toRadixString(16)}';
+          _message =
+              'Not a Q: Pressed 0x${event.logicalKey.keyId.toRadixString(16)}';
         } else {
           // As the name implies, the debugName will only print useful
           // information in debug mode.
@@ -60,7 +61,9 @@ class _MyKeyExampleState extends State<MyKeyExample> {
         }
       }
     });
-    return event.logicalKey == LogicalKeyboardKey.keyQ ? KeyEventResult.handled : KeyEventResult.ignored;
+    return event.logicalKey == LogicalKeyboardKey.keyQ
+        ? KeyEventResult.handled
+        : KeyEventResult.ignored;
   }
 
   @override
@@ -74,20 +77,17 @@ class _MyKeyExampleState extends State<MyKeyExample> {
         child: Focus(
           focusNode: _focusNode,
           onKeyEvent: _handleKeyEvent,
-          child: ListenableBuilder(
-            listenable: _focusNode,
-            builder: (BuildContext context, Widget? child) {
-              if (!_focusNode.hasFocus) {
-                return GestureDetector(
-                  onTap: () {
-                    FocusScope.of(context).requestFocus(_focusNode);
-                  },
-                  child: const Text('Click to focus'),
-                );
-              }
-              return Text(_message ?? 'Press a key');
-            },
-          ),
+          child: ListenableBuilder(listenable: _focusNode, builder: (
+            BuildContext context,
+            Widget? child,
+          ) {
+            if (!_focusNode.hasFocus) {
+              return GestureDetector(onTap: () {
+                FocusScope.of(context).requestFocus(_focusNode);
+              }, child: const Text('Click to focus'));
+            }
+            return Text(_message ?? 'Press a key');
+          }),
         ),
       ),
     );

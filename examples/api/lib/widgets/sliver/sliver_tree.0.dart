@@ -13,9 +13,7 @@ class TreeSliverExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: TreeSliverExample(),
-    );
+    return const MaterialApp(home: TreeSliverExample());
   }
 }
 
@@ -31,45 +29,31 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
   final TreeSliverController controller = TreeSliverController();
   final List<TreeSliverNode<String>> _tree = <TreeSliverNode<String>>[
     TreeSliverNode<String>('First'),
-    TreeSliverNode<String>(
-      'Second',
-      children: <TreeSliverNode<String>>[
-        TreeSliverNode<String>(
-          'alpha',
-          children: <TreeSliverNode<String>>[
-            TreeSliverNode<String>('uno'),
-            TreeSliverNode<String>('dos'),
-            TreeSliverNode<String>('tres'),
-          ],
-        ),
-        TreeSliverNode<String>('beta'),
-        TreeSliverNode<String>('kappa'),
-      ],
-    ),
-    TreeSliverNode<String>(
-      'Third',
-      expanded: true,
-      children: <TreeSliverNode<String>>[
-        TreeSliverNode<String>('gamma'),
-        TreeSliverNode<String>('delta'),
-        TreeSliverNode<String>('epsilon'),
-      ],
-    ),
+    TreeSliverNode<String>('Second', children: <TreeSliverNode<String>>[
+      TreeSliverNode<String>('alpha', children: <TreeSliverNode<String>>[
+        TreeSliverNode<String>('uno'),
+        TreeSliverNode<String>('dos'),
+        TreeSliverNode<String>('tres'),
+      ]),
+      TreeSliverNode<String>('beta'),
+      TreeSliverNode<String>('kappa'),
+    ]),
+    TreeSliverNode<String>('Third', expanded: true, children:
+        <TreeSliverNode<String>>[
+          TreeSliverNode<String>('gamma'),
+          TreeSliverNode<String>('delta'),
+          TreeSliverNode<String>('epsilon'),
+        ]),
     TreeSliverNode<String>('Fourth'),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('TreeSliver Demo'),
-      ),
-      body: CustomScrollView(
-        slivers: <Widget>[
-          TreeSliver<String>(
-            tree: _tree,
-            controller: controller,
-            treeNodeBuilder: (
+      appBar: AppBar(title: const Text('TreeSliver Demo')),
+      body: CustomScrollView(slivers: <Widget>[
+        TreeSliver<String>(tree: _tree, controller: controller, treeNodeBuilder:
+            (
               BuildContext context,
               TreeSliverNode<Object?> node,
               AnimationStyle animationStyle,
@@ -89,16 +73,11 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
                 ),
               );
               if (_selectedNode == node as TreeSliverNode<String>) {
-                child = ColoredBox(
-                  color: Colors.purple[100]!,
-                  child: child,
-                );
+                child = ColoredBox(color: Colors.purple[100]!, child: child);
               }
               return child;
-            },
-          ),
-        ],
-      ),
+            }),
+      ]),
     );
   }
 }

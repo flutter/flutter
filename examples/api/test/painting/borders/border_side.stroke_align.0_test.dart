@@ -10,9 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Finds the expected BorderedBox', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: example.StrokeAlignExample(),
-      ),
+      const MaterialApp(home: example.StrokeAlignExample()),
     );
 
     expect(find.byType(example.StrokeAlignExample), findsOneWidget);

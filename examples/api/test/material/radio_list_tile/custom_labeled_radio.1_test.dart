@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/radio_list_tile/custom_labeled_radio.1.dart' as example;
+import 'package:flutter_api_samples/material/radio_list_tile/custom_labeled_radio.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Tapping LabeledRadio toggles the radio', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.LabeledRadioApp(),
-    );
+  testWidgets('Tapping LabeledRadio toggles the radio', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.LabeledRadioApp());
 
     // First Radio is initially unchecked.
     Radio<bool> radio = tester.widget(find.byType(Radio<bool>).first);

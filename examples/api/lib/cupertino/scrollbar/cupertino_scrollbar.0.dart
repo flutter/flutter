@@ -34,17 +34,17 @@ class ScrollbarExample extends StatelessWidget {
         thicknessWhileDragging: 10.0,
         radius: const Radius.circular(34.0),
         radiusWhileDragging: Radius.zero,
-        child: ListView.builder(
-          itemCount: 120,
-          itemBuilder: (BuildContext context, int index) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text('Item $index'),
-              ),
-            );
-          },
-        ),
+        child: ListView.builder(itemCount: 120, itemBuilder: (
+          BuildContext context,
+          int index,
+        ) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('Item $index'),
+            ),
+          );
+        }),
       ),
     );
   }

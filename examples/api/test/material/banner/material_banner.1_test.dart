@@ -29,13 +29,15 @@ void main() {
     expect(banner.backgroundColor, Colors.green);
   });
 
-  testWidgets('BottomNavigationBar Updates Screen Content', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.MaterialBannerExampleApp(),
-    );
+  testWidgets('BottomNavigationBar Updates Screen Content', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.MaterialBannerExampleApp());
 
     expect(find.byType(MaterialBanner), findsNothing);
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Show MaterialBanner'));
+    await tester.tap(
+      find.widgetWithText(ElevatedButton, 'Show MaterialBanner'),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byType(MaterialBanner), findsOne);
@@ -44,7 +46,9 @@ void main() {
     expect(find.widgetWithText(TextButton, 'DISMISS'), findsOne);
   });
 
-  testWidgets('The banner is below the text saying so', (WidgetTester tester) async {
+  testWidgets('The banner is below the text saying so', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.MaterialBannerExampleApp());
     await tester.tap(find.text('Show MaterialBanner'));
     await tester.pumpAndSettle();
@@ -52,7 +56,8 @@ void main() {
     expect(find.byType(MaterialBanner), findsOneWidget);
     expect(find.text('The MaterialBanner is below'), findsOneWidget);
     final double bannerY = tester.getCenter(find.byType(MaterialBanner)).dy;
-    final double textY = tester.getCenter(find.text('The MaterialBanner is below')).dy;
+    final double textY =
+        tester.getCenter(find.text('The MaterialBanner is below')).dy;
     expect(bannerY, greaterThan(textY));
   });
 }

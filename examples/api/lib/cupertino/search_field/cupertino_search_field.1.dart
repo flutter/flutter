@@ -37,32 +37,25 @@ class _SearchTextFieldExampleState extends State<SearchTextFieldExample> {
         middle: Text('CupertinoSearchTextField Sample'),
       ),
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(text),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SearchTextField(
-                fieldValue: (String value) {
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+            <Widget>[
+              Text(text),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SearchTextField(fieldValue: (String value) {
                   setState(() {
                     text = value;
                   });
-                },
+                }),
               ),
-            ),
-          ],
-        ),
+            ]),
       ),
     );
   }
 }
 
 class SearchTextField extends StatelessWidget {
-  const SearchTextField({
-    super.key,
-    required this.fieldValue,
-  });
+  const SearchTextField({super.key, required this.fieldValue});
 
   final ValueChanged<String> fieldValue;
 

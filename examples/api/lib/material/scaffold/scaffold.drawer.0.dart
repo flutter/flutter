@@ -13,9 +13,7 @@ class DrawerExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: DrawerExample(),
-    );
+    return const MaterialApp(home: DrawerExample());
   }
 }
 
@@ -50,16 +48,14 @@ class _DrawerExampleState extends State<DrawerExample> {
       ),
       drawer: Drawer(
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const Text('This is the Drawer'),
-              ElevatedButton(
-                onPressed: _closeDrawer,
-                child: const Text('Close Drawer'),
-              ),
-            ],
-          ),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+              <Widget>[
+                const Text('This is the Drawer'),
+                ElevatedButton(
+                  onPressed: _closeDrawer,
+                  child: const Text('Close Drawer'),
+                ),
+              ]),
         ),
       ),
       // Disable opening the drawer with a swipe gesture.

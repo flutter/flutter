@@ -59,15 +59,13 @@ class _PageViewExampleState extends State<PageViewExample> {
         ),
       ),
       bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TextButton(
-              onPressed: () => _reverse(),
-              child: const Text('Reverse items'),
-            ),
-          ],
-        ),
+        child: Row(mainAxisAlignment: MainAxisAlignment.center, children:
+            <Widget>[
+              TextButton(
+                onPressed: () => _reverse(),
+                child: const Text('Reverse items'),
+              ),
+            ]),
       ),
     );
   }

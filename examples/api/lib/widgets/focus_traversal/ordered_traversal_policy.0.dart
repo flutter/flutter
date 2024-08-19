@@ -16,9 +16,7 @@ class OrderedTraversalPolicyExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('OrderedTraversalPolicy Sample')),
-        body: const Center(
-          child: OrderedTraversalPolicyExample(),
-        ),
+        body: const Center(child: OrderedTraversalPolicyExample()),
       ),
     );
   }
@@ -61,32 +59,21 @@ class OrderedTraversalPolicyExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return FocusTraversalGroup(
       policy: OrderedTraversalPolicy(),
-      child: const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
+      child: const Column(mainAxisAlignment: MainAxisAlignment.center, children:
+          <Widget>[
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
               DemoButton(name: 'Six', order: 6),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
+            ]),
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
               DemoButton(name: 'Five', order: 5),
               DemoButton(name: 'Four', order: 4),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
+            ]),
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
               DemoButton(name: 'Three', order: 3),
               DemoButton(name: 'Two', order: 2),
               DemoButton(name: 'One', order: 1, autofocus: true),
-            ],
-          ),
-        ],
-      ),
+            ]),
+          ]),
     );
   }
 }

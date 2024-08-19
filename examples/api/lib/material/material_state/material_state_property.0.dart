@@ -16,9 +16,7 @@ class MaterialStatePropertyExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('MaterialStateProperty Sample')),
-        body: const Center(
-          child: MaterialStatePropertyExample(),
-        ),
+        body: const Center(child: MaterialStatePropertyExample()),
       ),
     );
   }

@@ -21,9 +21,7 @@ class IconButtonToggleApp extends StatelessWidget {
         useMaterial3: true,
       ),
       title: 'Icon Button Types',
-      home: const Scaffold(
-        body: DemoIconToggleButtons(),
-      ),
+      home: const Scaffold(body: DemoIconToggleButtons()),
     );
   }
 }
@@ -43,12 +41,9 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+    return Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children:
+        <Widget>[
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
             IconButton(
               isSelected: standardSelected,
               icon: const Icon(Icons.settings_outlined),
@@ -66,11 +61,8 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
               selectedIcon: const Icon(Icons.settings),
               onPressed: null,
             ),
-          ],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+          ]),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
             IconButton.filled(
               isSelected: filledSelected,
               icon: const Icon(Icons.settings_outlined),
@@ -88,11 +80,8 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
               selectedIcon: const Icon(Icons.settings),
               onPressed: null,
             ),
-          ],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+          ]),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
             IconButton.filledTonal(
               isSelected: tonalSelected,
               icon: const Icon(Icons.settings_outlined),
@@ -110,11 +99,8 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
               selectedIcon: const Icon(Icons.settings),
               onPressed: null,
             ),
-          ],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+          ]),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
             IconButton.outlined(
               isSelected: outlinedSelected,
               icon: const Icon(Icons.settings_outlined),
@@ -132,9 +118,7 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
               selectedIcon: const Icon(Icons.settings),
               onPressed: null,
             ),
-          ],
-        ),
-      ],
-    );
+          ]),
+        ]);
   }
 }

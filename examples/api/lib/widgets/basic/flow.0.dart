@@ -15,9 +15,7 @@ class FlowApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Flow Example'),
-        ),
+        appBar: AppBar(title: const Text('Flow Example')),
         body: const FlowMenu(),
       ),
     );
@@ -31,7 +29,8 @@ class FlowMenu extends StatefulWidget {
   State<FlowMenu> createState() => _FlowMenuState();
 }
 
-class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin {
+class _FlowMenuState extends State<FlowMenu>
+    with SingleTickerProviderStateMixin {
   late AnimationController menuAnimation;
   IconData lastTapped = Icons.notifications;
   final List<IconData> menuItems = <IconData>[
@@ -58,7 +57,8 @@ class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin
   }
 
   Widget flowMenuItem(IconData icon) {
-    final double buttonDiameter = MediaQuery.of(context).size.width / menuItems.length;
+    final double buttonDiameter =
+        MediaQuery.of(context).size.width / menuItems.length;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: RawMaterialButton(
@@ -68,13 +68,11 @@ class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin
         constraints: BoxConstraints.tight(Size(buttonDiameter, buttonDiameter)),
         onPressed: () {
           _updateMenu(icon);
-          menuAnimation.status == AnimationStatus.completed ? menuAnimation.reverse() : menuAnimation.forward();
+          menuAnimation.status == AnimationStatus.completed
+              ? menuAnimation.reverse()
+              : menuAnimation.forward();
         },
-        child: Icon(
-          icon,
-          color: Colors.white,
-          size: 45.0,
-        ),
+        child: Icon(icon, color: Colors.white, size: 45.0),
       ),
     );
   }
@@ -83,13 +81,15 @@ class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin
   Widget build(BuildContext context) {
     return Flow(
       delegate: FlowMenuDelegate(menuAnimation: menuAnimation),
-      children: menuItems.map<Widget>((IconData icon) => flowMenuItem(icon)).toList(),
+      children:
+          menuItems.map<Widget>((IconData icon) => flowMenuItem(icon)).toList(),
     );
   }
 }
 
 class FlowMenuDelegate extends FlowDelegate {
-  FlowMenuDelegate({required this.menuAnimation}) : super(repaint: menuAnimation);
+  FlowMenuDelegate({required this.menuAnimation})
+    : super(repaint: menuAnimation);
 
   final Animation<double> menuAnimation;
 
@@ -105,11 +105,7 @@ class FlowMenuDelegate extends FlowDelegate {
       dx = context.getChildSize(i)!.width * i;
       context.paintChild(
         i,
-        transform: Matrix4.translationValues(
-          dx * menuAnimation.value,
-          0,
-          0,
-        ),
+        transform: Matrix4.translationValues(dx * menuAnimation.value, 0, 0),
       );
     }
   }

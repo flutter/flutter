@@ -15,21 +15,18 @@ class InheritedNotifierExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: InheritedNotifierExample(),
-    );
+    return const MaterialApp(home: InheritedNotifierExample());
   }
 }
 
 class SpinModel extends InheritedNotifier<AnimationController> {
-  const SpinModel({
-    super.key,
-    super.notifier,
-    required super.child,
-  });
+  const SpinModel({super.key, super.notifier, required super.child});
 
   static double of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<SpinModel>()!.notifier!.value;
+    return context
+        .dependOnInheritedWidgetOfExactType<SpinModel>()!
+        .notifier!
+        .value;
   }
 }
 
@@ -44,9 +41,7 @@ class Spinner extends StatelessWidget {
         width: 100,
         height: 100,
         color: Colors.green,
-        child: const Center(
-          child: Text('Whee!'),
-        ),
+        child: const Center(child: Text('Whee!')),
       ),
     );
   }
@@ -56,12 +51,14 @@ class InheritedNotifierExample extends StatefulWidget {
   const InheritedNotifierExample({super.key});
 
   @override
-  State<InheritedNotifierExample> createState() => _InheritedNotifierExampleState();
+  State<InheritedNotifierExample> createState() =>
+      _InheritedNotifierExampleState();
 }
 
 /// [AnimationController]s can be created with `vsync: this` because of
 /// [TickerProviderStateMixin].
-class _InheritedNotifierExampleState extends State<InheritedNotifierExample> with TickerProviderStateMixin {
+class _InheritedNotifierExampleState extends State<InheritedNotifierExample>
+    with TickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -85,11 +82,7 @@ class _InheritedNotifierExampleState extends State<InheritedNotifierExample> wit
       notifier: _controller,
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          Spinner(),
-          Spinner(),
-          Spinner(),
-        ],
+        children: <Widget>[Spinner(), Spinner(), Spinner()],
       ),
     );
   }

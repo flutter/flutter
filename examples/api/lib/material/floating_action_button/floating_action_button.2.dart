@@ -35,23 +35,21 @@ class FloatingActionButtonExample extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: Text(title, style: TextStyle(color: colorScheme.onInverseSurface)),
+          child: Text(
+            title,
+            style: TextStyle(color: colorScheme.onInverseSurface),
+          ),
         ),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('FAB Additional Color Mappings'),
-      ),
+      appBar: AppBar(title: const Text('FAB Additional Color Mappings')),
       body: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            // Surface color mapping.
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
+        child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children:
+            <Widget>[
+              // Surface color mapping.
+              Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
                 FloatingActionButton.large(
                   foregroundColor: colorScheme.primary,
                   backgroundColor: colorScheme.surface,
@@ -62,12 +60,9 @@ class FloatingActionButtonExample extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 titleBox('Surface'),
-              ],
-            ),
-            // Secondary color mapping.
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
+              ]),
+              // Secondary color mapping.
+              Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
                 FloatingActionButton.large(
                   foregroundColor: colorScheme.onSecondaryContainer,
                   backgroundColor: colorScheme.secondaryContainer,
@@ -78,12 +73,9 @@ class FloatingActionButtonExample extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 titleBox('Secondary'),
-              ],
-            ),
-            // Tertiary color mapping.
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
+              ]),
+              // Tertiary color mapping.
+              Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
                 FloatingActionButton.large(
                   foregroundColor: colorScheme.onTertiaryContainer,
                   backgroundColor: colorScheme.tertiaryContainer,
@@ -94,10 +86,8 @@ class FloatingActionButtonExample extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 titleBox('Tertiary'),
-              ],
-            ),
-          ],
-        ),
+              ]),
+            ]),
       ),
     );
   }

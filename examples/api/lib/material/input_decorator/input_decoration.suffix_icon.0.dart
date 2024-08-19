@@ -32,9 +32,7 @@ class InputDecoratorExample extends StatelessWidget {
         suffixIcon: Align(
           widthFactor: 1.0,
           heightFactor: 1.0,
-          child: Icon(
-            Icons.remove_red_eye,
-          ),
+          child: Icon(Icons.remove_red_eye),
         ),
       ),
     );

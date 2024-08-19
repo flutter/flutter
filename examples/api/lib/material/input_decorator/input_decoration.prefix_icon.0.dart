@@ -32,9 +32,7 @@ class InputDecoratorExample extends StatelessWidget {
         prefixIcon: Align(
           widthFactor: 1.0,
           heightFactor: 1.0,
-          child: Icon(
-            Icons.person,
-          ),
+          child: Icon(Icons.person),
         ),
       ),
     );

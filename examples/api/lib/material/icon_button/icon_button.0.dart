@@ -16,9 +16,7 @@ class IconButtonExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('IconButton Sample')),
-        body: const Center(
-          child: IconButtonExample(),
-        ),
+        body: const Center(child: IconButtonExample()),
       ),
     );
   }
@@ -36,20 +34,17 @@ class IconButtonExample extends StatefulWidget {
 class _IconButtonExampleState extends State<IconButtonExample> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        IconButton(
-          icon: const Icon(Icons.volume_up),
-          tooltip: 'Increase volume by 10',
-          onPressed: () {
-            setState(() {
-              _volume += 10;
-            });
-          },
-        ),
-        Text('Volume : $_volume'),
-      ],
-    );
+    return Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+      IconButton(
+        icon: const Icon(Icons.volume_up),
+        tooltip: 'Increase volume by 10',
+        onPressed: () {
+          setState(() {
+            _volume += 10;
+          });
+        },
+      ),
+      Text('Volume : $_volume'),
+    ]);
   }
 }

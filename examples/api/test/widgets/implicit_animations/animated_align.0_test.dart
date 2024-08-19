@@ -9,9 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('AnimatedAlign animates on tap', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.AnimatedAlignExampleApp(),
-    );
+    await tester.pumpWidget(const example.AnimatedAlignExampleApp());
 
     final Finder alignFinder = find.descendant(
       of: find.byType(AnimatedAlign),

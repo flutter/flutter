@@ -16,9 +16,7 @@ class IVBuilderExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('IV Builder Example'),
-        ),
+        appBar: AppBar(title: const Text('IV Builder Example')),
         body: const _IVBuilderExample(),
       ),
     );
@@ -67,35 +65,38 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          return InteractiveViewer.builder(
-            boundaryMargin: const EdgeInsets.all(double.infinity),
-            builder: (BuildContext context, Quad viewport) {
-              return _TableBuilder(
-                cellWidth: _cellWidth,
-                cellHeight: _cellHeight,
-                viewport: axisAlignedBoundingBox(viewport),
-                builder: (BuildContext context, int row, int column) {
-                  return Container(
-                    height: _cellHeight,
-                    width: _cellWidth,
-                    color: row % 2 + column % 2 == 1 ? Colors.white : Colors.grey.withOpacity(0.1),
-                    child: Align(
-                      child: Text('$row x $column'),
-                    ),
-                  );
-                },
-              );
-            },
-          );
-        },
-      ),
+      child: LayoutBuilder(builder: (
+        BuildContext context,
+        BoxConstraints constraints,
+      ) {
+        return InteractiveViewer.builder(
+          boundaryMargin: const EdgeInsets.all(double.infinity),
+          builder: (BuildContext context, Quad viewport) {
+            return _TableBuilder(
+              cellWidth: _cellWidth,
+              cellHeight: _cellHeight,
+              viewport: axisAlignedBoundingBox(viewport),
+              builder: (BuildContext context, int row, int column) {
+                return Container(
+                  height: _cellHeight,
+                  width: _cellWidth,
+                  color:
+                      row % 2 + column % 2 == 1
+                          ? Colors.white
+                          : Colors.grey.withOpacity(0.1),
+                  child: Align(child: Text('$row x $column')),
+                );
+              },
+            );
+          },
+        );
+      }),
     );
   }
 }
 
-typedef _CellBuilder = Widget Function(BuildContext context, int row, int column);
+typedef _CellBuilder =
+    Widget Function(BuildContext context, int row, int column);
 
 class _TableBuilder extends StatelessWidget {
   const _TableBuilder({
@@ -125,18 +126,15 @@ class _TableBuilder extends StatelessWidget {
       // See: https://api.flutter.dev/flutter/widgets/InteractiveViewer/constrained.html
       width: 1,
       height: 1,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: <Widget>[
-          for (int row = firstRow; row < lastRow; row++)
-            for (int col = firstCol; col < lastCol; col++)
-              Positioned(
-                left: col * cellWidth,
-                top: row * cellHeight,
-                child: builder(context, row, col),
-              ),
-        ],
-      ),
+      child: Stack(clipBehavior: Clip.none, children: <Widget>[
+        for (int row = firstRow; row < lastRow; row++)
+          for (int col = firstCol; col < lastCol; col++)
+            Positioned(
+              left: col * cellWidth,
+              top: row * cellHeight,
+              child: builder(context, row, col),
+            ),
+      ]),
     );
   }
 }

@@ -13,28 +13,26 @@ class MyDataSource extends DataTableSource {
   @override
   DataRow? getRow(int index) {
     switch (index) {
-      case 0: return const DataRow(
-        cells: <DataCell>[
+      case 0:
+        return const DataRow(cells: <DataCell>[
           DataCell(Text('Sarah')),
           DataCell(Text('19')),
           DataCell(Text('Student')),
-        ],
-      );
-      case 1: return const DataRow(
-        cells: <DataCell>[
+        ]);
+      case 1:
+        return const DataRow(cells: <DataCell>[
           DataCell(Text('Janine')),
           DataCell(Text('43')),
           DataCell(Text('Professor')),
-        ],
-      );
-      case 2: return const DataRow(
-        cells: <DataCell>[
+        ]);
+      case 2:
+        return const DataRow(cells: <DataCell>[
           DataCell(Text('William')),
           DataCell(Text('27')),
           DataCell(Text('Associate Professor')),
-        ],
-      );
-      default: return null;
+        ]);
+      default:
+        return null;
     }
   }
 
@@ -68,19 +66,10 @@ class DataTableExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PaginatedDataTable(
-      columns: const <DataColumn>[
-        DataColumn(
-          label: Text('Name'),
-        ),
-        DataColumn(
-          label: Text('Age'),
-        ),
-        DataColumn(
-          label: Text('Role'),
-        ),
-      ],
-      source: dataSource,
-    );
+    return PaginatedDataTable(columns: const <DataColumn>[
+      DataColumn(label: Text('Name')),
+      DataColumn(label: Text('Age')),
+      DataColumn(label: Text('Role')),
+    ], source: dataSource);
   }
 }

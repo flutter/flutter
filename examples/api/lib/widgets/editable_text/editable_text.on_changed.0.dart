@@ -13,9 +13,7 @@ class OnChangedExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: OnChangedExample(),
-    );
+    return const MaterialApp(home: OnChangedExample());
   }
 }
 
@@ -38,38 +36,29 @@ class _OnChangedExampleState extends State<OnChangedExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          const Text('What number comes next in the sequence?'),
-          const Text('1, 1, 2, 3, 5, 8...?'),
-          TextField(
-            controller: _controller,
-            onChanged: (String value) async {
+      body: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+          <Widget>[
+            const Text('What number comes next in the sequence?'),
+            const Text('1, 1, 2, 3, 5, 8...?'),
+            TextField(controller: _controller, onChanged: (String value) async {
               if (value != '13') {
                 return;
               }
-              await showDialog<void>(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('That is correct!'),
-                    content: const Text('13 is the right answer.'),
-                    actions: <Widget>[
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Text('OK'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
-        ],
-      ),
+              await showDialog<void>(context: context, builder: (
+                BuildContext context,
+              ) {
+                return AlertDialog(
+                  title: const Text('That is correct!'),
+                  content: const Text('13 is the right answer.'),
+                  actions: <Widget>[
+                    TextButton(onPressed: () {
+                      Navigator.pop(context);
+                    }, child: const Text('OK')),
+                  ],
+                );
+              });
+            }),
+          ]),
     );
   }
 }

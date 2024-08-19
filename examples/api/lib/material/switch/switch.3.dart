@@ -22,9 +22,7 @@ class SwitchApp extends StatelessWidget {
       ),
       home: Scaffold(
         appBar: AppBar(title: const Text('Switch Sample')),
-        body: const Center(
-          child: SwitchExample(),
-        ),
+        body: const Center(child: SwitchExample()),
       ),
     );
   }
@@ -42,28 +40,23 @@ class _SwitchExampleState extends State<SwitchExample> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Switch.adaptive(
-          value: light,
-          onChanged: (bool value) {
+    return Column(mainAxisAlignment: MainAxisAlignment.center, children:
+        <Widget>[
+          Switch.adaptive(value: light, onChanged: (bool value) {
             setState(() {
               light = value;
             });
-          },
-        ),
-        Switch.adaptive(
-          // Don't use the ambient CupertinoThemeData to style this switch.
-          applyCupertinoTheme: false,
-          value: light,
-          onChanged: (bool value) {
-            setState(() {
-              light = value;
-            });
-          },
-        ),
-      ],
-    );
+          }),
+          Switch.adaptive(
+            // Don't use the ambient CupertinoThemeData to style this switch.
+            applyCupertinoTheme: false,
+            value: light,
+            onChanged: (bool value) {
+              setState(() {
+                light = value;
+              });
+            },
+          ),
+        ]);
   }
 }

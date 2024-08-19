@@ -8,13 +8,13 @@ import 'package:flutter_api_samples/material/navigation_rail/navigation_rail.0.d
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Navigation rail updates destination on tap',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.NavigationRailExampleApp(),
+  testWidgets('Navigation rail updates destination on tap', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.NavigationRailExampleApp());
+    final NavigationRail navigationRailWidget = tester.firstWidget(
+      find.byType(NavigationRail),
     );
-    final NavigationRail navigationRailWidget =
-        tester.firstWidget(find.byType(NavigationRail));
 
     /// NavigationRailDestinations must be rendered
     expect(find.text('First'), findsOneWidget);
@@ -35,10 +35,10 @@ void main() {
     expect(find.text('selectedIndex: 2'), findsOneWidget);
   });
 
-  testWidgets('Navigation rail updates label type', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.NavigationRailExampleApp(),
-    );
+  testWidgets('Navigation rail updates label type', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.NavigationRailExampleApp());
 
     // initial label type set to all.
     expect(find.text('Label type: all'), findsOneWidget);
@@ -54,10 +54,10 @@ void main() {
     expect(find.text('Label type: none'), findsOneWidget);
   });
 
-  testWidgets('Navigation rail updates group alignment', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.NavigationRailExampleApp(),
-    );
+  testWidgets('Navigation rail updates group alignment', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.NavigationRailExampleApp());
 
     // initial group alignment set top top.
     expect(find.text('Group alignment: -1.0'), findsOneWidget);
@@ -73,10 +73,10 @@ void main() {
     expect(find.text('Group alignment: 1.0'), findsOneWidget);
   });
 
-  testWidgets('Navigation rail shows leading/trailing widgets', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.NavigationRailExampleApp(),
-    );
+  testWidgets('Navigation rail shows leading/trailing widgets', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.NavigationRailExampleApp());
 
     // Initially leading/trailing widgets are hidden.
     expect(find.byType(FloatingActionButton), findsNothing);

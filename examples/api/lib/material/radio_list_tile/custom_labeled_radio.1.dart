@@ -49,18 +49,14 @@ class LabeledRadio extends StatelessWidget {
       },
       child: Padding(
         padding: padding,
-        child: Row(
-          children: <Widget>[
-            Radio<bool>(
-              groupValue: groupValue,
-              value: value,
-              onChanged: (bool? newValue) {
-                onChanged(newValue!);
-              },
-            ),
-            Text(label),
-          ],
-        ),
+        child: Row(children: <Widget>[
+          Radio<bool>(groupValue: groupValue, value: value, onChanged: (
+            bool? newValue,
+          ) {
+            onChanged(newValue!);
+          }),
+          Text(label),
+        ]),
       ),
     );
   }
@@ -79,33 +75,31 @@ class _LabeledRadioExampleState extends State<LabeledRadioExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <LabeledRadio>[
-          LabeledRadio(
-            label: 'This is the first label text',
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            value: true,
-            groupValue: _isRadioSelected,
-            onChanged: (bool newValue) {
-              setState(() {
-                _isRadioSelected = newValue;
-              });
-            },
-          ),
-          LabeledRadio(
-            label: 'This is the second label text',
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            value: false,
-            groupValue: _isRadioSelected,
-            onChanged: (bool newValue) {
-              setState(() {
-                _isRadioSelected = newValue;
-              });
-            },
-          ),
-        ],
-      ),
+      body: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+          <LabeledRadio>[
+            LabeledRadio(
+              label: 'This is the first label text',
+              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+              value: true,
+              groupValue: _isRadioSelected,
+              onChanged: (bool newValue) {
+                setState(() {
+                  _isRadioSelected = newValue;
+                });
+              },
+            ),
+            LabeledRadio(
+              label: 'This is the second label text',
+              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+              value: false,
+              groupValue: _isRadioSelected,
+              onChanged: (bool newValue) {
+                setState(() {
+                  _isRadioSelected = newValue;
+                });
+              },
+            ),
+          ]),
     );
   }
 }

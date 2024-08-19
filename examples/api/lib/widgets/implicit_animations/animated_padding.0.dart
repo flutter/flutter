@@ -39,26 +39,22 @@ class _AnimatedPaddingExampleState extends State<AnimatedPaddingExample> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        AnimatedPadding(
-          padding: EdgeInsets.all(padValue),
-          duration: const Duration(seconds: 2),
-          curve: Curves.easeInOut,
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height / 5,
-            color: Colors.blue,
+    return Column(mainAxisAlignment: MainAxisAlignment.center, children:
+        <Widget>[
+          AnimatedPadding(
+            padding: EdgeInsets.all(padValue),
+            duration: const Duration(seconds: 2),
+            curve: Curves.easeInOut,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height / 5,
+              color: Colors.blue,
+            ),
           ),
-        ),
-        Text('Padding: $padValue'),
-        ElevatedButton(
-            child: const Text('Change padding'),
-            onPressed: () {
-              _updatePadding(padValue == 0.0 ? 100.0 : 0.0);
-            }),
-      ],
-    );
+          Text('Padding: $padValue'),
+          ElevatedButton(child: const Text('Change padding'), onPressed: () {
+            _updatePadding(padValue == 0.0 ? 100.0 : 0.0);
+          }),
+        ]);
   }
 }

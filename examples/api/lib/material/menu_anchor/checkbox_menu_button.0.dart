@@ -20,7 +20,10 @@ class MyCheckboxMenu extends StatefulWidget {
 
 class _MyCheckboxMenuState extends State<MyCheckboxMenu> {
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
-  static const SingleActivator _showShortcut = SingleActivator(LogicalKeyboardKey.keyS, control: true);
+  static const SingleActivator _showShortcut = SingleActivator(
+    LogicalKeyboardKey.keyS,
+    control: true,
+  );
   bool _showingMessage = false;
 
   @override
@@ -43,53 +46,49 @@ class _MyCheckboxMenuState extends State<MyCheckboxMenu> {
           _setMessageVisibility(!_showingMessage);
         },
       },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          MenuAnchor(
-            childFocusNode: _buttonFocusNode,
-            menuChildren: <Widget>[
-              CheckboxMenuButton(
-                value: _showingMessage,
-                onChanged: (bool? value) {
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:
+          <Widget>[
+            MenuAnchor(
+              childFocusNode: _buttonFocusNode,
+              menuChildren: <Widget>[
+                CheckboxMenuButton(value: _showingMessage, onChanged: (
+                  bool? value,
+                ) {
                   _setMessageVisibility(value!);
-                },
-                child: const Text('Show Message'),
-              ),
-            ],
-            builder: (BuildContext context, MenuController controller, Widget? child) {
-              return TextButton(
-                focusNode: _buttonFocusNode,
-                onPressed: () {
+                }, child: const Text('Show Message')),
+              ],
+              builder: (
+                BuildContext context,
+                MenuController controller,
+                Widget? child,
+              ) {
+                return TextButton(focusNode: _buttonFocusNode, onPressed: () {
                   if (controller.isOpen) {
                     controller.close();
                   } else {
                     controller.open();
                   }
-                },
-                child: const Text('OPEN MENU'),
-              );
-            },
-          ),
-          Expanded(
-            child: Container(
-              alignment: Alignment.center,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      _showingMessage ? widget.message : '',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                }, child: const Text('OPEN MENU'));
+              },
+            ),
+            Expanded(
+              child: Container(
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Text(
+                        _showingMessage ? widget.message : '',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
-      ),
+          ]),
     );
   }
 }
@@ -103,7 +102,9 @@ class MenuApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      home: const Scaffold(body: SafeArea(child: MyCheckboxMenu(message: kMessage))),
+      home: const Scaffold(
+        body: SafeArea(child: MyCheckboxMenu(message: kMessage)),
+      ),
     );
   }
 }

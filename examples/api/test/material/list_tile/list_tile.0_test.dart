@@ -3,16 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/list_tile/list_tile.0.dart' as example;
+import 'package:flutter_api_samples/material/list_tile/list_tile.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('ListTile with Hero does not throw', (WidgetTester tester) async {
     const int totalTiles = 3;
 
-    await tester.pumpWidget(
-      const example.ListTileApp(),
-    );
+    await tester.pumpWidget(const example.ListTileApp());
 
     expect(find.byType(ListTile), findsNWidgets(totalTiles));
 

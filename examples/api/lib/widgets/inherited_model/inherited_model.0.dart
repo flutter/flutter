@@ -15,9 +15,7 @@ class InheritedModelApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: InheritedModelExample(),
-    );
+    return const MaterialApp(home: InheritedModelExample());
   }
 }
 
@@ -33,21 +31,33 @@ class LogoModel extends InheritedModel<LogoAspect> {
   final bool? large;
 
   static Color? backgroundColorOf(BuildContext context) {
-    return InheritedModel.inheritFrom<LogoModel>(context, aspect: LogoAspect.backgroundColor)?.backgroundColor;
+    return InheritedModel.inheritFrom<LogoModel>(
+      context,
+      aspect: LogoAspect.backgroundColor,
+    )?.backgroundColor;
   }
 
   static bool sizeOf(BuildContext context) {
-    return InheritedModel.inheritFrom<LogoModel>(context, aspect: LogoAspect.large)?.large ?? false;
+    return InheritedModel.inheritFrom<LogoModel>(
+          context,
+          aspect: LogoAspect.large,
+        )?.large ??
+        false;
   }
 
   @override
   bool updateShouldNotify(LogoModel oldWidget) {
-    return backgroundColor != oldWidget.backgroundColor || large != oldWidget.large;
+    return backgroundColor != oldWidget.backgroundColor ||
+        large != oldWidget.large;
   }
 
   @override
-  bool updateShouldNotifyDependent(LogoModel oldWidget, Set<LogoAspect> dependencies) {
-    if (backgroundColor != oldWidget.backgroundColor && dependencies.contains(LogoAspect.backgroundColor)) {
+  bool updateShouldNotifyDependent(
+    LogoModel oldWidget,
+    Set<LogoAspect> dependencies,
+  ) {
+    if (backgroundColor != oldWidget.backgroundColor &&
+        dependencies.contains(LogoAspect.backgroundColor)) {
       return true;
     }
     if (large != oldWidget.large && dependencies.contains(LogoAspect.large)) {
@@ -72,57 +82,45 @@ class _InheritedModelExampleState extends State<InheritedModelExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('InheritedModel Sample')),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          Center(
-            child: LogoModel(
-              backgroundColor: color,
-              large: large,
-              child: const BackgroundWidget(
-                child: LogoWidget(),
+      body: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children:
+          <Widget>[
+            Center(
+              child: LogoModel(
+                backgroundColor: color,
+                large: large,
+                child: const BackgroundWidget(child: LogoWidget()),
               ),
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Rebuilt Background'),
-                      duration: Duration(milliseconds: 500),
-                    ),
-                  );
-                  setState(() {
-                    if (color == Colors.blue) {
-                      color = Colors.red;
-                    } else {
-                      color = Colors.blue;
-                    }
-                  });
-                },
-                child: const Text('Update background'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Rebuilt LogoWidget'),
-                      duration: Duration(milliseconds: 500),
-                    ),
-                  );
-                  setState(() {
-                    large = !large;
-                  });
-                },
-                child: const Text('Resize Logo'),
-              ),
-            ],
-          )
-        ],
-      ),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children:
+                <Widget>[
+                  ElevatedButton(onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Rebuilt Background'),
+                        duration: Duration(milliseconds: 500),
+                      ),
+                    );
+                    setState(() {
+                      if (color == Colors.blue) {
+                        color = Colors.red;
+                      } else {
+                        color = Colors.blue;
+                      }
+                    });
+                  }, child: const Text('Update background')),
+                  ElevatedButton(onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Rebuilt LogoWidget'),
+                        duration: Duration(milliseconds: 500),
+                      ),
+                    );
+                    setState(() {
+                      large = !large;
+                    });
+                  }, child: const Text('Resize Logo')),
+                ]),
+          ]),
     );
   }
 }

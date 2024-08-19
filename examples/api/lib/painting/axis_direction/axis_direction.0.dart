@@ -13,9 +13,7 @@ class ExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: MyWidget(),
-    );
+    return const MaterialApp(home: MyWidget());
   }
 }
 
@@ -28,17 +26,41 @@ class MyWidget extends StatefulWidget {
 
 class _MyWidgetState extends State<MyWidget> {
   final List<String> _alphabet = <String>[
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
-    'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+    'A',
+    'B',
+    'C',
+    'D',
+    'E',
+    'F',
+    'G',
+    'H',
+    'I',
+    'J',
+    'K',
+    'L',
+    'M',
+    'N',
+    'O',
+    'P',
+    'Q',
+    'R',
+    'S',
+    'T',
+    'U',
+    'V',
+    'W',
+    'X',
+    'Y',
+    'Z',
   ];
   final Widget _spacer = const SizedBox.square(dimension: 10);
   AxisDirection _axisDirection = AxisDirection.down;
 
   Widget _getArrows() {
     final Widget arrow = switch (_axisDirection) {
-      AxisDirection.up    => const Icon(Icons.arrow_upward_rounded),
-      AxisDirection.down  => const Icon(Icons.arrow_downward_rounded),
-      AxisDirection.left  => const Icon(Icons.arrow_back_rounded),
+      AxisDirection.up => const Icon(Icons.arrow_upward_rounded),
+      AxisDirection.down => const Icon(Icons.arrow_downward_rounded),
+      AxisDirection.left => const Icon(Icons.arrow_back_rounded),
       AxisDirection.right => const Icon(Icons.arrow_forward_rounded),
     };
     return Flex(
@@ -61,18 +83,16 @@ class _MyWidgetState extends State<MyWidget> {
     return Container(
       color: Colors.blue[100],
       padding: const EdgeInsets.all(8.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Text(axisDirectionToAxis(_axisDirection).toString()),
-          _spacer,
-          Text(_axisDirection.toString()),
-          _spacer,
-          const Text('GrowthDirection.forward'),
-          _spacer,
-          _getArrows(),
-        ],
-      ),
+      child: Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children:
+          <Widget>[
+            Text(axisDirectionToAxis(_axisDirection).toString()),
+            _spacer,
+            Text(_axisDirection.toString()),
+            _spacer,
+            const Text('GrowthDirection.forward'),
+            _spacer,
+            _getArrows(),
+          ]),
     );
   }
 
@@ -85,39 +105,37 @@ class _MyWidgetState extends State<MyWidget> {
         ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              Radio<AxisDirection>(
-                value: AxisDirection.up,
-                groupValue: _axisDirection,
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('up'),
-              _spacer,
-              Radio<AxisDirection>(
-                value: AxisDirection.down,
-                groupValue: _axisDirection,
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('down'),
-              _spacer,
-              Radio<AxisDirection>(
-                value: AxisDirection.left,
-                groupValue: _axisDirection,
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('left'),
-              _spacer,
-              Radio<AxisDirection>(
-                value: AxisDirection.right,
-                groupValue: _axisDirection,
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('right'),
-              _spacer,
-            ],
-          ),
+          child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children:
+              <Widget>[
+                Radio<AxisDirection>(
+                  value: AxisDirection.up,
+                  groupValue: _axisDirection,
+                  onChanged: _onAxisDirectionChanged,
+                ),
+                const Text('up'),
+                _spacer,
+                Radio<AxisDirection>(
+                  value: AxisDirection.down,
+                  groupValue: _axisDirection,
+                  onChanged: _onAxisDirectionChanged,
+                ),
+                const Text('down'),
+                _spacer,
+                Radio<AxisDirection>(
+                  value: AxisDirection.left,
+                  groupValue: _axisDirection,
+                  onChanged: _onAxisDirectionChanged,
+                ),
+                const Text('left'),
+                _spacer,
+                Radio<AxisDirection>(
+                  value: AxisDirection.right,
+                  groupValue: _axisDirection,
+                  onChanged: _onAxisDirectionChanged,
+                ),
+                const Text('right'),
+                _spacer,
+              ]),
         ),
       ),
     );
@@ -146,25 +164,22 @@ class _MyWidgetState extends State<MyWidget> {
         // into its Axis.
         scrollDirection: axisDirectionToAxis(_axisDirection),
         slivers: <Widget>[
-          SliverList.builder(
-            itemCount: 27,
-            itemBuilder: (BuildContext context, int index) {
-              final Widget child;
-              if (index == 0) {
-                child = _getLeading();
-              } else {
-                child = Container(
-                  color: index.isEven ? Colors.amber[100] : Colors.amberAccent,
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(child: Text(_alphabet[index - 1])),
-                );
-              }
-              return Padding(
+          SliverList.builder(itemCount: 27, itemBuilder: (
+            BuildContext context,
+            int index,
+          ) {
+            final Widget child;
+            if (index == 0) {
+              child = _getLeading();
+            } else {
+              child = Container(
+                color: index.isEven ? Colors.amber[100] : Colors.amberAccent,
                 padding: const EdgeInsets.all(8.0),
-                child: child,
+                child: Center(child: Text(_alphabet[index - 1])),
               );
-            },
-          ),
+            }
+            return Padding(padding: const EdgeInsets.all(8.0), child: child);
+          }),
         ],
       ),
     );

@@ -27,27 +27,25 @@ class GeneralDialogExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: OutlinedButton(
-          onPressed: () {
-            /// This shows an alert dialog.
-            Navigator.of(context).restorablePush(_dialogBuilder);
-          },
-          child: const Text('Open Dialog'),
-        ),
+        child: OutlinedButton(onPressed: () {
+          /// This shows an alert dialog.
+          Navigator.of(context).restorablePush(_dialogBuilder);
+        }, child: const Text('Open Dialog')),
       ),
     );
   }
 
   @pragma('vm:entry-point')
-  static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
-    return RawDialogRoute<void>(
-      pageBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-      ) {
-        return const AlertDialog(title: Text('Alert!'));
-      },
-    );
+  static Route<Object?> _dialogBuilder(
+    BuildContext context,
+    Object? arguments,
+  ) {
+    return RawDialogRoute<void>(pageBuilder: (
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+    ) {
+      return const AlertDialog(title: Text('Alert!'));
+    });
   }
 }

@@ -14,11 +14,7 @@ class DeleteIconBoxConstraintsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: DeleteIconBoxConstraintsExample(),
-        ),
-      ),
+      home: Scaffold(body: Center(child: DeleteIconBoxConstraintsExample())),
     );
   }
 }
@@ -28,48 +24,46 @@ class DeleteIconBoxConstraintsExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        RawChip(
-          deleteIconBoxConstraints: const BoxConstraints.tightForFinite(),
-          onDeleted: () {},
-          label: const SizedBox(
-            width: 150,
-            child: Text(
-              'One line text.',
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+    return Column(mainAxisAlignment: MainAxisAlignment.center, children:
+        <Widget>[
+          RawChip(
+            deleteIconBoxConstraints: const BoxConstraints.tightForFinite(),
+            onDeleted: () {},
+            label: const SizedBox(
+              width: 150,
+              child: Text(
+                'One line text.',
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-        RawChip(
-          deleteIconBoxConstraints: const BoxConstraints.tightForFinite(),
-          onDeleted: () {},
-          label: const SizedBox(
-            width: 150,
-            child: Text(
-              'This text will wrap into two lines.',
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+          const SizedBox(height: 10),
+          RawChip(
+            deleteIconBoxConstraints: const BoxConstraints.tightForFinite(),
+            onDeleted: () {},
+            label: const SizedBox(
+              width: 150,
+              child: Text(
+                'This text will wrap into two lines.',
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-        RawChip(
-          deleteIconBoxConstraints: const BoxConstraints.tightForFinite(),
-          onDeleted: () {},
-          label: const SizedBox(
-            width: 150,
-            child: Text(
-              'This is a very long text that will wrap into three lines.',
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+          const SizedBox(height: 10),
+          RawChip(
+            deleteIconBoxConstraints: const BoxConstraints.tightForFinite(),
+            onDeleted: () {},
+            label: const SizedBox(
+              width: 150,
+              child: Text(
+                'This is a very long text that will wrap into three lines.',
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
-        ),
-      ],
-    );
+        ]);
   }
 }

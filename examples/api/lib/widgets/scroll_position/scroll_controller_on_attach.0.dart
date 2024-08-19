@@ -21,7 +21,7 @@ class _ScrollControllerDemoState extends State<ScrollControllerDemo> {
 
   void _handleScrollChange() {
     if (isScrolling != _controller.position.isScrollingNotifier.value) {
-      setState((){
+      setState(() {
         isScrolling = _controller.position.isScrollingNotifier.value;
       });
     }
@@ -59,9 +59,10 @@ class _ScrollControllerDemoState extends State<ScrollControllerDemo> {
       home: Scaffold(
         appBar: AppBar(
           title: Text(isScrolling ? 'Scrolling' : 'Not Scrolling'),
-          backgroundColor: isScrolling
-              ? Colors.green[800]!.withOpacity(.85)
-              : Colors.redAccent[700]!.withOpacity(.85),
+          backgroundColor:
+              isScrolling
+                  ? Colors.green[800]!.withOpacity(.85)
+                  : Colors.redAccent[700]!.withOpacity(.85),
         ),
         // ListView.builder works very similarly to this example with
         // CustomScrollView & SliverList.
@@ -69,36 +70,33 @@ class _ScrollControllerDemoState extends State<ScrollControllerDemo> {
           // Provide the scroll controller to the scroll view.
           controller: _controller,
           slivers: <Widget>[
-            SliverList.builder(
-              itemCount: 50,
-              itemBuilder: (_, int index) {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Colors.blueGrey[50],
-                        boxShadow: const <BoxShadow>[
-                          BoxShadow(
-                            color: Colors.black12,
-                            offset: Offset(5, 5),
-                            blurRadius: 5,
-                          ),
-                        ],
-                        borderRadius: const BorderRadius.all(Radius.circular(10))
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12.0,
-                          horizontal: 20.0,
+            SliverList.builder(itemCount: 50, itemBuilder: (_, int index) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.blueGrey[50],
+                      boxShadow: const <BoxShadow>[
+                        BoxShadow(
+                          color: Colors.black12,
+                          offset: Offset(5, 5),
+                          blurRadius: 5,
                         ),
-                        child: Text('Item $index'),
+                      ],
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12.0,
+                        horizontal: 20.0,
                       ),
+                      child: Text('Item $index'),
                     ),
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            }),
           ],
         ),
       ),

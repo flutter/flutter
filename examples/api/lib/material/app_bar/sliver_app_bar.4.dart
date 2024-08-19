@@ -23,10 +23,10 @@ class _StretchableSliverAppBarState extends State<StretchableSliverAppBar> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        home: Scaffold(
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: <Widget>[
+      home: Scaffold(
+        body: CustomScrollView(physics: const BouncingScrollPhysics(), slivers: <
+          Widget
+        >[
           SliverAppBar(
             stretch: _stretch,
             onStretchTrigger: () async {
@@ -45,46 +45,43 @@ class _StretchableSliverAppBarState extends State<StretchableSliverAppBar> {
             ),
           ),
           SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                return Container(
-                  color: index.isOdd ? Colors.white : Colors.black12,
-                  height: 100.0,
-                  child: Center(
-                    child: Text('$index', textScaler: const TextScaler.linear(5.0)),
+            delegate: SliverChildBuilderDelegate((
+              BuildContext context,
+              int index,
+            ) {
+              return Container(
+                color: index.isOdd ? Colors.white : Colors.black12,
+                height: 100.0,
+                child: Center(
+                  child: Text(
+                    '$index',
+                    textScaler: const TextScaler.linear(5.0),
                   ),
-                );
-              },
-              childCount: 20,
-            ),
+                ),
+              );
+            }, childCount: 20),
           ),
-        ],
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: OverflowBar(
-            overflowAlignment: OverflowBarAlignment.center,
-            alignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
+        ]),
+        bottomNavigationBar: BottomAppBar(
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: OverflowBar(
+              overflowAlignment: OverflowBarAlignment.center,
+              alignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
                   const Text('stretch'),
-                  Switch(
-                    onChanged: (bool val) {
-                      setState(() {
-                        _stretch = val;
-                      });
-                    },
-                    value: _stretch,
-                  ),
-                ],
-              ),
-            ],
+                  Switch(onChanged: (bool val) {
+                    setState(() {
+                      _stretch = val;
+                    });
+                  }, value: _stretch),
+                ]),
+              ],
+            ),
           ),
         ),
       ),
-    ));
+    );
   }
 }

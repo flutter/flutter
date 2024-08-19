@@ -28,11 +28,9 @@ class ShowBottomSheetExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: ElevatedButton(
-        child: const Text('showBottomSheet'),
-        onPressed: () {
-          Scaffold.of(context).showBottomSheet(
-            (BuildContext context) {
+      child: ElevatedButton(child: const Text('showBottomSheet'), onPressed:
+          () {
+            Scaffold.of(context).showBottomSheet((BuildContext context) {
               return Container(
                 height: 200,
                 color: Colors.amber,
@@ -52,10 +50,8 @@ class ShowBottomSheetExample extends StatelessWidget {
                   ),
                 ),
               );
-            },
-          );
-        },
-      ),
+            });
+          }),
     );
   }
 }

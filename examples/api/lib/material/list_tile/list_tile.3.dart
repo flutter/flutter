@@ -48,7 +48,7 @@ class _ListTileExampleState extends State<ListTileExample> {
           iconColor: WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
             WidgetState.disabled: Colors.red,
             WidgetState.selected: Colors.green,
-            WidgetState.any:      Colors.black,
+            WidgetState.any: Colors.black,
           }),
           // The same can be achieved using the .resolveWith() constructor.
           // The text color will be identical to the icon color above.
@@ -64,15 +64,12 @@ class _ListTileExampleState extends State<ListTileExample> {
           leading: const Icon(Icons.person),
           title: const Text('Headline'),
           subtitle: Text('Enabled: $_enabled, Selected: $_selected'),
-          trailing: Switch(
-            onChanged: (bool? value) {
-              // This is called when the user toggles the switch.
-              setState(() {
-                _enabled = value!;
-              });
-            },
-            value: _enabled,
-          ),
+          trailing: Switch(onChanged: (bool? value) {
+            // This is called when the user toggles the switch.
+            setState(() {
+              _enabled = value!;
+            });
+          }, value: _enabled),
         ),
       ),
     );

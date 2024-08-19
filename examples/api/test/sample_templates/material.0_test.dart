@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/sample_templates/material.0.dart' as example;
+import 'package:flutter_api_samples/sample_templates/material.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 // This is an example of a test for API example code.
@@ -14,9 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Example app has a placeholder', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.SampleApp(),
-    );
+    await tester.pumpWidget(const example.SampleApp());
 
     expect(find.byType(Scaffold), findsOneWidget);
     expect(find.byType(Placeholder), findsOneWidget);

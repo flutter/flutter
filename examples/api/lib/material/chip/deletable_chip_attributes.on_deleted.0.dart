@@ -15,10 +15,10 @@ class OnDeletedExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('DeletableChipAttributes.onDeleted Sample')),
-        body: const Center(
-          child: OnDeletedExample(),
+        appBar: AppBar(
+          title: const Text('DeletableChipAttributes.onDeleted Sample'),
         ),
+        body: const Center(child: OnDeletedExample()),
       ),
     );
   }
@@ -66,9 +66,7 @@ class CastListState extends State<CastList> {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      children: actorWidgets.toList(),
-    );
+    return Wrap(children: actorWidgets.toList());
   }
 }
 

@@ -20,13 +20,12 @@ class PageTransitionsThemeApp extends StatelessWidget {
         // for different target platforms.
         // Non-specified target platforms will default to
         // ZoomPageTransitionsBuilder().
-        pageTransitionsTheme: const PageTransitionsTheme(
-          builders: <TargetPlatform, PageTransitionsBuilder>{
-            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-            TargetPlatform.linux: OpenUpwardsPageTransitionsBuilder(),
-            TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
-          },
-        ),
+        pageTransitionsTheme: const PageTransitionsTheme(builders:
+            <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+              TargetPlatform.linux: OpenUpwardsPageTransitionsBuilder(),
+              TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
+            }),
       ),
       home: const HomePage(),
     );
@@ -41,16 +40,13 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.blueGrey,
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute<SecondPage>(
-                builder: (BuildContext context) => const SecondPage(),
-              ),
-            );
-          },
-          child: const Text('To SecondPage'),
-        ),
+        child: ElevatedButton(onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute<SecondPage>(
+              builder: (BuildContext context) => const SecondPage(),
+            ),
+          );
+        }, child: const Text('To SecondPage')),
       ),
     );
   }
@@ -64,12 +60,9 @@ class SecondPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.purple[200],
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text('Back to HomePage'),
-        ),
+        child: ElevatedButton(onPressed: () {
+          Navigator.of(context).pop();
+        }, child: const Text('Back to HomePage')),
       ),
     );
   }

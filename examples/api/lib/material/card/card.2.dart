@@ -19,14 +19,12 @@ class CardExamplesApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text('Card Examples')),
         body: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Card(child: _SampleCard(cardName: 'Elevated Card')),
-              Card.filled(child: _SampleCard(cardName: 'Filled Card')),
-              Card.outlined(child: _SampleCard(cardName: 'Outlined Card')),
-            ],
-          ),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+              <Widget>[
+                Card(child: _SampleCard(cardName: 'Elevated Card')),
+                Card.filled(child: _SampleCard(cardName: 'Filled Card')),
+                Card.outlined(child: _SampleCard(cardName: 'Outlined Card')),
+              ]),
         ),
       ),
     );

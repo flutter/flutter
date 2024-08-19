@@ -16,7 +16,8 @@ class OfExampleApp extends StatefulWidget {
 }
 
 class _OfExampleAppState extends State<OfExampleApp> {
-  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
   int _counter = 0;
 
   void _incrementCounter() {
@@ -24,9 +25,9 @@ class _OfExampleAppState extends State<OfExampleApp> {
       _counter++;
     });
     if (_counter % 10 == 0) {
-      _scaffoldMessengerKey.currentState!.showSnackBar(const SnackBar(
-        content: Text('A multiple of ten!'),
-      ));
+      _scaffoldMessengerKey.currentState!.showSnackBar(
+        const SnackBar(content: Text('A multiple of ten!')),
+      );
     }
   }
 
@@ -37,18 +38,14 @@ class _OfExampleAppState extends State<OfExampleApp> {
       home: Scaffold(
         appBar: AppBar(title: const Text('ScaffoldMessenger Demo')),
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const Text(
-                'You have pushed the button this many times:',
-              ),
-              Text(
-                '$_counter',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-            ],
-          ),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+              <Widget>[
+                const Text('You have pushed the button this many times:'),
+                Text(
+                  '$_counter',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+              ]),
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: _incrementCounter,

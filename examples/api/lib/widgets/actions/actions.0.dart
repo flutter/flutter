@@ -16,9 +16,7 @@ class ActionsExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Actions Sample')),
-        body: const Center(
-          child: ActionsExample(),
-        ),
+        body: const Center(child: ActionsExample()),
       ),
     );
   }
@@ -96,25 +94,25 @@ class _SaveButtonState extends State<SaveButton> {
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: widget.valueNotifier,
-      builder: (BuildContext context, Widget? child) {
-        return TextButton.icon(
-          icon: const Icon(Icons.save),
-          label: Text('$_savedValue'),
-          style: ButtonStyle(
-            foregroundColor: WidgetStatePropertyAll<Color>(
-              widget.valueNotifier.value ? Colors.red : Colors.green,
-            ),
+    return ListenableBuilder(listenable: widget.valueNotifier, builder: (
+      BuildContext context,
+      Widget? child,
+    ) {
+      return TextButton.icon(
+        icon: const Icon(Icons.save),
+        label: Text('$_savedValue'),
+        style: ButtonStyle(
+          foregroundColor: WidgetStatePropertyAll<Color>(
+            widget.valueNotifier.value ? Colors.red : Colors.green,
           ),
-          onPressed: () {
-            setState(() {
-              _savedValue = Actions.invoke(context, const SaveIntent())! as int;
-            });
-          },
-        );
-      },
-    );
+        ),
+        onPressed: () {
+          setState(() {
+            _savedValue = Actions.invoke(context, const SaveIntent())! as int;
+          });
+        },
+      );
+    });
   }
 }
 
@@ -142,24 +140,22 @@ class _ActionsExampleState extends State<ActionsExample> {
         ModifyIntent: ModifyAction(_model),
         SaveIntent: SaveAction(_model),
       },
-      child: Builder(
-        builder: (BuildContext context) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
+      child: Builder(builder: (BuildContext context) {
+        return Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children:
+            <Widget>[
               const Spacer(),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  IconButton(
-                    icon: const Icon(Icons.exposure_plus_1),
-                    onPressed: () {
-                      Actions.invoke(context, ModifyIntent(++_count));
-                    },
-                  ),
-                  ListenableBuilder(
-                    listenable: _model.data,
-                    builder: (BuildContext context, Widget? child) {
+              Column(mainAxisAlignment: MainAxisAlignment.center, children:
+                  <Widget>[
+                    IconButton(
+                      icon: const Icon(Icons.exposure_plus_1),
+                      onPressed: () {
+                        Actions.invoke(context, ModifyIntent(++_count));
+                      },
+                    ),
+                    ListenableBuilder(listenable: _model.data, builder: (
+                      BuildContext context,
+                      Widget? child,
+                    ) {
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
@@ -167,22 +163,18 @@ class _ActionsExampleState extends State<ActionsExample> {
                           style: Theme.of(context).textTheme.headlineMedium,
                         ),
                       );
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.exposure_minus_1),
-                    onPressed: () {
-                      Actions.invoke(context, ModifyIntent(--_count));
-                    },
-                  ),
-                ],
-              ),
+                    }),
+                    IconButton(
+                      icon: const Icon(Icons.exposure_minus_1),
+                      onPressed: () {
+                        Actions.invoke(context, ModifyIntent(--_count));
+                      },
+                    ),
+                  ]),
               SaveButton(_model.isDirty),
               const Spacer(),
-            ],
-          );
-        },
-      ),
+            ]);
+      }),
     );
   }
 }

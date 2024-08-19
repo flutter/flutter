@@ -20,10 +20,7 @@ class SliverAnimatedOpacityExampleApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverAnimatedOpacity Sample')),
         body: const Center(
-          child: SliverAnimatedOpacityExample(
-            duration: duration,
-            curve: curve,
-          ),
+          child: SliverAnimatedOpacityExample(duration: duration, curve: curve),
         ),
       ),
     );
@@ -60,26 +57,23 @@ class _SliverAnimatedOpacityExampleState
         curve: widget.curve,
         sliver: SliverFixedExtentList(
           itemExtent: 100.0,
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
-              return Container(
-                color: index.isEven ? Colors.indigo[200] : Colors.orange[200],
-              );
-            },
-            childCount: 5,
-          ),
+          delegate: SliverChildBuilderDelegate((
+            BuildContext context,
+            int index,
+          ) {
+            return Container(
+              color: index.isEven ? Colors.indigo[200] : Colors.orange[200],
+            );
+          }, childCount: 5),
         ),
       ),
       SliverToBoxAdapter(
-          child: FloatingActionButton(
-        onPressed: () {
+        child: FloatingActionButton(onPressed: () {
           setState(() {
             _visible = !_visible;
           });
-        },
-        tooltip: 'Toggle opacity',
-        child: const Icon(Icons.flip),
-      )),
+        }, tooltip: 'Toggle opacity', child: const Icon(Icons.flip)),
+      ),
     ]);
   }
 }

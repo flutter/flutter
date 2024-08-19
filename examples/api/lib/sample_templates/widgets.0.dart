@@ -41,12 +41,12 @@ class SampleApp extends StatelessWidget {
   const SampleApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return WidgetsApp(
-      color: const Color(0xffffffff),
-      builder: (BuildContext context, Widget? child) {
-        return const PlaceholderExample();
-      },
-    );
+    return WidgetsApp(color: const Color(0xffffffff), builder: (
+      BuildContext context,
+      Widget? child,
+    ) {
+      return const PlaceholderExample();
+    });
   }
 }
 

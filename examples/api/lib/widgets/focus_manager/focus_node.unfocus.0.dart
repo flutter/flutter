@@ -13,9 +13,7 @@ class UnfocusExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: UnfocusExample(),
-    );
+    return const MaterialApp(home: UnfocusExample());
   }
 }
 
@@ -53,33 +51,29 @@ class _UnfocusExampleState extends State<UnfocusExample> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                ...List<Widget>.generate(UnfocusDisposition.values.length, (int index) {
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Radio<UnfocusDisposition>(
-                        groupValue: disposition,
-                        onChanged: (UnfocusDisposition? value) {
-                          setState(() {
-                            if (value != null) {
-                              disposition = value;
-                            }
-                          });
-                        },
-                        value: UnfocusDisposition.values[index],
-                      ),
-                      Text(UnfocusDisposition.values[index].name),
-                    ],
-                  );
+                ...List<Widget>.generate(UnfocusDisposition.values.length, (
+                  int index,
+                ) {
+                  return Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                    Radio<UnfocusDisposition>(
+                      groupValue: disposition,
+                      onChanged: (UnfocusDisposition? value) {
+                        setState(() {
+                          if (value != null) {
+                            disposition = value;
+                          }
+                        });
+                      },
+                      value: UnfocusDisposition.values[index],
+                    ),
+                    Text(UnfocusDisposition.values[index].name),
+                  ]);
                 }),
-                OutlinedButton(
-                  child: const Text('UNFOCUS'),
-                  onPressed: () {
-                    setState(() {
-                      primaryFocus!.unfocus(disposition: disposition);
-                    });
-                  },
-                ),
+                OutlinedButton(child: const Text('UNFOCUS'), onPressed: () {
+                  setState(() {
+                    primaryFocus!.unfocus(disposition: disposition);
+                  });
+                }),
               ],
             ),
           ],

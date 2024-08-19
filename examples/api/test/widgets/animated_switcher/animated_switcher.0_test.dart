@@ -9,9 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Increments counter on button tap', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.AnimatedSwitcherExampleApp(),
-    );
+    await tester.pumpWidget(const example.AnimatedSwitcherExampleApp());
 
     int counter = 0;
 
@@ -35,9 +33,7 @@ void main() {
   });
 
   testWidgets('Animates counter change', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.AnimatedSwitcherExampleApp(),
-    );
+    await tester.pumpWidget(const example.AnimatedSwitcherExampleApp());
 
     // The animation duration defined in the example app.
     const Duration animationDuration = Duration(milliseconds: 500);

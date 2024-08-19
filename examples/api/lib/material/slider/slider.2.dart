@@ -13,9 +13,7 @@ class SliderApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: SliderExample(),
-    );
+    return const MaterialApp(home: SliderExample());
   }
 }
 
@@ -34,30 +32,28 @@ class _SliderExampleState extends State<SliderExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Slider')),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Slider(
-            value: _currentSliderPrimaryValue,
-            secondaryTrackValue: _currentSliderSecondaryValue,
-            label: _currentSliderPrimaryValue.round().toString(),
-            onChanged: (double value) {
-              setState(() {
-                _currentSliderPrimaryValue = value;
-              });
-            },
-          ),
-          Slider(
-            value: _currentSliderSecondaryValue,
-            label: _currentSliderSecondaryValue.round().toString(),
-            onChanged: (double value) {
-              setState(() {
-                _currentSliderSecondaryValue = value;
-              });
-            },
-          ),
-        ],
-      ),
+      body: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+          <Widget>[
+            Slider(
+              value: _currentSliderPrimaryValue,
+              secondaryTrackValue: _currentSliderSecondaryValue,
+              label: _currentSliderPrimaryValue.round().toString(),
+              onChanged: (double value) {
+                setState(() {
+                  _currentSliderPrimaryValue = value;
+                });
+              },
+            ),
+            Slider(
+              value: _currentSliderSecondaryValue,
+              label: _currentSliderSecondaryValue.round().toString(),
+              onChanged: (double value) {
+                setState(() {
+                  _currentSliderSecondaryValue = value;
+                });
+              },
+            ),
+          ]),
     );
   }
 }

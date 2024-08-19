@@ -58,25 +58,20 @@ class _ListViewExampleState extends State<ListViewExample> {
         ),
       ),
       bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TextButton(
-              onPressed: () => _reverse(),
-              child: const Text('Reverse items'),
-            ),
-          ],
-        ),
+        child: Row(mainAxisAlignment: MainAxisAlignment.center, children:
+            <Widget>[
+              TextButton(
+                onPressed: () => _reverse(),
+                child: const Text('Reverse items'),
+              ),
+            ]),
       ),
     );
   }
 }
 
 class KeepAliveItem extends StatefulWidget {
-  const KeepAliveItem({
-    required Key super.key,
-    required this.data,
-  });
+  const KeepAliveItem({required Key super.key, required this.data});
 
   final String data;
 

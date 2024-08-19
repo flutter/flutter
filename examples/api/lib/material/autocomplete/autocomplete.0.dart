@@ -15,17 +15,16 @@ class AutocompleteExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Autocomplete Basic'),
-        ),
+        appBar: AppBar(title: const Text('Autocomplete Basic')),
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text('Type below to autocomplete the following possible results: ${AutocompleteBasicExample._kOptions}.'),
-              const AutocompleteBasicExample(),
-            ],
-          ),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: <
+            Widget
+          >[
+            Text(
+              'Type below to autocomplete the following possible results: ${AutocompleteBasicExample._kOptions}.',
+            ),
+            const AutocompleteBasicExample(),
+          ]),
         ),
       ),
     );

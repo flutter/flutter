@@ -8,12 +8,13 @@ import 'package:flutter_api_samples/material/navigation_bar/navigation_bar.0.dar
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Navigation bar updates destination on tap',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.NavigationBarApp(),
+  testWidgets('Navigation bar updates destination on tap', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.NavigationBarApp());
+    final NavigationBar navigationBarWidget = tester.firstWidget(
+      find.byType(NavigationBar),
     );
-    final NavigationBar navigationBarWidget = tester.firstWidget(find.byType(NavigationBar));
 
     /// NavigationDestinations must be rendered
     expect(find.text('Home'), findsOneWidget);
@@ -21,17 +22,21 @@ void main() {
     expect(find.text('Messages'), findsOneWidget);
 
     /// Test notification badge.
-    final Badge notificationBadge = tester.firstWidget(find.ancestor(
-      of: find.byIcon(Icons.notifications_sharp),
-      matching: find.byType(Badge),
-    ));
+    final Badge notificationBadge = tester.firstWidget(
+      find.ancestor(
+        of: find.byIcon(Icons.notifications_sharp),
+        matching: find.byType(Badge),
+      ),
+    );
     expect(notificationBadge.label, null);
 
     /// Test messages badge.
-    final Badge messagesBadge = tester.firstWidget(find.ancestor(
-      of: find.byIcon(Icons.messenger_sharp),
-      matching: find.byType(Badge),
-    ));
+    final Badge messagesBadge = tester.firstWidget(
+      find.ancestor(
+        of: find.byIcon(Icons.messenger_sharp),
+        matching: find.byType(Badge),
+      ),
+    );
     expect(messagesBadge.label, isNotNull);
 
     /// Initial index must be zero

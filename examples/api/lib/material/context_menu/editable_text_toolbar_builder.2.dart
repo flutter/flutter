@@ -15,12 +15,15 @@ class EditableTextToolbarBuilderExampleApp extends StatefulWidget {
   const EditableTextToolbarBuilderExampleApp({super.key});
 
   @override
-  State<EditableTextToolbarBuilderExampleApp> createState() => _EditableTextToolbarBuilderExampleAppState();
+  State<EditableTextToolbarBuilderExampleApp> createState() =>
+      _EditableTextToolbarBuilderExampleAppState();
 }
 
-class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolbarBuilderExampleApp> {
+class _EditableTextToolbarBuilderExampleAppState
+    extends State<EditableTextToolbarBuilderExampleApp> {
   final TextEditingController _controller = TextEditingController(
-    text: 'Right click (desktop) or long press (mobile) to see the menu with a custom toolbar.',
+    text:
+        'Right click (desktop) or long press (mobile) to see the menu with a custom toolbar.',
   );
 
   @override
@@ -49,17 +52,18 @@ class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolb
           title: const Text('Custom toolbar, default-looking buttons'),
         ),
         body: Center(
-          child: Column(
-            children: <Widget>[
-              const SizedBox(height: 20.0),
-              TextField(
-                controller: _controller,
-                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
-                  return _MyTextSelectionToolbar(
-                    anchor: editableTextState.contextMenuAnchors.primaryAnchor,
-                    // getAdaptiveButtons creates the default button widgets for
-                    // the current platform.
-                    children: AdaptiveTextSelectionToolbar.getAdaptiveButtons(
+          child: Column(children: <Widget>[
+            const SizedBox(height: 20.0),
+            TextField(controller: _controller, contextMenuBuilder: (
+              BuildContext context,
+              EditableTextState editableTextState,
+            ) {
+              return _MyTextSelectionToolbar(
+                anchor: editableTextState.contextMenuAnchors.primaryAnchor,
+                // getAdaptiveButtons creates the default button widgets for
+                // the current platform.
+                children:
+                    AdaptiveTextSelectionToolbar.getAdaptiveButtons(
                       context,
                       // These buttons just close the menu when clicked.
                       <ContextMenuButtonItem>[
@@ -85,11 +89,9 @@ class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolb
                         ),
                       ],
                     ).toList(),
-                  );
-                },
-              ),
-            ],
-          ),
+              );
+            }),
+          ]),
         ),
       ),
     );
@@ -100,33 +102,28 @@ class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolb
 ///
 /// Displays its children in a scrollable grid.
 class _MyTextSelectionToolbar extends StatelessWidget {
-  const _MyTextSelectionToolbar({
-    required this.anchor,
-    required this.children,
-  });
+  const _MyTextSelectionToolbar({required this.anchor, required this.children});
 
   final Offset anchor;
   final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        Positioned(
-          top: anchor.dy,
-          left: anchor.dx,
-          child: Container(
-            width: 200.0,
-            height: 200.0,
-            color: Colors.cyanAccent.withOpacity(0.5),
-            child: GridView.count(
-              padding: const EdgeInsets.all(12.0),
-              crossAxisCount: 2,
-              children: children,
-            ),
+    return Stack(children: <Widget>[
+      Positioned(
+        top: anchor.dy,
+        left: anchor.dx,
+        child: Container(
+          width: 200.0,
+          height: 200.0,
+          color: Colors.cyanAccent.withOpacity(0.5),
+          child: GridView.count(
+            padding: const EdgeInsets.all(12.0),
+            crossAxisCount: 2,
+            children: children,
           ),
         ),
-      ],
-    );
+      ),
+    ]);
   }
 }

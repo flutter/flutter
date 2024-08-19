@@ -13,9 +13,7 @@ class ProgressIndicatorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: ProgressIndicatorExample(),
-    );
+    return const MaterialApp(home: ProgressIndicatorExample());
   }
 }
 
@@ -23,10 +21,12 @@ class ProgressIndicatorExample extends StatefulWidget {
   const ProgressIndicatorExample({super.key});
 
   @override
-  State<ProgressIndicatorExample> createState() => _ProgressIndicatorExampleState();
+  State<ProgressIndicatorExample> createState() =>
+      _ProgressIndicatorExampleState();
 }
 
-class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> with TickerProviderStateMixin {
+class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
+    with TickerProviderStateMixin {
   late AnimationController controller;
 
   @override
@@ -37,8 +37,8 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> wit
       vsync: this,
       duration: const Duration(seconds: 5),
     )..addListener(() {
-        setState(() {});
-      });
+      setState(() {});
+    });
     controller.repeat(reverse: true);
     super.initState();
   }

@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/autocomplete/autocomplete.1.dart' as example;
+import 'package:flutter_api_samples/material/autocomplete/autocomplete.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('can search and find options by email and name', (WidgetTester tester) async {
+  testWidgets('can search and find options by email and name', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.AutocompleteExampleApp());
 
     expect(find.text('Alice'), findsNothing);

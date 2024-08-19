@@ -45,23 +45,18 @@ class _ReorderableExampleState extends State<ReorderableExample> {
           ColoredBox(
             key: Key('$index'),
             color: _items[index].isOdd ? oddItemColor : evenItemColor,
-            child: Row(
-              children: <Widget>[
-                Container(
-                  width: 64,
-                  height: 64,
-                  padding: const EdgeInsets.all(8),
-                  child: ReorderableDragStartListener(
-                    index: index,
-                    child: Card(
-                      color: colorScheme.primary,
-                      elevation: 2,
-                    ),
-                  ),
+            child: Row(children: <Widget>[
+              Container(
+                width: 64,
+                height: 64,
+                padding: const EdgeInsets.all(8),
+                child: ReorderableDragStartListener(
+                  index: index,
+                  child: Card(color: colorScheme.primary, elevation: 2),
                 ),
-                Text('Item ${_items[index]}'),
-              ],
-            ),
+              ),
+              Text('Item ${_items[index]}'),
+            ]),
           ),
       ],
       onReorder: (int oldIndex, int newIndex) {

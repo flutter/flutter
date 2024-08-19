@@ -16,17 +16,23 @@ class DynamicColorExample extends StatefulWidget {
 
   final List<ImageProvider> images = <NetworkImage>[
     const NetworkImage(
-        'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_1.png'),
+      'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_1.png',
+    ),
     const NetworkImage(
-        'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_2.png'),
+      'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_2.png',
+    ),
     const NetworkImage(
-        'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_3.png'),
+      'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_3.png',
+    ),
     const NetworkImage(
-        'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_4.png'),
+      'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_4.png',
+    ),
     const NetworkImage(
-        'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_5.png'),
+      'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_5.png',
+    ),
     const NetworkImage(
-        'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_6.png'),
+      'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_6.png',
+    ),
   ];
 
   @override
@@ -74,7 +80,10 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
         padding: const EdgeInsets.symmetric(vertical: 15),
         child: Text(
           brightness,
-          style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.onSecondaryContainer),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onSecondaryContainer,
+          ),
         ),
       );
     }
@@ -90,104 +99,109 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
       theme: ThemeData(useMaterial3: true, colorScheme: colorScheme),
       debugShowCheckedModeBanner: false,
       home: Builder(
-        builder: (BuildContext context) => Scaffold(
-          appBar: AppBar(
-            title: const Text('Content Based Dynamic Color'),
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
-            actions: <Widget>[
-              const Icon(Icons.light_mode),
-              Switch(
-                  activeColor: colorScheme.primary,
-                  activeTrackColor: colorScheme.surface,
-                  inactiveTrackColor: colorScheme.onSecondary,
-                  value: isLight,
-                  onChanged: (bool value) {
-                    setState(() {
-                      isLight = value;
-                      _updateImage(widget.images[selectedImage]);
-                    });
-                  })
-            ],
-          ),
-          body: Center(
-            child: isLoading
-                ? const CircularProgressIndicator()
-                : ColoredBox(
-                    color: colorScheme.secondaryContainer,
-                    child: Column(
-                      children: <Widget>[
-                        divider,
-                        _imagesRow(
-                          context,
-                          widget.images,
-                          colorScheme,
-                        ),
-                        divider,
-                        Expanded(
-                          child: ColoredBox(
-                            color: colorScheme.surface,
-                            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-                              if (constraints.maxWidth < narrowScreenWidthThreshold) {
-                                return SingleChildScrollView(
-                                  child: Column(
-                                    children: <Widget>[
-                                      divider,
-                                      schemeLabel('Light ColorScheme', colorScheme),
-                                      schemeView(lightTheme),
-                                      divider,
-                                      divider,
-                                      schemeLabel('Dark ColorScheme', colorScheme),
-                                      schemeView(darkTheme),
-                                    ],
-                                  ),
-                                );
-                              } else {
-                                return SingleChildScrollView(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(top: 5),
-                                    child: Column(
-                                      children: <Widget>[
-                                        Row(
-                                          children: <Widget>[
-                                            Expanded(
-                                              child: Column(
-                                                children: <Widget>[
-                                                  schemeLabel('Light ColorScheme', colorScheme),
-                                                  schemeView(lightTheme),
-                                                ],
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: Column(
-                                                children: <Widget>[
-                                                  schemeLabel('Dark ColorScheme', colorScheme),
-                                                  schemeView(darkTheme),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }
-                            }),
-                          ),
-                        ),
-                      ],
-                    ),
+        builder:
+            (BuildContext context) => Scaffold(
+              appBar: AppBar(
+                title: const Text('Content Based Dynamic Color'),
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                actions: <Widget>[
+                  const Icon(Icons.light_mode),
+                  Switch(
+                    activeColor: colorScheme.primary,
+                    activeTrackColor: colorScheme.surface,
+                    inactiveTrackColor: colorScheme.onSecondary,
+                    value: isLight,
+                    onChanged: (bool value) {
+                      setState(() {
+                        isLight = value;
+                        _updateImage(widget.images[selectedImage]);
+                      });
+                    },
                   ),
-          ),
-        ),
+                ],
+              ),
+              body: Center(
+                child:
+                    isLoading
+                        ? const CircularProgressIndicator()
+                        : ColoredBox(
+                          color: colorScheme.secondaryContainer,
+                          child: Column(children: <Widget>[
+                            divider,
+                            _imagesRow(context, widget.images, colorScheme),
+                            divider,
+                            Expanded(
+                              child: ColoredBox(
+                                color: colorScheme.surface,
+                                child: LayoutBuilder(builder: (
+                                  BuildContext context,
+                                  BoxConstraints constraints,
+                                ) {
+                                  if (constraints.maxWidth <
+                                      narrowScreenWidthThreshold) {
+                                    return SingleChildScrollView(
+                                      child: Column(children: <Widget>[
+                                        divider,
+                                        schemeLabel(
+                                          'Light ColorScheme',
+                                          colorScheme,
+                                        ),
+                                        schemeView(lightTheme),
+                                        divider,
+                                        divider,
+                                        schemeLabel(
+                                          'Dark ColorScheme',
+                                          colorScheme,
+                                        ),
+                                        schemeView(darkTheme),
+                                      ]),
+                                    );
+                                  } else {
+                                    return SingleChildScrollView(
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(top: 5),
+                                        child: Column(children: <Widget>[
+                                          Row(children: <Widget>[
+                                            Expanded(
+                                              child: Column(children: <Widget>[
+                                                schemeLabel(
+                                                  'Light ColorScheme',
+                                                  colorScheme,
+                                                ),
+                                                schemeView(lightTheme),
+                                              ]),
+                                            ),
+                                            Expanded(
+                                              child: Column(children: <Widget>[
+                                                schemeLabel(
+                                                  'Dark ColorScheme',
+                                                  colorScheme,
+                                                ),
+                                                schemeView(darkTheme),
+                                              ]),
+                                            ),
+                                          ]),
+                                        ]),
+                                      ),
+                                    );
+                                  }
+                                }),
+                              ),
+                            ),
+                          ]),
+                        ),
+              ),
+            ),
       ),
     );
   }
 
   Future<void> _updateImage(ImageProvider provider) async {
     final ColorScheme newColorScheme = await ColorScheme.fromImageProvider(
-        provider: provider, brightness: isLight ? Brightness.light : Brightness.dark);
+      provider: provider,
+      brightness: isLight ? Brightness.light : Brightness.dark,
+    );
     if (!mounted) {
       return;
     }
@@ -199,52 +213,75 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
 
   // For small screens, have two rows of image selection. For wide screens,
   // fit them onto one row.
-  Widget _imagesRow(BuildContext context, List<ImageProvider> images, ColorScheme colorScheme) {
+  Widget _imagesRow(
+    BuildContext context,
+    List<ImageProvider> images,
+    ColorScheme colorScheme,
+  ) {
     final double windowHeight = MediaQuery.of(context).size.height;
     final double windowWidth = MediaQuery.of(context).size.width;
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      child: LayoutBuilder(builder: (
+        BuildContext context,
+        BoxConstraints constraints,
+      ) {
         if (constraints.maxWidth > 800) {
           return _adaptiveLayoutImagesRow(images, colorScheme, windowHeight);
         } else {
           return Column(children: <Widget>[
-            _adaptiveLayoutImagesRow(images.sublist(0, 3), colorScheme, windowWidth),
-            _adaptiveLayoutImagesRow(images.sublist(3), colorScheme, windowWidth),
+            _adaptiveLayoutImagesRow(
+              images.sublist(0, 3),
+              colorScheme,
+              windowWidth,
+            ),
+            _adaptiveLayoutImagesRow(
+              images.sublist(3),
+              colorScheme,
+              windowWidth,
+            ),
           ]);
         }
       }),
     );
   }
 
-  Widget _adaptiveLayoutImagesRow(List<ImageProvider> images, ColorScheme colorScheme, double windowWidth) {
+  Widget _adaptiveLayoutImagesRow(
+    List<ImageProvider> images,
+    ColorScheme colorScheme,
+    double windowWidth,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: images
-          .map(
-            (ImageProvider image) => Flexible(
-              flex: (images.length / 3).floor(),
-              child: GestureDetector(
-                onTap: () => _updateImage(image),
-                child: Card(
-                  color: widget.images.indexOf(image) == selectedImage
-                      ? colorScheme.primaryContainer
-                      : colorScheme.surface,
-                  child: Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: windowWidth * .25),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        child: Image(image: image),
+      children:
+          images
+              .map(
+                (ImageProvider image) => Flexible(
+                  flex: (images.length / 3).floor(),
+                  child: GestureDetector(
+                    onTap: () => _updateImage(image),
+                    child: Card(
+                      color:
+                          widget.images.indexOf(image) == selectedImage
+                              ? colorScheme.primaryContainer
+                              : colorScheme.surface,
+                      child: Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: windowWidth * .25,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image(image: image),
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          )
-          .toList(),
+              )
+              .toList(),
     );
   }
 }
@@ -256,80 +293,137 @@ class ColorSchemeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        ColorGroup(children: <ColorChip>[
-          ColorChip(label: 'primary', color: colorScheme.primary, onColor: colorScheme.onPrimary),
-          ColorChip(label: 'onPrimary', color: colorScheme.onPrimary, onColor: colorScheme.primary),
-          ColorChip(
-              label: 'primaryContainer', color: colorScheme.primaryContainer, onColor: colorScheme.onPrimaryContainer),
-          ColorChip(
-              label: 'onPrimaryContainer',
-              color: colorScheme.onPrimaryContainer,
-              onColor: colorScheme.primaryContainer),
-        ]),
-        divider,
-        ColorGroup(children: <ColorChip>[
-          ColorChip(label: 'secondary', color: colorScheme.secondary, onColor: colorScheme.onSecondary),
-          ColorChip(label: 'onSecondary', color: colorScheme.onSecondary, onColor: colorScheme.secondary),
-          ColorChip(
-              label: 'secondaryContainer',
-              color: colorScheme.secondaryContainer,
-              onColor: colorScheme.onSecondaryContainer),
-          ColorChip(
-              label: 'onSecondaryContainer',
-              color: colorScheme.onSecondaryContainer,
-              onColor: colorScheme.secondaryContainer),
-        ]),
-        divider,
-        ColorGroup(
-          children: <ColorChip>[
-            ColorChip(label: 'tertiary', color: colorScheme.tertiary, onColor: colorScheme.onTertiary),
-            ColorChip(label: 'onTertiary', color: colorScheme.onTertiary, onColor: colorScheme.tertiary),
-            ColorChip(
-                label: 'tertiaryContainer',
-                color: colorScheme.tertiaryContainer,
-                onColor: colorScheme.onTertiaryContainer),
-            ColorChip(
-                label: 'onTertiaryContainer',
-                color: colorScheme.onTertiaryContainer,
-                onColor: colorScheme.tertiaryContainer),
-          ],
+    return Column(children: <Widget>[
+      ColorGroup(children: <ColorChip>[
+        ColorChip(
+          label: 'primary',
+          color: colorScheme.primary,
+          onColor: colorScheme.onPrimary,
         ),
-        divider,
-        ColorGroup(
-          children: <ColorChip>[
-            ColorChip(label: 'error', color: colorScheme.error, onColor: colorScheme.onError),
-            ColorChip(label: 'onError', color: colorScheme.onError, onColor: colorScheme.error),
-            ColorChip(
-                label: 'errorContainer', color: colorScheme.errorContainer, onColor: colorScheme.onErrorContainer),
-            ColorChip(
-                label: 'onErrorContainer', color: colorScheme.onErrorContainer, onColor: colorScheme.errorContainer),
-          ],
+        ColorChip(
+          label: 'onPrimary',
+          color: colorScheme.onPrimary,
+          onColor: colorScheme.primary,
         ),
-        divider,
-        ColorGroup(
-          children: <ColorChip>[
-            ColorChip(label: 'surface', color: colorScheme.surface, onColor: colorScheme.onSurface),
-            ColorChip(label: 'onSurface', color: colorScheme.onSurface, onColor: colorScheme.surface),
-            ColorChip(
-                label: 'onSurfaceVariant', color: colorScheme.onSurfaceVariant, onColor: colorScheme.surfaceContainerHighest),
-          ],
+        ColorChip(
+          label: 'primaryContainer',
+          color: colorScheme.primaryContainer,
+          onColor: colorScheme.onPrimaryContainer,
         ),
-        divider,
-        ColorGroup(
-          children: <ColorChip>[
-            ColorChip(label: 'outline', color: colorScheme.outline),
-            ColorChip(label: 'shadow', color: colorScheme.shadow),
-            ColorChip(
-                label: 'inverseSurface', color: colorScheme.inverseSurface, onColor: colorScheme.onInverseSurface),
-            ColorChip(
-                label: 'onInverseSurface', color: colorScheme.onInverseSurface, onColor: colorScheme.inverseSurface),
-            ColorChip(label: 'inversePrimary', color: colorScheme.inversePrimary, onColor: colorScheme.primary),
-          ],
+        ColorChip(
+          label: 'onPrimaryContainer',
+          color: colorScheme.onPrimaryContainer,
+          onColor: colorScheme.primaryContainer,
         ),
-      ],
-    );
+      ]),
+      divider,
+      ColorGroup(children: <ColorChip>[
+        ColorChip(
+          label: 'secondary',
+          color: colorScheme.secondary,
+          onColor: colorScheme.onSecondary,
+        ),
+        ColorChip(
+          label: 'onSecondary',
+          color: colorScheme.onSecondary,
+          onColor: colorScheme.secondary,
+        ),
+        ColorChip(
+          label: 'secondaryContainer',
+          color: colorScheme.secondaryContainer,
+          onColor: colorScheme.onSecondaryContainer,
+        ),
+        ColorChip(
+          label: 'onSecondaryContainer',
+          color: colorScheme.onSecondaryContainer,
+          onColor: colorScheme.secondaryContainer,
+        ),
+      ]),
+      divider,
+      ColorGroup(children: <ColorChip>[
+        ColorChip(
+          label: 'tertiary',
+          color: colorScheme.tertiary,
+          onColor: colorScheme.onTertiary,
+        ),
+        ColorChip(
+          label: 'onTertiary',
+          color: colorScheme.onTertiary,
+          onColor: colorScheme.tertiary,
+        ),
+        ColorChip(
+          label: 'tertiaryContainer',
+          color: colorScheme.tertiaryContainer,
+          onColor: colorScheme.onTertiaryContainer,
+        ),
+        ColorChip(
+          label: 'onTertiaryContainer',
+          color: colorScheme.onTertiaryContainer,
+          onColor: colorScheme.tertiaryContainer,
+        ),
+      ]),
+      divider,
+      ColorGroup(children: <ColorChip>[
+        ColorChip(
+          label: 'error',
+          color: colorScheme.error,
+          onColor: colorScheme.onError,
+        ),
+        ColorChip(
+          label: 'onError',
+          color: colorScheme.onError,
+          onColor: colorScheme.error,
+        ),
+        ColorChip(
+          label: 'errorContainer',
+          color: colorScheme.errorContainer,
+          onColor: colorScheme.onErrorContainer,
+        ),
+        ColorChip(
+          label: 'onErrorContainer',
+          color: colorScheme.onErrorContainer,
+          onColor: colorScheme.errorContainer,
+        ),
+      ]),
+      divider,
+      ColorGroup(children: <ColorChip>[
+        ColorChip(
+          label: 'surface',
+          color: colorScheme.surface,
+          onColor: colorScheme.onSurface,
+        ),
+        ColorChip(
+          label: 'onSurface',
+          color: colorScheme.onSurface,
+          onColor: colorScheme.surface,
+        ),
+        ColorChip(
+          label: 'onSurfaceVariant',
+          color: colorScheme.onSurfaceVariant,
+          onColor: colorScheme.surfaceContainerHighest,
+        ),
+      ]),
+      divider,
+      ColorGroup(children: <ColorChip>[
+        ColorChip(label: 'outline', color: colorScheme.outline),
+        ColorChip(label: 'shadow', color: colorScheme.shadow),
+        ColorChip(
+          label: 'inverseSurface',
+          color: colorScheme.inverseSurface,
+          onColor: colorScheme.onInverseSurface,
+        ),
+        ColorChip(
+          label: 'onInverseSurface',
+          color: colorScheme.onInverseSurface,
+          onColor: colorScheme.inverseSurface,
+        ),
+        ColorChip(
+          label: 'inversePrimary',
+          color: colorScheme.inversePrimary,
+          onColor: colorScheme.primary,
+        ),
+      ]),
+    ]);
   }
 }
 
@@ -341,7 +435,10 @@ class ColorGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
-      child: Card(clipBehavior: Clip.antiAlias, child: Column(children: children)),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: Column(children: children),
+      ),
     );
   }
 }
@@ -361,7 +458,7 @@ class ColorChip extends StatelessWidget {
   static Color contrastColor(Color color) {
     final Brightness brightness = ThemeData.estimateBrightnessForColor(color);
     return switch (brightness) {
-      Brightness.dark  => Colors.white,
+      Brightness.dark => Colors.white,
       Brightness.light => Colors.black,
     };
   }
@@ -373,11 +470,9 @@ class ColorChip extends StatelessWidget {
       color: color,
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
-          children: <Expanded>[
-            Expanded(child: Text(label, style: TextStyle(color: labelColor))),
-          ],
-        ),
+        child: Row(children: <Expanded>[
+          Expanded(child: Text(label, style: TextStyle(color: labelColor))),
+        ]),
       ),
     );
   }

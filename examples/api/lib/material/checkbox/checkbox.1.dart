@@ -14,13 +14,14 @@ class CheckboxExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4)),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: const Color(0xff6750a4),
+      ),
       title: 'Checkbox Sample',
       home: Scaffold(
         appBar: AppBar(title: const Text('Checkbox Sample')),
-        body: const Center(
-          child: CheckboxExample(),
-        ),
+        body: const Center(child: CheckboxExample()),
       ),
     );
   }
@@ -38,35 +39,26 @@ class _CheckboxExampleState extends State<CheckboxExample> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Checkbox(
-          tristate: true,
-          value: isChecked,
-          onChanged: (bool? value) {
+    return Column(mainAxisAlignment: MainAxisAlignment.center, children:
+        <Widget>[
+          Checkbox(tristate: true, value: isChecked, onChanged: (bool? value) {
             setState(() {
               isChecked = value;
             });
-          },
-        ),
-        Checkbox(
-          isError: true,
-          tristate: true,
-          value: isChecked,
-          onChanged: (bool? value) {
+          }),
+          Checkbox(isError: true, tristate: true, value: isChecked, onChanged: (
+            bool? value,
+          ) {
             setState(() {
               isChecked = value;
             });
-          },
-        ),
-        Checkbox(
-          isError: true,
-          tristate: true,
-          value: isChecked,
-          onChanged: null,
-        ),
-      ],
-    );
+          }),
+          Checkbox(
+            isError: true,
+            tristate: true,
+            value: isChecked,
+            onChanged: null,
+          ),
+        ]);
   }
 }

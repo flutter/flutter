@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/autocomplete/raw_autocomplete.focus_node.0.dart' as example;
+import 'package:flutter_api_samples/widgets/autocomplete/raw_autocomplete.focus_node.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -15,7 +16,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(AppBar),
-        matching: find.byType(TextFormField)
+        matching: find.byType(TextFormField),
       ),
       findsOneWidget,
     );
@@ -27,13 +28,15 @@ void main() {
     expect(
       find.ancestor(
         matching: find.byType(AppBar),
-        of: find.byType(RawAutocomplete)
+        of: find.byType(RawAutocomplete),
       ),
       findsNothing,
     );
   });
 
-  testWidgets('Options are shown correctly and selectable', (WidgetTester tester) async {
+  testWidgets('Options are shown correctly and selectable', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.AutocompleteExampleApp());
     await tester.tap(find.byType(TextFormField));
     await tester.pump();

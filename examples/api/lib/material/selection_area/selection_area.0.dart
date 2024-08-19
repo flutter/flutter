@@ -18,14 +18,8 @@ class SelectionAreaExampleApp extends StatelessWidget {
         child: Scaffold(
           appBar: AppBar(title: const Text('SelectionArea Sample')),
           body: const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text('Row 1'),
-                Text('Row 2'),
-                Text('Row 3'),
-              ],
-            ),
+            child: Column(mainAxisAlignment: MainAxisAlignment.center, children:
+                <Widget>[Text('Row 1'), Text('Row 2'), Text('Row 3')]),
           ),
         ),
       ),

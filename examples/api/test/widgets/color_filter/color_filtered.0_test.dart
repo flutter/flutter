@@ -17,10 +17,10 @@ void main() {
     HttpOverrides.global = null;
   });
 
-  testWidgets('Color filters are applied to the images', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.ColorFilteredExampleApp(),
-    );
+  testWidgets('Color filters are applied to the images', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.ColorFilteredExampleApp());
 
     await tester.pumpAndSettle();
 
@@ -39,9 +39,7 @@ void main() {
       equals(const ColorFilter.mode(Colors.red, BlendMode.modulate)),
     );
 
-    renderObject = tester.firstRenderObject(
-      find.byType(ColorFiltered).last,
-    );
+    renderObject = tester.firstRenderObject(find.byType(ColorFiltered).last);
     colorFilterLayer = renderObject.debugLayer! as ColorFilterLayer;
 
     // Verify that grey colored filter with saturation blend mode is applied to the first image.

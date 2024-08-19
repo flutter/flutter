@@ -8,9 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Slider can change its value', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.SliderApp(),
-    );
+    await tester.pumpWidget(const example.SliderApp());
 
     expect(find.byType(Slider), findsOneWidget);
 

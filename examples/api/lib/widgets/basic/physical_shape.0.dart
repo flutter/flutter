@@ -15,9 +15,7 @@ class PhysicalShapeApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('PhysicalShape Sample'),
-        ),
+        appBar: AppBar(title: const Text('PhysicalShape Sample')),
         body: const Center(child: PhysicalShapeExample()),
       ),
     );
@@ -43,10 +41,7 @@ class PhysicalShapeExample extends StatelessWidget {
         child: Center(
           child: Text(
             'Hello, World!',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20.0,
-            ),
+            style: TextStyle(color: Colors.white, fontSize: 20.0),
           ),
         ),
       ),

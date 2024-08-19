@@ -8,10 +8,7 @@ import 'package:flutter_api_samples/widgets/drag_target/draggable.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Finder findContainerWith({
-    required Finder child,
-    required Color color,
-  }) {
+  Finder findContainerWith({required Finder child, required Color color}) {
     return find.ancestor(
       of: child,
       matching: find.byWidgetPredicate(
@@ -21,9 +18,7 @@ void main() {
   }
 
   testWidgets('Verify initial state', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.DraggableExampleApp(),
-    );
+    await tester.pumpWidget(const example.DraggableExampleApp());
 
     expect(find.text('Draggable Sample'), findsOneWidget);
 
@@ -44,10 +39,10 @@ void main() {
     );
   });
 
-  testWidgets('Verify correct containers are displayed while dragging', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.DraggableExampleApp(),
-    );
+  testWidgets('Verify correct containers are displayed while dragging', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.DraggableExampleApp());
 
     final Finder idleContainer = findContainerWith(
       color: Colors.lightGreenAccent,
@@ -90,10 +85,10 @@ void main() {
     expect(feedbackContainer, findsNothing);
   });
 
-  testWidgets('Dropping Draggable over DragTarget updates the counter', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.DraggableExampleApp(),
-    );
+  testWidgets('Dropping Draggable over DragTarget updates the counter', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.DraggableExampleApp());
 
     final Finder draggable = find.byType(Draggable<int>);
     final Finder target = find.byType(DragTarget<int>);
