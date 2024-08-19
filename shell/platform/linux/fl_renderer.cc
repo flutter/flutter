@@ -195,6 +195,9 @@ static void render_with_textures(FlRenderer* self, int width, int height) {
   GLint saved_array_buffer_binding;
   glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &saved_array_buffer_binding);
 
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   glUseProgram(priv->program);
 
   for (guint i = 0; i < priv->framebuffers->len; i++) {
@@ -235,6 +238,8 @@ static void render_with_textures(FlRenderer* self, int width, int height) {
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vertex_buffer);
   }
+
+  glDisable(GL_BLEND);
 
   glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
   glBindVertexArray(saved_vao_binding);
@@ -443,13 +448,17 @@ void fl_renderer_setup(FlRenderer* self) {
   }
 }
 
-void fl_renderer_render(FlRenderer* self, int width, int height) {
+void fl_renderer_render(FlRenderer* self,
+                        int width,
+                        int height,
+                        const GdkRGBA* background_color) {
   FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
       fl_renderer_get_instance_private(self));
 
   g_return_if_fail(FL_IS_RENDERER(self));
 
-  glClearColor(0.0, 0.0, 0.0, 1.0);
+  glClearColor(background_color->red, background_color->green,
+               background_color->blue, background_color->alpha);
   glClear(GL_COLOR_BUFFER_BIT);
 
   if (priv->has_gl_framebuffer_blit) {
