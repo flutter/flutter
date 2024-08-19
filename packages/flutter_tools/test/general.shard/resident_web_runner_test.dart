@@ -1321,6 +1321,59 @@ flutter:
     ProcessManager: () => processManager,
   });
 
+  testUsingContext('Turns HttpException from ChromeTab::connect into ToolExit', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final ResidentRunner residentWebRunner = setUpResidentRunner(
+      flutterDevice,
+      logger: logger,
+    );
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    setupMocks();
+    final FakeChromeConnection chromeConnection = FakeChromeConnection();
+    final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
+    final FakeProcess process = FakeProcess();
+    final Chromium chrome = Chromium(
+      1,
+      chromeConnection,
+      chromiumLauncher: chromiumLauncher,
+      process: process,
+      logger: logger,
+    );
+    chromiumLauncher.setInstance(chrome);
+
+    flutterDevice.device = GoogleChromeDevice(
+      fileSystem: fileSystem,
+      chromiumLauncher: chromiumLauncher,
+      logger: logger,
+      platform: FakePlatform(),
+      processManager: FakeProcessManager.any(),
+    );
+    webDevFS.baseUri = Uri.parse('http://localhost:8765/app/');
+
+    final FakeChromeTab chromeTab = FakeChromeTab(
+      'index.html',
+      connectException: HttpException(
+        'Connection closed before full header was received',
+        uri: Uri(
+          path: 'http://localhost:50094/devtools/page/3036A94908353E86E183B6A40F54104B',
+        ),
+      ),
+    );
+    chromeConnection.tabs.add(chromeTab);
+
+    await expectLater(
+      residentWebRunner.run,
+      throwsToolExit(
+        message: 'Failed to establish connection with the application instance in Chrome.',
+      ),
+    );
+    expect(logger.errorText, contains('HttpException'));
+    expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
   testUsingContext('Successfully turns AppConnectionException into ToolExit',
       () async {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
@@ -1601,14 +1654,21 @@ class FakeChromeConnection extends Fake implements ChromeConnection {
 }
 
 class FakeChromeTab extends Fake implements ChromeTab {
-  FakeChromeTab(this.url);
+  FakeChromeTab(this.url, {
+    Exception? connectException,
+  }): _connectException = connectException;
 
   @override
   final String url;
+
+  final Exception? _connectException;
   final FakeWipConnection connection = FakeWipConnection();
 
   @override
   Future<WipConnection> connect({Function? onError}) async {
+    if (_connectException != null) {
+      throw _connectException;
+    }
     return connection;
   }
 }
