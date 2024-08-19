@@ -23,6 +23,6 @@ abstract class TestCompilerNativeAssetsBuilder {
 /// be found by the dynamic linker. This is necessary to support native asset
 /// libraries that dynamically link to other libraries.
 String windowsPathWithNativeAssetsBuildDirectory(FlutterProject project, Platform platform) {
-  return '${nativeAssetsBuildUri(project.buildDirectory.uri, OS.windows).toFilePath()};'
+  return '${nativeAssetsBuildUri(project.directory.uri, OS.windows).toFilePath()};'
          '${platform.environment['PATH']}';
 }
