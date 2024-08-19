@@ -692,4 +692,91 @@ void main() {
       );
     }
   }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+
+  test('Migrated app builds after Swift Package Manager is turned off', () async {
+    final Directory workingDirectory = fileSystem.systemTempDirectory
+      .createTempSync('swift_package_manager_turned_off.');
+    final String workingDirectoryPath = workingDirectory.path;
+    try {
+      await SwiftPackageManagerUtils.enableSwiftPackageManager(
+        flutterBin,
+        workingDirectoryPath,
+      );
+
+      // Create an app with a plugin and Swift Package Manager integration.
+      final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
+        flutterBin,
+        workingDirectoryPath,
+        iosLanguage: 'swift',
+        platform: 'ios',
+        usesSwiftPackageManager: true,
+        options: <String>['--platforms=ios'],
+      );
+
+      final SwiftPackageManagerPlugin integrationTestPlugin =
+        SwiftPackageManagerUtils.integrationTestPlugin('ios');
+
+      SwiftPackageManagerUtils.addDependency(
+        appDirectoryPath: appDirectoryPath,
+        plugin: integrationTestPlugin,
+      );
+
+      // Build the app.
+      // await SwiftPackageManagerUtils.buildApp(
+      //   flutterBin,
+      //   appDirectoryPath,
+      //   options: <String>['ios', '--config-only', '-v'],
+      // );
+
+      // Disable Swift Package Manager and re-build the app.
+      // The build should succeed. The app still has SwiftPM integration,
+      // but the plugin is added using CocoaPods.
+      await SwiftPackageManagerUtils.disableSwiftPackageManager(
+        flutterBin,
+        workingDirectoryPath,
+      );
+
+      await SwiftPackageManagerUtils.cleanApp(flutterBin, appDirectoryPath);
+
+      await SwiftPackageManagerUtils.buildApp(
+        flutterBin,
+        appDirectoryPath,
+        options: <String>['ios', '--debug', '-v'],
+        // expectedLines: SwiftPackageManagerUtils.expectedLines(
+        //   platform: platformName,
+        //   appDirectoryPath: appDirectoryPath,
+        //   cocoaPodsPlugin: integrationTestPlugin,
+        // ),
+        // unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
+        //   platform: platformName,
+        //   appDirectoryPath: appDirectoryPath,
+        //   cocoaPodsPlugin: integrationTestPlugin,
+        // ),
+      );
+
+      // Verify the generated Swift package depends on the plugin.
+      final File generatedManifestFile = fileSystem
+        .directory(appDirectoryPath)
+        .childDirectory('ios')
+        .childDirectory('Flutter')
+        .childDirectory('ephemeral')
+        .childDirectory('Packages')
+        .childDirectory('FlutterGeneratedPluginSwiftPackage')
+        .childFile('Package.swift');
+
+      expect(generatedManifestFile.existsSync(), isTrue);
+
+      final String generatedManifest = generatedManifestFile.readAsStringSync();
+      const String emptyDependencies = 'dependencies: [\n        \n    ],\n';
+
+      expect(generatedManifest.contains('integration_test'), isFalse);
+      expect(generatedManifest.contains(emptyDependencies), isTrue);
+    } finally {
+      await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+      ErrorHandlingFileSystem.deleteIfExists(
+        workingDirectory,
+        recursive: true,
+      );
+    }
+  }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
 }
