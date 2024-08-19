@@ -986,11 +986,6 @@ class FlutterVmService {
       throw VmServiceDisappearedException();
     } finally {
       await isolateEvents.cancel();
-      try {
-        await service.streamCancel(vm_service.EventStreams.kIsolate);
-      } on vm_service.RPCError {
-        // It's ok for cleanup to fail, such as when the service disappears.
-      }
     }
   }
 

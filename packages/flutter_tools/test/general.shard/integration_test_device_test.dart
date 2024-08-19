@@ -97,12 +97,6 @@ void main() {
         },
       ),
       const FakeVmServiceRequest(
-        method: 'streamCancel',
-        args: <String, Object>{
-          'streamId': 'Isolate',
-        },
-      ),
-      const FakeVmServiceRequest(
         method: 'streamListen',
         args: <String, Object>{
           'streamId': 'Extension',
