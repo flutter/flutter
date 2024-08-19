@@ -740,7 +740,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     if (_controller.isAnimating) {
       _controller.stop();
       _controller.reset();
-      _animation?.removeListener(_handlePanAnimation);
+      _animation?.removeListener(_handleInertiaAnimation);
       _animation = null;
     }
     if (_scaleController.isAnimating) {
@@ -857,7 +857,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _rotationStart = null;
     _referenceFocalPoint = null;
 
-    _animation?.removeListener(_handlePanAnimation);
+    _animation?.removeListener(_handleInertiaAnimation);
     _scaleAnimation?.removeListener(_handleScaleAnimation);
     _controller.reset();
     _scaleController.reset();
@@ -897,7 +897,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           curve: Curves.decelerate,
         ));
         _controller.duration = Duration(milliseconds: (tFinal * 1000).round());
-        _animation!.addListener(_handlePanAnimation);
+        _animation!.addListener(_handleInertiaAnimation);
         _controller.forward();
       case _GestureType.scale:
         if (details.scaleVelocity.abs() < 0.1) {
@@ -1017,10 +1017,10 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     widget.onInteractionEnd?.call(ScaleEndDetails());
   }
 
-  void _handlePanAnimation() {
+  void _handleInertiaAnimation() {
     if (!_controller.isAnimating) {
       _currentAxis = null;
-      _animation?.removeListener(_handlePanAnimation);
+      _animation?.removeListener(_handleInertiaAnimation);
       _animation = null;
       _controller.reset();
       return;
