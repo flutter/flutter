@@ -1053,7 +1053,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   }
 
   Size _computeOverallSizeFromChildSize(BoxConstraints constraints) {
-    final double maxChildHeight = _getMaxChildHeight(constraints, double.infinity);
+    final double maxChildHeight = _getMaxChildHeight(constraints, constraints.maxWidth);
     if (isProportionalSegment) {
       return constraints.constrain(Size(_getChildIntrinsicWidths(constraints).sum + totalSeparatorWidth, maxChildHeight));
     }
