@@ -825,6 +825,8 @@ class SpawnPlugin extends PlatformPlugin {
       'APP_NAME': flutterProject.manifest.appName,
       if (testAssetDirectory != null)
         'UNIT_TEST_ASSETS': testAssetDirectory,
+      if (globals.platform.isWindows)
+        'PATH': windowsPathWithNativeAssetsBuildDirectory(flutterProject, globals.platform),
     };
 
     globals.logger.printTrace('Starting flutter_tester process with command=$command, environment=$environment');

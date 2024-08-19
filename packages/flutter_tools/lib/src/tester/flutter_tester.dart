@@ -18,6 +18,8 @@ import '../desktop_device.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
+import '../globals.dart' as globals;
+import '../native_assets.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../version.dart';
@@ -137,6 +139,7 @@ class FlutterTesterDevice extends Device {
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
+    final FlutterProject project = FlutterProject.current();
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
     if (!buildInfo.isDebug) {
       _logger.printError('This device only supports debug mode.');
@@ -152,6 +155,7 @@ class FlutterTesterDevice extends Device {
 
     // Build assets and perform initial compilation.
     await BundleBuilder().build(
+      project: project,
       buildInfo: buildInfo,
       mainPath: mainPath,
       applicationKernelFilePath: applicationKernelFilePath,
@@ -182,6 +186,8 @@ class FlutterTesterDevice extends Device {
       _process = await _processManager.start(command,
         environment: <String, String>{
           'FLUTTER_TEST': 'true',
+          if (globals.platform.isWindows)
+            'PATH': windowsPathWithNativeAssetsBuildDirectory(project, globals.platform),
         },
       );
       if (!debuggingOptions.debuggingEnabled) {

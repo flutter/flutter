@@ -18,6 +18,7 @@ import '../base/platform.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../native_assets.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../vmservice.dart';
@@ -146,6 +147,8 @@ class FlutterTesterTestDevice extends TestDevice {
         'FLUTTER_TEST_IMPELLER': 'true',
       if (testAssetDirectory != null)
         'UNIT_TEST_ASSETS': testAssetDirectory!,
+      if (platform.isWindows && flutterProject != null)
+        'PATH': windowsPathWithNativeAssetsBuildDirectory(flutterProject!, platform),
     };
 
     logger.printTrace('test $id: Starting flutter_tester process with command=$command, environment=$environment');
