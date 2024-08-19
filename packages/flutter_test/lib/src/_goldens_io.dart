@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'matchers.dart';
+library;
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
@@ -54,8 +57,7 @@ import 'test_async_utils.dart';
 ///
 ///   * [GoldenFileComparator], the abstract class that [LocalFileComparator]
 ///   implements.
-///   * [matchesGoldenFile], the function from [flutter_test] that invokes the
-///    comparator.
+///   * [matchesGoldenFile], the function that invokes the comparator.
 class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutput {
   /// Creates a new [LocalFileComparator] for the specified [testFile].
   ///

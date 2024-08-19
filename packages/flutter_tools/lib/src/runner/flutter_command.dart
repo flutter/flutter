@@ -489,7 +489,7 @@ abstract class FlutterCommand extends Command<void> {
       defaultsTo: true,
       help: 'Enable (or disable, with "--no-$kEnableDevTools") the launching of the '
             'Flutter DevTools debugger and profiler. '
-            'If specified, "--$kDevToolsServerAddress" is ignored.'
+            'If "--no-$kEnableDevTools" is specified, "--$kDevToolsServerAddress" is ignored.'
     );
     argParser.addOption(
       kDevToolsServerAddress,
@@ -707,11 +707,28 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  // This option is deprecated and is no longer publicly supported, and
+  // therefore is hidden.
+  //
+  // The option still exists for internal testing, and to give existing users
+  // time to migrate off the HTML renderer, but it is no longer advertised as a
+  // supported mode.
+  //
+  // See also:
+  //   * https://github.com/flutter/flutter/issues/151786
+  //   * https://github.com/flutter/flutter/issues/145954
   void usesWebRendererOption() {
     argParser.addOption(
+      hide: true,
       FlutterOptions.kWebRendererFlag,
       allowed: WebRendererMode.values.map((WebRendererMode e) => e.name),
-      help: 'The renderer implementation to use when building for the web.',
+      help: 'This option is deprecated and will be removed in a future Flutter '
+            'release.\n'
+            'Selects the renderer implementation to use when building for the '
+            'web. The supported renderers are "canvaskit" when compiling to '
+            'JavaScript, and "skwasm" when compiling to WebAssembly. Other '
+            'renderer and compiler combinations are no longer supported. '
+            'Consider migrating your app to a supported renderer.',
       allowedHelp: CliEnum.allowedHelp(WebRendererMode.values)
     );
   }
@@ -1163,13 +1180,22 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
+  /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
+  FlutterProject get project => FlutterProject.current();
+
   /// Compute the [BuildInfo] for the current flutter command.
+  ///
   /// Commands that build multiple build modes can pass in a [forcedBuildMode]
   /// to be used instead of parsing flags.
   ///
   /// Throws a [ToolExit] if the current set of options is not compatible with
   /// each other.
-  Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
+  Future<BuildInfo> getBuildInfo({
+    BuildMode? forcedBuildMode,
+    File? forcedTargetFile,
+    bool? forcedUseLocalCanvasKit,
+  }) async {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
 
@@ -1177,10 +1203,12 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg('build-number')
       : null;
 
-    final File packagesFile = globals.fs.file(
-      packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'));
+    final File packageConfigFile = globals.fs.file(packagesPath ?? project.packageConfigFile.path);
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        packagesFile, logger: globals.logger, throwOnError: false);
+      packageConfigFile,
+      logger: globals.logger,
+      throwOnError: false,
+    );
 
     final List<String> experiments =
       argParser.options.containsKey(FlutterOptions.kEnableExperiment)
@@ -1281,12 +1309,17 @@ abstract class FlutterCommand extends Command<void> {
 
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
+
     final bool useCdn = !argParser.options.containsKey(FlutterOptions.kWebResourcesCdnFlag)
       || boolArg(FlutterOptions.kWebResourcesCdnFlag);
-    final bool useLocalWebSdk = argParser.options.containsKey(FlutterGlobalOptions.kLocalWebSDKOption)
-      && stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null;
-    final bool useLocalCanvasKit = !useCdn || useLocalWebSdk;
-    final String? defaultFlavor = FlutterProject.current().manifest.defaultFlavor;
+    bool useLocalWebSdk = false;
+    if (globalResults?.wasParsed(FlutterGlobalOptions.kLocalWebSDKOption) ?? false) {
+      useLocalWebSdk = stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null;
+    }
+    final bool useLocalCanvasKit = forcedUseLocalCanvasKit
+      ?? (!useCdn || useLocalWebSdk);
+
+    final String? defaultFlavor = project.manifest.defaultFlavor;
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
     final String? flavor = cliFlavor ?? defaultFlavor;
     if (flavor != null) {
@@ -1326,7 +1359,7 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
-      packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
+      packageConfigPath: packagesPath ?? packageConfigFile.path,
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
@@ -1875,10 +1908,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
   /// If no flag named [name] was added to the [ArgParser], an [ArgumentError]
   /// will be thrown.
   bool boolArg(String name, {bool global = false}) {
-    if (global) {
-      return globalResults![name] as bool;
-    }
-    return argResults![name] as bool;
+    return (global ? globalResults : argResults)!.flag(name);
   }
 
   /// Gets the parsed command-line option named [name] as a `String`.
@@ -1886,18 +1916,12 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
   /// If no option named [name] was added to the [ArgParser], an [ArgumentError]
   /// will be thrown.
   String? stringArg(String name, {bool global = false}) {
-    if (global) {
-      return globalResults![name] as String?;
-    }
-    return argResults![name] as String?;
+    return (global ? globalResults : argResults)!.option(name);
   }
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
   List<String> stringsArg(String name, {bool global = false}) {
-    if (global) {
-      return globalResults![name] as List<String>;
-    }
-    return argResults![name] as List<String>;
+    return (global ? globalResults : argResults)!.multiOption(name);
   }
 }
 

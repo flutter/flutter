@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'context_menu_controller.dart';
+/// @docImport 'form.dart';
+/// @docImport 'restoration.dart';
+/// @docImport 'restoration_properties.dart';
+/// @docImport 'selectable_region.dart';
+/// @docImport 'text_selection_toolbar_layout_delegate.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui hide TextStyle;
@@ -1630,12 +1642,14 @@ class EditableText extends StatefulWidget {
   final Brightness keyboardAppearance;
 
   /// {@template flutter.widgets.editableText.scrollPadding}
-  /// Configures padding to edges surrounding a [Scrollable] when the Textfield scrolls into view.
+  /// Configures the padding for the edges surrounding a [Scrollable] when the
+  /// text field scrolls into view.
   ///
-  /// When this widget receives focus and is not completely visible (for example scrolled partially
-  /// off the screen or overlapped by the keyboard)
-  /// then it will attempt to make itself visible by scrolling a surrounding [Scrollable], if one is present.
-  /// This value controls how far from the edges of a [Scrollable] the TextField will be positioned after the scroll.
+  /// When this widget receives focus and is not completely visible (for example
+  /// scrolled partially off the screen or overlapped by the keyboard), then it
+  /// will attempt to make itself visible by scrolling a surrounding
+  /// [Scrollable], if one is present. This value controls how far from the
+  /// edges of a [Scrollable] the TextField will be positioned after the scroll.
   ///
   /// Defaults to EdgeInsets.all(20.0).
   /// {@endtemplate}
@@ -2214,7 +2228,7 @@ class EditableText extends StatefulWidget {
   }
 }
 
-/// State for a [EditableText].
+/// State for an [EditableText].
 class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate, TextInputClient implements AutofillClient {
   Timer? _cursorTimer;
   AnimationController get _cursorBlinkOpacityController {
@@ -2722,7 +2736,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   static SpellCheckConfiguration _inferSpellCheckConfiguration(SpellCheckConfiguration? configuration) {
     final SpellCheckService? spellCheckService = configuration?.spellCheckService;
     final bool spellCheckAutomaticallyDisabled = configuration == null || configuration == const SpellCheckConfiguration.disabled();
-    final bool spellCheckServiceIsConfigured = spellCheckService != null || spellCheckService == null && WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
+    final bool spellCheckServiceIsConfigured = spellCheckService != null || WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
     if (spellCheckAutomaticallyDisabled || !spellCheckServiceIsConfigured) {
       // Only enable spell check if a non-disabled configuration is provided
       // and if that configuration does not specify a spell check service,
@@ -3799,27 +3813,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
        && notification is! ScrollEndNotification) {
       return;
     }
-    if (notification is ScrollStartNotification
-       && _dataWhenToolbarShowScheduled != null) {
-      return;
+    switch (notification) {
+      case ScrollStartNotification() when _dataWhenToolbarShowScheduled != null:
+      case ScrollEndNotification() when _dataWhenToolbarShowScheduled == null:
+        break;
+      case ScrollEndNotification() when _dataWhenToolbarShowScheduled!.value != _value:
+        _dataWhenToolbarShowScheduled = null;
+        _disposeScrollNotificationObserver();
+      case ScrollNotification(:final BuildContext? context)
+      when !_isInternalScrollableNotification(context) && _scrollableNotificationIsFromSameSubtree(context):
+        _handleContextMenuOnScroll(notification);
     }
-    if (notification is ScrollEndNotification
-       && _dataWhenToolbarShowScheduled == null) {
-      return;
-    }
-    if (notification is ScrollEndNotification
-       && _dataWhenToolbarShowScheduled!.value != _value) {
-      _dataWhenToolbarShowScheduled = null;
-      _disposeScrollNotificationObserver();
-      return;
-    }
-    if (_isInternalScrollableNotification(notification.context)) {
-      return;
-    }
-    if (!_scrollableNotificationIsFromSameSubtree(notification.context)) {
-      return;
-    }
-    _handleContextMenuOnScroll(notification);
   }
 
   Rect _calculateDeviceRect() {
@@ -5094,7 +5098,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
 
-  /// The default behavior used if [onTapOutside] is null.
+  /// The default behavior used if [EditableText.onTapOutside] is null.
   ///
   /// The `event` argument is the [PointerDownEvent] that caused the notification.
   void _defaultOnTapOutside(PointerDownEvent event) {
@@ -5746,7 +5750,7 @@ class _ScribblePlaceholder extends WidgetSpan {
 /// See also:
 ///
 ///  * [String.runes], which deals with code points like this class.
-///  * [String.characters], which deals with graphemes.
+///  * [Characters], which deals with graphemes.
 ///  * [CharacterBoundary], which is a [TextBoundary] like this class, but whose
 ///    boundaries are graphemes instead of code points.
 class _CodePointBoundary extends TextBoundary {

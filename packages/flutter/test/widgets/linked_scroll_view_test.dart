@@ -190,12 +190,8 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
   }
 
   void unlink(LinkedScrollActivity activity) {
-    if (_beforeActivities != null) {
-      _beforeActivities!.remove(activity);
-    }
-    if (_afterActivities != null) {
-      _afterActivities!.remove(activity);
-    }
+    _beforeActivities?.remove(activity);
+    _afterActivities?.remove(activity);
   }
 
   @override

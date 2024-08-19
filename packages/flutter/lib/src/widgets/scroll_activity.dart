@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/rendering.dart';
+///
+/// @docImport 'scroll_controller.dart';
+/// @docImport 'scroll_physics.dart';
+/// @docImport 'scroll_position.dart';
+/// @docImport 'scroll_position_with_single_context.dart';
+/// @docImport 'scrollable.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 

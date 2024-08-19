@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter/rendering.dart';
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'pointer_signal_resolver.dart';
+library;
+
 import 'dart:ui' show Offset, PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
@@ -1841,9 +1849,7 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
 
   @override
   void respond({required bool allowPlatformDefault}) {
-    if (_onRespond != null) {
-      _onRespond!(allowPlatformDefault: allowPlatformDefault);
-    }
+    _onRespond?.call(allowPlatformDefault: allowPlatformDefault);
   }
 }
 

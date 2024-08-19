@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'text_theme.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -159,6 +162,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.selectedTrailingIcon,
     this.enableFilter = false,
     this.enableSearch = true,
+    this.keyboardType,
     this.textStyle,
     this.textAlign = TextAlign.start,
     this.inputDecorationTheme,
@@ -171,6 +175,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.expandedInsets,
     this.filterCallback,
     this.searchCallback,
+    this.alignmentOffset,
     required this.dropdownMenuEntries,
     this.inputFormatters,
   }) : assert(filterCallback == null || enableFilter);
@@ -265,6 +270,11 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// Defaults to true as the search function could be commonly used.
   final bool enableSearch;
+
+  /// The type of keyboard to use for editing the text.
+  ///
+  /// Defaults to [TextInputType.text].
+  final TextInputType? keyboardType;
 
   /// The text style for the [TextField] of the [DropdownMenu];
   ///
@@ -387,7 +397,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// properties are used.
   ///
   /// Defaults to null.
-  final EdgeInsets? expandedInsets;
+  final EdgeInsetsGeometry? expandedInsets;
 
   /// When [DropdownMenu.enableFilter] is true, this callback is used to
   /// compute the list of filtered items.
@@ -466,6 +476,9 @@ class DropdownMenu<T> extends StatefulWidget {
   ///    and notifies its listeners on [TextEditingValue] changes.
   final List<TextInputFormatter>? inputFormatters;
 
+  /// {@macro flutter.material.MenuAnchor.alignmentOffset}
+  final Offset? alignmentOffset;
+
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
 }
@@ -475,7 +488,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   final GlobalKey _leadingKey = GlobalKey();
   late List<GlobalKey> buttonItemKeys;
   final MenuController _controller = MenuController();
-  late bool _enableFilter;
+  bool _enableFilter = false;
   late List<DropdownMenuEntry<T>> filteredEntries;
   List<Widget>? _initialMenu;
   int? currentHighlight;
@@ -491,7 +504,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     } else {
       _localTextEditingController = TextEditingController();
     }
-    _enableFilter = widget.enableFilter;
     filteredEntries = widget.dropdownMenuEntries;
     buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
     _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
@@ -523,6 +535,11 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         _localTextEditingController?.dispose();
       }
       _localTextEditingController = widget.controller ?? TextEditingController();
+    }
+    if (oldWidget.enableFilter != widget.enableFilter) {
+      if (!widget.enableFilter) {
+        _enableFilter = false;
+      }
     }
     if (oldWidget.enableSearch != widget.enableSearch) {
       if (!widget.enableSearch) {
@@ -663,6 +680,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               );
               currentHighlight = widget.enableSearch ? i : null;
               widget.onSelected?.call(entry.value);
+              _enableFilter = false;
             }
           : null,
         requestFocusOnHover: false,
@@ -735,11 +753,13 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     if (_enableFilter) {
       filteredEntries = widget.filterCallback?.call(filteredEntries, _localTextEditingController!.text)
         ?? filter(widget.dropdownMenuEntries, _localTextEditingController!);
+    } else {
+      filteredEntries = widget.dropdownMenuEntries;
     }
 
     if (widget.enableSearch) {
       if (widget.searchCallback != null) {
-        currentHighlight = widget.searchCallback!.call(filteredEntries, _localTextEditingController!.text);
+        currentHighlight = widget.searchCallback!(filteredEntries, _localTextEditingController!.text);
       } else {
         currentHighlight = search(filteredEntries, _localTextEditingController!);
       }
@@ -775,6 +795,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     Widget menuAnchor = MenuAnchor(
       style: effectiveMenuStyle,
+      alignmentOffset: widget.alignmentOffset,
       controller: _controller,
       menuChildren: menu,
       crossAxisUnconstrained: false,
@@ -804,6 +825,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           focusNode: widget.focusNode,
           canRequestFocus: canRequestFocus(),
           enableInteractiveSelection: canRequestFocus(),
+          keyboardType: widget.keyboardType,
           textAlign: widget.textAlign,
           textAlignVertical: TextAlignVertical.center,
           style: effectiveTextStyle,
@@ -869,9 +891,20 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       },
     );
 
-    if (widget.expandedInsets case final EdgeInsets padding) {
+    if (widget.expandedInsets case final EdgeInsetsGeometry padding) {
       menuAnchor = Padding(
-        padding: padding.copyWith(top: 0.0, bottom: 0.0),
+        // Clamp the top and bottom padding to 0.
+        padding: padding.clamp(
+          EdgeInsets.zero,
+          const EdgeInsets.only(
+            left: double.infinity,
+            right: double.infinity,
+          ).add(const EdgeInsetsDirectional.only(
+              end: double.infinity,
+              start: double.infinity,
+            ),
+          ),
+        ),
         child: Align(
           alignment: AlignmentDirectional.topStart,
           child: menuAnchor,
