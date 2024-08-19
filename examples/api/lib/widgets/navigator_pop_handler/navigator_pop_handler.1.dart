@@ -69,9 +69,9 @@ class _BottomNavPageState extends State<_BottomNavPage> with RestorationMixin {
   final GlobalKey _tabOneKey = GlobalKey();
   final GlobalKey _tabTwoKey = GlobalKey();
 
-  List<_TabPage> _tabHomePages = <_TabPage>[_TabPage.home];
-  List<_TabPage> _tabOnePages = <_TabPage>[_TabPage.home];
-  List<_TabPage> _tabTwoPages = <_TabPage>[_TabPage.home];
+  final _RestorableTabPageList _restorableTabHomePages = _RestorableTabPageList();
+  final _RestorableTabPageList _restorableTabOnePages = _RestorableTabPageList();
+  final _RestorableTabPageList _restorableTabTwoPages = _RestorableTabPageList();
 
   BottomNavigationBarItem _itemForPage(_Tab page) {
     switch (page) {
@@ -100,10 +100,10 @@ class _BottomNavPageState extends State<_BottomNavPage> with RestorationMixin {
           key: _tabHomeKey,
           title: 'Home Tab',
           color: Colors.grey,
-          pages: _tabHomePages,
+          pages: _restorableTabHomePages.value,
           onChangedPages: (List<_TabPage> pages) {
             setState(() {
-              _tabHomePages = pages;
+              _restorableTabHomePages.value = pages;
             });
           },
         );
@@ -112,10 +112,10 @@ class _BottomNavPageState extends State<_BottomNavPage> with RestorationMixin {
           key: _tabOneKey,
           title: 'Tab One',
           color: Colors.amber,
-          pages: _tabOnePages,
+          pages: _restorableTabOnePages.value,
           onChangedPages: (List<_TabPage> pages) {
             setState(() {
-              _tabOnePages = pages;
+              _restorableTabOnePages.value = pages;
             });
           },
         );
@@ -124,10 +124,10 @@ class _BottomNavPageState extends State<_BottomNavPage> with RestorationMixin {
           key: _tabTwoKey,
           title: 'Tab Two',
           color: Colors.blueGrey,
-          pages: _tabTwoPages,
+          pages: _restorableTabTwoPages.value,
           onChangedPages: (List<_TabPage> pages) {
             setState(() {
-              _tabTwoPages = pages;
+              _restorableTabTwoPages.value = pages;
             });
           },
         );
@@ -148,6 +148,9 @@ class _BottomNavPageState extends State<_BottomNavPage> with RestorationMixin {
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_restorableTab, 'tab');
+    registerForRestoration(_restorableTabHomePages, 'tab-home-pages');
+    registerForRestoration(_restorableTabOnePages, 'tab-one-pages');
+    registerForRestoration(_restorableTabTwoPages, 'tab-two-pages');
   }
 
   /// End RestorationMixin.
@@ -155,6 +158,9 @@ class _BottomNavPageState extends State<_BottomNavPage> with RestorationMixin {
   @override
   void dispose() {
     _restorableTab.dispose();
+    _restorableTabHomePages.dispose();
+    _restorableTabOnePages.dispose();
+    _restorableTabTwoPages.dispose();
     super.dispose();
   }
 
@@ -205,6 +211,17 @@ class _BottomNavTabState extends State<_BottomNavTab> {
         key: _navigatorKey,
         restorationScopeId: 'nested-navigator-${widget.title}',
         onDidRemovePage: (Page<Object?> page) {
+          // TODO(justinmc): If page isnt a tabpage, return early.
+          // After this all works, write a test.
+          final bool isTabPage = _TabPage.values.t((_TabPage tabPage) {
+            return page.name == tabPage.name;
+          },
+            orElse: () => null,
+          );
+          if (tabPage == null) {
+            return;
+          }
+          print('justin onDidRemovePage $page');
           widget.onChangedPages(<_TabPage>[
             ...widget.pages,
           ]..removeLast());
@@ -213,6 +230,7 @@ class _BottomNavTabState extends State<_BottomNavTab> {
           switch (page) {
             case _TabPage.home:
               return MaterialPage<void>(
+                restorationId: _TabPage.home.toString(),
                 child: _LinksPage(
                   title: 'Bottom nav - tab ${widget.title} - route $page',
                   backgroundColor: widget.color,
@@ -231,6 +249,7 @@ class _BottomNavTabState extends State<_BottomNavTab> {
               );
             case _TabPage.one:
               return MaterialPage<void>(
+                restorationId: _TabPage.one.toString(),
                 child: _LinksPage(
                   backgroundColor: widget.color,
                   title: 'Bottom nav - tab ${widget.title} - route $page',
@@ -306,7 +325,6 @@ class _RestorableTab extends RestorableValue<_Tab> {
 
   @override
   void didUpdateValue(_Tab? oldValue) {
-    print('justin didUpdateValue $oldValue, $value');
     if (oldValue == null || oldValue != value) {
       notifyListeners();
     }
@@ -314,10 +332,8 @@ class _RestorableTab extends RestorableValue<_Tab> {
 
   @override
   _Tab fromPrimitives(Object? data) {
-    print('justin fromPrimitive $data');
     if (data != null) {
       final String tabString = data as String;
-      print('justin fromPrimitive, tabString $tabString');
       return _Tab.values.firstWhere((_Tab tab) => tabString == tab.name);
     }
     return _Tab.home;
@@ -326,5 +342,36 @@ class _RestorableTab extends RestorableValue<_Tab> {
   @override
   Object toPrimitives() {
     return value.name;
+  }
+}
+
+class _RestorableTabPageList extends RestorableValue<List<_TabPage>> {
+  @override
+  List<_TabPage> createDefaultValue() => <_TabPage>[_TabPage.home];
+
+  @override
+  void didUpdateValue(List<_TabPage>? oldValue) {
+    if (oldValue == null || oldValue != value) {
+      notifyListeners();
+    }
+  }
+
+  @override
+  List<_TabPage> fromPrimitives(Object? data) {
+    if (data != null) {
+      final String dataString = data as String;
+      final List<String> listOfStrings = dataString.split(',');
+      return listOfStrings.map((String tabPageName) {
+        return _TabPage.values.firstWhere((_TabPage tabPage) => tabPageName == tabPage.name);
+      }).toList();
+    }
+    return <_TabPage>[];
+  }
+
+  @override
+  Object toPrimitives() {
+    return value
+        .map((_TabPage tabPage) => tabPage.name)
+        .join(',');
   }
 }
