@@ -3987,7 +3987,7 @@ void main() {
         ];
       });
       await tester.pumpAndSettle();
-      expect(tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey)).localToGlobal(Offset.zero), const Offset(12.0, 8.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey)).localToGlobal(Offset.zero), const Offset(8.0, 8.0));
 
       // two destinations and leading widget
       stateSetter(() {
@@ -4005,7 +4005,7 @@ void main() {
         ];
       });
       await tester.pumpAndSettle();
-      expect(tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey)).localToGlobal(Offset.zero), const Offset(12.0, 8.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey)).localToGlobal(Offset.zero), const Offset(8.0, 8.0));
 
       // empty destinations and trailing widget
       stateSetter(() {
@@ -4030,7 +4030,7 @@ void main() {
         ];
       });
       await tester.pumpAndSettle();
-      expect(tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey)).localToGlobal(Offset.zero), const Offset(12.0, 52.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey)).localToGlobal(Offset.zero), const Offset(8.0, 80.0));
 
       // two destinations and trailing widget
       stateSetter(() {
@@ -4048,7 +4048,7 @@ void main() {
         ];
       });
       await tester.pumpAndSettle();
-      expect(tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey)).localToGlobal(Offset.zero), const Offset(12.0, 96.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey)).localToGlobal(Offset.zero), const Offset(8.0, 152.0));
     });
 
     testWidgets('Change destinations and selectedIndex', (WidgetTester tester) async {
