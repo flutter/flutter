@@ -11,6 +11,7 @@
       ],
       "gclient_variables": {
         "download_android_deps": false,
+        "download_jdk": false,
         "download_emsdk": true
       },
       "gn": [
@@ -342,7 +343,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -378,7 +380,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -414,7 +417,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -450,7 +454,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -486,7 +491,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -522,7 +528,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -558,7 +565,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -594,7 +602,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -630,7 +639,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -666,7 +676,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -702,7 +713,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -738,7 +750,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -774,7 +787,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -810,7 +824,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -846,7 +861,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -882,7 +898,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -918,7 +935,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -954,7 +972,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -990,7 +1009,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1026,7 +1046,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1062,7 +1083,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1098,7 +1120,8 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1135,7 +1158,8 @@
         "cpu=arm64"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1168,7 +1192,8 @@
         "cpu=arm64"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1201,7 +1226,8 @@
         "cpu=arm64"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1234,7 +1260,8 @@
         "cpu=arm64"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1267,7 +1294,8 @@
         "cpu=arm64"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1300,7 +1328,8 @@
         "cpu=arm64"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1332,7 +1361,8 @@
         "os=Windows"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1368,7 +1398,8 @@
         "os=Windows"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1404,7 +1435,8 @@
         "os=Windows"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1440,7 +1472,8 @@
         "os=Windows"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1476,7 +1509,8 @@
         "os=Windows"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1512,7 +1546,8 @@
         "os=Windows"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1548,7 +1583,8 @@
         "os=Windows"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1584,7 +1620,8 @@
         "os=Windows"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1620,7 +1657,8 @@
         "os=Windows"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1656,7 +1694,8 @@
         "os=Windows"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1692,7 +1731,8 @@
         "os=Windows"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1728,7 +1768,8 @@
         "os=Windows"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1764,7 +1805,8 @@
         "os=Windows"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1800,7 +1842,8 @@
         "os=Windows"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1836,7 +1879,8 @@
         "os=Windows"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
@@ -1872,7 +1916,8 @@
         "os=Windows"
       ],
       "gclient_variables": {
-        "download_android_deps": false
+        "download_android_deps": false,
+        "download_jdk": false
       },
       "dependencies": [
         "web_tests/artifacts",
