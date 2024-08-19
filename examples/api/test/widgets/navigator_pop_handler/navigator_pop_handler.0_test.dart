@@ -45,4 +45,34 @@ void main() {
     expect(find.text('Nested Navigators Page One'), findsNothing);
     expect(find.text('Nested Navigators Page Two'), findsNothing);
   });
+
+  testWidgets('restoring the app preserves the navigation stack', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.NavigatorPopHandlerApp(),
+    );
+
+    expect(find.text('Nested Navigators Example'), findsOneWidget);
+    expect(find.text('Nested Navigators Page One'), findsNothing);
+    expect(find.text('Nested Navigators Page Two'), findsNothing);
+
+    await tester.tap(find.text('Nested Navigator route'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nested Navigators Example'), findsNothing);
+    expect(find.text('Nested Navigators Page One'), findsOneWidget);
+    expect(find.text('Nested Navigators Page Two'), findsNothing);
+
+    await tester.tap(find.text('Go to another route in this nested Navigator'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nested Navigators Example'), findsNothing);
+    expect(find.text('Nested Navigators Page One'), findsNothing);
+    expect(find.text('Nested Navigators Page Two'), findsOneWidget);
+
+    await tester.restartAndRestore();
+
+    expect(find.text('Nested Navigators Example'), findsNothing);
+    expect(find.text('Nested Navigators Page One'), findsNothing);
+    expect(find.text('Nested Navigators Page Two'), findsOneWidget);
+  });
 }
