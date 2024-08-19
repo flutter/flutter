@@ -847,5 +847,48 @@ TEST_P(AiksTest, CanDrawScaledPointsLargeScaleSmallRadius) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, TransparentShadowProducesCorrectColor) {
+  DisplayListBuilder builder;
+  builder.Save();
+  builder.Scale(1.618, 1.618);
+  SkPath path = SkPath{}.addRect(SkRect::MakeXYWH(0, 0, 200, 100));
+
+  builder.DrawShadow(path, flutter::DlColor::kTransparent(), 15, false, 1);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/130613
+TEST_P(AiksTest, DispatcherDoesNotCullPerspectiveTransformedChildDisplayLists) {
+  flutter::DisplayListBuilder sub_builder(true);
+  sub_builder.DrawRect(SkRect::MakeXYWH(0, 0, 50, 50),
+                       flutter::DlPaint(flutter::DlColor::kRed()));
+  auto display_list = sub_builder.Build();
+
+  AiksContext context(GetContext(), nullptr);
+  RenderTarget render_target =
+      context.GetContentContext().GetRenderTargetCache()->CreateOffscreen(
+          *context.GetContext(), {2400, 1800}, 1);
+
+  DisplayListBuilder builder;
+
+  builder.Scale(2.0, 2.0);
+  builder.Translate(-93.0, 0.0);
+
+  // clang-format off
+  builder.TransformFullPerspective(
+     0.8, -0.2, -0.1, -0.0,
+     0.0,  1.0,  0.0,  0.0,
+     1.4,  1.3,  1.0,  0.0,
+    63.2, 65.3, 48.6,  1.1
+  );
+  // clang-format on
+  builder.Translate(35.0, 75.0);
+  builder.DrawDisplayList(display_list, 1.0f);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller
