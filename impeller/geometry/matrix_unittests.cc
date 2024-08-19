@@ -161,6 +161,16 @@ TEST(MatrixTest, TransformHomogenous) {
             Vector3(32.0f, 33.0f, 41.0f));
 }
 
+TEST(MatrixTest, GetMaxBasisXYNegativeScale) {
+  Matrix m = Matrix::MakeScale({-2, 1, 1});
+
+  EXPECT_EQ(m.GetMaxBasisLengthXY(), 2);
+
+  m = Matrix::MakeScale({1, -3, 1});
+
+  EXPECT_EQ(m.GetMaxBasisLengthXY(), 3);
+}
+
 // Verifies a translate scale matrix doesn't need to compute sqrt(pow(scale, 2))
 TEST(MatrixTest, GetMaxBasisXYWithLargeAndSmallScalingFactor) {
   Matrix m = Matrix::MakeScale({2.625e+20, 2.625e+20, 1});
