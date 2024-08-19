@@ -5957,6 +5957,10 @@ class RichText extends MultiChildRenderObjectWidget {
 /// expected to call [dart:ui.Image.dispose] on the [image] once the [RawImage]
 /// is no longer buildable.
 ///
+/// The `scale` argument specifies the linear scale factor for drawing this
+/// image at its intended size and applies to both the width and the height.
+/// {@macro flutter.painting.imageInfo.scale}
+///
 /// This widget is rarely used directly. Instead, consider using [Image].
 class RawImage extends LeafRenderObjectWidget {
   /// Creates a widget that displays an image.
