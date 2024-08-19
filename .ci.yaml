@@ -150,7 +150,8 @@ targets:
       gclient_variables: >-
         {
           "download_emsdk": "true",
-          "download_android_deps": "true"
+          "download_android_deps": "true",
+          "download_jdk": "true"
         }
     timeout: 60
 
@@ -168,7 +169,8 @@ targets:
         ]
       gclient_variables: >-
         {
-          "download_android_deps": "true"
+          "download_android_deps": "true",
+          "download_jdk": "true"
         }
     timeout: 60
 
@@ -191,7 +193,8 @@ targets:
         ]
       gclient_variables: >-
         {
-          "download_android_deps": "true"
+          "download_android_deps": "true",
+          "download_jdk": "true"
         }
     timeout: 60
 
