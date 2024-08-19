@@ -82,13 +82,7 @@ void main() {
       final String hotReload = buildMode == 'debug' ? ' hot reload and hot restart' : '';
       testWithoutContext('flutter run$hotReload with native assets $device $buildMode', () async {
         await inTempDir((Directory tempDirectory) async {
-          final Directory packageDirectory = await createTestProject(
-            packageName,
-            tempDirectory,
-            // TODO(blaugold): Enable when loading dynamic libraries is possible on
-            // Windows with flutter-tester device. https://github.com/dart-lang/native/issues/190
-            dynamicallyLinkedLibrary: !(Platform.isWindows && device == 'flutter-tester'),
-          );
+          final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
           final Directory exampleDirectory = packageDirectory.childDirectory('example');
 
           final ProcessTestResult result = await runFlutter(
@@ -171,13 +165,7 @@ void main() {
 
   testWithoutContext('flutter test with native assets', () async {
     await inTempDir((Directory tempDirectory) async {
-      final Directory packageDirectory = await createTestProject(
-        packageName,
-        tempDirectory,
-        // TODO(blaugold): Enable when loading dynamic libraries is possible on
-        // Windows with flutter-tester device. https://github.com/dart-lang/native/issues/190
-        dynamicallyLinkedLibrary: !Platform.isWindows,
-      );
+      final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
 
       final ProcessTestResult result = await runFlutter(
         <String>[
@@ -552,11 +540,7 @@ extension on String {
   }
 }
 
-Future<Directory> createTestProject(
-  String packageName,
-  Directory tempDirectory, {
-  bool dynamicallyLinkedLibrary = true,
-}) async {
+Future<Directory> createTestProject(String packageName, Directory tempDirectory) async {
   final ProcessResult result = processManager.runSync(
     <String>[
       flutterBin,
@@ -587,10 +571,7 @@ Future<Directory> createTestProject(
       packageDirectory.childDirectory('example').childFile('pubspec.yaml'));
 
   await addLinkHookDependency(packageDirectory);
-
-  if (dynamicallyLinkedLibrary) {
-    await addDynamicallyLinkedNativeLibrary(packageDirectory);
-  }
+  await addDynamicallyLinkedNativeLibrary(packageDirectory);
 
   final ProcessResult result2 = await processManager.run(
     <String>[
