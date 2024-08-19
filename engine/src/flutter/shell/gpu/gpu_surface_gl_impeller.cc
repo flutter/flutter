@@ -98,7 +98,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
       impeller::ISize{size.width(), size.height()}  // fbo_size
   );
 
-  const impeller::RenderTarget& render_target =
+  impeller::RenderTarget render_target =
       surface->GetTargetRenderPassDescriptor();
 
   SurfaceFrame::EncodeCallback encode_calback =
@@ -117,13 +117,35 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
 
     auto cull_rect = render_target.GetRenderTargetSize();
     impeller::Rect dl_cull_rect = impeller::Rect::MakeSize(cull_rect);
+    const bool reset_host_buffer = surface_frame.submit_info().frame_boundary;
+
+#if EXPERIMENTAL_CANVAS
+    auto skia_cull_rect = SkIRect::MakeWH(cull_rect.width, cull_rect.height);
+    impeller::TextFrameDispatcher collector(aiks_context->GetContentContext(),
+                                            impeller::Matrix());
+    display_list->Dispatch(collector, skia_cull_rect);
+
+    impeller::ExperimentalDlDispatcher impeller_dispatcher(
+        aiks_context->GetContentContext(), render_target,
+        display_list->root_has_backdrop_filter(),
+        display_list->max_root_blend_mode(),
+        impeller::IRect::MakeSize(cull_rect));
+    display_list->Dispatch(impeller_dispatcher, skia_cull_rect);
+    impeller_dispatcher.FinishRecording();
+    aiks_context->GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
+    if (reset_host_buffer) {
+      aiks_context->GetContentContext().GetTransientsBuffer().Reset();
+    }
+    return true;
+#else
     impeller::DlDispatcher impeller_dispatcher(dl_cull_rect);
     display_list->Dispatch(impeller_dispatcher,
                            SkIRect::MakeWH(cull_rect.width, cull_rect.height));
     auto picture = impeller_dispatcher.EndRecordingAsPicture();
-    const bool reset_host_buffer = surface_frame.submit_info().frame_boundary;
 
     return aiks_context->Render(picture, render_target, reset_host_buffer);
+
+#endif  // EXPERIMENTAL_CANVAS
   };
 
   return std::make_unique<SurfaceFrame>(

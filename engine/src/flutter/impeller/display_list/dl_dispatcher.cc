@@ -1220,6 +1220,7 @@ Picture DlDispatcherBase::EndRecordingAsPicture() {
 
 /// Subclasses
 
+#if !EXPERIMENTAL_CANVAS
 DlDispatcher::DlDispatcher() = default;
 
 DlDispatcher::DlDispatcher(IRect cull_rect) : canvas_(cull_rect) {}
@@ -1229,6 +1230,7 @@ DlDispatcher::DlDispatcher(Rect cull_rect) : canvas_(cull_rect) {}
 Canvas& DlDispatcher::GetCanvas() {
   return canvas_;
 }
+#endif  // !EXPERIMENTAL_CANVAS
 
 static bool RequiresReadbackForBlends(
     const ContentContext& renderer,
@@ -1413,6 +1415,53 @@ void TextFrameDispatcher::setStrokeJoin(flutter::DlStrokeJoin join) {
       paint_.stroke_join = Join::kBevel;
       break;
   }
+}
+
+std::shared_ptr<Texture> DisplayListToTexture(
+    const sk_sp<flutter::DisplayList>& display_list,
+    ISize size,
+    AiksContext& context) {
+  // Do not use the render target cache as the lifecycle of this texture
+  // will outlive a particular frame.
+  impeller::RenderTargetAllocator render_target_allocator =
+      impeller::RenderTargetAllocator(
+          context.GetContext()->GetResourceAllocator());
+  impeller::RenderTarget target;
+  if (context.GetContext()->GetCapabilities()->SupportsOffscreenMSAA()) {
+    target = render_target_allocator.CreateOffscreenMSAA(
+        *context.GetContext(),  // context
+        size,                   // size
+        /*mip_count=*/1,
+        "Picture Snapshot MSAA",  // label
+        impeller::RenderTarget::
+            kDefaultColorAttachmentConfigMSAA  // color_attachment_config
+    );
+  } else {
+    target = render_target_allocator.CreateOffscreen(
+        *context.GetContext(),  // context
+        size,                   // size
+        /*mip_count=*/1,
+        "Picture Snapshot",  // label
+        impeller::RenderTarget::
+            kDefaultColorAttachmentConfig  // color_attachment_config
+    );
+  }
+
+  SkIRect sk_cull_rect = SkIRect::MakeWH(size.width, size.height);
+  impeller::TextFrameDispatcher collector(context.GetContentContext(),
+                                          impeller::Matrix());
+  display_list->Dispatch(collector, sk_cull_rect);
+  impeller::ExperimentalDlDispatcher impeller_dispatcher(
+      context.GetContentContext(), target,
+      display_list->root_has_backdrop_filter(),
+      display_list->max_root_blend_mode(), impeller::IRect::MakeSize(size));
+  display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
+  impeller_dispatcher.FinishRecording();
+
+  context.GetContentContext().GetTransientsBuffer().Reset();
+  context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
+
+  return target.GetRenderTargetTexture();
 }
 
 }  // namespace impeller

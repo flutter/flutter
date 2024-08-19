@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"
-#include "impeller/aiks/canvas.h"
-#include "impeller/aiks/image_filter.h"
+#include "impeller/aiks/aiks_context.h"
+#include "impeller/aiks/aiks_unittests.h"
+#include "impeller/aiks/experimental_canvas.h"
 #include "impeller/geometry/path_builder.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
@@ -13,252 +14,285 @@
 namespace impeller {
 namespace testing {
 
-using AiksCanvasTest = ::testing::Test;
+std::unique_ptr<ExperimentalCanvas> CreateTestCanvas(
+    ContentContext& context,
+    std::optional<Rect> cull_rect = std::nullopt) {
+  RenderTarget render_target = context.GetRenderTargetCache()->CreateOffscreen(
+      *context.GetContext(), {1, 1}, 1);
 
-TEST(AiksCanvasTest, EmptyCullRect) {
-  Canvas canvas;
-
-  ASSERT_FALSE(canvas.GetCurrentLocalCullingBounds().has_value());
+  if (cull_rect.has_value()) {
+    return std::make_unique<ExperimentalCanvas>(context, render_target, false,
+                                                cull_rect.value());
+  }
+  return std::make_unique<ExperimentalCanvas>(context, render_target, false);
 }
 
-TEST(AiksCanvasTest, InitialCullRect) {
+TEST_P(AiksTest, EmptyCullRect) {
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context);
+
+  ASSERT_FALSE(canvas->GetCurrentLocalCullingBounds().has_value());
+}
+
+TEST_P(AiksTest, InitialCullRect) {
   Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
 
-  Canvas canvas(initial_cull);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), initial_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), initial_cull);
 }
 
-TEST(AiksCanvasTest, TranslatedCullRect) {
+TEST_P(AiksTest, TranslatedCullRect) {
   Rect initial_cull = Rect::MakeXYWH(5, 5, 10, 10);
   Rect translated_cull = Rect::MakeXYWH(0, 0, 10, 10);
 
-  Canvas canvas(initial_cull);
-  canvas.Translate(Vector3(5, 5, 0));
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->Translate(Vector3(5, 5, 0));
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), translated_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), translated_cull);
 }
 
-TEST(AiksCanvasTest, ScaledCullRect) {
+TEST_P(AiksTest, ScaledCullRect) {
   Rect initial_cull = Rect::MakeXYWH(5, 5, 10, 10);
   Rect scaled_cull = Rect::MakeXYWH(10, 10, 20, 20);
 
-  Canvas canvas(initial_cull);
-  canvas.Scale(Vector2(0.5, 0.5));
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->Scale(Vector2(0.5, 0.5));
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), scaled_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), scaled_cull);
 }
 
-TEST(AiksCanvasTest, RectClipIntersectAgainstEmptyCullRect) {
+TEST_P(AiksTest, RectClipIntersectAgainstEmptyCullRect) {
   Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
 
-  Canvas canvas;
-  canvas.ClipRect(rect_clip, Entity::ClipOperation::kIntersect);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context);
+  canvas->ClipRect(rect_clip, Entity::ClipOperation::kIntersect);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), rect_clip);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), rect_clip);
 }
 
-TEST(AiksCanvasTest, RectClipDiffAgainstEmptyCullRect) {
+TEST_P(AiksTest, RectClipDiffAgainstEmptyCullRect) {
   Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
 
-  Canvas canvas;
-  canvas.ClipRect(rect_clip, Entity::ClipOperation::kDifference);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context);
+  canvas->ClipRect(rect_clip, Entity::ClipOperation::kDifference);
 
-  ASSERT_FALSE(canvas.GetCurrentLocalCullingBounds().has_value());
+  ASSERT_FALSE(canvas->GetCurrentLocalCullingBounds().has_value());
 }
 
-TEST(AiksCanvasTest, RectClipIntersectAgainstCullRect) {
+TEST_P(AiksTest, RectClipIntersectAgainstCullRect) {
   Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
   Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
   Rect result_cull = Rect::MakeXYWH(5, 5, 5, 5);
 
-  Canvas canvas(initial_cull);
-  canvas.ClipRect(rect_clip, Entity::ClipOperation::kIntersect);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->ClipRect(rect_clip, Entity::ClipOperation::kIntersect);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), result_cull);
 }
 
-TEST(AiksCanvasTest, RectClipDiffAgainstNonCoveredCullRect) {
+TEST_P(AiksTest, RectClipDiffAgainstNonCoveredCullRect) {
   Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
   Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
   Rect result_cull = Rect::MakeXYWH(0, 0, 10, 10);
 
-  Canvas canvas(initial_cull);
-  canvas.ClipRect(rect_clip, Entity::ClipOperation::kDifference);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->ClipRect(rect_clip, Entity::ClipOperation::kDifference);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), result_cull);
 }
 
-TEST(AiksCanvasTest, RectClipDiffAboveCullRect) {
+TEST_P(AiksTest, RectClipDiffAboveCullRect) {
   Rect initial_cull = Rect::MakeXYWH(5, 5, 10, 10);
   Rect rect_clip = Rect::MakeXYWH(0, 0, 20, 4);
   Rect result_cull = Rect::MakeXYWH(5, 5, 10, 10);
 
-  Canvas canvas(initial_cull);
-  canvas.ClipRect(rect_clip, Entity::ClipOperation::kDifference);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->ClipRect(rect_clip, Entity::ClipOperation::kDifference);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), result_cull);
 }
 
-TEST(AiksCanvasTest, RectClipDiffBelowCullRect) {
+TEST_P(AiksTest, RectClipDiffBelowCullRect) {
   Rect initial_cull = Rect::MakeXYWH(5, 5, 10, 10);
   Rect rect_clip = Rect::MakeXYWH(0, 16, 20, 4);
   Rect result_cull = Rect::MakeXYWH(5, 5, 10, 10);
 
-  Canvas canvas(initial_cull);
-  canvas.ClipRect(rect_clip, Entity::ClipOperation::kDifference);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->ClipRect(rect_clip, Entity::ClipOperation::kDifference);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), result_cull);
 }
 
-TEST(AiksCanvasTest, RectClipDiffLeftOfCullRect) {
+TEST_P(AiksTest, RectClipDiffLeftOfCullRect) {
   Rect initial_cull = Rect::MakeXYWH(5, 5, 10, 10);
   Rect rect_clip = Rect::MakeXYWH(0, 0, 4, 20);
   Rect result_cull = Rect::MakeXYWH(5, 5, 10, 10);
 
-  Canvas canvas(initial_cull);
-  canvas.ClipRect(rect_clip, Entity::ClipOperation::kDifference);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->ClipRect(rect_clip, Entity::ClipOperation::kDifference);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), result_cull);
 }
 
-TEST(AiksCanvasTest, RectClipDiffRightOfCullRect) {
+TEST_P(AiksTest, RectClipDiffRightOfCullRect) {
   Rect initial_cull = Rect::MakeXYWH(5, 5, 10, 10);
   Rect rect_clip = Rect::MakeXYWH(16, 0, 4, 20);
   Rect result_cull = Rect::MakeXYWH(5, 5, 10, 10);
 
-  Canvas canvas(initial_cull);
-  canvas.ClipRect(rect_clip, Entity::ClipOperation::kDifference);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->ClipRect(rect_clip, Entity::ClipOperation::kDifference);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), result_cull);
 }
 
-TEST(AiksCanvasTest, RectClipDiffAgainstVCoveredCullRect) {
+TEST_P(AiksTest, RectClipDiffAgainstVCoveredCullRect) {
   Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
   Rect rect_clip = Rect::MakeXYWH(5, 0, 10, 10);
   Rect result_cull = Rect::MakeXYWH(0, 0, 5, 10);
 
-  Canvas canvas(initial_cull);
-  canvas.ClipRect(rect_clip, Entity::ClipOperation::kDifference);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->ClipRect(rect_clip, Entity::ClipOperation::kDifference);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), result_cull);
 }
 
-TEST(AiksCanvasTest, RectClipDiffAgainstHCoveredCullRect) {
+TEST_P(AiksTest, RectClipDiffAgainstHCoveredCullRect) {
   Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
   Rect rect_clip = Rect::MakeXYWH(0, 5, 10, 10);
   Rect result_cull = Rect::MakeXYWH(0, 0, 10, 5);
 
-  Canvas canvas(initial_cull);
-  canvas.ClipRect(rect_clip, Entity::ClipOperation::kDifference);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->ClipRect(rect_clip, Entity::ClipOperation::kDifference);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), result_cull);
 }
 
-TEST(AiksCanvasTest, RRectClipIntersectAgainstEmptyCullRect) {
+TEST_P(AiksTest, RRectClipIntersectAgainstEmptyCullRect) {
   Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
 
-  Canvas canvas;
-  canvas.ClipRRect(rect_clip, {1, 1}, Entity::ClipOperation::kIntersect);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context);
+  canvas->ClipRRect(rect_clip, {1, 1}, Entity::ClipOperation::kIntersect);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), rect_clip);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), rect_clip);
 }
 
-TEST(AiksCanvasTest, RRectClipDiffAgainstEmptyCullRect) {
+TEST_P(AiksTest, RRectClipDiffAgainstEmptyCullRect) {
   Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
 
-  Canvas canvas;
-  canvas.ClipRRect(rect_clip, {1, 1}, Entity::ClipOperation::kDifference);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context);
+  canvas->ClipRRect(rect_clip, {1, 1}, Entity::ClipOperation::kDifference);
 
-  ASSERT_FALSE(canvas.GetCurrentLocalCullingBounds().has_value());
+  ASSERT_FALSE(canvas->GetCurrentLocalCullingBounds().has_value());
 }
 
-TEST(AiksCanvasTest, RRectClipIntersectAgainstCullRect) {
+TEST_P(AiksTest, RRectClipIntersectAgainstCullRect) {
   Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
   Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
   Rect result_cull = Rect::MakeXYWH(5, 5, 5, 5);
 
-  Canvas canvas(initial_cull);
-  canvas.ClipRRect(rect_clip, {1, 1}, Entity::ClipOperation::kIntersect);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->ClipRRect(rect_clip, {1, 1}, Entity::ClipOperation::kIntersect);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), result_cull);
 }
 
-TEST(AiksCanvasTest, RRectClipDiffAgainstNonCoveredCullRect) {
+TEST_P(AiksTest, RRectClipDiffAgainstNonCoveredCullRect) {
   Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
   Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
   Rect result_cull = Rect::MakeXYWH(0, 0, 10, 10);
 
-  Canvas canvas(initial_cull);
-  canvas.ClipRRect(rect_clip, {1, 1}, Entity::ClipOperation::kDifference);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->ClipRRect(rect_clip, {1, 1}, Entity::ClipOperation::kDifference);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), result_cull);
 }
 
-TEST(AiksCanvasTest, RRectClipDiffAgainstVPartiallyCoveredCullRect) {
+TEST_P(AiksTest, RRectClipDiffAgainstVPartiallyCoveredCullRect) {
   Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
   Rect rect_clip = Rect::MakeXYWH(5, 0, 10, 10);
   Rect result_cull = Rect::MakeXYWH(0, 0, 6, 10);
 
-  Canvas canvas(initial_cull);
-  canvas.ClipRRect(rect_clip, {1, 1}, Entity::ClipOperation::kDifference);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->ClipRRect(rect_clip, {1, 1}, Entity::ClipOperation::kDifference);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), result_cull);
 }
 
-TEST(AiksCanvasTest, RRectClipDiffAgainstVFullyCoveredCullRect) {
+TEST_P(AiksTest, RRectClipDiffAgainstVFullyCoveredCullRect) {
   Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
   Rect rect_clip = Rect::MakeXYWH(5, -2, 10, 14);
   Rect result_cull = Rect::MakeXYWH(0, 0, 5, 10);
 
-  Canvas canvas(initial_cull);
-  canvas.ClipRRect(rect_clip, {1, 1}, Entity::ClipOperation::kDifference);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->ClipRRect(rect_clip, {1, 1}, Entity::ClipOperation::kDifference);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), result_cull);
 }
 
-TEST(AiksCanvasTest, RRectClipDiffAgainstHPartiallyCoveredCullRect) {
+TEST_P(AiksTest, RRectClipDiffAgainstHPartiallyCoveredCullRect) {
   Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
   Rect rect_clip = Rect::MakeXYWH(0, 5, 10, 10);
   Rect result_cull = Rect::MakeXYWH(0, 0, 10, 6);
 
-  Canvas canvas(initial_cull);
-  canvas.ClipRRect(rect_clip, {1, 1}, Entity::ClipOperation::kDifference);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->ClipRRect(rect_clip, {1, 1}, Entity::ClipOperation::kDifference);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), result_cull);
 }
 
-TEST(AiksCanvasTest, RRectClipDiffAgainstHFullyCoveredCullRect) {
+TEST_P(AiksTest, RRectClipDiffAgainstHFullyCoveredCullRect) {
   Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
   Rect rect_clip = Rect::MakeXYWH(-2, 5, 14, 10);
   Rect result_cull = Rect::MakeXYWH(0, 0, 10, 5);
 
-  Canvas canvas(initial_cull);
-  canvas.ClipRRect(rect_clip, {1, 1}, Entity::ClipOperation::kDifference);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->ClipRRect(rect_clip, {1, 1}, Entity::ClipOperation::kDifference);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), result_cull);
 }
 
-TEST(AiksCanvasTest, PathClipIntersectAgainstEmptyCullRect) {
+TEST_P(AiksTest, PathClipIntersectAgainstEmptyCullRect) {
   PathBuilder builder;
   builder.AddRect(Rect::MakeXYWH(5, 5, 1, 1));
   builder.AddRect(Rect::MakeXYWH(5, 14, 1, 1));
@@ -267,14 +301,15 @@ TEST(AiksCanvasTest, PathClipIntersectAgainstEmptyCullRect) {
   Path path = builder.TakePath();
   Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
 
-  Canvas canvas;
-  canvas.ClipPath(path, Entity::ClipOperation::kIntersect);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context);
+  canvas->ClipPath(path, Entity::ClipOperation::kIntersect);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), rect_clip);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), rect_clip);
 }
 
-TEST(AiksCanvasTest, PathClipDiffAgainstEmptyCullRect) {
+TEST_P(AiksTest, PathClipDiffAgainstEmptyCullRect) {
   PathBuilder builder;
   builder.AddRect(Rect::MakeXYWH(5, 5, 1, 1));
   builder.AddRect(Rect::MakeXYWH(5, 14, 1, 1));
@@ -282,13 +317,14 @@ TEST(AiksCanvasTest, PathClipDiffAgainstEmptyCullRect) {
   builder.AddRect(Rect::MakeXYWH(14, 14, 1, 1));
   Path path = builder.TakePath();
 
-  Canvas canvas;
-  canvas.ClipPath(path, Entity::ClipOperation::kDifference);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context);
+  canvas->ClipPath(path, Entity::ClipOperation::kDifference);
 
-  ASSERT_FALSE(canvas.GetCurrentLocalCullingBounds().has_value());
+  ASSERT_FALSE(canvas->GetCurrentLocalCullingBounds().has_value());
 }
 
-TEST(AiksCanvasTest, PathClipIntersectAgainstCullRect) {
+TEST_P(AiksTest, PathClipIntersectAgainstCullRect) {
   Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
   PathBuilder builder;
   builder.AddRect(Rect::MakeXYWH(5, 5, 1, 1));
@@ -298,14 +334,15 @@ TEST(AiksCanvasTest, PathClipIntersectAgainstCullRect) {
   Path path = builder.TakePath();
   Rect result_cull = Rect::MakeXYWH(5, 5, 5, 5);
 
-  Canvas canvas(initial_cull);
-  canvas.ClipPath(path, Entity::ClipOperation::kIntersect);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->ClipPath(path, Entity::ClipOperation::kIntersect);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), result_cull);
 }
 
-TEST(AiksCanvasTest, PathClipDiffAgainstNonCoveredCullRect) {
+TEST_P(AiksTest, PathClipDiffAgainstNonCoveredCullRect) {
   Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
   PathBuilder builder;
   builder.AddRect(Rect::MakeXYWH(5, 5, 1, 1));
@@ -315,14 +352,15 @@ TEST(AiksCanvasTest, PathClipDiffAgainstNonCoveredCullRect) {
   Path path = builder.TakePath();
   Rect result_cull = Rect::MakeXYWH(0, 0, 10, 10);
 
-  Canvas canvas(initial_cull);
-  canvas.ClipPath(path, Entity::ClipOperation::kDifference);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->ClipPath(path, Entity::ClipOperation::kDifference);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), result_cull);
 }
 
-TEST(AiksCanvasTest, PathClipDiffAgainstFullyCoveredCullRect) {
+TEST_P(AiksTest, PathClipDiffAgainstFullyCoveredCullRect) {
   Rect initial_cull = Rect::MakeXYWH(5, 5, 10, 10);
   PathBuilder builder;
   builder.AddRect(Rect::MakeXYWH(0, 0, 100, 100));
@@ -330,28 +368,12 @@ TEST(AiksCanvasTest, PathClipDiffAgainstFullyCoveredCullRect) {
   // Diff clip of Paths is ignored due to complexity
   Rect result_cull = Rect::MakeXYWH(5, 5, 10, 10);
 
-  Canvas canvas(initial_cull);
-  canvas.ClipPath(path, Entity::ClipOperation::kDifference);
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, initial_cull);
+  canvas->ClipPath(path, Entity::ClipOperation::kDifference);
 
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-  ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
-}
-
-TEST(AiksCanvasTest, DisableLocalBoundsRectForFilteredSaveLayers) {
-  Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
-
-  Canvas canvas(initial_cull);
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
-
-  canvas.Save();
-  canvas.SaveLayer(
-      Paint{.image_filter = ImageFilter::MakeBlur(
-                Sigma(10), Sigma(10), FilterContents::BlurStyle::kNormal,
-                Entity::TileMode::kDecal)});
-  ASSERT_FALSE(canvas.GetCurrentLocalCullingBounds().has_value());
-
-  canvas.Restore();
-  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
+  ASSERT_TRUE(canvas->GetCurrentLocalCullingBounds().has_value());
+  ASSERT_EQ(canvas->GetCurrentLocalCullingBounds().value(), result_cull);
 }
 
 }  // namespace testing

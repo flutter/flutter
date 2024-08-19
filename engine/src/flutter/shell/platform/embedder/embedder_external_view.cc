@@ -129,7 +129,7 @@ bool EmbedderExternalView::Render(const EmbedderRenderTarget& render_target,
     slice_->render_into(&dl_builder);
     auto display_list = dl_builder.Build();
 
-#if ENABLE_EXPERIMENTAL_CANVAS
+#if EXPERIMENTAL_CANVAS
     auto cull_rect =
         impeller::IRect::MakeSize(impeller_target->GetRenderTargetSize());
     SkIRect sk_cull_rect =

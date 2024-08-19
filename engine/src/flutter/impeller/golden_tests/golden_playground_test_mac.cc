@@ -58,55 +58,6 @@ const std::unique_ptr<PlaygroundImpl>& GetSharedVulkanPlayground(
   }
 }
 
-#if EXPERIMENTAL_CANVAS
-std::shared_ptr<Texture> DisplayListToTexture(
-    sk_sp<flutter::DisplayList>& display_list,
-    ISize size,
-    AiksContext& context) {
-  // Do not use the render target cache as the lifecycle of this texture
-  // will outlive a particular frame.
-  impeller::RenderTargetAllocator render_target_allocator =
-      impeller::RenderTargetAllocator(
-          context.GetContext()->GetResourceAllocator());
-  impeller::RenderTarget target;
-  if (context.GetContext()->GetCapabilities()->SupportsOffscreenMSAA()) {
-    target = render_target_allocator.CreateOffscreenMSAA(
-        *context.GetContext(),  // context
-        size,                   // size
-        /*mip_count=*/1,
-        "Picture Snapshot MSAA",  // label
-        impeller::RenderTarget::
-            kDefaultColorAttachmentConfigMSAA  // color_attachment_config
-    );
-  } else {
-    target = render_target_allocator.CreateOffscreen(
-        *context.GetContext(),  // context
-        size,                   // size
-        /*mip_count=*/1,
-        "Picture Snapshot",  // label
-        impeller::RenderTarget::
-            kDefaultColorAttachmentConfig  // color_attachment_config
-    );
-  }
-
-  SkIRect sk_cull_rect = SkIRect::MakeWH(size.width, size.height);
-  impeller::TextFrameDispatcher collector(context.GetContentContext(),
-                                          impeller::Matrix());
-  display_list->Dispatch(collector, sk_cull_rect);
-  impeller::ExperimentalDlDispatcher impeller_dispatcher(
-      context.GetContentContext(), target,
-      display_list->root_has_backdrop_filter(),
-      display_list->max_root_blend_mode(), impeller::IRect::MakeSize(size));
-  display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
-  impeller_dispatcher.FinishRecording();
-
-  context.GetContentContext().GetTransientsBuffer().Reset();
-  context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
-
-  return target.GetRenderTargetTexture();
-}
-#endif  // EXPERIMENTAL_CANVAS
-
 }  // namespace
 
 #define IMP_AIKSTEST(name)                         \
@@ -399,6 +350,10 @@ std::unique_ptr<testing::Screenshot> GoldenPlaygroundTest::MakeScreenshot(
     const sk_sp<flutter::DisplayList>& list) {
   AiksContext renderer(GetContext(), typographer_context_);
 
+#if EXPERIMENTAL_CANVAS
+  return pimpl_->screenshotter->MakeScreenshot(
+      renderer, DisplayListToTexture(list, pimpl_->window_size, renderer));
+#else
   DlDispatcher dispatcher;
   list->Dispatch(dispatcher);
   Picture picture = dispatcher.EndRecordingAsPicture();
@@ -408,6 +363,7 @@ std::unique_ptr<testing::Screenshot> GoldenPlaygroundTest::MakeScreenshot(
                                             pimpl_->window_size);
 
   return screenshot;
+#endif  // EXPERIMENTAL_CANVAS
 }
 
 }  // namespace impeller

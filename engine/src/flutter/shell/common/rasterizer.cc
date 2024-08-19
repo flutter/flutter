@@ -925,13 +925,22 @@ ScreenshotLayerTreeAsImageImpeller(
   RenderFrameForScreenshot(compositor_context, &builder, tree, nullptr,
                            aiks_context);
 
+  std::shared_ptr<impeller::Texture> texture;
+#if EXPERIMENTAL_CANVAS
+  texture = impeller::DisplayListToTexture(
+      builder.Build(),
+      impeller::ISize(tree->frame_size().fWidth, tree->frame_size().fHeight),
+      *aiks_context);
+#else
   impeller::DlDispatcher dispatcher;
   builder.Build()->Dispatch(dispatcher);
   const auto& picture = dispatcher.EndRecordingAsPicture();
   const auto& image = picture.ToImage(
       *aiks_context,
       impeller::ISize(tree->frame_size().fWidth, tree->frame_size().fHeight));
-  const auto& texture = image->GetTexture();
+  texture = image->GetTexture();
+#endif  // EXPERIMENTAL_CANVAS
+
   impeller::DeviceBufferDescriptor buffer_desc;
   buffer_desc.storage_mode = impeller::StorageMode::kHostVisible;
   buffer_desc.size =

@@ -261,6 +261,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                                  const Paint& paint);
 };
 
+#if !EXPERIMENTAL_CANVAS
 class DlDispatcher : public DlDispatcherBase {
  public:
   DlDispatcher();
@@ -297,6 +298,7 @@ class DlDispatcher : public DlDispatcherBase {
 
   Canvas& GetCanvas() override;
 };
+#endif  // !EXPERIMENTAL_CANVAS
 
 class ExperimentalDlDispatcher : public DlDispatcherBase {
  public:
@@ -402,6 +404,12 @@ class TextFrameDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   std::vector<Matrix> stack_;
   Paint paint_;
 };
+
+/// Render the provided display list to a texture with the given size.
+std::shared_ptr<Texture> DisplayListToTexture(
+    const sk_sp<flutter::DisplayList>& display_list,
+    ISize size,
+    AiksContext& context);
 
 }  // namespace impeller
 
