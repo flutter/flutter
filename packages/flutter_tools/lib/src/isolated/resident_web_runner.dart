@@ -387,6 +387,10 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       appFailedToStart();
       _logger.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
+    } on HttpException catch (error, stackTrace) {
+      appFailedToStart();
+      _logger.printError('$error', stackTrace: stackTrace);
+      throwToolExit(kExitMessage);
     } on Exception {
       appFailedToStart();
       rethrow;
