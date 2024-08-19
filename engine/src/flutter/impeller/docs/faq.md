@@ -275,3 +275,21 @@ the name seemed apt. It's also an internal component and perhaps 30 seconds were
 spent thinking of a name.
 
 Why Flutter's compositor is called "flow" is left as an exercise to the reader.
+
+### How does Graphite (a new GPU backend for Skia) relate to Impeller?
+
+Graphite is a new backend the Skia team is building to replace its legacy
+renderer (called Ganesh).
+
+Similar to Impeller, Graphite is designed to be optimized for modern GPU APIs
+(e.g Metal, Vulkan, Dawn). It aims to reduce the CPU cost of recording commands
+while taking advantage of newer GPU features.
+
+One of the goals of Graphite is to allow for easier pre-compilation of shaders
+at startup time. But it still aims to support Skia’s general 2D API and has the
+same spec. requirements. The design decisions made to support those requirements
+make offline shader compilation impossible.
+
+As of August 2024, Flutter has no plans to use Graphite. However, we, the
+Flutter team, are in constant communication with the Skia team and freely share
+insights and ideas across Impeller and Graphite.
