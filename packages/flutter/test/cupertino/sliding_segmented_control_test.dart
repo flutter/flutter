@@ -590,6 +590,59 @@ void main() {
     expect(segmentedControl.size.width, childWidthSum + 6.0 + 2.0);
   });
 
+  testWidgets('proportionalWidth rebuild', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{
+      0: const SizedBox(width: 50, child: Text('First')),
+      1: const SizedBox(width: 200, child: Text('Second')),
+      2: const SizedBox(width: 70, child: Text('Third')),
+    };
+    bool proportionalWidth = false;
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            proportionalWidth: proportionalWidth,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    Size getChildSize(int index) {
+      return tester.getSize(
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
+      );
+    }
+
+    Size firstChildSize = getChildSize(0);
+    expect(firstChildSize.width, 200 + 9.25 * 2);
+
+    Size secondChildSize = getChildSize(1);
+    expect(secondChildSize.width, 200 + 9.25 * 2);
+
+    Size thirdChildSize = getChildSize(2);
+    expect(thirdChildSize.width, 200 + 9.25 * 2);
+
+    setState!(() { proportionalWidth = true; });
+    await tester.pump();
+
+    firstChildSize = getChildSize(0);
+    expect(firstChildSize.width, 50 + 9.25 * 2);
+
+    secondChildSize = getChildSize(1);
+    expect(secondChildSize.width, 200 + 9.25 * 2);
+
+    thirdChildSize = getChildSize(2);
+    expect(thirdChildSize.width, 70 + 9.25 * 2);
+  });
+
   testWidgets('If proportionalWidth is true, the width of each segmented '
   'control segment is updated when children change', (WidgetTester tester) async {
     Map<int, Widget> children = <int, Widget>{
