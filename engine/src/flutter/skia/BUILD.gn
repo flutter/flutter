@@ -638,7 +638,7 @@ skia_component("skia") {
   sources += skia_effects_sources
   sources += skia_colorfilters_sources
   sources += skia_effects_imagefilter_sources
-  sources += skia_codec_core
+  sources += skia_codec_shared
   sources += skia_codec_decode_bmp
   sources += skia_encode_srcs
   sources += skia_sksl_core_sources
@@ -649,8 +649,6 @@ skia_component("skia") {
     "$_skia_root/src/android/SkAnimatedImage.cpp",
     "$_skia_root/src/codec/SkAndroidCodec.cpp",
     "$_skia_root/src/codec/SkAndroidCodecAdapter.cpp",
-    "$_skia_root/src/codec/SkEncodedInfo.cpp",
-    "$_skia_root/src/codec/SkParseEncodedOrigin.cpp",
     "$_skia_root/src/codec/SkSampledCodec.cpp",
     "$_skia_root/src/ports/SkDiscardableMemory_none.cpp",
     "$_skia_root/src/ports/SkMemory_malloc.cpp",
