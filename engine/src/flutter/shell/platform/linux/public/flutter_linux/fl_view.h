@@ -69,6 +69,15 @@ FlView* fl_view_new_for_engine(FlEngine* engine);
  */
 FlEngine* fl_view_get_engine(FlView* view);
 
+/**
+ * fl_view_set_background_color:
+ * @view: an #FlView.
+ * @color: a background color.
+ *
+ * Set the background color for Flutter (defaults to black).
+ */
+void fl_view_set_background_color(FlView* view, const GdkRGBA* color);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_PUBLIC_FLUTTER_LINUX_FL_VIEW_H_

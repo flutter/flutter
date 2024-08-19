@@ -209,10 +209,14 @@ void fl_renderer_setup(FlRenderer* renderer);
  * @renderer: an #FlRenderer.
  * @width: width of the window in pixels.
  * @height: height of the window in pixels.
+ * @background_color: color to use for background.
  *
  * Performs OpenGL commands to render current Flutter view.
  */
-void fl_renderer_render(FlRenderer* renderer, int width, int height);
+void fl_renderer_render(FlRenderer* renderer,
+                        int width,
+                        int height,
+                        const GdkRGBA* background_color);
 
 /**
  * fl_renderer_cleanup:

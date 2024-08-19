@@ -382,6 +382,10 @@ GLuint _glCreateProgram() {
 
 void _glCompileShader(GLuint shader) {}
 
+void _glClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a) {
+  mock->glClearColor(r, g, b, a);
+}
+
 GLuint _glCreateShader(GLenum shaderType) {
   return 0;
 }
@@ -594,6 +598,7 @@ static void library_init() {
   epoxy_glBindTexture = _glBindTexture;
   epoxy_glBlitFramebuffer = _glBlitFramebuffer;
   epoxy_glCompileShader = _glCompileShader;
+  epoxy_glClearColor = _glClearColor;
   epoxy_glCreateProgram = _glCreateProgram;
   epoxy_glCreateShader = _glCreateShader;
   epoxy_glDeleteFramebuffers = _glDeleteFramebuffers;
