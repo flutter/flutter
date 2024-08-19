@@ -29,10 +29,27 @@ class NavigatorPopHandlerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/home',
-      routes: <String, WidgetBuilder>{
-        '/home': (BuildContext context) => const _BottomNavPage(
-        ),
+      initialRoute: '/',
+      restorationScopeId: 'root',
+      onGenerateRoute: (RouteSettings settings) {
+        return switch (settings.name) {
+          '/' => MaterialPageRoute<void>(
+            settings: const RouteSettings(
+              name: '/',
+            ),
+            builder: (BuildContext context) {
+              return const _BottomNavPage();
+            },
+          ),
+          _ => MaterialPageRoute<void>(
+            settings: const RouteSettings(
+              name: 'unknown_page',
+            ),
+            builder: (BuildContext context) {
+              return const _UnknownPage();
+            },
+          ),
+        };
       },
     );
   }
@@ -45,8 +62,8 @@ class _BottomNavPage extends StatefulWidget {
   State<_BottomNavPage> createState() => _BottomNavPageState();
 }
 
-class _BottomNavPageState extends State<_BottomNavPage> {
-  _Tab _tab = _Tab.home;
+class _BottomNavPageState extends State<_BottomNavPage> with RestorationMixin {
+  final _RestorableTab _restorableTab = _RestorableTab();
 
   final GlobalKey _tabHomeKey = GlobalKey();
   final GlobalKey _tabOneKey = GlobalKey();
@@ -119,19 +136,37 @@ class _BottomNavPageState extends State<_BottomNavPage> {
 
   void _onItemTapped(int index) {
     setState(() {
-      _tab = _Tab.values.elementAt(index);
+      _restorableTab.value = _Tab.values.elementAt(index);
     });
+  }
+
+  // Begin RestorationMixin.
+
+  @override
+  String? get restorationId => 'bottom-nav-page';
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_restorableTab, 'tab');
+  }
+
+  /// End RestorationMixin.
+
+  @override
+  void dispose() {
+    _restorableTab.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: _getPage(_tab),
+        child: _getPage(_restorableTab.value),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: _Tab.values.map(_itemForPage).toList(),
-        currentIndex: _Tab.values.indexOf(_tab),
+        currentIndex: _Tab.values.indexOf(_restorableTab.value),
         selectedItemColor: Colors.amber[800],
         onTap: _onItemTapped,
       ),
@@ -168,6 +203,7 @@ class _BottomNavTabState extends State<_BottomNavTab> {
       },
       child: Navigator(
         key: _navigatorKey,
+        restorationScopeId: 'nested-navigator-${widget.title}',
         onDidRemovePage: (Page<Object?> page) {
           widget.onChangedPages(<_TabPage>[
             ...widget.pages,
@@ -242,5 +278,53 @@ class _LinksPage extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _UnknownPage extends StatelessWidget {
+  const _UnknownPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey.withBlue(180),
+      body: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text('404'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RestorableTab extends RestorableValue<_Tab> {
+  @override
+  _Tab createDefaultValue() => _Tab.home;
+
+  @override
+  void didUpdateValue(_Tab? oldValue) {
+    print('justin didUpdateValue $oldValue, $value');
+    if (oldValue == null || oldValue != value) {
+      notifyListeners();
+    }
+  }
+
+  @override
+  _Tab fromPrimitives(Object? data) {
+    print('justin fromPrimitive $data');
+    if (data != null) {
+      final String tabString = data as String;
+      print('justin fromPrimitive, tabString $tabString');
+      return _Tab.values.firstWhere((_Tab tab) => tabString == tab.name);
+    }
+    return _Tab.home;
+  }
+
+  @override
+  Object toPrimitives() {
+    return value.name;
   }
 }
