@@ -82,9 +82,12 @@ Future<Plugin?> _pluginFromPackage(String name, Uri packageRoot, Set<String> app
 Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = true}) async {
   final List<Plugin> plugins = <Plugin>[];
   final FileSystem fs = project.directory.fileSystem;
-  final File packageConfigFile = findPackageConfigFileOrDefault(project.directory);
+  final String packagesFile = fs.path.join(
+    project.directory.path,
+    '.packages',
+  );
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-    packageConfigFile,
+    fs.file(packagesFile),
     logger: globals.logger,
     throwOnError: throwOnError,
   );

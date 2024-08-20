@@ -11,7 +11,6 @@ import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
-import '../../dart/package_map.dart';
 import '../../devfs.dart';
 import '../../flutter_manifest.dart';
 import '../build_system.dart';
@@ -61,7 +60,7 @@ Future<Depfile> copyAssets(
   ).createBundle();
   final int resultCode = await assetBundle.build(
     manifestPath: pubspecFile.path,
-    packageConfigPath: findPackageConfigFileOrDefault(environment.projectDir).path,
+    packagesPath: environment.projectDir.childFile('.packages').path,
     deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
     targetPlatform: targetPlatform,
     flavor: flavor,
