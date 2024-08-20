@@ -17,7 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('ImageDecoration.lerp',
+  testWidgets('ImageDecoration.lerp 1',
   // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
@@ -38,10 +38,18 @@ void main() {
       0x60, 0x82,
     ]));
 
+    late final _ImageLoader greenLoader = _ImageLoader(green);
+    late final _ImageLoader redLoader = _ImageLoader(red);
+
     await tester.runAsync(() async {
-      await load(green);
-      await load(red);
+      await greenLoader.load();
+      await redLoader.load();
     });
+
+    // await tester.runAsync(() async {
+    //   await load(green);
+    //   await load(red);
+    // });
 
     await tester.pumpWidget(
       ColoredBox(
@@ -580,6 +588,31 @@ void main() {
       matchesGoldenFile('decoration_image.lerp.2.png'),
     );
   }, skip: kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
+}
+
+class _ImageLoader {
+  _ImageLoader(this.image);
+
+  late final MemoryImage image;
+  late final ImageStream stream;
+  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
+  late final ImageStreamListener wrappedListener;
+
+  void _listener(ImageInfo image, bool syncCall) {
+    _completer.complete(image);
+    addTearDown(image.dispose);
+  }
+
+  Future<void> load() {
+    stream = image.resolve(ImageConfiguration.empty);
+    wrappedListener = ImageStreamListener(_listener);
+    stream.addListener(wrappedListener);
+    return _completer.future;
+  }
+
+  void dispose(){
+    stream.removeListener(wrappedListener);
+  }
 }
 
 Future<void> load(MemoryImage image) {
