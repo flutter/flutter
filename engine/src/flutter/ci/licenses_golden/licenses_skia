@@ -1,4 +1,4 @@
-Signature: abb93216e3fdc894379e6f63322dd951
+Signature: 2e30571ee4d3e667ed1fa4b3e0324976
 
 ====================================================================================================
 LIBRARY: etc1
@@ -3906,7 +3906,6 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/geometry/GrStyledShape.
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/gl/GrGLBuffer.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/gl/GrGLBuffer.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/gl/GrGLOpsRenderPass.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/gl/glfw/GrGLMakeNativeInterface_glfw.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/glsl/GrGLSLColorSpaceXformHelper.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/glsl/GrGLSLProgramDataManager.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/ops/GrPathStencilSettings.h + ../../../flutter/third_party/skia/LICENSE
@@ -4207,7 +4206,6 @@ FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/geometry/GrStyledShape.h
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/gl/GrGLBuffer.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/gl/GrGLBuffer.h
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/gl/GrGLOpsRenderPass.h
-FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/gl/glfw/GrGLMakeNativeInterface_glfw.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/glsl/GrGLSLColorSpaceXformHelper.h
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/glsl/GrGLSLProgramDataManager.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/ops/GrPathStencilSettings.h
