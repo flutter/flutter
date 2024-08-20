@@ -510,6 +510,7 @@ class FormField<T> extends StatefulWidget {
   ///
   /// This is called `value` in the [DropdownButtonFormField] constructor to be
   /// consistent with [DropdownButton].
+  /// The `initialValue` only affects the initial state when the form field is first built.
   final T? initialValue;
 
   /// Whether the form is able to receive user input.
