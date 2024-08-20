@@ -516,7 +516,8 @@ class DevFS {
       final vm_service.Response response = await _vmService.createDevFS(fsName);
       _baseUri = Uri.parse(response.json!['uri'] as String);
     } on vm_service.RPCError catch (rpcException) {
-      if (rpcException.code == RPCErrorCodes.kServiceDisappeared) {
+      if (rpcException.code == RPCErrorCodes.kServiceDisappeared ||
+          rpcException.message.contains('Service connection disposed')) {
         // This can happen if the device has been disconnected, so translate to
         // a DevFSException, which the caller will handle.
         throw DevFSException('Service disconnected', rpcException);
