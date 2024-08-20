@@ -700,6 +700,18 @@ void main() {
       ProcessManager: () => processManager,
     });
 
+    testUsingContext('sets useLocalCanvasKit in BuildInfo', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+      fileSystem.directory('engine/src/out/wasm_release').createSync(recursive: true);
+      await runner.run(<String>['--local-web-sdk=wasm_release', '--local-engine-src-path=engine/src', 'dummy']);
+      final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.useLocalCanvasKit, isTrue);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+
     testUsingContext('dds options', () async {
       final FakeDdsCommand ddsCommand = FakeDdsCommand();
       final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);

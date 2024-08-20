@@ -319,7 +319,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           ddcModuleSystem: debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc,
           webRenderer: debuggingOptions.webRenderer,
           isWasm: debuggingOptions.webUseWasm,
-          useLocalCanvasKit: debuggingOptions.webUseLocalCanvaskit,
+          useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
           rootDirectory: fileSystem.directory(projectRootPath),
         );
         Uri url = await device!.devFS!.create();
@@ -380,6 +380,10 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       _logger.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on SocketException catch (error, stackTrace) {
+      appFailedToStart();
+      _logger.printError('$error', stackTrace: stackTrace);
+      throwToolExit(kExitMessage);
+    } on HttpException catch (error, stackTrace) {
       appFailedToStart();
       _logger.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
@@ -556,7 +560,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     if (rebuildBundle) {
       _logger.printTrace('Updating assets');
       final int result = await assetBundle.build(
-        packagesPath: debuggingOptions.buildInfo.packageConfigPath,
+        packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         targetPlatform: TargetPlatform.web_javascript,
       );
       if (result != 0) {
