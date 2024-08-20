@@ -125,7 +125,7 @@ abstract class AssetBundle {
   /// Returns 0 for success; non-zero for failure.
   Future<int> build({
     String manifestPath = defaultManifestPath,
-    required String packageConfigPath,
+    required String packagesPath,
     bool deferredComponentsEnabled = false,
     TargetPlatform? targetPlatform,
     String? flavor,
@@ -246,7 +246,7 @@ class ManifestAssetBundle implements AssetBundle {
   Future<int> build({
     String manifestPath = defaultManifestPath,
     FlutterProject? flutterProject,
-    required String packageConfigPath,
+    required String packagesPath,
     bool deferredComponentsEnabled = false,
     TargetPlatform? targetPlatform,
     String? flavor,
@@ -293,7 +293,7 @@ class ManifestAssetBundle implements AssetBundle {
     }
 
     final String assetBasePath = _fileSystem.path.dirname(_fileSystem.path.absolute(manifestPath));
-    final File packageConfigFile = _fileSystem.file(packageConfigPath);
+    final File packageConfigFile = _fileSystem.file(packagesPath);
     inputFiles.add(packageConfigFile);
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,

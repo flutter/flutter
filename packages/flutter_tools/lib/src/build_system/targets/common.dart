@@ -181,7 +181,9 @@ class KernelSnapshotProgram extends Target {
     }
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String targetFile = environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
-    final File packagesFile = findPackageConfigFileOrDefault(environment.projectDir);
+    final File packagesFile = environment.projectDir
+      .childDirectory('.dart_tool')
+      .childFile('package_config.json');
     final String targetFileAbsolute = environment.fileSystem.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
     final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
@@ -338,7 +340,9 @@ class KernelSnapshotNativeAssets extends Target {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
-    final File packageConfigFile = findPackageConfigFileOrDefault(environment.projectDir);
+    final File packagesFile = environment.projectDir
+      .childDirectory('.dart_tool')
+      .childFile('package_config.json');
 
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
 
@@ -351,7 +355,7 @@ class KernelSnapshotNativeAssets extends Target {
     environment.logger.printTrace('Embedding native assets mapping $nativeAssets in kernel.');
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      packageConfigFile,
+      packagesFile,
       logger: environment.logger,
     );
 
@@ -367,7 +371,7 @@ class KernelSnapshotNativeAssets extends Target {
       buildMode: buildMode,
       trackWidgetCreation: false,
       outputFilePath: dillPath,
-      packagesPath: packageConfigFile.path,
+      packagesPath: packagesFile.path,
       frontendServerStarterPath: frontendServerStarterPath,
       packageConfig: packageConfig,
       buildDir: environment.buildDir,
