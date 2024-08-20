@@ -38,7 +38,7 @@ INTERNAL NOTE
 - [flutter/54446](https://github.com/flutter/engine/pull/54446) - [Web] Fixes an issue in Flutter Web apps where the app may crash if CanvasKit is loaded from the network instead of a cache.
 - [flutter/152955](https://github.com/flutter/flutter/issues/152955) - [Impeller] Fixes an issue where when using unbound `saveLayers` rendering issues would occur.
 - [flutter/153037](https://github.com/flutter/flutter/issues/153037) - [Impeller] Fixes an issue where RTL glyphs would render incorrectly.
-- [flutter/153038](https://github.com/flutter/flutter/issues/153038) - [Impeller] Fixes an issue where padding would be applied incorreectly in `Canvas.drawVerticies` when using texture coordinates.
+- [flutter/153038](https://github.com/flutter/flutter/issues/153038) - [Impeller] Fixes an issue where padding would be applied incorrectly in `Canvas.drawVerticies` when using texture coordinates.
 - [flutter/153041](https://github.com/flutter/flutter/issues/153041) - [Impeller] Fixes an rare issue causing applications to crash when using platform views on older iPhones.
 - [flutter/153188](https://github.com/flutter/flutter/issues/153188) - [Impeller] Fixes a rendering issue on iOS devices using Impeller where clips do not appear around entities drawn with certain advanced blend modes.
 - [flutter/54513](https://github.com/flutter/engine/pull/54513) - [iOS/MacOS] Fixes an issue preventing iOS Apps Store validation from failing for Flutter apps using Xcode versions before Xcode 16.
