@@ -640,3 +640,23 @@ final GradleHandledError couldNotOpenCacheDirectoryHandler = GradleHandledError(
   },
   eventLabel: 'could-not-open-cache-directory',
 );
+
+const String _agpLocationString = "Your project's AGP version is likely defined in ";
+
+@visibleForTesting
+final GradleHandledError r8DexingBugInAgp73Handler = GradleHandledError(
+  test: (String line) => line.contains('com.android.tools.r8.internal.Y10: Unused argument with users'),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+  }) async {
+    globals.printBox(
+        'Version 7.3 of the Android Gradle Plugin (AGP) uses a version of R8 that contains a bug which causes this error. To fix this error, update to a newer version of AGP (at least 7.4.0).\n\n',
+        title: _boxTitle,
+    );
+
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'r8-dexing-bug-in-AGP-7.3'
+);
