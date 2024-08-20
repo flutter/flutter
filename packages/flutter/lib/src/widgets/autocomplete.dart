@@ -360,7 +360,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   // Called when _textEditingController changes.
   Future<void> _onChangedField() async {
     final TextEditingValue value = _textEditingController.value;
-    // Makes sure that optionsBuilder is only called when text in the field changes.
+
+    // Makes sure that options change only when content of the field changes.
     if (value.text == _lastFieldText) {
       return;
     }
