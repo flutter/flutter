@@ -535,12 +535,6 @@ void main() {
             'isolateId': '1',
           },
         ),
-        const FakeVmServiceRequest(
-          method: 'streamCancel',
-          args: <String, Object>{
-            'streamId': 'Isolate',
-          },
-        ),
       ]);
 
       final vm_service.IsolateRef isolateRef = await fakeVmServiceHost.vmService.findExtensionIsolate(kExtensionName);
@@ -592,12 +586,6 @@ void main() {
             'isolateId': '2',
           },
         ),
-        const FakeVmServiceRequest(
-          method: 'streamCancel',
-          args: <String, Object>{
-            'streamId': 'Isolate',
-          },
-        ),
       ]);
 
       final vm_service.IsolateRef isolateRef = await fakeVmServiceHost.vmService.findExtensionIsolate(otherExtensionName);
@@ -644,12 +632,6 @@ void main() {
             isolate: isolate2,
           ),
         ),
-        const FakeVmServiceRequest(
-          method: 'streamCancel',
-          args: <String, Object>{
-            'streamId': 'Isolate',
-          },
-        ),
       ]);
 
       final vm_service.IsolateRef isolateRef = await fakeVmServiceHost.vmService.findExtensionIsolate(otherExtensionName);
@@ -672,12 +654,6 @@ void main() {
           jsonResponse: isolate.toJson()..['extensionRPCs'] = <String>[kExtensionName],
           args: <String, Object>{
             'isolateId': '1',
-          },
-        ),
-        const FakeVmServiceRequest(
-          method: 'streamCancel',
-          args: <String, Object>{
-            'streamId': 'Isolate',
           },
         ),
       ]);
@@ -710,12 +686,6 @@ void main() {
             timestamp: 1,
           ),
         ),
-        const FakeVmServiceRequest(
-          method: 'streamCancel',
-          args: <String, Object>{
-            'streamId': 'Isolate',
-          },
-        ),
       ]);
 
       final vm_service.IsolateRef isolateRef = await fakeVmServiceHost.vmService.findExtensionIsolate(kExtensionName);
@@ -732,13 +702,6 @@ void main() {
         ),
         const FakeVmServiceRequest(
           method: kListViewsMethod,
-          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
-        ),
-        const FakeVmServiceRequest(
-          method: 'streamCancel',
-          args: <String, Object>{
-            'streamId': 'Isolate',
-          },
           error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
       ]);
