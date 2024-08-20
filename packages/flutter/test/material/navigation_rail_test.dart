@@ -172,7 +172,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
+        theme: ThemeData(),
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             stateSetter = setState;
@@ -290,7 +290,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
+        theme: ThemeData(),
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             stateSetter = setState;
