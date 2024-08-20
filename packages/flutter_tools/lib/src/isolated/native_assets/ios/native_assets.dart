@@ -9,7 +9,6 @@ import 'package:native_assets_cli/native_assets_cli_internal.dart';
 import '../../../base/file_system.dart';
 import '../../../build_info.dart';
 import '../../../globals.dart' as globals;
-
 import '../macos/native_assets_host.dart';
 import '../native_assets.dart';
 
@@ -251,7 +250,7 @@ Future<void> _copyNativeAssetsIOS(
         .printTrace('Copying native assets to ${buildUri.toFilePath()}.');
 
     final Map<String, String> oldToNewInstallNames = <String, String>{};
-    final List<(File, Directory)> dylibs = <(File, Directory)>[];
+    final List<(File, String, Directory)> dylibs = <(File, String, Directory)>[];
 
     for (final MapEntry<KernelAssetPath, List<AssetImpl>> assetMapping
         in assetTargetLocations.entries) {
@@ -262,7 +261,6 @@ Future<void> _copyNativeAssetsIOS(
       final Uri targetUri = buildUri.resolveUri(target);
       final File dylibFile = fileSystem.file(targetUri);
       final Directory frameworkDir = dylibFile.parent;
-      dylibs.add((dylibFile, frameworkDir));
       if (!await frameworkDir.exists()) {
         await frameworkDir.create(recursive: true);
       }
@@ -270,15 +268,19 @@ Future<void> _copyNativeAssetsIOS(
 
       final String dylibFileName = dylibFile.basename;
       final String newInstallName = '@rpath/$dylibFileName.framework/$dylibFileName';
-      await setInstallNameDylib(dylibFile, newInstallName, oldToNewInstallNames);
+      final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
+      for (final String oldInstallName in oldInstallNames) {
+        oldToNewInstallNames[oldInstallName] = newInstallName;
+      }
+      dylibs.add((dylibFile, newInstallName, frameworkDir));
 
       // TODO(knopp): Wire the value once there is a way to configure that in the hook.
       // https://github.com/dart-lang/native/issues/1133
       await createInfoPlist(targetUri.pathSegments.last, frameworkDir, minimumIOSVersion: '12.0');
     }
 
-    for (final (File dylibFile, Directory frameworkDir) in dylibs) {
-      await changeDependencyInstallNamesDylib(dylibFile, oldToNewInstallNames);
+    for (final (File dylibFile, String newInstallName, Directory frameworkDir) in dylibs) {
+      await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
       await codesignDylib(codesignIdentity, buildMode, frameworkDir);
     }
 

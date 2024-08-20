@@ -82,40 +82,39 @@ Future<void> lipoDylibs(File target, List<File> sources) async {
   globals.logger.printTrace(lipoResult.stderr as String);
 }
 
-/// Sets the install name in a dylib with a Mach-O format.
+/// Sets the install names in a dylib with a Mach-O format.
 ///
 /// On macOS and iOS, opening a dylib at runtime fails if the path inside the
 /// dylib itself does not correspond to the path that the file is at. Therefore,
 /// native assets copied into their final location also need their install name
 /// updated with the `install_name_tool`.
 ///
-/// [oldToNewInstallNames] is a map that is updated with the old install name(s)
-/// as the key and the new install name as the value. The same map into which
-/// the install name mappings of all dylibs have been collected should be passed
-/// to [changeDependencyInstallNamesDylib]. [changeDependencyInstallNamesDylib]
-/// should be applied to all dylibs after all dylibs have had their install
-/// names set to update the install names of dependencies.
-Future<void> setInstallNameDylib(
+/// [oldToNewInstallNames] is a map from old to new install names, that should
+/// be applied to the dependencies of the dylib. Entries in this map for
+/// dependencies that are not present in the dylib are ignored. The install
+/// name of a dependencies needs to be updated if the location of the dependency
+/// has changed.
+Future<void> setInstallNamesDylib(
   File dylibFile,
   String newInstallName,
   Map<String, String> oldToNewInstallNames,
 ) async {
-  final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
-  for (final String oldInstallName in oldInstallNames) {
-    oldToNewInstallNames[oldInstallName] = newInstallName;
-  }
-
-  final ProcessResult installNameResult = await globals.processManager.run(
+   final ProcessResult setInstallNamesResult = await globals.processManager.run(
     <String>[
       'install_name_tool',
       '-id',
       newInstallName,
+      for (final MapEntry<String, String> entry in oldToNewInstallNames.entries)
+        ...<String>['-change', entry.key, entry.value],
       dylibFile.path,
     ],
   );
-  if (installNameResult.exitCode != 0) {
+  if (setInstallNamesResult.exitCode != 0) {
     throwToolExit(
-      'Failed to change the install name of $dylibFile:\n${installNameResult.stderr}',
+      'Failed to change install names in $dylibFile:\n'
+      'id -> $newInstallName\n'
+      'dependencies -> $newInstallName\n'
+      '${setInstallNamesResult.stderr}',
     );
   }
 }
@@ -144,25 +143,6 @@ Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
 }
 
 
-
-Future<void> changeDependencyInstallNamesDylib(
-  File dylibFile,
-  Map<String, String> oldToNewInstallNames,
-) async {
-   final ProcessResult changeDependencyResult = await globals.processManager.run(
-    <String>[
-      'install_name_tool',
-      for (final MapEntry<String, String> entry in oldToNewInstallNames.entries)
-        ...<String>['-change', entry.key, entry.value],
-      dylibFile.path,
-    ],
-  );
-  if (changeDependencyResult.exitCode != 0) {
-    throwToolExit(
-      'Failed to change a dependency install name of $dylibFile:\n${changeDependencyResult.stderr}',
-    );
-  }
-}
 
 Future<void> codesignDylib(
   String? codesignIdentity,

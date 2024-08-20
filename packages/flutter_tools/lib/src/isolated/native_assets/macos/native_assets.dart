@@ -294,7 +294,7 @@ Future<void> _copyNativeAssetsMacOS(
     );
 
     final Map<String, String> oldToNewInstallNames = <String, String>{};
-    final List<(File, Directory)> dylibs = <(File, Directory)>[];
+    final List<(File, String, Directory)> dylibs = <(File, String, Directory)>[];
 
     for (final MapEntry<KernelAssetPath, List<AssetImpl>> assetMapping
         in assetTargetLocations.entries) {
@@ -322,7 +322,6 @@ Future<void> _copyNativeAssetsMacOS(
       final Directory resourcesDir = versionADir.childDirectory('Resources');
       await resourcesDir.create(recursive: true);
       final File dylibFile = versionADir.childFile(name);
-      dylibs.add((dylibFile, frameworkDir));
       final Link currentLink = versionsDir.childLink('Current');
       await currentLink.create(fileSystem.path.relative(
         versionADir.path,
@@ -342,13 +341,17 @@ Future<void> _copyNativeAssetsMacOS(
 
       final String dylibFileName = dylibFile.basename;
       final String newInstallName = '@rpath/$dylibFileName.framework/$dylibFileName';
-      await setInstallNameDylib(dylibFile,newInstallName, oldToNewInstallNames);
+      final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
+      for (final String oldInstallName in oldInstallNames) {
+        oldToNewInstallNames[oldInstallName] = newInstallName;
+      }
+      dylibs.add((dylibFile, newInstallName, frameworkDir));
 
       await createInfoPlist(name, resourcesDir);
     }
 
-    for (final (File dylibFile, Directory frameworkDir) in dylibs) {
-      await changeDependencyInstallNamesDylib(dylibFile, oldToNewInstallNames);
+    for (final (File dylibFile, String newInstallName, Directory frameworkDir) in dylibs) {
+      await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
       // Do not code-sign the libraries here with identity. Code-signing
       // for bundled dylibs is done in `macos_assemble.sh embed` because the
       // "Flutter Assemble" target does not have access to the signing identity.
@@ -385,7 +388,7 @@ Future<void> _copyNativeAssetsMacOSFlutterTester(
     );
 
     final Map<String, String> oldToNewInstallNames = <String, String>{};
-    final List<File> dylibFiles = <File>[];
+    final List<(File, String)> dylibs = <(File, String)>[];
 
     for (final MapEntry<KernelAssetPath, List<AssetImpl>> assetMapping
         in assetTargetLocations.entries) {
@@ -395,17 +398,21 @@ Future<void> _copyNativeAssetsMacOSFlutterTester(
       ];
       final Uri targetUri = buildUri.resolveUri(target);
       final File dylibFile = fileSystem.file(targetUri);
-      dylibFiles.add(dylibFile);
       final Directory targetParent = dylibFile.parent;
       if (!await targetParent.exists()) {
         await targetParent.create(recursive: true);
       }
       await lipoDylibs(dylibFile, sources);
-      await setInstallNameDylib(dylibFile, dylibFile.path, oldToNewInstallNames);
+      final String newInstallName = dylibFile.path;
+      final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
+      for (final String oldInstallName in oldInstallNames) {
+        oldToNewInstallNames[oldInstallName] = newInstallName;
+      }
+      dylibs.add((dylibFile, newInstallName));
     }
 
-    for (final File dylibFile in dylibFiles) {
-      await changeDependencyInstallNamesDylib(dylibFile, oldToNewInstallNames);
+    for (final (File dylibFile, String newInstallName) in dylibs) {
+      await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
       await codesignDylib(codesignIdentity, buildMode, dylibFile);
     }
 

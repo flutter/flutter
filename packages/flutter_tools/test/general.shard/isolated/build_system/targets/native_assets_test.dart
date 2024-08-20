@@ -151,12 +151,6 @@ void main() {
               'install_name_tool',
               '-id',
               '@rpath/foo.framework/foo',
-              '/build/native_assets/ios/foo.framework/foo'
-            ],
-          ),
-          const FakeCommand(
-            command: <Pattern>[
-              'install_name_tool',
               '-change',
               '@rpath/libfoo.dylib',
               '@rpath/foo.framework/foo',

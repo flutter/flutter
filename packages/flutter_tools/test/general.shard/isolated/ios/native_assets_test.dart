@@ -251,14 +251,6 @@ void main() {
           ),
           const FakeCommand(
             command: <Pattern>[
-              'install_name_tool',
-              '-id',
-              '@rpath/bar.framework/bar',
-              '/build/native_assets/ios/bar.framework/bar'
-            ],
-          ),
-          const FakeCommand(
-            command: <Pattern>[
               'lipo',
               '-create',
               '-output',
@@ -284,13 +276,7 @@ void main() {
             command: <Pattern>[
               'install_name_tool',
               '-id',
-              '@rpath/buz.framework/buz',
-              '/build/native_assets/ios/buz.framework/buz'
-            ],
-          ),
-          const FakeCommand(
-            command: <Pattern>[
-              'install_name_tool',
+              '@rpath/bar.framework/bar',
               '-change',
               '@rpath/libbar.dylib',
               '@rpath/bar.framework/bar',
@@ -314,6 +300,8 @@ void main() {
           const FakeCommand(
             command: <Pattern>[
               'install_name_tool',
+              '-id',
+              '@rpath/buz.framework/buz',
               '-change',
               '@rpath/libbar.dylib',
               '@rpath/bar.framework/bar',
