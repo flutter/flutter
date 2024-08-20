@@ -10,6 +10,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart' show SchedulerBinding, timeDilation;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+import 'package:meta/meta.dart';
 
 import '../image_data.dart';
 import 'fake_codec.dart';
@@ -315,7 +316,9 @@ void main() {
     expect(tester.takeException(), 'frame completion error');
   });
 
-  testWidgets('ImageStream emits frame (static image)', (WidgetTester tester) async {
+  testWidgets('ImageStream emits frame (static image)',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 1;
     final Completer<Codec> codecCompleter = Completer<Codec>();
@@ -328,6 +331,7 @@ void main() {
     final List<ImageInfo> emittedImages = <ImageInfo>[];
     imageStream.addListener(ImageStreamListener((ImageInfo image, bool synchronousCall) {
       emittedImages.add(image);
+      addTearDown(image.dispose);
     }));
 
     codecCompleter.complete(mockCodec);
@@ -338,9 +342,13 @@ void main() {
     await tester.idle();
 
     expect(emittedImages.every((ImageInfo info) => info.image.isCloneOf(frame.image)), true);
+
+    imageCache.clear();
   });
 
-  testWidgets('ImageStream emits frames (animated images)', (WidgetTester tester) async {
+  testWidgets('ImageStream emits frames (animated images)',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
@@ -354,6 +362,7 @@ void main() {
     final List<ImageInfo> emittedImages = <ImageInfo>[];
     imageStream.addListener(ImageStreamListener((ImageInfo image, bool synchronousCall) {
       emittedImages.add(image);
+      addTearDown(image.dispose);
     }));
 
     codecCompleter.complete(mockCodec);
@@ -384,9 +393,13 @@ void main() {
     // Let the pending timer for the next frame to complete so we can cleanly
     // quit the test without pending timers.
     await tester.pump(const Duration(milliseconds: 400));
+
+    imageCache.clear();
   });
 
-  testWidgets('animation wraps back', (WidgetTester tester) async {
+  testWidgets('animation wraps back',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
@@ -400,6 +413,7 @@ void main() {
     final List<ImageInfo> emittedImages = <ImageInfo>[];
     imageStream.addListener(ImageStreamListener((ImageInfo image, bool synchronousCall) {
       emittedImages.add(image);
+      addTearDown(image.dispose);
     }));
 
     codecCompleter.complete(mockCodec);
@@ -425,9 +439,13 @@ void main() {
     // Let the pending timer for the next frame to complete so we can cleanly
     // quit the test without pending timers.
     await tester.pump(const Duration(milliseconds: 200));
+
+    imageCache.clear();
   });
 
-  testWidgets("animation doesn't repeat more than specified", (WidgetTester tester) async {
+  testWidgets("animation doesn't repeat more than specified",
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = 0;
@@ -441,6 +459,7 @@ void main() {
     final List<ImageInfo> emittedImages = <ImageInfo>[];
     imageStream.addListener(ImageStreamListener((ImageInfo image, bool synchronousCall) {
       emittedImages.add(image);
+      addTearDown(image.dispose);
     }));
 
     codecCompleter.complete(mockCodec);
@@ -463,9 +482,13 @@ void main() {
 
     expect(emittedImages[0].image.isCloneOf(frame1.image), true);
     expect(emittedImages[1].image.isCloneOf(frame2.image), true);
+
+    imageCache.clear();
   });
 
-  testWidgets('frames are only decoded when there are listeners', (WidgetTester tester) async {
+  testWidgets('frames are only decoded when there are listeners',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
@@ -505,9 +528,12 @@ void main() {
     expect(mockCodec.numFramesAsked, 3);
 
     handle.dispose();
+    imageCache.clear();
   });
 
-  testWidgets('multiple stream listeners', (WidgetTester tester) async {
+  testWidgets('multiple stream listeners',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
@@ -553,7 +579,7 @@ void main() {
     expect(emittedImages1.single.image.isCloneOf(frame1.image), true);
     expect(emittedImages2[0].image.isCloneOf(frame1.image), true);
     expect(emittedImages2[1].image.isCloneOf(frame2.image), true);
-
+    imageCache.clear();
   });
 
   testWidgets('timer is canceled when listeners are removed',
@@ -592,7 +618,9 @@ void main() {
     // point.
   });
 
-  testWidgets('timeDilation affects animation frame timers', (WidgetTester tester) async {
+  testWidgets('timeDilation affects animation frame timers',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
@@ -666,7 +694,9 @@ void main() {
     expect(capturedException, 'frame completion error');
   });
 
-  testWidgets('remove and add listener ', (WidgetTester tester) async {
+  testWidgets('remove and add listener ',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 3;
     mockCodec.repetitionCount = 0;
@@ -689,7 +719,6 @@ void main() {
     imageStream.addListener(ImageStreamListener(listener));
     imageStream.removeListener(ImageStreamListener(listener));
 
-
     final FrameInfo frame1 = FakeFrameInfo(const Duration(milliseconds: 200), image20x10);
 
     mockCodec.completeNextFrame(frame1);
@@ -697,6 +726,8 @@ void main() {
     await tester.pump(); // first animation frame shows on first app frame.
 
     await tester.pump(const Duration(milliseconds: 200)); // emit 2nd frame.
+
+    imageCache.clear();
   });
 
   testWidgets('ImageStreamListener hashCode and equals', (WidgetTester tester) async {
@@ -746,6 +777,7 @@ void main() {
     int onImageCount = 0;
     void activeListener(ImageInfo image, bool synchronousCall) {
       onImageCount += 1;
+      addTearDown(image.dispose);
     }
     bool lastListenerDropped = false;
     imageStream.addOnLastListenerRemovedCallback(() {
