@@ -722,15 +722,43 @@ void main() {
       );
 
       // Build the app.
-      // await SwiftPackageManagerUtils.buildApp(
-      //   flutterBin,
-      //   appDirectoryPath,
-      //   options: <String>['ios', '--config-only', '-v'],
-      // );
+      await SwiftPackageManagerUtils.buildApp(
+        flutterBin,
+        appDirectoryPath,
+        options: <String>['ios', '--config-only', '-v'],
+      );
+
+      // The app should have SwiftPM integration.
+      final File xcodeProjectFile = fileSystem
+        .directory(appDirectoryPath)
+        .childDirectory('ios')
+        .childDirectory('Runner.xcodeproj')
+        .childFile('project.pbxproj');
+      final File generatedManifestFile = fileSystem
+        .directory(appDirectoryPath)
+        .childDirectory('ios')
+        .childDirectory('Flutter')
+        .childDirectory('ephemeral')
+        .childDirectory('Packages')
+        .childDirectory('FlutterGeneratedPluginSwiftPackage')
+        .childFile('Package.swift');
+
+      expect(xcodeProjectFile.existsSync(), isTrue);
+      expect(generatedManifestFile.existsSync(), isTrue);
+
+      String xcodeProject = xcodeProjectFile.readAsStringSync();
+      String generatedManifest = generatedManifestFile.readAsStringSync();
+      final String generatedSwiftDependency = '''
+    dependencies: [
+        .package(name: "integration_test", path: "${integrationTestPlugin.swiftPackagePlatformPath}")
+    ],
+''';
+
+      expect(xcodeProject.contains('FlutterGeneratedPluginSwiftPackage'), isTrue);
+      expect(generatedManifest.contains(generatedSwiftDependency), isTrue);
 
       // Disable Swift Package Manager and re-build the app.
-      // The build should succeed. The app still has SwiftPM integration,
-      // but the plugin is added using CocoaPods.
+      // The build should succeed.
       await SwiftPackageManagerUtils.disableSwiftPackageManager(
         flutterBin,
         workingDirectoryPath,
@@ -742,33 +770,18 @@ void main() {
         flutterBin,
         appDirectoryPath,
         options: <String>['ios', '--debug', '-v'],
-        // expectedLines: SwiftPackageManagerUtils.expectedLines(
-        //   platform: platformName,
-        //   appDirectoryPath: appDirectoryPath,
-        //   cocoaPodsPlugin: integrationTestPlugin,
-        // ),
-        // unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
-        //   platform: platformName,
-        //   appDirectoryPath: appDirectoryPath,
-        //   cocoaPodsPlugin: integrationTestPlugin,
-        // ),
       );
 
-      // Verify the generated Swift package depends on the plugin.
-      final File generatedManifestFile = fileSystem
-        .directory(appDirectoryPath)
-        .childDirectory('ios')
-        .childDirectory('Flutter')
-        .childDirectory('ephemeral')
-        .childDirectory('Packages')
-        .childDirectory('FlutterGeneratedPluginSwiftPackage')
-        .childFile('Package.swift');
-
+      // The app should still have SwiftPM integration,
+      // but the plugin should be added using CocoaPods.
+      expect(xcodeProjectFile.existsSync(), isTrue);
       expect(generatedManifestFile.existsSync(), isTrue);
 
-      final String generatedManifest = generatedManifestFile.readAsStringSync();
+      xcodeProject = xcodeProjectFile.readAsStringSync();
+      generatedManifest = generatedManifestFile.readAsStringSync();
       const String emptyDependencies = 'dependencies: [\n        \n    ],\n';
 
+      expect(xcodeProject.contains('FlutterGeneratedPluginSwiftPackage'), isTrue);
       expect(generatedManifest.contains('integration_test'), isFalse);
       expect(generatedManifest.contains(emptyDependencies), isTrue);
     } finally {
