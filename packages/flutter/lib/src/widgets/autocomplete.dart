@@ -362,6 +362,12 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _onChangedCallId += 1;
     final int callId = _onChangedCallId;
     final TextEditingValue value = _textEditingController.value;
+
+    // Makes sure that optionsBuilder is only called when text in the field changes.
+    if (value.text == _lastFieldText) {
+      return;
+    }
+    _lastFieldText = value.text;
     final Iterable<T> options = await widget.optionsBuilder(value);
 
     // Makes sure that previous call results do not replace new ones.
@@ -377,10 +383,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
     // Make sure the options are no longer hidden if the content of the field
     // changes (ignore selection changes).
-    if (value.text != _lastFieldText) {
-      _lastFieldText = value.text;
-      _updateOptionsViewVisibility();
-    }
+    _updateOptionsViewVisibility();
   }
 
   // Called from fieldViewBuilder when the user submits the field.
