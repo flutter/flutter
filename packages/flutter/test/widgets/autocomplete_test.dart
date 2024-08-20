@@ -1431,4 +1431,65 @@ void main() {
     expect(find.byKey(optionsKey), findsOneWidget);
     expect(lastOptions, <String>['lemur']);
   });
+
+  testWidgets('update dropdown state when field input changes return to the starting keyword', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    Iterable<String>? lastOptions;
+    const Duration delay = Duration(milliseconds: 100);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) async {
+              final Iterable<String> options = kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+              return Future<Iterable<String>>.delayed(delay, () => options);
+            },
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+              );
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastOptions = options;
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      )
+    );
+
+    // Setup starting point.
+    await tester.enterText(find.byKey(fieldKey), 'ele');
+    await tester.pump(delay);
+    expect(lastOptions, <String>['chameleon', 'elephant']);
+    expect(find.byKey(optionsKey), findsOneWidget);
+
+    // Hide options.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsNothing);
+
+    // Enter another letter and then immediately erase it.
+    await tester.enterText(find.byKey(fieldKey), 'eleo');
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsNothing);
+
+    await tester.enterText(find.byKey(fieldKey), 'ele');
+    await tester.pump(delay);
+    expect(lastOptions, <String>['chameleon', 'elephant']);
+
+    // Options dropdown should be visible after the last optionsBuilder
+    // call is resolved.
+    expect(find.byKey(optionsKey), findsOneWidget);
+  });
 }
