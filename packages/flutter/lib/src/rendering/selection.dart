@@ -791,6 +791,8 @@ class SelectionDetails {
   const SelectionDetails({
     required this.status,
     required this.selectionFinalized,
+    required this.globalStartOffset,
+    required this.globalEndOffset,
     required this.ranges,
   });
 
@@ -803,6 +805,12 @@ class SelectionDetails {
   /// Returns false if the selection is ongoing and
   /// true if the selection is finalized.
   final bool selectionFinalized;
+
+  /// The global start offset.
+  final int globalStartOffset;
+
+  /// The global end offset.
+  final int globalEndOffset;
 
   /// The [SelectedContentRange]s that represent the selection.
   ///
@@ -841,6 +849,8 @@ class SelectionDetails {
     return 'SelectionDetails(\n'
            '  status: $status,\n'
            '  selectionFinalized: $selectionFinalized,\n'
+           '  globalStartOffset: $globalStartOffset\n'
+           '  globalEndOffset: $globalEndOffset,\n'
            '  ranges: $ranges,\n'
            ')';
   }
