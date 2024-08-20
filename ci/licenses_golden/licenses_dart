@@ -1,4 +1,4 @@
-Signature: 78d9a304f84afe77b871679a40906d23
+Signature: 5618c1c3c0fa65ec1a29057a65f8cb21
 
 ====================================================================================================
 LIBRARY: dart
@@ -4077,11 +4077,20 @@ ORIGIN: ../../../flutter/third_party/dart/runtime/platform/synchronization_posix
 ORIGIN: ../../../flutter/third_party/dart/runtime/platform/synchronization_win.cc + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/platform/threads.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/tools/dartfuzz/flag_fuzzer.dart + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/bytecode_reader.cc + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/bytecode_reader.h + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.cc + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/compiler/backend/dart_calling_conventions.cc + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/compiler/backend/dart_calling_conventions.h + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/constants_kbc.cc + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/constants_kbc.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/heap/incremental_compactor.cc + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/heap/incremental_compactor.h + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/interpreter.cc + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/interpreter.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/os.cc + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/stack_frame_kbc.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/private/custom_hash_set.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_only.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/private/identity_hash_set.dart + ../../../flutter/third_party/dart/LICENSE
@@ -4112,11 +4121,20 @@ FILE: ../../../flutter/third_party/dart/runtime/platform/synchronization_posix.c
 FILE: ../../../flutter/third_party/dart/runtime/platform/synchronization_win.cc
 FILE: ../../../flutter/third_party/dart/runtime/platform/threads.h
 FILE: ../../../flutter/third_party/dart/runtime/tools/dartfuzz/flag_fuzzer.dart
+FILE: ../../../flutter/third_party/dart/runtime/vm/bytecode_reader.cc
+FILE: ../../../flutter/third_party/dart/runtime/vm/bytecode_reader.h
+FILE: ../../../flutter/third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.cc
+FILE: ../../../flutter/third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.h
 FILE: ../../../flutter/third_party/dart/runtime/vm/compiler/backend/dart_calling_conventions.cc
 FILE: ../../../flutter/third_party/dart/runtime/vm/compiler/backend/dart_calling_conventions.h
+FILE: ../../../flutter/third_party/dart/runtime/vm/constants_kbc.cc
+FILE: ../../../flutter/third_party/dart/runtime/vm/constants_kbc.h
 FILE: ../../../flutter/third_party/dart/runtime/vm/heap/incremental_compactor.cc
 FILE: ../../../flutter/third_party/dart/runtime/vm/heap/incremental_compactor.h
+FILE: ../../../flutter/third_party/dart/runtime/vm/interpreter.cc
+FILE: ../../../flutter/third_party/dart/runtime/vm/interpreter.h
 FILE: ../../../flutter/third_party/dart/runtime/vm/os.cc
+FILE: ../../../flutter/third_party/dart/runtime/vm/stack_frame_kbc.h
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/private/custom_hash_set.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_only.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/private/identity_hash_set.dart
@@ -4769,7 +4787,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/790fcb755a0a6872cd5d36904b77630dcf7f0212
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/c22bf5aedbcf1881e68ab264fed70a50aa3f2f53
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
