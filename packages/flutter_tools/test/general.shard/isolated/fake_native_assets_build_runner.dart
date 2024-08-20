@@ -165,6 +165,7 @@ class FakeHotRunnerNativeAssetsBuilder implements HotRunnerNativeAssetsBuilder {
     required Uri projectUri,
     required FileSystem fileSystem,
     required List<FlutterDevice> flutterDevices,
+    required String packageConfigPath,
     required PackageConfig packageConfig,
     required Logger logger,
   }) {

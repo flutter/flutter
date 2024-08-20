@@ -35,8 +35,6 @@ Future<String> createProject(Directory temp, { List<String>? arguments }) async 
   final CreateCommand command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...arguments, projectPath]);
-  // Create `.packages` since it's not created when the flag `--no-pub` is passed.
-  globals.fs.file(globals.fs.path.join(projectPath, '.packages')).createSync();
   return projectPath;
 }
 

@@ -54,7 +54,7 @@ class CleanCommand extends FlutterCommand {
     deleteFile(buildDir);
 
     deleteFile(flutterProject.dartTool);
-    deleteFile(flutterProject.packagesFile);
+    deleteFile(flutterProject.directory.childFile('.packages'));
 
     deleteFile(flutterProject.android.ephemeralDirectory);
 

@@ -54,10 +54,10 @@ class WebEntrypointTarget extends Target {
   Future<void> build(Environment environment) async {
     final String? targetFile = environment.defines[kTargetFile];
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
-    // TODO(zanderso): support configuration of this file.
-    const String packageFile = '.packages';
+    final File packageConfigFile = findPackageConfigFileOrDefault(environment.projectDir);
+
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      environment.fileSystem.file(packageFile),
+      packageConfigFile,
       logger: environment.logger,
     );
     final FlutterProject flutterProject = FlutterProject.current();
@@ -129,7 +129,7 @@ abstract class Dart2WebTarget extends Target {
     compilerSnapshot,
     const Source.artifact(Artifact.engineDartBinary),
     const Source.pattern('{BUILD_DIR}/main.dart'),
-    const Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
+    const Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
   ];
 
   @override
@@ -188,7 +188,7 @@ class Dart2JSTarget extends Dart2WebTarget {
       ...compilerConfig.toSharedCommandOptions(buildMode),
       '-o',
       environment.buildDir.childFile('app.dill').path,
-      '--packages=.dart_tool/package_config.json',
+      '--packages=${findPackageConfigFileOrDefault(environment.projectDir).path}',
       '--cfe-only',
       environment.buildDir.childFile('main.dart').path, // dartfile
     ];
@@ -302,7 +302,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
       'compile',
       'wasm',
-      '--packages=.dart_tool/package_config.json',
+      '--packages=${findPackageConfigFileOrDefault(environment.projectDir).path}',
       '--extra-compiler-option=--platform=$platformFilePath',
       '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
       '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',

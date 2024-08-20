@@ -32,7 +32,7 @@ void main() {
     );
 
     await bundle.build(
-      packagesPath: '.packages',
+      packageConfigPath: '.packages',
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       flavor: flavor,
     );
