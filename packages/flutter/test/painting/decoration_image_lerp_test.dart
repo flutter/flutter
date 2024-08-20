@@ -29,176 +29,177 @@ void main() {
       0x00, 0x01, 0xe2, 0x21, 0xbc, 0x33, 0x00, 0x00,  0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42,
       0x60, 0x82,
     ]));
-    // final MemoryImage red = MemoryImage(Uint8List.fromList(<int>[
-    //   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
-    //   0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,  0x01, 0x03, 0x00, 0x00, 0x00, 0x25, 0xdb, 0x56,
-    //   0xca, 0x00, 0x00, 0x00, 0x03, 0x50, 0x4c, 0x54,  0x45, 0xff, 0x00, 0x00, 0x19, 0xe2, 0x09, 0x37,
-    //   0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41, 0x54,  0x08, 0xd7, 0x63, 0x60, 0x00, 0x00, 0x00, 0x02,
-    //   0x00, 0x01, 0xe2, 0x21, 0xbc, 0x33, 0x00, 0x00,  0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42,
-    //   0x60, 0x82,
-    // ]));
+    final MemoryImage red = MemoryImage(Uint8List.fromList(<int>[
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+      0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,  0x01, 0x03, 0x00, 0x00, 0x00, 0x25, 0xdb, 0x56,
+      0xca, 0x00, 0x00, 0x00, 0x03, 0x50, 0x4c, 0x54,  0x45, 0xff, 0x00, 0x00, 0x19, 0xe2, 0x09, 0x37,
+      0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41, 0x54,  0x08, 0xd7, 0x63, 0x60, 0x00, 0x00, 0x00, 0x02,
+      0x00, 0x01, 0xe2, 0x21, 0xbc, 0x33, 0x00, 0x00,  0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42,
+      0x60, 0x82,
+    ]));
 
     late final _ImageLoader greenLoader = _ImageLoader(green);
+    late final _ImageLoader redLoader = _ImageLoader(green);
 
     await tester.runAsync(() async {
       await greenLoader.load();
-      // await load(red);
+      await redLoader.load();
     });
 
+    await tester.pumpWidget(
+      ColoredBox(
+        color: Colors.white,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: RepaintBoundary(
+            child: Wrap(
+              textDirection: TextDirection.ltr,
+              children: <Widget>[
+                TestImage(
+                  DecorationImage(image: green, repeat: ImageRepeat.repeat)
+                ),
+                TestImage(DecorationImage.lerp(
+                  DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                  DecorationImage(image: red, repeat: ImageRepeat.repeat),
+                  0.0,
+                )),
+                TestImage(DecorationImage.lerp(
+                  DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                  DecorationImage(image: red, repeat: ImageRepeat.repeat),
+                  0.1,
+                )),
+                TestImage(DecorationImage.lerp(
+                  DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                  DecorationImage(image: red, repeat: ImageRepeat.repeat),
+                  0.2,
+                )),
+                TestImage(DecorationImage.lerp(
+                  DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                  DecorationImage(image: red, repeat: ImageRepeat.repeat),
+                  0.5,
+                )),
+                TestImage(DecorationImage.lerp(
+                  DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                  DecorationImage(image: red, repeat: ImageRepeat.repeat),
+                  0.8,
+                )),
+                TestImage(DecorationImage.lerp(
+                  DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                  DecorationImage(image: red, repeat: ImageRepeat.repeat),
+                  0.9,
+                )),
+                TestImage(DecorationImage.lerp(
+                  DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                  DecorationImage(image: red, repeat: ImageRepeat.repeat),
+                  1.0,
+                )),
+                TestImage(
+                  DecorationImage(image: red, repeat: ImageRepeat.repeat),
+                ),
+                for (double t = 0.0; t < 1.0; t += 0.125)
+                  TestImage(DecorationImage.lerp(
+                    DecorationImage.lerp(
+                      DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                      DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                      t,
+                    ),
+                    DecorationImage.lerp(
+                      DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                      DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                      t,
+                    ),
+                    t,
+                  )),
+                for (double t = 0.0; t < 1.0; t += 0.125)
+                  TestImage(DecorationImage.lerp(
+                    DecorationImage.lerp(
+                      DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                      DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                      1.0 - t,
+                    ),
+                    DecorationImage.lerp(
+                      DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                      DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                      t,
+                    ),
+                    t,
+                  )),
+                for (double t = 0.0; t < 1.0; t += 0.125)
+                  TestImage(DecorationImage.lerp(
+                    DecorationImage.lerp(
+                      DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                      DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                      t,
+                    ),
+                    DecorationImage.lerp(
+                      DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                      DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                      1.0 - t,
+                    ),
+                    t,
+                  )),
+                for (double t = 0.0; t < 1.0; t += 0.125)
+                  TestImage(DecorationImage.lerp(
+                    DecorationImage.lerp(
+                      DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                      DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                      1.0 - t,
+                    ),
+                    DecorationImage.lerp(
+                      DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                      DecorationImage(image: green, repeat: ImageRepeat.repeat),
+                      1.0 - t,
+                    ),
+                    t,
+                  )),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(Wrap),
+      matchesGoldenFile('decoration_image.lerp.0.png'),
+    );
+
+    if (!kIsWeb) { // TODO(ianh): https://github.com/flutter/flutter/issues/130610
+      // final ui.Image image = (await tester.binding.runAsync<ui.Image>(() => captureImage(find.byType(Wrap).evaluate().single)))!;
+      // addTearDown(() => image.dispose());
+      // final Uint8List bytes = (await tester.binding.runAsync<ByteData?>(() => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba)))!.buffer.asUint8List();
+      // expect(image.width, 792);
+      // expect(image.height, 48);
+      // expect(bytes, hasLength(image.width * image.height * 4));
+      // Color getPixel(int x, int y) {
+      //   final int offset = (x + y * image.width) * 4;
+      //   return Color.fromARGB(0xFF, bytes[offset], bytes[offset + 1], bytes[offset + 2]);
+      // }
+      // Color getBlockPixel(int index) {
+      //   int x = 12 + index * 24;
+      //   final int y = 12 + (x ~/ image.width) * 24;
+      //   x %= image.width;
+      //   return getPixel(x, y);
+      // }
+      // const Color lime = Color(0xFF00FF00);
+      // expect(getBlockPixel(0), lime); // pure green
+      // expect(getBlockPixel(1), lime); // 100% green 0% red
+      // expect(getBlockPixel(2), const Color(0xFF19E600));
+      // expect(getBlockPixel(3), const Color(0xFF33CC00));
+      // expect(getBlockPixel(4), const Color(0xFF808000)); // 50-50 mix green/red
+      // expect(getBlockPixel(5), const Color(0xFFCD3200));
+      // expect(getBlockPixel(6), const Color(0xFFE61900));
+      // expect(getBlockPixel(7), const Color(0xFFFF0000)); // 0% green 100% red
+      // expect(getBlockPixel(8), const Color(0xFFFF0000)); // pure red
+      // for (int index = 9; index < 40; index += 1) {
+      //   expect(getBlockPixel(index), lime);
+      // }
+    }
+
     greenLoader.dispose();
+    redLoader.dispose();
     imageCache.clear();
-    // await tester.pumpWidget(Placeholder());
 
-
-    // await tester.pumpWidget(
-    //   ColoredBox(
-    //     color: Colors.white,
-    //     child: Align(
-    //       alignment: Alignment.topLeft,
-    //       child: RepaintBoundary(
-    //         child: Wrap(
-    //           textDirection: TextDirection.ltr,
-    //           children: <Widget>[
-    //             TestImage(
-    //               DecorationImage(image: green, repeat: ImageRepeat.repeat)
-    //             ),
-    //             TestImage(DecorationImage.lerp(
-    //               DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //               DecorationImage(image: red, repeat: ImageRepeat.repeat),
-    //               0.0,
-    //             )),
-    //             TestImage(DecorationImage.lerp(
-    //               DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //               DecorationImage(image: red, repeat: ImageRepeat.repeat),
-    //               0.1,
-    //             )),
-    //             TestImage(DecorationImage.lerp(
-    //               DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //               DecorationImage(image: red, repeat: ImageRepeat.repeat),
-    //               0.2,
-    //             )),
-    //             TestImage(DecorationImage.lerp(
-    //               DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //               DecorationImage(image: red, repeat: ImageRepeat.repeat),
-    //               0.5,
-    //             )),
-    //             TestImage(DecorationImage.lerp(
-    //               DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //               DecorationImage(image: red, repeat: ImageRepeat.repeat),
-    //               0.8,
-    //             )),
-    //             TestImage(DecorationImage.lerp(
-    //               DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //               DecorationImage(image: red, repeat: ImageRepeat.repeat),
-    //               0.9,
-    //             )),
-    //             TestImage(DecorationImage.lerp(
-    //               DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //               DecorationImage(image: red, repeat: ImageRepeat.repeat),
-    //               1.0,
-    //             )),
-    //             TestImage(
-    //               DecorationImage(image: red, repeat: ImageRepeat.repeat),
-    //             ),
-    //             for (double t = 0.0; t < 1.0; t += 0.125)
-    //               TestImage(DecorationImage.lerp(
-    //                 DecorationImage.lerp(
-    //                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //                   t,
-    //                 ),
-    //                 DecorationImage.lerp(
-    //                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //                   t,
-    //                 ),
-    //                 t,
-    //               )),
-    //             for (double t = 0.0; t < 1.0; t += 0.125)
-    //               TestImage(DecorationImage.lerp(
-    //                 DecorationImage.lerp(
-    //                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //                   1.0 - t,
-    //                 ),
-    //                 DecorationImage.lerp(
-    //                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //                   t,
-    //                 ),
-    //                 t,
-    //               )),
-    //             for (double t = 0.0; t < 1.0; t += 0.125)
-    //               TestImage(DecorationImage.lerp(
-    //                 DecorationImage.lerp(
-    //                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //                   t,
-    //                 ),
-    //                 DecorationImage.lerp(
-    //                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //                   1.0 - t,
-    //                 ),
-    //                 t,
-    //               )),
-    //             for (double t = 0.0; t < 1.0; t += 0.125)
-    //               TestImage(DecorationImage.lerp(
-    //                 DecorationImage.lerp(
-    //                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //                   1.0 - t,
-    //                 ),
-    //                 DecorationImage.lerp(
-    //                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
-    //                   1.0 - t,
-    //                 ),
-    //                 t,
-    //               )),
-    //           ],
-    //         ),
-    //       ),
-    //     ),
-    //   ),
-    // );
-
-    // await expectLater(
-    //   find.byType(Wrap),
-    //   matchesGoldenFile('decoration_image.lerp.0.png'),
-    // );
-
-    // if (!kIsWeb) { // TODO(ianh): https://github.com/flutter/flutter/issues/130610
-    //   final ui.Image image = (await tester.binding.runAsync<ui.Image>(() => captureImage(find.byType(Wrap).evaluate().single)))!;
-    //   addTearDown(() => image.dispose());
-    //   final Uint8List bytes = (await tester.binding.runAsync<ByteData?>(() => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba)))!.buffer.asUint8List();
-    //   expect(image.width, 792);
-    //   expect(image.height, 48);
-    //   expect(bytes, hasLength(image.width * image.height * 4));
-    //   Color getPixel(int x, int y) {
-    //     final int offset = (x + y * image.width) * 4;
-    //     return Color.fromARGB(0xFF, bytes[offset], bytes[offset + 1], bytes[offset + 2]);
-    //   }
-    //   Color getBlockPixel(int index) {
-    //     int x = 12 + index * 24;
-    //     final int y = 12 + (x ~/ image.width) * 24;
-    //     x %= image.width;
-    //     return getPixel(x, y);
-    //   }
-    //   const Color lime = Color(0xFF00FF00);
-    //   expect(getBlockPixel(0), lime); // pure green
-    //   expect(getBlockPixel(1), lime); // 100% green 0% red
-    //   expect(getBlockPixel(2), const Color(0xFF19E600));
-    //   expect(getBlockPixel(3), const Color(0xFF33CC00));
-    //   expect(getBlockPixel(4), const Color(0xFF808000)); // 50-50 mix green/red
-    //   expect(getBlockPixel(5), const Color(0xFFCD3200));
-    //   expect(getBlockPixel(6), const Color(0xFFE61900));
-    //   expect(getBlockPixel(7), const Color(0xFFFF0000)); // 0% green 100% red
-    //   expect(getBlockPixel(8), const Color(0xFFFF0000)); // pure red
-    //   for (int index = 9; index < 40; index += 1) {
-    //     expect(getBlockPixel(index), lime);
-    //   }
-    // }
   }, skip: kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
 
   testWidgets('ImageDecoration.lerp 2',
