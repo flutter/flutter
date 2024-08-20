@@ -117,9 +117,8 @@ void main() {
 
     await commandRunner.run(<String>['get', targetDirectory.path]);
     final FlutterProject rootProject = FlutterProject.fromDirectory(targetDirectory);
-    final File packageConfigFile = rootProject.dartTool.childFile('package_config.json');
-    expect(packageConfigFile.existsSync(), true);
-    expect(packageConfigFile.readAsStringSync(), '{"configVersion":2,"packages":[]}');
+    expect(rootProject.packageConfigFile.existsSync(), true);
+    expect(await rootProject.packageConfigFile.readAsString(), '{"configVersion":2,"packages":[]}');
   }, overrides: <Type, Generator>{
     Pub: () => pub,
     ProcessManager: () => FakeProcessManager.any(),

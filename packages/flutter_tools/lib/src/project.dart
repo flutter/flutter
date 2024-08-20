@@ -214,6 +214,15 @@ class FlutterProject {
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
 
+  /// The `.packages` file of this project.
+  File get packagesFile => directory.childFile('.packages');
+
+  /// The `package_config.json` file of the project.
+  ///
+  /// This is the replacement for .packages which contains language
+  /// version information.
+  File get packageConfigFile => directory.childDirectory('.dart_tool').childFile('package_config.json');
+
   /// The `.metadata` file of this project.
   File get metadataFile => directory.childFile('.metadata');
 

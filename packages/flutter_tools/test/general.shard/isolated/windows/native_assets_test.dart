@@ -491,19 +491,18 @@ void main() {
         fileSystem.directory(r'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.35.32215\bin\Hostx64\x64');
     await msvcBinDir.create(recursive: true);
 
-    final File packageConfigFile = fileSystem
+    final File packagesFile = fileSystem
         .directory(projectUri)
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
-    await packageConfigFile.parent.create();
-    await packageConfigFile.create();
+    await packagesFile.parent.create();
+    await packagesFile.create();
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      packageConfigFile,
+      packagesFile,
       logger: environment.logger,
     );
     final NativeAssetsBuildRunner runner = NativeAssetsBuildRunnerImpl(
       projectUri,
-      packageConfigFile.path,
       packageConfig,
       fileSystem,
       logger,

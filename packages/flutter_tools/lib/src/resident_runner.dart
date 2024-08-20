@@ -1202,7 +1202,6 @@ abstract class ResidentRunner extends ResidentHandlers {
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       projectDir: globals.fs.currentDirectory,
-      packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
       generateDartPluginRegistry: generateDartPluginRegistry,
       defines: <String, String>{
         // Needed for Dart plugin registry generation.

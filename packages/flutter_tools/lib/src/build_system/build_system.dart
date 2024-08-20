@@ -334,7 +334,6 @@ class Environment {
   /// [engineVersion] should be set to null for local engine builds.
   factory Environment({
     required Directory projectDir,
-    required String packageConfigPath,
     required Directory outputDir,
     required Directory cacheDir,
     required Directory flutterRootDir,
@@ -375,7 +374,6 @@ class Environment {
     return Environment._(
       outputDir: outputDir,
       projectDir: projectDir,
-      packageConfigPath: packageConfigPath,
       buildDir: buildDirectory,
       rootBuildDir: rootBuildDir,
       cacheDir: cacheDir,
@@ -400,7 +398,6 @@ class Environment {
   @visibleForTesting
   factory Environment.test(Directory testDirectory, {
     Directory? projectDir,
-    String? packageConfigPath,
     Directory? outputDir,
     Directory? cacheDir,
     Directory? flutterRootDir,
@@ -419,7 +416,6 @@ class Environment {
   }) {
     return Environment(
       projectDir: projectDir ?? testDirectory,
-      packageConfigPath: packageConfigPath ?? '.dart_tool/package_config.json',
       outputDir: outputDir ?? testDirectory,
       cacheDir: cacheDir ?? testDirectory,
       flutterRootDir: flutterRootDir ?? testDirectory,
@@ -441,7 +437,6 @@ class Environment {
   Environment._({
     required this.outputDir,
     required this.projectDir,
-    required this.packageConfigPath,
     required this.buildDir,
     required this.rootBuildDir,
     required this.cacheDir,
@@ -462,11 +457,6 @@ class Environment {
   /// The [Source] value which is substituted with the path to [projectDir].
   static const String kProjectDirectory = '{PROJECT_DIR}';
 
-  /// The [Source] value which is substituted with the path to the directory
-  /// that contains `.dart_tool/package_config.json1`.
-  /// That is the grand-parent of [BuildInfo.packageConfigPath].
-  static const String kWorkspaceDirectory = '{WORKSPACE_DIR}';
-
   /// The [Source] value which is substituted with the path to [buildDir].
   static const String kBuildDirectory = '{BUILD_DIR}';
 
@@ -485,16 +475,10 @@ class Environment {
   /// can be located.
   final Directory projectDir;
 
-  /// The path to the package configuration file to use for compilation.
-  ///
-  /// This is used by package:package_config to locate the actual package_config.json
-  /// file. If not provided, defaults to `.dart_tool/package_config.json`.
-  final String packageConfigPath;
-
   /// The `BUILD_DIR` environment variable.
   ///
   /// The root of the output directory where build step intermediates and
-  /// outputs are written. Current usages of assemble configure this to be
+  /// outputs are written. Current usages of assemble configure ths to be
   /// a unique directory under `.dart_tool/flutter_build`, though it can
   /// be placed anywhere. The uniqueness is only enforced by callers, and
   /// is currently done by hashing the build configuration.

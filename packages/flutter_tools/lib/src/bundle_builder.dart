@@ -55,7 +55,6 @@ class BundleBuilder {
     // If the precompiled flag was not passed, force us into debug mode.
     final Environment environment = Environment(
       projectDir: project.directory,
-      packageConfigPath: buildInfo.packageConfigPath,
       outputDir: globals.fs.directory(assetDirPath),
       buildDir: project.dartTool.childDirectory('flutter_build'),
       cacheDir: globals.cache.getRoot(),
@@ -116,17 +115,18 @@ class BundleBuilder {
 Future<AssetBundle?> buildAssets({
   required String manifestPath,
   String? assetDirPath,
-  required String packageConfigPath,
+  String? packagesPath,
   TargetPlatform? targetPlatform,
   String? flavor,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
+  packagesPath ??= globals.fs.path.absolute('.packages');
 
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int result = await assetBundle.build(
     manifestPath: manifestPath,
-    packageConfigPath: packageConfigPath,
+    packagesPath: packagesPath,
     targetPlatform: targetPlatform,
     flavor: flavor,
   );

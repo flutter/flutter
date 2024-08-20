@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -36,14 +35,7 @@ void main() {
         ..web = FakeWebProject()
         ..windows = FakeWindowsProject()
         ..linux = FakeLinuxProject();
-      flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
-{
-  "packages": [],
-  "configVersion": 2
-}
-''');
+      flutterProject.directory.childFile('.packages').createSync(recursive: true);
     }
 
     setUp(() async {
@@ -68,25 +60,17 @@ void main() {
       ''';
 
       final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('cache');
-      final File packageConfigFile = flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json')
+      final File packagesFile = flutterProject.directory.childFile('.packages')
             ..createSync(recursive: true);
-      final Map<String, Object?> packageConfig = <String, Object?>{
-        'packages': <Object?>[],
-        'configVersion': 2,
-      };
       for (final String name in pluginNames) {
         final Directory pluginDirectory = fakePubCache.childDirectory(name);
-        (packageConfig['packages']! as List<Object?>).add(<String, Object?>{
-          'name': name,
-          'rootUri': pluginDirectory.uri.toString(),
-          'packageUri': 'lib/',
-        });
+        packagesFile.writeAsStringSync(
+            '$name:${pluginDirectory.childFile('lib').uri}\n',
+            mode: FileMode.writeOnlyAppend);
         pluginDirectory.childFile('pubspec.yaml')
             ..createSync(recursive: true)
             ..writeAsStringSync(pluginYamlTemplate.replaceAll('PLUGIN_CLASS', name));
       }
-
-      packageConfigFile.writeAsStringSync(jsonEncode(packageConfig));
     }
 
     group('for iOS', () {
