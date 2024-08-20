@@ -139,8 +139,12 @@ Damage DiffContext::ComputeDamage(const SkIRect& accumulated_buffer_damage,
   frame_damage.roundOut(&res.frame_damage);
 
   SkIRect frame_clip = SkIRect::MakeSize(frame_size_);
-  res.buffer_damage.intersect(frame_clip);
-  res.frame_damage.intersect(frame_clip);
+  if (!res.buffer_damage.intersect(frame_clip)) {
+    res.buffer_damage.setEmpty();
+  }
+  if (!res.frame_damage.intersect(frame_clip)) {
+    res.frame_damage.setEmpty();
+  }
 
   if (horizontal_clip_alignment > 1 || vertical_clip_alignment > 1) {
     AlignRect(res.buffer_damage, horizontal_clip_alignment,

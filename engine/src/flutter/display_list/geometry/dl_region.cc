@@ -499,8 +499,8 @@ DlRegion DlRegion::MakeIntersection(const DlRegion& a, const DlRegion& b) {
     return DlRegion();
   } else if (a.isSimple() && b.isSimple()) {
     SkIRect r(a.bounds_);
+    [[maybe_unused]]
     auto res = r.intersect(b.bounds_);
-    (void)res;  // Suppress unused variable warning in release builds.
     FML_DCHECK(res);
     return DlRegion(r);
   } else if (a.isSimple() && a.bounds_.contains(b.bounds_)) {

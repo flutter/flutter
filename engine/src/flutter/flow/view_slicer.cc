@@ -89,11 +89,19 @@ std::unordered_map<int64_t, SkRect> SliceViews(
       }
 
       // Get the intersection rect with the `current_view_rect`,
-      partial_joined_rect.intersect(SkRect::Make(current_view_rect.roundOut()));
-
-      // Join the `partial_joined_rect` into `full_joined_rect` to get the rect
-      // above the current `slice`
-      full_joined_rect.join(partial_joined_rect);
+      if (partial_joined_rect.intersect(
+              SkRect::Make(current_view_rect.roundOut()))) {
+        // Join the `partial_joined_rect` into `full_joined_rect` to get the
+        // rect above the current `slice`, only if it intersects the indicated
+        // view. This should always be the case because we just deleted any
+        // rects that don't intersect the "rounded-in" view, so they must
+        // all intersect the "rounded-out" view (or the partial join could
+        // be empty in which case this would be a NOP). Either way, the
+        // penalty for not checking the return value of the intersect method
+        // would be to join a non-overlapping rectangle into the overlay
+        // bounds - if the above implementation ever changes - so we check it.
+        full_joined_rect.join(partial_joined_rect);
+      }
     }
 
     if (!full_joined_rect.isEmpty()) {

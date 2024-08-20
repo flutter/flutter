@@ -617,7 +617,12 @@ void DisplayListBuilder::RestoreLayer() {
   if (layer_op->options.bounds_from_caller()) {
     if (!content_bounds.isEmpty() && !layer_op->rect.contains(content_bounds)) {
       layer_op->options = layer_op->options.with_content_is_clipped();
-      content_bounds.intersect(layer_op->rect);
+      if (!content_bounds.intersect(layer_op->rect)) {
+        // Should never happen because we prune ops that don't intersect the
+        // supplied bounds so content_bounds would already be empty and we
+        // wouldn't come into this control block due to the empty test above.
+        content_bounds.setEmpty();
+      }
     }
   }
   layer_op->rect = content_bounds;

@@ -4119,6 +4119,32 @@ TEST_F(DisplayListTest, SaveLayerBoundsClipDetectionSimpleClippedRect) {
   EXPECT_TRUE(expector.all_bounds_checked());
 }
 
+TEST_F(DisplayListTest, DisjointSaveLayerBoundsProduceEmptySuppliedBounds) {
+  // This test was added when we fixed the Builder code to check the
+  // return value of the SkRect::intersect method, but it turns out
+  // that the indicated case never happens in practice due to the
+  // internal culling during the recording process. It actually passes
+  // both before and after the fix, but is here to ensure the right
+  // behavior does not regress.
+
+  SkRect layer_bounds = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  SkRect draw_rect = SkRect::MakeLTRB(50.0f, 50.0f, 100.0f, 100.0f);
+  ASSERT_FALSE(layer_bounds.intersects(draw_rect));
+  ASSERT_FALSE(layer_bounds.isEmpty());
+  ASSERT_FALSE(draw_rect.isEmpty());
+
+  DisplayListBuilder builder;
+  builder.SaveLayer(&layer_bounds, nullptr);
+  builder.DrawRect(draw_rect, DlPaint());
+  builder.Restore();
+  auto display_list = builder.Build();
+
+  SaveLayerBoundsExpector expector;
+  expector.addSuppliedExpectation(SkRect::MakeEmpty(), false);
+  display_list->Dispatch(expector);
+  EXPECT_TRUE(expector.all_bounds_checked());
+}
+
 class DepthExpector : public virtual DlOpReceiver,
                       virtual IgnoreAttributeDispatchHelper,
                       virtual IgnoreTransformDispatchHelper,
