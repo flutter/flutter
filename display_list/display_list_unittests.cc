@@ -253,70 +253,6 @@ TEST_F(DisplayListTest, EmptyRebuild) {
   ASSERT_TRUE(dl2->Equals(dl3));
 }
 
-TEST_F(DisplayListTest, GeneralReceiverInitialValues) {
-  DisplayListGeneralReceiver receiver;
-
-  EXPECT_EQ(receiver.GetOpsReceived(), 0u);
-
-  auto max_type = static_cast<int>(DisplayListOpType::kMaxOp);
-  for (int i = 0; i <= max_type; i++) {
-    DisplayListOpType type = static_cast<DisplayListOpType>(i);
-    EXPECT_EQ(receiver.GetOpsReceived(type), 0u) << type;
-  }
-
-  auto max_category = static_cast<int>(DisplayListOpCategory::kMaxCategory);
-  for (int i = 0; i <= max_category; i++) {
-    DisplayListOpCategory category = static_cast<DisplayListOpCategory>(i);
-    EXPECT_EQ(receiver.GetOpsReceived(category), 0u) << category;
-  }
-}
-
-TEST_F(DisplayListTest, Iteration) {
-  DisplayListBuilder builder;
-  builder.DrawRect({10, 10, 20, 20}, DlPaint());
-  auto dl = builder.Build();
-  for (DlIndex i : *dl) {
-    EXPECT_EQ(dl->GetOpType(i), DisplayListOpType::kDrawRect)  //
-        << "at " << i;
-    EXPECT_EQ(dl->GetOpCategory(i), DisplayListOpCategory::kRendering)
-        << "at " << i;
-  }
-}
-
-TEST_F(DisplayListTest, InvalidIndices) {
-  DisplayListBuilder builder;
-  builder.DrawRect(kTestBounds, DlPaint());
-  auto dl = builder.Build();
-  DisplayListGeneralReceiver receiver;
-
-  EXPECT_FALSE(dl->Dispatch(receiver, -1));
-  EXPECT_FALSE(dl->Dispatch(receiver, dl->GetRecordCount()));
-  EXPECT_EQ(dl->GetOpType(-1), DisplayListOpType::kInvalidOp);
-  EXPECT_EQ(dl->GetOpType(dl->GetRecordCount()), DisplayListOpType::kInvalidOp);
-  EXPECT_EQ(dl->GetOpCategory(-1), DisplayListOpCategory::kInvalidCategory);
-  EXPECT_EQ(dl->GetOpCategory(dl->GetRecordCount()),
-            DisplayListOpCategory::kInvalidCategory);
-  EXPECT_EQ(dl->GetOpCategory(-1), DisplayListOpCategory::kInvalidCategory);
-  EXPECT_EQ(dl->GetOpCategory(DisplayListOpType::kInvalidOp),
-            DisplayListOpCategory::kInvalidCategory);
-  EXPECT_EQ(dl->GetOpCategory(DisplayListOpType::kMaxOp),
-            DisplayListOpCategory::kInvalidCategory);
-  EXPECT_EQ(receiver.GetOpsReceived(), 0u);
-}
-
-TEST_F(DisplayListTest, ValidIndices) {
-  DisplayListBuilder builder;
-  builder.DrawRect(kTestBounds, DlPaint());
-  auto dl = builder.Build();
-  DisplayListGeneralReceiver receiver;
-
-  EXPECT_EQ(dl->GetRecordCount(), 1u);
-  EXPECT_TRUE(dl->Dispatch(receiver, 0u));
-  EXPECT_EQ(dl->GetOpType(0u), DisplayListOpType::kDrawRect);
-  EXPECT_EQ(dl->GetOpCategory(0u), DisplayListOpCategory::kRendering);
-  EXPECT_EQ(receiver.GetOpsReceived(), 1u);
-}
-
 TEST_F(DisplayListTest, BuilderCanBeReused) {
   DisplayListBuilder builder(kTestBounds);
   builder.DrawRect(kTestBounds, DlPaint());
@@ -742,38 +678,6 @@ TEST_F(DisplayListTest, SingleOpDisplayListsRecapturedAreEqual) {
           group.op_name + "(variant " + std::to_string(i + 1) + " == copy)";
       ASSERT_TRUE(DisplayListsEQ_Verbose(dl, copy));
       ASSERT_EQ(copy->op_count(false), dl->op_count(false)) << desc;
-      ASSERT_EQ(copy->GetRecordCount(), dl->GetRecordCount());
-      ASSERT_EQ(copy->bytes(false), dl->bytes(false)) << desc;
-      ASSERT_EQ(copy->op_count(true), dl->op_count(true)) << desc;
-      ASSERT_EQ(copy->bytes(true), dl->bytes(true)) << desc;
-      ASSERT_EQ(copy->total_depth(), dl->total_depth()) << desc;
-      ASSERT_EQ(copy->bounds(), dl->bounds()) << desc;
-      ASSERT_TRUE(copy->Equals(*dl)) << desc;
-      ASSERT_TRUE(dl->Equals(*copy)) << desc;
-    }
-  }
-}
-
-TEST_F(DisplayListTest, SingleOpDisplayListsRecapturedByIndexAreEqual) {
-  for (auto& group : allGroups) {
-    for (size_t i = 0; i < group.variants.size(); i++) {
-      sk_sp<DisplayList> dl = Build(group.variants[i]);
-      // Verify recapturing the replay of the display list is Equals()
-      // when dispatching directly from the DL to another builder
-      DisplayListBuilder copy_builder;
-      DlOpReceiver& r = ToReceiver(copy_builder);
-      for (DlIndex i = 0; i < dl->GetRecordCount(); i++) {
-        EXPECT_NE(dl->GetOpType(i), DisplayListOpType::kInvalidOp);
-        EXPECT_NE(dl->GetOpCategory(i),
-                  DisplayListOpCategory::kInvalidCategory);
-        EXPECT_TRUE(dl->Dispatch(r, i));
-      }
-      sk_sp<DisplayList> copy = copy_builder.Build();
-      auto desc =
-          group.op_name + "(variant " + std::to_string(i + 1) + " == copy)";
-      ASSERT_TRUE(DisplayListsEQ_Verbose(dl, copy));
-      ASSERT_EQ(copy->op_count(false), dl->op_count(false)) << desc;
-      ASSERT_EQ(copy->GetRecordCount(), dl->GetRecordCount());
       ASSERT_EQ(copy->bytes(false), dl->bytes(false)) << desc;
       ASSERT_EQ(copy->op_count(true), dl->op_count(true)) << desc;
       ASSERT_EQ(copy->bytes(true), dl->bytes(true)) << desc;
@@ -3236,55 +3140,27 @@ TEST_F(DisplayListTest, RTreeOfClippedSaveLayerFilterScene) {
 }
 
 TEST_F(DisplayListTest, RTreeRenderCulling) {
-  SkRect rect1 = SkRect::MakeLTRB(0, 0, 10, 10);
-  SkRect rect2 = SkRect::MakeLTRB(20, 0, 30, 10);
-  SkRect rect3 = SkRect::MakeLTRB(0, 20, 10, 30);
-  SkRect rect4 = SkRect::MakeLTRB(20, 20, 30, 30);
-  DlPaint paint1 = DlPaint().setColor(DlColor::kRed());
-  DlPaint paint2 = DlPaint().setColor(DlColor::kGreen());
-  DlPaint paint3 = DlPaint().setColor(DlColor::kBlue());
-  DlPaint paint4 = DlPaint().setColor(DlColor::kMagenta());
-
   DisplayListBuilder main_builder(true);
-  main_builder.DrawRect(rect1, paint1);
-  main_builder.DrawRect(rect2, paint2);
-  main_builder.DrawRect(rect3, paint3);
-  main_builder.DrawRect(rect4, paint4);
+  DlOpReceiver& main_receiver = ToReceiver(main_builder);
+  main_receiver.drawRect({0, 0, 10, 10});
+  main_receiver.drawRect({20, 0, 30, 10});
+  main_receiver.drawRect({0, 20, 10, 30});
+  main_receiver.drawRect({20, 20, 30, 30});
   auto main = main_builder.Build();
 
-  auto test = [main](SkIRect cull_rect, const sk_sp<DisplayList>& expected,
-                     const std::string& label) {
-    SkRect cull_rectf = SkRect::Make(cull_rect);
-
+  auto test = [main](SkIRect cull_rect, const sk_sp<DisplayList>& expected) {
     {  // Test SkIRect culling
       DisplayListBuilder culling_builder;
       main->Dispatch(ToReceiver(culling_builder), cull_rect);
 
-      EXPECT_TRUE(DisplayListsEQ_Verbose(culling_builder.Build(), expected))
-          << "using cull rect " << cull_rect  //
-          << " where " << label;
+      EXPECT_TRUE(DisplayListsEQ_Verbose(culling_builder.Build(), expected));
     }
 
     {  // Test SkRect culling
       DisplayListBuilder culling_builder;
-      main->Dispatch(ToReceiver(culling_builder), cull_rectf);
+      main->Dispatch(ToReceiver(culling_builder), SkRect::Make(cull_rect));
 
-      EXPECT_TRUE(DisplayListsEQ_Verbose(culling_builder.Build(), expected))
-          << "using cull rect " << cull_rectf  //
-          << " where " << label;
-    }
-
-    {  // Test using vector of culled indices
-      DisplayListBuilder culling_builder;
-      DlOpReceiver& receiver = ToReceiver(culling_builder);
-      auto indices = main->GetCulledIndices(cull_rectf);
-      for (DlIndex i : indices) {
-        EXPECT_TRUE(main->Dispatch(receiver, i));
-      }
-
-      EXPECT_TRUE(DisplayListsEQ_Verbose(culling_builder.Build(), expected))
-          << "using culled indices on cull rect " << cull_rectf  //
-          << " where " << label;
+      EXPECT_TRUE(DisplayListsEQ_Verbose(culling_builder.Build(), expected));
     }
   };
 
@@ -3294,62 +3170,57 @@ TEST_F(DisplayListTest, RTreeRenderCulling) {
     DisplayListBuilder expected_builder;
     auto expected = expected_builder.Build();
 
-    test(cull_rect, expected, "no rects intersect");
+    test(cull_rect, expected);
   }
 
   {  // Rect 1
     SkIRect cull_rect = {9, 9, 19, 19};
 
     DisplayListBuilder expected_builder;
-    expected_builder.DrawRect(rect1, paint1);
+    DlOpReceiver& expected_receiver = ToReceiver(expected_builder);
+    expected_receiver.drawRect({0, 0, 10, 10});
     auto expected = expected_builder.Build();
 
-    test(cull_rect, expected, "rect 1 intersects");
+    test(cull_rect, expected);
   }
 
   {  // Rect 2
     SkIRect cull_rect = {11, 9, 21, 19};
 
     DisplayListBuilder expected_builder;
-    // Unfortunately we don't cull attribute records (yet?) until the last op
-    ToReceiver(expected_builder).setColor(paint1.getColor());
-    expected_builder.DrawRect(rect2, paint2);
+    DlOpReceiver& expected_receiver = ToReceiver(expected_builder);
+    expected_receiver.drawRect({20, 0, 30, 10});
     auto expected = expected_builder.Build();
 
-    test(cull_rect, expected, "rect 2 intersects");
+    test(cull_rect, expected);
   }
 
   {  // Rect 3
     SkIRect cull_rect = {9, 11, 19, 21};
 
     DisplayListBuilder expected_builder;
-    // Unfortunately we don't cull attribute records (yet?) until the last op
-    ToReceiver(expected_builder).setColor(paint1.getColor());
-    ToReceiver(expected_builder).setColor(paint2.getColor());
-    expected_builder.DrawRect(rect3, paint3);
+    DlOpReceiver& expected_receiver = ToReceiver(expected_builder);
+    expected_receiver.drawRect({0, 20, 10, 30});
     auto expected = expected_builder.Build();
 
-    test(cull_rect, expected, "rect 3 intersects");
+    test(cull_rect, expected);
   }
 
   {  // Rect 4
     SkIRect cull_rect = {11, 11, 21, 21};
 
     DisplayListBuilder expected_builder;
-    // Unfortunately we don't cull attribute records (yet?) until the last op
-    ToReceiver(expected_builder).setColor(paint1.getColor());
-    ToReceiver(expected_builder).setColor(paint2.getColor());
-    ToReceiver(expected_builder).setColor(paint3.getColor());
-    expected_builder.DrawRect(rect4, paint4);
+    DlOpReceiver& expected_receiver = ToReceiver(expected_builder);
+    expected_receiver.drawRect({20, 20, 30, 30});
     auto expected = expected_builder.Build();
 
-    test(cull_rect, expected, "rect 4 intersects");
+    test(cull_rect, expected);
   }
 
   {  // All 4 rects
     SkIRect cull_rect = {9, 9, 21, 21};
 
-    test(cull_rect, main, "all rects intersect");
+    test(cull_rect, main);
   }
 }
 
