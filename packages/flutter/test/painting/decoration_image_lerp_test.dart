@@ -45,10 +45,9 @@ void main() {
       // await load(red);
     });
 
+    greenLoader.dispose();
     await tester.pumpWidget(Placeholder());
-
-    imageCache.clear();
-    addTearDown(greenLoader.dispose);
+    // imageCache.clear();
 
     // await tester.pumpWidget(
     //   ColoredBox(
