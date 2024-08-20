@@ -777,7 +777,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
         restorationId: widget.restorationId,
         hitTestBehavior: widget.hitTestBehavior,
         scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
-        dragStartBehavior: DragStartBehavior.start,
+        dragStartBehavior: widget.dragStartBehavior,
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return ListWheelViewport(
             diameterRatio: widget.diameterRatio,
