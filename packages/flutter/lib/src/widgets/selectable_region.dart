@@ -3168,11 +3168,9 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
     final SelectionGeometry lastSelectionGeometry = value;
     final SelectionResult result = super.dispatchSelectionEvent(event);
     if (value.status == SelectionStatus.none) {
-      debugPrint('selection is undefined');
       return result;
     }
     if (lastSelectionGeometry != value) {
-      debugPrint('super final: ${_calculateGlobalOffsets()}');
       onSelectionChanged.call(_getDetails());
     }
     // A selection finalized selection event will not affect the selection
@@ -3181,7 +3179,6 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
     if (event is SelectionFinalizedSelectionEvent) {
       final SelectionDetails currentFinalizedDetails = _getDetails();
       if (_lastFinalizedDetails != currentFinalizedDetails) {
-        debugPrint('super final: ${_calculateGlobalOffsets()}');
         onSelectionChanged.call(currentFinalizedDetails);
         _lastFinalizedDetails = currentFinalizedDetails;
       }
@@ -3189,7 +3186,7 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
     return result;
   }
 
-  ({int startOffset, int endOffset}) _calculateGlobalOffsets() {
+  ({int startOffset, int endOffset}) _calculateGlobalOffsets(List<SelectedContentRange> ranges) {
     int startOffset = 0;
     int endOffset = 0;
     Selectable? startingSelectable;
@@ -3228,10 +3225,14 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
   }
 
   SelectionDetails _getDetails() {
+    final List<SelectedContentRange> ranges = getSelections();
+    final ({int startOffset, int endOffset}) globalOffsets = _calculateGlobalOffsets(ranges);
     return SelectionDetails(
       status: value.status,
       selectionFinalized: selectionIsFinalized,
-      ranges: getSelections(),
+      globalStartOffset: globalOffsets.startOffset,
+      globalEndOffset: globalOffsets.endOffset,
+      ranges: ranges,
     );
   }
 }
