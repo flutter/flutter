@@ -1026,21 +1026,14 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
 
     // If the sum of the children's width is larger than the allowed max width,
     // each segment width should scale down until the overall size can fit in
-    // the parent constraints.
+    // the parent constraints; similarly, if the sum of the children's width is
+    // smaller than the allowed min width, each segment width should scale up
+    // until the overall size can fit in the parent constraints.
     final double allowedMaxWidth = constraints.maxWidth - totalSeparatorWidth;
-    if (totalWidth > allowedMaxWidth) {
-      final double scale = allowedMaxWidth / totalWidth;
-      for (int i = 0; i < segmentWidths.length; i++) {
-        segmentWidths[i] = segmentWidths[i] * scale;
-      }
-    }
-
-    // If the sum of the children's width is smaller than the allowed min width,
-    // each segment width should scale up until the overall size can fit in
-    // the parent constraints.
     final double allowedMinWidth = constraints.minWidth - totalSeparatorWidth;
-    if (totalWidth < allowedMinWidth) {
-      final double scale = allowedMinWidth / totalWidth;
+
+    final double scale = clampDouble(totalWidth, allowedMinWidth, allowedMaxWidth) / totalWidth;
+    if (scale != 1) {
       for (int i = 0; i < segmentWidths.length; i++) {
         segmentWidths[i] = segmentWidths[i] * scale;
       }
