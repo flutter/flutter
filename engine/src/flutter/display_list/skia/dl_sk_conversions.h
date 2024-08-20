@@ -19,7 +19,9 @@ inline SkBlendMode ToSk(DlBlendMode mode) {
 }
 
 inline SkColor ToSk(DlColor color) {
-  return color.argb();
+  // This is safe because both SkColor and DlColor are backed by ARGB uint32_t.
+  // See dl_sk_conversions_unittests.cc.
+  return reinterpret_cast<SkColor&>(color);
 }
 
 inline SkPaint::Style ToSk(DlDrawStyle style) {

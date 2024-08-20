@@ -69,14 +69,8 @@ sk_sp<SkShader> ToSk(const DlColorSource* source) {
   if (!source) {
     return nullptr;
   }
-  static auto ToSkColors =
-      [](const DlGradientColorSourceBase* gradient) -> std::vector<SkColor> {
-    std::vector<SkColor> sk_colors;
-    sk_colors.reserve(gradient->stop_count());
-    for (int i = 0; i < gradient->stop_count(); ++i) {
-      sk_colors.push_back(gradient->colors()[i].argb());
-    }
-    return sk_colors;
+  static auto ToSkColors = [](const DlGradientColorSourceBase* gradient) {
+    return reinterpret_cast<const SkColor*>(gradient->colors());
   };
   switch (source->type()) {
     case DlColorSourceType::kColor: {
@@ -102,9 +96,8 @@ sk_sp<SkShader> ToSk(const DlColorSource* source) {
       FML_DCHECK(linear_source != nullptr);
       SkPoint pts[] = {linear_source->start_point(),
                        linear_source->end_point()};
-      std::vector<SkColor> skcolors = ToSkColors(linear_source);
       return SkGradientShader::MakeLinear(
-          pts, skcolors.data(), linear_source->stops(),
+          pts, ToSkColors(linear_source), linear_source->stops(),
           linear_source->stop_count(), ToSk(linear_source->tile_mode()), 0,
           linear_source->matrix_ptr());
     }
@@ -114,7 +107,7 @@ sk_sp<SkShader> ToSk(const DlColorSource* source) {
       FML_DCHECK(radial_source != nullptr);
       return SkGradientShader::MakeRadial(
           radial_source->center(), radial_source->radius(),
-          ToSkColors(radial_source).data(), radial_source->stops(),
+          ToSkColors(radial_source), radial_source->stops(),
           radial_source->stop_count(), ToSk(radial_source->tile_mode()), 0,
           radial_source->matrix_ptr());
     }
@@ -125,7 +118,7 @@ sk_sp<SkShader> ToSk(const DlColorSource* source) {
       return SkGradientShader::MakeTwoPointConical(
           conical_source->start_center(), conical_source->start_radius(),
           conical_source->end_center(), conical_source->end_radius(),
-          ToSkColors(conical_source).data(), conical_source->stops(),
+          ToSkColors(conical_source), conical_source->stops(),
           conical_source->stop_count(), ToSk(conical_source->tile_mode()), 0,
           conical_source->matrix_ptr());
     }
@@ -135,7 +128,7 @@ sk_sp<SkShader> ToSk(const DlColorSource* source) {
       FML_DCHECK(sweep_source != nullptr);
       return SkGradientShader::MakeSweep(
           sweep_source->center().x(), sweep_source->center().y(),
-          ToSkColors(sweep_source).data(), sweep_source->stops(),
+          ToSkColors(sweep_source), sweep_source->stops(),
           sweep_source->stop_count(), ToSk(sweep_source->tile_mode()),
           sweep_source->start(), sweep_source->end(), 0,
           sweep_source->matrix_ptr());
@@ -282,18 +275,11 @@ sk_sp<SkMaskFilter> ToSk(const DlMaskFilter* filter) {
 }
 
 sk_sp<SkVertices> ToSk(const std::shared_ptr<DlVertices>& vertices) {
-  std::vector<SkColor> sk_colors;
-  const SkColor* sk_colors_ptr = nullptr;
-  if (vertices->colors()) {
-    sk_colors.reserve(vertices->vertex_count());
-    for (int i = 0; i < vertices->vertex_count(); ++i) {
-      sk_colors.push_back(vertices->colors()[i].argb());
-    }
-    sk_colors_ptr = sk_colors.data();
-  }
+  const SkColor* sk_colors =
+      reinterpret_cast<const SkColor*>(vertices->colors());
   return SkVertices::MakeCopy(ToSk(vertices->mode()), vertices->vertex_count(),
                               vertices->vertices(),
-                              vertices->texture_coordinates(), sk_colors_ptr,
+                              vertices->texture_coordinates(), sk_colors,
                               vertices->index_count(), vertices->indices());
 }
 

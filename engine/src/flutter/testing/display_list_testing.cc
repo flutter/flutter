@@ -326,24 +326,7 @@ std::ostream& operator<<(std::ostream& os, const DlFilterMode& mode) {
 }
 
 std::ostream& operator<<(std::ostream& os, const DlColor& color) {
-  const char* color_space;
-  switch(color.getColorSpace()) {
-    case flutter::DlColorSpace::kSRGB:
-      color_space = "srgb";
-      break;
-    case flutter::DlColorSpace::kExtendedSRGB:
-      color_space = "srgb_xr";
-      break;
-    case flutter::DlColorSpace::kDisplayP3:
-      color_space = "p3";
-      break;
-  }
-  return os << "DlColor(" << //
-    color.getAlphaF() << ", " << //
-    color.getRedF() << ", " << //
-    color.getGreenF() << ", " << //
-    color.getBlueF() << ", " << //
-    color_space << ")";
+  return os << "DlColor(" << std::hex << color.argb() << std::dec << ")";
 }
 
 std::ostream& operator<<(std::ostream& os, DlImageSampling sampling) {
