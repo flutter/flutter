@@ -79,7 +79,7 @@ const FontWeight _kFontWeight = FontWeight.w500;
 const FontWeight _kHighlightedFontWeight = FontWeight.w600;
 
 // Inspected from iOS 17.5 simulator
-const Color _kDisabledContentColor = Color.fromARGB(115, 176, 176, 176);
+const Color _kDisabledContentColor = Color.fromARGB(115, 122, 122, 122);
 
 // The spring animation used when the thumb changes its rect.
 final SpringSimulation _kThumbSpringAnimationSimulation = SpringSimulation(
