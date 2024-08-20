@@ -114,9 +114,9 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
        }},
       {"SetColor",
        {
-           {0, 8, 0,
+           {0, 4 + sizeof(DlColor), 0,
             [](DlOpReceiver& r) { r.setColor(DlColor(SK_ColorGREEN)); }},
-           {0, 8, 0,
+           {0, 4 + sizeof(DlColor), 0,
             [](DlOpReceiver& r) { r.setColor(DlColor(SK_ColorBLUE)); }},
 
            // Reset attribute to default as last entry
@@ -137,14 +137,13 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
       {"SetColorSource",
        {
            {0, 96, 0, [](DlOpReceiver& r) { r.setColorSource(&kTestSource1); }},
-           // stop_count * (sizeof(float) + sizeof(uint32_t)) = 80
-           {0, 80 + 6 * 4, 0,
+           {0, 152, 0,
             [](DlOpReceiver& r) { r.setColorSource(kTestSource2.get()); }},
-           {0, 80 + 6 * 4, 0,
+           {0, 152, 0,
             [](DlOpReceiver& r) { r.setColorSource(kTestSource3.get()); }},
-           {0, 88 + 6 * 4, 0,
+           {0, 160, 0,
             [](DlOpReceiver& r) { r.setColorSource(kTestSource4.get()); }},
-           {0, 80 + 6 * 4, 0,
+           {0, 152, 0,
             [](DlOpReceiver& r) { r.setColorSource(kTestSource5.get()); }},
 
            // Reset attribute to default as last entry
@@ -219,11 +218,11 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
        }},
       {"SetColorFilter",
        {
-           {0, 24, 0,
+           {0, 40, 0,
             [](DlOpReceiver& r) { r.setColorFilter(&kTestBlendColorFilter1); }},
-           {0, 24, 0,
+           {0, 40, 0,
             [](DlOpReceiver& r) { r.setColorFilter(&kTestBlendColorFilter2); }},
-           {0, 24, 0,
+           {0, 40, 0,
             [](DlOpReceiver& r) { r.setColorFilter(&kTestBlendColorFilter3); }},
            {0, 96, 0,
             [](DlOpReceiver& r) {
@@ -551,15 +550,15 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
        }},
       {"DrawColor",
        {
-           {1, 16, 1,
+           {1, 32, 1,
             [](DlOpReceiver& r) {
               r.drawColor(DlColor(SK_ColorBLUE), DlBlendMode::kSrcIn);
             }},
-           {1, 16, 1,
+           {1, 32, 1,
             [](DlOpReceiver& r) {
               r.drawColor(DlColor(SK_ColorBLUE), DlBlendMode::kDstOut);
             }},
-           {1, 16, 1,
+           {1, 32, 1,
             [](DlOpReceiver& r) {
               r.drawColor(DlColor(SK_ColorCYAN), DlBlendMode::kSrcIn);
             }},
@@ -930,7 +929,7 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
                           DlBlendMode::kSrcIn, kNearestSampling, &cull_rect,
                           false);
             }},
-           {1, 48 + 32 + 8 + 8, 1,
+           {1, 128, 1,
             [](DlOpReceiver& r) {
               static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
               static SkRect texs[] = {{10, 10, 20, 20}, {20, 20, 30, 30}};
@@ -939,7 +938,7 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
                           DlBlendMode::kSrcIn, kNearestSampling, nullptr,
                           false);
             }},
-           {1, 64 + 32 + 8 + 8, 1,
+           {1, 144, 1,
             [](DlOpReceiver& r) {
               static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
               static SkRect texs[] = {{10, 10, 20, 20}, {20, 20, 30, 30}};
@@ -997,27 +996,27 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
        }},
       {"DrawShadow",
        {
-           {1, 48, 1,
+           {1, 64, 1,
             [](DlOpReceiver& r) {
               r.drawShadow(kTestPath1, DlColor(SK_ColorGREEN), 1.0, false, 1.0);
             }},
-           {1, 48, 1,
+           {1, 64, 1,
             [](DlOpReceiver& r) {
               r.drawShadow(kTestPath2, DlColor(SK_ColorGREEN), 1.0, false, 1.0);
             }},
-           {1, 48, 1,
+           {1, 64, 1,
             [](DlOpReceiver& r) {
               r.drawShadow(kTestPath1, DlColor(SK_ColorBLUE), 1.0, false, 1.0);
             }},
-           {1, 48, 1,
+           {1, 64, 1,
             [](DlOpReceiver& r) {
               r.drawShadow(kTestPath1, DlColor(SK_ColorGREEN), 2.0, false, 1.0);
             }},
-           {1, 48, 1,
+           {1, 64, 1,
             [](DlOpReceiver& r) {
               r.drawShadow(kTestPath1, DlColor(SK_ColorGREEN), 1.0, true, 1.0);
             }},
-           {1, 48, 1,
+           {1, 64, 1,
             [](DlOpReceiver& r) {
               r.drawShadow(kTestPath1, DlColor(SK_ColorGREEN), 1.0, false, 2.5);
             }},
