@@ -124,6 +124,7 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(
         <FakeCommand>[
+          // Create the framework dylib.
           const FakeCommand(
             command: <Pattern>[
               'lipo',
@@ -133,6 +134,8 @@ void main() {
               'foo.framework/foo',
             ],
           ),
+          // Lookup the original install names of the dylib.
+          // There can be different install names for different architectures.
           FakeCommand(
             command: const <Pattern>[
               'otool',
@@ -146,6 +149,10 @@ void main() {
               '@rpath/libfoo.dylib',
             ].join('\n'),
           ),
+          // Change the instal name of the binary itself and of its dependencies.
+          // We pass the old to new install name mappings of all native assets dylibs,
+          // even for the dylib that is being updated, since the `-change` option
+          // is ignored if the dylib does not depend on the target dylib.
           const FakeCommand(
             command: <Pattern>[
               'install_name_tool',
@@ -157,6 +164,7 @@ void main() {
               '/build/native_assets/ios/foo.framework/foo',
             ],
           ),
+          // Only after all changes to the dylib have been made do we sign it.
           const FakeCommand(
             command: <Pattern>[
               'codesign',
