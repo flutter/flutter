@@ -899,13 +899,19 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     int index = 0;
     while (index < segmentWidths.length) {
       final double segmentWidth = segmentWidths[index];
-      subtotalWidth += segmentWidth + separatorWidth / 2;
+      if (index == 0 || index == segmentWidths.length - 1) {
+        subtotalWidth += separatorWidth / 2;
+      } else {
+        subtotalWidth += separatorWidth;
+      }
 
+      subtotalWidth += segmentWidth;
       if (dx <= subtotalWidth) {
         break;
       }
       index++;
     }
+
     return index;
   }
 
