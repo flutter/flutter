@@ -16,7 +16,15 @@ enum _Tab {
 // Each tab has two possible pages.
 enum _TabPage {
   home,
-  one,
+  one;
+
+  static _TabPage? fromName(String? name) {
+    return switch (name) {
+      'home' => _TabPage.home,
+      'one' => _TabPage.one,
+      _ => null,
+    };
+  }
 }
 
 typedef _TabPageCallback = void Function(List<_TabPage> pages);
@@ -101,7 +109,7 @@ class _BottomNavPageState extends State<_BottomNavPage> with RestorationMixin {
           title: 'Home Tab',
           color: Colors.grey,
           pages: _restorableTabHomePages.value,
-          onChangedPages: (List<_TabPage> pages) {
+          onChangePages: (List<_TabPage> pages) {
             setState(() {
               _restorableTabHomePages.value = pages;
             });
@@ -113,7 +121,7 @@ class _BottomNavPageState extends State<_BottomNavPage> with RestorationMixin {
           title: 'Tab One',
           color: Colors.amber,
           pages: _restorableTabOnePages.value,
-          onChangedPages: (List<_TabPage> pages) {
+          onChangePages: (List<_TabPage> pages) {
             setState(() {
               _restorableTabOnePages.value = pages;
             });
@@ -125,7 +133,7 @@ class _BottomNavPageState extends State<_BottomNavPage> with RestorationMixin {
           title: 'Tab Two',
           color: Colors.blueGrey,
           pages: _restorableTabTwoPages.value,
-          onChangedPages: (List<_TabPage> pages) {
+          onChangePages: (List<_TabPage> pages) {
             setState(() {
               _restorableTabTwoPages.value = pages;
             });
@@ -184,13 +192,13 @@ class _BottomNavTab extends StatefulWidget {
   const _BottomNavTab({
     super.key,
     required this.color,
-    required this.onChangedPages,
+    required this.onChangePages,
     required this.pages,
     required this.title,
   });
 
   final Color color;
-  final _TabPageCallback onChangedPages;
+  final _TabPageCallback onChangePages;
   final List<_TabPage> pages;
   final String title;
 
@@ -211,33 +219,31 @@ class _BottomNavTabState extends State<_BottomNavTab> {
         key: _navigatorKey,
         restorationScopeId: 'nested-navigator-${widget.title}',
         onDidRemovePage: (Page<Object?> page) {
-          // TODO(justinmc): If page isnt a tabpage, return early.
-          // After this all works, write a test.
-          final bool isTabPage = _TabPage.values.t((_TabPage tabPage) {
-            return page.name == tabPage.name;
-          },
-            orElse: () => null,
-          );
+          final _TabPage? tabPage = _TabPage.fromName(page.name);
           if (tabPage == null) {
             return;
           }
-          print('justin onDidRemovePage $page');
-          widget.onChangedPages(<_TabPage>[
+          final List<_TabPage> nextPages = <_TabPage>[
             ...widget.pages,
-          ]..removeLast());
+          ]..remove(tabPage);
+          if (nextPages.length < widget.pages.length) {
+            widget.onChangePages(nextPages);
+          }
         },
         pages: widget.pages.map((_TabPage page) {
           switch (page) {
             case _TabPage.home:
               return MaterialPage<void>(
                 restorationId: _TabPage.home.toString(),
+                name: 'home',
                 child: _LinksPage(
                   title: 'Bottom nav - tab ${widget.title} - route $page',
                   backgroundColor: widget.color,
                   buttons: <Widget>[
                     TextButton(
                       onPressed: () {
-                        widget.onChangedPages(<_TabPage>[
+                        assert(!widget.pages.contains(_TabPage.one));
+                        widget.onChangePages(<_TabPage>[
                           ...widget.pages,
                           _TabPage.one,
                         ]);
@@ -250,13 +256,14 @@ class _BottomNavTabState extends State<_BottomNavTab> {
             case _TabPage.one:
               return MaterialPage<void>(
                 restorationId: _TabPage.one.toString(),
+                name: 'one',
                 child: _LinksPage(
                   backgroundColor: widget.color,
                   title: 'Bottom nav - tab ${widget.title} - route $page',
                   buttons: <Widget>[
                     TextButton(
                       onPressed: () {
-                        widget.onChangedPages(<_TabPage>[
+                        widget.onChangePages(<_TabPage>[
                           ...widget.pages,
                         ]..removeLast());
                       },
