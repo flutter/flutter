@@ -17,13 +17,13 @@ class PluginDeferredComponentsConfig extends BasicDeferredComponentsConfig {
   @override
   String get androidBuild => r'''
 buildscript {
-    ext.kotlin_version = '1.8.22'
+    ext.kotlin_version = '1.7.10'
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.0'
+        classpath 'com.android.tools.build:gradle:7.3.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
     configurations.classpath {
@@ -72,7 +72,8 @@ apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gra
 
   @override
   String get appManifest => r'''
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.yourcompany.flavors">
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:name="${applicationName}"

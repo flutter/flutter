@@ -3,7 +3,8 @@ Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file. -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="io.flutter.addtoapp">
 
     <application android:allowBackup="false"
         tools:ignore="GoogleAppIndexingWarning,MissingApplicationIcon">
