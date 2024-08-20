@@ -503,33 +503,24 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   // them from interfering with the active drag gesture.
   bool get isThumbDragging => _startedOnSelectedSegment ?? false;
 
-  // Converts local coordinate to segments. If `widget.proportionalWidth` is
-  // false, this method assumes each segment has the same width; if it is true,
-  // this method assumes segments have their own width based on their contents.
+  // Converts local coordinate to segments.
   T segmentForXPosition(double dx) {
-    final TextDirection textDirection = Directionality.of(context);
     final BuildContext currentContext = segmentedControlRenderWidgetKey.currentContext!;
     final _RenderSegmentedControl<T> renderBox = currentContext.findRenderObject()! as _RenderSegmentedControl<T>;
-
-    if (widget.proportionalWidth) {
-      final int? segmentIndex = renderBox.getSegmentIndex(dx, textDirection);
-      assert(segmentIndex != null);
-      return widget.children.keys.elementAt(segmentIndex!);
-    }
 
     final int numOfChildren = widget.children.length;
     assert(renderBox.hasSize);
     assert(numOfChildren >= 2);
-    int index = (dx ~/ (renderBox.size.width / numOfChildren)).clamp(0, numOfChildren - 1);
 
-    switch (textDirection) {
+    int segmentIndex = renderBox.getClosestSegmentIndex(dx);
+
+    switch (Directionality.of(context)) {
       case TextDirection.ltr:
         break;
       case TextDirection.rtl:
-        index = numOfChildren - 1 - index;
+        segmentIndex = numOfChildren - 1 - segmentIndex;
     }
-
-    return widget.children.keys.elementAt(index);
+    return widget.children.keys.elementAt(segmentIndex);
   }
 
   bool _hasDraggedTooFar(DragUpdateDetails details) {
@@ -899,24 +890,23 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   }
 
   // Intrinsic Dimensions
-
-  double get totalSeparatorWidth => (_kSeparatorInset.horizontal + _kSeparatorWidth) * (childCount ~/ 2);
+  double get separatorWidth => _kSeparatorInset.horizontal + _kSeparatorWidth;
+  double get totalSeparatorWidth => separatorWidth * (childCount ~/ 2);
 
   List<double> segmentWidths = <double>[];
-  int? getSegmentIndex(double dx, TextDirection textDirection) {
+  int getClosestSegmentIndex(double dx) {
     double subtotalWidth = 0;
-    for (int i = 0; i < segmentWidths.length; i++) {
-      final double segmentWidth = segmentWidths[i];
-      subtotalWidth += segmentWidth;
+    int index = 0;
+    while (index < segmentWidths.length) {
+      final double segmentWidth = segmentWidths[index];
+      subtotalWidth += segmentWidth + separatorWidth / 2;
 
       if (dx <= subtotalWidth) {
-        return switch (textDirection) {
-          TextDirection.ltr => i,
-          TextDirection.rtl => segmentWidths.length - 1 - i,
-        };
+        break;
       }
+      index++;
     }
-    return null;
+    return index;
   }
 
   RenderBox? nonSeparatorChildAfter(RenderBox child) {
