@@ -1,4 +1,4 @@
-Signature: 5bd45cef1f1b8b089f9faa2252e67a7d
+Signature: 2b792e5cfa9cc5f7a35fd60d98a49a88
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -4594,6 +4594,7 @@ FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.internal/fuchsia.wlan.internal.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.minstrel/fuchsia.wlan.minstrel.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.mlme/fuchsia.wlan.mlme.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.policy/fuchsia.wlan.policy.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.sme/fuchsia.wlan.sme.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.stats/fuchsia.wlan.stats.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/zx/zx.fidl.json
@@ -11815,6 +11816,7 @@ FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.internal/fuchsia.wlan.internal.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.minstrel/fuchsia.wlan.minstrel.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.mlme/fuchsia.wlan.mlme.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.policy/fuchsia.wlan.policy.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.sme/fuchsia.wlan.sme.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.stats/fuchsia.wlan.stats.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/zx/zx.fidl.json
@@ -14713,6 +14715,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/availability_
 ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.regulator/fuchsia.regulator.bind + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/codec_delay.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/iso.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/l2cap.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/channel.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/coding_format.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.sandbox/availability.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -14762,6 +14765,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/availability_le
 FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.regulator/fuchsia.regulator.bind
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/codec_delay.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/iso.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/l2cap.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/channel.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/coding_format.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.sandbox/availability.fidl
@@ -19425,6 +19429,7 @@ FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.internal/fuchsia.wlan.internal.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.minstrel/fuchsia.wlan.minstrel.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.mlme/fuchsia.wlan.mlme.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.policy/fuchsia.wlan.policy.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.sme/fuchsia.wlan.sme.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.wlan.stats/fuchsia.wlan.stats.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/zx/zx.fidl.json
