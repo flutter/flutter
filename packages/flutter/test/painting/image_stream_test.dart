@@ -73,9 +73,6 @@ class FakeEventReportingImageStreamCompleter extends ImageStreamCompleter {
 }
 
 void main() {
-  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
-  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
-
   late Image image20x10;
   late Image image200x100;
   setUp(() async {
@@ -83,7 +80,9 @@ void main() {
     image200x100 = await createTestImage(width: 200, height: 100);
   });
 
-  testWidgets('Codec future fails', (WidgetTester tester) async {
+  testWidgets('Codec future fails',
+  // experimentalLeakTesting: LeakTesting.settings.withTrackedAll(),
+  (WidgetTester tester) async {
     final Completer<Codec> completer = Completer<Codec>();
     MultiFrameImageStreamCompleter(
       codec: completer.future,
@@ -107,7 +106,9 @@ void main() {
     await tester.idle();
     expect(mockCodec.numFramesAsked, 0);
 
-    void listener(ImageInfo image, bool synchronousCall) { }
+    void listener(ImageInfo image, bool synchronousCall) {
+      addTearDown(image.dispose);
+    }
     imageStream.addListener(ImageStreamListener(listener));
     await tester.idle();
     expect(mockCodec.numFramesAsked, 1);
@@ -122,7 +123,9 @@ void main() {
       scale: 1.0,
     );
 
-    void listener(ImageInfo image, bool synchronousCall) { }
+    void listener(ImageInfo image, bool synchronousCall) {
+      addTearDown(image.dispose);
+    }
     imageStream.addListener(ImageStreamListener(listener));
     await tester.idle();
     expect(mockCodec.numFramesAsked, 0);
@@ -145,7 +148,9 @@ void main() {
     await tester.idle();
     expect(mockCodec.numFramesAsked, 0);
 
-    void listener(ImageInfo image, bool synchronousCall) { }
+    void listener(ImageInfo image, bool synchronousCall) {
+      addTearDown(image.dispose);
+    }
     final ImageStreamListener streamListener = ImageStreamListener(listener);
     imageStream.addListener(streamListener);
     await tester.idle();
@@ -293,7 +298,9 @@ void main() {
       scale: 1.0,
     );
 
-    void listener(ImageInfo image, bool synchronousCall) { }
+    void listener(ImageInfo image, bool synchronousCall) {
+      addTearDown(image.dispose);
+    }
     imageStream.addListener(ImageStreamListener(listener));
     codecCompleter.complete(mockCodec);
     // MultiFrameImageStreamCompleter only sets an error handler for the next
@@ -469,7 +476,9 @@ void main() {
       scale: 1.0,
     );
 
-    void listener(ImageInfo image, bool synchronousCall) { }
+    void listener(ImageInfo image, bool synchronousCall) {
+      addTearDown(image.dispose);
+    }
     imageStream.addListener(ImageStreamListener(listener));
     final ImageStreamCompleterHandle handle = imageStream.keepAlive();
 
@@ -512,10 +521,12 @@ void main() {
     final List<ImageInfo> emittedImages1 = <ImageInfo>[];
     void listener1(ImageInfo image, bool synchronousCall) {
       emittedImages1.add(image);
+      addTearDown(image.dispose);
     }
     final List<ImageInfo> emittedImages2 = <ImageInfo>[];
     void listener2(ImageInfo image, bool synchronousCall) {
       emittedImages2.add(image);
+      addTearDown(image.dispose);
     }
     imageStream.addListener(ImageStreamListener(listener1));
     imageStream.addListener(ImageStreamListener(listener2));
@@ -545,7 +556,8 @@ void main() {
 
   });
 
-  testWidgets('timer is canceled when listeners are removed', (WidgetTester tester) async {
+  testWidgets('timer is canceled when listeners are removed',
+   (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
@@ -556,7 +568,9 @@ void main() {
       scale: 1.0,
     );
 
-    void listener(ImageInfo image, bool synchronousCall) { }
+    void listener(ImageInfo image, bool synchronousCall) {
+      addTearDown(image.dispose);
+    }
     imageStream.addListener(ImageStreamListener(listener));
 
     codecCompleter.complete(mockCodec);
@@ -589,7 +603,9 @@ void main() {
       scale: 1.0,
     );
 
-    void listener(ImageInfo image, bool synchronousCall) { }
+    void listener(ImageInfo image, bool synchronousCall) {
+      addTearDown(image.dispose);
+    }
     imageStream.addListener(ImageStreamListener(listener));
 
     codecCompleter.complete(mockCodec);
@@ -661,7 +677,9 @@ void main() {
       scale: 1.0,
     );
 
-    void listener(ImageInfo image, bool synchronousCall) { }
+    void listener(ImageInfo image, bool synchronousCall) {
+      addTearDown(image.dispose);
+    }
     imageStream.addListener(ImageStreamListener(listener));
 
     codecCompleter.complete(mockCodec);
