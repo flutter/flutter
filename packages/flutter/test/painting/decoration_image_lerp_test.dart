@@ -46,8 +46,9 @@ void main() {
     });
 
     greenLoader.dispose();
+    imageCache.clear();
     await tester.pumpWidget(Placeholder());
-    // imageCache.clear();
+
 
     // await tester.pumpWidget(
     //   ColoredBox(

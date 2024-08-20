@@ -1137,8 +1137,8 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _chunkSubscription?.onData(null);
       _chunkSubscription?.cancel();
       _chunkSubscription = null;
-      _emittedImage?.dispose();
-      _emittedImage = null;
+      // _emittedImage?.dispose();
+      // _emittedImage = null;
     }
   }
 }
