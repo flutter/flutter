@@ -438,7 +438,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   final TapGestureRecognizer tap = TapGestureRecognizer();
   final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
   final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
-  GlobalKey segmentedControlRenderWidgetKey = GlobalKey();
+  final GlobalKey segmentedControlRenderWidgetKey = GlobalKey();
 
   @override
   void initState() {
@@ -902,17 +902,17 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
 
   double get totalSeparatorWidth => (_kSeparatorInset.horizontal + _kSeparatorWidth) * (childCount ~/ 2);
 
-  List<double> childWidths = <double>[];
+  List<double> segmentWidths = <double>[];
   int? getSegmentIndex(double dx, TextDirection textDirection) {
     double subtotalWidth = 0;
-    for (int i = 0; i < childWidths.length; i++) {
-      final double segmentWidth = childWidths[i];
+    for (int i = 0; i < segmentWidths.length; i++) {
+      final double segmentWidth = segmentWidths[i];
       subtotalWidth += segmentWidth;
 
       if (dx <= subtotalWidth) {
         return switch (textDirection) {
           TextDirection.ltr => i,
-          TextDirection.rtl => childWidths.length - 1 - i,
+          TextDirection.rtl => segmentWidths.length - 1 - i,
         };
       }
     }
@@ -1018,15 +1018,15 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   }
 
   List<double> _getChildIntrinsicWidths(BoxConstraints constraints) {
-    final List<double> childWidths = <double>[];
+    final List<double> segmentWidths = <double>[];
     RenderBox? child = firstChild;
     while (child != null) {
       final double childWidth = child.getMaxIntrinsicWidth(double.infinity) + 2 * _kSegmentMinPadding;
       child = nonSeparatorChildAfter(child);
-      childWidths.add(childWidth);
+      segmentWidths.add(childWidth);
     }
 
-    final double totalWidth = childWidths.sum;
+    final double totalWidth = segmentWidths.sum;
 
     // If the sum of the children's width is larger than the allowed max width,
     // each segment width should scale down until the overall size can fit in
@@ -1034,8 +1034,8 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     final double allowedMaxWidth = constraints.maxWidth - totalSeparatorWidth;
     if (totalWidth > allowedMaxWidth) {
       final double scale = allowedMaxWidth / totalWidth;
-      for (int i = 0; i < childWidths.length; i++) {
-        childWidths[i] = childWidths[i] * scale;
+      for (int i = 0; i < segmentWidths.length; i++) {
+        segmentWidths[i] = segmentWidths[i] * scale;
       }
     }
 
@@ -1045,11 +1045,11 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     final double allowedMinWidth = constraints.minWidth - totalSeparatorWidth;
     if (totalWidth < allowedMinWidth) {
       final double scale = allowedMinWidth / totalWidth;
-      for (int i = 0; i < childWidths.length; i++) {
-        childWidths[i] = childWidths[i] * scale;
+      for (int i = 0; i < segmentWidths.length; i++) {
+        segmentWidths[i] = segmentWidths[i] * scale;
       }
     }
-    return childWidths;
+    return segmentWidths;
   }
 
   Size _computeOverallSizeFromChildSize(BoxConstraints constraints) {
@@ -1084,10 +1084,10 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     final BoxConstraints constraints = this.constraints;
 
     if (proportionalWidth) {
-      childWidths = _getChildIntrinsicWidths(constraints);
+      segmentWidths = _getChildIntrinsicWidths(constraints);
     } else {
       final Size childSize = _calculateChildSize(constraints);
-      childWidths = List<double>.filled(childCount, childSize.width);
+      segmentWidths = List<double>.filled(childCount, childSize.width);
     }
 
     final double childHeight = _getMaxChildHeight(constraints, double.infinity);
@@ -1096,7 +1096,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     int index = 0;
     double start = 0;
     while (child != null) {
-      final BoxConstraints childConstraints = BoxConstraints.tight(Size(childWidths[index ~/ 2], childHeight));
+      final BoxConstraints childConstraints = BoxConstraints.tight(Size(segmentWidths[index ~/ 2], childHeight));
       child.layout(index.isEven ? childConstraints : separatorConstraints, parentUsesSize: true);
       final _SegmentedControlContainerBoxParentData childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
       final Offset childOffset = Offset(start, 0);
