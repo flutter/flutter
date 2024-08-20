@@ -17,10 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('ImageDecoration.lerp 1',
-  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
-  (WidgetTester tester) async {
+  testWidgets('ImageDecoration.lerp without background', (WidgetTester tester) async {
     final MemoryImage green = MemoryImage(Uint8List.fromList(<int>[
       0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
       0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,  0x01, 0x03, 0x00, 0x00, 0x00, 0x25, 0xdb, 0x56,
