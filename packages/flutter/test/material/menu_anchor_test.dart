@@ -97,7 +97,8 @@ void main() {
                 onTap: () {
                   onPressed?.call(TestMenu.outsideButton);
                 },
-                child: Text(TestMenu.outsideButton.label)),
+                child: Text(TestMenu.outsideButton.label),
+              ),
               MenuAnchor(
                 childFocusNode: focusNode,
                 controller: controller,
@@ -209,7 +210,7 @@ void main() {
       equals(const Rect.fromLTRB(257.0, 48.0, 471.0, 208.0)),
     );
 
-    // Test compact visual density (-2, -2)
+    // Test compact visual density (-2, -2).
     await tester.pumpWidget(Container());
     await tester.pumpWidget(buildMenu(visualDensity: VisualDensity.compact));
     await tester.pump();
@@ -284,7 +285,7 @@ void main() {
       ),
     );
 
-    // menu bar(horizontal menu)
+    // Menu bar (horizontal menu).
     Finder menuMaterial = find
         .ancestor(
           of: find.byType(TextButton),
@@ -314,7 +315,7 @@ void main() {
     expect(material.textStyle?.fontSize, 14.0);
     expect(material.textStyle?.height, 1.43);
 
-    // vertical menu
+    // Vertical menu.
     await tester.tap(find.text(TestMenu.mainMenu1.label));
     await tester.pump();
 
@@ -374,7 +375,7 @@ void main() {
       ),
     );
 
-    // menu bar(horizontal menu)
+    // Menu bar (horizontal menu).
     Finder menuMaterial = find
         .ancestor(
           of: find.widgetWithText(TextButton, TestMenu.mainMenu5.label),
@@ -402,7 +403,7 @@ void main() {
     expect(material.shape, const RoundedRectangleBorder());
     expect(material.textStyle?.color, themeData.colorScheme.onSurface.withOpacity(0.38));
 
-    // vertical menu
+    // Vertical menu.
     await tester.tap(find.text(TestMenu.mainMenu2.label));
     await tester.pump();
 
@@ -506,14 +507,10 @@ void main() {
                         ),
                       ),
                       onPressed: () {},
-                      child: const Text(
-                        'Category',
-                      ),
+                      child: const Text('Category'),
                     ),
                   ],
-                  child: const Text(
-                    'Main Menu',
-                  ),
+                  child: const Text('Main Menu'),
                 ),
               ],
             ),
@@ -532,7 +529,7 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('focus is returned to previous focus before invoking onPressed', (WidgetTester tester) async {
+  testWidgets('Focus is returned to previous focus before invoking onPressed', (WidgetTester tester) async {
     final FocusNode buttonFocus = FocusNode(debugLabel: 'Button Focus');
     addTearDown(buttonFocus.dispose);
     FocusNode? focusInOnPressed;
@@ -1073,8 +1070,10 @@ void main() {
       );
       await tester.tap(find.text('Tap me'));
       await tester.pump();
+
       // Test default clip behavior.
       expect(getMenuBarMaterial(tester).clipBehavior, equals(Clip.hardEdge));
+
       // Close the menu.
       await tester.tapAt(const Offset(10.0, 10.0));
       await tester.pumpAndSettle();
@@ -1104,6 +1103,7 @@ void main() {
       );
       await tester.tap(find.text('Tap me'));
       await tester.pump();
+
       // Test custom clip behavior.
       expect(getMenuBarMaterial(tester).clipBehavior, equals(Clip.antiAlias));
     });
@@ -1457,7 +1457,7 @@ void main() {
       await tester.pump();
       expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
 
-      // Open the next submenu
+      // Open the next submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
@@ -1504,7 +1504,6 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pump();
       expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
-
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
@@ -1577,7 +1576,7 @@ void main() {
       await tester.pump();
       expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
 
-      // Open the next submenu
+      // Open the next submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
@@ -1624,7 +1623,6 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
       expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
-
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pump();
@@ -1841,19 +1839,18 @@ void main() {
       expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
       expect(find.text('Sub Menu 00'), findsNothing);
 
-      // Open the submenu again
+      // Open the submenu again.
       await tester.sendKeyEvent(LogicalKeyboardKey.space);
       await tester.pump();
       expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
       expect(find.text('Sub Menu 00'), findsOne);
 
-      // Close all menus
+      // Close all menus.
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pump();
       expect(focusedMenu, equals(TestMenu.anchorButton.label));
       expect(find.byType(MenuItemButton), findsNothing);
     });
-
 
     testWidgets('MenuAnchor RTL directional traversal works', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/119532
@@ -1903,7 +1900,7 @@ void main() {
 
       listenForFocusChanges();
 
-        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       expect(focusedMenu, equals(TestMenu.anchorButton.label));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
@@ -1952,13 +1949,13 @@ void main() {
       expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
       expect(find.text('Sub Menu 00'), findsNothing);
 
-      // Open the submenu again
+      // Open the submenu again.
       await tester.sendKeyEvent(LogicalKeyboardKey.space);
       await tester.pump();
       expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
       expect(find.text('Sub Menu 00'), findsOne);
 
-      // Close all menus
+      // Close all menus.
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pump();
       expect(focusedMenu, equals(TestMenu.anchorButton.label));
@@ -2019,6 +2016,102 @@ void main() {
       await hoverOver(tester, find.text(TestMenu.subSubMenu110.label));
       await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
+    });
+
+    testWidgets('hover traversal invalidates directional focus scope data', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/150910.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: createTestMenus(
+                onPressed: onPressed,
+                onOpen: onOpen,
+                onClose: onClose,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      // Have to open a menu initially to start things going.
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
+
+      await hoverOver(tester, find.text(TestMenu.subMenu12.label));
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+      // Move pointer to disabled menu.
+      await hoverOver(tester, find.text(TestMenu.mainMenu5.label));
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 10"))'));
+
+      await hoverOver(tester, find.text(TestMenu.subMenu12.label));
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+    });
+
+    testWidgets('scrolling does not trigger hover traversal', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/150911.
+      final GlobalKey scrolledMenuItemKey = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuAnchor(
+              style: const MenuStyle(
+                fixedSize: WidgetStatePropertyAll<Size>(Size.fromHeight(200)),
+              ),
+              controller: controller,
+              menuChildren: <Widget>[
+                for (int i = 0; i < 20; i++)
+                  MenuItemButton(
+                    key: i == 15 ? scrolledMenuItemKey : null,
+                    onPressed: () {},
+                    child: Text('Item $i'),
+                  )
+              ]
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      await hoverOver(tester, find.text('Item 1'));
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Item 1"))'));
+
+      // Scroll the menu while the pointer is over a menu item. The focus should
+      // not change.
+      tester.renderObject(find.text('Item 15')).showOnScreen();
+      await tester.pumpAndSettle();
+      expect(focusedMenu, equals('MenuItemButton(Text("Item 1"))'));
+
+      // Traverse with the keyboard to test that the menu scrolls without hover
+      // focus affecting the focused menu.
+      for (int i = 2; i < 20; i++) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Item $i"))'));
+      }
     });
 
     testWidgets('menus close on ancestor scroll', (WidgetTester tester) async {
@@ -2504,7 +2597,7 @@ void main() {
       opened.clear();
       closed.clear();
 
-      // Close menus using the controller
+      // Close menus using the controller.
       controller.close();
       await tester.pump();
 
@@ -2541,41 +2634,29 @@ void main() {
       await tester.tap(find.text(TestMenu.subMenu11.label));
       await tester.pump();
 
-      Text mnemonic0;
-      Text mnemonic1;
-      Text mnemonic2;
-      Text mnemonic3;
+      Text mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
+      Text mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
+      Text mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
+      Text mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
 
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
-          mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
           expect(mnemonic0.data, equals('Ctrl+A'));
-          mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
           expect(mnemonic1.data, equals('Shift+B'));
-          mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
           expect(mnemonic2.data, equals('Alt+C'));
-          mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
           expect(mnemonic3.data, equals('Meta+D'));
         case TargetPlatform.windows:
-          mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
           expect(mnemonic0.data, equals('Ctrl+A'));
-          mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
           expect(mnemonic1.data, equals('Shift+B'));
-          mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
           expect(mnemonic2.data, equals('Alt+C'));
-          mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
           expect(mnemonic3.data, equals('Win+D'));
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
-          mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
           expect(mnemonic0.data, equals('⌃ A'));
-          mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
           expect(mnemonic1.data, equals('⇧ B'));
-          mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
           expect(mnemonic2.data, equals('⌥ C'));
-          mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
           expect(mnemonic3.data, equals('⌘ D'));
       }
 
@@ -2718,9 +2799,7 @@ void main() {
       expect(find.text('leadingIcon'), findsOneWidget);
     });
 
-    testWidgets('autofocus is used when set and widget is enabled',
-        (WidgetTester tester) async {
-
+    testWidgets('autofocus is used when set and widget is enabled', (WidgetTester tester) async {
       listenForFocusChanges();
 
       await tester.pumpWidget(
@@ -2931,7 +3010,7 @@ void main() {
       await tester.pump();
       expect(find.byType(MenuItemButton), findsNWidgets(1));
 
-      // Taps the MenuItemButton which should close the menu
+      // Taps the MenuItemButton which should close the menu.
       await tester.tap(find.text('Button 1'));
       await tester.pump();
       expect(find.byType(MenuItemButton), findsNWidgets(0));
@@ -2967,7 +3046,7 @@ void main() {
       await tester.pump();
       expect(find.byType(MenuItemButton), findsNWidgets(1));
 
-      // Taps the MenuItemButton which shouldn't close the menu
+      // Taps the MenuItemButton which shouldn't close the menu.
       await tester.tap(find.text('Button 1'));
       await tester.pump();
       expect(find.byType(MenuItemButton), findsNWidgets(1));
@@ -3062,6 +3141,7 @@ void main() {
       );
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/147479.
     testWidgets('MenuItemButton can build when its child is null', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -3074,7 +3154,6 @@ void main() {
         ),
       );
 
-      // exception `Null check operator used on a null value` would be thrown.
       expect(tester.takeException(), isNull);
     });
   });
@@ -3542,8 +3621,7 @@ void main() {
       );
     });
 
-    testWidgets('vertically constrained menus are positioned above the anchor with the provided offset',
-        (WidgetTester tester) async {
+    testWidgets('vertically constrained menus are positioned above the anchor with the provided offset', (WidgetTester tester) async {
       await changeSurfaceSize(tester, const Size(800, 600));
       await tester.pumpWidget(
         MaterialApp(
@@ -3941,7 +4019,7 @@ void main() {
         ),
       );
 
-      // The flags should not have SemanticsFlag.isButton
+      // The flags should not have SemanticsFlag.isButton.
       expect(
         semantics,
         hasSemantics(
@@ -4008,7 +4086,7 @@ void main() {
         ),
       );
 
-      // The flags should not have SemanticsFlag.isButton
+      // The flags should not have SemanticsFlag.isButton.
       expect(
         semantics,
         hasSemantics(

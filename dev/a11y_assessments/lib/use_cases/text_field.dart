@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class TextFieldUseCase extends UseCase {
-
   @override
   String get name => 'TextField';
 
@@ -26,7 +25,7 @@ class _MainWidget extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('TextField'),
+        title: Semantics(headingLevel: 1, child: const Text('TextField demo')),
       ),
       body: ListView(
         children: <Widget>[

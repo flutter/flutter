@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class SliderUseCase extends UseCase {
-
   @override
   String get name => 'Slider';
 
@@ -34,7 +33,7 @@ class MainWidgetState extends State<MainWidget> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Slider'),
+        title: Semantics(headingLevel: 1, child: const Text('Slider demo')),
       ),
       body: Center(
         child: Semantics(
