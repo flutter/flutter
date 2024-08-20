@@ -80,6 +80,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   incompatibleJavaAndGradleVersionsHandler,
   remoteTerminatedHandshakeHandler,
   couldNotOpenCacheDirectoryHandler,
+  incompatibleCompileSdk35AndAgpVersionHandler,
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -639,4 +640,27 @@ final GradleHandledError couldNotOpenCacheDirectoryHandler = GradleHandledError(
     return GradleBuildStatus.retry;
   },
   eventLabel: 'could-not-open-cache-directory',
+);
+
+@visibleForTesting
+final GradleHandledError incompatibleCompileSdk35AndAgpVersionHandler = GradleHandledError(
+  test: (String line) => line.contains('RES_TABLE_TYPE_TYPE entry offsets overlap actual entry data'),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+  }) async {
+    globals.printBox(
+      '${globals.logger.terminal.warningMark} Using compileSdk 35 requires Android Gradle Plugin (AGP) 8.1.0 or higher.'
+          ' \n Please upgrade to a newer AGP version. The version of AGP that your project uses is likely'
+          " defined in:\n${project.android.settingsGradleFile.path},\nin the 'plugins' closure. \n Alternatively, if your "
+          'project was created with an older version of the templates, it is likely \nin the buildscript.dependencies '
+          'closure of the top-level build.gradle:\n${project.android.hostAppGradleFile.path}.\n\n Finally, if you have a'
+          ' strong reason to avoid upgrading AGP, you can temporarily lower the compileSdk version in the following file:\n${project.android.appGradleFile.path}',
+      title: _boxTitle,
+    );
+
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'incompatible-compile-sdk-and-agp',
 );

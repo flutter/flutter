@@ -14,6 +14,8 @@ import '../src/context.dart';
 
 
 // This test requires Java 11 due to the intentionally low version of Gradle.
+// It also overrides the template compile sdk version to 34, because using 35
+// requires AGP 8.0+.
 void main() {
   late Directory tempDir;
 
@@ -31,6 +33,7 @@ void main() {
     final VersionTuple versionTuple = VersionTuple(agpVersion: '7.0.0', gradleVersion: '7.5', kotlinVersion: '1.7.10');
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
         versions: versionTuple,
+        compileSdkOverride: '34',
         tempDir: tempDir
     );
     expect(result, const ProcessResultMatcher());
@@ -44,6 +47,7 @@ void main() {
     final VersionTuple versionTuple = VersionTuple(agpVersion: '7.0.0', gradleVersion: '7.0.2', kotlinVersion: '1.7.10');
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
         versions: versionTuple,
+        compileSdkOverride: '34',
         tempDir: tempDir
     );
     expect(result, const ProcessResultMatcher());
@@ -56,6 +60,7 @@ void main() {
     final VersionTuple versionTuple = VersionTuple(agpVersion: '7.4.0', gradleVersion: '7.5', kotlinVersion: '1.7.0');
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
         versions: versionTuple,
+        compileSdkOverride: '34',
         tempDir: tempDir
     );
 

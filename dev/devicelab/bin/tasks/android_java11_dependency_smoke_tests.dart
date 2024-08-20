@@ -25,14 +25,22 @@ List<VersionTuple> versionTuples = <VersionTuple>[
 
 // This test requires a Java version less than 17 due to the intentionally low
 // version of Gradle. We choose 11 because this was the primary version used in
-// CI before 17, and hence it is also hosted on CIPD.
+// CI before 17, and hence it is also hosted on CIPD. It also overrides to
+// compileSdkVersion 34 because compileSdk 35 requires AGP 8.0+.
 // https://docs.gradle.org/current/userguide/compatibility.html
 Future<void> main() async {
   /// The [FileSystem] for the integration test environment.
   const LocalFileSystem fileSystem = LocalFileSystem();
 
-  final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_android_dependency_version_tests');
+  final Directory tempDir = fileSystem
+      .systemTempDirectory
+      .createTempSync('flutter_android_dependency_version_tests');
   await task(() {
-    return buildFlutterApkWithSpecifiedDependencyVersions(versionTuples: versionTuples, tempDir: tempDir, localFileSystem: fileSystem);
+    return buildFlutterApkWithSpecifiedDependencyVersions(
+        versionTuples: versionTuples,
+        compileSdkOverride: '34',
+        tempDir: tempDir,
+        localFileSystem: fileSystem
+    );
   });
 }

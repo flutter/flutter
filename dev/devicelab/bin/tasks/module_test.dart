@@ -449,7 +449,7 @@ class ModuleTest {
 Future<void> main() async {
   await task(combine(<TaskFunction>[
     // ignore: avoid_redundant_argument_values
-    ModuleTest('module-gradle-7.6', gradleVersion: '7.6.3').call,
-    ModuleTest('module-gradle-7.6', gradleVersion: '7.6-rc-2').call,
+    ModuleTest('module-gradle-7.6', gradleVersion: '8.4').call,
+    ModuleTest('module-gradle-7.6', gradleVersion: '8.4-rc-3').call,
   ]));
 }
