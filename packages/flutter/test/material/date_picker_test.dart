@@ -1563,7 +1563,7 @@ void main() {
   });
 
   group('Semantics', () {
-    testWidgets('dialog is not focusable', (WidgetTester tester) async {
+    testWidgets('datepicker semantics', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
