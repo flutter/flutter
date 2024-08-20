@@ -392,7 +392,7 @@ static sk_sp<DisplayList> BlendModeTest(Vector2 content_scale,
   // Draw grid behind the images.
   {
     DlPaint paint;
-    paint.setColor(DlColor::RGBA(41 / 255.0, 41 / 255.0, 41 / 255.0, 255));
+    paint.setColor(DlColor::RGBA(41 / 255.0, 41 / 255.0, 41 / 255.0, 1));
     builder.DrawRect(SkRect::MakeLTRB(0, 0, 800, 400), paint);
   }
 

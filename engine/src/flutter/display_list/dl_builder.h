@@ -805,7 +805,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
 
   // kAnyColor is a non-opaque and non-transparent color that will not
   // trigger any short-circuit tests about the results of a blend.
-  static constexpr DlColor kAnyColor = DlColor::kMidGrey().withAlpha(0x80);
+  static constexpr DlColor kAnyColor = DlColor::kMidGrey().withAlphaF(0.5f);
   static_assert(!kAnyColor.isOpaque());
   static_assert(!kAnyColor.isTransparent());
   static DlColor GetEffectiveColor(const DlPaint& paint,
