@@ -416,7 +416,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         _logger.printStatus('Waiting for a new connection from Flutter on ${device.name}...');
       }
     } on RPCError catch (err) {
-      if (err.code == RPCErrorCodes.kServiceDisappeared) {
+      if (err.code == RPCErrorCodes.kServiceDisappeared ||
+          err.message.contains('Service connection disposed')) {
         throwToolExit('Lost connection to device.');
       }
       rethrow;
