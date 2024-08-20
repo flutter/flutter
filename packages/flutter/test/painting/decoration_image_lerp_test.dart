@@ -14,7 +14,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('ImageDecoration.lerp without background', (WidgetTester tester) async {
@@ -198,10 +197,7 @@ void main() {
     imageCache.clear();
   }, skip: kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
 
-  testWidgets('ImageDecoration.lerp',
-  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('ImageDecoration.lerp', (WidgetTester tester) async {
     final MemoryImage cmyk = MemoryImage(Uint8List.fromList(<int>[
       0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
       0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04,  0x02, 0x03, 0x00, 0x00, 0x00, 0xd4, 0x9f, 0x76,
@@ -219,9 +215,12 @@ void main() {
       0x78, 0x1d, 0x41, 0x00, 0x00, 0x00, 0x00, 0x49,  0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
     ]));
 
+    late final _ImageLoader cmykLoader = _ImageLoader(cmyk);
+    late final _ImageLoader wrgbLoader = _ImageLoader(wrgb);
+
     await tester.runAsync(() async {
-      await _load(cmyk);
-      await _load(wrgb);
+      await cmykLoader.load();
+      await wrgbLoader.load();
     });
 
     await tester.pumpWidget(
@@ -417,12 +416,13 @@ void main() {
       expect(getPixelFromBlock(19, 18, 18), const Color(0xFF000000));
       expect(getPixelFromBlock(19, 19, 19), const Color(0xFF000000));
     }
+
+    cmykLoader.dispose();
+    wrgbLoader.dispose();
+    imageCache.clear();
   }, skip: kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
 
-  testWidgets('ImageDecoration.lerp with colored background',
-  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('ImageDecoration.lerp with colored background', (WidgetTester tester) async {
     final MemoryImage cmyk = MemoryImage(Uint8List.fromList(<int>[
       0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
       0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04,  0x02, 0x03, 0x00, 0x00, 0x00, 0xd4, 0x9f, 0x76,
@@ -440,9 +440,12 @@ void main() {
       0x78, 0x1d, 0x41, 0x00, 0x00, 0x00, 0x00, 0x49,  0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
     ]));
 
+    late final _ImageLoader cmykLoader = _ImageLoader(cmyk);
+    late final _ImageLoader wrgbLoader = _ImageLoader(wrgb);
+
     await tester.runAsync(() async {
-      await _load(cmyk);
-      await _load(wrgb);
+      await cmykLoader.load();
+      await wrgbLoader.load();
     });
 
     await tester.pumpWidget(
@@ -583,6 +586,10 @@ void main() {
       find.byType(Wrap),
       matchesGoldenFile('decoration_image.lerp.2.png'),
     );
+
+    cmykLoader.dispose();
+    wrgbLoader.dispose();
+    imageCache.clear();
   }, skip: kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
 }
 
@@ -611,15 +618,15 @@ class _ImageLoader {
   }
 }
 
-Future<void> _load(MemoryImage image) {
-  final ImageStream stream = image.resolve(ImageConfiguration.empty);
-  final Completer<ImageInfo> completer = Completer<ImageInfo>();
-  void listener(ImageInfo image, bool syncCall) {
-    completer.complete(image);
-  }
-  stream.addListener(ImageStreamListener(listener));
-  return completer.future;
-}
+// Future<void> _load(MemoryImage image) {
+//   final ImageStream stream = image.resolve(ImageConfiguration.empty);
+//   final Completer<ImageInfo> completer = Completer<ImageInfo>();
+//   void listener(ImageInfo image, bool syncCall) {
+//     completer.complete(image);
+//   }
+//   stream.addListener(ImageStreamListener(listener));
+//   return completer.future;
+// }
 
 class _TestImage extends StatelessWidget {
   _TestImage(this.image); // ignore: use_key_in_widget_constructors, prefer_const_constructors_in_immutables
