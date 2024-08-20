@@ -19,7 +19,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void main() {
   testWidgets('ImageDecoration.lerp 1',
   // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
   (WidgetTester tester) async {
     final MemoryImage green = MemoryImage(Uint8List.fromList(<int>[
       0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
@@ -60,49 +60,49 @@ void main() {
             child: Wrap(
               textDirection: TextDirection.ltr,
               children: <Widget>[
-                TestImage(
+                _TestImage(
                   DecorationImage(image: green, repeat: ImageRepeat.repeat)
                 ),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
                   DecorationImage(image: red, repeat: ImageRepeat.repeat),
                   0.0,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
                   DecorationImage(image: red, repeat: ImageRepeat.repeat),
                   0.1,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
                   DecorationImage(image: red, repeat: ImageRepeat.repeat),
                   0.2,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
                   DecorationImage(image: red, repeat: ImageRepeat.repeat),
                   0.5,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
                   DecorationImage(image: red, repeat: ImageRepeat.repeat),
                   0.8,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
                   DecorationImage(image: red, repeat: ImageRepeat.repeat),
                   0.9,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
                   DecorationImage(image: red, repeat: ImageRepeat.repeat),
                   1.0,
                 )),
-                TestImage(
+                _TestImage(
                   DecorationImage(image: red, repeat: ImageRepeat.repeat),
                 ),
                 for (double t = 0.0; t < 1.0; t += 0.125)
-                  TestImage(DecorationImage.lerp(
+                  _TestImage(DecorationImage.lerp(
                     DecorationImage.lerp(
                       DecorationImage(image: green, repeat: ImageRepeat.repeat),
                       DecorationImage(image: green, repeat: ImageRepeat.repeat),
@@ -116,7 +116,7 @@ void main() {
                     t,
                   )),
                 for (double t = 0.0; t < 1.0; t += 0.125)
-                  TestImage(DecorationImage.lerp(
+                  _TestImage(DecorationImage.lerp(
                     DecorationImage.lerp(
                       DecorationImage(image: green, repeat: ImageRepeat.repeat),
                       DecorationImage(image: green, repeat: ImageRepeat.repeat),
@@ -130,7 +130,7 @@ void main() {
                     t,
                   )),
                 for (double t = 0.0; t < 1.0; t += 0.125)
-                  TestImage(DecorationImage.lerp(
+                  _TestImage(DecorationImage.lerp(
                     DecorationImage.lerp(
                       DecorationImage(image: green, repeat: ImageRepeat.repeat),
                       DecorationImage(image: green, repeat: ImageRepeat.repeat),
@@ -144,7 +144,7 @@ void main() {
                     t,
                   )),
                 for (double t = 0.0; t < 1.0; t += 0.125)
-                  TestImage(DecorationImage.lerp(
+                  _TestImage(DecorationImage.lerp(
                     DecorationImage.lerp(
                       DecorationImage(image: green, repeat: ImageRepeat.repeat),
                       DecorationImage(image: green, repeat: ImageRepeat.repeat),
@@ -200,6 +200,10 @@ void main() {
         expect(getBlockPixel(index), lime);
       }
     }
+
+    greenLoader.dispose();
+    redLoader.dispose();
+    imageCache.clear();
   }, skip: kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
 
   testWidgets('ImageDecoration.lerp',
@@ -224,8 +228,8 @@ void main() {
     ]));
 
     await tester.runAsync(() async {
-      await load(cmyk);
-      await load(wrgb);
+      await _load(cmyk);
+      await _load(wrgb);
     });
 
     await tester.pumpWidget(
@@ -237,122 +241,122 @@ void main() {
             child: Wrap(
               textDirection: TextDirection.ltr,
               children: <Widget>[
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: wrgb, fit: BoxFit.contain),
                   DecorationImage(image: cmyk, fit: BoxFit.contain),
                   0.0,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: wrgb, fit: BoxFit.contain),
                   DecorationImage(image: cmyk, fit: BoxFit.contain),
                   0.1,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: wrgb, fit: BoxFit.contain),
                   DecorationImage(image: cmyk, fit: BoxFit.contain),
                   0.2,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: wrgb, fit: BoxFit.contain),
                   DecorationImage(image: cmyk, fit: BoxFit.contain),
                   0.5,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: wrgb, fit: BoxFit.contain),
                   DecorationImage(image: cmyk, fit: BoxFit.contain),
                   0.8,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: wrgb, fit: BoxFit.contain),
                   DecorationImage(image: cmyk, fit: BoxFit.contain),
                   0.9,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: wrgb, fit: BoxFit.contain),
                   DecorationImage(image: cmyk, fit: BoxFit.contain),
                   1.0,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: wrgb, fit: BoxFit.cover),
                   DecorationImage(image: cmyk, repeat: ImageRepeat.repeat),
                   0.5,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: wrgb, repeat: ImageRepeat.repeat),
                   DecorationImage(image: cmyk, repeat: ImageRepeat.repeatY),
                   0.5,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: wrgb, repeat: ImageRepeat.repeatX),
                   DecorationImage(image: cmyk, repeat: ImageRepeat.repeat),
                   0.5,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
                   DecorationImage(image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
                   0.25,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
                   DecorationImage(image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
                   0.5,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
                   DecorationImage(image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
                   0.75,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: wrgb, scale: 0.5, repeat: ImageRepeat.repeatX),
                   DecorationImage(image: cmyk, scale: 0.25, repeat: ImageRepeat.repeatY),
                   0.5,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   0.0,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   0.25,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   0.5,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   0.75,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   1.0,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   0.0,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   0.25,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   0.5,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   0.75,
                 )),
-                TestImage(DecorationImage.lerp(
+                _TestImage(DecorationImage.lerp(
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
                   DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   1.0,
@@ -445,8 +449,8 @@ void main() {
     ]));
 
     await tester.runAsync(() async {
-      await load(cmyk);
-      await load(wrgb);
+      await _load(cmyk);
+      await _load(wrgb);
     });
 
     await tester.pumpWidget(
@@ -457,122 +461,122 @@ void main() {
           child: Wrap(
             textDirection: TextDirection.ltr,
             children: <Widget>[
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: wrgb, fit: BoxFit.contain),
                 DecorationImage(image: cmyk, fit: BoxFit.contain),
                 0.0,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: wrgb, fit: BoxFit.contain),
                 DecorationImage(image: cmyk, fit: BoxFit.contain),
                 0.1,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: wrgb, fit: BoxFit.contain),
                 DecorationImage(image: cmyk, fit: BoxFit.contain),
                 0.2,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: wrgb, fit: BoxFit.contain),
                 DecorationImage(image: cmyk, fit: BoxFit.contain),
                 0.5,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: wrgb, fit: BoxFit.contain),
                 DecorationImage(image: cmyk, fit: BoxFit.contain),
                 0.8,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: wrgb, fit: BoxFit.contain),
                 DecorationImage(image: cmyk, fit: BoxFit.contain),
                 0.9,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: wrgb, fit: BoxFit.contain),
                 DecorationImage(image: cmyk, fit: BoxFit.contain),
                 1.0,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: wrgb, fit: BoxFit.cover),
                 DecorationImage(image: cmyk, repeat: ImageRepeat.repeat),
                 0.5,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: wrgb, repeat: ImageRepeat.repeat),
                 DecorationImage(image: cmyk, repeat: ImageRepeat.repeatY),
                 0.5,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: wrgb, repeat: ImageRepeat.repeatX),
                 DecorationImage(image: cmyk, repeat: ImageRepeat.repeat),
                 0.5,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
                 DecorationImage(image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
                 0.25,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
                 DecorationImage(image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
                 0.5,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
                 DecorationImage(image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
                 0.75,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: wrgb, scale: 0.5, repeat: ImageRepeat.repeatX),
                 DecorationImage(image: cmyk, scale: 0.25, repeat: ImageRepeat.repeatY),
                 0.5,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 0.0,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 0.25,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 0.5,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 0.75,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 1.0,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 0.0,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 0.25,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 0.5,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 0.75,
               )),
-              TestImage(DecorationImage.lerp(
+              _TestImage(DecorationImage.lerp(
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
                 DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 1.0,
@@ -615,7 +619,7 @@ class _ImageLoader {
   }
 }
 
-Future<void> load(MemoryImage image) {
+Future<void> _load(MemoryImage image) {
   final ImageStream stream = image.resolve(ImageConfiguration.empty);
   final Completer<ImageInfo> completer = Completer<ImageInfo>();
   void listener(ImageInfo image, bool syncCall) {
@@ -625,8 +629,8 @@ Future<void> load(MemoryImage image) {
   return completer.future;
 }
 
-class TestImage extends StatelessWidget {
-  TestImage(this.image); // ignore: use_key_in_widget_constructors, prefer_const_constructors_in_immutables
+class _TestImage extends StatelessWidget {
+  _TestImage(this.image); // ignore: use_key_in_widget_constructors, prefer_const_constructors_in_immutables
 
   final DecorationImage? image;
 
