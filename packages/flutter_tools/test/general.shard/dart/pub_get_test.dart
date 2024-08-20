@@ -646,7 +646,6 @@ exit code: 66
       platform: FakePlatform(),
       fileSystem: fileSystem,
       logger: logger,
-      usage: TestUsage(),
       botDetector: const BotDetectorAlwaysNo(),
       processManager: processManager,
     );
