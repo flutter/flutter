@@ -619,7 +619,7 @@ class _ImageLoader {
 }
 
 class _TestImage extends StatelessWidget {
-  _TestImage(this.image); // ignore: use_key_in_widget_constructors, prefer_const_constructors_in_immutables
+  const _TestImage(this.image);
 
   final DecorationImage? image;
 
