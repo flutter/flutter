@@ -164,8 +164,6 @@ Size ToSize(const SkPoint& point) {
 }
 
 Color ToColor(const flutter::DlColor& color) {
-  FML_DCHECK(color.getColorSpace() == flutter::DlColorSpace::kExtendedSRGB ||
-             color.getColorSpace() == flutter::DlColorSpace::kSRGB);
   return {
       static_cast<Scalar>(color.getRedF()),    //
       static_cast<Scalar>(color.getGreenF()),  //

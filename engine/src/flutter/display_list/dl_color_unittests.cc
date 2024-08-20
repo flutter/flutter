@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/dl_color.h"
-#include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
 
 #include "third_party/skia/include/core/SkColor.h"
@@ -15,7 +14,7 @@ static void arraysEqual(const uint32_t* ints,
                         const DlColor* colors,
                         int count) {
   for (int i = 0; i < count; i++) {
-    EXPECT_EQ(ints[i], colors[i].argb()) << " index:" << i;
+    EXPECT_TRUE(ints[i] == colors[i].argb());
   }
 }
 
@@ -35,6 +34,8 @@ TEST(DisplayListColor, ArrayInterchangeableWithUint32) {
       DlColor(0xF1F2F3F4),
   };
   arraysEqual(ints, colors, 5);
+  arraysEqual(reinterpret_cast<const uint32_t*>(colors),
+              reinterpret_cast<const DlColor*>(ints), 5);
 }
 
 TEST(DisplayListColor, DlColorDirectlyComparesToSkColor) {
@@ -47,17 +48,13 @@ TEST(DisplayListColor, DlColorDirectlyComparesToSkColor) {
 TEST(DisplayListColor, DlColorFloatConstructor) {
   EXPECT_EQ(DlColor::ARGB(1.0f, 1.0f, 1.0f, 1.0f), DlColor(0xFFFFFFFF));
   EXPECT_EQ(DlColor::ARGB(0.0f, 0.0f, 0.0f, 0.0f), DlColor(0x00000000));
-  EXPECT_TRUE(
-      DlColor::ARGB(0.5f, 0.5f, 0.5f, 0.5f).isClose(DlColor(0x80808080)));
-  EXPECT_TRUE(
-      DlColor::ARGB(1.0f, 0.0f, 0.5f, 1.0f).isClose(DlColor(0xFF0080FF)));
+  EXPECT_EQ(DlColor::ARGB(0.5f, 0.5f, 0.5f, 0.5f), DlColor(0x80808080));
+  EXPECT_EQ(DlColor::ARGB(1.0f, 0.0f, 0.5f, 1.0f), DlColor(0xFF0080FF));
 
   EXPECT_EQ(DlColor::RGBA(1.0f, 1.0f, 1.0f, 1.0f), DlColor(0xFFFFFFFF));
   EXPECT_EQ(DlColor::RGBA(0.0f, 0.0f, 0.0f, 0.0f), DlColor(0x00000000));
-  EXPECT_TRUE(
-      DlColor::RGBA(0.5f, 0.5f, 0.5f, 0.5f).isClose(DlColor(0x80808080)));
-  EXPECT_TRUE(
-      DlColor::RGBA(1.0f, 0.0f, 0.5f, 1.0f).isClose(DlColor(0xFFFF0080)));
+  EXPECT_EQ(DlColor::RGBA(0.5f, 0.5f, 0.5f, 0.5f), DlColor(0x80808080));
+  EXPECT_EQ(DlColor::RGBA(1.0f, 0.0f, 0.5f, 1.0f), DlColor(0xFFFF0080));
 }
 
 TEST(DisplayListColor, DlColorComponentGetters) {
@@ -127,10 +124,10 @@ TEST(DisplayListColor, DlColorComponentGetters) {
 
     const DlScalar half = 127.0f * (1.0f / 255.0f);
 
-    EXPECT_NEAR(test.getAlphaF(), half, 0.00001);
-    EXPECT_NEAR(test.getRedF(), half, 0.00001);
-    EXPECT_NEAR(test.getGreenF(), half, 0.00001);
-    EXPECT_NEAR(test.getBlueF(), half, 0.00001);
+    EXPECT_EQ(test.getAlphaF(), half);
+    EXPECT_EQ(test.getRedF(), half);
+    EXPECT_EQ(test.getGreenF(), half);
+    EXPECT_EQ(test.getBlueF(), half);
   }
 
   {
@@ -141,10 +138,12 @@ TEST(DisplayListColor, DlColorComponentGetters) {
     EXPECT_EQ(test.getGreen(), 0x80);
     EXPECT_EQ(test.getBlue(), 0x80);
 
-    EXPECT_EQ(test.getAlphaF(), 0.5);
-    EXPECT_EQ(test.getRedF(), 0.5);
-    EXPECT_EQ(test.getGreenF(), 0.5);
-    EXPECT_EQ(test.getBlueF(), 0.5);
+    const DlScalar half = 128.0f * (1.0f / 255.0f);
+
+    EXPECT_EQ(test.getAlphaF(), half);
+    EXPECT_EQ(test.getRedF(), half);
+    EXPECT_EQ(test.getGreenF(), half);
+    EXPECT_EQ(test.getBlueF(), half);
   }
 
   {
@@ -155,10 +154,10 @@ TEST(DisplayListColor, DlColorComponentGetters) {
     EXPECT_EQ(test.getGreen(), 0x3F);
     EXPECT_EQ(test.getBlue(), 0x4F);
 
-    EXPECT_NEAR(test.getAlphaF(), 0x1f * (1.0f / 255.0f), 0.00001);
-    EXPECT_NEAR(test.getRedF(), 0x2f * (1.0f / 255.0f), 0.00001);
-    EXPECT_NEAR(test.getGreenF(), 0x3f * (1.0f / 255.0f), 0.00001);
-    EXPECT_NEAR(test.getBlueF(), 0x4f * (1.0f / 255.0f), 0.00001);
+    EXPECT_EQ(test.getAlphaF(), 0x1f * (1.0f / 255.0f));
+    EXPECT_EQ(test.getRedF(), 0x2f * (1.0f / 255.0f));
+    EXPECT_EQ(test.getGreenF(), 0x3f * (1.0f / 255.0f));
+    EXPECT_EQ(test.getBlueF(), 0x4f * (1.0f / 255.0f));
   }
 
   {
@@ -169,10 +168,11 @@ TEST(DisplayListColor, DlColorComponentGetters) {
     EXPECT_EQ(test.getGreen(), round(0.3f * 255));
     EXPECT_EQ(test.getBlue(), round(0.4f * 255));
 
-    EXPECT_EQ(test.getAlphaF(), 0.1f);
-    EXPECT_EQ(test.getRedF(), 0.2f);
-    EXPECT_EQ(test.getGreenF(), 0.3f);
-    EXPECT_EQ(test.getBlueF(), 0.4f);
+    // Unfortunately conversion from float to 8-bit back to float is lossy
+    EXPECT_EQ(test.getAlphaF(), round(0.1f * 255) * (1.0f / 255.0f));
+    EXPECT_EQ(test.getRedF(), round(0.2f * 255) * (1.0f / 255.0f));
+    EXPECT_EQ(test.getGreenF(), round(0.3f * 255) * (1.0f / 255.0f));
+    EXPECT_EQ(test.getBlueF(), round(0.4f * 255) * (1.0f / 255.0f));
   }
 
   {
@@ -183,10 +183,11 @@ TEST(DisplayListColor, DlColorComponentGetters) {
     EXPECT_EQ(test.getGreen(), round(0.3f * 255));
     EXPECT_EQ(test.getBlue(), round(0.4f * 255));
 
-    EXPECT_EQ(test.getAlphaF(), 0.1f);
-    EXPECT_EQ(test.getRedF(), 0.2f);
-    EXPECT_EQ(test.getGreenF(), 0.3f);
-    EXPECT_EQ(test.getBlueF(), 0.4f);
+    // Unfortunately conversion from float to 8-bit back to float is lossy
+    EXPECT_EQ(test.getAlphaF(), round(0.1f * 255) * (1.0f / 255.0f));
+    EXPECT_EQ(test.getRedF(), round(0.2f * 255) * (1.0f / 255.0f));
+    EXPECT_EQ(test.getGreenF(), round(0.3f * 255) * (1.0f / 255.0f));
+    EXPECT_EQ(test.getBlueF(), round(0.4f * 255) * (1.0f / 255.0f));
   }
 }
 
@@ -227,74 +228,6 @@ TEST(DisplayListColor, DlColorOpaqueTransparent) {
       }
     }
   }
-}
-
-TEST(DisplayListColor, EqualityWithColorspace) {
-  EXPECT_TRUE(DlColor(0.9, 0.8, 0.7, 0.6, DlColorSpace::kSRGB) ==
-              DlColor(0.9, 0.8, 0.7, 0.6, DlColorSpace::kSRGB));
-  EXPECT_FALSE(DlColor(0.9, 0.8, 0.7, 0.6, DlColorSpace::kSRGB) ==
-               DlColor(0.9, 0.8, 0.7, 0.6, DlColorSpace::kExtendedSRGB));
-  EXPECT_FALSE(DlColor(0.9, 0.8, 0.7, 0.6, DlColorSpace::kSRGB) !=
-               DlColor(0.9, 0.8, 0.7, 0.6, DlColorSpace::kSRGB));
-  EXPECT_TRUE(DlColor(0.9, 0.8, 0.7, 0.6, DlColorSpace::kSRGB) !=
-              DlColor(0.9, 0.8, 0.7, 0.6, DlColorSpace::kExtendedSRGB));
-}
-
-TEST(DisplayListColor, EqualityWithExtendedSRGB) {
-  EXPECT_TRUE(DlColor(1.0, 1.1, -0.2, 0.1, DlColorSpace::kExtendedSRGB) ==
-              DlColor(1.0, 1.1, -0.2, 0.1, DlColorSpace::kExtendedSRGB));
-  EXPECT_FALSE(DlColor(1.0, 1.1, -0.2, 0.1, DlColorSpace::kExtendedSRGB) ==
-               DlColor(1.0, 1.0, 0.0, 0.0, DlColorSpace::kExtendedSRGB));
-}
-
-TEST(DisplayListColor, ColorSpaceSRGBtoSRGB) {
-  DlColor srgb(0.9, 0.8, 0.7, 0.6, DlColorSpace::kSRGB);
-  EXPECT_EQ(srgb, srgb.withColorSpace(DlColorSpace::kSRGB));
-}
-
-TEST(DisplayListColor, ColorSpaceSRGBtoExtendedSRGB) {
-  DlColor srgb(0.9, 0.8, 0.7, 0.6, DlColorSpace::kSRGB);
-  EXPECT_EQ(DlColor(0.9, 0.8, 0.7, 0.6, DlColorSpace::kExtendedSRGB),
-            srgb.withColorSpace(DlColorSpace::kExtendedSRGB));
-}
-
-TEST(DisplayListColor, ColorSpaceExtendedSRGBtoExtendedSRGB) {
-  DlColor xsrgb(0.9, 0.8, 0.7, 0.6, DlColorSpace::kExtendedSRGB);
-  EXPECT_EQ(DlColor(0.9, 0.8, 0.7, 0.6, DlColorSpace::kExtendedSRGB),
-            xsrgb.withColorSpace(DlColorSpace::kExtendedSRGB));
-}
-
-TEST(DisplayListColor, ColorSpaceP3ToP3) {
-  DlColor p3(0.9, 0.8, 0.7, 0.6, DlColorSpace::kDisplayP3);
-  EXPECT_EQ(DlColor(0.9, 0.8, 0.7, 0.6, DlColorSpace::kDisplayP3),
-            p3.withColorSpace(DlColorSpace::kDisplayP3));
-}
-
-TEST(DisplayListColor, ColorSpaceP3ToExtendedSRGB) {
-  DlColor red(0.9, 1.0, 0.0, 0.0, DlColorSpace::kDisplayP3);
-  EXPECT_TRUE(
-      DlColor(0.9, 1.0931, -0.2268, -0.1501, DlColorSpace::kExtendedSRGB)
-          .isClose(red.withColorSpace(DlColorSpace::kExtendedSRGB)))
-      << red.withColorSpace(DlColorSpace::kExtendedSRGB);
-
-  DlColor green(0.9, 0.0, 1.0, 0.0, DlColorSpace::kDisplayP3);
-  EXPECT_TRUE(
-      DlColor(0.9, -0.5116, 1.0183, -0.3106, DlColorSpace::kExtendedSRGB)
-          .isClose(green.withColorSpace(DlColorSpace::kExtendedSRGB)))
-      << green.withColorSpace(DlColorSpace::kExtendedSRGB);
-
-  DlColor blue(0.9, 0.0, 0.0, 1.0, DlColorSpace::kDisplayP3);
-  EXPECT_TRUE(DlColor(0.9, -0.0004, 0.0003, 1.0420, DlColorSpace::kExtendedSRGB)
-                  .isClose(blue.withColorSpace(DlColorSpace::kExtendedSRGB)))
-      << blue.withColorSpace(DlColorSpace::kExtendedSRGB);
-}
-
-TEST(DisplayListColor, isClose) {
-  EXPECT_TRUE(DlColor(0xffaabbcc).isClose(DlColor(0xffaabbcc)));
-}
-
-TEST(DisplayListColor, isNotClose) {
-  EXPECT_FALSE(DlColor(0xffaabbcc).isClose(DlColor(0xffaabbcd)));
 }
 
 }  // namespace testing

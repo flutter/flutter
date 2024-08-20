@@ -327,10 +327,11 @@ class DlGradientColorSourceBase : public DlMatrixColorSourceBase {
         stop_count_ != other_base->stop_count_) {
       return false;
     }
-    return (memcmp(colors(), other_base->colors(),
-                   stop_count_ * sizeof(colors()[0])) == 0 &&
-            memcmp(stops(), other_base->stops(),
-                   stop_count_ * sizeof(stops()[0])) == 0);
+    static_assert(sizeof(colors()[0]) == 4);
+    static_assert(sizeof(stops()[0]) == 4);
+    int num_bytes = stop_count_ * 4;
+    return (memcmp(colors(), other_base->colors(), num_bytes) == 0 &&
+            memcmp(stops(), other_base->stops(), num_bytes) == 0);
   }
 
   void store_color_stops(void* pod,

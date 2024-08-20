@@ -9,39 +9,10 @@
 
 namespace flutter {
 
-// These should match the enumerations defined in //lib/ui/painting.dart.
-enum class DlColorSpace { kSRGB = 0, kExtendedSRGB = 1, kDisplayP3 = 2 };
-
-/// A representation of a color.
-///
-/// The color belongs to a DlColorSpace. Using deprecated integer data accessors
-/// on colors not in the kSRGB colorspace can lead to data loss. Using the
-/// floating point accessors and constructors that were added for wide-gamut
-/// support are preferred.
 struct DlColor {
  public:
-  constexpr DlColor()
-      : alpha_(0.f),
-        red_(0.f),
-        green_(0.f),
-        blue_(0.f),
-        color_space_(DlColorSpace::kSRGB) {}
-  constexpr explicit DlColor(uint32_t argb)
-      : alpha_(toF((argb >> 24) & 0xff)),
-        red_(toF((argb >> 16) & 0xff)),
-        green_(toF((argb >> 8) & 0xff)),
-        blue_(toF((argb >> 0) & 0xff)),
-        color_space_(DlColorSpace::kSRGB) {}
-  constexpr DlColor(DlScalar alpha,
-                    DlScalar red,
-                    DlScalar green,
-                    DlScalar blue,
-                    DlColorSpace colorspace)
-      : alpha_(alpha),
-        red_(red),
-        green_(green),
-        blue_(blue),
-        color_space_(colorspace) {}
+  constexpr DlColor() : argb_(0xFF000000) {}
+  constexpr explicit DlColor(uint32_t argb) : argb_(argb) {}
 
   /// @brief Construct a 32 bit color from floating point R, G, B, and A color
   /// channels.
@@ -58,7 +29,10 @@ struct DlColor {
                                 DlScalar r,
                                 DlScalar g,
                                 DlScalar b) {
-    return DlColor(a, r, g, b, DlColorSpace::kSRGB);
+    return DlColor(toC(a) << 24 |  //
+                   toC(r) << 16 |  //
+                   toC(g) << 8 |   //
+                   toC(b));
   }
 
   static constexpr uint8_t toAlpha(DlScalar opacity) { return toC(opacity); }
@@ -92,58 +66,42 @@ struct DlColor {
   static constexpr DlColor kOrangeRed()          {return DlColor(0xFFFF4500);};
   // clang-format on
 
-  constexpr bool isOpaque() const { return alpha_ >= 1.f; }
-  constexpr bool isTransparent() const { return alpha_ <= 0.f; }
+  constexpr bool isOpaque() const { return getAlpha() == 0xFF; }
+  constexpr bool isTransparent() const { return getAlpha() == 0; }
 
-  ///\deprecated Use floating point accessors to avoid data loss when using wide
-  /// gamut colors.
-  constexpr int getAlpha() const { return toC(alpha_); }
-  ///\deprecated Use floating point accessors to avoid data loss when using wide
-  /// gamut colors.
-  constexpr int getRed() const { return toC(red_); }
-  ///\deprecated Use floating point accessors to avoid data loss when using wide
-  /// gamut colors.
-  constexpr int getGreen() const { return toC(green_); }
-  ///\deprecated Use floating point accessors to avoid data loss when using wide
-  /// gamut colors.
-  constexpr int getBlue() const { return toC(blue_); }
+  constexpr int getAlpha() const { return argb_ >> 24; }
+  constexpr int getRed() const { return (argb_ >> 16) & 0xFF; }
+  constexpr int getGreen() const { return (argb_ >> 8) & 0xFF; }
+  constexpr int getBlue() const { return argb_ & 0xFF; }
 
-  constexpr DlScalar getAlphaF() const { return alpha_; }
-  constexpr DlScalar getRedF() const { return red_; }
-  constexpr DlScalar getGreenF() const { return green_; }
-  constexpr DlScalar getBlueF() const { return blue_; }
+  constexpr DlScalar getAlphaF() const { return toF(getAlpha()); }
+  constexpr DlScalar getRedF() const { return toF(getRed()); }
+  constexpr DlScalar getGreenF() const { return toF(getGreen()); }
+  constexpr DlScalar getBlueF() const { return toF(getBlue()); }
 
-  constexpr DlColorSpace getColorSpace() const { return color_space_; }
+  constexpr uint32_t premultipliedArgb() const {
+    if (isOpaque()) {
+      return argb_;
+    }
+    DlScalar f = getAlphaF();
+    return (argb_ & 0xFF000000) |       //
+           toC(getRedF() * f) << 16 |   //
+           toC(getGreenF() * f) << 8 |  //
+           toC(getBlueF() * f);
+  }
 
   constexpr DlColor withAlpha(uint8_t alpha) const {  //
-    return DlColor((argb() & 0x00FFFFFF) | (alpha << 24));
+    return DlColor((argb_ & 0x00FFFFFF) | (alpha << 24));
   }
   constexpr DlColor withRed(uint8_t red) const {  //
-    return DlColor((argb() & 0xFF00FFFF) | (red << 16));
+    return DlColor((argb_ & 0xFF00FFFF) | (red << 16));
   }
   constexpr DlColor withGreen(uint8_t green) const {  //
-    return DlColor((argb() & 0xFFFF00FF) | (green << 8));
+    return DlColor((argb_ & 0xFFFF00FF) | (green << 8));
   }
   constexpr DlColor withBlue(uint8_t blue) const {  //
-    return DlColor((argb() & 0xFFFFFF00) | (blue << 0));
+    return DlColor((argb_ & 0xFFFFFF00) | (blue << 0));
   }
-  constexpr DlColor withAlphaF(float alpha) const {  //
-    return DlColor(alpha, red_, green_, blue_, color_space_);
-  }
-  constexpr DlColor withRedF(float red) const {  //
-    return DlColor(alpha_, red, green_, blue_, color_space_);
-  }
-  constexpr DlColor withGreenF(float green) const {  //
-    return DlColor(alpha_, red_, green, blue_, color_space_);
-  }
-  constexpr DlColor withBlueF(float blue) const {  //
-    return DlColor(alpha_, red_, green_, blue, color_space_);
-  }
-  /// Performs a colorspace transformation.
-  ///
-  /// This isn't just a replacement of the color space field, the new color
-  /// components are calculated.
-  DlColor withColorSpace(DlColorSpace color_space) const;
 
   constexpr DlColor modulateOpacity(DlScalar opacity) const {
     return opacity <= 0   ? withAlpha(0)
@@ -151,47 +109,15 @@ struct DlColor {
                           : withAlpha(round(getAlpha() * opacity));
   }
 
-  ///\deprecated Use floating point accessors to avoid data loss when using wide
-  /// gamut colors.
-  constexpr uint32_t argb() const {
-    return toC(alpha_) << 24 |  //
-           toC(red_) << 16 |    //
-           toC(green_) << 8 |   //
-           toC(blue_) << 0;
-  }
+  constexpr uint32_t argb() const { return argb_; }
 
-  /// Checks that no difference in color components exceeds the delta.
-  ///
-  /// This doesn't check against the actual distance between the colors in some
-  /// space.
-  bool isClose(DlColor const& other, DlScalar delta = 1.0f / 256.0f) {
-    return color_space_ == other.color_space_ &&
-           std::abs(alpha_ - other.alpha_) < delta &&
-           std::abs(red_ - other.red_) < delta &&
-           std::abs(green_ - other.green_) < delta &&
-           std::abs(blue_ - other.blue_) < delta;
-  }
-  bool operator==(DlColor const& other) const {
-    return alpha_ == other.alpha_ && red_ == other.red_ &&
-           green_ == other.green_ && blue_ == other.blue_ &&
-           color_space_ == other.color_space_;
-  }
-  bool operator!=(DlColor const& other) const {
-    return !this->operator==(other);
-  }
-  bool operator==(uint32_t const& other) const {
-    return argb() == other && color_space_ == DlColorSpace::kSRGB;
-  }
-  bool operator!=(uint32_t const& other) const {
-    return !this->operator==(other);
-  }
+  bool operator==(DlColor const& other) const { return argb_ == other.argb_; }
+  bool operator!=(DlColor const& other) const { return argb_ != other.argb_; }
+  bool operator==(uint32_t const& other) const { return argb_ == other; }
+  bool operator!=(uint32_t const& other) const { return argb_ != other; }
 
  private:
-  DlScalar alpha_;
-  DlScalar red_;
-  DlScalar green_;
-  DlScalar blue_;
-  DlColorSpace color_space_;
+  uint32_t argb_;
 
   static constexpr DlScalar toF(uint8_t comp) { return comp * (1.0f / 255); }
   static constexpr uint8_t toC(DlScalar fComp) { return round(fComp * 255); }

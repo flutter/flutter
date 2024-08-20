@@ -35,7 +35,6 @@ source_set("display_list") {
     "dl_builder.h",
     "dl_canvas.cc",
     "dl_canvas.h",
-    "dl_color.cc",
     "dl_color.h",
     "dl_op_flags.cc",
     "dl_op_flags.h",

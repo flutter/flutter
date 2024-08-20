@@ -45,15 +45,10 @@ void CanvasGradient::initLinear(const tonic::Float32List& end_points,
 
   SkPoint p0 = SkPoint::Make(end_points[0], end_points[1]);
   SkPoint p1 = SkPoint::Make(end_points[2], end_points[3]);
-  std::vector<DlColor> dl_colors;
-  dl_colors.reserve(colors.num_elements());
-  for (int i = 0; i < colors.num_elements(); ++i) {
-    /// TODO(gaaclarke): Make this preserve wide gamut colors.
-    dl_colors.emplace_back(DlColor(colors[i]));
-  }
+  const DlColor* colors_array = reinterpret_cast<const DlColor*>(colors.data());
 
   dl_shader_ = DlColorSource::MakeLinear(
-      p0, p1, colors.num_elements(), dl_colors.data(), color_stops.data(),
+      p0, p1, colors.num_elements(), colors_array, color_stops.data(),
       tile_mode, has_matrix ? &sk_matrix : nullptr);
   // Just a sanity check, all gradient shaders should be thread-safe
   FML_DCHECK(dl_shader_->isUIThreadSafe());
@@ -78,15 +73,11 @@ void CanvasGradient::initRadial(double center_x,
     sk_matrix = ToSkMatrix(matrix4);
   }
 
-  std::vector<DlColor> dl_colors;
-  dl_colors.reserve(colors.num_elements());
-  for (int i = 0; i < colors.num_elements(); ++i) {
-    dl_colors.emplace_back(DlColor(colors[i]));
-  }
+  const DlColor* colors_array = reinterpret_cast<const DlColor*>(colors.data());
 
   dl_shader_ = DlColorSource::MakeRadial(
       SkPoint::Make(SafeNarrow(center_x), SafeNarrow(center_y)),
-      SafeNarrow(radius), colors.num_elements(), dl_colors.data(),
+      SafeNarrow(radius), colors.num_elements(), colors_array,
       color_stops.data(), tile_mode, has_matrix ? &sk_matrix : nullptr);
   // Just a sanity check, all gradient shaders should be thread-safe
   FML_DCHECK(dl_shader_->isUIThreadSafe());
@@ -112,17 +103,13 @@ void CanvasGradient::initSweep(double center_x,
     sk_matrix = ToSkMatrix(matrix4);
   }
 
-  std::vector<DlColor> dl_colors;
-  dl_colors.reserve(colors.num_elements());
-  for (int i = 0; i < colors.num_elements(); ++i) {
-    dl_colors.emplace_back(DlColor(colors[i]));
-  }
+  const DlColor* colors_array = reinterpret_cast<const DlColor*>(colors.data());
 
   dl_shader_ = DlColorSource::MakeSweep(
       SkPoint::Make(SafeNarrow(center_x), SafeNarrow(center_y)),
       SafeNarrow(start_angle) * 180.0f / static_cast<float>(M_PI),
       SafeNarrow(end_angle) * 180.0f / static_cast<float>(M_PI),
-      colors.num_elements(), dl_colors.data(), color_stops.data(), tile_mode,
+      colors.num_elements(), colors_array, color_stops.data(), tile_mode,
       has_matrix ? &sk_matrix : nullptr);
   // Just a sanity check, all gradient shaders should be thread-safe
   FML_DCHECK(dl_shader_->isUIThreadSafe());
@@ -150,17 +137,13 @@ void CanvasGradient::initTwoPointConical(double start_x,
     sk_matrix = ToSkMatrix(matrix4);
   }
 
-  std::vector<DlColor> dl_colors;
-  dl_colors.reserve(colors.num_elements());
-  for (int i = 0; i < colors.num_elements(); ++i) {
-    dl_colors.emplace_back(DlColor(colors[i]));
-  }
+  const DlColor* colors_array = reinterpret_cast<const DlColor*>(colors.data());
 
   dl_shader_ = DlColorSource::MakeConical(
       SkPoint::Make(SafeNarrow(start_x), SafeNarrow(start_y)),
       SafeNarrow(start_radius),
       SkPoint::Make(SafeNarrow(end_x), SafeNarrow(end_y)),
-      SafeNarrow(end_radius), colors.num_elements(), dl_colors.data(),
+      SafeNarrow(end_radius), colors.num_elements(), colors_array,
       color_stops.data(), tile_mode, has_matrix ? &sk_matrix : nullptr);
   // Just a sanity check, all gradient shaders should be thread-safe
   FML_DCHECK(dl_shader_->isUIThreadSafe());

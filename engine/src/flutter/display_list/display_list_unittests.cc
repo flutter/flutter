@@ -1847,7 +1847,7 @@ TEST_F(DisplayListTest, FlutterSvgIssue661BoundsWereEmpty) {
   // This is the more practical result. The bounds are "almost" 0,0,100x100
   EXPECT_EQ(display_list->bounds().roundOut(), SkIRect::MakeWH(100, 100));
   EXPECT_EQ(display_list->op_count(), 19u);
-  EXPECT_EQ(display_list->bytes(), sizeof(DisplayList) + 424u);
+  EXPECT_EQ(display_list->bytes(), sizeof(DisplayList) + 408u);
   EXPECT_EQ(display_list->total_depth(), 3u);
 }
 
