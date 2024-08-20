@@ -194,12 +194,7 @@ void DlDispatcherBase::setDrawStyle(flutter::DlDrawStyle style) {
 
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::setColor(flutter::DlColor color) {
-  paint_.color = {
-      color.getRedF(),
-      color.getGreenF(),
-      color.getBlueF(),
-      color.getAlphaF(),
-  };
+  paint_.color = skia_conversions::ToColor(color);
 }
 
 // |flutter::DlOpReceiver|
@@ -1369,12 +1364,7 @@ void TextFrameDispatcher::setDrawStyle(flutter::DlDrawStyle style) {
 
 // |flutter::DlOpReceiver|
 void TextFrameDispatcher::setColor(flutter::DlColor color) {
-  paint_.color = {
-      color.getRedF(),
-      color.getGreenF(),
-      color.getBlueF(),
-      color.getAlphaF(),
-  };
+  paint_.color = skia_conversions::ToColor(color);
 }
 
 // |flutter::DlOpReceiver|
