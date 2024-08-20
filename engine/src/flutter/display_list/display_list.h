@@ -142,29 +142,11 @@ namespace flutter {
 #define DL_OP_TO_ENUM_VALUE(name) k##name,
 enum class DisplayListOpType {
   FOR_EACH_DISPLAY_LIST_OP(DL_OP_TO_ENUM_VALUE)
-
 #ifdef IMPELLER_ENABLE_3D
       DL_OP_TO_ENUM_VALUE(SetSceneColorSource)
 #endif  // IMPELLER_ENABLE_3D
-
-  // empty comment to make formatter happy
-  kInvalidOp,
-  kMaxOp = kInvalidOp,
 };
 #undef DL_OP_TO_ENUM_VALUE
-
-enum class DisplayListOpCategory {
-  kAttribute,
-  kTransform,
-  kClip,
-  kSave,
-  kSaveLayer,
-  kRestore,
-  kRendering,
-  kSubDisplayList,
-  kInvalidCategory,
-  kMaxCategory = kInvalidCategory,
-};
 
 class DlOpReceiver;
 class DisplayListBuilder;
@@ -288,7 +270,7 @@ class DisplayListStorage {
   std::unique_ptr<uint8_t, FreeDeleter> ptr_;
 };
 
-using DlIndex = uint32_t;
+class Culler;
 
 // The base class that contains a sequence of rendering operations
 // for dispatch to a DlOpReceiver. These objects must be instantiated
@@ -378,158 +360,6 @@ class DisplayList : public SkRefCnt {
   /// be required for the indicated blend mode to do its work.
   DlBlendMode max_root_blend_mode() const { return max_root_blend_mode_; }
 
-  /// @brief   Iterator utility class used for the |DisplayList::begin|
-  ///          and |DisplayList::end| methods. It implements just the
-  ///          basic methods to enable iteration-style for loops.
-  class Iterator {
-   public:
-    DlIndex operator*() const { return value_; }
-    bool operator!=(const Iterator& other) { return value_ != other.value_; }
-    Iterator& operator++() {
-      value_++;
-      return *this;
-    }
-
-   private:
-    explicit Iterator(DlIndex value) : value_(value) {}
-
-    DlIndex value_;
-
-    friend class DisplayList;
-  };
-
-  /// @brief   Return the number of stored records in the DisplayList.
-  ///
-  /// Each stored record represents a dispatchable operation that will be
-  /// sent to a |DlOpReceiver| by the |Dispatch| method. You can directly
-  /// simulate the |Dispatch| method using a simple for loop on the indices:
-  ///
-  /// {
-  ///   for (DlIndex i = 0u; i < display_list->GetRecordCount(); i++) {
-  ///     display_list->Dispatch(my_receiver, i);
-  ///   }
-  /// }
-  ///
-  /// @see |Dispatch(receiver, index)|
-  /// @see |begin|
-  /// @see |end|
-  /// @see |GetCulledIndices|
-  DlIndex GetRecordCount() const { return offsets_.size(); }
-
-  /// @brief   Return an iterator to the start of the stored records,
-  ///          enabling the iteration form of a for loop.
-  ///
-  /// Each stored record represents a dispatchable operation that will be
-  /// sent to a |DlOpReceiver| by the |Dispatch| method. You can directly
-  /// simulate the |Dispatch| method using a simple for loop on the indices:
-  ///
-  /// {
-  ///   for (DlIndex i : *display_list) {
-  ///     display_list->Dispatch(my_receiver, i);
-  ///   }
-  /// }
-  ///
-  /// @see |end|
-  /// @see |GetCulledIndices|
-  Iterator begin() const { return Iterator(0u); }
-
-  /// @brief   Return an iterator to the end of the stored records,
-  ///          enabling the iteration form of a for loop.
-  ///
-  /// Each stored record represents a dispatchable operation that will be
-  /// sent to a |DlOpReceiver| by the |Dispatch| method. You can directly
-  /// simulate the |Dispatch| method using a simple for loop on the indices:
-  ///
-  /// {
-  ///   for (DlIndex i : *display_list) {
-  ///     display_list->Dispatch(my_receiver, i);
-  ///   }
-  /// }
-  ///
-  /// @see |begin|
-  /// @see |GetCulledIndices|
-  Iterator end() const { return Iterator(offsets_.size()); }
-
-  /// @brief   Dispatch a single stored operation by its index.
-  ///
-  /// Each stored record represents a dispatchable operation that will be
-  /// sent to a |DlOpReceiver| by the |Dispatch| method. You can use this
-  /// method to dispatch a single operation to your receiver with an index
-  /// between |0u| (inclusive) and |GetRecordCount()| (exclusive), as in:
-  ///
-  /// {
-  ///   for (DlIndex i = 0u; i < display_list->GetRecordCount(); i++) {
-  ///     display_list->Dispatch(my_receiver, i);
-  ///   }
-  /// }
-  ///
-  /// If the index is out of the range of the stored records, this method
-  /// will not call any methods on the receiver and return false. You can
-  /// check the return value for true if you want to make sure you are
-  /// using valid indices.
-  ///
-  /// @see |GetRecordCount|
-  /// @see |begin|
-  /// @see |end|
-  /// @see |GetCulledIndices|
-  bool Dispatch(DlOpReceiver& receiver, DlIndex index) const;
-
-  /// @brief   Return an enum describing the specific op type stored at
-  ///          the indicated index.
-  ///
-  /// The specific types of the records are subject to change without notice
-  /// as the DisplayList code is developed and optimized. These values are
-  /// useful mostly for debugging purposes and should not be used in
-  /// production code.
-  ///
-  /// @see |GetOpCategory| for a more stable description of the records
-  DisplayListOpType GetOpType(DlIndex index) const;
-
-  /// @brief   Return an enum describing the general category of the
-  ///          operation record stored at the indicated index.
-  ///
-  /// The categories are general and stable and can be used fairly safely
-  /// in production code to plan how to dispatch or reorder ops during
-  /// final rendering.
-  ///
-  /// @see |GetOpType| for a more detailed description of the records
-  ///                  primarily for debugging use
-  DisplayListOpCategory GetOpCategory(DlIndex index) const;
-
-  /// @brief   Return an enum describing the general category of the
-  ///          operation record with the given type.
-  ///
-  /// @see |GetOpType| for a more detailed description of the records
-  ///                  primarily for debugging use
-  static DisplayListOpCategory GetOpCategory(DisplayListOpType type);
-
-  /// @brief   Return a vector of valid indices for records stored in
-  ///          the DisplayList that must be dispatched if you are
-  ///          restricted to the indicated cull_rect.
-  ///
-  /// This method can be used along with indexed dispatching to implement
-  /// RTree culling while still maintaining control over planning of
-  /// operations to be rendered, as in:
-  ///
-  /// {
-  ///   std::vector<DlIndex> indices =
-  ///       display_list->GetCulledIndices(cull-rect);
-  ///   for (DlIndex i : indices) {
-  ///     display_list->Dispatch(my_receiver, i);
-  ///   }
-  /// }
-  ///
-  /// The indices returned in the vector will automatically deal with
-  /// including or culling related operations such as attributes, clips
-  /// and transforms that will provide state for any rendering operations
-  /// selected by the culling checks.
-  ///
-  /// @see |GetOpType| for a more detailed description of the records
-  ///                  primarily for debugging use
-  ///
-  /// @see |Dispatch(receiver, index)|
-  std::vector<DlIndex> GetCulledIndices(const SkRect& cull_rect) const;
-
  private:
   DisplayList(DisplayListStorage&& ptr,
               size_t byte_count,
@@ -551,7 +381,6 @@ class DisplayList : public SkRefCnt {
   static void DisposeOps(const uint8_t* ptr, const uint8_t* end);
 
   const DisplayListStorage storage_;
-  const std::vector<size_t> offsets_;
   const size_t byte_count_;
   const uint32_t op_count_;
 
@@ -572,10 +401,10 @@ class DisplayList : public SkRefCnt {
 
   const sk_sp<const DlRTree> rtree_;
 
-  void DispatchOneOp(DlOpReceiver& receiver, const uint8_t* ptr) const;
-
-  void RTreeResultsToIndexVector(std::vector<DlIndex>& indices,
-                                 const std::vector<int>& rtree_results) const;
+  void Dispatch(DlOpReceiver& ctx,
+                const uint8_t* ptr,
+                const uint8_t* end,
+                Culler& culler) const;
 
   friend class DisplayListBuilder;
 };

@@ -510,7 +510,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
   // Most rendering ops will use 1 depth value, but some attributes may
   // require an additional depth value (due to implicit saveLayers)
   uint32_t render_op_depth_cost_ = 1u;
-  DlIndex op_index_ = 0;
+  int op_index_ = 0;
 
   // bytes and ops from |drawPicture| and |drawDisplayList|
   size_t nested_bytes_ = 0;
