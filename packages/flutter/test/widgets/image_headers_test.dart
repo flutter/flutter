@@ -13,10 +13,6 @@ import '../image_data.dart';
 void main() {
   final MockHttpClient client = MockHttpClient();
 
-  tearDown(() {
-
-  });
-
   testWidgets('Headers', (WidgetTester tester) async {
     HttpOverrides.runZoned<Future<void>>(() async {
       await tester.pumpWidget(Image.network(
