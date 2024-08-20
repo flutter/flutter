@@ -1,4 +1,4 @@
-Signature: 5618c1c3c0fa65ec1a29057a65f8cb21
+Signature: 5253fd0dca672216663ed79b75121c52
 
 ====================================================================================================
 LIBRARY: dart
@@ -3714,7 +3714,6 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/identical_p
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/internal_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/isolate_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/js_helper.dart + ../../../flutter/third_party/dart/LICENSE
-ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/js_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/js_util_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/list.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/math_patch.dart + ../../../flutter/third_party/dart/LICENSE
@@ -3787,7 +3786,6 @@ FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/identical_pat
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/internal_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/isolate_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/js_helper.dart
-FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/js_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/js_util_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/list.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/math_patch.dart
@@ -4787,7 +4785,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/c22bf5aedbcf1881e68ab264fed70a50aa3f2f53
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/04c57423f90d50f61c6dfeceb5201cac3f14fab0
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
