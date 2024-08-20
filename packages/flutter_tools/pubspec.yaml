@@ -65,7 +65,7 @@ dependencies:
   test_api: 0.7.3
   test_core: 0.6.5
 
-  vm_service: 14.2.4
+  vm_service: 14.2.5
 
   standard_message_codec: 0.0.1+4
 
@@ -122,4 +122,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: e4ed
+# PUBSPEC CHECKSUM: 83ee

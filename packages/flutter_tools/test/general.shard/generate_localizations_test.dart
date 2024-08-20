@@ -1658,6 +1658,28 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(content, contains(r"DateFormat('asdf o\'clock', localeName)"));
       });
 
+      testWithoutContext('handle arbitrary formatted date with actual boolean', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "@@locale": "en",
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "asdf o'clock",
+        "isCustomDateFormat": true
+      }
+    }
+  }
+}'''
+        });
+        final String content = getGeneratedFileContent(locale: 'en');
+        expect(content, contains(r"DateFormat('asdf o\'clock', localeName)"));
+      });
+
       testWithoutContext('throws an exception when no format attribute is passed in', () {
         expect(
           () {
