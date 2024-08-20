@@ -81,9 +81,7 @@ void main() {
     image200x100 = await createTestImage(width: 200, height: 100);
   });
 
-  testWidgets('Codec future fails',
-  // experimentalLeakTesting: LeakTesting.settings.withTrackedAll(),
-  (WidgetTester tester) async {
+  testWidgets('Codec future fails', (WidgetTester tester) async {
     final Completer<Codec> completer = Completer<Codec>();
     MultiFrameImageStreamCompleter(
       codec: completer.future,
@@ -317,6 +315,7 @@ void main() {
   });
 
   testWidgets('ImageStream emits frame (static image)',
+  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
@@ -347,6 +346,7 @@ void main() {
   });
 
   testWidgets('ImageStream emits frames (animated images)',
+  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
@@ -398,6 +398,7 @@ void main() {
   });
 
   testWidgets('animation wraps back',
+  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
@@ -444,6 +445,7 @@ void main() {
   });
 
   testWidgets("animation doesn't repeat more than specified",
+  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
@@ -487,6 +489,7 @@ void main() {
   });
 
   testWidgets('frames are only decoded when there are listeners',
+  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
@@ -532,6 +535,7 @@ void main() {
   });
 
   testWidgets('multiple stream listeners',
+  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
@@ -619,6 +623,7 @@ void main() {
   });
 
   testWidgets('timeDilation affects animation frame timers',
+  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
@@ -695,6 +700,7 @@ void main() {
   });
 
   testWidgets('remove and add listener ',
+  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
