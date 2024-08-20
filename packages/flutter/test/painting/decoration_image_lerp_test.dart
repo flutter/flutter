@@ -47,7 +47,7 @@ void main() {
 
     greenLoader.dispose();
     imageCache.clear();
-    await tester.pumpWidget(Placeholder());
+    // await tester.pumpWidget(Placeholder());
 
 
     // await tester.pumpWidget(
