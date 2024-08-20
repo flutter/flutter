@@ -124,16 +124,19 @@ class VersionTuple {
   VersionTuple({
     required this.agpVersion,
     required this.gradleVersion,
-    required this.kotlinVersion
+    required this.kotlinVersion,
+    this.compileSdkVersion,
   });
 
   String agpVersion;
   String gradleVersion;
   String kotlinVersion;
+  String? compileSdkVersion;
 
   @override
   String toString() {
-    return '(AGP version: $agpVersion, Gradle version: $gradleVersion, Kotlin version: $kotlinVersion)';
+    return '(AGP version: $agpVersion, Gradle version: $gradleVersion, Kotlin version: $kotlinVersion'
+        '${(compileSdkVersion == null) ? '' : ', compileSdk version: $compileSdkVersion)'}';
   }
 }
 
@@ -142,7 +145,6 @@ class VersionTuple {
 /// ProcessResult.
 Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
   required VersionTuple versions,
-  String? compileSdkOverride,
   required Directory tempDir,}) async {
   // Create a new flutter project.
   final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
@@ -156,11 +158,11 @@ Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
 
   final Directory app = Directory(fileSystem.path.join(tempDir.path, 'dependency_checker_app'));
 
-  if (compileSdkOverride != null) {
+  if (versions.compileSdkVersion != null) {
     final File appGradleBuild = File(fileSystem.path.join(
         app.path, 'android', 'app', 'build.gradle'));
     final String appBuildContent = appGradleBuild.readAsStringSync()
-        .replaceFirst(flutterCompileSdkString, compileSdkOverride);
+        .replaceFirst(flutterCompileSdkString, versions.compileSdkVersion!);
     appGradleBuild.writeAsStringSync(appBuildContent);
   }
 

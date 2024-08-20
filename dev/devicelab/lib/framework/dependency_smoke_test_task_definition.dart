@@ -66,16 +66,19 @@ class VersionTuple {
   VersionTuple({
     required this.agpVersion,
     required this.gradleVersion,
-    required this.kotlinVersion
+    required this.kotlinVersion,
+    this.compileSdkVersion,
   });
 
   String agpVersion;
   String gradleVersion;
   String kotlinVersion;
+  String? compileSdkVersion;
 
   @override
   String toString() {
-    return '(AGP version: $agpVersion, Gradle version: $gradleVersion, Kotlin version: $kotlinVersion)';
+    return '(AGP version: $agpVersion, Gradle version: $gradleVersion, Kotlin version: $kotlinVersion'
+        '${(compileSdkVersion == null) ? '' : ', compileSdk version: $compileSdkVersion)'}';
   }
 }
 
@@ -88,14 +91,13 @@ class VersionTuple {
 /// fails, returns a successful result otherwise. Cleans up in either case.
 Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
   required List<VersionTuple> versionTuples,
-  String? compileSdkOverride,
   required Directory tempDir,
   required LocalFileSystem localFileSystem,}) async {
   for (final VersionTuple versions in versionTuples) {
     final Directory innerTempDir = tempDir.createTempSync(versions.gradleVersion);
     try {
       // Create a new flutter project.
-      section('Create new app with Gradle ${versions.gradleVersion}, AGP ${versions.agpVersion}, and Kotlin ${versions.kotlinVersion}');
+      section('Create new app with dependency versions: $versions');
       await flutter(
         'create',
         options: <String>[
@@ -107,11 +109,11 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
 
       final String appPath = '${innerTempDir.absolute.path}/dependency_checker_app';
 
-      if (compileSdkOverride != null) {
+      if (versions.compileSdkVersion != null) {
         final File appGradleBuild = localFileSystem.file(localFileSystem.path.join(
             appPath, 'android', 'app', 'build.gradle'));
         final String appBuildContent = appGradleBuild.readAsStringSync()
-            .replaceFirst(flutterCompileSdkString, compileSdkOverride);
+            .replaceFirst(flutterCompileSdkString, versions.compileSdkVersion!);
         appGradleBuild.writeAsStringSync(appBuildContent);
       }
 
