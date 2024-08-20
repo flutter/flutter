@@ -1313,15 +1313,21 @@ Execution failed for task ':app:bundleReleaseResources'.
         testLogger.statusText,
         contains(
                 '\n'
-                '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────────┐\n'
-                '│ [!] Using compileSdk 35 requires Android Gradle Plugin (AGP) 8.1.0 or higher.                    │\n'
-                '│ Please upgrade to a newer AGP version. The version of AGP that your project uses is likely       │\n'
-                '│ defined in:                                                                                      │\n'
-                '│ /android/settings.gradle,                                                                        │\n'
-                "│ in the 'plugins' closure.                                                                        │\n"
-                '│ Alternatively, if you have a strong reason to avoid upgrading AGP, you can temporarily lower the │\n'
-                '│ compileSdk version in the following file: /android/app/build.gradle                              │\n'
-                '└──────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+                    '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────────┐\n'
+                    '│ [!] Using compileSdk 35 requires Android Gradle Plugin (AGP) 8.1.0 or higher.                    │\n'
+                    '│  Please upgrade to a newer AGP version. The version of AGP that your project uses is likely      │\n'
+                    '│  defined in:                                                                                     │\n'
+                    '│ /android/settings.gradle,                                                                        │\n'
+                    "│ in the 'plugins' closure.                                                                        │\n"
+                    '│  Alternatively, if your project was created with an older version of the templates, it is likely │\n'
+                    '│                                                                                                  │\n'
+                    '│ in the buildscript.dependencies closure of the top-level build.gradle:                           │\n'
+                    '│ /android/build.gradle.                                                                           │\n'
+                    '│                                                                                                  │\n'
+                    '│  Finally, if you have a strong reason to avoid upgrading AGP, you can temporarily lower the      │\n'
+                    '│  compileSdk version in the following file:                                                       │\n'
+                    '│ /android/app/build.gradle                                                                        │\n'
+                    '└──────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
                 ''
         )
     );
