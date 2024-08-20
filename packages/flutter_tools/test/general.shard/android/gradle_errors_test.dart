@@ -51,6 +51,7 @@ void main() {
           incompatibleJavaAndGradleVersionsHandler,
           remoteTerminatedHandshakeHandler,
           couldNotOpenCacheDirectoryHandler,
+          incompatibleCompileSdk35AndAgpVersionHandler,
         ])
       );
     });
@@ -1285,6 +1286,51 @@ A problem occurred evaluating script.
     );
     expect(testLogger.errorText, contains('Gradle threw an error while resolving dependencies'));
     expect(status, GradleBuildStatus.retry);
+  }, overrides: <Type, Generator>{
+    GradleUtils: () => FakeGradleUtils(),
+    Platform: () => fakePlatform('android'),
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('compileSdk 35 and AGP < 8.1', () async {
+    const String errorExample = r'''
+Execution failed for task ':app:bundleReleaseResources'.
+> A failure occurred while executing com.android.build.gradle.internal.res.Aapt2ProcessResourcesRunnable
+   > Android resource linking failed
+     aapt2 E 08-19 15:06:26 76078 5921862 LoadedArsc.cpp:94] RES_TABLE_TYPE_TYPE entry offsets overlap actual entry data.
+     aapt2 E 08-19 15:06:26 76078 5921862 ApkAssets.cpp:152] Failed to load resources table in APK '/Users/mackall/Library/Android/sdk/platforms/android-35/android.jar'.
+     error: failed to load include path /Users/mackall/Library/Android/sdk/platforms/android-35/android.jar.
+    ''';
+
+    await incompatibleCompileSdk35AndAgpVersionHandler.handler(
+      line: errorExample,
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      usesAndroidX: true,
+    );
+
+    expect(
+        testLogger.statusText,
+        contains(
+                '\n'
+                    '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────────┐\n'
+                    '│ [!] Using compileSdk 35 requires Android Gradle Plugin (AGP) 8.1.0 or higher.                    │\n'
+                    '│  Please upgrade to a newer AGP version. The version of AGP that your project uses is likely      │\n'
+                    '│  defined in:                                                                                     │\n'
+                    '│ /android/settings.gradle,                                                                        │\n'
+                    "│ in the 'plugins' closure.                                                                        │\n"
+                    '│  Alternatively, if your project was created with an older version of the templates, it is likely │\n'
+                    '│                                                                                                  │\n'
+                    '│ in the buildscript.dependencies closure of the top-level build.gradle:                           │\n'
+                    '│ /android/build.gradle.                                                                           │\n'
+                    '│                                                                                                  │\n'
+                    '│  Finally, if you have a strong reason to avoid upgrading AGP, you can temporarily lower the      │\n'
+                    '│  compileSdk version in the following file:                                                       │\n'
+                    '│ /android/app/build.gradle                                                                        │\n'
+                    '└──────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+                ''
+        )
+    );
   }, overrides: <Type, Generator>{
     GradleUtils: () => FakeGradleUtils(),
     Platform: () => fakePlatform('android'),

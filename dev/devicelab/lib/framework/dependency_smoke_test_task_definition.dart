@@ -58,6 +58,7 @@ distributionUrl=https\://services.gradle.org/distributions/gradle-GRADLE_REPLACE
 ''';
 
 const String gradleReplacementString = 'GRADLE_REPLACE_ME';
+const String flutterCompileSdkString = 'flutter.compileSdkVersion';
 
 /// A simple class containing a Kotlin, Gradle, and AGP version.
 class VersionTuple {
@@ -87,6 +88,7 @@ class VersionTuple {
 /// fails, returns a successful result otherwise. Cleans up in either case.
 Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
   required List<VersionTuple> versionTuples,
+  String? compileSdkOverride,
   required Directory tempDir,
   required LocalFileSystem localFileSystem,}) async {
   for (final VersionTuple versions in versionTuples) {
@@ -104,6 +106,14 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
       );
 
       final String appPath = '${innerTempDir.absolute.path}/dependency_checker_app';
+
+      if (compileSdkOverride != null) {
+        final File appGradleBuild = localFileSystem.file(localFileSystem.path.join(
+            appPath, 'android', 'app', 'build.gradle'));
+        final String appBuildContent = appGradleBuild.readAsStringSync()
+            .replaceFirst(flutterCompileSdkString, compileSdkOverride);
+        appGradleBuild.writeAsStringSync(appBuildContent);
+      }
 
       // Modify gradle version to passed in version.
       final File gradleWrapperProperties = localFileSystem.file(localFileSystem.path.join(
