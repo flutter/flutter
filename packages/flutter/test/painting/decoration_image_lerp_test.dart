@@ -618,16 +618,6 @@ class _ImageLoader {
   }
 }
 
-// Future<void> _load(MemoryImage image) {
-//   final ImageStream stream = image.resolve(ImageConfiguration.empty);
-//   final Completer<ImageInfo> completer = Completer<ImageInfo>();
-//   void listener(ImageInfo image, bool syncCall) {
-//     completer.complete(image);
-//   }
-//   stream.addListener(ImageStreamListener(listener));
-//   return completer.future;
-// }
-
 class _TestImage extends StatelessWidget {
   _TestImage(this.image); // ignore: use_key_in_widget_constructors, prefer_const_constructors_in_immutables
 
