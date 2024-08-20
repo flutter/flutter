@@ -99,7 +99,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       );
 
       await bundle.build(
-        packagesPath: '.packages',
+        packageConfigPath: '.packages',
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
@@ -154,7 +154,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       );
 
       await bundle.build(
-        packagesPath: '.packages',
+        packageConfigPath: '.packages',
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
@@ -210,7 +210,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       );
 
       await bundle.build(
-        packagesPath: '.packages',
+        packageConfigPath: '.packages',
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
@@ -256,7 +256,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       );
 
       await bundle.build(
-        packagesPath: '.packages',
+        packageConfigPath: '.packages',
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
@@ -328,7 +328,7 @@ flutter:
       );
 
       await bundle.build(
-        packagesPath: '.packages',
+        packageConfigPath: '.packages',
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 

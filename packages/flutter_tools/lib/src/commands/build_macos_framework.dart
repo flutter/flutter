@@ -217,6 +217,7 @@ end
     try {
       final Environment environment = Environment(
         projectDir: globals.fs.currentDirectory,
+        packageConfigPath: packageConfigPath(),
         outputDir: macosBuildOutput,
         buildDir: project.dartTool.childDirectory('flutter_build'),
         cacheDir: globals.cache.getRoot(),
