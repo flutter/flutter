@@ -219,6 +219,8 @@ void main() {
       ];
     });
     await tester.pumpAndSettle();
+    expect(_iconRenderBox(tester, Icons.favorite_border).localToGlobal(Offset.zero), const Offset(28.0, 82.0));
+    expect(_labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero), const Offset(0.0, 72.0));
     expect(tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey)).localToGlobal(Offset.zero), const Offset(12.0, 8.0));
 
     // two destinations and leading widget
@@ -237,6 +239,10 @@ void main() {
       ];
     });
     await tester.pumpAndSettle();
+    expect(_iconRenderBox(tester, Icons.favorite_border).localToGlobal(Offset.zero), const Offset(28.0, 82.0));
+    expect(_labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero), const Offset(0.0, 72.0));
+    expect(_iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero), const Offset(28.0, 126.0));
+    expect(_labelRenderBox(tester, 'Longer Label').localToGlobal(Offset.zero), const Offset(0.0, 116.0));
     expect(tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey)).localToGlobal(Offset.zero), const Offset(12.0, 8.0));
 
     // empty destinations and trailing widget
@@ -262,6 +268,8 @@ void main() {
       ];
     });
     await tester.pumpAndSettle();
+    expect(_iconRenderBox(tester, Icons.favorite_border).localToGlobal(Offset.zero), const Offset(28.0, 18.0));
+    expect(_labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero), const Offset(0.0, 8.0));
     expect(tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey)).localToGlobal(Offset.zero), const Offset(12.0, 52.0));
 
     // two destinations and trailing widget
@@ -280,6 +288,10 @@ void main() {
         ];
     });
     await tester.pumpAndSettle();
+    expect(_iconRenderBox(tester, Icons.favorite_border).localToGlobal(Offset.zero), const Offset(28.0, 18.0));
+    expect(_labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero), const Offset(0.0, 8.0));
+    expect(_iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero), const Offset(28.0, 62.0));
+    expect(_labelRenderBox(tester, 'Longer Label').localToGlobal(Offset.zero), const Offset(0.0, 52.0));
     expect(tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey)).localToGlobal(Offset.zero), const Offset(12.0, 96.0));
   });
 
@@ -3987,6 +3999,8 @@ void main() {
         ];
       });
       await tester.pumpAndSettle();
+      expect(_iconRenderBox(tester, Icons.favorite_border).localToGlobal(Offset.zero), const Offset(24.0, 96.0));
+      expect(_labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero), const Offset(0.0, 72.0));
       expect(tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey)).localToGlobal(Offset.zero), const Offset(8.0, 8.0));
 
       // two destinations and leading widget
@@ -4005,6 +4019,10 @@ void main() {
         ];
       });
       await tester.pumpAndSettle();
+      expect(_iconRenderBox(tester, Icons.favorite_border).localToGlobal(Offset.zero), const Offset(24.0, 96.0));
+      expect(_labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero), const Offset(0.0, 72.0));
+      expect(_iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero), const Offset(24.0, 168.0));
+      expect(_labelRenderBox(tester, 'Longer Label').localToGlobal(Offset.zero), const Offset(0.0, 144.0));
       expect(tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey)).localToGlobal(Offset.zero), const Offset(8.0, 8.0));
 
       // empty destinations and trailing widget
@@ -4030,6 +4048,8 @@ void main() {
         ];
       });
       await tester.pumpAndSettle();
+      expect(_iconRenderBox(tester, Icons.favorite_border).localToGlobal(Offset.zero), const Offset(24.0, 32.0));
+      expect(_labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero), const Offset(0.0, 8.0));
       expect(tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey)).localToGlobal(Offset.zero), const Offset(8.0, 80.0));
 
       // two destinations and trailing widget
@@ -4048,6 +4068,10 @@ void main() {
         ];
       });
       await tester.pumpAndSettle();
+      expect(_iconRenderBox(tester, Icons.favorite_border).localToGlobal(Offset.zero), const Offset(24.0, 32.0));
+      expect(_labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero), const Offset(0.0, 8.0));
+      expect(_iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero), const Offset(24.0, 104.0));
+      expect(_labelRenderBox(tester, 'Longer Label').localToGlobal(Offset.zero), const Offset(0.0, 80.0));
       expect(tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey)).localToGlobal(Offset.zero), const Offset(8.0, 152.0));
     });
 
