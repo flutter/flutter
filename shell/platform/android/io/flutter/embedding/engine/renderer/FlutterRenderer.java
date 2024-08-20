@@ -1271,6 +1271,9 @@ public class FlutterRenderer implements TextureRegistry {
     public float devicePixelRatio = 1.0f;
     public int width = 0;
     public int height = 0;
+    // The fields prefixed with viewPadding and viewInset are used to calculate the padding,
+    // viewPadding, and viewInsets of ViewConfiguration in Dart. This calculation is performed at
+    // https://github.com/flutter/engine/blob/main/lib/ui/hooks.dart#L139-L155.
     public int viewPaddingTop = 0;
     public int viewPaddingRight = 0;
     public int viewPaddingBottom = 0;
