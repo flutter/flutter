@@ -153,12 +153,6 @@ void main() {
           'isolateId': '1',
         },
       ),
-      const FakeVmServiceRequest(
-        method: 'streamCancel',
-        args: <String, Object>{
-          'streamId': 'Isolate',
-        },
-      ),
       listViews,
       listViews,
       const FakeVmServiceRequest(
@@ -225,12 +219,6 @@ void main() {
         },
       ),
       const FakeVmServiceRequest(
-        method: 'streamCancel',
-        args: <String, Object>{
-          'streamId': 'Isolate',
-        },
-      ),
-      const FakeVmServiceRequest(
         method: 'ext.flutter.activeDevToolsServerAddress',
         args: <String, Object>{
           'value': 'http://localhost:8080',
@@ -270,13 +258,6 @@ void main() {
         method: kListViewsMethod,
         error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
       ),
-      const FakeVmServiceRequest(
-        method: 'streamCancel',
-        args: <String, Object>{
-          'streamId': 'Isolate',
-        },
-        error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
-      ),
     ], httpAddress: Uri.parse('http://localhost:1234'));
 
     final FakeFlutterDevice device = FakeFlutterDevice()
@@ -311,12 +292,6 @@ void main() {
           'isolateId': '1',
         },
       ),
-      const FakeVmServiceRequest(
-        method: 'streamCancel',
-        args: <String, Object>{
-          'streamId': 'Isolate',
-        },
-      ),
       listViews,
       listViews,
       const FakeVmServiceRequest(
@@ -344,13 +319,6 @@ void main() {
       ),
       const FakeVmServiceRequest(
         method: kListViewsMethod,
-        error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
-      ),
-      const FakeVmServiceRequest(
-        method: 'streamCancel',
-        args: <String, Object>{
-          'streamId': 'Isolate',
-        },
         error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
       ),
     ], httpAddress: Uri.parse('http://localhost:5678'));
