@@ -1641,6 +1641,7 @@
 ../../../flutter/third_party/dart/utils/OWNERS
 ../../../flutter/third_party/dart/utils/compiler/.gitignore
 ../../../flutter/third_party/dart/utils/dartanalyzer/.gitignore
+../../../flutter/third_party/dart/utils/dynamic_module_runner/dynamic_interface.yaml
 ../../../flutter/third_party/depot_tools
 ../../../flutter/third_party/expat/.git
 ../../../flutter/third_party/expat/.github
