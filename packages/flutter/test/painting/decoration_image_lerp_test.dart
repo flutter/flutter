@@ -43,11 +43,6 @@ void main() {
       await redLoader.load();
     });
 
-    // await tester.runAsync(() async {
-    //   await load(green);
-    //   await load(red);
-    // });
-
     await tester.pumpWidget(
       ColoredBox(
         color: Colors.white,
