@@ -453,7 +453,7 @@ void main() {
     );
 
     final List<ImageInfo> emittedImages = <ImageInfo>[];
-    final listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
+    final ImageStreamListener listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
       emittedImages.add(image);
       addTearDown(image.dispose);
     });
@@ -540,12 +540,12 @@ void main() {
     );
 
     final List<ImageInfo> emittedImages1 = <ImageInfo>[];
-    final listener1 =   ImageStreamListener((ImageInfo image, bool synchronousCall) {
+    final ImageStreamListener listener1 =   ImageStreamListener((ImageInfo image, bool synchronousCall) {
       emittedImages1.add(image);
       addTearDown(image.dispose);
     });
     final List<ImageInfo> emittedImages2 = <ImageInfo>[];
-    final listener2 =   ImageStreamListener((ImageInfo image, bool synchronousCall) {
+    final ImageStreamListener listener2 =   ImageStreamListener((ImageInfo image, bool synchronousCall) {
       emittedImages2.add(image);
       addTearDown(image.dispose);
     });
