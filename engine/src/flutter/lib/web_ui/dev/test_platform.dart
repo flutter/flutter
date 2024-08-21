@@ -1104,7 +1104,6 @@ class BrowserManager {
       default:
         // Unreachable.
         assert(false);
-        break;
     }
   }
 

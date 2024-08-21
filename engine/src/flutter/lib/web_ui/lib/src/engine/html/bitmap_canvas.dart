@@ -823,7 +823,6 @@ class BitmapCanvas extends EngineCanvas {
           ..backgroundBlendMode =
               blendModeToCssMixBlendMode(colorFilterBlendMode) ?? ''
           ..backgroundColor = filterColor!.toCssString();
-        break;
     }
     return imgElement;
   }
