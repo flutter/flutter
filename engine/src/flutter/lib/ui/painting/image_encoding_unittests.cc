@@ -374,8 +374,8 @@ TEST_F(ShellTest, EncodeImageFailsWithoutGPUImpeller) {
           shell->GetIOManager()->GetImpellerContext();
       // This will cause the stored tasks to overflow and start throwing them
       // away.
-      for (int i = 0; i < impeller::Context::kMaxTasksAwaitingGPU; ++i) {
-        impeller_context->StoreTaskForGPU([] {});
+      for (int i = 0; i < impeller::Context::kMaxTasksAwaitingGPU; i++) {
+        impeller_context->StoreTaskForGPU([] {}, [] {});
       }
     });
   };

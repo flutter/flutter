@@ -15,6 +15,8 @@
 #include "flutter/impeller/renderer/context.h"
 #include "impeller/base/strings.h"
 #include "impeller/core/device_buffer.h"
+#include "impeller/core/formats.h"
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/geometry/size.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
@@ -26,7 +28,6 @@
 #include "third_party/skia/include/core/SkPixelRef.h"
 #include "third_party/skia/include/core/SkPixmap.h"
 #include "third_party/skia/include/core/SkPoint.h"
-#include "third_party/skia/include/core/SkSamplingOptions.h"
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {
@@ -224,59 +225,68 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
     bitmap = premul_bitmap;
   }
 
-  if (bitmap->dimensions() == target_size) {
+  std::shared_ptr<impeller::DeviceBuffer> buffer =
+      bitmap_allocator->GetDeviceBuffer();
+  if (!buffer) {
+    return DecompressResult{.decode_error = "Unable to get device buffer"};
+  }
+  buffer->Flush();
+
+  std::optional<SkImageInfo> resize_info =
+      bitmap->dimensions() == target_size
+          ? std::nullopt
+          : std::optional<SkImageInfo>(image_info.makeDimensions(target_size));
+
+  if (source_size.width() > max_texture_size.width ||
+      source_size.height() > max_texture_size.height) {
+    //----------------------------------------------------------------------------
+    /// 2. If the decoded image isn't the requested target size and the src size
+    ///    exceeds the device max texture size, perform a slow CPU reisze.
+    ///
+    TRACE_EVENT0("impeller", "SlowCPUDecodeScale");
+    const auto scaled_image_info = image_info.makeDimensions(target_size);
+
+    auto scaled_bitmap = std::make_shared<SkBitmap>();
+    auto scaled_allocator = std::make_shared<ImpellerAllocator>(allocator);
+    scaled_bitmap->setInfo(scaled_image_info);
+    if (!scaled_bitmap->tryAllocPixels(scaled_allocator.get())) {
+      std::string decode_error(
+          "Could not allocate scaled bitmap for image decompression.");
+      FML_DLOG(ERROR) << decode_error;
+      return DecompressResult{.decode_error = decode_error};
+    }
+    if (!bitmap->pixmap().scalePixels(
+            scaled_bitmap->pixmap(),
+            SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone))) {
+      FML_LOG(ERROR) << "Could not scale decoded bitmap data.";
+    }
+    scaled_bitmap->setImmutable();
+
     std::shared_ptr<impeller::DeviceBuffer> buffer =
-        bitmap_allocator->GetDeviceBuffer();
+        scaled_allocator->GetDeviceBuffer();
     if (!buffer) {
       return DecompressResult{.decode_error = "Unable to get device buffer"};
     }
     buffer->Flush();
 
     return DecompressResult{.device_buffer = std::move(buffer),
-                            .sk_bitmap = bitmap,
-                            .image_info = bitmap->info()};
+                            .sk_bitmap = scaled_bitmap,
+                            .image_info = scaled_bitmap->info()};
   }
 
-  //----------------------------------------------------------------------------
-  /// 2. If the decoded image isn't the requested target size, resize it.
-  ///
-
-  TRACE_EVENT0("impeller", "DecodeScale");
-  const auto scaled_image_info = image_info.makeDimensions(target_size);
-
-  auto scaled_bitmap = std::make_shared<SkBitmap>();
-  auto scaled_allocator = std::make_shared<ImpellerAllocator>(allocator);
-  scaled_bitmap->setInfo(scaled_image_info);
-  if (!scaled_bitmap->tryAllocPixels(scaled_allocator.get())) {
-    std::string decode_error(
-        "Could not allocate scaled bitmap for image decompression.");
-    FML_DLOG(ERROR) << decode_error;
-    return DecompressResult{.decode_error = decode_error};
-  }
-  if (!bitmap->pixmap().scalePixels(
-          scaled_bitmap->pixmap(),
-          SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone))) {
-    FML_LOG(ERROR) << "Could not scale decoded bitmap data.";
-  }
-  scaled_bitmap->setImmutable();
-
-  std::shared_ptr<impeller::DeviceBuffer> buffer =
-      scaled_allocator->GetDeviceBuffer();
-  buffer->Flush();
-
-  if (!buffer) {
-    return DecompressResult{.decode_error = "Unable to get device buffer"};
-  }
   return DecompressResult{.device_buffer = std::move(buffer),
-                          .sk_bitmap = scaled_bitmap,
-                          .image_info = scaled_bitmap->info()};
+                          .sk_bitmap = bitmap,
+                          .image_info = bitmap->info(),
+                          .resize_info = resize_info};
 }
 
-/// Only call this method if the GPU is available.
-static std::pair<sk_sp<DlImage>, std::string> UnsafeUploadTextureToPrivate(
+// static
+std::pair<sk_sp<DlImage>, std::string>
+ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
     const std::shared_ptr<impeller::Context>& context,
     const std::shared_ptr<impeller::DeviceBuffer>& buffer,
-    const SkImageInfo& image_info) {
+    const SkImageInfo& image_info,
+    const std::optional<SkImageInfo>& resize_info) {
   const auto pixel_format =
       impeller::skia_conversions::ToPixelFormat(image_info.colorType());
   if (!pixel_format) {
@@ -292,6 +302,12 @@ static std::pair<sk_sp<DlImage>, std::string> UnsafeUploadTextureToPrivate(
   texture_descriptor.size = {image_info.width(), image_info.height()};
   texture_descriptor.mip_count = texture_descriptor.size.MipCount();
   texture_descriptor.compression_type = impeller::CompressionType::kLossy;
+  if (context->GetBackendType() == impeller::Context::BackendType::kMetal &&
+      resize_info.has_value()) {
+    // The MPS used to resize images on iOS does not require mip generation.
+    // Remove mip count if we are resizing the image on the GPU.
+    texture_descriptor.mip_count = 1;
+  }
 
   auto dest_texture =
       context->GetResourceAllocator()->CreateTexture(texture_descriptor);
@@ -323,59 +339,107 @@ static std::pair<sk_sp<DlImage>, std::string> UnsafeUploadTextureToPrivate(
   blit_pass->SetLabel("Mipmap Blit Pass");
   blit_pass->AddCopy(impeller::DeviceBuffer::AsBufferView(buffer),
                      dest_texture);
-  if (texture_descriptor.size.MipCount() > 1) {
+  if (texture_descriptor.mip_count > 1) {
     blit_pass->GenerateMipmap(dest_texture);
   }
 
+  std::shared_ptr<impeller::Texture> result_texture = dest_texture;
+  if (resize_info.has_value()) {
+    impeller::TextureDescriptor resize_desc;
+    resize_desc.storage_mode = impeller::StorageMode::kDevicePrivate;
+    resize_desc.format = pixel_format.value();
+    resize_desc.size = {resize_info->width(), resize_info->height()};
+    resize_desc.mip_count = resize_desc.size.MipCount();
+    resize_desc.compression_type = impeller::CompressionType::kLossy;
+    resize_desc.usage = impeller::TextureUsage::kShaderRead;
+    if (context->GetBackendType() == impeller::Context::BackendType::kMetal) {
+      // Resizing requires a MPS on Metal platforms.
+      resize_desc.usage |= impeller::TextureUsage::kShaderWrite;
+      resize_desc.compression_type = impeller::CompressionType::kLossless;
+    }
+
+    auto resize_texture =
+        context->GetResourceAllocator()->CreateTexture(resize_desc);
+    if (!resize_texture) {
+      std::string decode_error("Could not create resized Impeller texture.");
+      FML_DLOG(ERROR) << decode_error;
+      return std::make_pair(nullptr, decode_error);
+    }
+
+    blit_pass->ResizeTexture(/*source=*/dest_texture,
+                             /*destination=*/resize_texture);
+    if (resize_desc.mip_count > 1) {
+      blit_pass->GenerateMipmap(resize_texture);
+    }
+
+    result_texture = std::move(resize_texture);
+  }
   blit_pass->EncodeCommands(context->GetResourceAllocator());
+
   if (!context->GetCommandQueue()->Submit({command_buffer}).ok()) {
-    std::string decode_error("Failed to submit blit pass command buffer.");
+    std::string decode_error("Failed to submit image decoding command buffer.");
     FML_DLOG(ERROR) << decode_error;
     return std::make_pair(nullptr, decode_error);
   }
 
   return std::make_pair(
-      impeller::DlImageImpeller::Make(std::move(dest_texture)), std::string());
+      impeller::DlImageImpeller::Make(std::move(result_texture)),
+      std::string());
 }
 
-std::pair<sk_sp<DlImage>, std::string>
-ImageDecoderImpeller::UploadTextureToPrivate(
+void ImageDecoderImpeller::UploadTextureToPrivate(
+    ImageResult result,
     const std::shared_ptr<impeller::Context>& context,
     const std::shared_ptr<impeller::DeviceBuffer>& buffer,
     const SkImageInfo& image_info,
     const std::shared_ptr<SkBitmap>& bitmap,
+    const std::optional<SkImageInfo>& resize_info,
     const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   if (!context) {
-    return std::make_pair(nullptr, "No Impeller context is available");
+    result(nullptr, "No Impeller context is available");
+    return;
   }
   if (!buffer) {
-    return std::make_pair(nullptr, "No Impeller device buffer is available");
+    result(nullptr, "No Impeller device buffer is available");
+    return;
   }
 
-  std::pair<sk_sp<DlImage>, std::string> result;
   gpu_disabled_switch->Execute(
       fml::SyncSwitch::Handlers()
-          .SetIfFalse([&result, context, buffer, image_info] {
-            result = UnsafeUploadTextureToPrivate(context, buffer, image_info);
+          .SetIfFalse([&result, context, buffer, image_info, resize_info] {
+            sk_sp<DlImage> image;
+            std::string decode_error;
+            std::tie(image, decode_error) = std::tie(image, decode_error) =
+                UnsafeUploadTextureToPrivate(context, buffer, image_info,
+                                             resize_info);
+            result(image, decode_error);
           })
-          .SetIfTrue([&result, context, bitmap, gpu_disabled_switch] {
-            // create_mips is false because we already know the GPU is disabled.
-            result =
-                UploadTextureToStorage(context, bitmap, gpu_disabled_switch,
-                                       impeller::StorageMode::kHostVisible,
-                                       /*create_mips=*/false);
+          .SetIfTrue([&result, context, buffer, image_info, resize_info] {
+            // The `result` function must be copied in the capture list for each
+            // closure or the stack allocated callback will be cleared by the
+            // time to closure is executed later.
+            context->StoreTaskForGPU(
+                [result, context, buffer, image_info, resize_info]() {
+                  sk_sp<DlImage> image;
+                  std::string decode_error;
+                  std::tie(image, decode_error) =
+                      std::tie(image, decode_error) =
+                          UnsafeUploadTextureToPrivate(context, buffer,
+                                                       image_info, resize_info);
+                  result(image, decode_error);
+                },
+                [result]() {
+                  result(nullptr,
+                         "Image upload failed due to loss of GPU access.");
+                });
           }));
-  return result;
 }
 
 std::pair<sk_sp<DlImage>, std::string>
 ImageDecoderImpeller::UploadTextureToStorage(
     const std::shared_ptr<impeller::Context>& context,
-    std::shared_ptr<SkBitmap> bitmap,
-    const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
-    impeller::StorageMode storage_mode,
-    bool create_mips) {
+    std::shared_ptr<SkBitmap> bitmap) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   if (!context) {
     return std::make_pair(nullptr, "No Impeller context is available");
@@ -394,11 +458,10 @@ ImageDecoderImpeller::UploadTextureToStorage(
   }
 
   impeller::TextureDescriptor texture_descriptor;
-  texture_descriptor.storage_mode = storage_mode;
+  texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
   texture_descriptor.format = pixel_format.value();
   texture_descriptor.size = {image_info.width(), image_info.height()};
-  texture_descriptor.mip_count =
-      create_mips ? texture_descriptor.size.MipCount() : 1;
+  texture_descriptor.mip_count = 1;
 
   auto texture =
       context->GetResourceAllocator()->CreateTexture(texture_descriptor);
@@ -421,43 +484,6 @@ ImageDecoderImpeller::UploadTextureToStorage(
   }
 
   texture->SetLabel(impeller::SPrintF("ui.Image(%p)", texture.get()).c_str());
-
-  if (texture_descriptor.mip_count > 1u && create_mips) {
-    std::optional<std::string> decode_error;
-
-    // The only platform that needs mipmapping unconditionally is GL.
-    // GL based platforms never disable GPU access.
-    // This is only really needed for iOS.
-    gpu_disabled_switch->Execute(fml::SyncSwitch::Handlers().SetIfFalse(
-        [context, &texture, &decode_error] {
-          auto command_buffer = context->CreateCommandBuffer();
-          if (!command_buffer) {
-            decode_error =
-                "Could not create command buffer for mipmap generation.";
-            return;
-          }
-          command_buffer->SetLabel("Mipmap Command Buffer");
-
-          auto blit_pass = command_buffer->CreateBlitPass();
-          if (!blit_pass) {
-            decode_error = "Could not create blit pass for mipmap generation.";
-            return;
-          }
-          blit_pass->SetLabel("Mipmap Blit Pass");
-          blit_pass->GenerateMipmap(texture);
-          blit_pass->EncodeCommands(context->GetResourceAllocator());
-          if (!context->GetCommandQueue()->Submit({command_buffer}).ok()) {
-            decode_error = "Failed to submit blit pass command buffer.";
-            return;
-          }
-          command_buffer->WaitUntilScheduled();
-        }));
-    if (decode_error.has_value()) {
-      FML_DLOG(ERROR) << decode_error.value();
-      return std::make_pair(nullptr, decode_error.value());
-    }
-  }
-
   return std::make_pair(impeller::DlImageImpeller::Make(std::move(texture)),
                         std::string());
 }
@@ -509,14 +535,21 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
 
         auto upload_texture_and_invoke_result = [result, context, bitmap_result,
                                                  gpu_disabled_switch]() {
-          sk_sp<DlImage> image;
-          std::string decode_error;
-          std::tie(image, decode_error) = UploadTextureToPrivate(
-              context, bitmap_result.device_buffer, bitmap_result.image_info,
-              bitmap_result.sk_bitmap, gpu_disabled_switch);
-          result(image, decode_error);
+          UploadTextureToPrivate(result, context,              //
+                                 bitmap_result.device_buffer,  //
+                                 bitmap_result.image_info,     //
+                                 bitmap_result.sk_bitmap,      //
+                                 bitmap_result.resize_info,    //
+                                 gpu_disabled_switch           //
+          );
         };
-        io_runner->PostTask(upload_texture_and_invoke_result);
+        // The I/O image uploads are not threadsafe on GLES.
+        if (context->GetBackendType() ==
+            impeller::Context::BackendType::kOpenGLES) {
+          io_runner->PostTask(upload_texture_and_invoke_result);
+        } else {
+          upload_texture_and_invoke_result();
+        }
       });
 }
 

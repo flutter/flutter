@@ -5,6 +5,7 @@
 #include "flutter/lib/ui/painting/image_encoding_impeller.h"
 
 #include "flutter/lib/ui/painting/image.h"
+#include "fml/status.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/command_buffer.h"
@@ -90,8 +91,7 @@ void DoConvertImageToRasterImpellerWithRetry(
     // task on the Context so it can be executed when the GPU becomes available.
     if (status.code() == fml::StatusCode::kUnavailable) {
       impeller_context->StoreTaskForGPU(
-          [dl_image, encode_task = std::move(encode_task),
-           is_gpu_disabled_sync_switch, impeller_context,
+          [dl_image, encode_task, is_gpu_disabled_sync_switch, impeller_context,
            retry_runner]() mutable {
             auto retry_task = [dl_image, encode_task = std::move(encode_task),
                                is_gpu_disabled_sync_switch, impeller_context] {
@@ -111,6 +111,10 @@ void DoConvertImageToRasterImpellerWithRetry(
             } else {
               retry_task();
             }
+          },
+          [encode_task]() {
+            encode_task(
+                fml::Status(fml::StatusCode::kUnavailable, "GPU unavailable."));
           });
     } else {
       // Pass on errors that are not `kUnavailable`.
