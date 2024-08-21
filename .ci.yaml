@@ -2920,6 +2920,7 @@ targets:
         ["device_os=U","os=Linux", "device_type=mokey"]
 
   - name: Linux_build_test flutter_gallery__transition_perf_e2e
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/153836
     recipe: devicelab/devicelab_drone_build_test
     presubmit: false
     timeout: 60
