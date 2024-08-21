@@ -118,14 +118,22 @@ def copy_tree(source_path, destination_path, symlinks=False):
   shutil.copytree(source_path, destination_path, symlinks=symlinks)
 
 
-def create_fat_macos_framework(fat_framework, arm64_framework, x64_framework):
+def create_fat_macos_framework(args, dst, fat_framework, arm64_framework, x64_framework):
   """Creates a fat framework from two arm64 and x64 frameworks."""
   # Clone the arm64 framework bundle as a starting point.
   copy_tree(arm64_framework, fat_framework, symlinks=True)
   _regenerate_symlinks(fat_framework)
+  framework_dylib = get_mac_framework_dylib_path(fat_framework)
   lipo([get_mac_framework_dylib_path(arm64_framework),
-        get_mac_framework_dylib_path(x64_framework)], get_mac_framework_dylib_path(fat_framework))
+        get_mac_framework_dylib_path(x64_framework)], framework_dylib)
   _set_framework_permissions(fat_framework)
+
+  # Compute dsym output path, if enabled.
+  framework_dsym = None
+  if args.dsym:
+    framework_dsym = os.path.join(dst, get_framework_name(fat_framework) + '.dSYM')
+
+  _process_macos_framework(args, dst, framework_dylib, framework_dsym)
 
 
 def _regenerate_symlinks(framework_dir):
@@ -180,6 +188,15 @@ def _set_framework_permissions(framework_dir):
                                       stdin=find_subprocess.stdout)
   find_subprocess.wait()
   xargs_subprocess.wait()
+
+
+def _process_macos_framework(args, dst, framework_dylib, dsym):
+  if dsym:
+    extract_dsym(framework_dylib, dsym)
+
+  if args.strip:
+    unstripped_out = os.path.join(dst, 'FlutterMacOS.unstripped')
+    strip_binary(framework_dylib, unstripped_out)
 
 
 def create_zip(cwd, zip_filename, paths):
