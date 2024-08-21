@@ -44,7 +44,7 @@ void main() {
     );
     await tester.pump();
 
-    // An additional SliverList appears
+    // An additional SliverList appears.
     expect(find.byType(SliverList), findsExactly(2));
 
     // All items are visible.
