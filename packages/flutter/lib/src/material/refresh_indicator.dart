@@ -532,7 +532,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     if (_status == RefreshIndicatorStatus.armed) {
       newValue = math.max(newValue, 1.0 / _kDragSizeFactorLimit);
     }
-    _positionController.value = clampDouble(newValue, 0.0, 1.0); // This triggers various rebuilds
+    _positionController.value = clampDouble(newValue, 0.0, 1.0); // This triggers various rebuilds.
     if (_status == RefreshIndicatorStatus.drag && _valueColor.value!.alpha == _effectiveValueColor.alpha) {
       _status = RefreshIndicatorStatus.armed;
       widget.onStatusChange?.call(_status);
