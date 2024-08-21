@@ -48,9 +48,11 @@ function follow_links() (
 # Lookup the parent directory of the script (../), the Flutter SDK root.
 PROG_NAME="$(follow_links "${BASH_SOURCE[0]}")"
 BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
+SHARED_NAME="$BIN_DIR/internal/shared.sh"
 FLUTTER_ROOT="$(cd "$BIN_DIR/.." ; pwd -P)"
 
+# To define `shared::execute()` function
+source "$SHARED_NAME"
+
 # Run the Flutter tool directly without using the cached snapshot.
-exec "$FLUTTER_ROOT/bin/cache/dart-sdk/bin/dart" \
-  "$FLUTTER_ROOT/packages/flutter_tools/bin/flutter_tools.dart" \
-  "$@"
+shared::execute "$@"
