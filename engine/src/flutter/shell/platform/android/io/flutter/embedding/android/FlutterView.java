@@ -777,8 +777,6 @@ public class FlutterView extends FrameLayout
     // existing Insets-based method calls above.
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_35) {
       delegate.growViewportMetricsToCaptionBar(getContext(), viewportMetrics);
-    } else {
-      Log.w(TAG, "API level " + Build.VERSION.SDK_INT + " is too low to query bounding rects.");
     }
 
     Log.v(
