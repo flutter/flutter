@@ -469,18 +469,18 @@ void main() {
     await fileSystem.file('/some/path/to/llvm-ar').create();
     await fileSystem.file('/some/path/to/ld.lld').create();
 
-    final File packagesFile = fileSystem
+    final File packageConfigFile = fileSystem
         .directory(projectUri)
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
-    await packagesFile.parent.create();
-    await packagesFile.create();
+    await packageConfigFile.parent.create();
+    await packageConfigFile.create();
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      packagesFile,
+      packageConfigFile,
       logger: environment.logger,
     );
     final NativeAssetsBuildRunner runner =
-        NativeAssetsBuildRunnerImpl(projectUri, packageConfig, fileSystem, logger);
+        NativeAssetsBuildRunnerImpl(projectUri, packageConfigFile.path, packageConfig, fileSystem, logger);
     final CCompilerConfigImpl result = await runner.cCompilerConfig;
     expect(result.compiler, Uri.file('/some/path/to/clang'));
   });
