@@ -27,6 +27,7 @@ class _WidgetsAppExampleState extends State<WidgetsAppExample> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(justinmc): This should include state restoration.
     return WidgetsApp.router(
       color: Colors.red,
       localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
