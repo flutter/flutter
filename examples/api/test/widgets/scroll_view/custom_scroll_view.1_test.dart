@@ -16,6 +16,7 @@ void main() {
           matching: find.byIcon(Icons.add),
         ), findsOne);
     expect(find.byType(SliverList), findsOne);
+
     // Initial state should present only "Item: 0" on the SliverList.
     expect(find.widgetWithText(SliverList, 'Item: 0'), findsOne);
     expect(find.widgetWithText(SliverList, 'Item: -1'), findsNothing);
