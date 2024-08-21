@@ -49,7 +49,6 @@
 
 namespace impeller {
 
-struct ColorHSB;
 struct Vector4;
 
 enum class YUVColorSpace { kBT601LimitedRange, kBT601FullRange };
@@ -143,8 +142,6 @@ struct Color {
   Scalar alpha = 0.0;
 
   constexpr Color() {}
-
-  explicit Color(const ColorHSB& hsbColor);
 
   explicit Color(const Vector4& value);
 
@@ -919,38 +916,6 @@ constexpr inline Color operator/(T value, const Color& c) {
 }
 
 std::string ColorToString(const Color& color);
-
-/**
- *  Represents a color by its constituent hue, saturation, brightness and alpha
- */
-struct ColorHSB {
-  /**
-   *  The hue of the color (0 to 1)
-   */
-  Scalar hue;
-
-  /**
-   *  The saturation of the color (0 to 1)
-   */
-  Scalar saturation;
-
-  /**
-   *  The brightness of the color (0 to 1)
-   */
-  Scalar brightness;
-
-  /**
-   *  The alpha of the color (0 to 1)
-   */
-  Scalar alpha;
-
-  constexpr ColorHSB(Scalar h, Scalar s, Scalar b, Scalar a)
-      : hue(h), saturation(s), brightness(b), alpha(a) {}
-
-  static ColorHSB FromRGB(Color rgb);
-
-  Color ToRGBA() const;
-};
 
 static_assert(sizeof(Color) == 4 * sizeof(Scalar));
 
