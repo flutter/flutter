@@ -60,7 +60,8 @@ void testMain() {
         value: 'hi',
         isFocused: true,
       );
-      final SemanticTextField textField = textFieldSemantics.semanticRole! as SemanticTextField;
+      final SemanticTextField textField =
+          textFieldSemantics.semanticRole! as SemanticTextField;
 
       // ensureInitialized() isn't called prior to calling dispose() here.
       // Since we are conditionally calling dispose() on our
@@ -92,41 +93,53 @@ void testMain() {
     test('renders a text field', () {
       createTextFieldSemantics(value: 'hello');
 
-      expectSemanticsTree(owner(), '''
-  <sem>
-    <input />
-  </sem>''');
+      expectSemanticsTree(
+        owner(),
+        '<sem><input type="text" /></sem>',
+      );
 
       // TODO(yjbanov): this used to attempt to test that value="hello" but the
       //                test was a false positive. We should revise this test and
       //                make sure it tests the right things:
       //                https://github.com/flutter/flutter/issues/147200
-      final SemanticsObject node = owner().debugSemanticsTree![0]!;
-      final SemanticTextField textFieldRole = node.semanticRole! as SemanticTextField;
-      final DomHTMLInputElement inputElement =
-          textFieldRole.editableElement as DomHTMLInputElement;
+      final node = owner().debugSemanticsTree![0]!;
+      final textFieldRole = node.semanticRole! as SemanticTextField;
+      final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
       expect(inputElement.tagName.toLowerCase(), 'input');
       expect(inputElement.value, '');
+      expect(inputElement.disabled, isFalse);
+    });
+
+    test('renders a password field', () {
+      createTextFieldSemantics(value: 'secret', isObscured: true);
+
+      expectSemanticsTree(
+        owner(),
+        '<sem><input type="password" /></sem>',
+      );
+
+      final node = owner().debugSemanticsTree![0]!;
+      final textFieldRole = node.semanticRole! as SemanticTextField;
+      final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
       expect(inputElement.disabled, isFalse);
     });
 
     test('renders a disabled text field', () {
       createTextFieldSemantics(isEnabled: false, value: 'hello');
       expectSemanticsTree(owner(), '''<sem><input /></sem>''');
-      final SemanticsObject node = owner().debugSemanticsTree![0]!;
-      final SemanticTextField textFieldRole = node.semanticRole! as SemanticTextField;
-      final DomHTMLInputElement inputElement =
-          textFieldRole.editableElement as DomHTMLInputElement;
+      final node = owner().debugSemanticsTree![0]!;
+      final textFieldRole = node.semanticRole! as SemanticTextField;
+      final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
       expect(inputElement.tagName.toLowerCase(), 'input');
       expect(inputElement.disabled, isTrue);
     });
 
     test('sends a SemanticsAction.focus action when browser requests focus',
         () async {
-      final SemanticsActionLogger logger = SemanticsActionLogger();
+      final logger = SemanticsActionLogger();
       createTextFieldSemantics(value: 'hello');
 
-      final DomElement textField = owner()
+      final textField = owner()
           .semanticsHost
           .querySelector('input[data-semantics-role="text-field"]')!;
 
@@ -163,14 +176,14 @@ void testMain() {
       );
 
       // Create
-      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
+      final textFieldSemantics = createTextFieldSemantics(
         value: 'hello',
         label: 'greeting',
         isFocused: true,
         rect: const ui.Rect.fromLTWH(0, 0, 10, 15),
       );
 
-      final SemanticTextField textField = textFieldSemantics.semanticRole! as SemanticTextField;
+      final textField = textFieldSemantics.semanticRole! as SemanticTextField;
       expect(owner().semanticsHost.ownerDocument?.activeElement,
           strategy.domElement);
       expect(textField.editableElement, strategy.domElement);
@@ -231,16 +244,16 @@ void testMain() {
         onAction: (_) {},
       );
 
-      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
-          value: 'hello',
-          textSelectionBase: 1,
-          textSelectionExtent: 3,
-          isFocused: true,
-          rect: const ui.Rect.fromLTWH(0, 0, 10, 15));
+      final textFieldSemantics = createTextFieldSemantics(
+        value: 'hello',
+        textSelectionBase: 1,
+        textSelectionExtent: 3,
+        isFocused: true,
+        rect: const ui.Rect.fromLTWH(0, 0, 10, 15),
+      );
 
-      final SemanticTextField textField = textFieldSemantics.semanticRole! as SemanticTextField;
-      final DomHTMLInputElement editableElement =
-          textField.editableElement as DomHTMLInputElement;
+      final textField = textFieldSemantics.semanticRole! as SemanticTextField;
+      final editableElement = textField.editableElement as DomHTMLInputElement;
 
       expect(editableElement, strategy.domElement);
       expect(editableElement.value, '');
@@ -262,16 +275,16 @@ void testMain() {
         onAction: (_) {},
       );
 
-      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
-          value: 'hello',
-          textSelectionBase: 1,
-          textSelectionExtent: 3,
-          isFocused: true,
-          rect: const ui.Rect.fromLTWH(0, 0, 10, 15));
+      final textFieldSemantics = createTextFieldSemantics(
+        value: 'hello',
+        textSelectionBase: 1,
+        textSelectionExtent: 3,
+        isFocused: true,
+        rect: const ui.Rect.fromLTWH(0, 0, 10, 15),
+      );
 
-      final SemanticTextField textField = textFieldSemantics.semanticRole! as SemanticTextField;
-      final DomHTMLInputElement editableElement =
-          textField.editableElement as DomHTMLInputElement;
+      final textField = textFieldSemantics.semanticRole! as SemanticTextField;
+      final editableElement = textField.editableElement as DomHTMLInputElement;
 
       // No updates expected on semantic updates
       expect(editableElement, strategy.domElement);
@@ -280,7 +293,7 @@ void testMain() {
       expect(editableElement.selectionEnd, 0);
 
       // Update from framework
-      const MethodCall setEditingState =
+      const setEditingState =
           MethodCall('TextInput.setEditingState', <String, dynamic>{
         'text': 'updated',
         'selectionBase': 2,
@@ -306,12 +319,12 @@ void testMain() {
         onChange: (_, __) {},
         onAction: (_) {},
       );
-      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
+      final textFieldSemantics = createTextFieldSemantics(
         value: 'hello',
         isFocused: true,
       );
 
-      final SemanticTextField textField = textFieldSemantics.semanticRole! as SemanticTextField;
+      final textField = textFieldSemantics.semanticRole! as SemanticTextField;
       expect(textField.editableElement, strategy.domElement);
       expect(owner().semanticsHost.ownerDocument?.activeElement,
           strategy.domElement);
@@ -335,7 +348,7 @@ void testMain() {
       expect(strategy.domElement, isNull);
 
       // During the semantics update the DOM element is created and is focused on.
-      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
+      final textFieldSemantics = createTextFieldSemantics(
         value: 'hello',
         isFocused: true,
       );
@@ -347,7 +360,7 @@ void testMain() {
       expect(strategy.domElement, isNull);
 
       // It doesn't remove the DOM element.
-      final SemanticTextField textField = textFieldSemantics.semanticRole! as SemanticTextField;
+      final textField = textFieldSemantics.semanticRole! as SemanticTextField;
       expect(owner().semanticsHost.contains(textField.editableElement), isTrue);
       // Editing element is not enabled.
       expect(strategy.isEnabled, isFalse);
@@ -412,8 +425,11 @@ void testMain() {
         isMultiline: true,
       );
 
-      final DomHTMLTextAreaElement textArea =
-          strategy.domElement! as DomHTMLTextAreaElement;
+      final textArea = strategy.domElement! as DomHTMLTextAreaElement;
+      expect(
+        textArea.style.getPropertyValue('-webkit-text-security'),
+        '',
+      );
 
       expect(owner().semanticsHost.ownerDocument?.activeElement,
           strategy.domElement);
@@ -435,6 +451,27 @@ void testMain() {
       expect(strategy.isEnabled, isFalse);
     });
 
+    test('multi-line and obscured', () {
+      strategy.enable(
+        multilineConfig,
+        onChange: (_, __) {},
+        onAction: (_) {},
+      );
+      createTextFieldSemantics(
+        value: 'hello',
+        isFocused: true,
+        isMultiline: true,
+        isObscured: true,
+      );
+
+      expectSemanticsTree(
+        owner(),
+        '<sem><textarea style="-webkit-text-security: circle"></textarea></sem>',
+      );
+
+      strategy.disable();
+    });
+
     test('Does not position or size its DOM element', () {
       strategy.enable(
         singlelineConfig,
@@ -444,7 +481,7 @@ void testMain() {
 
       // Send width and height that are different from semantics values on
       // purpose.
-      final EditableTextGeometry geometry = EditableTextGeometry(
+      final geometry = EditableTextGeometry(
         height: 12,
         width: 13,
         globalTransform: Matrix4.translationValues(14, 15, 0).storage,
@@ -534,11 +571,12 @@ SemanticsObject createTextFieldSemantics({
   bool isEnabled = true,
   bool isFocused = false,
   bool isMultiline = false,
+  bool isObscured = false,
   ui.Rect rect = const ui.Rect.fromLTRB(0, 0, 100, 50),
   int textSelectionBase = 0,
   int textSelectionExtent = 0,
 }) {
-  final SemanticsTester tester = SemanticsTester(owner());
+  final tester = SemanticsTester(owner());
   tester.updateNode(
       id: 0,
       isEnabled: isEnabled,
@@ -547,6 +585,7 @@ SemanticsObject createTextFieldSemantics({
       isTextField: true,
       isFocused: isFocused,
       isMultiline: isMultiline,
+      isObscured: isObscured,
       hasTap: true,
       rect: rect,
       textDirection: ui.TextDirection.ltr,

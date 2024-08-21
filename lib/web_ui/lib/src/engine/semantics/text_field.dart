@@ -223,10 +223,33 @@ class SemanticTextField extends SemanticRole {
     return true;
   }
 
+  DomHTMLInputElement _createSingleLineField() {
+    return createDomHTMLInputElement()
+        ..type = semanticsObject.hasFlag(ui.SemanticsFlag.isObscured)
+          ? 'password'
+          : 'text';
+  }
+
+  DomHTMLTextAreaElement _createMultiLineField() {
+    final textArea = createDomHTMLTextAreaElement();
+
+    if (semanticsObject.hasFlag(ui.SemanticsFlag.isObscured)) {
+      // -webkit-text-security is not standard, but it's the best we can do.
+      // Another option would be to create a single-line <input type="password">
+      // but that may have layout quirks, since it cannot represent multi-line
+      // text. Worst case with -webkit-text-security is the browser does not
+      // support it and it does not obscure text. However, that's not a huge
+      // problem because semantic DOM is already invisible.
+      textArea.style.setProperty('-webkit-text-security', 'circle');
+    }
+
+    return textArea;
+  }
+
   void _initializeEditableElement() {
     editableElement = semanticsObject.hasFlag(ui.SemanticsFlag.isMultiline)
-        ? createDomHTMLTextAreaElement()
-        : createDomHTMLInputElement();
+        ? _createMultiLineField()
+        : _createSingleLineField();
     _updateEnabledState();
 
     // On iOS, even though the semantic text field is transparent, the cursor
