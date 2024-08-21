@@ -1858,51 +1858,7 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
   /// The global position of the last selection end edge update.
   Offset? _lastEndEdgeUpdateGlobalPosition;
 
-  /// Updates the internal selection state after a [SelectionEvent] that
-  /// selects a boundary such as: [SelectWordSelectionEvent],
-  /// [SelectParagraphSelectionEvent], and [SelectAllSelectionEvent].
-  ///
-  /// Call this method after determining the new selection as a result of
-  /// a [SelectionEvent] that selects a boundary. The [currentSelectionStartIndex]
-  /// and [currentSelectionEndIndex] should be set to valid values at the time
-  /// this method is called.
-  @protected
-  void didReceiveSelectionBoundaryEvents() {
-    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
-      return;
-    }
-    final int start = min(currentSelectionStartIndex, currentSelectionEndIndex);
-    final int end = max(currentSelectionStartIndex, currentSelectionEndIndex);
-    for (int index = start; index <= end; index += 1) {
-      didReceiveSelectionEventFor(selectable: selectables[index]);
-    }
-    _updateLastSelectionEdgeLocationsFromGeometries();
-  }
-
-  /// Clears the internal selection state.
-  ///
-  /// This indicates that no [Selectable] child under this delegate
-  /// has received start or end events, and resets any tracked global
-  /// locations for start and end [SelectionEdgeUpdateEvent]s.
-  @protected
-  void clearInternalSelectionState() {
-    _hasReceivedStartEvent.clear();
-    _hasReceivedEndEvent.clear();
-    _lastStartEdgeUpdateGlobalPosition = null;
-    _lastEndEdgeUpdateGlobalPosition = null;
-  }
-
-  /// Clears the internal selection state for a given [Selectable].
-  ///
-  /// This indicates that the given `selectable` has neither received a
-  /// start or end [SelectionEdgeUpdateEvent]s.
-  @protected
-  void clearInternalSelectionStateForSelectable(Selectable selectable) {
-    _hasReceivedStartEvent.remove(selectable);
-    _hasReceivedEndEvent.remove(selectable);
-  }
-
-  /// Tracks the internal selection state for a given [Selectable].
+  /// Tracks whether a selection edge update event for a given [Selectable] was received.
   ///
   /// When `forEnd` is true, the [Selectable] will be registered as having received
   /// an end event. When false, the [Selectable] is registered as having received
@@ -1922,6 +1878,27 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
     } else {
       _hasReceivedStartEvent.add(selectable);
     }
+  }
+
+  /// Updates the internal selection state after a [SelectionEvent] that
+  /// selects a boundary such as: [SelectWordSelectionEvent],
+  /// [SelectParagraphSelectionEvent], and [SelectAllSelectionEvent].
+  ///
+  /// Call this method after determining the new selection as a result of
+  /// a [SelectionEvent] that selects a boundary. The [currentSelectionStartIndex]
+  /// and [currentSelectionEndIndex] should be set to valid values at the time
+  /// this method is called.
+  @protected
+  void didReceiveSelectionBoundaryEvents() {
+    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
+      return;
+    }
+    final int start = min(currentSelectionStartIndex, currentSelectionEndIndex);
+    final int end = max(currentSelectionStartIndex, currentSelectionEndIndex);
+    for (int index = start; index <= end; index += 1) {
+      didReceiveSelectionEventFor(selectable: selectables[index]);
+    }
+    _updateLastSelectionEdgeLocationsFromGeometries();
   }
 
   /// Updates the last selection edge location of the edge specified by `forEnd`
@@ -1956,6 +1933,29 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
         forEnd: true,
       );
     }
+  }
+
+  /// Clears the internal selection state.
+  ///
+  /// This indicates that no [Selectable] child under this delegate
+  /// has received start or end events, and resets any tracked global
+  /// locations for start and end [SelectionEdgeUpdateEvent]s.
+  @protected
+  void clearInternalSelectionState() {
+    _hasReceivedStartEvent.clear();
+    _hasReceivedEndEvent.clear();
+    _lastStartEdgeUpdateGlobalPosition = null;
+    _lastEndEdgeUpdateGlobalPosition = null;
+  }
+
+  /// Clears the internal selection state for a given [Selectable].
+  ///
+  /// This indicates that the given `selectable` has neither received a
+  /// start or end [SelectionEdgeUpdateEvent]s.
+  @protected
+  void clearInternalSelectionStateForSelectable(Selectable selectable) {
+    _hasReceivedStartEvent.remove(selectable);
+    _hasReceivedEndEvent.remove(selectable);
   }
 
   @override
