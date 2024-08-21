@@ -806,12 +806,11 @@ class _AppBarState extends State<AppBar> {
       // Check if any scroll positions on the vertical axis have been updated.
       // If any have, then the app bar should not be scrolled under.
 
-      // TODO(Mairramer): - Back later
-      // if (_scrollPositions.isNotEmpty && notification.metrics.axis == Axis.vertical) {
-      //   if (_scrollPositions.values.toList().any((double element) => element > 0) && _scrolledUnder) {
-      //     return;
-      //   }
-      // }
+      if (_scrollPositions.isNotEmpty && notification.metrics.axis == Axis.vertical) {
+        if (_scrollPositions.values.toList().any((double element) => element > 0) && _scrolledUnder) {
+          return;
+        }
+      }
 
       final bool oldScrolledUnder = _scrolledUnder;
       final ScrollMetrics metrics = notification.metrics;
