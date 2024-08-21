@@ -59,6 +59,15 @@ struct BlitGenerateMipmapCommandGLES : public BlitEncodeGLES,
   [[nodiscard]] bool Encode(const ReactorGLES& reactor) const override;
 };
 
+struct BlitResizeTextureCommandGLES : public BlitEncodeGLES,
+                                      public BlitResizeTextureCommand {
+  ~BlitResizeTextureCommandGLES() override;
+
+  std::string GetLabel() const override;
+
+  [[nodiscard]] bool Encode(const ReactorGLES& reactor) const override;
+};
+
 }  // namespace impeller
 
 #endif  // FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_BLIT_COMMAND_GLES_H_

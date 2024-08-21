@@ -137,10 +137,11 @@ void SnapshotControllerImpeller::MakeRasterSnapshot(
             if (context) {
               context->GetContext()->StoreTaskForGPU(
                   [context, sync_switch, display_list = std::move(display_list),
-                   picture_size, callback = std::move(callback)] {
+                   picture_size, callback] {
                     callback(DoMakeRasterSnapshot(display_list, picture_size,
                                                   sync_switch, context));
-                  });
+                  },
+                  [callback]() { callback(nullptr); });
             } else {
               callback(nullptr);
             }

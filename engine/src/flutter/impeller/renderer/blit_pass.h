@@ -40,6 +40,14 @@ class BlitPass {
       const std::shared_ptr<Texture>& texture);
 
   //----------------------------------------------------------------------------
+  /// @brief      Resize the [source] texture into the [destination] texture.
+  ///
+  ///             On Metal platforms, [destination] is required to be non-lossy
+  ///             and have the Shader read capability.
+  virtual bool ResizeTexture(const std::shared_ptr<Texture>& source,
+                             const std::shared_ptr<Texture>& destination) = 0;
+
+  //----------------------------------------------------------------------------
   /// @brief      Record a command to copy the contents of one texture to
   ///             another texture. The blit area is limited by the intersection
   ///             of the texture coverage with respect the source region and

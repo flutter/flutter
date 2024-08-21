@@ -62,6 +62,12 @@ class MockBlitPass : public BlitPass {
   MOCK_METHOD(void, OnSetLabel, (std::string label), (override));
 
   MOCK_METHOD(bool,
+              ResizeTexture,
+              (const std::shared_ptr<Texture>& source,
+               const std::shared_ptr<Texture>& destination),
+              (override));
+
+  MOCK_METHOD(bool,
               OnCopyTextureToTextureCommand,
               (std::shared_ptr<Texture> source,
                std::shared_ptr<Texture> destination,

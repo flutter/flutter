@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <cstdint>
+#include "fml/mapping.h"
 #include "gtest/gtest.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/device_buffer.h"
 #include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
@@ -126,6 +129,45 @@ TEST_P(BlitPassTest, CanBlitSmallRegionToUninitializedTexture) {
 
   EXPECT_TRUE(blit_pass->AddCopy(DeviceBuffer::AsBufferView(src), dst,
                                  IRect::MakeLTRB(0, 0, 1, 1), "", /*slice=*/0));
+  EXPECT_TRUE(blit_pass->EncodeCommands(GetContext()->GetResourceAllocator()));
+  EXPECT_TRUE(context->GetCommandQueue()->Submit({std::move(cmd_buffer)}).ok());
+}
+
+TEST_P(BlitPassTest, CanResizeTextures) {
+  auto context = GetContext();
+  auto cmd_buffer = context->CreateCommandBuffer();
+  auto blit_pass = cmd_buffer->CreateBlitPass();
+
+  TextureDescriptor dst_format;
+  dst_format.storage_mode = StorageMode::kDevicePrivate;
+  dst_format.format = PixelFormat::kR8G8B8A8UNormInt;
+  dst_format.size = {10, 10};
+  dst_format.usage = TextureUsage::kShaderRead | TextureUsage::kShaderWrite;
+  auto dst = context->GetResourceAllocator()->CreateTexture(dst_format);
+
+  TextureDescriptor src_format;
+  src_format.storage_mode = StorageMode::kDevicePrivate;
+  src_format.format = PixelFormat::kR8G8B8A8UNormInt;
+  src_format.size = {100, 100};
+  auto src = context->GetResourceAllocator()->CreateTexture(src_format);
+
+  std::vector<uint8_t> bytes(src_format.GetByteSizeOfBaseMipLevel());
+  for (auto i = 0u; i < src_format.GetByteSizeOfBaseMipLevel(); i += 4) {
+    // RGBA
+    bytes[i + 0] = 255;
+    bytes[i + 1] = 0;
+    bytes[i + 2] = 0;
+    bytes[i + 3] = 255;
+  }
+  auto mapping = fml::DataMapping(bytes);
+  auto staging = context->GetResourceAllocator()->CreateBufferWithCopy(mapping);
+
+  ASSERT_TRUE(dst);
+  ASSERT_TRUE(src);
+  ASSERT_TRUE(staging);
+
+  EXPECT_TRUE(blit_pass->AddCopy(DeviceBuffer::AsBufferView(staging), src));
+  EXPECT_TRUE(blit_pass->ResizeTexture(src, dst));
   EXPECT_TRUE(blit_pass->EncodeCommands(GetContext()->GetResourceAllocator()));
   EXPECT_TRUE(context->GetCommandQueue()->Submit({std::move(cmd_buffer)}).ok());
 }

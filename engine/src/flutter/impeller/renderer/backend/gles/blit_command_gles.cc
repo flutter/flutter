@@ -9,6 +9,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/geometry/point.h"
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
+#include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/backend/gles/texture_gles.h"
 
 namespace impeller {
@@ -73,7 +74,7 @@ bool BlitCopyTextureToTextureCommandGLES::Encode(
   // emulate the blit when it's not available in the driver.
   if (!gl.BlitFramebuffer.IsAvailable()) {
     // TODO(135818): Emulate the blit using a raster draw call here.
-    FML_LOG(ERROR) << "Texture blit fallback not implemented yet for GLES2.";
+    VALIDATION_LOG << "Texture blit fallback not implemented yet for GLES2.";
     return false;
   }
 
@@ -352,5 +353,70 @@ bool BlitGenerateMipmapCommandGLES::Encode(const ReactorGLES& reactor) const {
 
   return true;
 };
+
+//////  BlitResizeTextureCommandGLES
+//////////////////////////////////////////////////////
+
+BlitResizeTextureCommandGLES::~BlitResizeTextureCommandGLES() = default;
+
+std::string BlitResizeTextureCommandGLES::GetLabel() const {
+  return "Resize Texture";
+}
+
+bool BlitResizeTextureCommandGLES::Encode(const ReactorGLES& reactor) const {
+  const auto& gl = reactor.GetProcTable();
+
+  // glBlitFramebuffer is a GLES3 proc. Since we target GLES2, we need to
+  // emulate the blit when it's not available in the driver.
+  if (!gl.BlitFramebuffer.IsAvailable()) {
+    // TODO(135818): Emulate the blit using a raster draw call here.
+    VALIDATION_LOG << "Texture blit fallback not implemented yet for GLES2.";
+    return false;
+  }
+
+  GLuint read_fbo = GL_NONE;
+  GLuint draw_fbo = GL_NONE;
+  fml::ScopedCleanupClosure delete_fbos([&gl, &read_fbo, &draw_fbo]() {
+    DeleteFBO(gl, read_fbo, GL_READ_FRAMEBUFFER);
+    DeleteFBO(gl, draw_fbo, GL_DRAW_FRAMEBUFFER);
+  });
+
+  {
+    auto read = ConfigureFBO(gl, source, GL_READ_FRAMEBUFFER);
+    if (!read.has_value()) {
+      return false;
+    }
+    read_fbo = read.value();
+  }
+
+  {
+    auto draw = ConfigureFBO(gl, destination, GL_DRAW_FRAMEBUFFER);
+    if (!draw.has_value()) {
+      return false;
+    }
+    draw_fbo = draw.value();
+  }
+
+  gl.Disable(GL_SCISSOR_TEST);
+  gl.Disable(GL_DEPTH_TEST);
+  gl.Disable(GL_STENCIL_TEST);
+
+  const IRect source_region = IRect::MakeSize(source->GetSize());
+  const IRect destination_region = IRect::MakeSize(destination->GetSize());
+
+  gl.BlitFramebuffer(source_region.GetX(),            // srcX0
+                     source_region.GetY(),            // srcY0
+                     source_region.GetWidth(),        // srcX1
+                     source_region.GetHeight(),       // srcY1
+                     destination_region.GetX(),       // dstX0
+                     destination_region.GetY(),       // dstY0
+                     destination_region.GetWidth(),   // dstX1
+                     destination_region.GetHeight(),  // dstY1
+                     GL_COLOR_BUFFER_BIT,             // mask
+                     GL_LINEAR                        // filter
+  );
+
+  return true;
+}
 
 }  // namespace impeller

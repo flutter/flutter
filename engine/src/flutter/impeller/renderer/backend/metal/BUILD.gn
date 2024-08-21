@@ -59,7 +59,10 @@ impeller_component("metal") {
     "//flutter/fml",
   ]
 
-  frameworks = [ "Metal.framework" ]
+  frameworks = [
+    "Metal.framework",
+    "MetalPerformanceShaders.framework",
+  ]
 }
 
 impeller_component("metal_unittests") {
