@@ -22,7 +22,7 @@ void main() {
     expect(find.widgetWithText(SliverList, 'Item: 1'), findsNothing);
 });
 
-  testWidgets('IconButton click and scroll adds elements to the screen.', (WidgetTester tester) async {
+  testWidgets('Items are added correctly', (WidgetTester tester) async {
     await tester.pumpWidget(const example.CustomScrollViewExampleApp());
 
     await tester.tap(find.byType(IconButton));
