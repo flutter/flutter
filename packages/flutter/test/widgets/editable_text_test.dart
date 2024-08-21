@@ -9637,7 +9637,7 @@ void main() {
     controller.text = testText * 20;
     final ScrollController editableScrollController = ScrollController();
     addTearDown(editableScrollController.dispose);
-    final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
     await tester.pumpWidget(MaterialApp(
       navigatorKey: navigatorKey,
@@ -9648,7 +9648,7 @@ void main() {
               return;
             }
             await navigatorKey.currentState!.push(
-              CupertinoPageRoute(
+              CupertinoPageRoute<void>(
                 settings: const RouteSettings(name: '/TestCupertinoRoute'),
                 builder: (BuildContext innerContext) {
                   return Align(
