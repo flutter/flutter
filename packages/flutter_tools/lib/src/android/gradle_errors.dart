@@ -71,7 +71,6 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   minSdkVersionHandler,
   transformInputIssueHandler,
   lockFileDepMissingHandler,
-  incompatibleKotlinVersionHandler,
   minCompileSdkVersionHandler,
   jvm11RequiredHandler,
   outdatedGradleHandler,
@@ -82,6 +81,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   couldNotOpenCacheDirectoryHandler,
   incompatibleCompileSdk35AndAgpVersionHandler,
   r8DexingBugInAgp73Handler,
+  incompatibleKotlinVersionHandler, // This handler always be last, as it's key log output is sometimes in error messages with other root causes.
 ];
 
 const String _boxTitle = 'Flutter Fix';
