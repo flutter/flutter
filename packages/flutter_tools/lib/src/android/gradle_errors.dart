@@ -80,7 +80,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   remoteTerminatedHandshakeHandler,
   couldNotOpenCacheDirectoryHandler,
   incompatibleCompileSdk35AndAgpVersionHandler,
-  incompatibleKotlinVersionHandler, // This handler always be last, as it's key log output is sometimes in error messages with other root causes.
+  incompatibleKotlinVersionHandler, // This handler should always be last, as its key log output is sometimes in error messages with other root causes.
 ];
 
 const String _boxTitle = 'Flutter Fix';
