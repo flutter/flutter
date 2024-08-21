@@ -47,12 +47,12 @@ def main():
     print('Cannot find macOS x64 Framework at %s' % x64_framework)
     return 1
 
-  arm64_dylib = os.path.join(arm64_framework, 'FlutterMacOS')
+  arm64_dylib = sky_utils.get_mac_framework_dylib_path(arm64_framework)
   if not os.path.isfile(arm64_dylib):
     print('Cannot find macOS arm64 dylib at %s' % arm64_dylib)
     return 1
 
-  x64_dylib = os.path.join(x64_framework, 'FlutterMacOS')
+  x64_dylib = sky_utils.get_mac_framework_dylib_path(x64_framework)
   if not os.path.isfile(x64_dylib):
     print('Cannot find macOS x64 dylib at %s' % x64_dylib)
     return 1
@@ -71,15 +71,16 @@ def main():
   return 0
 
 
-def process_framework(dst, args, fat_framework):
-  fat_framework_binary = os.path.join(fat_framework, 'Versions', 'A', 'FlutterMacOS')
+def process_framework(dst, args, framework_path):
+  framework_binary = sky_utils.get_mac_framework_dylib_path(framework_path)
+
   if args.dsym:
-    dsym_out = os.path.splitext(fat_framework)[0] + '.dSYM'
-    sky_utils.extract_dsym(fat_framework_binary, dsym_out)
+    dsym_out = os.path.join(dst, 'FlutterMacOS.dSYM')
+    sky_utils.extract_dsym(framework_binary, dsym_out)
     if args.zip:
       dsym_dst = os.path.join(dst, 'FlutterMacOS.dSYM')
       sky_utils.create_zip(dsym_dst, 'FlutterMacOS.dSYM.zip', ['.'])
-      # Double zip to make it consistent with legacy artifacts.
+      # Create a zip of just the contents of the dSYM, then create a zip of that zip.
       # TODO(fujino): remove this once https://github.com/flutter/flutter/issues/125067 is resolved
       sky_utils.create_zip(dsym_dst, 'FlutterMacOS.dSYM_.zip', ['FlutterMacOS.dSYM.zip'])
 
@@ -90,7 +91,7 @@ def process_framework(dst, args, fat_framework):
 
   if args.strip:
     unstripped_out = os.path.join(dst, 'FlutterMacOS.unstripped')
-    sky_utils.strip_binary(fat_framework_binary, unstripped_out)
+    sky_utils.strip_binary(framework_binary, unstripped_out)
 
 
 def zip_framework(dst):
