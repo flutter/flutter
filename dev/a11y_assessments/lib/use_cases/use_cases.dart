@@ -29,9 +29,8 @@ import 'text_field_password.dart';
 abstract class UseCase {
   String get name;
   String get route;
-  // Widget get mainWidget;
 
-  Widget myActualBuild(BuildContext context) {
+  Widget buildWithTitle(BuildContext context) {
       return DynamicTitle(
       title: name,
       child: build(context),

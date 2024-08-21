@@ -30,6 +30,7 @@ class MainWidgetState extends State<MainWidget> {
   final FocusNode showButtonFocusNode = FocusNode();
 
   String pageTitle = getUseCaseName(MaterialBannerUseCase());
+
   @override
   void dispose() {
     dismissButtonFocusNode.dispose();
@@ -63,20 +64,16 @@ class MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return  Title(
-      color: Theme.of(context).primaryColor,
-      title: '$pageTitle Demo',
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-        ),
-        body: Center(
-          child: ElevatedButton(
-            focusNode: showButtonFocusNode,
-            onPressed: showBanner,
-            child: const Text('Show a MaterialBanner'),
-          ),
+    return  Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          focusNode: showButtonFocusNode,
+          onPressed: showBanner,
+          child: const Text('Show a MaterialBanner'),
         ),
       ),
     );

@@ -35,7 +35,7 @@ class App extends StatelessWidget {
     final Map<String, WidgetBuilder> routes =
         Map<String, WidgetBuilder>.fromEntries(
       useCases.map((UseCase useCase) =>
-          MapEntry<String, WidgetBuilder>(useCase.route, (BuildContext context) => useCase.myActualBuild(context))),
+          MapEntry<String, WidgetBuilder>(useCase.route, (BuildContext context) => useCase.buildWithTitle(context))),
     );
 
     return MaterialApp(
