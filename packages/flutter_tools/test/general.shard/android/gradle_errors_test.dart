@@ -38,10 +38,10 @@ void main() {
           networkErrorHandler,
           permissionDeniedErrorHandler,
           flavorUndefinedHandler,
+          r8DexingBugInAgp73Handler,
           minSdkVersionHandler,
           transformInputIssueHandler,
           lockFileDepMissingHandler,
-          incompatibleKotlinVersionHandler,
           minCompileSdkVersionHandler,
           jvm11RequiredHandler,
           outdatedGradleHandler,
@@ -51,6 +51,7 @@ void main() {
           remoteTerminatedHandshakeHandler,
           couldNotOpenCacheDirectoryHandler,
           incompatibleCompileSdk35AndAgpVersionHandler,
+          incompatibleKotlinVersionHandler,
         ])
       );
     });

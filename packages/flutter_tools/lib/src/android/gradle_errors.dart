@@ -638,7 +638,7 @@ final GradleHandledError incompatibleCompileSdk35AndAgpVersionHandler = GradleHa
   }) async {
     globals.printBox(
       '${globals.logger.terminal.warningMark} Using compileSdk 35 requires Android Gradle Plugin (AGP) 8.1.0 or higher.'
-          ' \n Please upgrade to a newer AGP version. ${_getAgpLocation(project)}\n\n Finally, if you have a'
+          ' \n Please upgrade to a newer AGP version.${_getAgpLocation(project)}\n\n Finally, if you have a'
           ' strong reason to avoid upgrading AGP, you can temporarily lower the compileSdk version in the following file:\n${project.android.appGradleFile.path}',
       title: _boxTitle,
     );
