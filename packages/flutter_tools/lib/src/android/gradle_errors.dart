@@ -81,6 +81,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   remoteTerminatedHandshakeHandler,
   couldNotOpenCacheDirectoryHandler,
   incompatibleCompileSdk35AndAgpVersionHandler,
+  r8DexingBugInAgp73Handler,
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -642,7 +643,13 @@ final GradleHandledError couldNotOpenCacheDirectoryHandler = GradleHandledError(
   eventLabel: 'could-not-open-cache-directory',
 );
 
-const String _agpLocationString = "Your project's AGP version is likely defined in ";
+
+String _getAgpLocation(FlutterProject project) {
+  return 'The version of AGP that your project uses is likely'
+      " defined in:\n${project.android.settingsGradleFile.path},\nin the 'plugins' closure. \n Alternatively, if your "
+      'project was created with an older version of the templates, it is likely \nin the buildscript.dependencies '
+      'closure of the top-level build.gradle:\n${project.android.hostAppGradleFile.path}.';
+}
 
 @visibleForTesting
 final GradleHandledError incompatibleCompileSdk35AndAgpVersionHandler = GradleHandledError(
@@ -654,10 +661,7 @@ final GradleHandledError incompatibleCompileSdk35AndAgpVersionHandler = GradleHa
   }) async {
     globals.printBox(
       '${globals.logger.terminal.warningMark} Using compileSdk 35 requires Android Gradle Plugin (AGP) 8.1.0 or higher.'
-          ' \n Please upgrade to a newer AGP version. The version of AGP that your project uses is likely'
-          " defined in:\n${project.android.settingsGradleFile.path},\nin the 'plugins' closure. \n Alternatively, if your "
-          'project was created with an older version of the templates, it is likely \nin the buildscript.dependencies '
-          'closure of the top-level build.gradle:\n${project.android.hostAppGradleFile.path}.\n\n Finally, if you have a'
+          ' \n Please upgrade to a newer AGP version. ${_getAgpLocation(project)}\n\n Finally, if you have a'
           ' strong reason to avoid upgrading AGP, you can temporarily lower the compileSdk version in the following file:\n${project.android.appGradleFile.path}',
       title: _boxTitle,
     );
@@ -676,7 +680,9 @@ final GradleHandledError r8DexingBugInAgp73Handler = GradleHandledError(
     required bool usesAndroidX,
   }) async {
     globals.printBox(
-        'Version 7.3 of the Android Gradle Plugin (AGP) uses a version of R8 that contains a bug which causes this error. To fix this error, update to a newer version of AGP (at least 7.4.0).\n\n',
+      'Version 7.3 of the Android Gradle Plugin (AGP) uses a version of R8 that contains a bug which causes this error. '
+          'To fix this error, update to a newer version of AGP (at least 7.4.0).\n\n'
+          '${_getAgpLocation(project)}',
         title: _boxTitle,
     );
 
