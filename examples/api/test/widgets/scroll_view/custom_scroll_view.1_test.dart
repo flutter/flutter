@@ -28,7 +28,7 @@ void main() {
     await tester.tap(find.byType(IconButton));
     await tester.pump();
 
-    // 'Item: -1' is invisible before scrolling
+    // 'Item: -1' is invisible before scrolling.
     expect(find.widgetWithText(SliverList, 'Item: -1'), findsNothing);
     expect(find.widgetWithText(SliverList, 'Item: 1'), findsOne);
 
