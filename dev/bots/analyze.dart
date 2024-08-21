@@ -2216,6 +2216,7 @@ Future<CommandResult> _runFlutterAnalyze(String workingDirectory, {
 const Set<String> kExecutableAllowlist = <String>{
   'bin/dart',
   'bin/flutter',
+  'bin/flutter-dev',
   'bin/internal/update_dart_sdk.sh',
 
   'dev/bots/accept_android_sdk_licenses.sh',
