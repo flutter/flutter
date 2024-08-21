@@ -26,6 +26,11 @@ $ dart bin/flutter_tools.dart
 ```
 followed by command-line arguments, as usual.
 
+As a convenience, you can also use the `bin/flutter-dev` script:
+```shell
+# Assuming flutter/bin is on your PATH
+$ flutter-dev
+```
 
 ### Running the analyzer
 
