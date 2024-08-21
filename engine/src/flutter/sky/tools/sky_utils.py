@@ -186,9 +186,10 @@ def create_zip(cwd, zip_filename, paths):
   """Creates a zip archive in cwd, containing a set of cwd-relative files.
 
   In order to preserve the correct internal structure of macOS frameworks,
-  symlinks are preserved.
+  symlinks are preserved (-y). In order to generate reproducible builds,
+  owner/group and unix file timestamps are not included in the archive (-X).
   """
-  subprocess.check_call(['zip', '-r', '-y', zip_filename] + paths, cwd=cwd)
+  subprocess.check_call(['zip', '-r', '-X', '-y', zip_filename] + paths, cwd=cwd)
 
 
 def _dsymutil_path():
