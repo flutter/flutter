@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/rendering/sliver_grid/sliver_grid_delegate_w
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Each tiles should have a width of 200.0 and a height of 400.0', (WidgetTester tester) async {
+  testWidgets('Each tiles should have a width of 200.0 and a height of 100.0', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SliverGridDelegateWithFixedCrossAxisCountExampleApp(),
     );
