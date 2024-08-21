@@ -166,9 +166,9 @@ class Dismissible extends StatefulWidget {
   /// The default flinging effect can be disabled by using:
   /// ```dart
   /// Dismissible(
-  ///   key: ValueKey('dismissible-key'),
+  ///   key: const ValueKey<String>('dismissible-key'),
   ///   shouldDismiss: (AcceptDismissDetails details) => details.reached ? null : false,
-  ///   child: ListTile(title: Text('Slide me to dismiss')),
+  ///   child: const ListTile(title: Text('Slide me to dismiss')),
   /// )
   /// ```
   /// {@end-tool}
