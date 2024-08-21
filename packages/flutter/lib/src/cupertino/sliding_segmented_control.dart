@@ -1041,7 +1041,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     return segmentWidths;
   }
 
-  Size _computeOverallSizeFromChildSize(BoxConstraints constraints) {
+  Size _computeOverallSize(BoxConstraints constraints) {
     final double maxChildHeight = _getMaxChildHeight(constraints, constraints.maxWidth);
     if (proportionalWidth) {
       return constraints.constrain(Size(_getChildIntrinsicWidths(constraints).sum + totalSeparatorWidth, maxChildHeight));
@@ -1065,7 +1065,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    return _computeOverallSizeFromChildSize(constraints);
+    return _computeOverallSize(constraints);
   }
 
   @override
@@ -1098,7 +1098,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
       child = childAfter(child);
       index += 1;
     }
-    size = _computeOverallSizeFromChildSize(constraints);
+    size = _computeOverallSize(constraints);
   }
 
   // This method is used to convert the original unscaled thumb rect painted in
