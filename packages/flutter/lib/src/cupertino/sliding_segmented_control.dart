@@ -1013,7 +1013,13 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     return maxHeight;
   }
 
-  List<double> _getChildIntrinsicWidths(BoxConstraints constraints) {
+  List<double> _getChildWidths(BoxConstraints constraints) {
+    if (!proportionalWidth) {
+      final double maxChildWidth = _getMaxChildWidth(constraints);
+      final int segmentCount = childCount ~/ 2 + 1;
+      return List<double>.filled(segmentCount, maxChildWidth);
+    }
+
     final List<double> segmentWidths = <double>[];
     RenderBox? child = firstChild;
     while (child != null) {
@@ -1043,12 +1049,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
 
   Size _computeOverallSize(BoxConstraints constraints) {
     final double maxChildHeight = _getMaxChildHeight(constraints, constraints.maxWidth);
-    if (proportionalWidth) {
-      return constraints.constrain(Size(_getChildIntrinsicWidths(constraints).sum + totalSeparatorWidth, maxChildHeight));
-    }
-    final int childCount = this.childCount ~/ 2 + 1;
-    final double maxChildWidth = _getMaxChildWidth(constraints);
-    return constraints.constrain(Size(maxChildWidth * childCount + totalSeparatorWidth, maxChildHeight));
+    return constraints.constrain(Size(_getChildWidths(constraints).sum + totalSeparatorWidth, maxChildHeight));
   }
 
   @override
@@ -1071,13 +1072,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-
-    if (proportionalWidth) {
-      segmentWidths = _getChildIntrinsicWidths(constraints);
-    } else {
-      final Size childSize = _calculateChildSize(constraints);
-      segmentWidths = List<double>.filled(childCount, childSize.width);
-    }
+    segmentWidths = _getChildWidths(constraints);
 
     final double childHeight = _getMaxChildHeight(constraints, double.infinity);
     final BoxConstraints separatorConstraints = BoxConstraints(minHeight: childHeight, maxHeight: childHeight);
