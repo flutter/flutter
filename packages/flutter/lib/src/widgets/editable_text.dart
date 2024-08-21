@@ -5829,6 +5829,9 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
         start: atomicBoundary.getLeadingTextBoundaryAt(selection.start) ?? state._value.text.length,
         end: atomicBoundary.getTrailingTextBoundaryAt(selection.end - 1) ?? 0,
       );
+      if (state._selectionOverlay?.toolbarIsVisible ?? false) {
+        state.hideToolbar();
+      }
       return Actions.invoke(
         context!,
         ReplaceTextIntent(state._value, '', range, SelectionChangedCause.keyboard),
