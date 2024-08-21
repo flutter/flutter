@@ -67,6 +67,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   networkErrorHandler,
   permissionDeniedErrorHandler,
   flavorUndefinedHandler,
+  r8DexingBugInAgp73Handler,
   r8FailureHandler,
   minSdkVersionHandler,
   transformInputIssueHandler,
@@ -80,7 +81,6 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   remoteTerminatedHandshakeHandler,
   couldNotOpenCacheDirectoryHandler,
   incompatibleCompileSdk35AndAgpVersionHandler,
-  r8DexingBugInAgp73Handler,
   incompatibleKotlinVersionHandler, // This handler always be last, as it's key log output is sometimes in error messages with other root causes.
 ];
 
@@ -645,7 +645,7 @@ final GradleHandledError couldNotOpenCacheDirectoryHandler = GradleHandledError(
 
 
 String _getAgpLocation(FlutterProject project) {
-  return 'The version of AGP that your project uses is likely'
+  return ' The version of AGP that your project uses is likely'
       " defined in:\n${project.android.settingsGradleFile.path},\nin the 'plugins' closure. \n Alternatively, if your "
       'project was created with an older version of the templates, it is likely \nin the buildscript.dependencies '
       'closure of the top-level build.gradle:\n${project.android.hostAppGradleFile.path}.';
