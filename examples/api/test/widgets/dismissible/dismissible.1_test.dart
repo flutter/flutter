@@ -17,7 +17,7 @@ void main() {
     await tester.tap(fab);
     await tester.pumpAndSettle();
   }
-  
+
   Future<void> dismissHorizontally({
     required WidgetTester tester,
     required Finder finder,

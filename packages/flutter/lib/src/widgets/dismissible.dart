@@ -799,7 +799,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 }
 
 extension on DismissDirection {
-  bool get directionIsXAxis => switch(this) {
+  bool get directionIsXAxis => switch (this) {
     DismissDirection.horizontal || DismissDirection.endToStart || DismissDirection.startToEnd => true,
     _ => false
   };
