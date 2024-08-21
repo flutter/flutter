@@ -742,9 +742,18 @@ void main() {
         .childDirectory('Packages')
         .childDirectory('FlutterGeneratedPluginSwiftPackage')
         .childFile('Package.swift');
+      final Directory cocoaPodsPluginFramework = fileSystem
+        .directory(appDirectoryPath)
+        .childDirectory('build')
+        .childDirectory('ios')
+        .childDirectory('iphoneos')
+        .childDirectory('Runner.app')
+        .childDirectory('Frameworks')
+        .childDirectory('${integrationTestPlugin.pluginName}.framework');
 
       expect(xcodeProjectFile.existsSync(), isTrue);
       expect(generatedManifestFile.existsSync(), isTrue);
+      expect(cocoaPodsPluginFramework.existsSync(), isFalse);
 
       String xcodeProject = xcodeProjectFile.readAsStringSync();
       String generatedManifest = generatedManifestFile.readAsStringSync();
@@ -757,7 +766,7 @@ void main() {
       expect(xcodeProject.contains('FlutterGeneratedPluginSwiftPackage'), isTrue);
       expect(generatedManifest.contains(generatedSwiftDependency), isTrue);
 
-      // Disable Swift Package Manager and re-build the app.
+      // Disable Swift Package Manager and do a clean re-build of the app.
       // The build should succeed.
       await SwiftPackageManagerUtils.disableSwiftPackageManager(
         flutterBin,
@@ -769,7 +778,7 @@ void main() {
       await SwiftPackageManagerUtils.buildApp(
         flutterBin,
         appDirectoryPath,
-        options: <String>['ios', '--debug', '-v'],
+        options: <String>['ios', '-v'],
       );
 
       // The app should still have SwiftPM integration,
@@ -784,6 +793,7 @@ void main() {
       expect(xcodeProject.contains('FlutterGeneratedPluginSwiftPackage'), isTrue);
       expect(generatedManifest.contains('integration_test'), isFalse);
       expect(generatedManifest.contains(emptyDependencies), isTrue);
+      expect(cocoaPodsPluginFramework.existsSync(), isTrue);
     } finally {
       await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
       ErrorHandlingFileSystem.deleteIfExists(
