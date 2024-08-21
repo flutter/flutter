@@ -254,7 +254,7 @@ function shared::execute() {
   upgrade_flutter 7< "$SHARED_NAME"
 
   case "$BIN_NAME" in
-    flutter-dev*)
+    flutter-dev)
       # FLUTTER_TOOL_ARGS aren't quoted below, because it is meant to be
       # considered as separate space-separated args.
       exec "$DART" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" $FLUTTER_TOOL_ARGS "$SCRIPT_PATH" "$@"
