@@ -9696,6 +9696,7 @@ void main() {
     state.renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     expect(state.showToolbar(), true);
     await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection(baseOffset: 1426, extentOffset: 1431));
     expect(state.selectionOverlay, isNotNull);
     expect(state.selectionOverlay!.toolbarIsVisible, true);
 
@@ -9704,6 +9705,7 @@ void main() {
     // should not cause an exception, and the toolbar should no longer be visible.
     await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
     await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection.collapsed(offset: 1426));
     expect(tester.takeException(), isNull);
     expect(state.selectionOverlay, isNotNull);
     expect(state.selectionOverlay!.toolbarIsVisible, false);
