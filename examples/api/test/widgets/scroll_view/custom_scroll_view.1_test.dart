@@ -47,9 +47,9 @@ void main() {
     // An additional SliverList appears
     expect(find.byType(SliverList), findsExactly(2));
 
-    expect(find.widgetWithText(SliverList, 'Item: 0'), findsOne);
-    // Additional items appear on SilverLists
+    // All items are visible.
     expect(find.widgetWithText(SliverList, 'Item: -1'), findsOne);
+    expect(find.widgetWithText(SliverList, 'Item: 0'), findsOne);
     expect(find.widgetWithText(SliverList, 'Item: 1'), findsOne);
   });
 }
