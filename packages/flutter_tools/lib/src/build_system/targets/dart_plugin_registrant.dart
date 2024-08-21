@@ -31,8 +31,9 @@ class DartPluginRegistrantTarget extends Target {
     assert(environment.generateDartPluginRegistry);
     final FlutterProject project = _project
       ?? FlutterProject.fromDirectory(environment.projectDir);
+    final File packageConfigFile = findPackageConfigFileOrDefault(environment.projectDir);
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      project.packageConfigFile,
+      packageConfigFile,
       logger: environment.logger,
     );
     final String targetFilePath = environment.defines[kTargetFile] ??
@@ -73,7 +74,7 @@ class DartPluginRegistrantTarget extends Target {
 
   @override
   List<Source> get inputs => <Source>[
-    const Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
+    const Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
   ];
 
   @override

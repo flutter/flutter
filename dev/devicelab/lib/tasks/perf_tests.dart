@@ -353,43 +353,6 @@ TaskFunction createSlidersPerfTest() {
   ).run;
 }
 
-TaskFunction createStackSizeTest() {
-  final String testDirectory =
-      '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
-  const String testTarget = 'test_driver/run_app.dart';
-  const String testDriver = 'test_driver/stack_size_perf_test.dart';
-  return () {
-    return inDirectory<TaskResult>(testDirectory, () async {
-      final Device device = await devices.workingDevice;
-      await device.unlock();
-      final String deviceId = device.deviceId;
-      await flutter('packages', options: <String>['get']);
-
-      await flutter('drive', options: <String>[
-        '--no-android-gradle-daemon',
-        '-v',
-        '--verbose-system-logs',
-        '--profile',
-        '-t', testTarget,
-        '--driver', testDriver,
-        '-d',
-        deviceId,
-      ]);
-      final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory)}/stack_size.json').readAsStringSync(),
-      ) as Map<String, dynamic>;
-
-      final Map<String, dynamic> result = <String, dynamic>{
-        'stack_size_per_nesting_level': data['stack_size'],
-      };
-      return TaskResult.success(
-        result,
-        benchmarkScoreKeys: result.keys.toList(),
-      );
-    });
-  };
-}
-
 TaskFunction createFullscreenTextfieldPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
