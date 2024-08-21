@@ -589,4 +589,52 @@ void main() {
     expect(tappedChildren, const <int>[0, 1]);
   });
 
+  testWidgets('Tapping on child in a CupertinoPicker selects that child', (WidgetTester tester) async {
+    int selectedItem = 0;
+    const Duration tapScrollDuration = Duration(milliseconds: 300);
+    // The tap animation is set to 300ms, but add an extra 1µs to complete the scroll animation.
+    const Duration infinitesimalPause = Duration(microseconds: 1);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPicker(
+          itemExtent: 10.0,
+          onSelectedItemChanged: (int i) {
+            selectedItem = i;
+          },
+          children: const <Widget>[
+             Text('0'),
+             Text('1'),
+             Text('2'),
+             Text('3'),
+          ],
+        ),
+      ),
+    );
+
+    expect(selectedItem, equals(0));
+    // Tap on the item at index 1.
+    await tester.tap(find.text('1'));
+    await tester.pump();
+    await tester.pump(tapScrollDuration + infinitesimalPause);
+    expect(selectedItem, equals(1));
+
+    // Skip to the item at index 3.
+    await tester.tap(find.text('3'));
+    await tester.pump();
+    await tester.pump(tapScrollDuration + infinitesimalPause);
+    expect(selectedItem, equals(3));
+
+    // Tap on the item at index 0.
+    await tester.tap(find.text('0'));
+    await tester.pump();
+    await tester.pump(tapScrollDuration + infinitesimalPause);
+    expect(selectedItem, equals(0));
+
+    // Skip to the item at index 2.
+    await tester.tap(find.text('2'));
+    await tester.pump();
+    await tester.pump(tapScrollDuration + infinitesimalPause);
+    expect(selectedItem, equals(2));
+  });
 }

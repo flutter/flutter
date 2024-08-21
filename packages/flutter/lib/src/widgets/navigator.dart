@@ -410,7 +410,7 @@ abstract class Route<T> extends _RoutePlaceholder {
   @mustCallSuper
   void onPopInvokedWithResult(bool didPop, T? result) {
     if (_isPageBased) {
-      final Page<Object?> page = settings as Page<Object?>;
+      final Page<T> page = settings as Page<T>;
       page.onPopInvoked(didPop, result);
     }
   }
