@@ -320,6 +320,90 @@ bool BlitPassVK::OnCopyBufferToTextureCommand(
 }
 
 // |BlitPass|
+bool BlitPassVK::ResizeTexture(const std::shared_ptr<Texture>& source,
+                               const std::shared_ptr<Texture>& destination) {
+  auto& encoder = *command_buffer_->GetEncoder();
+  const auto& cmd_buffer = encoder.GetCommandBuffer();
+
+  const auto& src = TextureVK::Cast(*source);
+  const auto& dst = TextureVK::Cast(*destination);
+
+  if (!encoder.Track(source) || !encoder.Track(destination)) {
+    return false;
+  }
+
+  BarrierVK src_barrier;
+  src_barrier.cmd_buffer = cmd_buffer;
+  src_barrier.new_layout = vk::ImageLayout::eTransferSrcOptimal;
+  src_barrier.src_access = vk::AccessFlagBits::eTransferWrite |
+                           vk::AccessFlagBits::eShaderWrite |
+                           vk::AccessFlagBits::eColorAttachmentWrite;
+  src_barrier.src_stage = vk::PipelineStageFlagBits::eTransfer |
+                          vk::PipelineStageFlagBits::eFragmentShader |
+                          vk::PipelineStageFlagBits::eColorAttachmentOutput;
+  src_barrier.dst_access = vk::AccessFlagBits::eTransferRead;
+  src_barrier.dst_stage = vk::PipelineStageFlagBits::eTransfer;
+
+  BarrierVK dst_barrier;
+  dst_barrier.cmd_buffer = cmd_buffer;
+  dst_barrier.new_layout = vk::ImageLayout::eTransferDstOptimal;
+  dst_barrier.src_access = {};
+  dst_barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+  dst_barrier.dst_access =
+      vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eTransferWrite;
+  dst_barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader |
+                          vk::PipelineStageFlagBits::eTransfer;
+
+  if (!src.SetLayout(src_barrier) || !dst.SetLayout(dst_barrier)) {
+    VALIDATION_LOG << "Could not complete layout transitions.";
+    return false;
+  }
+
+  vk::ImageBlit blit;
+  blit.srcSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+  blit.srcSubresource.baseArrayLayer = 0u;
+  blit.srcSubresource.layerCount = 1u;
+  blit.srcSubresource.mipLevel = 0;
+
+  blit.dstSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+  blit.dstSubresource.baseArrayLayer = 0u;
+  blit.dstSubresource.layerCount = 1u;
+  blit.dstSubresource.mipLevel = 0;
+
+  // offsets[0] is origin.
+  blit.srcOffsets[1].x = std::max<int32_t>(source->GetSize().width, 1u);
+  blit.srcOffsets[1].y = std::max<int32_t>(source->GetSize().height, 1u);
+  blit.srcOffsets[1].z = 1u;
+
+  // offsets[0] is origin.
+  blit.dstOffsets[1].x = std::max<int32_t>(destination->GetSize().width, 1u);
+  blit.dstOffsets[1].y = std::max<int32_t>(destination->GetSize().height, 1u);
+  blit.dstOffsets[1].z = 1u;
+
+  cmd_buffer.blitImage(src.GetImage(),          //
+                       src_barrier.new_layout,  //
+                       dst.GetImage(),          //
+                       dst_barrier.new_layout,  //
+                       1,                       //
+                       &blit,                   //
+                       vk::Filter::eLinear
+
+  );
+
+  // Convert back to shader read
+
+  BarrierVK barrier;
+  barrier.cmd_buffer = cmd_buffer;
+  barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+  barrier.src_access = {};
+  barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+  barrier.dst_access = vk::AccessFlagBits::eShaderRead;
+  barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
+
+  return dst.SetLayout(barrier);
+}
+
+// |BlitPass|
 bool BlitPassVK::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
                                          std::string label) {
   auto& encoder = *command_buffer_->GetEncoder();

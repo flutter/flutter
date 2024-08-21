@@ -11,6 +11,7 @@
 #include "flutter/lib/ui/painting/image_decoder.h"
 #include "impeller/core/formats.h"
 #include "impeller/geometry/size.h"
+#include "include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 
 namespace impeller {
@@ -41,6 +42,7 @@ struct DecompressResult {
   std::shared_ptr<impeller::DeviceBuffer> device_buffer;
   std::shared_ptr<SkBitmap> sk_bitmap;
   SkImageInfo image_info;
+  std::optional<SkImageInfo> resize_info = std::nullopt;
   std::string decode_error;
 };
 
@@ -69,40 +71,43 @@ class ImageDecoderImpeller final : public ImageDecoder {
       const std::shared_ptr<impeller::Allocator>& allocator);
 
   /// @brief Create a device private texture from the provided host buffer.
-  ///        This method is only suported on the metal backend.
+  ///
+  /// @param result     The image result closure that accepts the DlImage and
+  ///                   any encoding error messages.
   /// @param context    The Impeller graphics context.
   /// @param buffer     A host buffer containing the image to be uploaded.
   /// @param image_info Format information about the particular image.
   /// @param bitmap      A bitmap containg the image to be uploaded.
   /// @param gpu_disabled_switch Whether the GPU is available command encoding.
-  /// @return           A DlImage.
-  static std::pair<sk_sp<DlImage>, std::string> UploadTextureToPrivate(
+  static void UploadTextureToPrivate(
+      ImageResult result,
       const std::shared_ptr<impeller::Context>& context,
       const std::shared_ptr<impeller::DeviceBuffer>& buffer,
       const SkImageInfo& image_info,
       const std::shared_ptr<SkBitmap>& bitmap,
+      const std::optional<SkImageInfo>& resize_info,
       const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch);
 
-  /// @brief Create a host visible texture from the provided bitmap.
+  /// @brief Create a texture from the provided bitmap.
   /// @param context     The Impeller graphics context.
   /// @param bitmap      A bitmap containg the image to be uploaded.
-  /// @param create_mips Whether mipmaps should be generated for the given
-  /// image.
-  /// @param gpu_disabled_switch Whether the GPU is available for mipmap
-  /// creation.
   /// @return            A DlImage.
   static std::pair<sk_sp<DlImage>, std::string> UploadTextureToStorage(
       const std::shared_ptr<impeller::Context>& context,
-      std::shared_ptr<SkBitmap> bitmap,
-      const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
-      impeller::StorageMode storage_mode,
-      bool create_mips = true);
+      std::shared_ptr<SkBitmap> bitmap);
 
  private:
   using FutureContext = std::shared_future<std::shared_ptr<impeller::Context>>;
   FutureContext context_;
   const bool supports_wide_gamut_;
   std::shared_ptr<fml::SyncSwitch> gpu_disabled_switch_;
+
+  /// Only call this method if the GPU is available.
+  static std::pair<sk_sp<DlImage>, std::string> UnsafeUploadTextureToPrivate(
+      const std::shared_ptr<impeller::Context>& context,
+      const std::shared_ptr<impeller::DeviceBuffer>& buffer,
+      const SkImageInfo& image_info,
+      const std::optional<SkImageInfo>& resize_info);
 
   FML_DISALLOW_COPY_AND_ASSIGN(ImageDecoderImpeller);
 };

@@ -157,4 +157,15 @@ bool BlitPassGLES::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
   return true;
 }
 
+// |BlitPass|
+bool BlitPassGLES::ResizeTexture(const std::shared_ptr<Texture>& source,
+                                 const std::shared_ptr<Texture>& destination) {
+  auto command = std::make_unique<BlitResizeTextureCommandGLES>();
+  command->source = source;
+  command->destination = destination;
+
+  commands_.push_back(std::move(command));
+  return true;
+}
+
 }  // namespace impeller

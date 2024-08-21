@@ -12,6 +12,7 @@
 
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/synchronization/sync_switch.h"
+#include "fml/closure.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/core/sampler.h"
 #include "impeller/renderer/backend/metal/allocator_mtl.h"
@@ -136,7 +137,8 @@ class ContextMTL final : public Context,
 #endif  // IMPELLER_DEBUG
 
   // |Context|
-  void StoreTaskForGPU(const std::function<void()>& task) override;
+  void StoreTaskForGPU(const fml::closure& task,
+                       const fml::closure& failure) override;
 
  private:
   class SyncSwitchObserver : public fml::SyncSwitch::Observer {
@@ -149,6 +151,11 @@ class ContextMTL final : public Context,
     ContextMTL& parent_;
   };
 
+  struct PendingTasks {
+    fml::closure task;
+    fml::closure failure;
+  };
+
   id<MTLDevice> device_ = nullptr;
   id<MTLCommandQueue> command_queue_ = nullptr;
   std::shared_ptr<ShaderLibraryMTL> shader_library_;
@@ -157,7 +164,7 @@ class ContextMTL final : public Context,
   std::shared_ptr<AllocatorMTL> resource_allocator_;
   std::shared_ptr<const Capabilities> device_capabilities_;
   std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch_;
-  std::deque<std::function<void()>> tasks_awaiting_gpu_;
+  std::deque<PendingTasks> tasks_awaiting_gpu_;
   std::unique_ptr<SyncSwitchObserver> sync_switch_observer_;
   std::shared_ptr<CommandQueue> command_queue_ip_;
 #ifdef IMPELLER_DEBUG

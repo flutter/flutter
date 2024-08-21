@@ -338,7 +338,7 @@ std::shared_ptr<CommandBuffer> ContextMTL::CreateCommandBufferInQueue(
   }
 
   auto buffer = std::shared_ptr<CommandBufferMTL>(
-      new CommandBufferMTL(weak_from_this(), queue));
+      new CommandBufferMTL(weak_from_this(), device_, queue));
   if (!buffer->IsValid()) {
     return nullptr;
   }
@@ -377,17 +377,21 @@ id<MTLCommandBuffer> ContextMTL::CreateMTLCommandBuffer(
   return buffer;
 }
 
-void ContextMTL::StoreTaskForGPU(const std::function<void()>& task) {
-  tasks_awaiting_gpu_.emplace_back(task);
+void ContextMTL::StoreTaskForGPU(const fml::closure& task,
+                                 const fml::closure& failure) {
+  tasks_awaiting_gpu_.push_back(PendingTasks{task, failure});
   while (tasks_awaiting_gpu_.size() > kMaxTasksAwaitingGPU) {
-    tasks_awaiting_gpu_.front()();
+    PendingTasks front = std::move(tasks_awaiting_gpu_.front());
+    if (front.failure) {
+      front.failure();
+    }
     tasks_awaiting_gpu_.pop_front();
   }
 }
 
 void ContextMTL::FlushTasksAwaitingGPU() {
   for (const auto& task : tasks_awaiting_gpu_) {
-    task();
+    task.task();
   }
   tasks_awaiting_gpu_.clear();
 }

@@ -128,8 +128,11 @@ static id<MTLCommandBuffer> CreateCommandBuffer(id<MTLCommandQueue> queue) {
 }
 
 CommandBufferMTL::CommandBufferMTL(const std::weak_ptr<const Context>& context,
+                                   id<MTLDevice> device,
                                    id<MTLCommandQueue> queue)
-    : CommandBuffer(context), buffer_(CreateCommandBuffer(queue)) {}
+    : CommandBuffer(context),
+      buffer_(CreateCommandBuffer(queue)),
+      device_(device) {}
 
 CommandBufferMTL::~CommandBufferMTL() = default;
 
@@ -208,7 +211,7 @@ std::shared_ptr<BlitPass> CommandBufferMTL::OnCreateBlitPass() {
     return nullptr;
   }
 
-  auto pass = std::shared_ptr<BlitPassMTL>(new BlitPassMTL(buffer_));
+  auto pass = std::shared_ptr<BlitPassMTL>(new BlitPassMTL(buffer_, device_));
   if (!pass->IsValid()) {
     return nullptr;
   }

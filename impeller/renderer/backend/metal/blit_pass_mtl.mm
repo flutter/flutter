@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/metal/blit_pass_mtl.h"
 #include <Metal/Metal.h>
+#import <MetalPerformanceShaders/MetalPerformanceShaders.h>
 #include <memory>
 #include <utility>
 #include <variant>
@@ -25,7 +26,8 @@
 
 namespace impeller {
 
-BlitPassMTL::BlitPassMTL(id<MTLCommandBuffer> buffer) : buffer_(buffer) {
+BlitPassMTL::BlitPassMTL(id<MTLCommandBuffer> buffer, id<MTLDevice> device)
+    : buffer_(buffer), device_(device) {
   if (!buffer_) {
     return;
   }
@@ -105,7 +107,28 @@ bool BlitPassMTL::OnCopyTextureToTextureCommand(
     [encoder_ popDebugGroup];
   }
 #endif  // IMPELLER_DEBUG
+  return true;
+}
 
+// |BlitPass|
+bool BlitPassMTL::ResizeTexture(const std::shared_ptr<Texture>& source,
+                                const std::shared_ptr<Texture>& destination) {
+  auto source_mtl = TextureMTL::Cast(*source).GetMTLTexture();
+  if (!source_mtl) {
+    return false;
+  }
+
+  auto destination_mtl = TextureMTL::Cast(*destination).GetMTLTexture();
+  if (!destination_mtl) {
+    return false;
+  }
+
+  [encoder_ endEncoding];
+  auto filter = [[MPSImageBilinearScale alloc] initWithDevice:device_];
+  [filter encodeToCommandBuffer:buffer_
+                  sourceTexture:source_mtl
+             destinationTexture:destination_mtl];
+  encoder_ = [buffer_ blitCommandEncoder];
   return true;
 }
 
