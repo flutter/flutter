@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [Dismissible] using [Dismissible.shouldDismiss].
+/// Flutter code sample for [Dismissible] using [Dismissible.shouldTriggerDismiss].
 
 void main() => runApp(const DismissibleExampleApp());
 
@@ -28,7 +28,9 @@ class _DismissibleExampleAppState extends State<DismissibleExampleApp> {
           }),
           child: const Icon(Icons.refresh),
         ),
-        appBar: AppBar(title: const Text('Dismissible Sample - shouldDismiss')),
+        appBar: AppBar(
+          title: const Text('Dismissible Sample - shouldTriggerDismiss'),
+        ),
         body: DismissibleExample(key: _refreshKey),
       ),
     );
@@ -47,34 +49,34 @@ class _DismissibleExampleState extends State<DismissibleExample> {
     _Dismissible(
       index: 0,
       title: 'Default behavior',
-      description: '`shouldDismiss: null`',
+      description: '`shouldTriggerDismiss: null`',
       onDismissed: _dismissItem,
     ),
     _Dismissible(
       index: 1,
       title: 'Default behavior',
-      description: '`shouldDismiss: (_) => null`',
-      shouldDismiss: (_) => null,
+      description: '`shouldTriggerDismiss: (_) => null`',
+      shouldTriggerDismiss: (_) => null,
       onDismissed: _dismissItem,
     ),
     _Dismissible(
       index: 2,
       title: 'Never dismiss',
-      description: '`shouldDismiss: (_) => false`',
-      shouldDismiss: (_) => false,
+      description: '`shouldTriggerDismiss: (_) => false`',
+      shouldTriggerDismiss: (_) => false,
       onDismissed: _dismissItem,
     ),
     _Dismissible(
       index: 3,
       title: 'Always dismiss',
-      description: '`shouldDismiss: (_) => true`',
-      shouldDismiss: (_) => true,
+      description: '`shouldTriggerDismiss: (_) => true`',
+      shouldTriggerDismiss: (_) => true,
       onDismissed: _dismissItem,
     ),
     _Dismissible(
       index: 4,
       title: 'Only accept if threshold is reached (Disable flinging)',
-      shouldDismiss: (AcceptDismissDetails details) =>
+      shouldTriggerDismiss: (TriggerDismissDetails details) =>
           details.reached ? null : false,
       onDismissed: _dismissItem,
     ),
@@ -82,7 +84,7 @@ class _DismissibleExampleState extends State<DismissibleExample> {
       index: 5,
       title: 'Accept dismiss before threshold',
       description: '`details.progress >= 0.2`',
-      shouldDismiss: (AcceptDismissDetails details) {
+      shouldTriggerDismiss: (TriggerDismissDetails details) {
         if (details.progress >= 0.2) {
           return true;
         }
@@ -109,7 +111,7 @@ class _DismissibleExampleState extends State<DismissibleExample> {
   }
 }
 
-/// A [Dismissible] widget used to demonstrates the behavior of the [shouldDismiss]
+/// A [Dismissible] widget used to demonstrates the behavior of the [shouldTriggerDismiss]
 /// parameter.
 ///
 /// Change background color to red when the item is reached based on
@@ -120,13 +122,13 @@ class _Dismissible extends StatefulWidget {
     required this.title,
     required this.onDismissed,
     this.description,
-    this.shouldDismiss,
+    this.shouldTriggerDismiss,
   }) : super(key: ValueKey<int>(index));
 
   final int index;
   final String title;
   final String? description;
-  final AcceptDismissCallback? shouldDismiss;
+  final TriggerDismissCallback? shouldTriggerDismiss;
   final ValueChanged<_Dismissible> onDismissed;
 
   @override
@@ -148,7 +150,7 @@ class _DismissibleState extends State<_Dismissible> {
           reached = details.reached;
         });
       },
-      shouldDismiss: widget.shouldDismiss,
+      shouldTriggerDismiss: widget.shouldTriggerDismiss,
       child: ListTile(
         title: Text(widget.title),
         subtitle: widget.description != null ? Text(widget.description!) : null,

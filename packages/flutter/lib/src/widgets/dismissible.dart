@@ -36,8 +36,8 @@ typedef ConfirmDismissCallback = Future<bool?> Function(DismissDirection directi
 /// Signature used by [Dismissible] to give the application an opportunity to
 /// accept or deny a dismiss gesture.
 ///
-/// Used by [Dismissible.shouldDismiss].
-typedef AcceptDismissCallback = bool? Function(AcceptDismissDetails details);
+/// Used by [Dismissible.shouldTriggerDismiss].
+typedef TriggerDismissCallback = bool? Function(TriggerDismissDetails details);
 
 /// Signature used by [Dismissible] to indicate that the dismissible has been dragged.
 ///
@@ -88,7 +88,7 @@ enum DismissDirection {
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// In this sample, the [shouldDismiss] callback is used to customize the behavior
+/// In this sample, the [shouldTriggerDismiss] callback is used to customize the behavior
 /// of the [Dismissible] widget.
 ///
 /// ** See code in examples/api/lib/widgets/dismissible/dismissible.1.dart **
@@ -118,7 +118,7 @@ class Dismissible extends StatefulWidget {
     this.background,
     this.secondaryBackground,
     this.confirmDismiss,
-    this.shouldDismiss,
+    this.shouldTriggerDismiss,
     this.onResize,
     this.onUpdate,
     this.onDismissed,
@@ -167,12 +167,12 @@ class Dismissible extends StatefulWidget {
   /// ```dart
   /// Dismissible(
   ///   key: const ValueKey<String>('dismissible-key'),
-  ///   shouldDismiss: (AcceptDismissDetails details) => details.reached ? null : false,
+  ///   shouldTriggerDismiss: (TriggerDismissDetails details) => details.reached ? null : false,
   ///   child: const ListTile(title: Text('Slide me to dismiss')),
   /// )
   /// ```
   /// {@end-tool}
-  final AcceptDismissCallback? shouldDismiss;
+  final TriggerDismissCallback? shouldTriggerDismiss;
 
   /// Called when the widget changes size (i.e., when contracting before being dismissed).
   final VoidCallback? onResize;
@@ -290,14 +290,14 @@ class DismissUpdateDetails {
   final double progress;
 }
 
-/// Details for [AcceptDismissCallback].
+/// Details for [TriggerDismissCallback].
 ///
 /// See also:
 ///
-///   * [Dismissible.shouldDismiss], which receives this information.
-class AcceptDismissDetails {
-  /// Create a new instance of [AcceptDismissDetails].
-  const AcceptDismissDetails({
+///   * [Dismissible.shouldTriggerDismiss], which receives this information.
+class TriggerDismissDetails {
+  /// Create a new instance of [TriggerDismissDetails].
+  const TriggerDismissDetails({
     this.direction = DismissDirection.horizontal,
     this.reached = false,
     this.progress = 0.0,
@@ -580,10 +580,10 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     }
     _dragUnderway = false;
 
-    // Use value returned by `widget.shouldDismiss` if a callback is provided
+    // Use value returned by `shouldTriggerDismiss` if a callback is provided
     // If the callback returns null, use the default behavior
-    if (widget.shouldDismiss case final AcceptDismissCallback shouldDismissCallback) {
-      final AcceptDismissDetails acceptDismissDetails = AcceptDismissDetails(
+    if (widget.shouldTriggerDismiss case final TriggerDismissCallback shouldDismissCallback) {
+      final TriggerDismissDetails triggerDismissDetails = TriggerDismissDetails(
         direction: _dismissDirection,
         reached: _moveController.value > _dismissThreshold,
         progress: _moveController.value,
@@ -591,7 +591,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         dragExtent: _dragExtent,
       );
 
-      final bool? shouldDismiss = shouldDismissCallback(acceptDismissDetails);
+      final bool? shouldDismiss = shouldDismissCallback(triggerDismissDetails);
 
       if (shouldDismiss != null) {
         if (_moveController.isDismissed) {

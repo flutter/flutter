@@ -22,7 +22,7 @@ Widget buildTest({
   Axis scrollDirection = Axis.vertical,
   DismissDirection dismissDirection = defaultDismissDirection,
   double? startToEndThreshold,
-  AcceptDismissCallback? shouldDismiss,
+  TriggerDismissCallback? shouldTriggerDismiss,
   TextDirection textDirection = TextDirection.ltr,
   Future<bool?> Function(BuildContext context, DismissDirection direction)? confirmDismiss,
   ScrollController? controller,
@@ -41,7 +41,7 @@ Widget buildTest({
             confirmDismiss: confirmDismiss == null ? null : (DismissDirection direction) {
               return confirmDismiss(context, direction);
             },
-            shouldDismiss: shouldDismiss,
+            shouldTriggerDismiss: shouldTriggerDismiss,
             onDismissed: (DismissDirection direction) {
               setState(() {
                 reportedDismissDirection = direction;
@@ -869,10 +869,10 @@ void main() {
     expect(tester.getTopLeft(find.text('0')), position);
   });
 
-  testWidgets('Default behavior expected when `shouldDismiss` returns `null`', (WidgetTester tester) async {
+  testWidgets('Default behavior expected when `shouldTriggerDismiss` returns `null`', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
-        shouldDismiss: (AcceptDismissDetails details) => null,
+        shouldTriggerDismiss: (TriggerDismissDetails details) => null,
       )
     );
 
@@ -884,10 +884,10 @@ void main() {
     expect(find.text('1'), findsNothing);
   });
 
-  testWidgets('Value returned by `shouldDismiss` override dismiss gesture validation', (WidgetTester tester) async {
+  testWidgets('Value returned by `shouldTriggerDismiss` override dismiss gesture validation', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
-        shouldDismiss: (AcceptDismissDetails details) => false,
+        shouldTriggerDismiss: (TriggerDismissDetails details) => false,
       )
     );
 
@@ -897,10 +897,10 @@ void main() {
     await dismissItem(tester, 1, gestureDirection: AxisDirection.right);
     expect(find.text('1'), findsOneWidget);
   });
-  testWidgets('Use `shouldDismiss` to disable flinging', (WidgetTester tester) async {
+  testWidgets('Use `shouldTriggerDismiss` to disable flinging', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
-        shouldDismiss: (AcceptDismissDetails details) => details.reached ? null : false,
+        shouldTriggerDismiss: (TriggerDismissDetails details) => details.reached ? null : false,
       )
     );
 

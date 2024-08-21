@@ -72,7 +72,7 @@ void main() {
 
   group('Test Drag behavior', () {
     testWidgets(
-      '0 - Default begavior - `shouldDismiss: null`',
+      '0 - Default begavior - `shouldTriggerDismiss: null`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
@@ -82,7 +82,7 @@ void main() {
     );
 
     testWidgets(
-      '1 - Default begavior - `shouldDismiss: (_) => null`',
+      '1 - Default begavior - `shouldTriggerDismiss: (_) => null`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
@@ -92,7 +92,7 @@ void main() {
     );
 
     testWidgets(
-      '2 - Never dismiss - `shouldDismiss: (_) => false`',
+      '2 - Never dismiss - `shouldTriggerDismiss: (_) => false`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
@@ -106,7 +106,7 @@ void main() {
     );
 
     testWidgets(
-      '3 - Always dismiss - `shouldDismiss: (_) => true`',
+      '3 - Always dismiss - `shouldTriggerDismiss: (_) => true`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
@@ -198,7 +198,7 @@ void main() {
 
   group('Test Fling behavior', () {
     testWidgets(
-      '0 - Default begavior - `shouldDismiss: null`',
+      '0 - Default begavior - `shouldTriggerDismiss: null`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
@@ -208,7 +208,7 @@ void main() {
     );
 
     testWidgets(
-      '1 - Default begavior - `shouldDismiss: (_) => null`',
+      '1 - Default begavior - `shouldTriggerDismiss: (_) => null`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
@@ -218,7 +218,7 @@ void main() {
     );
 
     testWidgets(
-      '2 - Never dismiss - `shouldDismiss: (_) => false`',
+      '2 - Never dismiss - `shouldTriggerDismiss: (_) => false`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
@@ -232,7 +232,7 @@ void main() {
     );
 
     testWidgets(
-      '3 - Always dismiss - `shouldDismiss: (_) => true`',
+      '3 - Always dismiss - `shouldTriggerDismiss: (_) => true`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
