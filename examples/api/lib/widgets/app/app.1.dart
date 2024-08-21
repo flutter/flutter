@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [MaterialApp.router] that shows how to set up nested
+/// Flutter code sample for [WidgetsApp.router] that shows how to set up nested
 /// [Navigator]s.
 
 void main() async {
@@ -32,7 +32,7 @@ class _WidgetsAppExampleState extends State<WidgetsAppExample> {
       localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
         DefaultMaterialLocalizations.delegate,
       ],
-      title: 'MaterialApp.router Example',
+      title: 'WidgetsApp.router Example',
       routeInformationParser: _routeInformationParser,
       routerDelegate: _routerDelegate,
     );
