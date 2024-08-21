@@ -5824,8 +5824,8 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
       intent.replacementText,
     );
     if (oldValue.text != newValue.text) {
-      // Hide the toolbar if the text was changed, but only hide the toolbar 
-      // overlay; the selection handle's visibility will be handled 
+      // Hide the toolbar if the text was changed, but only hide the toolbar
+      // overlay; the selection handle's visibility will be handled
       // by `_handleSelectionChanged`.
       state.hideToolbar(false);
     }
