@@ -9707,7 +9707,9 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(state.selectionOverlay, isNotNull);
     expect(state.selectionOverlay!.toolbarIsVisible, false);
-  }, skip: kIsWeb);
+    // On web, we don't show the Flutter toolbar and instead rely on the browser
+    // toolbar. Until we change that, this test should remain skipped.
+  }, skip: kIsWeb); // [intended]
 
   testWidgets('bringIntoView brings the caret into view when in a viewport', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/55547.
