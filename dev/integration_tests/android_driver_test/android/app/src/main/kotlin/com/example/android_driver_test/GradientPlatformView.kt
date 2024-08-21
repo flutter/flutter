@@ -18,24 +18,28 @@ import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
 
 class BlueOrangeGradientPlatformViewFactory : PlatformViewFactory(null) {
-    override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
-        return GradientPlatformView(context)
-    }
+    override fun create(
+        context: Context,
+        viewId: Int,
+        args: Any?
+    ): PlatformView = GradientPlatformView(context)
 }
 
-private class GradientPlatformView(context: Context) : View(context), PlatformView {
+private class GradientPlatformView(
+    context: Context
+) : View(context),
+    PlatformView {
     val paint = Paint()
 
     init {
-        layoutParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT,
-        )
+        layoutParams =
+            ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
     }
 
-    override fun getView(): View {
-        return this
-    }
+    override fun getView(): View = this
 
     override fun dispose() {}
 
@@ -44,19 +48,25 @@ private class GradientPlatformView(context: Context) : View(context), PlatformVi
         super.onDraw(canvas)
     }
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        paint.shader = LinearGradient(
-            0f,
-            0f,
-            w.toFloat(),
-            h.toFloat(),
-            intArrayOf(
-                Color.rgb(0x41, 0x69, 0xE1),
-                Color.rgb(0xFF, 0xA5, 0x00)
-            ),
-            null,
-            Shader.TileMode.CLAMP
-        )
+    override fun onSizeChanged(
+        w: Int,
+        h: Int,
+        oldw: Int,
+        oldh: Int
+    ) {
+        paint.shader =
+            LinearGradient(
+                0f,
+                0f,
+                w.toFloat(),
+                h.toFloat(),
+                intArrayOf(
+                    Color.rgb(0x41, 0x69, 0xE1),
+                    Color.rgb(0xFF, 0xA5, 0x00)
+                ),
+                null,
+                Shader.TileMode.CLAMP
+            )
         super.onSizeChanged(w, h, oldw, oldh)
     }
 }
