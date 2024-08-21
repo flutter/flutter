@@ -59,7 +59,7 @@ $fontsSection
     String expectedAssetManifest,
   ) async {
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-    await bundle.build(packagesPath: '.packages');
+    await bundle.build(packageConfigPath: '.packages');
 
     for (final String packageName in packages) {
       for (final String packageFont in packageFonts) {
@@ -110,7 +110,7 @@ $fontsSection
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packagesPath: '.packages');
+      await bundle.build(packageConfigPath: '.packages');
       expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.bin',
         'AssetManifest.json', 'FontManifest.json', 'NOTICES.Z']));
     }, overrides: <Type, Generator>{

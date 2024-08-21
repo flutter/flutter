@@ -78,7 +78,7 @@ $assetsSection
   ) async {
 
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-    await bundle.build(packagesPath: '.packages');
+    await bundle.build(packageConfigPath: '.packages');
 
     for (final String packageName in packages) {
       for (final String asset in assets) {
@@ -138,7 +138,7 @@ $assetsSection
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packagesPath: '.packages');
+      await bundle.build(packageConfigPath: '.packages');
       expect(bundle.entries.keys, unorderedEquals(
         <String>['NOTICES.Z', 'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json']));
       const String expectedAssetManifest = '{}';
@@ -164,7 +164,7 @@ $assetsSection
       writeAssets('p/p/', assets);
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packagesPath: '.packages');
+      await bundle.build(packageConfigPath: '.packages');
       expect(bundle.entries.keys, unorderedEquals(
         <String>['NOTICES.Z', 'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json']));
       const String expectedAssetManifest = '{}';
@@ -618,7 +618,7 @@ $assetsSection
       writeAssets('p/p/', assetsOnDisk);
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packagesPath: '.packages');
+      await bundle.build(packageConfigPath: '.packages');
 
       expect(bundle.entries['AssetManifest.json'], isNull,
         reason: 'Invalid pubspec.yaml should not generate AssetManifest.json'  );
@@ -698,7 +698,7 @@ $assetsSection
       );
 
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-    await bundle.build(packagesPath: '.packages');
+    await bundle.build(packageConfigPath: '.packages');
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
