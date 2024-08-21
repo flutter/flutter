@@ -74,7 +74,8 @@ class _DismissibleExampleState extends State<DismissibleExample> {
     _Dismissible(
       index: 4,
       title: 'Only accept if threshold is reached (Disable flinging)',
-      shouldDismiss: (AcceptDismissDetails details) => details.reached ? null : false,
+      shouldDismiss: (AcceptDismissDetails details) =>
+          details.reached ? null : false,
       onDismissed: _dismissItem,
     ),
     _Dismissible(
@@ -101,7 +102,9 @@ class _DismissibleExampleState extends State<DismissibleExample> {
 
   void _dismissItem(_Dismissible dismissedItem) {
     setState(() {
-      dismissibleWidgets = dismissibleWidgets.where((_Dismissible item) => item != dismissedItem).toList();
+      dismissibleWidgets = dismissibleWidgets
+          .where((_Dismissible item) => item != dismissedItem)
+          .toList();
     });
   }
 }

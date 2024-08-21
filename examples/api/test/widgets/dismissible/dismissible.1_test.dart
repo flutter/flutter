@@ -36,7 +36,8 @@ void main() {
     await tester.drag(finder, offset);
   }
 
-  Future<void> testDragBehavior(WidgetTester tester, {
+  Future<void> testDragBehavior(
+    WidgetTester tester, {
     required Key key,
     Matcher expectedBelowThreshold = findsOneWidget,
     Matcher expectedAboveThreshold = findsNothing,
@@ -49,7 +50,7 @@ void main() {
     await dismissHorizontally(
       tester: tester,
       finder: find.byKey(key),
-      dragRatio: 0.3
+      dragRatio: 0.3,
     );
 
     await tester.pumpAndSettle();
@@ -70,15 +71,12 @@ void main() {
   }
 
   group('Test Drag behavior', () {
-
     testWidgets(
-
       '0 - Default begavior - `shouldDismiss: null`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
         const ValueKey<int> key = ValueKey<int>(0);
-
         await testDragBehavior(tester, key: key);
       },
     );
@@ -89,7 +87,6 @@ void main() {
         await initWidget(tester);
 
         const ValueKey<int> key = ValueKey<int>(1);
-
         await testDragBehavior(tester, key: key);
       },
     );
@@ -100,8 +97,11 @@ void main() {
         await initWidget(tester);
 
         const ValueKey<int> key = ValueKey<int>(2);
-
-        await testDragBehavior(tester, key: key, expectedAboveThreshold: findsOneWidget);
+        await testDragBehavior(
+          tester,
+          key: key,
+          expectedAboveThreshold: findsOneWidget,
+        );
       },
     );
 
@@ -111,8 +111,11 @@ void main() {
         await initWidget(tester);
 
         const ValueKey<int> key = ValueKey<int>(3);
-
-        await testDragBehavior(tester, key: key, expectedBelowThreshold: findsNothing);
+        await testDragBehavior(
+          tester,
+          key: key,
+          expectedBelowThreshold: findsNothing,
+        );
       },
     );
 
@@ -122,7 +125,6 @@ void main() {
         await initWidget(tester);
 
         const ValueKey<int> key = ValueKey<int>(4);
-
         await testDragBehavior(tester, key: key);
       },
     );
@@ -133,8 +135,11 @@ void main() {
         await initWidget(tester);
 
         const ValueKey<int> key = ValueKey<int>(5);
-
-        await testDragBehavior(tester, key: key, expectedBelowThreshold: findsNothing);
+        await testDragBehavior(
+          tester,
+          key: key,
+          expectedBelowThreshold: findsNothing,
+        );
       },
     );
   });
@@ -157,7 +162,8 @@ void main() {
     await tester.fling(finder, offset, speed);
   }
 
-  Future<void> testFlingBehavior(WidgetTester tester, {
+  Future<void> testFlingBehavior(
+    WidgetTester tester, {
     required Key key,
     Matcher expectedBelowThreshold = findsOneWidget,
     Matcher expectedAboveThreshold = findsNothing,
@@ -170,7 +176,7 @@ void main() {
     await flingHorizontally(
       tester: tester,
       finder: find.byKey(key),
-      speed: 200
+      speed: 200,
     );
 
     await tester.pumpAndSettle();
@@ -191,14 +197,12 @@ void main() {
   }
 
   group('Test Fling behavior', () {
-
     testWidgets(
       '0 - Default begavior - `shouldDismiss: null`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
         const ValueKey<int> key = ValueKey<int>(0);
-
         await testFlingBehavior(tester, key: key);
       },
     );
@@ -209,7 +213,6 @@ void main() {
         await initWidget(tester);
 
         const ValueKey<int> key = ValueKey<int>(1);
-
         await testFlingBehavior(tester, key: key);
       },
     );
@@ -220,8 +223,11 @@ void main() {
         await initWidget(tester);
 
         const ValueKey<int> key = ValueKey<int>(2);
-
-        await testFlingBehavior(tester, key: key, expectedAboveThreshold: findsOneWidget);
+        await testFlingBehavior(
+          tester,
+          key: key,
+          expectedAboveThreshold: findsOneWidget,
+        );
       },
     );
 
@@ -231,8 +237,11 @@ void main() {
         await initWidget(tester);
 
         const ValueKey<int> key = ValueKey<int>(3);
-
-        await testFlingBehavior(tester, key: key, expectedBelowThreshold: findsNothing);
+        await testFlingBehavior(
+          tester,
+          key: key,
+          expectedBelowThreshold: findsNothing,
+        );
       },
     );
 
@@ -242,8 +251,11 @@ void main() {
         await initWidget(tester);
 
         const ValueKey<int> key = ValueKey<int>(4);
-
-        await testFlingBehavior(tester, key: key, expectedAboveThreshold: findsOneWidget);
+        await testFlingBehavior(
+          tester,
+          key: key,
+          expectedAboveThreshold: findsOneWidget,
+        );
       },
     );
 
@@ -253,7 +265,6 @@ void main() {
         await initWidget(tester);
 
         const ValueKey<int> key = ValueKey<int>(5);
-
         await testFlingBehavior(tester, key: key);
       },
     );
