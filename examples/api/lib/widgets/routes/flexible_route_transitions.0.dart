@@ -193,7 +193,12 @@ class VerticalPageTransition extends StatelessWidget {
     end: const Offset(0.0, -1.0),
   );
 
-  static Widget _delegatedTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
+  const DelegatedTransition _delegatedTransition = DelegatedTransition(
+    builder: _delegatedTransitionBuilder,
+    name: 'Vertical-Transition',
+  )
+
+  static Widget _delegatedTransitionBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
     final Animatable<Offset> tween = Tween<Offset>(
       begin: Offset.zero,
       end: const Offset(0.0, -1.0),

@@ -289,7 +289,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
   }
 
   @override
-  DelegatedTransitionBuilder? get delegatedTransition => CupertinoPageTransition.delegateTransition;
+  DelegatedTransition? get delegatedTransition => this.fullscreenDialog ? null : CupertinoPageTransition.delegatedTransition;
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
@@ -320,7 +320,7 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
   }
 
   @override
-  DelegatedTransitionBuilder? get delegatedTransition => this.fullscreenDialog ? null : CupertinoPageTransition.delegateTransition;
+  DelegatedTransition? get delegatedTransition => this.fullscreenDialog ? null : CupertinoPageTransition.delegatedTransition;
 
   CupertinoPage<T> get _page => settings as CupertinoPage<T>;
 
@@ -424,7 +424,7 @@ class CupertinoPageTransition extends StatefulWidget {
   final bool linearTransition;
 
   /// The delegated transition.
-  static Widget delegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
+  static Widget delegatedTransitionBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
     final Animation<Offset> delegatedPositionAnimation =
       CurvedAnimation(
         parent: secondaryAnimation,
@@ -440,6 +440,11 @@ class CupertinoPageTransition extends StatefulWidget {
       child: child,
     );
   }
+
+  static const DelegatedTransition delegatedTransition = DelegatedTransition(
+    builder: delegatedTransitionBuilder,
+    name: "Flutter-Cupertino-Page-Transition",
+  );
 
   @override
   State<CupertinoPageTransition> createState() => _CupertinoPageTransitionState();

@@ -280,7 +280,7 @@ class _PageBasedVerticalPageRoute<T> extends PageRoute<T> {
   String get debugLabel => '${super.debugLabel}(${_page.name})';
 
   @override
-  DelegatedTransitionBuilder? get delegatedTransition => VerticalPageTransition._delegatedTransition;
+  DelegatedTransition? get delegatedTransition => VerticalPageTransition._delegatedTransition;
 
   @override
   Color? get barrierColor => const Color(0x00000000);
@@ -331,7 +331,7 @@ class VerticalTransitionPageRoute<T> extends PageRoute<T> {
   final WidgetBuilder builder;
 
   @override
-  DelegatedTransitionBuilder? get delegatedTransition => VerticalPageTransition._delegatedTransition;
+  DelegatedTransition? get delegatedTransition => VerticalPageTransition._delegatedTransition;
 
   @override
   Color? get barrierColor => const Color(0x00000000);
@@ -420,7 +420,12 @@ class VerticalPageTransition extends StatelessWidget {
     end: const Offset(0.0, -1.0),
   );
 
-  static Widget _delegatedTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
+  const DelegatedTransition _delegatedTransition = DelegatedTransition(
+    builder: _delegatedTransitionBuilder,
+    name: 'Vertical-Transition',
+  )
+
+  static Widget _delegatedTransitionBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
     final Animatable<Offset> tween = Tween<Offset>(
       begin: Offset.zero,
       end: const Offset(0.0, -1.0),

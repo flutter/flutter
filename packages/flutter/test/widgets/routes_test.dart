@@ -1978,7 +1978,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(materialPageRoute.receivedTransition, isNotNull);
-      expect(materialPageRoute.receivedTransition, CupertinoPageTransition.delegateTransition);
+      expect(materialPageRoute.receivedTransition, CupertinoPageTransition.delegatedTransition);
     });
 
     testWidgets('outgoing route does not receive a delegated transition from a route with the same transition', (WidgetTester tester) async {
@@ -2033,6 +2033,70 @@ void main() {
 
       await tester.tap(find.text('Second Material Transition'));
 
+      await tester.pumpAndSettle();
+
+      expect(materialPageRoute.receivedTransition, null);
+    });
+
+    testWidgets('outgoing route does not receive a delegated transition from a route with the same un-snapshotted transition', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+      final MaterialPageRoute<void> materialPageRoute = MaterialPageRoute<void>(
+        allowSnapshotting: false,
+        builder: (BuildContext context) {
+          return Scaffold(
+            body: TextButton(
+              onPressed: () {
+                final MaterialPageRoute<void> route = MaterialPageRoute<void>(
+                  allowSnapshotting: false,
+                  builder: (BuildContext context) {
+                    return  const Text('Page 3');
+                  }
+                );
+                Navigator.of(context).push(route);
+              },
+              child: const Text('Second Material Transition'),
+            ),
+          );
+        }
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        navigatorKey: navigatorKey,
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
+              TargetPlatform.android: ZoomPageTransitionsBuilder(),
+            },
+          ),
+        ),
+        home: Scaffold(
+          body: TextButton(
+            onPressed: () {
+              navigatorKey.currentState!.push<void>(materialPageRoute);
+            },
+            child: const Text('Material Route Transition'),
+          ),
+        ),
+        )
+      );
+
+      expect(materialPageRoute.receivedTransition, null);
+
+      await tester.tap(find.text('Material Route Transition'));
+
+      await tester.pumpAndSettle();
+
+      expect(materialPageRoute.receivedTransition, null);
+
+      await tester.tap(find.text('Second Material Transition'));
+
+      await tester.pumpAndSettle();
+
+      expect(materialPageRoute.receivedTransition, null);
+
+      navigatorKey.currentState!.pop();
       await tester.pumpAndSettle();
 
       expect(materialPageRoute.receivedTransition, null);

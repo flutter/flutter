@@ -337,7 +337,7 @@ class _ZoomPageTransition extends StatelessWidget {
           child: child,
         );
       },
-      child: ZoomPageTransitionsBuilder.delegateTransition(
+      child: ZoomPageTransitionsBuilder.snapshotAwareDelegatedTransition(
         context,
         animation,
         secondaryAnimation,
@@ -588,7 +588,7 @@ abstract class PageTransitionsBuilder {
   const PageTransitionsBuilder();
 
   /// Provideds a secondary transition to the previous route.
-  DelegatedTransitionBuilder? get delegatedTransitionBuilder => null;
+  DelegatedTransition? get delegatedTransition => null;
 
   /// Wraps the child with one or more transition widgets which define how [route]
   /// arrives on and leaves the screen.
@@ -749,12 +749,13 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   static const bool _kProfileForceDisableSnapshotting = bool.fromEnvironment('flutter.benchmarks.force_disable_snapshot');
 
   @override
-  DelegatedTransitionBuilder? get delegatedTransitionBuilder => (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
-    return delegateTransition(context, animation, secondaryAnimation, child, allowSnapshotting, allowEnterRouteSnapshotting);
-  };
+  DelegatedTransition? get delegatedTransition => DelegatedTransition(
+    builder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) => snapshotAwareDelegatedTransition(context, animation, secondaryAnimation, child, allowSnapshotting, allowEnterRouteSnapshotting),
+    name: 'Flutter-Zoom-Transition-${allowSnapshotting}-${allowEnterRouteSnapshotting}',
+  );
 
   /// The delegated transition.
-  static Widget delegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child, bool allowSnapshotting, bool allowEnterRouteSnapshotting) {
+  static Widget snapshotAwareDelegatedTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child, bool allowSnapshotting, bool allowEnterRouteSnapshotting) {
     return DualTransitionBuilder(
       animation: ReverseAnimation(secondaryAnimation),
       forwardBuilder: (
@@ -828,7 +829,7 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
   const CupertinoPageTransitionsBuilder();
 
   @override
-  DelegatedTransitionBuilder? get delegatedTransitionBuilder => CupertinoPageTransition.delegateTransition;
+  DelegatedTransition? get delegatedTransition => CupertinoPageTransition.delegatedTransition;
 
   @override
   Widget buildTransitions<T>(
@@ -913,9 +914,7 @@ class PageTransitionsTheme with Diagnosticable {
   }
 
   /// Provide delegate transition for platform.
-  DelegatedTransitionBuilder? delegatedTransition(BuildContext context, bool allowSnapshotting) {
-    final TargetPlatform platform = Theme.of(context).platform;
-
+  DelegatedTransition? delegatedTransition(TargetPlatform platform, bool allowSnapshotting) {
     final PageTransitionsBuilder matchingBuilder =
       builders[platform] ?? const ZoomPageTransitionsBuilder();
 
@@ -927,7 +926,7 @@ class PageTransitionsTheme with Diagnosticable {
         ) :
         matchingBuilder;
 
-    return snapshotAwareBuilder.delegatedTransitionBuilder;
+    return snapshotAwareBuilder.delegatedTransition;
   }
 
   // Map the builders to a list with one PageTransitionsBuilder per platform for

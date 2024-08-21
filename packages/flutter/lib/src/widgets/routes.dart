@@ -1418,15 +1418,15 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   /// The delegated transition provided to the previous route.
-  DelegatedTransitionBuilder? get delegatedTransition => null;
+  DelegatedTransition? get delegatedTransition => null;
 
   /// The delegated transition received from an incoming route.
-  DelegatedTransitionBuilder? receivedTransition;
+  DelegatedTransition? receivedTransition;
 
   /// Transition that matches with the next route. Will be null if there is no
   /// next route or a next route is not provided. If a non-null value exists,
   /// then it will be used in place of [buildTransitions].
-  DelegatedTransitionBuilder? get nextRouteTransition {
+  DelegatedTransition? get nextRouteTransition {
     if (receivedTransition != null) {
       return receivedTransition;
     } else {

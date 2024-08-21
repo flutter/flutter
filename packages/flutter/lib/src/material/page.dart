@@ -95,12 +95,12 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   @override
   String? get barrierLabel => null;
 
-  DelegatedTransitionBuilder? _delegatedTransition;
+  DelegatedTransition? _delegatedTransition;
 
   @override
-  DelegatedTransitionBuilder? get delegatedTransition => _delegatedTransition;
+  DelegatedTransition? get delegatedTransition => _delegatedTransition;
 
-  set delegatedTransition(DelegatedTransitionBuilder? newTransition) {
+  set delegatedTransition(DelegatedTransition? newTransition) {
     _delegatedTransition = newTransition;
   }
 
@@ -132,7 +132,11 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
-    delegatedTransition = theme.delegatedTransition(context, allowSnapshotting);
+    final TargetPlatform platform = Theme.of(context).platform;
+    final DelegatedTransition? themeDelegatedTransition = theme.delegatedTransition(platform, allowSnapshotting);
+    if (delegatedTransition != themeDelegatedTransition) {
+      delegatedTransition = themeDelegatedTransition;
+    }
     return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 }
