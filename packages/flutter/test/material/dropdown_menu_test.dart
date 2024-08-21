@@ -2442,6 +2442,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: DropdownMenu<String>(
+            requestFocusOnTap: true,
             controller: controller,
             dropdownMenuEntries: const <DropdownMenuEntry<String>>[
               DropdownMenuEntry<String>(
@@ -2674,6 +2675,53 @@ void main() {
     for (final TestMenu menu in TestMenu.values) {
       expect(find.widgetWithText(MenuItemButton, menu.label), findsNWidgets(2));
     }
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/151686.
+  testWidgets('Setting DropdownMenu.requestFocusOnTap to false makes TextField read only', (WidgetTester tester) async {
+    const String label = 'Test';
+    Widget buildDropdownMenu({ bool? requestFocusOnTap }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownMenu<TestMenu>(
+              requestFocusOnTap: requestFocusOnTap,
+              dropdownMenuEntries: menuChildren,
+              hintText: label,
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildDropdownMenu(requestFocusOnTap: true));
+
+    expect(
+      tester.getSemantics(find.byType(TextField)),
+      matchesSemantics(
+        hasFocusAction: true,
+        hasTapAction: true,
+        isTextField: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        label: 'Test',
+        textDirection: TextDirection.ltr,
+      ),
+    );
+
+    await tester.pumpWidget(buildDropdownMenu(requestFocusOnTap: false));
+
+    expect(
+      tester.getSemantics(find.byType(TextField)),
+      matchesSemantics(
+        hasFocusAction: true,
+        isTextField: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        label: 'Test',
+        isReadOnly: true,
+        textDirection: TextDirection.ltr,
+      ),
+    );
   });
 }
 
