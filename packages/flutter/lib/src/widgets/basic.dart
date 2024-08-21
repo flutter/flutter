@@ -6009,9 +6009,11 @@ class RawImage extends LeafRenderObjectWidget {
   /// aspect ratio.
   final double? height;
 
-  /// Specifies the image's scale.
+  /// The linear scale factor for drawing this image at its intended size.
   ///
-  /// Used when determining the best display size for the image.
+  /// The scale factor applies to the width and the height.
+  ///
+  /// {@macro flutter.painting.imageInfo.scale}
   final double scale;
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
