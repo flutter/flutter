@@ -406,7 +406,10 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     super.dispose();
   }
 
-  bool get _directionIsXAxis => widget.direction.directionIsXAxis;
+  bool get _directionIsXAxis => switch (widget.direction) {
+    DismissDirection.horizontal || DismissDirection.endToStart || DismissDirection.startToEnd => true,
+    DismissDirection.vertical || DismissDirection.up || DismissDirection.down || DismissDirection.none => false
+  };
 
   DismissDirection _extentToDirection(double extent) {
     if (extent == 0.0) {
@@ -787,11 +790,4 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       child: content,
     );
   }
-}
-
-extension on DismissDirection {
-  bool get directionIsXAxis => switch (this) {
-    DismissDirection.horizontal || DismissDirection.endToStart || DismissDirection.startToEnd => true,
-    _ => false
-  };
 }
