@@ -12,9 +12,9 @@ void main() {
     await tester.pumpWidget(const example.CustomScrollViewExampleApp());
 
     expect(find.descendant(
-          of: find.byType(IconButton),
-          matching: find.byIcon(Icons.add),
-        ), findsOne);
+      of: find.byType(IconButton),
+      matching: find.byIcon(Icons.add),
+    ), findsOne);
     expect(find.byType(SliverList), findsOne);
 
     // Initial state should present only "Item: 0" on the SliverList.
