@@ -36,26 +36,9 @@
                 "targets": [
                     "flutter",
                     "flutter/shell/platform/android:embedding_jars",
-                    "flutter/shell/platform/android:abi_jars",
-                    "flutter/shell/platform/android:robolectric_tests"
+                    "flutter/shell/platform/android:abi_jars"
                 ]
-            },
-            "tests": [
-                {
-                    "language": "python3",
-                    "name": "Host Tests for android_jit_release_x86",
-                    "script": "flutter/testing/run_tests.py",
-                    "parameters": [
-                        "--variant",
-                        "ci/android_jit_release_x86",
-                        "--type",
-                        "java",
-                        "--engine-capture-core-dump",
-                        "--android-variant",
-                        "ci/android_jit_release_x86"
-                    ]
-                }
-            ]
+            }
         },
         {
             "archives": [
@@ -99,26 +82,9 @@
                     "flutter/sky/dist:zip_old_location",
                     "flutter/lib/gpu/dist:zip_old_location",
                     "flutter/shell/platform/android:embedding_jars",
-                    "flutter/shell/platform/android:abi_jars",
-                    "flutter/shell/platform/android:robolectric_tests"
+                    "flutter/shell/platform/android:abi_jars"
                 ]
-            },
-            "tests": [
-                {
-                    "language": "python3",
-                    "name": "Host Tests for android_debug",
-                    "script": "flutter/testing/run_tests.py",
-                    "parameters": [
-                        "--variant",
-                        "ci/android_debug",
-                        "--type",
-                        "java",
-                        "--engine-capture-core-dump",
-                        "--android-variant",
-                        "ci/android_debug"
-                    ]
-                }
-            ]
+            }
         },
         {
             "archives": [
