@@ -616,7 +616,7 @@ exit code: 66
         context: PubContext.flutterTests,
       ),
       throwsA(isA<ToolExit>()
-          .having((ToolExit error) => error.message, 'message', null)),
+          .having((ToolExit error) => error.message, 'message', contains('Failed to update packages'))),
     );
     expect(logger.statusText, isEmpty);
     expect(logger.traceText, contains(toolExitMessage));

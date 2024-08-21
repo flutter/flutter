@@ -461,7 +461,7 @@ class _DefaultPub implements Pub {
           'upstream branch to point to the canonical flutter/flutter: \n\n'
           '  git remote set-url upstream https://github.com/flutter/flutter.git\n'
           '\n'
-          'See https://github.com/flutter/flutter/blob/master/docs/contributing/Setting-up-the-Framework-development-environment.md#set-up-your-environment.');
+          'See https://github.com/flutter/flutter/blob/main/docs/contributing/Setting-up-the-Framework-development-environment.md#set-up-your-environment.');
       }
       throwToolExit(
         'Failed to update packages.',
