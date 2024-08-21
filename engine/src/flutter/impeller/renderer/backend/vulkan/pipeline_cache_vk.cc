@@ -9,49 +9,11 @@
 #include <sstream>
 
 #include "flutter/fml/mapping.h"
+#include "impeller/base/allocation_size.h"
 #include "impeller/base/validation.h"
+#include "impeller/renderer/backend/vulkan/pipeline_cache_data_vk.h"
 
 namespace impeller {
-
-static constexpr const char* kPipelineCacheFileName =
-    "flutter.impeller.vkcache";
-
-static bool VerifyExistingCache(const fml::Mapping& mapping,
-                                const CapabilitiesVK& caps) {
-  return true;
-}
-
-static std::shared_ptr<fml::Mapping> DecorateCacheWithMetadata(
-    std::shared_ptr<fml::Mapping> data) {
-  return data;
-}
-
-static std::unique_ptr<fml::Mapping> RemoveMetadataFromCache(
-    std::unique_ptr<fml::Mapping> data) {
-  return data;
-}
-
-static std::unique_ptr<fml::Mapping> OpenCacheFile(
-    const fml::UniqueFD& base_directory,
-    const std::string& cache_file_name,
-    const CapabilitiesVK& caps) {
-  if (!base_directory.is_valid()) {
-    return nullptr;
-  }
-  std::unique_ptr<fml::Mapping> mapping =
-      fml::FileMapping::CreateReadOnly(base_directory, cache_file_name);
-  if (!mapping) {
-    return nullptr;
-  }
-  if (!VerifyExistingCache(*mapping, caps)) {
-    return nullptr;
-  }
-  mapping = RemoveMetadataFromCache(std::move(mapping));
-  if (!mapping) {
-    return nullptr;
-  }
-  return mapping;
-}
 
 PipelineCacheVK::PipelineCacheVK(std::shared_ptr<const Capabilities> caps,
                                  std::shared_ptr<DeviceHolderVK> device_holder,
@@ -65,8 +27,8 @@ PipelineCacheVK::PipelineCacheVK(std::shared_ptr<const Capabilities> caps,
 
   const auto& vk_caps = CapabilitiesVK::Cast(*caps_);
 
-  auto existing_cache_data =
-      OpenCacheFile(cache_directory_, kPipelineCacheFileName, vk_caps);
+  auto existing_cache_data = PipelineCacheDataRetrieve(
+      cache_directory_, vk_caps.GetPhysicalDeviceProperties());
 
   vk::PipelineCacheCreateInfo cache_info;
   if (existing_cache_data) {
@@ -79,6 +41,9 @@ PipelineCacheVK::PipelineCacheVK(std::shared_ptr<const Capabilities> caps,
 
   if (result == vk::Result::eSuccess) {
     cache_ = std::move(existing_cache);
+    FML_LOG(INFO)
+        << Bytes{cache_info.initialDataSize}.ConvertTo<MegaBytes>().GetSize()
+        << " MB of data was used to construct a pipeline cache.";
   } else {
     // Even though we perform consistency checks because we don't trust the
     // driver, the driver may have additional information that may cause it to
@@ -145,46 +110,15 @@ vk::UniquePipeline PipelineCacheVK::CreatePipeline(
   return std::move(pipeline);
 }
 
-std::shared_ptr<fml::Mapping> PipelineCacheVK::CopyPipelineCacheData() const {
-  std::shared_ptr<DeviceHolderVK> strong_device = device_holder_.lock();
-  if (!strong_device) {
-    return nullptr;
-  }
-
-  if (!IsValid()) {
-    return nullptr;
-  }
-  auto [result, data] =
-      strong_device->GetDevice().getPipelineCacheData(*cache_);
-  if (result != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Could not get pipeline cache data to persist.";
-    return nullptr;
-  }
-  auto shared_data = std::make_shared<std::vector<uint8_t>>();
-  std::swap(*shared_data, data);
-  return std::make_shared<fml::NonOwnedMapping>(
-      shared_data->data(), shared_data->size(), [shared_data](auto, auto) {});
-}
-
 void PipelineCacheVK::PersistCacheToDisk() const {
-  if (!cache_directory_.is_valid()) {
+  if (!is_valid_) {
     return;
   }
-  auto data = CopyPipelineCacheData();
-  if (!data) {
-    VALIDATION_LOG << "Could not copy pipeline cache data.";
-    return;
-  }
-  data = DecorateCacheWithMetadata(std::move(data));
-  if (!data) {
-    VALIDATION_LOG
-        << "Could not decorate pipeline cache with additional metadata.";
-    return;
-  }
-  if (!fml::WriteAtomically(cache_directory_, kPipelineCacheFileName, *data)) {
-    VALIDATION_LOG << "Could not persist pipeline cache to disk.";
-    return;
-  }
+  const auto& vk_caps = CapabilitiesVK::Cast(*caps_);
+  PipelineCacheDataPersist(cache_directory_,                       //
+                           vk_caps.GetPhysicalDeviceProperties(),  //
+                           cache_                                  //
+  );
 }
 
 const CapabilitiesVK* PipelineCacheVK::GetCapabilities() const {
