@@ -1,4 +1,4 @@
-Signature: 7698c4e04e85eb6fa6926b8c3ed159c7
+Signature: 9bc974412ed2abd3ff4ae1f734e4dda9
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8214,7 +8214,6 @@ ORIGIN: ../../../flutter/third_party/skia/src/text/gpu/GlyphVector.cpp + ../../.
 ORIGIN: ../../../flutter/third_party/skia/src/text/gpu/GlyphVector.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/text/gpu/SubRunContainer.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/text/gpu/SubRunContainer.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/utils/SkTestCanvas.h + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/gm/bug12866.cpp
 FILE: ../../../flutter/third_party/skia/gm/crbug_1313579.cpp
@@ -8429,7 +8428,6 @@ FILE: ../../../flutter/third_party/skia/src/text/gpu/GlyphVector.cpp
 FILE: ../../../flutter/third_party/skia/src/text/gpu/GlyphVector.h
 FILE: ../../../flutter/third_party/skia/src/text/gpu/SubRunContainer.cpp
 FILE: ../../../flutter/third_party/skia/src/text/gpu/SubRunContainer.h
-FILE: ../../../flutter/third_party/skia/src/utils/SkTestCanvas.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 Google LLC
 
@@ -8980,7 +8978,6 @@ ORIGIN: ../../../flutter/third_party/skia/src/text/gpu/SlugImpl.cpp + ../../../f
 ORIGIN: ../../../flutter/third_party/skia/src/text/gpu/SlugImpl.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/text/gpu/VertexFiller.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/text/gpu/VertexFiller.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/utils/SkTestCanvas.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/utils/win/SkWGL_win.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/toolchain/android_trampolines/gen_trampolines/gen_trampolines.go + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
@@ -9273,7 +9270,6 @@ FILE: ../../../flutter/third_party/skia/src/text/gpu/SlugImpl.cpp
 FILE: ../../../flutter/third_party/skia/src/text/gpu/SlugImpl.h
 FILE: ../../../flutter/third_party/skia/src/text/gpu/VertexFiller.cpp
 FILE: ../../../flutter/third_party/skia/src/text/gpu/VertexFiller.h
-FILE: ../../../flutter/third_party/skia/src/utils/SkTestCanvas.cpp
 FILE: ../../../flutter/third_party/skia/src/utils/win/SkWGL_win.cpp
 FILE: ../../../flutter/third_party/skia/toolchain/android_trampolines/gen_trampolines/gen_trampolines.go
 ----------------------------------------------------------------------------------------------------
