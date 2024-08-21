@@ -106,7 +106,7 @@ class MyRouterDelegate extends RouterDelegate<MyPageConfiguration> {
   Future<void> setNewRoutePath(MyPageConfiguration configuration) {
     _pages.add(configuration);
     _notifyListeners();
-    return SynchronousFuture(null);
+    return SynchronousFuture<void>(null);
   }
 
   @override
@@ -121,7 +121,7 @@ class MyRouterDelegate extends RouterDelegate<MyPageConfiguration> {
         MyPageConfiguration.home => MyHomePage<void>(routerDelegate: this),
         MyPageConfiguration.zoom => ZoomPage<void>(routerDelegate: this),
         MyPageConfiguration.iOS => IOSPage<void>(routerDelegate: this),
-        MyPageConfiguration.vertical => VerticalPage(routerDelegate: this),
+        MyPageConfiguration.vertical => VerticalPage<void>(routerDelegate: this),
       }).toList(),
     );
   }
@@ -178,7 +178,7 @@ class IOSPage<T> extends CupertinoPage<T> {
   String get name => MyPageConfiguration.iOS.name;
 }
 
-class VerticalPage extends VerticalTransitionPage {
+class VerticalPage<T> extends VerticalTransitionPage<T> {
   VerticalPage({required this.routerDelegate}) : super(
     restorationId: 'vertical-page',
     child: MyPageScaffold(title: 'Vertical Route', routerDelegate: routerDelegate),
