@@ -40,8 +40,6 @@ const Duration _kIndicatorScaleDuration = Duration(milliseconds: 200);
 /// Used by [RefreshIndicator.onRefresh].
 typedef RefreshCallback = Future<void> Function();
 
-// The state machine moves through these modes only when the scrollable
-// identified by scrollableKey has been scrolled to its min or max limit.
 /// Indicates current status of Material `RefreshIndicator`
 enum RefreshIndicatorStatus {
   /// Pointer is down.
@@ -555,11 +553,9 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     });
     switch (_status!) {
       case RefreshIndicatorStatus.done:
-        await _scaleController.animateTo(1.0,
-            duration: _kIndicatorScaleDuration);
+        await _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
       case RefreshIndicatorStatus.canceled:
-        await _positionController.animateTo(0.0,
-            duration: _kIndicatorScaleDuration);
+        await _positionController.animateTo(0.0, duration: _kIndicatorScaleDuration);
       case RefreshIndicatorStatus.armed:
       case RefreshIndicatorStatus.drag:
       case RefreshIndicatorStatus.refresh:
@@ -583,24 +579,23 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     _status = RefreshIndicatorStatus.snap;
     widget.onStatusChange?.call(_status);
     _positionController
-        .animateTo(1.0 / _kDragSizeFactorLimit,
-            duration: _kIndicatorSnapDuration)
-        .then<void>((void value) {
-      if (mounted && _status == RefreshIndicatorStatus.snap) {
-        setState(() {
-          // Show the indeterminate progress indicator.
-          _status = RefreshIndicatorStatus.refresh;
-        });
+      .animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration)
+      .then<void>((void value) {
+        if (mounted && _status == RefreshIndicatorStatus.snap) {
+          setState(() {
+            // Show the indeterminate progress indicator.
+            _status = RefreshIndicatorStatus.refresh;
+          });
 
-        final Future<void> refreshResult = widget.onRefresh();
-        refreshResult.whenComplete(() {
-          if (mounted && _status == RefreshIndicatorStatus.refresh) {
-            completer.complete();
-            _dismiss(RefreshIndicatorStatus.done);
-          }
-        });
-      }
-    });
+          final Future<void> refreshResult = widget.onRefresh();
+          refreshResult.whenComplete(() {
+            if (mounted && _status == RefreshIndicatorStatus.refresh) {
+              completer.complete();
+              _dismiss(RefreshIndicatorStatus.done);
+            }
+          });
+        }
+      });
   }
 
   /// Show the refresh indicator and run the refresh callback as if it had
@@ -651,77 +646,74 @@ class RefreshIndicatorState extends State<RefreshIndicator>
       return true;
     }());
 
-    final bool showIndeterminateIndicator =
-        _status == RefreshIndicatorStatus.refresh ||
-            _status == RefreshIndicatorStatus.done;
+    final bool showIndeterminateIndicator = _status == RefreshIndicatorStatus.refresh
+      || _status == RefreshIndicatorStatus.done;
 
     return Stack(
       children: <Widget>[
         child,
-        if (_status != null)
-          Positioned(
-            top: _isIndicatorAtTop! ? widget.edgeOffset : null,
-            bottom: !_isIndicatorAtTop! ? widget.edgeOffset : null,
-            left: 0.0,
-            right: 0.0,
-            child: SizeTransition(
-              axisAlignment: _isIndicatorAtTop! ? 1.0 : -1.0,
-              sizeFactor: _positionFactor, // this is what brings it down
-              child: Container(
-                padding: _isIndicatorAtTop!
-                    ? EdgeInsets.only(top: widget.displacement)
-                    : EdgeInsets.only(bottom: widget.displacement),
-                alignment: _isIndicatorAtTop!
-                    ? Alignment.topCenter
-                    : Alignment.bottomCenter,
-                child: ScaleTransition(
-                  scale: _scaleFactor,
-                  child: AnimatedBuilder(
-                    animation: _positionController,
-                    builder: (BuildContext context, Widget? child) {
-                      final Widget materialIndicator = RefreshProgressIndicator(
-                        semanticsLabel: widget.semanticsLabel ??
-                            MaterialLocalizations.of(context)
-                                .refreshIndicatorSemanticLabel,
-                        semanticsValue: widget.semanticsValue,
-                        value: showIndeterminateIndicator ? null : _value.value,
-                        valueColor: _valueColor,
-                        backgroundColor: widget.backgroundColor,
-                        strokeWidth: widget.strokeWidth,
-                      );
+        if (_status != null) Positioned(
+          top: _isIndicatorAtTop! ? widget.edgeOffset : null,
+          bottom: !_isIndicatorAtTop! ? widget.edgeOffset : null,
+          left: 0.0,
+          right: 0.0,
+          child: SizeTransition(
+            axisAlignment: _isIndicatorAtTop! ? 1.0 : -1.0,
+            sizeFactor: _positionFactor, // This is what brings it down.
+            child: Container(
+              padding: _isIndicatorAtTop!
+                  ? EdgeInsets.only(top: widget.displacement)
+                  : EdgeInsets.only(bottom: widget.displacement),
+              alignment: _isIndicatorAtTop!
+                  ? Alignment.topCenter
+                  : Alignment.bottomCenter,
+              child: ScaleTransition(
+                scale: _scaleFactor,
+                child: AnimatedBuilder(
+                  animation: _positionController,
+                  builder: (BuildContext context, Widget? child) {
+                    final Widget materialIndicator = RefreshProgressIndicator(
+                      semanticsLabel: widget.semanticsLabel ??
+                        MaterialLocalizations.of(context)
+                          .refreshIndicatorSemanticLabel,
+                      semanticsValue: widget.semanticsValue,
+                      value: showIndeterminateIndicator ? null : _value.value,
+                      valueColor: _valueColor,
+                      backgroundColor: widget.backgroundColor,
+                      strokeWidth: widget.strokeWidth,
+                    );
 
-                      final Widget cupertinoIndicator =
-                          CupertinoActivityIndicator(
-                        color: widget.color,
-                      );
+                    final Widget cupertinoIndicator = CupertinoActivityIndicator(
+                      color: widget.color,
+                    );
 
-                      switch (widget._indicatorType) {
-                        case _IndicatorType.material:
-                          return materialIndicator;
+                    switch (widget._indicatorType) {
+                      case _IndicatorType.material:
+                        return materialIndicator;
 
-                        case _IndicatorType.adaptive:
-                          {
-                            final ThemeData theme = Theme.of(context);
-                            switch (theme.platform) {
-                              case TargetPlatform.android:
-                              case TargetPlatform.fuchsia:
-                              case TargetPlatform.linux:
-                              case TargetPlatform.windows:
-                                return materialIndicator;
-                              case TargetPlatform.iOS:
-                              case TargetPlatform.macOS:
-                                return cupertinoIndicator;
-                            }
+                      case _IndicatorType.adaptive:
+                        {
+                          final ThemeData theme = Theme.of(context);
+                          switch (theme.platform) {
+                            case TargetPlatform.android:
+                            case TargetPlatform.fuchsia:
+                            case TargetPlatform.linux:
+                            case TargetPlatform.windows:
+                              return materialIndicator;
+                            case TargetPlatform.iOS:
+                            case TargetPlatform.macOS:
+                              return cupertinoIndicator;
                           }
-                        case _IndicatorType.noSpinner:
-                          return Container();
-                      }
-                    },
-                  ),
+                        }
+                      case _IndicatorType.noSpinner:
+                        return Container();
+                    }
+                  },
                 ),
               ),
             ),
           ),
+        ),
       ],
     );
   }
