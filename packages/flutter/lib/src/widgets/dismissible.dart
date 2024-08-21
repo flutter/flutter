@@ -301,6 +301,8 @@ class AcceptDismissDetails {
     this.direction = DismissDirection.horizontal,
     this.reached = false,
     this.progress = 0.0,
+    this.flingVelocity = Velocity.zero,
+    this.dragExtent = 0.0,
   });
 
   /// The direction that the dismissible is being dragged.
@@ -317,6 +319,24 @@ class AcceptDismissDetails {
   /// This can be used to synchronize other elements to what the dismissible is doing on screen,
   /// e.g. using this value to set the opacity thereby fading dismissible as it's dragged offscreen.
   final double progress;
+
+  /// Distance from the start of the drag to the current position
+  ///
+  /// The drag distance is represented in logical pixels.
+  final double dragExtent;
+
+  /// The velocity the pointer was moving when it stopped contacting the screen.
+  ///
+  /// Defaults to [Velocity.zero] if not specified in the constructor.
+  final Velocity flingVelocity;
+
+  /// The component of the velocity parallel to the [DismissDirection].
+  /// A fling away from the center will have a positive value.
+  double get velocity => (
+    direction.directionIsXAxis
+      ? flingVelocity.pixelsPerSecond.dx
+      : flingVelocity.pixelsPerSecond.dy
+    ).abs();
 }
 
 class _DismissibleClipper extends CustomClipper<Rect> {
@@ -395,11 +415,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     super.dispose();
   }
 
-  bool get _directionIsXAxis {
-    return widget.direction == DismissDirection.horizontal
-        || widget.direction == DismissDirection.endToStart
-        || widget.direction == DismissDirection.startToEnd;
-  }
+  bool get _directionIsXAxis => widget.direction.directionIsXAxis;
 
   DismissDirection _extentToDirection(double extent) {
     if (extent == 0.0) {
@@ -567,12 +583,15 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     // Use value returned by `widget.shouldDismiss` if a callback is provided
     // If the callback returns null, use the default behavior
     if (widget.shouldDismiss case final AcceptDismissCallback shouldDismissCallback) {
-      final AcceptDismissDetails details = AcceptDismissDetails(
+      final AcceptDismissDetails acceptDismissDetails = AcceptDismissDetails(
         direction: _dismissDirection,
         reached: _moveController.value > _dismissThreshold,
         progress: _moveController.value,
+        flingVelocity: details.velocity,
+        dragExtent: _dragExtent,
       );
-      final bool? shouldDismiss = shouldDismissCallback(details);
+
+      final bool? shouldDismiss = shouldDismissCallback(acceptDismissDetails);
 
       if (shouldDismiss != null) {
         if (_moveController.isDismissed) {
@@ -592,7 +611,9 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       _handleMoveCompleted();
       return;
     }
+
     final double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
+
     switch (_describeFlingGesture(details.velocity)) {
       case _FlingGestureKind.forward:
         assert(_dragExtent != 0.0);
@@ -775,4 +796,11 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       child: content,
     );
   }
+}
+
+extension on DismissDirection {
+  bool get directionIsXAxis => switch(this) {
+    DismissDirection.horizontal || DismissDirection.endToStart || DismissDirection.startToEnd => true,
+    _ => false
+  };
 }
