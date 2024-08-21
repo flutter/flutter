@@ -301,7 +301,7 @@ class TriggerDismissDetails {
     this.direction = DismissDirection.horizontal,
     this.reached = false,
     this.progress = 0.0,
-    this.flingVelocity = Velocity.zero,
+    this.velocity = 0.0,
     this.dragExtent = 0.0,
   });
 
@@ -325,18 +325,9 @@ class TriggerDismissDetails {
   /// The drag distance is represented in logical pixels.
   final double dragExtent;
 
-  /// The velocity the pointer was moving when it stopped contacting the screen.
-  ///
-  /// Defaults to [Velocity.zero] if not specified in the constructor.
-  final Velocity flingVelocity;
-
   /// The component of the velocity parallel to the [DismissDirection].
   /// A fling away from the center will have a positive value.
-  double get velocity => (
-    direction.directionIsXAxis
-      ? flingVelocity.pixelsPerSecond.dx
-      : flingVelocity.pixelsPerSecond.dy
-    ).abs();
+  final double velocity;
 }
 
 class _DismissibleClipper extends CustomClipper<Rect> {
@@ -580,6 +571,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     }
     _dragUnderway = false;
 
+    final double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
+
     // Use value returned by `shouldTriggerDismiss` if a callback is provided
     // If the callback returns null, use the default behavior
     if (widget.shouldTriggerDismiss case final TriggerDismissCallback shouldDismissCallback) {
@@ -587,7 +580,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         direction: _dismissDirection,
         reached: _moveController.value > _dismissThreshold,
         progress: _moveController.value,
-        flingVelocity: details.velocity,
+        velocity: flingVelocity.abs(),
         dragExtent: _dragExtent,
       );
 
@@ -611,8 +604,6 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       _handleMoveCompleted();
       return;
     }
-
-    final double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
 
     switch (_describeFlingGesture(details.velocity)) {
       case _FlingGestureKind.forward:
