@@ -68,7 +68,6 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   permissionDeniedErrorHandler,
   flavorUndefinedHandler,
   r8DexingBugInAgp73Handler,
-  r8FailureHandler,
   minSdkVersionHandler,
   transformInputIssueHandler,
   lockFileDepMissingHandler,
@@ -197,28 +196,6 @@ final GradleHandledError zipExceptionHandler = GradleHandledError(
     return GradleBuildStatus.retry;
   },
   eventLabel: 'zip-exception',
-);
-
-// R8 failure.
-@visibleForTesting
-final GradleHandledError r8FailureHandler = GradleHandledError(
-  test: _lineMatcher(const <String>[
-    'com.android.tools.r8',
-  ]),
-  handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-  }) async {
-    globals.printBox(
-      '${globals.logger.terminal.warningMark} The shrinker may have failed to optimize the Java bytecode.\n'
-      'To disable the shrinker, pass the `--no-shrink` flag to this command.\n'
-      'To learn more, see: https://developer.android.com/studio/build/shrink-code',
-      title: _boxTitle,
-    );
-    return GradleBuildStatus.exit;
-  },
-  eventLabel: 'r8',
 );
 
 /// Handle Gradle error thrown when Gradle needs to download additional

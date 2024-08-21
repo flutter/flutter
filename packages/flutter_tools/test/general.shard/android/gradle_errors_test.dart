@@ -38,7 +38,6 @@ void main() {
           networkErrorHandler,
           permissionDeniedErrorHandler,
           flavorUndefinedHandler,
-          r8FailureHandler,
           minSdkVersionHandler,
           transformInputIssueHandler,
           lockFileDepMissingHandler,
