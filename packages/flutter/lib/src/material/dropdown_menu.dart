@@ -489,6 +489,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   late List<GlobalKey> buttonItemKeys;
   final MenuController _controller = MenuController();
   bool _enableFilter = false;
+  late bool _enableSearch;
   late List<DropdownMenuEntry<T>> filteredEntries;
   List<Widget>? _initialMenu;
   int? currentHighlight;
@@ -504,6 +505,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     } else {
       _localTextEditingController = TextEditingController();
     }
+    _enableSearch = widget.enableSearch;
     filteredEntries = widget.dropdownMenuEntries;
     buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
     _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
@@ -543,6 +545,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     }
     if (oldWidget.enableSearch != widget.enableSearch) {
       if (!widget.enableSearch) {
+        _enableSearch = widget.enableSearch;
         currentHighlight = null;
       }
     }
@@ -698,6 +701,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         return;
       }
       _enableFilter = false;
+      _enableSearch = false;
       currentHighlight ??= 0;
       currentHighlight = (currentHighlight! - 1) % filteredEntries.length;
       while (!filteredEntries[currentHighlight!].enabled) {
@@ -717,6 +721,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         return;
       }
       _enableFilter = false;
+      _enableSearch = false;
       currentHighlight ??= -1;
       currentHighlight = (currentHighlight! + 1) % filteredEntries.length;
       while (!filteredEntries[currentHighlight!].enabled) {
@@ -757,7 +762,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       filteredEntries = widget.dropdownMenuEntries;
     }
 
-    if (widget.enableSearch) {
+    if (_enableSearch) {
       if (widget.searchCallback != null) {
         currentHighlight = widget.searchCallback!(filteredEntries, _localTextEditingController!.text);
       } else {
@@ -856,6 +861,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             setState(() {
               filteredEntries = widget.dropdownMenuEntries;
               _enableFilter = widget.enableFilter;
+              _enableSearch = widget.enableSearch;
             });
           },
           inputFormatters: widget.inputFormatters,
