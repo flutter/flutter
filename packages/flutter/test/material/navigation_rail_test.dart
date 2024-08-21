@@ -171,7 +171,7 @@ void main() {
     // Height of a destination indicator with icon.
     const double destinationHeight = 32.0;
     // Space between destinations.
-    const double destinationSpacing = 12.0;    
+    const double destinationSpacing = 12.0;
     // Height of the leading and trailing widgets.
     const double fabHeight = 56.0;
 
@@ -360,7 +360,7 @@ void main() {
       double nextDestinationY = topPadding + destinationSpacing / 2;
       final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite_border);
       matchExpect(firstIconRenderBox, nextDestinationY);
-      
+
       nextDestinationY += destinationHeight + destinationSpacing;
       final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
       matchExpect(secondIconRenderBox, nextDestinationY);
