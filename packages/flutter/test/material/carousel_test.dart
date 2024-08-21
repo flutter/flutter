@@ -1149,6 +1149,50 @@ void main() {
     expect(getItem(5), findsOneWidget);
     expect(tester.getRect(getItem(5)).width, difference);
   });
+
+  testWidgets('Updating CarouselView does not cause exception', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/152787
+    bool isLight = true;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            theme: Theme.of(context).copyWith(
+              brightness: isLight ? Brightness.light : Brightness.dark,
+            ),
+            home: Scaffold(
+              appBar: AppBar(
+                actions: <Widget>[
+                  Switch(
+                    value: isLight,
+                    onChanged: (bool value) {
+                      setState(() {
+                        isLight = value;
+                      });
+                    }
+                  )
+                ],
+              ),
+              body: CarouselView(
+                itemExtent: 100,
+                children: List<Widget>.generate(10, (int index) {
+                  return Center(
+                    child: Text('Item $index'),
+                  );
+                }),
+              ),
+            ),
+          );
+        }
+      )
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    // No exception.
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Finder getItem(int index) {

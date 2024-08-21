@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class BadgeUseCase extends UseCase {
-
   @override
   String get name => 'Badge';
 
@@ -26,12 +25,13 @@ class MainWidget extends StatefulWidget {
 }
 
 class MainWidgetState extends State<MainWidget> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Badge'),
+        title: Semantics(headingLevel: 1, child: const Text('Badge Demo')),
       ),
       body: const Center(
         child: Badge(

@@ -245,6 +245,24 @@ class SwiftPackageManagerUtils {
     );
   }
 
+  static void removeDependency({
+    required SwiftPackageManagerPlugin plugin,
+    required String appDirectoryPath,
+  }) {
+    final File pubspec = fileSystem.file(
+      fileSystem.path.join(appDirectoryPath, 'pubspec.yaml'),
+    );
+    final String pubspecContent = pubspec.readAsStringSync();
+    final String updatedPubspecContent = pubspecContent.replaceFirst(
+      '\n  ${plugin.pluginName}:\n    path: ${plugin.pluginPath}\n',
+      '\n',
+    );
+
+    expect(updatedPubspecContent, isNot(pubspecContent));
+
+    pubspec.writeAsStringSync(updatedPubspecContent);
+  }
+
   static void disableSwiftPackageManagerByPubspec({
     required String appDirectoryPath,
   }) {
@@ -378,4 +396,5 @@ class SwiftPackageManagerPlugin {
   final String platform;
   String get exampleAppPath => fileSystem.path.join(pluginPath, 'example');
   String get exampleAppPlatformPath => fileSystem.path.join(exampleAppPath, platform);
+  String get swiftPackagePlatformPath => fileSystem.path.join(pluginPath, platform, pluginName);
 }
