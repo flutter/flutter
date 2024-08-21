@@ -105,6 +105,7 @@ TaskFunction createAndroidTextureScrollPerfTest({bool? enableImpeller}) {
     testDriver: 'test_driver/scroll_perf_test.dart',
     needsFullTimeline: false,
     enableImpeller: enableImpeller,
+    enableMergedPlatformThread: true,
   ).run;
 }
 
@@ -114,6 +115,7 @@ TaskFunction createAndroidViewScrollPerfTest() {
     'test_driver/android_view_scroll_perf.dart',
     'platform_views_scroll_perf_hybrid_composition',
     testDriver: 'test_driver/scroll_perf_test.dart',
+    enableMergedPlatformThread: true,
   ).run;
 }
 
@@ -349,43 +351,6 @@ TaskFunction createSlidersPerfTest() {
     'sliders_perf',
     testDriver: 'test_driver/sliders_perf_test.dart',
   ).run;
-}
-
-TaskFunction createStackSizeTest() {
-  final String testDirectory =
-      '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
-  const String testTarget = 'test_driver/run_app.dart';
-  const String testDriver = 'test_driver/stack_size_perf_test.dart';
-  return () {
-    return inDirectory<TaskResult>(testDirectory, () async {
-      final Device device = await devices.workingDevice;
-      await device.unlock();
-      final String deviceId = device.deviceId;
-      await flutter('packages', options: <String>['get']);
-
-      await flutter('drive', options: <String>[
-        '--no-android-gradle-daemon',
-        '-v',
-        '--verbose-system-logs',
-        '--profile',
-        '-t', testTarget,
-        '--driver', testDriver,
-        '-d',
-        deviceId,
-      ]);
-      final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory)}/stack_size.json').readAsStringSync(),
-      ) as Map<String, dynamic>;
-
-      final Map<String, dynamic> result = <String, dynamic>{
-        'stack_size_per_nesting_level': data['stack_size'],
-      };
-      return TaskResult.success(
-        result,
-        benchmarkScoreKeys: result.keys.toList(),
-      );
-    });
-  };
 }
 
 TaskFunction createFullscreenTextfieldPerfTest() {
@@ -896,6 +861,13 @@ void _addMetadataToManifest(String testDirectory, List<(String, String)> keyPair
   file.writeAsStringSync(xmlDoc.toXmlString(pretty: true, indent: '    '));
 }
 
+void _addMergedPlatformThreadSupportToManifest(String testDirectory) {
+    final List<(String, String)> keyPairs = <(String, String)>[
+    ('io.flutter.embedding.android.EnableMergedPlatformUIThread', 'true'),
+  ];
+  _addMetadataToManifest(testDirectory, keyPairs);
+}
+
 /// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
 /// <meta-data
 ///   android:name="io.flutter.embedding.android.EnableVulkanGPUTracing"
@@ -1389,6 +1361,9 @@ class PerfTest {
           if (forceOpenGLES ?? false) {
             _addOpenGLESToManifest(testDirectory);
           }
+          if (enableMergedPlatformThread) {
+            _addMergedPlatformThreadSupportToManifest(testDirectory);
+          }
         }
         if (disablePartialRepaint || enableMergedPlatformThread) {
           changedPlist = true;
@@ -1460,7 +1435,7 @@ class PerfTest {
         case DeviceOperatingSystem.android:
         case DeviceOperatingSystem.androidArm:
         case DeviceOperatingSystem.androidArm64:
-          recordGPU = enableImpeller ?? false;
+          recordGPU = true;
         case DeviceOperatingSystem.fake:
         case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.linux:
@@ -2160,6 +2135,7 @@ class DevToolsMemoryTest {
 
       await flutter(
         'drive',
+        driveWithDds: true,
         options: <String>[
           '-d', _device.deviceId,
           '--profile',

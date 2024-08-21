@@ -60,13 +60,15 @@ class BuildPreviewCommand extends BuildSubCommand {
     try {
       final FlutterProject flutterProject = await _createProject(targetDir);
 
+      final File packageConfigFile = findPackageConfigFileOrDefault(flutterProject.directory);
+
       final BuildInfo buildInfo = BuildInfo(
         BuildMode.debug,
         null, // no flavor
         // users may add icons later
-        packageConfigPath: flutterProject.packageConfigFile.path,
+        packageConfigPath: packageConfigFile.path,
         packageConfig: await loadPackageConfigWithLogging(
-          flutterProject.packageConfigFile,
+          packageConfigFile,
           logger: logger,
         ),
         treeShakeIcons: false,
