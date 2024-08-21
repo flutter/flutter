@@ -69,9 +69,10 @@ void main() {
     expect(find.byKey(key), expectedAboveThreshold);
   }
 
-  group('Test Drag behaviour', () {
+  group('Test Drag behavior', () {
 
     testWidgets(
+
       '0 - Default begavior - `shouldDismiss: null`',
       (WidgetTester tester) async {
         await initWidget(tester);
@@ -189,7 +190,7 @@ void main() {
     expect(find.byKey(key), expectedAboveThreshold);
   }
 
-  group('Test Fling behaviour', () {
+  group('Test Fling behavior', () {
 
     testWidgets(
       '0 - Default begavior - `shouldDismiss: null`',
