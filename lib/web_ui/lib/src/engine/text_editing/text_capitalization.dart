@@ -77,7 +77,6 @@ class TextCapitalizationConfig {
       case TextCapitalization.none:
       default:
         autocapitalize = 'off';
-        break;
     }
     if (domInstanceOfString(domElement, 'HTMLInputElement')) {
       final DomHTMLInputElement element = domElement as DomHTMLInputElement;
