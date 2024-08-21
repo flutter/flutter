@@ -162,6 +162,19 @@ void main() {
   });
 
   testWidgets('Leading and trailing spacing is correct with 0~2 destinations', (WidgetTester tester) async {
+    // Padding at the top of the rail.
+    const double topPadding = 8.0;
+    // Padding at after the leading widget.
+    const double spacerPadding = 8.0;
+    // Width of a destination.
+    const double destinationWidth = 80.0;
+    // Height of a destination indicator with icon.
+    const double destinationHeight = 32.0;
+    // Space between destinations.
+    const double destinationSpacing = 12.0;    
+    // Height of the leading and trailing widgets.
+    const double fabHeight = 56.0;
+
     late StateSetter stateSetter;
     List<NavigationRailDestination> destinations = const <NavigationRailDestination>[];
     Widget? leadingWidget;
@@ -218,9 +231,31 @@ void main() {
       ];
     });
     await tester.pumpAndSettle();
-    expect(_iconRenderBox(tester, Icons.favorite_border).localToGlobal(Offset.zero), const Offset(28.0, 82.0));
-    expect(_labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero), const Offset(0.0, 72.0));
-    expect(tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey)).localToGlobal(Offset.zero), const Offset(12.0, 8.0));
+    {
+      double nextDestinationY = topPadding;
+      final RenderBox leadingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey));
+      expect(
+        leadingWidgetRenderBox.localToGlobal(Offset.zero),
+        equals(
+           Offset(
+            (destinationWidth - leadingWidgetRenderBox.size.width) / 2.0,
+            nextDestinationY,
+          ),
+        ),
+      );
+
+      nextDestinationY += fabHeight + spacerPadding + destinationSpacing / 2;
+      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite_border);
+      expect(
+        firstIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - firstIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - firstIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+    }
 
     // two destinations and leading widget
     stateSetter(() {
@@ -238,11 +273,43 @@ void main() {
       ];
     });
     await tester.pumpAndSettle();
-    expect(_iconRenderBox(tester, Icons.favorite_border).localToGlobal(Offset.zero), const Offset(28.0, 82.0));
-    expect(_labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero), const Offset(0.0, 72.0));
-    expect(_iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero), const Offset(28.0, 126.0));
-    expect(_labelRenderBox(tester, 'Longer Label').localToGlobal(Offset.zero), const Offset(0.0, 116.0));
-    expect(tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey)).localToGlobal(Offset.zero), const Offset(12.0, 8.0));
+    {
+      double nextDestinationY = topPadding;
+      final RenderBox leadingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey));
+      expect(
+        leadingWidgetRenderBox.localToGlobal(Offset.zero),
+        equals(
+           Offset(
+            (destinationWidth - leadingWidgetRenderBox.size.width) / 2.0,
+            nextDestinationY,
+          ),
+        ),
+      );
+
+      nextDestinationY += fabHeight + spacerPadding + destinationSpacing / 2;
+      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite_border);
+      expect(
+        firstIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - firstIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - firstIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      nextDestinationY += destinationHeight + destinationSpacing;
+      final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+    }
 
     // empty destinations and trailing widget
     stateSetter(() {
@@ -267,9 +334,31 @@ void main() {
       ];
     });
     await tester.pumpAndSettle();
-    expect(_iconRenderBox(tester, Icons.favorite_border).localToGlobal(Offset.zero), const Offset(28.0, 18.0));
-    expect(_labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero), const Offset(0.0, 8.0));
-    expect(tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey)).localToGlobal(Offset.zero), const Offset(12.0, 52.0));
+    {
+      double nextDestinationY = topPadding + destinationSpacing / 2;
+      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite_border);
+      expect(
+        firstIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - firstIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - firstIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      nextDestinationY += destinationHeight + destinationSpacing / 2;
+      final RenderBox trailingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey));
+      expect(
+        trailingWidgetRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - trailingWidgetRenderBox.size.width) / 2.0,
+            nextDestinationY,
+          ),
+        ),
+      );
+    }
 
     // two destinations and trailing widget
     stateSetter(() {
@@ -287,11 +376,43 @@ void main() {
         ];
     });
     await tester.pumpAndSettle();
-    expect(_iconRenderBox(tester, Icons.favorite_border).localToGlobal(Offset.zero), const Offset(28.0, 18.0));
-    expect(_labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero), const Offset(0.0, 8.0));
-    expect(_iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero), const Offset(28.0, 62.0));
-    expect(_labelRenderBox(tester, 'Longer Label').localToGlobal(Offset.zero), const Offset(0.0, 52.0));
-    expect(tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey)).localToGlobal(Offset.zero), const Offset(12.0, 96.0));
+    {
+      double nextDestinationY = topPadding + destinationSpacing / 2;
+      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite_border);
+      expect(
+        firstIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - firstIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - firstIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+      
+      nextDestinationY += destinationHeight + destinationSpacing;
+      final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      nextDestinationY += destinationHeight + destinationSpacing / 2.0;
+      final RenderBox trailingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey));
+      expect(
+        trailingWidgetRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - trailingWidgetRenderBox.size.width) / 2.0,
+            nextDestinationY,
+          ),
+        ),
+      );
+    }
   });
 
   testWidgets('Change destinations and selectedIndex', (WidgetTester tester) async {
