@@ -1867,14 +1867,14 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
   /// and [currentSelectionEndIndex] should be set to valid values at the time
   /// this method is called.
   @protected
-  void updateInternalSelectionStateForBoundaryEvents() {
+  void didReceiveSelectionBoundaryEvents() {
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
       return;
     }
     final int start = min(currentSelectionStartIndex, currentSelectionEndIndex);
     final int end = max(currentSelectionStartIndex, currentSelectionEndIndex);
     for (int index = start; index <= end; index += 1) {
-      trackInternalSelectionStateForSelectable(selectable: selectables[index]);
+      didReceiveSelectionEventFor(selectable: selectables[index]);
     }
     _updateLastSelectionEdgeLocationsFromGeometries();
   }
@@ -1911,7 +1911,7 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
   /// When `forEnd` is null, the [Selectable] will be registered as having received both
   /// start and end events.
   @protected
-  void trackInternalSelectionStateForSelectable({required Selectable selectable, bool? forEnd}) {
+  void didReceiveSelectionEventFor({required Selectable selectable, bool? forEnd}) {
     if (forEnd == null) {
       _hasReceivedStartEvent.add(selectable);
       _hasReceivedEndEvent.add(selectable);
@@ -1967,21 +1967,21 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
   @override
   SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
     final SelectionResult result = super.handleSelectAll(event);
-    updateInternalSelectionStateForBoundaryEvents();
+    didReceiveSelectionBoundaryEvents();
     return result;
   }
 
   @override
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
     final SelectionResult result = super.handleSelectWord(event);
-    updateInternalSelectionStateForBoundaryEvents();
+    didReceiveSelectionBoundaryEvents();
     return result;
   }
 
   @override
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
     final SelectionResult result = super.handleSelectParagraph(event);
-    updateInternalSelectionStateForBoundaryEvents();
+    didReceiveSelectionBoundaryEvents();
     return result;
   }
 
@@ -2011,10 +2011,10 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
   SelectionResult dispatchSelectionEventToChild(Selectable selectable, SelectionEvent event) {
     switch (event.type) {
       case SelectionEventType.startEdgeUpdate:
-        trackInternalSelectionStateForSelectable(selectable: selectable, forEnd: false);
+        didReceiveSelectionEventFor(selectable: selectable, forEnd: false);
         ensureChildUpdated(selectable);
       case SelectionEventType.endEdgeUpdate:
-        trackInternalSelectionStateForSelectable(selectable: selectable, forEnd: true);
+        didReceiveSelectionEventFor(selectable: selectable, forEnd: true);
         ensureChildUpdated(selectable);
       case SelectionEventType.clear:
         clearInternalSelectionStateForSelectable(selectable);
@@ -2024,7 +2024,7 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
         break;
       case SelectionEventType.granularlyExtendSelection:
       case SelectionEventType.directionallyExtendSelection:
-        trackInternalSelectionStateForSelectable(selectable: selectable);
+        didReceiveSelectionEventFor(selectable: selectable);
         ensureChildUpdated(selectable);
     }
     return super.dispatchSelectionEventToChild(selectable, event);
