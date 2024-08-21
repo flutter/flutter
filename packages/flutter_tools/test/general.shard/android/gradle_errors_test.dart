@@ -1354,9 +1354,9 @@ ERROR:/Users/mackall/.gradle/caches/transforms-3/bd2c84591857c6d4c308221ffece862
         contains(
             '\n'
                 '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────────┐\n'
-                '│ Version 7.3 of the Android Gradle Plugin (AGP) uses a version of R8 that contains a bug which    │\n'
-                '│ causes this error (see more info at https://issuetracker.google.com/issues/242308990). To fix    │\n'
-                '│ this error, update to a newer version of AGP (at least 7.4.0).                                   │\n'
+                '│ [!] Version 7.3 of the Android Gradle Plugin (AGP) uses a version of R8 that contains a bug      │\n'
+                '│ which causes this error (see more info at https://issuetracker.google.com/issues/242308990). To  │\n'
+                '│ fix this error, update to a newer version of AGP (at least 7.4.0).                               │\n'
                 '│                                                                                                  │\n'
                 '│  The version of AGP that your project uses is likely defined in:                                 │\n'
                 '│ /android/settings.gradle,                                                                        │\n'

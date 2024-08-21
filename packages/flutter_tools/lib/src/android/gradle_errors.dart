@@ -657,7 +657,7 @@ final GradleHandledError r8DexingBugInAgp73Handler = GradleHandledError(
     required bool usesAndroidX,
   }) async {
     globals.printBox(
-      'Version 7.3 of the Android Gradle Plugin (AGP) uses a version of R8 that contains a bug which causes this error (see more info at https://issuetracker.google.com/issues/242308990). '
+      '${globals.logger.terminal.warningMark} Version 7.3 of the Android Gradle Plugin (AGP) uses a version of R8 that contains a bug which causes this error (see more info at https://issuetracker.google.com/issues/242308990). '
           'To fix this error, update to a newer version of AGP (at least 7.4.0).\n\n'
           '${_getAgpLocation(project)}',
         title: _boxTitle,
