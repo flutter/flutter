@@ -40,8 +40,6 @@ class PipelineCacheVK {
   vk::UniquePipelineCache cache_;
   bool is_valid_ = false;
 
-  std::shared_ptr<fml::Mapping> CopyPipelineCacheData() const;
-
   PipelineCacheVK(const PipelineCacheVK&) = delete;
 
   PipelineCacheVK& operator=(const PipelineCacheVK&) = delete;
