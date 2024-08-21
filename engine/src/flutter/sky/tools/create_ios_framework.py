@@ -34,7 +34,6 @@ def main():
   args = parser.parse_args()
 
   dst = (args.dst if os.path.isabs(args.dst) else sky_utils.buildroot_relative_path(args.dst))
-
   arm64_out_dir = (
       args.arm64_out_dir if os.path.isabs(args.arm64_out_dir) else
       sky_utils.buildroot_relative_path(args.arm64_out_dir)

@@ -28,10 +28,12 @@ def main():
   args = parser.parse_args()
 
   dst = args.dst if os.path.isabs(args.dst) else sky_utils.buildroot_relative_path(args.dst)
+
   arm64_out_dir = (
       args.arm64_out_dir if os.path.isabs(args.arm64_out_dir) else
       sky_utils.buildroot_relative_path(args.arm64_out_dir)
   )
+
   x64_out_dir = (
       args.x64_out_dir
       if os.path.isabs(args.x64_out_dir) else sky_utils.buildroot_relative_path(args.x64_out_dir)
@@ -58,8 +60,7 @@ def main():
     return 1
 
   fat_framework = os.path.join(dst, 'FlutterMacOS.framework')
-  sky_utils.create_fat_macos_framework(fat_framework, arm64_framework, x64_framework)
-  process_framework(dst, args, fat_framework)
+  sky_utils.create_fat_macos_framework(args, dst, fat_framework, arm64_framework, x64_framework)
 
   # Create XCFramework from the arm64 and x64 fat framework.
   xcframeworks = [fat_framework]
@@ -69,29 +70,6 @@ def main():
     zip_framework(dst)
 
   return 0
-
-
-def process_framework(dst, args, framework_path):
-  framework_binary = sky_utils.get_mac_framework_dylib_path(framework_path)
-
-  if args.dsym:
-    dsym_out = os.path.join(dst, 'FlutterMacOS.dSYM')
-    sky_utils.extract_dsym(framework_binary, dsym_out)
-    if args.zip:
-      dsym_dst = os.path.join(dst, 'FlutterMacOS.dSYM')
-      sky_utils.create_zip(dsym_dst, 'FlutterMacOS.dSYM.zip', ['.'])
-      # Create a zip of just the contents of the dSYM, then create a zip of that zip.
-      # TODO(fujino): remove this once https://github.com/flutter/flutter/issues/125067 is resolved
-      sky_utils.create_zip(dsym_dst, 'FlutterMacOS.dSYM_.zip', ['FlutterMacOS.dSYM.zip'])
-
-      # Overwrite the FlutterMacOS.dSYM.zip with the double-zipped archive.
-      dsym_final_src_path = os.path.join(dsym_dst, 'FlutterMacOS.dSYM_.zip')
-      dsym_final_dst_path = os.path.join(dst, 'FlutterMacOS.dSYM.zip')
-      shutil.move(dsym_final_src_path, dsym_final_dst_path)
-
-  if args.strip:
-    unstripped_out = os.path.join(dst, 'FlutterMacOS.unstripped')
-    sky_utils.strip_binary(framework_binary, unstripped_out)
 
 
 def zip_framework(dst):
@@ -125,6 +103,18 @@ def zip_framework(dst):
   shutil.move(final_src_path, final_dst_path)
 
   zip_xcframework_archive(dst)
+
+  dsym_dst = os.path.join(dst, 'FlutterMacOS.dSYM')
+  if os.path.exists(dsym_dst):
+    # Create a zip of just the contents of the dSYM, then create a zip of that zip.
+    # TODO(cbracken): remove this once https://github.com/flutter/flutter/issues/125067 is resolved
+    sky_utils.create_zip(dsym_dst, 'FlutterMacOS.dSYM.zip', ['.'])
+    sky_utils.create_zip(dsym_dst, 'FlutterMacOS.dSYM_.zip', ['FlutterMacOS.dSYM.zip'])
+
+    # Move the double-zipped FlutterMacOS.dSYM.zip to dst.
+    dsym_final_src_path = os.path.join(dsym_dst, 'FlutterMacOS.dSYM_.zip')
+    dsym_final_dst_path = os.path.join(dst, 'FlutterMacOS.dSYM.zip')
+    shutil.move(dsym_final_src_path, dsym_final_dst_path)
 
 
 def zip_xcframework_archive(dst):
