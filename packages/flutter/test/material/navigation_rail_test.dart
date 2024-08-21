@@ -230,7 +230,18 @@ void main() {
       trailingWidget = null;
     });
     await tester.pumpAndSettle();
-    expect(tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey)).localToGlobal(Offset.zero), const Offset(0, 8.0));
+    {
+      final RenderBox leadingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey));
+      expect(
+        leadingWidgetRenderBox.localToGlobal(Offset.zero),
+        equals(
+          const Offset(
+            0.0,
+            topPadding,
+          ),
+        ),
+      );
+    }
 
     // one destination and leading widget
     stateSetter(() {
@@ -309,7 +320,18 @@ void main() {
       );
     });
     await tester.pumpAndSettle();
-    expect(tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey)).localToGlobal(Offset.zero), const Offset(0, 8.0));
+    {
+      final RenderBox trailingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey));
+      expect(
+        trailingWidgetRenderBox.localToGlobal(Offset.zero),
+        equals(
+          const Offset(
+            0.0,
+            topPadding,
+          ),
+        ),
+      );
+    }
 
     // one destination and trailing widget
     stateSetter(() {
