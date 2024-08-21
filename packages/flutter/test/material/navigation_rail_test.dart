@@ -183,6 +183,18 @@ void main() {
     const Key leadingWidgetKey = Key('leadingWidget');
     const Key trailingWidgetKey = Key('trailingWidget');
 
+    void matchExpect(RenderBox renderBox, double nextDestinationY) {
+      expect(
+        renderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - renderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - renderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+    }
+
     await tester.pumpWidget(
       MaterialApp(
         home: StatefulBuilder(
@@ -246,15 +258,7 @@ void main() {
 
       nextDestinationY += fabHeight + spacerPadding + destinationSpacing / 2;
       final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite_border);
-      expect(
-        firstIconRenderBox.localToGlobal(Offset.zero),
-        equals(
-          Offset(
-            (destinationWidth - firstIconRenderBox.size.width) / 2.0,
-            nextDestinationY + (destinationHeight - firstIconRenderBox.size.height) / 2.0,
-          ),
-        ),
-      );
+      matchExpect(firstIconRenderBox, nextDestinationY);
     }
 
     // two destinations and leading widget
@@ -288,27 +292,11 @@ void main() {
 
       nextDestinationY += fabHeight + spacerPadding + destinationSpacing / 2;
       final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite_border);
-      expect(
-        firstIconRenderBox.localToGlobal(Offset.zero),
-        equals(
-          Offset(
-            (destinationWidth - firstIconRenderBox.size.width) / 2.0,
-            nextDestinationY + (destinationHeight - firstIconRenderBox.size.height) / 2.0,
-          ),
-        ),
-      );
+      matchExpect(firstIconRenderBox, nextDestinationY);
 
       nextDestinationY += destinationHeight + destinationSpacing;
       final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-      expect(
-        secondIconRenderBox.localToGlobal(Offset.zero),
-        equals(
-          Offset(
-            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
-            nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
-          ),
-        ),
-      );
+      matchExpect(secondIconRenderBox, nextDestinationY);
     }
 
     // empty destinations and trailing widget
@@ -337,15 +325,7 @@ void main() {
     {
       double nextDestinationY = topPadding + destinationSpacing / 2;
       final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite_border);
-      expect(
-        firstIconRenderBox.localToGlobal(Offset.zero),
-        equals(
-          Offset(
-            (destinationWidth - firstIconRenderBox.size.width) / 2.0,
-            nextDestinationY + (destinationHeight - firstIconRenderBox.size.height) / 2.0,
-          ),
-        ),
-      );
+      matchExpect(firstIconRenderBox, nextDestinationY);
 
       nextDestinationY += destinationHeight + destinationSpacing / 2;
       final RenderBox trailingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey));
@@ -379,27 +359,11 @@ void main() {
     {
       double nextDestinationY = topPadding + destinationSpacing / 2;
       final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite_border);
-      expect(
-        firstIconRenderBox.localToGlobal(Offset.zero),
-        equals(
-          Offset(
-            (destinationWidth - firstIconRenderBox.size.width) / 2.0,
-            nextDestinationY + (destinationHeight - firstIconRenderBox.size.height) / 2.0,
-          ),
-        ),
-      );
+      matchExpect(firstIconRenderBox, nextDestinationY);
       
       nextDestinationY += destinationHeight + destinationSpacing;
       final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-      expect(
-        secondIconRenderBox.localToGlobal(Offset.zero),
-        equals(
-          Offset(
-            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
-            nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
-          ),
-        ),
-      );
+      matchExpect(secondIconRenderBox, nextDestinationY);
 
       nextDestinationY += destinationHeight + destinationSpacing / 2.0;
       final RenderBox trailingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey));
