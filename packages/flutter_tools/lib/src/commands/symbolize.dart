@@ -72,11 +72,24 @@ class SymbolizeCommand extends FlutterCommand {
   @override
   bool get shouldUpdateCache => false;
 
-  Map<int, String> _unitDebugInfoPathMap() {
-    final Map<int, String> map = <int, String>{};
+  File _handleDSYM(String fileName) {
+    if (!fileName.endsWith('.dSYM')) {
+      return _fileSystem.file(fileName);
+    }
+    final Directory dwarfDir = _fileSystem
+        .directory(fileName)
+        .childDirectory('Contents')
+        .childDirectory('Resources')
+        .childDirectory('DWARF');
+    // The DWARF directory inside the .dSYM should contain a single MachO file.
+    return dwarfDir.listSync().single as File;
+  }
+
+  Map<int, File> _unitDebugInfoPathMap() {
+    final Map<int, File> map = <int, File>{};
     final String? rootInfo = stringArg('debug-info');
     if (rootInfo != null) {
-      map[rootLoadingUnitId] = rootInfo;
+      map[rootLoadingUnitId] = _fileSystem.file(rootInfo);
     }
     for (final String arg in stringsArg('unit-id-debug-info')) {
       final int separatorIndex = arg.indexOf(':');
@@ -84,18 +97,28 @@ class SymbolizeCommand extends FlutterCommand {
         throwToolExit('The argument to "--unit-id-debug-info" must contain a unit ID and path,'
             ' separated by ":": "$arg".');
       }
-      final String unitIdString= arg.substring(0, separatorIndex);
+      final String unitIdString = arg.substring(0, separatorIndex);
       final int? unitId = int.tryParse(unitIdString);
       if (unitId == null) {
         throwToolExit('The argument to "--unit-id-debug-info" must begin with'
             ' a unit ID: "$unitIdString" is not an integer.');
       }
       final String unitDebugPath = arg.substring(separatorIndex + 1);
-      if (map.containsKey(unitId) && map[unitId] != unitDebugPath) {
+      if (map.containsKey(unitId) && map[unitId]!.path != unitDebugPath) {
         throwToolExit('Different paths were given for the same loading unit'
-            ' $unitId: "${map[unitId]}" and "$unitDebugPath".');
+            ' $unitId: "${map[unitId]!.path}" and "$unitDebugPath".');
       }
-      map[unitId] = unitDebugPath;
+      if (unitDebugPath.endsWith('.dSYM')
+          ? !_fileSystem.isDirectorySync(unitDebugPath)
+          : !_fileSystem.isFileSync(unitDebugPath)) {
+        throwToolExit('$unitDebugPath does not exist.');
+      }
+      // If it's a dSYM container, expand the path to the actual file.
+      map[unitId] = _handleDSYM(unitDebugPath);
+    }
+    if (!map.containsKey(rootLoadingUnitId)) {
+      throwToolExit('Missing debug info for the root loading unit'
+          ' (id $rootLoadingUnitId).');
     }
     return map;
   }
@@ -106,17 +129,10 @@ class SymbolizeCommand extends FlutterCommand {
         argResults?.wasParsed('unit-id-debug-info') != true) {
       throwToolExit('Either "--debug-info" or "--unit-id-debug-info" is required to symbolize stack traces.');
     }
-    final Map<int, String> debugInfoPathMap = _unitDebugInfoPathMap();
-    if (!debugInfoPathMap.containsKey(rootLoadingUnitId)) {
-      throwToolExit('Missing debug info for the root loading unit (id $rootLoadingUnitId).');
-    }
-    for (final String debugInfoPath in debugInfoPathMap.values) {
-      if (debugInfoPath.endsWith('.dSYM')
-          ? !_fileSystem.isDirectorySync(debugInfoPath)
-          : !_fileSystem.isFileSync(debugInfoPath)) {
-        throwToolExit('$debugInfoPath does not exist.');
-      }
-    }
+    // Parsing the path information throws appropriate errors, so parse it once
+    // here to throw away and then re-parse it when the command is run in case
+    //the paths are invalidated between validating and running the command.
+    _unitDebugInfoPathMap();
     if ((argResults?.wasParsed('input') ?? false) && !_fileSystem.isFileSync(stringArg('input')!)) {
       throwToolExit('${stringArg('input')} does not exist.');
     }
@@ -151,30 +167,11 @@ class SymbolizeCommand extends FlutterCommand {
       input = _stdio.stdin;
     }
 
-    final Map<int, String> debugInfoPathMap = _unitDebugInfoPathMap();
+    final Map<int, File> debugInfoPathMap = _unitDebugInfoPathMap();
     final Map<int, Uint8List> unitSymbols = <int, Uint8List>{};
 
     for (final int unitId in debugInfoPathMap.keys) {
-      String debugInfoPath = debugInfoPathMap[unitId]!;
-
-      // If it's a dSYM container, expand the path to the actual DWARF.
-      if (debugInfoPath.endsWith('.dSYM')) {
-        final Directory debugInfoDir = _fileSystem
-          .directory(debugInfoPath)
-          .childDirectory('Contents')
-          .childDirectory('Resources')
-          .childDirectory('DWARF');
-
-        final List<FileSystemEntity> dwarfFiles = debugInfoDir.listSync().whereType<File>().toList();
-        if (dwarfFiles.length == 1) {
-          debugInfoPath = dwarfFiles.first.path;
-        } else {
-          throwToolExit('Expected a single DWARF file in a dSYM container.');
-        }
-      }
-
-      final Uint8List symbols = _fileSystem.file(debugInfoPath).readAsBytesSync();
-      unitSymbols[unitId] = symbols;
+      unitSymbols[unitId] = debugInfoPathMap[unitId]!.readAsBytesSync();
     }
 
     await _dwarfSymbolizationService.decodeWithUnits(
@@ -268,7 +265,7 @@ class DwarfSymbolizationService {
         input: input,
         output: output,
         unitSymbols: <int, Uint8List>{
-          1: symbols,
+          rootLoadingUnitId: symbols,
         },
     );
   }
