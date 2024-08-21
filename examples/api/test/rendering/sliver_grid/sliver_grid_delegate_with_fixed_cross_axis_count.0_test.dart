@@ -12,11 +12,11 @@ void main() {
       const example.SliverGridDelegateWithFixedCrossAxisCountExampleApp(),
     );
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 20; i++) {
       expect(find.text('$i'), findsOne);
       final Element element = tester.element(find.text('$i'));
 
-      expect(element.size, const Size(200, 400));
+      expect(element.size, const Size(200, 100));
     }
   });
 }
