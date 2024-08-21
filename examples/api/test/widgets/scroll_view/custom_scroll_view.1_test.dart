@@ -32,7 +32,7 @@ void main() {
     expect(find.widgetWithText(SliverList, 'Item: -1'), findsNothing);
     expect(find.widgetWithText(SliverList, 'Item: 1'), findsOne);
 
-    // Scroll the updated screen
+    // Scroll the updated screen.
     final Offset location = tester.getCenter(find.byType(CustomScrollView));
     final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
     testPointer.hover(location);
