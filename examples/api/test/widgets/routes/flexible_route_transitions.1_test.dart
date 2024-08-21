@@ -4,9 +4,6 @@
 
 import 'package:flutter_api_samples/widgets/routes/flexible_route_transitions.1.dart';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../navigator_utils.dart';

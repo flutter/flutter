@@ -289,7 +289,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
   }
 
   @override
-  DelegatedTransition? get delegatedTransition => this.fullscreenDialog ? null : CupertinoPageTransition.delegatedTransition;
+  DelegatedTransition? get delegatedTransition => CupertinoPageTransition.delegatedTransition;
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
@@ -441,9 +441,10 @@ class CupertinoPageTransition extends StatefulWidget {
     );
   }
 
+  /// The delegated transition.
   static const DelegatedTransition delegatedTransition = DelegatedTransition(
     builder: delegatedTransitionBuilder,
-    name: "Flutter-Cupertino-Page-Transition",
+    name: 'Flutter-Cupertino-Page-Transition',
   );
 
   @override

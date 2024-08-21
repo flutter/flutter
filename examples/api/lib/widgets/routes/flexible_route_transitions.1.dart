@@ -38,7 +38,7 @@ class FlexibleRouteTransitionsApp extends StatelessWidget {
 class _MyRouteInformationParser extends RouteInformationParser<MyPageConfiguration> {
   @override
   SynchronousFuture<MyPageConfiguration> parseRouteInformation(RouteInformation routeInformation) {
-    return SynchronousFuture(MyPageConfiguration.values.firstWhere((MyPageConfiguration pageConfiguration) {
+    return SynchronousFuture<MyPageConfiguration>(MyPageConfiguration.values.firstWhere((MyPageConfiguration pageConfiguration) {
       return pageConfiguration.uriString == routeInformation.uri.toString();
     },
       orElse: () => MyPageConfiguration.unknown,
@@ -56,7 +56,7 @@ class MyRouterDelegate extends RouterDelegate<MyPageConfiguration> {
   final List<MyPageConfiguration> _pages = <MyPageConfiguration>[];
 
   void _notifyListeners() {
-    for (VoidCallback listener in _listeners) {
+    for (final VoidCallback listener in _listeners) {
       listener();
     }
   }
@@ -95,11 +95,11 @@ class MyRouterDelegate extends RouterDelegate<MyPageConfiguration> {
   @override
   Future<bool> popRoute() {
     if (_pages.isEmpty) {
-      return SynchronousFuture(false);
+      return SynchronousFuture<bool>(false);
     }
     _pages.removeLast();
     _notifyListeners();
-    return SynchronousFuture(true);
+    return SynchronousFuture<bool>(true);
   }
 
   @override
@@ -113,21 +113,21 @@ class MyRouterDelegate extends RouterDelegate<MyPageConfiguration> {
   Widget build(BuildContext context) {
     return Navigator(
       restorationScopeId: 'root',
-      onDidRemovePage: (Page page) {
+      onDidRemovePage: (Page<dynamic> page) {
         _pages.remove(MyPageConfiguration.fromName(page.name!));
       },
       pages: _pages.map((MyPageConfiguration page) => switch (page) {
-        MyPageConfiguration.unknown => MyUnknownPage(),
-        MyPageConfiguration.home => MyHomePage(routerDelegate: this),
-        MyPageConfiguration.zoom => ZoomPage(routerDelegate: this),
-        MyPageConfiguration.iOS => IOSPage(routerDelegate: this),
+        MyPageConfiguration.unknown => MyUnknownPage<void>(),
+        MyPageConfiguration.home => MyHomePage<void>(routerDelegate: this),
+        MyPageConfiguration.zoom => ZoomPage<void>(routerDelegate: this),
+        MyPageConfiguration.iOS => IOSPage<void>(routerDelegate: this),
         MyPageConfiguration.vertical => VerticalPage(routerDelegate: this),
       }).toList(),
     );
   }
 }
 
-class MyUnknownPage extends MaterialPage {
+class MyUnknownPage<T> extends MaterialPage<T> {
   MyUnknownPage() : super(
     restorationId: 'unknown-page',
     child: Scaffold(
@@ -142,7 +142,7 @@ class MyUnknownPage extends MaterialPage {
   String get name => MyPageConfiguration.unknown.name;
 }
 
-class MyHomePage extends MaterialPage {
+class MyHomePage<T> extends MaterialPage<T> {
   MyHomePage({required this.routerDelegate}) : super(
     restorationId: 'home-page',
     child: MyPageScaffold(title: 'Home', routerDelegate: routerDelegate),
@@ -154,7 +154,7 @@ class MyHomePage extends MaterialPage {
   String get name => MyPageConfiguration.home.name;
 }
 
-class ZoomPage extends MaterialPage {
+class ZoomPage<T> extends MaterialPage<T> {
   ZoomPage({required this.routerDelegate}) : super(
     restorationId: 'zoom-page',
     child: MyPageScaffold(title: 'Zoom Route', routerDelegate: routerDelegate),
@@ -166,7 +166,7 @@ class ZoomPage extends MaterialPage {
   String get name => MyPageConfiguration.zoom.name;
 }
 
-class IOSPage extends CupertinoPage {
+class IOSPage<T> extends CupertinoPage<T> {
   IOSPage({required this.routerDelegate}) : super(
     restorationId: 'ios-page',
     child: MyPageScaffold(title: 'Cupertino Route', routerDelegate: routerDelegate),
@@ -420,10 +420,10 @@ class VerticalPageTransition extends StatelessWidget {
     end: const Offset(0.0, -1.0),
   );
 
-  const DelegatedTransition _delegatedTransition = DelegatedTransition(
+  static const DelegatedTransition _delegatedTransition = DelegatedTransition(
     builder: _delegatedTransitionBuilder,
     name: 'Vertical-Transition',
-  )
+  );
 
   static Widget _delegatedTransitionBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
     final Animatable<Offset> tween = Tween<Offset>(
