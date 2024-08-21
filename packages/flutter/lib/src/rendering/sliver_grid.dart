@@ -314,7 +314,7 @@ abstract class SliverGridDelegate {
 /// {@tool dartpad}
 /// Here is an example using the [childAspectRatio] property. On a device with a
 /// screen width of 800.0, it creates a GridView with each tile with a width of
-/// 200.0 and a height of 400.0.
+/// 200.0 and a height of 100.0.
 ///
 /// ** See code in examples/api/lib/rendering/sliver_grid/sliver_grid_delegate_with_fixed_cross_axis_count.0.dart **
 /// {@end-tool}
