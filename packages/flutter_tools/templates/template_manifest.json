@@ -87,7 +87,7 @@
         "templates/app_shared/linux.tmpl/.gitignore",
         "templates/app_shared/linux.tmpl/CMakeLists.txt.tmpl",
         "templates/app_shared/linux.tmpl/flutter/CMakeLists.txt",
-        "templates/app_shared/linux.tmpl/runner/CMakeLists.txt.tmpl",
+        "templates/app_shared/linux.tmpl/runner/CMakeLists.txt",
         "templates/app_shared/linux.tmpl/runner/main.cc",
         "templates/app_shared/linux.tmpl/runner/my_application.cc",
         "templates/app_shared/linux.tmpl/runner/my_application.cc.tmpl",
