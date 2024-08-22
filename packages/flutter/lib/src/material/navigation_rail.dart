@@ -77,7 +77,7 @@ const double _kIndicatorHeight = 32;
 class NavigationRail extends StatefulWidget {
   /// Creates a Material Design navigation rail.
   ///
-  /// The value of [destinations] must be a list of two or more
+  /// The value of [destinations] must be a list of zero or more
   /// [NavigationRailDestination] values.
   ///
   /// If [elevation] is specified, it must be non-negative.
@@ -118,8 +118,7 @@ class NavigationRail extends StatefulWidget {
     this.useIndicator,
     this.indicatorColor,
     this.indicatorShape,
-  }) :  assert(destinations.length >= 2),
-        assert(selectedIndex == null || (0 <= selectedIndex && selectedIndex < destinations.length)),
+  }) :  assert(selectedIndex == null || (0 <= selectedIndex && selectedIndex < destinations.length)),
         assert(elevation == null || elevation > 0),
         assert(minWidth == null || minWidth > 0),
         assert(minExtendedWidth == null || minExtendedWidth > 0),
@@ -173,7 +172,7 @@ class NavigationRail extends StatefulWidget {
   /// Defines the appearance of the button items that are arrayed within the
   /// navigation rail.
   ///
-  /// The value must be a list of two or more [NavigationRailDestination]
+  /// The value must be a list of zero or more [NavigationRailDestination]
   /// values.
   final List<NavigationRailDestination> destinations;
 
