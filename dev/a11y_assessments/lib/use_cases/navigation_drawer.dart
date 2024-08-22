@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
+import '../utils.dart';
 import 'use_cases.dart';
+
 
 class ExampleDestination {
   const ExampleDestination(this.label, this.icon, this.selectedIcon);
@@ -58,12 +60,14 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
     scaffoldKey.currentState!.openEndDrawer();
   }
 
+  String pageTitle = getUseCaseName(NavigationDrawerUseCase());
+
   Widget buildDrawerScaffold(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: const Text('Navigation Drawer Demo')),
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
       ),
       body: SafeArea(
         bottom: false,
