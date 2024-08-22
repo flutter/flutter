@@ -897,6 +897,7 @@ void main() {
     await dismissItem(tester, 1, gestureDirection: AxisDirection.right);
     expect(find.text('1'), findsOneWidget);
   });
+
   testWidgets('Use `shouldTriggerDismiss` to disable flinging', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
