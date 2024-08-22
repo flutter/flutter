@@ -1334,6 +1334,7 @@ class AnonymousSpinnerStatus extends Status {
   final List<String> _animation;
 
   Timer? timer;
+  @visibleForTesting
   int ticks = 0;
   int _lastAnimationFrameLength = 0;
   bool timedOut = false;
