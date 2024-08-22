@@ -419,7 +419,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final bool transitionBetweenRoutes;
 
-  /// {@template flutter.cupertino.CupertinoNavigationBar.disableBackgroundFilterBlur}
+  /// {@template flutter.cupertino.CupertinoNavigationBar.enableBackgroundFilterBlur}
   /// Whether to have blur effect with transparent color.
   ///
   /// If the [CupertinoNavigationBar] is not a child of a [CupertinoPageScaffold],
@@ -777,7 +777,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// {@macro flutter.cupertino.CupertinoNavigationBar.automaticBackgroundVisibility}
   final bool automaticBackgroundVisibility;
 
-  /// {@macro flutter.cupertino.CupertinoNavigationBar.disableBackgroundFilterBlur}
+  /// {@macro flutter.cupertino.CupertinoNavigationBar.enableBackgroundFilterBlur}
   final bool enableBackgroundFilterBlur;
 
   /// {@macro flutter.cupertino.CupertinoNavigationBar.brightness}
