@@ -210,11 +210,6 @@ class AnalyzeCommand extends FlutterCommand {
       return false;
     }
 
-    // Don't run pub if asking for android analysis.
-    if (boolArg('android')) {
-      return false;
-    }
-
     return super.shouldRunPub;
   }
 
