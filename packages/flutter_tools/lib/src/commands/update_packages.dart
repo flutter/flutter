@@ -524,15 +524,13 @@ class UpdatePackagesCommand extends FlutterCommand {
 
     // Run "pub get" on it in order to force the download of any
     // needed packages to the pub cache, upgrading if requested.
-    // TODO(ianh): If this fails, the tool exits silently.
-    // It can fail, e.g., if --cherry-pick-version is invalid.
     await pub.get(
       context: PubContext.updatePackages,
       project: FlutterProject.fromDirectory(syntheticPackageDir),
       upgrade: doUpgrade,
       offline: boolArg('offline'),
       flutterRootOverride: temporaryFlutterSdk?.path,
-      outputMode: PubOutputMode.none,
+      outputMode: PubOutputMode.failuresOnly,
     );
 
     if (reportDependenciesToTree) {
@@ -615,7 +613,7 @@ class UpdatePackagesCommand extends FlutterCommand {
             // All dependencies should already have been downloaded by the fake
             // package, so the concurrent checks can all happen offline.
             offline: true,
-            outputMode: PubOutputMode.none,
+            outputMode: PubOutputMode.failuresOnly,
           );
           stopwatch.stop();
           final double seconds = stopwatch.elapsedMilliseconds / 1000.0;

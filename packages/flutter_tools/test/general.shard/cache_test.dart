@@ -1039,7 +1039,7 @@ void main() {
     expect(
       pub.invocations.first,
       predicate<FakePubInvocation>(
-        (FakePubInvocation invocation) => invocation.outputMode == PubOutputMode.none,
+        (FakePubInvocation invocation) => invocation.outputMode == PubOutputMode.failuresOnly,
         'Pub invoked with PubOutputMode.none',
       ),
     );
