@@ -1320,7 +1320,6 @@ Execution failed for task ':app:bundleReleaseResources'.
                     '│ /android/settings.gradle,                                                                        │\n'
                     "│ in the 'plugins' closure.                                                                        │\n"
                     '│  Alternatively, if your project was created with an older version of the templates, it is likely │\n'
-                    '│                                                                                                  │\n'
                     '│ in the buildscript.dependencies closure of the top-level build.gradle:                           │\n'
                     '│ /android/build.gradle.                                                                           │\n'
                     '│                                                                                                  │\n'
@@ -1362,7 +1361,6 @@ ERROR:/Users/mackall/.gradle/caches/transforms-3/bd2c84591857c6d4c308221ffece862
                 '│ /android/settings.gradle,                                                                        │\n'
                 "│ in the 'plugins' closure.                                                                        │\n"
                 '│  Alternatively, if your project was created with an older version of the templates, it is likely │\n'
-                '│                                                                                                  │\n'
                 '│ in the buildscript.dependencies closure of the top-level build.gradle:                           │\n'
                 '│ /android/build.gradle.                                                                           │\n'
                 '└──────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
