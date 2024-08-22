@@ -15,6 +15,15 @@
 #include "vulkan/vulkan.hpp"
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
+#define S1(x) #x
+#define S2(x) S1(x)
+#define LOCATION __FILE__ " : " S2(__LINE__)
+
+#define CHECK_VK_RESULT(x)                                 \
+  do {                                                     \
+    vk::resultCheck(static_cast<vk::Result>(x), LOCATION); \
+  } while (0)
+
 // Convenient reference to vulkan.hpp's global proc table.
 auto& d = vk::defaultDispatchLoaderDynamic;
 
@@ -23,7 +32,13 @@ auto& d = vk::defaultDispatchLoaderDynamic;
 
 #include "embedder.h"  // Flutter's Embedder ABI.
 
-static const bool g_enable_validation_layers = true;
+struct {
+  bool enable_validation_layers = true;
+  bool utils_supported = false;
+  bool report_supported = false;
+  VkDebugReportCallbackEXT report_callback = VK_NULL_HANDLE;
+  VkDebugUtilsMessengerEXT utils_messenger_callback = VK_NULL_HANDLE;
+} g_debug;
 // This value is calculated after the window is created.
 static double g_pixelRatio = 1.0;
 static const size_t kInitialWindowWidth = 800;
@@ -45,6 +60,7 @@ struct {
   GLFWwindow* window;
 
   std::vector<const char*> enabled_instance_extensions;
+  std::vector<const char*> enabled_layer_names;
   VkInstance instance;
   VkSurfaceKHR surface;
 
@@ -404,6 +420,56 @@ void* FlutterGetInstanceProcAddressCallback(
   return reinterpret_cast<void*>(proc);
 }
 
+VkBool32 DebugReportCallback(VkDebugReportFlagsEXT flags,
+                             VkDebugReportObjectTypeEXT /* objectType */,
+                             uint64_t /* object */,
+                             size_t /* location */,
+                             int32_t /* messageCode */,
+                             const char* pLayerPrefix,
+                             const char* pMessage,
+                             void* /* pUserData */) {
+  if (flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
+    std::cout << "VULKAN: (" << pLayerPrefix << ") " << pMessage << std::endl;
+  } else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT) {
+    std::cout << "VULKAN DEBUG: (" << pLayerPrefix << ") " << pMessage
+              << std::endl;
+  } else if (flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
+    std::cout << "VULKAN PERF WARNING: (" << pLayerPrefix << ") " << pMessage
+              << std::endl;
+  } else if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
+    std::cerr << "VULKAN ERROR: (" << pLayerPrefix << ") " << pMessage
+              << std::endl;
+  } else if (flags & VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
+    std::cout << "VULKAN DEBUG: (" << pLayerPrefix << ") " << pMessage
+              << std::endl;
+  }
+  return VK_FALSE;
+}
+
+VkBool32 DebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+                            VkDebugUtilsMessageTypeFlagsEXT /* types */,
+                            const VkDebugUtilsMessengerCallbackDataEXT* cb_data,
+                            void* /* pUserData */) {
+  if (strstr(cb_data->pMessage, "ALL_GRAPHICS_BIT") ||
+      strstr(cb_data->pMessage, "ALL_COMMANDS_BIT")) {
+    return VK_FALSE;
+  }
+  if (severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) {
+    std::cout << "VULKAN: (" << cb_data->pMessageIdName << ") "
+              << cb_data->pMessage << std::endl;
+  } else if (severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) {
+    std::cout << "VULKAN INFO: (" << cb_data->pMessageIdName << ") "
+              << cb_data->pMessage << std::endl;
+  } else if (severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+    std::cout << "VULKAN WARN: (" << cb_data->pMessageIdName << ") "
+              << cb_data->pMessage << std::endl;
+  } else if (severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+    std::cerr << "VULKAN ERROR: (" << cb_data->pMessageIdName << ") "
+              << cb_data->pMessage << std::endl;
+  }
+  return VK_TRUE;
+}
+
 int main(int argc, char** argv) {
   if (argc != 3) {
     PrintUsage();
@@ -473,15 +539,49 @@ int main(int argc, char** argv) {
     memcpy(g_state.enabled_instance_extensions.data(), glfw_extensions,
            extension_count * sizeof(char*));
 
-    if (g_enable_validation_layers) {
-      g_state.enabled_instance_extensions.push_back(
-          VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+    if (g_debug.enable_validation_layers) {
+      auto props = vk::enumerateInstanceExtensionProperties();
+      for (const auto& prop : props.value) {
+        if (strcmp(prop.extensionName,
+                   VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME) == 0) {
+          g_state.enabled_instance_extensions.push_back(
+              VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME);
+        }
+        if (strcmp(prop.extensionName, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) ==
+            0) {
+          g_debug.utils_supported = true;
+        }
+        if (strcmp(prop.extensionName, VK_EXT_DEBUG_REPORT_EXTENSION_NAME) ==
+            0) {
+          g_debug.report_supported = true;
+        }
+      }
+      if (g_debug.utils_supported) {
+        g_state.enabled_instance_extensions.push_back(
+            VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        g_debug.report_supported = false;
+      } else if (g_debug.report_supported) {
+        g_state.enabled_instance_extensions.push_back(
+            VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+      }
+
+      auto available_layers = vk::enumerateInstanceLayerProperties();
+      for (const auto& l : available_layers.value) {
+        if (strcmp(l.layerName, "VK_LAYER_KHRONOS_validation") == 0) {
+          g_state.enabled_layer_names.push_back("VK_LAYER_KHRONOS_validation");
+        }
+      }
     }
 
     std::cout << "Enabling " << g_state.enabled_instance_extensions.size()
               << " instance extensions:" << std::endl;
     for (const auto& extension : g_state.enabled_instance_extensions) {
       std::cout << "  - " << extension << std::endl;
+    }
+    std::cout << "Enabling " << g_state.enabled_layer_names.size()
+              << " layers:" << std::endl;
+    for (const auto& layer : g_state.enabled_layer_names) {
+      std::cout << "  - " << layer << std::endl;
     }
 
     VkApplicationInfo app_info = {
@@ -499,18 +599,8 @@ int main(int argc, char** argv) {
     info.pApplicationInfo = &app_info;
     info.enabledExtensionCount = g_state.enabled_instance_extensions.size();
     info.ppEnabledExtensionNames = g_state.enabled_instance_extensions.data();
-    if (g_enable_validation_layers) {
-      auto available_layers = vk::enumerateInstanceLayerProperties();
-
-      const char* layer = "VK_LAYER_KHRONOS_validation";
-      for (const auto& l : available_layers.value) {
-        if (strcmp(l.layerName, layer) == 0) {
-          info.enabledLayerCount = 1;
-          info.ppEnabledLayerNames = &layer;
-          break;
-        }
-      }
-    }
+    info.enabledLayerCount = g_state.enabled_layer_names.size();
+    info.ppEnabledLayerNames = g_state.enabled_layer_names.data();
 
     if (d.vkCreateInstance(&info, nullptr, &g_state.instance) != VK_SUCCESS) {
       std::cerr << "Failed to create Vulkan instance." << std::endl;
@@ -798,8 +888,24 @@ int main(int argc, char** argv) {
                        nullptr);
   d.vkDestroyFence(g_state.device, g_state.image_ready_fence, nullptr);
 
+  if (g_state.swapchain) {
+    d.vkDestroySwapchainKHR(g_state.device, g_state.swapchain, nullptr);
+  }
+
   d.vkDestroyDevice(g_state.device, nullptr);
   d.vkDestroySurfaceKHR(g_state.instance, g_state.surface, nullptr);
+
+  if (g_debug.enable_validation_layers) {
+    if (g_debug.report_callback) {
+      d.vkDestroyDebugReportCallbackEXT(g_state.instance,
+                                        g_debug.report_callback, nullptr);
+    }
+    if (g_debug.utils_messenger_callback) {
+      d.vkDestroyDebugUtilsMessengerEXT(
+          g_state.instance, g_debug.utils_messenger_callback, nullptr);
+    }
+  }
+
   d.vkDestroyInstance(g_state.instance, nullptr);
 
   glfwDestroyWindow(g_state.window);
