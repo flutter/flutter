@@ -41,9 +41,6 @@ PipelineCacheVK::PipelineCacheVK(std::shared_ptr<const Capabilities> caps,
 
   if (result == vk::Result::eSuccess) {
     cache_ = std::move(existing_cache);
-    FML_LOG(INFO)
-        << Bytes{cache_info.initialDataSize}.ConvertTo<MegaBytes>().GetSize()
-        << " MB of data was used to construct a pipeline cache.";
   } else {
     // Even though we perform consistency checks because we don't trust the
     // driver, the driver may have additional information that may cause it to
