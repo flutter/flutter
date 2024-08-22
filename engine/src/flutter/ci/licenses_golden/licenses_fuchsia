@@ -1,4 +1,4 @@
-Signature: 8895fb7d6b17e1d8fbf972513e47f0ab
+Signature: 2d8be5fc477ee6d4d719bbeafa5cad6a
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -14733,6 +14733,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/debuglog-resource.fidl + 
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/msi-resource.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/capabilities.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/rules.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/config.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/error.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/zircon/availability_levels.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-17/sysroot/include/zircon/availability_levels.inc + ../../../fuchsia/sdk/linux/LICENSE
@@ -14783,6 +14784,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/debuglog-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/msi-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/capabilities.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/rules.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/config.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/error.fidl
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/zircon/availability_levels.inc
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/sysroot/include/zircon/availability_levels.inc
