@@ -7,6 +7,7 @@
 //   machines.
 @Tags(<String>['reduced-test-set'])
 library;
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -575,10 +576,142 @@ void main() {
     );
   });
 
+  testWidgets('Checkbox fill color resolves in enabled/disabled states', (WidgetTester tester) async {
+    const Color activeEnabledFillColor = Color(0xFF000001);
+    const Color activeDisabledFillColor = Color(0xFF000002);
+
+    Color getFillColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        return activeDisabledFillColor;
+      }
+      return activeEnabledFillColor;
+    }
+
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
+
+    Widget buildApp({required bool enabled}) {
+      return CupertinoApp(
+        home: CupertinoCheckbox(
+          value: true,
+          fillColor: fillColor,
+          onChanged: enabled ? (bool? value) { } : null,
+        ),
+      );
+    }
+
+    RenderBox getCheckboxRenderer() {
+      return tester.renderObject<RenderBox>(find.byType(CupertinoCheckbox));
+    }
+
+    await tester.pumpWidget(buildApp(enabled: true));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..path(color: activeEnabledFillColor));
+
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..path(color: activeDisabledFillColor));
+  });
+
+  testWidgets('Checkbox fill color take precedence over active/inactive colors', (WidgetTester tester) async {
+    const Color activeEnabledFillColor = Color(0xFF000001);
+    const Color activeDisabledFillColor = Color(0xFF000002);
+    const Color activeColor = Color(0xFF000003);
+    const Color inactiveColor = Color(0xFF000004);
+
+    Color getFillColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        return activeDisabledFillColor;
+      }
+      return activeEnabledFillColor;
+    }
+
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
+
+    Widget buildApp({required bool enabled}) {
+      return CupertinoApp(
+        home: CupertinoCheckbox(
+          value: true,
+          fillColor: fillColor,
+          activeColor: activeColor,
+          inactiveColor: inactiveColor,
+          onChanged: enabled ? (bool? value) { } : null,
+        ),
+      );
+    }
+
+    RenderBox getCheckboxRenderer() {
+      return tester.renderObject<RenderBox>(find.byType(CupertinoCheckbox));
+    }
+
+    await tester.pumpWidget(buildApp(enabled: true));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..path(color: activeEnabledFillColor));
+
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..path(color: activeDisabledFillColor));
+  });
+
+  testWidgets('Checkbox fill color resolves in hovered/focused states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'checkbox');
+    addTearDown(focusNode.dispose);
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color hoveredFillColor = Color(0xFF000001);
+    const Color focusedFillColor = Color(0xFF000002);
+    const Color transparentColor = Color(0x00000000);
+
+    Color getFillColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
+        return hoveredFillColor;
+      }
+      if (states.contains(WidgetState.focused)) {
+        return focusedFillColor;
+      }
+      return transparentColor;
+    }
+
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
+
+    Widget buildApp({required bool enabled}) {
+      return CupertinoApp(
+        home: CupertinoCheckbox(
+          focusNode: focusNode,
+          value: enabled,
+          fillColor: fillColor,
+          onChanged: enabled ? (bool? value) { } : null,
+        ),
+      );
+    }
+
+    RenderBox getCheckboxRenderer() {
+      return tester.renderObject<RenderBox>(find.byType(CupertinoCheckbox));
+    }
+
+    await tester.pumpWidget(buildApp(enabled: true));
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(getCheckboxRenderer(), paints..path(color: focusedFillColor));
+
+    // Start hovering.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byType(CupertinoCheckbox)));
+    await tester.pumpAndSettle();
+
+    expect(getCheckboxRenderer(), paints..path(color: hoveredFillColor));
+  });
+
   testWidgets('Checkbox configures focus color', (WidgetTester tester) async {
     const Color defaultCheckColor = Color(0xffffffff);
     const Color defaultActiveFillColor = Color(0xff007aff);
-    const Color defaultFocusColor = Color(0xcc6eadf2);
+    final Color defaultFocusColor = HSLColor
+      .fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
+      .withLightness(kCupertinoFocusColorBrightness)
+      .withSaturation(kCupertinoFocusColorSaturation)
+      .toColor();
     const Color testFocusColor = Color(0xffaabbcc);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final FocusNode node = FocusNode();

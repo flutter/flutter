@@ -31,7 +31,8 @@ void main() {
     }
   });
 
-  testWidgets('font size increase does not ellipsize hint text', (WidgetTester tester) async {
+  testWidgets('font size increase does not ellipsize hint text',
+      (WidgetTester tester) async {
     await pumpsUseCase(tester, TextFieldUseCase());
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery.withClampedTextScaling(
@@ -59,7 +60,15 @@ void main() {
     await pumpsUseCase(tester, TextFieldUseCase());
     const String textFieldLabel = 'Input field with suffix @gmail.com';
 
-    final Finder semanticsWidgets = find.bySemanticsLabel(RegExp(textFieldLabel));
+    final Finder semanticsWidgets =
+        find.bySemanticsLabel(RegExp(textFieldLabel));
     expect(semanticsWidgets, findsExactly(2));
+  });
+
+  testWidgets('text field demo page has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, TextFieldUseCase());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('TextField Demo');
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
   });
 }

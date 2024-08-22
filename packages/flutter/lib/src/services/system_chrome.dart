@@ -41,7 +41,7 @@ enum DeviceOrientation {
   /// clockwise from its boot orientation.
   portraitUp,
 
-  /// The orientation that is 90 degrees clockwise from [portraitUp].
+  /// The orientation that is 90 degrees counterclockwise from [portraitUp].
   ///
   /// If the device shows its boot logo in landscape, then the boot logo is
   /// shown in [landscapeLeft].
@@ -50,7 +50,7 @@ enum DeviceOrientation {
   /// The orientation that is 180 degrees from [portraitUp].
   portraitDown,
 
-  /// The orientation that is 90 degrees counterclockwise from [portraitUp].
+  /// The orientation that is 90 degrees clockwise from [portraitUp].
   landscapeRight,
 }
 
@@ -639,6 +639,17 @@ abstract final class SystemChrome {
       }
       _pendingStyle = null;
     });
+  }
+
+  /// Called by the binding during a transition to a new app lifecycle state.
+  static void handleAppLifecycleStateChanged(AppLifecycleState state) {
+    // When the app is detached, clear the record of the style sent to the host
+    // so that it will be sent again when the app is reattached.
+    if (state == AppLifecycleState.detached) {
+      scheduleMicrotask(() {
+        _latestStyle = null;
+      });
+    }
   }
 
   static SystemUiOverlayStyle? _pendingStyle;
