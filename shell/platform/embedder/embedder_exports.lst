@@ -13,6 +13,8 @@
     kDartIsolateSnapshotInstructions;
     kDartVmSnapshotData;
     kDartVmSnapshotInstructions;
+    InternalFlutterGpu*;
+    kInternalFlutterGpu*;
   local:
     *;
 };
