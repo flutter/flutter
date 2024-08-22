@@ -157,19 +157,18 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Blur affect is disabled when disableBackgroundFilterBlur is true', (WidgetTester test) async {
+  testWidgets('Blur affect is disabled when enableBackgroundFilterBlur is false', (WidgetTester test) async {
     await test.pumpWidget(
       const CupertinoApp(
-        theme:  CupertinoThemeData(brightness: Brightness.light),
-        home:  CupertinoPageScaffold(
-          navigationBar:  CupertinoNavigationBar(
+        theme: CupertinoThemeData(brightness: Brightness.light),
+        home: CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(
             middle: Text('Title'),
             automaticBackgroundVisibility: false,
-            disableBackgroundFilterBlur: true,
+            enableBackgroundFilterBlur: false,
           ),
-          child:  Column(
-            children:  <Widget>[
+          child: Column(
+            children: <Widget>[
               Placeholder(),
             ],
           ),
