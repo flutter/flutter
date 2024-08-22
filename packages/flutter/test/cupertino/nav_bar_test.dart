@@ -160,9 +160,6 @@ void main() {
   testWidgets(
       'Blur affect is disabled when disableBackgroundFilterBlur is true',
       (WidgetTester test) async {
-    final ScrollController scrollController = ScrollController();
-    addTearDown(scrollController.dispose);
-
     await test.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.light),
@@ -172,8 +169,7 @@ void main() {
             automaticBackgroundVisibility: false,
             disableBackgroundFilterBlur: true,
           ),
-          child: ListView(
-            controller: scrollController,
+          child: Column(
             children: const <Widget>[
               Placeholder(),
             ],
