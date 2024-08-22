@@ -797,7 +797,6 @@ void main() {
     expect(logger.errorText, isEmpty);
   });
 
-
   test('exits if getTabs throws a connection exception consistently', () async {
     final BufferLogger logger = BufferLogger.test();
     final FakeChromeConnection chromeConnection = FakeChromeConnection();
