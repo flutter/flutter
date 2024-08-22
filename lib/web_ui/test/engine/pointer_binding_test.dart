@@ -4,6 +4,7 @@
 
 import 'dart:js_util' as js_util;
 
+import 'package:meta/meta.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -2757,6 +2758,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     String description,
     Future<void> Function() body, {
     Object? skip,
+    @doNotSubmit bool solo = false,
   }) {
     test(
       description,
@@ -2768,6 +2770,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
         EngineSemantics.instance.semanticsEnabled = false;
       },
       skip: skip,
+      solo: solo, // ignore: invalid_use_of_do_not_submit_member
     );
   }
 
@@ -3035,6 +3038,67 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
         ui.PointerChange.up,
       ],
     );
+
+    final DomEvent click = createDomMouseEvent(
+      'click',
+      <Object?, Object?>{
+        'clientX': testElement.getBoundingClientRect().x,
+        'clientY': testElement.getBoundingClientRect().y,
+      }
+    );
+    PointerBinding.clickDebouncer.onClick(click, 42, true);
+
+    expect(
+      reason: 'Because the DOM click event was deduped.',
+      semanticsActions,
+      isEmpty,
+    );
+    // TODO(yjbanov): https://github.com/flutter/flutter/issues/142991.
+  }, skip: ui_web.browser.operatingSystem == ui_web.OperatingSystem.windows);
+
+  // Regression test for https://github.com/flutter/flutter/issues/147050
+  //
+  // This test emulates a long-press. Start with a "pointerdown" followed by no
+  // activity long enough that the debounce timer expires and the state of the
+  // ClickDebouncer is reset back to idle. Then a "pointerup" arrives seemingly
+  // standalone. Since no gesture is being debounced, the debouncer simply
+  // forwards it to the framework. However, "pointerup" will be immediately
+  // followed by a "click". Since we sent the "pointerdown" and "pointerup" to
+  // the framework already, the framework registered a tap. Forwarding the
+  // "click" would lead to a double-tap. This was the bug.
+  testWithSemantics('Dedupes click if pointer up happened recently without debouncing', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
+
+    // Begin a long-press with a "pointerdown".
+    testElement.dispatchEvent(context.primaryDown());
+
+    // Expire the timer causing the debouncer to reset itself.
+    await Future<void>.delayed(const Duration(milliseconds: 250));
+    expect(
+      reason: '"pointerdown" should be flushed when the timer expires.',
+      pointerPackets,
+      <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down],
+    );
+    pointerPackets.clear();
+
+    // Send a "pointerup" while the debouncer is not debouncing anything.
+    testElement.dispatchEvent(context.primaryUp());
+
+    // A standalone "pointerup" should not start debouncing anything.
+    expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
+    expect(
+      reason: 'The "pointerup" should be forwarded to the framework immediately',
+      pointerPackets,
+      <ui.PointerChange>[ui.PointerChange.up],
+    );
+
+    // Use a delay that's short enough for the click to be deduped.
+    await Future<void>.delayed(const Duration(milliseconds: 10));
 
     final DomEvent click = createDomMouseEvent(
       'click',
