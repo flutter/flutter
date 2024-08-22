@@ -3153,10 +3153,18 @@ class TextSelectionGestureDetector extends StatefulWidget {
     required this.child,
   });
 
-  /// {@macro flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.onTapTrackStart}
+  /// {@template flutter.gestures.selectionrecognizers.TextSelectionGestureDetector.onTapTrackStart}
+  /// Callback used to indicate that a tap tracking has started upon
+  /// a [PointerDownEvent].
+  /// {@endtemplate}
   final VoidCallback? onTapTrackStart;
 
-  /// {@macro flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.onTapTrackReset}
+  /// {@template flutter.gestures.selectionrecognizers.TextSelectionGestureDetector.onTapTrackReset}
+  /// Callback used to indicate that a tap tracking has been reset which
+  /// happens on the next [PointerDownEvent] after the timer between two taps
+  /// elapses, the recognizer loses the arena, the gesture is cancelled or
+  /// the recognizer is disposed of.
+  /// {@endtemplate}
   final VoidCallback? onTapTrackReset;
 
   /// Called for every tap down including every tap down that's part of a
