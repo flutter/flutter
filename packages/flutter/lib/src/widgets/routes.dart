@@ -1454,7 +1454,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    final Animation<double> proxyAnimation = ProxyAnimation();
+    final Animation<double> proxyAnimation = ProxyAnimation(secondaryAnimation);
 
     final Animation<double> flexAnimation = (nextRouteTransition == null) ?
       secondaryAnimation : proxyAnimation;

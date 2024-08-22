@@ -173,10 +173,11 @@ class DelegatedTransition {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is DelegatedTransition
-      && other.name != null
-      && name != null
-      && other.name == name;
+    // return other is DelegatedTransition
+    //   && other.name != null
+    //   && name != null
+    //   && other.name == name;
+    return false;
   }
 
   @override
