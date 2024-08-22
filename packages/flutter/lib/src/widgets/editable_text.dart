@@ -5814,6 +5814,23 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
   final TextBoundary Function() getTextBoundary;
   final _ApplyTextBoundary _applyTextBoundary;
 
+  void _hideToolbarIfTextChanged(ReplaceTextIntent intent) {
+    if (state._selectionOverlay == null || !state.selectionOverlay!.toolbarIsVisible) {
+      return;
+    }
+    final TextEditingValue oldValue = intent.currentTextEditingValue;
+    final TextEditingValue newValue = intent.currentTextEditingValue.replaced(
+      intent.replacementRange,
+      intent.replacementText,
+    );
+    if (oldValue.text != newValue.text) {
+      // Hide the toolbar if the text was changed, but only hide the toolbar
+      // overlay; the selection handle's visibility will be handled
+      // by `_handleSelectionChanged`.
+      state.hideToolbar(false);
+    }
+  }
+
   @override
   Object? invoke(T intent, [BuildContext? context]) {
     final TextSelection selection = state._value.selection;
@@ -5829,9 +5846,11 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
         start: atomicBoundary.getLeadingTextBoundaryAt(selection.start) ?? state._value.text.length,
         end: atomicBoundary.getTrailingTextBoundaryAt(selection.end - 1) ?? 0,
       );
+      final ReplaceTextIntent replaceTextIntent = ReplaceTextIntent(state._value, '', range, SelectionChangedCause.keyboard);
+      _hideToolbarIfTextChanged(replaceTextIntent);
       return Actions.invoke(
         context!,
-        ReplaceTextIntent(state._value, '', range, SelectionChangedCause.keyboard),
+        replaceTextIntent,
       );
     }
 
@@ -5843,9 +5862,11 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
         : atomicBoundary.getTrailingTextBoundaryAt(selection.baseOffset - 1) ?? 0,
       extentOffset: target,
     );
+    final ReplaceTextIntent replaceTextIntent = ReplaceTextIntent(state._value, '', rangeToDelete, SelectionChangedCause.keyboard);
+    _hideToolbarIfTextChanged(replaceTextIntent);
     return Actions.invoke(
       context!,
-      ReplaceTextIntent(state._value, '', rangeToDelete, SelectionChangedCause.keyboard),
+      replaceTextIntent,
     );
   }
 

@@ -9632,6 +9632,87 @@ void main() {
     expect(scrollable.controller!.position.pixels, equals(renderEditable.maxScrollExtent));
   });
 
+  testWidgets('Deleting text with keyboard backspace does not trigger assertion on CupertinoPageRoute', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/153003.
+    controller.text = testText * 20;
+    final ScrollController editableScrollController = ScrollController();
+    addTearDown(editableScrollController.dispose);
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: navigatorKey,
+      home: Center(
+        child: TextButton(
+          onPressed: () async {
+            if (navigatorKey.currentState == null) {
+              return;
+            }
+            await navigatorKey.currentState!.push(
+              CupertinoPageRoute<void>(
+                settings: const RouteSettings(name: '/TestCupertinoRoute'),
+                builder: (BuildContext innerContext) {
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: SizedBox(
+                      width: 200,
+                      height: 200,
+                      child: EditableText(
+                        maxLines: null,
+                        controller: controller,
+                        scrollController: editableScrollController,
+                        focusNode: focusNode,
+                        style: textStyle,
+                        cursorColor: Colors.blue,
+                        backgroundCursorColor: Colors.grey,
+                        showSelectionHandles: true,
+                        selectionControls: materialTextSelectionControls,
+                        selectionColor: Colors.lightBlueAccent,
+                      ),
+                    ),
+                  );
+                }
+              ),
+            );
+          },
+          child: const Text('Push Route'),
+        ),
+      ),
+    ));
+
+    // Push cupertino route.
+    await tester.tap(find.text('Push Route'));
+    await tester.pumpAndSettle();
+
+    expect(editableScrollController.offset, 0);
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.bringIntoView(TextPosition(offset: controller.text.length));
+
+    await tester.pumpAndSettle();
+    expect(editableScrollController.offset, editableScrollController.position.maxScrollExtent);
+
+    // Select a word near the end of the text. And show the toolbar.
+    await tester.tapAt(textOffsetToPosition(tester, controller.text.length - 10));
+    state.renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    expect(state.showToolbar(), true);
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection(baseOffset: 1426, extentOffset: 1431));
+    expect(state.selectionOverlay, isNotNull);
+    expect(state.selectionOverlay!.toolbarIsVisible, true);
+
+    // Send backspace key event to delete the selected word. This will cause
+    // the EditableText to scroll the new position into view, but this
+    // should not cause an exception, and the toolbar should no longer be visible.
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection.collapsed(offset: 1426));
+    expect(tester.takeException(), isNull);
+    expect(state.selectionOverlay, isNotNull);
+    expect(state.selectionOverlay!.toolbarIsVisible, false);
+    // On web, we don't show the Flutter toolbar and instead rely on the browser
+    // toolbar. Until we change that, this test should remain skipped.
+  }, skip: kIsWeb); // [intended]
+
   testWidgets('bringIntoView brings the caret into view when in a viewport', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/55547.
     controller.text = testText * 20;
