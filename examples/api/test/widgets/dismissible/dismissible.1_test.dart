@@ -72,7 +72,7 @@ void main() {
 
   group('Test Drag behavior', () {
     testWidgets(
-      '0 - Default begavior - `shouldTriggerDismiss: null`',
+      '0 - Default behavior - `shouldTriggerDismiss: null`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
@@ -82,7 +82,7 @@ void main() {
     );
 
     testWidgets(
-      '1 - Default begavior - `shouldTriggerDismiss: (_) => null`',
+      '1 - Default behavior - `shouldTriggerDismiss: (_) => null`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
@@ -198,7 +198,7 @@ void main() {
 
   group('Test Fling behavior', () {
     testWidgets(
-      '0 - Default begavior - `shouldTriggerDismiss: null`',
+      '0 - Default behavior - `shouldTriggerDismiss: null`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
@@ -208,7 +208,7 @@ void main() {
     );
 
     testWidgets(
-      '1 - Default begavior - `shouldTriggerDismiss: (_) => null`',
+      '1 - Default behavior - `shouldTriggerDismiss: (_) => null`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
