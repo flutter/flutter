@@ -1181,12 +1181,15 @@ void main() {
       await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
       await tester.pump();
 
-      await tester
-          .pump(const Duration(seconds: 1)); // Finish the scroll animation.
-      await tester.pump(
-          const Duration(seconds: 1)); // Finish the indicator settle animation.
-      await tester.pump(
-          const Duration(seconds: 1)); // Finish the indicator hide animation.
+      // Finish the scroll animation.
+      await tester.pump(const Duration(seconds: 1));
+
+      // Finish the indicator settle animation.
+      await tester.pump(const Duration(seconds: 1));
+
+      // Finish the indicator hide animation.
+      await tester.pump(const Duration(seconds: 1));
+
       expect(refreshCalled, true);
       expect(modeSnap, true);
       expect(modeDrag, true);
