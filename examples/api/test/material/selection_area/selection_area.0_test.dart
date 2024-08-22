@@ -9,8 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('Texts are descendant of the SelectionArea',
-      (WidgetTester tester) async {
+  testWidgets('Texts are descendant of the SelectionArea', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SelectionAreaExampleApp(),
     );
