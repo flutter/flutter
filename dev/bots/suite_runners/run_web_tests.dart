@@ -301,7 +301,7 @@ class WebTestsSuite {
       workingDirectory: testAppDirectory,
     );
     // This must match the testOutputsDirectory defined in flutter_driver's driver/common.dart.
-    String driverOutputPath = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? path.join(testAppDirectory, 'build');
+    final String driverOutputPath = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? path.join(testAppDirectory, 'build');
     final String responseFile =
         path.join(driverOutputPath, 'integration_response_data.json');
     if (File(responseFile).existsSync()) {
