@@ -13,4 +13,11 @@ void main() {
     await pumpsUseCase(tester, ActionChipUseCase());
     expect(find.byType(ActionChip), findsExactly(2));
   });
+
+  testWidgets('action chip has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, ActionChipUseCase());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel(RegExp('ActionChip Demo'));
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
+  });
 }

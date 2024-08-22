@@ -9,8 +9,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_utils.dart';
 
 void main() {
-  testWidgets('action chip can run', (WidgetTester tester) async {
+  testWidgets('switch list can run', (WidgetTester tester) async {
     await pumpsUseCase(tester, SwitchListTileUseCase());
     expect(find.byType(SwitchListTile), findsExactly(2));
+  });
+
+  testWidgets('switch list demo page has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, SwitchListTileUseCase());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('SwitchListTile Demo');
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
   });
 }

@@ -13,4 +13,11 @@ void main() {
     await pumpsUseCase(tester, CardUseCase());
     expect(find.byType(Card), findsExactly(1));
   });
+
+  testWidgets('card has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, CardUseCase());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel(RegExp('Card Demo'));
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
+  });
 }
