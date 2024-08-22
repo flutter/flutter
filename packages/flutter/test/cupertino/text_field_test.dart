@@ -1122,6 +1122,27 @@ void main() {
     );
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+  testWidgets('can control suffix and prefix icons alignment',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: CupertinoTextField(
+            prefix: Icon(CupertinoIcons.add),
+            suffix: Icon(CupertinoIcons.clear),
+            crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+        ),
+      );
+
+      final CupertinoTextField cupertinoTextField = tester.widget<CupertinoTextField>(
+        find.byType(CupertinoTextField),
+      );
+
+      expect(cupertinoTextField.crossAxisAlignment, CrossAxisAlignment.start);
+    },
+  );
+
+
   testWidgets(
     'can control text content via controller',
     (WidgetTester tester) async {
