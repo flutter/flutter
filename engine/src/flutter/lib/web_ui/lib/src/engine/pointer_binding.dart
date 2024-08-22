@@ -205,12 +205,13 @@ class ClickDebouncer {
   @visibleForTesting
   DebounceState? get debugState => _state;
 
-  // The timestamp of the last "pointerup" DOM event that was flushed.
+  // The timestamp of the last "pointerup" DOM event that was sent to the
+  // framework.
   //
   // Not to be confused with the time when it was flushed. The two may be far
   // apart because the flushing can happen after a delay due to timer, or events
   // that happen after the said "pointerup".
-  Duration? _lastFlushedPointerUpTimeStamp;
+  Duration? _lastSentPointerUpTimeStamp;
 
   /// Returns true if the debouncer has a non-empty queue of pointer events that
   /// were withheld from the framework.
@@ -244,6 +245,14 @@ class ClickDebouncer {
     } else if (event.type == 'pointerdown') {
       _startDebouncing(event, data);
     } else {
+      if (event.type == 'pointerup') {
+        // Record the last pointerup event even if not debouncing. This is
+        // because the sequence of pointerdown-pointerup could indicate a
+        // long-press, and the debounce timer is not long enough to capture it.
+        // If a "click" is observed after a long-press it should be
+        // discarded.
+        _lastSentPointerUpTimeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
+      }
       _sendToFramework(event, data);
     }
   }
@@ -295,6 +304,7 @@ class ClickDebouncer {
 
     EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
         semanticsNodeId, ui.SemanticsAction.tap, null);
+    reset();
   }
 
   void _startDebouncing(DomEvent event, List<ui.PointerData> data) {
@@ -351,10 +361,7 @@ class ClickDebouncer {
     // It's only interesting to debounce clicks when both `pointerdown` and
     // `pointerup` land on the same element.
     if (event.type == 'pointerup') {
-      // TODO(yjbanov): this is a bit mouthful, but see https://github.com/dart-lang/sdk/issues/53070
-      final DomEventTarget? eventTarget = event.target;
-      final DomElement stateTarget = state.target;
-      final bool targetChanged = eventTarget != stateTarget;
+      final bool targetChanged = event.target != state.target;
       if (targetChanged) {
         _flush();
       }
@@ -372,15 +379,15 @@ class ClickDebouncer {
   // already flushed to the framework, the click event is dropped to avoid
   // double click.
   bool _shouldSendClickEventToFramework(DomEvent click) {
-    final Duration? lastFlushedPointerUpTimeStamp = _lastFlushedPointerUpTimeStamp;
+    final Duration? lastSentPointerUpTimeStamp = _lastSentPointerUpTimeStamp;
 
-    if (lastFlushedPointerUpTimeStamp == null) {
+    if (lastSentPointerUpTimeStamp == null) {
       // We haven't seen a pointerup. It's standalone click event. Let it through.
       return true;
     }
 
     final Duration clickTimeStamp = _BaseAdapter._eventTimeStampToDuration(click.timeStamp!);
-    final Duration delta = clickTimeStamp - lastFlushedPointerUpTimeStamp;
+    final Duration delta = clickTimeStamp - lastSentPointerUpTimeStamp;
     return delta >= const Duration(milliseconds: 50);
   }
 
@@ -393,7 +400,7 @@ class ClickDebouncer {
     final List<ui.PointerData> aggregateData = <ui.PointerData>[];
     for (final QueuedEvent queuedEvent in state.queue) {
       if (queuedEvent.event.type == 'pointerup') {
-        _lastFlushedPointerUpTimeStamp = queuedEvent.timeStamp;
+        _lastSentPointerUpTimeStamp = queuedEvent.timeStamp;
       }
       aggregateData.addAll(queuedEvent.data);
     }
@@ -419,7 +426,7 @@ class ClickDebouncer {
   void reset() {
     _state?.timer.cancel();
     _state = null;
-    _lastFlushedPointerUpTimeStamp = null;
+    _lastSentPointerUpTimeStamp = null;
   }
 }
 
