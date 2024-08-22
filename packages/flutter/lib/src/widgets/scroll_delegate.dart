@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'scroll_view.dart';
+/// @docImport 'sliver.dart';
+/// @docImport 'spacer.dart';
+/// @docImport 'two_dimensional_scroll_view.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -656,10 +663,10 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// ```
   final List<Widget> children;
 
-  /// A map to cache key to index lookup for children.
-  ///
-  /// _keyToIndex[null] is used as current index during the lazy loading process
-  /// in [_findChildIndex]. _keyToIndex should never be used for looking up null key.
+  // A map to cache key to index lookup for children.
+  //
+  // _keyToIndex[null] is used as current index during the lazy loading process
+  // in [_findChildIndex]. _keyToIndex should never be used for looking up null key.
   final Map<Key?, int>? _keyToIndex;
 
   bool get _isConstantInstance => _keyToIndex == null;

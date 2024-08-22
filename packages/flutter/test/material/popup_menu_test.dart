@@ -4242,6 +4242,84 @@ void main() {
     ));
     expect(iconText.text.style?.color, Colors.red);
   });
+
+  testWidgets("Popup menu child's InkWell borderRadius", (WidgetTester tester) async {
+    final BorderRadius borderRadius = BorderRadius.circular(20);
+
+    Widget buildPopupMenu({required BorderRadius? borderRadius}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              borderRadius: borderRadius,
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('Item 0'),
+                ),
+              ],
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text('Pop up menu'),
+                  Icon(Icons.arrow_drop_down),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Popup menu with default null borderRadius.
+    await tester.pumpWidget(buildPopupMenu(borderRadius: null));
+    await tester.pumpAndSettle();
+
+    InkWell inkWell = tester.widget<InkWell>(find.byType(InkWell));
+    expect(inkWell.borderRadius, isNull);
+
+    // Popup menu with fixed borderRadius.
+    await tester.pumpWidget(buildPopupMenu(borderRadius: borderRadius));
+    await tester.pumpAndSettle();
+
+    inkWell = tester.widget<InkWell>(find.byType(InkWell));
+    expect(inkWell.borderRadius, borderRadius);
+  });
+
+  testWidgets('If requestFocus is false, the original focus should be preserved upon menu appearance.', (WidgetTester tester) async {
+    final FocusNode fieldFocusNode = FocusNode();
+    addTearDown(fieldFocusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              TextField(focusNode: fieldFocusNode, autofocus: true),
+              PopupMenuButton<int>(
+                style: const ButtonStyle(
+                  iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+                ),
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuItem<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('One'),
+                    ),
+                  ];
+                },
+                requestFocus: false,
+                child: const Text('click here'),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(fieldFocusNode.hasFocus, isTrue);
+    await tester.tap(find.text('click here'));
+    await tester.pump();
+    expect(fieldFocusNode.hasFocus, isTrue);
+  });
 }
 
 Matcher overlaps(Rect other) => OverlapsMatcher(other);

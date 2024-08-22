@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.1'
+        classpath 'com.android.tools.build:gradle:8.1.0'
     }
 }
 
@@ -34,11 +34,10 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
-    // Conditional for compatibility with AGP <4.2.
-    namespace 'dev.flutter.integration_test'
     // We recommend using flutter.compileSdkVersion as it will automatically
     // pick the flutter sdk's preferred version number.
     compileSdk flutter.compileSdkVersion
+    namespace 'dev.flutter.integration_test'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

@@ -11,6 +11,7 @@ import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
+import '../../dart/package_map.dart';
 import '../../devfs.dart';
 import '../../flutter_manifest.dart';
 import '../build_system.dart';
@@ -60,7 +61,7 @@ Future<Depfile> copyAssets(
   ).createBundle();
   final int resultCode = await assetBundle.build(
     manifestPath: pubspecFile.path,
-    packagesPath: environment.projectDir.childFile('.packages').path,
+    packageConfigPath: findPackageConfigFileOrDefault(environment.projectDir).path,
     deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
     targetPlatform: targetPlatform,
     flavor: flavor,
@@ -154,7 +155,8 @@ Future<Depfile> copyAssets(
                 );
                 doCopy = false;
                 if (failure != null) {
-                  throwToolExit(failure.message);
+                  throwToolExit('User-defined transformation of asset "${entry.key}" failed.\n'
+                      '${failure.message}');
                 }
               }
             case AssetKind.font:

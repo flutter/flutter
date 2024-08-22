@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'form.dart';
+/// @docImport 'heroes.dart';
+/// @docImport 'pages.dart';
+/// @docImport 'pop_scope.dart';
+/// @docImport 'will_pop_scope.dart';
+library;
+
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
@@ -45,6 +57,7 @@ abstract class OverlayRoute<T> extends Route<T> {
   /// Creates a route that knows how to interact with an [Overlay].
   OverlayRoute({
     super.settings,
+    super.requestFocus,
   });
 
   /// Subclasses should override this getter to return the builders for the overlay.
@@ -103,6 +116,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   /// Creates a route that animates itself when it is pushed or popped.
   TransitionRoute({
     super.settings,
+    super.requestFocus,
   });
 
   /// This future completes only once the transition itself has finished, after
@@ -399,9 +413,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
     }
     // Finally, we dispose any previous train hopping animation because it
     // has been successfully updated at this point.
-    if (previousTrainHoppingListenerRemover != null) {
-      previousTrainHoppingListenerRemover();
-    }
+    previousTrainHoppingListenerRemover?.call();
   }
 
   void _setSecondaryAnimation(Animation<double>? animation, [Future<dynamic>? disposed]) {
@@ -1018,7 +1030,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   }
 
   bool get _shouldRequestFocus {
-    return widget.route.navigator!.widget.requestFocus;
+    return widget.route.requestFocus;
   }
 
   // This should be called to wrap any changes to route.isCurrent, route.canPop,
@@ -1130,6 +1142,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Creates a route that blocks interaction with previous routes.
   ModalRoute({
     super.settings,
+    super.requestFocus,
     this.filter,
     this.traversalEdgeBehavior,
   });
@@ -1807,6 +1820,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void addScopedWillPopCallback(WillPopCallback callback) {
     assert(_scopeKey.currentState != null, 'Tried to add a willPop callback to a route that is not currently in the tree.');
     _willPopCallbacks.add(callback);
+    if (_willPopCallbacks.length == 1) {
+      _maybeDispatchNavigationNotification();
+    }
   }
 
   /// Remove one of the callbacks run by [willPop].
@@ -1823,6 +1839,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void removeScopedWillPopCallback(WillPopCallback callback) {
     assert(_scopeKey.currentState != null, 'Tried to remove a willPop callback from a route that is not currently in the tree.');
     _willPopCallbacks.remove(callback);
+    if (_willPopCallbacks.isEmpty) {
+      _maybeDispatchNavigationNotification();
+    }
   }
 
   /// Registers the existence of a [PopEntry] in the route.
@@ -1860,7 +1879,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       // canPop indicates that the originator of the Notification can handle a
       // pop. In the case of PopScope, it handles pops when canPop is
       // false. Hence the seemingly backward logic here.
-      canHandlePop: popDisposition == RoutePopDisposition.doNotPop,
+      canHandlePop: popDisposition == RoutePopDisposition.doNotPop
+          || _willPopCallbacks.isNotEmpty,
     );
     // Avoid dispatching a notification in the middle of a build.
     switch (SchedulerBinding.instance.schedulerPhase) {
@@ -2076,6 +2096,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
   /// Initializes the [PopupRoute].
   PopupRoute({
     super.settings,
+    super.requestFocus,
     super.filter,
     super.traversalEdgeBehavior,
   });
@@ -2277,6 +2298,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     Duration transitionDuration = const Duration(milliseconds: 200),
     RouteTransitionsBuilder? transitionBuilder,
     super.settings,
+    super.requestFocus,
     this.anchorPoint,
     super.traversalEdgeBehavior,
   }) : _pageBuilder = pageBuilder,
