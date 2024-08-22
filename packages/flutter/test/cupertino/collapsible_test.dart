@@ -116,7 +116,10 @@ void main() {
         home: Center(
           child: CupertinoCollapsible(
             isExpanded: value,
-            animationDuration: const Duration(milliseconds: 100),
+            animationStyle: AnimationStyle(
+              duration: const Duration(milliseconds: 100),
+              curve: Curves.linear,
+            ),
             child: testChild,
           ),
         ),

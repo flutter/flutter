@@ -23,7 +23,7 @@ class CupertinoCollapsible extends StatelessWidget {
     super.key,
     required this.child,
     this.isExpanded = true,
-    this.animationDuration = kCupertinoCollapsibleAnimationDuration,
+    this.animationStyle,
   }) : super();
 
   /// The child widget to be collapsed or expanded.
@@ -34,18 +34,31 @@ class CupertinoCollapsible extends StatelessWidget {
   /// Defaults to true.
   final bool isExpanded;
 
-  /// The duration of the animation when collapsing or expanding.
+    /// Used to override the expansion animation curve and duration.
   ///
-  /// Defaults to [kCupertinoCollapsibleAnimationDuration].
-  final Duration animationDuration;
+  /// If [AnimationStyle.duration] is provided, it will be used to override
+  /// the expansion animation duration. If it is null, then
+  /// [kCupertinoCollapsibleAnimationDuration] will be used.
+  ///
+  /// If [AnimationStyle.curve] is provided, it will be used to override
+  /// the expansion animation curve. If it is null, then
+  /// [kCupertinoCollapsibleAnimationCurve] will be used.
+  ///
+  /// The same curve will be used for expansion and collapse animations.
+  ///
+  /// To disable the animation, use [AnimationStyle.noAnimation].
+  final AnimationStyle? animationStyle;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedCrossFade(
-      duration: animationDuration,
       crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+      duration: animationStyle?.duration ?? kCupertinoCollapsibleAnimationDuration,
+      firstCurve: animationStyle?.curve ?? kCupertinoCollapsibleAnimationCurve,
+      secondCurve: animationStyle?.curve ?? kCupertinoCollapsibleAnimationCurve,
+      sizeCurve: animationStyle?.curve ?? kCupertinoCollapsibleAnimationCurve,
       alignment: Alignment.bottomLeft,
-      firstChild: const SizedBox(width: double.infinity, height: 0,),
+      firstChild: const SizedBox(width: double.infinity, height: 0.0,),
       secondChild: child,
       layoutBuilder: (Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey) => Stack(
         clipBehavior: Clip.none,
