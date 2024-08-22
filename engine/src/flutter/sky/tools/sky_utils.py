@@ -84,7 +84,7 @@ def _contains_duplicates(strings):
 
 def _is_macho_binary(filename):
   """Returns True if the specified path is file and a Mach-O binary."""
-  if not os.path.isfile(filename):
+  if os.path.islink(filename) or not os.path.isfile(filename):
     return False
 
   with open(filename, 'rb') as file:
@@ -128,11 +128,7 @@ def create_fat_macos_framework(args, dst, fat_framework, arm64_framework, x64_fr
         get_mac_framework_dylib_path(x64_framework)], framework_dylib)
   _set_framework_permissions(fat_framework)
 
-  # Compute dsym output path, if enabled.
-  framework_dsym = None
-  if args.dsym:
-    framework_dsym = os.path.join(dst, get_framework_name(fat_framework) + '.dSYM')
-
+  framework_dsym = fat_framework + '.dSYM' if args.dsym else None
   _process_macos_framework(args, dst, framework_dylib, framework_dsym)
 
 
