@@ -32,6 +32,13 @@ void main() {
     return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
   }
 
+  Finder findTooltipContainer(String tooltipText) {
+    return find.ancestor(
+      of: find.text(tooltipText),
+      matching: find.byType(Container),
+    );
+  }
+
   testWidgets('test icon is findable by key', (WidgetTester tester) async {
     const ValueKey<String> key = ValueKey<String>('icon-button');
     await tester.pumpWidget(
@@ -412,45 +419,43 @@ void main() {
   });
 
   testWidgets('test tooltip', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
+    const String tooltipText = 'Test tooltip';
+    Widget buildIconButton({ String? tooltip }) {
+      return MaterialApp(
         theme: theme,
         home: Material(
           child: Center(
             child: IconButton(
               onPressed: mockOnPressedFunction.handler,
               icon: const Icon(Icons.ac_unit),
+              tooltip: tooltip,
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
+
+    await tester.pumpWidget(buildIconButton());
 
     expect(find.byType(Tooltip), findsNothing);
 
     // Clear the widget tree.
     await tester.pumpWidget(Container(key: UniqueKey()));
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: Material(
-          child: Center(
-            child: IconButton(
-              onPressed: mockOnPressedFunction.handler,
-              icon: const Icon(Icons.ac_unit),
-              tooltip: 'Test tooltip',
-            ),
-          ),
-        ),
-      ),
-    );
+    await tester.pumpWidget(buildIconButton(tooltip: tooltipText));
 
     expect(find.byType(Tooltip), findsOneWidget);
-    expect(find.byTooltip('Test tooltip'), findsOneWidget);
+    expect(find.byTooltip(tooltipText), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Test tooltip'));
+    await tester.tap(find.byTooltip(tooltipText));
     expect(mockOnPressedFunction.called, 1);
+
+    // Hovering over the button should show the tooltip.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.byType(IconButton)));
+    await tester.pump();
+
+    expect(findTooltipContainer(tooltipText), findsOneWidget);
   });
 
   testWidgets('IconButton AppBar size', (WidgetTester tester) async {
@@ -2953,6 +2958,39 @@ void main() {
 
       // No exception is thrown.
     });
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/153544.
+  testWidgets('Tooltip is drawn when hovering within IconButton area but outside the Icon tself', (WidgetTester tester) async {
+    const String tooltipText = 'Test tooltip';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.favorite),
+              tooltip: tooltipText,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Verify that the tooltip is not shown initially.
+    expect(findTooltipContainer(tooltipText), findsNothing);
+
+    // Start hovering within IconButton area to show the tooltip.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+
+    final Offset topLeft = tester.getTopLeft(find.byType(Icon));
+    // Move the cursor just outside the Icon.
+    await gesture.moveTo(Offset(topLeft.dx - 1, topLeft.dy - 1));
+    await tester.pump();
+
+    // Verify that the tooltip is shown.
+    expect(findTooltipContainer(tooltipText), findsOneWidget);
   });
 }
 
