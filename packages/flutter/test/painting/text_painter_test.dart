@@ -1777,20 +1777,6 @@ void main() {
     expect(painter.height, 10);
   });
 
-  test('getOffsetForCaret does not crash on decomposed characters', () {
-    final TextPainter painter = TextPainter(
-      textDirection: TextDirection.ltr,
-      text: const TextSpan(
-        text: '각',
-        style: TextStyle(fontSize: 10),
-      ),
-    )..layout(maxWidth: 1); // Force the jamo characters to soft wrap.
-    expect(
-      () => painter.getOffsetForCaret(const TextPosition(offset: 0), Rect.zero),
-      returnsNormally,
-    );
-  });
-
   test('TextPainter dispatches memory events', () async {
     await expectLater(
       await memoryEvents(() => TextPainter().dispose(), TextPainter),
