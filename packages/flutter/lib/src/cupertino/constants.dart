@@ -87,3 +87,8 @@ const Map<CupertinoButtonSize, double> kCupertinoButtonMinSize = <CupertinoButto
   CupertinoButtonSize.medium: 32,
   CupertinoButtonSize.large: 44,
 };
+
+/// The duration of the animation used to expand or collapse a [CupertinoCollapsible].
+///
+/// Based on iOS 17
+const Duration kCupertinoCollapsibleAnimationDuration = Duration(milliseconds: 200);
