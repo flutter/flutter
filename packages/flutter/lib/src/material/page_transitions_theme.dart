@@ -677,7 +677,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   const ZoomPageTransitionsBuilder({
     this.allowSnapshotting = true,
     this.allowEnterRouteSnapshotting = true,
-    this.scrimColor,
+    this.scrimColor = Colors.black,
   });
 
   /// Whether zoom page transitions will prefer to animate a snapshot of the entering
@@ -924,7 +924,7 @@ class _PageTransitionsThemeTransitionsState<T> extends State<_PageTransitionsThe
 
     final PageTransitionsBuilder matchingBuilder = widget.builders[platform] ?? switch (platform) {
       TargetPlatform.iOS => const CupertinoPageTransitionsBuilder(),
-      TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.windows || TargetPlatform.macOS || TargetPlatform.linux => const ZoomPageTransitionsBuilder(scrimColor: Colors.black),
+      TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.windows || TargetPlatform.macOS || TargetPlatform.linux => const ZoomPageTransitionsBuilder(),
     };
     return matchingBuilder.buildTransitions<T>(
       widget.route,
