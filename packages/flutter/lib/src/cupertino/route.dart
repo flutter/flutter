@@ -30,8 +30,8 @@ import 'localizations.dart';
 const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
 
-// An value for the time it takes for a page to animate if the user releases a page mid swipe.
-const int _kDroppedSwipePageAnimationTime = 350; // Milliseconds.
+// The duration for a page to animate when the user releases it mid-swipe.
+const Duration _kDroppedSwipePageAnimationDuration = Duration(milliseconds: 350);
 
 /// Barrier color used for a barrier visible during transitions for Cupertino
 /// page routes.
@@ -813,7 +813,7 @@ class _CupertinoBackGestureController<T> {
     }
 
     if (animateForward) {
-      controller.animateTo(1.0, duration: const Duration(milliseconds: _kDroppedSwipePageAnimationTime), curve: animationCurve);
+      controller.animateTo(1.0, duration: _kDroppedSwipePageAnimationDuration, curve: animationCurve);
     } else {
       if (isCurrent) {
         // This route is destined to pop at this point. Reuse navigator's pop.
@@ -822,7 +822,7 @@ class _CupertinoBackGestureController<T> {
 
       // The popping may have finished inline if already at the target destination.
       if (controller.isAnimating) {
-        controller.animateBack(0.0, duration: const Duration(milliseconds: _kDroppedSwipePageAnimationTime), curve: animationCurve);
+        controller.animateBack(0.0, duration: _kDroppedSwipePageAnimationDuration, curve: animationCurve);
       }
     }
 
