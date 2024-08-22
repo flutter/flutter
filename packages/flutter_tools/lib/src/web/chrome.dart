@@ -490,6 +490,10 @@ class Chromium {
         if (i == attempts) {
           rethrow;
         }
+      } on IOException catch (_) {
+        if (i == attempts) {
+          rethrow;
+        }
       }
       await Future<void>.delayed(const Duration(milliseconds: 25));
     }

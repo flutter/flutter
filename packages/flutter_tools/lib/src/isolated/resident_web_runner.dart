@@ -608,9 +608,15 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
   }) async {
     if (_chromiumLauncher != null) {
       final Chromium chrome = await _chromiumLauncher!.connectedInstance;
-      final ChromeTab? chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
-        return !chromeTab.url.startsWith('chrome-extension');
-      }, retryFor: const Duration(seconds: 5));
+      late final ChromeTab? chromeTab;
+      try {
+        chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
+          return !chromeTab.url.startsWith('chrome-extension');
+        }, retryFor: const Duration(seconds: 5));
+      } on IOException {
+        // We were unable to unable to communicate with Chrome.
+        chromeTab = null;
+      }
       if (chromeTab == null) {
         throwToolExit('Failed to connect to Chrome instance.');
       }
