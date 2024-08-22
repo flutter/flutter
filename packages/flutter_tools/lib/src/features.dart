@@ -90,21 +90,21 @@ const Feature flutterWebFeature = Feature.fullyEnabled(
 
 /// The [Feature] for macOS desktop.
 const Feature flutterMacOSDesktopFeature = Feature.fullyEnabled(
-  name: 'support for desktop on macOS',
+  name: 'Flutter for macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'FLUTTER_MACOS',
 );
 
 /// The [Feature] for Linux desktop.
 const Feature flutterLinuxDesktopFeature = Feature.fullyEnabled(
-  name: 'support for desktop on Linux',
+  name: 'Flutter for Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'FLUTTER_LINUX',
 );
 
 /// The [Feature] for Windows desktop.
 const Feature flutterWindowsDesktopFeature = Feature.fullyEnabled(
-  name: 'support for desktop on Windows',
+  name: 'Flutter for Windows',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'FLUTTER_WINDOWS',
 );

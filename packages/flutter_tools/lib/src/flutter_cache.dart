@@ -132,6 +132,9 @@ class PubDependencies extends ArtifactSet {
       outputMode: PubOutputMode.failuresOnly,
     );
   }
+
+  @override
+  bool get logUpdates => false;
 }
 
 /// A cached artifact containing fonts used for Material Design.
@@ -149,10 +152,13 @@ class MaterialFonts extends CachedArtifact {
     OperatingSystemUtils operatingSystemUtils,
   ) async {
     final Uri archiveUri = _toStorageUri(version!);
-    return artifactUpdater.downloadZipArchive('Downloading Material fonts...', archiveUri, location);
+    return artifactUpdater.downloadZipArchive(archiveUri, location);
   }
 
   Uri _toStorageUri(String path) => Uri.parse('${cache.storageBaseUrl}/$path');
+
+  @override
+  bool get logUpdates => true;
 }
 
 /// A cached artifact containing the web dart:ui sources, platform dill files,
@@ -181,8 +187,11 @@ class FlutterWebSdk extends CachedArtifact {
   ) async {
     final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/flutter-web-sdk.zip');
     ErrorHandlingFileSystem.deleteIfExists(location, recursive: true);
-    await artifactUpdater.downloadZipArchive('Downloading Web SDK...', url, location);
+    await artifactUpdater.downloadZipArchive(url, location);
   }
+
+  @override
+  bool get logUpdates => true;
 }
 
 // In previous builds, CanvasKit artifacts were stored in a different location
@@ -215,6 +224,9 @@ class LegacyCanvasKitRemover extends ArtifactSet {
     OperatingSystemUtils operatingSystemUtils,
     {bool offline = false}
   ) => _getLegacyCanvasKitDirectory(fileSystem).delete(recursive: true);
+
+  @override
+  bool get logUpdates => false;
 }
 
 /// A cached artifact containing the dart:ui source code.
@@ -417,7 +429,6 @@ class AndroidMavenArtifacts extends ArtifactSet {
     final Directory tempDir = cache.getRoot().createTempSync('flutter_gradle_wrapper.');
     globals.gradleUtils?.injectGradleWrapperIfNeeded(tempDir);
 
-    final Status status = logger.startProgress('Downloading Android Maven dependencies...');
     final File gradle = tempDir.childFile(
       _platform.isWindows ? 'gradlew.bat' : 'gradlew',
     );
@@ -437,7 +448,6 @@ class AndroidMavenArtifacts extends ArtifactSet {
         logger.printError('Failed to download the Android dependencies');
       }
     } finally {
-      status.stop();
       tempDir.deleteSync(recursive: true);
       globals.androidSdk?.reinitialize();
     }
@@ -453,6 +463,9 @@ class AndroidMavenArtifacts extends ArtifactSet {
 
   @override
   String get name => 'android-maven-artifacts';
+
+  @override
+  bool get logUpdates => true;
 }
 
 /// Artifacts used for internal builds. The flutter tool builds Android projects
@@ -532,7 +545,7 @@ class GradleWrapper extends CachedArtifact {
     OperatingSystemUtils operatingSystemUtils,
   ) async {
     final Uri archiveUri = _toStorageUri(version!);
-    await artifactUpdater.downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location);
+    await artifactUpdater.downloadZippedTarball(archiveUri, location);
     // Delete property file, allowing templates to provide it.
     // Remove NOTICE file. Should not be part of the template.
     final File propertiesFile = fileSystem.file(fileSystem.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'));
@@ -562,6 +575,9 @@ class GradleWrapper extends CachedArtifact {
     }
     return true;
   }
+
+  @override
+  bool get logUpdates => true;
 }
 
 /// Common functionality for pulling Fuchsia SDKs.
@@ -581,9 +597,11 @@ abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
 
   Future<void> _doUpdate(ArtifactUpdater artifactUpdater) {
     final String url = '${cache.cipdBaseUrl}/$_path/+/$version';
-    return artifactUpdater.downloadZipArchive('Downloading package fuchsia SDK...',
-                               Uri.parse(url), location);
+    return artifactUpdater.downloadZipArchive(Uri.parse(url), location);
   }
+
+  @override
+  bool get logUpdates => true;
 }
 
 /// The pre-built flutter runner for Fuchsia development.
@@ -615,8 +633,11 @@ class FlutterRunnerSDKArtifacts extends CachedArtifact {
       return;
     }
     final String url = '${cache.cipdBaseUrl}/flutter/fuchsia/+/git_revision:$version';
-    await artifactUpdater.downloadZipArchive('Downloading package flutter runner...', Uri.parse(url), location);
+    await artifactUpdater.downloadZipArchive(Uri.parse(url), location);
   }
+
+  @override
+  bool get logUpdates => true;
 }
 
 /// Implementations of this class can resolve URLs for packages that are versioned.
@@ -662,11 +683,7 @@ class FlutterRunnerDebugSymbols extends CachedArtifact {
   Future<void> _downloadDebugSymbols(String targetArch, ArtifactUpdater artifactUpdater) async {
     final String packageName = 'fuchsia-debug-symbols-$targetArch';
     final String url = packageResolver.resolveUrl(packageName, version!);
-    await artifactUpdater.downloadZipArchive(
-      'Downloading debug symbols for flutter runner - arch:$targetArch...',
-      Uri.parse(url),
-      location,
-    );
+    await artifactUpdater.downloadZipArchive(Uri.parse(url), location);
   }
 
   @override
@@ -681,6 +698,9 @@ class FlutterRunnerDebugSymbols extends CachedArtifact {
     await _downloadDebugSymbols('x64', artifactUpdater);
     await _downloadDebugSymbols('arm64', artifactUpdater);
   }
+
+  @override
+  bool get logUpdates => true;
 }
 
 /// The Fuchsia core SDK for Linux.
@@ -833,8 +853,11 @@ class IosUsbArtifacts extends CachedArtifact {
     if (location.existsSync()) {
       location.deleteSync(recursive: true);
     }
-    await artifactUpdater.downloadZipArchive('Downloading $name...', archiveUri, location);
+    await artifactUpdater.downloadZipArchive(archiveUri, location);
   }
+
+  @override
+  bool get logUpdates => true;
 
   @visibleForTesting
   Uri get archiveUri => Uri.parse(

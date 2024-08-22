@@ -36,11 +36,9 @@ void main() {
     );
 
     await artifactUpdater.downloadZipArchive(
-      'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     );
-    expect(logger.statusText, contains('test message'));
     expect(fileSystem.file('out/test'), exists);
   });
 
@@ -64,11 +62,9 @@ void main() {
     fileSystem.file('out/test/foo.txt').createSync(recursive: true);
 
     await artifactUpdater.downloadZipArchive(
-      'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     );
-    expect(logger.statusText, contains('test message'));
     expect(fileSystem.file('out/test'), exists);
     expect(fileSystem.file('out/bar'), exists);
     expect(fileSystem.file('out/test/foo.txt'), isNot(exists));
@@ -106,11 +102,9 @@ void main() {
 
     expect(staleEntitlementsFile, exists);
     await artifactUpdater.downloadZipArchive(
-      'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     );
-    expect(logger.statusText, contains('test message'));
     expect(desiredArtifact, exists);
     expect(entitlementsFile, isNot(exists));
     expect(nestedWithoutEntitlementsFile, isNot(exists));
@@ -141,11 +135,9 @@ void main() {
     );
 
     await artifactUpdater.downloadZipArchive(
-      'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     );
-    expect(logger.statusText, contains('test message'));
     expect(fileSystem.file('out/test'), exists);
   });
 
@@ -177,11 +169,9 @@ void main() {
     );
 
     await artifactUpdater.downloadZipArchive(
-      'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     );
-    expect(logger.statusText, contains('test message'));
     expect(fileSystem.file('out/test'), exists);
   });
 
@@ -221,7 +211,6 @@ void main() {
     );
 
     await expectLater(() async => artifactUpdater.downloadZipArchive(
-      'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     ), throwsToolExit(message: 'k7iFrf4SQT9WfcQ==')); // validate that the hash mismatch message is included.
@@ -250,7 +239,6 @@ void main() {
     );
 
     await artifactUpdater.downloadZipArchive(
-      'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     );
@@ -278,12 +266,10 @@ void main() {
     );
 
     await expectLater(() async => artifactUpdater.downloadZipArchive(
-      'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     ), throwsToolExit());
 
-    expect(logger.statusText, contains('test message'));
     expect(fileSystem.file('out/test'), isNot(exists));
   });
 
@@ -309,12 +295,10 @@ void main() {
     );
 
     await expectLater(() async => artifactUpdater.downloadZipArchive(
-      'test message',
       Uri.parse('http://foo-bar/test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     ), throwsToolExit());
 
-    expect(logger.statusText, contains('test message'));
     expect(fileSystem.file('out/test'), isNot(exists));
   });
 
@@ -336,12 +320,10 @@ void main() {
     );
 
     await expectLater(() async => artifactUpdater.downloadZipArchive(
-      'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     ), throwsArgumentError);
 
-    expect(logger.statusText, contains('test message'));
     expect(fileSystem.file('out/test'), isNot(exists));
   });
 
@@ -362,11 +344,9 @@ void main() {
     operatingSystemUtils.failures = 1;
 
     await artifactUpdater.downloadZipArchive(
-      'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     );
-    expect(logger.statusText, contains('test message'));
     expect(fileSystem.file('out/test'), exists);
   });
 
@@ -387,11 +367,9 @@ void main() {
     operatingSystemUtils.failures = 1;
 
     await artifactUpdater.downloadZipArchive(
-      'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     );
-    expect(logger.statusText, contains('test message'));
     expect(fileSystem.file('out/test'), exists);
   });
 
@@ -412,7 +390,6 @@ void main() {
     operatingSystemUtils.failures = 2;
 
     expect(artifactUpdater.downloadZipArchive(
-      'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     ), throwsToolExit());
@@ -437,7 +414,6 @@ void main() {
     operatingSystemUtils.failures = 2;
 
     expect(artifactUpdater.downloadZipArchive(
-      'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     ), throwsToolExit());
@@ -461,7 +437,6 @@ void main() {
     );
 
     await artifactUpdater.downloadZippedTarball(
-      'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     );
@@ -518,7 +493,6 @@ void main() {
     handler.addError(errorDirectory, FileSystemOp.delete, const FileSystemException('', '', OSError('', kSharingViolation)));
 
     await expectLater(() async => artifactUpdater.downloadZippedTarball(
-      'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     ), throwsToolExit(

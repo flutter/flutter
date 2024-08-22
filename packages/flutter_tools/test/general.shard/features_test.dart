@@ -87,18 +87,24 @@ void main() {
     });
 
     testWithoutContext('Flutter macOS desktop help string', () {
-      expect(flutterMacOSDesktopFeature.generateHelpMessage(),
-      'Enable or disable support for desktop on macOS.');
+      expect(
+        flutterMacOSDesktopFeature.generateHelpMessage(),
+        'Enable or disable Flutter for macOS.',
+      );
     });
 
     testWithoutContext('Flutter Linux desktop help string', () {
-      expect(flutterLinuxDesktopFeature.generateHelpMessage(),
-      'Enable or disable support for desktop on Linux.');
+      expect(
+        flutterLinuxDesktopFeature.generateHelpMessage(),
+        'Enable or disable Flutter for Linux.',
+      );
     });
 
     testWithoutContext('Flutter Windows desktop help string', () {
-      expect(flutterWindowsDesktopFeature.generateHelpMessage(),
-      'Enable or disable support for desktop on Windows.');
+      expect(
+        flutterWindowsDesktopFeature.generateHelpMessage(),
+        'Enable or disable Flutter for Windows.',
+      );
     });
 
     testWithoutContext('help string on multiple channels', () {

@@ -701,16 +701,49 @@ class Cache {
     if (!_lockEnabled) {
       return;
     }
+    final List<ArtifactSet> neededArtifacts = <ArtifactSet>[];
+
     for (final ArtifactSet artifact in _artifacts) {
       if (!requiredArtifacts.contains(artifact.developmentArtifact)) {
         _logger.printTrace('Artifact $artifact is not required, skipping update.');
         continue;
       }
+
       if (await artifact.isUpToDate(_fileSystem)) {
         continue;
       }
+      neededArtifacts.add(artifact);
+    }
+
+    final Map<String, List<ArtifactSet>> neededArtifactsByUserFriendlyName = <String, List<ArtifactSet>>{};
+    for (final ArtifactSet artifact in neededArtifacts) {
+      final String userFriendlyName = artifact.developmentArtifact.feature == null
+          ? '${artifact.developmentArtifact.name} tools'
+          : '${artifact.developmentArtifact.feature!.name} tools';
+
+      final List<ArtifactSet> artifactsForName = neededArtifactsByUserFriendlyName[userFriendlyName] ?? <ArtifactSet>[];
+      artifactsForName.add(artifact);
+      neededArtifactsByUserFriendlyName[userFriendlyName] = artifactsForName;
+    }
+
+    for (final (int i, MapEntry<String, List<ArtifactSet>> artifactGroup) in neededArtifactsByUserFriendlyName.entries.indexed) {
       try {
-        await artifact.update(_artifactUpdater, _logger, _fileSystem, _osUtils, offline: offline);
+        // TODO make this not ugly.
+        final Status? progress = artifactGroup.value.any((ArtifactSet a) => a.logUpdates)
+            ? _logger.startProgress(
+                'Downloading ${artifactGroup.key} (${i + 1} of ${neededArtifactsByUserFriendlyName.length})...',
+              )
+            : null;
+        for (final ArtifactSet artifact in artifactGroup.value) {
+          await artifact.update(
+            _artifactUpdater,
+            _logger,
+            _fileSystem,
+            _osUtils,
+            offline: offline,
+          );
+        }
+        progress?.stop();
       } on SocketException catch (e) {
         if (_hostsBlockedInChina.contains(e.address?.host)) {
           _logger.printError(
@@ -785,6 +818,9 @@ abstract class ArtifactSet {
   // The name of the stamp file. Defaults to the same as the
   // artifact name.
   String get stampName => name;
+
+  /// Whether a message should be logged when updating this artifact set.
+  bool get logUpdates;
 }
 
 /// An artifact set managed by the cache.
@@ -875,7 +911,6 @@ abstract class CachedArtifact extends ArtifactSet {
   );
 }
 
-
 abstract class EngineCachedArtifact extends CachedArtifact {
   EngineCachedArtifact(
     this.stampName,
@@ -885,6 +920,9 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   @override
   final String stampName;
+
+  @override
+  bool get logUpdates => true;
 
   /// Return a list of (directory path, download URL path) tuples.
   List<List<String>> getBinaryDirs();
@@ -931,7 +969,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (final String pkgName in getPackageDirs()) {
-      await artifactUpdater.downloadZipArchive('Downloading package $pkgName...', Uri.parse('$url$pkgName.zip'), pkgDir);
+      await artifactUpdater.downloadZipArchive(Uri.parse('$url$pkgName.zip'), pkgDir);
     }
 
     for (final List<String> toolsDir in getBinaryDirs()) {
@@ -939,9 +977,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       final String urlPath = toolsDir[1];
       final Directory dir = fileSystem.directory(fileSystem.path.join(location.path, cacheDir));
 
-      // Avoid printing things like 'Downloading linux-x64 tools...' multiple times.
-      final String friendlyName = urlPath.replaceAll('/artifacts.zip', '').replaceAll('.zip', '');
-      await artifactUpdater.downloadZipArchive('Downloading $friendlyName tools...', Uri.parse(url + urlPath), dir);
+      await artifactUpdater.downloadZipArchive(Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir, operatingSystemUtils);
     }
@@ -1048,12 +1084,10 @@ class ArtifactUpdater {
 
   /// Download a zip archive from the given [url] and unzip it to [location].
   Future<void> downloadZipArchive(
-    String message,
     Uri url,
     Directory location,
   ) {
     return _downloadArchive(
-      message,
       url,
       location,
       _operatingSystemUtils.unzip,
@@ -1061,9 +1095,8 @@ class ArtifactUpdater {
   }
 
   /// Download a gzipped tarball from the given [url] and unpack it to [location].
-  Future<void> downloadZippedTarball(String message, Uri url, Directory location) {
+  Future<void> downloadZippedTarball(Uri url, Directory location) {
     return _downloadArchive(
-      message,
       url,
       location,
       _operatingSystemUtils.unpack,
@@ -1072,26 +1105,21 @@ class ArtifactUpdater {
 
   /// Download an archive from the given [url] and unzip it to [location].
   Future<void> _downloadArchive(
-    String message,
     Uri url,
     Directory location,
     void Function(File, Directory) extractor,
   ) async {
     final String downloadPath = flattenNameSubdirs(url, _fileSystem);
     final File tempFile = _createDownloadFile(downloadPath);
-    Status status;
     int retries = _kRetryCount;
 
     while (retries > 0) {
-      status = _logger.startProgress(
-        message,
-      );
       try {
         _ensureExists(tempFile.parent);
         if (tempFile.existsSync()) {
           tempFile.deleteSync();
         }
-        await _download(url, tempFile, status);
+        await _download(url, tempFile);
 
         if (!tempFile.existsSync()) {
           throw Exception('Did not find downloaded file ${tempFile.path}');
@@ -1120,8 +1148,6 @@ class ArtifactUpdater {
         // This error should not be hit if there was not a storage URL override, allow the
         // tool to crash.
         rethrow;
-      } finally {
-        status.stop();
       }
       /// Unzipping multiple file into a directory will not remove old files
       /// from previous versions that are not present in the new bundle.
@@ -1175,7 +1201,7 @@ class ArtifactUpdater {
   ///
   /// See also:
   ///   * https://cloud.google.com/storage/docs/xml-api/reference-headers#xgooghash
-  Future<void> _download(Uri url, File file, Status status) async {
+  Future<void> _download(Uri url, File file) async {
     final bool isAllowedUrl = _allowedBaseUrls.any((String baseUrl) => url.toString().startsWith(baseUrl));
 
     // In tests make this a hard failure.
@@ -1187,12 +1213,10 @@ class ArtifactUpdater {
 
     // In production, issue a warning but allow the download to proceed.
     if (!isAllowedUrl) {
-      status.pause();
       _logger.printWarning(
         'Downloading an artifact that may not be reachable in some environments (e.g. firewalled environments): $url\n'
         'This should not have happened. This is likely a Flutter SDK bug. Please file an issue at https://github.com/flutter/flutter/issues/new?template=1_activation.yml'
       );
-      status.resume();
     }
 
     final HttpClientRequest request = await _httpClient.getUrl(url);

@@ -41,6 +41,9 @@ class FakeDyldEnvironmentArtifact extends ArtifactSet {
   @override
   Future<void> update(ArtifactUpdater artifactUpdater, Logger logger, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils, {bool offline = false}) async {
   }
+
+  @override
+  bool get logUpdates => true;
 }
 
 /// A fake process implementation which can be provided all necessary values.
