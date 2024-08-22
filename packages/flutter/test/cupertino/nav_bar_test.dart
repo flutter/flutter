@@ -158,8 +158,7 @@ void main() {
   });
 
   testWidgets(
-      'Blur affect is disabled when disableBackgroundFilterBlur is true',
-      (WidgetTester test) async {
+      'Blur affect is disabled when disableBackgroundFilterBlur is true', (WidgetTester test) async {
     await test.pumpWidget(
       const CupertinoApp(
         theme:  CupertinoThemeData(brightness: Brightness.light),
