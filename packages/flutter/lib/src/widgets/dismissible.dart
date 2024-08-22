@@ -578,8 +578,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
     final double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
 
-    // Use value returned by `shouldTriggerDismiss` if a callback is provided
-    // If the callback returns null, use the default behavior
+    // Use value returned by `shouldTriggerDismiss` if a callback is provided.
+    // If the callback returns null, use the default behavior.
     if (widget.shouldTriggerDismiss case final TriggerDismissCallback shouldDismissCallback) {
       final TriggerDismissDetails triggerDismissDetails = TriggerDismissDetails(
         direction: _dismissDirection,
