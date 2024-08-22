@@ -186,11 +186,9 @@ void main() {
     void matchExpect(RenderBox renderBox, double nextDestinationY) {
       expect(
         renderBox.localToGlobal(Offset.zero),
-        equals(
-          Offset(
-            (destinationWidth - renderBox.size.width) / 2.0,
-            nextDestinationY + (destinationHeight - renderBox.size.height) / 2.0,
-          ),
+        Offset(
+          (destinationWidth - renderBox.size.width) / 2.0,
+          nextDestinationY + (destinationHeight - renderBox.size.height) / 2.0,
         ),
       );
     }
@@ -230,18 +228,11 @@ void main() {
       trailingWidget = null;
     });
     await tester.pumpAndSettle();
-    {
-      final RenderBox leadingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey));
-      expect(
-        leadingWidgetRenderBox.localToGlobal(Offset.zero),
-        equals(
-          const Offset(
-            0.0,
-            topPadding,
-          ),
-        ),
-      );
-    }
+    RenderBox leadingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey));
+    expect(
+      leadingWidgetRenderBox.localToGlobal(Offset.zero),
+      const Offset(0.0, topPadding),
+    );
 
     // one destination and leading widget
     stateSetter(() {
@@ -254,23 +245,16 @@ void main() {
       ];
     });
     await tester.pumpAndSettle();
-    {
-      double nextDestinationY = topPadding;
-      final RenderBox leadingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey));
-      expect(
-        leadingWidgetRenderBox.localToGlobal(Offset.zero),
-        equals(
-           Offset(
-            (destinationWidth - leadingWidgetRenderBox.size.width) / 2.0,
-            nextDestinationY,
-          ),
-        ),
-      );
+    double nextDestinationY = topPadding;
+    leadingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey));
+    expect(
+      leadingWidgetRenderBox.localToGlobal(Offset.zero),
+      Offset((destinationWidth - leadingWidgetRenderBox.size.width) / 2.0, nextDestinationY),
+    );
 
-      nextDestinationY += fabHeight + spacerPadding + destinationSpacing / 2;
-      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite_border);
-      matchExpect(firstIconRenderBox, nextDestinationY);
-    }
+    nextDestinationY += fabHeight + spacerPadding + destinationSpacing / 2;
+    RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite_border);
+    matchExpect(firstIconRenderBox, nextDestinationY);
 
     // two destinations and leading widget
     stateSetter(() {
@@ -288,27 +272,20 @@ void main() {
       ];
     });
     await tester.pumpAndSettle();
-    {
-      double nextDestinationY = topPadding;
-      final RenderBox leadingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey));
-      expect(
-        leadingWidgetRenderBox.localToGlobal(Offset.zero),
-        equals(
-           Offset(
-            (destinationWidth - leadingWidgetRenderBox.size.width) / 2.0,
-            nextDestinationY,
-          ),
-        ),
-      );
+    nextDestinationY = topPadding;
+    leadingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(leadingWidgetKey));
+    expect(
+      leadingWidgetRenderBox.localToGlobal(Offset.zero),
+      Offset((destinationWidth - leadingWidgetRenderBox.size.width) / 2.0, nextDestinationY),
+    );
 
-      nextDestinationY += fabHeight + spacerPadding + destinationSpacing / 2;
-      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite_border);
-      matchExpect(firstIconRenderBox, nextDestinationY);
+    nextDestinationY += fabHeight + spacerPadding + destinationSpacing / 2;
+    firstIconRenderBox = _iconRenderBox(tester, Icons.favorite_border);
+    matchExpect(firstIconRenderBox, nextDestinationY);
 
-      nextDestinationY += destinationHeight + destinationSpacing;
-      final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-      matchExpect(secondIconRenderBox, nextDestinationY);
-    }
+    nextDestinationY += destinationHeight + destinationSpacing;
+    RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
+    matchExpect(secondIconRenderBox, nextDestinationY);
 
     // empty destinations and trailing widget
     stateSetter(() {
@@ -320,18 +297,11 @@ void main() {
       );
     });
     await tester.pumpAndSettle();
-    {
-      final RenderBox trailingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey));
-      expect(
-        trailingWidgetRenderBox.localToGlobal(Offset.zero),
-        equals(
-          const Offset(
-            0.0,
-            topPadding,
-          ),
-        ),
-      );
-    }
+    RenderBox trailingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey));
+    expect(
+      trailingWidgetRenderBox.localToGlobal(Offset.zero),
+      const Offset(0.0, topPadding),
+    );
 
     // one destination and trailing widget
     stateSetter(() {
@@ -344,23 +314,19 @@ void main() {
       ];
     });
     await tester.pumpAndSettle();
-    {
-      double nextDestinationY = topPadding + destinationSpacing / 2;
-      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite_border);
-      matchExpect(firstIconRenderBox, nextDestinationY);
+    nextDestinationY = topPadding + destinationSpacing / 2;
+    firstIconRenderBox = _iconRenderBox(tester, Icons.favorite_border);
+    matchExpect(firstIconRenderBox, nextDestinationY);
 
-      nextDestinationY += destinationHeight + destinationSpacing / 2;
-      final RenderBox trailingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey));
-      expect(
-        trailingWidgetRenderBox.localToGlobal(Offset.zero),
-        equals(
-          Offset(
-            (destinationWidth - trailingWidgetRenderBox.size.width) / 2.0,
-            nextDestinationY,
-          ),
-        ),
-      );
-    }
+    nextDestinationY += destinationHeight + destinationSpacing / 2;
+    trailingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey));
+    expect(
+      trailingWidgetRenderBox.localToGlobal(Offset.zero),
+      Offset(
+        (destinationWidth - trailingWidgetRenderBox.size.width) / 2.0,
+        nextDestinationY,
+      ),
+    );
 
     // two destinations and trailing widget
     stateSetter(() {
@@ -378,27 +344,23 @@ void main() {
         ];
     });
     await tester.pumpAndSettle();
-    {
-      double nextDestinationY = topPadding + destinationSpacing / 2;
-      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite_border);
-      matchExpect(firstIconRenderBox, nextDestinationY);
+    nextDestinationY = topPadding + destinationSpacing / 2;
+    firstIconRenderBox = _iconRenderBox(tester, Icons.favorite_border);
+    matchExpect(firstIconRenderBox, nextDestinationY);
 
-      nextDestinationY += destinationHeight + destinationSpacing;
-      final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-      matchExpect(secondIconRenderBox, nextDestinationY);
+    nextDestinationY += destinationHeight + destinationSpacing;
+    secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
+    matchExpect(secondIconRenderBox, nextDestinationY);
 
-      nextDestinationY += destinationHeight + destinationSpacing / 2.0;
-      final RenderBox trailingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey));
-      expect(
-        trailingWidgetRenderBox.localToGlobal(Offset.zero),
-        equals(
-          Offset(
-            (destinationWidth - trailingWidgetRenderBox.size.width) / 2.0,
-            nextDestinationY,
-          ),
-        ),
-      );
-    }
+    nextDestinationY += destinationHeight + destinationSpacing / 2.0;
+    trailingWidgetRenderBox = tester.renderObject<RenderBox>(find.byKey(trailingWidgetKey));
+    expect(
+      trailingWidgetRenderBox.localToGlobal(Offset.zero),
+      Offset(
+        (destinationWidth - trailingWidgetRenderBox.size.width) / 2.0,
+        nextDestinationY,
+      ),
+    );
   });
 
   testWidgets('Change destinations and selectedIndex', (WidgetTester tester) async {
