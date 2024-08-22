@@ -1434,7 +1434,8 @@ dev_dependencies:
 
   testUsingContext('Can test in a pub workspace',
       () async {
-    final Directory package = fs.directory('/package');
+    final String root = fs.path.rootPrefix(fs.currentDirectory.absolute.path);
+    final Directory package = fs.directory('${root}package').absolute;
     package.childFile('pubspec.yaml').createSync(recursive: true);
     package.childFile('pubspec.yaml').writeAsStringSync('''
 workspace:
