@@ -33,8 +33,8 @@ typedef DismissDirectionCallback = void Function(DismissDirection direction);
 /// Used by [Dismissible.confirmDismiss].
 typedef ConfirmDismissCallback = Future<bool?> Function(DismissDirection direction);
 
-/// Signature used by [Dismissible] to give the application an opportunity to
-/// accept or deny a dismiss gesture.
+/// Signature used by [Dismissible] to determine whether a user gesture
+/// should qualify as a dismissal.
 ///
 /// Used by [Dismissible.shouldTriggerDismiss].
 typedef TriggerDismissCallback = bool? Function(TriggerDismissDetails details);
