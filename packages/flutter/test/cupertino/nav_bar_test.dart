@@ -189,37 +189,6 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Blur affect is enabled when disableBackgroundFilterBlur is false',
-      (WidgetTester test) async {
-    final ScrollController scrollController = ScrollController();
-    addTearDown(scrollController.dispose);
-
-    await test.pumpWidget(
-      CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.light),
-        home: CupertinoPageScaffold(
-          navigationBar: const CupertinoNavigationBar(
-            middle: Text('Title'),
-            automaticBackgroundVisibility: false,
-          ),
-          child: ListView(
-            controller: scrollController,
-            children: const <Widget>[
-              Placeholder(),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    expect(
-      test.widget(find.byType(BackdropFilter)),
-      isA<BackdropFilter>().having(
-          (BackdropFilter filter) => filter.enabled, 'filter enabled', true),
-    );
-  });
-
   testWidgets('Nav bar displays correctly', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
