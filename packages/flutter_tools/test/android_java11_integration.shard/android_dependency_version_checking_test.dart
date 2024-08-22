@@ -14,6 +14,8 @@ import '../src/context.dart';
 
 
 // This test requires Java 11 due to the intentionally low version of Gradle.
+// It also overrides the template compile sdk version to 34, because using 35
+// requires AGP 8.0+.
 void main() {
   late Directory tempDir;
 
@@ -28,7 +30,7 @@ void main() {
   testUsingContext(
       'AGP version out of "warn" support band but in "error" band builds '
           'successfully and prints warning', () async {
-    final VersionTuple versionTuple = VersionTuple(agpVersion: '7.0.0', gradleVersion: '7.5', kotlinVersion: '1.7.10');
+    final VersionTuple versionTuple = VersionTuple(agpVersion: '7.0.0', gradleVersion: '7.5', kotlinVersion: '1.7.10', compileSdkVersion: '34');
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
         versions: versionTuple,
         tempDir: tempDir
@@ -41,7 +43,7 @@ void main() {
       'Gradle version out of "warn" support band but in "error" band builds '
           'successfully and prints warning', () async {
     // Create a new flutter project.
-    final VersionTuple versionTuple = VersionTuple(agpVersion: '7.0.0', gradleVersion: '7.0.2', kotlinVersion: '1.7.10');
+    final VersionTuple versionTuple = VersionTuple(agpVersion: '7.0.0', gradleVersion: '7.0.2', kotlinVersion: '1.7.10', compileSdkVersion: '34');
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
         versions: versionTuple,
         tempDir: tempDir
@@ -53,7 +55,7 @@ void main() {
   testUsingContext(
       'Kotlin version out of "warn" support band but in "error" band builds '
           'successfully and prints warning', () async {
-    final VersionTuple versionTuple = VersionTuple(agpVersion: '7.4.0', gradleVersion: '7.5', kotlinVersion: '1.7.0');
+    final VersionTuple versionTuple = VersionTuple(agpVersion: '7.4.0', gradleVersion: '7.5', kotlinVersion: '1.7.0', compileSdkVersion: '34');
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
         versions: versionTuple,
         tempDir: tempDir
