@@ -34,15 +34,7 @@ void main() {
     expect(find.widgetWithText(SliverList, 'Item: 1'), findsOne);
 
     // Scroll the updated screen.
-    final Offset location = tester.getCenter(find.byType(CustomScrollView));
-    final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
-    testPointer.hover(location);
-    await tester.sendEventToBinding(
-      PointerScrollEvent(
-        position: location,
-        scrollDelta: const Offset(0, -1),
-      ),
-    );
+    await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 50.0));
     await tester.pump();
 
     // An additional SliverList appears.
