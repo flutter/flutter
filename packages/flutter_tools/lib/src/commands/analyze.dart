@@ -210,6 +210,12 @@ class AnalyzeCommand extends FlutterCommand {
       return false;
     }
 
+    // Android analyze needs to process resource, i.e. evaluating build
+    // settings and assets, and thus needs to run pub.
+    if (boolArg('android')) {
+      return true;
+    }
+
     return super.shouldRunPub;
   }
 
