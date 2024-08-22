@@ -322,12 +322,12 @@ class TriggerDismissDetails {
   /// completely outside its parent.
   final double progress;
 
-  /// Distance from the start of the drag to the current position
-  ///
-  /// The drag distance is represented in logical pixels.
+  /// Distance from the start of the drag to the current position,
+  /// represented in logical pixels.
   final double dragExtent;
 
   /// The component of the velocity parallel to the [DismissDirection].
+  ///
   /// A fling away from the center will have a positive value.
   final double velocity;
 }
