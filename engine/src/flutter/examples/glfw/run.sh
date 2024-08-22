@@ -25,6 +25,7 @@ if [ ! -d myapp ]; then
 fi
 
 cd myapp
+flutter pub add flutter_gpu --sdk=flutter
 cp ../../main.dart lib/main.dart
 flutter build bundle \
         --local-engine-src-path ../../../../../ \
