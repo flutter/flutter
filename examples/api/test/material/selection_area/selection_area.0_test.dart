@@ -7,7 +7,6 @@ import 'package:flutter_api_samples/material/selection_area/selection_area.0.dar
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-
   testWidgets('Texts are descendant of the SelectionArea', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SelectionAreaExampleApp(),
