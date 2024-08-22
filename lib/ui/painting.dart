@@ -83,7 +83,7 @@ Color _scaleAlpha(Color a, double factor) {
 ///  * [Colors](https://api.flutter.dev/flutter/material/Colors-class.html), which
 ///    defines the colors found in the Material Design specification.
 class Color {
-  /// Construct a color from the lower 32 bits of an [int].
+  /// Construct an sRGB color from the lower 32 bits of an [int].
   ///
   /// The bits are interpreted as follows:
   ///
@@ -99,9 +99,32 @@ class Color {
   /// For example, to get a fully opaque orange, you would use `const
   /// Color(0xFFFF9000)` (`FF` for the alpha, `FF` for the red, `90` for the
   /// green, and `00` for the blue).
-  const Color(int value) : value = value & 0xFFFFFFFF;
+  const Color(int value)
+      : _value = value & 0xFFFFFFFF,
+        colorSpace = ColorSpace.sRGB,
+        _a = null,
+        _r = null,
+        _g = null,
+        _b = null;
 
-  /// Construct a color from the lower 8 bits of four integers.
+  /// Construct a color with normalized color components.
+  ///
+  /// Normalized color components allows arbitrary bit depths for color
+  /// components to be be supported. The values will be normalized relative to
+  /// the [ColorSpace] argument.
+  const Color.from(
+      {required double alpha,
+      required double red,
+      required double green,
+      required double blue,
+      this.colorSpace = ColorSpace.sRGB})
+      : _value = 0,
+        _a = alpha,
+        _r = red,
+        _g = green,
+        _b = blue;
+
+  /// Construct an sRGB color from the lower 8 bits of four integers.
   ///
   /// * `a` is the alpha value, with 0 being transparent and 255 being fully
   ///   opaque.
@@ -113,13 +136,32 @@ class Color {
   ///
   /// See also [fromRGBO], which takes the alpha value as a floating point
   /// value.
-  const Color.fromARGB(int a, int r, int g, int b) :
-    value = (((a & 0xff) << 24) |
-             ((r & 0xff) << 16) |
-             ((g & 0xff) << 8)  |
-             ((b & 0xff) << 0)) & 0xFFFFFFFF;
+  const Color.fromARGB(int a, int r, int g, int b)
+      : _value = (((a & 0xff) << 24) |
+                ((r & 0xff) << 16) |
+                ((g & 0xff) << 8) |
+                ((b & 0xff) << 0)) &
+            0xFFFFFFFF,
+        colorSpace = ColorSpace.sRGB,
+        _a = null,
+        _r = null,
+        _g = null,
+        _b = null;
 
-  /// Create a color from red, green, blue, and opacity, similar to `rgba()` in CSS.
+  const Color._fromARGBC(
+      int alpha, int red, int green, int blue, this.colorSpace)
+      : _value = (((alpha & 0xff) << 24) |
+                ((red & 0xff) << 16) |
+                ((green & 0xff) << 8) |
+                ((blue & 0xff) << 0)) &
+            0xFFFFFFFF,
+        _a = null,
+        _r = null,
+        _g = null,
+        _b = null;
+
+  /// Create an sRGB color from red, green, blue, and opacity, similar to
+  /// `rgba()` in CSS.
   ///
   /// * `r` is [red], from 0 to 255.
   /// * `g` is [green], from 0 to 255.
@@ -130,11 +172,43 @@ class Color {
   /// Out of range values are brought into range using modulo 255.
   ///
   /// See also [fromARGB], which takes the opacity as an integer value.
-  const Color.fromRGBO(int r, int g, int b, double opacity) :
-    value = ((((opacity * 0xff ~/ 1) & 0xff) << 24) |
-              ((r                    & 0xff) << 16) |
-              ((g                    & 0xff) << 8)  |
-              ((b                    & 0xff) << 0)) & 0xFFFFFFFF;
+  const Color.fromRGBO(int r, int g, int b, double opacity)
+      : _value = ((((opacity * 0xff ~/ 1) & 0xff) << 24) |
+                ((r & 0xff) << 16) |
+                ((g & 0xff) << 8) |
+                ((b & 0xff) << 0)) &
+            0xFFFFFFFF,
+        colorSpace = ColorSpace.sRGB,
+        _a = null,
+        _r = null,
+        _g = null,
+        _b = null;
+
+  /// The alpha channel of this color.
+  ///
+  /// A value of 0.0 means this color is fully transparent. A value of 1.0 means
+  /// this color is fully opaque.
+  double get a => _a ?? (alpha / 255);
+  final double? _a;
+
+  /// The red channel of this color.
+  double get r => _r ?? (red / 255);
+  final double? _r;
+
+  /// The green channel of this color.
+  double get g => _g ?? (green / 255);
+  final double? _g;
+
+  /// The blue channel of this color.
+  double get b => _b ?? (blue / 255);
+  final double? _b;
+
+  /// The color space of this color.
+  final ColorSpace colorSpace;
+
+  static int _floatToInt8(double x) {
+    return ((x * 255.0).round()) & 0xff;
+  }
 
   /// A 32 bit value representing this color.
   ///
@@ -144,28 +218,73 @@ class Color {
   /// * Bits 16-23 are the red value.
   /// * Bits 8-15 are the green value.
   /// * Bits 0-7 are the blue value.
-  final int value;
+  @Deprecated('Use component accessors like .r or .g.')
+  int get value {
+    if (_a != null && _r != null && _g != null && _b != null) {
+      return _floatToInt8(_a) << 24 |
+          _floatToInt8(_r) << 16 |
+          _floatToInt8(_g) << 8 |
+          _floatToInt8(_b) << 0;
+    } else {
+      return _value;
+    }
+  }
+  final int _value;
 
   /// The alpha channel of this color in an 8 bit value.
   ///
   /// A value of 0 means this color is fully transparent. A value of 255 means
   /// this color is fully opaque.
+  @Deprecated('Use .a.')
   int get alpha => (0xff000000 & value) >> 24;
 
   /// The alpha channel of this color as a double.
   ///
   /// A value of 0.0 means this color is fully transparent. A value of 1.0 means
   /// this color is fully opaque.
+  @Deprecated('Use .a.')
   double get opacity => alpha / 0xFF;
 
   /// The red channel of this color in an 8 bit value.
+  @Deprecated('Use .r.')
   int get red => (0x00ff0000 & value) >> 16;
 
   /// The green channel of this color in an 8 bit value.
+  @Deprecated('Use .g.')
   int get green => (0x0000ff00 & value) >> 8;
 
   /// The blue channel of this color in an 8 bit value.
+  @Deprecated('Use .b.')
   int get blue => (0x000000ff & value) >> 0;
+
+  /// Returns a new color that matches this color with the passed in components
+  /// changed.
+  ///
+  /// Changes to color components will be applied before applying changes to the
+  /// color space.
+  Color withValues(
+      {double? alpha,
+      double? red,
+      double? green,
+      double? blue,
+      ColorSpace? colorSpace}) {
+    Color? updatedComponents;
+    if (alpha != null || red != null || green != null || blue != null) {
+      updatedComponents = Color.from(
+          alpha: alpha ?? a,
+          red: red ?? r,
+          green: green ?? g,
+          blue: blue ?? b,
+          colorSpace: this.colorSpace);
+    }
+    if (colorSpace != null && colorSpace != this.colorSpace) {
+      final _ColorTransform transform =
+          _getColorTransform(this.colorSpace, colorSpace);
+      return transform.transform(updatedComponents ?? this, colorSpace);
+    } else {
+      return updatedComponents ?? this;
+    }
+  }
 
   /// Returns a new color that matches this color with the alpha channel
   /// replaced with `a` (which ranges from 0 to 255).
@@ -179,6 +298,7 @@ class Color {
   /// replaced with the given `opacity` (which ranges from 0.0 to 1.0).
   ///
   /// Out of range values will have unexpected effects.
+  @Deprecated('Use .withValues() to avoid precision loss.')
   Color withOpacity(double opacity) {
     assert(opacity >= 0.0 && opacity <= 1.0);
     return withAlpha((255.0 * opacity).round());
@@ -253,6 +373,10 @@ class Color {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static Color? lerp(Color? a, Color? b, double t) {
+    // TODO(gaaclarke): Update math to use floats. This was already attempted
+    //                  but it leads to subtle changes that change test results.
+    assert(a?.colorSpace != ColorSpace.extendedSRGB);
+    assert(b?.colorSpace != ColorSpace.extendedSRGB);
     if (b == null) {
       if (a == null) {
         return null;
@@ -263,11 +387,13 @@ class Color {
       if (a == null) {
         return _scaleAlpha(b, t);
       } else {
-        return Color.fromARGB(
+        assert(a.colorSpace == b.colorSpace);
+        return Color._fromARGBC(
           _clampInt(_lerpInt(a.alpha, b.alpha, t).toInt(), 0, 255),
           _clampInt(_lerpInt(a.red, b.red, t).toInt(), 0, 255),
           _clampInt(_lerpInt(a.green, b.green, t).toInt(), 0, 255),
           _clampInt(_lerpInt(a.blue, b.blue, t).toInt(), 0, 255),
+          a.colorSpace,
         );
       }
     }
@@ -282,6 +408,10 @@ class Color {
   /// operations for two things that are solid colors with the same shape, but
   /// overlay each other: instead, just paint one with the combined color.
   static Color alphaBlend(Color foreground, Color background) {
+    assert(foreground.colorSpace == background.colorSpace);
+    assert(foreground.colorSpace != ColorSpace.extendedSRGB);
+    // TODO(gaaclarke): Update math to use floats. This was already attempted
+    //                  but it leads to subtle changes that change test results.
     final int alpha = foreground.alpha;
     if (alpha == 0x00) { // Foreground completely transparent.
       return background;
@@ -289,21 +419,23 @@ class Color {
     final int invAlpha = 0xff - alpha;
     int backAlpha = background.alpha;
     if (backAlpha == 0xff) { // Opaque background case
-      return Color.fromARGB(
+      return Color._fromARGBC(
         0xff,
         (alpha * foreground.red + invAlpha * background.red) ~/ 0xff,
         (alpha * foreground.green + invAlpha * background.green) ~/ 0xff,
         (alpha * foreground.blue + invAlpha * background.blue) ~/ 0xff,
+        foreground.colorSpace,
       );
     } else { // General case
       backAlpha = (backAlpha * invAlpha) ~/ 0xff;
       final int outAlpha = alpha + backAlpha;
       assert(outAlpha != 0x00);
-      return Color.fromARGB(
+      return Color._fromARGBC(
         outAlpha,
         (foreground.red * alpha + background.red * backAlpha) ~/ outAlpha,
         (foreground.green * alpha + background.green * backAlpha) ~/ outAlpha,
         (foreground.blue * alpha + background.blue * backAlpha) ~/ outAlpha,
+        foreground.colorSpace,
       );
     }
   }
@@ -323,13 +455,15 @@ class Color {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is Color
-        && other.value == value;
+    return other is Color &&
+        other.value == value &&
+        other.colorSpace == colorSpace;
   }
 
   @override
-  int get hashCode => value.hashCode;
+  int get hashCode => Object.hash(value, colorSpace);
 
+  // TODO(gaaclarke): Make toString() print out float values.
   @override
   String toString() => 'Color(0x${value.toRadixString(16).padLeft(8, '0')})';
 }
@@ -1126,22 +1260,31 @@ final class Paint {
   @pragma('vm:entry-point')
   final ByteData _data = ByteData(_kDataByteCount);
 
+  // Must match //lib/ui/painting/paint.cc.
   static const int _kIsAntiAliasIndex = 0;
-  static const int _kColorIndex = 1;
-  static const int _kBlendModeIndex = 2;
-  static const int _kStyleIndex = 3;
-  static const int _kStrokeWidthIndex = 4;
-  static const int _kStrokeCapIndex = 5;
-  static const int _kStrokeJoinIndex = 6;
-  static const int _kStrokeMiterLimitIndex = 7;
-  static const int _kFilterQualityIndex = 8;
-  static const int _kMaskFilterIndex = 9;
-  static const int _kMaskFilterBlurStyleIndex = 10;
-  static const int _kMaskFilterSigmaIndex = 11;
-  static const int _kInvertColorIndex = 12;
+  static const int _kColorRedIndex = 1;
+  static const int _kColorGreenIndex = 2;
+  static const int _kColorBlueIndex = 3;
+  static const int _kColorAlphaIndex = 4;
+  static const int _kColorSpaceIndex = 5;
+  static const int _kBlendModeIndex = 6;
+  static const int _kStyleIndex = 7;
+  static const int _kStrokeWidthIndex = 8;
+  static const int _kStrokeCapIndex = 9;
+  static const int _kStrokeJoinIndex = 10;
+  static const int _kStrokeMiterLimitIndex = 11;
+  static const int _kFilterQualityIndex = 12;
+  static const int _kMaskFilterIndex = 13;
+  static const int _kMaskFilterBlurStyleIndex = 14;
+  static const int _kMaskFilterSigmaIndex = 15;
+  static const int _kInvertColorIndex = 16;
 
   static const int _kIsAntiAliasOffset = _kIsAntiAliasIndex << 2;
-  static const int _kColorOffset = _kColorIndex << 2;
+  static const int _kColorRedOffset = _kColorRedIndex << 2;
+  static const int _kColorGreenOffset = _kColorGreenIndex << 2;
+  static const int _kColorBlueOffset = _kColorBlueIndex << 2;
+  static const int _kColorAlphaOffset = _kColorAlphaIndex << 2;
+  static const int _kColorSpaceOffset = _kColorSpaceIndex << 2;
   static const int _kBlendModeOffset = _kBlendModeIndex << 2;
   static const int _kStyleOffset = _kStyleIndex << 2;
   static const int _kStrokeWidthOffset = _kStrokeWidthIndex << 2;
@@ -1155,7 +1298,7 @@ final class Paint {
   static const int _kInvertColorOffset = _kInvertColorIndex << 2;
 
   // If you add more fields, remember to update _kDataByteCount.
-  static const int _kDataByteCount = 52; // 4 * (last index + 1).
+  static const int _kDataByteCount = 68; // 4 * (last index + 1).
 
   // Binary format must match the deserialization code in paint.cc.
   // C++ unit tests access this.
@@ -1201,12 +1344,28 @@ final class Paint {
   /// This color is not used when compositing. To colorize a layer, use
   /// [colorFilter].
   Color get color {
-    final int encoded = _data.getInt32(_kColorOffset, _kFakeHostEndian);
-    return Color(encoded ^ _kColorDefault);
+    final double red = _data.getFloat32(_kColorRedOffset, _kFakeHostEndian);
+    final double green = _data.getFloat32(_kColorGreenOffset, _kFakeHostEndian);
+    final double blue = _data.getFloat32(_kColorBlueOffset, _kFakeHostEndian);
+    final double alpha =
+        1.0 - _data.getFloat32(_kColorAlphaOffset, _kFakeHostEndian);
+    final ColorSpace colorSpace = _indexToColorSpace(
+        _data.getInt32(_kColorSpaceOffset, _kFakeHostEndian));
+    return Color.from(
+        alpha: alpha,
+        red: red,
+        green: green,
+        blue: blue,
+        colorSpace: colorSpace);
   }
+
   set color(Color value) {
-    final int encoded = value.value ^ _kColorDefault;
-    _data.setInt32(_kColorOffset, encoded, _kFakeHostEndian);
+    _data.setFloat32(_kColorRedOffset, value.r, _kFakeHostEndian);
+    _data.setFloat32(_kColorGreenOffset, value.g, _kFakeHostEndian);
+    _data.setFloat32(_kColorBlueOffset, value.b, _kFakeHostEndian);
+    _data.setFloat32(_kColorAlphaOffset, 1.0 - value.a, _kFakeHostEndian);
+    _data.setInt32(_kColorSpaceOffset, _colorSpaceToIndex(value.colorSpace),
+        _kFakeHostEndian);
   }
 
   // Must be kept in sync with the default in paint.cc.
@@ -1580,6 +1739,38 @@ enum ColorSpace {
   /// see the extended values an [ImageByteFormat] like
   /// [ImageByteFormat.rawExtendedRgba128] must be used.
   extendedSRGB,
+  /// The Display P3 color space.
+  ///
+  /// This is a wide gamut color space that has broad hardware support. It's
+  /// supported in cases like using Impeller on iOS. When used on a platform
+  /// that doesn't support Display P3, the colors will be clamped to sRGB.
+  ///
+  /// See also: https://en.wikipedia.org/wiki/DCI-P3
+  displayP3,
+}
+
+int _colorSpaceToIndex(ColorSpace colorSpace) {
+  switch (colorSpace) {
+    case ColorSpace.sRGB:
+      return 0;
+    case ColorSpace.extendedSRGB:
+      return 1;
+    case ColorSpace.displayP3:
+      return 2;
+  }
+}
+
+ColorSpace _indexToColorSpace(int index) {
+  switch(index) {
+    case 0:
+      return ColorSpace.sRGB;
+    case 1:
+      return ColorSpace.extendedSRGB;
+    case 2:
+      return ColorSpace.displayP3;
+    default:
+      throw ArgumentError('Unknown color space: $index');
+  }
 }
 
 /// The format in which image bytes should be returned when using
@@ -3462,6 +3653,121 @@ class MaskFilter {
 
   @override
   String toString() => 'MaskFilter.blur($_style, ${_sigma.toStringAsFixed(1)})';
+}
+
+abstract class _ColorTransform {
+  Color transform(Color color, ColorSpace resultColorSpace);
+}
+
+class _IdentityColorTransform implements _ColorTransform {
+  const _IdentityColorTransform();
+  @override
+  Color transform(Color color, ColorSpace resultColorSpace) => color;
+}
+
+class _ClampTransform implements _ColorTransform {
+  const _ClampTransform(this.child);
+  final _ColorTransform child;
+  @override
+  Color transform(Color color, ColorSpace resultColorSpace) {
+    return Color.from(
+      alpha: clampDouble(color.a, 0, 1),
+      red: clampDouble(color.r, 0, 1),
+      green: clampDouble(color.g, 0, 1),
+      blue: clampDouble(color.b, 0, 1),
+      colorSpace: resultColorSpace);
+  }
+}
+
+class _MatrixColorTransform implements _ColorTransform {
+  /// Row-major.
+  const _MatrixColorTransform(this.values);
+
+  final List<double> values;
+
+  @override
+  Color transform(Color color, ColorSpace resultColorSpace) {
+    return Color.from(
+        alpha: color.a,
+        red: values[0] * color.r +
+            values[1] * color.g +
+            values[2] * color.b +
+            values[3],
+        green: values[4] * color.r +
+            values[5] * color.g +
+            values[6] * color.b +
+            values[7],
+        blue: values[8] * color.r +
+            values[9] * color.g +
+            values[10] * color.b +
+            values[11],
+        colorSpace: resultColorSpace);
+  }
+}
+
+_ColorTransform _getColorTransform(ColorSpace source, ColorSpace destination) {
+  // The transforms were calculated with the following octave script from known
+  // conversions. These transforms have a white point that matches Apple's.
+  //
+  // p3Colors = [
+  //   1, 0, 0, 0.25;
+  //   0, 1, 0, 0.5;
+  //   0, 0, 1, 0.75;
+  //   1, 1, 1, 1;
+  // ];
+  // srgbColors = [
+  //   1.0930908918380737,  -0.5116420984268188, -0.0003518527664709836, 0.12397786229848862;
+  //   -0.22684034705162048, 1.0182716846466064,  0.00027732315356843174,  0.5073589086532593;
+  //   -0.15007957816123962, -0.31062406301498413, 1.0420056581497192,  0.771118700504303;
+  //   1,       1,       1,       1;
+  // ];
+  //
+  // format long
+  // p3ToSrgb = srgbColors * inv(p3Colors)
+  // srgbToP3 = inv(p3ToSrgb)
+  const _MatrixColorTransform srgbToP3 = _MatrixColorTransform(<double>[
+    0.808052267214446, 0.220292047628890, -0.139648846160100,
+    0.145738111193222, //
+    0.096480880462996, 0.916386732581291, -0.086093928394828,
+    0.089490172325882, //
+    -0.127099563510240, -0.068983484963878, 0.735426667591299, 0.233655661600230
+  ]);
+  const _ColorTransform p3ToSrgb = _MatrixColorTransform(<double>[
+    1.306671048092539, -0.298061942172353, 0.213228303487995,
+    -0.213580156254466, //
+    -0.117390025596251, 1.127722006101976, 0.109727644608938,
+    -0.109450321455370, //
+    0.214813187718391, 0.054268702864647, 1.406898424029350, -0.364892765879631
+  ]);
+  switch (source) {
+    case ColorSpace.sRGB:
+      switch (destination) {
+        case ColorSpace.sRGB:
+          return const _IdentityColorTransform();
+        case ColorSpace.extendedSRGB:
+          return const _IdentityColorTransform();
+        case ColorSpace.displayP3:
+          return srgbToP3;
+      }
+    case ColorSpace.extendedSRGB:
+      switch (destination) {
+        case ColorSpace.sRGB:
+          return const _ClampTransform(_IdentityColorTransform());
+        case ColorSpace.extendedSRGB:
+          return const _IdentityColorTransform();
+        case ColorSpace.displayP3:
+          return const _ClampTransform(srgbToP3);
+      }
+    case ColorSpace.displayP3:
+      switch (destination) {
+        case ColorSpace.sRGB:
+          return const _ClampTransform(p3ToSrgb);
+        case ColorSpace.extendedSRGB:
+          return p3ToSrgb;
+        case ColorSpace.displayP3:
+          return const _IdentityColorTransform();
+      }
+  }
 }
 
 /// A description of a color filter to apply when drawing a shape or compositing
