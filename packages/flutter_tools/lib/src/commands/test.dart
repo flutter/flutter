@@ -425,6 +425,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         flavor: buildInfo.flavor,
         impellerStatus: debuggingOptions.enableImpeller,
         buildMode: debuggingOptions.buildInfo.mode,
+        packageConfigPath: buildInfo.packageConfigPath,
       );
       testAssetDirectory = globals.fs.path.
         join(flutterProject.directory.path, 'build', 'unit_test_assets');
@@ -691,12 +692,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     required String? flavor,
     required ImpellerStatus impellerStatus,
     required BuildMode buildMode,
+    required String packageConfigPath,
   }) async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    // TODO(sigurdm): parametrize packageConfigPath to support testing
-    // workspaces.
     final int build = await assetBundle.build(
-      packageConfigPath: '.dart_tool/package_config.json',
+      packageConfigPath: packageConfigPath,
       flavor: flavor,
     );
     if (build != 0) {
