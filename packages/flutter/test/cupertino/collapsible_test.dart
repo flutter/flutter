@@ -23,7 +23,7 @@ void main() {
       const CupertinoApp(
         home: Center(
             child: CupertinoCollapsible(
-            collapsed: true,
+            isExpanded: false,
             child: testChild,
           ),
         ),
@@ -58,11 +58,11 @@ void main() {
   testWidgets('CupertinoCollapsible paints child while animating', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    Widget buildCollapsible({bool value = true}) {
+    Widget buildCollapsible({bool value = false}) {
       return CupertinoApp(
         home: Center(
           child: CupertinoCollapsible(
-            collapsed: value,
+            isExpanded: value,
             child: testChild,
           ),
         ),
@@ -72,7 +72,7 @@ void main() {
     await tester.pumpWidget(buildCollapsible());
     expect(find.byWidget(testChild).hitTestable(), findsNothing);
 
-    await tester.pumpWidget(buildCollapsible(value: false));
+    await tester.pumpWidget(buildCollapsible(value: true));
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byWidget(testChild).hitTestable(), findsOneWidget);
 
@@ -81,11 +81,11 @@ void main() {
   testWidgets('CupertinoCollapsible animates height', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    Widget buildCollapsible({bool value = true}) {
+    Widget buildCollapsible({bool value = false}) {
       return CupertinoApp(
         home: Center(
           child: CupertinoCollapsible(
-            collapsed: value,
+            isExpanded: value,
             child: testChild,
           ),
         ),
@@ -96,7 +96,7 @@ void main() {
     expect(find.byWidget(testChild), findsOneWidget);
     expect(tester.getSize(find.byType(CupertinoCollapsible)).height, 0.0);
 
-    await tester.pumpWidget(buildCollapsible(value: false));
+    await tester.pumpWidget(buildCollapsible(value: true));
     expect(tester.getSize(find.byType(CupertinoCollapsible)).height, 0.0);
 
     await tester.pump(const Duration(milliseconds: 100));
@@ -111,11 +111,11 @@ void main() {
   testWidgets('CupertinoCollapsible animates height with custom duration', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    Widget buildCollapsible({bool value = true}) {
+    Widget buildCollapsible({bool value = false}) {
       return CupertinoApp(
         home: Center(
           child: CupertinoCollapsible(
-            collapsed: value,
+            isExpanded: value,
             animationDuration: const Duration(milliseconds: 100),
             child: testChild,
           ),
@@ -127,7 +127,7 @@ void main() {
     expect(find.byWidget(testChild), findsOneWidget);
     expect(tester.getSize(find.byType(CupertinoCollapsible)).height, 0.0);
 
-    await tester.pumpWidget(buildCollapsible(value: false));
+    await tester.pumpWidget(buildCollapsible(value: true));
     await tester.pump(const Duration(milliseconds: 50));
     expect(tester.getSize(find.byType(CupertinoCollapsible)).height, 50.0);
 

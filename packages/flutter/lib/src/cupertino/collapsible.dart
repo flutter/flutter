@@ -22,17 +22,17 @@ class CupertinoCollapsible extends StatelessWidget {
   const CupertinoCollapsible({
     super.key,
     required this.child,
-    this.collapsed = false,
+    this.isExpanded = true,
     this.animationDuration = kCupertinoCollapsibleAnimationDuration,
   }) : super();
 
   /// The child widget to be collapsed or expanded.
   final Widget child;
 
-  /// Whether the child is collapsed or expanded.
+  /// Whether the child is expanded.
   ///
-  /// Defaults to false.
-  final bool collapsed;
+  /// Defaults to true.
+  final bool isExpanded;
 
   /// The duration of the animation when collapsing or expanding.
   ///
@@ -43,7 +43,7 @@ class CupertinoCollapsible extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedCrossFade(
       duration: animationDuration,
-      crossFadeState: collapsed ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+      crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
       alignment: Alignment.bottomLeft,
       firstChild: const SizedBox(width: double.infinity, height: 0,),
       secondChild: child,
