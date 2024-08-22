@@ -157,17 +157,22 @@ class Dismissible extends StatefulWidget {
   /// and [onDismissed] callbacks will not run.
   final ConfirmDismissCallback? confirmDismiss;
 
-  /// Gives the app the ability to accept or reject a dismiss gesture, overriding
-  /// the default behavior.
+  /// Whether a drag should be considered as a dismiss gesture.
   ///
-  /// Returning `null` will use de default behavior.
+  /// If `null`, defers to behavior defined in [dismissThresholds].
+  /// (This applies both when the callback returns `null`,
+  /// and when no callback is provided.)
   ///
   /// {@tool snippet}
-  /// The default flinging effect can be disabled by using:
+  /// By default, when the dismiss threshold is not reached, flinging the item
+  /// can still cause it to be dismissed.
+  ///
+  /// This behavior can be prevented with the following [TriggerDismissCallback]:
+  ///
   /// ```dart
   /// Dismissible(
   ///   key: const ValueKey<String>('dismissible-key'),
-  ///   shouldTriggerDismiss: (TriggerDismissDetails details) => details.reached ? null : false,
+  ///   shouldTriggerDismiss: (TriggerDismissDetails details) => details.reached,
   ///   child: const ListTile(title: Text('Slide me to dismiss')),
   /// )
   /// ```
