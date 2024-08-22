@@ -40,6 +40,7 @@ abstract class UnpackMacOS extends Target {
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework/Versions/A/FlutterMacOS'),
+    Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework.dSYM/Contents/Resources/DWARF/FlutterMacOS'),
   ];
 
   @override
@@ -51,9 +52,10 @@ abstract class UnpackMacOS extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
+
+    // Copy Flutter framework.
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String basePath = environment.artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
-
     final ProcessResult result = environment.processManager.runSync(<String>[
       'rsync',
       '-av',
@@ -82,7 +84,35 @@ abstract class UnpackMacOS extends Target {
     if (!frameworkBinary.existsSync()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
+
     await _thinFramework(environment, frameworkBinaryPath);
+
+    // Copy Flutter framework dSYM (debug symbol) bundle, if present.
+    final Directory frameworkDsym = environment.fileSystem.directory(
+      environment.artifacts.getArtifactPath(
+        Artifact.flutterMacOSFrameworkDsym,
+        platform: TargetPlatform.darwin,
+        mode: buildMode,
+      )
+    );
+    if (frameworkDsym.existsSync()) {
+      final ProcessResult result = await environment.processManager.run(<String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        frameworkDsym.path,
+        environment.outputDir.path,
+      ]);
+      if (result.exitCode != 0) {
+        throw Exception(
+          'Failed to copy framework dSYM (exit ${result.exitCode}:\n'
+          '${result.stdout}\n---\n${result.stderr}',
+        );
+      }
+    }
   }
 
   static const List<String> _copyDenylist = <String>['entitlements.txt', 'without_entitlements.txt'];
@@ -158,6 +188,7 @@ class ReleaseUnpackMacOS extends UnpackMacOS {
   @override
   List<Source> get inputs => <Source>[
     ...super.inputs,
+    const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.release),
     const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.release),
   ];
 }
