@@ -164,6 +164,12 @@ def create_framework(  # pylint: disable=too-many-arguments
 
 def zip_archive(dst, args):
   # pylint: disable=line-too-long
+
+  # When updating with_entitlements and without_entitlements,
+  # `binariesWithoutEntitlements` and `signedXcframeworks` should be updated in
+  # the framework's `verifyCodeSignedTestRunner`.
+  #
+  # See: https://github.com/flutter/flutter/blob/62382c7b83a16b3f48dc06c19a47f6b8667005a5/dev/bots/suite_runners/run_verify_binaries_codesigned_tests.dart#L82-L130
   with_entitlements = ['gen_snapshot_arm64']
   with_entitlements_file = os.path.join(dst, 'entitlements.txt')
   sky_utils.write_codesign_config(with_entitlements_file, with_entitlements)
