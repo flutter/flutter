@@ -16,9 +16,11 @@ void main() {
   late Directory testDirectory;
   late File testTarget;
   late Device device;
+  late String perfTestOutputPath;
 
   setUp(() async {
     testDirectory = Directory.systemTemp.createTempSync('test_dir');
+    perfTestOutputPath = testOutputDirectory(testDirectory.absolute.path);
     testTarget = File('${testDirectory.absolute.path}/test_file')..createSync();
     device = const FakeDevice(deviceId: 'fakeDeviceId');
     deviceOperatingSystem = DeviceOperatingSystem.fake;
@@ -64,7 +66,7 @@ void main() {
     };
     const String resultFileName = 'fake_result';
     void driveCallback(List<String> arguments) {
-      final File resultFile = File('${testDirectory.absolute.path}/build/$resultFileName.json')..createSync(recursive: true);
+      final File resultFile = File('$perfTestOutputPath/$resultFileName.json')..createSync(recursive: true);
       resultFile.writeAsStringSync(json.encode(fakeData));
     }
     final PerfTest perfTest = PerfTest(testDirectory.absolute.path, testTarget.absolute.path, 'test_file', resultFilename: resultFileName, device: device, flutterDriveCallback: driveCallback);
@@ -117,7 +119,7 @@ void main() {
     };
     const String resultFileName = 'fake_result';
     void driveCallback(List<String> arguments) {
-      final File resultFile = File('${testDirectory.absolute.path}/build/$resultFileName.json')..createSync(recursive: true);
+      final File resultFile = File('$perfTestOutputPath/$resultFileName.json')..createSync(recursive: true);
       resultFile.writeAsStringSync(json.encode(fakeData));
     }
     final PerfTest perfTest = PerfTest(testDirectory.absolute.path, testTarget.absolute.path, 'test_file', resultFilename: resultFileName, device: device, flutterDriveCallback: driveCallback);
