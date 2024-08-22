@@ -13,7 +13,7 @@ import 'basic_types.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
-/// Defines the relative size and alignment of one <LinearBorder> edge.
+/// Defines the relative size and alignment of one [LinearBorder] edge.
 ///
 /// A [LinearBorder] defines a box outline as zero to four edges, each
 /// of which is rendered as a single line. The width and color of the

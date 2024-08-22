@@ -1790,7 +1790,7 @@ void main() {
     expect(
       find.ancestor(of: find.byType(Table), matching: find.byType(Container)),
       paints..rect(
-        rect: const Rect.fromLTRB(0.0, 0.0, width, height),
+        rect: const Rect.fromLTRB(borderVertical / 2, borderHorizontal / 2, width - borderVertical / 2, height - borderHorizontal / 2),
         color: backgroundColor,
       ),
     );

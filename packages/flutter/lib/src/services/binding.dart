@@ -27,6 +27,7 @@ import 'raw_keyboard.dart' show RawKeyboard;
 import 'restoration.dart';
 import 'service_extensions.dart';
 import 'system_channels.dart';
+import 'system_chrome.dart';
 import 'text_input.dart';
 
 export 'dart:ui' show ChannelBuffers, RootIsolateToken;
@@ -284,7 +285,10 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   Future<String?> _handleLifecycleMessage(String? message) async {
     final AppLifecycleState? state = _parseAppLifecycleMessage(message!);
     final List<AppLifecycleState> generated = _generateStateTransitions(lifecycleState, state!);
-    generated.forEach(handleAppLifecycleStateChanged);
+    for (final AppLifecycleState stateChange in generated) {
+      handleAppLifecycleStateChanged(stateChange);
+      SystemChrome.handleAppLifecycleStateChanged(stateChange);
+    }
     return null;
   }
 
@@ -573,11 +577,11 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
     ByteData? message,
     ui.PlatformMessageResponseCallback? callback,
   ) async {
-    ui.channelBuffers.push(channel, message, (ByteData? data) {
-      if (callback != null) {
-        callback(data);
-      }
-    });
+    ui.channelBuffers.push(
+      channel,
+      message,
+      (ByteData? data) => callback?.call(data),
+    );
   }
 
   @override

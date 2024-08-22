@@ -393,6 +393,7 @@ void main() {
           groupValue: 2,
           onChanged: (int? i) {},
           title: const Text('Title'),
+          internalAddSemanticForOnTap: true,
         ),
       ),
     );
@@ -405,6 +406,7 @@ void main() {
             TestSemantics(
               id: 1,
               flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
                 SemanticsFlag.hasCheckedState,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
@@ -429,6 +431,7 @@ void main() {
           groupValue: 2,
           onChanged: (int? i) {},
           title: const Text('Title'),
+          internalAddSemanticForOnTap: true,
         ),
       ),
     );
@@ -441,6 +444,7 @@ void main() {
             TestSemantics(
               id: 1,
               flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
                 SemanticsFlag.hasCheckedState,
                 SemanticsFlag.isChecked,
                 SemanticsFlag.hasEnabledState,
@@ -466,6 +470,7 @@ void main() {
           groupValue: 2,
           onChanged: null,
           title: Text('Title'),
+          internalAddSemanticForOnTap: true,
         ),
       ),
     );
@@ -502,6 +507,7 @@ void main() {
           groupValue: 2,
           onChanged: null,
           title: Text('Title'),
+          internalAddSemanticForOnTap: true,
         ),
       ),
     );
