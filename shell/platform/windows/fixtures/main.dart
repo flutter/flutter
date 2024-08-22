@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
-import 'dart:typed_data' show ByteData, Endian, Uint8List;
-import 'dart:ui' as ui;
 import 'dart:convert';
+import 'dart:io' as io;
+import 'dart:typed_data' show ByteData, Uint8List;
+import 'dart:ui' as ui;
 
 // Signals a waiting latch in the native test.
 @pragma('vm:external-name', 'Signal')
@@ -53,7 +53,7 @@ Future<void> get semanticsChanged {
 }
 
 @pragma('vm:entry-point')
-void sendAccessibilityAnnouncement() async {
+Future<void> sendAccessibilityAnnouncement() async {
   // Wait until semantics are enabled.
   if (!ui.PlatformDispatcher.instance.semanticsEnabled) {
     await semanticsChanged;
@@ -91,7 +91,7 @@ void sendAccessibilityAnnouncement() async {
 }
 
 @pragma('vm:entry-point')
-void sendAccessibilityTooltipEvent() async {
+Future<void> sendAccessibilityTooltipEvent() async {
   // Wait until semantics are enabled.
   if (!ui.PlatformDispatcher.instance.semanticsEnabled) {
     await semanticsChanged;
@@ -129,10 +129,13 @@ void sendAccessibilityTooltipEvent() async {
 }
 
 @pragma('vm:entry-point')
-void exitTestExit() async {
+Future<void> exitTestExit() async {
   final Completer<ByteData?> closed = Completer<ByteData?>();
-  ui.channelBuffers.setListener('flutter/platform', (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
-    final String jsonString = json.encode(<Map<String, String>>[{'response': 'exit'}]);
+  ui.channelBuffers.setListener('flutter/platform',
+      (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
+    final String jsonString = json.encode(<Map<String, String>>[
+      {'response': 'exit'}
+    ]);
     final ByteData responseData = ByteData.sublistView(utf8.encode(jsonString));
     callback(responseData);
     closed.complete(data);
@@ -141,10 +144,13 @@ void exitTestExit() async {
 }
 
 @pragma('vm:entry-point')
-void exitTestCancel() async {
+Future<void> exitTestCancel() async {
   final Completer<ByteData?> closed = Completer<ByteData?>();
-  ui.channelBuffers.setListener('flutter/platform', (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
-    final String jsonString = json.encode(<Map<String, String>>[{'response': 'cancel'}]);
+  ui.channelBuffers.setListener('flutter/platform',
+      (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
+    final String jsonString = json.encode(<Map<String, String>>[
+      {'response': 'cancel'}
+    ]);
     final ByteData responseData = ByteData.sublistView(utf8.encode(jsonString));
     callback(responseData);
     closed.complete(data);
@@ -155,53 +161,52 @@ void exitTestCancel() async {
   final Completer<ByteData?> exited = Completer<ByteData?>();
   final String jsonString = json.encode(<String, dynamic>{
     'method': 'System.exitApplication',
-    'args': <String, dynamic>{
-      'type': 'required', 'exitCode': 0
-      }
-    });
+    'args': <String, dynamic>{'type': 'required', 'exitCode': 0}
+  });
   ui.PlatformDispatcher.instance.sendPlatformMessage(
-    'flutter/platform',
-    ByteData.sublistView(utf8.encode(jsonString)),
-    (ByteData? reply) {
-      exited.complete(reply);
-    });
+      'flutter/platform', ByteData.sublistView(utf8.encode(jsonString)),
+      (ByteData? reply) {
+    exited.complete(reply);
+  });
   await exited.future;
 }
 
 @pragma('vm:entry-point')
-void enableLifecycleTest() async {
+Future<void> enableLifecycleTest() async {
   final Completer<ByteData?> finished = Completer<ByteData?>();
-  ui.channelBuffers.setListener('flutter/lifecycle', (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
+  ui.channelBuffers.setListener('flutter/lifecycle',
+      (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
     if (data != null) {
-      ui.PlatformDispatcher.instance.sendPlatformMessage(
-        'flutter/unittest',
-        data,
-        (ByteData? reply) {
-          finished.complete();
-        });
+      ui.PlatformDispatcher.instance
+          .sendPlatformMessage('flutter/unittest', data, (ByteData? reply) {
+        finished.complete();
+      });
     }
   });
   await finished.future;
 }
 
 @pragma('vm:entry-point')
-void enableLifecycleToFrom() async {
-  ui.channelBuffers.setListener('flutter/lifecycle', (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
+Future<void> enableLifecycleToFrom() async {
+  ui.channelBuffers.setListener('flutter/lifecycle',
+      (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
     if (data != null) {
-      ui.PlatformDispatcher.instance.sendPlatformMessage(
-        'flutter/unittest',
-        data,
-        (ByteData? reply) {});
+      ui.PlatformDispatcher.instance
+          .sendPlatformMessage('flutter/unittest', data, (ByteData? reply) {});
     }
   });
   final Completer<ByteData?> enabledLifecycle = Completer<ByteData?>();
-  ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/platform', ByteData.sublistView(utf8.encode('{"method":"System.initializationComplete"}')), (ByteData? data) {
+  ui.PlatformDispatcher.instance.sendPlatformMessage(
+      'flutter/platform',
+      ByteData.sublistView(
+          utf8.encode('{"method":"System.initializationComplete"}')),
+      (ByteData? data) {
     enabledLifecycle.complete(data);
   });
 }
 
 @pragma('vm:entry-point')
-void sendCreatePlatformViewMethod() async {
+Future<void> sendCreatePlatformViewMethod() async {
   // The platform view method channel uses the standard method codec.
   // See https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/services/message_codecs.dart#L262
   // for the implementation of the encoding and magic number identifiers.
@@ -225,14 +230,15 @@ void sendCreatePlatformViewMethod() async {
 
   final Completer<ByteData?> completed = Completer<ByteData?>();
   final ByteData bytes = ByteData.sublistView(Uint8List.fromList(data));
-  ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/platform_views', bytes, (ByteData? response) {
+  ui.PlatformDispatcher.instance.sendPlatformMessage(
+      'flutter/platform_views', bytes, (ByteData? response) {
     completed.complete(response);
   });
   await completed.future;
 }
 
 @pragma('vm:entry-point')
-void sendGetKeyboardState() async {
+Future<void> sendGetKeyboardState() async {
   // The keyboard method channel uses the standard method codec.
   // See https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/services/message_codecs.dart#L262
   // for the implementation of the encoding and magic number identifiers.
@@ -250,7 +256,8 @@ void sendGetKeyboardState() async {
 
   final Completer<void> completer = Completer<void>();
   final ByteData bytes = ByteData.sublistView(Uint8List.fromList(data));
-  ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/keyboard', bytes, (ByteData? response) {
+  ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/keyboard', bytes,
+      (ByteData? response) {
     // For magic numbers for decoding a reply envelope, see:
     // https://github.com/flutter/flutter/blob/67271f69f7f88a4edba6d8023099e3bd27a072d2/packages/flutter/lib/src/services/message_codecs.dart#L577-L587
     const int replyEnvelopeSuccess = 0;
@@ -259,11 +266,14 @@ void sendGetKeyboardState() async {
     if (response == null) {
       signalStringValue('Unexpected null response');
     } else if (response.lengthInBytes < 2) {
-      signalStringValue('Unexpected response length of ${response.lengthInBytes} bytes');
+      signalStringValue(
+          'Unexpected response length of ${response.lengthInBytes} bytes');
     } else if (response.getUint8(0) != replyEnvelopeSuccess) {
-      signalStringValue('Unexpected response envelope status: ${response.getUint8(0)}');
+      signalStringValue(
+          'Unexpected response envelope status: ${response.getUint8(0)}');
     } else if (response.getUint8(1) != valueMap) {
-      signalStringValue('Unexpected response value magic number: ${response.getUint8(1)}');
+      signalStringValue(
+          'Unexpected response value magic number: ${response.getUint8(1)}');
     } else {
       signalStringValue('Success');
     }
@@ -287,7 +297,7 @@ void verifyNativeFunctionWithParameters() {
 
 @pragma('vm:entry-point')
 void verifyNativeFunctionWithReturn() {
-  bool value = signalBoolReturn();
+  final value = signalBoolReturn();
   signalBoolValue(value);
 }
 
@@ -334,15 +344,14 @@ ui.Picture _createColoredBox(ui.Color color, ui.Size size) {
 @pragma('vm:entry-point')
 void renderImplicitView() {
   ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
-    final ui.Size size = ui.Size(800.0, 600.0);
-    final ui.Color red = ui.Color.fromARGB(127, 255, 0, 0);
+    const ui.Size size = ui.Size(800.0, 600.0);
+    const ui.Color red = ui.Color.fromARGB(127, 255, 0, 0);
 
     final ui.SceneBuilder builder = ui.SceneBuilder();
 
     builder.pushOffset(0.0, 0.0);
 
-    builder.addPicture(
-        ui.Offset(0.0, 0.0), _createColoredBox(red, size));
+    builder.addPicture(ui.Offset.zero, _createColoredBox(red, size));
 
     builder.pop();
 
