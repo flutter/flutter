@@ -9,10 +9,12 @@
 /// @docImport 'placeholder_span.dart';
 library;
 
-import 'dart:ui' as ui show ParagraphBuilder, StringAttribute;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
+import 'package:meta/meta.dart' show useResult;
 
 import 'basic_types.dart';
 import 'text_painter.dart';
@@ -22,6 +24,8 @@ import 'text_style.dart';
 
 // Examples can assume:
 // late InlineSpan myInlineSpan;
+
+typedef RemovableInlineSpanAttribute<T> = Either<T, void>;
 
 /// Mutable wrapper of an integer that can be passed by reference to track a
 /// value across a recursive stack.
@@ -364,6 +368,11 @@ abstract class InlineSpan extends DiagnosticableTree {
   @protected
   int? codeUnitAtVisitor(int index, Accumulator offset);
 
+  int get contentLength;
+
+  @useResult
+  InlineSpan updateAttributes(covariant InlineSpanAttributes newAttributes, TextRange textRange);
+
   /// In debug mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.
   ///
@@ -405,5 +414,161 @@ abstract class InlineSpan extends DiagnosticableTree {
     super.debugFillProperties(properties);
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
     style?.debugFillProperties(properties);
+  }
+}
+
+/// A text attribute set that can be used to update an [InlineSpan].
+///
+/// See also:
+///
+///  * [InlineSpan.updateAttributes], which takes an [InlineSpanAttributes], and
+///    updates a given [TextRange] within the receiver [InlineSpan] using the
+///    [InlineSpanAttributes].
+class InlineSpanAttributes {
+  /// Creates an [InlineSpanAttributes].
+  const InlineSpanAttributes({
+    this.package,
+    this.fontFamilies,
+    this.locale,
+    this.fontSize,
+    this.fontWeight,
+    this.fontStyle,
+    this.fontFeatures,
+    this.fontVariations,
+    this.height,
+    this.leadingDistribution,
+    this.textBaseline,
+    this.wordSpacing,
+    this.letterSpacing,
+
+    this.foreground,
+    this.background,
+    this.shadows,
+    this.underline,
+    this.overline,
+    this.lineThrough,
+    this.decorationColor,
+    this.decorationStyle,
+    this.decorationThickness,
+
+    this.recognizer,
+    this.mouseCursor,
+    this.onEnter,
+    this.onExit,
+    this.spellOut,
+  });
+
+  final String? package;
+  final List<String>? fontFamilies;
+  final ui.Locale? locale;
+  final double? fontSize;
+  final ui.FontWeight? fontWeight;
+  final ui.FontStyle? fontStyle;
+
+  final List<ui.FontFeature>? fontFeatures;
+  final List<ui.FontVariation>? fontVariations;
+
+  final double? height;
+  final ui.TextLeadingDistribution? leadingDistribution;
+  final ui.TextBaseline? textBaseline;
+
+  final double? wordSpacing;
+  final double? letterSpacing;
+
+  final Either<ui.Color, ui.Paint>? foreground;
+  final Either<ui.Color, ui.Paint>? background;
+  final List<ui.Shadow>? shadows;
+
+  final bool? underline;
+  final bool? overline;
+  final bool? lineThrough;
+
+  final ui.Color? decorationColor;
+  final ui.TextDecorationStyle? decorationStyle;
+  final double? decorationThickness;
+
+  final RemovableInlineSpanAttribute<GestureRecognizer>? recognizer;
+
+  final MouseCursor? mouseCursor;
+  final RemovableInlineSpanAttribute<PointerEnterEventListener>? onEnter;
+  final RemovableInlineSpanAttribute<PointerExitEventListener>? onExit;
+
+  /// Unsets the given [RemovableInlineSpanAttribute] from an [InlineSpan].
+  ///
+  /// [InlineSpan.updateAttributes] does not mutate the target [InlineSpan].
+  /// Rather, when [remove] is specified for a [RemovableInlineSpanAttribute],
+  /// [InlineSpan.updateAttributes] returns a new [InlineSpan] with that
+  /// attribute unset.
+  static const RemovableInlineSpanAttribute<Never> remove = Right<Never, void>(null);
+
+  final bool? spellOut;
+
+  static L? _maybeLeft<L extends Object>(Either<L, Object?>? value) => value is Left<L, Object?> ? value.value : null;
+  static R? _maybeRight<R extends Object>(Either<Object?, R>? value) => value is Right<Object?, R> ? value.value : null;
+
+  TextStyle? updateTextStyle(TextStyle? textStyle) {
+    final bool hasNoUpdate = package == null
+      && fontFamilies == null
+      && locale == null
+      && fontSize == null
+      && fontWeight == null
+      && fontStyle == null
+      && fontFeatures == null
+      && fontVariations == null
+      && height == null
+      && leadingDistribution == null
+      && textBaseline == null
+      && wordSpacing == null
+      && letterSpacing == null
+      && foreground == null
+      && background == null
+      && shadows == null
+      && underline == null
+      && overline == null
+      && lineThrough == null
+      && decorationColor == null
+      && decorationStyle == null
+      && decorationThickness == null;
+
+    if (hasNoUpdate) {
+      return textStyle;
+    }
+    final (String? fontFamily, List<String>? fallback) = switch (fontFamilies) {
+      null => (null, null),
+      [] => ('', const <String>[]),
+      [final String fontFamily, ...final List<String> fallback] => (fontFamily, fallback)
+    };
+    final ui.TextDecoration? decoration = underline == null && overline == null && lineThrough == null
+      ? null
+      : ui.TextDecoration.combine(<ui.TextDecoration>[
+          if (underline ?? textStyle?.decoration?.contains(ui.TextDecoration.underline) ?? false) ui.TextDecoration.underline,
+          if (overline ?? textStyle?.decoration?.contains(ui.TextDecoration.overline) ?? false) ui.TextDecoration.overline,
+          if (lineThrough ?? textStyle?.decoration?.contains(ui.TextDecoration.lineThrough) ?? false) ui.TextDecoration.lineThrough,
+        ]);
+    return (textStyle ?? const TextStyle()).copyWith(
+      package: package,
+      fontFamily: fontFamily,
+      fontFamilyFallback: fallback,
+      locale: locale,
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      fontStyle: fontStyle,
+      fontFeatures: fontFeatures,
+      fontVariations: fontVariations,
+      height: height,
+      leadingDistribution: leadingDistribution,
+      textBaseline: textBaseline,
+      wordSpacing: wordSpacing,
+      letterSpacing: letterSpacing,
+      color: _maybeLeft(foreground),
+      foreground: _maybeRight(foreground),
+      backgroundColor: _maybeLeft(background),
+      background: _maybeRight(background),
+      shadows: shadows,
+      decoration: decoration,
+      decorationColor: decorationColor,
+      decorationStyle: decorationStyle,
+      decorationThickness: decorationThickness,
+    );
   }
 }
