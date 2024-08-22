@@ -1431,7 +1431,7 @@ dev_dependencies:
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
-  
+
   testUsingContext('Can test in a pub workspace',
       () async {
     final Directory package = fs.directory('/package');
@@ -1440,7 +1440,7 @@ dev_dependencies:
 workspace:
   - app/
 ''');
-    
+
     final Directory app = package.childDirectory('app');
     app.createSync();
     app.childFile('pubspec.yaml').writeAsStringSync('''
@@ -1451,7 +1451,7 @@ resolution: workspace
     app.childDirectory('integration_test').childFile('some_integration_test.dart').createSync(recursive: true);
 
     fs.currentDirectory = app;
-    
+
     final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
     final FakePackageTest fakePackageTest = FakePackageTest();
     final TestCommand testCommand = TestCommand(
