@@ -22,6 +22,7 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
+import '../version.dart';
 
 /// The [Pub] instance.
 Pub get pub => context.get<Pub>()!;
@@ -91,13 +92,16 @@ class PubContext {
 }
 
 /// Describes the amount of output that should get printed from a `pub` command.
-/// [PubOutputMode.all] indicates that the complete output is printed. This is
-/// typically the default.
-/// [PubOutputMode.none] indicates that no output should be printed.
-/// [PubOutputMode.summaryOnly] indicates that only summary information should be printed.
 enum PubOutputMode {
-  none,
+  /// No normal output should be printed.
+  ///
+  /// If the command were to fail, failures are still printed.
+  failuresOnly,
+
+  /// The complete output should be printed; this is typically the default.
   all,
+
+  /// Only summary information should be printed.
   summaryOnly,
 }
 
@@ -392,8 +396,9 @@ class _DefaultPub implements Pub {
     final List<String> pubCommand = <String>[..._pubCommand, ...arguments];
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context: context, flutterRootOverride: flutterRootOverride, summaryOnly: outputMode == PubOutputMode.summaryOnly);
 
+    String? pubStderr;
     try {
-      if (outputMode != PubOutputMode.none) {
+      if (outputMode != PubOutputMode.failuresOnly) {
         final io.Stdio? stdio = _stdio;
         if (stdio == null) {
           // Let pub inherit stdio and output directly to the tool's stdout and
@@ -447,6 +452,7 @@ class _DefaultPub implements Pub {
         );
 
         exitCode = result.exitCode;
+        pubStderr = result.stderr;
       }
     } on io.ProcessException catch (exception) {
       final StringBuffer buffer = StringBuffer('${exception.message}\n');
@@ -477,7 +483,27 @@ class _DefaultPub implements Pub {
       buffer.write(_stringifyPubEnv(pubEnvironment));
       buffer.writeln('exit code: $code');
       _logger.printTrace(buffer.toString());
-      throwToolExit(null, exitCode: code);
+
+      // When this is null, but a failure happened, it is assumed that stderr
+      // was already redirected to the process stderr. This handles the corner
+      // case where we otherwise would log nothing. See
+      // https://github.com/flutter/flutter/issues/148569 for details.
+      if (pubStderr != null) {
+        _logger.printError(pubStderr);
+      }
+      if (context == PubContext.updatePackages) {
+        _logger.printWarning(
+          'If the current version was resolved as $kUnknownFrameworkVersion '
+          'and this is a fork of flutter/flutter, you forgot to set the remote '
+          'upstream branch to point to the canonical flutter/flutter: \n\n'
+          '  git remote set-url upstream https://github.com/flutter/flutter.git\n'
+          '\n'
+          'See https://github.com/flutter/flutter/blob/main/docs/contributing/Setting-up-the-Framework-development-environment.md#set-up-your-environment.');
+      }
+      throwToolExit(
+        'Failed to update packages.',
+        exitCode: code,
+      );
     }
   }
 

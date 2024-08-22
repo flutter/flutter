@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class ExpansionTileUseCase extends UseCase {
@@ -27,12 +27,14 @@ class ExpansionTileExample extends StatefulWidget {
 class _ExpansionTileExampleState extends State<ExpansionTileExample> {
   bool _customTileExpanded = false;
 
+  String pageTitle = getUseCaseName(ExpansionTileUseCase());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: const Text('ExpansionTile')),
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
       ),
       body: Column(
         children: <Widget>[
@@ -47,9 +49,7 @@ class _ExpansionTileExampleState extends State<ExpansionTileExample> {
             title: const Text('ExpansionTile 2'),
             subtitle: const Text('Custom expansion arrow icon'),
             trailing: Icon(
-              _customTileExpanded
-                  ? Icons.arrow_drop_down_circle
-                  : Icons.arrow_drop_down,
+              _customTileExpanded ? Icons.arrow_drop_down_circle : Icons.arrow_drop_down,
             ),
             children: const <Widget>[
               ListTile(title: Text('This is tile number 2')),

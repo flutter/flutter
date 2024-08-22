@@ -946,7 +946,7 @@ void main() {
         expect(
             testLogger.warningText,
             'Package url_launcher:linux references url_launcher_linux:linux as the default plugin, '
-            'but the package does not exist.\n'
+            'but the package does not exist, or is not a plugin package.\n'
             'Ask the maintainers of url_launcher to either avoid referencing a default implementation via `platforms: linux: default_package: url_launcher_linux` '
             'or create a plugin named url_launcher_linux.\n'
             '\n');
