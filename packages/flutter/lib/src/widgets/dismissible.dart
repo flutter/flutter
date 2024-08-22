@@ -405,7 +405,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
   bool get _directionIsXAxis => switch (widget.direction) {
     DismissDirection.horizontal || DismissDirection.endToStart || DismissDirection.startToEnd => true,
-    DismissDirection.vertical || DismissDirection.up || DismissDirection.down || DismissDirection.none => false
+    DismissDirection.vertical || DismissDirection.up || DismissDirection.down || DismissDirection.none => false,
   };
 
   DismissDirection _extentToDirection(double extent) {
