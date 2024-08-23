@@ -25,55 +25,31 @@ void main() {
     final Finder errorWidget = find.byType(ErrorWidget);
     expect(errorWidget, findsOneWidget);
     final ErrorWidget error = tester.firstWidget(errorWidget);
-
     expect(error.message, 'Exception: oh no, an error');
+
     ErrorWidget.builder = oldBuilder;
   });
 
-  tearDown(() {
+
+  testWidgets('Tests ErrorWidget in Release Mode', (WidgetTester tester) async {
+    final ErrorWidgetBuilder oldBuilder = ErrorWidget.builder;
     ErrorWidget.builder = (FlutterErrorDetails details) {
-      return Container(
-        alignment: Alignment.center,
-        child: Text(
-          'Error!\n${details.exception}',
-          style: const TextStyle(color: Colors.yellow),
-          textAlign: TextAlign.center,
-          textDirection: TextDirection.ltr,
-        ),
-      );
+      return example.ReleaseModeErrorWidget(details);
     };
+    await tester.pumpWidget(const example.ErrorWidgetExampleApp());
+
+    expect(find.widgetWithText(AppBar, 'ErrorWidget Sample'), findsOne);
+
+    await tester.tap(find.widgetWithText(TextButton, 'Error Prone'));
+    await tester.pump();
+
+    expectLater(tester.takeException(), isInstanceOf<Exception>());
+
+    final Finder errorTextFinder = find.textContaining('Error!\nException: oh no, an error');
+    expect(errorTextFinder, findsOneWidget);
+    final Text errorText = tester.firstWidget(errorTextFinder);
+    expect(errorText.style?.color, Colors.yellow);
+
+    ErrorWidget.builder = oldBuilder;
   });
-
-  testWidgets(
-    'Tests ErrorWidget in Release Mode', (WidgetTester tester) async {
-      final ErrorWidgetBuilder oldBuilder = ErrorWidget.builder;
-      ErrorWidget.builder = (FlutterErrorDetails details) {
-        return Container(
-          alignment: Alignment.center,
-          child: Text(
-            'Error!\n${details.exception}',
-            style: const TextStyle(color: Colors.yellow),
-            textAlign: TextAlign.center,
-            textDirection: TextDirection.ltr,
-          ),
-
-        );
-      };
-      await tester.pumpWidget(const example.ErrorWidgetExampleApp());
-
-      expect(find.widgetWithText(AppBar, 'ErrorWidget Sample'), findsOne);
-
-      await tester.tap(find.widgetWithText(TextButton, 'Error Prone'));
-      await tester.pump();
-
-      expectLater(tester.takeException(), isInstanceOf<Exception>());
-
-      final Finder errorTextFinder = find.textContaining('Error!\nException: oh no, an error');
-
-      expect(errorTextFinder, findsOneWidget);
-
-      final Text errorText = tester.firstWidget(errorTextFinder);
-      expect(errorText.style?.color, Colors.yellow);
-      ErrorWidget.builder = oldBuilder;
-    });
 }
