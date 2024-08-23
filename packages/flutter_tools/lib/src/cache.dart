@@ -717,6 +717,9 @@ class Cache {
 
     final Map<String, List<ArtifactSet>> neededArtifactsByUserFriendlyName = <String, List<ArtifactSet>>{};
     for (final ArtifactSet artifact in neededArtifacts) {
+      if (await artifact.isUpToDate(_fileSystem)) {
+        continue;
+      }
       final String userFriendlyName = artifact.developmentArtifact.feature == null
           ? '${artifact.developmentArtifact.name} tools'
           : '${artifact.developmentArtifact.feature!.name} tools';
