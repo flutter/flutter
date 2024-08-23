@@ -2961,7 +2961,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/153544.
-  testWidgets('Tooltip is drawn when hovering within IconButton area but outside the Icon tself', (WidgetTester tester) async {
+  testWidgets('Tooltip is drawn when hovering within IconButton area but outside the Icon itself', (WidgetTester tester) async {
     const String tooltipText = 'Test tooltip';
     await tester.pumpWidget(
       MaterialApp(

@@ -160,10 +160,13 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
   final IconAlignment iconAlignment;
 
-  /// Text that describes the action that will occur when the button is pressed.
+  /// Text that describes the action that will occur when the button is pressed or
+  /// hovered over.
   ///
-  /// This text is displayed when the user long-presses on the button and is
-  /// used for accessibility.
+  /// This text is displayed when the user long-presses or hovers over the button
+  /// in a tooltip. This string is also used for accessibility.
+  ///
+  /// If null, the button will not display a tooltip.
   final String? tooltip;
 
   /// Typically the button's label.
