@@ -429,7 +429,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// When [enableBackgroundFilterBlur] is set to false. The blur effect will be
   /// disabled. [enableBackgroundFilterBlur]'s behaviour will only be respected when
   /// [automaticBackgroundVisibility] is false or until content scrolls under the navbar.
-  /// 
+  ///
   /// This value defaults to true.
   /// {@endtemplate}
   final bool enableBackgroundFilterBlur;
