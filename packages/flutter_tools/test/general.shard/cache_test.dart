@@ -1197,6 +1197,9 @@ class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
   DevelopmentArtifact get developmentArtifact => DevelopmentArtifact.universal;
 
   @override
+  String get name => 'fake_secondary_cached_artifact';
+
+  @override
   bool get logUpdates => true;
 }
 
