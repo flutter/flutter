@@ -159,15 +159,16 @@ void main() {
 
   testWidgets('Blur affect is disabled when enableBackgroundFilterBlur is false', (WidgetTester test) async {
     await test.pumpWidget(
-      const CupertinoApp(
-        theme: CupertinoThemeData(brightness: Brightness.light),
-        home: CupertinoPageScaffold(
+       CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        home:  CupertinoPageScaffold(
           navigationBar: CupertinoNavigationBar(
-            middle: Text('Title'),
+            backgroundColor: const Color(0xFFFFFFFF).withOpacity(0),
+            middle: const Text('Title'),
             automaticBackgroundVisibility: false,
             enableBackgroundFilterBlur: false,
           ),
-          child: Column(
+          child: const Column(
             children: <Widget>[
               Placeholder(),
             ],

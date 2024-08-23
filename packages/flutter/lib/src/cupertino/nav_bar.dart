@@ -277,6 +277,8 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
          'Cannot specify a heroTag override if this navigation bar does not '
          'transition due to transitionBetweenRoutes = false.',
        );
+       
+     
 
   /// {@template flutter.cupertino.CupertinoNavigationBar.leading}
   /// Widget to place at the start of the navigation bar. Normally a back button
@@ -344,7 +346,8 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@template flutter.cupertino.CupertinoNavigationBar.backgroundColor}
   /// The background color of the navigation bar. If it contains transparency, the
   /// tab bar will automatically produce a blurring effect to the content
-  /// behind it.
+  /// behind it. This behavior can be disabled by setting [enableBackgroundFilterBlur]
+  /// to false.
   ///
   /// By default, the navigation bar's background is visible only when scrolled under.
   /// This behavior can be controlled with [automaticBackgroundVisibility].
@@ -420,14 +423,15 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   final bool transitionBetweenRoutes;
 
   /// {@template flutter.cupertino.CupertinoNavigationBar.enableBackgroundFilterBlur}
-  /// Whether to have blur effect with transparent color.
+  /// Whether to have blur effect with non opaque color.
   ///
   /// If the [CupertinoNavigationBar] is not a child of a [CupertinoPageScaffold],
   /// this has no effect.
   ///
   /// When [enableBackgroundFilterBlur] is set to false. The blur effect will be
-  /// disabled.
-  ///
+  /// disabled. [enableBackgroundFilterBlur]'s behaviour will only be respected when
+  /// [automaticBackgroundVisibility] is false or until content scrolls under the navbar.
+  /// 
   /// This value defaults to true.
   /// {@endtemplate}
   final bool enableBackgroundFilterBlur;
