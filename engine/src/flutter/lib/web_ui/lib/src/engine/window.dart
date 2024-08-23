@@ -44,7 +44,7 @@ int _nextViewId = kImplicitViewId + 1;
 ///
 /// In addition to everything defined in [ui.FlutterView], this class adds
 /// a few web-specific properties.
-base class EngineFlutterView implements ui.FlutterView {
+class EngineFlutterView implements ui.FlutterView {
   /// Creates a [ui.FlutterView] that can be used in multi-view mode.
   ///
   /// The [hostElement] parameter specifies the container in the DOM into which

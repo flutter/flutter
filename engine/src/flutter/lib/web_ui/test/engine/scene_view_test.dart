@@ -53,12 +53,12 @@ class StubPictureRenderer implements PictureRenderer {
   Map<ScenePicture, ui.Rect> clipRequests = <ScenePicture, ui.Rect>{};
 }
 
-class StubFlutterView implements ui.FlutterView {
+class StubFlutterView implements EngineFlutterView {
   @override
   double get devicePixelRatio => throw UnimplementedError();
 
   @override
-  ui.Display get display => throw UnimplementedError();
+  EngineFlutterDisplay get display => throw UnimplementedError();
 
   @override
   List<ui.DisplayFeature> get displayFeatures => throw UnimplementedError();
@@ -67,23 +67,23 @@ class StubFlutterView implements ui.FlutterView {
   ui.GestureSettings get gestureSettings => throw UnimplementedError();
 
   @override
-  ui.ViewPadding get padding => throw UnimplementedError();
+  ViewPadding get padding => throw UnimplementedError();
 
   @override
-  ui.ViewConstraints get physicalConstraints => throw UnimplementedError();
+  ViewConstraints get physicalConstraints => throw UnimplementedError();
 
   @override
   ui.Size get physicalSize => const ui.Size(1000, 1000);
 
   @override
-  ui.PlatformDispatcher get platformDispatcher => throw UnimplementedError();
+  EnginePlatformDispatcher get platformDispatcher => throw UnimplementedError();
 
   @override
   void render(ui.Scene scene, {ui.Size? size}) {
   }
 
   @override
-  ui.ViewPadding get systemGestureInsets => throw UnimplementedError();
+  ViewPadding get systemGestureInsets => throw UnimplementedError();
 
   @override
   void updateSemantics(ui.SemanticsUpdate update) {
@@ -93,10 +93,60 @@ class StubFlutterView implements ui.FlutterView {
   int get viewId => throw UnimplementedError();
 
   @override
-  ui.ViewPadding get viewInsets => throw UnimplementedError();
+  ViewPadding get viewInsets => throw UnimplementedError();
 
   @override
-  ui.ViewPadding get viewPadding => throw UnimplementedError();
+  ViewPadding get viewPadding => throw UnimplementedError();
+
+  @override
+  ui.Size? debugPhysicalSizeOverride;
+
+  @override
+  bool isDisposed = false;
+
+  @override
+  PointerBinding get pointerBinding => throw UnimplementedError();
+
+  @override
+  set pointerBinding(_) {
+    throw UnimplementedError();
+  }
+
+  @override
+  ContextMenu get contextMenu => throw UnimplementedError();
+
+  @override
+  void debugForceResize() {
+    throw UnimplementedError();
+  }
+
+  @override
+  DimensionsProvider get dimensionsProvider => throw UnimplementedError();
+
+  @override
+  void dispose() {
+    throw UnimplementedError();
+  }
+
+  @override
+  DomManager get dom => throw UnimplementedError();
+
+  @override
+  EmbeddingStrategy get embeddingStrategy => throw UnimplementedError();
+
+  @override
+  MouseCursor get mouseCursor => throw UnimplementedError();
+
+  @override
+  Stream<ui.Size?> get onResize => throw UnimplementedError();
+
+  @override
+  void resize(ui.Size newPhysicalSize) {
+    throw UnimplementedError();
+  }
+
+  @override
+  EngineSemanticsOwner get semantics => throw UnimplementedError();
 }
 
 void testMain() {
