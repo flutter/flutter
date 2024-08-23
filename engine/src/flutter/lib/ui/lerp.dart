@@ -26,7 +26,7 @@ double? lerpDouble(num? a, num? b, double t) {
 ///
 /// Same as [lerpDouble] but specialized for non-null `double` type.
 double _lerpDouble(double a, double b, double t) {
-  return a + (b - a) * t;
+  return a * (1.0 - t) + b * t;
 }
 
 /// Linearly interpolate between two integers.
