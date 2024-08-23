@@ -137,7 +137,7 @@ const String _displayP3Logo =
     'gr3yrjmlwqXLjmWw1O2I5Wmp9Xxjyh+AVIZ6ADIAqcwClakzeMgApDILVKbO4CED'
     'kMosUJk6g4dUBuRfvf1am9VRqzYAAAAASUVORK5CYII=';
 
-void main() => run(Setup.conicalGradient);
+void main() => run(Setup.sweepGradient);
 
 enum Setup {
   none,
@@ -149,6 +149,7 @@ enum Setup {
   linearGradient,
   radialGradient,
   conicalGradient,
+  sweepGradient,
 }
 
 void run(Setup setup) {
@@ -274,7 +275,8 @@ class _MyHomePageState extends State<MyHomePage> {
             Setup.container ||
             Setup.linearGradient ||
             Setup.radialGradient ||
-            Setup.conicalGradient:
+            Setup.conicalGradient ||
+            Setup.sweepGradient:
         break;
     }
     super.initState();
@@ -370,6 +372,28 @@ class _MyHomePageState extends State<MyHomePage> {
           decoration: const BoxDecoration(
             gradient: RadialGradient(
               focal: Alignment(0.2, 0.2),
+              colors: [
+                const Color.from(
+                  alpha: 1,
+                  red: 1,
+                  green: 0,
+                  blue: 0,
+                  colorSpace: ui.ColorSpace.displayP3),
+                const Color.from(
+                  alpha: 1,
+                  red: 0,
+                  green: 1,
+                  blue: 0,
+                  colorSpace: ui.ColorSpace.displayP3)],
+            ),
+          ),
+        );
+      case Setup.sweepGradient:
+        imageWidget = Container(
+          width: 100,
+          height: 100,
+          decoration: const BoxDecoration(
+            gradient: SweepGradient(
               colors: [
                 const Color.from(
                   alpha: 1,
