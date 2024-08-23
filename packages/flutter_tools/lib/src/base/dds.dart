@@ -14,17 +14,20 @@ import '../globals.dart' as globals;
 import 'io.dart' as io;
 import 'logger.dart';
 
-export 'package:dds/dds.dart' show DartDevelopmentServiceException;
+export 'package:dds/dds.dart'
+    show
+        DartDevelopmentServiceException,
+        ExistingDartDevelopmentServiceException;
 
 typedef DDSLauncherCallback = Future<DartDevelopmentServiceLauncher> Function({
-    required Uri remoteVmServiceUri,
-    Uri? serviceUri,
-    bool enableAuthCodes,
-    bool serveDevTools,
-    Uri? devToolsServerAddress,
-    bool enableServicePortFallback,
-    List<String> cachedUserTags,
-    String? dartExecutable,
+  required Uri remoteVmServiceUri,
+  Uri? serviceUri,
+  bool enableAuthCodes,
+  bool serveDevTools,
+  Uri? devToolsServerAddress,
+  bool enableServicePortFallback,
+  List<String> cachedUserTags,
+  String? dartExecutable,
 });
 
 // TODO(fujino): This should be direct injected, rather than mutable global state.
