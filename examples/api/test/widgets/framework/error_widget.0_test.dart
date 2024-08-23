@@ -8,12 +8,11 @@ import 'package:flutter_api_samples/widgets/framework/error_widget.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-
-  ErrorWidget.builder = (FlutterErrorDetails details) {
-    return ErrorWidget(details.exception);
-  };
-
-  testWidgets('Tests ErrorWiget in Debug Mode', (WidgetTester tester) async {
+  testWidgets('Tests ErrorWidget in Debug Mode', (WidgetTester tester) async {
+    final ErrorWidgetBuilder oldBuilder = ErrorWidget.builder;
+    ErrorWidget.builder = (FlutterErrorDetails details) {
+       return ErrorWidget(details.exception);
+    };
     await tester.pumpWidget(const example.ErrorWidgetExampleApp());
 
     expect(find.widgetWithText(AppBar, 'ErrorWidget Sample'), findsOne);
@@ -28,6 +27,7 @@ void main() {
     final ErrorWidget error = tester.firstWidget(errorWidget);
 
     expect(error.message, 'Exception: oh no, an error');
+    ErrorWidget.builder = oldBuilder;
   });
 
   tearDown(() {
@@ -45,7 +45,20 @@ void main() {
   });
 
   testWidgets(
-    'Tests ErrorWiget in Release Mode', (WidgetTester tester) async {
+    'Tests ErrorWidget in Release Mode', (WidgetTester tester) async {
+      final ErrorWidgetBuilder oldBuilder = ErrorWidget.builder;
+      ErrorWidget.builder = (FlutterErrorDetails details) {
+        return Container(
+          alignment: Alignment.center,
+          child: Text(
+            'Error!\n${details.exception}',
+            style: const TextStyle(color: Colors.yellow),
+            textAlign: TextAlign.center,
+            textDirection: TextDirection.ltr,
+          ),
+
+        );
+      };
       await tester.pumpWidget(const example.ErrorWidgetExampleApp());
 
       expect(find.widgetWithText(AppBar, 'ErrorWidget Sample'), findsOne);
@@ -55,13 +68,12 @@ void main() {
 
       expectLater(tester.takeException(), isInstanceOf<Exception>());
 
-      final Finder errorTextFinder = find.textContaining(
-        'Error!\nException: oh no, an error');
+      final Finder errorTextFinder = find.textContaining('Error!\nException: oh no, an error');
 
       expect(errorTextFinder, findsOneWidget);
 
       final Text errorText = tester.firstWidget(errorTextFinder);
       expect(errorText.style?.color, Colors.yellow);
-    },
-  );
+      ErrorWidget.builder = oldBuilder;
+    });
 }
