@@ -5,7 +5,6 @@
 import 'dart:convert';
 import 'dart:io' as io;
 
-import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
