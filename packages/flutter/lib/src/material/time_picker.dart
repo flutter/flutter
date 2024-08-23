@@ -3348,7 +3348,7 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
       // TODO(rami-a): Remove this workaround once
       // https://github.com/flutter/flutter/issues/54104
       // is fixed.
-      errorStyle: const TextStyle(fontSize: 0.0, height: 1.0),
+      errorStyle: const TextStyle(fontSize: 0, height: 1),
     );
   }
 
@@ -3683,7 +3683,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
       // TODO(rami-a): Remove this workaround once
       // https://github.com/flutter/flutter/issues/54104
       // is fixed.
-      errorStyle: const TextStyle(fontSize: 0.0),
+      errorStyle: const TextStyle(fontSize: 0),
     );
   }
 
