@@ -3,12 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/framework/error_widget.0.dart'
-    as example;
+import 'package:flutter_api_samples/widgets/framework/error_widget.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Tests ErrorWidget in Debug Mode', (WidgetTester tester) async {
+  testWidgets('ErrorWidget is displayed in debug mode', (WidgetTester tester) async {
     final ErrorWidgetBuilder oldBuilder = ErrorWidget.builder;
     ErrorWidget.builder = (FlutterErrorDetails details) {
        return ErrorWidget(details.exception);
@@ -30,8 +29,7 @@ void main() {
     ErrorWidget.builder = oldBuilder;
   });
 
-
-  testWidgets('Tests ErrorWidget in Release Mode', (WidgetTester tester) async {
+  testWidgets('ErrorWidget is displayed in release mode', (WidgetTester tester) async {
     final ErrorWidgetBuilder oldBuilder = ErrorWidget.builder;
     ErrorWidget.builder = (FlutterErrorDetails details) {
       return example.ReleaseModeErrorWidget(details);

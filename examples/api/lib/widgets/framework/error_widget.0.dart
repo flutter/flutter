@@ -64,7 +64,8 @@ class _ErrorWidgetExampleAppState extends State<ErrorWidgetExampleApp> {
 
 
 class ReleaseModeErrorWidget extends StatelessWidget {
-  const ReleaseModeErrorWidget(this.details,{super.key});
+  const ReleaseModeErrorWidget(this.details, {super.key});
+
   final FlutterErrorDetails details;
 
   @override
