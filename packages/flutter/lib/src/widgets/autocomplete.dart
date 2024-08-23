@@ -445,16 +445,21 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       OptionsViewOpenDirection.down => AlignmentDirectional.bottomStart,
     }.resolve(textDirection);
 
+    const String optionsListboxLabel = 'Autocomplete Options List';
+
     return CompositedTransformFollower(
       link: _optionsLayerLink,
       showWhenUnlinked: false,
       targetAnchor: targetAnchor,
       followerAnchor: followerAlignment,
       child: TextFieldTapRegion(
-        child: AutocompleteHighlightedOption(
-          highlightIndexNotifier: _highlightedOptionIndex,
-          child: Builder(
-            builder: (BuildContext context) => widget.optionsViewBuilder(context, _select, _options),
+        child: Semantics(
+          label: optionsListboxLabel,
+          child: AutocompleteHighlightedOption(
+            highlightIndexNotifier: _highlightedOptionIndex,
+            child: Builder(
+                builder: (BuildContext context) => widget.optionsViewBuilder(context, _select, _options),
+            ),
           ),
         ),
       ),
