@@ -477,85 +477,101 @@ class InlineSpanAttributes {
     this.spellOut,
   });
 
-  /// An attribute that corresponds to [TextStyle.fontFamily].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.fontFamily] if
+  /// set to non-null.
   final List<String>? fontFamilies;
 
-  /// An attribute that corresponds to [TextStyle.locale].
-  ///
-  /// This value also affects [TextSpan.locale].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.locale] and
+  /// [TextSpan.locale] if set to non-null.
   final ui.Locale? locale;
 
-  /// An attribute that corresponds to [TextStyle.fontSize].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.fontSize] if set
+  /// to non-null.
   final double? fontSize;
 
-  /// An attribute that corresponds to [TextStyle.fontSize].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.fontSize] if set
+  /// to non-null.
   final ui.FontWeight? fontWeight;
 
-  /// An attribute that corresponds to [TextStyle.fontSize].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.fontSize] if set
+  /// to non-null.
   final ui.FontStyle? fontStyle;
 
-  /// An attribute that corresponds to [TextStyle.fontFeatures].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.fontFeatures]
+  /// if set to non-null.
   final List<ui.FontFeature>? fontFeatures;
 
-  /// An attribute that corresponds to [TextStyle.fontVariations].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.fontVariations]
+  /// if set to non-null.
   final List<ui.FontVariation>? fontVariations;
 
-  /// An attribute that corresponds to [TextStyle.height].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.height] if set
+  /// to non-null.
   ///
   /// Setting this attribute to [kTextHeightNone] unsets the [TextStyle.height]
   /// multiplier, and restores the font's natural ascent and descent.
   final double? height;
 
-  /// An attribute that corresponds to [TextStyle.leadingDistribution].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.leadingDistribution]
+  /// if set to non-null.
   final ui.TextLeadingDistribution? leadingDistribution;
 
-  /// An attribute that corresponds to [TextStyle.textBaseline].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.textBaseline]
+  /// if set to non-null.
   final ui.TextBaseline? textBaseline;
 
-  /// An attribute that corresponds to [TextStyle.wordSpacing].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.wordSpacing]
+  /// if set to non-null.
   final double? wordSpacing;
 
-  /// An attribute that corresponds to [TextStyle.letterSpacing].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.letterSpacing]
+  /// if set to non-null.
   final double? letterSpacing;
 
-  /// An attribute that corresponds to [TextStyle.foreground] and [TextStyle.color].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.foreground] and
+  /// [TextStyle.color] if set to non-null.
   final Either<ui.Color, ui.Paint>? foreground;
 
-  /// An attribute that corresponds to [TextStyle.foreground] and [TextStyle.color].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.foreground] and
+  /// [TextStyle.color] if set to non-null.
   final Either<ui.Color, ui.Paint>? background;
 
-  /// An attribute that corresponds to [TextStyle.shadows].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.shadows] if set
+  /// to non-null.
   final List<ui.Shadow>? shadows;
 
-  /// An attribute that corresponds to the [TextDecoration.underline] aspect of
-  /// [TextStyle.decoration].
+  /// An attribute which overwrites the [TextDecoration.underline] aspect of
+  /// [TextStyle.decoration] on an [InlineSpan], if set to non-null.
   ///
   /// Setting this value to true applies underline and setting it to false
   /// disables underline.
   final bool? underline;
 
-  /// An attribute that corresponds to the [TextDecoration.overline] aspect of
-  /// [TextStyle.decoration].
+  /// An attribute which overwrites the [TextDecoration.overline] aspect of
+  /// [TextStyle.decoration] on an [InlineSpan], if set to non-null.
   ///
   /// Setting this value to true applies overline and setting it to false
   /// disables overline.
   final bool? overline;
 
-  /// An attribute that corresponds to the [TextDecoration.lineThrough] aspect of
-  /// [TextStyle.decoration].
+  /// An attribute which overwrites the [TextDecoration.lineThrough] aspect of
+  /// [TextStyle.decoration] on an [InlineSpan], if set to non-null.
   ///
   /// Setting this value to true applies lineThrough and setting it to false
   /// disables lineThrough.
   final bool? lineThrough;
 
-  /// An attribute that corresponds to [TextStyle.decorationColor].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.decorationColor]
+  /// if set to non-null.
   final ui.Color? decorationColor;
-  /// An attribute that corresponds to [TextStyle.decorationStyle].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.decorationStyle]
+  /// if set to non-null.
   final ui.TextDecorationStyle? decorationStyle;
-  /// An attribute that corresponds to [TextStyle.decorationThickness].
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.decorationThickness]
+  /// if set to non-null.
   final double? decorationThickness;
 
-  /// An attribute that corresponds to [TextSpan.recognizer].
+  /// An attribute which overwrites [TextSpan.recognizer] if set to non-null.
   ///
   /// When a recognizer is specified, the [InlineSpan.updateAttributes] method
   /// replaces existing recognizers (if any) within the given range with the
@@ -566,24 +582,24 @@ class InlineSpanAttributes {
   /// [TextSpan].
   final RemovableInlineSpanAttribute<GestureRecognizer>? recognizer;
 
-  /// An attribute that corresponds to [TextSpan.mouseCursor].
+  /// An attribute which overwrites [TextSpan.mouseCursor] if set to non-null.
   final MouseCursor? mouseCursor;
 
-  /// An attribute that corresponds to [TextSpan.onEnter].
+  /// An attribute which overwrites [TextSpan.onEnter] if set to non-null.
   ///
   /// When this value is set to [remove], the [InlineSpan.updateAttributes]
   /// method sets [TextSpan.onEnder] to null in the given range of the returned
   /// [TextSpan].
   final RemovableInlineSpanAttribute<PointerEnterEventListener>? onEnter;
 
-  /// An attribute that corresponds to [TextSpan.onExit].
+  /// An attribute which overwrites [TextSpan.onExit] if set to non-null.
   ///
   /// When this value is set to [remove], the [InlineSpan.updateAttributes]
   /// method sets [TextSpan.onExit] to null in the given range of the returned
   /// [TextSpan].
   final RemovableInlineSpanAttribute<PointerExitEventListener>? onExit;
 
-  /// An attribute that corresponds to [TextSpan.spellOut].
+  /// An attribute which overwrites [TextSpan.spellOut] if set to non-null.
   final bool? spellOut;
 
   /// Unsets the given [RemovableInlineSpanAttribute] from an [InlineSpan].

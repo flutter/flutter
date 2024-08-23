@@ -458,6 +458,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
       || _updateRemovableAttribute(span.onEnter, newAttributes.onEnter) != span.onEnter
       || _updateRemovableAttribute(span.onExit, newAttributes.onExit) != span.onExit
       || (newAttributes.mouseCursor != null && newAttributes.mouseCursor != span.mouseCursor)
+      || (newAttributes.locale != null && newAttributes.locale != span.locale)
       || (newAttributes.spellOut != null && newAttributes.spellOut != span.spellOut));
 
     if (!needsUpdate && identical(newChildren, span.children)) {
@@ -478,7 +479,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     ));
   }
 
-  static TextSpan _subrange(TextSpan span, TextRange range, List<InlineSpan>? newChildren) {
+  static TextSpan _slice(TextSpan span, TextRange range, List<InlineSpan>? newChildren) {
     final int textLength = span.text?.length ?? 0;
     assert(range.isValid);
     assert(range.isNormalized);
@@ -557,12 +558,14 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     // parent: [0, clipStart) -- when clipStart == 0 it's an empty node
     //   - child1: [clipStart, clipEnd), with newAttributes applied
     //   - child2: [clipEnd, textLength) if clipEnd < textLength, plus the rest of updated `children`
-    final TextSpan child1 = _subrange(updated, TextRange(start: clipStart, end: clipEnd), null);
-    final TextSpan? child2 = (clipEnd < textLength || (newChildren != null && newChildren.isNotEmpty))
-      ? _subrange(this, TextRange(start: clipEnd, end: textLength), newChildren)
+    final TextSpan child1 = _slice(updated, TextRange(start: clipStart, end: clipEnd), null);
+    final TextSpan? child2 = clipEnd < textLength || (newChildren != null && newChildren.isNotEmpty)
+      ? _slice(this, TextRange(start: clipEnd, end: textLength), newChildren)
       : null;
-    final List<TextSpan> subtree = List<TextSpan>.generate(child2 != null ? 2 : 1, (int i) => i == 1 ? child2! : child1);
-    return _subrange(this, TextRange(start: 0, end: clipStart), subtree);
+    final List<TextSpan> subtree = child2 == null
+     ? List<TextSpan>.filled(1, child1)
+     : (List<TextSpan>.filled(2, child1)..[1] = child2);
+    return _slice(this, TextRange(start: 0, end: clipStart), subtree);
   }
 
   /// In debug mode, throws an exception if the object is not in a valid
