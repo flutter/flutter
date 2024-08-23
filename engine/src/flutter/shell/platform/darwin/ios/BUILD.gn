@@ -137,6 +137,8 @@ source_set("flutter_framework_source_arc") {
     "ios_surface_metal_impeller.mm",
     "ios_surface_metal_skia.h",
     "ios_surface_metal_skia.mm",
+    "ios_surface_noop.h",
+    "ios_surface_noop.mm",
     "ios_surface_software.h",
     "ios_surface_software.mm",
     "platform_message_handler_ios.h",
@@ -284,6 +286,7 @@ shared_library("ios_test_flutter") {
     "framework/Source/accessibility_bridge_test.mm",
     "framework/Source/availability_version_check_test.mm",
     "framework/Source/connection_collection_test.mm",
+    "ios_surface_noop_unittests.mm",
     "platform_message_handler_ios_test.mm",
   ]
   deps = [
