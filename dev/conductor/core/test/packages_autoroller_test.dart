@@ -64,42 +64,6 @@ void main() {
     );
   });
 
-  test('TODO: delete', () async {
-    stdio = TestStdio();
-    fileSystem = MemoryFileSystem.test();
-    processManager = FakeProcessManager.empty();
-    final FakePlatform platform = FakePlatform(
-      environment: <String, String>{
-        'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
-      },
-      operatingSystem: localOperatingSystem,
-      pathSeparator: localPathSeparator,
-    );
-    final Checkouts checkouts = Checkouts(
-      fileSystem: fileSystem,
-      parentDirectory: fileSystem.directory(checkoutsParentDirectory)
-        ..createSync(recursive: true),
-      platform: platform,
-      processManager: processManager,
-      stdio: stdio,
-    );
-    framework = FrameworkRepository(
-      checkouts,
-      mirrorRemote: const Remote.mirror(mirrorUrl),
-    );
-
-    autoroller = PackageAutoroller(
-      githubClient: githubClient,
-      token: token,
-      framework: framework,
-      orgName: orgName,
-      processManager: processManager,
-      stdio: stdio,
-      githubUsername: 'flutter-pub-roller-bot',
-    );
-
-  });
-
   test('GitHub token is redacted from exceptions while pushing', () async {
     final StreamController<List<int>> controller =
         StreamController<List<int>>();
@@ -468,6 +432,12 @@ void main() {
         'rev-parse',
         'HEAD',
       ], stdout: '000deadbeef'),
+      const FakeCommand(command: <String>[
+        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/dart',
+        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/dev/tools/bin/generate_gradle_lockfiles.dart',
+        '--no-gradle-generation',
+        '--no-exclusion',
+      ]),
       const FakeCommand(command: <String>[
         'git',
         'push',
