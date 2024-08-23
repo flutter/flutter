@@ -553,15 +553,14 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     if (hasSameAttributes || (clipStart == 0 && clipEnd == textLength && (newChildren?.isEmpty ?? true))) {
       return updated;
     }
-    // This span must be broken up into 2 or 3 parts, resulting in a new span tree:
+    // Breaks this span into 2 or 3 parts, forming a new span tree:
     // parent: [0, clipStart) -- when clipStart == 0 it's an empty node
-    //   - child1: [clipStart, min(clipEnd, textLength)), with newAttributes applied
+    //   - child1: [clipStart, clipEnd), with newAttributes applied
     //   - child2: [clipEnd, textLength) if clipEnd < textLength, plus the rest of updated `children`
-    final TextSpan child1 = _subrange(updated, TextRange(start: clipStart, end: math.min(clipEnd, textLength)), null);
+    final TextSpan child1 = _subrange(updated, TextRange(start: clipStart, end: clipEnd), null);
     final TextSpan? child2 = (clipEnd < textLength || (newChildren != null && newChildren.isNotEmpty))
-      ? _subrange(this, TextRange(start: math.min(clipEnd, textLength), end: textLength), newChildren)
+      ? _subrange(this, TextRange(start: clipEnd, end: textLength), newChildren)
       : null;
-
     final List<TextSpan> subtree = List<TextSpan>.generate(child2 != null ? 2 : 1, (int i) => i == 1 ? child2! : child1);
     return _subrange(this, TextRange(start: 0, end: clipStart), subtree);
   }

@@ -557,6 +557,10 @@ class InlineSpanAttributes {
 
   /// An attribute that corresponds to [TextSpan.recognizer].
   ///
+  /// When a recognizer is specified, the [InlineSpan.updateAttributes] method
+  /// replaces existing recognizers (if any) within the given range with the
+  /// specified recognizer.
+  ///
   /// When this value is set to [remove], the [InlineSpan.updateAttributes]
   /// method sets [TextSpan.recognizer] to null in the given range of the returned
   /// [TextSpan].
