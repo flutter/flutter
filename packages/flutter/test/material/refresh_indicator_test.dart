@@ -1140,6 +1140,64 @@ void main() {
     expect(stretchAccepted, false);
   });
 
+  group('RefreshIndicator.noSpinner', () {
+    testWidgets('onStatusChange and onRefresh Trigger', (WidgetTester tester) async {
+      refreshCalled = false;
+      bool modeSnap = false;
+      bool modeDrag = false;
+      bool modeArmed = false;
+      bool modeDone = false;
+
+      await tester.pumpWidget(MaterialApp(
+        home: RefreshIndicator.noSpinner(
+          onStatusChange: (RefreshIndicatorStatus? mode) {
+            if (mode == RefreshIndicatorStatus.armed) {
+              modeArmed = true;
+            }
+            if (mode == RefreshIndicatorStatus.drag) {
+              modeDrag = true;
+            }
+            if (mode == RefreshIndicatorStatus.snap) {
+              modeSnap = true;
+            }
+            if (mode == RefreshIndicatorStatus.done) {
+              modeDone = true;
+            }
+          },
+          onRefresh: refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children:
+            <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(
+                height: 200.0,
+                child: Text(item),
+              );
+            }).toList(),
+          ),
+        ),
+      ));
+
+      await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+      await tester.pump();
+
+      // Finish the scroll animation.
+      await tester.pump(const Duration(seconds: 1));
+
+      // Finish the indicator settle animation.
+      await tester.pump(const Duration(seconds: 1));
+
+      // Finish the indicator hide animation.
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(refreshCalled, true);
+      expect(modeSnap, true);
+      expect(modeDrag, true);
+      expect(modeArmed, true);
+      expect(modeDone, true);
+    });
+  });
+
   testWidgets('RefreshIndicator manipulates value color opacity correctly', (WidgetTester tester) async {
     final List<Color> colors = <Color>[
       Colors.black,
