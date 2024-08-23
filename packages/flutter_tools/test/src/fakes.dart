@@ -723,7 +723,6 @@ class FakeDartDevelopmentServiceLauncher extends Fake
   final Completer<void> _completer = Completer<void>();
 }
 
-
 class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   FakeDevtoolsLauncher({DevToolsServerAddress? serverAddress})
       : _serverAddress = serverAddress;
