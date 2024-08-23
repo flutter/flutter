@@ -401,7 +401,7 @@ class CanvasKitRenderer implements Renderer {
   // TODO(harryterkelsen): Merge this logic with the async logic in
   // [EngineScene], https://github.com/flutter/flutter/issues/142072.
   @override
-  Future<void> renderScene(ui.Scene scene, ui.FlutterView view) async {
+  Future<void> renderScene(ui.Scene scene, EngineFlutterView view) async {
     assert(_rasterizers.containsKey(view.viewId),
         "Unable to render to a view which hasn't been registered");
     final ViewRasterizer rasterizer = _rasterizers[view.viewId]!;
