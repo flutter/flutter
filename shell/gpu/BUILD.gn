@@ -75,6 +75,8 @@ source_set("gpu_surface_metal") {
     "gpu_surface_metal_delegate.h",
     "gpu_surface_metal_skia.h",
     "gpu_surface_metal_skia.mm",
+    "gpu_surface_noop.h",
+    "gpu_surface_noop.mm",
   ]
 
   public_deps = gpu_common_deps
@@ -93,7 +95,10 @@ if (is_mac) {
   impeller_component("gpu_surface_metal_unittests") {
     testonly = true
     target_type = "executable"
-    sources = [ "gpu_surface_metal_impeller_unittests.mm" ]
+    sources = [
+      "gpu_surface_metal_impeller_unittests.mm",
+      "gpu_surface_noop_unittests.mm",
+    ]
 
     frameworks = [
       "AppKit.framework",
