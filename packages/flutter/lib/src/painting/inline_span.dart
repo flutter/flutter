@@ -14,7 +14,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart' show useResult;
 
 import 'basic_types.dart';
 import 'text_painter.dart';
