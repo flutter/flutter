@@ -28,7 +28,7 @@ import 'theme.dart';
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
 @immutable
-class DialogTheme extends InheritedWidget with Diagnosticable {
+class DialogTheme extends InheritedTheme with Diagnosticable {
   /// Creates a dialog theme that can be used for [ThemeData.dialogTheme].
   const DialogTheme({
     super.key,
@@ -196,6 +196,11 @@ class DialogTheme extends InheritedWidget with Diagnosticable {
   }
 
   @override
+  Widget wrap(BuildContext context, Widget child) {
+    return DialogTheme(data: data, child: child);
+  }
+
+  @override
   bool updateShouldNotify(DialogTheme oldWidget) => data != oldWidget.data;
 
   /// Creates a copy of this object but with the given fields replaced with the
@@ -265,17 +270,17 @@ class DialogTheme extends InheritedWidget with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ColorProperty('backgroundColor', backgroundColor));
-    properties.add(DoubleProperty('elevation', elevation));
-    properties.add(ColorProperty('shadowColor', shadowColor));
-    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
-    properties.add(ColorProperty('iconColor', iconColor));
+    properties.add(ColorProperty('iconColor', iconColor, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('actionsPadding', actionsPadding, defaultValue: null));
-    properties.add(ColorProperty('barrierColor', barrierColor));
+    properties.add(ColorProperty('barrierColor', barrierColor, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsets>('insetPadding', insetPadding, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
   }
@@ -463,17 +468,17 @@ class DialogThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ColorProperty('backgroundColor', backgroundColor));
-    properties.add(DoubleProperty('elevation', elevation));
-    properties.add(ColorProperty('shadowColor', shadowColor));
-    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
-    properties.add(ColorProperty('iconColor', iconColor));
+    properties.add(ColorProperty('iconColor', iconColor, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('actionsPadding', actionsPadding, defaultValue: null));
-    properties.add(ColorProperty('barrierColor', barrierColor));
+    properties.add(ColorProperty('barrierColor', barrierColor, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsets>('insetPadding', insetPadding, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
   }

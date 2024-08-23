@@ -1443,7 +1443,10 @@ Future<T?> showDialog<T>({
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(DialogRoute<T>(
     context: context,
     builder: builder,
-    barrierColor: barrierColor ?? Theme.of(context).dialogTheme.data.barrierColor ?? Colors.black54,
+    barrierColor: barrierColor
+      ?? DialogTheme.of(context).barrierColor
+      ?? Theme.of(context).dialogTheme.data.barrierColor
+      ?? Colors.black54,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,
     useSafeArea: useSafeArea,
