@@ -2927,10 +2927,12 @@
 ../../../flutter/third_party/skia/toolchain/download_mac_toolchain.bzl
 ../../../flutter/third_party/skia/toolchain/download_ndk_linux_amd64_toolchain.bzl
 ../../../flutter/third_party/skia/toolchain/download_toolchains.bzl
+../../../flutter/third_party/skia/toolchain/download_windows_amd64_toolchain.bzl
 ../../../flutter/third_party/skia/toolchain/linux_amd64_toolchain_config.bzl
 ../../../flutter/third_party/skia/toolchain/mac_toolchain_config.bzl
 ../../../flutter/third_party/skia/toolchain/ndk_linux_arm64_toolchain_config.bzl
 ../../../flutter/third_party/skia/toolchain/utils.bzl
+../../../flutter/third_party/skia/toolchain/windows_toolchain_config.bzl
 ../../../flutter/third_party/skia/tools
 ../../../flutter/third_party/spring_animation/README.md
 ../../../flutter/third_party/sqlite/.git
