@@ -473,6 +473,7 @@ FLUTTER_ASSERT_ARC
 - (void)testCanMergePlatformAndUIThread {
   auto settings = FLTDefaultSettingsForBundle();
   settings.merged_platform_ui_thread = true;
+  settings.enable_impeller = true;
   FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
   [engine run];
@@ -481,15 +482,16 @@ FLUTTER_ASSERT_ARC
                  engine.shell.GetTaskRunners().GetPlatformTaskRunner());
 }
 
-- (void)testCanUnMergePlatformAndUIThread {
+- (void)testCanNotUnMergePlatformAndUIThread {
   auto settings = FLTDefaultSettingsForBundle();
   settings.merged_platform_ui_thread = false;
+  settings.enable_impeller = true;
   FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
   [engine run];
 
-  XCTAssertNotEqual(engine.shell.GetTaskRunners().GetUITaskRunner(),
-                    engine.shell.GetTaskRunners().GetPlatformTaskRunner());
+  XCTAssertEqual(engine.shell.GetTaskRunners().GetUITaskRunner(),
+                 engine.shell.GetTaskRunners().GetPlatformTaskRunner());
 }
 
 @end
