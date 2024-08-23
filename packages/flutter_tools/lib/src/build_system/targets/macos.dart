@@ -40,7 +40,6 @@ abstract class UnpackMacOS extends Target {
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework/Versions/A/FlutterMacOS'),
-    Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework.dSYM/Contents/Resources/DWARF/FlutterMacOS'),
   ];
 
   @override
@@ -86,33 +85,6 @@ abstract class UnpackMacOS extends Target {
     }
 
     await _thinFramework(environment, frameworkBinaryPath);
-
-    // Copy Flutter framework dSYM (debug symbol) bundle, if present.
-    final Directory frameworkDsym = environment.fileSystem.directory(
-      environment.artifacts.getArtifactPath(
-        Artifact.flutterMacOSFrameworkDsym,
-        platform: TargetPlatform.darwin,
-        mode: buildMode,
-      )
-    );
-    if (frameworkDsym.existsSync()) {
-      final ProcessResult result = await environment.processManager.run(<String>[
-        'rsync',
-        '-av',
-        '--delete',
-        '--filter',
-        '- .DS_Store/',
-        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-        frameworkDsym.path,
-        environment.outputDir.path,
-      ]);
-      if (result.exitCode != 0) {
-        throw Exception(
-          'Failed to copy framework dSYM (exit ${result.exitCode}:\n'
-          '${result.stdout}\n---\n${result.stderr}',
-        );
-      }
-    }
   }
 
   static const List<String> _copyDenylist = <String>['entitlements.txt', 'without_entitlements.txt'];
@@ -186,11 +158,51 @@ class ReleaseUnpackMacOS extends UnpackMacOS {
   String get name => 'release_unpack_macos';
 
   @override
-  List<Source> get inputs => <Source>[
-    ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.release),
+  List<Source> get outputs => super.outputs + const <Source>[
+    Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework.dSYM/Contents/Resources/DWARF/FlutterMacOS'),
+  ];
+
+  @override
+  List<Source> get inputs => super.inputs + const <Source>[
     const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.release),
   ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    await super.build(environment);
+
+    // Copy Flutter framework dSYM (debug symbol) bundle, if present.
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
+      throw MissingDefineException(kBuildMode, 'unpack_macos');
+    }
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final Directory frameworkDsym = environment.fileSystem.directory(
+      environment.artifacts.getArtifactPath(
+        Artifact.flutterMacOSFrameworkDsym,
+        platform: TargetPlatform.darwin,
+        mode: buildMode,
+      )
+    );
+    if (frameworkDsym.existsSync()) {
+      final ProcessResult result = await environment.processManager.run(<String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        frameworkDsym.path,
+        environment.outputDir.path,
+      ]);
+      if (result.exitCode != 0) {
+        throw Exception(
+          'Failed to copy framework dSYM (exit ${result.exitCode}:\n'
+          '${result.stdout}\n---\n${result.stderr}',
+        );
+      }
+    }
+  }
 }
 
 /// Unpack the profile prebuilt engine framework.
