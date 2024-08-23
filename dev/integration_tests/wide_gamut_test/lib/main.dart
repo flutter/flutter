@@ -137,7 +137,7 @@ const String _displayP3Logo =
     'gr3yrjmlwqXLjmWw1O2I5Wmp9Xxjyh+AVIZ6ADIAqcwClakzeMgApDILVKbO4CED'
     'kMosUJk6g4dUBuRfvf1am9VRqzYAAAAASUVORK5CYII=';
 
-void main() => run(Setup.gradient);
+void main() => run(Setup.radialGradient);
 
 enum Setup {
   none,
@@ -146,7 +146,8 @@ enum Setup {
   blur,
   drawnImage,
   container,
-  gradient,
+  linearGradient,
+  radialGradient,
 }
 
 void run(Setup setup) {
@@ -266,7 +267,12 @@ class _MyHomePageState extends State<MyHomePage> {
         _loadImage().then((ui.Image? value) => setState(() { _image = value; }));
       case Setup.drawnImage:
         _drawImage().then((ui.Image? value) => setState(() { _image = value; }));
-      case Setup.image || Setup.blur || Setup.none || Setup.container || Setup.gradient:
+      case Setup.image ||
+            Setup.blur ||
+            Setup.none ||
+            Setup.container ||
+            Setup.linearGradient ||
+            Setup.radialGradient:
         break;
     }
     super.initState();
@@ -309,7 +315,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 green: 0,
                 blue: 0,
                 colorSpace: ui.ColorSpace.displayP3));
-      case Setup.gradient:
+      case Setup.linearGradient:
         imageWidget = Container(
           width: 100,
           height: 100,
@@ -317,6 +323,28 @@ class _MyHomePageState extends State<MyHomePage> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
+              colors: [
+                const Color.from(
+                  alpha: 1,
+                  red: 1,
+                  green: 0,
+                  blue: 0,
+                  colorSpace: ui.ColorSpace.displayP3),
+                const Color.from(
+                  alpha: 1,
+                  red: 0,
+                  green: 1,
+                  blue: 0,
+                  colorSpace: ui.ColorSpace.displayP3)],
+            ),
+          ),
+        );
+      case Setup.radialGradient:
+        imageWidget = Container(
+          width: 100,
+          height: 100,
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
               colors: [
                 const Color.from(
                   alpha: 1,
