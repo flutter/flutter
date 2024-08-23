@@ -670,7 +670,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           )
         : effectiveStyle;
 
-      final Widget  menuItemButton = MenuItemButton(
+      final Widget menuItemButton = MenuItemButton(
         key: enableScrollToHighlight ? buttonItemKeys[i] : null,
         style: effectiveStyle,
         leadingIcon: entry.leadingIcon,
@@ -890,7 +890,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           width: widget.width,
           children: <Widget>[
             textField,
-            ..._initialMenu!,
+            ..._initialMenu!.map((Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item)),
             trailingButton,
             leadingButton,
           ],
