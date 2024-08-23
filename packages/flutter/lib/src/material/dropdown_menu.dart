@@ -890,7 +890,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           width: widget.width,
           children: <Widget>[
             textField,
-            ..._initialMenu!.map((Widget item) => controller.isOpen ? item : ExcludeFocus(child: item)),
+            ..._initialMenu!.map((Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item)),
             trailingButton,
             leadingButton,
           ],
