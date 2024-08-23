@@ -802,7 +802,7 @@ static flutter::ThreadHost MakeThreadHost(NSString* thread_label,
   flutter::ThreadHost::ThreadHostConfig host_config(thread_label.UTF8String, threadHostType,
                                                     IOSPlatformThreadConfigSetter);
 
-  if (!settings.merged_platform_ui_thread) {
+  if (!settings.enable_impeller) {
     host_config.ui_config =
         fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
                                       flutter::ThreadHost::Type::kUi, thread_label.UTF8String),
@@ -879,8 +879,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
       [](flutter::Shell& shell) { return std::make_unique<flutter::Rasterizer>(shell); };
 
   fml::RefPtr<fml::TaskRunner> ui_runner;
-  if (settings.merged_platform_ui_thread) {
-    FML_LOG(IMPORTANT) << "Warning: Using highly experimental merged thread mode.";
+  if (settings.enable_impeller) {
     ui_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
   } else {
     ui_runner = _threadHost->ui_thread->GetTaskRunner();
