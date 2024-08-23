@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class CardUseCase extends UseCase {
@@ -26,12 +26,15 @@ class MainWidget extends StatefulWidget {
 
 class MainWidgetState extends State<MainWidget> {
   bool favorite = false;
+
+  String pageTitle = getUseCaseName(CardUseCase());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: const Text('Card')),
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
       ),
       body: const Center(
         child: Column(
