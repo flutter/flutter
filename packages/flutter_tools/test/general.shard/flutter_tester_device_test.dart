@@ -21,6 +21,7 @@ import 'package:test/fake.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
+import '../src/fakes.dart';
 
 void main() {
   late FakePlatform platform;
@@ -222,16 +223,17 @@ void main() {
       ]);
       device = createDevice(enableVmService: true);
       originalDdsLauncher = ddsLauncherCallback;
-      ddsLauncherCallback = (Uri remoteVmServiceUri, {
-        required bool enableAuthCodes,
-        required bool ipv6,
-        required bool enableDevTools,
-        required List<String> cachedUserTags,
+      ddsLauncherCallback = ({
+        required Uri remoteVmServiceUri,
         Uri? serviceUri,
-        String? google3WorkspaceRoot,
+        bool enableAuthCodes = true,
+        bool serveDevTools = false,
         Uri? devToolsServerAddress,
+        bool enableServicePortFallback = false,
+        List<String> cachedUserTags = const <String>[],
+        String? dartExecutable,
       }) async {
-        return (process: null, serviceUri: Uri.parse('http://localhost:1234'), devToolsUri: null, dtdUri: null);
+        return FakeDartDevelopmentServiceLauncher(uri: Uri.parse('http://localhost:1234'));
       };
     });
 
