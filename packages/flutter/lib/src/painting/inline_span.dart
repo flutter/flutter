@@ -588,7 +588,7 @@ class InlineSpanAttributes {
   /// An attribute which overwrites [TextSpan.onEnter] if set to non-null.
   ///
   /// When this value is set to [remove], the [InlineSpan.updateAttributes]
-  /// method sets [TextSpan.onEnder] to null in the given range of the returned
+  /// method sets [TextSpan.onEnter] to null in the given range of the returned
   /// [TextSpan].
   final RemovableInlineSpanAttribute<PointerEnterEventListener>? onEnter;
 
