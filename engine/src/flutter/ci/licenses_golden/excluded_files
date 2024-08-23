@@ -293,6 +293,7 @@
 ../../../flutter/shell/common/variable_refresh_rate_display_unittests.cc
 ../../../flutter/shell/common/vsync_waiter_unittests.cc
 ../../../flutter/shell/gpu/gpu_surface_metal_impeller_unittests.mm
+../../../flutter/shell/gpu/gpu_surface_noop_unittests.mm
 ../../../flutter/shell/platform/android/.gitignore
 ../../../flutter/shell/platform/android/README.md
 ../../../flutter/shell/platform/android/android_context_gl_impeller_unittests.cc
@@ -337,6 +338,7 @@
 ../../../flutter/shell/platform/darwin/common/availability_version_check_unittests.cc
 ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_codecs_unittest.mm
 ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_standard_codec_unittest.mm
+../../../flutter/shell/platform/darwin/ios/ios_surface_noop_unittests.mm
 ../../../flutter/shell/platform/darwin/macos/README.md
 ../../../flutter/shell/platform/darwin/macos/framework/Source/fixtures
 ../../../flutter/shell/platform/embedder/fixtures
