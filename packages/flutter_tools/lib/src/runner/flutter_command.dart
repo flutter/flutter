@@ -1744,8 +1744,13 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
       } else {
         offline = false;
       }
-      await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal}, offline: offline);
-      await globals.cache.updateAll(await requiredArtifacts, offline: offline);
+      await globals.cache.updateAll(
+        <DevelopmentArtifact>{
+          ...await requiredArtifacts,
+          DevelopmentArtifact.universal,
+        },
+        offline: offline,
+      );
     }
     globals.cache.releaseLock();
 
