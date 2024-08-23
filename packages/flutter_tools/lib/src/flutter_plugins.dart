@@ -993,8 +993,8 @@ void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<Object?>? pl
         e,
         platform: globals.platform,
         os: globals.os,
-        destination: 'dest',
-        source: 'source',
+        destination: link.path,
+        source: path,
       );
       rethrow;
     }
