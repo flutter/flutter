@@ -164,7 +164,7 @@ class ReleaseUnpackMacOS extends UnpackMacOS {
 
   @override
   List<Source> get inputs => super.inputs + const <Source>[
-    const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.release),
+    Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.release),
   ];
 
   @override
