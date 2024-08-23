@@ -728,11 +728,14 @@ class Cache {
 
     for (final (int i, MapEntry<String, List<ArtifactSet>> artifactGroup) in neededArtifactsByUserFriendlyName.entries.indexed) {
       try {
-        // TODO make this not ugly.
+        final List<String> statusMessageParts = <String>[
+          'Downloading ${artifactGroup.key}',
+          if (neededArtifactsByUserFriendlyName.length > 1)
+            ' (${i + 1} of ${neededArtifactsByUserFriendlyName.length})',
+          '...',
+        ];
         final Status? progress = artifactGroup.value.any((ArtifactSet a) => a.logUpdates)
-            ? _logger.startProgress(
-                'Downloading ${artifactGroup.key} (${i + 1} of ${neededArtifactsByUserFriendlyName.length})...',
-              )
+            ? _logger.startProgress(statusMessageParts.join())
             : null;
         for (final ArtifactSet artifact in artifactGroup.value) {
           await artifact.update(
