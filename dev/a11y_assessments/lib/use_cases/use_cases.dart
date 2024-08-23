@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import '../common/dynamic_title.dart';
 import 'action_chip.dart';
+import 'app_bar.dart';
 import 'auto_complete.dart';
 import 'badge.dart';
 import 'card.dart';
@@ -22,6 +23,7 @@ import 'radio_list_tile.dart';
 import 'slider.dart';
 import 'snack_bar.dart';
 import 'switch_list_tile.dart';
+import 'tab_bar_view.dart';
 import 'text_button.dart';
 import 'text_field.dart';
 import 'text_field_password.dart';
@@ -61,4 +63,6 @@ final List<UseCase> useCases = <UseCase>[
   DrawerUseCase(),
   NavigationDrawerUseCase(),
   NavigationRailUseCase(),
+  AppBarUseCase(),
+  TabBarViewUseCase(),
 ];
