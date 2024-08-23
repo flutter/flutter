@@ -43,6 +43,8 @@ Entity::Entity(Entity&&) = default;
 
 Entity::Entity(const Entity&) = default;
 
+Entity& Entity::operator=(Entity&&) = default;
+
 const Matrix& Entity::GetTransform() const {
   return transform_;
 }

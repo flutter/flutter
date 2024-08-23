@@ -890,5 +890,39 @@ TEST_P(AiksTest, DispatcherDoesNotCullPerspectiveTransformedChildDisplayLists) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// Results in a 100x100 green square. If any red is drawn, there is a bug.
+TEST_P(AiksTest, BackdropRestoreUsesCorrectCoverageForFirstRestoredClip) {
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  // Add a difference clip that cuts out the bottom right corner
+  builder.ClipRect(SkRect::MakeLTRB(50, 50, 100, 100),
+                   DlCanvas::ClipOp::kDifference);
+
+  // Draw a red rectangle that's going to be completely covered by green later.
+  paint.setColor(DlColor::kRed());
+  builder.DrawRect(SkRect::MakeLTRB(0, 0, 100, 100), paint);
+
+  // Add a clip restricting the backdrop filter to the top right corner.
+  auto count = builder.GetSaveCount();
+  builder.Save();
+  {
+    builder.ClipRect(SkRect::MakeLTRB(0, 0, 100, 100));
+    {
+      // Create a save layer with a backdrop blur filter.
+      auto backdrop_filter =
+          DlBlurImageFilter::Make(10.0, 10.0, DlTileMode::kDecal);
+      builder.SaveLayer(nullptr, nullptr, backdrop_filter.get());
+    }
+  }
+  builder.RestoreToCount(count);
+
+  // Finally, overwrite all the previous stuff with green.
+  paint.setColor(DlColor::kGreen());
+  builder.DrawRect(SkRect::MakeLTRB(0, 0, 100, 100), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller
