@@ -19,6 +19,7 @@ import 'basic_types.dart';
 import 'inline_span.dart';
 import 'text_painter.dart';
 import 'text_scaler.dart';
+import 'text_style.dart';
 
 // Examples can assume:
 // late TextSpan myTextSpan;
@@ -441,33 +442,6 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     return localOffset < text.length ? text.codeUnitAt(localOffset) : null;
   }
 
-  @override
-  int get contentLength {
-     int length = text?.length ?? 0;
-     if (children case final List<InlineSpan> children?) {
-      for (final InlineSpan child in children) {
-        length += child.contentLength;
-      }
-     }
-     return length;
-  }
-
-  static bool _removableAttributeChanged<T extends Object>(T? old, RemovableInlineSpanAttribute<T>? newValue) {
-    return switch (newValue) {
-      null => false,
-      Right() => old == null,
-      Left(:final T value) => value == old,
-    };
-  }
-  static bool _needsUpdate(TextSpan span, InlineSpanAttributes newAttributes) {
-    return newAttributes.updateTextStyle(span.style) != span.style
-      || !_removableAttributeChanged(span.recognizer, newAttributes.recognizer)
-      || !_removableAttributeChanged(span.onEnter, newAttributes.onEnter)
-      || !_removableAttributeChanged(span.onExit, newAttributes.onExit)
-      || (newAttributes.mouseCursor != null && newAttributes.mouseCursor != span.mouseCursor)
-      || (newAttributes.spellOut != null && newAttributes.spellOut != span.spellOut);
-  }
-
   static T? _updateRemovableAttribute<T extends Object>(T? oldValue, RemovableInlineSpanAttribute<T>? newValue) {
     return switch (newValue) {
       null => oldValue,
@@ -476,53 +450,75 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     };
   }
 
-  static TextSpan _update(TextSpan span, { TextRange? range, InlineSpanAttributes? newAttributes, List<InlineSpan>? newChildren }) {
-    assert(range == null || range.isValid);
-    assert(range == null || range.isNormalized);
-    assert(range == null || range.end <= (span.text?.length ?? 0));
+  static (bool hasSameAttributes, TextSpan span) _copyWith(TextSpan span, InlineSpanAttributes? newAttributes, List<InlineSpan>? newChildren) {
+    final TextStyle? newStyle = newAttributes?.updateTextStyle(span.style);
+    final bool needsUpdate = newAttributes != null
+      && (newStyle != span.style
+      || _updateRemovableAttribute(span.recognizer, newAttributes.recognizer) != span.recognizer
+      || _updateRemovableAttribute(span.onEnter, newAttributes.onEnter) != span.onEnter
+      || _updateRemovableAttribute(span.onExit, newAttributes.onExit) != span.onExit
+      || (newAttributes.mouseCursor != null && newAttributes.mouseCursor != span.mouseCursor)
+      || (newAttributes.spellOut != null && newAttributes.spellOut != span.spellOut));
 
-    final bool subsetsSpan = range != null && (range.start > 0 && range.end < (span.text?.length ?? 0));
-    if (newAttributes == null && identical(newChildren, span.children) && !subsetsSpan) {
+    if (!needsUpdate && identical(newChildren, span.children)) {
+      return (true, span);
+    }
+
+    return (!needsUpdate, TextSpan(
+      text: span.text,
+      style: newStyle ?? span.style,
+      recognizer: _updateRemovableAttribute(span.recognizer, newAttributes?.recognizer),
+      mouseCursor: newAttributes?.mouseCursor ?? span.mouseCursor,
+      onEnter: _updateRemovableAttribute(span.onEnter, newAttributes?.onEnter),
+      onExit: _updateRemovableAttribute(span.onExit, newAttributes?.onExit),
+      semanticsLabel: span.semanticsLabel,
+      locale: newAttributes?.locale ?? span.locale,
+      spellOut: newAttributes?.spellOut ?? span.spellOut,
+      children: newChildren ?? span.children,
+    ));
+  }
+
+  static TextSpan _subrange(TextSpan span, TextRange range, List<InlineSpan>? newChildren) {
+    final int textLength = span.text?.length ?? 0;
+    assert(range.isValid);
+    assert(range.isNormalized);
+    assert(range.end <= textLength);
+
+    if (identical(newChildren, span.children) && range.start == 0 && range.end == textLength) {
       return span;
     }
-    final String? newSemanticsLabel = subsetsSpan
-      ? span.semanticsLabel?.substring(range.start, range.end)
-      : span.semanticsLabel;
+    final String? newSemanticsLabel = span.semanticsLabel?.substring(range.start, range.end);
     assert(
       newSemanticsLabel == null || newSemanticsLabel.isEmpty || newSemanticsLabel.length == span.semanticsLabel?.length,
       'Cannot create a subspan from $range of $span. The original span has a semanticsLabel.'
     );
     return TextSpan(
-      text: subsetsSpan ? span.text?.substring(range.start, range.end) : span.text,
-      style: newAttributes?.updateTextStyle(span.style) ?? span.style,
-      recognizer: _updateRemovableAttribute(span.recognizer, newAttributes?.recognizer),
-      mouseCursor: newAttributes?.mouseCursor ?? span.mouseCursor,
-      onEnter: _updateRemovableAttribute(span.onEnter, newAttributes?.onEnter),
-      onExit: _updateRemovableAttribute(span.onExit, newAttributes?.onExit),
+      text: span.text?.substring(range.start, range.end),
+      style: span.style,
+      recognizer: span.recognizer,
+      mouseCursor: span.mouseCursor,
+      onEnter: span.onEnter,
+      onExit: span.onExit,
       semanticsLabel: newSemanticsLabel,
-      locale: newAttributes?.locale ?? span.locale,
-      spellOut: newAttributes?.spellOut ?? span.spellOut,
+      locale: span.locale,
+      spellOut: span.spellOut,
       children: newChildren,
     );
   }
 
   // Update the children in a copy-on-write fashion (the original List is
-  // returned if no changes are made).
-  //
-  // The parameter `endIndex` is the exclusive end index until which (the start index is always 0).
-  static List<InlineSpan>? _updateChildren(InlineSpanAttributes newAttributes, List<InlineSpan>? children, int startIndex, int endIndex) {
-    if (endIndex <= 0 || children == null || children.isEmpty) {
+  // returned if nothing changes).
+  static List<InlineSpan>? _updateChildren(InlineSpanAttributes newAttributes, List<InlineSpan>? children, TextRange range, Accumulator offset) {
+    // The offset from the start of the root span to the start of the first child in `children`.
+    final int startOffset = offset.value;
+    assert(!range.isCollapsed);
+    if (range.end <= startOffset || children == null || children.isEmpty) {
       return children;
     }
-    int start = math.max(0, startIndex);
-    int end = endIndex;
     List<InlineSpan> newChildren = children;
-    for (int i = 0; i < children.length && end > 0; i++) {
+    for (int i = 0; i < children.length && offset.value < range.end; i++) {
       final InlineSpan oldSpan = children[i];
-      final InlineSpan newSpan = oldSpan.updateAttributes(newAttributes, TextRange(start: start, end: end));
-      final int length = newSpan.contentLength;
-      start = math.max(0, start - length);
-      end -= length;
+      final InlineSpan newSpan = oldSpan.updateAttributes(newAttributes, range, offset : offset);
       if (identical(newSpan, oldSpan)) {
         continue;
       }
@@ -535,62 +531,39 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   }
 
   @override
-  InlineSpan updateAttributes(covariant InlineSpanAttributes newAttributes, TextRange textRange) {
-    assert(0 <= textRange.start);
-    final int contentLength = this.contentLength;
-    final int clipStart = textRange.start;
-    final int clipEnd = math.min(textRange.end, contentLength);
-
-    if (clipEnd <= clipStart) {
+  TextSpan updateAttributes(covariant InlineSpanAttributes newAttributes, TextRange textRange, { Accumulator? offset }) {
+    final Accumulator offsetAccumulator = offset ?? Accumulator();
+    if (textRange.isCollapsed || !textRange.isNormalized || textRange.end <= offsetAccumulator.value) {
       return this;
     }
-    final int textLength = text?.length ?? 0;
 
-    final InlineSpanAttributes? effectiveNewAttributesForThisSpan = _needsUpdate(this, newAttributes) ? newAttributes : null;
-    // This span doesn't have to be broken up. When clipStart == 0 and
-    // textLength <= cliptEnd < contentLength, we may need to create an empty
-    // parent node, such that children that do not clip `textRange` can still
-    // inherit the original style.
-    if (effectiveNewAttributesForThisSpan == null || textLength < clipStart || (clipStart == 0 && clipEnd == contentLength)) {
-      return _update(this,
-        newAttributes: effectiveNewAttributesForThisSpan,
-        newChildren: _updateChildren(newAttributes, children, clipStart - textLength, clipEnd - textLength),
-      );
+    final int textLength = text?.length ?? 0;
+    final int startOffset = offsetAccumulator.value;
+    final List<InlineSpan>? newChildren = _updateChildren(newAttributes, children, textRange, offsetAccumulator..increment(textLength));
+
+    final int clipStart = math.max(textRange.start - startOffset, 0);
+    final int clipEnd = math.min(textRange.end - startOffset, textLength);
+
+    if (clipEnd <= clipStart) {
+      return _copyWith(this, null, newChildren).$2;
     }
 
-    // Otherwise this span must be broken up into 2 or 3 parts, resulting in a
-    // new span tree:
+    // 0 <= clipStart < clipEnd <= textLength.
+    final (bool hasSameAttributes, TextSpan updated) = _copyWith(this, newAttributes, newChildren);
+    if (hasSameAttributes || (clipStart == 0 && clipEnd == textLength && (newChildren?.isEmpty ?? true))) {
+      return updated;
+    }
+    // This span must be broken up into 2 or 3 parts, resulting in a new span tree:
     // parent: [0, clipStart) -- when clipStart == 0 it's an empty node
     //   - child1: [clipStart, min(clipEnd, textLength)), with newAttributes applied
-    //   - child2: [clipEnd, textLength) if clipEnd < textLength
-    //   - ... the rest of updated `children`
+    //   - child2: [clipEnd, textLength) if clipEnd < textLength, plus the rest of updated `children`
+    final TextSpan child1 = _subrange(updated, TextRange(start: clipStart, end: math.min(clipEnd, textLength)), null);
+    final TextSpan? child2 = (clipEnd < textLength || (newChildren != null && newChildren.isNotEmpty))
+      ? _subrange(this, TextRange(start: math.min(clipEnd, textLength), end: textLength), newChildren)
+      : null;
 
-    // [clipStart, min(clipEnd, textLength)), this is the subrange where
-    // newAttributes must be applied.
-    final TextSpan child1 = _update(this, range: TextRange(start: clipStart, end: math.min(clipEnd, textLength)), newAttributes: newAttributes);
-    // [clipEnd, textLength)
-    final TextSpan? child2 = clipEnd < textLength ? _update(this, range: TextRange(start: clipEnd, end: textLength)) : null;
-    final int additionalChildNodes = child2 == null ? 1 : 2;
-    final List<InlineSpan> newChildren = List<InlineSpan>.filled((children?.length ?? 0) + additionalChildNodes, child1);
-    if (child2 != null) {
-      newChildren[1] = child2;
-    }
-    if (children case final List<InlineSpan> children?) {
-      int start = math.max(0, clipStart - textLength);
-      int end = clipEnd - textLength;
-      for (int i = 0; i < children.length; i++) {
-        InlineSpan span = children[i];
-        if (end > 0) {
-          span = span.updateAttributes(newAttributes, TextRange(start: start, end: end));
-          final int length = span.contentLength;
-          start = math.max(0, start - length);
-          end -= length;
-        }
-        newChildren[i + additionalChildNodes] = span;
-      }
-    }
-    // [0, clipStart)
-    return _update(this, range: TextRange(start: 0, end: clipStart), newChildren: newChildren);
+    final List<TextSpan> subtree = List<TextSpan>.generate(child2 != null ? 2 : 1, (int i) => i == 1 ? child2! : child1);
+    return _subrange(this, TextRange(start: 0, end: clipStart), subtree);
   }
 
   /// In debug mode, throws an exception if the object is not in a valid

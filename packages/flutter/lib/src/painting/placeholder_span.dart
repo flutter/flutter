@@ -76,10 +76,10 @@ abstract class PlaceholderSpan extends InlineSpan {
   }
 
   @override
-  int get contentLength => 1;
-
-  @override
-  PlaceholderSpan updateAttributes(covariant InlineSpanAttributes newAttributes, TextRange textRange) => this;
+  PlaceholderSpan updateAttributes(covariant InlineSpanAttributes newAttributes, TextRange textRange, { Accumulator? offset }) {
+    offset?.increment(1);
+    return this;
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -25,6 +25,18 @@ import 'text_style.dart';
 // Examples can assume:
 // late InlineSpan myInlineSpan;
 
+/// The signature of [InlineSpanAttributes.remove].
+///
+/// This type represents a binary decision: the [Left] branch indicates that the
+/// attribute should be set to a value of type `T`, and the [Right] branch
+/// typically indicates the current value should be unset.
+///
+/// This is useful when the value `null` already has a different meaning (other
+/// than "unset") in the context. For example, in [InlineSpanAttributes], a null
+/// value means an attribute should not be updated. However, nullable attributes
+/// such as [TextSpan.recognizer] also need `null` for setting the value to `null`.
+/// This type introduces an additional state [InlineSpanAttributes.remove] when
+/// `null` is not available.
 typedef RemovableInlineSpanAttribute<T> = Either<T, void>;
 
 /// Mutable wrapper of an integer that can be passed by reference to track a
@@ -368,10 +380,14 @@ abstract class InlineSpan extends DiagnosticableTree {
   @protected
   int? codeUnitAtVisitor(int index, Accumulator offset);
 
-  int get contentLength;
-
+  /// Creates a new [InlineSpan] from this [InlineSpan] by applying
+  /// `newAttributes` to the given [TextRange] within this span.
+  ///
+  /// The `offset` parameter is used by the implementation to track the offsets
+  /// from the start of the root span to sub-spans , it should be set to null
+  /// (the default) if you are not implementing an `InlineSpan` subclass.
   @useResult
-  InlineSpan updateAttributes(covariant InlineSpanAttributes newAttributes, TextRange textRange);
+  InlineSpan updateAttributes(covariant InlineSpanAttributes newAttributes, TextRange textRange, { Accumulator? offset });
 
   /// In debug mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.
@@ -417,7 +433,11 @@ abstract class InlineSpan extends DiagnosticableTree {
   }
 }
 
-/// A text attribute set that can be used to update an [InlineSpan].
+/// A text attribute set that can be used to update the attributes of an
+/// [InlineSpan].
+///
+/// All attributes are nullable, and default to `null`. Attributes set to `null`
+/// in an [InlineSpanAttributes] will not be updated.
 ///
 /// See also:
 ///
@@ -427,7 +447,6 @@ abstract class InlineSpan extends DiagnosticableTree {
 class InlineSpanAttributes {
   /// Creates an [InlineSpanAttributes].
   const InlineSpanAttributes({
-    this.package,
     this.fontFamilies,
     this.locale,
     this.fontSize,
@@ -458,40 +477,110 @@ class InlineSpanAttributes {
     this.spellOut,
   });
 
-  final String? package;
+  /// An attribute that corresponds to [TextStyle.fontFamily].
   final List<String>? fontFamilies;
+
+  /// An attribute that corresponds to [TextStyle.locale].
+  ///
+  /// This value also affects [TextSpan.locale].
   final ui.Locale? locale;
+
+  /// An attribute that corresponds to [TextStyle.fontSize].
   final double? fontSize;
+
+  /// An attribute that corresponds to [TextStyle.fontSize].
   final ui.FontWeight? fontWeight;
+
+  /// An attribute that corresponds to [TextStyle.fontSize].
   final ui.FontStyle? fontStyle;
 
+  /// An attribute that corresponds to [TextStyle.fontFeatures].
   final List<ui.FontFeature>? fontFeatures;
+
+  /// An attribute that corresponds to [TextStyle.fontVariations].
   final List<ui.FontVariation>? fontVariations;
 
+  /// An attribute that corresponds to [TextStyle.height].
+  ///
+  /// Setting this attribute to [kTextHeightNone] unsets the [TextStyle.height]
+  /// multiplier, and restores the font's natural ascent and descent.
   final double? height;
+
+  /// An attribute that corresponds to [TextStyle.leadingDistribution].
   final ui.TextLeadingDistribution? leadingDistribution;
+
+  /// An attribute that corresponds to [TextStyle.textBaseline].
   final ui.TextBaseline? textBaseline;
 
+  /// An attribute that corresponds to [TextStyle.wordSpacing].
   final double? wordSpacing;
+
+  /// An attribute that corresponds to [TextStyle.letterSpacing].
   final double? letterSpacing;
 
+  /// An attribute that corresponds to [TextStyle.foreground] and [TextStyle.color].
   final Either<ui.Color, ui.Paint>? foreground;
+
+  /// An attribute that corresponds to [TextStyle.foreground] and [TextStyle.color].
   final Either<ui.Color, ui.Paint>? background;
+
+  /// An attribute that corresponds to [TextStyle.shadows].
   final List<ui.Shadow>? shadows;
 
+  /// An attribute that corresponds to the [TextDecoration.underline] aspect of
+  /// [TextStyle.decoration].
+  ///
+  /// Setting this value to true applies underline and setting it to false
+  /// disables underline.
   final bool? underline;
+
+  /// An attribute that corresponds to the [TextDecoration.overline] aspect of
+  /// [TextStyle.decoration].
+  ///
+  /// Setting this value to true applies overline and setting it to false
+  /// disables overline.
   final bool? overline;
+
+  /// An attribute that corresponds to the [TextDecoration.lineThrough] aspect of
+  /// [TextStyle.decoration].
+  ///
+  /// Setting this value to true applies lineThrough and setting it to false
+  /// disables lineThrough.
   final bool? lineThrough;
 
+  /// An attribute that corresponds to [TextStyle.decorationColor].
   final ui.Color? decorationColor;
+  /// An attribute that corresponds to [TextStyle.decorationStyle].
   final ui.TextDecorationStyle? decorationStyle;
+  /// An attribute that corresponds to [TextStyle.decorationThickness].
   final double? decorationThickness;
 
+  /// An attribute that corresponds to [TextSpan.recognizer].
+  ///
+  /// When this value is set to [remove], the [InlineSpan.updateAttributes]
+  /// method sets [TextSpan.recognizer] to null in the given range of the returned
+  /// [TextSpan].
   final RemovableInlineSpanAttribute<GestureRecognizer>? recognizer;
 
+  /// An attribute that corresponds to [TextSpan.mouseCursor].
   final MouseCursor? mouseCursor;
+
+  /// An attribute that corresponds to [TextSpan.onEnter].
+  ///
+  /// When this value is set to [remove], the [InlineSpan.updateAttributes]
+  /// method sets [TextSpan.onEnder] to null in the given range of the returned
+  /// [TextSpan].
   final RemovableInlineSpanAttribute<PointerEnterEventListener>? onEnter;
+
+  /// An attribute that corresponds to [TextSpan.onExit].
+  ///
+  /// When this value is set to [remove], the [InlineSpan.updateAttributes]
+  /// method sets [TextSpan.onExit] to null in the given range of the returned
+  /// [TextSpan].
   final RemovableInlineSpanAttribute<PointerExitEventListener>? onExit;
+
+  /// An attribute that corresponds to [TextSpan.spellOut].
+  final bool? spellOut;
 
   /// Unsets the given [RemovableInlineSpanAttribute] from an [InlineSpan].
   ///
@@ -501,14 +590,14 @@ class InlineSpanAttributes {
   /// attribute unset.
   static const RemovableInlineSpanAttribute<Never> remove = Right<Never, void>(null);
 
-  final bool? spellOut;
-
   static L? _maybeLeft<L extends Object>(Either<L, Object?>? value) => value is Left<L, Object?> ? value.value : null;
   static R? _maybeRight<R extends Object>(Either<Object?, R>? value) => value is Right<Object?, R> ? value.value : null;
 
+  /// A convenience method, similar to [TextStyle.merge], that merges the
+  /// `textStyle` argument with the [TextStyle] related attributes in this
+  /// [InlineSpanAttributes] object.
   TextStyle? updateTextStyle(TextStyle? textStyle) {
-    final bool hasNoUpdate = package == null
-      && fontFamilies == null
+    final bool hasNoUpdate = fontFamilies == null
       && locale == null
       && fontSize == null
       && fontWeight == null
@@ -546,7 +635,6 @@ class InlineSpanAttributes {
           if (lineThrough ?? textStyle?.decoration?.contains(ui.TextDecoration.lineThrough) ?? false) ui.TextDecoration.lineThrough,
         ]);
     return (textStyle ?? const TextStyle()).copyWith(
-      package: package,
       fontFamily: fontFamily,
       fontFamilyFallback: fallback,
       locale: locale,
