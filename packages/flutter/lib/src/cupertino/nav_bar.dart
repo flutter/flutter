@@ -426,7 +426,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// If the [CupertinoNavigationBar] is not a child of a [CupertinoPageScaffold],
   /// this has no effect.
   ///
-  /// When [enableBackgroundFilterBlur] is set to false. The blur effect will be
+  /// When [enableBackgroundFilterBlur] is set to false, the blur effect will be
   /// disabled. [enableBackgroundFilterBlur]'s behaviour will only be respected when
   /// [automaticBackgroundVisibility] is false or until content scrolls under the navbar.
   ///
