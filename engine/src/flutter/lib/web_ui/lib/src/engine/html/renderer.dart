@@ -302,7 +302,7 @@ class HtmlRenderer implements Renderer {
       CanvasParagraphBuilder(style as EngineParagraphStyle);
 
   @override
-  Future<void> renderScene(ui.Scene scene, ui.FlutterView view) async {
+  Future<void> renderScene(ui.Scene scene, EngineFlutterView view) async {
     final EngineFlutterView implicitView =
         EnginePlatformDispatcher.instance.implicitView!;
     scene as SurfaceScene;

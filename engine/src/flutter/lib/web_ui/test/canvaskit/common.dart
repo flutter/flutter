@@ -33,7 +33,7 @@ void setUpCanvasKitTest({bool withImplicitView = false}) {
 }
 
 /// Convenience getter for the implicit view.
-ui.FlutterView get implicitView =>
+EngineFlutterWindow get implicitView =>
     EnginePlatformDispatcher.instance.implicitView!;
 
 /// Utility function for CanvasKit tests to draw pictures without

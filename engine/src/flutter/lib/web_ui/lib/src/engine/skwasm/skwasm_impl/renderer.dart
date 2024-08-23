@@ -14,7 +14,7 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 class SkwasmRenderer implements Renderer {
   late SkwasmSurface surface;
-  EngineSceneView? _sceneView;
+  final Map<EngineFlutterView, EngineSceneView> _sceneViews = <EngineFlutterView, EngineSceneView>{};
 
   @override
   final SkwasmFontCollection fontCollection = SkwasmFontCollection();
@@ -397,27 +397,21 @@ class SkwasmRenderer implements Renderer {
     return decoder;
   }
 
-  // TODO(harryterkelsen): Add multiview support,
-  // https://github.com/flutter/flutter/issues/137073.
   @override
-  Future<void> renderScene(ui.Scene scene, ui.FlutterView view) {
+  Future<void> renderScene(ui.Scene scene, EngineFlutterView view) {
     final FrameTimingRecorder? recorder = FrameTimingRecorder.frameTimingsEnabled ? FrameTimingRecorder() : null;
     recorder?.recordBuildFinish();
 
-    view as EngineFlutterView;
-    assert(view is EngineFlutterWindow, 'Skwasm does not support multi-view mode yet');
     final EngineSceneView sceneView = _getSceneViewForView(view);
     return sceneView.renderScene(scene as EngineScene, recorder);
   }
 
   EngineSceneView _getSceneViewForView(EngineFlutterView view) {
-    // TODO(mdebbar): Support multi-view mode.
-    if (_sceneView == null) {
-      _sceneView = EngineSceneView(SkwasmPictureRenderer(surface), view);
-      final EngineFlutterView implicitView = EnginePlatformDispatcher.instance.implicitView!;
-      implicitView.dom.setScene(_sceneView!.sceneElement);
-    }
-    return _sceneView!;
+    return _sceneViews.putIfAbsent(view, () {
+      final EngineSceneView sceneView = EngineSceneView(SkwasmPictureRenderer(surface), view);
+      view.dom.setScene(sceneView.sceneElement);
+      return sceneView;
+    });
   }
 
   @override

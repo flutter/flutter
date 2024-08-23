@@ -44,7 +44,7 @@ class _SceneRender {
 
 // This class builds a DOM tree that composites an `EngineScene`.
 class EngineSceneView {
-  factory EngineSceneView(PictureRenderer pictureRenderer, ui.FlutterView flutterView) {
+  factory EngineSceneView(PictureRenderer pictureRenderer, EngineFlutterView flutterView) {
     final DomElement sceneElement = createDomElement('flt-scene');
     return EngineSceneView._(pictureRenderer, flutterView, sceneElement);
   }
@@ -53,7 +53,7 @@ class EngineSceneView {
 
   final PictureRenderer pictureRenderer;
   final DomElement sceneElement;
-  final ui.FlutterView flutterView;
+  final EngineFlutterView flutterView;
 
   List<SliceContainer> containers = <SliceContainer>[];
 
