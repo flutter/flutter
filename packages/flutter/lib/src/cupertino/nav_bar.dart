@@ -277,8 +277,6 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
          'Cannot specify a heroTag override if this navigation bar does not '
          'transition due to transitionBetweenRoutes = false.',
        );
-       
-     
 
   /// {@template flutter.cupertino.CupertinoNavigationBar.leading}
   /// Widget to place at the start of the navigation bar. Normally a back button
