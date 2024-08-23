@@ -40,7 +40,7 @@ const Duration _kIndicatorScaleDuration = Duration(milliseconds: 200);
 /// Used by [RefreshIndicator.onRefresh].
 typedef RefreshCallback = Future<void> Function();
 
-/// Indicates current status of Material `RefreshIndicator`
+/// Indicates current status of Material `RefreshIndicator`.
 enum RefreshIndicatorStatus {
   /// Pointer is down.
   drag,
@@ -328,17 +328,17 @@ class RefreshIndicatorState extends State<RefreshIndicator>
 
   static final Animatable<double> _threeQuarterTween = Tween<double>(
     begin: 0.0,
-    end: 0.75
+    end: 0.75,
   );
 
   static final Animatable<double> _kDragSizeFactorLimitTween = Tween<double>(
     begin: 0.0,
-    end: _kDragSizeFactorLimit
+    end: _kDragSizeFactorLimit,
   );
 
   static final Animatable<double> _oneToZeroTween = Tween<double>(
     begin: 1.0,
-    end: 0.0
+    end: 0.0,
   );
 
   @override
