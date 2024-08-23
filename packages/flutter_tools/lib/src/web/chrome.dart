@@ -490,7 +490,7 @@ class Chromium {
         if (i == attempts) {
           rethrow;
         }
-      } on IOException catch (_) {
+      } on IOException {
         if (i == attempts) {
           rethrow;
         }
