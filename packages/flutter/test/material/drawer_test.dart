@@ -277,38 +277,39 @@ void main() {
       return renderBox.localToGlobal(Offset.zero).dx;
     }
 
-    // pointer down (drawer is closed)
+    // Pointer down (drawer is closed).
     await gesture.addPointer();
     await gesture.down(const Offset(2,2));
+    await tester.pump();
     expect(finder, findsNothing);
 
-    // open drawer slightly
+    // Open drawer slightly.
     await gesture.moveBy(const Offset(20, 0));
     await tester.pump();
     expect(drawerPosition(), isNegative);
 
-    // open drawer more than halfway
+    // Open drawer more than halfway.
     await gesture.moveBy(const Offset(200, 0));
     await tester.pump();
     expect(drawerPosition(), isNegative);
 
-    // drawer fully open
+    // Drawer is fully open.
     await gesture.moveBy(const Offset(200, 0));
     await tester.pump();
     expect(drawerPosition(), 0.0);
 
-    // drawer less than halfway closed
+    // Drawer is less than halfway closed.
     await gesture.moveBy(const Offset(-100.0, 0));
     await tester.pump();
     expect(drawerPosition(), moreOrLessEquals(-100.0));
 
-    // drawer more than halfway closed
+    // Drawer is more than halfway closed.
     await gesture.moveBy(const Offset(-100.0, 0));
     await tester.pump();
     expect(drawerPosition(), moreOrLessEquals(-200.0));
 
-    // drawer completely closed
-    await gesture.moveTo(const Offset(2, 0));
+    // Drawer is completely closed.
+    await gesture.moveTo(Offset.zero);
     await tester.pump();
     expect(finder, findsNothing);
   });
