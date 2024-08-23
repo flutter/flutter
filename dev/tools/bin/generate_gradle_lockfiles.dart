@@ -188,18 +188,6 @@ void main(List<String> arguments) {
   }
 }
 
-List<String> getFilesFromStdin() {
-  final List<String> files = <String>[];
-  while (true) {
-    final String? file = stdin.readLineSync();
-    if (file == null) {
-      break;
-    }
-    files.add(file);
-  }
-  return files;
-}
-
 void exec(
   String cmd,
   List<String> args, {
