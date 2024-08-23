@@ -106,7 +106,6 @@ void main() {
         cache.artifacts,
         <Set<DevelopmentArtifact>>[
           <DevelopmentArtifact>{DevelopmentArtifact.universal},
-          <DevelopmentArtifact>{},
         ],
       );
     },
