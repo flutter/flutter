@@ -601,7 +601,7 @@ void main() {
     // Use golden file to compare canvas color presence and not other
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('page_transitions_theme_test.zoom_page_canvas.scaffolded.png'),
+      matchesGoldenFile('page_transitions_theme.zoom_page_canvas.scaffolded.png'),
     );
 
     await tester.pumpAndSettle();
@@ -618,7 +618,7 @@ void main() {
     // Use golden file to compare canvas color presence and not other
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('page_transitions_theme_test.zoom_page_canvas.not_scaffolded.png'),
+      matchesGoldenFile('page_transitions_theme.zoom_page_canvas.not_scaffolded.png'),
     );
 
     await tester.pumpAndSettle();
