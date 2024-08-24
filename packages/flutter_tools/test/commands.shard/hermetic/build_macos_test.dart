@@ -10,6 +10,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -61,6 +62,10 @@ final Platform notMacosPlatform = FakePlatform(
   environment: <String, String>{
     'FLUTTER_ROOT': '/',
   }
+);
+
+final OperatingSystemUtils osUtils = FakeOperatingSystemUtils(
+  hostPlatform: HostPlatform.darwin_arm64
 );
 
 void main() {
@@ -115,6 +120,13 @@ void main() {
   }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
+    final List<String> destinations = switch (configuration) {
+      'Debug' => <String>['-destination', 'platform=macOS,arch=arm64'],
+      'Release' => <String>['-destination','platform=macOS'],
+      'Profile' => <String>['-destination', 'platform=macOS'],
+      String() => throw ArgumentError(),
+    };
+    final String onlyActiveArch = configuration == 'Debug' ? 'YES' : 'NO';
     return FakeCommand(
       command: <String>[
         '/usr/bin/env',
@@ -124,9 +136,10 @@ void main() {
         '-configuration', configuration,
         '-scheme', 'Runner',
         '-derivedDataPath', flutterBuildDir.absolute.path,
-        '-destination', 'platform=macOS',
+        ...destinations,
         'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
         'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+        'ONLY_ACTIVE_ARCH=$onlyActiveArch',
         if (verbose)
           'VERBOSE_SCRIPT_LOGGING=YES'
         else
@@ -215,6 +228,7 @@ STDERR STUFF
       true,
     );
   }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => osUtils,
     Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
@@ -298,6 +312,7 @@ STDERR STUFF
     expect(testLogger.errorText, isNot(contains('_NSMainThread:')));
     expect(testLogger.errorText, isNot(contains('Please file a bug at https://feedbackassistant')));
   }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => osUtils,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler('Debug'),
@@ -323,6 +338,7 @@ STDERR STUFF
     );
     expect(testLogger.statusText, contains(RegExp(r'✓ Built build/macos/Build/Products/Release/example.app \(\d+\.\d+MB\)')));
   }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => osUtils,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler('Release'),
@@ -347,6 +363,7 @@ STDERR STUFF
       const <String>['build', 'macos', '--debug', '--no-pub']
     );
   }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => osUtils,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler('Debug'),
@@ -371,6 +388,7 @@ STDERR STUFF
       const <String>['build', 'macos', '--debug', '--no-pub', '-v']
     );
   }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => osUtils,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler('Debug', verbose: true),
@@ -396,6 +414,7 @@ STDERR STUFF
       const <String>['build', 'macos', '--profile', '--no-pub']
     );
   }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => osUtils,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler('Profile'),
@@ -421,6 +440,7 @@ STDERR STUFF
       const <String>['build', 'macos', '--release', '--no-pub']
     );
   }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => osUtils,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler('Release'),
@@ -484,6 +504,7 @@ STDERR STUFF
     ]));
     expect(contents, isNot(contains('EXCLUDED_ARCHS')));
   }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => osUtils,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler('Release'),
@@ -513,9 +534,10 @@ STDERR STUFF
           '-configuration', 'Debug',
           '-scheme', 'Runner',
           '-derivedDataPath', flutterBuildDir.absolute.path,
-          '-destination', 'platform=macOS',
+          '-destination', 'platform=macOS,arch=arm64',
           'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
           'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+          'ONLY_ACTIVE_ARCH=YES',
           '-quiet',
           'COMPILER_INDEX_STORE_ENABLE=NO',
           'ASSETCATALOG_COMPILER_APPICON_NAME=AppIcon.special',
@@ -539,6 +561,7 @@ STDERR STUFF
 
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => osUtils,
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatformCustomEnv,
@@ -575,6 +598,7 @@ STDERR STUFF
     expect(contents, contains('FLUTTER_BUILD_NAME=1.2.3'));
     expect(contents, contains('FLUTTER_BUILD_NUMBER=42'));
   }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => osUtils,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler('Debug'),
@@ -646,6 +670,7 @@ STDERR STUFF
 
     expect(testLogger.statusText, isEmpty);
   }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => osUtils,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       // we never generate code size snapshot here
@@ -680,6 +705,7 @@ STDERR STUFF
     expect(testLogger.statusText, contains('dart devtools --appSizeBase='));
     expect(fakeAnalytics.sentEvents, contains(Event.codeSizeAnalysis(platform: 'macos')));
   }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => osUtils,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       // These are generated by gen_snapshot because flutter assemble passes
@@ -751,6 +777,7 @@ STDERR STUFF
 
 ''');
   }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => osUtils,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler(
@@ -819,6 +846,7 @@ STDERR STUFF
 
 ''');
   }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => osUtils,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler(

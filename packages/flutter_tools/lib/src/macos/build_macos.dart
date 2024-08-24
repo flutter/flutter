@@ -8,6 +8,7 @@ import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
@@ -69,6 +70,7 @@ Future<void> buildMacOS({
   bool configOnly = false,
   SizeAnalyzer? sizeAnalyzer,
   bool usingCISystem = false,
+  DarwinArch? darwinArch,
 }) async {
   final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
   if (xcodeWorkspace == null) {
@@ -196,9 +198,13 @@ Future<void> buildMacOS({
       '-configuration', configuration,
       '-scheme', scheme,
       '-derivedDataPath', flutterBuildDir.absolute.path,
-      '-destination', 'platform=macOS',
+      ..._computeDestinations(darwinArch, configuration),
       'OBJROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
       'SYMROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+      if (darwinArch != null || configuration == 'Debug')
+        'ONLY_ACTIVE_ARCH=YES'
+      else
+        'ONLY_ACTIVE_ARCH=NO',
       if (verboseLogging)
         'VERBOSE_SCRIPT_LOGGING=YES'
       else
@@ -241,6 +247,23 @@ Future<void> buildMacOS({
     variableName: 'xcode-macos',
     elapsedMilliseconds: elapsedDuration.inMilliseconds,
   ));
+}
+
+List<String> _computeDestinations(DarwinArch? darwinArch, String? configuration) {
+  final DarwinArch currentArch = switch (globals.os.hostPlatform) {
+    HostPlatform.darwin_arm64 => DarwinArch.arm64,
+    HostPlatform.darwin_x64 => DarwinArch.x86_64,
+    _ => throw ArgumentError(),
+  };
+
+  if (darwinArch == null) {
+    if (configuration == 'Debug') {
+      return <String>['-destination', 'platform=macOS,arch=${currentArch.name}'];
+    }
+    return <String>['-destination','platform=macOS'];
+  }
+
+  return <String>['-destination', 'platform=macOS,arch=${darwinArch.name}'];
 }
 
 /// Performs a size analysis of the AOT snapshot and writes to an analysis file, if configured.

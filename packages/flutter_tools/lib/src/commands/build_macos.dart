@@ -21,11 +21,21 @@ class BuildMacosCommand extends BuildSubCommand {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     usesFlavorOption();
     argParser
-      .addFlag('config-only',
+      ..addFlag('config-only',
         help: 'Update the project configuration without performing a build. '
           'This can be used in CI/CD process that create an archive to avoid '
           'performing duplicate work.'
-    );
+      )
+      ..addOption('darwin-arch',
+        allowed: <String>['x86_64', 'arm64'],
+        help: 'Specifies the target architecture for macOS builds.\n'
+          'When not specified (default):\n'
+          "Debug builds target the host machine's architecture.\n"
+          'Release and Profile builds create universal binaries (x86_64 and arm64).\n'
+          'When specified:\n'
+          'Builds target only the specified architecture.\n'
+          'ONLY_ACTIVE_ARCH is set to YES in Xcode build settings.\n'
+      );
   }
 
   @override
@@ -46,6 +56,10 @@ class BuildMacosCommand extends BuildSubCommand {
   bool get supported => globals.platform.isMacOS;
 
   bool get configOnly => boolArg('config-only');
+
+  DarwinArch? get darwinArch => stringArg('darwin-arch') != null ? DarwinArch
+    .values
+    .byName(stringArg('darwin-arch')!) : null;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -70,6 +84,7 @@ class BuildMacosCommand extends BuildSubCommand {
         analytics: analytics,
       ),
       usingCISystem: usingCISystem,
+      darwinArch: darwinArch,
     );
     return FlutterCommandResult.success();
   }
