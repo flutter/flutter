@@ -70,7 +70,7 @@ void main() {
     await tester.pumpWidget(
       boilerplate(child: CupertinoButton(
         onPressed: null,
-        onLongPressed: () {
+        onLongPress: () {
           value = !value;
         },
         child: const Text('XXXX', style: testStyle),
