@@ -423,9 +423,6 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@template flutter.cupertino.CupertinoNavigationBar.enableBackgroundFilterBlur}
   /// Whether to have blur effect with non opaque color.
   ///
-  /// If the [CupertinoNavigationBar] is not a child of a [CupertinoPageScaffold],
-  /// this has no effect.
-  ///
   /// When [enableBackgroundFilterBlur] is set to false, the blur effect will be
   /// disabled. [enableBackgroundFilterBlur]'s behaviour will only be respected when
   /// [automaticBackgroundVisibility] is false or until content scrolls under the navbar.
