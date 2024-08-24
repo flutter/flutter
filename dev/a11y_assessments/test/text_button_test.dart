@@ -14,7 +14,8 @@ void main() {
     expect(find.text('Action Disabled'), findsOneWidget);
   });
 
-  testWidgets('text button increments correctly when clicked', (WidgetTester tester) async {
+  testWidgets('text button increments correctly when clicked',
+      (WidgetTester tester) async {
     await pumpsUseCase(tester, TextButtonUseCase());
 
     expect(find.text('Action'), findsOneWidget);
@@ -25,5 +26,12 @@ void main() {
     await tester.tap(find.text('Action'));
     await tester.pumpAndSettle();
     expect(find.text('Clicked 2 time(s).'), findsOneWidget);
+  });
+
+  testWidgets('text button demo page has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, TextButtonUseCase());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('TextButton Demo');
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
   });
 }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show AppLifecycleState;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -199,5 +200,32 @@ void main() {
       'systemNavigationBarIconBrightness: null, '
       'systemNavigationBarContrastEnforced: null})',
     );
+  });
+
+  testWidgets('SystemChrome handles detached lifecycle state', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      log.add(methodCall);
+      return null;
+    });
+
+    const SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle();
+    SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
+    await tester.idle();
+    expect(log.length, equals(1));
+
+    // Setting the same state should not send another message to the host.
+    SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
+    await tester.idle();
+    expect(log.length, equals(1));
+
+    // The state should be sent again if the app was detached.
+    SystemChrome.handleAppLifecycleStateChanged(ui.AppLifecycleState.detached);
+    await tester.idle();
+    SystemChrome.handleAppLifecycleStateChanged(ui.AppLifecycleState.resumed);
+    SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
+    await tester.idle();
+    expect(log.length, equals(2));
   });
 }

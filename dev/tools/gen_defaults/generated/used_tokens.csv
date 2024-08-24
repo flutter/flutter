@@ -1,4 +1,4 @@
-Versions used, v4_1_0
+Versions used, 5_0_0
 md.comp.assist-chip.container.shape,
 md.comp.assist-chip.disabled.label-text.color,
 md.comp.assist-chip.elevated.container.color,
@@ -808,7 +808,6 @@ md.comp.top-app-bar.small.leading-icon.size,
 md.comp.top-app-bar.small.on-scroll.container.elevation,
 md.comp.top-app-bar.small.trailing-icon.color,
 md.comp.top-app-bar.small.trailing-icon.size,
-md.ref.palette.error10,
 md.ref.palette.error100,
 md.ref.palette.error20,
 md.ref.palette.error30,
