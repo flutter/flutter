@@ -598,7 +598,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds:75));
 
-    // Use golden file to compare canvas color presence and not other
+    // Use golden file to check canvas color presence
     await expectLater(
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('page_transitions_theme.zoom_page_canvas.scaffolded.png'),
@@ -606,7 +606,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // Go back home andd then go to non-scaffolded page
+    // Go back home and then go to non-scaffolded page
     await tester.tap(find.text('Back to home route...'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Route with NO scaffold!'));
@@ -615,7 +615,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds:125));
 
-    // Use golden file to compare canvas color presence and not other
+    // Use golden file to check canvas color presence
     await expectLater(
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('page_transitions_theme.zoom_page_canvas.not_scaffolded.png'),
