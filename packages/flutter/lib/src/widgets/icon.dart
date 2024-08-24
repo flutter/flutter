@@ -86,15 +86,10 @@ class Icon extends StatelessWidget {
     this.semanticLabel,
     this.textDirection,
     this.applyTextScaling,
-    this.foreground,
+    this.blendMode,
   })  : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
         assert(weight == null || (0.0 < weight)),
-        assert(opticalSize == null || (0.0 < opticalSize)),
-        assert(
-          color == null || foreground == null,
-          'Cannot provide both a color and a foreground. The color argument '
-          'is just a shorthand for "foreground: Paint()..color = color".',
-        );
+        assert(opticalSize == null || (0.0 < opticalSize));
 
   /// The icon to display. The available icons are described in [Icons].
   ///
@@ -253,10 +248,10 @@ class Icon extends StatelessWidget {
   /// [IconThemeData.applyTextScaling].
   final bool? applyTextScaling;
 
-  /// The paint object to use for the icon's foreground.
+  /// A blend mode to apply when a shape is drawn or a layer is composited.
   ///
-  /// This is useful for applying effects like blur or color filters to the icon.
-  final Paint? foreground;
+  /// Detailed in [Paint.blendMode].
+  final BlendMode? blendMode;
 
   @override
   Widget build(BuildContext context) {
@@ -290,12 +285,15 @@ class Icon extends StatelessWidget {
     }
 
     final double iconOpacity = iconTheme.opacity ?? 1.0;
-    Color? iconColor = color ?? foreground?.color ?? iconTheme.color!;
+    Color? iconColor = color ?? iconTheme.color!;
+    Paint? foreground;
     if (iconOpacity != 1.0) {
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
     }
-    if (foreground != null) {
-      foreground!.color = iconColor;
+    if (blendMode != null) {
+      foreground = Paint()
+        ..blendMode = blendMode!
+        ..color = iconColor;
       // Cannot provide both a color and a foreground.
       iconColor = null;
     }
