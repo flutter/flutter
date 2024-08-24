@@ -124,7 +124,7 @@ final class NaiveLocalFileComparator with GoldenFileComparator {
     try {
       goldenBytes = await goldenFile.readAsBytes();
     } on io.PathNotFoundException {
-      throw TestFailure('Golden file not found: $golden');
+      throw TestFailure('Golden file not found: ${goldenFile.path}');
     }
 
     if (goldenBytes.length != imageBytes.length) {
