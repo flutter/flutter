@@ -131,10 +131,8 @@ def create_framework(  # pylint: disable=too-many-arguments
 
   # Compute dsym output paths, if enabled.
   framework_dsym = None
-  simulator_dsym = None
   if args.dsym:
     framework_dsym = framework + '.dSYM'
-    simulator_dsym = simulator_framework + '.dSYM'
 
   # Emit the framework for physical devices.
   sky_utils.copy_tree(arm64_framework, framework)
@@ -146,7 +144,7 @@ def create_framework(  # pylint: disable=too-many-arguments
     sky_utils.copy_tree(simulator_arm64_framework, simulator_framework)
     simulator_framework_binary = os.path.join(simulator_framework, 'Flutter')
     sky_utils.lipo([simulator_x64_dylib, simulator_arm64_dylib], simulator_framework_binary)
-    process_framework(args, dst, simulator_framework_binary, simulator_dsym)
+    process_framework(args, dst, simulator_framework_binary, dsym=None)
   else:
     simulator_framework = simulator_x64_framework
 
@@ -154,7 +152,7 @@ def create_framework(  # pylint: disable=too-many-arguments
   # simulator frameworks, or just the x64 simulator framework if only that one
   # exists.
   xcframeworks = [simulator_framework, framework]
-  dsyms = [simulator_dsym, framework_dsym] if args.dsym else None
+  dsyms = {framework: framework_dsym} if args.dsym else None
   create_xcframework(location=dst, name='Flutter', frameworks=xcframeworks, dsyms=dsyms)
 
   sky_utils.lipo([arm64_dylib, simulator_x64_dylib], framework_binary)
@@ -183,9 +181,7 @@ def zip_archive(dst, args):
   if args.dsym:
     without_entitlements.extend([
         'Flutter.xcframework/ios-arm64/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
-        'Flutter.xcframework/ios-arm64_x86_64-simulator/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
         'extension_safe/Flutter.xcframework/ios-arm64/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
-        'extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
     ])
 
   without_entitlements_file = os.path.join(dst, 'without_entitlements.txt')
