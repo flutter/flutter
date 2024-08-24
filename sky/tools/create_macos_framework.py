@@ -64,7 +64,7 @@ def main():
 
   # Create XCFramework from the arm64 and x64 fat framework.
   xcframeworks = [fat_framework]
-  dsyms = [fat_framework + '.dSYM'] if args.dsym else None
+  dsyms = {fat_framework: fat_framework + '.dSYM'} if args.dsym else None
   create_xcframework(location=dst, name='FlutterMacOS', frameworks=xcframeworks, dsyms=dsyms)
 
   if args.zip:
