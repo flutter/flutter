@@ -583,7 +583,7 @@ void main() {
     });
 
     testWidgets('Non-selectable end date', (WidgetTester tester) async {
-      // The end date is not selectable, so only the start date should be selected
+      // The end date is not selectable, so only the start date should be selected.
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/24/2016');
         await tester.enterText(find.byType(TextField).at(1), '12/25/2016');
