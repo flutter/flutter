@@ -65,6 +65,23 @@ void main() {
     );
   });
 
+    testWidgets('OnLongPress works!', (WidgetTester tester) async {
+    bool value = false;
+    await tester.pumpWidget(
+      boilerplate(child: CupertinoButton(
+        onPressed: null,
+        onLongPressed: () {
+          value = !value;
+        },
+        child: const Text('XXXX', style: testStyle),
+      )),
+    );
+    await tester.pump();
+    final Finder cupertinoBtn = find.byType(CupertinoButton);
+    await tester.longPress(cupertinoBtn);
+    expect(value, isTrue);
+  });
+
   // TODO(LongCatIsLoong): Uncomment once https://github.com/flutter/flutter/issues/44115
   // is fixed.
   /*
