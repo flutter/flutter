@@ -1498,7 +1498,6 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
 
         case DatePickerEntryMode.input:
           // Validate the range dates
-
           if (_selectedStart.value != null && _selectedEnd.value != null && _selectedStart.value!.isAfter(_selectedEnd.value!)) {
             _selectedEnd.value = null;
           }
