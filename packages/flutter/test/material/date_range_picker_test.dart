@@ -427,7 +427,7 @@ void main() {
     firstDate = DateTime(2017, DateTime.january, 12);
     lastDate = DateTime(2017, DateTime.january, 16);
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
-      // non selectable date. Should be ignored.
+      // Non-selectable date. Should be ignored.
       await tester.tap(find.text('15'));
       await tester.tap(find.text('SAVE'));
       // We should still be on the initial date.
