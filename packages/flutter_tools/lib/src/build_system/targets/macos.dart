@@ -51,9 +51,10 @@ abstract class UnpackMacOS extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
+
+    // Copy Flutter framework.
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String basePath = environment.artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
-
     final ProcessResult result = environment.processManager.runSync(<String>[
       'rsync',
       '-av',
@@ -82,6 +83,7 @@ abstract class UnpackMacOS extends Target {
     if (!frameworkBinary.existsSync()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
+
     await _thinFramework(environment, frameworkBinaryPath);
   }
 
@@ -156,10 +158,51 @@ class ReleaseUnpackMacOS extends UnpackMacOS {
   String get name => 'release_unpack_macos';
 
   @override
-  List<Source> get inputs => <Source>[
-    ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.release),
+  List<Source> get outputs => super.outputs + const <Source>[
+    Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework.dSYM/Contents/Resources/DWARF/FlutterMacOS'),
   ];
+
+  @override
+  List<Source> get inputs => super.inputs + const <Source>[
+    Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.release),
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    await super.build(environment);
+
+    // Copy Flutter framework dSYM (debug symbol) bundle, if present.
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
+      throw MissingDefineException(kBuildMode, 'unpack_macos');
+    }
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final Directory frameworkDsym = environment.fileSystem.directory(
+      environment.artifacts.getArtifactPath(
+        Artifact.flutterMacOSFrameworkDsym,
+        platform: TargetPlatform.darwin,
+        mode: buildMode,
+      )
+    );
+    if (frameworkDsym.existsSync()) {
+      final ProcessResult result = await environment.processManager.run(<String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        frameworkDsym.path,
+        environment.outputDir.path,
+      ]);
+      if (result.exitCode != 0) {
+        throw Exception(
+          'Failed to copy framework dSYM (exit ${result.exitCode}:\n'
+          '${result.stdout}\n---\n${result.stderr}',
+        );
+      }
+    }
+  }
 }
 
 /// Unpack the profile prebuilt engine framework.
