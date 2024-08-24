@@ -519,4 +519,108 @@ void main() {
     expect(find.text('push'), findsOneWidget);
     expect(find.text('page b'), findsNothing);
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('ZoomPageTransitionsBuilder paints theme canvasColor during transition to both scaffolded and non scaffolded pages', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => RepaintBoundary(
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Home Page'),
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/scaffolded');
+                  },
+                  child: const Text('Route with scaffold!'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/not-scaffolded');
+                  },
+                  child: const Text('Route with NO scaffold!'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      '/scaffolded': (BuildContext context) => RepaintBoundary(
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Scaffolded Page'),
+          ),
+          body: Center(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Back to home route...'),
+            ),
+          ),
+        ),
+      ),
+      '/not-scaffolded': (BuildContext context) => RepaintBoundary(
+        child: Center(
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Back to home route...'),
+          ),
+        ),
+      ),
+    };
+
+    await tester.pumpWidget(
+      RepaintBoundary(
+        child: MaterialApp(
+          theme: ThemeData(
+            canvasColor: const Color.fromARGB(255, 255, 0, 0),
+            primarySwatch: Colors.blue,
+          ),
+          routes: routes,
+        ),
+      ),
+    );
+
+    // Verify initial page
+    expect(find.text('Route with scaffold!'), findsOneWidget);
+    expect(find.text('Route with NO scaffold!'), findsOneWidget);
+
+    // Click to go to scaffolded page
+    await tester.tap(find.text('Route with scaffold!'));
+
+    // Pump till animation is half-way through
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds:75));
+
+    // Use golden file to compare canvas color presence and not other
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('page_transitions_theme_test.zoom_page_canvas.scaffolded.png'),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Go back home andd then go to non-scaffolded page
+    await tester.tap(find.text('Back to home route...'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Route with NO scaffold!'));
+
+    // Pump till animation is half-way through
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds:125));
+
+    // Use golden file to compare canvas color presence and not other
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('page_transitions_theme_test.zoom_page_canvas.not_scaffolded.png'),
+    );
+
+    await tester.pumpAndSettle();
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 }
