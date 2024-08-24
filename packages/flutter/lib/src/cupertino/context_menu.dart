@@ -16,6 +16,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'localizations.dart';
+import 'scrollbar.dart';
 
 // The scale of the child at the time that the CupertinoContextMenu opens.
 // This value was eyeballed from a physical device running iOS 13.1.2.
@@ -56,6 +57,11 @@ const List<BoxShadow> _endBoxShadow = <BoxShadow>[
 const Color _borderColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFA9A9AF),
   darkColor: Color(0xFF57585A),
+);
+
+const Color _kBackgroundColor = CupertinoDynamicColor.withBrightness(
+   color: Color(0xFFF1F1F1),
+   darkColor: Color(0xFF212122),
 );
 
 typedef _DismissCallback = void Function(
@@ -1393,27 +1399,34 @@ class _ContextMenuSheet extends StatelessWidget {
       child: IntrinsicHeight(
         child: ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(13.0)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              actions.first,
-              for (final Widget action in actions.skip(1))
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(
-                        color: CupertinoDynamicColor.resolve(
-                          _borderColor,
-                          context,
+          child: ColoredBox(
+            color: CupertinoDynamicColor.resolve(_kBackgroundColor, context),
+            child: CupertinoScrollbar(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    actions.first,
+                    for (final Widget action in actions.skip(1))
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: Border(
+                            top: BorderSide(
+                              color: CupertinoDynamicColor.resolve(
+                                _borderColor,
+                                context,
+                              ),
+                              width: 0.4,
+                            ),
+                          ),
                         ),
-                        width: 0.4,
+                        position: DecorationPosition.foreground,
+                        child: action,
                       ),
-                    ),
-                  ),
-                  position: DecorationPosition.foreground,
-                  child: action,
+                  ],
                 ),
-            ],
+              ),
+            ),
           ),
         ),
       ),
