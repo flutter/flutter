@@ -1583,6 +1583,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     super.requestFocus,
     super.anchorPoint,
     super.traversalEdgeBehavior,
+    super.transitionDuration = const Duration(milliseconds: 150),
   }) : super(
          pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
            final Widget pageChild = Builder(builder: builder);
@@ -1593,7 +1594,6 @@ class DialogRoute<T> extends RawDialogRoute<T> {
            return dialog;
          },
          barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
-         transitionDuration: const Duration(milliseconds: 150),
          transitionBuilder: _buildMaterialDialogTransitions,
        );
 
