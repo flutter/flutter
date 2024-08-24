@@ -525,7 +525,7 @@ void main() {
     expect(find.text('page b'), findsNothing);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('ZoomPageTransitionsBuilder paints theme canvasColor during transition to both scaffolded and non scaffolded pages', (WidgetTester tester) async {
+  testWidgets('ZoomPageTransitionsBuilder uses theme canvasColor during transition effects', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => RepaintBoundary(
         child: Scaffold(
