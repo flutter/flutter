@@ -961,6 +961,114 @@ void main() {
     expect(item2material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
   }, variant: TargetPlatformVariant.desktop());
 
+  // Regression test for https://github.com/flutter/flutter/issues/152375.
+  testWidgets('Down key and up key can navigate on desktop platforms when a label text contains '
+      'another label text using customized search algorithm', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: DropdownMenu<int>(
+          searchCallback: (List<DropdownMenuEntry<int>> entries, String query) {
+            if (query.isEmpty) {
+              return null;
+            }
+            final int index = entries.indexWhere(
+              (DropdownMenuEntry<int> entry) => entry.label.contains(query),
+            );
+            return index != -1 ? index : null;
+          },
+          dropdownMenuEntries: const <DropdownMenuEntry<int>>[
+            DropdownMenuEntry<int>(
+              value: 0,
+              label: 'ABC'
+            ),
+            DropdownMenuEntry<int>(
+              value: 1,
+              label: 'AB'
+            ),
+            DropdownMenuEntry<int>(
+              value: 2,
+              label: 'ABCD'
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(DropdownMenu<int>));
+    await tester.pump();
+
+    final Finder button0Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, 'ABC').last,
+      matching: find.byType(Material),
+    );
+    final Finder button1Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, 'AB').last,
+      matching: find.byType(Material),
+    );
+    final Finder button2Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, 'ABCD').last,
+      matching: find.byType(Material),
+    );
+
+    // Press down key three times, the highlight should move to the next item each time.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    Material item0Material = tester.widget<Material>(button0Material);
+    expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    Material item1Material = tester.widget<Material>(button1Material);
+    expect(item1Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    final Material item2Material = tester.widget<Material>(button2Material);
+    expect(item2Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    // Press up key two times, the highlight should up each time.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    item1Material = tester.widget<Material>(button1Material);
+    expect(item1Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    item0Material = tester.widget<Material>(button0Material);
+    expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+  }, variant: TargetPlatformVariant.desktop());
+
+  // Regression test for https://github.com/flutter/flutter/issues/152375.
+  testWidgets('Searching can hightlight entry after keyboard navigation', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          dropdownMenuEntries: menuChildren,
+        ),
+      ),
+    ));
+
+    // Open the menu and highlight the first item.
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    // Search for the last item.
+    await tester.enterText(find.byType(TextField).first, menuChildren.last.label);
+    await tester.pump();
+    final Finder buttonMaterial = find.descendant(
+      of: find.widgetWithText(MenuItemButton, menuChildren.last.label).last,
+      matching: find.byType(Material),
+    );
+    final Material itemMaterial = tester.widget<Material>(buttonMaterial);
+    expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12)); // Menu 1 button is highlighted.
+  }, variant: TargetPlatformVariant.desktop());
+
   testWidgets('The text input should match the label of the menu item '
       'while pressing down key on desktop platforms', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
@@ -2319,6 +2427,44 @@ void main() {
     expect(box, paints..rrect(color: theme.colorScheme.primary));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/131120.
+  testWidgets('Focus traversal ignores non visible entries', (WidgetTester tester) async {
+    final FocusNode buttonFocusNode = FocusNode();
+    addTearDown(buttonFocusNode.dispose);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Column(
+          children: <Widget>[
+            DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren),
+            ElevatedButton(
+              focusNode: buttonFocusNode,
+              onPressed: () {},
+              child: const Text('Button'),
+            )
+          ],
+        ),
+      ),
+    ));
+
+    // Move the focus to the text field.
+    primaryFocus!.nextFocus();
+    await tester.pump();
+    final Element textField = tester.element(find.byType(TextField));
+    expect(Focus.of(textField).hasFocus, isTrue);
+
+    // Move the focus to the dropdown trailing icon.
+    primaryFocus!.nextFocus();
+    await tester.pump();
+    final Element iconButton = tester.firstElement(find.byIcon(Icons.arrow_drop_down));
+    expect(Focus.of(iconButton).hasFocus, isTrue);
+
+    // Move the focus to the elevated button.
+    primaryFocus!.nextFocus();
+    await tester.pump();
+    expect(buttonFocusNode.hasFocus, isTrue);
+  });
+
   testWidgets('DropdownMenu honors inputFormatters', (WidgetTester tester) async {
     int called = 0;
     final TextInputFormatter formatter = TextInputFormatter.withFunction(
@@ -2334,6 +2480,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: DropdownMenu<String>(
+            requestFocusOnTap: true,
             controller: controller,
             dropdownMenuEntries: const <DropdownMenuEntry<String>>[
               DropdownMenuEntry<String>(
@@ -2453,7 +2600,7 @@ void main() {
             DropdownMenu<int>(
               dropdownMenuEntries: <DropdownMenuEntry<int>>[],
             ),
-             DropdownMenu<int>(
+            DropdownMenu<int>(
               textAlign: TextAlign.center,
               dropdownMenuEntries: <DropdownMenuEntry<int>>[],
             ),
@@ -2566,6 +2713,83 @@ void main() {
     for (final TestMenu menu in TestMenu.values) {
       expect(find.widgetWithText(MenuItemButton, menu.label), findsNWidgets(2));
     }
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/151686.
+  testWidgets('Setting DropdownMenu.requestFocusOnTap to false makes TextField read only', (WidgetTester tester) async {
+    const String label = 'Test';
+    Widget buildDropdownMenu({ bool? requestFocusOnTap }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownMenu<TestMenu>(
+              requestFocusOnTap: requestFocusOnTap,
+              dropdownMenuEntries: menuChildren,
+              hintText: label,
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildDropdownMenu(requestFocusOnTap: true));
+
+    expect(
+      tester.getSemantics(find.byType(TextField)),
+      matchesSemantics(
+        hasFocusAction: true,
+        hasTapAction: true,
+        isTextField: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        label: 'Test',
+        textDirection: TextDirection.ltr,
+      ),
+    );
+
+    await tester.pumpWidget(buildDropdownMenu(requestFocusOnTap: false));
+
+    expect(
+      tester.getSemantics(find.byType(TextField)),
+      matchesSemantics(
+        hasFocusAction: true,
+        isTextField: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        label: 'Test',
+        isReadOnly: true,
+        textDirection: TextDirection.ltr,
+      ),
+    );
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/151854.
+  testWidgets('scrollToHighlight does not scroll parent', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ListView(
+            controller: controller,
+            children: <Widget>[
+              ListView(
+                shrinkWrap: true,
+                children: <Widget>[DropdownMenu<TestMenu>(
+                  initialSelection: menuChildren.last.value,
+                  dropdownMenuEntries: menuChildren,
+                )],
+              ),
+              const SizedBox(height: 1000.0),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField).first);
+    await tester.pumpAndSettle();
+    expect(controller.offset, 0.0);
   });
 }
 
