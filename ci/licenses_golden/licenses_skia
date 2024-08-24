@@ -1,4 +1,4 @@
-Signature: e15a4d43635e34f0c10ed2e9fb496328
+Signature: c5319c012c198233cc458c6cd54ffa13
 
 ====================================================================================================
 LIBRARY: etc1
@@ -397,6 +397,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
+FILE: ../../../flutter/third_party/skia/relnotes/grglconfig.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -1421,7 +1422,6 @@ ORIGIN: ../../../flutter/third_party/skia/include/core/SkData.h + ../../../flutt
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkImageFilter.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkSize.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/gl/GrGLConfig.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/include/gpu/gl/GrGLConfig_chrome.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/gl/GrGLInterface.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/ports/SkTypeface_mac.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/ports/SkTypeface_win.h + ../../../flutter/third_party/skia/LICENSE
@@ -1600,7 +1600,6 @@ FILE: ../../../flutter/third_party/skia/include/core/SkData.h
 FILE: ../../../flutter/third_party/skia/include/core/SkImageFilter.h
 FILE: ../../../flutter/third_party/skia/include/core/SkSize.h
 FILE: ../../../flutter/third_party/skia/include/gpu/gl/GrGLConfig.h
-FILE: ../../../flutter/third_party/skia/include/gpu/gl/GrGLConfig_chrome.h
 FILE: ../../../flutter/third_party/skia/include/gpu/gl/GrGLInterface.h
 FILE: ../../../flutter/third_party/skia/include/ports/SkTypeface_mac.h
 FILE: ../../../flutter/third_party/skia/include/ports/SkTypeface_win.h
