@@ -555,7 +555,7 @@ void main() {
 
     testWidgets('Non-selectable start date', (WidgetTester tester) async {
       // Even if start and end dates are selected, the start date is not selectable
-      //  ending up to no date selected at all in calendar mode
+      // ending up to no date selected at all in calendar mode.
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/24/2016');
         await tester.enterText(find.byType(TextField).at(1), '12/25/2016');
