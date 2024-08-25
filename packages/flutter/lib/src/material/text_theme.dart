@@ -14,7 +14,9 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 
+import 'theme.dart';
 import 'typography.dart';
 
 /// Material design text theme.
@@ -596,6 +598,10 @@ class TextTheme with Diagnosticable {
       labelSmall: TextStyle.lerp(a?.labelSmall, b?.labelSmall, t),
     );
   }
+
+  /// The [ThemeData.textTheme] property of the ambient [Theme].
+  static TextTheme of(BuildContext context) => Theme.of(context).textTheme;
+
 
   @override
   bool operator ==(Object other) {
