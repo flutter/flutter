@@ -248,9 +248,9 @@ class Icon extends StatelessWidget {
   /// [IconThemeData.applyTextScaling].
   final bool? applyTextScaling;
 
-  /// A blend mode to apply when a shape is drawn or a layer is composited.
+  /// The [BlendMode] to apply to the foreground of the icon.
   ///
-  /// Detailed in [Paint.blendMode].
+  /// When null, the default behavior is to use [color] as-is.
   final BlendMode? blendMode;
 
   @override
