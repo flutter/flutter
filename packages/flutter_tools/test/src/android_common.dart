@@ -160,7 +160,7 @@ Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
 
   if (versions.compileSdkVersion != null) {
     final File appGradleBuild = File(fileSystem.path.join(
-        app.path, 'android', 'app', 'build.gradle'));
+        app.path, 'android', 'app', 'build.gradle.kts'));
     final String appBuildContent = appGradleBuild.readAsStringSync()
         .replaceFirst(flutterCompileSdkString, versions.compileSdkVersion!);
     appGradleBuild.writeAsStringSync(appBuildContent);
@@ -176,7 +176,7 @@ Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
   await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
   final File gradleSettings = File(fileSystem.path.join(
-      app.path, 'android', 'settings.gradle'));
+      app.path, 'android', 'settings.gradle.kts'));
   final String settingsContent = gradleSettingsFileContent
       .replaceFirst(agpReplacementString, versions.agpVersion)
       .replaceFirst(kgpReplacementString, versions.kotlinVersion);
