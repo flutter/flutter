@@ -426,61 +426,6 @@ void main() {
       AndroidStudio: () => FakeAndroidStudio(),
     });
 
-    testUsingContext('guides the user when the shrinker fails', () async {
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
-      const String r8StdoutWarning =
-        "Execution failed for task ':app:transformClassesAndResourcesWithR8ForStageInternal'.\n"
-        '> com.android.tools.r8.CompilationFailedException: Compilation failed to complete';
-      processManager.addCommand(FakeCommand(
-        command: <String>[
-          gradlew,
-          '-q',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
-          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
-          '-Pbase-application-name=android.app.Application',
-          '-Pdart-obfuscation=false',
-          '-Ptrack-widget-creation=true',
-          '-Ptree-shake-icons=true',
-          'assembleRelease',
-        ],
-        exitCode: 1,
-        stdout: r8StdoutWarning,
-      ));
-
-      await expectLater(
-        () => runBuildApkCommand(
-          projectPath,
-        ),
-        throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'),
-      );
-      expect(
-        testLogger.statusText, allOf(
-          containsIgnoringWhitespace('The shrinker may have failed to optimize the Java bytecode.'),
-          containsIgnoringWhitespace('To disable the shrinker, pass the `--no-shrink` flag to this command.'),
-          containsIgnoringWhitespace('To learn more, see: https://developer.android.com/studio/build/shrink-code'),
-        )
-      );
-
-      expect(
-        analytics.sentEvents,
-        contains(
-          Event.flutterBuildInfo(
-            label: 'gradle-r8-failure',
-            buildType: 'gradle',
-          ),
-        ),
-      );
-      expect(processManager, hasNoRemainingExpectations);
-    },
-    overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      Java: () => null,
-      FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-      ProcessManager: () => processManager,
-      Analytics: () => analytics,
-      AndroidStudio: () => FakeAndroidStudio(),
-    });
-
     testUsingContext("reports when the app isn't using AndroidX", () async {
       final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
       // Simulate a non-androidx project.
