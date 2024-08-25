@@ -14,6 +14,7 @@ import 'package:flutter/widgets.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 
 import 'colors.dart';
+import 'theme.dart';
 import 'theme_data.dart';
 
 /// The algorithm used to construct a [ColorScheme] in [ColorScheme.fromSeed].
@@ -1920,4 +1921,9 @@ class ColorScheme with Diagnosticable {
       DynamicSchemeVariant.fruitSalad => SchemeFruitSalad(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: contrastLevel),
     };
   }
+
+  /// The [ThemeData.colorScheme] of the ambient [Theme].
+  ///
+  /// Equivalent to `Theme.of(context).colorScheme`.
+  static ColorScheme of(BuildContext context) => Theme.of(context).colorScheme;
 }
