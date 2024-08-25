@@ -5,7 +5,6 @@
         "templates/app/lib/main.dart.tmpl",
         "templates/app/pubspec.yaml.tmpl",
         "templates/app/README.md.tmpl",
-
         "templates/app_shared/.gitignore.tmpl",
         "templates/app_shared/.idea/libraries/Dart_SDK.xml.tmpl",
         "templates/app_shared/.idea/libraries/KotlinJavaRuntime.xml.tmpl",
@@ -14,13 +13,13 @@
         "templates/app_shared/.idea/workspace.xml.tmpl",
         "templates/app_shared/.metadata.tmpl",
         "templates/app_shared/analysis_options.yaml.tmpl",
-        "templates/app_shared/android-java.tmpl/app/build.gradle.tmpl",
+        "templates/app_shared/android-java.tmpl/app/build.gradle.kts.tmpl",
         "templates/app_shared/android-java.tmpl/app/src/main/java/androidIdentifier/MainActivity.java.tmpl",
-        "templates/app_shared/android-java.tmpl/build.gradle.tmpl",
+        "templates/app_shared/android-java.tmpl/build.gradle.kts.tmpl",
         "templates/app_shared/android-java.tmpl/projectName_android.iml.tmpl",
-        "templates/app_shared/android-kotlin.tmpl/app/build.gradle.tmpl",
+        "templates/app_shared/android-kotlin.tmpl/app/build.gradle.kts.tmpl",
         "templates/app_shared/android-kotlin.tmpl/app/src/main/kotlin/androidIdentifier/MainActivity.kt.tmpl",
-        "templates/app_shared/android-kotlin.tmpl/build.gradle.tmpl",
+        "templates/app_shared/android-kotlin.tmpl/build.gradle.kts.tmpl",
         "templates/app_shared/android-kotlin.tmpl/projectName_android.iml.tmpl",
         "templates/app_shared/android.tmpl/.gitignore",
         "templates/app_shared/android.tmpl/app/src/debug/AndroidManifest.xml.tmpl",
@@ -36,7 +35,7 @@
         "templates/app_shared/android.tmpl/app/src/main/res/values/styles.xml",
         "templates/app_shared/android.tmpl/app/src/profile/AndroidManifest.xml.tmpl",
         "templates/app_shared/android.tmpl/gradle.properties.tmpl",
-        "templates/app_shared/android.tmpl/settings.gradle.tmpl",
+        "templates/app_shared/android.tmpl/settings.gradle.kts.tmpl",
         "templates/app_shared/android.tmpl/gradle/wrapper/gradle-wrapper.properties.tmpl",
         "templates/app_shared/android.tmpl/settings.gradle",
         "templates/app_shared/ios-objc.tmpl/Runner.xcodeproj/project.pbxproj.tmpl",
@@ -141,15 +140,11 @@
         "templates/app_shared/windows.tmpl/runner/utils.h",
         "templates/app_shared/windows.tmpl/runner/win32_window.cpp",
         "templates/app_shared/windows.tmpl/runner/win32_window.h",
-
         "templates/app_test_widget/test/widget_test.dart.tmpl",
-
         "templates/app_integration_test/integration_test/plugin_integration_test.dart.tmpl",
-
         "templates/cocoapods/Podfile-ios-objc",
         "templates/cocoapods/Podfile-ios-swift",
         "templates/cocoapods/Podfile-macos",
-
         "templates/module/android/deferred_component/build.gradle.tmpl",
         "templates/module/android/deferred_component/src/main/AndroidManifest.xml.tmpl",
         "templates/module/android/gradle/build.gradle.tmpl",
@@ -234,7 +229,6 @@
         "templates/module/ios/library/Flutter.tmpl/podhelper.rb.tmpl",
         "templates/module/ios/library/Flutter.tmpl/README.md",
         "templates/module/README.md",
-
         "templates/package/.gitignore.tmpl",
         "templates/package/.idea/libraries/Dart_SDK.xml.tmpl",
         "templates/package/.idea/modules.xml.tmpl",
@@ -248,7 +242,6 @@
         "templates/package/pubspec.yaml.tmpl",
         "templates/package/README.md.tmpl",
         "templates/package/test/projectName_test.dart.tmpl",
-
         "templates/package_ffi/.gitignore.tmpl",
         "templates/package_ffi/.metadata.tmpl",
         "templates/package_ffi/analysis_options.yaml.tmpl",
@@ -263,7 +256,6 @@
         "templates/package_ffi/src.tmpl/projectName.c.tmpl",
         "templates/package_ffi/src.tmpl/projectName.h.tmpl",
         "templates/package_ffi/test/projectName_test.dart.tmpl",
-
         "templates/plugin/android-java.tmpl/build.gradle.tmpl",
         "templates/plugin/android-java.tmpl/projectName_android.iml.tmpl",
         "templates/plugin/android-java.tmpl/src/main/java/androidIdentifier/pluginClass.java.tmpl",
@@ -298,7 +290,6 @@
         "templates/plugin/windows.tmpl/pluginClassSnakeCase.h.tmpl",
         "templates/plugin/windows.tmpl/pluginClassSnakeCase_c_api.cpp.tmpl",
         "templates/plugin/lib/projectName_web.dart.tmpl",
-
         "templates/plugin_ffi/android.tmpl/build.gradle.tmpl",
         "templates/plugin_ffi/android.tmpl/projectName_android.iml.tmpl",
         "templates/plugin_ffi/ffigen.yaml.tmpl",
@@ -315,7 +306,6 @@
         "templates/plugin_ffi/src.tmpl/projectName.c.tmpl",
         "templates/plugin_ffi/src.tmpl/projectName.h.tmpl",
         "templates/plugin_ffi/windows.tmpl/CMakeLists.txt.tmpl",
-
         "templates/plugin_shared/.gitignore.tmpl",
         "templates/plugin_shared/.idea/libraries/Dart_SDK.xml.tmpl",
         "templates/plugin_shared/.idea/modules.xml.tmpl",
@@ -332,14 +322,12 @@
         "templates/plugin_shared/projectName.iml.tmpl",
         "templates/plugin_shared/pubspec.yaml.tmpl",
         "templates/plugin_shared/windows.tmpl/.gitignore",
-
         "templates/plugin_cocoapods/ios-objc.tmpl/Classes/pluginClass.h.tmpl",
         "templates/plugin_cocoapods/ios-objc.tmpl/Classes/pluginClass.m.tmpl",
         "templates/plugin_cocoapods/ios-swift.tmpl/Classes/pluginClass.swift.tmpl",
         "templates/plugin_cocoapods/ios.tmpl/Assets/.gitkeep",
         "templates/plugin_cocoapods/ios.tmpl/Resources/PrivacyInfo.xcprivacy",
         "templates/plugin_cocoapods/macos.tmpl/Classes/pluginClass.swift.tmpl",
-
         "templates/plugin_swift_package_manager/ios-objc.tmpl/projectName.tmpl/Sources/projectName.tmpl/include/projectName.tmpl/pluginClass.h.tmpl",
         "templates/plugin_swift_package_manager/ios-objc.tmpl/projectName.tmpl/Sources/projectName.tmpl/pluginClass.m.tmpl",
         "templates/plugin_swift_package_manager/ios-objc.tmpl/projectName.tmpl/Package.swift.tmpl",
@@ -349,7 +337,6 @@
         "templates/plugin_swift_package_manager/macos.tmpl/projectName.tmpl/Sources/projectName.tmpl/Resources/.gitkeep",
         "templates/plugin_swift_package_manager/macos.tmpl/projectName.tmpl/Sources/projectName.tmpl/pluginClass.swift.tmpl",
         "templates/plugin_swift_package_manager/macos.tmpl/projectName.tmpl/Package.swift.tmpl",
-
         "templates/skeleton/assets/images/2.0x/flutter_logo.png.img.tmpl",
         "templates/skeleton/assets/images/3.0x/flutter_logo.png.img.tmpl",
         "templates/skeleton/assets/images/flutter_logo.png.img.tmpl",
@@ -368,7 +355,6 @@
         "templates/skeleton/test/implementation_test.dart.test.tmpl",
         "templates/skeleton/test/unit_test.dart.tmpl",
         "templates/skeleton/test/widget_test.dart.tmpl",
-
         "templates/xcode/ios/custom_application_bundle/Runner.xcworkspace.tmpl/contents.xcworkspacedata",
         "templates/xcode/ios/custom_application_bundle/Runner.xcworkspace.tmpl/xcshareddata/IDEWorkspaceChecks.plist",
         "templates/xcode/ios/custom_application_bundle/Runner.xcworkspace.tmpl/xcshareddata/WorkspaceSettings.xcsettings",
