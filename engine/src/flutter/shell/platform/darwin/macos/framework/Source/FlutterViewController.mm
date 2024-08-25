@@ -297,6 +297,9 @@ static void OnKeyboardLayoutChanged(CFNotificationCenterRef center,
   // See: https://github.com/flutter/flutter/issues/115015
   // See: http://www.openradar.me/FB12050037
   // See: https://developer.apple.com/documentation/appkit/nsresponder/1524634-mousedown
+  //
+  // TODO(cbracken): https://github.com/flutter/flutter/issues/154063
+  // Remove this workaround when we drop support for macOS 12 (Monterey).
   [self.nextResponder mouseDown:event];
 }
 
@@ -311,6 +314,9 @@ static void OnKeyboardLayoutChanged(CFNotificationCenterRef center,
   // See: https://github.com/flutter/flutter/issues/115015
   // See: http://www.openradar.me/FB12050037
   // See: https://developer.apple.com/documentation/appkit/nsresponder/1535349-mouseup
+  //
+  // TODO(cbracken): https://github.com/flutter/flutter/issues/154063
+  // Remove this workaround when we drop support for macOS 12 (Monterey).
   [self.nextResponder mouseUp:event];
 }
 
