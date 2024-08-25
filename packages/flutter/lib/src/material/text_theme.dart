@@ -25,8 +25,9 @@ import 'typography.dart';
 /// (e.g., labelLarge, bodySmall). Rather than creating a [TextTheme] directly,
 /// you can obtain an instance as [Typography.black] or [Typography.white].
 ///
-/// To obtain the current text theme, call [Theme.of] with the current
-/// [BuildContext] and read the [ThemeData.textTheme] property.
+/// To obtain the current text theme, call [TextTheme.of] with the current
+/// [BuildContext]. This is equivalent to calling [Theme.of] and reading
+/// the [ThemeData.textTheme] property.
 ///
 /// The names of the TextTheme properties match this table from the
 /// [Material Design spec](https://m3.material.io/styles/typography/tokens).
@@ -600,11 +601,24 @@ class TextTheme with Diagnosticable {
   }
 
   /// The [ThemeData.textTheme] property of the ambient [Theme].
+  ///
+  /// Equivalent to `Theme.of(context).textTheme`.
+  ///
+  /// See also:
+  /// * [primaryOf], which returns the [ThemeData.primaryTextTheme] property of
+  ///   the ambient [Theme] instead.
   static TextTheme of(BuildContext context) => Theme.of(context).textTheme;
 
   /// The [ThemeData.primaryTextTheme] property of the ambient [Theme].
-  static TextTheme primaryOf(BuildContext context) => Theme.of(context).primaryTextTheme;
-
+  ///
+  ///
+  /// Equivalent to `Theme.of(context).primaryTextTheme`.
+  ///
+  /// See also:
+  /// * [of], which returns the [ThemeData.textTheme] property of the ambient
+  ///   [Theme] instead.
+  static TextTheme primaryOf(BuildContext context) =>
+      Theme.of(context).primaryTextTheme;
 
   @override
   bool operator ==(Object other) {
