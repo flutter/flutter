@@ -602,6 +602,9 @@ class TextTheme with Diagnosticable {
   /// The [ThemeData.textTheme] property of the ambient [Theme].
   static TextTheme of(BuildContext context) => Theme.of(context).textTheme;
 
+  /// The [ThemeData.primaryTextTheme] property of the ambient [Theme].
+  static TextTheme primaryOf(BuildContext context) => Theme.of(context).primaryTextTheme;
+
 
   @override
   bool operator ==(Object other) {
