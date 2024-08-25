@@ -15,8 +15,11 @@
 #include "display_list/effects/dl_mask_filter.h"
 #include "flutter/impeller/aiks/aiks_unittests.h"
 
+#include "gmock/gmock.h"
+#include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/playground/widgets.h"
+#include "impeller/renderer/testing/mocks.h"
 #include "include/core/SkRRect.h"
 #include "include/core/SkRect.h"
 #include "third_party/imgui/imgui.h"
@@ -971,6 +974,174 @@ TEST_P(AiksTest, GaussianBlurRotatedNonUniform) {
   };
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, BlurredRectangleWithShader) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  auto paint_lines = [&builder](Scalar dx, Scalar dy, DlPaint paint) {
+    auto draw_line = [&builder, &paint](SkPoint a, SkPoint b) {
+      SkPath line = SkPath::Line(a, b);
+      builder.DrawPath(line, paint);
+    };
+    paint.setStrokeWidth(5);
+    paint.setDrawStyle(DlDrawStyle::kStroke);
+    draw_line(SkPoint::Make(dx + 100, dy + 100),
+              SkPoint::Make(dx + 200, dy + 200));
+    draw_line(SkPoint::Make(dx + 100, dy + 200),
+              SkPoint::Make(dx + 200, dy + 100));
+    draw_line(SkPoint::Make(dx + 150, dy + 100),
+              SkPoint::Make(dx + 200, dy + 150));
+    draw_line(SkPoint::Make(dx + 100, dy + 150),
+              SkPoint::Make(dx + 150, dy + 200));
+  };
+
+  AiksContext renderer(GetContext(), nullptr);
+  DisplayListBuilder recorder_builder;
+  for (int x = 0; x < 5; ++x) {
+    for (int y = 0; y < 5; ++y) {
+      SkRect rect = SkRect::MakeXYWH(x * 20, y * 20, 20, 20);
+      DlPaint paint;
+      paint.setColor(((x + y) & 1) == 0 ? DlColor::kYellow()
+                                        : DlColor::kBlue());
+
+      recorder_builder.DrawRect(rect, paint);
+    }
+  }
+  auto texture =
+      DisplayListToTexture(recorder_builder.Build(), {100, 100}, renderer);
+
+  auto image_source = std::make_shared<DlImageColorSource>(
+      DlImageImpeller::Make(texture), DlTileMode::kRepeat, DlTileMode::kRepeat);
+  auto blur_filter = DlBlurImageFilter::Make(5, 5, DlTileMode::kDecal);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kDarkGreen());
+  builder.DrawRect(SkRect::MakeLTRB(0, 0, 300, 600), paint);
+
+  paint.setColorSource(image_source);
+  builder.DrawRect(SkRect::MakeLTRB(100, 100, 200, 200), paint);
+
+  paint.setColorSource(nullptr);
+  paint.setColor(DlColor::kRed());
+  builder.DrawRect(SkRect::MakeLTRB(300, 0, 600, 600), paint);
+
+  paint.setColorSource(image_source);
+  paint.setImageFilter(blur_filter);
+  builder.DrawRect(SkRect::MakeLTRB(400, 100, 500, 200), paint);
+
+  paint.setImageFilter(nullptr);
+  paint_lines(0, 300, paint);
+
+  paint.setImageFilter(blur_filter);
+  paint_lines(300, 300, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+#define FLT_FORWARD(mock, real, method) \
+  EXPECT_CALL(*mock, method())          \
+      .WillRepeatedly(::testing::Return(real->method()));
+
+TEST_P(AiksTest, GaussianBlurWithoutDecalSupport) {
+  if (GetParam() != PlaygroundBackend::kMetal) {
+    GTEST_SKIP()
+        << "This backend doesn't yet support setting device capabilities.";
+  }
+  if (!WillRenderSomething()) {
+    // Sometimes these tests are run without playgrounds enabled which is
+    // pointless for this test since we are asserting that
+    // `SupportsDecalSamplerAddressMode` is called.
+    GTEST_SKIP() << "This test requires playgrounds.";
+  }
+
+  std::shared_ptr<const Capabilities> old_capabilities =
+      GetContext()->GetCapabilities();
+  auto mock_capabilities = std::make_shared<MockCapabilities>();
+  EXPECT_CALL(*mock_capabilities, SupportsDecalSamplerAddressMode())
+      .Times(::testing::AtLeast(1))
+      .WillRepeatedly(::testing::Return(false));
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultColorFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultStencilFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              GetDefaultDepthStencilFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsOffscreenMSAA);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsImplicitResolvingMSAA);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsReadFromResolve);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsFramebufferFetch);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsSSBO);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsCompute);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsTextureToTextureBlits);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultGlyphAtlasFormat);
+  ASSERT_TRUE(SetCapabilities(mock_capabilities).ok());
+
+  auto texture = DlImageImpeller::Make(CreateTextureForFixture("boston.jpg"));
+
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x * 0.5, GetContentScale().y * 0.5);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlack());
+  builder.DrawPaint(paint);
+
+  auto blur_filter = DlBlurImageFilter::Make(20, 20, DlTileMode::kDecal);
+  paint.setImageFilter(blur_filter);
+  builder.DrawImage(texture, SkPoint::Make(200, 200), {}, &paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// This addresses a bug where tiny blurs could result in mip maps that beyond
+// the limits for the textures used for blurring.
+// See also: b/323402168
+TEST_P(AiksTest, GaussianBlurSolidColorTinyMipMap) {
+  AiksContext renderer(GetContext(), nullptr);
+
+  for (int32_t i = 1; i < 5; ++i) {
+    DisplayListBuilder builder;
+    Scalar fi = i;
+    SkPath path;
+    path.moveTo(100, 100);
+    path.lineTo(100 + fi, 100 + fi);
+
+    DlPaint paint;
+    paint.setColor(DlColor::kChartreuse());
+    auto blur_filter = DlBlurImageFilter::Make(0.1, 0.1, DlTileMode::kClamp);
+    paint.setImageFilter(blur_filter);
+
+    builder.DrawPath(path, paint);
+
+    auto image = DisplayListToTexture(builder.Build(), {1024, 768}, renderer);
+    EXPECT_TRUE(image) << " length " << i;
+  }
+}
+
+// This addresses a bug where tiny blurs could result in mip maps that beyond
+// the limits for the textures used for blurring.
+// See also: b/323402168
+TEST_P(AiksTest, GaussianBlurBackdropTinyMipMap) {
+  AiksContext renderer(GetContext(), nullptr);
+  for (int32_t i = 1; i < 5; ++i) {
+    DisplayListBuilder builder;
+
+    ISize clip_size = ISize(i, i);
+    builder.Save();
+    builder.ClipRect(
+        SkRect::MakeXYWH(400, 400, clip_size.width, clip_size.height));
+
+    DlPaint paint;
+    paint.setColor(DlColor::kGreen());
+    auto blur_filter = DlBlurImageFilter::Make(0.1, 0.1, DlTileMode::kDecal);
+    paint.setImageFilter(blur_filter);
+
+    builder.DrawCircle({400, 400}, 200, paint);
+    builder.Restore();
+
+    auto image = DisplayListToTexture(builder.Build(), {1024, 768}, renderer);
+    EXPECT_TRUE(image) << " length " << i;
+  }
 }
 
 }  // namespace testing
