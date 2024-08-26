@@ -528,10 +528,8 @@ optional("png_decode") {
   ]
 
   deps = [ "//flutter/third_party/libpng" ]
-  sources = [
-    "$_skia_root/src/codec/SkIcoCodec.cpp",
-    "$_skia_root/src/codec/SkPngCodec.cpp",
-  ]
+  sources = [ "$_skia_root/src/codec/SkIcoCodec.cpp" ]
+  sources += skia_codec_png
 }
 
 optional("png_encode") {
