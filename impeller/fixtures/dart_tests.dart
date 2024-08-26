@@ -3,13 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
-import 'dart:ui' as ui;
+
+// ignore: avoid_relative_lib_imports
 import '../../lib/gpu/lib/gpu.dart' as gpu;
 
 void main() {}
 
 @pragma('vm:entry-point')
 void sayHi() {
+  // ignore: avoid_print
   print('Hi');
 }
 
