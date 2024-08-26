@@ -7,7 +7,7 @@ environment:
 
 dependencies:
   js: ^0.7.0
-  meta: ^1.7.0
+  meta: ^1.14.0
   web_locale_keymap:
     path: ../../third_party/web_locale_keymap
 
