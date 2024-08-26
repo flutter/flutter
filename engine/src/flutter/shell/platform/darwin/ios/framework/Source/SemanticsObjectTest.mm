@@ -16,6 +16,10 @@ FLUTTER_ASSERT_ARC
 
 const float kFloatCompareEpsilon = 0.001;
 
+@interface TextInputSemanticsObject (Test)
+- (UIView<UITextInput>*)textInputSurrogate;
+@end
+
 @interface SemanticsObjectTest : XCTestCase
 @end
 
@@ -1067,6 +1071,85 @@ const float kFloatCompareEpsilon = 0.001;
   [object setSemanticsNode:&node];
   [object accessibilityBridgeDidFinishUpdate];
   XCTAssertEqual([object accessibilityTraits], UIAccessibilityTraitNone);
+}
+
+- (void)testTextInputSemanticsObject_canPerformAction {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode node;
+  node.label = "foo";
+  node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kIsTextField) |
+               static_cast<int32_t>(flutter::SemanticsFlags::kIsReadOnly);
+  TextInputSemanticsObject* object = [[TextInputSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [object setSemanticsNode:&node];
+  [object accessibilityBridgeDidFinishUpdate];
+
+  id textInputSurrogate = OCMClassMock([UIResponder class]);
+  id partialSemanticsObject = OCMPartialMock(object);
+  OCMStub([partialSemanticsObject textInputSurrogate]).andReturn(textInputSurrogate);
+
+  OCMExpect([textInputSurrogate canPerformAction:[OCMArg anySelector] withSender:OCMOCK_ANY])
+      .andReturn(YES);
+  XCTAssertTrue([partialSemanticsObject canPerformAction:@selector(copy:) withSender:nil]);
+
+  OCMExpect([textInputSurrogate canPerformAction:[OCMArg anySelector] withSender:OCMOCK_ANY])
+      .andReturn(NO);
+  XCTAssertFalse([partialSemanticsObject canPerformAction:@selector(copy:) withSender:nil]);
+}
+
+- (void)testTextInputSemanticsObject_editActions {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode node;
+  node.label = "foo";
+  node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kIsTextField) |
+               static_cast<int32_t>(flutter::SemanticsFlags::kIsReadOnly);
+  TextInputSemanticsObject* object = [[TextInputSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [object setSemanticsNode:&node];
+  [object accessibilityBridgeDidFinishUpdate];
+
+  id textInputSurrogate = OCMClassMock([UIResponder class]);
+  id partialSemanticsObject = OCMPartialMock(object);
+  OCMStub([partialSemanticsObject textInputSurrogate]).andReturn(textInputSurrogate);
+
+  XCTestExpectation* copyExpectation =
+      [self expectationWithDescription:@"Surrogate's copy method is called."];
+  XCTestExpectation* cutExpectation =
+      [self expectationWithDescription:@"Surrogate's cut method is called."];
+  XCTestExpectation* pasteExpectation =
+      [self expectationWithDescription:@"Surrogate's paste method is called."];
+  XCTestExpectation* selectAllExpectation =
+      [self expectationWithDescription:@"Surrogate's selectAll method is called."];
+  XCTestExpectation* deleteExpectation =
+      [self expectationWithDescription:@"Surrogate's delete method is called."];
+
+  OCMStub([textInputSurrogate copy:OCMOCK_ANY]).andDo(^(NSInvocation* invocation) {
+    [copyExpectation fulfill];
+  });
+  OCMStub([textInputSurrogate cut:OCMOCK_ANY]).andDo(^(NSInvocation* invocation) {
+    [cutExpectation fulfill];
+  });
+  OCMStub([textInputSurrogate paste:OCMOCK_ANY]).andDo(^(NSInvocation* invocation) {
+    [pasteExpectation fulfill];
+  });
+  OCMStub([textInputSurrogate selectAll:OCMOCK_ANY]).andDo(^(NSInvocation* invocation) {
+    [selectAllExpectation fulfill];
+  });
+  OCMStub([textInputSurrogate delete:OCMOCK_ANY]).andDo(^(NSInvocation* invocation) {
+    [deleteExpectation fulfill];
+  });
+
+  [partialSemanticsObject copy:nil];
+  [partialSemanticsObject cut:nil];
+  [partialSemanticsObject paste:nil];
+  [partialSemanticsObject selectAll:nil];
+  [partialSemanticsObject delete:nil];
+
+  [self waitForExpectationsWithTimeout:1 handler:nil];
 }
 
 @end
