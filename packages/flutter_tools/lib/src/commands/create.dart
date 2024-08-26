@@ -17,6 +17,7 @@ import '../base/version_range.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../features.dart';
+import '../ffi_language_options.dart';
 import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
@@ -69,6 +70,14 @@ class CreateCommand extends CreateBase {
       help: 'Specifies a JSON output file for a listing of Flutter code samples '
         'that can be created with "--sample".',
       valueHelp: 'path',
+    );
+    argParser.addOption(
+      'native-language',
+      help: 'Specify what language you want your example to be generated in. '
+      'To be used in conjunction with `--template package_ffi`. Defaults to C',
+      abbr: 'l',
+      allowed: FfiLanguageOptions.values.map<String>((FfiLanguageOptions value) => value.cliName),
+      allowedHelp: CliEnum.allowedHelp(FfiLanguageOptions.values)
     );
   }
 
@@ -260,6 +269,13 @@ class CreateCommand extends CreateBase {
       );
     }
 
+    if (!generateFfi && argResults!.wasParsed('native-language')){
+      throwToolExit('The native-language option requires the template type to be '
+      'package_ffi', exitCode: 2);
+    }
+
+    final String? language = stringArg('native-language');
+
     final String organization = await getOrganization();
 
     final bool overwrite = boolArg('overwrite');
@@ -426,6 +442,7 @@ class CreateCommand extends CreateBase {
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
           projectType: template,
+          language: language ?? FfiLanguageOptions.C.cliName
         );
         pubContext = PubContext.createPackage;
     }
@@ -732,6 +749,7 @@ Your $application code is in $relativeAppMain.
     Map<String, Object?> templateContext, {
     bool overwrite = false,
     bool printStatusWhenWriting = true,
+    required String language,
     required FlutterProjectType projectType,
   }) async {
     int generatedCount = 0;
@@ -741,7 +759,8 @@ Your $application code is in $relativeAppMain.
     templateContext['description'] = description;
     generatedCount += await renderMerged(
       <String>[
-        'package_ffi',
+        'package_ffi/shared',
+        globals.fs.path.join('package_ffi', language),
       ],
       directory,
       templateContext,

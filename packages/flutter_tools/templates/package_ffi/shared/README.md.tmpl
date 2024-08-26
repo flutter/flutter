@@ -29,9 +29,9 @@ Bundling is done by Flutter based on the output from `build.dart`.
 ## Binding to native code
 
 To use the native code, bindings in Dart are needed.
-To avoid writing these by hand, they are generated from the header file
-(`src/{{projectName}}.h`) by `package:ffigen`.
-Regenerate the bindings by running `dart run ffigen --config ffigen.yaml`.
+To avoid writing these by hand, they are automatically generated.
+Regenerate the bindings by running `go generate` in the `src` folder.
+Before using the bindings, run `flutter pub get` to dowload necessary library code.
 
 ## Invoking native code
 
