@@ -26,6 +26,7 @@ void main() {
     final ErrorWidget error = tester.firstWidget(errorWidget);
     expect(error.message, 'Exception: oh no, an error');
 
+    // Restore the ErrorWidget to conclude the test
     ErrorWidget.builder = oldBuilder;
   });
 
@@ -48,6 +49,7 @@ void main() {
     final Text errorText = tester.firstWidget(errorTextFinder);
     expect(errorText.style?.color, Colors.yellow);
 
+    // Restore the ErrorWidget to conclude the test
     ErrorWidget.builder = oldBuilder;
   });
 }
