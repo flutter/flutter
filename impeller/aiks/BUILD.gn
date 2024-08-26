@@ -16,8 +16,6 @@ impeller_component("aiks") {
     "color_source.h",
     "experimental_canvas.cc",
     "experimental_canvas.h",
-    "image.cc",
-    "image.h",
     "image_filter.cc",
     "image_filter.h",
     "paint.cc",
