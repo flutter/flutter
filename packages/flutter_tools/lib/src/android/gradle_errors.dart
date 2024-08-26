@@ -73,7 +73,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   lockFileDepMissingHandler,
   incompatibleKotlinVersionHandler,
   minCompileSdkVersionHandler,
-  jvm11RequiredHandler,
+  incompatibleJavaAndAgpVersionsHandler,
   outdatedGradleHandler,
   sslExceptionHandler,
   zipExceptionHandler,
@@ -524,20 +524,30 @@ final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
   eventLabel: 'min-compile-sdk-version',
 );
 
+final RegExp _agpJavaError = RegExp(r'Android Gradle plugin requires Java\s+\d+\s+to run');
+
 @visibleForTesting
-final GradleHandledError jvm11RequiredHandler = GradleHandledError(
+final GradleHandledError incompatibleJavaAndAgpVersionsHandler= GradleHandledError(
   test: (String line) {
-    return line.contains('Android Gradle plugin requires Java 11 to run');
+    return _agpJavaError.hasMatch(line);
   },
   handler: ({
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
   }) async {
+    final File settingsFile = project.directory
+      .childDirectory('android')
+      .childFile('settings.gradle');
     globals.printBox(
-      '${globals.logger.terminal.warningMark} You need Java 11 or higher to build your app with this version of Gradle.\n\n'
-      'To get Java 11, update to the latest version of Android Studio on https://developer.android.com/studio/install.\n\n'
-      'To check the Java version used by Flutter, run `flutter doctor -v`.',
+      '${globals.logger.terminal.warningMark} Your version of Java is incompatible with your project\’s Android Gradle Plugin version.\n\n'
+      'To fix this issue, get a compatible version of Java by updating to the latest version of Android Studio on https://developer.android.com/studio/install\n'
+      'If that does not work, update the Java version used by Flutter by running `flutter config --jdk-dir=“</path/to/jdk>“`\n'
+      'To check the Java version used by Flutter, run `flutter doctor -verbose`.\n\n'
+      'Check your project\’s Android Gradle Plugin version specified in ${settingsFile} \n'
+      'and check if it is compatible with that Java version. '
+      'See the link below for more information on compatible Java/Android Gradle Plugin versions:\n'
+      'https://developer.android.com/build/releases/past-releases\n\n',
       title: _boxTitle,
     );
     return GradleBuildStatus.exit;
