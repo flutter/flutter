@@ -332,7 +332,12 @@ class InkResponse extends StatelessWidget {
     this.enableFeedback = true,
     this.excludeFromSemantics = false,
     this.focusNode,
+    @Deprecated(
+      'Use focusable instead. '
+      'This feature was deprecated after v3.25.0-1.0.pre.',
+    )
     this.canRequestFocus = true,
+    this.focusable = true,
     this.onFocusChange,
     this.autofocus = false,
     this.statesController,
@@ -597,8 +602,15 @@ class InkResponse extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
-  /// {@macro flutter.widgets.Focus.canRequestFocus}
+  /// {@macro flutter.widgets.Focus.focusable}
+  @Deprecated(
+    'Use focusable instead. '
+    'This feature was deprecated after v 3.25.0-1.0.pre.',
+  )
   final bool canRequestFocus;
+
+  /// {@macro flutter.widgets.Focus.focusable}
+  final bool focusable;
 
   /// The rectangle to use for the highlight effect and for clipping
   /// the splash effects if [containedInkWell] is true.
@@ -662,7 +674,7 @@ class InkResponse extends StatelessWidget {
       enableFeedback: enableFeedback,
       excludeFromSemantics: excludeFromSemantics,
       focusNode: focusNode,
-      canRequestFocus: canRequestFocus,
+      focusable: focusable || canRequestFocus,
       onFocusChange: onFocusChange,
       autofocus: autofocus,
       parentState: parentState,
@@ -719,7 +731,7 @@ class _InkResponseStateWidget extends StatefulWidget {
     this.enableFeedback = true,
     this.excludeFromSemantics = false,
     this.focusNode,
-    this.canRequestFocus = true,
+    this.focusable = true,
     this.onFocusChange,
     this.autofocus = false,
     this.parentState,
@@ -759,7 +771,7 @@ class _InkResponseStateWidget extends StatefulWidget {
   final ValueChanged<bool>? onFocusChange;
   final bool autofocus;
   final FocusNode? focusNode;
-  final bool canRequestFocus;
+  final bool focusable;
   final _ParentInkResponseState? parentState;
   final _GetRectCallback? getRectCallback;
   final _CheckContext debugCheckContext;
@@ -1275,9 +1287,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     updateHighlight(_HighlightType.hover, value: _hovering);
   }
 
-  bool get _canRequestFocus {
+  bool get _focusable {
     return switch (MediaQuery.maybeNavigationModeOf(context)) {
-      NavigationMode.traditional || null => enabled && widget.canRequestFocus,
+      NavigationMode.traditional || null => enabled && widget.focusable,
       NavigationMode.directional => true,
     };
   }
@@ -1319,7 +1331,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         actions: _actionMap,
         child: Focus(
           focusNode: widget.focusNode,
-          canRequestFocus: _canRequestFocus,
+          focusable: _focusable,
           onFocusChange: handleFocusUpdate,
           autofocus: widget.autofocus,
           child: MouseRegion(
@@ -1466,6 +1478,7 @@ class InkWell extends InkResponse {
     super.excludeFromSemantics,
     super.focusNode,
     super.canRequestFocus,
+    super.focusable,
     super.onFocusChange,
     super.autofocus,
     super.statesController,

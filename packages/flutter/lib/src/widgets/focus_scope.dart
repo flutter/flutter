@@ -138,7 +138,7 @@ class Focus extends StatefulWidget {
     bool? focusable,
     @Deprecated(
       'Use focusable instead. '
-      'This feature was deprecated after v 3.25.0-1.0.pre.',
+      'This feature was deprecated after v3.25.0-1.0.pre.',
     )
     bool? canRequestFocus,
     bool? skipTraversal,
@@ -292,11 +292,12 @@ class Focus extends StatefulWidget {
 
   final bool? _focusable;
 
-  /// {@macro flutter.widgets.Focus.focusable}
+
   @Deprecated(
     'Use focusable instead. '
-    'This feature was deprecated after v 3.25.0-1.0.pre.',
+    'This feature was deprecated after v3.25.0-1.0.pre.',
   )
+  /// {@macro flutter.widgets.Focus.focusable}
   bool get canRequestFocus => focusable;
 
   /// Sets the [FocusNode.skipTraversal] flag on the focus node so that it won't
@@ -788,7 +789,7 @@ class FocusScope extends Focus {
     super.focusable,
     @Deprecated(
       'Use focusable instead. '
-      'This feature was deprecated after v 3.25.0-1.0.pre.',
+      'This feature was deprecated after v3.25.0-1.0.pre.',
     )
     super.canRequestFocus,
     super.skipTraversal,

@@ -453,7 +453,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     bool focusable = true,
     @Deprecated(
       'Use focusable instead. '
-      'This feature was deprecated after v 3.25.0-1.0.pre.',
+      'This feature was deprecated after v3.25.0-1.0.pre.',
     )
     bool canRequestFocus = true,
     bool descendantsAreFocusable = true,
@@ -547,7 +547,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   @Deprecated(
     'Use focusable instead. '
-    'This feature was deprecated after v 3.25.0-1.0.pre.',
+    'This feature was deprecated after v3.25.0-1.0.pre.',
   )
   /// {@macro flutter.widgets.focus_manager.FocusManager.focusable}
   bool get canRequestFocus => _focusable && ancestors.every(_allowDescendantsToBeFocused);
@@ -1301,7 +1301,7 @@ class FocusScopeNode extends FocusNode {
     super.focusable,
     @Deprecated(
       'Use focusable instead. '
-      'This feature was deprecated after v 3.25.0-1.0.pre.',
+      'This feature was deprecated after v3.25.0-1.0.pre.',
     )
     super.canRequestFocus,
     this.traversalEdgeBehavior = TraversalEdgeBehavior.closedLoop,
