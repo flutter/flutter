@@ -453,6 +453,16 @@ class AndroidProject extends FlutterProjectPlatform {
   static const String javaGradleCompatUrl =
     'https://docs.gradle.org/current/userguide/compatibility.html#java';
 
+  // User facing link that describes compatibility between java and
+  // android gradle plugin.
+  static const String javaAgpCompatUrl =
+    'https://developer.android.com/build/releases/past-releases';
+
+  // User facing link that describes instructions for downloading
+  // the latest version of Android Studio.
+  static const String installAndroidStudioUrl =
+    'https://developer.android.com/build/releases/past-releases';
+
   /// The parent of this project.
   final FlutterProject parent;
 

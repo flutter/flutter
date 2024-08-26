@@ -541,13 +541,13 @@ final GradleHandledError incompatibleJavaAndAgpVersionsHandler= GradleHandledErr
       .childFile('settings.gradle');
     globals.printBox(
       '${globals.logger.terminal.warningMark} Your version of Java is incompatible with your project\’s Android Gradle Plugin version.\n\n'
-      'To fix this issue, get a compatible version of Java by updating to the latest version of Android Studio on https://developer.android.com/studio/install\n'
+      'To fix this issue, get a compatible version of Java by updating to the latest version of Android Studio on ${AndroidProject.installAndroidStudioUrl}\n'
       'If that does not work, update the Java version used by Flutter by running `flutter config --jdk-dir=“</path/to/jdk>“`\n'
       'To check the Java version used by Flutter, run `flutter doctor -verbose`.\n\n'
       'Check your project\’s Android Gradle Plugin version specified in ${settingsFile} \n'
       'and check if it is compatible with that Java version. '
       'See the link below for more information on compatible Java/Android Gradle Plugin versions:\n'
-      'https://developer.android.com/build/releases/past-releases\n\n',
+      '${AndroidProject.javaAgpCompatUrl}\n\n',
       title: _boxTitle,
     );
     return GradleBuildStatus.exit;
