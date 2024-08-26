@@ -2,6 +2,8 @@ package io.flutter.embedding.engine;
 
 import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -151,6 +153,32 @@ public class FlutterJNITest {
     assertEquals(result[2], "");
   }
 
+  @Test
+  public void setAccessibilityIfAttached() {
+    // --- Test Setup ---
+    FlutterJNITester flutterJNI = new FlutterJNITester(true);
+    int expectedFlag = 100;
+
+    flutterJNI.setAccessibilityFeatures(expectedFlag);
+    assertEquals(flutterJNI.flags, expectedFlag);
+
+    flutterJNI.setSemanticsEnabled(true);
+    assertTrue(flutterJNI.semanticsEnabled);
+  }
+
+  @Test
+  public void doesNotSetAccessibilityIfNotAttached() {
+    // --- Test Setup ---
+    FlutterJNITester flutterJNI = new FlutterJNITester(false);
+    int flags = 100;
+
+    flutterJNI.setAccessibilityFeatures(flags);
+    assertEquals(flutterJNI.flags, 0);
+
+    flutterJNI.setSemanticsEnabled(true);
+    assertFalse(flutterJNI.semanticsEnabled);
+  }
+
   public void onDisplayPlatformView_callsPlatformViewsController() {
     PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
 
@@ -255,5 +283,30 @@ public class FlutterJNITest {
     flutterJNI.setRefreshRateFPS(120.0f);
     // --- Verify Results ---
     verify(flutterJNI, times(1)).updateRefreshRate();
+  }
+
+  static class FlutterJNITester extends FlutterJNI {
+    FlutterJNITester(boolean attached) {
+      this.isAttached = attached;
+    }
+
+    final boolean isAttached;
+    boolean semanticsEnabled = false;
+    int flags = 0;
+
+    @Override
+    public boolean isAttached() {
+      return isAttached;
+    }
+
+    @Override
+    public void setSemanticsEnabledInNative(boolean enabled) {
+      semanticsEnabled = enabled;
+    }
+
+    @Override
+    public void setAccessibilityFeaturesInNative(int flags) {
+      this.flags = flags;
+    }
   }
 }
