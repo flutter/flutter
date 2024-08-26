@@ -1017,12 +1017,11 @@ void DlDispatcherBase::drawImageRect(
     flutter::DlImageSampling sampling,
     bool render_with_attributes,
     SrcRectConstraint constraint = SrcRectConstraint::kFast) {
-  GetCanvas().DrawImageRect(
-      std::make_shared<Image>(image->impeller_texture()),  // image
-      skia_conversions::ToRect(src),                       // source rect
-      skia_conversions::ToRect(dst),                       // destination rect
-      render_with_attributes ? paint_ : Paint(),           // paint
-      ToSamplerDescriptor(sampling)                        // sampling
+  GetCanvas().DrawImageRect(image->impeller_texture(),      // image
+                            skia_conversions::ToRect(src),  // source rect
+                            skia_conversions::ToRect(dst),  // destination rect
+                            render_with_attributes ? paint_ : Paint(),  // paint
+                            ToSamplerDescriptor(sampling)  // sampling
   );
 }
 
@@ -1034,7 +1033,7 @@ void DlDispatcherBase::drawImageNine(const sk_sp<flutter::DlImage> image,
                                      bool render_with_attributes) {
   NinePatchConverter converter = {};
   converter.DrawNinePatch(
-      std::make_shared<Image>(image->impeller_texture()),
+      image->impeller_texture(),
       Rect::MakeLTRB(center.fLeft, center.fTop, center.fRight, center.fBottom),
       skia_conversions::ToRect(dst), ToSamplerDescriptor(filter), &GetCanvas(),
       &paint_);
@@ -1050,12 +1049,11 @@ void DlDispatcherBase::drawAtlas(const sk_sp<flutter::DlImage> atlas,
                                  flutter::DlImageSampling sampling,
                                  const SkRect* cull_rect,
                                  bool render_with_attributes) {
-  GetCanvas().DrawAtlas(std::make_shared<Image>(atlas->impeller_texture()),
-                        skia_conversions::ToRSXForms(xform, count),
-                        skia_conversions::ToRects(tex, count),
-                        ToColors(colors, count), ToBlendMode(mode),
-                        ToSamplerDescriptor(sampling),
-                        skia_conversions::ToRect(cull_rect), paint_);
+  GetCanvas().DrawAtlas(
+      atlas->impeller_texture(), skia_conversions::ToRSXForms(xform, count),
+      skia_conversions::ToRects(tex, count), ToColors(colors, count),
+      ToBlendMode(mode), ToSamplerDescriptor(sampling),
+      skia_conversions::ToRect(cull_rect), paint_);
 }
 
 // |flutter::DlOpReceiver|

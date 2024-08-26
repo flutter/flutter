@@ -16,7 +16,6 @@
 #include "gtest/gtest.h"
 #include "impeller/aiks/canvas.h"
 #include "impeller/aiks/color_filter.h"
-#include "impeller/aiks/image.h"
 #include "impeller/aiks/image_filter.h"
 #include "impeller/aiks/testing/context_spy.h"
 #include "impeller/core/device_buffer.h"
@@ -126,7 +125,7 @@ TEST_P(AiksTest, DrawPaintAbsorbsClears) {
   std::shared_ptr<Context> real_context = GetContext();
   std::shared_ptr<ContextMock> mock_context = spy->MakeContext(real_context);
   AiksContext renderer(mock_context, nullptr);
-  std::shared_ptr<Image> image = picture.ToImage(renderer, {300, 300});
+  std::shared_ptr<Texture> image = picture.ToImage(renderer, {300, 300});
 
   ASSERT_EQ(spy->render_passes_.size(), 1llu);
   std::shared_ptr<RenderPass> render_pass = spy->render_passes_[0];
@@ -150,7 +149,7 @@ TEST_P(AiksTest,
   std::shared_ptr<Context> real_context = GetContext();
   std::shared_ptr<ContextMock> mock_context = spy->MakeContext(real_context);
   AiksContext renderer(mock_context, nullptr);
-  std::shared_ptr<Image> image = picture.ToImage(renderer, {300, 300});
+  std::shared_ptr<Texture> image = picture.ToImage(renderer, {300, 300});
 
   ASSERT_EQ(spy->render_passes_.size(),
             GetBackend() == PlaygroundBackend::kOpenGLES ? 4llu : 3llu);
@@ -171,7 +170,7 @@ TEST_P(AiksTest, DrawRectAbsorbsClears) {
   std::shared_ptr<Context> real_context = GetContext();
   std::shared_ptr<ContextMock> mock_context = spy->MakeContext(real_context);
   AiksContext renderer(mock_context, nullptr);
-  std::shared_ptr<Image> image = picture.ToImage(renderer, {300, 300});
+  std::shared_ptr<Texture> image = picture.ToImage(renderer, {300, 300});
 
   ASSERT_EQ(spy->render_passes_.size(), 1llu);
   std::shared_ptr<RenderPass> render_pass = spy->render_passes_[0];
@@ -191,7 +190,7 @@ TEST_P(AiksTest, DrawRectAbsorbsClearsNegativeRRect) {
   std::shared_ptr<Context> real_context = GetContext();
   std::shared_ptr<ContextMock> mock_context = spy->MakeContext(real_context);
   AiksContext renderer(mock_context, nullptr);
-  std::shared_ptr<Image> image = picture.ToImage(renderer, {300, 300});
+  std::shared_ptr<Texture> image = picture.ToImage(renderer, {300, 300});
 
   ASSERT_EQ(spy->render_passes_.size(), 1llu);
   std::shared_ptr<RenderPass> render_pass = spy->render_passes_[0];
@@ -211,7 +210,7 @@ TEST_P(AiksTest, DrawRectAbsorbsClearsNegativeRotation) {
   std::shared_ptr<Context> real_context = GetContext();
   std::shared_ptr<ContextMock> mock_context = spy->MakeContext(real_context);
   AiksContext renderer(mock_context, nullptr);
-  std::shared_ptr<Image> image = picture.ToImage(renderer, {300, 300});
+  std::shared_ptr<Texture> image = picture.ToImage(renderer, {300, 300});
 
   ASSERT_EQ(spy->render_passes_.size(), 1llu);
   std::shared_ptr<RenderPass> render_pass = spy->render_passes_[0];
@@ -231,7 +230,7 @@ TEST_P(AiksTest, DrawRectAbsorbsClearsNegative) {
   std::shared_ptr<Context> real_context = GetContext();
   std::shared_ptr<ContextMock> mock_context = spy->MakeContext(real_context);
   AiksContext renderer(mock_context, nullptr);
-  std::shared_ptr<Image> image = picture.ToImage(renderer, {301, 301});
+  std::shared_ptr<Texture> image = picture.ToImage(renderer, {301, 301});
 
   ASSERT_EQ(spy->render_passes_.size(), 1llu);
   std::shared_ptr<RenderPass> render_pass = spy->render_passes_[0];
@@ -255,7 +254,7 @@ TEST_P(AiksTest, ClipRectElidesNoOpClips) {
   std::shared_ptr<Context> real_context = GetContext();
   std::shared_ptr<ContextMock> mock_context = spy->MakeContext(real_context);
   AiksContext renderer(mock_context, nullptr);
-  std::shared_ptr<Image> image = picture.ToImage(renderer, {300, 300});
+  std::shared_ptr<Texture> image = picture.ToImage(renderer, {300, 300});
 
   ASSERT_EQ(spy->render_passes_.size(), 1llu);
   std::shared_ptr<RenderPass> render_pass = spy->render_passes_[0];

@@ -719,7 +719,7 @@ void Canvas::DrawPoints(std::vector<Point> points,
   AddRenderEntityToCurrentPass(std::move(entity));
 }
 
-void Canvas::DrawImage(const std::shared_ptr<Image>& image,
+void Canvas::DrawImage(const std::shared_ptr<Texture>& image,
                        Point offset,
                        const Paint& paint,
                        SamplerDescriptor sampler) {
@@ -733,7 +733,7 @@ void Canvas::DrawImage(const std::shared_ptr<Image>& image,
   DrawImageRect(image, source, dest, paint, std::move(sampler));
 }
 
-void Canvas::DrawImageRect(const std::shared_ptr<Image>& image,
+void Canvas::DrawImageRect(const std::shared_ptr<Texture>& image,
                            Rect source,
                            Rect dest,
                            const Paint& paint,
@@ -750,7 +750,7 @@ void Canvas::DrawImageRect(const std::shared_ptr<Image>& image,
   }
 
   auto texture_contents = TextureContents::MakeRect(dest);
-  texture_contents->SetTexture(image->GetTexture());
+  texture_contents->SetTexture(image);
   texture_contents->SetSourceRect(source);
   texture_contents->SetStrictSourceRect(src_rect_constraint ==
                                         SourceRectConstraint::kStrict);
@@ -991,7 +991,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   AddRenderEntityToCurrentPass(std::move(entity));
 }
 
-void Canvas::DrawAtlas(const std::shared_ptr<Image>& atlas,
+void Canvas::DrawAtlas(const std::shared_ptr<Texture>& atlas,
                        std::vector<Matrix> transforms,
                        std::vector<Rect> texture_coordinates,
                        std::vector<Color> colors,
@@ -1007,7 +1007,7 @@ void Canvas::DrawAtlas(const std::shared_ptr<Image>& atlas,
   contents->SetColors(std::move(colors));
   contents->SetTransforms(std::move(transforms));
   contents->SetTextureCoordinates(std::move(texture_coordinates));
-  contents->SetTexture(atlas->GetTexture());
+  contents->SetTexture(atlas);
   contents->SetSamplerDescriptor(std::move(sampler));
   contents->SetBlendMode(blend_mode);
   contents->SetCullRect(cull_rect);

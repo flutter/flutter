@@ -11,7 +11,6 @@
 #include <optional>
 #include <vector>
 
-#include "impeller/aiks/image.h"
 #include "impeller/aiks/image_filter.h"
 #include "impeller/aiks/paint.h"
 #include "impeller/aiks/picture.h"
@@ -129,13 +128,13 @@ class Canvas {
                   const Paint& paint,
                   PointStyle point_style);
 
-  void DrawImage(const std::shared_ptr<Image>& image,
+  void DrawImage(const std::shared_ptr<Texture>& image,
                  Point offset,
                  const Paint& paint,
                  SamplerDescriptor sampler = {});
 
   void DrawImageRect(
-      const std::shared_ptr<Image>& image,
+      const std::shared_ptr<Texture>& image,
       Rect source,
       Rect dest,
       const Paint& paint,
@@ -167,7 +166,7 @@ class Canvas {
                     BlendMode blend_mode,
                     const Paint& paint);
 
-  void DrawAtlas(const std::shared_ptr<Image>& atlas,
+  void DrawAtlas(const std::shared_ptr<Texture>& atlas,
                  std::vector<Matrix> transforms,
                  std::vector<Rect> texture_coordinates,
                  std::vector<Color> colors,
