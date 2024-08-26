@@ -41,6 +41,13 @@ class SemanticRoute extends SemanticRole {
       // Case 2: nothing requested explicit focus. Focus on the first descendant.
       _setDefaultFocus();
     });
+
+    // Lacking any more specific information, ARIA role "dialog" is the
+    // closest thing to Flutter's route. This can be revisited if better
+    // options become available, especially if the framework volunteers more
+    // specific information about the route. Other attributes in the vicinity
+    // of routes include: "alertdialog", `aria-modal`, "menu", "tooltip".
+    setAriaRole('dialog');
   }
 
   void _setDefaultFocus() {
@@ -79,7 +86,6 @@ class SemanticRoute extends SemanticRole {
       }());
 
       setAttribute('aria-label', label ?? '');
-      _assignRole();
     }
   }
 
@@ -91,20 +97,10 @@ class SemanticRoute extends SemanticRole {
       return;
     }
 
-    _assignRole();
     setAttribute(
       'aria-describedby',
       routeName.semanticsObject.element.id,
     );
-  }
-
-  void _assignRole() {
-    // Lacking any more specific information, ARIA role "dialog" is the
-    // closest thing to Flutter's route. This can be revisited if better
-    // options become available, especially if the framework volunteers more
-    // specific information about the route. Other attributes in the vicinity
-    // of routes include: "alertdialog", `aria-modal`, "menu", "tooltip".
-    setAriaRole('dialog');
   }
 
   @override

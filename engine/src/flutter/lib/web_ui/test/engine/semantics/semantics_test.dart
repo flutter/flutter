@@ -3110,10 +3110,7 @@ void _testRoute() {
     semantics().semanticsEnabled = false;
   });
 
-  test('scopesRoute alone sets the SemanticRoute role with no label', () {
-    final List<String> warnings = <String>[];
-    printWarning = warnings.add;
-
+  test('scopesRoute alone sets the SemanticRoute role and "dialog" ARIA role with no label', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -3127,7 +3124,7 @@ void _testRoute() {
     tester.apply();
 
     expectSemanticsTree(owner(), '''
-      <sem></sem>
+      <sem role="dialog"></sem>
     ''');
 
     expect(
