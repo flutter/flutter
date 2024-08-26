@@ -1082,7 +1082,16 @@ static void SwizzledNoop(id self, SEL _cmd) {}
 // See: https://github.com/flutter/flutter/issues/115015
 // See: http://www.openradar.me/FB12050037
 // See: https://developer.apple.com/documentation/appkit/nsresponder/1524634-mousedown
+//
+// TODO(cbracken): https://github.com/flutter/flutter/issues/154063
+// Remove this test when we drop support for macOS 12 (Monterey).
 - (bool)testMouseDownUpEventsSentToNextResponder:(id)engineMock {
+  if (@available(macOS 13.3.1, *)) {
+    // This workaround is disabled for macOS 13.3.1 onwards, since the underlying AppKit bug is
+    // fixed.
+    return true;
+  }
+
   // The root cause of the above bug is NSResponder mouseDown/mouseUp methods that don't correctly
   // walk the responder chain calling the appropriate method on the next responder under certain
   // conditions. Simulate this by swizzling out the default implementations and replacing them with
