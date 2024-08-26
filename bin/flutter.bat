@@ -6,8 +6,8 @@ REM found in the LICENSE file.
 REM ---------------------------------- NOTE ----------------------------------
 REM
 REM Please keep the logic in this file consistent with the logic in the
-REM `flutter` script in the same directory to ensure that Flutter & Dart continue to
-REM work across all platforms!
+REM `flutter` script in the same directory to ensure that Flutter & Dart
+REM continue to work across all platforms!
 REM
 REM --------------------------------------------------------------------------
 

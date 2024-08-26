@@ -3,6 +3,14 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# ---------------------------------- NOTE ---------------------------------- #
+#
+# Please keep the logic in this file consistent with the logic in the
+# `flutter-dev.bat` script in the same directory to ensure that Flutter
+# continues to work across all platforms!
+#
+# -------------------------------------------------------------------------- #
+
 set -e
 
 # This is a helper script for development purposes. It runs the Flutter tool
@@ -50,6 +58,12 @@ PROG_NAME="$(follow_links "${BASH_SOURCE[0]}")"
 BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
 SHARED_NAME="$BIN_DIR/internal/shared.sh"
 FLUTTER_ROOT="$(cd "$BIN_DIR/.." ; pwd -P)"
+OS="$(uname -s)"
+
+# If we're on Windows, invoke the batch script instead to get proper locking.
+if [[ $OS =~ MINGW.* || $OS =~ CYGWIN.* || $OS =~ MSYS.* ]]; then
+  exec "${BIN_DIR}/flutter-dev.bat" "$@"
+fi
 
 # To define `shared::execute()` function
 source "$SHARED_NAME"
