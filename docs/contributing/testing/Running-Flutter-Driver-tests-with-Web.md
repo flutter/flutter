@@ -63,7 +63,7 @@ Let's go over the different arguments that can be used:
 - Use one of the six browsers for `--browser-name` parameter: chrome, safari, ios-safari, android-chrome, firefox, edge.
 - Use `--local-engine=host_debug_unopt --local-engine-host=host_debug_unopt` for running tests with a local engine.
 - Use `--release` or `--profile` mode for running the tests. Debug mode will be supported soon.
-- Change the `--webport` as needed, don't forget to change remote debugging settings for Android Chrome.
+- Change the `--web-port` as needed, don't forget to change remote debugging settings for Android Chrome.
 - Use `--no-android-emulator` for using Android with real devices.
 
 ## Web Installers Repo
