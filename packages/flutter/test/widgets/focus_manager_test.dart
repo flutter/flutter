@@ -250,7 +250,7 @@ void main() {
         'context: null',
         'descendantsAreFocusable: true',
         'descendantsAreTraversable: true',
-        'canRequestFocus: true',
+        'focusable: true',
         'hasFocus: false',
         'hasPrimaryFocus: false',
       ]);
@@ -439,6 +439,19 @@ void main() {
 
       await setAppLifecycleState(AppLifecycleState.resumed);
       expect(focusNode.hasPrimaryFocus, isFalse);
+    });
+
+    testWidgets('focusable and canRequestFocus are the same.', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      expect(focusNode.focusable, isTrue);
+      expect(focusNode.canRequestFocus, isTrue);
+      focusNode.canRequestFocus = false;
+      expect(focusNode.focusable, isFalse);
+      expect(focusNode.canRequestFocus, isFalse);
+      focusNode.canRequestFocus = true;
+      expect(focusNode.focusable, isTrue);
+      expect(focusNode.canRequestFocus, isTrue);
     });
   });
 
@@ -1534,7 +1547,7 @@ void main() {
         'context: null',
         'descendantsAreFocusable: true',
         'descendantsAreTraversable: true',
-        'canRequestFocus: true',
+        'focusable: true',
         'hasFocus: false',
         'hasPrimaryFocus: false',
       ]);

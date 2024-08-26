@@ -323,7 +323,7 @@ enum UnfocusDisposition {
 ///
 /// [FocusNode]s are [ChangeNotifier]s, so a listener can be registered to
 /// receive a notification when the focus changes. Listeners will also be
-/// notified when [skipTraversal], [canRequestFocus], [descendantsAreFocusable],
+/// notified when [skipTraversal], [focusable], [descendantsAreFocusable],
 /// and [descendantsAreTraversable] properties are updated. If the [Focus] and
 /// [FocusScope] widgets are being used to manage the nodes, consider
 /// establishing an [InheritedWidget] dependency on them by calling [Focus.of]
@@ -450,11 +450,16 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     this.onKey,
     this.onKeyEvent,
     bool skipTraversal = false,
+    bool focusable = true,
+    @Deprecated(
+      'Use focusable instead. '
+      'This feature was deprecated after v 3.25.0-1.0.pre.',
+    )
     bool canRequestFocus = true,
     bool descendantsAreFocusable = true,
     bool descendantsAreTraversable = true,
   })  : _skipTraversal = skipTraversal,
-        _canRequestFocus = canRequestFocus,
+        _focusable = focusable || canRequestFocus,
         _descendantsAreFocusable = descendantsAreFocusable,
         _descendantsAreTraversable = descendantsAreTraversable {
     // Set it via the setter so that it does nothing on release builds.
@@ -472,7 +477,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// not traversed, allowing them to receive key events as part of the focus
   /// chain, but not be traversed to via focus traversal.
   ///
-  /// This is different from [canRequestFocus] because it only implies that the
+  /// This is different from [focusable] because it only implies that the
   /// node can't be reached via traversal, not that it can't be focused. It may
   /// still be focused explicitly.
   bool get skipTraversal {
@@ -494,6 +499,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
+  /// {@template flutter.widgets.focus_manager.FocusManager.focusable}
   /// If true, this focus node may request the primary focus.
   ///
   /// Defaults to true. Set to false if you want this node to do nothing when
@@ -512,7 +518,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// allows the node to be focused, just not traversed to via the
   /// [FocusTraversalPolicy].
   ///
-  /// Setting [canRequestFocus] to false implies that the node will also be
+  /// Setting [focusable] to false implies that the node will also be
   /// skipped for traversal purposes.
   ///
   /// See also:
@@ -521,16 +527,37 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///    focus traversal policy for a widget subtree.
   ///  * [FocusTraversalPolicy], a class that can be extended to describe a
   ///    traversal policy.
-  bool get canRequestFocus => _canRequestFocus && ancestors.every(_allowDescendantsToBeFocused);
+  /// {@endtemplate}
+  bool get focusable => _focusable && ancestors.every(_allowDescendantsToBeFocused);
   static bool _allowDescendantsToBeFocused(FocusNode ancestor) => ancestor.descendantsAreFocusable;
 
-  bool _canRequestFocus;
+  bool _focusable;
   @mustCallSuper
-  set canRequestFocus(bool value) {
-    if (value != _canRequestFocus) {
+  set focusable(bool value) {
+    if (value != _focusable) {
       // Have to set this first before unfocusing, since it checks this to cull
       // unfocusable, previously-focused children.
-      _canRequestFocus = value;
+      _focusable = value;
+      if (hasFocus && !value) {
+        unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
+      }
+      _manager?._markPropertiesChanged(this);
+    }
+  }
+
+  @Deprecated(
+    'Use focusable instead. '
+    'This feature was deprecated after v 3.25.0-1.0.pre.',
+  )
+  /// {@macro flutter.widgets.focus_manager.FocusManager.focusable}
+  bool get canRequestFocus => _focusable && ancestors.every(_allowDescendantsToBeFocused);
+
+  @mustCallSuper
+  set canRequestFocus(bool value) {
+    if (value != _focusable) {
+      // Have to set this first before unfocusing, since it checks this to cull
+      // unfocusable, previously-focused children.
+      _focusable = value;
       if (hasFocus && !value) {
         unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
       }
@@ -541,13 +568,13 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// If false, will disable focus for all of this node's descendants.
   ///
   /// Defaults to true. Does not affect focusability of this node: for that,
-  /// use [canRequestFocus].
+  /// use [focusable].
   ///
   /// If any descendants are focused when this is set to false, they will be
   /// unfocused. When [descendantsAreFocusable] is set to true again, they will
   /// not be refocused, although they will be able to accept focus again.
   ///
-  /// Does not affect the value of [canRequestFocus] on the descendants.
+  /// Does not affect the value of [focusable] on the descendants.
   ///
   /// If a descendant node loses focus when this value is changed, the focus
   /// will move to the scope enclosing this node.
@@ -673,7 +700,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       return const Iterable<FocusNode>.empty();
     }
     return children.where(
-      (FocusNode node) => !node.skipTraversal && node.canRequestFocus,
+      (FocusNode node) => !node.skipTraversal && node.focusable,
     );
   }
 
@@ -707,12 +734,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   }
 
   /// Returns all descendants which do not have the [skipTraversal] and do have
-  /// the [canRequestFocus] flag set.
+  /// the [focusable] flag set.
   Iterable<FocusNode> get traversalDescendants {
     if (!descendantsAreFocusable) {
       return const Iterable<FocusNode>.empty();
     }
-    return descendants.where((FocusNode node) => !node.skipTraversal && node.canRequestFocus);
+    return descendants.where((FocusNode node) => !node.skipTraversal && node.focusable);
   }
 
   /// An [Iterable] over the ancestors of this node.
@@ -908,7 +935,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     switch (disposition) {
       case UnfocusDisposition.scope:
         // If it can't request focus, then don't modify its focused children.
-        if (scope.canRequestFocus) {
+        if (scope.focusable) {
           // Clearing the focused children here prevents re-focusing the node
           // that we just unfocused if we immediately hit "next" after
           // unfocusing, and also prevents choosing to refocus the next-to-last
@@ -916,17 +943,17 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
           scope._focusedChildren.clear();
         }
 
-        while (!scope!.canRequestFocus) {
+        while (!scope!.focusable) {
           scope = scope.enclosingScope ?? _manager?.rootScope;
         }
         scope._doRequestFocus(findFirstFocus: false);
       case UnfocusDisposition.previouslyFocusedChild:
         // Select the most recent focused child from the nearest focusable scope
         // and focus that. If there isn't one, focus the scope itself.
-        if (scope.canRequestFocus) {
+        if (scope.focusable) {
           scope._focusedChildren.remove(this);
         }
-        while (!scope!.canRequestFocus) {
+        while (!scope!.focusable) {
           scope.enclosingScope?._focusedChildren.remove(scope);
           scope = scope.enclosingScope ?? _manager?.rootScope;
         }
@@ -1127,8 +1154,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   // This is overridden in FocusScopeNode.
   void _doRequestFocus({required bool findFirstFocus}) {
-    if (!canRequestFocus) {
-      assert(_focusDebug(() => 'Node NOT requesting focus because canRequestFocus is false: $this'));
+    if (!focusable) {
+      assert(_focusDebug(() => 'Node NOT requesting focus because focusable is false: $this'));
       return;
     }
     // If the node isn't part of the tree, then we just defer the focus request
@@ -1208,7 +1235,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     properties.add(DiagnosticsProperty<BuildContext>('context', context, defaultValue: null));
     properties.add(FlagProperty('descendantsAreFocusable', value: descendantsAreFocusable, ifFalse: 'DESCENDANTS UNFOCUSABLE', defaultValue: true));
     properties.add(FlagProperty('descendantsAreTraversable', value: descendantsAreTraversable, ifFalse: 'DESCENDANTS UNTRAVERSABLE', defaultValue: true));
-    properties.add(FlagProperty('canRequestFocus', value: canRequestFocus, ifFalse: 'NOT FOCUSABLE', defaultValue: true));
+    properties.add(FlagProperty('focusable', value: focusable, ifFalse: 'NOT FOCUSABLE', defaultValue: true));
     properties.add(FlagProperty('hasFocus', value: hasFocus && !hasPrimaryFocus, ifTrue: 'IN FOCUS PATH', defaultValue: false));
     properties.add(FlagProperty('hasPrimaryFocus', value: hasPrimaryFocus, ifTrue: 'PRIMARY FOCUS', defaultValue: false));
   }
@@ -1271,6 +1298,11 @@ class FocusScopeNode extends FocusNode {
     )
     super.onKey,
     super.skipTraversal,
+    super.focusable,
+    @Deprecated(
+      'Use focusable instead. '
+      'This feature was deprecated after v 3.25.0-1.0.pre.',
+    )
     super.canRequestFocus,
     this.traversalEdgeBehavior = TraversalEdgeBehavior.closedLoop,
   })  : super(descendantsAreFocusable: true);
@@ -1279,7 +1311,7 @@ class FocusScopeNode extends FocusNode {
   FocusScopeNode get nearestScope => this;
 
   @override
-  bool get descendantsAreFocusable => _canRequestFocus && super.descendantsAreFocusable;
+  bool get descendantsAreFocusable => _focusable && super.descendantsAreFocusable;
 
   /// Controls the transfer of focus beyond the first and the last items of a
   /// [FocusScopeNode].
@@ -1322,20 +1354,20 @@ class FocusScopeNode extends FocusNode {
   ///    not just the immediate children.
   @override
   Iterable<FocusNode> get traversalChildren {
-    if (!canRequestFocus) {
+    if (!focusable) {
       return const Iterable<FocusNode>.empty();
     }
     return super.traversalChildren;
   }
 
   /// Returns all descendants which do not have the [skipTraversal] and do have
-  /// the [canRequestFocus] flag set.
+  /// the [focusable] flag set.
   ///
   /// Will return an empty iterable if this scope node is not focusable, or if
   /// [descendantsAreFocusable] is false.
   @override
   Iterable<FocusNode> get traversalDescendants {
-    if (!canRequestFocus) {
+    if (!focusable) {
       return const Iterable<FocusNode>.empty();
     }
     return super.traversalDescendants;
@@ -1396,7 +1428,7 @@ class FocusScopeNode extends FocusNode {
     // It is possible that a previously focused child is no longer focusable, so
     // clean out the list if so.
     while (_focusedChildren.isNotEmpty &&
-           (!_focusedChildren.last.canRequestFocus || _focusedChildren.last.enclosingScope == null)) {
+           (!_focusedChildren.last.focusable || _focusedChildren.last.enclosingScope == null)) {
       _focusedChildren.removeLast();
     }
 
@@ -1405,7 +1437,7 @@ class FocusScopeNode extends FocusNode {
     // focus instead of looking for the ultimate first focus for this scope and
     // its descendants.
     if (!findFirstFocus || focusedChild == null) {
-      if (canRequestFocus) {
+      if (focusable) {
         _setAsFocusedChildForScope();
         _markNextFocus(this);
       }
