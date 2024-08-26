@@ -16,7 +16,7 @@ void main() {
       return ErrorWidget(details.exception);
     }
     // In release builds, show a yellow-on-blue message instead:
-    return ReleaseModeErrorWidget(details);
+    return ReleaseModeErrorWidget(details: details);
   };
 
   // Start the app.
@@ -62,16 +62,14 @@ class _ErrorWidgetExampleAppState extends State<ErrorWidgetExampleApp> {
   }
 }
 
-
 class ReleaseModeErrorWidget extends StatelessWidget {
-  const ReleaseModeErrorWidget(this.details, {super.key});
+  const ReleaseModeErrorWidget({super.key, required this.details});
 
   final FlutterErrorDetails details;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.center,
+    return Center(
       child: Text(
         'Error!\n${details.exception}',
         style: const TextStyle(color: Colors.yellow),

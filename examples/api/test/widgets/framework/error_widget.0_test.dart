@@ -32,7 +32,7 @@ void main() {
   testWidgets('ErrorWidget is displayed in release mode', (WidgetTester tester) async {
     final ErrorWidgetBuilder oldBuilder = ErrorWidget.builder;
     ErrorWidget.builder = (FlutterErrorDetails details) {
-      return example.ReleaseModeErrorWidget(details);
+      return example.ReleaseModeErrorWidget(details: details);
     };
     await tester.pumpWidget(const example.ErrorWidgetExampleApp());
 
