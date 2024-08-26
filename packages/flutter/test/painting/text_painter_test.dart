@@ -876,6 +876,8 @@ void main() {
       expect(painter.getFullHeightForCaret(const TextPosition(offset: 2), Rect.zero), 64.0);
       expect(painter.getFullHeightForCaret(const TextPosition(offset: 3, affinity: ui.TextAffinity.upstream), Rect.zero), 64.0);
       expect(painter.getFullHeightForCaret(const TextPosition(offset: 3), Rect.zero), 128.0);
+
+      painter.dispose();
     });
   });
 
