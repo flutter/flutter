@@ -85,9 +85,7 @@ void main() {
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package_ffi', 'c'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package_ffi', 'cpp'),
-          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package_ffi', 'rust'),
-          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package_ffi', 'go'),
-          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package_shared'),
+          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package_ffi', 'shared'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_ffi'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_shared'),
@@ -229,7 +227,7 @@ void main() {
       ),
     });
 
-    testUsingContext('Disallow the native language flag outside package_ffi', () => testbed.run(() async {
+    testUsingContext('Reject the native language flag outside package_ffi', () => testbed.run(() async {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -238,7 +236,7 @@ void main() {
         <String>[
           'create',
           '--no-pub',
-          '--native-language=rust',
+          '--native-language=cpp',
           'my_rust_ffi_package'
         ],
       ),
