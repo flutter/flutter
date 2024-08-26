@@ -605,7 +605,7 @@ class InkResponse extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.focusable}
   @Deprecated(
     'Use focusable instead. '
-    'This feature was deprecated after v 3.25.0-1.0.pre.',
+    'This feature was deprecated after v3.25.0-1.0.pre.',
   )
   final bool canRequestFocus;
 
