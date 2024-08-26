@@ -183,8 +183,9 @@ Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
   );
   await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
-  final File gradleSettings =
-      File(fileSystem.path.join(app.path, 'android', 'settings.gradle.kts'));
+  final File gradleSettings = File(
+    fileSystem.path.join(app.path, 'android', 'settings.gradle.kts'),
+  );
   final String settingsContent = gradleSettingsFileContent
       .replaceFirst(agpReplacementString, versions.agpVersion)
       .replaceFirst(kgpReplacementString, versions.kotlinVersion);
