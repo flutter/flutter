@@ -462,4 +462,32 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
   return [[self textInputSurrogate] hasText];
 }
 
+#pragma mark - UIResponder overrides
+
+- (void)cut:(id)sender {
+  [[self textInputSurrogate] cut:sender];
+}
+
+- (void)copy:(id)sender {
+  [[self textInputSurrogate] copy:sender];
+}
+
+- (void)paste:(id)sender {
+  [[self textInputSurrogate] paste:sender];
+}
+
+// TODO(hellohuanlin): should also support `select:`, which is not implemented by the surrogate yet.
+// See: https://github.com/flutter/flutter/issues/107578.
+- (void)selectAll:(id)sender {
+  [[self textInputSurrogate] selectAll:sender];
+}
+
+- (void)delete:(id)sender {
+  [[self textInputSurrogate] delete:sender];
+}
+
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
+  return [[self textInputSurrogate] canPerformAction:action withSender:sender];
+}
+
 @end
