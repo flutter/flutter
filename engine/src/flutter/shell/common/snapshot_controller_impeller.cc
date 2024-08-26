@@ -92,10 +92,10 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
   display_list->Dispatch(dispatcher);
   impeller::Picture picture = dispatcher.EndRecordingAsPicture();
 
-  std::shared_ptr<impeller::Image> image =
+  std::shared_ptr<impeller::Texture> image =
       picture.ToImage(*context, render_target_size);
   if (image) {
-    return impeller::DlImageImpeller::Make(image->GetTexture(),
+    return impeller::DlImageImpeller::Make(image,
                                            DlImage::OwningContext::kRaster);
   }
 #endif  // EXPERIMENTAL_CANVAS

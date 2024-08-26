@@ -28,13 +28,12 @@ std::optional<Snapshot> Picture::Snapshot(AiksContext& context) {
       .transform = Matrix::MakeTranslation(coverage->GetOrigin())};
 }
 
-std::shared_ptr<Image> Picture::ToImage(AiksContext& context,
-                                        ISize size) const {
+std::shared_ptr<Texture> Picture::ToImage(AiksContext& context,
+                                          ISize size) const {
   if (size.IsEmpty()) {
     return nullptr;
   }
-  auto texture = RenderToTexture(context, size);
-  return texture ? std::make_shared<Image>(texture) : nullptr;
+  return RenderToTexture(context, size);
 }
 
 std::shared_ptr<Texture> Picture::RenderToTexture(

@@ -9,7 +9,6 @@
 #include <optional>
 
 #include "impeller/aiks/aiks_context.h"
-#include "impeller/aiks/image.h"
 #include "impeller/entity/entity_pass.h"
 
 namespace impeller {
@@ -19,7 +18,7 @@ struct Picture {
 
   std::optional<Snapshot> Snapshot(AiksContext& context);
 
-  std::shared_ptr<Image> ToImage(AiksContext& context, ISize size) const;
+  std::shared_ptr<Texture> ToImage(AiksContext& context, ISize size) const;
 
  private:
   std::shared_ptr<Texture> RenderToTexture(

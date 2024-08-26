@@ -84,7 +84,7 @@ TEST_P(AiksTest, ColorWheel) {
     }
   };
 
-  std::shared_ptr<Image> color_wheel_image;
+  std::shared_ptr<Texture> color_wheel_image;
   Matrix color_wheel_transform;
 
   auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
@@ -131,7 +131,7 @@ TEST_P(AiksTest, ColorWheel) {
       if (!snapshot.has_value() || !snapshot->texture) {
         return std::nullopt;
       }
-      color_wheel_image = std::make_shared<Image>(snapshot->texture);
+      color_wheel_image = snapshot->texture;
       color_wheel_transform = snapshot->transform;
     }
 

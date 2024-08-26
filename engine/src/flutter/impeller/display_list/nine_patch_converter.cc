@@ -57,7 +57,7 @@ std::vector<double> NinePatchConverter::InitSlices(double img0,
   // clang-format on
 }
 
-void NinePatchConverter::DrawNinePatch(const std::shared_ptr<Image>& image,
+void NinePatchConverter::DrawNinePatch(const std::shared_ptr<Texture>& image,
                                        Rect center,
                                        Rect dst,
                                        const SamplerDescriptor& sampler,

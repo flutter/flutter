@@ -118,9 +118,8 @@ sk_sp<DlImage> DlMetalSurfaceProvider::MakeImpellerImage(
                        flutter::DlBlendMode::kSrc);
   list->Dispatch(dispatcher);
   auto picture = dispatcher.EndRecordingAsPicture();
-  std::shared_ptr<impeller::Image> image =
+  std::shared_ptr<impeller::Texture> texture =
       picture.ToImage(*aiks_context_, {width, height});
-  std::shared_ptr<impeller::Texture> texture = image->GetTexture();
   return impeller::DlImageImpeller::Make(texture);
 
 #endif  // EXPERIMENTAL_CANVAS

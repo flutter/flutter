@@ -27,11 +27,10 @@ std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
     bool scale_content) {
   Vector2 content_scale =
       scale_content ? playground_->GetContentScale() : Vector2{1, 1};
-  std::shared_ptr<Image> image = picture.ToImage(
+  std::shared_ptr<Texture> image = picture.ToImage(
       aiks_context,
       ISize(size.width * content_scale.x, size.height * content_scale.y));
-  std::shared_ptr<Texture> texture = image->GetTexture();
-  return MakeScreenshot(aiks_context, texture);
+  return MakeScreenshot(aiks_context, image);
 }
 
 std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(

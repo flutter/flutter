@@ -935,10 +935,9 @@ ScreenshotLayerTreeAsImageImpeller(
   impeller::DlDispatcher dispatcher;
   builder.Build()->Dispatch(dispatcher);
   const auto& picture = dispatcher.EndRecordingAsPicture();
-  const auto& image = picture.ToImage(
+  texture = picture.ToImage(
       *aiks_context,
       impeller::ISize(tree->frame_size().fWidth, tree->frame_size().fHeight));
-  texture = image->GetTexture();
 #endif  // EXPERIMENTAL_CANVAS
 
   impeller::DeviceBufferDescriptor buffer_desc;
