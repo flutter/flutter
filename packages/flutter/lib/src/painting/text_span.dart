@@ -519,7 +519,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     List<InlineSpan> newChildren = children;
     for (int i = 0; i < children.length && offset.value < range.end; i++) {
       final InlineSpan oldSpan = children[i];
-      final InlineSpan newSpan = oldSpan.updateAttributes(newAttributes, range, offset : offset);
+      final InlineSpan newSpan = oldSpan.updateAttributesAtOffset(newAttributes, range, offset);
       if (identical(newSpan, oldSpan)) {
         continue;
       }
@@ -532,15 +532,14 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   }
 
   @override
-  TextSpan updateAttributes(covariant InlineSpanAttributes newAttributes, TextRange textRange, { Accumulator? offset }) {
-    final Accumulator offsetAccumulator = offset ?? Accumulator();
-    if (textRange.isCollapsed || !textRange.isNormalized || textRange.end <= offsetAccumulator.value) {
+  TextSpan updateAttributesAtOffset(covariant InlineSpanAttributes newAttributes, TextRange textRange, Accumulator offset) {
+    if (textRange.isCollapsed || !textRange.isNormalized || textRange.end <= offset.value) {
       return this;
     }
 
     final int textLength = text?.length ?? 0;
-    final int startOffset = offsetAccumulator.value;
-    final List<InlineSpan>? newChildren = _updateChildren(newAttributes, children, textRange, offsetAccumulator..increment(textLength));
+    final int startOffset = offset.value;
+    final List<InlineSpan>? newChildren = _updateChildren(newAttributes, children, textRange, offset..increment(textLength));
 
     final int clipStart = math.max(textRange.start - startOffset, 0);
     final int clipEnd = math.min(textRange.end - startOffset, textLength);
@@ -563,8 +562,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
       ? _slice(this, TextRange(start: clipEnd, end: textLength), newChildren)
       : null;
     final List<TextSpan> subtree = child2 == null
-     ? List<TextSpan>.filled(1, child1)
-     : (List<TextSpan>.filled(2, child1)..[1] = child2);
+      ? List<TextSpan>.filled(1, child1)
+      : (List<TextSpan>.filled(2, child1)..[1] = child2);
     return _slice(this, TextRange(start: 0, end: clipStart), subtree);
   }
 

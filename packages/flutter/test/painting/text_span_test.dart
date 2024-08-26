@@ -530,7 +530,7 @@ void main() {
       final GestureRecognizer recognizer = TapGestureRecognizer();
       addTearDown(recognizer.dispose);
       final int length = simpleSpan.toPlainText().length;
-      final TextSpan withRecognizer = simpleSpan.updateAttributes(
+      final InlineSpan withRecognizer = simpleSpan.updateAttributes(
         InlineSpanAttributes(recognizer: Left(recognizer)),
         const TextRange(start: 1, end: 9),
       );
@@ -539,7 +539,7 @@ void main() {
         expect(span.recognizer, 1 <= i && i < 9 ? recognizer : null, reason: 'index = $i');
       }
 
-      final TextSpan partiallyDeleted = withRecognizer.updateAttributes(
+      final InlineSpan partiallyDeleted = withRecognizer.updateAttributes(
         const InlineSpanAttributes(recognizer: InlineSpanAttributes.remove),
         const TextRange(start: 5, end: 6),
       );
@@ -548,7 +548,7 @@ void main() {
         expect(span.recognizer, 1 <= i && i < 9 && !(5 <= i && i < 6) ? recognizer : null, reason: 'index = $i');
       }
 
-      final TextSpan fullyDeleted = partiallyDeleted.updateAttributes(
+      final InlineSpan fullyDeleted = partiallyDeleted.updateAttributes(
         const InlineSpanAttributes(recognizer: InlineSpanAttributes.remove),
         const TextRange(start: 0, end: 999),
       );
@@ -608,9 +608,9 @@ void main() {
 }
 
 
- List<(int, TextStyle)> toStyleRuns(TextSpan span) {
+ List<(int, TextStyle)> toStyleRuns(InlineSpan span) {
    final List<(int, TextStyle)> runs = <(int, TextStyle)>[(0, const TextStyle())];
-   _toStyleRuns(span, runs, Accumulator());
+   _toStyleRuns(span as TextSpan, runs, Accumulator());
    return runs;
 }
 

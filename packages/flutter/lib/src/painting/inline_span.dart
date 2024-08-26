@@ -379,14 +379,25 @@ abstract class InlineSpan extends DiagnosticableTree {
   @protected
   int? codeUnitAtVisitor(int index, Accumulator offset);
 
+  /// Returns an [InlineSpan] by applying `newAttributes` to a [TextRange] within
+  /// this span.
+  ///
+  /// The `textRange` argument is the range, in relation to the start of the root
+  /// span, to which the `newAttributes` should be applied.
+  ///
+  /// The `offset` argument is a mutable offset. When this implementation is
+  /// invoked, its value is set to the offset from the start of the root span to
+  /// the span of this [InlineSpan]. The implementation is responsible for
+  /// advancing the offset by this [InlineSpan]'s length in UTF16 code units,
+  /// such that the `offset` points to the end (enclusive) of this [InlineSpan]
+  /// when this method returns.
+  @protected
+  InlineSpan updateAttributesAtOffset(covariant InlineSpanAttributes newAttributes, TextRange textRange, Accumulator offset);
+
   /// Creates a new [InlineSpan] from this [InlineSpan] by applying
   /// `newAttributes` to the given [TextRange] within this span.
-  ///
-  /// The `offset` parameter is used by the implementation to track the offsets
-  /// from the start of the root span to sub-spans , it should be set to null
-  /// (the default) if you are not implementing an `InlineSpan` subclass.
   @useResult
-  InlineSpan updateAttributes(covariant InlineSpanAttributes newAttributes, TextRange textRange, { Accumulator? offset });
+  InlineSpan updateAttributes(covariant InlineSpanAttributes newAttributes, TextRange textRange) => updateAttributesAtOffset(newAttributes, textRange, Accumulator());
 
   /// In debug mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.
@@ -433,14 +444,14 @@ abstract class InlineSpan extends DiagnosticableTree {
 }
 
 /// A text attribute set that can be used to update the attributes of an
-/// [InlineSpan].
+/// [InlineSpan] subclass.
 ///
 /// All attributes are nullable, and default to `null`. Attributes set to `null`
 /// in an [InlineSpanAttributes] will not be updated.
 ///
 /// See also:
 ///
-///  * [InlineSpan.updateAttributes], which takes an [InlineSpanAttributes], and
+///  * [InlineSpan.updateAttributesAtOffset], which takes an [InlineSpanAttributes], and
 ///    updates a given [TextRange] within the receiver [InlineSpan] using the
 ///    [InlineSpanAttributes].
 class InlineSpanAttributes {
@@ -572,11 +583,11 @@ class InlineSpanAttributes {
 
   /// An attribute which overwrites [TextSpan.recognizer] if set to non-null.
   ///
-  /// When a recognizer is specified, the [InlineSpan.updateAttributes] method
+  /// When a recognizer is specified, the [InlineSpan.updateAttributesAtOffset] method
   /// replaces existing recognizers (if any) within the given range with the
   /// specified recognizer.
   ///
-  /// When this value is set to [remove], the [InlineSpan.updateAttributes]
+  /// When this value is set to [remove], the [InlineSpan.updateAttributesAtOffset]
   /// method sets [TextSpan.recognizer] to null in the given range of the returned
   /// [TextSpan].
   final RemovableInlineSpanAttribute<GestureRecognizer>? recognizer;
@@ -586,14 +597,14 @@ class InlineSpanAttributes {
 
   /// An attribute which overwrites [TextSpan.onEnter] if set to non-null.
   ///
-  /// When this value is set to [remove], the [InlineSpan.updateAttributes]
+  /// When this value is set to [remove], the [InlineSpan.updateAttributesAtOffset]
   /// method sets [TextSpan.onEnter] to null in the given range of the returned
   /// [TextSpan].
   final RemovableInlineSpanAttribute<PointerEnterEventListener>? onEnter;
 
   /// An attribute which overwrites [TextSpan.onExit] if set to non-null.
   ///
-  /// When this value is set to [remove], the [InlineSpan.updateAttributes]
+  /// When this value is set to [remove], the [InlineSpan.updateAttributesAtOffset]
   /// method sets [TextSpan.onExit] to null in the given range of the returned
   /// [TextSpan].
   final RemovableInlineSpanAttribute<PointerExitEventListener>? onExit;
@@ -603,9 +614,9 @@ class InlineSpanAttributes {
 
   /// Unsets the given [RemovableInlineSpanAttribute] from an [InlineSpan].
   ///
-  /// [InlineSpan.updateAttributes] does not mutate the target [InlineSpan].
+  /// [InlineSpan.updateAttributesAtOffset] does not mutate the target [InlineSpan].
   /// Rather, when [remove] is specified for a [RemovableInlineSpanAttribute],
-  /// [InlineSpan.updateAttributes] returns a new [InlineSpan] with that
+  /// [InlineSpan.updateAttributesAtOffset] returns a new [InlineSpan] with that
   /// attribute unset.
   static const RemovableInlineSpanAttribute<Never> remove = Right<Never, void>(null);
 
@@ -615,6 +626,7 @@ class InlineSpanAttributes {
   /// A convenience method, similar to [TextStyle.merge], that merges the
   /// `textStyle` argument with the [TextStyle] related attributes in this
   /// [InlineSpanAttributes] object.
+  @useResult
   TextStyle? updateTextStyle(TextStyle? textStyle) {
     final bool hasNoUpdate = fontFamilies == null
       && locale == null

@@ -76,7 +76,7 @@ abstract class PlaceholderSpan extends InlineSpan {
   }
 
   @override
-  PlaceholderSpan updateAttributes(covariant InlineSpanAttributes newAttributes, TextRange textRange, { Accumulator? offset }) {
+  PlaceholderSpan updateAttributesAtOffset(covariant InlineSpanAttributes newAttributes, TextRange textRange, Accumulator? offset) {
     offset?.increment(1);
     return this;
   }
