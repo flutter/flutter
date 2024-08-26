@@ -1117,8 +1117,8 @@ class _ReorderableItemState extends State<_ReorderableItem> {
       return SizedBox.fromSize(size: size);
     }
     _listState._registerItem(this);
-    return Transform(
-      transform: Matrix4.translationValues(offset.dx, offset.dy, 0.0),
+    return Transform.translate(
+      offset: offset,
       child: widget.child,
     );
   }
