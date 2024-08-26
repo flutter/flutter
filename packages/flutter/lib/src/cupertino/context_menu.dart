@@ -1388,8 +1388,13 @@ class _ContextMenuSheet extends StatelessWidget {
   final List<Widget> actions;
   final _ContextMenuLocation _contextMenuLocation;
   final Orientation _orientation;
+  // Link the scrollbar to the scrollview by providing them the same scroll
+  // controller.
+  final ScrollController _controller = ScrollController();
 
   static const double _kMenuWidth = 250.0;
+  // Eyeballed on a context menu on an iOS 15 simulator running iOS 17.5.
+  static const double _kScrollbarMainAxisMargin = 10.0;
 
   // Get the children, whose order depends on orientation and
   // contextMenuLocation.
@@ -1401,29 +1406,35 @@ class _ContextMenuSheet extends StatelessWidget {
           borderRadius: const BorderRadius.all(Radius.circular(13.0)),
           child: ColoredBox(
             color: CupertinoDynamicColor.resolve(_kBackgroundColor, context),
-            child: CupertinoScrollbar(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    actions.first,
-                    for (final Widget action in actions.skip(1))
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            top: BorderSide(
-                              color: CupertinoDynamicColor.resolve(
-                                _borderColor,
-                                context,
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+              child: CupertinoScrollbar(
+                mainAxisMargin: _kScrollbarMainAxisMargin,
+                controller: _controller,
+                child: SingleChildScrollView(
+                  controller: _controller,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      actions.first,
+                      for (final Widget action in actions.skip(1))
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(
+                                color: CupertinoDynamicColor.resolve(
+                                  _borderColor,
+                                  context,
+                                ),
+                                width: 0.4,
                               ),
-                              width: 0.4,
                             ),
                           ),
+                          position: DecorationPosition.foreground,
+                          child: action,
                         ),
-                        position: DecorationPosition.foreground,
-                        child: action,
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
