@@ -1,7 +1,7 @@
 # Flutter Conductor
 
 Command-line tool for managing a release of the Flutter SDK. Also see
-[Release Process](../../docs/releases/Release-process.md) for more information on
+[Release Process](https://goto.google.com/flutter-release-workflow) for more information on
 the release process.
 
 ## Requirements
