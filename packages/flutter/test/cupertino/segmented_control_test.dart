@@ -54,12 +54,10 @@ StatefulBuilder buildOneDisabledSegmentedControl({required int disabledIndex}) {
     1: const Text('Child 2'),
     2: const Text('Child 3'),
   };
-  final Map<int, bool> segmentStates = <int, bool>{};
+  final Set<int> disabledChildren = <int>{};
   for (int i = 0; i < children.length; i++) {
     if (i == disabledIndex) {
-      segmentStates[i] = false;
-    } else {
-      segmentStates[i] = true;
+      disabledChildren.add(i);
     }
   }
   int sharedValue = 0;
@@ -69,7 +67,7 @@ StatefulBuilder buildOneDisabledSegmentedControl({required int disabledIndex}) {
       return boilerplate(
         child: CupertinoSegmentedControl<int>(
           children: children,
-          segmentStates: segmentStates,
+          disabledChildren: disabledChildren,
           onValueChanged: (int newValue) {
             setState(() {
               sharedValue = newValue;
@@ -1676,25 +1674,20 @@ void main() {
     );
   });
 
-  testWidgets('The segment states length should not exceed children length', (WidgetTester tester) async {
+  testWidgets('The disabled children length should not exceed children length', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
       0: const Text('Child 1'),
       1: const Text('Child 2'),
       2: const Text('Child 3'),
     };
-    final Map<int, bool> segmentStates = <int, bool>{
-      0: true,
-      1: true,
-      2: true,
-      3: true,
-    };
+    final Set<int> disabledChildren = <int>{0, 1, 2, 3};
 
     await expectLater(
       () => tester.pumpWidget(
         boilerplate(
           child: CupertinoSegmentedControl<int>(
             children: children,
-            segmentStates: segmentStates,
+            disabledChildren: disabledChildren,
             onValueChanged: (int newValue) {},
           ),
         ),
@@ -1702,7 +1695,7 @@ void main() {
       throwsA(isAssertionError.having(
         (AssertionError error) => error.toString(),
         '.toString()',
-        contains('segmentStates.length'),
+        contains('disabledChildren.length'),
       )),
     );
   });
@@ -1714,11 +1707,7 @@ void main() {
       2: const Text('Child 3'),
     };
 
-    final Map<int, bool> segmentStates = <int, bool>{
-      0: true,
-      1: false,
-      2: true,
-    };
+    final Set<int> disabledChildren = <int>{1};
 
     int sharedValue = 0;
 
@@ -1729,7 +1718,7 @@ void main() {
             child: CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
-              segmentStates: segmentStates,
+              disabledChildren: disabledChildren,
               onValueChanged: (int newValue) {
                 setState(() {
                   sharedValue = newValue;
@@ -1778,11 +1767,7 @@ void main() {
       2: const Text('Child 3'),
     };
 
-    final Map<int, bool> segmentStates = <int, bool>{
-      0: false,
-      1: true,
-      2: true,
-    };
+    final Set<int> disabledChildren = <int>{0};
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -1790,7 +1775,7 @@ void main() {
           return boilerplate(
             child: CupertinoSegmentedControl<int>(
               children: children,
-              segmentStates: segmentStates,
+              disabledChildren: disabledChildren,
               onValueChanged: (int newValue) {},
               disabledColor: CupertinoColors.systemGrey2,
             ),

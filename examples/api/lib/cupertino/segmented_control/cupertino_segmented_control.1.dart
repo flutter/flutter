@@ -39,11 +39,7 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
   Sky _selectedSegment = Sky.midnight;
   bool _toggleOne = false;
   bool _toggleAll = true;
-  Map<Sky, bool> _segments = <Sky, bool>{
-    Sky.midnight: true,
-    Sky.viridian: true,
-    Sky.cerulean: true,
-  };
+  Set<Sky> _disabledChildren = <Sky>{};
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +48,7 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
       navigationBar: CupertinoNavigationBar(
         // This Cupertino segmented control has the enum "Sky" as the type.
         middle: CupertinoSegmentedControl<Sky>(
-          segmentStates: _segments,
+          disabledChildren: _disabledChildren,
           selectedColor: skyColors[_selectedSegment],
           borderColor: CupertinoColors.transparent,
           pressedColor: CupertinoColors.systemFill,
@@ -103,18 +99,10 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
                       _toggleOne = value;
                       if (value) {
                         _toggleAll = false;
-                        _segments = <Sky, bool>{
-                          Sky.midnight: false,
-                          Sky.viridian: true,
-                          Sky.cerulean: true,
-                        };
+                        _disabledChildren = <Sky>{Sky.midnight};
                       } else {
                         _toggleAll = true;
-                        _segments = <Sky, bool>{
-                          Sky.midnight: true,
-                          Sky.viridian: true,
-                          Sky.cerulean: true,
-                        };
+                        _disabledChildren = <Sky>{};
                       }
                     });
                   },
@@ -132,16 +120,12 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
                       _toggleAll = value;
                       if (value) {
                         _toggleOne = false;
-                        _segments = <Sky, bool>{
-                          Sky.midnight: true,
-                          Sky.viridian: true,
-                          Sky.cerulean: true,
-                        };
+                        _disabledChildren = <Sky>{};
                       } else {
-                        _segments = <Sky, bool>{
-                          Sky.midnight: false,
-                          Sky.viridian: false,
-                          Sky.cerulean: false,
+                        _disabledChildren = <Sky>{
+                          Sky.midnight,
+                          Sky.viridian,
+                          Sky.cerulean,
                         };
                       }
                     });
