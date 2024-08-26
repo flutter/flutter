@@ -183,7 +183,6 @@ class TextFormField extends FormField<String> {
     Clip clipBehavior = Clip.hardEdge,
     bool scribbleEnabled = true,
     bool canRequestFocus = true,
-    this.isHintNotCreatedOnInput,
   }) : assert(initialValue == null || controller == null),
        assert(obscuringCharacter.length == 1),
        assert(maxLines == null || maxLines > 0),
@@ -279,7 +278,6 @@ class TextFormField extends FormField<String> {
                clipBehavior: clipBehavior,
                scribbleEnabled: scribbleEnabled,
                canRequestFocus: canRequestFocus,
-               isHintNotCreatedOnInput: isHintNotCreatedOnInput,
              ),
            );
          },
@@ -293,9 +291,6 @@ class TextFormField extends FormField<String> {
 
   /// {@macro flutter.widgets.editableText.groupId}
   final Object groupId;
-
-  /// Whether the hint view do not be created when there is input text.
-  final bool? isHintNotCreatedOnInput;
 
   /// {@template flutter.material.TextFormField.onChanged}
   /// Called when the user initiates a change to the TextField's
