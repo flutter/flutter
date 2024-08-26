@@ -104,7 +104,7 @@ plugins {
     id ("org.jetbrains.kotlin.android") version "KGP_REPLACE_ME" apply false
 }
 
-include ":app"
+include(":app")
 
 ''';
 
