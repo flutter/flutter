@@ -2699,12 +2699,14 @@
 ../../../flutter/third_party/skia/include/gpu/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/d3d/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/ganesh/BUILD.bazel
+../../../flutter/third_party/skia/include/gpu/ganesh/d3d/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/ganesh/gl/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/ganesh/gl/egl/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/ganesh/gl/epoxy/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/ganesh/gl/glx/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/ganesh/gl/ios/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/ganesh/gl/mac/BUILD.bazel
+../../../flutter/third_party/skia/include/gpu/ganesh/mock/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/ganesh/mtl/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/ganesh/vk/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/gl/BUILD.bazel
