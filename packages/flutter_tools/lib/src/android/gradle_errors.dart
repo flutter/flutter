@@ -67,11 +67,10 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   networkErrorHandler,
   permissionDeniedErrorHandler,
   flavorUndefinedHandler,
-  r8FailureHandler,
+  r8DexingBugInAgp73Handler,
   minSdkVersionHandler,
   transformInputIssueHandler,
   lockFileDepMissingHandler,
-  incompatibleKotlinVersionHandler,
   minCompileSdkVersionHandler,
   incompatibleJavaAndAgpVersionsHandler,
   outdatedGradleHandler,
@@ -81,6 +80,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   remoteTerminatedHandshakeHandler,
   couldNotOpenCacheDirectoryHandler,
   incompatibleCompileSdk35AndAgpVersionHandler,
+  incompatibleKotlinVersionHandler, // This handler should always be last, as its key log output is sometimes in error messages with other root causes.
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -196,28 +196,6 @@ final GradleHandledError zipExceptionHandler = GradleHandledError(
     return GradleBuildStatus.retry;
   },
   eventLabel: 'zip-exception',
-);
-
-// R8 failure.
-@visibleForTesting
-final GradleHandledError r8FailureHandler = GradleHandledError(
-  test: _lineMatcher(const <String>[
-    'com.android.tools.r8',
-  ]),
-  handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-  }) async {
-    globals.printBox(
-      '${globals.logger.terminal.warningMark} The shrinker may have failed to optimize the Java bytecode.\n'
-      'To disable the shrinker, pass the `--no-shrink` flag to this command.\n'
-      'To learn more, see: https://developer.android.com/studio/build/shrink-code',
-      title: _boxTitle,
-    );
-    return GradleBuildStatus.exit;
-  },
-  eventLabel: 'r8',
 );
 
 /// Handle Gradle error thrown when Gradle needs to download additional
@@ -429,7 +407,8 @@ final GradleHandledError lockFileDepMissingHandler = GradleHandledError(
   eventLabel: 'lock-dep-issue',
 );
 
-@visibleForTesting
+// This handler is made visible in other files so that we can uniquely set it
+// to be the lowest priority error.
 final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
   test: _lineMatcher(const <String>[
     'was compiled with an incompatible version of Kotlin',
@@ -652,6 +631,17 @@ final GradleHandledError couldNotOpenCacheDirectoryHandler = GradleHandledError(
   eventLabel: 'could-not-open-cache-directory',
 );
 
+
+String _getAgpLocation(FlutterProject project) {
+  return '''
+ The version of AGP that your project uses is likely defined in:
+${project.android.settingsGradleFile.path},
+in the 'plugins' closure.
+ Alternatively, if your project was created with an older version of the templates, it is likely
+in the buildscript.dependencies closure of the top-level build.gradle:
+${project.android.hostAppGradleFile.path}.''';
+}
+
 @visibleForTesting
 final GradleHandledError incompatibleCompileSdk35AndAgpVersionHandler = GradleHandledError(
   test: (String line) => line.contains('RES_TABLE_TYPE_TYPE entry offsets overlap actual entry data'),
@@ -662,10 +652,7 @@ final GradleHandledError incompatibleCompileSdk35AndAgpVersionHandler = GradleHa
   }) async {
     globals.printBox(
       '${globals.logger.terminal.warningMark} Using compileSdk 35 requires Android Gradle Plugin (AGP) 8.1.0 or higher.'
-          ' \n Please upgrade to a newer AGP version. The version of AGP that your project uses is likely'
-          " defined in:\n${project.android.settingsGradleFile.path},\nin the 'plugins' closure. \n Alternatively, if your "
-          'project was created with an older version of the templates, it is likely \nin the buildscript.dependencies '
-          'closure of the top-level build.gradle:\n${project.android.hostAppGradleFile.path}.\n\n Finally, if you have a'
+          ' \n Please upgrade to a newer AGP version.${_getAgpLocation(project)}\n\n Finally, if you have a'
           ' strong reason to avoid upgrading AGP, you can temporarily lower the compileSdk version in the following file:\n${project.android.appGradleFile.path}',
       title: _boxTitle,
     );
@@ -673,4 +660,25 @@ final GradleHandledError incompatibleCompileSdk35AndAgpVersionHandler = GradleHa
     return GradleBuildStatus.exit;
   },
   eventLabel: 'incompatible-compile-sdk-and-agp',
+);
+
+@visibleForTesting
+final GradleHandledError r8DexingBugInAgp73Handler = GradleHandledError(
+  test: (String line) => line.contains('com.android.tools.r8.internal') && line.contains(': Unused argument with users'),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+  }) async {
+    globals.printBox('''
+${globals.logger.terminal.warningMark} Version 7.3 of the Android Gradle Plugin (AGP) uses a version of R8 that contains a bug which causes this error (see more info at https://issuetracker.google.com/issues/242308990).
+To fix this error, update to a newer version of AGP (at least 7.4.0).
+
+${_getAgpLocation(project)}''',
+        title: _boxTitle,
+    );
+
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'r8-dexing-bug-in-AGP-7.3'
 );

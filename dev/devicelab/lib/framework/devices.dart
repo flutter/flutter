@@ -128,6 +128,9 @@ abstract class Device {
   /// A unique device identifier.
   String get deviceId;
 
+  /// Switch the device into fixed/regular performance mode.
+  Future<void> toggleFixedPerformanceMode(bool enable) async {}
+
   /// Whether the device is awake.
   Future<bool> isAwake();
 
@@ -588,6 +591,11 @@ class AndroidDevice extends Device {
   final String deviceId;
   String deviceInfo = '';
   int apiLevel = 0;
+
+  @override
+  Future<void> toggleFixedPerformanceMode(bool enable) async {
+    await shellExec('cmd', <String>['power', 'set-fixed-performance-mode-enabled', if (enable) 'true' else 'false']);
+  }
 
   /// Whether the device is awake.
   @override
