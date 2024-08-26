@@ -106,8 +106,21 @@ void main(List<String> args) {
     return;
   }
 
-  // Run clangd.
+  final Engine engineRoot = Engine.findWithin(p.canonicalize(compileCommandsDir));
+  final io.File clangdConfig = io.File(p.join(engineRoot.flutterDir.path, '.clangd'));
   try {
+    // Write a .clangd file to the engine root directory.
+    //
+    // See:
+    // - https://clangd.llvm.org/config#compileflags
+    // - https://github.com/clangd/clangd/issues/662
+    clangdConfig.writeAsStringSync(
+      'CompileFlags:\n'
+      '  Add: -Wno-unknown-warning-option\n'
+      '  Remove: [-m*, -f*]\n'
+    );
+
+    // Run clangd.
     final io.ProcessResult result = io.Process.runSync(clangd, <String>[
       '--compile-commands-dir',
       compileCommandsDir,
@@ -128,5 +141,8 @@ void main(List<String> args) {
     io.stderr.writeln('Failed to run clangd: $e');
     io.stderr.writeln(const JsonEncoder.withIndent('  ').convert(entry));
     io.exitCode = 1;
+  } finally {
+    // Remove the copied .clangd file from the engine root directory.
+    clangdConfig.deleteSync();
   }
 }
