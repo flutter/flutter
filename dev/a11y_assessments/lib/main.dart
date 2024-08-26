@@ -35,10 +35,11 @@ class App extends StatelessWidget {
     final Map<String, WidgetBuilder> routes =
         Map<String, WidgetBuilder>.fromEntries(
       useCases.map((UseCase useCase) =>
-          MapEntry<String, WidgetBuilder>(useCase.route, useCase.build)),
+          MapEntry<String, WidgetBuilder>(useCase.route, (BuildContext context) => useCase.buildWithTitle(context))),
     );
+
     return MaterialApp(
-      title: 'Accessibility Assessments',
+      title: 'Accessibility Assessments Home Page',
       theme: lightTheme,
       darkTheme: darkTheme,
       routes: <String, WidgetBuilder>{'/': (_) => const HomePage(), ...routes},
@@ -68,7 +69,7 @@ class HomePageState extends State<HomePage> {
         child: Builder(builder: (BuildContext context) {
           return TextButton(
             key: Key(useCase.name),
-            onPressed: () => Navigator.of(context).pushNamed(useCase.route),
+            onPressed: () => Navigator.of(context).pushNamed(useCase.route, arguments: useCase.name),
             child: Text(useCase.name),
           );
         }));
@@ -76,9 +77,10 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
-        title: Semantics(headingLevel: 1, child: const Text('Accessibility Assessments')),
+      title: Semantics(headingLevel: 1, child: const Text('Accessibility Assessments')),
       ),
       body: Center(
         child: ListView(
