@@ -421,10 +421,10 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   final bool transitionBetweenRoutes;
 
   /// {@template flutter.cupertino.CupertinoNavigationBar.enableBackgroundFilterBlur}
-  /// Whether to have blur effect with non opaque color.
+  /// Whether to have a blur effect when a non-opaque background color is used.
   ///
   /// When [enableBackgroundFilterBlur] is set to false, the blur effect will be
-  /// disabled. [enableBackgroundFilterBlur]'s behaviour will only be respected when
+  /// disabled. The behaviour of [enableBackgroundFilterBlur] will only be respected when
   /// [automaticBackgroundVisibility] is false or until content scrolls under the navbar.
   ///
   /// This value defaults to true.
