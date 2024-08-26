@@ -596,12 +596,17 @@ Dart_Handle Canvas::drawAtlas(Dart_Handle paint_objects,
     tonic::Int32List colors(colors_handle);
     tonic::Float32List cull_rect(cull_rect_handle);
 
+    std::vector<DlColor> dl_color(colors.num_elements());
+    size_t count = colors.num_elements();
+    for (size_t i = 0; i < count; i++) {
+      dl_color[i] = DlColor(colors[i]);
+    }
+
     DlPaint dl_paint;
     const DlPaint* opt_paint = paint.paint(dl_paint, kDrawAtlasWithPaintFlags);
     builder()->DrawAtlas(
         dl_image, reinterpret_cast<const SkRSXform*>(transforms.data()),
-        reinterpret_cast<const SkRect*>(rects.data()),
-        reinterpret_cast<const DlColor*>(colors.data()),
+        reinterpret_cast<const SkRect*>(rects.data()), dl_color.data(),
         rects.num_elements() / 4,  // SkRect have four floats.
         blend_mode, sampling, reinterpret_cast<const SkRect*>(cull_rect.data()),
         opt_paint);
