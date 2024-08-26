@@ -433,6 +433,12 @@ void main() {
         'HEAD',
       ], stdout: '000deadbeef'),
       const FakeCommand(command: <String>[
+        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/dart',
+        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/dev/tools/bin/generate_gradle_lockfiles.dart',
+        '--no-gradle-generation',
+        '--no-exclusion',
+      ]),
+      const FakeCommand(command: <String>[
         'git',
         'push',
         'https://$token@github.com/$orgName/flutter.git',
