@@ -1175,11 +1175,6 @@
             "realm": "production"
         },
         {
-            "source": "out/release/framework/FlutterMacOS.dSYM.zip",
-            "destination": "darwin-x64-release/FlutterMacOS.dSYM.zip",
-            "realm": "production"
-        },
-        {
             "source": "out/debug/framework/FlutterMacOS.framework.zip",
             "destination": "darwin-x64/FlutterMacOS.framework.zip",
             "realm": "production"
