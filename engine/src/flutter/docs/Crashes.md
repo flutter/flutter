@@ -110,6 +110,27 @@ schema:
 `https://storage.googleapis.com/flutter_infra_release/flutter/c11fe483947c95553610ab59210af643f031f5f4/ios-release/artifacts.zip`
 (replace the engine hash with your hash).
 
+### macOS
+
+Since Flutter 3.27, symbols can be found in the Flutter framework's artifact
+cache, within the xcframework bundle at
+`bin/cache/artifacts/engine/darwin-x64-release/Flutter.xcframework`.
+
+  * Symbols for device builds are in the `macos-arm64_x86_64/dSYMs/FlutterMacOS.framework.dSYM` bundle.
+
+For versions prior to Flutter 3.27, the dSYM bundle can downloaded from Google
+Cloud Storage. Follow the steps from the Android section in this guide, but in
+the last step use a download url following this schema:
+`https://storage.cloud.google.com/flutter_infra_release/flutter/cf4507ae1008c11c6155d31e852999d75670afcf/darwin-x64-release/FlutterMacOS.dSYM.zip`
+(replace the engine hash with your hash).
+
+For release since Flutter 3.27, these symbols are no longer uploaded as a
+separate archive and should be obtained from the artifact cache as described
+above. The artifact cache can be downloaded direcly using a URL following this
+schema:
+`https://storage.googleapis.com/flutter_infra_release/flutter/cf4507ae1008c11c6155d31e852999d75670afcf/darwin-x64-release/framework.zip`
+(replace the engine hash with your hash).
+
 #### Symbolicating local builds
 
 If you built your local engine in debug or profile Dart modes, the framework's dylib's symbols aren't stripped and are available by default.
