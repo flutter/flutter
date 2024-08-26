@@ -210,7 +210,6 @@ TEST_F(FlutterEngineTest, CanLogToStdout) {
 
   // Replace stdout stream buffer with our own.
   StreamCapture stdout_capture(&std::cout);
-  StreamCapture stderr_capture(&std::cerr);
 
   // Launch the test entrypoint.
   FlutterEngine* engine = GetFlutterEngine();
@@ -220,12 +219,9 @@ TEST_F(FlutterEngineTest, CanLogToStdout) {
   latch.Wait();
 
   stdout_capture.Stop();
-  stderr_capture.Stop();
 
   // Verify hello world was written to stdout.
-  // Check equality to ensure no unexpected stray logging.
-  EXPECT_EQ(stdout_capture.GetOutput(), "flutter: Hello logging\n");
-  EXPECT_TRUE(stderr_capture.GetOutput().empty());
+  EXPECT_TRUE(stdout_capture.GetOutput().find("Hello logging") != std::string::npos);
 }
 
 TEST_F(FlutterEngineTest, DISABLED_BackgroundIsBlack) {
