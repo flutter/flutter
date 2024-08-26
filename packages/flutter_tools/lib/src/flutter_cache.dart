@@ -829,6 +829,10 @@ class IosUsbArtifacts extends CachedArtifact {
 
   @override
   bool isUpToDateInner(FileSystem fileSystem) {
+    if (!_platform.isMacOS && !ignorePlatformFiltering) {
+      return true;
+    }
+
     final List<String>? executables =_kExecutables[name];
     if (executables == null) {
       return true;
