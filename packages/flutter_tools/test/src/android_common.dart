@@ -43,16 +43,17 @@ class FakeAndroidBuilder implements AndroidBuilder {
   }) async {}
 
   @override
-  Future<List<String>> getBuildVariants(
-          {required FlutterProject project}) async =>
-      const <String>[];
+  Future<List<String>> getBuildVariants({required FlutterProject project}) {
+    return Future<List<String>>.value(const <String>[]);
+  }
 
   @override
   Future<String> outputsAppLinkSettings(
     String buildVariant, {
     required FlutterProject project,
-  }) async =>
-      '/';
+  }) {
+    return Future<String>.value('/');
+  }
 }
 
 /// Creates a [FlutterProject] in a directory named [flutter_project]
@@ -69,8 +70,9 @@ class FakeFlutterProjectFactory extends FlutterProjectFactory {
   @override
   FlutterProject fromDirectory(Directory _) {
     projects.clear();
-    return super
-        .fromDirectory(directoryOverride.childDirectory('flutter_project'));
+    return super.fromDirectory(
+      directoryOverride.childDirectory('flutter_project'),
+    );
   }
 }
 
@@ -166,7 +168,8 @@ Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
 
   if (versions.compileSdkVersion != null) {
     final File appGradleBuild = File(
-        fileSystem.path.join(app.path, 'android', 'app', 'build.gradle.kts'));
+      fileSystem.path.join(app.path, 'android', 'app', 'build.gradle.kts'),
+    );
     final String appBuildContent = appGradleBuild
         .readAsStringSync()
         .replaceFirst(flutterCompileSdkString, versions.compileSdkVersion!);
@@ -176,8 +179,7 @@ Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
   // Modify gradle version to passed in version.
   final File gradleWrapperProperties = File(fileSystem.path.join(
       app.path, 'android', 'gradle', 'wrapper', 'gradle-wrapper.properties'));
-  final String propertyContent =
-      gradleWrapperPropertiesFileContent.replaceFirst(
+  final String propertyContent =gradleWrapperPropertiesFileContent.replaceFirst(
     gradleReplacementString,
     versions.gradleVersion,
   );
