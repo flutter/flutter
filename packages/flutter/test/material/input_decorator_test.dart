@@ -7680,6 +7680,72 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  group('Intrinsic width', () {
+    const EdgeInsetsGeometry padding = EdgeInsetsDirectional.only(end: 24, start: 12);
+
+    const InputDecoration decorationWithoutIcons = InputDecoration(contentPadding: padding);
+    const InputDecoration decorationWithPrefix = InputDecoration(contentPadding: padding, prefixIcon: Icon(Icons.search));
+    const InputDecoration decorationWithSuffix = InputDecoration(contentPadding: padding, suffixIcon: Icon(Icons.search));
+    const InputDecoration decorationWithAffixes = InputDecoration(
+      contentPadding: padding,
+      prefixIcon: Icon(Icons.search),
+      suffixIcon: Icon(Icons.search),
+    );
+
+    Future<Size> measureText(WidgetTester tester, InputDecoration decoration, TextDirection direction) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decoration,
+          useIntrinsicWidth: true,
+          textDirection: direction,
+        ),
+      );
+      return tester.renderObject<RenderBox>(findInputText()).size;
+    }
+
+    testWidgets('with prefixIcon in LTR', (WidgetTester tester) async {
+      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.ltr);
+      final Size textSizeWithPrefixIcon = await measureText(tester, decorationWithPrefix, TextDirection.ltr);
+
+      expect(textSizeWithPrefixIcon.width, equals(textSizeWithoutIcon.width));
+    });
+
+    testWidgets('with suffixIcon in LTR', (WidgetTester tester) async {
+      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.ltr);
+      final Size textSizeWithSuffixIcon = await measureText(tester, decorationWithSuffix, TextDirection.ltr);
+
+      expect(textSizeWithSuffixIcon.width, equals(textSizeWithoutIcon.width));
+    });
+
+    testWidgets('with prefixIcon and suffixIcon in LTR', (WidgetTester tester) async {
+      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.ltr);
+      final Size textSizeWithIcons = await measureText(tester, decorationWithAffixes, TextDirection.ltr);
+
+      expect(textSizeWithIcons.width, equals(textSizeWithoutIcon.width));
+    });
+
+    testWidgets('with prefixIcon in RTL', (WidgetTester tester) async {
+      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.rtl);
+      final Size textSizeWithPrefixIcon = await measureText(tester, decorationWithPrefix, TextDirection.rtl);
+
+      expect(textSizeWithPrefixIcon.width, equals(textSizeWithoutIcon.width));
+    });
+
+    testWidgets('with suffixIcon in RTL', (WidgetTester tester) async {
+      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.rtl);
+      final Size textSizeWithSuffixIcon = await measureText(tester, decorationWithSuffix, TextDirection.rtl);
+
+      expect(textSizeWithSuffixIcon.width, equals(textSizeWithoutIcon.width));
+    });
+
+    testWidgets('with prefixIcon and suffixIcon in RTL', (WidgetTester tester) async {
+      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.rtl);
+      final Size textSizeWithIcons = await measureText(tester, decorationWithAffixes, TextDirection.rtl);
+
+      expect(textSizeWithIcons.width, equals(textSizeWithoutIcon.width));
+    });
+  });
+
   testWidgets('Ensure the height of labelStyle remains unchanged when TextField is focused', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/141448.
     final FocusNode focusNode = FocusNode();
