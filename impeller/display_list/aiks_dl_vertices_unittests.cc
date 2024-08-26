@@ -379,7 +379,7 @@ TEST_P(AiksTest, DrawVerticesWithInvalidIndices) {
 }
 
 // All four vertices should form a solid red rectangle with no gaps.
-// The blur rectangle drawn under them should not be visible.
+// The blue rectangle drawn under them should not be visible.
 TEST_P(AiksTest, DrawVerticesTextureCoordinatesWithFragmentShader) {
   std::vector<SkPoint> positions_lt = {
       SkPoint::Make(0, 0),    //
@@ -464,6 +464,55 @@ TEST_P(AiksTest, DrawVerticesTextureCoordinatesWithFragmentShader) {
   builder.DrawVertices(vertices_lb, flutter::DlBlendMode::kSrcOver, paint);
   builder.DrawVertices(vertices_rb, flutter::DlBlendMode::kSrcOver, paint);
   builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// The vertices should form a solid red rectangle with no gaps.
+// The blue rectangle drawn under them should not be visible.
+TEST_P(AiksTest,
+       DrawVerticesTextureCoordinatesWithFragmentShaderNonZeroOrigin) {
+  std::vector<SkPoint> positions_lt = {
+      SkPoint::Make(200, 200),  //
+      SkPoint::Make(250, 200),  //
+      SkPoint::Make(200, 250),  //
+      SkPoint::Make(250, 250),  //
+  };
+
+  auto vertices = flutter::DlVertices::Make(
+      flutter::DlVertexMode::kTriangleStrip, positions_lt.size(),
+      positions_lt.data(),
+      /*texture_coordinates=*/positions_lt.data(), /*colors=*/nullptr,
+      /*index_count=*/0,
+      /*indices=*/nullptr);
+
+  flutter::DisplayListBuilder builder;
+  flutter::DlPaint paint;
+  flutter::DlPaint rect_paint;
+  rect_paint.setColor(DlColor::kBlue());
+
+  auto runtime_stages =
+      OpenAssetAsRuntimeStage("runtime_stage_position.frag.iplr");
+
+  auto runtime_stage =
+      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(runtime_stage);
+
+  auto runtime_effect = DlRuntimeEffect::MakeImpeller(runtime_stage);
+  auto rect_data = std::vector<Rect>{Rect::MakeLTRB(200, 200, 250, 250)};
+
+  auto uniform_data = std::make_shared<std::vector<uint8_t>>();
+  uniform_data->resize(rect_data.size() * sizeof(Rect));
+  memcpy(uniform_data->data(), rect_data.data(), uniform_data->size());
+
+  auto color_source = flutter::DlColorSource::MakeRuntimeEffect(
+      runtime_effect, {}, uniform_data);
+
+  paint.setColorSource(color_source);
+
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawRect(SkRect::MakeLTRB(200, 200, 250, 250), rect_paint);
+  builder.DrawVertices(vertices, flutter::DlBlendMode::kSrcOver, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
