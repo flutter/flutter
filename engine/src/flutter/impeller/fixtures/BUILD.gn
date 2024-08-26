@@ -91,6 +91,7 @@ impellerc("runtime_stages") {
     "ink_sparkle.frag",
     "runtime_stage_example.frag",
     "runtime_stage_simple.frag",
+    "runtime_stage_position.frag",
     "gradient.frag",
     "uniforms_and_sampler_1.frag",
     "uniforms_and_sampler_2.frag",

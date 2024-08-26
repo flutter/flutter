@@ -5,6 +5,7 @@
 #include "vertices_contents.h"
 
 #include "fml/logging.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/contents.h"
@@ -12,7 +13,6 @@
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/geometry/vertices_geometry.h"
 #include "impeller/geometry/color.h"
-#include "impeller/geometry/size.h"
 #include "impeller/renderer/render_pass.h"
 
 namespace impeller {
@@ -112,6 +112,10 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
     }
   } else {
     texture = renderer.GetEmptyTexture();
+  }
+  if (!texture) {
+    VALIDATION_LOG << "Missing texture for VerticesSimpleBlendContents";
+    return false;
   }
 
   auto dst_sampler_descriptor = descriptor_;

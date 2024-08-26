@@ -970,9 +970,8 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
         // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
         vertices->GetTextureCoordinateCoverge().value_or(cvg.value());
   }
-  Rect translated_coverage = Rect::MakeSize(src_coverage.GetSize());
   src_contents = src_paint.CreateContentsForGeometry(
-      Geometry::MakeRect(translated_coverage));
+      Geometry::MakeRect(Rect::Round(src_coverage)));
 
   auto contents = std::make_shared<VerticesSimpleBlendContents>();
   contents->SetBlendMode(blend_mode);
@@ -980,11 +979,12 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   contents->SetGeometry(vertices);
   contents->SetLazyTextureCoverage(src_coverage);
   contents->SetLazyTexture(
-      [src_contents, translated_coverage](const ContentContext& renderer) {
+      [src_contents, src_coverage](const ContentContext& renderer) {
         // Applying the src coverage as the coverage limit prevents the 1px
         // coverage pad from adding a border that is picked up by developer
         // specified UVs.
-        return src_contents->RenderToSnapshot(renderer, {}, translated_coverage)
+        return src_contents
+            ->RenderToSnapshot(renderer, {}, Rect::Round(src_coverage))
             ->texture;
       });
   entity.SetContents(paint.WithFilters(std::move(contents)));
