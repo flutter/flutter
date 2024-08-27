@@ -28,10 +28,6 @@ class IconData {
   /// 
   /// The [fontFamily] argument is normally required when using custom icons.
   /// 
-  /// e.g. When you are using the [codePoint] in 
-  /// [Material Icons](https://material.io/resources/icons), You should specify
-  /// that `fontFamily: 'MaterialIcons'`. See the source code in [Icons].
-  /// 
   /// e.g. When you are using the [codePoint] in your [CustomIcons]
   /// ```yaml
   /// fonts:
