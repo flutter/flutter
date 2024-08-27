@@ -526,7 +526,7 @@ final GradleHandledError incompatibleJavaAndAgpVersionsHandler= GradleHandledErr
     );
     return GradleBuildStatus.exit;
   },
-  eventLabel: 'java11-required',
+  eventLabel: 'incompatible-java-agp-version',
 );
 
 /// Handles SSL exceptions: https://github.com/flutter/flutter/issues/104628
