@@ -452,6 +452,13 @@ void main() {
       focusNode.canRequestFocus = true;
       expect(focusNode.focusable, isTrue);
       expect(focusNode.canRequestFocus, isTrue);
+
+      focusNode.focusable = false;
+      expect(focusNode.focusable, isFalse);
+      expect(focusNode.canRequestFocus, isFalse);
+      focusNode.focusable = true;
+      expect(focusNode.focusable, isTrue);
+      expect(focusNode.canRequestFocus, isTrue);
     });
   });
 
