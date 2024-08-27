@@ -602,7 +602,7 @@ class TextTheme with Diagnosticable {
   /// Equivalent to `Theme.of(context).textTheme`.
   ///
   /// See also:
-  /// * [primaryOf], which returns the [ThemeData.primaryTextTheme] property of
+  /// * [TextTheme.primaryOf], which returns the [ThemeData.primaryTextTheme] property of
   ///   the ambient [Theme] instead.
   static TextTheme of(BuildContext context) => Theme.of(context).textTheme;
 
@@ -612,7 +612,7 @@ class TextTheme with Diagnosticable {
   /// Equivalent to `Theme.of(context).primaryTextTheme`.
   ///
   /// See also:
-  /// * [of], which returns the [ThemeData.textTheme] property of the ambient
+  /// * [TextTheme.of], which returns the [ThemeData.textTheme] property of the ambient
   ///   [Theme] instead.
   static TextTheme primaryOf(BuildContext context) => Theme.of(context).primaryTextTheme;
 
