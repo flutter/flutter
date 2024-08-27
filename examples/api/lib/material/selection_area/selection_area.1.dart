@@ -62,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
     const String textAfterBulletList = '\nSome text after the bulleted list.';
     const String emphasizedText = ' This text is emphasized.';
     const String endOfBulletTree = ' This is the end of the text widget.';
-    final List<String> bullets = <String>[ 
+    final List<String> bullets = <String>[
       for (int i = 1; i <= 7; i += 1)
         '• Bullet $i'
     ];
