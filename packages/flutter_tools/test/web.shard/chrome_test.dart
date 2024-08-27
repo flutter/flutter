@@ -29,6 +29,7 @@ const List<String> kChromeArgs = <String>[
   '--no-default-browser-check',
   '--disable-default-apps',
   '--disable-translate',
+  '--disable-search-engine-choice-screen',
 ];
 
 const List<String> kCodeCache = <String>[
