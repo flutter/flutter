@@ -25,7 +25,22 @@ class IconData {
   ///
   /// Rarely used directly. Instead, consider using one of the predefined icons
   /// like the [Icons] collection.
-  ///
+  /// 
+  /// The [fontFamily] argument is normally required when using custom icons.
+  /// 
+  /// e.g. When you are using the [codePoint] in 
+  /// [Material Icons](https://material.io/resources/icons), You should specify
+  /// that `fontFamily: 'MaterialIcons'`. See the source code in [Icons].
+  /// 
+  /// e.g. When you are using the [codePoint] in your [CustomIcons]
+  /// ```yaml
+  /// fonts:
+  ///   - family: CustomIcons
+  ///     fonts:
+  ///       - asset: assets/fonts/CustomIcons.ttf
+  /// ```
+  /// You should specify that `fontFamily: 'CustomIcons'`
+  /// 
   /// The [fontPackage] argument must be non-null when using a font family that
   /// is included in a package. This is used when selecting the font.
   ///
@@ -45,10 +60,6 @@ class IconData {
   final int codePoint;
 
   /// The font family from which the glyph for the [codePoint] will be selected.
-  /// 
-  /// e.g. When you are using the [codePoint] in 
-  /// [Material Icons](https://material.io/resources/icons), You should specify
-  /// that `fontFamily: 'MaterialIcons'`. See the source code in [Icons].
   final String? fontFamily;
 
   /// The name of the package from which the font family is included.
