@@ -2894,6 +2894,12 @@ void main() {
     const SimpleDialog simpleDialog = SimpleDialog();
     expect(simpleDialog.insetPadding, isNull);
   });
+
+  testWidgets('Can pass a null value to AlertDialog.adaptive clip behavior', (WidgetTester tester) async {
+    for (final Clip? clipBehavior in <Clip?>[null, ...Clip.values]) {
+      AlertDialog.adaptive(clipBehavior: clipBehavior);
+    }
+  });
 }
 
 class _RestorableDialogTestWidget extends StatelessWidget {
