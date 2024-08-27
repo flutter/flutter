@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
@@ -167,8 +166,8 @@ class Plugin {
         }
         final DartPluginClassAndFilePair? dartPair = _getPluginDartClassForPlatform(
           platformsYaml,
-          platform,
-          name,
+          platformKey: platform,
+          pluginName: name,
         );
         if (dartPair != null) {
           dartPluginClasses[platform] = dartPair;
@@ -355,10 +354,10 @@ class Plugin {
   }
 
   static DartPluginClassAndFilePair? _getPluginDartClassForPlatform(
-    YamlMap platformsYaml,
-    String platformKey,
-    String name,
-  ) {
+    YamlMap platformsYaml,{
+    required String platformKey,
+    required String pluginName,
+  }) {
     if (!_supportsPlatform(platformsYaml, platformKey)) {
       return null;
     }
@@ -366,8 +365,8 @@ class Plugin {
       final String dartClass = (platformsYaml[platformKey] as YamlMap)[kDartPluginClass] as String;
       final String dartFileName = (platformsYaml[platformKey] as YamlMap)[kDartFileName]
         as String?
-        ?? '$name.dart';
-      return DartPluginClassAndFilePair(dartClass, dartFileName);
+        ?? '$pluginName.dart';
+      return (dartClass: dartClass, dartFileName: dartFileName);
     }
     return null;
   }
@@ -481,35 +480,13 @@ class PluginInterfaceResolution {
   }
 }
 
-/// A class representing pair of dartPluginClass and dartFileName used as metadata
+/// A record representing pair of dartPluginClass and dartFileName used as metadata
 /// in [PluginInterfaceResolution].
 ///
 /// The [dartClass] and [dartFileName] fields are guaranteed to be non-null:
-/// - instance of this class should be created only if dartClassName
-/// exists in plugin configuration.
+/// - record should be created only if dartClassName exists in plugin configuration.
 /// - dartFileName either taken from configuration, or, if absent, should be
 /// constructed from plugin name.
 /// See also:
-/// - [PluginInterfaceResolution], which uses this class to create Map with metadata.
-@immutable
-class DartPluginClassAndFilePair {
-  const DartPluginClassAndFilePair(this.dartClass, this.dartFileName);
-
-  final String dartClass;
-  final String dartFileName;
-
-  @override
-  bool operator ==(Object other) {
-    if (runtimeType != other.runtimeType) {
-      return false;
-    }
-    return other is DartPluginClassAndFilePair
-        && dartClass == other.dartClass
-        && dartFileName == other.dartFileName;
-  }
-  @override
-  int get hashCode => Object.hash(dartClass, dartFileName);
-
-  @override
-  String toString() => 'DartPluginClassAndFilePair(dartClass: $dartClass, dartFileName: $dartFileName)';
-}
+/// - [PluginInterfaceResolution], which uses this record to create Map with metadata.
+typedef DartPluginClassAndFilePair = ({String dartClass, String dartFileName});
