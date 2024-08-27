@@ -246,4 +246,28 @@ void main() {
     expect(fullLerp.horizontal, 2.0);
     expect(fullLerp.vertical, 1.0);
   });
+
+  testWidgets('TextTheme.of(context) is equivalent to Theme.of(context).textTheme', (WidgetTester tester) async {
+    const Key sizedBoxKey = Key('sizedBox');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          textTheme: const TextTheme(
+            displayLarge: TextStyle(color: Colors.blue, fontSize: 30.0),
+          ),
+        ),
+        home: const SizedBox(key: sizedBoxKey),
+      ),
+    );
+    final BuildContext context = tester.element(find.byKey(sizedBoxKey));
+
+    final ThemeData themeData = Theme.of(context);
+    final TextTheme expectedTextTheme = themeData.textTheme;
+    final TextTheme actualTextTheme = TextTheme.of(context);
+
+    expect(actualTextTheme, equals(expectedTextTheme));
+
+  });
+
 }
