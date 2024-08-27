@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 /// @docImport 'app.dart';
+/// @docImport 'color_scheme.dart';
+/// @docImport 'text_theme.dart';
 library;
 
 import 'package:flutter/cupertino.dart';
