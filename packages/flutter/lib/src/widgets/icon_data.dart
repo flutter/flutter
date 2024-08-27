@@ -45,6 +45,10 @@ class IconData {
   final int codePoint;
 
   /// The font family from which the glyph for the [codePoint] will be selected.
+  /// 
+  /// e.g. When you are using the [codePoint] in 
+  /// [Material Icons](https://material.io/resources/icons), You should specify
+  /// that `fontFamily: 'MaterialIcons'`. See the source code in [Icons].
   final String? fontFamily;
 
   /// The name of the package from which the font family is included.
