@@ -560,7 +560,7 @@ void main() {
         'gradle',
         label: 'gradle-expected-file-not-found',
         parameters: CustomDimensions.fromMap(<String, String> {
-          'cd37': 'androidGradlePluginVersion: 7.6.3, fileExtension: .aab',
+          'cd37': 'androidGradlePluginVersion: 8.3, fileExtension: .aab',
         }),
       ),
     ));
