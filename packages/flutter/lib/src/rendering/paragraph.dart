@@ -1496,6 +1496,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     }
     final SelectedContentRange localSelectedContentRange = SelectedContentRange(
       contentLength: contentLength,
+      contentStart: range.start,
       startOffset: _textSelectionStart!.offset,
       endOffset: _textSelectionEnd!.offset,
     );
