@@ -64,11 +64,11 @@ static FlColorScheme fl_gnome_settings_get_color_scheme(FlSettings* settings) {
 }
 
 static gboolean fl_gnome_settings_get_enable_animations(FlSettings* settings) {
-  return true;
+  return TRUE;
 }
 
 static gboolean fl_gnome_settings_get_high_contrast(FlSettings* settings) {
-  return false;
+  return FALSE;
 }
 
 static gdouble fl_gnome_settings_get_text_scaling_factor(FlSettings* settings) {

@@ -387,7 +387,7 @@ static gboolean fl_accessible_text_field_set_caret_offset(AtkText* text,
   FlAccessibleTextField* self = FL_ACCESSIBLE_TEXT_FIELD(text);
 
   perform_set_selection_action(self, offset, offset);
-  return true;
+  return TRUE;
 }
 
 // Implements AtkText::get_n_selections.
@@ -435,11 +435,11 @@ static gboolean fl_accessible_text_field_add_selection(AtkText* text,
   FlAccessibleTextField* self = FL_ACCESSIBLE_TEXT_FIELD(text);
 
   if (self->selection_base != self->selection_extent) {
-    return false;
+    return FALSE;
   }
 
   perform_set_selection_action(self, start_offset, end_offset);
-  return true;
+  return TRUE;
 }
 
 // Implements AtkText::remove_selection.
@@ -449,12 +449,12 @@ static gboolean fl_accessible_text_field_remove_selection(AtkText* text,
   FlAccessibleTextField* self = FL_ACCESSIBLE_TEXT_FIELD(text);
 
   if (selection_num != 0 || self->selection_base == self->selection_extent) {
-    return false;
+    return FALSE;
   }
 
   perform_set_selection_action(self, self->selection_extent,
                                self->selection_extent);
-  return true;
+  return TRUE;
 }
 
 // Implements AtkText::set_selection.
@@ -466,11 +466,11 @@ static gboolean fl_accessible_text_field_set_selection(AtkText* text,
   FlAccessibleTextField* self = FL_ACCESSIBLE_TEXT_FIELD(text);
 
   if (selection_num != 0) {
-    return false;
+    return FALSE;
   }
 
   perform_set_selection_action(self, start_offset, end_offset);
-  return true;
+  return TRUE;
 }
 
 // Implements AtkEditableText::set_text_contents.
