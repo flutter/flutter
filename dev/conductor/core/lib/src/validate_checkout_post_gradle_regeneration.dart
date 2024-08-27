@@ -8,6 +8,7 @@ import 'package:path/path.dart' show Context;
 /// regeneration.
 sealed class CheckoutStatePostGradleRegeneration {
   factory CheckoutStatePostGradleRegeneration(String gitStatusOutput, Context context) {
+    gitStatusOutput = gitStatusOutput.trim();
     if (gitStatusOutput.isEmpty) {
       return const NoDiff();
     }
