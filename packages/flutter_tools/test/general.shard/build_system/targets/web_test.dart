@@ -35,8 +35,6 @@ const List<String> _kDart2WasmLinuxArgs = <String> [
   'wasm',
   '--packages=/.dart_tool/package_config.json',
   '--extra-compiler-option=--platform=HostArtifact.webPlatformKernelFolder/dart2wasm_platform.dill',
-  '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
-  '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
 ];
 
 void main() {
@@ -1034,6 +1032,10 @@ void main() {
                 processManager.addCommand(FakeCommand(
                   command: <String>[
                     ..._kDart2WasmLinuxArgs,
+                    if (buildMode != 'debug') ...<String>[
+                      '--delete-tostring-package-uri=dart:ui',
+                      '--delete-tostring-package-uri=package:flutter',
+                    ],
                     if (renderer == WebRendererMode.skwasm) ...<String>[
                       '--extra-compiler-option=--import-shared-memory',
                       '--extra-compiler-option=--shared-memory-max-pages=32768',

@@ -12,6 +12,7 @@ import '../../base/file_system.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../cache.dart';
+import '../../compile.dart';
 import '../../convert.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
@@ -297,6 +298,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
     final String platformBinariesPath = artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
     final String platformFilePath = environment.fileSystem.path.join(platformBinariesPath, 'dart2wasm_platform.dill');
+    final List<String> dartDefines = computeDartDefines(environment);
 
     final List<String> compilationArgs = <String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
@@ -304,18 +306,13 @@ class Dart2WasmTarget extends Dart2WebTarget {
       'wasm',
       '--packages=${findPackageConfigFileOrDefault(environment.projectDir).path}',
       '--extra-compiler-option=--platform=$platformFilePath',
-      '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
-      '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
+      ...buildModeOptions(buildMode, dartDefines),
       if (compilerConfig.renderer == WebRendererMode.skwasm) ...<String>[
         '--extra-compiler-option=--import-shared-memory',
         '--extra-compiler-option=--shared-memory-max-pages=32768',
       ],
-      if (buildMode == BuildMode.profile)
-        '-Ddart.vm.profile=true'
-      else if (buildMode == BuildMode.release)
-        '-Ddart.vm.product=true',
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
-      for (final String dartDefine in computeDartDefines(environment))
+      for (final String dartDefine in dartDefines)
         '-D$dartDefine',
       '--extra-compiler-option=--depfile=${depFile.path}',
 
