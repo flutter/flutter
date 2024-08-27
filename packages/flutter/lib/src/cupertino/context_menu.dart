@@ -1404,7 +1404,9 @@ class _ContextMenuSheetState extends State<_ContextMenuSheet> {
   @override
   void initState() {
     super.initState();
-    // Link the scrollbar to the scrollview by providing both the same scroll controller.
+    // Link the scrollbar to the scroll view by providing both the same scroll
+    // controller. Using SingleChildScrollview.primary might conflict with users
+    // already using the PrimaryScrollController.
     _controller = ScrollController();
   }
 
