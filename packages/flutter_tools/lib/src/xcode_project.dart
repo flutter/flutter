@@ -262,7 +262,7 @@ class IosProject extends XcodeBasedProject {
   static final RegExp _productBundleIdPattern = RegExp('^\\s*$kProductBundleIdKey\\s*=\\s*(["\']?)(.*?)\\1;\\s*\$');
   static const String _kProductBundleIdVariable = '\$($kProductBundleIdKey)';
 
-  // The string starts with `applinks:` and ignores the query string which starts with `?`.
+  // The string starts with `applinks:` and ignores the query param which starts with `?`.
   static final RegExp _associatedDomainPattern = RegExp(r'^applinks:([^?]+)');
 
   Directory get ephemeralModuleDirectory => parent.directory.childDirectory('.ios');
