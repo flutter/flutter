@@ -1261,4 +1261,57 @@ void main() {
       await testColor(color);
     }
   });
+
+  testWidgets('RefreshIndicator passes the default elevation through correctly', (WidgetTester tester) async {
+    final AnimationController positionController = AnimationController(vsync: const TestVSync());
+    addTearDown(positionController.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[Text('X')],
+          ),
+        ),
+      ),
+    );
+
+    final double maxPosition = tester.view.physicalSize.height / tester.view.devicePixelRatio * 0.25;
+    const double position = 50.0;
+    await tester.fling(find.text('X'), const Offset(0.0, position), 1.0);
+    await tester.pump();
+    positionController.value = position / maxPosition;
+    expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).elevation, 2.0);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('RefreshIndicator passes custom elevation values through correctly', (WidgetTester tester) async {
+    for (final double elevation in <double>[0.0, 2.0]) {
+      final AnimationController positionController = AnimationController(vsync: const TestVSync());
+      addTearDown(positionController.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RefreshIndicator(
+            elevation: elevation,
+            onRefresh: refresh,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const <Widget>[Text('X')],
+            ),
+          ),
+        ),
+      );
+
+      final double maxPosition = tester.view.physicalSize.height / tester.view.devicePixelRatio * 0.25;
+      const double position = 50.0;
+      await tester.fling(find.text('X'), const Offset(0.0, position), 1.0);
+      await tester.pump();
+      positionController.value = position / maxPosition;
+      expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).elevation, elevation);
+      await tester.pumpAndSettle();
+    }
+  });
 }
