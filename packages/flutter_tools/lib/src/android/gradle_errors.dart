@@ -517,10 +517,6 @@ final GradleHandledError incompatibleJavaAndAgpVersionsHandler= GradleHandledErr
   }) async {
     final String helpfulGradleError = line.trim().substring(2);
 
-    final File settingsFile = project.directory
-      .childDirectory('android')
-      .childFile('settings.gradle');
-
     globals.printBox(
       '${globals.logger.terminal.warningMark} ${helpfulGradleError}\n\n'
       'To fix this issue, try updating to the latest Android SDK and Android Studio on: ${AndroidProject.installAndroidStudioUrl}\n'

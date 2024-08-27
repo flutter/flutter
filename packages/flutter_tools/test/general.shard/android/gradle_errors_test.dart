@@ -1010,12 +1010,10 @@ An exception occurred applying plugin request [id: 'com.android.application']
         usesAndroidX: true,
       );
 
-      // Ensure the error notes the incompatible Java/AGP versions, links to related resources,
-      // and a portion of the path to where to change their AGP version.
-      expect(testLogger.statusText, contains('Your version of Java is incompatible with your project\’s Android Gradle Plugin version'));
+      // Ensure the error notes the required Java version, the Java version currently used,
+      // and the android studio and android sdk installation link.
+      expect(testLogger.statusText, contains('Android Gradle plugin requires Java 17 to run. You are currently using Java 11.'));
       expect(testLogger.statusText, contains('https://developer.android.com/studio/install'));
-      expect(testLogger.statusText, contains('settings.gradle'));
-      expect(testLogger.statusText, contains('https://developer.android.com/build/releases/past-releases'));
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
