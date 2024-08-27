@@ -751,7 +751,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   @override
   DelegatedTransition? get delegatedTransition => DelegatedTransition(
     builder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) => snapshotAwareDelegatedTransition(context, animation, secondaryAnimation, child, allowSnapshotting, allowEnterRouteSnapshotting),
-    name: 'Flutter-Zoom-Transition-$allowSnapshotting-$allowEnterRouteSnapshotting',
+    name: 'Flutter-Zoom-Transition',
   );
 
   /// The delegated transition.

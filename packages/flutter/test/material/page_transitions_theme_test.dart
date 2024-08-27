@@ -379,8 +379,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    // First route is snapshotted to match incoming route.
-    expect(isTransitioningWithSnapshotting(tester, page1), isFalse);
+    // First route should be snapshotted.
+    expect(isTransitioningWithSnapshotting(tester, page1), isTrue);
 
     // Second route should not be snapshotted.
     expect(isTransitioningWithSnapshotting(tester, page2), isFalse);
