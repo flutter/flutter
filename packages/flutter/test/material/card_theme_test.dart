@@ -275,8 +275,7 @@ void main() {
     expect(cardMargin.padding, margin);
   });
 
-
-  testWidgets('Loacal CardTheme can override global CardTheme', (WidgetTester tester) async {
+  testWidgets('Local CardTheme can override global CardTheme', (WidgetTester tester) async {
     const Clip globalClipBehavior = Clip.antiAlias;
     const Color globalColor = Colors.red;
     const Color globalShadowColor = Colors.orange;
@@ -301,28 +300,27 @@ void main() {
         shape: globalShape,
       ),
     );
-     await tester.pumpWidget(MaterialApp(
-        theme: themeData,
-        home: const Scaffold(
-          body: CardTheme(
-            data: CardThemeData(
-              clipBehavior: localClipBehavior,
-              color: localColor,
-              shadowColor: localShadowColor,
-              elevation: localElevation,
-              margin: localMargin,
-              shape: localShape,
-            ),
-            child: Card(
-              child: SizedBox(
-                width: 200,
-                height: 200,
-              ),
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: const Scaffold(
+        body: CardTheme(
+          data: CardThemeData(
+            clipBehavior: localClipBehavior,
+            color: localColor,
+            shadowColor: localShadowColor,
+            elevation: localElevation,
+            margin: localMargin,
+            shape: localShape,
+          ),
+          child: Card(
+            child: SizedBox(
+              width: 200,
+              height: 200,
             ),
           ),
         ),
-      )
-     );
+      ),
+    ));
 
     final Padding cardMargin = _getCardPadding(tester);
     final Material material = _getCardMaterial(tester);
