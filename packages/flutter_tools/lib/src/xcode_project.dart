@@ -262,8 +262,8 @@ class IosProject extends XcodeBasedProject {
   static final RegExp _productBundleIdPattern = RegExp('^\\s*$kProductBundleIdKey\\s*=\\s*(["\']?)(.*?)\\1;\\s*\$');
   static const String _kProductBundleIdVariable = '\$($kProductBundleIdKey)';
 
-  static final RegExp _associatedDomainPattern = RegExp(r'^applinks:(.*)');
-  static final RegExp _associatedDomainPatternWithParam = RegExp(r'^applinks:(.*)\?(.*)');
+  // The string starts with `applinks:` and ignores the query string which starts with `?`.
+  static final RegExp _associatedDomainPattern = RegExp(r'^applinks:([^?]+)');
 
   Directory get ephemeralModuleDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
@@ -471,10 +471,8 @@ class IosProject extends XcodeBasedProject {
           if (domains != null) {
             return <String>[
               for (final String domain in domains)
-                 if (_associatedDomainPatternWithParam.firstMatch(domain) case final RegExpMatch match)
+                 if (_associatedDomainPattern.firstMatch(domain) case final RegExpMatch match)
                    match.group(1)!
-                 else if (_associatedDomainPattern.firstMatch(domain) case final RegExpMatch match)
-                 match.group(1)!,
             ];
           }
         }
