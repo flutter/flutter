@@ -187,7 +187,7 @@ void fl_view_accessible_handle_update_semantics(
         }
         fl_accessible_node_set_children(parent, children);
 
-        return true;
+        return TRUE;
       },
       self);
 }

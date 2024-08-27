@@ -398,7 +398,7 @@ gboolean fl_renderer_present_layers(FlRenderer* self,
       layers[0]->offset.x == 0 && layers[0]->offset.y == 0 &&
       (layers[0]->size.width != priv->target_width ||
        layers[0]->size.height != priv->target_height)) {
-    return true;
+    return TRUE;
   }
 
   priv->had_first_frame = true;

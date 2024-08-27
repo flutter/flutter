@@ -123,25 +123,25 @@ static gboolean settings_portal_read(GDBusProxy* proxy,
     if (error->domain == G_DBUS_ERROR &&
         error->code == G_DBUS_ERROR_SERVICE_UNKNOWN) {
       g_debug("XDG desktop portal unavailable: %s", error->message);
-      return false;
+      return FALSE;
     }
 
     if (error->domain == G_DBUS_ERROR &&
         error->code == G_DBUS_ERROR_UNKNOWN_METHOD) {
       g_debug("XDG desktop portal settings unavailable: %s", error->message);
-      return false;
+      return FALSE;
     }
 
     g_critical("Failed to read XDG desktop portal settings: %s",
                error->message);
-    return false;
+    return FALSE;
   }
 
   g_autoptr(GVariant) child = nullptr;
   g_variant_get(value, "(v)", &child);
   g_variant_get(child, "v", out);
 
-  return true;
+  return TRUE;
 }
 
 static void settings_portal_changed_cb(GDBusProxy* proxy,
@@ -282,7 +282,7 @@ gboolean fl_settings_portal_start(FlSettingsPortal* self, GError** error) {
       kPortalPath, kPortalSettings, nullptr, error);
 
   if (self->dbus_proxy == nullptr) {
-    return false;
+    return FALSE;
   }
 
   for (const FlSetting setting : kAllSettings) {
