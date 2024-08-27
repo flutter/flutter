@@ -609,8 +609,9 @@ static gboolean render_cb(FlView* self, GdkGLContext* context) {
   int width = gtk_widget_get_allocated_width(GTK_WIDGET(self->gl_area));
   int height = gtk_widget_get_allocated_height(GTK_WIDGET(self->gl_area));
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self->gl_area));
-  fl_renderer_render(FL_RENDERER(self->renderer), width * scale_factor,
-                     height * scale_factor, self->background_color);
+  fl_renderer_render(FL_RENDERER(self->renderer), self->view_id,
+                     width * scale_factor, height * scale_factor,
+                     self->background_color);
 
   return TRUE;
 }
