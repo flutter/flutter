@@ -464,7 +464,7 @@ class AlertDialog extends StatelessWidget {
     Color? surfaceTintColor,
     String? semanticLabel,
     EdgeInsets insetPadding,
-    Clip clipBehavior,
+    Clip? clipBehavior,
     ShapeBorder? shape,
     AlignmentGeometry? alignment,
     bool scrollable,
