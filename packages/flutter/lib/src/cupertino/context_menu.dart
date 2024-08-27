@@ -1399,7 +1399,7 @@ class _ContextMenuSheetState extends State<_ContextMenuSheet> {
   late final ScrollController _controller;
   static const double _kMenuWidth = 250.0;
   // Eyeballed on a context menu on an iOS 15 simulator running iOS 17.5.
-  static const double _kScrollbarMainAxisMargin = 10.0;
+  static const double _kScrollbarMainAxisMargin = 13.0;
 
   @override
   void initState() {
