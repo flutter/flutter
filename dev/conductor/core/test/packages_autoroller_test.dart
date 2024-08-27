@@ -607,8 +607,8 @@ void main() {
 ''', ctx);
       expect(result, isA<NonLockfileChanges>());
       result = result as NonLockfileChanges;
-      expect(result.nonLockfileChanges, hasLength(1));
-      expect(result.nonLockfileChanges.single, pathToZip);
+      expect(result.changes, hasLength(1));
+      expect(result.changes.single, pathToZip);
     });
 
     test('if it contains a line not matching the regex returns MalformedLine', () {

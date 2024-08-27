@@ -60,9 +60,9 @@ final class OnlyLockfileChanges implements CheckoutStatePostGradleRegeneration {
 /// and because the packages_autoroller can have its PRs merged without a
 /// human review, we are conservative about what changes we commit.
 final class NonLockfileChanges implements CheckoutStatePostGradleRegeneration {
-  const NonLockfileChanges(this.nonLockfileChanges);
+  const NonLockfileChanges(this.changes);
 
-  final List<String> nonLockfileChanges;
+  final List<String> changes;
 }
 
 /// A line in the output of `git status` does not match the expected pattern;
