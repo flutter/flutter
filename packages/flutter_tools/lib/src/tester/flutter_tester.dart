@@ -51,11 +51,13 @@ class FlutterTesterDevice extends Device {
     required super.logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) : _processManager = processManager,
        _flutterVersion = flutterVersion,
        _logger = logger,
        _fileSystem = fileSystem,
-        _artifacts = artifacts,
+      _artifacts = artifacts,
+      _nativeAssetsBuilder = nativeAssetsBuilder,
        super(
         platformType: null,
         category: null,
@@ -67,6 +69,7 @@ class FlutterTesterDevice extends Device {
   final Logger _logger;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
+  final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
 
   Process? _process;
   final DevicePortForwarder _portForwarder = const NoOpDevicePortForwarder();
@@ -186,8 +189,8 @@ class FlutterTesterDevice extends Device {
       _process = await _processManager.start(command,
         environment: <String, String>{
           'FLUTTER_TEST': 'true',
-          if (globals.platform.isWindows)
-            'PATH': windowsPathWithNativeAssetsBuildDirectory(project, globals.platform),
+          if (globals.platform.isWindows && _nativeAssetsBuilder != null)
+            'PATH': _nativeAssetsBuilder.windowsPathWithBuildDirectory(project, globals.platform),
         },
       );
       if (!debuggingOptions.debuggingEnabled) {
@@ -262,13 +265,15 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
     required ProcessManager processManager,
     required Logger logger,
     required FlutterVersion flutterVersion,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) : _testerDevice = FlutterTesterDevice(
         kTesterDeviceId,
         fileSystem: fileSystem,
         artifacts: artifacts,
         processManager: processManager,
         logger: logger,
-          flutterVersion: flutterVersion,
+        flutterVersion: flutterVersion,
+        nativeAssetsBuilder: nativeAssetsBuilder,
       ),
        super('Flutter tester');
 

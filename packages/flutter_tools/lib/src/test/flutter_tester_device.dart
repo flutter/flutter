@@ -22,7 +22,6 @@ import '../native_assets.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../vmservice.dart';
-
 import 'font_config_manager.dart';
 import 'test_device.dart';
 
@@ -44,6 +43,7 @@ class FlutterTesterTestDevice extends TestDevice {
     required this.icudtlPath,
     required this.compileExpression,
     required this.fontConfigManager,
+    required this.nativeAssetsBuilder,
   })  : assert(!debuggingOptions.startPaused || enableVmService),
         _gotProcessVmServiceUri = enableVmService
             ? Completer<Uri?>() : (Completer<Uri?>()..complete());
@@ -64,6 +64,7 @@ class FlutterTesterTestDevice extends TestDevice {
   final String? icudtlPath;
   final CompileExpression? compileExpression;
   final FontConfigManager fontConfigManager;
+  final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
 
   late final DartDevelopmentService _ddsLauncher = DartDevelopmentService(logger: logger);
   final Completer<Uri?> _gotProcessVmServiceUri;
@@ -147,8 +148,8 @@ class FlutterTesterTestDevice extends TestDevice {
         'FLUTTER_TEST_IMPELLER': 'true',
       if (testAssetDirectory != null)
         'UNIT_TEST_ASSETS': testAssetDirectory!,
-      if (platform.isWindows && flutterProject != null)
-        'PATH': windowsPathWithNativeAssetsBuildDirectory(flutterProject!, platform),
+      if (platform.isWindows && nativeAssetsBuilder != null && flutterProject != null)
+        'PATH': nativeAssetsBuilder!.windowsPathWithBuildDirectory(flutterProject!, platform),
     };
 
     logger.printTrace('test $id: Starting flutter_tester process with command=$command, environment=$environment');

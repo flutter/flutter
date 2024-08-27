@@ -129,7 +129,7 @@ void main() {
         'SERVER_PORT': '0',
         'APP_NAME': '',
         'FLUTTER_TEST_IMPELLER': 'true',
-        'PATH': windowsPathWithNativeAssetsBuildDirectory(project, platform),
+        'PATH': device.nativeAssetsBuilder!.windowsPathWithBuildDirectory(project, platform),
       }));
 
     await device.start('example.dill');
@@ -327,6 +327,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     icudtlPath: null,
     compileExpression: null,
     fontConfigManager: FontConfigManager(),
+    nativeAssetsBuilder: FakeNativeAssetsBuilder(),
   );
 
   @override
@@ -350,4 +351,11 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
 class FakeHttpServer extends Fake implements HttpServer {
   @override
   int get port => 0;
+}
+
+class FakeNativeAssetsBuilder extends Fake implements TestCompilerNativeAssetsBuilder {
+  @override
+  String windowsPathWithBuildDirectory(FlutterProject project, Platform platform) {
+    return r'C:\native_assets\path;C:\other\path';
+  }
 }

@@ -591,6 +591,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         shardIndex: shardIndex,
         totalShards: totalShards,
         testTimeRecorder: testTimeRecorder,
+        nativeAssetsBuilder: nativeAssetsBuilder,
       );
     } else {
       result = await testRunner.runTests(
