@@ -1447,7 +1447,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// set the [delegatedTransition] based on the provided [BuildContext]. This
   /// context will be from the PREVIOUS route, so do not use logic that requires
   /// the [BuildContext] of the current route.
-  void setDelegatedTransition(BuildContext context) => null;
+  void setDelegatedTransition(BuildContext context) => {};
 
   /// Wraps the transitions of the route with a delegated transition received
   /// from a route being pushed on top of the current route.

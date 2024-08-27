@@ -61,16 +61,5 @@ void main() {
     expect(find.text('Home'), findsOneWidget);
     expect(find.text('Cupertino Route'), findsNothing);
     expect(find.text('Zoom Route'), findsNothing);
-
-    // await tester.tap(find.text('Crazy Vertical Transition'));
-
-    // print(tester.getTopLeft(find.text('Cupertino Route')).dy);
-
-    // await tester.pumpAndSettle();
-
-    // print(tester.getTopLeft(find.text('Cupertino Route')).dy);
-    // print(tester.getTopLeft(find.text('Vertical Route')).dy);
-
-    // print(find.byType(MyPageScaffold));
   });
 }
