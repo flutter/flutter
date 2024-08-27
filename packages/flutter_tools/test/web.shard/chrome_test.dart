@@ -774,6 +774,29 @@ void main() {
     expect(logger.errorText, isEmpty);
   });
 
+  test('can recover if getTabs throws an HttpException', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FakeChromeConnection chromeConnection = FakeChromeConnection(
+      maxRetries: 4,
+      exception: io.HttpException(
+        'Connection closed before full header was received',
+        uri: Uri.parse('http://localhost:52097/json'),
+      ),
+    );
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: findChromeExecutable,
+      logger: logger,
+    );
+    final FakeProcess process = FakeProcess();
+    final Chromium chrome = Chromium(0, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger);
+    expect(await chromiumLauncher.connect(chrome, false), equals(chrome));
+    expect(logger.errorText, isEmpty);
+  });
+
   test('exits if getTabs throws a connection exception consistently', () async {
     final BufferLogger logger = BufferLogger.test();
     final FakeChromeConnection chromeConnection = FakeChromeConnection();
@@ -846,11 +869,19 @@ class FakeChromeConnection extends Fake implements ChromeConnection {
   /// Create a connection that throws a connection exception on first
   /// [maxRetries] calls to [getTabs].
   /// If [maxRetries] is `null`, [getTabs] calls never succeed.
-  FakeChromeConnection({this.maxRetries}): _retries = 0;
+  FakeChromeConnection({this.maxRetries, Exception? exception}) : _retries = 0 {
+    this.exception = exception ??
+        ConnectionException(
+          formatException: const FormatException('incorrect format'),
+          responseStatus: 'OK,',
+          responseBody: '<html> ...',
+        );
+  }
 
   final List<ChromeTab> tabs = <ChromeTab>[];
   final int? maxRetries;
   int _retries;
+  late final Exception exception;
 
   @override
   Future<ChromeTab?> getTab(bool Function(ChromeTab tab) accept, {Duration? retryFor}) async {
@@ -861,10 +892,7 @@ class FakeChromeConnection extends Fake implements ChromeConnection {
   Future<List<ChromeTab>> getTabs({Duration? retryFor}) async {
     _retries ++;
     if (maxRetries == null || _retries < maxRetries!) {
-      throw ConnectionException(
-        formatException: const FormatException('incorrect format'),
-        responseStatus: 'OK,',
-        responseBody: '<html> ...');
+      throw exception;
     }
     return tabs;
   }

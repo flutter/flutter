@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
+import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -490,6 +491,10 @@ class Chromium {
         if (i == attempts) {
           rethrow;
         }
+      } on IOException {
+        if (i == attempts) {
+          rethrow;
+        }
       }
       await Future<void>.delayed(const Duration(milliseconds: 25));
     }
@@ -509,7 +514,7 @@ class Chromium {
     if (_hasValidChromeConnection) {
       ChromeTab? tab;
       try {
-        tab = await chromeConnection.getTab(
+        tab = await getChromeTabGuarded(chromeConnection,
             (_) => true, retryFor: const Duration(seconds: 1));
       } on SocketException {
         // Chrome is not responding to the debug protocol and probably has
@@ -551,4 +556,14 @@ class Chromium {
       });
     });
   }
+}
+
+// TODO(andrewkolos): Remove when https://github.com/dart-lang/sdk/issues/56566
+//  is fixed.
+Future<ChromeTab?> getChromeTabGuarded(
+  ChromeConnection chromeConnection,
+  bool Function(ChromeTab tab) accept, {
+  Duration? retryFor,
+}) {
+  return asyncGuard(() => chromeConnection.getTab(accept, retryFor: retryFor));
 }
