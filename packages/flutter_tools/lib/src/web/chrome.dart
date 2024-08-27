@@ -215,6 +215,12 @@ class ChromiumLauncher {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
+
+      // Remove the search engine choice screen. It's irrelevant for app
+      // debugging purposes.
+      // See: https://github.com/flutter/flutter/issues/153928
+      '--disable-search-engine-choice-screen',
+
       if (headless)
         ...<String>[
           '--headless',
