@@ -39,7 +39,7 @@ TEST(FlRendererTest, BackgroundColor) {
   fl_renderer_present_layers(FL_RENDERER(renderer), 0, layers, 1);
   GdkRGBA background_color = {
       .red = 0.2, .green = 0.3, .blue = 0.4, .alpha = 0.5};
-  fl_renderer_render(FL_RENDERER(renderer), 1024, 1024, &background_color);
+  fl_renderer_render(FL_RENDERER(renderer), 0, 1024, 1024, &background_color);
 }
 
 TEST(FlRendererTest, RestoresGLState) {
@@ -76,7 +76,8 @@ TEST(FlRendererTest, RestoresGLState) {
                              layers.size());
   GdkRGBA background_color = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
-  fl_renderer_render(FL_RENDERER(renderer), kWidth, kHeight, &background_color);
+  fl_renderer_render(FL_RENDERER(renderer), 0, kWidth, kHeight,
+                     &background_color);
 
   GLuint texture_2d_binding;
   glGetIntegerv(GL_TEXTURE_BINDING_2D,
@@ -131,7 +132,7 @@ TEST(FlRendererTest, BlitFramebuffer) {
   fl_renderer_present_layers(FL_RENDERER(renderer), 0, layers, 1);
   GdkRGBA background_color = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
-  fl_renderer_render(FL_RENDERER(renderer), 1024, 1024, &background_color);
+  fl_renderer_render(FL_RENDERER(renderer), 0, 1024, 1024, &background_color);
 }
 
 TEST(FlRendererTest, BlitFramebufferExtension) {
@@ -166,7 +167,7 @@ TEST(FlRendererTest, BlitFramebufferExtension) {
   fl_renderer_present_layers(FL_RENDERER(renderer), 0, layers, 1);
   GdkRGBA background_color = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
-  fl_renderer_render(FL_RENDERER(renderer), 1024, 1024, &background_color);
+  fl_renderer_render(FL_RENDERER(renderer), 0, 1024, 1024, &background_color);
 }
 
 TEST(FlRendererTest, NoBlitFramebuffer) {
@@ -196,7 +197,7 @@ TEST(FlRendererTest, NoBlitFramebuffer) {
   fl_renderer_present_layers(FL_RENDERER(renderer), 0, layers, 1);
   GdkRGBA background_color = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
-  fl_renderer_render(FL_RENDERER(renderer), 1024, 1024, &background_color);
+  fl_renderer_render(FL_RENDERER(renderer), 0, 1024, 1024, &background_color);
 }
 
 TEST(FlRendererTest, BlitFramebufferNvidia) {
@@ -227,5 +228,5 @@ TEST(FlRendererTest, BlitFramebufferNvidia) {
   fl_renderer_present_layers(FL_RENDERER(renderer), 0, layers, 1);
   GdkRGBA background_color = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
-  fl_renderer_render(FL_RENDERER(renderer), 1024, 1024, &background_color);
+  fl_renderer_render(FL_RENDERER(renderer), 0, 1024, 1024, &background_color);
 }
