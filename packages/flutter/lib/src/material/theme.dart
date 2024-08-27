@@ -104,6 +104,12 @@ class Theme extends StatelessWidget {
   ///   );
   /// }
   /// ```
+  ///
+  /// See also:
+  /// * [ColorScheme.of], a convenience method that returns [ThemeData.colorScheme]
+  ///   from the closest [Theme] ancestor. (equivalent to `Theme.of(context).colorScheme`).
+  /// * [TextTheme.of], a convenience method that returns [ThemeData.textTheme]
+  ///  from the closest [Theme] ancestor. (equivalent to `Theme.of(context).textTheme`).
   static ThemeData of(BuildContext context) {
     final _InheritedTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
     final MaterialLocalizations? localizations = Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
