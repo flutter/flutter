@@ -15,7 +15,6 @@ import 'package:material_color_utilities/material_color_utilities.dart';
 
 import 'colors.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 
 /// The algorithm used to construct a [ColorScheme] in [ColorScheme.fromSeed].
 ///
