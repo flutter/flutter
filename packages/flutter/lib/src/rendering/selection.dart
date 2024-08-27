@@ -114,22 +114,12 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   SelectionResult dispatchSelectionEvent(SelectionEvent event);
 }
 
-/// This class stores the information of an active selection under
+/// This class stores the information of the selection under
 /// a [Selectable] or [SelectionHandler].
 ///
 /// The [SelectedContentRange]s for a given [Selectable] or
 /// [SelectionHandler] can be retrieved by calling
 /// [SelectionHandler.getSelections].
-///
-/// [SelectionArea] and [SelectableRegion] provide access to the
-/// [SelectedContentRange]s that represent their active selection
-/// through the [SelectionListener.onSelectionChanged] callback.
-///
-/// See also:
-///
-///   * [SelectionListener], which provides selection updates in
-///   the form of [SelectedContentRange]s for the subtree it wraps,
-///   contained under a [SelectionArea] or [SelectableRegion].
 @immutable
 class SelectedContentRange {
   /// Creates a [SelectedContentRange] with the given values.
@@ -783,8 +773,9 @@ enum SelectionStatus {
 /// This object is created by users of the [SelectionListenerSelectionChangedCallback] callback.
 ///
 /// This includes information such as the status of the selection
-/// indicating if it is collapsed or uncollapsed, the [SelectedContentRange]s
-/// that represent the selection, and whether the selection is ongoing.
+/// indicating if it is collapsed or uncollapsed, the start and end offsets
+/// of the selection local to the [SelectionListener] that reports this object,
+/// and whether the selection is ongoing.
 ///
 /// See also:
 ///
