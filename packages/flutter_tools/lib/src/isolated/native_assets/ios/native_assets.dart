@@ -234,7 +234,7 @@ final KernelAssetPath kernelAssetPath;
 /// The install name is set so that it matches with the place it will
 /// be bundled in the final app. Install names that are referenced in dependent
 /// libraries are updated to match the new install name, so that the referenced
-/// library can be found the dynamic linker.
+/// library can be found by the dynamic linker.
 ///
 /// Code signing is also done here, so that it doesn't have to be done in
 /// in xcode_backend.dart.
