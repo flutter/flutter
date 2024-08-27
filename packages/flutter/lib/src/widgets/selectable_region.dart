@@ -3186,12 +3186,48 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
     return result;
   }
 
+  // Expects that their is an active selection.
+  bool _determineSelectionForward(List<SelectedContentRange> ranges) {
+    ({int index, SelectedContentRange range})? firstRange;
+    ({int index, SelectedContentRange range})? lastRange;
+
+    // Find the first range and last range with a non-empty selection.
+    for (int index = 0; index < ranges.length; index++) {
+      final SelectedContentRange range = ranges[index];
+      if (range.startOffset == -1 && range.endOffset == -1) {
+        if (firstRange == null) {
+          continue;
+        }
+        lastRange ??= (index: index - 1, range: ranges[index - 1]);
+        break;
+      }
+      firstRange ??= (index: index, range: range);
+      if (index == ranges.length - 1) {
+        lastRange ??= (index: index, range: range);
+      }
+    }
+
+    assert(firstRange != null && lastRange != null);
+    if (firstRange!.index == lastRange!.index) {
+      final SelectedContentRange range = firstRange.range;
+      return range.endOffset >= range.startOffset;
+    }
+
+    final bool firstRangeForward = firstRange.range.endOffset >= firstRange.range.startOffset;
+    final bool lastRangeForward = lastRange.range.endOffset >= lastRange.range.startOffset;
+    return firstRangeForward && lastRangeForward;
+  }
+
   ({int startOffset, int endOffset}) _calculateGlobalOffsets(List<SelectedContentRange> ranges) {
     int startOffset = 0;
     int endOffset = 0;
     Selectable? startingSelectable;
-    // Determining forward selection may be innacurate if currentSelectionStartIndex == currentSelectionEndIndex.
-    final bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
+    bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
+    if (currentSelectionEndIndex == currentSelectionStartIndex) {
+      // Determining forward selection may be innacurate if currentSelectionStartIndex == currentSelectionEndIndex.
+      // Attempt to determine by iterating through the ranges.
+      forwardSelection = _determineSelectionForward(selectables[currentSelectionStartIndex].getSelections());
+    }
     for (int index = 0; index < selectables.length; index++) {
       final Selectable selectable = selectables[index];
       final List<SelectedContentRange> ranges = selectable.getSelections();
