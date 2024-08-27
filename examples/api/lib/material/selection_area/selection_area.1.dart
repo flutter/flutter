@@ -59,16 +59,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _initData() {
     const String bulletListTitle = 'This is some bulleted list:\n';
-    const String textAfterBulletList = '\nSome text after the bulleted list.';
-    const String emphasizedText = ' This text is emphasized.';
-    const String endOfBulletTree = ' This is the end of the text widget.';
     final List<String> bullets = <String>[
       for (int i = 1; i <= 7; i += 1)
         '• Bullet $i'
     ];
-    final String flattenedBulletedList = bulletListTitle + bullets.join();
+    const String textAfterBulletList = '\nSome text after the bulleted list.';
+    const String emphasizedText = ' This text is emphasized.';
+    const String endOfBulletTree = ' This is the end of the text widget.';
+
     int currentOffset = 0;
-    dataSourceMap[(startOffset: 0, endOffset: flattenedBulletedList.length + textAfterBulletList.length + emphasizedText.length + endOfBulletTree.length)] = TextSpan(
+    dataSourceMap[(startOffset: 0, endOffset: bulletListTitle.length + bullets.join().length + textAfterBulletList.length + emphasizedText.length + endOfBulletTree.length)] = TextSpan(
       text: bulletListTitle,
       children: <InlineSpan>[
         WidgetSpan(
@@ -102,11 +102,13 @@ class _MyHomePageState extends State<MyHomePage> {
       bulletSourceMap[(startOffset: currentOffset, endOffset: currentOffset + bullet.length)] = TextSpan(text: bullet);
       currentOffset += bullet.length;
     }
+
     currentOffset += textAfterBulletList.length;
     emphasizedTextMap[(startOffset: currentOffset, endOffset: currentOffset + emphasizedText.length)] = const TextSpan(text: emphasizedText, style: TextStyle(fontWeight: FontWeight.bold));
     widgetSpanMaps[currentOffset] = emphasizedTextMap;
     currentOffset += emphasizedText.length;
     currentOffset += endOfBulletTree.length;
+
     const TextSpan secondTextParagraph = TextSpan(
       text: 'This is some text in a text widget.',
       children: <InlineSpan>[TextSpan(text: ' This is some more text in the same text widget.')],
@@ -115,6 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
     currentOffset += secondTextParagraph.toPlainText(includeSemanticsLabels: false).length;
     const TextSpan thirdTextParagraph = TextSpan(text: 'This is some text in another text widget.');
     dataSourceMap[(startOffset: currentOffset, endOffset: currentOffset + thirdTextParagraph.toPlainText(includeSemanticsLabels: false).length)] = thirdTextParagraph;
+
     // Save the origin data so we can revert our changes.
     originSourceData = <_GlobalSpanRange, TextSpan>{};
     for (final MapEntry<_GlobalSpanRange, TextSpan> entry in dataSourceMap.entries) {
