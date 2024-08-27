@@ -129,7 +129,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
     );
   }
 
-  /// Sets the correct delegatedTransition depending on the theme.
+  @override
   void setDelegatedTransition(BuildContext context) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
     final TargetPlatform platform = Theme.of(context).platform;
