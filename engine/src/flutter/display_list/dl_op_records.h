@@ -790,6 +790,7 @@ struct DrawImageRectOp final : DrawOpBase {
 #define DEFINE_DRAW_IMAGE_NINE_OP(name, render_with_attributes)            \
   struct name##Op final : DrawOpBase {                                     \
     static constexpr auto kType = DisplayListOpType::k##name;              \
+    static constexpr uint32_t kDepthInc = 9;                               \
                                                                            \
     name##Op(const sk_sp<DlImage>& image,                                  \
              const SkIRect& center,                                        \
