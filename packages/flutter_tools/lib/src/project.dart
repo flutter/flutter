@@ -461,7 +461,7 @@ class AndroidProject extends FlutterProjectPlatform {
   // User facing link that describes instructions for downloading
   // the latest version of Android Studio.
   static const String installAndroidStudioUrl =
-    'https://developer.android.com/build/releases/past-releases';
+    'https://developer.android.com/studio/install';
 
   /// The parent of this project.
   final FlutterProject parent;
