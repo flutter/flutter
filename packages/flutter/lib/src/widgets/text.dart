@@ -677,7 +677,6 @@ class Text extends StatelessWidget {
       result = MouseRegion(
         cursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
         child: _SelectableTextContainer(
-          selectableId: key,
           textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
           textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
           locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
@@ -753,7 +752,6 @@ class Text extends StatelessWidget {
 
 class _SelectableTextContainer extends StatefulWidget {
   const _SelectableTextContainer({
-    this.selectableId,
     required this.text,
     required this.textAlign,
     this.textDirection,
@@ -768,7 +766,6 @@ class _SelectableTextContainer extends StatefulWidget {
     required this.selectionColor,
   });
 
-  final Object? selectableId;
   final TextSpan text;
   final TextAlign textAlign;
   final TextDirection? textDirection;
@@ -793,22 +790,7 @@ class _SelectableTextContainerState extends State<_SelectableTextContainer> {
   @override
   void initState() {
     super.initState();
-    _selectionDelegate = _SelectableTextContainerDelegate(
-      _textKey,
-      textState: widget.text,
-      selectableId: widget.selectableId,
-    );
-  }
-
-  @override
-  void didUpdateWidget(covariant _SelectableTextContainer oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.text != oldWidget.text) {
-      _selectionDelegate.textState = widget.text;
-    }
-    if (widget.selectableId != oldWidget.selectableId) {
-      _selectionDelegate.selectableId = widget.selectableId;
-    }
+    _selectionDelegate = _SelectableTextContainerDelegate(_textKey);
   }
 
   @override
@@ -901,14 +883,8 @@ class _RichText extends StatelessWidget {
 const double _kSelectableVerticalComparingThreshold = 3.0;
 
 class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate {
-  _SelectableTextContainerDelegate(
-    GlobalKey textKey, {
-    required this.textState,
-    this.selectableId,
-  }) : _textKey = textKey;
+  _SelectableTextContainerDelegate(GlobalKey textKey) : _textKey = textKey;
 
-  TextSpan textState;
-  Object? selectableId;
   final GlobalKey _textKey;
   RenderParagraph get paragraph => _textKey.currentContext!.findRenderObject()! as RenderParagraph;
 
