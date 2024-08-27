@@ -239,6 +239,10 @@ class CupertinoContextMenu extends StatefulWidget {
   static final double animationOpensAt =
       _previewLongPressTimeout.inMilliseconds / _animationDuration;
 
+  /// The background color of a [CupertinoContextMenuAction] and a
+  /// [CupertinoContextMenu] sheet.
+  static const Color kBackgroundColor = _kBackgroundColor;
+
   /// A function that returns a widget to be used alternatively from [child].
   ///
   /// The widget returned by the function will be shown at all times: when the
@@ -1413,7 +1417,7 @@ class _ContextMenuSheetState extends State<_ContextMenuSheet> {
         child: ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(13.0)),
           child: ColoredBox(
-            color: CupertinoDynamicColor.resolve(_kBackgroundColor, context),
+            color: CupertinoDynamicColor.resolve(CupertinoContextMenu.kBackgroundColor, context),
             child: ScrollConfiguration(
               behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
               child: CupertinoScrollbar(
