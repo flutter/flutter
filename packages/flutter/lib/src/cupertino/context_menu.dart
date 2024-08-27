@@ -1375,26 +1375,34 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
 
 // The menu that displays when CupertinoContextMenu is open. It consists of a
 // list of actions that are typically CupertinoContextMenuActions.
-class _ContextMenuSheet extends StatelessWidget {
+class _ContextMenuSheet extends StatefulWidget {
   _ContextMenuSheet({
     super.key,
     required this.actions,
-    required _ContextMenuLocation contextMenuLocation,
-    required Orientation orientation,
-  }) : assert(actions.isNotEmpty),
-       _contextMenuLocation = contextMenuLocation,
-       _orientation = orientation;
+    required this.contextMenuLocation,
+    required this.orientation,
+  }) : assert(actions.isNotEmpty);
 
   final List<Widget> actions;
-  final _ContextMenuLocation _contextMenuLocation;
-  final Orientation _orientation;
-  // Link the scrollbar to the scrollview by providing both the same scroll
-  // controller.
-  final ScrollController _controller = ScrollController();
+  final _ContextMenuLocation contextMenuLocation;
+  final Orientation orientation;
 
+  @override
+  State<_ContextMenuSheet> createState() => _ContextMenuSheetState();
+}
+
+class _ContextMenuSheetState extends State<_ContextMenuSheet> {
+  late final ScrollController _controller;
   static const double _kMenuWidth = 250.0;
   // Eyeballed on a context menu on an iOS 15 simulator running iOS 17.5.
   static const double _kScrollbarMainAxisMargin = 10.0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Link the scrollbar to the scrollview by providing both the same scroll controller.
+    _controller = ScrollController();
+  }
 
   // Get the children, whose order depends on orientation and
   // contextMenuLocation.
@@ -1416,8 +1424,8 @@ class _ContextMenuSheet extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      actions.first,
-                      for (final Widget action in actions.skip(1))
+                      widget.actions.first,
+                      for (final Widget action in widget.actions.skip(1))
                         DecoratedBox(
                           decoration: BoxDecoration(
                             border: Border(
@@ -1443,12 +1451,18 @@ class _ContextMenuSheet extends StatelessWidget {
       ),
     );
 
-    return switch (_contextMenuLocation) {
-      _ContextMenuLocation.center when _orientation == Orientation.portrait => <Widget>[const Spacer(), menu, const Spacer()],
+    return switch (widget.contextMenuLocation) {
+      _ContextMenuLocation.center when widget.orientation == Orientation.portrait => <Widget>[const Spacer(), menu, const Spacer()],
       _ContextMenuLocation.center => <Widget>[menu, const Spacer()],
       _ContextMenuLocation.right  => <Widget>[const Spacer(), menu],
       _ContextMenuLocation.left   => <Widget>[menu, const Spacer()],
     };
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
