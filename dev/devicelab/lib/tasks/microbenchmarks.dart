@@ -30,6 +30,18 @@ TaskFunction createMicrobenchmarkTask({
         final Directory appDir = dir(
             path.join(flutterDirectory.path, 'dev/benchmarks/microbenchmarks'));
         final Process flutterProcess = await inDirectory(appDir, () async {
+          section('Uninstall microbenchmarks app ($benchmarkPath)');
+
+          await flutter(
+            'install',
+            options: <String>[
+              '-v',
+              '--uninstall-only',
+              '-d',
+              device.deviceId,
+            ],
+          );
+
           final List<String> options = <String>[
             '-v',
             // --release doesn't work on iOS due to code signing issues
