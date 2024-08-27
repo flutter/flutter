@@ -19,7 +19,7 @@
 namespace impeller {
 
 /// Approximately the same size as the max frames in flight.
-static const constexpr size_t kHostBufferArenaSize = 3u;
+static const constexpr size_t kHostBufferArenaSize = 4u;
 
 /// The host buffer class manages one more 1024 Kb blocks of device buffer
 /// allocations.
