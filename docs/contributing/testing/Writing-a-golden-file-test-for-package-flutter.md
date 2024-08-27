@@ -57,20 +57,20 @@ Notice, Gold may wrongly attribute blame for image changes on the dashboard. Pos
   differences are clearly called out.
 -->
 
-Writing a _new_ golden file test is an involved process, particularly if the
-_test suite_ (sometimes called "task" or "shard") is not already configured for
-golden file testing, and missing a step can result in a broken build or a
-failing test.
+Writing a _new_ golden file test if the _test suite_ (sometimes called "task"
+or "shard") is not already configured for golden file testing is an involved
+process, and missing a step can result in a broken build or a failing test.
 
 The process involves:
 
-1. (Potentially) [Adding or configuring a `.ci.yaml` task](#add-or-configure-a-ciyaml-task).
+1. [Adding or configuring a `.ci.yaml` task](#add-or-configure-a-ciyaml-task).
 1. [Writing and submitting the test](#writing-and-submitting-the-test).
-1. (Potentially) [Adding a known task name to the `flutter-gold` check](#adding-a-known-task-name-to-the-flutter-gold-check).
+1. [Adding a known task name to the `flutter-gold` check](#adding-a-known-task-name-to-the-flutter-gold-check).
 
 ### Add or configure a `.ci.yaml` task
 
-_If you are editing an existing test or test suite, you can skip this step._
+_If you are editing an existing test or test suite that already includes the
+`goldctl` dependency (as seen below), you can skip this step._
 
 Every test suite that runs tests (golden file tests included) needs to be
 configured in the top-level [`.ci.yaml` file](../../../.ci.yaml), which contains
@@ -110,14 +110,15 @@ If a new dependency was added, see [adding a known task name to the `flutter-gol
 
 ### Adding a known task name to the `flutter-gold` check
 
-The way `flutter-gold` works, roughly, is that on a schedule, every open
-(non-draft) PR across `flutter/flutter` and `flutter/engine` is checked for
-tasks that are _known_ to run golden file tests, and if they are present, the
-check asks (via a Skia Gold API) if there were any untriaged images generated,
-showing a :question: if so, or a :white_check_mark: if not.
+The `flutter-gold` check is a cron job that is scheduled to run (every 5
+minutes) through every open (non-draft) PR across `flutter/flutter` and
+`flutter/engine` is checked for tasks that are _known_ to run golden file tests,
+and if they are present, the check asks (via a Skia Gold API) if there were any
+untriaged images generated, showing a :question: if so, or a :white_check_mark:
+if not.
 
 This list is manually curated in the [`flutter/cocoon` codebase](https://github.com/flutter/cocoon/blob/65e89508cad5b6f9622ee072a1178913fed5001e/app_dart/lib/src/request_handlers/push_gold_status_to_github.dart#L123-L144)
-and need to be updated when new tasks are added or removed.
+and needs to be updated when new tasks are added or removed.
 
 See [#149544](https://github.com/flutter/flutter/pull/149544) for an example of adding a new task to the list
 and [#143863](https://github.com/flutter/flutter/issues/143863#issuecomment-2310898513) for a discussion on the topic.
@@ -131,7 +132,10 @@ not running on some PRs (and build breakages as a result).
 > These instructions are specific to writing golden file tests for
 > `package:flutter`. If you are writing integration tests, or tests in another
 > repository (such as `flutter/engine`) the specifics will be different; consult
-> relevant documentation and/or team members about the process.
+> relevant documentation and/or team members about the process. Examples:
+>
+> - [`engine > testing > skia_gold_client > README.md`](https://github.com/flutter/engine/blob/main/testing/skia_gold_client/README.md)
+> - [`engine > impeller > golden_tests > README.md`](https://github.com/flutter/engine/blob/main/impeller/golden_tests/README.md)
 
 Write your test as a normal test, using `testWidgets` and `await tester.pumpWidget` and so on.
 
