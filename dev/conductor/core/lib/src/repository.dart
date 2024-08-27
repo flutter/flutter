@@ -601,6 +601,13 @@ class FrameworkRepository extends Repository {
     ]);
   }
 
+  Future<io.ProcessResult> runDart(List<String> args) async {
+    return processManager.run(<String>[
+      fileSystem.path.join((await checkoutDirectory).path, 'bin', 'dart'),
+      ...args,
+    ]);
+  }
+
   Future<io.ProcessResult> runFlutter(List<String> args) async {
     await _ensureToolReady();
     return processManager.run(<String>[
