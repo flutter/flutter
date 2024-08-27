@@ -91,6 +91,9 @@ TEST_P(HostBufferTest, ResetIncrementsFrameCounter) {
   EXPECT_EQ(buffer->GetStateForTest().current_frame, 2u);
 
   buffer->Reset();
+  EXPECT_EQ(buffer->GetStateForTest().current_frame, 3u);
+
+  buffer->Reset();
   EXPECT_EQ(buffer->GetStateForTest().current_frame, 0u);
 }
 
@@ -131,7 +134,7 @@ TEST_P(HostBufferTest, UnusedBuffersAreDiscardedWhenResetting) {
   EXPECT_EQ(buffer->GetStateForTest().current_frame, 0u);
 
   // Reset until we get back to this frame.
-  for (auto i = 0; i < 3; i++) {
+  for (auto i = 0; i < 4; i++) {
     buffer->Reset();
   }
 
@@ -141,7 +144,7 @@ TEST_P(HostBufferTest, UnusedBuffersAreDiscardedWhenResetting) {
 
   // Now when we reset, the buffer should get dropped.
   // Reset until we get back to this frame.
-  for (auto i = 0; i < 3; i++) {
+  for (auto i = 0; i < 4; i++) {
     buffer->Reset();
   }
 
