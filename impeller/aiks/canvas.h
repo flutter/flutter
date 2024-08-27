@@ -177,6 +177,9 @@ class Canvas {
 
   Picture EndRecordingAsPicture();
 
+  uint64_t GetOpDepth() const { return current_depth_; }
+  uint64_t GetMaxOpDepth() const { return transform_stack_.back().clip_depth; }
+
  protected:
   std::deque<CanvasStackEntry> transform_stack_;
   std::optional<Rect> initial_cull_rect_;
