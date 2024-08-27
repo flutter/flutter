@@ -3215,7 +3215,11 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
 
     final bool firstRangeForward = firstRange.range.endOffset >= firstRange.range.startOffset;
     final bool lastRangeForward = lastRange.range.endOffset >= lastRange.range.startOffset;
-    return firstRangeForward && lastRangeForward;
+    if (firstRangeForward == lastRangeForward) {
+      return firstRangeForward && lastRangeForward;
+    }
+    // Defaults to forward selection.
+    return true;
   }
 
   ({int startOffset, int endOffset}) _calculateGlobalOffsets(List<SelectedContentRange> ranges) {
