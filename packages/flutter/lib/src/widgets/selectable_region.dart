@@ -3191,8 +3191,6 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
     int endOffset = 0;
     Selectable? startingSelectable;
     // Determining forward selection may be innacurate if currentSelectionStartIndex == currentSelectionEndIndex.
-    // This is because the a selectable may have many children selectables, and depending if their is RTL
-    // mixed in with LTR text, there may be backwards selections mixed with forward selections.
     final bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
     for (int index = 0; index < selectables.length; index++) {
       final Selectable selectable = selectables[index];
