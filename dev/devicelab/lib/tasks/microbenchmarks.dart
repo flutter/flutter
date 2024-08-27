@@ -24,6 +24,23 @@ TaskFunction createMicrobenchmarkTask({
     await device.unlock();
     await device.clearLogs();
 
+    final Directory appDir =
+        dir(path.join(flutterDirectory.path, 'dev/benchmarks/microbenchmarks'));
+
+    // Hard-uninstall any prior apps.
+    await inDirectory(appDir, () async {
+      section('Uninstall previous microbenchmarks app');
+      await flutter(
+        'install',
+        options: <String>[
+          '-v',
+          '--uninstall-only',
+          '-d',
+          device.deviceId,
+        ],
+      );
+    });
+
     Future<Map<String, double>> runMicrobench(String benchmarkPath) async {
       Future<Map<String, double>> run() async {
         print('Running $benchmarkPath');
