@@ -435,7 +435,6 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
             Flexible(
               child: Semantics(
                 label: MaterialLocalizations.of(context).selectYearSemanticsLabel,
-                excludeSemantics: true,
                 button: true,
                 container: true,
                 child: SizedBox(
@@ -788,6 +787,8 @@ class _MonthPickerState extends State<_MonthPicker> {
     final Color controlColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.60);
 
     return Semantics(
+      container: true,
+      explicitChildNodes: true,
       child: Column(
         children: <Widget>[
           SizedBox(
