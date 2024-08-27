@@ -3193,11 +3193,10 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
     // Determining forward selection may be innacurate if currentSelectionStartIndex == currentSelectionEndIndex.
     // This is because the a selectable may have many children selectables, and depending if their is RTL
     // mixed in with LTR text, there may be backwards selections mixed with forward selections.
-    bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
+    final bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
     for (int index = 0; index < selectables.length; index++) {
       final Selectable selectable = selectables[index];
       final List<SelectedContentRange> ranges = selectable.getSelections();
-      final int previousStart = startOffset;
       if (ranges.isNotEmpty) {
         for (int rangeIndex = 0; rangeIndex < ranges.length; rangeIndex++) {
           final SelectedContentRange range = ranges[rangeIndex];
@@ -3212,16 +3211,19 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
           final int selectionStartNormalized = min(range.startOffset, range.endOffset);
           final int selectionEndNormalized = max(range.startOffset, range.endOffset);
           if (startingSelectable == null) {
-            startOffset += selectionStartNormalized;
-            endOffset += selectionEndNormalized;
+            startOffset += (selectionStartNormalized - range.contentStart).abs();
+            endOffset = startOffset + (selectionEndNormalized - selectionStartNormalized).abs();
             startingSelectable = selectable;
           } else {
-            endOffset += selectionEndNormalized;
+            endOffset += (selectionEndNormalized - selectionStartNormalized).abs();
           }
         }
       }
     }
-    return (startOffset: forwardSelection ? startOffset : endOffset, endOffset: forwardSelection ? endOffset : startOffset);
+    return (
+      startOffset: forwardSelection ? startOffset : endOffset,
+      endOffset: forwardSelection ? endOffset : startOffset,
+    );
   }
 
   SelectionDetails _getDetails() {
@@ -3232,7 +3234,6 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
       selectionFinalized: selectionIsFinalized,
       globalStartOffset: globalOffsets.startOffset,
       globalEndOffset: globalOffsets.endOffset,
-      ranges: ranges,
     );
   }
 }

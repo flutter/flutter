@@ -35,17 +35,21 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+typedef _GlobalSpanRange = ({int startOffset, int endOffset});
+
 class _MyHomePageState extends State<MyHomePage> {
   final ContextMenuController _menuController = ContextMenuController();
   final GlobalKey<SelectionAreaState> selectionAreaKey = GlobalKey<SelectionAreaState>();
-  final Key _text1Id = UniqueKey();
-  final Key _text2Id = UniqueKey();
-  final Key _text3Id = UniqueKey();
 
-  Map<Key, TextSpan> dataSourceMap = <Key, TextSpan>{};
-  Map<Key, TextSpan> bulletSourceMap = <Key, TextSpan>{};
-  late final Map<Key, TextSpan> originSourceData;
-  late final Map<Key, TextSpan> originBulletSourceData;
+  // The data of the top level TextSpans.
+  Map<_GlobalSpanRange, TextSpan> dataSourceMap = <_GlobalSpanRange, TextSpan>{};
+  // The data of the bulleted list contained within a TextSpan.
+  Map<_GlobalSpanRange, TextSpan> bulletSourceMap = <_GlobalSpanRange, TextSpan>{};
+  Map<_GlobalSpanRange, TextSpan> emphasizedTextMap = <_GlobalSpanRange, TextSpan>{};
+  Map<int, Map<_GlobalSpanRange, TextSpan>> widgetSpanMaps = <int, Map<_GlobalSpanRange, TextSpan>>{};
+  late final Map<_GlobalSpanRange, TextSpan> originSourceData;
+  late final Map<_GlobalSpanRange, TextSpan> originBulletSourceData;
+  late final Map<_GlobalSpanRange, TextSpan> originEmphasizedSourceData;
 
   @override
   void initState() {
@@ -54,63 +58,100 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _initData() {
-    for (int i = 1; i <= 7; i += 1) {
-      final Key currentSelectableId = UniqueKey();
-      bulletSourceMap[currentSelectableId] = TextSpan(text: '• Bullet $i');
-    }
-    dataSourceMap[_text1Id] = TextSpan(
-      text: 'This is some bulleted list:\n',
+    const String bulletListTitle = 'This is some bulleted list:\n';
+    const String textAfterBulletList = '\nSome text after the bulleted list.';
+    const String emphasizedText = ' This text is emphasized.';
+    const String endOfBulletTree = ' This is the end of the text widget.';
+    final List<String> bullets = <String>[ 
+      for (int i = 1; i <= 7; i += 1)
+        '• Bullet $i'
+    ];
+    final String flattenedBulletedList = bulletListTitle + bullets.join();
+    int currentOffset = 0;
+    dataSourceMap[(startOffset: 0, endOffset: flattenedBulletedList.length + textAfterBulletList.length + emphasizedText.length + endOfBulletTree.length)] = TextSpan(
+      text: bulletListTitle,
       children: <InlineSpan>[
         WidgetSpan(
           child: Column(
             children: <Widget>[
-              for (final MapEntry<Key, TextSpan> entry in bulletSourceMap.entries)
+              for (final String bullet in bullets)
                 Padding(
                   padding: const EdgeInsets.only(left: 20.0),
-                  child: Text.rich(
-                    bulletSourceMap[entry.key]!,
-                    key: entry.key,
-                  ),
+                  child: Text(bullet),
                 )
             ],
           ),
         ),
+        const TextSpan(
+          text: textAfterBulletList,
+          children: <InlineSpan>[
+            WidgetSpan(
+              child: Text(
+                emphasizedText,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            TextSpan(text: endOfBulletTree),
+          ],
+        ),
       ],
     );
-    dataSourceMap[_text2Id] = const TextSpan(
+    currentOffset += bulletListTitle.length;
+    widgetSpanMaps[currentOffset] = bulletSourceMap;
+    for (final String bullet in bullets) {
+      bulletSourceMap[(startOffset: currentOffset, endOffset: currentOffset + bullet.length)] = TextSpan(text: bullet);
+      currentOffset += bullet.length;
+    }
+    currentOffset += textAfterBulletList.length;
+    emphasizedTextMap[(startOffset: currentOffset, endOffset: currentOffset + emphasizedText.length)] = const TextSpan(text: emphasizedText, style: TextStyle(fontWeight: FontWeight.bold));
+    widgetSpanMaps[currentOffset] = emphasizedTextMap;
+    currentOffset += emphasizedText.length;
+    currentOffset += endOfBulletTree.length;
+    const TextSpan secondTextParagraph = TextSpan(
       text: 'This is some text in a text widget.',
       children: <InlineSpan>[TextSpan(text: ' This is some more text in the same text widget.')],
     );
-    dataSourceMap[_text3Id] = const TextSpan(text: 'This is some text in another text widget.');
+    dataSourceMap[(startOffset: currentOffset, endOffset: currentOffset + secondTextParagraph.toPlainText(includeSemanticsLabels: false).length)] = secondTextParagraph;
+    currentOffset += secondTextParagraph.toPlainText(includeSemanticsLabels: false).length;
+    const TextSpan thirdTextParagraph = TextSpan(text: 'This is some text in another text widget.');
+    dataSourceMap[(startOffset: currentOffset, endOffset: currentOffset + thirdTextParagraph.toPlainText(includeSemanticsLabels: false).length)] = thirdTextParagraph;
     // Save the origin data so we can revert our changes.
-    originSourceData = <Key, TextSpan>{};
-    originBulletSourceData = <Key, TextSpan>{};
-    for (final MapEntry<Key, TextSpan> entry in dataSourceMap.entries) {
+    originSourceData = <_GlobalSpanRange, TextSpan>{};
+    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in dataSourceMap.entries) {
       originSourceData[entry.key] = entry.value;
     }
-    for (final MapEntry<Key, TextSpan> entry in bulletSourceMap.entries) {
+    originBulletSourceData = <_GlobalSpanRange, TextSpan>{};
+    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in bulletSourceMap.entries) {
       originBulletSourceData[entry.key] = entry.value;
+    }
+    originEmphasizedSourceData = <_GlobalSpanRange, TextSpan>{};
+    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in emphasizedTextMap.entries) {
+      originEmphasizedSourceData[entry.key] = entry.value;
     }
   }
 
   void _colorSelectionRed(
-    List<SelectedContentRange> ranges, {
-    required Map<Key, TextSpan> dataMap,
+    SelectionDetails selectionDetails, {
+    required Map<_GlobalSpanRange, TextSpan> dataMap,
     required bool coloringChildSpan,
   }) {
-    if (ranges.isEmpty) {
-      return;
-    }
-    for (int index = 0; index < ranges.length; index += 1) {
-      final SelectedContentRange contentRange = ranges[index];
-      if (contentRange.selectableId == null || !dataMap.containsKey(contentRange.selectableId)) {
-        // Cannot color range red if a selectable id has not been provided or if the selectableId
-        // is not in the data model.
-        return;
+    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in dataMap.entries) {
+      final _GlobalSpanRange entryGlobalRange = entry.key;
+      final int normalizedStartOffset = min(selectionDetails.globalStartOffset, selectionDetails.globalEndOffset);
+      final int normalizedEndOffset = max(selectionDetails.globalStartOffset, selectionDetails.globalEndOffset);
+      if (normalizedStartOffset > entryGlobalRange.endOffset) {
+        continue;
       }
-      final TextSpan rawSpan = dataMap[contentRange.selectableId]!;
-      final int startOffset = min(contentRange.startOffset, contentRange.endOffset);
-      final int endOffset = max(contentRange.startOffset, contentRange.endOffset);
+      if (normalizedEndOffset < entryGlobalRange.startOffset) {
+        continue;
+      }
+      // The selection details is covering the current entry so let's color the range red.
+      final TextSpan rawSpan = entry.value;
+      // Determine local ranges.
+      final int clampedGlobalStart = normalizedStartOffset < entryGlobalRange.startOffset ? entryGlobalRange.startOffset : normalizedStartOffset;
+      final int clampedGlobalEnd = normalizedEndOffset > entryGlobalRange.endOffset ? entryGlobalRange.endOffset : normalizedEndOffset;
+      final int startOffset = (clampedGlobalStart - entryGlobalRange.startOffset).abs();
+      final int endOffset = startOffset + (clampedGlobalEnd - clampedGlobalStart).abs();
       final List<InlineSpan> beforeSelection = <InlineSpan>[];
       final List<InlineSpan> insideSelection = <InlineSpan>[];
       final List<InlineSpan> afterSelection = <InlineSpan>[];
@@ -135,7 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 final int globalNewStartAfterSelection = count + newStartAfterSelection;
                 insideSelection.add(
                   TextSpan(
-                    style: const TextStyle(color: Colors.red),
+                    style: const TextStyle(color: Colors.red).merge(entry.value.style),
                     text: rawText.substring(newStart, newStartAfterSelection),
                   ),
                 );
@@ -165,34 +206,44 @@ class _MyHomePageState extends State<MyHomePage> {
             count += rawText.length;
           }
         } else if (child is WidgetSpan) {
-          if (count < startOffset) {
+          if (!widgetSpanMaps.containsKey(count)) {
+            // We have arrived at a WidgetSpan but it is unaccounted for.
+            return true;
+          }
+          final Map<_GlobalSpanRange, TextSpan> widgetSpanSourceMap = widgetSpanMaps[count]!;
+          if (count < startOffset && count + (widgetSpanSourceMap.keys.last.endOffset - widgetSpanSourceMap.keys.first.startOffset).abs() < startOffset) {
+            // When the count is less than the startOffset and we are at a widgetspan
+            // it is still possible that the startOffset is somewhere within the widgetspan,
+            // so we should try to color the selection red for the widgetspan.
+            //
+            // If the calculated widgetspan length would not extend the count past the
+            // startOffset then add this widgetspan to the beforeSelection, and
+            // continue walking the tree.
             beforeSelection.add(child);
+            count += (widgetSpanSourceMap.keys.last.endOffset - widgetSpanSourceMap.keys.first.startOffset).abs();
+            return true;
           } else if (count >= endOffset) {
             afterSelection.add(child);
-          } else {
-            if (contentRange.children == null) {
-              count += 1;
-              return true;
-            }
-            // Update bulleted list data.
-            for (final SelectedContentRange range in contentRange.children!) {
-              _colorSelectionRed(
-                <SelectedContentRange>[range],
-                dataMap: bulletSourceMap,
-                coloringChildSpan: true,
-              );
-            }
-            // Re-create bulleted list.
+            count += (widgetSpanSourceMap.keys.last.endOffset - widgetSpanSourceMap.keys.first.startOffset).abs();
+            return true;
+          }
+          // Update widgetspan data.
+          _colorSelectionRed(
+            selectionDetails,
+            dataMap: widgetSpanSourceMap,
+            coloringChildSpan: true,
+          );
+          // Re-create widgetspan.
+          if (count == 28) {
             insideSelection.add(
               WidgetSpan(
                 child: Column(
                   children: <Widget>[
-                    for (final MapEntry<Key, TextSpan> entry in bulletSourceMap.entries)
+                    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in widgetSpanSourceMap.entries)
                       Padding(
                         padding: const EdgeInsets.only(left: 20.0),
                         child: Text.rich(
-                          bulletSourceMap[entry.key]!,
-                          key: entry.key,
+                          widgetSpanSourceMap[entry.key]!,
                         ),
                       )
                   ],
@@ -200,12 +251,22 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             );
           }
-          count += 1;
+          if (count == 133) {
+            insideSelection.add(
+              WidgetSpan(
+                child: Text.rich(
+                  widgetSpanSourceMap.entries.first.value,
+                ),
+              ),
+            );
+          }
+          count += (widgetSpanSourceMap.keys.last.endOffset - widgetSpanSourceMap.keys.first.startOffset).abs();
+          return true;
         }
         return true;
       });
-      dataMap[contentRange.selectableId! as Key] = TextSpan(
-        style: dataMap[contentRange.selectableId]!.style,
+      dataMap[entry.key] = TextSpan(
+        style: dataMap[entry.key]!.style,
         children: <InlineSpan>[
           ...beforeSelection,
           ...insideSelection,
@@ -258,7 +319,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         onPressed: () {
                           ContextMenuController.removeAny();
                           _colorSelectionRed(
-                            selectionDetails.ranges,
+                            selectionDetails,
                             dataMap: dataSourceMap,
                             coloringChildSpan: false,
                           );
@@ -277,18 +338,10 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text.rich(
-                  key: _text1Id,
-                  dataSourceMap[_text1Id]!,
-                ),
-                Text.rich(
-                  key: _text2Id,
-                  dataSourceMap[_text2Id]!,
-                ),
-                Text.rich(
-                  key: _text3Id,
-                  dataSourceMap[_text3Id]!,
-                ),
+                for (final MapEntry<_GlobalSpanRange, TextSpan> entry in dataSourceMap.entries)
+                  Text.rich(
+                    entry.value,
+                  ),
               ],
             ),
           ),
@@ -298,11 +351,14 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () {
           setState(() {
             // Resets the state to the origin data.
-            for (final MapEntry<Key, TextSpan> entry in originSourceData.entries) {
+            for (final MapEntry<_GlobalSpanRange, TextSpan> entry in originSourceData.entries) {
               dataSourceMap[entry.key] = entry.value;
             }
-            for (final MapEntry<Key, TextSpan> entry in originBulletSourceData.entries) {
+            for (final MapEntry<_GlobalSpanRange, TextSpan> entry in originBulletSourceData.entries) {
               bulletSourceMap[entry.key] = entry.value;
+            }
+            for (final MapEntry<_GlobalSpanRange, TextSpan> entry in originEmphasizedSourceData.entries) {
+              emphasizedTextMap[entry.key] = entry.value;
             }
           });
         },

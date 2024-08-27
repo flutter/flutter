@@ -96,7 +96,8 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// order as the [Selectable]s contained under
   /// this [SelectionHandler].
   ///
-  /// Return an empty list if nothing is selected.
+  /// Return a list of [SelectedContentRange.empty]
+  /// when nothing is selected.
   List<SelectedContentRange> getSelections();
 
   /// Handles the [SelectionEvent] sent to this object.
@@ -134,6 +135,7 @@ class SelectedContentRange {
   /// Creates a [SelectedContentRange] with the given values.
   const SelectedContentRange({
     required this.contentLength,
+    required this.contentStart,
     required this.startOffset,
     required this.endOffset,
   });
@@ -143,6 +145,7 @@ class SelectedContentRange {
     return SelectedContentRange(
       startOffset: -1,
       endOffset: -1,
+      contentStart: -1,
       contentLength: contentLength ?? -1,
     );
   }
@@ -153,6 +156,9 @@ class SelectedContentRange {
   /// offset and end offset contained by this [SelectedContentRange]
   /// must not exceed the content length.
   final int contentLength;
+
+  /// The offset where the content begins.
+  final int contentStart;
 
   /// The start of the selection relative to the start of the content.
   ///
@@ -178,17 +184,14 @@ class SelectedContentRange {
   /// {@end-tool}
   ///
   /// If we select from the beginning of 'world' to the
-  /// end of the '?' in the [WidgetSpan], the [startOffset]
-  /// in the root [SelectedContentRange] will be 6,
-  /// and [endOffset] will be 14. This is because the
-  /// [WidgetSpan] begins at index 13 in the root text
-  /// and ends at index 14. In this example, the root
-  /// [SelectedContentRange] will have one child
-  /// which represents the selection inside the [WidgetSpan].
-  /// In the child [SelectedContentRange] the [startOffset]
-  /// will be 0 and the [endOffset] will be 18. These offsets
-  /// are relative to the content in the child [SelectedContentRange]
-  /// and not the root text.
+  /// end of the '?' in the [WidgetSpan], we will receive
+  /// two [SelectedContentRange]s from [SelectionHandler.getSelections].
+  /// The first range will be relative to the root text
+  /// of the [TextSpan], the [startOffset] will be 6,
+  /// and [endOffset] will be 13. The second range
+  /// will be relative to the content inside the
+  /// [WidgetSpan], the [startOffset] will be 0,
+  /// and [endOffset] will be 18.
   /// {@endtemplate}
   final int startOffset;
 
@@ -207,6 +210,7 @@ class SelectedContentRange {
     }
     return other is SelectedContentRange
         && other.contentLength == contentLength
+        && other.contentStart == contentStart
         && other.startOffset == startOffset
         && other.endOffset == endOffset;
   }
@@ -215,6 +219,7 @@ class SelectedContentRange {
   int get hashCode {
     return Object.hash(
       contentLength,
+      contentStart,
       startOffset,
       endOffset,
     );
@@ -224,6 +229,7 @@ class SelectedContentRange {
   String toString() {
     return 'SelectedContentRange(\n'
            '  contentLength: $contentLength,\n'
+           '  contentStart: $contentStart, \n'
            '  startOffset: $startOffset,\n'
            '  endOffset: $endOffset,\n'
            ')';
@@ -793,7 +799,6 @@ class SelectionDetails {
     required this.selectionFinalized,
     required this.globalStartOffset,
     required this.globalEndOffset,
-    required this.ranges,
   });
 
   /// The status of ongoing selection under the [Selectable]
@@ -812,15 +817,6 @@ class SelectionDetails {
   /// The global end offset.
   final int globalEndOffset;
 
-  /// The [SelectedContentRange]s that represent the selection.
-  ///
-  /// The [ranges] list is ordered according to the order of the
-  /// [Selectable]s contained under the [Selectable] or [SelectionHandler]
-  /// that created this object.
-  ///
-  /// [ranges] will be an empty list if nothing is selected.
-  final List<SelectedContentRange> ranges;
-
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
@@ -832,7 +828,8 @@ class SelectionDetails {
     return other is SelectionDetails
         && other.status == status
         && other.selectionFinalized == selectionFinalized
-        && listEquals(other.ranges, ranges);
+        && other.globalStartOffset == globalStartOffset
+        && other.globalEndOffset == globalEndOffset;
   }
 
   @override
@@ -840,7 +837,8 @@ class SelectionDetails {
     return Object.hash(
       status,
       selectionFinalized,
-      ranges,
+      globalStartOffset,
+      globalEndOffset,
     );
   }
 
@@ -851,7 +849,6 @@ class SelectionDetails {
            '  selectionFinalized: $selectionFinalized,\n'
            '  globalStartOffset: $globalStartOffset\n'
            '  globalEndOffset: $globalEndOffset,\n'
-           '  ranges: $ranges,\n'
            ')';
   }
 }

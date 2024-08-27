@@ -32,29 +32,31 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+typedef _GlobalSpanRange = ({int startOffset, int endOffset});
+
 class _MyHomePageState extends State<MyHomePage> {
   static const String _aboutLorem =
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ac turpis vitae felis varius '
     'mattis. Nulla facilisi. Pellentesque habitant morbi tristique senectus et netus et malesuada '
     'fames ac turpis egestas. Aenean sit amet cursus turpis. Suspendisse potenti. Quisque vel '
     'libero ac ligula cursus tincidunt id vel metus. Vivamus at sapien sit amet quam feugiat '
-    'fermentum sit amet nec velit.\n'
+    'fermentum sit amet nec velit.'
     '\n'
     'Vestibulum nec dui non odio fermentum consequat non id felis. Integer vel massa ut nunc '
     'congue cursus. Nunc eu lacus eros. Aliquam erat volutpat. Vivamus posuere libero at ligula '
     'ultrices, at volutpat risus auctor. Nullam ac mauris quis justo auctor tempor. Nulla quis '
-    'lobortis nisi, ut bibendum felis. Duis ac libero sit amet magna varius sagittis vel in arcu.\n'
+    'lobortis nisi, ut bibendum felis. Duis ac libero sit amet magna varius sagittis vel in arcu.'
     '\n'
     'Etiam varius, eros ac gravida sagittis, mi justo vulputate mauris, non posuere lacus sapien '
     'quis lectus. Donec non felis et libero malesuada ultricies. Nulla facilisi. Vestibulum sed '
     'nulla ac libero venenatis ullamcorper. Integer fringilla diam eu eros euismod, a congue purus '
     'vulputate. Sed at urna in urna faucibus elementum. Curabitur eget orci at lacus efficitur '
-    'dictum. Duis gravida bibendum sapien, sed fermentum libero vestibulum sed.\n'
+    'dictum. Duis gravida bibendum sapien, sed fermentum libero vestibulum sed.'
     '\n'
     'Praesent congue ex et magna vehicula, nec fringilla dui sollicitudin. Quisque at erat et mi '
     'facilisis accumsan id a felis. Cras a interdum lacus, non bibendum libero. Nulla facilisi. '
     'Donec a dui sapien. Suspendisse potenti. Integer et risus quis arcu facilisis dignissim. '
-    'Suspendisse potenti. Nam ac orci nec arcu malesuada vulputate.\n'
+    'Suspendisse potenti. Nam ac orci nec arcu malesuada vulputate.'
     '\n'
     'Sed vestibulum libero sit amet dolor fringilla, at aliquet purus sollicitudin. Donec sed '
     'nunc venenatis, bibendum libero ut, condimentum libero. Vivamus dictum lectus sit amet purus '
@@ -65,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final ContextMenuController _menuController = ContextMenuController();
   late final List<Widget> _textWidgets;
-  final Map<Key, TextSpan> dataSourceMap = <Key, TextSpan>{};
+  final Map<_GlobalSpanRange, TextSpan> dataSourceMap = <_GlobalSpanRange, TextSpan>{};
   final GlobalKey<SelectionAreaState> selectionAreaKey = GlobalKey<SelectionAreaState>();
 
   @override
@@ -86,12 +88,11 @@ class _MyHomePageState extends State<MyHomePage> {
         break;
       }
       final String paragraphText = text.substring(start, end);
-      final Key currentSelectableId = UniqueKey();
-      dataSourceMap[currentSelectableId] = TextSpan(text: paragraphText.trim());
+      final _GlobalSpanRange globalRange = (startOffset: currentPosition, endOffset: end);
+      dataSourceMap[globalRange] = TextSpan(text: paragraphText);
       paragraphWidgets.add(
         Text.rich(
-          dataSourceMap[currentSelectableId]!,
-          key: currentSelectableId,
+          dataSourceMap[globalRange]!,
         ),
       );
       currentPosition = end;
@@ -100,37 +101,40 @@ class _MyHomePageState extends State<MyHomePage> {
     return paragraphWidgets;
   }
 
-  List<InlineSpan> _initSpans(String text) {
-    final ParagraphBoundary paragraphBoundary = ParagraphBoundary(text);
-    final List<TextSpan> paragraphSpans = <TextSpan>[];
-    int currentPosition = 0;
-
-    while (currentPosition < text.length) {
-      final int? start = paragraphBoundary.getLeadingTextBoundaryAt(currentPosition);
-      final int? end = paragraphBoundary.getTrailingTextBoundaryAt(currentPosition);
-      if (start == null || end == null) {
-        break;
-      }
-      final String paragraphText = text.substring(start, end);
-      paragraphSpans.add(TextSpan(text: paragraphText.trim()));
-      currentPosition = end;
-    }
-
-    return paragraphSpans;
-  }
-
-  void _insertContent(List<SelectedContentRange> ranges, String plainText) {
+  void _insertContent(SelectionDetails selectionDetails, String plainText) {
     int rangeIndex = 0;
+    int textWidgetsInsideSelection = 0;
     final List<Widget> newText = <Widget>[];
-    for (final SelectedContentRange contentRange in ranges) {
-      if (contentRange.selectableId == null || !dataSourceMap.containsKey(contentRange.selectableId)) {
-        // Cannot replace content at range if a selectable id has not been provided or if the selectableId
-        // is not in the data model.
-        return;
+    final List<InlineSpan> insertedContent = <InlineSpan>[TextSpan(text: plainText)];
+    // First pass, find how many text widgets are within the selection.
+    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in dataSourceMap.entries) {
+      final _GlobalSpanRange entryGlobalRange = entry.key;
+      final int normalizedStartOffset = min(selectionDetails.globalStartOffset, selectionDetails.globalEndOffset);
+      final int normalizedEndOffset = max(selectionDetails.globalStartOffset, selectionDetails.globalEndOffset);
+      if (normalizedStartOffset > entryGlobalRange.endOffset) {
+        continue;
       }
-      final TextSpan rawSpan = dataSourceMap[contentRange.selectableId]!;
-      final int startOffset = min(contentRange.startOffset, contentRange.endOffset);
-      final int endOffset = max(contentRange.startOffset, contentRange.endOffset);
+      if (normalizedEndOffset < entryGlobalRange.startOffset) {
+        continue;
+      }
+      textWidgetsInsideSelection += 1;
+    }
+    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in dataSourceMap.entries) {
+      final _GlobalSpanRange entryGlobalRange = entry.key;
+      final int normalizedStartOffset = min(selectionDetails.globalStartOffset, selectionDetails.globalEndOffset);
+      final int normalizedEndOffset = max(selectionDetails.globalStartOffset, selectionDetails.globalEndOffset);
+      if (normalizedStartOffset > entryGlobalRange.endOffset) {
+        continue;
+      }
+      if (normalizedEndOffset < entryGlobalRange.startOffset) {
+        continue;
+      }
+      final TextSpan rawSpan = entry.value;
+      // Determine local ranges.
+      final int clampedGlobalStart = normalizedStartOffset < entryGlobalRange.startOffset ? entryGlobalRange.startOffset : normalizedStartOffset;
+      final int clampedGlobalEnd = normalizedEndOffset > entryGlobalRange.endOffset ? entryGlobalRange.endOffset : normalizedEndOffset;
+      final int startOffset = (clampedGlobalStart - entryGlobalRange.startOffset).abs();
+      final int endOffset = startOffset + (clampedGlobalEnd - clampedGlobalStart).abs();
       final List<InlineSpan> beforeSelection = <InlineSpan>[];
       final List<InlineSpan> insideSelection = <InlineSpan>[];
       final List<InlineSpan> afterSelection = <InlineSpan>[];
@@ -159,8 +163,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   // Can either wrap with a SelectionArea so the WidgetSpan can have its
                   // own contained selection. Or a SelectionContainer.disabled to completely
                   // disable the selection of the WidgetSpan contents.
-                  insideSelection.add(WidgetSpan(child: SelectionArea(child: DetailBox(children: _initSpans(plainText)))));
-                  if (ranges.length == 1) {
+                  insideSelection.add(WidgetSpan(child: SelectionArea(child: DetailBox(children: insertedContent))));
+                  if (textWidgetsInsideSelection == 1) {
                     insideSelection.add(const TextSpan(text: '\n'));
                     insideSelection.add(const TextSpan(text: '\n'));
                   }
@@ -188,8 +192,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 // Can either wrap with a SelectionArea so the WidgetSpan can have its
                 // own contained selection. Or a SelectionContainer.disabled to completely
                 // disable the selection of the WidgetSpan contents.
-                insideSelection.add(WidgetSpan(child: SelectionArea(child: DetailBox(children: _initSpans(plainText)))));
-                if (ranges.length == 1) {
+                insideSelection.add(WidgetSpan(child: SelectionArea(child: DetailBox(children: insertedContent))));
+                if (textWidgetsInsideSelection == 1) {
                   insideSelection.add(const TextSpan(text: '\n'));
                   insideSelection.add(const TextSpan(text: '\n'));
                 }
@@ -209,12 +213,16 @@ class _MyHomePageState extends State<MyHomePage> {
           } else {
             insideSelection.add(child);
           }
-          count += 1;
+          // We do not increment the count here because the
+          // SelectionListener's global range offsets do not
+          // account for un-selectable widgets or widgets
+          // not managed by its selection delegate, like the
+          // ones being inserted in this example.
         }
         return true;
       });
-      dataSourceMap[contentRange.selectableId! as Key] = TextSpan(
-        style: dataSourceMap[contentRange.selectableId]!.style,
+      dataSourceMap[entry.key] = TextSpan(
+        style: dataSourceMap[entry.key]!.style,
         children: <InlineSpan>[
           ...beforeSelection,
           ...insideSelection,
@@ -224,14 +232,29 @@ class _MyHomePageState extends State<MyHomePage> {
       rangeIndex += 1;
     }
     // Rebuild column contents.
-    for (final MapEntry<Key, TextSpan> entry in dataSourceMap.entries) {
+    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in dataSourceMap.entries) {
       newText.add(
         Text.rich(
           entry.value,
-          key: entry.key,
         ),
       );
     }
+    // Calculate new global ranges for paragraphs. This is necessary to keep the ranges
+    // in sync after cutting/inserting new content into the textspan.
+    final Map<_GlobalSpanRange, TextSpan> newData = <_GlobalSpanRange, TextSpan>{};
+    int globalCount = 0;
+    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in dataSourceMap.entries) {
+      // Since the non-selectable widgetspan is not included in the SelectionListeners
+      // global range calculation, we should ignore them in the plain text calculation.
+      final int spanLength = entry.value.toPlainText(includePlaceholders: false).length;
+      newData[(startOffset: globalCount, endOffset: globalCount + spanLength)] = entry.value;
+      globalCount += spanLength;
+    }
+    dataSourceMap.clear();
+    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in newData.entries) {
+      dataSourceMap[entry.key] = entry.value;
+    }
+    newData.clear();
     _textWidgets.clear();
     _textWidgets.addAll(newText);
     setState(() {});
@@ -271,7 +294,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ContextMenuButtonItem(
                         onPressed: () {
                           ContextMenuController.removeAny();
-                          _insertContent(selectionDetails.ranges, 'Inserted Content');
+                          _insertContent(selectionDetails, 'Inserted Content');
                           selectionAreaKey.currentState!.selectableRegion.clearSelection();
                         },
                         label: 'Insert Content',
