@@ -440,6 +440,39 @@ void main() {
       ]),
       const FakeCommand(command: <String>[
         'git',
+        'status',
+        '--porcelain',
+      ], stdout: '''
+ M dev/integration_tests/ui/android/project-app.lockfile
+ M examples/image_list/android/project-app.lockfile
+'''),
+      const FakeCommand(command: <String>[
+        'git',
+        'status',
+        '--porcelain',
+      ], stdout: '''
+ M dev/integration_tests/ui/android/project-app.lockfile
+ M examples/image_list/android/project-app.lockfile
+'''),
+      const FakeCommand(command: <String>[
+        'git',
+        'add',
+        '--all',
+      ]),
+      const FakeCommand(command: <String>[
+        'git',
+        'commit',
+        '--message',
+        'Re-generate Gradle lockfiles',
+        '--author="flutter-pub-roller-bot <flutter-pub-roller-bot@google.com>"',
+      ]),
+      const FakeCommand(command: <String>[
+        'git',
+        'rev-parse',
+        'HEAD',
+      ], stdout: '234deadbeef'),
+      const FakeCommand(command: <String>[
+        'git',
         'push',
         'https://$token@github.com/$orgName/flutter.git',
         'packages-autoroller-branch-1:packages-autoroller-branch-1',
