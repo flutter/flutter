@@ -4668,9 +4668,10 @@ class SemanticsConfiguration {
   /// accessibility focused may or may not be selected; e.g. a [ListTile] can have
   /// accessibility focus but have its [ListTile.selected] property set to false,
   /// in which case it will not be flagged as selected.
-  bool get isSelected => _hasFlag(SemanticsFlag.isSelected);
-  set isSelected(bool value) {
-    _setFlag(SemanticsFlag.isSelected, value);
+  bool? get isSelected => _hasFlag(SemanticsFlag.hasSelectedState) ? _hasFlag(SemanticsFlag.isSelected) : null;
+  set isSelected(bool? value) {
+    _setFlag(SemanticsFlag.hasSelectedState, true);
+    _setFlag(SemanticsFlag.isSelected, value!);
   }
 
   /// If this node has Boolean state that can be controlled by the user, whether

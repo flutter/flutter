@@ -77,6 +77,7 @@ class SemanticsController {
   static final int _importantFlagsForAccessibility =
     SemanticsFlag.hasCheckedState.index |
     SemanticsFlag.hasToggledState.index |
+    SemanticsFlag.hasSelectedState.index |
     SemanticsFlag.hasEnabledState.index |
     SemanticsFlag.isButton.index |
     SemanticsFlag.isTextField.index |
