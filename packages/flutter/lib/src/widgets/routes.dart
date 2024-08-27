@@ -1454,7 +1454,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    final Animation<double> proxyAnimation = ProxyAnimation(secondaryAnimation);
+    final ProxyAnimation proxyAnimation = ProxyAnimation();
 
     final Animation<double> flexAnimation = (nextRouteTransition == null) ?
       secondaryAnimation : proxyAnimation;
@@ -1985,7 +1985,12 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
     if (nextRoute is ModalRoute<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition != this.delegatedTransition) {
-      receivedTransition = nextRoute.delegatedTransition;
+      print(nextRoute.delegatedTransition);
+      print(nextRoute.subtreeContext);
+      print(this.subtreeContext);
+      if (receivedTransition != nextRoute.delegatedTransition) {
+        receivedTransition = nextRoute.delegatedTransition;
+      }
     } else {
       receivedTransition = null;
     }
@@ -1996,7 +2001,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   void didPopNext(Route<dynamic> nextRoute) {
     if (nextRoute is ModalRoute<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition != this.delegatedTransition) {
-      receivedTransition = nextRoute.delegatedTransition;
+      if (receivedTransition != nextRoute.delegatedTransition) {
+        receivedTransition = nextRoute.delegatedTransition;
+      }
     } else {
       receivedTransition = null;
     }
