@@ -11,7 +11,6 @@
 library;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
