@@ -17,7 +17,8 @@ flutter/tools/gn \
 ```
 
 Then adding the following field to the
-`android/app/src/main/AndroidManifest.xml` will turn them on:
+`android/app/src/main/AndroidManifest.xml` under the `<application>` tag will turn
+them on:
 
 ```xml
 <meta-data
