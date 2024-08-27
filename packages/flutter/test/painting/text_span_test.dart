@@ -4,7 +4,6 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -531,7 +530,7 @@ void main() {
       addTearDown(recognizer.dispose);
       final int length = simpleSpan.toPlainText().length;
       final InlineSpan withRecognizer = simpleSpan.updateAttributes(
-        InlineSpanAttributes(recognizer: Left(recognizer)),
+        InlineSpanAttributes(recognizer: recognizer),
         const TextRange(start: 1, end: 9),
       );
       for (int i = 0; i < length; i++) {
@@ -572,16 +571,16 @@ void main() {
       expect(const InlineSpanAttributes(fontSize: 10).updateTextStyle(style), style.copyWith(fontSize: 10));
 
       expect(
-        const InlineSpanAttributes(foreground: Left(Color(0x12345678))).updateTextStyle(style),
+        const InlineSpanAttributes(color: Color(0x12345678)).updateTextStyle(style),
         style.copyWith(color: const Color(0x12345678)),
       );
 
       expect(
-        const InlineSpanAttributes(foreground: Left(Color(0x12345678))).updateTextStyle(style),
+        const InlineSpanAttributes(color: Color(0x12345678)).updateTextStyle(style),
         style.copyWith(color: const Color(0x12345678)),
       );
       expect(
-        const InlineSpanAttributes(foreground: Left(Color(0x12345678))).updateTextStyle(style)?.foreground?.blendMode,
+        const InlineSpanAttributes(color: Color(0x12345678)).updateTextStyle(style)?.foreground?.blendMode,
         BlendMode.xor,
       );
 

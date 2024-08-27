@@ -442,12 +442,10 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     return localOffset < text.length ? text.codeUnitAt(localOffset) : null;
   }
 
-  static T? _updateRemovableAttribute<T extends Object>(T? oldValue, RemovableInlineSpanAttribute<T>? newValue) {
-    return switch (newValue) {
-      null => oldValue,
-      Right() => null,
-      Left(:final T value) => value,
-    };
+  static T? _updateRemovableAttribute<T extends Object>(T? oldValue, T? newValue) {
+    return identical(newValue, InlineSpanAttributes.remove)
+      ? null
+      : newValue ?? oldValue;
   }
 
   static (bool hasSameAttributes, TextSpan span) _copyWith(TextSpan span, InlineSpanAttributes? newAttributes, List<InlineSpan>? newChildren) {
@@ -455,8 +453,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     final bool needsUpdate = newAttributes != null
       && (newStyle != span.style
       || _updateRemovableAttribute(span.recognizer, newAttributes.recognizer) != span.recognizer
-      || _updateRemovableAttribute(span.onEnter, newAttributes.onEnter) != span.onEnter
-      || _updateRemovableAttribute(span.onExit, newAttributes.onExit) != span.onExit
+      || (newAttributes.onEnter != null && (newAttributes.onEnter != span.onEnter))
+      || (newAttributes.onExit != null && (newAttributes.onExit != span.onExit))
       || (newAttributes.mouseCursor != null && newAttributes.mouseCursor != span.mouseCursor)
       || (newAttributes.locale != null && newAttributes.locale != span.locale)
       || (newAttributes.spellOut != null && newAttributes.spellOut != span.spellOut));

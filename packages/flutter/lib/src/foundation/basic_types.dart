@@ -7,10 +7,6 @@ library;
 
 import 'dart:collection';
 
-import 'package:meta/meta.dart';
-
-import 'object.dart';
-
 // COMMON SIGNATURES
 
 /// Signature for callbacks that report that an underlying value has changed.
@@ -254,65 +250,4 @@ Duration lerpDuration(Duration a, Duration b, double t) {
   return Duration(
     microseconds: (a.inMicroseconds + (b.inMicroseconds - a.inMicroseconds) * t).round(),
   );
-}
-
-/// A value that is either a [Left] containing a value of type [L], or a [Right]
-/// containing a value of type [R].
-///
-/// This sealed class has two final subclasses [Left] and [Right], which can be
-/// used to represent two possible types of a value, similar to nullable types.
-sealed class Either<L, R> { }
-
-/// The left branch of an [Either].
-///
-/// A [Left] value is considered equal to another value if and only if the other
-/// value is also a [Left], and their [value]s are equal.
-@immutable
-@optionalTypeArgs
-final class Left<L, R> implements Either<L, R> {
-  /// Creates a [Left] with the given `value`.
-  const Left(this.value);
-  /// The value of this [Left] branch.
-  final L value;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    return other is Left<Object?, Object?> && other.value == value;
-  }
-
-  @override
-  int get hashCode => value.hashCode;
-
-  @override
-  String toString() => '${objectRuntimeType(this, 'Left')}($value)';
-}
-
-/// The right branch of an [Either].
-///
-/// A [Right] value is considered equal to another value if and only if the other
-/// value is also a [Right], and their [value]s are equal.
-@immutable
-@optionalTypeArgs
-final class Right<L, R> implements Either<L, R> {
-  /// Creates a [Right] with the given `value`.
-  const Right(this.value);
-  /// The value of this [Right] branch.
-  final R value;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    return other is Right<Object?, Object?> && other.value == value;
-  }
-
-  @override
-  int get hashCode => value.hashCode;
-
-  @override
-  String toString() => '${objectRuntimeType(this, 'Right')}($value)';
 }

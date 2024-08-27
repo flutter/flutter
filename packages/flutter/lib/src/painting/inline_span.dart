@@ -26,17 +26,9 @@ import 'text_style.dart';
 
 /// The signature of [InlineSpanAttributes.remove].
 ///
-/// This type represents a binary decision: the [Left] branch indicates that the
-/// attribute should be set to a value of type `T`, and the [Right] branch
-/// typically indicates the current value should be unset.
-///
-/// This is useful when the value `null` already has a different meaning (other
-/// than "unset") in the context. For example, in [InlineSpanAttributes], a null
-/// value means an attribute should not be updated. However, nullable attributes
-/// such as [TextSpan.recognizer] also need `null` for setting the value to `null`.
-/// This type introduces an additional state [InlineSpanAttributes.remove] when
-/// `null` is not available.
-typedef RemovableInlineSpanAttribute<T> = Either<T, void>;
+/// The type information is intentionally kept obscure because it is used as a
+/// sentinel value.
+typedef RemoveInlineSpanAttribute = _PoorMansBottomType;
 
 /// Mutable wrapper of an integer that can be passed by reference to track a
 /// value across a recursive stack.
@@ -470,7 +462,9 @@ class InlineSpanAttributes {
     this.wordSpacing,
     this.letterSpacing,
 
+    this.color,
     this.foreground,
+    this.backgroundColor,
     this.background,
     this.shadows,
     this.underline,
@@ -485,7 +479,8 @@ class InlineSpanAttributes {
     this.onEnter,
     this.onExit,
     this.spellOut,
-  });
+  }) : assert(color == null || foreground == null),
+       assert(backgroundColor == null || background == null);
 
   /// An attribute which overwrites an [InlineSpan]'s [TextStyle.fontFamily] if
   /// set to non-null.
@@ -538,13 +533,29 @@ class InlineSpanAttributes {
   /// if set to non-null.
   final double? letterSpacing;
 
-  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.foreground] and
-  /// [TextStyle.color] if set to non-null.
-  final Either<ui.Color, ui.Paint>? foreground;
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.color] if set to
+  /// non-null.
+  ///
+  /// Must be null if [foreground] is set to a non-null value.
+  final ui.Color? color;
 
-  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.foreground] and
-  /// [TextStyle.color] if set to non-null.
-  final Either<ui.Color, ui.Paint>? background;
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.foreground] if
+  /// set to non-null.
+  ///
+  /// Must be null if [color] is set to a non-null value.
+  final ui.Paint? foreground;
+
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.backgroundColor]
+  /// if set to non-null.
+  ///
+  /// Must be null if [background] is set to a non-null value.
+  final ui.Color? backgroundColor;
+
+  /// An attribute which overwrites an [InlineSpan]'s [TextStyle.background] if
+  /// set to non-null.
+  ///
+  /// Must be null if [backgroundColor] is set to a non-null value.
+  final ui.Paint? background;
 
   /// An attribute which overwrites an [InlineSpan]'s [TextStyle.shadows] if set
   /// to non-null.
@@ -590,38 +601,46 @@ class InlineSpanAttributes {
   /// When this value is set to [remove], the [InlineSpan.updateAttributesAtOffset]
   /// method sets [TextSpan.recognizer] to null in the given range of the returned
   /// [TextSpan].
-  final RemovableInlineSpanAttribute<GestureRecognizer>? recognizer;
+  final GestureRecognizer? recognizer;
 
   /// An attribute which overwrites [TextSpan.mouseCursor] if set to non-null.
   final MouseCursor? mouseCursor;
 
   /// An attribute which overwrites [TextSpan.onEnter] if set to non-null.
   ///
-  /// When this value is set to [remove], the [InlineSpan.updateAttributesAtOffset]
-  /// method sets [TextSpan.onEnter] to null in the given range of the returned
-  /// [TextSpan].
-  final RemovableInlineSpanAttribute<PointerEnterEventListener>? onEnter;
+  /// [TextSpan.onEnter] can not be set from a non-null value to null using this
+  /// attribute. Considering setting [TextSpan.onEnter] to a function that does
+  /// nothing if you want to unset the callback from a [TextSpan].
+  final PointerEnterEventListener? onEnter;
 
   /// An attribute which overwrites [TextSpan.onExit] if set to non-null.
   ///
-  /// When this value is set to [remove], the [InlineSpan.updateAttributesAtOffset]
-  /// method sets [TextSpan.onExit] to null in the given range of the returned
-  /// [TextSpan].
-  final RemovableInlineSpanAttribute<PointerExitEventListener>? onExit;
+  /// [TextSpan.onExit] can not be set from a non-null value to null using this
+  /// attribute. Considering setting [TextSpan.onExit] to a function that does
+  /// nothing if you want to unset the callback from a [TextSpan].
+  final PointerExitEventListener? onExit;
 
   /// An attribute which overwrites [TextSpan.spellOut] if set to non-null.
   final bool? spellOut;
 
-  /// Unsets the given [RemovableInlineSpanAttribute] from an [InlineSpan].
+  /// A sentinel values that can be used to unset the [TextSpan.recognizer] from
+  /// an [TextSpan].
   ///
-  /// [InlineSpan.updateAttributesAtOffset] does not mutate the target [InlineSpan].
-  /// Rather, when [remove] is specified for a [RemovableInlineSpanAttribute],
-  /// [InlineSpan.updateAttributesAtOffset] returns a new [InlineSpan] with that
-  /// attribute unset.
-  static const RemovableInlineSpanAttribute<Never> remove = Right<Never, void>(null);
-
-  static L? _maybeLeft<L extends Object>(Either<L, Object?>? value) => value is Left<L, Object?> ? value.value : null;
-  static R? _maybeRight<R extends Object>(Either<Object?, R>? value) => value is Right<Object?, R> ? value.value : null;
+  /// This is useful when the value `null` already has a different meaning (other
+  /// than "unset") in the context. In [InlineSpanAttributes], a null value means
+  /// an attribute should not be updated. However, [TextSpan.recognizer] uses
+  /// `null` to indicate there's no recognizer. The sentinel value introduces an
+  /// additional state that indicates any existing [TextSpan.recognizer] should
+  /// be unset in the new span.
+  ///
+  /// The only supported operation on this singleton object is the identity
+  /// comparison function `identical`, performing any other operation on this
+  /// object may crash the program.
+  ///
+  /// [InlineSpan.updateAttributesAtOffset] does not mutate the target
+  /// [InlineSpan]. Rather, when [recognizer] is set to [remove], that method
+  /// returns a new [InlineSpan] with [recognizer] set to null.
+  static const RemoveInlineSpanAttribute remove = _PoorMansBottomType._();
 
   /// A convenience method, similar to [TextStyle.merge], that merges the
   /// `textStyle` argument with the [TextStyle] related attributes in this
@@ -640,8 +659,10 @@ class InlineSpanAttributes {
       && textBaseline == null
       && wordSpacing == null
       && letterSpacing == null
+      && color == null
       && foreground == null
       && background == null
+      && backgroundColor == null
       && shadows == null
       && underline == null
       && overline == null
@@ -679,10 +700,10 @@ class InlineSpanAttributes {
       textBaseline: textBaseline,
       wordSpacing: wordSpacing,
       letterSpacing: letterSpacing,
-      color: _maybeLeft(foreground),
-      foreground: _maybeRight(foreground),
-      backgroundColor: _maybeLeft(background),
-      background: _maybeRight(background),
+      color: color,
+      foreground: foreground,
+      backgroundColor: backgroundColor,
+      background: background,
       shadows: shadows,
       decoration: decoration,
       decorationColor: decorationColor,
@@ -690,4 +711,10 @@ class InlineSpanAttributes {
       decorationThickness: decorationThickness,
     );
   }
+}
+
+final class _PoorMansBottomType with DiagnosticableTreeMixin implements GestureRecognizer {
+  const _PoorMansBottomType._();
+  @override
+  Never noSuchMethod(Invocation invocation) => throw NoSuchMethodError.withInvocation(this, invocation);
 }

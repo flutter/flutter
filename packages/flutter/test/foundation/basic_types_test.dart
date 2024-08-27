@@ -54,38 +54,4 @@ void main() {
       );
     });
   });
-
-  group('Either', () {
-    test('toString', () {
-      expect(const Left<int, double>(1).toString(), 'Left<int, double>(1)');
-      expect(const Right<int, bool>(true).toString(), 'Right<int, bool>(true)');
-    });
-
-    test('Equality - left', () {
-      expect(const Left<int, double>(1) == const Left<int, double>(1), isTrue);
-      expect(Left<int, double>(1) == Left<int, double>(1), isTrue); // ignore: prefer_const_constructors
-
-      expect(const Left<int, double>(1) == const Left<int, Never>(1), isTrue);
-      expect(const Left<int, Never>(1) == const Left<int, double>(1), isTrue);
-
-      expect(const Left<int, Never>(1) == const Left<double, Never>(1.0), isTrue);
-      expect(const Left<double, Never>(1.0) == const Left<int, Never>(1), isTrue);
-    });
-
-    test('Equality - right', () {
-      expect(const Right<double, int>(1) == const Right<double, int>(1), isTrue);
-      expect(Right<double, int>(1) == Right<double, int>(1), isTrue); // ignore: prefer_const_constructors
-
-      expect(const Right<double, int>(1) == const Right<Never, int>(1), isTrue);
-      expect(const Right<Never, int>(1) == const Right<double, int>(1), isTrue);
-
-      expect(const Right<Never, int>(1) == const Right<Never, double>(1.0), isTrue);
-      expect(const Right<Never, double>(1.0) == const Right<Never, int>(1), isTrue);
-    });
-
-    test('Equality - not equal', () {
-      expect(const Left<int, int>(1) == const Right<int, int>(1), isFalse); // ignore: unrelated_type_equality_checks
-      expect(Right<int, double>(1) == Right<int, double>(2), isFalse);      // ignore: prefer_const_constructors
-    });
-  });
 }
