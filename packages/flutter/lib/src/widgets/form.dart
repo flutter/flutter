@@ -513,7 +513,8 @@ class FormField<T> extends StatefulWidget {
   ///
   /// The `initialValue` affects the form field's state in two cases:
   /// 1. When the form field is first built, `initialValue` determines the field's initial state.
-  /// 2. When [FormField.reset] is called, the form field is reset to this `initialValue`.
+  /// 2. When [FormFieldState.reset] is called (either directly or by calling
+  ///    [FormFieldState.reset]), the form field is reset to this `initialValue`.
   final T? initialValue;
 
   /// Whether the form is able to receive user input.
