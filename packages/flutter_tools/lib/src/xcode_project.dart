@@ -471,8 +471,8 @@ class IosProject extends XcodeBasedProject {
           if (domains != null) {
             return <String>[
               for (final String domain in domains)
-                 if (_associatedDomainPattern.firstMatch(domain) case final RegExpMatch match)
-                   match.group(1)!
+                if (_associatedDomainPattern.firstMatch(domain) case final RegExpMatch match)
+                  match.group(1)!
             ];
           }
         }
