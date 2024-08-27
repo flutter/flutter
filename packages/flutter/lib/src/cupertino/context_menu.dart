@@ -1388,7 +1388,7 @@ class _ContextMenuSheet extends StatelessWidget {
   final List<Widget> actions;
   final _ContextMenuLocation _contextMenuLocation;
   final Orientation _orientation;
-  // Link the scrollbar to the scrollview by providing them the same scroll
+  // Link the scrollbar to the scrollview by providing both the same scroll
   // controller.
   final ScrollController _controller = ScrollController();
 
