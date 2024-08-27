@@ -319,7 +319,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/color_scheme/dynamic_content_color.0_test.dart',
   'examples/api/test/material/platform_menu_bar/platform_menu_bar.0_test.dart',
   'examples/api/test/material/flexible_space_bar/flexible_space_bar.0_test.dart',
-  'examples/api/test/material/selection_area/selection_area.0_test.dart',
   'examples/api/test/material/navigation_rail/navigation_rail.extended_animation.0_test.dart',
   'examples/api/test/rendering/sliver_grid/sliver_grid_delegate_with_fixed_cross_axis_count.0_test.dart',
   'examples/api/test/rendering/sliver_grid/sliver_grid_delegate_with_fixed_cross_axis_count.1_test.dart',
@@ -333,7 +332,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/navigator/navigator_state.restorable_push.0_test.dart',
   'examples/api/test/widgets/focus_manager/focus_node.unfocus.0_test.dart',
   'examples/api/test/widgets/framework/build_owner.0_test.dart',
-  'examples/api/test/widgets/framework/error_widget.0_test.dart',
   'examples/api/test/widgets/autofill/autofill_group.0_test.dart',
   'examples/api/test/widgets/nested_scroll_view/nested_scroll_view_state.0_test.dart',
   'examples/api/test/widgets/scroll_position/scroll_metrics_notification.0_test.dart',
@@ -356,6 +354,5 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/restoration/restoration_mixin.0_test.dart',
   'examples/api/test/widgets/actions/focusable_action_detector.0_test.dart',
   'examples/api/test/widgets/focus_scope/focus_scope.0_test.dart',
-  'examples/api/test/widgets/scroll_view/custom_scroll_view.1_test.dart',
   'examples/api/test/gestures/pointer_signal_resolver/pointer_signal_resolver.0_test.dart',
 };
