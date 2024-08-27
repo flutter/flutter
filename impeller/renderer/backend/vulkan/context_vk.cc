@@ -157,18 +157,8 @@ void ContextVK::Setup(Settings settings) {
   auto& dispatcher = VULKAN_HPP_DEFAULT_DISPATCHER;
   dispatcher.init(settings.proc_address_callback);
 
-  // Enable Vulkan validation if either:
-  // 1. The user has explicitly enabled it.
-  // 2. We are in a combination of debug mode, and running on Android.
-  // (It's possible 2 is overly conservative and we can simplify this)
-  auto enable_validation = settings.enable_validation;
-
-#if defined(FML_OS_ANDROID) && !defined(NDEBUG)
-  enable_validation = true;
-#endif
-
   auto caps = std::shared_ptr<CapabilitiesVK>(new CapabilitiesVK(
-      enable_validation, settings.fatal_missing_validations));
+      settings.enable_validation, settings.fatal_missing_validations));
 
   if (!caps->IsValid()) {
     VALIDATION_LOG << "Could not determine device capabilities.";
