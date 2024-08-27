@@ -1191,6 +1191,23 @@ enum ResizeImagePolicy {
 /// Instructs Flutter to decode the image at the specified dimensions
 /// instead of at its native size.
 ///
+/// [width] and [height] parameters refer to logical pixels.
+///
+/// Logical pixels are roughly the same visual size across devices.
+/// Physical pixels are the size of the actual hardware pixels on the device.
+/// The number of physical pixels per logical pixel is described by the `devicePixelRatio`.
+///
+/// For example, if you want to resize the image to half of the screen's width, you can use:
+///
+/// ```dart
+///    Image(
+///      image: ResizeImage(
+///        FileImage(File(pathRefImage)),
+///        width: (MediaQuery.sizeOf(context).width / 2).toInt(), // Half of the screen's width
+///      ),
+///    );
+/// ```
+///
 /// This allows finer control of the size of the image in [ImageCache] and is
 /// generally used to reduce the memory footprint of [ImageCache].
 ///
