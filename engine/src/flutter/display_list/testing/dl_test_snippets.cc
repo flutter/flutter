@@ -835,37 +835,37 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
        }},
       {"DrawImageNine",
        {
-           {1, 48, 1,
+           {1, 48, 9,
             [](DlOpReceiver& r) {
               r.drawImageNine(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
                               DlFilterMode::kNearest, false);
             }},
-           {1, 48, 1,
+           {1, 48, 9,
             [](DlOpReceiver& r) {
               r.drawImageNine(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
                               DlFilterMode::kNearest, true);
             }},
-           {1, 48, 1,
+           {1, 48, 9,
             [](DlOpReceiver& r) {
               r.drawImageNine(TestImage1, {10, 10, 25, 20}, {10, 10, 80, 80},
                               DlFilterMode::kNearest, false);
             }},
-           {1, 48, 1,
+           {1, 48, 9,
             [](DlOpReceiver& r) {
               r.drawImageNine(TestImage1, {10, 10, 20, 20}, {10, 10, 85, 80},
                               DlFilterMode::kNearest, false);
             }},
-           {1, 48, 1,
+           {1, 48, 9,
             [](DlOpReceiver& r) {
               r.drawImageNine(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
                               DlFilterMode::kLinear, false);
             }},
-           {1, 48, 1,
+           {1, 48, 9,
             [](DlOpReceiver& r) {
               r.drawImageNine(TestImage2, {10, 10, 15, 15}, {10, 10, 80, 80},
                               DlFilterMode::kNearest, false);
             }},
-           {1, 48, 1,
+           {1, 48, 9,
             [](DlOpReceiver& r) {
               auto dl_image = DlImage::Make(TestSkImage);
               r.drawImageNine(dl_image, {10, 10, 15, 15}, {10, 10, 80, 80},
