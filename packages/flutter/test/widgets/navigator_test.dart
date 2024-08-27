@@ -5352,6 +5352,56 @@ void main() {
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
         skip: isBrowser, // [intended] only non-web Android supports predictive back.
       );
+
+      testWidgets('canPop and onPopInvoked', (WidgetTester tester) async {
+        bool page2CanPop = false;
+        bool page3CanPop = false;
+        final CanPopPage<int> page1 = CanPopPage<int>(name: 'page1', pageCanPop: () => false);
+        final CanPopPage<String> page2 = CanPopPage<String>(name: 'page2', pageCanPop: () => page2CanPop);
+        final CanPopPage<bool> page3 = CanPopPage<bool>(name: 'page3', pageCanPop: () => page3CanPop);
+        final List<Page<Object?>> pages = <Page<Object?>>[page1, page2, page3];
+        final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Navigator(
+              key: key,
+              pages: pages,
+              onDidRemovePage: (Page<Object?> page) => pages.remove(page),
+            ),
+          ),
+        );
+
+        expect(find.text('page3'), findsOneWidget);
+
+        key.currentState!.maybePop(true);
+        await tester.pumpAndSettle();
+        expect(find.text('page3'), findsOneWidget);
+        expect(page3.popInvoked, <CanPopPageInvoke>[(false, true)]);
+
+        page3CanPop = true;
+        key.currentState!.maybePop(false);
+        await tester.pumpAndSettle();
+        expect(find.text('page3'), findsNothing);
+        expect(find.text('page2'), findsOneWidget);
+        expect(page3.popInvoked, <CanPopPageInvoke>[(false, true), (true, false)]);
+
+        key.currentState!.maybePop('some string');
+        await tester.pumpAndSettle();
+        expect(find.text('page2'), findsOneWidget);
+        expect(page2.popInvoked, <CanPopPageInvoke>[(false, 'some string')]);
+
+        page2CanPop = true;
+        key.currentState!.maybePop('another string');
+        await tester.pumpAndSettle();
+        expect(find.text('page2'), findsNothing);
+        expect(find.text('page1'), findsOneWidget);
+        expect(page2.popInvoked, <CanPopPageInvoke>[(false, 'some string'), (true, 'another string')]);
+
+        key.currentState!.maybePop(1);
+        await tester.pumpAndSettle();
+        expect(find.text('page1'), findsOneWidget);
+        expect(page1.popInvoked, <CanPopPageInvoke>[(false, 1)]);
+      });
     });
   });
 }
@@ -5483,6 +5533,36 @@ class ZeroTransitionPage extends Page<void> {
     return NoAnimationPageRoute(
       settings: this,
       pageBuilder: (BuildContext context) => Text(name!),
+    );
+  }
+}
+
+typedef CanPopPageInvoke = (bool didPop, Object? result);
+
+class CanPopPage<T> extends Page<T> {
+  CanPopPage({
+    super.key,
+    super.name,
+    required this.pageCanPop,
+    super.arguments,
+  });
+
+  final List<CanPopPageInvoke> popInvoked = <CanPopPageInvoke>[];
+
+  @override
+  bool get canPop => pageCanPop();
+  final ValueGetter<bool> pageCanPop;
+
+  @override
+  PopInvokedWithResultCallback<T> get onPopInvoked => (bool didPop, T? result) {
+    popInvoked.add((didPop, result));
+  };
+
+  @override
+  Route<T> createRoute(BuildContext context) {
+    return MaterialPageRoute<T>(
+      builder: (BuildContext context) => Text(name!),
+      settings: this,
     );
   }
 }

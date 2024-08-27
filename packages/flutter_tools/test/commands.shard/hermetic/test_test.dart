@@ -112,9 +112,10 @@ void main() {
     (package.childDirectory('.dart_tool')
         .childFile('package_config.json')
       ..createSync(recursive: true))
-        .writeAsString(_packageConfigContents);
+        .writeAsStringSync(_packageConfigContents);
     package.childDirectory('test').childFile('some_test.dart').createSync(recursive: true);
     package.childDirectory('integration_test').childFile('some_integration_test.dart').createSync(recursive: true);
+
 
     final File flutterToolsPackageConfigFile = fs.directory(
       fs.path.join(
@@ -1429,6 +1430,53 @@ dev_dependencies:
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
     });
+  });
+
+  testUsingContext('Can test in a pub workspace',
+      () async {
+    final String root = fs.path.rootPrefix(fs.currentDirectory.absolute.path);
+    final Directory package = fs.directory('${root}package').absolute;
+    package.childFile('pubspec.yaml').createSync(recursive: true);
+    package.childFile('pubspec.yaml').writeAsStringSync('''
+workspace:
+  - app/
+''');
+
+    final Directory app = package.childDirectory('app');
+    app.createSync();
+    app.childFile('pubspec.yaml').writeAsStringSync('''
+$_pubspecContents
+resolution: workspace
+''');
+    app.childDirectory('test').childFile('some_test.dart').createSync(recursive: true);
+    app.childDirectory('integration_test').childFile('some_integration_test.dart').createSync(recursive: true);
+
+    fs.currentDirectory = app;
+
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+    final FakePackageTest fakePackageTest = FakePackageTest();
+    final TestCommand testCommand = TestCommand(
+      testWrapper: fakePackageTest,
+      testRunner: testRunner,
+    );
+    final CommandRunner<void> commandRunner =
+    createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+    ]);
+    expect(
+      testRunner.lastDebuggingOptionsValue.buildInfo.packageConfigPath,
+      package
+        .childDirectory('.dart_tool')
+        .childFile('package_config.json')
+        .path,
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Logger: () => logger,
   });
 }
 

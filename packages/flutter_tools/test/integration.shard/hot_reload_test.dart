@@ -81,7 +81,7 @@ void main() {
   });
 
   testWithoutContext('hot restart works without error', () async {
-    await flutter.run(verbose: true, noDevtools: true);
+    await flutter.run(verbose: true);
     await flutter.hotRestart();
   });
 
