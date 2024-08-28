@@ -1,8 +1,6 @@
 # Flutter Engine
 
 [![Flutter CI Status](https://flutter-dashboard.appspot.com/api/public/build-status-badge?repo=engine)](https://flutter-dashboard.appspot.com/#/build?repo=engine)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/flutter/engine/badge)](https://deps.dev/project/github/flutter%2Fengine)
-[![SLSA 1](https://slsa.dev/images/gh-badge-level1.svg)](https://slsa.dev)
 
 Flutter is Google's SDK for crafting beautiful, fast user experiences for
 mobile, web, and desktop from a single codebase. Flutter works with existing
