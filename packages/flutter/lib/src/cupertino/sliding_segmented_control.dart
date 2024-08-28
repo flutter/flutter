@@ -898,7 +898,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     RenderBox? child = firstChild;
     while (child != null) {
       final _SegmentedControlContainerBoxParentData childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
-      final double clampX = dx.clamp(childParentData.offset.dx, child.size.width + childParentData.offset.dx);
+      final double clampX = clampDouble(dx, childParentData.offset.dx, child.size.width + childParentData.offset.dx);
       if (clampX == dx) {
         break;
       }
