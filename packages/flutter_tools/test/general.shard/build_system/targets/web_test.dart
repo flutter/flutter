@@ -1035,8 +1035,8 @@ void main() {
                     '-Ddart.vm.profile=${buildMode == 'profile'}',
                     '-Ddart.vm.product=${buildMode == 'release'}',
                     if (buildMode != 'debug') ...<String>[
-                      '--delete-tostring-package-uri=dart:ui',
-                      '--delete-tostring-package-uri=package:flutter',
+                      '--extra-compiler-option=delete-tostring-package-uri=dart:ui',
+                      '--extra-compiler-option=delete-tostring-package-uri=package:flutter',
                     ],
                     if (renderer == WebRendererMode.skwasm) ...<String>[
                       '--extra-compiler-option=--import-shared-memory',
