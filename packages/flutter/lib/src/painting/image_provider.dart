@@ -1191,7 +1191,7 @@ enum ResizeImagePolicy {
 /// Instructs Flutter to decode the image at the specified dimensions
 /// instead of at its native size.
 ///
-/// [width] and [height] parameters refer to logical pixels.
+/// The [width] and [height] parameters refer to logical pixels.
 ///
 /// Logical pixels are roughly the same visual size across devices.
 /// Physical pixels are the size of the actual hardware pixels on the device.
