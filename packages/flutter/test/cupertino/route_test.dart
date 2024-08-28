@@ -2857,7 +2857,7 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100)); // Advance route transition animation.
 
     // The page two is showing and the text widget has focus.
     Element textOnPageTwo = tester.element(find.text(pageTwoText));
@@ -2867,7 +2867,7 @@ void main() {
     // Navigate back to page one.
     navigator.pop();
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100)); // Advance route transition animation.
 
     // Navigate to page two again with requestFocus set to false.
     navigator.push(
@@ -2879,7 +2879,7 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100)); // Advance route transition animation.
 
     // The page two is showing and the text widget is not focused.
     textOnPageTwo = tester.element(find.text(pageTwoText));
