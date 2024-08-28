@@ -1311,6 +1311,8 @@ class PerfTest {
       late Device selectedDevice;
       selectedDevice = device ?? await devices.workingDevice;
       await selectedDevice.unlock();
+      await selectedDevice.toggleFixedPerformanceMode(true);
+
       final String deviceId = selectedDevice.deviceId;
       final String? localEngine = localEngineFromEnv;
       final String? localEngineHost = localEngineHostFromEnv;
@@ -1415,6 +1417,7 @@ class PerfTest {
       } finally {
         await resetManifest();
         await resetPlist();
+        await selectedDevice.toggleFixedPerformanceMode(false);
       }
 
       final Map<String, dynamic> data = json.decode(
