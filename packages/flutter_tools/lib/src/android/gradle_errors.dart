@@ -525,7 +525,7 @@ final GradleHandledError incompatibleJavaAndAgpVersionsHandler= GradleHandledErr
     final String helpfulGradleError = line.trim().substring(2);
 
     globals.printBox(
-      '${globals.logger.terminal.warningMark} ${helpfulGradleError}\n\n'
+      '${globals.logger.terminal.warningMark} $helpfulGradleError\n\n'
       'To fix this issue, try updating to the latest Android SDK and Android Studio on: ${AndroidProject.installAndroidStudioUrl}\n'
       'If that does not work, you can set the Java version used by Flutter by \n'
       'running `flutter config --jdk-dir=“</path/to/jdk>“`\n\n'
