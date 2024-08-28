@@ -1873,6 +1873,51 @@ void main() {
       await tester.pump();
       expect(tester.takeException(), null);
     });
+
+    testWidgets('requestFocus can be updated', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(MaterialApp(
+        navigatorKey: navigatorKey,
+        home: const Text('home'),
+      ));
+      expect(find.text('page2'), findsNothing);
+
+      // Navigate to page 2.
+      navigatorKey.currentState!.push<void>(MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return const Text('page2');
+        },
+      ));
+
+      await tester.pumpAndSettle();
+      expect(find.text('page2'), findsOneWidget);
+
+      // Check that the modal route is requesting focus.
+      ModalRoute<void>? modalRoute = ModalRoute.of<void>(tester.element(find.text('page2')));
+      expect(modalRoute, isNotNull);
+      expect(modalRoute!.requestFocus, isTrue);
+
+      // Navigate back to the home page.
+      navigatorKey.currentState!.pop();
+      await tester.pumpAndSettle();
+      expect(find.text('page2'), findsNothing);
+
+      // Navigate to page 2 again with requestFocus set to false.
+      navigatorKey.currentState!.push<void>(MaterialPageRoute<void>(
+        requestFocus: false,
+        builder: (BuildContext context) {
+          return const Text('page2');
+        },
+      ));
+
+      await tester.pumpAndSettle();
+      expect(find.text('page2'), findsOneWidget);
+
+      // Check that the modal route is not requesting focus.
+      modalRoute = ModalRoute.of<void>(tester.element(find.text('page2')));
+      expect(modalRoute, isNotNull);
+      expect(modalRoute!.requestFocus, isFalse);
+    });
   });
 
   testWidgets('can be dismissed with escape keyboard shortcut', (WidgetTester tester) async {
