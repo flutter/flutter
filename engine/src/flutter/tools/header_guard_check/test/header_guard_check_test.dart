@@ -1,15 +1,17 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+@TestOn('vm')
+library;
 
 import 'dart:io' as io;
 
 import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:header_guard_check/header_guard_check.dart';
-import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as p;
+import 'package:test/test.dart';
 
-Future<int> main(List<String> args) async {
+Future<int> main() async {
   void withTestRepository(String path, void Function(io.Directory) fn) {
     // Create a temporary directory and delete it when we're done.
     final io.Directory tempDir = io.Directory.systemTemp.createTempSync('header_guard_check_test');

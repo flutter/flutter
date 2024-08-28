@@ -1,18 +1,21 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+@TestOn('vm')
+library;
 
 import 'dart:io' as io;
 
 import 'package:header_guard_check/src/header_file.dart';
-import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as p;
 import 'package:source_span/source_span.dart';
+import 'package:test/test.dart';
 
-Future<int> main(List<String> args) async {
+Future<int> main() async {
   void withTestFile(String path, String contents, void Function(io.File) fn) {
     // Create a temporary file and delete it when we're done.
-    final io.Directory tempDir = io.Directory.systemTemp.createTempSync('header_guard_check_test');
+    final io.Directory tempDir =
+        io.Directory.systemTemp.createTempSync('header_guard_check_test');
     final io.File file = io.File(p.join(tempDir.path, path));
     file.writeAsStringSync(contents);
     try {
@@ -157,7 +160,8 @@ Future<int> main(List<String> args) async {
           guard: null,
           pragmaOnce: null,
         );
-        expect(headerFile.computeExpectedName(engineRoot: ''), endsWith('FOO_BAR_BAZ_H_'));
+        expect(headerFile.computeExpectedName(engineRoot: ''),
+            endsWith('FOO_BAR_BAZ_H_'));
       }
     });
 
@@ -240,14 +244,16 @@ Future<int> main(List<String> args) async {
       withTestFile('foo.h', input, (io.File file) {
         final HeaderFile headerFile = HeaderFile.parse(file.path);
         expect(headerFile.fix(engineRoot: p.dirname(file.path)), isTrue);
-        expect(file.readAsStringSync(), <String>[
-          '#ifndef FLUTTER_FOO_H_',
-          '#define FLUTTER_FOO_H_',
-          '',
-          '// ...',
-          '#endif  // FLUTTER_FOO_H_',
-          '',
-        ].join('\n'));
+        expect(
+            file.readAsStringSync(),
+            <String>[
+              '#ifndef FLUTTER_FOO_H_',
+              '#define FLUTTER_FOO_H_',
+              '',
+              '// ...',
+              '#endif  // FLUTTER_FOO_H_',
+              '',
+            ].join('\n'));
       });
     });
 
@@ -261,13 +267,15 @@ Future<int> main(List<String> args) async {
       withTestFile('foo.h', input, (io.File file) {
         final HeaderFile headerFile = HeaderFile.parse(file.path);
         expect(headerFile.fix(engineRoot: p.dirname(file.path)), isTrue);
-        expect(file.readAsStringSync(), <String>[
-          '#ifndef FLUTTER_FOO_H_',
-          '#define FLUTTER_FOO_H_',
-          '',
-          '#endif  // FLUTTER_FOO_H_',
-          '',
-        ].join('\n'));
+        expect(
+            file.readAsStringSync(),
+            <String>[
+              '#ifndef FLUTTER_FOO_H_',
+              '#define FLUTTER_FOO_H_',
+              '',
+              '#endif  // FLUTTER_FOO_H_',
+              '',
+            ].join('\n'));
       });
     });
 
@@ -287,27 +295,30 @@ Future<int> main(List<String> args) async {
       withTestFile('foo.h', input, (io.File file) {
         final HeaderFile headerFile = HeaderFile.parse(file.path);
         expect(headerFile.fix(engineRoot: p.dirname(file.path)), isTrue);
-        expect(file.readAsStringSync(), <String>[
-          '// 1.',
-          '// 2.',
-          '// 3.',
-          '',
-          '#ifndef FLUTTER_FOO_H_',
-          '#define FLUTTER_FOO_H_',
-          '',
-          "#import 'flutter/shell/platform/darwin/Flutter.h'",
-          '',
-          '@protocl Flutter',
-          '',
-          '@end',
-          '',
-          '#endif  // FLUTTER_FOO_H_',
-          '',
-        ].join('\n'));
+        expect(
+            file.readAsStringSync(),
+            <String>[
+              '// 1.',
+              '// 2.',
+              '// 3.',
+              '',
+              '#ifndef FLUTTER_FOO_H_',
+              '#define FLUTTER_FOO_H_',
+              '',
+              "#import 'flutter/shell/platform/darwin/Flutter.h'",
+              '',
+              '@protocl Flutter',
+              '',
+              '@end',
+              '',
+              '#endif  // FLUTTER_FOO_H_',
+              '',
+            ].join('\n'));
       });
     });
 
-    test('does not touch a file with an existing guard and another #define', () {
+    test('does not touch a file with an existing guard and another #define',
+        () {
       final String input = <String>[
         '// 1.',
         '// 2.',
