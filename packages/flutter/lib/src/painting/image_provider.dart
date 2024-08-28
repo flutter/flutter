@@ -1203,7 +1203,7 @@ enum ResizeImagePolicy {
 ///    Image(
 ///      image: ResizeImage(
 ///        FileImage(File(pathRefImage)),
-///        width: (MediaQuery.sizeOf(context).width / 2).toInt(), // Half of the screen's width
+///        width: (MediaQuery.sizeOf(context).width / 2).toInt(), // Half of the screen's width.
 ///      ),
 ///    );
 /// ```
