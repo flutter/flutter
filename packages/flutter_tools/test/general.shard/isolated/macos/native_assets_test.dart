@@ -497,18 +497,19 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
       return;
     }
 
-    final File packagesFile = fileSystem
+    final File packageConfigFile = fileSystem
         .directory(projectUri)
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
-    await packagesFile.parent.create();
-    await packagesFile.create();
+    await packageConfigFile.parent.create();
+    await packageConfigFile.create();
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      packagesFile,
+      packageConfigFile,
       logger: environment.logger,
     );
     final NativeAssetsBuildRunner runner = NativeAssetsBuildRunnerImpl(
       projectUri,
+      packageConfigFile.path,
       packageConfig,
       fileSystem,
       logger,

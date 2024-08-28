@@ -67,7 +67,7 @@ void main() {
 
   testWidgets('text field demo page has one h1 tag', (WidgetTester tester) async {
     await pumpsUseCase(tester, TextFieldUseCase());
-    final Finder findHeadingLevelOnes = find.bySemanticsLabel('TextField demo');
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('TextField Demo');
     await tester.pumpAndSettle();
     expect(findHeadingLevelOnes, findsOne);
   });

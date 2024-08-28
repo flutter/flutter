@@ -214,15 +214,6 @@ class FlutterProject {
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
 
-  /// The `.packages` file of this project.
-  File get packagesFile => directory.childFile('.packages');
-
-  /// The `package_config.json` file of the project.
-  ///
-  /// This is the replacement for .packages which contains language
-  /// version information.
-  File get packageConfigFile => directory.childDirectory('.dart_tool').childFile('package_config.json');
-
   /// The `.metadata` file of this project.
   File get metadataFile => directory.childFile('.metadata');
 
@@ -577,22 +568,33 @@ class AndroidProject extends FlutterProjectPlatform {
   /// The file must exist and it must be written in either Groovy (build.gradle)
   /// or Kotlin (build.gradle.kts).
   File get hostAppGradleFile {
-    final File buildGroovy = hostAppGradleRoot.childFile('build.gradle');
-    final File buildKotlin = hostAppGradleRoot.childFile('build.gradle.kts');
+    return getGroovyOrKotlin(hostAppGradleRoot, 'build.gradle');
+  }
 
-    if (buildGroovy.existsSync() && buildKotlin.existsSync()) {
+  /// Gets the project root level Gradle settings file.
+  ///
+  /// The file must exist and it must be written in either Groovy (build.gradle)
+  /// or Kotlin (build.gradle.kts).
+  File get settingsGradleFile {
+    return getGroovyOrKotlin(hostAppGradleRoot, 'settings.gradle');
+  }
+
+  File getGroovyOrKotlin(Directory directory, String baseFilename) {
+    final File groovyFile = directory.childFile(baseFilename);
+    final File kotlinFile = directory.childFile('$baseFilename.kts');
+
+    if (groovyFile.existsSync()) {
       // We mimic Gradle's behavior of preferring Groovy over Kotlin when both files exist.
-      return buildGroovy;
+      return groovyFile;
     }
-
-    if (buildKotlin.existsSync()) {
-      return buildKotlin;
+    if (kotlinFile.existsSync()) {
+      return kotlinFile;
     }
 
     // TODO(bartekpacia): An exception should be thrown when neither
-    // build.gradle nor build.gradle.kts exist, instead of falling back to the
+    // the Groovy or Kotlin file exists, instead of falling back to the
     // Groovy file. See #141180.
-    return buildGroovy;
+    return groovyFile;
   }
 
   /// Gets the module-level build.gradle file.
@@ -602,22 +604,7 @@ class AndroidProject extends FlutterProjectPlatform {
   /// or Kotlin (build.gradle.kts).
   File get appGradleFile {
     final Directory appDir = hostAppGradleRoot.childDirectory('app');
-    final File buildGroovy = appDir.childFile('build.gradle');
-    final File buildKotlin = appDir.childFile('build.gradle.kts');
-
-    if (buildGroovy.existsSync() && buildKotlin.existsSync()) {
-      // We mimic Gradle's behavior of preferring Groovy over Kotlin when both files exist.
-      return buildGroovy;
-    }
-
-    if (buildKotlin.existsSync()) {
-      return buildKotlin;
-    }
-
-    // TODO(bartekpacia): An exception should be thrown when neither
-    // build.gradle nor build.gradle.kts exist, instead of falling back to the
-    // Groovy file. See #141180.
-    return buildGroovy;
+    return getGroovyOrKotlin(appDir, 'build.gradle');
   }
 
   File get appManifestFile {
