@@ -977,12 +977,6 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     }
   }
 
-  Size _calculateChildSize(BoxConstraints constraints) {
-    final double childWidth = _getMaxChildWidth(constraints);
-    final double maxHeight = _getMaxChildHeight(constraints, childWidth);
-    return Size(childWidth, maxHeight);
-  }
-
   double _getMaxChildWidth(BoxConstraints constraints) {
     final int childCount = this.childCount ~/ 2 + 1;
     double childWidth = (constraints.minWidth - totalSeparatorWidth) / childCount;
@@ -1049,13 +1043,23 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
 
   @override
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    final Size childSize = _calculateChildSize(constraints);
-    final BoxConstraints childConstraints = BoxConstraints.tight(childSize);
+    final List<double> segmentWidths = _getChildWidths(constraints);
 
+    final double childHeight = _getMaxChildHeight(constraints, constraints.maxWidth);
+    final BoxConstraints separatorConstraints = BoxConstraints(minHeight: childHeight, maxHeight: childHeight);
+
+    int index = 0;
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
-    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
-      baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDryBaseline(childConstraints, baseline)));
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final BoxConstraints childConstraints = BoxConstraints.tight(Size(segmentWidths[index ~/ 2], childHeight));
+      final BoxConstraints constraints = index.isEven ? childConstraints : separatorConstraints;
+      baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDryBaseline(constraints, baseline)));
+
+      child = childAfter(child);
+      index++;
     }
+
     return baselineOffset.offset;
   }
 
