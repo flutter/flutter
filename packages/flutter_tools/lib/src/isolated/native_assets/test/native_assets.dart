@@ -26,10 +26,8 @@ class TestCompilerNativeAssetsBuilderImpl
       testCompilerBuildNativeAssets(buildInfo);
 
   @override
-  String windowsPathWithBuildDirectory(FlutterProject project, Platform platform) {
-    return '${nativeAssetsBuildUri(project.directory.uri, OS.windows).toFilePath()};'
-           '${platform.environment['PATH']}';
-  }
+  String windowsBuildDirectory(FlutterProject project) =>
+      nativeAssetsBuildUri(project.directory.uri, OS.windows).toFilePath();
 }
 
 Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {

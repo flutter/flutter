@@ -129,7 +129,7 @@ void main() {
         'SERVER_PORT': '0',
         'APP_NAME': '',
         'FLUTTER_TEST_IMPELLER': 'true',
-        'PATH': device.nativeAssetsBuilder!.windowsPathWithBuildDirectory(project, platform),
+        'PATH': '${device.nativeAssetsBuilder!.windowsBuildDirectory(project)};${platform.environment['PATH']}',
       }));
 
     await device.start('example.dill');
@@ -355,7 +355,6 @@ class FakeHttpServer extends Fake implements HttpServer {
 
 class FakeNativeAssetsBuilder extends Fake implements TestCompilerNativeAssetsBuilder {
   @override
-  String windowsPathWithBuildDirectory(FlutterProject project, Platform platform) {
-    return r'C:\native_assets\path;C:\other\path';
-  }
+  String windowsBuildDirectory(FlutterProject project) =>
+      r'C:\native_assets\path';
 }

@@ -190,7 +190,7 @@ class FlutterTesterDevice extends Device {
         environment: <String, String>{
           'FLUTTER_TEST': 'true',
           if (globals.platform.isWindows && _nativeAssetsBuilder != null)
-            'PATH': _nativeAssetsBuilder.windowsPathWithBuildDirectory(project, globals.platform),
+            'PATH': '${_nativeAssetsBuilder.windowsBuildDirectory(project)};${globals.platform.environment['PATH']}',
         },
       );
       if (!debuggingOptions.debuggingEnabled) {

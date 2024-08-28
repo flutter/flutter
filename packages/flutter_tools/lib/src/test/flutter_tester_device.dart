@@ -149,7 +149,7 @@ class FlutterTesterTestDevice extends TestDevice {
       if (testAssetDirectory != null)
         'UNIT_TEST_ASSETS': testAssetDirectory!,
       if (platform.isWindows && nativeAssetsBuilder != null && flutterProject != null)
-        'PATH': nativeAssetsBuilder!.windowsPathWithBuildDirectory(flutterProject!, platform),
+        'PATH': '${nativeAssetsBuilder!.windowsBuildDirectory(flutterProject!)};${platform.environment['PATH']}',
     };
 
     logger.printTrace('test $id: Starting flutter_tester process with command=$command, environment=$environment');
