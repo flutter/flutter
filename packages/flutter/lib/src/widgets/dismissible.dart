@@ -513,7 +513,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   void _handleDismissUpdateValueChanged() {
-    if (widget.onUpdate case final DismissUpdateCallback onUpdate) {
+    if (widget.onUpdate != null) {
       final bool oldDismissThresholdReached = _dismissThresholdReached;
       _dismissThresholdReached = _moveController.value > _dismissThreshold;
       final DismissUpdateDetails details = DismissUpdateDetails(
@@ -522,7 +522,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
           previousReached: oldDismissThresholdReached,
           progress: _moveController.value,
       );
-      onUpdate(details);
+      widget.onUpdate!(details);
     }
   }
 
@@ -580,7 +580,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
     // Use value returned by `shouldTriggerDismiss` if a callback is provided.
     // If the callback returns null, use the default behavior.
-    if (widget.shouldTriggerDismiss case final TriggerDismissCallback shouldDismissCallback) {
+    if (widget.shouldTriggerDismiss != null) {
       final TriggerDismissDetails triggerDismissDetails = TriggerDismissDetails(
         direction: _dismissDirection,
         reached: _moveController.value > _dismissThreshold,
@@ -589,7 +589,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         dragExtent: _dragExtent,
       );
 
-      final bool? shouldDismiss = shouldDismissCallback(triggerDismissDetails);
+      final bool? shouldDismiss = widget.shouldTriggerDismiss!(triggerDismissDetails);
 
       if (shouldDismiss != null) {
         if (_moveController.isDismissed) {
