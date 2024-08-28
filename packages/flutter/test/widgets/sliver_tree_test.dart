@@ -790,6 +790,7 @@ void main() {
   });
 
   testWidgets('TreeSliverNode should close all children when collapsed when animation is disabled', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/153889
     final TreeSliverController controller = TreeSliverController();
     final List<TreeSliverNode<String>> tree = <TreeSliverNode<String>>[
       TreeSliverNode<String>('First'),
