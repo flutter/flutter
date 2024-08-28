@@ -893,7 +893,6 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   double get separatorWidth => _kSeparatorInset.horizontal + _kSeparatorWidth;
   double get totalSeparatorWidth => separatorWidth * (childCount ~/ 2);
 
-  List<double> segmentWidths = <double>[];
   int getClosestSegmentIndex(double dx) {
     int index = 0;
     RenderBox? child = firstChild;
@@ -1068,7 +1067,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    segmentWidths = _getChildWidths(constraints);
+    final List<double> segmentWidths = _getChildWidths(constraints);
 
     final double childHeight = _getMaxChildHeight(constraints, double.infinity);
     final BoxConstraints separatorConstraints = BoxConstraints(minHeight: childHeight, maxHeight: childHeight);
