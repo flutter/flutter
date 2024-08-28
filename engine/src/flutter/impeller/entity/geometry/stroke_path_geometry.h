@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_ENTITY_GEOMETRY_STROKE_PATH_GEOMETRY_H_
 
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/geometry/matrix.h"
 
 namespace impeller {
 
@@ -28,7 +29,7 @@ class StrokePathGeometry final : public Geometry {
 
   Join GetStrokeJoin() const;
 
-  Scalar ComputeAlphaCoverage(const Entity& entity) const override;
+  Scalar ComputeAlphaCoverage(const Matrix& transform) const override;
 
  private:
   // |Geometry|

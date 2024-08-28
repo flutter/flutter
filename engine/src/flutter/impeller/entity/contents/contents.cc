@@ -49,7 +49,7 @@ Contents::Contents() = default;
 
 Contents::~Contents() = default;
 
-bool Contents::IsOpaque() const {
+bool Contents::IsOpaque(const Matrix& transform) const {
   return false;
 }
 

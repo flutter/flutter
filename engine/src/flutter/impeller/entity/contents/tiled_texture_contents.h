@@ -28,7 +28,7 @@ class TiledTextureContents final : public ColorSourceContents {
       std::function<std::shared_ptr<ColorFilterContents>(FilterInput::Ref)>;
 
   // |Contents|
-  bool IsOpaque() const override;
+  bool IsOpaque(const Matrix& transform) const override;
 
   // |Contents|
   bool Render(const ContentContext& renderer,

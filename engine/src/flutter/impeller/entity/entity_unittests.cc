@@ -2275,62 +2275,118 @@ TEST_P(EntityTest, CoverageForStrokePathWithNegativeValuesInTransform) {
 }
 
 TEST_P(EntityTest, SolidColorContentsIsOpaque) {
+  Matrix matrix;
   SolidColorContents contents;
+  contents.SetGeometry(Geometry::MakeRect(Rect::MakeLTRB(0, 0, 10, 10)));
+
   contents.SetColor(Color::CornflowerBlue());
-  ASSERT_TRUE(contents.IsOpaque());
+  EXPECT_TRUE(contents.IsOpaque(matrix));
   contents.SetColor(Color::CornflowerBlue().WithAlpha(0.5));
-  ASSERT_FALSE(contents.IsOpaque());
+  EXPECT_FALSE(contents.IsOpaque(matrix));
+
+  // Create stroked path that required alpha coverage.
+  contents.SetGeometry(Geometry::MakeStrokePath(
+      PathBuilder{}.AddLine({0, 0}, {100, 100}).TakePath(),
+      /*stroke_width=*/0.05));
+  contents.SetColor(Color::CornflowerBlue());
+
+  EXPECT_FALSE(contents.IsOpaque(matrix));
 }
 
 TEST_P(EntityTest, ConicalGradientContentsIsOpaque) {
+  Matrix matrix;
   ConicalGradientContents contents;
+  contents.SetGeometry(Geometry::MakeRect(Rect::MakeLTRB(0, 0, 10, 10)));
+
   contents.SetColors({Color::CornflowerBlue()});
-  ASSERT_FALSE(contents.IsOpaque());
+  EXPECT_FALSE(contents.IsOpaque(matrix));
   contents.SetColors({Color::CornflowerBlue().WithAlpha(0.5)});
-  ASSERT_FALSE(contents.IsOpaque());
+  EXPECT_FALSE(contents.IsOpaque(matrix));
+
+  // Create stroked path that required alpha coverage.
+  contents.SetGeometry(Geometry::MakeStrokePath(
+      PathBuilder{}.AddLine({0, 0}, {100, 100}).TakePath(),
+      /*stroke_width=*/0.05));
+  contents.SetColors({Color::CornflowerBlue()});
+
+  EXPECT_FALSE(contents.IsOpaque(matrix));
 }
 
 TEST_P(EntityTest, LinearGradientContentsIsOpaque) {
+  Matrix matrix;
   LinearGradientContents contents;
+  contents.SetGeometry(Geometry::MakeRect(Rect::MakeLTRB(0, 0, 10, 10)));
+
   contents.SetColors({Color::CornflowerBlue()});
-  ASSERT_TRUE(contents.IsOpaque());
+  EXPECT_TRUE(contents.IsOpaque(matrix));
   contents.SetColors({Color::CornflowerBlue().WithAlpha(0.5)});
-  ASSERT_FALSE(contents.IsOpaque());
+  EXPECT_FALSE(contents.IsOpaque(matrix));
   contents.SetColors({Color::CornflowerBlue()});
   contents.SetTileMode(Entity::TileMode::kDecal);
-  ASSERT_FALSE(contents.IsOpaque());
+  EXPECT_FALSE(contents.IsOpaque(matrix));
+
+  // Create stroked path that required alpha coverage.
+  contents.SetGeometry(Geometry::MakeStrokePath(
+      PathBuilder{}.AddLine({0, 0}, {100, 100}).TakePath(),
+      /*stroke_width=*/0.05));
+  contents.SetColors({Color::CornflowerBlue()});
+
+  EXPECT_FALSE(contents.IsOpaque(matrix));
 }
 
 TEST_P(EntityTest, RadialGradientContentsIsOpaque) {
+  Matrix matrix;
   RadialGradientContents contents;
+  contents.SetGeometry(Geometry::MakeRect(Rect::MakeLTRB(0, 0, 10, 10)));
+
   contents.SetColors({Color::CornflowerBlue()});
-  ASSERT_TRUE(contents.IsOpaque());
+  EXPECT_TRUE(contents.IsOpaque(matrix));
   contents.SetColors({Color::CornflowerBlue().WithAlpha(0.5)});
-  ASSERT_FALSE(contents.IsOpaque());
+  EXPECT_FALSE(contents.IsOpaque(matrix));
   contents.SetColors({Color::CornflowerBlue()});
   contents.SetTileMode(Entity::TileMode::kDecal);
-  ASSERT_FALSE(contents.IsOpaque());
+  EXPECT_FALSE(contents.IsOpaque(matrix));
+
+  // Create stroked path that required alpha coverage.
+  contents.SetGeometry(Geometry::MakeStrokePath(
+      PathBuilder{}.AddLine({0, 0}, {100, 100}).TakePath(),
+      /*stroke_width=*/0.05));
+  contents.SetColors({Color::CornflowerBlue()});
+
+  EXPECT_FALSE(contents.IsOpaque(matrix));
 }
 
 TEST_P(EntityTest, SweepGradientContentsIsOpaque) {
+  Matrix matrix;
   RadialGradientContents contents;
+  contents.SetGeometry(Geometry::MakeRect(Rect::MakeLTRB(0, 0, 10, 10)));
+
   contents.SetColors({Color::CornflowerBlue()});
-  ASSERT_TRUE(contents.IsOpaque());
+  EXPECT_TRUE(contents.IsOpaque(matrix));
   contents.SetColors({Color::CornflowerBlue().WithAlpha(0.5)});
-  ASSERT_FALSE(contents.IsOpaque());
+  EXPECT_FALSE(contents.IsOpaque(matrix));
   contents.SetColors({Color::CornflowerBlue()});
   contents.SetTileMode(Entity::TileMode::kDecal);
-  ASSERT_FALSE(contents.IsOpaque());
+  EXPECT_FALSE(contents.IsOpaque(matrix));
+
+  // Create stroked path that required alpha coverage.
+  contents.SetGeometry(Geometry::MakeStrokePath(
+      PathBuilder{}.AddLine({0, 0}, {100, 100}).TakePath(),
+      /*stroke_width=*/0.05));
+  contents.SetColors({Color::CornflowerBlue()});
+
+  EXPECT_FALSE(contents.IsOpaque(matrix));
 }
 
 TEST_P(EntityTest, TiledTextureContentsIsOpaque) {
+  Matrix matrix;
   auto bay_bridge = CreateTextureForFixture("bay_bridge.jpg");
   TiledTextureContents contents;
   contents.SetTexture(bay_bridge);
   // This is a placeholder test. Images currently never decompress as opaque
   // (whether in Flutter or the playground), and so this should currently always
   // return false in practice.
-  ASSERT_FALSE(contents.IsOpaque());
+  EXPECT_FALSE(contents.IsOpaque(matrix));
 }
 
 TEST_P(EntityTest, PointFieldGeometryCoverage) {

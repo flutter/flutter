@@ -31,7 +31,7 @@ class SolidColorContents final : public ColorSourceContents {
   bool IsSolidColor() const override;
 
   // |Contents|
-  bool IsOpaque() const override;
+  bool IsOpaque(const Matrix& transform) const override;
 
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;

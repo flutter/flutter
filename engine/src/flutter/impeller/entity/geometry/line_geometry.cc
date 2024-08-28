@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/entity/geometry/line_geometry.h"
+#include "impeller/entity/geometry/geometry.h"
 
 namespace impeller {
 
@@ -12,19 +13,21 @@ LineGeometry::LineGeometry(Point p0, Point p1, Scalar width, Cap cap)
 }
 
 Scalar LineGeometry::ComputePixelHalfWidth(const Matrix& transform,
-                                           Scalar width) {
-  auto determinant = transform.GetDeterminant();
-  if (determinant == 0) {
-    return 0.0f;
+                                           Scalar width,
+                                           bool msaa) {
+  Scalar max_basis = transform.GetMaxBasisLengthXY();
+  if (max_basis == 0) {
+    return {};
   }
 
-  Scalar min_size = 1.0f / sqrt(std::abs(determinant));
+  Scalar min_size = (msaa ? kMinStrokeSize : kMinStrokeSizeMSAA) / max_basis;
   return std::max(width, min_size) * 0.5f;
 }
 
 Vector2 LineGeometry::ComputeAlongVector(const Matrix& transform,
-                                         bool allow_zero_length) const {
-  Scalar stroke_half_width = ComputePixelHalfWidth(transform, width_);
+                                         bool allow_zero_length,
+                                         bool msaa) const {
+  Scalar stroke_half_width = ComputePixelHalfWidth(transform, width_, msaa);
   if (stroke_half_width < kEhCloseEnough) {
     return {};
   }
@@ -44,8 +47,9 @@ Vector2 LineGeometry::ComputeAlongVector(const Matrix& transform,
 
 bool LineGeometry::ComputeCorners(Point corners[4],
                                   const Matrix& transform,
-                                  bool extend_endpoints) const {
-  auto along = ComputeAlongVector(transform, extend_endpoints);
+                                  bool extend_endpoints,
+                                  bool msaa) const {
+  auto along = ComputeAlongVector(transform, extend_endpoints, msaa);
   if (along.IsZero()) {
     return false;
   }
@@ -64,13 +68,18 @@ bool LineGeometry::ComputeCorners(Point corners[4],
   return true;
 }
 
+Scalar LineGeometry::ComputeAlphaCoverage(const Matrix& entity) const {
+  return Geometry::ComputeStrokeAlphaCoverage(entity, width_);
+}
+
 GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                const Entity& entity,
                                                RenderPass& pass) const {
   using VT = SolidFillVertexShader::PerVertexData;
 
   auto& transform = entity.GetTransform();
-  auto radius = ComputePixelHalfWidth(transform, width_);
+  auto radius = ComputePixelHalfWidth(
+      transform, width_, pass.GetSampleCount() == SampleCount::kCount4);
 
   if (cap_ == Cap::kRound) {
     std::shared_ptr<Tessellator> tessellator = renderer.GetTessellator();
@@ -79,7 +88,8 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
   }
 
   Point corners[4];
-  if (!ComputeCorners(corners, transform, cap_ == Cap::kSquare)) {
+  if (!ComputeCorners(corners, transform, cap_ == Cap::kSquare,
+                      pass.GetSampleCount() == SampleCount::kCount4)) {
     return kEmptyResult;
   }
 
@@ -110,7 +120,8 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
 
 std::optional<Rect> LineGeometry::GetCoverage(const Matrix& transform) const {
   Point corners[4];
-  if (!ComputeCorners(corners, transform, cap_ != Cap::kButt)) {
+  // Note: MSAA boolean doesn't matter for coverage computation.
+  if (!ComputeCorners(corners, transform, cap_ != Cap::kButt, /*msaa=*/false)) {
     return {};
   }
 

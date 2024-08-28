@@ -96,7 +96,7 @@ bool TiledTextureContents::UsesEmulatedTileMode(
 }
 
 // |Contents|
-bool TiledTextureContents::IsOpaque() const {
+bool TiledTextureContents::IsOpaque(const Matrix& transform) const {
   if (GetOpacityFactor() < 1 || x_tile_mode_ == Entity::TileMode::kDecal ||
       y_tile_mode_ == Entity::TileMode::kDecal) {
     return false;
@@ -104,7 +104,7 @@ bool TiledTextureContents::IsOpaque() const {
   if (color_filter_) {
     return false;
   }
-  return texture_->IsOpaque();
+  return texture_->IsOpaque() && !AppliesAlphaForStrokeCoverage(transform);
 }
 
 bool TiledTextureContents::Render(const ContentContext& renderer,
@@ -160,14 +160,16 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
           frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
           frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
           frag_info.alpha =
-              GetOpacityFactor() * GetGeometry()->ComputeAlphaCoverage(entity);
+              GetOpacityFactor() *
+              GetGeometry()->ComputeAlphaCoverage(entity.GetTransform());
           FSExternal::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
         } else {
           FS::FragInfo frag_info;
           frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
           frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
           frag_info.alpha =
-              GetOpacityFactor() * GetGeometry()->ComputeAlphaCoverage(entity);
+              GetOpacityFactor() *
+              GetGeometry()->ComputeAlphaCoverage(entity.GetTransform());
           FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
         }
 

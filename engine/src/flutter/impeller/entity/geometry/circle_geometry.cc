@@ -7,6 +7,8 @@
 #include "flutter/impeller/entity/geometry/circle_geometry.h"
 
 #include "flutter/impeller/entity/geometry/line_geometry.h"
+#include "impeller/core/formats.h"
+#include "impeller/entity/geometry/geometry.h"
 
 namespace impeller {
 
@@ -25,16 +27,26 @@ CircleGeometry::CircleGeometry(const Point& center,
   FML_DCHECK(stroke_width >= 0);
 }
 
+// |Geometry|
+Scalar CircleGeometry::ComputeAlphaCoverage(const Matrix& transform) const {
+  if (stroke_width_ < 0) {
+    return 1;
+  }
+  return Geometry::ComputeStrokeAlphaCoverage(transform, stroke_width_);
+}
+
 GeometryResult CircleGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                  const Entity& entity,
                                                  RenderPass& pass) const {
   auto& transform = entity.GetTransform();
 
-  Scalar half_width = stroke_width_ < 0 ? 0.0
-                                        : LineGeometry::ComputePixelHalfWidth(
-                                              transform, stroke_width_);
+  Scalar half_width = stroke_width_ < 0
+                          ? 0.0
+                          : LineGeometry::ComputePixelHalfWidth(
+                                transform, stroke_width_,
+                                pass.GetSampleCount() == SampleCount::kCount4);
 
-  std::shared_ptr<Tessellator> tessellator = renderer.GetTessellator();
+  const std::shared_ptr<Tessellator>& tessellator = renderer.GetTessellator();
 
   // We call the StrokedCircle method which will simplify to a
   // FilledCircleGenerator if the inner_radius is <= 0.
