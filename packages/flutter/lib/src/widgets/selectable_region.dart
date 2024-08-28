@@ -2604,20 +2604,14 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Copies the selections of all [Selectable]s.
   @override
   List<SelectedContentRange> getSelections() {
-    final List<SelectedContentRange> selections = <SelectedContentRange>[];
-    for (int index = 0; index < selectables.length; index += 1) {
-      final List<SelectedContentRange> selectedContentRanges = selectables[index].getSelections();
-      if (selectedContentRanges.isNotEmpty) {
-        selections.addAll(selectedContentRanges);
-      }
-    }
-    if (selections.isEmpty) {
-      assert(
-        true,
-        'This selection container delegate has an active selection, indicated by its currentSelectionStartIndex and currentSelectionEndIndex, but it provides no SelectedContentRanges to represent this selection.',
-      );
-      return <SelectedContentRange>[];
-    }
+    final List<SelectedContentRange> selections = <SelectedContentRange>[
+      for (final Selectable selectable in selectables)
+        ...selectable.getSelections(),
+    ];
+    assert(
+      selections.isEmpty == selectables.isEmpty,
+      'This selection container delegate should return a list of SelectedContentRange.empty even if no selection is currently active.',
+    );
     return selections;
   }
 
