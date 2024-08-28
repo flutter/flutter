@@ -259,6 +259,23 @@ TEST_F(PainterTest, DrawStrokedTextImpeller) {
   EXPECT_EQ(recorder.pathCount(), 0);
 }
 
+TEST_F(PainterTest, DrawStrokedTextWithLargeWidthImpeller) {
+  PretendImpellerIsEnabled(true);
+
+  auto style = makeStyle();
+  DlPaint foreground;
+  foreground.setDrawStyle(DlDrawStyle::kStroke);
+  foreground.setStrokeWidth(10);
+  style.foreground = foreground;
+
+  auto recorder = DlOpRecorder();
+  draw(style)->Dispatch(recorder);
+
+  EXPECT_EQ(recorder.textFrameCount(), 0);
+  EXPECT_EQ(recorder.blobCount(), 0);
+  EXPECT_EQ(recorder.pathCount(), 1);
+}
+
 TEST_F(PainterTest, DrawTextWithGradientImpeller) {
   PretendImpellerIsEnabled(true);
 
