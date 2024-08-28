@@ -282,7 +282,9 @@ void main() {
 
       artifact1.upToDate = false;
       logger.clear();
-      await cache.updateAll({DevelopmentArtifact.androidGenSnapshot});
+      await cache.updateAll(<DevelopmentArtifact>{
+        DevelopmentArtifact.androidGenSnapshot,
+      });
       expect(logger.statusText, 'Downloading Flutter for Android tools...\n');
     });
 
