@@ -3025,7 +3025,6 @@ void main() {
             builder: (BuildContext context, SearchController controller) {
               return const Icon(Icons.search);
             },
-            headerHeight: 32,
             suggestionsBuilder: (BuildContext context, SearchController controller) {
               return <Widget>[];
             },
