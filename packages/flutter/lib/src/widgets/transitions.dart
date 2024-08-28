@@ -145,42 +145,33 @@ class _AnimatedState extends State<AnimatedWidget> {
 /// Convenience function for passing around a builder for a transiton's secondary animation.
 typedef DelegatedTransitionBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child);
 
-/// Placeholder
+/// An exit animation for a route that can be provided to another route.
+///
+/// Used for the purposes of coordinating transitions between two routes with
+/// different route transitions. When a route is added to the stack, the original
+/// topmost route will look for this transition, and if diferent from its own
+/// `DelegatedTransition`, it will use this [builder] to animate off the screen.
+///
+/// This check is based on the run time type of the `DelegatedTransition`. So if
+/// the topmost route has a `DelegatedTransition` of the same type as the route
+/// below it, then the transition will not be used in the lower route, even if
+/// the builder is different.
 @immutable
-class DelegatedTransition {
-  /// Placeholder
+abstract class DelegatedTransition {
+  /// Creates a transition that will be passed to the previous page.
+  ///
+  /// The [builder] argument must not be null.
   const DelegatedTransition({
     required this.builder,
-    this.name
   });
 
-  /// Placeholder
+  /// The builder method that will wrap the page with the exit transition.
+  ///
+  /// When a route is added to the stack, this transition will play on the
+  /// previous route as the new route is animating on to the screen. If the new
+  /// route pops off of the stack, than this transition will play in reverse as
+  /// the previous page returns to the view.
   final DelegatedTransitionBuilder builder;
-
-  /// Placeholder
-  final String? name;
-
-  /// Placeholder
-  Widget call(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
-    return builder(context, animation, secondaryAnimation, child);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is DelegatedTransition
-      && other.name != null
-      && name != null
-      && other.name == name;
-  }
-
-  @override
-  int get hashCode => name.hashCode;
 }
 
 /// Animates the position of a widget relative to its normal position.

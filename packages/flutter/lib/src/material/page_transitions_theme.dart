@@ -749,9 +749,8 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   static const bool _kProfileForceDisableSnapshotting = bool.fromEnvironment('flutter.benchmarks.force_disable_snapshot');
 
   @override
-  DelegatedTransition? get delegatedTransition => DelegatedTransition(
+  DelegatedTransition? get delegatedTransition => ZoomDelegatedTransition(
     builder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) => snapshotAwareDelegatedTransition(context, animation, secondaryAnimation, child, allowSnapshotting, allowEnterRouteSnapshotting),
-    name: 'Flutter-Zoom-Transition',
   );
 
   /// The delegated transition.
@@ -809,6 +808,12 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
       child: child,
     );
   }
+}
+
+/// The [DelegatedTransition] for a Zoom page transition.
+class ZoomDelegatedTransition extends DelegatedTransition {
+  /// Creates a Zoom delegated transtion.
+  const ZoomDelegatedTransition({required super.builder});
 }
 
 /// Used by [PageTransitionsTheme] to define a horizontal [MaterialPageRoute]

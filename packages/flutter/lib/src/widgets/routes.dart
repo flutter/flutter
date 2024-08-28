@@ -1484,7 +1484,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     final Widget originalTransitions = buildTransitions(context, animation, flexAnimation, child);
 
     if (nextRouteTransition != null) {
-      return nextRouteTransition!(context, animation, secondaryAnimation, originalTransitions);
+      return nextRouteTransition!.builder(context, animation, secondaryAnimation, originalTransitions);
     } else {
       return originalTransitions;
     }
@@ -2009,8 +2009,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     if (nextRoute is ModalRoute<T> && nextRoute.delegatedTransition == null && nextRoute.subtreeContext == null && this.subtreeContext != null) {
       nextRoute.setDelegatedTransition(this.subtreeContext!);
     }
-    if (nextRoute is ModalRoute<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition != this.delegatedTransition) {
-      if (receivedTransition != nextRoute.delegatedTransition) {
+    if (nextRoute is ModalRoute<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition.runtimeType != this.delegatedTransition.runtimeType) {
+      if (receivedTransition.runtimeType != nextRoute.delegatedTransition.runtimeType) {
         receivedTransition = nextRoute.delegatedTransition;
       }
     } else {
@@ -2022,8 +2022,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   void didPopNext(Route<dynamic> nextRoute) {
-    if (nextRoute is ModalRoute<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition != this.delegatedTransition) {
-      if (receivedTransition != nextRoute.delegatedTransition) {
+    if (nextRoute is ModalRoute<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition.runtimeType != this.delegatedTransition.runtimeType) {
+      if (receivedTransition.runtimeType != nextRoute.delegatedTransition.runtimeType) {
         receivedTransition = nextRoute.delegatedTransition;
       }
     } else {

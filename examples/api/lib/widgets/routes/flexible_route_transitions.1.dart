@@ -420,9 +420,8 @@ class VerticalPageTransition extends StatelessWidget {
     end: const Offset(0.0, -1.0),
   );
 
-  static const DelegatedTransition _delegatedTransition = DelegatedTransition(
+  static const VerticalDelegatedTransition _delegatedTransition = VerticalDelegatedTransition(
     builder: _delegatedTransitionBuilder,
-    name: 'Vertical-Transition',
   );
 
   static Widget _delegatedTransitionBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
@@ -475,4 +474,8 @@ enum MyPageConfiguration {
   }
 
   Uri get uri => Uri.parse(uriString);
+}
+
+class VerticalDelegatedTransition extends DelegatedTransition {
+  const VerticalDelegatedTransition({required super.builder});
 }

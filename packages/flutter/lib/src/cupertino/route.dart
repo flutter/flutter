@@ -424,28 +424,7 @@ class CupertinoPageTransition extends StatefulWidget {
   final bool linearTransition;
 
   /// The delegated transition.
-  static Widget delegatedTransitionBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
-    final Animation<Offset> delegatedPositionAnimation =
-      CurvedAnimation(
-        parent: secondaryAnimation,
-        curve: Curves.linearToEaseOut,
-        reverseCurve: Curves.easeInToLinear,
-      ).drive(_kMiddleLeftTween);
-    assert(debugCheckHasDirectionality(context));
-    final TextDirection textDirection = Directionality.of(context);
-    return SlideTransition(
-      position: delegatedPositionAnimation,
-      textDirection: textDirection,
-      transformHitTests: false,
-      child: child,
-    );
-  }
-
-  /// The delegated transition.
-  static const DelegatedTransition delegatedTransition = DelegatedTransition(
-    builder: delegatedTransitionBuilder,
-    name: 'Flutter-Cupertino-Page-Transition',
-  );
+  static const DelegatedTransition delegatedTransition = CupertinoDelegatedTransition();
 
   @override
   State<CupertinoPageTransition> createState() => _CupertinoPageTransitionState();
@@ -540,6 +519,33 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
           child: widget.child,
         ),
       ),
+    );
+  }
+}
+
+/// Creates a [DelegatedTransition] for [CupertinoPageTransition].
+class CupertinoDelegatedTransition extends DelegatedTransition {
+  /// Creates a [DelegatedTransition] for [CupertinoPageTransition].
+  const CupertinoDelegatedTransition() : super(builder: CupertinoDelegatedTransition.delegatedTransitionBuilder);
+
+  /// The delegated transition from [CupertinoDelegatedTransition].
+  ///
+  /// Slides the content of the screen off the page to sync up with the topmost
+  /// route's [CupertinoPageTransition].
+  static Widget delegatedTransitionBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
+    final Animation<Offset> delegatedPositionAnimation =
+      CurvedAnimation(
+        parent: secondaryAnimation,
+        curve: Curves.linearToEaseOut,
+        reverseCurve: Curves.easeInToLinear,
+      ).drive(_kMiddleLeftTween);
+    assert(debugCheckHasDirectionality(context));
+    final TextDirection textDirection = Directionality.of(context);
+    return SlideTransition(
+      position: delegatedPositionAnimation,
+      textDirection: textDirection,
+      transformHitTests: false,
+      child: child,
     );
   }
 }

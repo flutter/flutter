@@ -100,10 +100,6 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   @override
   DelegatedTransition? get delegatedTransition => _delegatedTransition;
 
-  set delegatedTransition(DelegatedTransition? newTransition) {
-    _delegatedTransition = newTransition;
-  }
-
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     return ((nextRoute is! PageRoute<T>) || !nextRoute.fullscreenDialog)
@@ -135,7 +131,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
     final TargetPlatform platform = Theme.of(context).platform;
     final DelegatedTransition? themeDelegatedTransition = theme.delegatedTransition(platform, allowSnapshotting);
     if (delegatedTransition != themeDelegatedTransition) {
-      delegatedTransition = themeDelegatedTransition;
+      _delegatedTransition = themeDelegatedTransition;
     }
   }
 
