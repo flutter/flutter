@@ -270,22 +270,18 @@ void main() {
               children: <Widget>[
                 const ListTile(
                   title: Text('one'),
-                  internalAddSemanticForOnTap: true,
                 ),
                 ListTile(
                   title: const Text('two'),
                   onTap: () {},
-                  internalAddSemanticForOnTap: true,
                 ),
                 const ListTile(
                   title: Text('three'),
                   selected: true,
-                  internalAddSemanticForOnTap: true,
                 ),
                 const ListTile(
                   title: Text('four'),
                   enabled: false,
-                  internalAddSemanticForOnTap: true,
                 ),
               ],
             ),
