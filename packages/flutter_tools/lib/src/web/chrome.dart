@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
+import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -214,6 +215,12 @@ class ChromiumLauncher {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
+
+      // Remove the search engine choice screen. It's irrelevant for app
+      // debugging purposes.
+      // See: https://github.com/flutter/flutter/issues/153928
+      '--disable-search-engine-choice-screen',
+
       if (headless)
         ...<String>[
           '--headless',
@@ -490,6 +497,10 @@ class Chromium {
         if (i == attempts) {
           rethrow;
         }
+      } on IOException {
+        if (i == attempts) {
+          rethrow;
+        }
       }
       await Future<void>.delayed(const Duration(milliseconds: 25));
     }
@@ -508,7 +519,7 @@ class Chromium {
     Duration sigtermDelay = Duration.zero;
     if (_hasValidChromeConnection) {
       try {
-        final ChromeTab? tab = await chromeConnection.getTab(
+        final ChromeTab? tab = await getChromeTabGuarded(chromeConnection,
             (_) => true, retryFor: const Duration(seconds: 1));
         if (tab != null) {
           final WipConnection wipConnection = await tab.connect();
@@ -550,4 +561,14 @@ class Chromium {
       });
     });
   }
+}
+
+// TODO(andrewkolos): Remove when https://github.com/dart-lang/sdk/issues/56566
+//  is fixed.
+Future<ChromeTab?> getChromeTabGuarded(
+  ChromeConnection chromeConnection,
+  bool Function(ChromeTab tab) accept, {
+  Duration? retryFor,
+}) {
+  return asyncGuard(() => chromeConnection.getTab(accept, retryFor: retryFor));
 }
