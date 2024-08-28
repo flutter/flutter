@@ -995,6 +995,21 @@ void main() {
     expect(dismissedItems, <int>[0, 1]);
   });
 
+  testWidgets('`shouldTriggerDismiss` should override thresholds higher than 1', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildTest(
+        startToEndThreshold: 10,
+        shouldTriggerDismiss: (TriggerDismissDetails details) => true,
+      )
+    );
+
+    await checkFlingItemAfterMovement(tester, 0, gestureDirection: AxisDirection.right, mechanism: flingElement);
+    expect(find.text('0'), findsNothing);
+
+    await dismissItem(tester, 1, gestureDirection: AxisDirection.right);
+    expect(find.text('1'), findsNothing);
+  });
+
   testWidgets('Dismissible with null resizeDuration calls onDismissed immediately', (WidgetTester tester) async {
     bool resized = false;
     bool dismissed = false;
