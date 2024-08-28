@@ -2306,14 +2306,13 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
       return;
     }
     if (theater._layingOutSizeDeterminingChild) {
-      // The theater having unbounded constraints means the it will compute child
-      // constraints using  the correct
-      // BoxConstraints can only be
       theater.invokeLayoutCallback((BoxConstraints constraints) { markNeedsLayout(); });
     } else {
       final BoxConstraints theaterConstraints = theater.constraints;
       final Size boxSize = theaterConstraints.biggest.isFinite
         ? theaterConstraints.biggest
+        // Accessing the theater's size is only unsafe if it is laying out the
+        // size-determining child.
         : theater.size;
       super.layout(BoxConstraints.tight(boxSize));
     }
