@@ -1417,6 +1417,64 @@ void main() {
     expect(callbackCalled, isFalse);
   });
 
+  testWidgets('Dragging out of bound does not cause out of range exception', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCC'),
+    };
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            proportionalWidth: true,
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    Size getChildSize(int index) {
+      return tester.getSize(
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
+      );
+    }
+
+    expect(getChildSize(0).width, 32.5);
+    expect(getChildSize(2).width, 60.5);
+
+    // Start dragging.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('A')));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Dragging to left until out of bound.
+    await gesture.moveTo(const Offset(-100, 0));
+    await tester.pump();
+    expect(getHighlightedIndex(tester), 0);
+
+    // Move the pointer to the last child and continue dragging until out of bound.
+    final Offset thirdChild = tester.getCenter(find.text('CCC'));
+    await gesture.moveTo(thirdChild);
+    await tester.pump();
+
+    await gesture.moveTo(thirdChild + const Offset(100, 0));
+    await tester.pump();
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(getHighlightedIndex(tester), 2);
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Disallow new gesture when dragging', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('A'),

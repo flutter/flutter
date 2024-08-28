@@ -6,6 +6,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -908,7 +909,10 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
       child = nonSeparatorChildAfter(child);
     }
 
-    return index;
+    final int segmentCount = childCount ~/ 2 + 1;
+    // When the thumb is dragging out of bounds, the return result must be
+    // smaller than segment count.
+    return min(index, segmentCount - 1);
   }
 
   RenderBox? nonSeparatorChildAfter(RenderBox child) {
