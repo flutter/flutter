@@ -613,7 +613,11 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         }
 
         if (shouldDismiss) {
-          _moveController.forward();
+          if (_moveController.isCompleted) {
+            _handleMoveCompleted();
+          } else {
+            _moveController.forward();
+          }
         } else {
           _moveController.reverse();
         }
