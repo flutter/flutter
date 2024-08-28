@@ -130,6 +130,115 @@ TEST(EntityPassClipStackTest, AppendAndRestoreClipCoverage) {
   EXPECT_EQ(recorder.GetReplayEntities().size(), 0u);
 }
 
+// Append two clip coverages, the second is larger the first. This
+// should result in the second clip not requiring any update.
+TEST(EntityPassClipStackTest, AppendLargerClipCoverage) {
+  EntityPassClipStack recorder =
+      EntityPassClipStack(Rect::MakeLTRB(0, 0, 100, 100));
+
+  ASSERT_EQ(recorder.GetClipCoverageLayers().size(), 1u);
+
+  // Push a clip.
+  Entity entity;
+  EntityPassClipStack::ClipStateResult result = recorder.ApplyClipState(
+      Contents::ClipCoverage{
+          .type = Contents::ClipCoverage::Type::kAppend,
+          .coverage = Rect::MakeLTRB(50, 50, 55, 55),
+      },
+      entity, 0, Point(0, 0));
+  EXPECT_TRUE(result.should_render);
+  EXPECT_TRUE(result.clip_did_change);
+
+  // Push a clip with larger coverage than the previous state.
+  result = recorder.ApplyClipState(
+      Contents::ClipCoverage{
+          .type = Contents::ClipCoverage::Type::kAppend,
+          .coverage = Rect::MakeLTRB(0, 0, 100, 100),
+      },
+      entity, 0, Point(0, 0));
+
+  EXPECT_FALSE(result.should_render);
+  EXPECT_FALSE(result.clip_did_change);
+}
+
+// Since clip entities return the outer coverage we can only cull axis aligned
+// rectangles and intersect clips.
+TEST(EntityPassClipStackTest,
+     AppendLargerClipCoverageWithDifferenceOrNonSquare) {
+  EntityPassClipStack recorder =
+      EntityPassClipStack(Rect::MakeLTRB(0, 0, 100, 100));
+
+  ASSERT_EQ(recorder.GetClipCoverageLayers().size(), 1u);
+
+  // Push a clip.
+  Entity entity;
+  EntityPassClipStack::ClipStateResult result = recorder.ApplyClipState(
+      Contents::ClipCoverage{
+          .type = Contents::ClipCoverage::Type::kAppend,
+          .coverage = Rect::MakeLTRB(50, 50, 55, 55),
+      },
+      entity, 0, Point(0, 0));
+  EXPECT_TRUE(result.should_render);
+  EXPECT_TRUE(result.clip_did_change);
+
+  // Push a clip with larger coverage than the previous state.
+  result = recorder.ApplyClipState(
+      Contents::ClipCoverage{
+          .type = Contents::ClipCoverage::Type::kAppend,
+          .is_difference_or_non_square = true,
+          .coverage = Rect::MakeLTRB(0, 0, 100, 100),
+      },
+      entity, 0, Point(0, 0));
+
+  EXPECT_TRUE(result.should_render);
+  EXPECT_TRUE(result.clip_did_change);
+}
+
+TEST(EntityPassClipStackTest, AppendDecreasingSizeClipCoverage) {
+  EntityPassClipStack recorder =
+      EntityPassClipStack(Rect::MakeLTRB(0, 0, 100, 100));
+
+  ASSERT_EQ(recorder.GetClipCoverageLayers().size(), 1u);
+
+  // Push Clips that shrink in size. All should be applied.
+  Entity entity;
+
+  for (auto i = 1; i < 20; i++) {
+    EntityPassClipStack::ClipStateResult result = recorder.ApplyClipState(
+        Contents::ClipCoverage{
+            .type = Contents::ClipCoverage::Type::kAppend,
+            .coverage = Rect::MakeLTRB(i, i, 100 - i, 100 - i),
+        },
+        entity, 0, Point(0, 0));
+    EXPECT_TRUE(result.should_render);
+    EXPECT_TRUE(result.clip_did_change);
+    EXPECT_EQ(recorder.CurrentClipCoverage(),
+              Rect::MakeLTRB(i, i, 100 - i, 100 - i));
+  }
+}
+
+TEST(EntityPassClipStackTest, AppendIncreasingSizeClipCoverage) {
+  EntityPassClipStack recorder =
+      EntityPassClipStack(Rect::MakeLTRB(0, 0, 100, 100));
+
+  ASSERT_EQ(recorder.GetClipCoverageLayers().size(), 1u);
+
+  // Push Clips that grow in size. All should be skipped.
+  Entity entity;
+
+  for (auto i = 1; i < 20; i++) {
+    EntityPassClipStack::ClipStateResult result = recorder.ApplyClipState(
+        Contents::ClipCoverage{
+            .type = Contents::ClipCoverage::Type::kAppend,
+            .coverage = Rect::MakeLTRB(0 - i, 0 - i, 100 + i, 100 + i),
+        },
+        entity, 0, Point(0, 0));
+    EXPECT_FALSE(result.should_render);
+    EXPECT_FALSE(result.clip_did_change);
+    EXPECT_EQ(recorder.CurrentClipCoverage(), Rect::MakeLTRB(0, 0, 100, 100));
+  }
+}
+
 TEST(EntityPassClipStackTest, UnbalancedRestore) {
   EntityPassClipStack recorder =
       EntityPassClipStack(Rect::MakeLTRB(0, 0, 100, 100));
