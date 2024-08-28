@@ -256,9 +256,11 @@ void main() {
     testWithoutContext('should print status messages about each artifact update (grouped by development artifact)', () async {
       final FakeSecondaryCachedArtifact artifact1 = FakeSecondaryCachedArtifact()
         ..upToDate = false
+        ..name = 'artifact1'
         ..developmentArtifact = DevelopmentArtifact.androidGenSnapshot;
       final FakeSecondaryCachedArtifact artifact2 = FakeSecondaryCachedArtifact()
         ..upToDate = false
+        ..name = 'artifact2'
         ..developmentArtifact = DevelopmentArtifact.universal;
       final FileSystem fileSystem = MemoryFileSystem.test();
 
@@ -276,8 +278,8 @@ void main() {
       });
       expect(
         logger.statusText,
-        'Downloading Flutter for Android tools (1 of 2)...\n'
-        'Downloading universal tools (2 of 2)...\n',
+        'Downloading artifact1 (1 of 2)...\n'
+        'Downloading artifact2 (2 of 2)...\n',
       );
 
       artifact1.upToDate = false;
@@ -285,7 +287,8 @@ void main() {
       await cache.updateAll(<DevelopmentArtifact>{
         DevelopmentArtifact.androidGenSnapshot,
       });
-      expect(logger.statusText, 'Downloading Flutter for Android tools...\n');
+      // Don't print (1 of 1)
+      expect(logger.statusText, 'Downloading artifact1...\n');
     });
 
     testWithoutContext("getter dyLdLibEntry concatenates the output of each artifact's dyLdLibEntry getter", () async {
@@ -1232,7 +1235,10 @@ class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
   DevelopmentArtifact developmentArtifact = DevelopmentArtifact.universal;
 
   @override
-  String get name => 'fake_secondary_cached_artifact';
+  String name = 'fake_secondary_cached_artifact';
+
+  @override
+  String get stampName => name;
 
   @override
   bool get logUpdates => true;

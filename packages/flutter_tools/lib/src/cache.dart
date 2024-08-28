@@ -715,40 +715,24 @@ class Cache {
       neededArtifacts.add(artifact);
     }
 
-    final Map<String, List<ArtifactSet>> neededArtifactsByUserFriendlyName = <String, List<ArtifactSet>>{};
-    for (final ArtifactSet artifact in neededArtifacts) {
-      if (await artifact.isUpToDate(_fileSystem)) {
-        continue;
-      }
-      final String userFriendlyName = artifact.developmentArtifact.feature == null
-          ? '${artifact.developmentArtifact.name} tools'
-          : '${artifact.developmentArtifact.feature!.name} tools';
-
-      final List<ArtifactSet> artifactsForName = neededArtifactsByUserFriendlyName[userFriendlyName] ?? <ArtifactSet>[];
-      artifactsForName.add(artifact);
-      neededArtifactsByUserFriendlyName[userFriendlyName] = artifactsForName;
-    }
-
-    for (final (int i, MapEntry<String, List<ArtifactSet>> artifactGroup) in neededArtifactsByUserFriendlyName.entries.indexed) {
+    for (final (int i, ArtifactSet artifact) in neededArtifacts.indexed) {
       try {
         final List<String> statusMessageParts = <String>[
-          'Downloading ${artifactGroup.key}',
-          if (neededArtifactsByUserFriendlyName.length > 1)
-            ' (${i + 1} of ${neededArtifactsByUserFriendlyName.length})',
+          'Downloading ${artifact.stampName}',
+          if (neededArtifacts.length > 1)
+            ' (${i + 1} of ${neededArtifacts.length})',
           '...',
         ];
-        final Status? progress = artifactGroup.value.any((ArtifactSet a) => a.logUpdates)
+        final Status? progress = artifact.logUpdates
             ? _logger.startProgress(statusMessageParts.join())
             : null;
-        for (final ArtifactSet artifact in artifactGroup.value) {
-          await artifact.update(
-            _artifactUpdater,
-            _logger,
-            _fileSystem,
-            _osUtils,
-            offline: offline,
-          );
-        }
+        await artifact.update(
+          _artifactUpdater,
+          _logger,
+          _fileSystem,
+          _osUtils,
+          offline: offline,
+        );
         progress?.stop();
       } on SocketException catch (e) {
         if (_hostsBlockedInChina.contains(e.address?.host)) {
