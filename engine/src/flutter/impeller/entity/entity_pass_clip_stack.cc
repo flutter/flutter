@@ -64,7 +64,7 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::ApplyClipState(
     case Contents::ClipCoverage::Type::kNoChange:
       break;
     case Contents::ClipCoverage::Type::kAppend: {
-      auto op = CurrentClipCoverage();
+      auto maybe_coverage = CurrentClipCoverage();
 
       // Compute the previous clip height.
       size_t previous_clip_height = 0;
@@ -76,6 +76,24 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::ApplyClipState(
         previous_clip_height = clip_height_floor;
       }
 
+      if (!maybe_coverage.has_value()) {
+        // Running this append op won't impact the clip buffer because the
+        // whole screen is already being clipped, so skip it.
+        return result;
+      }
+      auto op = maybe_coverage.value();
+
+      // If the new clip coverage is bigger than the existing coverage for
+      // intersect clips, we do not need to change the clip region.
+      if (!global_clip_coverage.is_difference_or_non_square &&
+          global_clip_coverage.coverage.has_value() &&
+          global_clip_coverage.coverage.value().Contains(op)) {
+        subpass_state.clip_coverage.push_back(ClipCoverageLayer{
+            .coverage = op, .clip_height = previous_clip_height + 1});
+
+        return result;
+      }
+
       subpass_state.clip_coverage.push_back(
           ClipCoverageLayer{.coverage = global_clip_coverage.coverage,
                             .clip_height = previous_clip_height + 1});
@@ -85,11 +103,6 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::ApplyClipState(
                  subpass_state.clip_coverage.front().clip_height +
                      subpass_state.clip_coverage.size() - 1);
 
-      if (!op.has_value()) {
-        // Running this append op won't impact the clip buffer because the
-        // whole screen is already being clipped, so skip it.
-        return result;
-      }
     } break;
     case Contents::ClipCoverage::Type::kRestore: {
       ClipRestoreContents* restore_contents =
