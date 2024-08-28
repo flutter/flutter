@@ -38,6 +38,17 @@ class Contents {
     enum class Type { kNoChange, kAppend, kRestore };
 
     Type type = Type::kNoChange;
+    // TODO(jonahwilliams): this should probably use the Entity::ClipOperation
+    // enum, but that has transitive import errors.
+    bool is_difference_or_non_square = false;
+
+    /// @brief This coverage is the outer coverage of the clip.
+    ///
+    /// For example, if the clip is a circular clip, this is the rectangle that
+    /// contains the circle and not the rectangle that is contained within the
+    /// circle. This means that we cannot use the coverage alone to determine if
+    /// a clip can be culled, and instead also use the somewhat hacky
+    /// "is_difference_or_non_square" field.
     std::optional<Rect> coverage = std::nullopt;
   };
 

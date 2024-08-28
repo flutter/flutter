@@ -53,8 +53,11 @@ Contents::ClipCoverage ClipContents::GetClipCoverage(
     case Entity::ClipOperation::kDifference:
       // This can be optimized further by considering cases when the bounds of
       // the current stencil will shrink.
-      return {.type = ClipCoverage::Type::kAppend,
-              .coverage = current_clip_coverage};
+      return {
+          .type = ClipCoverage::Type::kAppend,  //
+          .is_difference_or_non_square = true,  //
+          .coverage = current_clip_coverage     //
+      };
     case Entity::ClipOperation::kIntersect:
       if (!geometry_) {
         return {.type = ClipCoverage::Type::kAppend, .coverage = std::nullopt};
@@ -64,8 +67,9 @@ Contents::ClipCoverage ClipContents::GetClipCoverage(
         return {.type = ClipCoverage::Type::kAppend, .coverage = std::nullopt};
       }
       return {
-          .type = ClipCoverage::Type::kAppend,
-          .coverage = current_clip_coverage->Intersection(coverage.value()),
+          .type = ClipCoverage::Type::kAppend,                                //
+          .is_difference_or_non_square = !geometry_->IsAxisAlignedRect(),     //
+          .coverage = current_clip_coverage->Intersection(coverage.value()),  //
       };
   }
   FML_UNREACHABLE();
@@ -90,19 +94,6 @@ bool ClipContents::Render(const ContentContext& renderer,
   }
 
   using VS = ClipPipeline::VertexShader;
-
-  if (clip_op_ == Entity::ClipOperation::kIntersect &&
-      geometry_->IsAxisAlignedRect() &&
-      entity.GetTransform().IsTranslationScaleOnly()) {
-    std::optional<Rect> coverage =
-        geometry_->GetCoverage(entity.GetTransform());
-    if (coverage.has_value() &&
-        coverage->Contains(Rect::MakeSize(pass.GetRenderTargetSize()))) {
-      // Skip axis-aligned intersect clips that cover the whole render target
-      // since they won't draw anything to the depth buffer.
-      return true;
-    }
-  }
 
   VS::FrameInfo info;
   info.depth = GetShaderClipDepth(entity);

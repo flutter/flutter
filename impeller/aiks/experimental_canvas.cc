@@ -11,6 +11,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
+#include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/entity.h"
@@ -442,6 +443,12 @@ void ExperimentalCanvas::SaveLayer(
   entry.rendering_mode = Entity::RenderingMode::kSubpassAppendSnapshotTransform;
   transform_stack_.emplace_back(entry);
 
+  // The current clip aiks clip culling can not handle image filters.
+  // Remove this once we've migrated to exp canvas and removed it.
+  if (paint.image_filter) {
+    transform_stack_.back().cull_rect = std::nullopt;
+  }
+
   // Start non-collapsed subpasses with a fresh clip coverage stack limited by
   // the subpass coverage. This is important because image filters applied to
   // save layers may transform the subpass texture after it's rendered,
@@ -764,6 +771,7 @@ void ExperimentalCanvas::AddClipEntityToCurrentPass(Entity entity) {
   auto transform = entity.GetTransform();
   entity.SetTransform(
       Matrix::MakeTranslation(Vector3(-GetGlobalPassPosition())) * transform);
+
   // Ideally the clip depth would be greater than the current rendering
   // depth because any rendering calls that follow this clip operation will
   // pre-increment the depth and then be rendering above our clip depth,
