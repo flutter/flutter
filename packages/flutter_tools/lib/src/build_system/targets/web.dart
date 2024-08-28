@@ -284,6 +284,36 @@ class Dart2WasmTarget extends Dart2WebTarget {
   @override
   final WasmCompilerConfig compilerConfig;
 
+  /// List the preconfigured build options for a given build mode.
+  List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) =>
+    switch (mode) {
+      BuildMode.debug => <String>[
+          // These checks allow the CLI to override the value of this define for unit
+          // testing the framework.
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
+            '-Ddart.vm.profile=false',
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
+            '-Ddart.vm.product=false',
+        ],
+      BuildMode.profile => <String>[
+          // These checks allow the CLI to override the value of this define for
+          // benchmarks with most timeline traces disabled.
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
+            '-Ddart.vm.profile=true',
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
+            '-Ddart.vm.product=false',
+          '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
+          '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
+        ],
+      BuildMode.release => <String>[
+          '-Ddart.vm.profile=false',
+          '-Ddart.vm.product=true',
+          '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
+          '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
+        ],
+      _ => throw Exception('Unknown BuildMode: $mode')
+    };
+
   @override
   Future<void> build(Environment environment) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
@@ -297,6 +327,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
     final String platformBinariesPath = artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
     final String platformFilePath = environment.fileSystem.path.join(platformBinariesPath, 'dart2wasm_platform.dill');
+    final List<String> dartDefines = computeDartDefines(environment);
 
     final List<String> compilationArgs = <String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
@@ -304,18 +335,13 @@ class Dart2WasmTarget extends Dart2WebTarget {
       'wasm',
       '--packages=${findPackageConfigFileOrDefault(environment.projectDir).path}',
       '--extra-compiler-option=--platform=$platformFilePath',
-      '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
-      '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
+      ...buildModeOptions(buildMode, dartDefines),
       if (compilerConfig.renderer == WebRendererMode.skwasm) ...<String>[
         '--extra-compiler-option=--import-shared-memory',
         '--extra-compiler-option=--shared-memory-max-pages=32768',
       ],
-      if (buildMode == BuildMode.profile)
-        '-Ddart.vm.profile=true'
-      else if (buildMode == BuildMode.release)
-        '-Ddart.vm.product=true',
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
-      for (final String dartDefine in computeDartDefines(environment))
+      for (final String dartDefine in dartDefines)
         '-D$dartDefine',
       '--extra-compiler-option=--depfile=${depFile.path}',
 
