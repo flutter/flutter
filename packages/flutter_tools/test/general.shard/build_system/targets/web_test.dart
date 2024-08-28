@@ -1032,6 +1032,8 @@ void main() {
                 processManager.addCommand(FakeCommand(
                   command: <String>[
                     ..._kDart2WasmLinuxArgs,
+                    '-Ddart.vm.profile=${buildMode == 'profile'}',
+                    '-Ddart.vm.product=${buildMode == 'release'}',
                     if (buildMode != 'debug') ...<String>[
                       '--delete-tostring-package-uri=dart:ui',
                       '--delete-tostring-package-uri=package:flutter',
@@ -1040,8 +1042,6 @@ void main() {
                       '--extra-compiler-option=--import-shared-memory',
                       '--extra-compiler-option=--shared-memory-max-pages=32768',
                     ],
-                    if (buildMode != 'debug')
-                      '-Ddart.vm.${buildMode == 'release' ? 'product' : 'profile' }=true',
                     ...defines.map((String define) => '-D$define'),
                     if (renderer == WebRendererMode.skwasm) ...<String>[
                       '-DFLUTTER_WEB_AUTO_DETECT=false',

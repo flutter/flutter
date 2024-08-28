@@ -12,7 +12,6 @@ import '../../base/file_system.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../cache.dart';
-import '../../compile.dart';
 import '../../convert.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
@@ -284,6 +283,36 @@ class Dart2WasmTarget extends Dart2WebTarget {
 
   @override
   final WasmCompilerConfig compilerConfig;
+
+  /// List the preconfigured build options for a given build mode.
+  List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) =>
+    switch (mode) {
+      BuildMode.debug => <String>[
+          // These checks allow the CLI to override the value of this define for unit
+          // testing the framework.
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
+            '-Ddart.vm.profile=false',
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
+            '-Ddart.vm.product=false',
+        ],
+      BuildMode.profile => <String>[
+          // These checks allow the CLI to override the value of this define for
+          // benchmarks with most timeline traces disabled.
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
+            '-Ddart.vm.profile=true',
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
+            '-Ddart.vm.product=false',
+          '--delete-tostring-package-uri=dart:ui',
+          '--delete-tostring-package-uri=package:flutter',
+        ],
+      BuildMode.release => <String>[
+          '-Ddart.vm.profile=false',
+          '-Ddart.vm.product=true',
+          '--delete-tostring-package-uri=dart:ui',
+          '--delete-tostring-package-uri=package:flutter',
+        ],
+      _ => throw Exception('Unknown BuildMode: $mode')
+    };
 
   @override
   Future<void> build(Environment environment) async {
