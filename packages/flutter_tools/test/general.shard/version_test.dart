@@ -937,6 +937,42 @@ void main() {
     GitTagVersion.determine(processUtils, platform, workingDirectory: '.', fetchTags: true);
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
+
+  group('fetchTagsAndGetVersion', () {
+    testUsingContext('fetches tags if current channel is not an official channel', () async {
+      bool calledFetch = false;
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%H'],
+          stdout: '1234abcd',
+        ),
+        const FakeCommand(
+          command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
+          stdout: 'foo-channel',
+        ),
+        FakeCommand(
+          command: const <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags', '-f'],
+          onRun: (List<String> _) => calledFetch = true,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'tag', '--points-at', '1234abcd'],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', '1234abcd'],
+          stdout: '0.1.2-3-1234abcd',
+        ),
+
+      ]);
+      final _FakeFlutterVersion version = _FakeFlutterVersion()..channel = 'feature-branch';
+      final FlutterVersion nextVersion = version.fetchTagsAndGetVersion();
+      expect(version, isNot(nextVersion));
+      expect(processManager, hasNoRemainingExpectations);
+      expect(calledFetch, isTrue);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Cache: () => cache,
+    });
+  });
 }
 
 class FakeCache extends Fake implements Cache {
@@ -969,4 +1005,44 @@ class FakeCache extends Fake implements Cache {
       setVersionStamp = true;
     }
   }
+}
+
+class _FakeFlutterVersion extends FlutterVersion {
+  _FakeFlutterVersion() : super.constructor(
+    flutterRoot: 'foo',
+    clock: SystemClock.fixed(DateTime.utc(2015)),
+    fs: MemoryFileSystem.test(),
+  );
+
+  @override
+  late String channel;
+
+  @override
+  late String dartSdkVersion;
+
+  @override
+  late String devToolsVersion;
+
+  @override
+  late String engineRevision;
+
+  @override
+  void ensureVersionFile() {
+    throw UnimplementedError();
+  }
+
+  @override
+  late String frameworkCommitDate;
+
+  @override
+  late String frameworkRevision;
+
+  @override
+  late String frameworkVersion;
+
+  @override
+  late GitTagVersion gitTagVersion;
+
+  @override
+  late String? repositoryUrl;
 }

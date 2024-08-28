@@ -62,6 +62,10 @@ const Set<String> kDevelopmentChannels = <String>{
   'main',
 };
 
+final Set<String> kReleaseChannels = kOfficialChannels.where(
+  (String channel) => !kDevelopmentChannels.contains(channel),
+).toSet();
+
 /// Retrieve a human-readable name for a given [channel].
 ///
 /// Requires [kOfficialChannels] to be correctly ordered.
@@ -126,7 +130,8 @@ abstract class FlutterVersion {
     );
   }
 
-  FlutterVersion._({
+  @visibleForTesting
+  FlutterVersion.constructor({
     required SystemClock clock,
     required this.flutterRoot,
     required this.fs,
@@ -170,7 +175,7 @@ abstract class FlutterVersion {
     // We don't need to fetch tags on beta and stable to calculate the version,
     // we should already exactly be on a tag that was pushed when this release
     // was published.
-    if (channel != 'master' && channel != 'main') {
+    if (kReleaseChannels.contains(channel)) {
       return this;
     }
     return FlutterVersion(
@@ -466,7 +471,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
     required this.gitTagVersion,
     required super.flutterRoot,
     required super.fs,
-  }) : super._();
+  }) : super.constructor();
 
   static _FlutterVersionFromFile? tryParseFromFile(
     File jsonFile, {
@@ -552,7 +557,7 @@ class _FlutterVersionGit extends FlutterVersion {
     required this.frameworkVersion,
     required this.gitTagVersion,
     required super.fs,
-  }) : super._();
+  }) : super.constructor();
 
   @override
   final GitTagVersion gitTagVersion;

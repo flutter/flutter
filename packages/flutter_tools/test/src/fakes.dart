@@ -382,9 +382,9 @@ class FakeFlutterVersion implements FlutterVersion {
   final FlutterVersion? nextFlutterVersion;
 
   @override
-    FlutterVersion fetchTagsAndGetVersion({
-      SystemClock clock = const SystemClock(),
-    }) {
+  FlutterVersion fetchTagsAndGetVersion({
+    SystemClock clock = const SystemClock(),
+  }) {
     _didFetchTagsAndUpdate = true;
     return nextFlutterVersion ?? this;
   }
