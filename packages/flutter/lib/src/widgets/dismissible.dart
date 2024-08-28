@@ -259,18 +259,13 @@ class Dismissible extends StatefulWidget {
   State<Dismissible> createState() => _DismissibleState();
 }
 
-/// Details for [DismissUpdateCallback].
-///
-/// See also:
-///
-///   * [Dismissible.onUpdate], which receives this information.
-class DismissUpdateDetails {
-  /// Create a new instance of [DismissUpdateDetails].
-  const DismissUpdateDetails({
-    this.direction = DismissDirection.horizontal,
-    this.reached = false,
-    this.previousReached = false,
-    this.progress = 0.0,
+/// Base class used for the details provided to [DismissUpdateCallback] and [TriggerDismissCallback].
+sealed class _DismissGestureDetails {
+  const _DismissGestureDetails({
+    required this.direction,
+    required this.reached,
+    required this.progress,
+    required this.dragExtent,
   });
 
   /// The direction that the dismissible is being dragged.
@@ -278,12 +273,6 @@ class DismissUpdateDetails {
 
   /// Whether the dismiss threshold is currently reached.
   final bool reached;
-
-  /// Whether the dismiss threshold was reached the last time this callback was invoked.
-  ///
-  /// This can be used in conjunction with [DismissUpdateDetails.reached] to catch the moment
-  /// that the [Dismissible] is dragged across the threshold.
-  final bool previousReached;
 
   /// The offset ratio of the dismissible in its parent container.
   ///
@@ -293,6 +282,33 @@ class DismissUpdateDetails {
   /// This can be used to synchronize other elements to what the dismissible is doing on screen,
   /// e.g. using this value to set the opacity thereby fading dismissible as it's dragged offscreen.
   final double progress;
+
+  /// Distance from the start of the drag to the current position,
+  /// represented in logical pixels.
+  final double dragExtent;
+}
+
+/// Details for [DismissUpdateCallback].
+///
+/// See also:
+///
+///   * [Dismissible.onUpdate], which receives this information.
+class DismissUpdateDetails extends _DismissGestureDetails {
+  /// Create a new instance of [DismissUpdateDetails].
+  const DismissUpdateDetails({
+    super.direction = DismissDirection.horizontal,
+    super.reached = false,
+    super.progress = 0.0,
+    super.dragExtent = 0.0,
+    this.previousReached = false,
+  });
+
+  /// Whether the dismiss threshold was reached the last time this callback was invoked.
+  ///
+  /// This can be used in conjunction with [DismissUpdateDetails.reached] to catch the moment
+  /// that the [Dismissible] is dragged across the threshold.
+  final bool previousReached;
+
 }
 
 /// Details for [TriggerDismissCallback].
@@ -300,32 +316,16 @@ class DismissUpdateDetails {
 /// See also:
 ///
 ///   * [Dismissible.shouldTriggerDismiss], which receives this information.
-class TriggerDismissDetails {
+class TriggerDismissDetails extends _DismissGestureDetails {
   /// Create a new instance of [TriggerDismissDetails].
   const TriggerDismissDetails({
-    this.direction = DismissDirection.horizontal,
-    this.reached = false,
-    this.progress = 0.0,
-    this.dragExtent = 0.0,
+    super.direction = DismissDirection.horizontal,
+    super.reached = false,
+    super.progress = 0.0,
+    super.dragExtent = 0.0,
     this.isFling = false,
     this.velocity = 0.0,
   });
-
-  /// The direction that the dismissible is being dragged.
-  final DismissDirection direction;
-
-  /// Whether the dismiss threshold is currently reached.
-  final bool reached;
-
-  /// The offset ratio of the dismissible in its parent container.
-  ///
-  /// A value of 0.0 represents the normal position and 1.0 means the child is
-  /// completely outside its parent.
-  final double progress;
-
-  /// Distance from the start of the drag to the current position,
-  /// represented in logical pixels.
-  final double dragExtent;
 
   /// Whether a fling gesture is detected and will trigger a dismiss.
   final bool isFling;
@@ -533,6 +533,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
           reached: _dismissThresholdReached,
           previousReached: oldDismissThresholdReached,
           progress: _moveController.value,
+          dragExtent: _dragExtent,
       );
       widget.onUpdate!(details);
     }
