@@ -895,21 +895,17 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
 
   List<double> segmentWidths = <double>[];
   int getClosestSegmentIndex(double dx) {
-    double subtotalWidth = 0;
     int index = 0;
-    while (index < segmentWidths.length) {
-      final double segmentWidth = segmentWidths[index];
-      if (index == 0 || index == segmentWidths.length - 1) {
-        subtotalWidth += separatorWidth / 2;
-      } else {
-        subtotalWidth += separatorWidth;
-      }
-
-      subtotalWidth += segmentWidth;
-      if (dx <= subtotalWidth) {
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final _SegmentedControlContainerBoxParentData childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
+      final double clampX = dx.clamp(childParentData.offset.dx, child.size.width + childParentData.offset.dx);
+      if (clampX == dx) {
         break;
       }
+
       index++;
+      child = nonSeparatorChildAfter(child);
     }
 
     return index;
