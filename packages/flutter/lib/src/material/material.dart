@@ -881,6 +881,7 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
   Tween<double>? _elevation;
   ColorTween? _surfaceTintColor;
   ColorTween? _shadowColor;
+  ColorTween? _backgroundColor;
   ShapeBorderTween? _border;
 
   @override
@@ -893,6 +894,11 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
     _shadowColor = visitor(
       _shadowColor,
       widget.shadowColor,
+      (dynamic value) => ColorTween(begin: value as Color),
+    ) as ColorTween?;
+    _backgroundColor = visitor(
+      _backgroundColor,
+      widget.color,
       (dynamic value) => ColorTween(begin: value as Color),
     ) as ColorTween?;
     _surfaceTintColor = widget.surfaceTintColor != null
@@ -913,9 +919,11 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
   Widget build(BuildContext context) {
     final ShapeBorder shape = _border!.evaluate(animation)!;
     final double elevation = _elevation!.evaluate(animation);
+    final Color backgroundColor = _backgroundColor!.evaluate(animation)!;
+    final Color tintColor = _surfaceTintColor?.evaluate(animation) ?? backgroundColor;
     final Color color = Theme.of(context).useMaterial3
-      ? ElevationOverlay.applySurfaceTint(widget.color, _surfaceTintColor?.evaluate(animation), elevation)
-      : ElevationOverlay.applyOverlay(context, widget.color, elevation);
+      ? ElevationOverlay.applySurfaceTint(backgroundColor, tintColor, elevation)
+      : ElevationOverlay.applyOverlay(context, backgroundColor, elevation);
     final Color shadowColor = _shadowColor!.evaluate(animation)!;
 
     return PhysicalShape(
