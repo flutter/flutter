@@ -61,27 +61,39 @@ class _DismissibleExampleState extends State<DismissibleExample> {
     ),
     _Dismissible(
       index: 2,
+      title: 'Default behavior',
+      description: '`shouldTriggerDismiss: (details) => details.reached || details.isFling`',
+      shouldTriggerDismiss: (TriggerDismissDetails details) => details.reached || details.isFling,
+      onDismissed: _dismissItem,
+    ),
+    _Dismissible(
+      index: 3,
       title: 'Never dismiss',
       description: '`shouldTriggerDismiss: (_) => false`',
       shouldTriggerDismiss: (_) => false,
       onDismissed: _dismissItem,
     ),
     _Dismissible(
-      index: 3,
+      index: 4,
       title: 'Always dismiss',
       description: '`shouldTriggerDismiss: (_) => true`',
       shouldTriggerDismiss: (_) => true,
       onDismissed: _dismissItem,
     ),
     _Dismissible(
-      index: 4,
+      index: 5,
       title: 'Only accept if threshold is reached (Disable flinging)',
-      shouldTriggerDismiss: (TriggerDismissDetails details) =>
-          details.reached ? null : false,
+      shouldTriggerDismiss: (TriggerDismissDetails details) => details.reached,
       onDismissed: _dismissItem,
     ),
     _Dismissible(
-      index: 5,
+      index: 6,
+      title: 'Only accept if flung (Disable threshold check)',
+      shouldTriggerDismiss: (TriggerDismissDetails details) => details.isFling,
+      onDismissed: _dismissItem,
+    ),
+    _Dismissible(
+      index: 7,
       title: 'Accept dismiss before threshold',
       description: '`details.progress >= 0.2`',
       shouldTriggerDismiss: (TriggerDismissDetails details) {

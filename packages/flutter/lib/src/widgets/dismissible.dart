@@ -306,8 +306,9 @@ class TriggerDismissDetails {
     this.direction = DismissDirection.horizontal,
     this.reached = false,
     this.progress = 0.0,
-    this.velocity = 0.0,
     this.dragExtent = 0.0,
+    this.isFling = false,
+    this.velocity = 0.0,
   });
 
   /// The direction that the dismissible is being dragged.
@@ -326,6 +327,8 @@ class TriggerDismissDetails {
   /// represented in logical pixels.
   final double dragExtent;
 
+  /// Whether a fling gesture is detected and will trigger a dismiss.
+  final bool isFling;
   /// The component of the velocity parallel to the [DismissDirection].
   ///
   /// A fling away from the center will have a positive value.
@@ -585,17 +588,20 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     }
     _dragUnderway = false;
 
-    final double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
+    late final double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
+    late final _FlingGestureKind flingGesture = _describeFlingGesture(details.velocity);
+    late final bool reached = _moveController.value > _dismissThreshold;
 
     // Use value returned by `shouldTriggerDismiss` if a callback is provided.
     // If the callback returns null, use the default behavior.
     if (widget.shouldTriggerDismiss != null) {
       final TriggerDismissDetails triggerDismissDetails = TriggerDismissDetails(
         direction: _dismissDirection,
-        reached: _moveController.value > _dismissThreshold,
+        reached: reached,
         progress: _moveController.value,
-        velocity: flingVelocity.abs(),
         dragExtent: _dragExtent,
+        isFling: flingGesture != _FlingGestureKind.none,
+        velocity: flingVelocity.abs(),
       );
 
       final bool? shouldDismiss = widget.shouldTriggerDismiss!(triggerDismissDetails);
@@ -619,7 +625,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       return;
     }
 
-    switch (_describeFlingGesture(details.velocity)) {
+    switch (flingGesture) {
       case _FlingGestureKind.forward:
         assert(_dragExtent != 0.0);
         assert(!_moveController.isDismissed);
@@ -636,7 +642,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         _moveController.fling(velocity: -flingVelocity.abs() * _kFlingVelocityScale);
       case _FlingGestureKind.none:
         if (!_moveController.isDismissed) { // we already know it's not completed, we check that above
-          if (_moveController.value > _dismissThreshold) {
+          if (reached) {
             _moveController.forward();
           } else {
             _moveController.reverse();

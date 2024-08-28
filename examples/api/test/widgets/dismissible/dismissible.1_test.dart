@@ -92,11 +92,21 @@ void main() {
     );
 
     testWidgets(
-      '2 - Never dismiss - `shouldTriggerDismiss: (_) => false`',
+      '2 - Default behavior - `shouldTriggerDismiss: (details) => details.reached || details.isFling`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
         const ValueKey<int> key = ValueKey<int>(2);
+        await testDragBehavior(tester, key: key);
+      },
+    );
+
+    testWidgets(
+      '3 - Never dismiss - `shouldTriggerDismiss: (_) => false`',
+      (WidgetTester tester) async {
+        await initWidget(tester);
+
+        const ValueKey<int> key = ValueKey<int>(3);
         await testDragBehavior(
           tester,
           key: key,
@@ -106,11 +116,11 @@ void main() {
     );
 
     testWidgets(
-      '3 - Always dismiss - `shouldTriggerDismiss: (_) => true`',
+      '4 - Always dismiss - `shouldTriggerDismiss: (_) => true`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
-        const ValueKey<int> key = ValueKey<int>(3);
+        const ValueKey<int> key = ValueKey<int>(4);
         await testDragBehavior(
           tester,
           key: key,
@@ -120,21 +130,35 @@ void main() {
     );
 
     testWidgets(
-      '4 - Only accept if threshold is reached (Disable flinging)',
+      '5 - Only accept if threshold is reached (Disable flinging)',
       (WidgetTester tester) async {
         await initWidget(tester);
 
-        const ValueKey<int> key = ValueKey<int>(4);
+        const ValueKey<int> key = ValueKey<int>(5);
         await testDragBehavior(tester, key: key);
       },
     );
 
     testWidgets(
-      '5 - Accept dismiss before threshold - `details.progress >= 0.2`',
+      '6 - Only accept if flung (Disable threshold check)',
       (WidgetTester tester) async {
         await initWidget(tester);
 
-        const ValueKey<int> key = ValueKey<int>(5);
+        const ValueKey<int> key = ValueKey<int>(6);
+        await testDragBehavior(
+          tester,
+          key: key,
+          expectedAboveThreshold: findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets(
+      '7 - Accept dismiss before threshold - `details.progress >= 0.2`',
+      (WidgetTester tester) async {
+        await initWidget(tester);
+
+        const ValueKey<int> key = ValueKey<int>(7);
         await testDragBehavior(
           tester,
           key: key,
@@ -218,11 +242,21 @@ void main() {
     );
 
     testWidgets(
-      '2 - Never dismiss - `shouldTriggerDismiss: (_) => false`',
+      '2 - Default behavior - `shouldTriggerDismiss: (details) => details.reached || details.isFling`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
-        const ValueKey<int> key = ValueKey<int>(2);
+        const ValueKey<int> key = ValueKey<int>(1);
+        await testFlingBehavior(tester, key: key);
+      },
+    );
+
+    testWidgets(
+      '3 - Never dismiss - `shouldTriggerDismiss: (_) => false`',
+      (WidgetTester tester) async {
+        await initWidget(tester);
+
+        const ValueKey<int> key = ValueKey<int>(3);
         await testFlingBehavior(
           tester,
           key: key,
@@ -232,11 +266,11 @@ void main() {
     );
 
     testWidgets(
-      '3 - Always dismiss - `shouldTriggerDismiss: (_) => true`',
+      '4 - Always dismiss - `shouldTriggerDismiss: (_) => true`',
       (WidgetTester tester) async {
         await initWidget(tester);
 
-        const ValueKey<int> key = ValueKey<int>(3);
+        const ValueKey<int> key = ValueKey<int>(4);
         await testFlingBehavior(
           tester,
           key: key,
@@ -246,11 +280,11 @@ void main() {
     );
 
     testWidgets(
-      '4 - Only accept if threshold is reached (Disable flinging)',
+      '5 - Only accept if threshold is reached (Disable flinging)',
       (WidgetTester tester) async {
         await initWidget(tester);
 
-        const ValueKey<int> key = ValueKey<int>(4);
+        const ValueKey<int> key = ValueKey<int>(5);
         await testFlingBehavior(
           tester,
           key: key,
@@ -260,11 +294,21 @@ void main() {
     );
 
     testWidgets(
-      '5 - Accept dismiss before threshold - `details.progress >= 0.2`',
+      '6 - Only accept if flung (Disable threshold check)',
       (WidgetTester tester) async {
         await initWidget(tester);
 
-        const ValueKey<int> key = ValueKey<int>(5);
+        const ValueKey<int> key = ValueKey<int>(6);
+        await testFlingBehavior(tester, key: key);
+      },
+    );
+
+    testWidgets(
+      '7 - Accept dismiss before threshold - `details.progress >= 0.2`',
+      (WidgetTester tester) async {
+        await initWidget(tester);
+
+        const ValueKey<int> key = ValueKey<int>(7);
         await testFlingBehavior(tester, key: key);
       },
     );
