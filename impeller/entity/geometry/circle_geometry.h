@@ -27,6 +27,9 @@ class CircleGeometry final : public Geometry {
   // |Geometry|
   bool IsAxisAlignedRect() const override;
 
+  // |Geometry|
+  Scalar ComputeAlphaCoverage(const Matrix& transform) const override;
+
  private:
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,

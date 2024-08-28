@@ -54,4 +54,9 @@ void ColorSourceContents::SetInheritedOpacity(Scalar opacity) {
   inherited_opacity_ = opacity;
 }
 
+bool ColorSourceContents::AppliesAlphaForStrokeCoverage(
+    const Matrix& transform) const {
+  return GetGeometry() && GetGeometry()->ComputeAlphaCoverage(transform) < 1.0;
+}
+
 }  // namespace impeller

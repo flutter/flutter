@@ -17,13 +17,6 @@ using VS = SolidFillVertexShader;
 
 namespace {
 
-/// @brief The minimum stroke size can be less than one physical pixel because
-///        of MSAA, but no less that half a physical pixel otherwise we might
-///        not hit one of the sample positions.
-static constexpr Scalar kMinStrokeSizeMSAA = 0.5f;
-
-static constexpr Scalar kMinStrokeSize = 1.0f;
-
 template <typename VertexWriter>
 using CapProc = std::function<void(VertexWriter& vtx_builder,
                                    const Point& position,
@@ -565,16 +558,8 @@ Join StrokePathGeometry::GetStrokeJoin() const {
   return stroke_join_;
 }
 
-Scalar StrokePathGeometry::ComputeAlphaCoverage(const Entity& entity) const {
-  Scalar scaled_stroke_width =
-      entity.GetTransform().GetMaxBasisLengthXY() * stroke_width_;
-  // If the stroke width is 0 or greater than kMinStrokeSizeMSAA, don't apply
-  // any additional alpha. This is intended to match Skia behavior.
-  if (scaled_stroke_width == 0.0 || scaled_stroke_width >= kMinStrokeSizeMSAA) {
-    return 1.0;
-  }
-  // This scalling is eyeballed from Skia.
-  return std::clamp(scaled_stroke_width * 20.0f, 0.f, 1.f);
+Scalar StrokePathGeometry::ComputeAlphaCoverage(const Matrix& transform) const {
+  return Geometry::ComputeStrokeAlphaCoverage(transform, stroke_width_);
 }
 
 GeometryResult StrokePathGeometry::GetPositionBuffer(
@@ -584,15 +569,15 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
   if (stroke_width_ < 0.0) {
     return {};
   }
-  auto determinant = entity.GetTransform().GetDeterminant();
-  if (determinant == 0) {
+  Scalar max_basis = entity.GetTransform().GetMaxBasisLengthXY();
+  if (max_basis == 0) {
     return {};
   }
 
   Scalar min_size =
       (pass.GetSampleCount() == SampleCount::kCount4 ? kMinStrokeSizeMSAA
                                                      : kMinStrokeSize) /
-      sqrt(std::abs(determinant));
+      max_basis;
   Scalar stroke_width = std::max(stroke_width_, min_size);
 
   auto& host_buffer = renderer.GetTransientsBuffer();
@@ -641,12 +626,12 @@ std::optional<Rect> StrokePathGeometry::GetCoverage(
   if (stroke_join_ == Join::kMiter) {
     max_radius = std::max(max_radius, miter_limit_ * 0.5f);
   }
-  Scalar determinant = transform.GetDeterminant();
-  if (determinant == 0) {
-    return std::nullopt;
+  Scalar max_basis = transform.GetMaxBasisLengthXY();
+  if (max_basis == 0) {
+    return {};
   }
   // Use the most conervative coverage setting.
-  Scalar min_size = kMinStrokeSize / sqrt(std::abs(determinant));
+  Scalar min_size = kMinStrokeSize / max_basis;
   max_radius *= std::max(stroke_width_, min_size);
   return path_bounds->Expand(max_radius).TransformBounds(transform);
 }

@@ -126,6 +126,10 @@ class ColorSourceContents : public Contents {
     return geom.GetPositionBuffer(renderer, entity, pass);
   }
 
+  /// @brief Whether the entity should be treated as non-opaque due to stroke
+  ///        geometry requiring alpha for coverage.
+  bool AppliesAlphaForStrokeCoverage(const Matrix& transform) const;
+
   template <typename VertexShaderT>
   bool DrawGeometry(const ContentContext& renderer,
                     const Entity& entity,

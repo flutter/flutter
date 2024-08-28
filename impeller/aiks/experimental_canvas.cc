@@ -673,7 +673,7 @@ void ExperimentalCanvas::AddRenderEntityToCurrentPass(Entity entity,
       entity.GetTransform());
   entity.SetInheritedOpacity(transform_stack_.back().distributed_opacity);
   if (entity.GetBlendMode() == BlendMode::kSourceOver &&
-      entity.GetContents()->IsOpaque()) {
+      entity.GetContents()->IsOpaque(entity.GetTransform())) {
     entity.SetBlendMode(BlendMode::kSource);
   }
 
