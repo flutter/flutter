@@ -701,14 +701,13 @@ class Cache {
     if (!_lockEnabled) {
       return;
     }
-    final List<ArtifactSet> neededArtifacts = <ArtifactSet>[];
 
+    final List<ArtifactSet> neededArtifacts = <ArtifactSet>[];
     for (final ArtifactSet artifact in _artifacts) {
       if (!requiredArtifacts.contains(artifact.developmentArtifact)) {
         _logger.printTrace('Artifact $artifact is not required, skipping update.');
         continue;
       }
-
       if (await artifact.isUpToDate(_fileSystem)) {
         continue;
       }
@@ -718,7 +717,7 @@ class Cache {
     for (final (int i, ArtifactSet artifact) in neededArtifacts.indexed) {
       try {
         final List<String> statusMessageParts = <String>[
-          'Downloading ${artifact.stampName}',
+          'Downloading artifacts: ${artifact.stampName}',
           if (neededArtifacts.length > 1)
             ' (${i + 1} of ${neededArtifacts.length})',
           '...',

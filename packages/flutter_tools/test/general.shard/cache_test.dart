@@ -278,8 +278,8 @@ void main() {
       });
       expect(
         logger.statusText,
-        'Downloading artifact1 (1 of 2)...\n'
-        'Downloading artifact2 (2 of 2)...\n',
+        'Downloading artifacts: artifact1 (1 of 2)...\n'
+        'Downloading artifacts: artifact2 (2 of 2)...\n',
       );
 
       artifact1.upToDate = false;
@@ -288,7 +288,7 @@ void main() {
         DevelopmentArtifact.androidGenSnapshot,
       });
       // Don't print (1 of 1)
-      expect(logger.statusText, 'Downloading artifact1...\n');
+      expect(logger.statusText, 'Downloading artifacts: artifact1...\n');
     });
 
     testWithoutContext("getter dyLdLibEntry concatenates the output of each artifact's dyLdLibEntry getter", () async {
