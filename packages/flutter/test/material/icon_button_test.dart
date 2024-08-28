@@ -2992,6 +2992,45 @@ void main() {
     // Verify that the tooltip is shown.
     expect(findTooltipContainer(tooltipText), findsOneWidget);
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/153544.
+  testWidgets('Trigger Ink splash when hovering within layout bounds with tooltip', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: ColoredBox(
+              color: const Color(0xFFFF0000),
+              child: IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.favorite),
+                tooltip: 'Test tooltip',
+                style: const ButtonStyle(
+                  overlayColor: WidgetStatePropertyAll<Color>(Color(0xFF00FF00)),
+                  padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(20)),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset topLeft = tester.getTopLeft(find.byType(ColoredBox));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(topLeft);
+    await gesture.down(topLeft);
+    await tester.pumpAndSettle();
+    expect(
+      getOverlayColor(tester),
+      paints
+        ..rect(color: const Color(0xFFFF0000)) // ColoredBox.
+        ..rect(color: const Color(0xFF00FF00)), // IconButton overlay.
+    );
+  });
 }
 
 Widget wrap({required Widget child, required bool useMaterial3}) {

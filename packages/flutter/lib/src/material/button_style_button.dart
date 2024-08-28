@@ -480,7 +480,14 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       effectiveChild = resolvedBackgroundBuilder(context, statesController.value, effectiveChild);
     }
 
-    Widget result = ConstrainedBox(
+    if (widget.tooltip != null) {
+      effectiveChild = Tooltip(
+        message: widget.tooltip,
+        child: effectiveChild,
+      );
+    }
+
+    final Widget result = ConstrainedBox(
       constraints: effectiveConstraints,
       child: Material(
         elevation: resolvedElevation!,
@@ -529,13 +536,6 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         assert(minSize.height >= 0.0);
       case MaterialTapTargetSize.shrinkWrap:
         minSize = Size.zero;
-    }
-
-    if (widget.tooltip != null) {
-      result = Tooltip(
-        message: widget.tooltip,
-        child: result,
-      );
     }
 
     return Semantics(
