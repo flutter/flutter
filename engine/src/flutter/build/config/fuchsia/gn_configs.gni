@@ -21,12 +21,6 @@ declare_args() {
 # TODO(zijiehe): Remove the override and move it into declare_args once the one
 # in //build/config/sdk.gni being removed. - b/40935282
 
-# The target API level for this repository. Embedders should override this
-# value to specify the API level the packages produced from this repository
-# should be targeting, e.g. in their top-level //.gn file. A value of -1
-# means that no API level will be passed to the tools that consumes it.
-fuchsia_target_api_level = 22
-
 # The SDK manifest file. This is useful to include as a dependency
 # for some targets in order to cause a rebuild when the version of the
 # SDK is changed.

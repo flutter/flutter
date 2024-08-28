@@ -178,12 +178,13 @@ def CopyToBucket(src, dst, product=False):
 
 
 def ReadTargetAPILevel():
-  filename = os.path.join(os.path.dirname(__file__), '../../build/config/fuchsia/gn_configs.gni')
+  filename = os.path.join(os.path.dirname(__file__), 'gn-sdk/src/gn_configs.gni')
   with open(filename) as f:
     for line in f:
+      line = line.strip()
       if line.startswith('fuchsia_target_api_level'):
         return line.split('=')[-1].strip()
-  assert False, 'No fuchsia_target_api_level found in //flutter/build/config/fuchsia/gn_configs.gni'
+  assert False, 'No fuchsia_target_api_level found in ' + filename
 
 
 def CopyVulkanDepsToBucket(src, dst, arch):
