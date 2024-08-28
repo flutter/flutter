@@ -884,7 +884,36 @@ void main() {
     expect(find.text('1'), findsNothing);
   });
 
-  testWidgets('Value returned by `shouldTriggerDismiss` override dismiss gesture validation', (WidgetTester tester) async {
+  testWidgets('Default behavior expected when `shouldTriggerDismiss` returns `details.reached || details.isFling`', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildTest(
+        shouldTriggerDismiss: (TriggerDismissDetails details) => details.reached || details.isFling,
+      )
+    );
+
+    // Check that flung item is dismissed.
+    await checkFlingItemAfterMovement(tester, 0, gestureDirection: AxisDirection.right, mechanism: flingElement);
+    expect(find.text('0'), findsNothing);
+
+    await dismissItem(tester, 1, gestureDirection: AxisDirection.right);
+    expect(find.text('1'), findsNothing);
+  });
+
+  testWidgets('Value returned by `shouldTriggerDismiss` override dismiss gesture validation - true', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildTest(
+        shouldTriggerDismiss: (TriggerDismissDetails details) => true,
+      )
+    );
+
+    await checkFlingItemAfterMovement(tester, 0, gestureDirection: AxisDirection.right, mechanism: flingElement);
+    expect(find.text('0'), findsNothing);
+
+    await dismissItem(tester, 1, gestureDirection: AxisDirection.right);
+    expect(find.text('1'), findsNothing);
+  });
+
+  testWidgets('Value returned by `shouldTriggerDismiss` override dismiss gesture validation - false', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         shouldTriggerDismiss: (TriggerDismissDetails details) => false,
@@ -901,7 +930,7 @@ void main() {
   testWidgets('Use `shouldTriggerDismiss` to disable flinging', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
-        shouldTriggerDismiss: (TriggerDismissDetails details) => details.reached ? null : false,
+        shouldTriggerDismiss: (TriggerDismissDetails details) => details.reached,
       )
     );
 
@@ -910,6 +939,60 @@ void main() {
 
     await dismissItem(tester, 1, gestureDirection: AxisDirection.right);
     expect(find.text('1'), findsNothing);
+  });
+
+  testWidgets('Result from `shouldTriggerDismiss` does not override `confirmDismiss` validation - confirmDismiss complete with false', (WidgetTester tester) async {
+    final Completer<bool?> completer = Completer<bool?>();
+    await tester.pumpWidget(
+      buildTest(
+        confirmDismiss: (BuildContext context, DismissDirection dismissDirection) {
+          return completer.future;
+        },
+        shouldTriggerDismiss: (TriggerDismissDetails details) => true,
+      )
+    );
+
+    await checkFlingItemAfterMovement(tester, 0, gestureDirection: AxisDirection.right, mechanism: flingElement);
+    expect(find.text('0'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
+
+    await dismissItem(tester, 1, gestureDirection: AxisDirection.right);
+    expect(find.text('1'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
+
+    completer.complete(false);
+    await tester.pumpAndSettle();
+
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
+  });
+
+  testWidgets('Result from `shouldTriggerDismiss` does not override `confirmDismiss` validation - confirmDismiss complete with true', (WidgetTester tester) async {
+    final Completer<bool?> completer = Completer<bool?>();
+    await tester.pumpWidget(
+      buildTest(
+        confirmDismiss: (BuildContext context, DismissDirection dismissDirection) {
+          return completer.future;
+        },
+        shouldTriggerDismiss: (TriggerDismissDetails details) => true,
+      )
+    );
+
+    await checkFlingItemAfterMovement(tester, 0, gestureDirection: AxisDirection.right, mechanism: flingElement);
+    expect(find.text('0'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
+
+    await dismissItem(tester, 1, gestureDirection: AxisDirection.right);
+    expect(find.text('1'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
+
+    completer.complete(true);
+    await tester.pumpAndSettle();
+
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsNothing);
+    expect(dismissedItems, <int>[0, 1]);
   });
 
   testWidgets('Dismissible with null resizeDuration calls onDismissed immediately', (WidgetTester tester) async {
