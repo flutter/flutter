@@ -3021,7 +3021,6 @@ void main() {
       home: Center(
         child: Material(
           child: SearchAnchor(
-            isFullScreen: true,
             enabled: false,
             builder: (BuildContext context, SearchController controller) {
               return const Icon(Icons.search);
