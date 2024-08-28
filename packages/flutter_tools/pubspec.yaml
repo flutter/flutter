@@ -12,8 +12,8 @@ dependencies:
   # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
   archive: 3.6.1
   args: 2.5.0
-  browser_launcher: 1.1.1
-  dds: 4.2.5
+  browser_launcher: 1.1.2
+  dds: 4.2.5+1
   dwds: 24.1.0
   completion: 1.0.1
   coverage: 1.9.0
@@ -47,7 +47,7 @@ dependencies:
   pub_semver: 2.1.4
   pool: 1.5.1
   path: 1.9.0
-  mime: 1.0.5
+  mime: 1.0.6
   logging: 1.2.0
   http_multi_server: 3.2.1
   convert: 3.1.1
@@ -122,4 +122,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 1fe9
+# PUBSPEC CHECKSUM: a648
