@@ -501,9 +501,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (widget.scrimColor != oldWidget.scrimColor) {
       _scrimColorTween = _buildScrimColorTween();
     }
-    final bool drawerOpen = widget.isDrawerOpen;
-    if (drawerOpen != oldWidget.isDrawerOpen && !_controller.status.isAnimating) {
-      _controller.value = drawerOpen ? 1.0 : 0.0;
+
+    if (_controller.status.isAnimating) {
+      return; // Don't snap the drawer open or shut while the user is dragging.
+    }
+    if (widget.isDrawerOpen != oldWidget.isDrawerOpen) {
+      _controller.value = widget.isDrawerOpen ? 1.0 : 0.0;
     }
   }
 
