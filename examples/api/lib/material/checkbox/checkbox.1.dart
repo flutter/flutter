@@ -66,6 +66,12 @@ class _CheckboxExampleState extends State<CheckboxExample> {
           value: isChecked,
           onChanged: null,
         ),
+        Checkbox(
+          tristate: true,
+          value: isChecked,
+          onChanged: null,
+          dimension: 28.0,
+        ),
       ],
     );
   }
