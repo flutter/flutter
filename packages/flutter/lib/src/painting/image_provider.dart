@@ -1202,7 +1202,7 @@ enum ResizeImagePolicy {
 /// ```dart
 ///    Image(
 ///      image: ResizeImage(
-///        FileImage(File(pathRefImage)),
+///        FileImage(File('path/to/image')),
 ///        width: (MediaQuery.sizeOf(context).width / 2).toInt(), // Half of the screen's width.
 ///      ),
 ///    );
