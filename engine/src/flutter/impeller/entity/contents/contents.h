@@ -91,7 +91,9 @@ class Contents {
   ///        properties (e.g. the blend mode), clips/visibility culling, or
   ///        inherited opacity.
   ///
-  virtual bool IsOpaque() const;
+  /// @param transform The current transform matrix of the entity that will
+  /// render this contents.
+  virtual bool IsOpaque(const Matrix& transform) const;
 
   //----------------------------------------------------------------------------
   /// @brief Given the current pass space bounding rectangle of the clip

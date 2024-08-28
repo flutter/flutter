@@ -16,6 +16,13 @@ namespace impeller {
 
 class Tessellator;
 
+/// @brief The minimum stroke size can be less than one physical pixel because
+///        of MSAA, but no less that half a physical pixel otherwise we might
+///        not hit one of the sample positions.
+static constexpr Scalar kMinStrokeSizeMSAA = 0.5f;
+
+static constexpr Scalar kMinStrokeSize = 1.0f;
+
 struct GeometryResult {
   enum class Mode {
     /// The geometry has no overlapping triangles.
@@ -91,6 +98,11 @@ class Geometry {
 
   virtual std::optional<Rect> GetCoverage(const Matrix& transform) const = 0;
 
+  /// @brief Compute an alpha value to simulate lower coverage of fractional
+  ///        pixel strokes.
+  static Scalar ComputeStrokeAlphaCoverage(const Matrix& entity,
+                                           Scalar stroke_width);
+
   /// @brief    Determines if this geometry, transformed by the given
   ///           `transform`, will completely cover all surface area of the given
   ///           `rect`.
@@ -107,7 +119,7 @@ class Geometry {
 
   virtual bool CanApplyMaskFilter() const;
 
-  virtual Scalar ComputeAlphaCoverage(const Entity& entitys) const {
+  virtual Scalar ComputeAlphaCoverage(const Matrix& transform) const {
     return 1.0;
   }
 

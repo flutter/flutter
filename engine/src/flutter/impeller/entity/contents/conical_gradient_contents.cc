@@ -80,7 +80,8 @@ bool ConicalGradientContents::RenderSSBO(const ContentContext& renderer,
         frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
         frag_info.decal_border_color = decal_border_color_;
         frag_info.alpha =
-            GetOpacityFactor() * GetGeometry()->ComputeAlphaCoverage(entity);
+            GetOpacityFactor() *
+            GetGeometry()->ComputeAlphaCoverage(entity.GetTransform());
         if (focus_) {
           frag_info.focus = focus_.value();
           frag_info.focus_radius = focus_radius_;
@@ -137,7 +138,8 @@ bool ConicalGradientContents::RenderTexture(const ContentContext& renderer,
         frag_info.texture_sampler_y_coord_scale =
             gradient_texture->GetYCoordScale();
         frag_info.alpha =
-            GetOpacityFactor() * GetGeometry()->ComputeAlphaCoverage(entity);
+            GetOpacityFactor() *
+            GetGeometry()->ComputeAlphaCoverage(entity.GetTransform());
         frag_info.half_texel =
             Vector2(0.5 / gradient_texture->GetSize().width,
                     0.5 / gradient_texture->GetSize().height);

@@ -16,13 +16,17 @@ class LineGeometry final : public Geometry {
 
   ~LineGeometry() = default;
 
-  static Scalar ComputePixelHalfWidth(const Matrix& transform, Scalar width);
+  static Scalar ComputePixelHalfWidth(const Matrix& transform,
+                                      Scalar width,
+                                      bool msaa);
 
   // |Geometry|
   bool CoversArea(const Matrix& transform, const Rect& rect) const override;
 
   // |Geometry|
   bool IsAxisAlignedRect() const override;
+
+  Scalar ComputeAlphaCoverage(const Matrix& transform) const override;
 
  private:
   // Computes the 4 corners of a rectangle that defines the line and
@@ -41,10 +45,12 @@ class LineGeometry final : public Geometry {
   // @return true if the transform and width were not degenerate
   bool ComputeCorners(Point corners[4],
                       const Matrix& transform,
-                      bool extend_endpoints) const;
+                      bool extend_endpoints,
+                      bool msaa) const;
 
   Vector2 ComputeAlongVector(const Matrix& transform,
-                             bool allow_zero_length) const;
+                             bool allow_zero_length,
+                             bool msaa) const;
 
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,

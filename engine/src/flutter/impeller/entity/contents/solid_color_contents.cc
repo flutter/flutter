@@ -28,8 +28,8 @@ bool SolidColorContents::IsSolidColor() const {
   return true;
 }
 
-bool SolidColorContents::IsOpaque() const {
-  return GetColor().IsOpaque();
+bool SolidColorContents::IsOpaque(const Matrix& transform) const {
+  return GetColor().IsOpaque() && !AppliesAlphaForStrokeCoverage(transform);
 }
 
 std::optional<Rect> SolidColorContents::GetCoverage(
@@ -54,8 +54,8 @@ bool SolidColorContents::Render(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
-  frag_info.color =
-      GetColor().Premultiply() * GetGeometry()->ComputeAlphaCoverage(entity);
+  frag_info.color = GetColor().Premultiply() *
+                    GetGeometry()->ComputeAlphaCoverage(entity.GetTransform());
 
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
