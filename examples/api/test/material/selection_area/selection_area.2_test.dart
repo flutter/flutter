@@ -11,7 +11,7 @@ void main() {
     await tester.pumpWidget(
       const example.SelectionAreaInsertContentExampleApp(),
     );
-    expect(find.byType(Text), findsNWidgets(9));
+    expect(find.byType(Text), findsNWidgets(5));
     expect(find.byType(Column), findsOneWidget);
   });
 }
