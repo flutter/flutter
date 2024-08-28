@@ -793,6 +793,17 @@ class NavigatorObserver {
   /// The [Navigator] replaced `oldRoute` with `newRoute`.
   void didReplace({ Route<dynamic>? newRoute, Route<dynamic>? oldRoute }) { }
 
+  /// The top most route has changed.
+  ///
+  /// The `topRoute` is the new top most route. This can be a new route pushed
+  /// on top of the screen, or an existing route that becomes the new top-most
+  /// route because the previous top-most route has been popped.
+  ///
+  /// The `previousTopRoute` was the top most route before the change. This can
+  /// be a route that was popped off the screen, or a route that will be covered
+  /// by the `topRoute`. This can also be null if this is the first build.
+  void didChangeTop(Route<dynamic> topRoute, Route<dynamic>? previousTopRoute) { }
+
   /// The [Navigator]'s routes are being moved by a user gesture.
   ///
   /// For example, this is called when an iOS back gesture starts, and is used
@@ -3962,12 +3973,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     for (final NavigatorObserver observer in _effectiveObservers) {
       NavigatorObserver._navigators[observer] = null;
     }
+    _effectiveObservers = <NavigatorObserver>[];
     super.deactivate();
   }
 
   @override
   void activate() {
     super.activate();
+    _updateEffectiveObservers();
     for (final NavigatorObserver observer in _effectiveObservers) {
       assert(observer.navigator == null);
       NavigatorObserver._navigators[observer] = this;
@@ -3981,12 +3994,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       _debugLocked = true;
       return true;
     }());
-    assert(() {
-      for (final NavigatorObserver observer in _effectiveObservers) {
-        assert(observer.navigator != this);
-      }
-      return true;
-    }());
+    assert(_effectiveObservers.isEmpty);
     _updateHeroController(null);
     focusNode.dispose();
     _forcedDisposeAllRouteEntries();
@@ -4011,6 +4019,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     ];
   }
 
+  _RouteEntry? _lastTopmostRoute;
   String? _lastAnnouncedRouteName;
 
   bool _debugUpdatingPage = false;
@@ -4437,9 +4446,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     // notifications.
     _flushRouteAnnouncement();
 
+    final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+    if (lastEntry != null && _lastTopmostRoute != lastEntry) {
+      for (final NavigatorObserver observer in _effectiveObservers) {
+        observer.didChangeTop(lastEntry.route, _lastTopmostRoute?.route);
+      }
+    }
+    _lastTopmostRoute = lastEntry;
     // Announce route name changes.
     if (widget.reportsRouteUpdateToEngine) {
-      final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
       final String? routeName = lastEntry?.route.settings.name;
       if (routeName != null && routeName != _lastAnnouncedRouteName) {
         SystemNavigator.routeInformationUpdated(uri: Uri.parse(routeName));
