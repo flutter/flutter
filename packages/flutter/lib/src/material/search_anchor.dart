@@ -351,7 +351,11 @@ class SearchAnchor extends StatefulWidget {
   /// Defaults to the default value specified in [TextField].
   final TextInputType? keyboardType;
 
-  /// If false the widget is "disabled" so the SearchAnchor will ignore taps.
+  /// Whether or not this widget is currently interactive.
+  ///
+  /// When false, the widget will ignore taps and appear dimmed.
+  ///
+  /// Defaults to true.
   final bool enabled;
 
   @override
