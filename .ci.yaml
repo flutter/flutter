@@ -487,6 +487,8 @@ targets:
       - .ci.yaml
 
   - name: Linux customer_testing
+    # TODO(matanlurey): https://github.com/flutter/flutter/issues/154293
+    bringup: true
     # This really just runs dev/bots/customer_testing/ci.sh,
     # but it does so indirectly via the flutter_drone recipe
     # calling the dev/bots/test.dart script.
