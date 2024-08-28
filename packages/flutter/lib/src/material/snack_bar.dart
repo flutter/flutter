@@ -436,7 +436,7 @@ class SnackBar extends StatefulWidget {
   /// Tapping the icon will close the snack bar.
   final bool? showCloseIcon;
 
-  /// (optional) color for the close icon, if [showCloseIcon] is
+  /// An optional color for the close icon, if [showCloseIcon] is
   /// true.
   ///
   /// If this property is null, then [SnackBarThemeData.closeIconColor] of
