@@ -1044,19 +1044,16 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   @override
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     final List<double> segmentWidths = _getChildWidths(constraints);
-
     final double childHeight = _getMaxChildHeight(constraints, constraints.maxWidth);
-    final BoxConstraints separatorConstraints = BoxConstraints(minHeight: childHeight, maxHeight: childHeight);
 
     int index = 0;
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
     RenderBox? child = firstChild;
     while (child != null) {
-      final BoxConstraints childConstraints = BoxConstraints.tight(Size(segmentWidths[index ~/ 2], childHeight));
-      final BoxConstraints constraints = index.isEven ? childConstraints : separatorConstraints;
-      baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDryBaseline(constraints, baseline)));
+      final BoxConstraints childConstraints = BoxConstraints.tight(Size(segmentWidths[index], childHeight));
+      baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDryBaseline(childConstraints, baseline)));
 
-      child = childAfter(child);
+      child = nonSeparatorChildAfter(child);
       index++;
     }
 
