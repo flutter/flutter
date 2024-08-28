@@ -503,8 +503,15 @@ final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
   eventLabel: 'min-compile-sdk-version',
 );
 
-final RegExp _agpJavaError = RegExp(r'Android Gradle plugin requires Java\s+\d+\s+to run');
+final RegExp _agpJavaError = RegExp(r'Android Gradle plugin requires Java (\d+\.?\d*) to run');
 
+// If an incompatible Java and Android Gradle Plugin error is caught,
+// Android Gradle Plugin throws the required Java version to fix the error.
+// Android Gradle Plugin handles the error here: http://shortn/_SgUWyRdywL.
+
+// If we ever need to reference or check the thrown requirements,
+// we can find the Java and Android Gradle Plugin compatability here:
+// 'https://developer.android.com/build/releases/past-releases'
 @visibleForTesting
 final GradleHandledError incompatibleJavaAndAgpVersionsHandler= GradleHandledError(
   test: (String line) {
@@ -520,7 +527,8 @@ final GradleHandledError incompatibleJavaAndAgpVersionsHandler= GradleHandledErr
     globals.printBox(
       '${globals.logger.terminal.warningMark} ${helpfulGradleError}\n\n'
       'To fix this issue, try updating to the latest Android SDK and Android Studio on: ${AndroidProject.installAndroidStudioUrl}\n'
-      'If that does not work, you can set the Java version used by Flutter by running `flutter config --jdk-dir=“</path/to/jdk>“`\n\n'
+      'If that does not work, you can set the Java version used by Flutter by \n'
+      'running `flutter config --jdk-dir=“</path/to/jdk>“`\n\n'
       'To check the Java version used by Flutter, run `flutter doctor --verbose`',
       title: _boxTitle,
     );

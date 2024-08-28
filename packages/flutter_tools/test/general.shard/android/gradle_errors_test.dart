@@ -1011,9 +1011,12 @@ An exception occurred applying plugin request [id: 'com.android.application']
       );
 
       // Ensure the error notes the required Java version, the Java version currently used,
-      // and the android studio and android sdk installation link.
+      // the android studio and android sdk installation link, the flutter command to set
+      // the Java version Flutter uses, and the flutter doctor command.
       expect(testLogger.statusText, contains('Android Gradle plugin requires Java 17 to run. You are currently using Java 11.'));
       expect(testLogger.statusText, contains('https://developer.android.com/studio/install'));
+      expect(testLogger.statusText, contains('`flutter config --jdk-dir=“</path/to/jdk>“`'));
+      expect(testLogger.statusText, contains('`flutter doctor --verbose`'));
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
