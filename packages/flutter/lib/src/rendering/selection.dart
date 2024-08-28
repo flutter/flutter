@@ -96,8 +96,11 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// order as the [Selectable]s contained under
   /// this [SelectionHandler].
   ///
-  /// Return a list of [SelectedContentRange.empty]
+  /// Returns a list of [SelectedContentRange.empty]
   /// when nothing is selected.
+  ///
+  /// Returns an empty list only if there is no
+  /// content under this [SelectionHandler].
   List<SelectedContentRange> getSelections();
 
   /// Handles the [SelectionEvent] sent to this object.
@@ -770,7 +773,7 @@ enum SelectionStatus {
 
 /// The details of a selection.
 ///
-/// This object is created by users of the [SelectionListenerSelectionChangedCallback] callback.
+/// This object is created by callers of the [SelectionListenerSelectionChangedCallback] callback.
 ///
 /// This includes information such as the status of the selection
 /// indicating if it is collapsed or uncollapsed, the start and end offsets
@@ -780,8 +783,8 @@ enum SelectionStatus {
 /// See also:
 ///
 ///   * [SelectionListener], which provides a [SelectionDetails] object
-///   for the selection under its subtree in its [SelectionListener.onSelectionChanged]
-///   callback.
+///     for the selection under its subtree in its [SelectionListener.onSelectionChanged]
+///     callback.
 @immutable
 class SelectionDetails {
   /// Creates a selection details object.
