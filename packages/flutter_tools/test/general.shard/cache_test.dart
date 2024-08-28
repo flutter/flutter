@@ -253,6 +253,39 @@ void main() {
       expect(artifact2.didUpdate, true);
     });
 
+    testWithoutContext('should print status messages about each artifact update (grouped by development artifact)', () async {
+      final FakeSecondaryCachedArtifact artifact1 = FakeSecondaryCachedArtifact()
+        ..upToDate = false
+        ..developmentArtifact = DevelopmentArtifact.androidGenSnapshot;
+      final FakeSecondaryCachedArtifact artifact2 = FakeSecondaryCachedArtifact()
+        ..upToDate = false
+        ..developmentArtifact = DevelopmentArtifact.universal;
+      final FileSystem fileSystem = MemoryFileSystem.test();
+
+      final BufferLogger logger = BufferLogger.test();
+      final Cache cache = Cache.test(
+        fileSystem: fileSystem,
+        artifacts: <CachedArtifact>[artifact1, artifact2],
+        logger: logger,
+        processManager: FakeProcessManager.any(),
+      );
+
+      await cache.updateAll(<DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+        DevelopmentArtifact.androidGenSnapshot
+      });
+      expect(
+        logger.statusText,
+        'Downloading Flutter for Android tools (1 of 2)...\n'
+        'Downloading universal tools (2 of 2)...\n',
+      );
+
+      artifact1.upToDate = false;
+      logger.clear();
+      await cache.updateAll({DevelopmentArtifact.androidGenSnapshot});
+      expect(logger.statusText, 'Downloading Flutter for Android tools...\n');
+    });
+
     testWithoutContext("getter dyLdLibEntry concatenates the output of each artifact's dyLdLibEntry getter", () async {
       final FakeIosUsbArtifacts artifact1 = FakeIosUsbArtifacts();
       final FakeIosUsbArtifacts artifact2 = FakeIosUsbArtifacts();
@@ -1194,7 +1227,7 @@ class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
   }
 
   @override
-  DevelopmentArtifact get developmentArtifact => DevelopmentArtifact.universal;
+  DevelopmentArtifact developmentArtifact = DevelopmentArtifact.universal;
 
   @override
   String get name => 'fake_secondary_cached_artifact';
