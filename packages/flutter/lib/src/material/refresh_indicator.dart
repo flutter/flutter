@@ -311,9 +311,9 @@ class RefreshIndicator extends StatefulWidget {
   /// Defaults to [RefreshIndicatorTriggerMode.onEdge].
   final RefreshIndicatorTriggerMode triggerMode;
 
-  /// Defines [elevation] for `RefreshIndicator`.
+  /// Defines `elevation` for [RefreshIndicator].
   ///
-  /// By default, the value of [elevation] is 2.0.
+  /// Defaults to 2.0.
   final double elevation;
 
   @override
