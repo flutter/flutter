@@ -215,6 +215,34 @@ Future<void> testMain() async {
       await matchGoldenFile('scene_builder_backdrop_filter.png', region: region);
     });
 
+    test('empty backdrop filter layer with clip', () async {
+      // Note that this test does not actually render properly in skwasm due to
+      // a Skia bug. See https://g-issues.skia.org/issues/362552959 and
+      // https://github.com/flutter/flutter/issues/152026
+      final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
+
+      sceneBuilder.addPicture(ui.Offset.zero, drawPicture((ui.Canvas canvas) {
+        // Create a red and blue checkerboard pattern
+        final ui.Paint redPaint = ui.Paint()..color = const ui.Color(0xFFFF0000);
+        final ui.Paint bluePaint = ui.Paint()..color = const ui.Color(0xFF0000FF);
+        for (double y = 0; y < 300; y += 10) {
+          for (double x = 0; x < 300; x += 10) {
+            final ui.Paint paint = ((x + y) % 20 == 0) ? redPaint : bluePaint;
+            canvas.drawRect(ui.Rect.fromLTWH(x, y, 10, 10), paint);
+          }
+        }
+      }));
+
+      sceneBuilder.pushClipRect(const ui.Rect.fromLTRB(100, 100, 200, 200));
+
+      sceneBuilder.pushBackdropFilter(ui.ImageFilter.blur(
+        sigmaX: 3.0,
+        sigmaY: 3.0,
+      ));
+      await renderScene(sceneBuilder.build());
+      await matchGoldenFile('scene_builder_empty_backdrop_filter_with_clip.png', region: region);
+    });
+
     test('image filter layer', () async {
       final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
       sceneBuilder.pushImageFilter(ui.ImageFilter.blur(
