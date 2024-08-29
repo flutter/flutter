@@ -455,6 +455,7 @@ class FlutterPlatform extends PlatformPlugin {
       icudtlPath: icudtlPath,
       compileExpression: _compileExpressionService,
       fontConfigManager: _fontConfigManager,
+      nativeAssetsBuilder: nativeAssetsBuilder,
     );
   }
 

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart';
+import 'package:native_assets_cli/native_assets_cli.dart';
 
 import '../../../src/common.dart';
 
@@ -64,5 +65,84 @@ void main() {
       frameworkUri('libatoolongfilenameforaframework.dylib', alreadyTakenNames),
       equals(Uri.file('atoolongfilenameforaframework2.framework/atoolongfilenameforaframework2')),
     );
+  });
+
+  group('parseOtoolArchitectureSections', () {
+    test('single architecture', () {
+      expect(
+        parseOtoolArchitectureSections(
+'''
+/build/native_assets/ios/buz.framework/buz (architecture x86_64):
+@rpath/libfoo.dylib
+'''
+        ),
+        <Architecture, List<String>>{
+          Architecture.x64: <String>['@rpath/libfoo.dylib'],
+        },
+      );
+    });
+
+    test('single architecture but not specified', () {
+      expect(
+        parseOtoolArchitectureSections(
+'''
+/build/native_assets/ios/buz.framework/buz:
+@rpath/libfoo.dylib
+'''
+        ),
+        <Architecture?, List<String>>{
+          null: <String>['@rpath/libfoo.dylib'],
+        },
+      );
+    });
+
+    test('multiple architectures', () {
+      expect(
+        parseOtoolArchitectureSections(
+'''
+/build/native_assets/ios/buz.framework/buz (architecture x86_64):
+@rpath/libfoo.dylib
+/build/native_assets/ios/buz.framework/buz (architecture arm64):
+@rpath/libbar.dylib
+'''
+        ),
+        <Architecture, List<String>>{
+          Architecture.x64: <String>['@rpath/libfoo.dylib'],
+          Architecture.arm64: <String>['@rpath/libbar.dylib'],
+        },
+      );
+    });
+
+    test('multiple lines in section', () {
+      expect(
+        parseOtoolArchitectureSections(
+'''
+/build/native_assets/ios/buz.framework/buz (architecture x86_64):
+@rpath/libfoo.dylib
+@rpath/libbar.dylib
+'''
+        ),
+        <Architecture, List<String>>{
+          Architecture.x64: <String>[
+            '@rpath/libfoo.dylib',
+            '@rpath/libbar.dylib',
+          ],
+        },
+      );
+    });
+
+    test('trim each line in section', () {
+      expect(
+        parseOtoolArchitectureSections(
+'''
+/build/native_assets/ios/buz.framework/buz (architecture x86_64):
+  @rpath/libfoo.dylib
+'''
+        ),
+        <Architecture, List<String>>{
+          Architecture.x64: <String>['@rpath/libfoo.dylib'],
+        },
+      );
+    });
   });
 }

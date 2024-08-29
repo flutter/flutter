@@ -222,43 +222,109 @@ void main() {
     BuildMode.debug,
     BuildMode.release,
   ]) {
-    testUsingContext('build with assets $buildMode',
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-          ProcessManager: () => FakeProcessManager.list(
-                <FakeCommand>[
-                  const FakeCommand(
-                    command: <Pattern>[
-                      'lipo',
-                      '-create',
-                      '-output',
-                      '/build/native_assets/ios/bar.framework/bar',
-                      'arm64/libbar.dylib',
-                      'x64/libbar.dylib',
-                    ],
-                  ),
-                  const FakeCommand(
-                    command: <Pattern>[
-                      'install_name_tool',
-                      '-id',
-                      '@rpath/bar.framework/bar',
-                      '/build/native_assets/ios/bar.framework/bar'
-                    ],
-                  ),
-                  FakeCommand(
-                    command: <Pattern>[
-                      'codesign',
-                      '--force',
-                      '--sign',
-                      '-',
-                      if (buildMode == BuildMode.debug)
-                      '--timestamp=none',
-                      '/build/native_assets/ios/bar.framework',
-                    ],
-                  ),
-                ],
-              ),
-        }, () async {
+    testUsingContext('build with assets $buildMode', overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+      ProcessManager: () => FakeProcessManager.list(
+        <FakeCommand>[
+          const FakeCommand(
+            command: <Pattern>[
+              'lipo',
+              '-create',
+              '-output',
+              '/build/native_assets/ios/bar.framework/bar',
+              'arm64/libbar.dylib',
+              'x64/libbar.dylib',
+            ],
+          ),
+          FakeCommand(
+            command: const <Pattern>[
+              'otool',
+              '-D',
+              '/build/native_assets/ios/bar.framework/bar',
+            ],
+            stdout: <String>[
+              '/build/native_assets/ios/bar.framework/bar (architecture x86_64):',
+              '@rpath/libbar.dylib',
+              '/build/native_assets/ios/bar.framework/bar (architecture arm64):',
+              '@rpath/libbar.dylib',
+            ].join('\n'),
+          ),
+          const FakeCommand(
+            command: <Pattern>[
+              'lipo',
+              '-create',
+              '-output',
+              '/build/native_assets/ios/buz.framework/buz',
+              'arm64/libbuz.dylib',
+              'x64/libbuz.dylib',
+            ],
+          ),
+          FakeCommand(
+            command: const <Pattern>[
+              'otool',
+              '-D',
+              '/build/native_assets/ios/buz.framework/buz',
+            ],
+            stdout: <String>[
+              '/build/native_assets/ios/buz.framework/buz (architecture x86_64):',
+              '@rpath/libbuz.dylib',
+              '/build/native_assets/ios/buz.framework/buz (architecture arm64):',
+              '@rpath/libbuz.dylib',
+            ].join('\n'),
+          ),
+          const FakeCommand(
+            command: <Pattern>[
+              'install_name_tool',
+              '-id',
+              '@rpath/bar.framework/bar',
+              '-change',
+              '@rpath/libbar.dylib',
+              '@rpath/bar.framework/bar',
+              '-change',
+              '@rpath/libbuz.dylib',
+              '@rpath/buz.framework/buz',
+              '/build/native_assets/ios/bar.framework/bar',
+            ],
+          ),
+          FakeCommand(
+            command: <Pattern>[
+              'codesign',
+              '--force',
+              '--sign',
+              '-',
+              if (buildMode == BuildMode.debug)
+                '--timestamp=none',
+              '/build/native_assets/ios/bar.framework',
+            ],
+          ),
+          const FakeCommand(
+            command: <Pattern>[
+              'install_name_tool',
+              '-id',
+              '@rpath/buz.framework/buz',
+              '-change',
+              '@rpath/libbar.dylib',
+              '@rpath/bar.framework/bar',
+              '-change',
+              '@rpath/libbuz.dylib',
+              '@rpath/buz.framework/buz',
+              '/build/native_assets/ios/buz.framework/buz',
+            ],
+          ),
+          FakeCommand(
+            command: <Pattern>[
+              'codesign',
+              '--force',
+              '--sign',
+              '-',
+              if (buildMode == BuildMode.debug)
+                '--timestamp=none',
+              '/build/native_assets/ios/buz.framework',
+            ],
+          ),
+        ],
+      ),
+    }, () async {
       if (const LocalPlatform().isWindows) {
         return; // Backslashes in commands, but we will never run these commands on Windows.
       }
@@ -273,16 +339,23 @@ void main() {
         ],
         onBuild: (native_assets_cli.Target target) =>
             FakeNativeAssetsBuilderResult(
-          assets: <AssetImpl>[
-            NativeCodeAssetImpl(
-              id: 'package:bar/bar.dart',
-              linkMode: DynamicLoadingBundledImpl(),
-              os: target.os,
-              architecture: target.architecture,
-              file: Uri.file('${target.architecture}/libbar.dylib'),
+              assets: <AssetImpl>[
+                NativeCodeAssetImpl(
+                  id: 'package:bar/bar.dart',
+                  linkMode: DynamicLoadingBundledImpl(),
+                  os: target.os,
+                  architecture: target.architecture,
+                  file: Uri.file('${target.architecture}/libbar.dylib'),
+                ),
+                NativeCodeAssetImpl(
+                  id: 'package:buz/buz.dart',
+                  linkMode: DynamicLoadingBundledImpl(),
+                  os: target.os,
+                  architecture: target.architecture,
+                  file: Uri.file('${target.architecture}/libbuz.dylib'),
+                ),
+              ],
             ),
-          ],
-        ),
       );
       await buildNativeAssetsIOS(
         darwinArchs: <DarwinArch>[DarwinArch.arm64, DarwinArch.x86_64],

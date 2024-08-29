@@ -570,7 +570,8 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   await pinDependencies(
       packageDirectory.childDirectory('example').childFile('pubspec.yaml'));
 
-  await addLinkHookDepedendency(packageDirectory);
+  await addLinkHookDependency(packageDirectory);
+  await addDynamicallyLinkedNativeLibrary(packageDirectory);
 
   final ProcessResult result2 = await processManager.run(
     <String>[
@@ -640,7 +641,7 @@ void main(List<String> args) async {
   return packageDirectory;
 }
 
-Future<void> addLinkHookDepedendency(Directory packageDirectory) async {
+Future<void> addLinkHookDependency(Directory packageDirectory) async {
   final Directory flutterDirectory = fileSystem.currentDirectory.parent.parent;
   final Directory linkHookDirectory = flutterDirectory
       .childDirectory('dev')
@@ -684,6 +685,108 @@ import '${packageName}_bindings_generated.dart' as bindings;
   );
   expect(dartFileNew2, isNot(dartFileNew));
   await dartFile.writeAsString(dartFileNew2);
+}
+
+/// Adds a native library to be built by the builder and dynamically link it to
+/// the  main library.
+Future<void> addDynamicallyLinkedNativeLibrary(Directory packageDirectory) async {
+  // Add linked library source files.
+  final Directory srcDirectory = packageDirectory.childDirectory('src');
+  final File linkedLibraryHeaderFile = srcDirectory.childFile('add.h');
+  await linkedLibraryHeaderFile.writeAsString('''
+#include <stdint.h>
+
+#if _WIN32
+#define FFI_PLUGIN_EXPORT __declspec(dllexport)
+#else
+#define FFI_PLUGIN_EXPORT
+#endif
+
+FFI_PLUGIN_EXPORT intptr_t add(intptr_t a, intptr_t b);
+'''
+  );
+  final File linkedLibrarySourceFile = srcDirectory.childFile('add.c');
+  await linkedLibrarySourceFile.writeAsString('''
+#include "add.h"
+
+FFI_PLUGIN_EXPORT intptr_t add(intptr_t a, intptr_t b) {
+  return a + b;
+}
+''');
+
+  // Update main library to include call to linked library.
+  final File mainLibrarySourceFile = srcDirectory.childFile('$packageName.c');
+  String mainLibrarySource = await mainLibrarySourceFile.readAsString();
+  mainLibrarySource = mainLibrarySource.replaceFirst(
+    '#include "$packageName.h"',
+'''
+#include "$packageName.h"
+#include "add.h"
+''',
+  );
+  mainLibrarySource = mainLibrarySource.replaceAll('a + b', 'add(a, b)');
+  await mainLibrarySourceFile.writeAsString(mainLibrarySource);
+
+  // Update builder to build the native library and link it into the main library.
+  const String builderSource = r'''
+import 'package:native_toolchain_c/native_toolchain_c.dart';
+import 'package:logging/logging.dart';
+import 'package:native_assets_cli/native_assets_cli.dart';
+
+void main(List<String> args) async {
+  await build(args, (config, output) async {
+    final packageName = config.packageName;
+
+    final builders = [
+      CBuilder.library(
+        name: 'add',
+        assetName: 'add',
+        sources: ['src/add.c'],
+      ),
+      CBuilder.library(
+        name: packageName,
+        assetName: '${packageName}_bindings_generated.dart',
+        sources: ['src/$packageName.c'],
+        flags: config.dynamicLinkingFlags('add'),
+      ),
+    ];
+
+    final logger = Logger('')
+        ..level = Level.ALL
+        ..onRecord.listen((record) => print(record.message));
+
+    for (final builder in builders) {
+      await builder.run(
+        config: config,
+        output: output,
+        logger: logger,
+      );
+    }
+  });
+}
+
+extension on BuildConfig {
+  List<String> dynamicLinkingFlags(String libraryName) => switch (targetOS) {
+        OS.macOS || OS.iOS => [
+            '-L${outputDirectory.toFilePath()}',
+            '-l$libraryName',
+          ],
+        OS.linux || OS.android => [
+            '-Wl,-rpath=\$ORIGIN/.',
+            '-L${outputDirectory.toFilePath()}',
+            '-l$libraryName',
+          ],
+        OS.windows => [
+            outputDirectory.resolve('$libraryName.lib').toFilePath()
+          ],
+        _ => throw UnimplementedError('Unsupported OS: $targetOS'),
+      };
+}
+''';
+
+  final Directory hookDirectory = packageDirectory.childDirectory('hook');
+  final File builderFile = hookDirectory.childFile('build.dart');
+  await builderFile.writeAsString(builderSource);
 }
 
 Future<void> pinDependencies(File pubspecFile) async {
