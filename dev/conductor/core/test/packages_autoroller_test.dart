@@ -8,7 +8,9 @@ import 'dart:io' as io;
 
 import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_core/packages_autoroller.dart';
+import 'package:conductor_core/src/validate_checkout_post_gradle_regeneration.dart';
 import 'package:file/memory.dart';
+import 'package:path/path.dart' show Context, Style;
 import 'package:platform/platform.dart';
 
 import '../bin/packages_autoroller.dart' show run;
@@ -440,6 +442,39 @@ void main() {
       ]),
       const FakeCommand(command: <String>[
         'git',
+        'status',
+        '--porcelain',
+      ], stdout: '''
+ M dev/integration_tests/ui/android/project-app.lockfile
+ M examples/image_list/android/project-app.lockfile
+'''),
+      const FakeCommand(command: <String>[
+        'git',
+        'status',
+        '--porcelain',
+      ], stdout: '''
+ M dev/integration_tests/ui/android/project-app.lockfile
+ M examples/image_list/android/project-app.lockfile
+'''),
+      const FakeCommand(command: <String>[
+        'git',
+        'add',
+        '--all',
+      ]),
+      const FakeCommand(command: <String>[
+        'git',
+        'commit',
+        '--message',
+        'Re-generate Gradle lockfiles',
+        '--author="flutter-pub-roller-bot <flutter-pub-roller-bot@google.com>"',
+      ]),
+      const FakeCommand(command: <String>[
+        'git',
+        'rev-parse',
+        'HEAD',
+      ], stdout: '234deadbeef'),
+      const FakeCommand(command: <String>[
+        'git',
         'push',
         'https://$token@github.com/$orgName/flutter.git',
         'packages-autoroller-branch-1:packages-autoroller-branch-1',
@@ -539,6 +574,55 @@ void main() {
 
     stdio.printTrace('Using $token');
     expect(stdio.logs.last, '[trace] Using $replacement');
+  });
+
+  group('CheckoutStatePostGradleRegeneration', () {
+    final Context ctx = Context(style: Style.posix);
+
+    test('empty input returns NoDiff', () {
+      expect(
+        CheckoutStatePostGradleRegeneration('', ctx),
+        const NoDiff(),
+      );
+    });
+
+    test('only *.lockfile changes returns OnlyLockfileChanges', () {
+      expect(
+        CheckoutStatePostGradleRegeneration('''
+ A dev/benchmarks/test_apps/stocks/android/buildscript-gradle.lockfile
+ M dev/integration_tests/ui/android/project-app.lockfile
+ M examples/image_list/android/project-app.lockfile
+''', ctx),
+        const OnlyLockfileChanges(),
+      );
+    });
+
+    test('if a *.zip file is added returns NonLockfileChanges', () {
+      const String pathToZip = 'dev/benchmarks/test_apps/stocks/android/very-large-archive.zip';
+      CheckoutStatePostGradleRegeneration result = CheckoutStatePostGradleRegeneration('''
+ A dev/benchmarks/test_apps/stocks/android/buildscript-gradle.lockfile
+ A $pathToZip
+ M dev/integration_tests/ui/android/project-app.lockfile
+ M examples/image_list/android/project-app.lockfile
+''', ctx);
+      expect(result, isA<NonLockfileChanges>());
+      result = result as NonLockfileChanges;
+      expect(result.changes, hasLength(1));
+      expect(result.changes.single, pathToZip);
+    });
+
+    test('if it contains a line not matching the regex returns MalformedLine', () {
+      const String malformedLine = 'New Git Output.';
+      CheckoutStatePostGradleRegeneration result = CheckoutStatePostGradleRegeneration('''
+$malformedLine
+ A dev/benchmarks/test_apps/stocks/android/buildscript-gradle.lockfile
+ M dev/integration_tests/ui/android/project-app.lockfile
+ M examples/image_list/android/project-app.lockfile
+''', ctx);
+      expect(result, isA<MalformedLine>());
+      result = result as MalformedLine;
+      expect(result.line, malformedLine);
+    });
   });
 }
 
