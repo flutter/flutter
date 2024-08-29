@@ -337,6 +337,7 @@
 ../../../flutter/shell/platform/darwin/common/availability_version_check_unittests.cc
 ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_codecs_unittest.mm
 ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_standard_codec_unittest.mm
+../../../flutter/shell/platform/darwin/ios/ios_context_noop_unittests.mm
 ../../../flutter/shell/platform/darwin/ios/ios_surface_noop_unittests.mm
 ../../../flutter/shell/platform/darwin/macos/README.md
 ../../../flutter/shell/platform/darwin/macos/framework/Source/fixtures

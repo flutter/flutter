@@ -125,6 +125,8 @@ source_set("flutter_framework_source_arc") {
     "ios_context_metal_impeller.mm",
     "ios_context_metal_skia.h",
     "ios_context_metal_skia.mm",
+    "ios_context_noop.h",
+    "ios_context_noop.mm",
     "ios_context_software.h",
     "ios_context_software.mm",
     "ios_external_texture_metal.h",
@@ -286,6 +288,7 @@ shared_library("ios_test_flutter") {
     "framework/Source/accessibility_bridge_test.mm",
     "framework/Source/availability_version_check_test.mm",
     "framework/Source/connection_collection_test.mm",
+    "ios_context_noop_unittests.mm",
     "ios_surface_noop_unittests.mm",
     "platform_message_handler_ios_test.mm",
   ]
