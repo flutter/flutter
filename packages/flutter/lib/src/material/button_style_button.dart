@@ -26,6 +26,7 @@ import 'material_state.dart';
 import 'outlined_button.dart';
 import 'text_button.dart';
 import 'theme_data.dart';
+import 'tooltip.dart';
 
 /// {@template flutter.material.ButtonStyleButton.iconAlignment}
 /// Determines the alignment of the icon within the widgets such as:
@@ -85,8 +86,9 @@ abstract class ButtonStyleButton extends StatefulWidget {
     required this.clipBehavior,
     this.statesController,
     this.isSemanticButton = true,
-    required this.child,
     this.iconAlignment = IconAlignment.start,
+    this.tooltip,
+    required this.child,
   });
 
   /// Called when the button is tapped or otherwise activated.
@@ -155,13 +157,22 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// Defaults to true.
   final bool? isSemanticButton;
 
+  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
+  final IconAlignment iconAlignment;
+
+  /// Text that describes the action that will occur when the button is pressed or
+  /// hovered over.
+  ///
+  /// This text is displayed when the user long-presses or hovers over the button
+  /// in a tooltip. This string is also used for accessibility.
+  ///
+  /// If null, the button will not display a tooltip.
+  final String? tooltip;
+
   /// Typically the button's label.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
-
-  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
-  final IconAlignment iconAlignment;
 
   /// Returns a [ButtonStyle] that's based primarily on the [Theme]'s
   /// [ThemeData.textTheme] and [ThemeData.colorScheme], but has most values
@@ -467,6 +478,13 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     );
     if (resolvedBackgroundBuilder != null) {
       effectiveChild = resolvedBackgroundBuilder(context, statesController.value, effectiveChild);
+    }
+
+    if (widget.tooltip != null) {
+      effectiveChild = Tooltip(
+        message: widget.tooltip,
+        child: effectiveChild,
+      );
     }
 
     final Widget result = ConstrainedBox(
