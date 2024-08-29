@@ -487,7 +487,7 @@ targets:
       - .ci.yaml
 
   - name: Linux customer_testing
-    # TODO(matanlurey): https://github.com/flutter/flutter/issues/154293
+    # TODO(Piinks): https://github.com/flutter/flutter/issues/154251
     bringup: true
     # This really just runs dev/bots/customer_testing/ci.sh,
     # but it does so indirectly via the flutter_drone recipe
@@ -495,7 +495,10 @@ targets:
     enabled_branches:
       - master
     recipe: flutter/flutter_drone
+    # Timeout in minutes for the whole task.
     timeout: 60
+    # Timeout in seconds for each individual step.
+    test_timeout_secs: "2700" # 45 minutes * 60
     properties:
       shard: customer_testing
       tags: >
@@ -3696,7 +3699,10 @@ targets:
     enabled_branches:
       - master
     recipe: flutter/flutter_drone
+    # Timeout in minutes for the whole task.
     timeout: 60
+    # Timeout in seconds for each individual step.
+    test_timeout_secs: "2700" # 45 minutes * 60
     properties:
       shard: customer_testing
       tags: >
@@ -5363,7 +5369,10 @@ targets:
     enabled_branches:
       - master
     recipe: flutter/flutter_drone
+    # Timeout in minutes for the whole task.
     timeout: 60
+    # Timeout in seconds for each individual step.
+    test_timeout_secs: "2700" # 45 minutes * 60
     properties:
       shard: customer_testing
       tags: >
