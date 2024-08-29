@@ -4,6 +4,8 @@
 
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
+@Tags(<String>['reduced-test-set'])
+library;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -1167,6 +1169,7 @@ void main() {
       previewsChildRect = currentChildRect;
     }
   });
+
 
   testWidgets('SegmentedButton vertical aligned golden image', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();

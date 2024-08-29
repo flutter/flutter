@@ -884,7 +884,7 @@ class _RenderSegmentedButton<T> extends RenderBox with
         childHeight = math.max(childHeight, child.getMaxIntrinsicHeight(double.infinity));
         child = childAfter(child);
       }
-      childHeight = math.min(childHeight, constraints.maxWidth / childCount);
+      childHeight = math.min(childHeight, constraints.maxHeight / childCount);
     }
     child = firstChild;
     while (child != null) {
