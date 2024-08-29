@@ -187,6 +187,8 @@ Future<TaskResult> runTask(
   final Process runner = await startProcess(
     dartBin,
     <String>[
+      // TODO(matanlurey): This is load bearing; see https://github.com/flutter/flutter/issues/154268#issuecomment-2318996125.
+      '--disable-dart-dev',
       '--enable-vm-service=0', // zero causes the system to choose a free port
       '--no-pause-isolates-on-exit',
       if (localEngine != null) '-DlocalEngine=$localEngine',
