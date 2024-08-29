@@ -454,6 +454,10 @@ class AnimationController extends Animation<double>
   /// controller's ticker might get muted, in which case the animation
   /// controller's callbacks will no longer fire even though time is continuing
   /// to pass. See [Ticker.muted] and [TickerMode].
+  ///
+  /// If the animation was stopped (e.g. with [stop] or by setting a new [value]),
+  /// [isAnimating] will return `false` but the [status] will not change,
+  /// so the value of [AnimationStatus.isAnimating] might still be `true`.
   @override
   bool get isAnimating => _ticker != null && _ticker!.isActive;
 
