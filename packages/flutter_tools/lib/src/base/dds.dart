@@ -28,6 +28,7 @@ typedef DDSLauncherCallback = Future<DartDevelopmentServiceLauncher> Function({
   bool enableServicePortFallback,
   List<String> cachedUserTags,
   String? dartExecutable,
+  Uri? google3WorkspaceRoot,
 });
 
 // TODO(fujino): This should be direct injected, rather than mutable global state.
