@@ -58,6 +58,7 @@ distributionUrl=https\://services.gradle.org/distributions/gradle-GRADLE_REPLACE
 ''';
 
 const String gradleReplacementString = 'GRADLE_REPLACE_ME';
+const String flutterCompileSdkString = 'flutter.compileSdkVersion';
 
 /// A simple class containing a Kotlin, Gradle, and AGP version.
 class VersionTuple {
@@ -65,16 +66,19 @@ class VersionTuple {
   VersionTuple({
     required this.agpVersion,
     required this.gradleVersion,
-    required this.kotlinVersion
+    required this.kotlinVersion,
+    this.compileSdkVersion,
   });
 
   String agpVersion;
   String gradleVersion;
   String kotlinVersion;
+  String? compileSdkVersion;
 
   @override
   String toString() {
-    return '(AGP version: $agpVersion, Gradle version: $gradleVersion, Kotlin version: $kotlinVersion)';
+    return '(AGP version: $agpVersion, Gradle version: $gradleVersion, Kotlin version: $kotlinVersion'
+        '${(compileSdkVersion == null) ? '' : ', compileSdk version: $compileSdkVersion)'}';
   }
 }
 
@@ -93,7 +97,7 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
     final Directory innerTempDir = tempDir.createTempSync(versions.gradleVersion);
     try {
       // Create a new flutter project.
-      section('Create new app with Gradle ${versions.gradleVersion}, AGP ${versions.agpVersion}, and Kotlin ${versions.kotlinVersion}');
+      section('Create new app with dependency versions: $versions');
       await flutter(
         'create',
         options: <String>[
@@ -104,6 +108,14 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
       );
 
       final String appPath = '${innerTempDir.absolute.path}/dependency_checker_app';
+
+      if (versions.compileSdkVersion != null) {
+        final File appGradleBuild = localFileSystem.file(localFileSystem.path.join(
+            appPath, 'android', 'app', 'build.gradle'));
+        final String appBuildContent = appGradleBuild.readAsStringSync()
+            .replaceFirst(flutterCompileSdkString, versions.compileSdkVersion!);
+        appGradleBuild.writeAsStringSync(appBuildContent);
+      }
 
       // Modify gradle version to passed in version.
       final File gradleWrapperProperties = localFileSystem.file(localFileSystem.path.join(
