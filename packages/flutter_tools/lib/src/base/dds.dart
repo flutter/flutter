@@ -85,7 +85,6 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
         remoteVmServiceUri: vmServiceUri,
         serviceUri: ddsUri,
         enableAuthCodes: disableServiceAuthCodes != true,
-        serveDevTools: enableDevTools,
         // Enables caching of CPU samples collected during application startup.
         cachedUserTags: cacheStartupProfile
             ? const <String>['AppStartUp']
