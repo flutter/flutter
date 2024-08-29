@@ -588,6 +588,10 @@ abstract class PageTransitionsBuilder {
   const PageTransitionsBuilder();
 
   /// Provideds a secondary transition to the previous route.
+  ///
+  /// {@macro flutter.widgets.delegatedTransition}
+  ///
+  /// If left as null, the previous page will not animate.
   DelegatedTransition? get delegatedTransition => null;
 
   /// Wraps the child with one or more transition widgets which define how [route]
@@ -753,7 +757,11 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
     builder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) => snapshotAwareDelegatedTransition(context, animation, secondaryAnimation, child, allowSnapshotting, allowEnterRouteSnapshotting),
   );
 
-  /// The delegated transition.
+  /// A transition builder that takes in account the snapshotting properties of
+  /// [ZoomPageTransitionsBuilder].
+  ///
+  /// This is provided to [ZoomDelegatedTransition.builder], to be passed to the
+  /// previous page route, when the current page is added to the stack.
   static Widget snapshotAwareDelegatedTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child, bool allowSnapshotting, bool allowEnterRouteSnapshotting) {
     return DualTransitionBuilder(
       animation: ReverseAnimation(secondaryAnimation),
@@ -918,7 +926,9 @@ class PageTransitionsTheme with Diagnosticable {
     );
   }
 
-  /// Provide delegate transition for platform.
+  /// Provides the delegate transition for the target platform.
+  ///
+  /// {@macro flutter.widgets.delegatedTransition}
   DelegatedTransition? delegatedTransition(TargetPlatform platform, bool allowSnapshotting) {
     final PageTransitionsBuilder matchingBuilder =
       builders[platform] ?? const ZoomPageTransitionsBuilder();

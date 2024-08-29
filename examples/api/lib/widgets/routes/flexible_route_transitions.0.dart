@@ -25,79 +25,80 @@ class FlexibleRouteTransitionsApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Zoom Transition'),
+      home: const _MyHomePage(title: 'Zoom Page'),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key, required this.title});
+class _MyHomePage extends StatelessWidget {
+  const _MyHomePage({super.key, required this.title});
 
   final String title;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Text(title),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    VerticalTransitionPageRoute<void>(
-                      builder: (BuildContext context) {
-                        return  const MyHomePage(title: 'Crazy Vertical Transition');
-                      },
-                    ),
-                  );
-                },
-                child: const Text('Crazy Vertical Transition'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (BuildContext context) {
-                        return  const MyHomePage(title: 'Zoom Transition');
-                      },
-                    ),
-                  );
-                },
-                child: const Text('Zoom Transition'),
-              ),
-              TextButton(
-                onPressed: () {
-                  final CupertinoPageRoute<void> route = CupertinoPageRoute<void>(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(title),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  _VerticalTransitionPageRoute<void>(
                     builder: (BuildContext context) {
-                      return  const MyHomePage(title: 'Cupertino Transition');
-                    }
-                  );
-                  Navigator.of(context).push(route);
-                },
-                child: const Text('Cupertino Transition'),
-              ),
-            ],
-          ),
+                      return  const _MyHomePage(title: 'Crazy Vertical Page');
+                    },
+                  ),
+                );
+              },
+              child: const Text('Crazy Vertical Transition'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (BuildContext context) {
+                      return  const _MyHomePage(title: 'Zoom Page');
+                    },
+                  ),
+                );
+              },
+              child: const Text('Zoom Transition'),
+            ),
+            TextButton(
+              onPressed: () {
+                final CupertinoPageRoute<void> route = CupertinoPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return  const _MyHomePage(title: 'Cupertino Page');
+                  }
+                );
+                Navigator.of(context).push(route);
+              },
+              child: const Text('Cupertino Transition'),
+            ),
+          ],
         ),
+      ),
     );
   }
 }
 
-class VerticalTransitionPageRoute<T> extends PageRoute<T> {
-  /// Creates a page route for use in an iOS designed app.
-  VerticalTransitionPageRoute({
+// A PageRoute that applies a _VerticalPageTransition.
+class _VerticalTransitionPageRoute<T> extends PageRoute<T> {
+
+  _VerticalTransitionPageRoute({
     required this.builder,
   });
 
   final WidgetBuilder builder;
 
   @override
-  DelegatedTransition? get delegatedTransition => VerticalPageTransition._delegatedTransition;
+  DelegatedTransition? get delegatedTransition => _VerticalPageTransition._delegatedTransition;
 
   @override
   Color? get barrierColor => const Color(0x00000000);
@@ -114,8 +115,6 @@ class VerticalTransitionPageRoute<T> extends PageRoute<T> {
   @override
   bool get opaque => false;
 
-  // Begin PageRoute.
-
   @override
   Duration get transitionDuration => const Duration(milliseconds: 2000);
 
@@ -131,26 +130,23 @@ class VerticalTransitionPageRoute<T> extends PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return VerticalPageTransition(
+    return _VerticalPageTransition(
       primaryRouteAnimation: animation,
       secondaryRouteAnimation: secondaryAnimation,
       child: child,
     );
   }
 
-  // TODO(justinmc): No canTransitionTo needed? I want to be able to have
-  // back-to-back VerticalPageTransitions.
-
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
-
-  // End PageRoute.
 }
 
-class VerticalPageTransition extends StatelessWidget {
-  VerticalPageTransition({
+// A page transition that slides off the screen vertically, and uses
+// delegatedTransition to ensure that the outgoing route slides with it.
+class _VerticalPageTransition extends StatelessWidget {
+  _VerticalPageTransition({
     super.key,
     required Animation<double> primaryRouteAnimation,
     required this.secondaryRouteAnimation,
@@ -169,16 +165,12 @@ class VerticalPageTransition extends StatelessWidget {
                )
            .drive(_kTopDownTween);
 
-  // When this page is coming in to cover another page.
   final Animation<Offset> _primaryPositionAnimation;
 
-  // When this page is being coverd by another page.
   final Animation<Offset> _secondaryPositionAnimation;
 
-  /// Animation
   final Animation<double> secondaryRouteAnimation;
 
-  /// The widget below this widget in the tree.
   final Widget child;
 
   static const Curve curve = Curves.decelerate;
@@ -193,6 +185,9 @@ class VerticalPageTransition extends StatelessWidget {
     end: const Offset(0.0, -1.0),
   );
 
+  // When the _VerticalTransitionPageRoute animates onto or off of the navigation
+  // stack, this transition is given to the route below it so that they animate in
+  // sync.
   static const VerticalDelegatedTransition _delegatedTransition = VerticalDelegatedTransition(
     builder: _delegatedTransitionBuilder,
   );

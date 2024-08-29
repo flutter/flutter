@@ -160,7 +160,8 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
-    // Don't perform outgoing animation if the next route is a fullscreen dialog.
+    // Don't perform outgoing animation if the next route is a fullscreen dialog,
+    // or there is no matching transition to use.
     return ((nextRoute is! PageRoute<T>) || !nextRoute.fullscreenDialog) &&
       ((nextRoute is ModalRoute<T> && nextRoute.delegatedTransition != null) ||
       nextRoute is CupertinoRouteTransitionMixin);
@@ -423,7 +424,9 @@ class CupertinoPageTransition extends StatefulWidget {
   ///    Used to precisely track back gesture drags.
   final bool linearTransition;
 
-  /// The delegated transition.
+  /// The Cupertino styled [DelegatedTransition] provided to the previous route.
+  ///
+  /// {@macro flutter.widgets.delegatedTransition}
   static const DelegatedTransition delegatedTransition = CupertinoDelegatedTransition();
 
   @override

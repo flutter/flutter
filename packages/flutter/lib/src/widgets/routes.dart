@@ -1417,22 +1417,25 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     return child;
   }
 
-  /// The delegated transition provided to the previous route.
+  /// The [DelegatedTransition] provided to the route below this one in the
+  /// navigation stack.
+  ///
+  /// {@macro flutter.widgets.delegatedTransition}
+  ///
+  /// The [ModalRoute] receiving this transition will set it to their
+  /// [receivedTransition] property.
   DelegatedTransition? get delegatedTransition => null;
 
-  /// The delegated transition received from an incoming route.
+  /// The [DelegatedTransition] received from the route above this one in the
+  /// navigation stack.
+  ///
+  /// {@macro flutter.widgets.delegatedTransition}
+  ///
+  /// `receivedTransition` will use the above route's [delegatedTransition] in
+  /// order to play the right route transition when the above route either enters
+  /// or leaves the navigation stack. If not null, the `receivedTransition` will
+  /// wrap the route content through [buildFlexTransitions].
   DelegatedTransition? receivedTransition;
-
-  /// Transition that matches with the next route. Will be null if there is no
-  /// next route or a next route is not provided. If a non-null value exists,
-  /// then it will be used in place of [buildTransitions].
-  DelegatedTransition? get nextRouteTransition {
-    if (receivedTransition != null) {
-      return receivedTransition;
-    } else {
-      return null;
-    }
-  }
 
   /// A method to trigger setting the [delegatedTransition] for a route.
   ///
@@ -1449,11 +1452,12 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// the [BuildContext] of the current route.
   void setDelegatedTransition(BuildContext context) {}
 
-  /// Wraps the transitions of the route with a delegated transition received
-  /// from a route being pushed on top of the current route.
+  /// Wraps the transitions of this route with a [DelegatedTransition], when
+  /// [receivedTransition] is not null.
   ///
   /// This allows the current route to sync its exit transition with the
-  /// entrance transition of the incoming route.
+  /// entrance transition of the incoming route, as well as the exit animation
+  /// when the above route is popped.
   ///
   /// {@tool dartpad}
   /// This sample shows an app that uses three different page transitions, a
@@ -1478,13 +1482,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ) {
     final ProxyAnimation proxyAnimation = ProxyAnimation();
 
-    final Animation<double> flexAnimation = (nextRouteTransition == null) ?
+    final Animation<double> flexAnimation = (receivedTransition == null) ?
       secondaryAnimation : proxyAnimation;
 
     final Widget originalTransitions = buildTransitions(context, animation, flexAnimation, child);
 
-    if (nextRouteTransition != null) {
-      return nextRouteTransition!.builder(context, animation, secondaryAnimation, originalTransitions);
+    if (receivedTransition != null) {
+      return receivedTransition!.builder(context, animation, secondaryAnimation, originalTransitions);
     } else {
       return originalTransitions;
     }

@@ -102,13 +102,10 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+    // Don't perform outgoing animation if the next route is a fullscreen dialog,
+    // or there is no matching transition to use.
     return ((nextRoute is! PageRoute<T>) || !nextRoute.fullscreenDialog)
       && ((nextRoute is MaterialRouteTransitionMixin) || (nextRoute is ModalRoute<T> && nextRoute.delegatedTransition != null));
-  }
-
-  @override
-  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
-    return previousRoute is PageRoute;
   }
 
   @override
