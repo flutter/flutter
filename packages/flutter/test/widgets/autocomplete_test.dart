@@ -1492,4 +1492,70 @@ void main() {
     // call is resolved.
     expect(find.byKey(optionsKey), findsOneWidget);
   });
+
+  testWidgets('optionsBuilder does not have to be a pure function', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    Iterable<String>? lastOptions;
+    const Duration delay = Duration(milliseconds: 100);
+
+    // This is used to tell optionsBuilder to return something different after
+    // being called with "ele" the second time. I.e. it is not a pure function.
+    int timesOptionsBuilderCalledWithEle = 0;
+    final Iterable<String> altEleOptions = <String>['something new and crazy for ele!'];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) async {
+              if (textEditingValue.text == 'ele') {
+                timesOptionsBuilderCalledWithEle += 1;
+                if (timesOptionsBuilderCalledWithEle > 1) {
+                  return Future<Iterable<String>>.delayed(delay, () => altEleOptions);
+                }
+              }
+              final Iterable<String> options = kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+              return Future<Iterable<String>>.delayed(delay, () => options);
+            },
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+              );
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastOptions = options;
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      )
+    );
+
+    await tester.enterText(find.byKey(fieldKey), 'ele');
+    await tester.pump(delay);
+    expect(lastOptions, <String>['chameleon', 'elephant']);
+    expect(find.byKey(optionsKey), findsOneWidget);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsNothing);
+
+    await tester.enterText(find.byKey(fieldKey), 'eleo');
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsNothing);
+
+    await tester.enterText(find.byKey(fieldKey), 'ele');
+    await tester.pump(delay);
+    expect(lastOptions, altEleOptions);
+    expect(find.byKey(optionsKey), findsOneWidget);
+  });
 }
