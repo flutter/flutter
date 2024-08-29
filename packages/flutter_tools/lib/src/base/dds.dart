@@ -90,6 +90,9 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
             ? const <String>['AppStartUp']
             : const <String>[],
         devToolsServerAddress: devToolsServerAddress,
+        google3WorkspaceRoot: google3WorkspaceRoot != null
+            ? Uri.parse(google3WorkspaceRoot)
+            : null,
         dartExecutable: globals.artifacts!.getArtifactPath(
           Artifact.engineDartBinary,
         ),
