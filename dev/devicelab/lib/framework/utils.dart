@@ -642,7 +642,7 @@ String get dartBin =>
 String get pubBin =>
     path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'pub');
 
-Future<int> dart(List<String> args) => exec(dartBin, <String>['--disable-dart-dev', ...args]);
+Future<int> dart(List<String> args) => exec(dartBin, args);
 
 /// Returns a future that completes with a path suitable for JAVA_HOME
 /// or with null, if Java cannot be found.

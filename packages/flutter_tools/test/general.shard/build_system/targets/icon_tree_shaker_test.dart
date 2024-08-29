@@ -37,7 +37,6 @@ void main() {
 
   List<String> getConstFinderArgs(String appDillPath) => <String>[
     dartPath,
-    '--disable-dart-dev',
     constFinderPath,
     '--kernel-file', appDillPath,
     '--class-library-uri', 'package:flutter/src/widgets/icon_data.dart',

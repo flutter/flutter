@@ -23,7 +23,6 @@ import '../../../src/testbed.dart';
 
 const List<String> _kDart2jsLinuxArgs = <String>[
   'Artifact.engineDartBinary.TargetPlatform.web_javascript',
-  '--disable-dart-dev',
   'Artifact.dart2jsSnapshot.TargetPlatform.web_javascript',
   '--platform-binaries=HostArtifact.webPlatformKernelFolder',
   '--invoker=flutter_tool',
