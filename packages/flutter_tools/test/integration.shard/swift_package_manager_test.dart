@@ -607,4 +607,89 @@ void main() {
       );
     }
   }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+
+  test('Removing the last plugin updates the generated Swift package', () async {
+    final Directory workingDirectory = fileSystem.systemTempDirectory
+      .createTempSync('swift_package_manager_remove_last_plugin.');
+    final String workingDirectoryPath = workingDirectory.path;
+    try {
+      await SwiftPackageManagerUtils.enableSwiftPackageManager(
+        flutterBin,
+        workingDirectoryPath,
+      );
+
+      // Create an app with a plugin.
+      final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
+        flutterBin,
+        workingDirectoryPath,
+        iosLanguage: 'swift',
+        platform: 'ios',
+        usesSwiftPackageManager: true,
+        options: <String>['--platforms=ios'],
+      );
+
+      final SwiftPackageManagerPlugin integrationTestPlugin =
+        SwiftPackageManagerUtils.integrationTestPlugin('ios');
+
+      SwiftPackageManagerUtils.addDependency(
+        appDirectoryPath: appDirectoryPath,
+        plugin: integrationTestPlugin,
+      );
+
+      // Build the app to generate the Swift package.
+      await SwiftPackageManagerUtils.buildApp(
+        flutterBin,
+        appDirectoryPath,
+        options: <String>['ios', '--config-only', '-v'],
+      );
+
+      // Verify the generated Swift package depends on the plugin.
+      final File generatedManifestFile = fileSystem
+        .directory(appDirectoryPath)
+        .childDirectory('ios')
+        .childDirectory('Flutter')
+        .childDirectory('ephemeral')
+        .childDirectory('Packages')
+        .childDirectory('FlutterGeneratedPluginSwiftPackage')
+        .childFile('Package.swift');
+
+      expect(generatedManifestFile.existsSync(), isTrue);
+
+      String generatedManifest = generatedManifestFile.readAsStringSync();
+      final String generatedSwiftDependency = '''
+    dependencies: [
+        .package(name: "integration_test", path: "${integrationTestPlugin.swiftPackagePlatformPath}")
+    ],
+''';
+
+      expect(generatedManifest.contains(generatedSwiftDependency), isTrue);
+
+      // Remove the plugin and rebuild the app to re-generate the Swift package.
+      SwiftPackageManagerUtils.removeDependency(
+        appDirectoryPath: appDirectoryPath,
+        plugin: integrationTestPlugin,
+      );
+
+      await SwiftPackageManagerUtils.buildApp(
+        flutterBin,
+        appDirectoryPath,
+        options: <String>['ios', '--config-only', '-v'],
+      );
+
+      // Verify the generated Swift package does not depend on the plugin.
+      expect(generatedManifestFile.existsSync(), isTrue);
+
+      generatedManifest = generatedManifestFile.readAsStringSync();
+      const String emptyDependencies = 'dependencies: [\n        \n    ],\n';
+
+      expect(generatedManifest.contains(generatedSwiftDependency), isFalse);
+      expect(generatedManifest.contains(emptyDependencies), isTrue);
+    } finally {
+      await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+      ErrorHandlingFileSystem.deleteIfExists(
+        workingDirectory,
+        recursive: true,
+      );
+    }
+  }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
 }
