@@ -68,7 +68,6 @@ echo "$(date +%T) Running clang_tidy"
 
 cd "$SCRIPT_DIR"
 "$DART" \
-  --disable-dart-dev \
   "$SRC_DIR/flutter/tools/clang_tidy/bin/main.dart" \
   --src-dir="$SRC_DIR" \
   ${CLANG_TIDY_PATH:+--clang-tidy="$SRC_DIR/$CLANG_TIDY_PATH"} \

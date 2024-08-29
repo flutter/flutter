@@ -43,7 +43,6 @@ DART="${DART_BIN}/dart"
 
 cd "$SCRIPT_DIR"
 "$DART" \
-  --disable-dart-dev \
   "$SRC_DIR/flutter/tools/pkg/engine_build_configs/bin/check.dart" \
   "$SRC_DIR"
 
