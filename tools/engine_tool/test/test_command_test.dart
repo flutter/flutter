@@ -7,8 +7,8 @@ import 'dart:convert' as convert;
 import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:engine_tool/src/commands/command_runner.dart';
 import 'package:engine_tool/src/environment.dart';
-import 'package:litetest/litetest.dart';
 import 'package:platform/platform.dart';
+import 'package:test/test.dart';
 
 import 'fixtures.dart' as fixtures;
 import 'utils.dart';
@@ -34,7 +34,6 @@ void main() {
 
   final Map<String, BuilderConfig> configs = <String, BuilderConfig>{
     'linux_test_config': linuxTestConfig,
-    'linux_test_config2': linuxTestConfig,
     'mac_test_config': macTestConfig,
     'win_test_config': winTestConfig,
   };

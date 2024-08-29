@@ -23,9 +23,6 @@ dependencies:
   yaml: any
 
 dev_dependencies:
-  async_helper: any
-  expect: any
-  litetest: any
   process_fakes: any
-  smith: any
   source_span: any
+  test: any

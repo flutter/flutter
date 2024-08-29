@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:engine_tool/src/logger.dart';
-import 'package:litetest/litetest.dart';
 import 'package:logging/logging.dart' as log;
+import 'package:test/test.dart';
 
 void main() {
   List<String> stringsFromLogs(List<log.LogRecord> logs) {

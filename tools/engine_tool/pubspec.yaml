@@ -24,5 +24,5 @@ dependencies:
   process_runner: any
 
 dev_dependencies:
-  litetest: any
   process_fakes: any
+  test: any

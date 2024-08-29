@@ -5,10 +5,10 @@
 import 'dart:io' as io;
 
 import 'package:engine_repo_tools/engine_repo_tools.dart';
-import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process_runner/process_runner.dart';
+import 'package:test/test.dart';
 
 void main() {
   final Engine engine;

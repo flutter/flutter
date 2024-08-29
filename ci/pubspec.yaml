@@ -20,6 +20,5 @@ dependencies:
   process: any
 
 dev_dependencies:
-  async_helper: any
-  expect: any
-  litetest: any
+  engine_repo_tools: any
+  test: any

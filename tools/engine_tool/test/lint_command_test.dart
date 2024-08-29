@@ -11,10 +11,10 @@ import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:engine_tool/src/commands/command_runner.dart';
 import 'package:engine_tool/src/environment.dart';
 import 'package:engine_tool/src/logger.dart';
-import 'package:litetest/litetest.dart';
 import 'package:platform/platform.dart';
 import 'package:process_fakes/process_fakes.dart';
 import 'package:process_runner/process_runner.dart';
+import 'package:test/test.dart';
 
 import 'fixtures.dart' as fixtures;
 
@@ -47,7 +47,6 @@ void main() {
 
   final Map<String, BuilderConfig> configs = <String, BuilderConfig>{
     'linux_test_config': linuxTestConfig,
-    'linux_test_config2': linuxTestConfig,
     'mac_test_config': macTestConfig,
     'win_test_config': winTestConfig,
   };
