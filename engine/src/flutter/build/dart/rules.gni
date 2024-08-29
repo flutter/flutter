@@ -65,8 +65,6 @@ template("flutter_frontend_server") {
   ]
   snapshot_depfile = "$kernel_output.d"
 
-  common_vm_args = [ "--disable-dart-dev" ]
-
   flutter_patched_sdk =
       rebase_path("$root_out_dir/flutter_patched_sdk", root_build_dir)
 
@@ -106,7 +104,7 @@ template("flutter_frontend_server") {
       frontend_server =
           rebase_path("$root_gen_dir/frontend_server_aot.dart.snapshot")
 
-      args = [ dart ] + common_vm_args + [ frontend_server ] + common_args
+      args = [ dart ] + [ frontend_server ] + common_args
     }
   } else {
     prebuilt_dart_action(target_name) {
@@ -122,8 +120,7 @@ template("flutter_frontend_server") {
       inputs = [ invoker.main_dart ]
       outputs = [ invoker.kernel_output ]
       depfile = snapshot_depfile
-      vm_args = common_vm_args
-      args = common_args
+      vm_args = (args = common_args)
     }
   }
 }
@@ -337,7 +334,6 @@ template("application_snapshot") {
   abs_output = rebase_path(output)
   rel_output = rebase_path(output, root_build_dir)
   snapshot_vm_args = [
-    "--disable-dart-dev",
     "--deterministic",
     "--packages=$package_config",
     "--snapshot=$abs_output",

@@ -1016,7 +1016,7 @@ def run_benchmark_tests(build_dir):
   test_dir = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'benchmark')
   dart_tests = glob.glob('%s/test/*_test.dart' % test_dir)
   for dart_test_file in dart_tests:
-    opts = ['--disable-dart-dev', dart_test_file]
+    opts = [dart_test_file]
     run_engine_executable(
         build_dir, os.path.join('dart-sdk', 'bin', 'dart'), None, flags=opts, cwd=test_dir
     )
@@ -1114,7 +1114,7 @@ def run_impeller_golden_tests(build_dir: str, require_skia_gold: bool = False):
     golden_path = os.path.join('testing', 'impeller_golden_tests_output.txt')
     script_path = os.path.join('tools', 'dir_contents_diff', 'bin', 'dir_contents_diff.dart')
     diff_result = subprocess.run(
-        f'{dart_bin} --disable-dart-dev {script_path} {golden_path} {temp_dir}',
+        f'{dart_bin} {script_path} {golden_path} {temp_dir}',
         check=False,
         shell=True,
         stdout=subprocess.PIPE,
@@ -1154,7 +1154,7 @@ for more information.
 
     with DirectoryChange(harvester_path):
       bin_path = Path('.').joinpath('bin').joinpath('golden_tests_harvester.dart')
-      run_cmd([dart_bin, '--disable-dart-dev', str(bin_path), temp_dir])
+      run_cmd([dart_bin, str(bin_path), temp_dir])
 
 
 def main():

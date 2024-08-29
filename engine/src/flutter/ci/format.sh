@@ -42,6 +42,5 @@ DART="${DART_BIN}/dart"
 
 cd "$SCRIPT_DIR"
 "$DART" \
-  --disable-dart-dev \
   bin/format.dart \
   "$@"

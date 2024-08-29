@@ -47,21 +47,21 @@ VARIANT=$1
 shift 1
 
 cd "$SCRIPT_DIR"
-"$DART" --disable-dart-dev bin/parse_and_send.dart \
+"$DART" bin/parse_and_send.dart \
   --json $ENGINE_PATH/src/out/${VARIANT}/txt_benchmarks.json "$@"
-"$DART" --disable-dart-dev bin/parse_and_send.dart \
+"$DART" bin/parse_and_send.dart \
   --json $ENGINE_PATH/src/out/${VARIANT}/fml_benchmarks.json "$@"
-"$DART" --disable-dart-dev bin/parse_and_send.dart \
+"$DART" bin/parse_and_send.dart \
   --json $ENGINE_PATH/src/out/${VARIANT}/shell_benchmarks.json "$@"
-"$DART" --disable-dart-dev bin/parse_and_send.dart \
+"$DART" bin/parse_and_send.dart \
   --json $ENGINE_PATH/src/out/${VARIANT}/ui_benchmarks.json "$@"
-"$DART" --disable-dart-dev bin/parse_and_send.dart \
+"$DART" bin/parse_and_send.dart \
   --json $ENGINE_PATH/src/out/${VARIANT}/display_list_builder_benchmarks.json "$@"
-"$DART" --disable-dart-dev bin/parse_and_send.dart \
+"$DART" bin/parse_and_send.dart \
   --json $ENGINE_PATH/src/out/${VARIANT}/display_list_region_benchmarks.json "$@"
-"$DART" --disable-dart-dev bin/parse_and_send.dart \
+"$DART" bin/parse_and_send.dart \
   --json $ENGINE_PATH/src/out/${VARIANT}/display_list_transform_benchmarks.json "$@"
-"$DART" --disable-dart-dev bin/parse_and_send.dart \
+"$DART" bin/parse_and_send.dart \
   --json $ENGINE_PATH/src/out/${VARIANT}/geometry_benchmarks.json "$@"
-"$DART" --disable-dart-dev bin/parse_and_send.dart \
+"$DART" bin/parse_and_send.dart \
   --json $ENGINE_PATH/src/out/${VARIANT}/canvas_benchmarks.json "$@"

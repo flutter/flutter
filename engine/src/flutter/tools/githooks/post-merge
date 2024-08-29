@@ -30,7 +30,6 @@ def Main(argv):
 
   result = subprocess.run([
     os.path.join(GetDartBin(), 'dart'),
-    '--disable-dart-dev',
     os.path.join(FLUTTER_DIR, 'tools', 'githooks', 'bin', 'main.dart'),
   ] + githook_args + [
     'post-merge',

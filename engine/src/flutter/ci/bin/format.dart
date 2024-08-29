@@ -1049,7 +1049,6 @@ final class HeaderFormatChecker extends FormatChecker {
     }
     final List<String> args = <String>[
       _dartBin,
-      '--disable-dart-dev',
       _headerGuardCheckBin,
       ...include.map((String f) => '--include=$f'),
     ];
@@ -1078,7 +1077,6 @@ final class HeaderFormatChecker extends FormatChecker {
     }
     final List<String> args = <String>[
       _dartBin,
-      '--disable-dart-dev',
       _headerGuardCheckBin,
       '--fix',
       ...include.map((String f) => '--include=$f'),

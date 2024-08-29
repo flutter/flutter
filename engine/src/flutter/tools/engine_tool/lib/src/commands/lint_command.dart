@@ -51,7 +51,7 @@ final class LintCommand extends CommandBase {
     ]);
     _linters[Linter.java] =
         _LinterDescription(Linter.java, environment.engine.flutterDir, <String>[
-      findDartBinary(environment), '--disable-dart-dev',
+      findDartBinary(environment),
       p.join(engineFlutterPath, 'tools', 'android_lint', 'bin', 'main.dart'),
     ]);
     _linters[Linter.c] = _LinterDescription(
