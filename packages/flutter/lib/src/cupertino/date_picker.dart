@@ -548,8 +548,10 @@ class CupertinoDatePicker extends StatefulWidget {
     required List<String> texts,
     required BuildContext context,
   }) {
-    // Selecting the top 4 longest texts optimizes performance and prevents a single
-    // text from overly influencing the column width calculation. It also reduces the number of texts processed.
+    // To optimize performance and ensure accurate column width calculation, we select the top 4 longest texts.
+    // This approach prevents any single text from disproportionately affecting the column width and reduces the
+    // number of texts that need to be processed. In practice, the top 4 longest texts are sufficient to determine
+    // the column width.
     final List<String> sortedTexts = (List<String>.from(texts)
         ..sort((String a, String b) => b.length.compareTo(a.length)))
         .take(4)
