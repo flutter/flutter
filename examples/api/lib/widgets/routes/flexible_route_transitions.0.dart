@@ -31,7 +31,7 @@ class FlexibleRouteTransitionsApp extends StatelessWidget {
 }
 
 class _MyHomePage extends StatelessWidget {
-  const _MyHomePage({super.key, required this.title});
+  const _MyHomePage({required this.title});
 
   final String title;
 
@@ -147,7 +147,6 @@ class _VerticalTransitionPageRoute<T> extends PageRoute<T> {
 // delegatedTransition to ensure that the outgoing route slides with it.
 class _VerticalPageTransition extends StatelessWidget {
   _VerticalPageTransition({
-    super.key,
     required Animation<double> primaryRouteAnimation,
     required this.secondaryRouteAnimation,
     required this.child,

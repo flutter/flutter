@@ -119,7 +119,7 @@ class MyRouterDelegate extends RouterDelegate<MyPageConfiguration> {
       pages: _pages.map((MyPageConfiguration page) => switch (page) {
         MyPageConfiguration.unknown => _MyUnknownPage<void>(),
         MyPageConfiguration.home => _MyHomePage<void>(routerDelegate: this),
-        MyPageConfiguration.zoom => ZoomPage<void>(routerDelegate: this),
+        MyPageConfiguration.zoom => _ZoomPage<void>(routerDelegate: this),
         MyPageConfiguration.iOS => _IOSPage<void>(routerDelegate: this),
         MyPageConfiguration.vertical => _VerticalPage<void>(routerDelegate: this),
       }).toList(),
@@ -154,8 +154,8 @@ class _MyHomePage<T> extends MaterialPage<T> {
   String get name => MyPageConfiguration.home.name;
 }
 
-class ZoomPage<T> extends MaterialPage<T> {
-  ZoomPage({required this.routerDelegate}) : super(
+class _ZoomPage<T> extends MaterialPage<T> {
+  _ZoomPage({required this.routerDelegate}) : super(
     restorationId: 'zoom-page',
     child: _MyPageScaffold(title: 'Zoom Route', routerDelegate: routerDelegate),
   );
@@ -191,7 +191,7 @@ class _VerticalPage<T> extends _VerticalTransitionPage<T> {
 }
 
 class _MyPageScaffold extends StatelessWidget {
-  const _MyPageScaffold({super.key, required this.title, required this.routerDelegate});
+  const _MyPageScaffold({required this.title, required this.routerDelegate});
 
   final String title;
 
@@ -265,7 +265,7 @@ class _VerticalTransitionPage<T> extends Page<T> {
 
 class _PageBasedVerticalPageRoute<T> extends PageRoute<T> {
   _PageBasedVerticalPageRoute({
-    required VerticalTransitionPage<T> page,
+    required _VerticalTransitionPage<T> page,
     super.allowSnapshotting,
   }) : super(settings: page);
 
@@ -327,7 +327,6 @@ class _PageBasedVerticalPageRoute<T> extends PageRoute<T> {
 // delegatedTransition to ensure that the outgoing route slides with it.
 class _VerticalPageTransition extends StatelessWidget {
   _VerticalPageTransition({
-    super.key,
     required Animation<double> primaryRouteAnimation,
     required this.secondaryRouteAnimation,
     required this.child,

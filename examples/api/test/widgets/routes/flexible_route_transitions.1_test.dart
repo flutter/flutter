@@ -46,8 +46,6 @@ void main() {
     expect(find.text('Cupertino Route'), findsOneWidget);
     expect(find.text('Zoom Route'), findsNothing);
 
-    expect(find.byType(MyPageScaffold), findsOneWidget);
-
     await simulateSystemBack();
     await tester.pumpAndSettle();
 
