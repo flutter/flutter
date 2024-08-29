@@ -14,7 +14,7 @@ dependencies:
   path_provider: 2.1.4
   # This made non-transitive to allow exact pinning
   # https://github.com/flutter/flutter/issues/116376
-  path_provider_android: 2.2.1
+  path_provider_android: 2.2.10
   collection: 1.19.0
   assets_for_android_views:
     git:
@@ -95,4 +95,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: 97d9
+# PUBSPEC CHECKSUM: b30a
