@@ -6,7 +6,7 @@ import 'package:engine_build_configs/src/build_config.dart';
 import 'package:engine_build_configs/src/build_config_loader.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 import 'fixtures.dart' as fixtures;
 

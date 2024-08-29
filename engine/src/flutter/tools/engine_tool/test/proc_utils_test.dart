@@ -10,10 +10,10 @@ import 'package:engine_tool/src/environment.dart';
 import 'package:engine_tool/src/logger.dart';
 import 'package:engine_tool/src/proc_utils.dart';
 import 'package:engine_tool/src/worker_pool.dart';
-import 'package:litetest/litetest.dart';
 import 'package:platform/platform.dart';
 import 'package:process_fakes/process_fakes.dart';
 import 'package:process_runner/process_runner.dart';
+import 'package:test/test.dart';
 
 void main() {
   final Engine engine;
@@ -79,7 +79,7 @@ void main() {
         ProcessTask('F', env, io.Directory.current, <String>['failure']);
     final bool r = await wp.run(<WorkerTask>{task});
     expect(r, equals(false));
-    expect(task.processArtifacts.exitCode, notEquals(0));
+    expect(task.processArtifacts.exitCode, isNot(0));
     final ProcessArtifacts loaded =
         ProcessArtifacts.fromFile(io.File(task.processArtifactsPath));
     expect(loaded.stdout, equals('stdout failure'));

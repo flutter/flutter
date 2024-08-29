@@ -4,7 +4,7 @@
 
 import 'package:engine_tool/src/gn.dart';
 import 'package:engine_tool/src/label.dart';
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 import 'utils.dart';
 

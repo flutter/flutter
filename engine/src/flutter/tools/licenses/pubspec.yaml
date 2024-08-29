@@ -21,4 +21,4 @@ dependencies:
   path: any
 
 dev_dependencies:
-  litetest: any
+  test: any

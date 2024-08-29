@@ -5,8 +5,8 @@
 import 'dart:convert' as convert;
 
 import 'package:engine_build_configs/src/build_config.dart';
-import 'package:litetest/litetest.dart';
 import 'package:platform/platform.dart';
+import 'package:test/test.dart';
 
 import 'fixtures.dart' as fixtures;
 

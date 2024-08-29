@@ -4,13 +4,13 @@
 
 import 'dart:io' as io;
 
-import 'package:litetest/litetest.dart';
+import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:path/path.dart' as path;
+import 'package:test/test.dart';
 
 import '../bin/format.dart' as target;
 
-final io.File script = io.File.fromUri(io.Platform.script).absolute;
-final io.Directory repoDir = script.parent.parent.parent;
+final io.Directory repoDir = Engine.findWithin().flutterDir;
 
 class FileContentPair {
   FileContentPair(this.original, this.formatted);
@@ -32,22 +32,21 @@ final FileContentPair pythonContentPair = FileContentPair(
     "if __name__=='__main__':\n  sys.exit(\nMain(sys.argv)\n)\n",
     "if __name__ == '__main__':\n  sys.exit(Main(sys.argv))\n");
 final FileContentPair whitespaceContentPair = FileContentPair(
-    'int main() {\n  return 0;       \n}\n',
-    'int main() {\n  return 0;\n}\n');
+    'int main() {\n  return 0;       \n}\n', 'int main() {\n  return 0;\n}\n');
 final FileContentPair headerContentPair = FileContentPair(
-    <String>[
-      '#ifndef FOO_H_',
-      '#define FOO_H_',
-      '',
-      '#endif  // FOO_H_',
-    ].join('\n'),
-    <String>[
-      '#ifndef FLUTTER_FORMAT_TEST_H_',
-      '#define FLUTTER_FORMAT_TEST_H_',
-      '',
-      '#endif  // FLUTTER_FORMAT_TEST_H_',
-      '',
-    ].join('\n'),
+  <String>[
+    '#ifndef FOO_H_',
+    '#define FOO_H_',
+    '',
+    '#endif  // FOO_H_',
+  ].join('\n'),
+  <String>[
+    '#ifndef FLUTTER_FORMAT_TEST_H_',
+    '#define FLUTTER_FORMAT_TEST_H_',
+    '',
+    '#endif  // FLUTTER_FORMAT_TEST_H_',
+    '',
+  ].join('\n'),
 );
 
 class TestFileFixture {
@@ -238,7 +237,8 @@ void main() {
     try {
       fixture.gitAdd();
       io.Process.runSync(
-        formatterPath, <String>['--check', 'header', '--fix'],
+        formatterPath,
+        <String>['--check', 'header', '--fix'],
         workingDirectory: repoDir.path,
       );
       final Iterable<FileContentPair> files = fixture.getFileContents();

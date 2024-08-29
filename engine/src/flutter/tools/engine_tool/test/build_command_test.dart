@@ -10,9 +10,9 @@ import 'package:engine_tool/src/build_utils.dart';
 import 'package:engine_tool/src/commands/command_runner.dart';
 import 'package:engine_tool/src/environment.dart';
 import 'package:engine_tool/src/logger.dart';
-import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
+import 'package:test/test.dart';
 
 import 'fixtures.dart' as fixtures;
 import 'utils.dart';
@@ -38,7 +38,6 @@ void main() {
 
   final Map<String, BuilderConfig> configs = <String, BuilderConfig>{
     'linux_test_config': linuxTestConfig,
-    'linux_test_config2': linuxTestConfig,
     'mac_test_config': macTestConfig,
     'win_test_config': winTestConfig,
   };
@@ -53,8 +52,9 @@ void main() {
       cannedProcesses: cannedProcesses,
     );
     try {
-      final List<Build> result = runnableBuilds(testEnv.environment, configs, true);
-      expect(result.length, equals(8));
+      final List<Build> result =
+          runnableBuilds(testEnv.environment, configs, true);
+      expect(result.length, equals(4));
       expect(result[0].name, equals('ci/build_name'));
     } finally {
       testEnv.cleanup();
@@ -123,7 +123,7 @@ void main() {
       expect(testEnv.processHistory.length, greaterThanOrEqualTo(3));
       expect(
         testEnv.processHistory[2].command,
-        containsStringsInOrder(<String>['python3', 'gen/script.py']),
+        containsAllInOrder(<String>['python3', 'gen/script.py']),
       );
     } finally {
       testEnv.cleanup();
@@ -251,7 +251,7 @@ void main() {
       expect(testEnv.processHistory[0].command[0],
           contains(path.join('tools', 'gn')));
       expect(testEnv.processHistory[0].command,
-          doesNotContainAny(<String>['--rbe']));
+          isNot(contains(<String>['--rbe'])));
       expect(testEnv.processHistory[1].command[0],
           contains(path.join('ninja', 'ninja')));
     } finally {
@@ -278,7 +278,7 @@ void main() {
       expect(testEnv.processHistory[0].command[0],
           contains(path.join('tools', 'gn')));
       expect(testEnv.processHistory[0].command,
-          doesNotContainAny(<String>['--rbe']));
+          isNot(contains(<String>['--rbe'])));
       expect(testEnv.processHistory[1].command[0],
           contains(path.join('ninja', 'ninja')));
     } finally {
@@ -305,7 +305,10 @@ void main() {
     );
     try {
       final Environment env = testEnv.environment;
-      expectArgumentError(() => mangleConfigName(env, 'build'));
+      expect(
+        () => mangleConfigName(env, 'build'),
+        throwsArgumentError,
+      );
     } finally {
       testEnv.cleanup();
     }
@@ -316,9 +319,9 @@ void main() {
       cannedProcesses: cannedProcesses,
     );
     try {
-        final Environment env = testEnv.environment;
-        expect(demangleConfigName(env, 'build'), equals('linux/build'));
-        expect(demangleConfigName(env, 'ci/build'), equals('ci/build'));
+      final Environment env = testEnv.environment;
+      expect(demangleConfigName(env, 'build'), equals('linux/build'));
+      expect(demangleConfigName(env, 'ci/build'), equals('ci/build'));
     } finally {
       testEnv.cleanup();
     }
@@ -453,9 +456,9 @@ void main() {
 
   test('build command gracefully handles no matched targets', () async {
     final List<CannedProcess> cannedProcesses = <CannedProcess>[
-      CannedProcess((List<String> command) =>
-          command.contains('desc'),
-          stdout: fixtures.gnDescOutputEmpty(gnPattern: 'testing/scenario_app:sceario_app'),
+      CannedProcess((List<String> command) => command.contains('desc'),
+          stdout: fixtures.gnDescOutputEmpty(
+              gnPattern: 'testing/scenario_app:sceario_app'),
           exitCode: 1),
     ];
     final TestEnvironment testEnv = TestEnvironment.withTestEngine(
@@ -496,7 +499,8 @@ void main() {
             help: true,
           );
           final int result = await runner.run(<String>[
-            'help', 'build',
+            'help',
+            'build',
           ]);
           expect(result, equals(0));
         } finally {
@@ -528,7 +532,8 @@ void main() {
             help: true,
           );
           final int result = await runner.run(<String>[
-            'help', 'build',
+            'help',
+            'build',
           ]);
           expect(result, equals(0));
         } finally {

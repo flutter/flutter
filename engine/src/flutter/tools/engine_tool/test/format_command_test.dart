@@ -11,11 +11,11 @@ import 'package:engine_tool/src/commands/command_runner.dart';
 import 'package:engine_tool/src/commands/flags.dart';
 import 'package:engine_tool/src/environment.dart';
 import 'package:engine_tool/src/logger.dart';
-import 'package:litetest/litetest.dart';
 import 'package:logging/logging.dart' as log;
 import 'package:platform/platform.dart';
 import 'package:process_fakes/process_fakes.dart';
 import 'package:process_runner/process_runner.dart';
+import 'package:test/test.dart';
 
 void main() {
   final Engine engine;
