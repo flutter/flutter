@@ -4506,11 +4506,11 @@ void main() {
       expect(hintTextWidget.style!.overflow, decoration.hintStyle!.overflow);
     });
 
-    testWidgets('hint should be adapt its height when there is input text', (WidgetTester tester) async {
+    testWidgets('hint should be ignore its height when input text', (WidgetTester tester) async {
       final String hintText = 'hint text' * 20;
       final InputDecoration decoration = InputDecoration(
         hintText: hintText,
-        adjustHeightForHintOnInput: true,
+        hintIgnoreHeightOnInput: true,
       );
 
       await tester.pumpWidget(
