@@ -6,7 +6,8 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
+    hide StackTrace;
 
 import '../base/async_guard.dart';
 import '../base/common.dart';
@@ -563,12 +564,23 @@ class Chromium {
   }
 }
 
-// TODO(andrewkolos): Remove when https://github.com/dart-lang/sdk/issues/56566
-//  is fixed.
 Future<ChromeTab?> getChromeTabGuarded(
   ChromeConnection chromeConnection,
   bool Function(ChromeTab tab) accept, {
   Duration? retryFor,
-}) {
-  return asyncGuard(() => chromeConnection.getTab(accept, retryFor: retryFor));
+  void Function(Object error, StackTrace stackTrace)? onError,
+}) async {
+  try {
+    return asyncGuard(() => chromeConnection.getTab(accept, retryFor: retryFor));
+  } on IOException catch (error, stackTrace) {
+    if (onError != null) {
+      onError(error, stackTrace);
+    }
+    return null;
+  } on StateError catch (error, stackTrace) {
+    if (onError != null) {
+      onError(error, stackTrace);
+    }
+    return null;
+  }
 }

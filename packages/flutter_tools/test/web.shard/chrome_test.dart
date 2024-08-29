@@ -758,7 +758,7 @@ void main() {
     expect(logger.errorText, contains('SocketException'));
   });
 
-  test('can recover if getTabs throws a connection exception', () async {
+  testWithoutContext('can recover if getTabs throws a connection exception', () async {
     final BufferLogger logger = BufferLogger.test();
     final FakeChromeConnection chromeConnection = FakeChromeConnection(maxRetries: 4);
     final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
@@ -775,11 +775,11 @@ void main() {
     expect(logger.errorText, isEmpty);
   });
 
-  test('can recover if getTabs throws an HttpException', () async {
+  testWithoutContext('can recover if getTabs throws an HttpException', () async {
     final BufferLogger logger = BufferLogger.test();
     final FakeChromeConnection chromeConnection = FakeChromeConnection(
       maxRetries: 4,
-      exception: io.HttpException(
+      error: io.HttpException(
         'Connection closed before full header was received',
         uri: Uri.parse('http://localhost:52097/json'),
       ),
@@ -798,7 +798,27 @@ void main() {
     expect(logger.errorText, isEmpty);
   });
 
-  test('exits if getTabs throws a connection exception consistently', () async {
+  testWithoutContext('chrome.close can recover if getTab throws a StateError', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FakeChromeConnection chromeConnection = FakeChromeConnection(
+      maxRetries: 4,
+      error: StateError('Client is closed.'),
+    );
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: findChromeExecutable,
+      logger: logger,
+    );
+    final FakeProcess process = FakeProcess();
+    final Chromium chrome = Chromium(0, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger,);
+    await chrome.close();
+    expect(logger.errorText, isEmpty);
+  });
+
+  testWithoutContext('exits if getTabs throws a connection exception consistently', () async {
     final BufferLogger logger = BufferLogger.test();
     final FakeChromeConnection chromeConnection = FakeChromeConnection();
     final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
@@ -887,8 +907,8 @@ class FakeChromeConnection extends Fake implements ChromeConnection {
   /// Create a connection that throws a connection exception on first
   /// [maxRetries] calls to [getTabs].
   /// If [maxRetries] is `null`, [getTabs] calls never succeed.
-  FakeChromeConnection({this.maxRetries, Exception? exception}) : _retries = 0 {
-    this.exception = exception ??
+  FakeChromeConnection({this.maxRetries, Object? error}) : _retries = 0 {
+    this.error = error ??
         ConnectionException(
           formatException: const FormatException('incorrect format'),
           responseStatus: 'OK,',
@@ -899,7 +919,7 @@ class FakeChromeConnection extends Fake implements ChromeConnection {
   final List<ChromeTab> tabs = <ChromeTab>[];
   final int? maxRetries;
   int _retries;
-  late final Exception exception;
+  late final Object error;
 
   @override
   Future<ChromeTab?> getTab(bool Function(ChromeTab tab) accept, {Duration? retryFor}) async {
@@ -910,7 +930,8 @@ class FakeChromeConnection extends Fake implements ChromeConnection {
   Future<List<ChromeTab>> getTabs({Duration? retryFor}) async {
     _retries ++;
     if (maxRetries == null || _retries < maxRetries!) {
-      throw exception;
+      // ignore: only_throw_errors -- This is fine for an ad-hoc test.
+      throw error;
     }
     return tabs;
   }
