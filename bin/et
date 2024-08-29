@@ -57,4 +57,4 @@ if [ ! -d "${ENGINE_DIR}/tools/engine_tool/.dart_tool" ]; then
   exit 1
 fi
 
-"${DART}" --disable-dart-dev "${ENGINE_DIR}/tools/engine_tool/bin/et.dart" "$@"
+"${DART}" "${ENGINE_DIR}/tools/engine_tool/bin/et.dart" "$@"

@@ -78,5 +78,5 @@ WEB_SDK_TEST_FILES="$FLUTTER_DIR/web_sdk/test/*"
 for testFile in $WEB_SDK_TEST_FILES
 do
   echo "Running $testFile"
-  (cd "$FLUTTER_DIR"; FLUTTER_DIR="$FLUTTER_DIR" "$DART" --disable-dart-dev --enable-asserts $testFile)
+  (cd "$FLUTTER_DIR"; FLUTTER_DIR="$FLUTTER_DIR" "$DART" --enable-asserts $testFile)
 done
