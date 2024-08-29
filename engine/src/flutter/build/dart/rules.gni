@@ -120,7 +120,7 @@ template("flutter_frontend_server") {
       inputs = [ invoker.main_dart ]
       outputs = [ invoker.kernel_output ]
       depfile = snapshot_depfile
-      vm_args = (args = common_args)
+      args = common_args
     }
   }
 }
