@@ -38,6 +38,7 @@
                 "fuchsia.logger.LogSink", // Copied from syslog/client.shard.cml.
                 "fuchsia.media.ProfileProvider",
                 "fuchsia.memorypressure.Provider",
+                "fuchsia.scheduler.RoleManager",
                 "fuchsia.net.name.Lookup",
                 "fuchsia.posix.socket.Provider",
                 "fuchsia.sysmem.Allocator",
