@@ -12,7 +12,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-MaterialApp _appWithDialog(WidgetTester tester, Widget dialog, { ThemeData? theme, DialogThemeData? dialogTheme }) {
+MaterialApp _appWithDialog(
+  WidgetTester tester,
+  Widget dialog, {
+    ThemeData? theme,
+    DialogThemeData? dialogTheme
+  }
+) {
   Widget dialogBuilder = Builder(
     builder: (BuildContext context) {
       return Center(
@@ -64,9 +70,10 @@ RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
 }
 
 RenderParagraph _getIconRenderObject(WidgetTester tester, IconData icon) {
-  return tester.renderObject<RenderParagraph>(
-    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
-  );
+  return tester.renderObject<RenderParagraph>(find.descendant(
+    of: find.byIcon(icon),
+    matching: find.byType(RichText)
+  ));
 }
 
 void main() {
@@ -217,9 +224,10 @@ void main() {
     expect(materialWidget.surfaceTintColor, themeSurfaceTintColor);
     expect(materialWidget.shape, themeShape);
     expect(materialWidget.clipBehavior, Clip.antiAlias);
-    final Offset bottomLeft = tester.getBottomLeft(
-      find.descendant(of: find.byType(Dialog), matching: find.byType(Material)),
-    );
+    final Offset bottomLeft = tester.getBottomLeft(find.descendant(
+      of: find.byType(Dialog),
+      matching: find.byType(Material)
+    ));
     expect(bottomLeft.dx, 30.0); // 30 is the padding value.
     expect(bottomLeft.dy, 570.0); // 600 - 30
     expect(_getIconRenderObject(tester, Icons.search).text.style?.color, themeIconColor);
@@ -228,7 +236,10 @@ void main() {
     final ModalBarrier modalBarrier = tester.widget(find.byType(ModalBarrier).last);
     expect(modalBarrier.color, themeBarrierColor);
 
-    final Finder findPadding = find.ancestor(of: find.byIcon(Icons.cancel), matching: find.byType(Padding)).first;
+    final Finder findPadding = find.ancestor(
+      of: find.byIcon(Icons.cancel),
+      matching: find.byType(Padding)
+    ).first;
     final Padding padding = tester.widget<Padding>(findPadding);
     expect(padding.padding, themeActionsPadding);
   });
