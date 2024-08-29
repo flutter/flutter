@@ -405,6 +405,39 @@ void main() {
     );
   });
 
+  testWidgets('Properly size itself when the theater is given unbounded constraints', (WidgetTester tester) async {
+    // Regression test https://github.com/flutter/flutter/issues/153903.
+    late final OverlayEntry overlayEntry;
+    addTearDown(() => overlayEntry..remove()..dispose());
+    const Size size = Size.square(40);
+
+    final Widget widget = Directionality(
+      key: GlobalKey(debugLabel: 'key'),
+      textDirection: TextDirection.ltr,
+      child: UnconstrainedBox(
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            overlayEntry = OverlayEntry(
+              canSizeOverlay: true,
+              builder: (BuildContext context) {
+                return OverlayPortal(
+                  controller: controller1,
+                  overlayChildBuilder: (BuildContext context) => const SizedBox(),
+                  child: SizedBox.fromSize(size: size),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    controller1.show();
+    await tester.pumpWidget(widget);
+    expect(tester.getSize(find.byType(Overlay)), size);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('show/hide works', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(() => overlayEntry..remove()..dispose());
