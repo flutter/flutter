@@ -196,7 +196,7 @@ class RefreshIndicator extends StatefulWidget {
     this.elevation = 2.0,
   })  : _indicatorType = _IndicatorType.adaptive,
         onStatusChange = null,
-        assert(elevation >= 0);
+        assert(elevation >= 0.0);
 
   /// Creates a [RefreshIndicator] with no spinner and calls `onRefresh` when
   /// successfully armed by a drag event.
@@ -221,7 +221,7 @@ class RefreshIndicator extends StatefulWidget {
         color = null,
         backgroundColor = null,
         strokeWidth = 0.0,
-        assert(elevation >= 0);
+        assert(elevation >= 0.0);
 
   /// The widget below this widget in the tree.
   ///
@@ -311,7 +311,7 @@ class RefreshIndicator extends StatefulWidget {
   /// Defaults to [RefreshIndicatorTriggerMode.onEdge].
   final RefreshIndicatorTriggerMode triggerMode;
 
-  /// Defines `elevation` for [RefreshIndicator].
+  /// Defines the elevation of the underlying [RefreshIndicator].
   ///
   /// Defaults to 2.0.
   final double elevation;

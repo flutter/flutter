@@ -1284,7 +1284,6 @@ void main() {
     await tester.pump();
     positionController.value = position / maxPosition;
     expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).elevation, 2.0);
-    await tester.pumpAndSettle();
   });
 
   testWidgets('RefreshIndicator passes custom elevation values through correctly', (WidgetTester tester) async {
@@ -1311,7 +1310,6 @@ void main() {
       await tester.pump();
       positionController.value = position / maxPosition;
       expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).elevation, elevation);
-      await tester.pumpAndSettle();
     }
   });
 }
