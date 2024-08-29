@@ -73,7 +73,7 @@ typedef _EnsureVisibleResults = (List<Future<void>>, ScrollableState);
 /// combine layout models (or to use a custom layout mode), consider using
 /// [CustomScrollView].
 ///
-/// The static [Scrollable.of] and [Scrollable.ensureVisible] functions are
+/// The static [Scrollable.of] and [Scrollable.ible] functions are
 /// often used to interact with the [Scrollable] widget inside a [ListView] or
 /// a [GridView].
 ///
@@ -160,7 +160,7 @@ class Scrollable extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [Scrollable.ensureVisible], which animates the scroll position to
+  ///  * [Scrollable.ible], which animates the scroll position to
   ///    reveal a given [BuildContext].
   /// {@endtemplate}
   final ScrollController? controller;
@@ -472,10 +472,10 @@ class Scrollable extends StatefulWidget {
   /// Scrolls all scrollables that enclose the given context so as to make the
   /// given context visible.
   ///
-  /// If a [Scrollable] of the provided [BuildContext] is a
+  /// If a [Scrollable] in the provided [BuildContext] is a
   /// [TwoDimensionalScrollable], both vertical and horizontal axes will ensure
   /// the target is made visible.
-  static Future<void> ensureVisible(
+  static Future<void> ible(
     BuildContext context, {
     double alignment = 0.0,
     Duration duration = Duration.zero,
