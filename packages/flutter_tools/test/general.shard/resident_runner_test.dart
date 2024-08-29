@@ -1938,14 +1938,17 @@ flutter:
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService(logger: testLogger);
-    ddsLauncherCallback = (Uri uri,
-                            {bool enableDevTools = false,
-                            bool enableAuthCodes = true,
-                            bool ipv6 = false, Uri? serviceUri,
-                            List<String> cachedUserTags = const <String>[],
-                            String? google3WorkspaceRoot,
-                            Uri? devToolsServerAddress,
-                          }) {
+    ddsLauncherCallback = ({
+      required Uri remoteVmServiceUri,
+      Uri? serviceUri,
+      bool enableAuthCodes = true,
+      bool serveDevTools = false,
+      Uri? devToolsServerAddress,
+      bool enableServicePortFallback = false,
+      List<String> cachedUserTags = const <String>[],
+      String? dartExecutable,
+      Uri? google3WorkspaceRoot,
+    }) {
       throw DartDevelopmentServiceException.existingDdsInstance(
         'Existing DDS at http://localhost/existingDdsInMessage.',
         ddsUri: Uri.parse('http://localhost/existingDdsInField'),
@@ -1984,21 +1987,23 @@ flutter:
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService(logger: testLogger);
     final Completer<void>done = Completer<void>();
-    ddsLauncherCallback = (Uri uri,
-                            {bool enableDevTools = false,
-                            bool enableAuthCodes = true,
-                            bool ipv6 = false, Uri? serviceUri,
-                            List<String> cachedUserTags = const <String>[],
-                            String? google3WorkspaceRoot,
-                            Uri? devToolsServerAddress,
-                          }) async {
-      expect(uri, Uri(scheme: 'foo', host: 'bar'));
+    ddsLauncherCallback = ({
+        required Uri remoteVmServiceUri,
+        Uri? serviceUri,
+        bool enableAuthCodes = true,
+        bool serveDevTools = false,
+        Uri? devToolsServerAddress,
+        bool enableServicePortFallback = false,
+        List<String> cachedUserTags = const <String>[],
+        String? dartExecutable,
+        Uri? google3WorkspaceRoot,
+      }) async {
+      expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isFalse);
-      expect(ipv6, isTrue);
       expect(serviceUri, Uri(scheme: 'http', host: '::1', port: 0));
       expect(cachedUserTags, isEmpty);
       done.complete();
-      return fakeDartDevelopmentServiceInstance;
+      return FakeDartDevelopmentServiceLauncher(uri: remoteVmServiceUri);
     };
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       device,
@@ -2029,19 +2034,19 @@ flutter:
     // See https://github.com/flutter/flutter/issues/72385 for context.
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService(logger: testLogger);
-    ddsLauncherCallback = (
-      Uri uri, {
-      bool enableDevTools = false,
-      bool enableAuthCodes = false,
-      bool ipv6 = false,
-      Uri? serviceUri,
-      List<String> cachedUserTags = const <String>[],
-      String? google3WorkspaceRoot,
-      Uri? devToolsServerAddress,
-    }) {
-      expect(uri, Uri(scheme: 'foo', host: 'bar'));
+    ddsLauncherCallback = ({
+        required Uri remoteVmServiceUri,
+        Uri? serviceUri,
+        bool enableAuthCodes = true,
+        bool serveDevTools = false,
+        Uri? devToolsServerAddress,
+        bool enableServicePortFallback = false,
+        List<String> cachedUserTags = const <String>[],
+        String? dartExecutable,
+        Uri? google3WorkspaceRoot,
+      }) {
+      expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isTrue);
-      expect(ipv6, isFalse);
       expect(serviceUri, Uri(scheme: 'http', host: '127.0.0.1', port: 0));
       expect(cachedUserTags, isEmpty);
       throw FakeDartDevelopmentServiceException(message: 'No URI');
