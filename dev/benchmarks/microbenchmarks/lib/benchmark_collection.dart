@@ -1,4 +1,6 @@
-// ignore_for_file: always_specify_types
+// Copyright 2014 The Flutter Authors.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 import 'dart:io';
 
@@ -42,8 +44,8 @@ Future<void> main() async {
   // BenchmarkingBinding is used by animation_bench, providing a simple
   // stopwatch interface over rendering. Lifting it here makes all
   // benchmarks run together.
-  final binding = BenchmarkingBinding();
-  final benchmarks = <Benchmark>[
+  final BenchmarkingBinding binding = BenchmarkingBinding();
+  final List<Benchmark> benchmarks = <Benchmark>[
     ('foundation/change_notifier_bench.dart', change_notifier_bench.execute),
     ('foundation/clamp.dart', clamp.execute),
     ('foundation/platform_asset_bundle.dart', platform_asset_bundle.execute),
@@ -93,7 +95,7 @@ Future<void> main() async {
 
   print('╡ ••• Running microbenchmarks ••• ╞');
 
-  for (final mark in benchmarks) {
+  for (final Benchmark mark in benchmarks) {
     // Reset the frame policy to default - each test can set it on their own.
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fadePointers;
     print('╡ ••• Running ${mark.$1} ••• ╞');
