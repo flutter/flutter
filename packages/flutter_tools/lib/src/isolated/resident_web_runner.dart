@@ -614,7 +614,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           return !chromeTab.url.startsWith('chrome-extension');
         },
         retryFor: const Duration(seconds: 5),
-        onError: (Object error, StackTrace stackTrace) {
+        onIoError: (Object error, StackTrace stackTrace) {
           // We were unable to unable to communicate with Chrome.
           _logger.printError(error.toString(), stackTrace: stackTrace);
         }
