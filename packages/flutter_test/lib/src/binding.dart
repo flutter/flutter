@@ -1832,7 +1832,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     fontSize: 10.0,
   );
 
-  void _setDescription(String value) {
+  /// Label describing the test.
+  @visibleForTesting
+  TextPainter? get label => _label;
+
+  /// Set a description label that is drawn into the test output.
+  @protected
+  void setLabel(String value) {
     if (value.isEmpty) {
       _label = null;
       return;
@@ -2033,7 +2039,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }) {
     assert(!inTest);
     _inTest = true;
-    _setDescription(description);
+    setLabel(description);
     return _runTest(testBody, invariantTester, description);
   }
 
