@@ -719,14 +719,6 @@ class IconButton extends StatelessWidget {
         effectiveIcon = selectedIcon!;
       }
 
-      Widget iconButton = effectiveIcon;
-      if (tooltip != null) {
-        iconButton = Tooltip(
-          message: tooltip,
-          child: effectiveIcon,
-        );
-      }
-
       return _SelectableIconButton(
         style: adjustedStyle,
         onPressed: onPressed,
@@ -734,7 +726,8 @@ class IconButton extends StatelessWidget {
         focusNode: focusNode,
         isSelected: isSelected,
         variant: _variant,
-        child: iconButton,
+        tooltip: tooltip,
+        child: effectiveIcon,
       );
     }
 
@@ -835,6 +828,7 @@ class _SelectableIconButton extends StatefulWidget {
     required this.variant,
     required this.autofocus,
     required this.onPressed,
+    this.tooltip,
     required this.child,
   });
 
@@ -844,6 +838,7 @@ class _SelectableIconButton extends StatefulWidget {
   final _IconButtonVariant variant;
   final bool autofocus;
   final VoidCallback? onPressed;
+  final String? tooltip;
   final Widget child;
 
   @override
@@ -891,6 +886,7 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
       onPressed: widget.onPressed,
       variant: widget.variant,
       toggleable: toggleable,
+      tooltip: widget.tooltip,
       child: Semantics(
         selected: widget.isSelected,
         child: widget.child,
@@ -914,6 +910,7 @@ class _IconButtonM3 extends ButtonStyleButton {
     super.statesController,
     required this.variant,
     required this.toggleable,
+    super.tooltip,
     required Widget super.child,
   }) : super(
       onLongPress: null,

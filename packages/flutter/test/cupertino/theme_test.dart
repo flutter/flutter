@@ -189,6 +189,7 @@ void main() {
           'applyThemeToAll',
           'textStyle',
           'actionTextStyle',
+          'actionSmallTextStyle',
           'tabLabelTextStyle',
           'navTitleTextStyle',
           'navLargeTitleTextStyle',

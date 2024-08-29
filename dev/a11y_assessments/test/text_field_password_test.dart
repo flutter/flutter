@@ -50,4 +50,11 @@ void main() {
       expect(textField.decoration?.hintText, isNull);
     }
   });
+
+  testWidgets('text field password demo page has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, TextFieldPasswordUseCase());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('TextField password Demo');
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
+  });
 }
