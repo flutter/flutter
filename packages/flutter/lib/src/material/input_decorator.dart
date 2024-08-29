@@ -2575,6 +2575,7 @@ class InputDecoration {
     this.hintTextDirection,
     this.hintMaxLines,
     this.hintFadeDuration,
+    this.hintIgnoreHeightOnInput = false,
     this.error,
     this.errorText,
     this.errorStyle,
@@ -2613,7 +2614,6 @@ class InputDecoration {
     this.semanticCounterText,
     this.alignLabelWithHint,
     this.constraints,
-    this.hintIgnoreHeightOnInput = false,
   }) : assert(!(label != null && labelText != null), 'Declaring both label and labelText is not supported.'),
        assert(!(helper != null && helperText != null), 'Declaring both helper and helperText is not supported.'),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
@@ -2645,6 +2645,7 @@ class InputDecoration {
     this.hintTextDirection,
     this.hintMaxLines,
     this.hintFadeDuration,
+    this.hintIgnoreHeightOnInput = false,
     this.filled = false,
     this.fillColor,
     this.focusColor,
@@ -2652,7 +2653,6 @@ class InputDecoration {
     this.border = InputBorder.none,
     this.enabled = true,
     this.constraints,
-    this.hintIgnoreHeightOnInput = false,
   }) : icon = null,
        iconColor = null,
        label = null,
@@ -3587,6 +3587,7 @@ class InputDecoration {
     TextDirection? hintTextDirection,
     Duration? hintFadeDuration,
     int? hintMaxLines,
+    bool? hintIgnoreHeightOnInput,
     Widget? error,
     String? errorText,
     TextStyle? errorStyle,
@@ -3625,7 +3626,6 @@ class InputDecoration {
     String? semanticCounterText,
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
-    bool? hintIgnoreHeightOnInput,
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
@@ -3643,6 +3643,7 @@ class InputDecoration {
       hintTextDirection: hintTextDirection ?? this.hintTextDirection,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
       hintFadeDuration: hintFadeDuration ?? this.hintFadeDuration,
+      hintIgnoreHeightOnInput: hintIgnoreHeightOnInput ?? this.hintIgnoreHeightOnInput,
       error: error ?? this.error,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
@@ -3681,7 +3682,6 @@ class InputDecoration {
       semanticCounterText: semanticCounterText ?? this.semanticCounterText,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
-      hintIgnoreHeightOnInput: hintIgnoreHeightOnInput ?? this.hintIgnoreHeightOnInput,
     );
   }
 
@@ -3752,6 +3752,7 @@ class InputDecoration {
         && other.hintTextDirection == hintTextDirection
         && other.hintMaxLines == hintMaxLines
         && other.hintFadeDuration == hintFadeDuration
+        && other.hintIgnoreHeightOnInput == hintIgnoreHeightOnInput
         && other.error == error
         && other.errorText == errorText
         && other.errorStyle == errorStyle
@@ -3789,8 +3790,7 @@ class InputDecoration {
         && other.enabled == enabled
         && other.semanticCounterText == semanticCounterText
         && other.alignLabelWithHint == alignLabelWithHint
-        && other.constraints == constraints
-        && other.hintIgnoreHeightOnInput == hintIgnoreHeightOnInput;
+        && other.constraints == constraints;
   }
 
   @override
@@ -3811,6 +3811,7 @@ class InputDecoration {
       hintTextDirection,
       hintMaxLines,
       hintFadeDuration,
+      hintIgnoreHeightOnInput,
       error,
       errorText,
       errorStyle,
@@ -3849,7 +3850,6 @@ class InputDecoration {
       semanticCounterText,
       alignLabelWithHint,
       constraints,
-      hintIgnoreHeightOnInput,
     ];
     return Object.hashAll(values);
   }
@@ -3868,6 +3868,7 @@ class InputDecoration {
       if (hintText != null) 'hintText: "$hintText"',
       if (hintMaxLines != null) 'hintMaxLines: "$hintMaxLines"',
       if (hintFadeDuration != null) 'hintFadeDuration: "$hintFadeDuration"',
+      if (hintIgnoreHeightOnInput) 'hintIgnoreHeightOnInput: true',
       if (error != null) 'error: "$error"',
       if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
@@ -3906,7 +3907,6 @@ class InputDecoration {
       if (semanticCounterText != null) 'semanticCounterText: $semanticCounterText',
       if (alignLabelWithHint != null) 'alignLabelWithHint: $alignLabelWithHint',
       if (constraints != null) 'constraints: $constraints',
-      if (hintIgnoreHeightOnInput) 'hintIgnoreHeightOnInput: true',
     ];
     return 'InputDecoration(${description.join(', ')})';
   }
