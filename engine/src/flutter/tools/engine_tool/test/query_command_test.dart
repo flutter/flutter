@@ -7,9 +7,9 @@ import 'dart:convert' as convert;
 import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:engine_tool/src/commands/command_runner.dart';
 import 'package:engine_tool/src/environment.dart';
-import 'package:litetest/litetest.dart';
 import 'package:logging/logging.dart' as log;
 import 'package:platform/platform.dart';
+import 'package:test/test.dart';
 
 import 'fixtures.dart' as fixtures;
 import 'utils.dart';
@@ -18,6 +18,12 @@ void main() {
   final BuilderConfig linuxTestConfig = BuilderConfig.fromJson(
     path: 'ci/builders/linux_test_config.json',
     map: convert.jsonDecode(fixtures.testConfig('Linux', Platform.linux))
+        as Map<String, Object?>,
+  );
+
+  final BuilderConfig linuxTestConfig2 = BuilderConfig.fromJson(
+    path: 'ci/builders/linux_test_config2.json',
+    map: convert.jsonDecode(fixtures.testConfig('Linux', Platform.linux, suffix: '2'))
         as Map<String, Object?>,
   );
 
@@ -35,7 +41,7 @@ void main() {
 
   final Map<String, BuilderConfig> configs = <String, BuilderConfig>{
     'linux_test_config': linuxTestConfig,
-    'linux_test_config2': linuxTestConfig,
+    'linux_test_config2': linuxTestConfig2,
     'mac_test_config': macTestConfig,
     'win_test_config': winTestConfig,
   };
@@ -75,10 +81,10 @@ void main() {
           '   "linux/android_debug_arm64" config\n',
           '   "ci/android_debug_rbe_arm64" config\n',
           '"linux_test_config2" builder:\n',
-          '   "ci/build_name" config\n',
-          '   "linux/host_debug" config\n',
-          '   "linux/android_debug_arm64" config\n',
-          '   "ci/android_debug_rbe_arm64" config\n',
+          '   "ci/build_name2" config\n',
+          '   "linux/host_debug2" config\n',
+          '   "linux/android_debug2_arm64" config\n',
+          '   "ci/android_debug2_rbe_arm64" config\n',
         ]),
       );
     } finally {

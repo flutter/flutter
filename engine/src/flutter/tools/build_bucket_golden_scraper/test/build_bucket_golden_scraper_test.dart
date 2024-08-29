@@ -5,10 +5,10 @@
 import 'dart:io' as io;
 
 import 'package:build_bucket_golden_scraper/build_bucket_golden_scraper.dart';
-import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as p;
+import 'package:test/test.dart';
 
-int main(List<String> args) {
+void main() {
   test('parses command-line arguments', () {
     // Create a fake engine directory.
     final io.Directory buildRoot = io.Directory.systemTemp.createTempSync('build_bucket_golden_scraper_test_engine');
@@ -69,6 +69,4 @@ iVBORw0KGgoAAAANSUhEUgAAADcAAAA3CAYAAACo29JGAAAAAXNSR0IArs4c6QAAAAlwSFlzAAALEwAA
       buildRoot.deleteSync(recursive: true);
     }
   });
-
-  return 0;
 }

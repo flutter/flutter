@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:engine_tool/src/phone_home.dart';
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 void main() {
   test('can et phone home', () async {

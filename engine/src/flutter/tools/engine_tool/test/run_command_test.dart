@@ -13,10 +13,10 @@ import 'package:engine_tool/src/environment.dart';
 import 'package:engine_tool/src/label.dart';
 import 'package:engine_tool/src/logger.dart';
 import 'package:engine_tool/src/run_utils.dart';
-import 'package:litetest/litetest.dart';
 import 'package:platform/platform.dart';
 import 'package:process_fakes/process_fakes.dart';
 import 'package:process_runner/process_runner.dart';
+import 'package:test/test.dart';
 
 import 'fixtures.dart' as fixtures;
 
@@ -50,7 +50,6 @@ void main() {
 
   final Map<String, BuilderConfig> configs = <String, BuilderConfig>{
     'linux_test_config': linuxTestConfig,
-    'linux_test_config2': linuxTestConfig,
     'mac_test_config': macTestConfig,
     'win_test_config': winTestConfig,
   };
@@ -62,10 +61,10 @@ void main() {
         abi: ffi.Abi.linuxX64,
         engine: engine,
         platform: FakePlatform(
-            operatingSystem: Platform.linux,
-            resolvedExecutable: io.Platform.resolvedExecutable,
-            pathSeparator: '/',
-            numberOfProcessors: 32,
+          operatingSystem: Platform.linux,
+          resolvedExecutable: io.Platform.resolvedExecutable,
+          pathSeparator: '/',
+          numberOfProcessors: 32,
         ),
         processRunner: ProcessRunner(
           processManager: FakeProcessManager(onStart: (List<String> command) {
@@ -100,7 +99,7 @@ void main() {
     expect(result, equals(0));
     expect(runHistory.length, greaterThanOrEqualTo(6));
     expect(runHistory[5],
-        containsStringsInOrder(<String>['flutter', 'run', '--weird_argument']));
+        containsAllInOrder(<String>['flutter', 'run', '--weird_argument']));
   });
 
   test('parse devices list', () async {
@@ -165,7 +164,7 @@ void main() {
     // Observe that we selected android_debug_arm64 as the target.
     expect(
         runHistory[5],
-        containsStringsInOrder(<String>[
+        containsAllInOrder(<String>[
           'flutter',
           'run',
           '--local-engine',

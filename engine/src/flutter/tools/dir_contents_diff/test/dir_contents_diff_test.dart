@@ -4,12 +4,17 @@
 
 import 'dart:io' as io;
 
-import 'package:litetest/litetest.dart';
+import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:path/path.dart' as p;
+import 'package:test/test.dart';
 
 void main() {
   // Find a path to `dir_contents_diff.dart` from the working directory.
-  final String pkgPath = io.File.fromUri(io.Platform.script).parent.parent.path;
+  final String pkgPath = p.join(
+    Engine.findWithin().flutterDir.path,
+    'tools',
+    'dir_contents_diff',
+  );
   final String binPath = p.join(
     pkgPath,
     'bin',
@@ -44,7 +49,8 @@ void main() {
   });
 
   test('lists files and diffs successfully, even with an EOF newline', () {
-    final String goldenPath = p.join(pkgPath, 'test', 'file_ok_eof_newline.txt');
+    final String goldenPath =
+        p.join(pkgPath, 'test', 'file_ok_eof_newline.txt');
     final String dirPath = p.join(pkgPath, 'test', 'fixtures');
     final (int exitCode, String output) = runSync(goldenPath, dirPath);
     if (exitCode != 0) {
@@ -67,7 +73,8 @@ void main() {
   });
 
   test('diff fails when an unexpected file is present', () {
-    final String goldenPath = p.join(pkgPath, 'test', 'file_bad_unexpected.txt');
+    final String goldenPath =
+        p.join(pkgPath, 'test', 'file_bad_unexpected.txt');
     final String dirPath = p.join(pkgPath, 'test', 'fixtures');
     final (int exitCode, String output) = runSync(goldenPath, dirPath);
     if (exitCode == 0) {

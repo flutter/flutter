@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:licenses/formatter.dart';
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 void main() {
   test('Block comments', () {

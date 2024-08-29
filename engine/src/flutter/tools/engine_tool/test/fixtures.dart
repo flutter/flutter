@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-String testConfig(String osDimension, String osPlatform) => '''
+String testConfig(String osDimension, String osPlatform,
+        {String suffix = ''}) =>
+    '''
 {
   "builds": [
     {
       "archives": [
         {
-          "name": "build_name",
+          "name": "build_name$suffix",
           "base_path": "base/path",
           "type": "gcs",
           "include_paths": ["include/path"],
@@ -22,16 +24,16 @@ String testConfig(String osDimension, String osPlatform) => '''
         "variable": false
       },
       "gn": ["--gn-arg", "--lto", "--no-rbe"],
-      "name": "ci/build_name",
+      "name": "ci/build_name$suffix",
       "description": "This is a very long description that will test that the help message is wrapped correctly at an appropriate number of characters.",
       "ninja": {
-        "config": "build_name",
+        "config": "build_name$suffix",
         "targets": ["ninja_target"]
       },
       "tests": [
         {
           "language": "python3",
-          "name": "build_name tests",
+          "name": "build_name$suffix tests",
           "parameters": ["--test-params"],
           "script": "test/script.py",
           "contexts": ["context"]
@@ -55,9 +57,9 @@ String testConfig(String osDimension, String osPlatform) => '''
         "os=$osDimension"
       ],
       "gn": ["--gn-arg", "--lto", "--no-rbe"],
-      "name": "$osPlatform/host_debug",
+      "name": "$osPlatform/host_debug$suffix",
       "ninja": {
-        "config": "host_debug",
+        "config": "host_debug$suffix",
         "targets": ["ninja_target"]
       }
     },
@@ -66,9 +68,9 @@ String testConfig(String osDimension, String osPlatform) => '''
         "os=$osDimension"
       ],
       "gn": ["--gn-arg", "--lto", "--no-rbe"],
-      "name": "$osPlatform/android_debug_arm64",
+      "name": "$osPlatform/android_debug${suffix}_arm64",
       "ninja": {
-        "config": "android_debug_arm64",
+        "config": "android_debug${suffix}_arm64",
         "targets": ["ninja_target"]
       }
     },
@@ -77,9 +79,9 @@ String testConfig(String osDimension, String osPlatform) => '''
         "os=$osDimension"
       ],
       "gn": ["--gn-arg", "--lto", "--rbe"],
-      "name": "ci/android_debug_rbe_arm64",
+      "name": "ci/android_debug${suffix}_rbe_arm64",
       "ninja": {
-        "config": "android_debug_rbe_arm64",
+        "config": "android_debug${suffix}_rbe_arm64",
         "targets": ["ninja_target"]
       }
     }

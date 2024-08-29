@@ -5,12 +5,11 @@
 import 'dart:io' as io;
 
 import 'package:git_repo_tools/git_repo_tools.dart';
-import 'package:litetest/litetest.dart';
 import 'package:process_fakes/process_fakes.dart';
+import 'package:test/test.dart';
 
 void main() {
   const String fakeShaHash = 'fake-sha-hash';
-
 
   test('returns non-deleted files which differ from merge-base with main', () async {
     final Fixture fixture = Fixture(

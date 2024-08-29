@@ -966,10 +966,7 @@ def uses_package_test_runner(package):
 # arguments to pass to each of the packages tests.
 def build_dart_host_test_list(build_dir):
   dart_host_tests = [
-      (
-          os.path.join('flutter', 'ci'),
-          [os.path.join(BUILDROOT_DIR, 'flutter')],
-      ),
+      (os.path.join('flutter', 'ci'), []),
       (
           os.path.join('flutter', 'flutter_frontend_server'),
           [

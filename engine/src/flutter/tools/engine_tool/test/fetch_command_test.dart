@@ -10,10 +10,10 @@ import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:engine_tool/src/commands/command_runner.dart';
 import 'package:engine_tool/src/environment.dart';
 import 'package:engine_tool/src/logger.dart';
-import 'package:litetest/litetest.dart';
 import 'package:platform/platform.dart';
 import 'package:process_fakes/process_fakes.dart';
 import 'package:process_runner/process_runner.dart';
+import 'package:test/test.dart';
 
 void main() {
   final Engine? engine = Engine.tryFindWithin();
@@ -62,7 +62,7 @@ void main() {
     expect(runHistory.length, greaterThanOrEqualTo(1));
     expect(
       runHistory[0],
-      containsStringsInOrder(<String>['gclient', 'sync', '-D']),
+      containsAllInOrder(<String>['gclient', 'sync', '-D']),
     );
   });
 
@@ -78,7 +78,7 @@ void main() {
     expect(runHistory.length, greaterThanOrEqualTo(1));
     expect(
       runHistory[0],
-      containsStringsInOrder(<String>['gclient', 'sync', '-D']),
+      containsAllInOrder(<String>['gclient', 'sync', '-D']),
     );
   });
 }

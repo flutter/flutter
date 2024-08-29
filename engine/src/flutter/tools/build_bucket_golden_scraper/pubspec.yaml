@@ -18,7 +18,4 @@ dependencies:
   path: any
 
 dev_dependencies:
-  async_helper: any
-  expect: any
-  litetest: any
-  smith: any
+  test: any

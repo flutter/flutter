@@ -6,9 +6,9 @@ import 'dart:io' as io;
 
 import 'package:engine_build_configs/src/ci_yaml.dart';
 import 'package:engine_repo_tools/engine_repo_tools.dart';
-import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
 import 'package:source_span/source_span.dart';
+import 'package:test/test.dart';
 import 'package:yaml/yaml.dart' as y;
 
 void main() {

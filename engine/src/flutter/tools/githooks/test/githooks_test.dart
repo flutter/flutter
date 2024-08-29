@@ -5,7 +5,7 @@
 import 'dart:io' as io;
 
 import 'package:githooks/githooks.dart';
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 void main() {
   test('Fails gracefully without a command', () async {
