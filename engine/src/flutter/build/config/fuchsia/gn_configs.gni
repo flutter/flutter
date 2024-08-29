@@ -6,38 +6,9 @@
 # https://crsrc.org/c/build/config/fuchsia/gn_configs.gni?q=gn_configs.gni
 # with some local modifications to match the flutter setup.
 
-declare_args() {
-  # Path to the fuchsia SDK. This is intended for use in other templates &
-  # rules to reference the contents of the fuchsia SDK.
-  fuchsia_sdk = "//fuchsia/sdk/$host_os"
-
-  # ID uniquely identifying the Fuchsia IDK build. This is exposed as a
-  # property so it can be used to locate images and packages on GCS and
-  # as a marker to indicate the "version" of the IDK.
-  # Defaults to the id found in the manifest.json file of the SDK.
-  fuchsia_sdk_id = ""
-}
-
-# TODO(zijiehe): Remove the override and move it into declare_args once the one
-# in //build/config/sdk.gni being removed. - b/40935282
-
-# The SDK manifest file. This is useful to include as a dependency
-# for some targets in order to cause a rebuild when the version of the
-# SDK is changed.
-fuchsia_sdk_manifest_file = "${fuchsia_sdk}/meta/manifest.json"
-
-# fuchsia_tool_dir is used to specify the directory in the SDK to locate
-# tools for the host cpu architecture. If the host_cpu is not recognized,
-# then tool dir defaults to x64.
-fuchsia_tool_dir = "${fuchsia_sdk}/tools/${host_cpu}"
-
-if (fuchsia_sdk_id == "") {
-  # Note: If we need to expose more than just the id in the future,
-  # we should consider exposing the entire json object for the metadata vs.
-  # adding a bunch of variables.
-  _meta = read_file(fuchsia_sdk_manifest_file, "json")
-  fuchsia_sdk_id = _meta.id
-}
+# Path to the fuchsia SDK. This is intended for use in other templates &
+# rules to reference the contents of the fuchsia SDK.
+fuchsia_sdk = "//fuchsia/sdk/$host_os"
 
 declare_args() {
   # Specify a readelf_exec path to use. If not specified, the host's system
