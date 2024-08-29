@@ -41,7 +41,7 @@ void main() {
             'forceCompile': true,
             'reportLines': true,
             'libraryFilters': <Object>['package:foo/'],
-            'librariesAlreadyCompiled': [],
+            'librariesAlreadyCompiled': <Object>[],
           },
           jsonResponse: <String, Object>{
             'type': 'Sentinel',
@@ -82,7 +82,7 @@ void main() {
             'forceCompile': true,
             'reportLines': true,
             'libraryFilters': <Object>['package:foo/'],
-            'librariesAlreadyCompiled': [],
+            'librariesAlreadyCompiled': <Object>[],
           },
           jsonResponse: SourceReport(
             ranges: <SourceReportRange>[
@@ -195,7 +195,7 @@ void main() {
             'forceCompile': true,
             'reportLines': true,
             'libraryFilters': <Object>['package:foo/'],
-            'librariesAlreadyCompiled': [],
+            'librariesAlreadyCompiled': <Object>[],
           },
           jsonResponse: SourceReport(
             ranges: <SourceReportRange>[
@@ -267,7 +267,7 @@ void main() {
             'reports': <Object>['Coverage'],
             'forceCompile': true,
             'reportLines': true,
-            'librariesAlreadyCompiled': [],
+            'librariesAlreadyCompiled': <Object>[],
           },
           jsonResponse: SourceReport(
             ranges: <SourceReportRange>[
@@ -340,7 +340,7 @@ void main() {
             'forceCompile': true,
             'reportLines': true,
             'libraryFilters': <Object>['package:foo/'],
-            'librariesAlreadyCompiled': [],
+            'librariesAlreadyCompiled': <Object>[],
           },
           jsonResponse: SourceReport(
             ranges: <SourceReportRange>[
