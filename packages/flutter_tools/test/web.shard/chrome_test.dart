@@ -845,7 +845,7 @@ void main() {
         ));
   });
 
-  test('Chromium close sends browser close command', () async {
+  testWithoutContext('Chromium close sends browser close command', () async {
     final BufferLogger logger = BufferLogger.test();
     final List<String> commands = <String>[];
     void onSendCommand(String cmd) { commands.add(cmd); }
@@ -865,7 +865,7 @@ void main() {
     expect(commands, contains('Browser.close'));
   });
 
-  test('Chromium close handles a SocketException when connecting to Chrome', () async {
+  testWithoutContext('Chromium close handles a SocketException when connecting to Chrome', () async {
     final BufferLogger logger = BufferLogger.test();
     final FakeChromeConnectionWithTab chromeConnection = FakeChromeConnectionWithTab();
     final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
@@ -883,7 +883,7 @@ void main() {
     await chrome.close();
   });
 
-  test('Chromium close handles a WebSocketException when closing the WipConnection', () async {
+  testWithoutContext('Chromium close handles a WebSocketException when closing the WipConnection', () async {
     final BufferLogger logger = BufferLogger.test();
     final FakeChromeConnectionWithTab chromeConnection = FakeChromeConnectionWithTab(throwWebSocketException: true);
     final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
