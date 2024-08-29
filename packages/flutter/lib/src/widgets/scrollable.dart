@@ -472,7 +472,7 @@ class Scrollable extends StatefulWidget {
   /// Scrolls all scrollables that enclose the given context so as to make the
   /// given context visible.
   ///
-  /// If a [Scrollable] in the provided [BuildContext] is a
+  /// If a [Scrollable] enclosing the provided [BuildContext] is a
   /// [TwoDimensionalScrollable], both vertical and horizontal axes will ensure
   /// the target is made visible.
   static Future<void> ensureVisible(
