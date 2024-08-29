@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+import '../widgets/multi_view_testing.dart';
 import '../widgets/test_border.dart' show TestBorder;
 
 class NotifyMaterial extends StatelessWidget {
@@ -1240,6 +1241,43 @@ void main() {
         ),
       );
     });
+  });
+
+  testWidgets('Material is not visible from sub-views', (WidgetTester tester) async {
+    MaterialInkController? outsideView;
+    MaterialInkController? insideView;
+    MaterialInkController? outsideViewAnchor;
+
+    await tester.pumpWidget(
+      Material(
+        child: Builder(
+          builder: (BuildContext context) {
+            outsideViewAnchor = Material.maybeOf(context);
+            return ViewAnchor(
+              view: Builder(
+                builder: (BuildContext context) {
+                  outsideView = Material.maybeOf(context);
+                  return View(
+                    view: FakeView(tester.view),
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        insideView = Material.maybeOf(context);
+                        return const SizedBox();
+                      },
+                    ),
+                  );
+                },
+              ),
+              child: const SizedBox(),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(outsideViewAnchor, isNotNull);
+    expect(outsideView, isNull);
+    expect(insideView, isNull);
   });
 }
 
