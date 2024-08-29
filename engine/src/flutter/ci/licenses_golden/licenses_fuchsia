@@ -1,4 +1,4 @@
-Signature: 3890492d4bab34d8123959fbd757a2e5
+Signature: a5134a9c512e24817c7f493fcc8ed9d1
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -16192,6 +16192,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.pinimpl/pin-impl.fidl +
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.device/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/metadata.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.spmi/spmi.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/debuglog-resource.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/msi-resource.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -16251,6 +16252,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.pinimpl/pin-impl.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.device/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/metadata.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/overview.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.spmi/spmi.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/debuglog-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/msi-resource.fidl
