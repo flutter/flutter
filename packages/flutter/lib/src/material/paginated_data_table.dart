@@ -94,7 +94,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.header,
     this.headerBackgroundColor,
     this.footerBackgroundColor,
-    this.footerStyle = const TextStyle(color: Color.fromARGB(255,0, 0, 0)), //default text style
+    this.footerStyle = themeData.textTheme.bodySmall, //default text style
     this.actions,
     required this.columns,
     this.sortColumnIndex,
@@ -501,7 +501,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     }
 
     // FOOTER
-    final TextStyle footerTextStyle = widget.footerStyle; //previous based on themeData.textTheme.bodySmall which is misleading, converted to widget level property
+    final TextStyle footerTextStyle = widget.footerStyle;
     final List<Widget> footerWidgets = <Widget>[];
     if (widget.onRowsPerPageChanged != null) {
       final List<Widget> availableRowsPerPage = widget.availableRowsPerPage
@@ -596,7 +596,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                       data: const IconThemeData(
                         opacity: 0.54,
                       ),
-                      child: Container(
+                      child: ColoredBox(
                         height: 64.0,
                         color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : widget.headerBackgroundColor,
                         child: Padding(
@@ -653,7 +653,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     // TODO(bkonyi): this won't handle text zoom correctly,
                     //  https://github.com/flutter/flutter/issues/48522
                     height: 56.0,
-                    child: Container(
+                    child: ColoredBox(
                       color: widget.footerBackgroundColor, // Set footer background color  here
                       child: SingleChildScrollView(
                         dragStartBehavior: widget.dragStartBehavior,
