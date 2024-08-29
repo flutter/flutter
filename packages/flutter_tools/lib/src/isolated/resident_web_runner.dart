@@ -608,8 +608,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
   }) async {
     if (_chromiumLauncher != null) {
       final Chromium chrome = await _chromiumLauncher!.connectedInstance;
-      ChromeTab? chromeTab;      
-      chromeTab = await getChromeTabGuarded(
+      final ChromeTab? chromeTab = await getChromeTabGuarded(
         chrome.chromeConnection,
         (ChromeTab chromeTab) {
           return !chromeTab.url.startsWith('chrome-extension');
