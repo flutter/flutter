@@ -767,7 +767,9 @@ void main() {
       expect(frameworkHandlesBacks.last, isFalse);
 
       // Set the app state to inactive, where setFrameworkHandlesBack is still
-      // called.
+      // called. This could happen when responding to a tap on a notification
+      // when the app is not active and immediately navigating, for example.
+      // See https://github.com/flutter/flutter/pull/154313.
       await setAppLifeCycleState(AppLifecycleState.inactive);
 
       final int inactiveStartCallsLength = frameworkHandlesBacks.length;
@@ -781,7 +783,6 @@ void main() {
 
       // Set the app state to detached, where setFrameworkHandlesBack shouldn't
       // be called.
-      //await setAppLifeCycleState(AppLifecycleState.paused);
       await setAppLifeCycleState(AppLifecycleState.detached);
 
       final int finalCallsLength = frameworkHandlesBacks.length;
