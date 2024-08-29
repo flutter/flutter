@@ -399,6 +399,7 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   final Color backgroundColor;
 
   /// Determine whether segments have proportional widths based on their content.
+  ///
   /// If false, all segments will have the same width, determined by the longest
   /// segment. If true, each segment's width will be determined by its individual
   /// content.
