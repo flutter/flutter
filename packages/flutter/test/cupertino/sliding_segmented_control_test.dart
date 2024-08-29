@@ -510,7 +510,7 @@ void main() {
     );
   });
 
-  testWidgets('Width of each segmented control segment is determined by widest widget', (WidgetTester tester) async {
+  testWidgets('Width of each segmented control segment is determined by widest widget by default', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
       0: Container(constraints: const BoxConstraints.tightFor(width: 50.0)),
       1: Container(constraints: const BoxConstraints.tightFor(width: 100.0)),
@@ -539,6 +539,266 @@ void main() {
     final double childWidth = (segmentedControl.size.width - 8) / 3;
 
     expect(childWidth, 200.0 + 9.25 * 2);
+  });
+
+  testWidgets('If proportionalWidth is true, the width of each segmented '
+  'control segment is determined by its own content', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{
+      0: const SizedBox(width: 50, child: Text('First')),
+      1: const SizedBox(width: 100, child: Text('Second')),
+      2: const SizedBox(width: 70, child: Text('Third')),
+    };
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            groupValue: groupValue,
+            proportionalWidth: true,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    Size getChildSize(int index) {
+      return tester.getSize(
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
+      );
+    }
+
+    final Size firstChildSize = getChildSize(0);
+    expect(firstChildSize.width, 50 + 9.25 * 2);
+
+    final Size secondChildSize = getChildSize(1);
+    expect(secondChildSize.width, 100 + 9.25 * 2);
+
+    final Size thirdChildSize = getChildSize(2);
+    expect(thirdChildSize.width, 70 + 9.25 * 2);
+
+    // Overall segment control width is the sum of the segment widths + horizontal paddings + 2 separator width.
+    final RenderBox segmentedControl = tester.renderObject(
+      find.byKey(const ValueKey<String>('Segmented Control')),
+    );
+
+    final double childWidthSum = firstChildSize.width + secondChildSize.width + thirdChildSize.width;
+    expect(segmentedControl.size.width, childWidthSum + 6.0 + 2.0);
+  });
+
+  testWidgets('proportionalWidth rebuild', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{
+      0: const SizedBox(width: 50, child: Text('First')),
+      1: const SizedBox(width: 200, child: Text('Second')),
+      2: const SizedBox(width: 70, child: Text('Third')),
+    };
+    bool proportionalWidth = false;
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            proportionalWidth: proportionalWidth,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    Size getChildSize(int index) {
+      return tester.getSize(
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
+      );
+    }
+
+    Size firstChildSize = getChildSize(0);
+    expect(firstChildSize.width, 200 + 9.25 * 2);
+
+    Size secondChildSize = getChildSize(1);
+    expect(secondChildSize.width, 200 + 9.25 * 2);
+
+    Size thirdChildSize = getChildSize(2);
+    expect(thirdChildSize.width, 200 + 9.25 * 2);
+
+    setState!(() { proportionalWidth = true; });
+    await tester.pump();
+
+    firstChildSize = getChildSize(0);
+    expect(firstChildSize.width, 50 + 9.25 * 2);
+
+    secondChildSize = getChildSize(1);
+    expect(secondChildSize.width, 200 + 9.25 * 2);
+
+    thirdChildSize = getChildSize(2);
+    expect(thirdChildSize.width, 70 + 9.25 * 2);
+  });
+
+  testWidgets('If proportionalWidth is true, the width of each segmented '
+  'control segment is updated when children change', (WidgetTester tester) async {
+    Map<int, Widget> children = <int, Widget>{
+      0: const SizedBox(width: 50, child: Text('First')),
+      1: const SizedBox(width: 100, child: Text('Second')),
+      2: const SizedBox(width: 70, child: Text('Third')),
+    };
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            groupValue: groupValue,
+            proportionalWidth: true,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    Size getChildSize(int index) {
+      return tester.getSize(
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
+      );
+    }
+
+    Size firstChildSize = getChildSize(0);
+    expect(firstChildSize.width, 50 + 9.25 * 2);
+
+    Size secondChildSize = getChildSize(1);
+    expect(secondChildSize.width, 100 + 9.25 * 2);
+
+    Size thirdChildSize = getChildSize(2);
+    expect(thirdChildSize.width, 70 + 9.25 * 2);
+
+    setState!(() {
+      children = <int, Widget>{
+        0: const SizedBox(),
+        1: const SizedBox(width: 220, child: Text('Second')),
+        2: const SizedBox(width: 170, child: Text('Third')),
+      };
+    });
+    await tester.pump();
+
+    firstChildSize = getChildSize(0);
+    expect(firstChildSize.width, 0 + 9.25 * 2);
+
+    secondChildSize = getChildSize(1);
+    expect(secondChildSize.width, 220 + 9.25 * 2);
+
+    thirdChildSize = getChildSize(2);
+    expect(thirdChildSize.width, 170 + 9.25 * 2);
+  });
+
+
+  testWidgets('If proportionalWidth is true and the overall segment control width '
+  'is larger than the max width of the parent constraints, each segment scales down', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{
+      0: const SizedBox(width: 50, child: Text('First')),
+      1: const SizedBox(width: 100, child: Text('Second')),
+      2: const SizedBox(width: 200, child: Text('Third')),
+    };
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 200),
+            child: CupertinoSlidingSegmentedControl<int>(
+              key: const ValueKey<String>('Segmented Control'),
+              children: children,
+              groupValue: groupValue,
+              proportionalWidth: true,
+              onValueChanged: defaultCallback,
+            ),
+          );
+        },
+      ),
+    );
+
+    Size getChildSize(int index) {
+      return tester.getSize(
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
+      );
+    }
+
+    // Without constraints, the overall size should be 405.5:  50 + 100 + 200
+    // + 9.25 * 6(horizontal padding). To fit in 194(allowed max width - padding),
+    // each segment width should scale down to original width * (194 - separator) / 413.5.
+    final Size firstChildSize = getChildSize(0);
+    const double maxAllowedTotal = 200 - 6 - 2;
+    const double originalTotal = 405.5;
+    expect(firstChildSize.width, (50 + 9.25 * 2) * maxAllowedTotal / originalTotal);
+
+    final Size secondChildSize = getChildSize(1);
+    expect(secondChildSize.width, (100 + 9.25 * 2) * maxAllowedTotal / originalTotal);
+
+    final Size thirdChildSize = getChildSize(2);
+    expect(thirdChildSize.width, (200 + 9.25 * 2) * maxAllowedTotal / originalTotal);
+  });
+
+  testWidgets('If proportionalWidth is true and the overall segment control width '
+  'is smaller than the min width of the parent constraints, each segment scales up', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{
+      0: const SizedBox(width: 20, child: Text('First')),
+      1: const SizedBox(width: 30, child: Text('Second')),
+      2: const SizedBox(width: 50, child: Text('Third')),
+    };
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 200),
+            child: CupertinoSlidingSegmentedControl<int>(
+              key: const ValueKey<String>('Segmented Control'),
+              children: children,
+              groupValue: groupValue,
+              proportionalWidth: true,
+              onValueChanged: defaultCallback,
+            ),
+          );
+        },
+      ),
+    );
+
+    Size getChildSize(int index) {
+      return tester.getSize(
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
+      );
+    }
+
+    // Without constraints, the overall size should be 155.5:  20 + 30 + 50
+    // + 9.25 * 6(horizontal padding). To fit in 194(allowed max width - padding),
+    // each segment width should scale up to original width * (194 - separator) / 155.5.
+    final Size firstChildSize = getChildSize(0);
+    const double constraintsMinWidth = 200 - 6 - 2;
+    const double originalTotal = 155.5;
+    expect(firstChildSize.width, moreOrLessEquals((20 + 9.25 * 2) * constraintsMinWidth / originalTotal));
+
+    final Size secondChildSize = getChildSize(1);
+    expect(secondChildSize.width, moreOrLessEquals((30 + 9.25 * 2) * constraintsMinWidth / originalTotal));
+
+    final Size thirdChildSize = getChildSize(2);
+    expect(thirdChildSize.width, moreOrLessEquals((50 + 9.25 * 2) * constraintsMinWidth / originalTotal));
   });
 
   testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
@@ -759,6 +1019,46 @@ void main() {
     expect(groupValue, 1);
   });
 
+  testWidgets('Non-centered taps work on propotional segments', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{};
+    children[0] = const SizedBox(width: 50, height: 30);
+    children[1] = const SizedBox();
+    children[2] = const SizedBox(width: 100, height: 30);
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            proportionalWidth: true,
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    expect(groupValue, 0);
+
+    final Rect firstChild = tester.getRect(find.ancestor(of: find.byWidget(children[0]!), matching: find.byType(MetaData)));
+    expect(firstChild.width, 50.0 + 9.25 * 2);
+
+    final Rect secondChild = tester.getRect(find.ancestor(of: find.byWidget(children[1]!), matching: find.byType(MetaData)));
+    expect(secondChild.width, 0.0 + 9.25 * 2);
+
+    final Rect thirdChild = tester.getRect(find.ancestor(of: find.byWidget(children[2]!), matching: find.byType(MetaData)));
+    expect(thirdChild.width, 100.0  + 9.25 * 2);
+
+    final Finder child0 = find.ancestor(of: find.byWidget(children[0]!), matching: find.byType(MetaData));
+    final Offset centerOfChild0 = tester.getCenter(child0);
+    await tester.tapAt(centerOfChild0 + Offset(firstChild.width / 2 + 1, 0));
+    expect(groupValue, 1);
+
+    await tester.tapAt(centerOfChild0 + Offset(firstChild.width / 2 + 1 + secondChild.width + 1, 0));
+    expect(groupValue, 2);
+  });
+
   testWidgets('Hit-tests report accurate local position in segments', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     late TapDownDetails tapDownDetails;
@@ -774,6 +1074,39 @@ void main() {
         builder: (BuildContext context) {
           return CupertinoSlidingSegmentedControl<int>(
             key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    expect(groupValue, 0);
+
+    final Offset segment0GlobalOffset = tester.getTopLeft(find.byWidget(children[0]!));
+    await tester.tapAt(segment0GlobalOffset + const Offset(7, 11));
+
+    expect(tapDownDetails.localPosition, const Offset(7, 11));
+    expect(tapDownDetails.globalPosition, segment0GlobalOffset + const Offset(7, 11));
+  });
+
+  testWidgets('Hit-tests report accurate local position in proportional segments', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{};
+    late TapDownDetails tapDownDetails;
+    children[0] = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (TapDownDetails details) { tapDownDetails = details; },
+      child: const SizedBox(width: 200, height: 200),
+    );
+    children[1] = const Text('Child 2');
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            proportionalWidth: true,
             children: children,
             groupValue: groupValue,
             onValueChanged: defaultCallback,
@@ -1082,6 +1415,64 @@ void main() {
     );
 
     expect(callbackCalled, isFalse);
+  });
+
+  testWidgets('Dragging out of bound does not cause out of range exception', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCC'),
+    };
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            proportionalWidth: true,
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    Size getChildSize(int index) {
+      return tester.getSize(
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
+      );
+    }
+
+    expect(getChildSize(0).width, 32.5);
+    expect(getChildSize(2).width, 60.5);
+
+    // Start dragging.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('A')));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Dragging to left until out of bound.
+    await gesture.moveTo(const Offset(-100, 0));
+    await tester.pump();
+    expect(getHighlightedIndex(tester), 0);
+
+    // Move the pointer to the last child and continue dragging until out of bound.
+    final Offset thirdChild = tester.getCenter(find.text('CCC'));
+    await gesture.moveTo(thirdChild);
+    await tester.pump();
+
+    await gesture.moveTo(thirdChild + const Offset(100, 0));
+    await tester.pump();
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(getHighlightedIndex(tester), 2);
+
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Disallow new gesture when dragging', (WidgetTester tester) async {

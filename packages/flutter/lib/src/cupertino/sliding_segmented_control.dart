@@ -6,7 +6,9 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
@@ -323,6 +325,7 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
     this.thumbColor = _kThumbColor,
     this.padding = _kHorizontalItemPadding,
     this.backgroundColor = CupertinoColors.tertiarySystemFill,
+    this.proportionalWidth = false,
   }) : assert(children.length >= 2),
        assert(
          groupValue == null || children.keys.contains(groupValue),
@@ -395,6 +398,21 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   /// will not be painted if null is specified.
   final Color backgroundColor;
 
+  /// Determine whether segments have proportional widths based on their content.
+  ///
+  /// If false, all segments will have the same width, determined by the longest
+  /// segment. If true, each segment's width will be determined by its individual
+  /// content.
+  ///
+  /// If the max width of parent constraints is smaller than the width that the
+  /// segmented control needs, The segment widths will scale down proportionally
+  /// to ensure the segment control fits within the boundaries; similarly, if
+  /// the min width of parent constraints is larger, the segment width will scales
+  /// up to meet the min width requirement.
+  ///
+  /// Defaults to false.
+  final bool proportionalWidth;
+
   /// The color used to paint the interior of the thumb that appears behind the
   /// currently selected item.
   ///
@@ -422,10 +440,12 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   final TapGestureRecognizer tap = TapGestureRecognizer();
   final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
   final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
+  final GlobalKey segmentedControlRenderWidgetKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
+
     // If the long press or horizontal drag recognizer gets accepted, we know for
     // sure the gesture is meant for the segmented control. Hand everything to
     // the drag gesture recognizer.
@@ -485,23 +505,24 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   // them from interfering with the active drag gesture.
   bool get isThumbDragging => _startedOnSelectedSegment ?? false;
 
-  // Converts local coordinate to segments. This method assumes each segment has
-  // the same width.
+  // Converts local coordinate to segments.
   T segmentForXPosition(double dx) {
-    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    final BuildContext currentContext = segmentedControlRenderWidgetKey.currentContext!;
+    final _RenderSegmentedControl<T> renderBox = currentContext.findRenderObject()! as _RenderSegmentedControl<T>;
+
     final int numOfChildren = widget.children.length;
     assert(renderBox.hasSize);
     assert(numOfChildren >= 2);
-    int index = (dx ~/ (renderBox.size.width / numOfChildren)).clamp(0, numOfChildren - 1);
+
+    int segmentIndex = renderBox.getClosestSegmentIndex(dx);
 
     switch (Directionality.of(context)) {
       case TextDirection.ltr:
         break;
       case TextDirection.rtl:
-        index = numOfChildren - 1 - index;
+        segmentIndex = numOfChildren - 1 - segmentIndex;
     }
-
-    return widget.children.keys.elementAt(index);
+    return widget.children.keys.elementAt(segmentIndex);
   }
 
   bool _hasDraggedTooFar(DragUpdateDetails details) {
@@ -696,9 +717,11 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
           animation: thumbScaleAnimation,
           builder: (BuildContext context, Widget? child) {
             return _SegmentedControlRenderWidget<T>(
+              key: segmentedControlRenderWidgetKey,
               highlightedIndex: highlightedIndex,
               thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor, context),
               thumbScale: thumbScaleAnimation.value,
+              proportionalWidth: widget.proportionalWidth,
               state: this,
               children: children,
             );
@@ -716,12 +739,14 @@ class _SegmentedControlRenderWidget<T extends Object> extends MultiChildRenderOb
     required this.highlightedIndex,
     required this.thumbColor,
     required this.thumbScale,
+    required this.proportionalWidth,
     required this.state,
   });
 
   final int? highlightedIndex;
   final Color thumbColor;
   final double thumbScale;
+  final bool proportionalWidth;
   final _SegmentedControlState<T> state;
 
   @override
@@ -730,6 +755,7 @@ class _SegmentedControlRenderWidget<T extends Object> extends MultiChildRenderOb
       highlightedIndex: highlightedIndex,
       thumbColor: thumbColor,
       thumbScale: thumbScale,
+      proportionalWidth: proportionalWidth,
       state: state,
     );
   }
@@ -740,7 +766,8 @@ class _SegmentedControlRenderWidget<T extends Object> extends MultiChildRenderOb
     renderObject
       ..thumbColor = thumbColor
       ..thumbScale = thumbScale
-      ..highlightedIndex = highlightedIndex;
+      ..highlightedIndex = highlightedIndex
+      ..proportionalWidth = proportionalWidth;
   }
 }
 
@@ -785,10 +812,12 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     required int? highlightedIndex,
     required Color thumbColor,
     required double thumbScale,
+    required bool proportionalWidth,
     required this.state,
   }) : _highlightedIndex = highlightedIndex,
        _thumbColor = thumbColor,
-       _thumbScale = thumbScale;
+       _thumbScale = thumbScale,
+       _proportionalWidth = proportionalWidth;
 
   final _SegmentedControlState<T> state;
 
@@ -841,6 +870,16 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     markNeedsPaint();
   }
 
+  bool get proportionalWidth => _proportionalWidth;
+  bool _proportionalWidth;
+  set proportionalWidth(bool value) {
+    if (_proportionalWidth == value) {
+      return;
+    }
+    _proportionalWidth = value;
+    markNeedsLayout();
+  }
+
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
@@ -853,8 +892,29 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   }
 
   // Intrinsic Dimensions
+  double get separatorWidth => _kSeparatorInset.horizontal + _kSeparatorWidth;
+  double get totalSeparatorWidth => separatorWidth * (childCount ~/ 2);
 
-  double get totalSeparatorWidth => (_kSeparatorInset.horizontal + _kSeparatorWidth) * (childCount ~/ 2);
+  int getClosestSegmentIndex(double dx) {
+    int index = 0;
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final _SegmentedControlContainerBoxParentData childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
+      final double clampX = clampDouble(dx, childParentData.offset.dx, child.size.width + childParentData.offset.dx);
+
+      if (dx <= clampX) {
+        break;
+      }
+
+      index++;
+      child = nonSeparatorChildAfter(child);
+    }
+
+    final int segmentCount = childCount ~/ 2 + 1;
+    // When the thumb is dragging out of bounds, the return result must be
+    // smaller than segment count.
+    return min(index, segmentCount - 1);
+  }
 
   RenderBox? nonSeparatorChildAfter(RenderBox child) {
     final RenderBox? nextChild = childAfter(child);
@@ -923,62 +983,106 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     }
   }
 
-  Size _calculateChildSize(BoxConstraints constraints) {
+  double _getMaxChildWidth(BoxConstraints constraints) {
     final int childCount = this.childCount ~/ 2 + 1;
     double childWidth = (constraints.minWidth - totalSeparatorWidth) / childCount;
-    double maxHeight = _kMinSegmentedControlHeight;
     RenderBox? child = firstChild;
     while (child != null) {
       childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity) + 2 * _kSegmentMinPadding);
       child = nonSeparatorChildAfter(child);
     }
-    childWidth = math.min(
+    return math.min(
       childWidth,
       (constraints.maxWidth - totalSeparatorWidth) / childCount,
     );
-    child = firstChild;
+  }
+
+  double _getMaxChildHeight(BoxConstraints constraints, double childWidth) {
+    double maxHeight = _kMinSegmentedControlHeight;
+    RenderBox? child = firstChild;
     while (child != null) {
       final double boxHeight = child.getMaxIntrinsicHeight(childWidth);
       maxHeight = math.max(maxHeight, boxHeight);
       child = nonSeparatorChildAfter(child);
     }
-    return Size(childWidth, maxHeight);
+    return maxHeight;
   }
 
-  Size _computeOverallSizeFromChildSize(Size childSize, BoxConstraints constraints) {
-    final int childCount = this.childCount ~/ 2 + 1;
-    return constraints.constrain(Size(childSize.width * childCount + totalSeparatorWidth, childSize.height));
+  List<double> _getChildWidths(BoxConstraints constraints) {
+    if (!proportionalWidth) {
+      final double maxChildWidth = _getMaxChildWidth(constraints);
+      final int segmentCount = childCount ~/ 2 + 1;
+      return List<double>.filled(segmentCount, maxChildWidth);
+    }
+
+    final List<double> segmentWidths = <double>[];
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final double childWidth = child.getMaxIntrinsicWidth(double.infinity) + 2 * _kSegmentMinPadding;
+      child = nonSeparatorChildAfter(child);
+      segmentWidths.add(childWidth);
+    }
+
+    final double totalWidth = segmentWidths.sum;
+
+    // If the sum of the children's width is larger than the allowed max width,
+    // each segment width should scale down until the overall size can fit in
+    // the parent constraints; similarly, if the sum of the children's width is
+    // smaller than the allowed min width, each segment width should scale up
+    // until the overall size can fit in the parent constraints.
+    final double allowedMaxWidth = constraints.maxWidth - totalSeparatorWidth;
+    final double allowedMinWidth = constraints.minWidth - totalSeparatorWidth;
+
+    final double scale = clampDouble(totalWidth, allowedMinWidth, allowedMaxWidth) / totalWidth;
+    if (scale != 1) {
+      for (int i = 0; i < segmentWidths.length; i++) {
+        segmentWidths[i] = segmentWidths[i] * scale;
+      }
+    }
+    return segmentWidths;
+  }
+
+  Size _computeOverallSize(BoxConstraints constraints) {
+    final double maxChildHeight = _getMaxChildHeight(constraints, constraints.maxWidth);
+    return constraints.constrain(Size(_getChildWidths(constraints).sum + totalSeparatorWidth, maxChildHeight));
   }
 
   @override
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    final Size childSize = _calculateChildSize(constraints);
-    final BoxConstraints childConstraints = BoxConstraints.tight(childSize);
+    final List<double> segmentWidths = _getChildWidths(constraints);
+    final double childHeight = _getMaxChildHeight(constraints, constraints.maxWidth);
 
+    int index = 0;
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
-    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final BoxConstraints childConstraints = BoxConstraints.tight(Size(segmentWidths[index], childHeight));
       baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDryBaseline(childConstraints, baseline)));
+
+      child = nonSeparatorChildAfter(child);
+      index++;
     }
+
     return baselineOffset.offset;
   }
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    final Size childSize = _calculateChildSize(constraints);
-    return _computeOverallSizeFromChildSize(childSize, constraints);
+    return _computeOverallSize(constraints);
   }
 
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    final Size childSize = _calculateChildSize(constraints);
-    final BoxConstraints childConstraints = BoxConstraints.tight(childSize);
-    final BoxConstraints separatorConstraints = childConstraints.heightConstraints();
+    final List<double> segmentWidths = _getChildWidths(constraints);
 
+    final double childHeight = _getMaxChildHeight(constraints, double.infinity);
+    final BoxConstraints separatorConstraints = BoxConstraints(minHeight: childHeight, maxHeight: childHeight);
     RenderBox? child = firstChild;
     int index = 0;
     double start = 0;
     while (child != null) {
+      final BoxConstraints childConstraints = BoxConstraints.tight(Size(segmentWidths[index ~/ 2], childHeight));
       child.layout(index.isEven ? childConstraints : separatorConstraints, parentUsesSize: true);
       final _SegmentedControlContainerBoxParentData childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
       final Offset childOffset = Offset(start, 0);
@@ -991,8 +1095,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
       child = childAfter(child);
       index += 1;
     }
-
-    size = _computeOverallSizeFromChildSize(childSize, constraints);
+    size = _computeOverallSize(constraints);
   }
 
   // This method is used to convert the original unscaled thumb rect painted in
