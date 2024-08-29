@@ -162,7 +162,7 @@ class RefreshIndicator extends StatefulWidget {
     this.elevation = 2.0,
   })  : _indicatorType = _IndicatorType.material,
         onStatusChange = null,
-        assert(elevation >= 0);
+        assert(elevation >= 0.0);
 
   /// Creates an adaptive [RefreshIndicator] based on whether the target
   /// platform is iOS or macOS, following Material design's
