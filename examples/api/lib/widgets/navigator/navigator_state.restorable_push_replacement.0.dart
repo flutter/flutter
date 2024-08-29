@@ -13,9 +13,7 @@ class RestorablePushReplacementExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: RestorablePushReplacementExample(),
-    );
+    return const MaterialApp(home: RestorablePushReplacementExample());
   }
 }
 
@@ -37,13 +35,9 @@ class _RestorablePushReplacementExampleState extends State<RestorablePushReplace
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sample Code'),
-      ),
+      appBar: AppBar(title: const Text('Sample Code')),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.of(context).restorablePushReplacement(
-          _myRouteBuilder,
-        ),
+        onPressed: () => Navigator.of(context).restorablePushReplacement(_myRouteBuilder),
         tooltip: 'Increment Counter',
         child: const Icon(Icons.add),
       ),

@@ -45,30 +45,29 @@ class LinkedLabelRadio extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: padding,
-      child: Row(
-        children: <Widget>[
-          Radio<bool>(
-            groupValue: groupValue,
-            value: value,
-            onChanged: (bool? newValue) {
-              onChanged(newValue!);
-            },
-          ),
-          RichText(
-            text: TextSpan(
-              text: label,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                decoration: TextDecoration.underline,
-              ),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  debugPrint('Label has been tapped.');
-                },
+      child: Row(children: <Widget>[
+        Radio<bool>(
+          groupValue: groupValue,
+          value: value,
+          onChanged: (bool? newValue) {
+            onChanged(newValue!);
+          },
+        ),
+        RichText(
+          text: TextSpan(
+            text: label,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              decoration: TextDecoration.underline,
             ),
+            recognizer:
+                TapGestureRecognizer()
+                  ..onTap = () {
+                    debugPrint('Label has been tapped.');
+                  },
           ),
-        ],
-      ),
+        ),
+      ]),
     );
   }
 }

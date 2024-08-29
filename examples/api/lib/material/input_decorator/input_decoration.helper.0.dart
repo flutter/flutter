@@ -32,22 +32,10 @@ class HelperExample extends StatelessWidget {
       child: TextField(
         decoration: InputDecoration(
           helper: Text.rich(
-            TextSpan(
-              children: <InlineSpan>[
-                WidgetSpan(
-                  child: Text(
-                    'Helper Text ',
-                  ),
-                ),
-                WidgetSpan(
-                  child: Icon(
-                    Icons.help_outline,
-                    color: Colors.blue,
-                    size: 20.0,
-                  ),
-                ),
-              ],
-            ),
+            TextSpan(children: <InlineSpan>[
+              WidgetSpan(child: Text('Helper Text ')),
+              WidgetSpan(child: Icon(Icons.help_outline, color: Colors.blue, size: 20.0)),
+            ]),
           ),
         ),
       ),

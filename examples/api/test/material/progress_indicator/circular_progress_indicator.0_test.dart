@@ -8,14 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Finds CircularProgressIndicator', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.ProgressIndicatorApp(),
-    );
+    await tester.pumpWidget(const example.ProgressIndicatorApp());
 
-    expect(
-      find.bySemanticsLabel('Circular progress indicator'),
-      findsOneWidget,
-    );
+    expect(find.bySemanticsLabel('Circular progress indicator'), findsOneWidget);
 
     // Test if CircularProgressIndicator is animating.
     await tester.pump(const Duration(seconds: 2));

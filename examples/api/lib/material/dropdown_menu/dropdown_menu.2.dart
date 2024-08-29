@@ -18,9 +18,7 @@ class DropdownMenuApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('DropdownMenu Sample')),
-        body: const Center(
-          child: DropdownMenuExample(),
-        ),
+        body: const Center(child: DropdownMenuExample()),
       ),
     );
   }
@@ -40,130 +38,108 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    return ListView(
-      children: <Widget>[
-        ListTile(
-          tileColor: colorScheme.primaryContainer,
-          title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text('enabled: true'),
-              Text('requestFocusOnTap: true'),
-            ],
-          ),
-          subtitle: Column(
-            children: <Widget>[
-              DropdownMenu<String>(
-                requestFocusOnTap: true,
-                initialSelection: list.first,
-                expandedInsets: EdgeInsets.zero,
-                onSelected: (String? value) {
-                  setState(() {
-                    dropdownValue = value!;
-                  });
-                },
-                dropdownMenuEntries:
-                    list.map<DropdownMenuEntry<String>>((String value) {
+    return ListView(children: <Widget>[
+      ListTile(
+        tileColor: colorScheme.primaryContainer,
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[Text('enabled: true'), Text('requestFocusOnTap: true')],
+        ),
+        subtitle: Column(children: <Widget>[
+          DropdownMenu<String>(
+            requestFocusOnTap: true,
+            initialSelection: list.first,
+            expandedInsets: EdgeInsets.zero,
+            onSelected: (String? value) {
+              setState(() {
+                dropdownValue = value!;
+              });
+            },
+            dropdownMenuEntries:
+                list.map<DropdownMenuEntry<String>>((String value) {
                   return DropdownMenuEntry<String>(value: value, label: value);
                 }).toList(),
-              ),
-              const Text('Text cursor is shown when hovering over the DropdownMenu.'),
-            ],
           ),
+          const Text('Text cursor is shown when hovering over the DropdownMenu.'),
+        ]),
+      ),
+      const SizedBox(height: 20),
+      ListTile(
+        tileColor: colorScheme.primaryContainer,
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[Text('enabled: true'), Text('requestFocusOnTap: false')],
         ),
-        const SizedBox(height: 20),
-        ListTile(
-          tileColor: colorScheme.primaryContainer,
-          title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text('enabled: true'),
-              Text('requestFocusOnTap: false'),
-            ],
-          ),
-          subtitle: Column(
-            children: <Widget>[
-              DropdownMenu<String>(
-                requestFocusOnTap: false,
-                initialSelection: list.first,
-                expandedInsets: EdgeInsets.zero,
-                onSelected: (String? value) {
-                  setState(() {
-                    dropdownValue = value!;
-                  });
-                },
-                dropdownMenuEntries:
-                    list.map<DropdownMenuEntry<String>>((String value) {
+        subtitle: Column(children: <Widget>[
+          DropdownMenu<String>(
+            requestFocusOnTap: false,
+            initialSelection: list.first,
+            expandedInsets: EdgeInsets.zero,
+            onSelected: (String? value) {
+              setState(() {
+                dropdownValue = value!;
+              });
+            },
+            dropdownMenuEntries:
+                list.map<DropdownMenuEntry<String>>((String value) {
                   return DropdownMenuEntry<String>(value: value, label: value);
                 }).toList(),
-              ),
-              const Text('Clickable cursor is shown when hovering over the DropdownMenu.'),
-            ],
           ),
+          const Text('Clickable cursor is shown when hovering over the DropdownMenu.'),
+        ]),
+      ),
+      const SizedBox(height: 20),
+      ListTile(
+        tileColor: colorScheme.onInverseSurface,
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[Text('enabled: false'), Text('requestFocusOnTap: true')],
         ),
-        const SizedBox(height: 20),
-        ListTile(
-          tileColor: colorScheme.onInverseSurface,
-          title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text('enabled: false'),
-              Text('requestFocusOnTap: true'),
-            ],
-          ),
-          subtitle: Column(
-            children: <Widget>[
-              DropdownMenu<String>(
-                enabled: false,
-                requestFocusOnTap: true,
-                initialSelection: list.first,
-                expandedInsets: EdgeInsets.zero,
-                onSelected: (String? value) {
-                  setState(() {
-                    dropdownValue = value!;
-                  });
-                },
-                dropdownMenuEntries:
-                    list.map<DropdownMenuEntry<String>>((String value) {
+        subtitle: Column(children: <Widget>[
+          DropdownMenu<String>(
+            enabled: false,
+            requestFocusOnTap: true,
+            initialSelection: list.first,
+            expandedInsets: EdgeInsets.zero,
+            onSelected: (String? value) {
+              setState(() {
+                dropdownValue = value!;
+              });
+            },
+            dropdownMenuEntries:
+                list.map<DropdownMenuEntry<String>>((String value) {
                   return DropdownMenuEntry<String>(value: value, label: value);
                 }).toList(),
-              ),
-              const Text('Default cursor is shown when hovering over the DropdownMenu.'),
-            ],
           ),
+          const Text('Default cursor is shown when hovering over the DropdownMenu.'),
+        ]),
+      ),
+      const SizedBox(height: 20),
+      ListTile(
+        tileColor: colorScheme.onInverseSurface,
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[Text('enabled: false'), Text('requestFocusOnTap: false')],
         ),
-        const SizedBox(height: 20),
-        ListTile(
-          tileColor: colorScheme.onInverseSurface,
-          title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text('enabled: false'),
-              Text('requestFocusOnTap: false'),
-            ],
-          ),
-          subtitle: Column(
-            children: <Widget>[
-              DropdownMenu<String>(
-                enabled: false,
-                requestFocusOnTap: false,
-                initialSelection: list.first,
-                expandedInsets: EdgeInsets.zero,
-                onSelected: (String? value) {
-                  setState(() {
-                    dropdownValue = value!;
-                  });
-                },
-                dropdownMenuEntries:
-                    list.map<DropdownMenuEntry<String>>((String value) {
+        subtitle: Column(children: <Widget>[
+          DropdownMenu<String>(
+            enabled: false,
+            requestFocusOnTap: false,
+            initialSelection: list.first,
+            expandedInsets: EdgeInsets.zero,
+            onSelected: (String? value) {
+              setState(() {
+                dropdownValue = value!;
+              });
+            },
+            dropdownMenuEntries:
+                list.map<DropdownMenuEntry<String>>((String value) {
                   return DropdownMenuEntry<String>(value: value, label: value);
                 }).toList(),
-              ),
-              const Text('Default cursor is shown when hovering over the DropdownMenu.'),
-            ],
           ),
-        ),
-      ],
-    );
+          const Text('Default cursor is shown when hovering over the DropdownMenu.'),
+        ]),
+      ),
+    ]);
   }
 }

@@ -29,33 +29,31 @@ class DividerExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(10),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.deepPurpleAccent,
-              ),
+      child: Row(children: <Widget>[
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.deepPurpleAccent,
             ),
           ),
-          const VerticalDivider(
-            width: 20,
-            thickness: 1,
-            indent: 20,
-            endIndent: 0,
-            color: Colors.grey,
-          ),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.deepOrangeAccent,
-              ),
+        ),
+        const VerticalDivider(
+          width: 20,
+          thickness: 1,
+          indent: 20,
+          endIndent: 0,
+          color: Colors.grey,
+        ),
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.deepOrangeAccent,
             ),
           ),
-        ],
-      ),
+        ),
+      ]),
     );
   }
 }

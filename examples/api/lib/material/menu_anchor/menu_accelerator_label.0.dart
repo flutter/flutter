@@ -14,86 +14,70 @@ class MyMenuBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Expanded(
-              child: MenuBar(
-                children: <Widget>[
-                  SubmenuButton(
-                    menuChildren: <Widget>[
-                      MenuItemButton(
-                        onPressed: () {
-                          showAboutDialog(
-                            context: context,
-                            applicationName: 'MenuBar Sample',
-                            applicationVersion: '1.0.0',
-                          );
-                        },
-                        child: const MenuAcceleratorLabel('&About'),
-                      ),
-                      MenuItemButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Saved!'),
-                            ),
-                          );
-                        },
-                        child: const MenuAcceleratorLabel('&Save'),
-                      ),
-                      MenuItemButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Quit!'),
-                            ),
-                          );
-                        },
-                        child: const MenuAcceleratorLabel('&Quit'),
-                      ),
-                    ],
-                    child: const MenuAcceleratorLabel('&File'),
+    return Column(children: <Widget>[
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Expanded(
+            child: MenuBar(children: <Widget>[
+              SubmenuButton(
+                menuChildren: <Widget>[
+                  MenuItemButton(
+                    onPressed: () {
+                      showAboutDialog(
+                        context: context,
+                        applicationName: 'MenuBar Sample',
+                        applicationVersion: '1.0.0',
+                      );
+                    },
+                    child: const MenuAcceleratorLabel('&About'),
                   ),
-                  SubmenuButton(
-                    menuChildren: <Widget>[
-                      MenuItemButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Magnify!'),
-                            ),
-                          );
-                        },
-                        child: const MenuAcceleratorLabel('&Magnify'),
-                      ),
-                      MenuItemButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Minify!'),
-                            ),
-                          );
-                        },
-                        child: const MenuAcceleratorLabel('Mi&nify'),
-                      ),
-                    ],
-                    child: const MenuAcceleratorLabel('&View'),
+                  MenuItemButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(const SnackBar(content: Text('Saved!')));
+                    },
+                    child: const MenuAcceleratorLabel('&Save'),
+                  ),
+                  MenuItemButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(const SnackBar(content: Text('Quit!')));
+                    },
+                    child: const MenuAcceleratorLabel('&Quit'),
                   ),
                 ],
+                child: const MenuAcceleratorLabel('&File'),
               ),
-            ),
-          ],
-        ),
-        Expanded(
-          child: FlutterLogo(
-            size: MediaQuery.of(context).size.shortestSide * 0.5,
+              SubmenuButton(
+                menuChildren: <Widget>[
+                  MenuItemButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(const SnackBar(content: Text('Magnify!')));
+                    },
+                    child: const MenuAcceleratorLabel('&Magnify'),
+                  ),
+                  MenuItemButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(const SnackBar(content: Text('Minify!')));
+                    },
+                    child: const MenuAcceleratorLabel('Mi&nify'),
+                  ),
+                ],
+                child: const MenuAcceleratorLabel('&View'),
+              ),
+            ]),
           ),
-        ),
-      ],
-    );
+        ],
+      ),
+      Expanded(child: FlutterLogo(size: MediaQuery.of(context).size.shortestSide * 0.5)),
+    ]);
   }
 }
 

@@ -14,9 +14,7 @@ class TreeSliverExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: TreeSliverExample(),
-    );
+    return const MaterialApp(home: TreeSliverExample());
   }
 }
 
@@ -32,42 +30,27 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
   final List<TreeSliverNode<String>> tree = <TreeSliverNode<String>>[
     TreeSliverNode<String>('README.md'),
     TreeSliverNode<String>('analysis_options.yaml'),
-    TreeSliverNode<String>(
-      'lib',
-      children: <TreeSliverNode<String>>[
-        TreeSliverNode<String>(
-          'src',
-          children: <TreeSliverNode<String>>[
-            TreeSliverNode<String>(
-              'widgets',
-              children: <TreeSliverNode<String>>[
-                TreeSliverNode<String>('about.dart.dart'),
-                TreeSliverNode<String>('app.dart'),
-                TreeSliverNode<String>('basic.dart'),
-                TreeSliverNode<String>('constants.dart'),
-              ],
-            ),
-          ],
-        ),
-        TreeSliverNode<String>('widgets.dart'),
-      ],
-    ),
+    TreeSliverNode<String>('lib', children: <TreeSliverNode<String>>[
+      TreeSliverNode<String>('src', children: <TreeSliverNode<String>>[
+        TreeSliverNode<String>('widgets', children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>('about.dart.dart'),
+          TreeSliverNode<String>('app.dart'),
+          TreeSliverNode<String>('basic.dart'),
+          TreeSliverNode<String>('constants.dart'),
+        ]),
+      ]),
+      TreeSliverNode<String>('widgets.dart'),
+    ]),
     TreeSliverNode<String>('pubspec.lock'),
     TreeSliverNode<String>('pubspec.yaml'),
-    TreeSliverNode<String>(
-      'test',
-      children: <TreeSliverNode<String>>[
-        TreeSliverNode<String>(
-          'widgets',
-          children: <TreeSliverNode<String>>[
-            TreeSliverNode<String>('about_test.dart'),
-            TreeSliverNode<String>('app_test.dart'),
-            TreeSliverNode<String>('basic_test.dart'),
-            TreeSliverNode<String>('constants_test.dart'),
-          ],
-        ),
-      ],
-    ),
+    TreeSliverNode<String>('test', children: <TreeSliverNode<String>>[
+      TreeSliverNode<String>('widgets', children: <TreeSliverNode<String>>[
+        TreeSliverNode<String>('about_test.dart'),
+        TreeSliverNode<String>('app_test.dart'),
+        TreeSliverNode<String>('basic_test.dart'),
+        TreeSliverNode<String>('constants_test.dart'),
+      ]),
+    ]),
   ];
 
   Widget _treeNodeBuilder(
@@ -76,48 +59,38 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
     AnimationStyle toggleAnimationStyle,
   ) {
     final bool isParentNode = node.children.isNotEmpty;
-    final BorderSide border = BorderSide(
-      width: 2,
-      color: Colors.purple[300]!,
-    );
+    final BorderSide border = BorderSide(width: 2, color: Colors.purple[300]!);
     return TreeSliver.wrapChildToToggleNode(
       node: node,
-      child: Row(
-        children: <Widget>[
-          // Custom indentation
-          SizedBox(width: 10.0 * node.depth! + 8.0),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              border: node.parent != null
-                  ? Border(left: border, bottom: border)
-                  : null,
-            ),
-            child: const SizedBox(height: 50.0, width: 20.0),
+      child: Row(children: <Widget>[
+        // Custom indentation
+        SizedBox(width: 10.0 * node.depth! + 8.0),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            border: node.parent != null ? Border(left: border, bottom: border) : null,
           ),
-          // Leading icon for parent nodes
-          if (isParentNode)
-            DecoratedBox(
-              decoration: BoxDecoration(border: Border.all()),
-              child: SizedBox.square(
-                dimension: 20.0,
-                child: Icon(
-                  node.isExpanded ? Icons.remove : Icons.add,
-                  size: 14,
-                ),
-              ),
+          child: const SizedBox(height: 50.0, width: 20.0),
+        ),
+        // Leading icon for parent nodes
+        if (isParentNode)
+          DecoratedBox(
+            decoration: BoxDecoration(border: Border.all()),
+            child: SizedBox.square(
+              dimension: 20.0,
+              child: Icon(node.isExpanded ? Icons.remove : Icons.add, size: 14),
             ),
-          // Spacer
-          const SizedBox(width: 8.0),
-          // Content
-          Text(node.content.toString()),
-        ],
-      ),
+          ),
+        // Spacer
+        const SizedBox(width: 8.0),
+        // Content
+        Text(node.content.toString()),
+      ]),
     );
   }
 
   Widget _getTree() {
     return DecoratedSliver(
-      decoration: BoxDecoration( border: Border.all()),
+      decoration: BoxDecoration(border: Border.all()),
       sliver: TreeSliver<String>(
         tree: tree,
         onNodeToggle: (TreeSliverNode<Object?> node) {
@@ -148,11 +121,7 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
     if (_selectedNode != null) {
       selectedChildren.addAll(<Widget>[
         const Spacer(),
-        Icon(
-          _selectedNode!.children.isEmpty
-              ? Icons.file_open_outlined
-              : Icons.folder_outlined,
-        ),
+        Icon(_selectedNode!.children.isEmpty ? Icons.file_open_outlined : Icons.folder_outlined),
         const SizedBox(height: 16.0),
         Text(_selectedNode!.content),
         const Spacer(),
@@ -163,24 +132,14 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
         SizedBox(
           width: screenSize.width / 2,
           height: double.infinity,
-          child: CustomScrollView(
-            slivers: <Widget>[
-              _getTree(),
-            ],
-          ),
+          child: CustomScrollView(slivers: <Widget>[_getTree()]),
         ),
         DecoratedBox(
-          decoration: BoxDecoration(
-            border: Border.all(),
-          ),
+          decoration: BoxDecoration(border: Border.all()),
           child: SizedBox(
             width: screenSize.width / 2,
             height: double.infinity,
-            child: Center(
-              child: Column(
-                children: selectedChildren,
-              ),
-            ),
+            child: Center(child: Column(children: selectedChildren)),
           ),
         ),
       ]),

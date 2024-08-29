@@ -17,9 +17,7 @@ class CallbackShortcutsApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('CallbackShortcuts Sample')),
-        body: const Center(
-          child: CallbackShortcutsExample(),
-        ),
+        body: const Center(child: CallbackShortcutsExample()),
       ),
     );
   }
@@ -48,13 +46,11 @@ class _CallbackShortcutsExampleState extends State<CallbackShortcutsExample> {
       },
       child: Focus(
         autofocus: true,
-        child: Column(
-          children: <Widget>[
-            const Text('Press the up arrow key to add to the counter'),
-            const Text('Press the down arrow key to subtract from the counter'),
-            Text('count: $count'),
-          ],
-        ),
+        child: Column(children: <Widget>[
+          const Text('Press the up arrow key to add to the counter'),
+          const Text('Press the down arrow key to subtract from the counter'),
+          Text('count: $count'),
+        ]),
       ),
     );
   }

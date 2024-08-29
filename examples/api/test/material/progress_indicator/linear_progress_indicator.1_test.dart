@@ -9,14 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Finds LinearProgressIndicator', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.ProgressIndicatorApp(),
-    );
+    await tester.pumpWidget(const example.ProgressIndicatorApp());
 
-    expect(
-      find.bySemanticsLabel('Linear progress indicator').first,
-      findsOneWidget,
-    );
+    expect(find.bySemanticsLabel('Linear progress indicator').first, findsOneWidget);
 
     // Test if LinearProgressIndicator is animating.
     expect(tester.hasRunningAnimations, isTrue);

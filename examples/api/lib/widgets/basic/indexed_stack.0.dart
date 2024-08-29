@@ -77,7 +77,7 @@ class _IndexedStackExampleState extends State<IndexedStackExample> {
                 IndexedStack(
                   index: index,
                   children: <Widget>[for (final String name in names) PersonTracker(name: name)],
-                )
+                ),
               ],
             ),
             GestureDetector(
@@ -93,7 +93,7 @@ class _IndexedStackExampleState extends State<IndexedStackExample> {
               child: const Icon(Icons.chevron_right, key: Key('gesture2')),
             ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -118,22 +118,20 @@ class _PersonTrackerState extends State<PersonTracker> {
         borderRadius: const BorderRadius.all(Radius.circular(10)),
       ),
       padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: <Widget>[
-          Text('Name: ${widget.name}'),
-          Text('Score: $counter'),
-          TextButton.icon(
-            key: Key('increment${widget.name}'),
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              setState(() {
-                counter += 1;
-              });
-            },
-            label: const Text('Increment'),
-          )
-        ],
-      ),
+      child: Column(children: <Widget>[
+        Text('Name: ${widget.name}'),
+        Text('Score: $counter'),
+        TextButton.icon(
+          key: Key('increment${widget.name}'),
+          icon: const Icon(Icons.add),
+          onPressed: () {
+            setState(() {
+              counter += 1;
+            });
+          },
+          label: const Text('Increment'),
+        ),
+      ]),
     );
   }
 }

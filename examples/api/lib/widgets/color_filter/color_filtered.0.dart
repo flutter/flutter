@@ -28,28 +28,20 @@ class ColorFilteredExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Column(
-        children: <Widget>[
-          ColorFiltered(
-            colorFilter: const ColorFilter.mode(
-              Colors.red,
-              BlendMode.modulate,
-            ),
-            child: Image.network(
-              'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
-            ),
+      child: Column(children: <Widget>[
+        ColorFiltered(
+          colorFilter: const ColorFilter.mode(Colors.red, BlendMode.modulate),
+          child: Image.network(
+            'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
           ),
-          ColorFiltered(
-            colorFilter: const ColorFilter.mode(
-              Colors.grey,
-              BlendMode.saturation,
-            ),
-            child: Image.network(
-              'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-            ),
+        ),
+        ColorFiltered(
+          colorFilter: const ColorFilter.mode(Colors.grey, BlendMode.saturation),
+          child: Image.network(
+            'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
           ),
-        ],
-      ),
+        ),
+      ]),
     );
   }
 }

@@ -32,12 +32,10 @@ class MaterialStateExample extends StatelessWidget {
       initialValue: 'abc',
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.person),
-        prefixIconColor: WidgetStateColor.fromMap(
-          <WidgetStatesConstraint, Color>{
-            WidgetState.focused: Colors.green,
-            WidgetState.any:     Colors.grey,
-          },
-        ),
+        prefixIconColor: WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
+          WidgetState.focused: Colors.green,
+          WidgetState.any: Colors.grey,
+        }),
       ),
     );
   }

@@ -36,23 +36,19 @@ class ConstrainedExample extends StatelessWidget {
       scaleEnabled: false,
       child: Table(
         columnWidths: <int, TableColumnWidth>{
-          for (int column = 0; column < columnCount; column += 1) column: const FixedColumnWidth(200.0),
+          for (int column = 0; column < columnCount; column += 1)
+            column: const FixedColumnWidth(200.0),
         },
         children: <TableRow>[
           for (int row = 0; row < rowCount; row += 1)
-            TableRow(
-              children: <Widget>[
-                for (int column = 0; column < columnCount; column += 1)
-                  Container(
-                    height: 26,
-                    color: row % 2 + column % 2 == 1 ? Colors.white : Colors.grey.withOpacity(0.1),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text('$row x $column'),
-                    ),
-                  ),
-              ],
-            ),
+            TableRow(children: <Widget>[
+              for (int column = 0; column < columnCount; column += 1)
+                Container(
+                  height: 26,
+                  color: row % 2 + column % 2 == 1 ? Colors.white : Colors.grey.withOpacity(0.1),
+                  child: Align(alignment: Alignment.centerLeft, child: Text('$row x $column')),
+                ),
+            ]),
         ],
       ),
     );

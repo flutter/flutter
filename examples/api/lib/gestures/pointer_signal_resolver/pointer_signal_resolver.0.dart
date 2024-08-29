@@ -15,9 +15,7 @@ class PointerSignalResolverExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: PointerSignalResolverExample(),
-    );
+    return const MaterialApp(home: PointerSignalResolverExample());
   }
 }
 
@@ -62,7 +60,9 @@ class _ColorChangerState extends State<ColorChanger> {
       child: Listener(
         onPointerSignal: (PointerSignalEvent event) {
           if (widget.useResolver) {
-            GestureBinding.instance.pointerSignalResolver.register(event, (PointerSignalEvent event) {
+            GestureBinding.instance.pointerSignalResolver.register(event, (
+              PointerSignalEvent event,
+            ) {
               rotateColor();
             });
           } else {
@@ -71,10 +71,7 @@ class _ColorChangerState extends State<ColorChanger> {
         },
         child: Stack(
           fit: StackFit.expand,
-          children: <Widget>[
-            const AbsorbPointer(),
-            if (widget.child != null) widget.child!,
-          ],
+          children: <Widget>[const AbsorbPointer(), if (widget.child != null) widget.child!],
         ),
       ),
     );
@@ -111,22 +108,20 @@ class _PointerSignalResolverExampleState extends State<PointerSignalResolverExam
           ),
           Align(
             alignment: Alignment.topLeft,
-            child: Row(
-              children: <Widget>[
-                Switch(
-                  value: useResolver,
-                  onChanged: (bool value) {
-                    setState(() {
-                      useResolver = value;
-                    });
-                  },
-                ),
-                const Text(
-                  'Use the PointerSignalResolver?',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
+            child: Row(children: <Widget>[
+              Switch(
+                value: useResolver,
+                onChanged: (bool value) {
+                  setState(() {
+                    useResolver = value;
+                  });
+                },
+              ),
+              const Text(
+                'Use the PointerSignalResolver?',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ]),
           ),
         ],
       ),

@@ -38,23 +38,22 @@ class _ErrorWidgetExampleAppState extends State<ErrorWidgetExampleApp> {
     if (throwError) {
       // Since the error widget is only used during a build, in this contrived example,
       // we purposely throw an exception in a build function.
-      return Builder(
-        builder: (BuildContext context) {
-          throw Exception('oh no, an error');
-        },
-      );
+      return Builder(builder: (BuildContext context) {
+        throw Exception('oh no, an error');
+      });
     } else {
       return MaterialApp(
         home: Scaffold(
           appBar: AppBar(title: const Text('ErrorWidget Sample')),
           body: Center(
             child: TextButton(
-                onPressed: () {
-                  setState(() {
-                    throwError = true;
-                  });
-                },
-                child: const Text('Error Prone')),
+              onPressed: () {
+                setState(() {
+                  throwError = true;
+                });
+              },
+              child: const Text('Error Prone'),
+            ),
           ),
         ),
       );

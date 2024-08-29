@@ -17,11 +17,7 @@ void main() {
       title: 'BuildOwner Sample',
       color: const Color(0xff000000),
       builder: (BuildContext context, Widget? child) {
-        return Scaffold(
-          body: Center(
-            child: Text(size.toString()),
-          ),
-        );
+        return Scaffold(body: Center(child: Text(size.toString())));
       },
     ),
   );

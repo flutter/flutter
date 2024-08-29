@@ -15,7 +15,10 @@ void main() => runApp(const MenuBarApp());
 /// menus could be done.
 class MenuEntry {
   const MenuEntry({required this.label, this.shortcut, this.onPressed, this.menuChildren})
-      : assert(menuChildren == null || onPressed == null, 'onPressed is ignored if menuChildren are provided');
+    : assert(
+        menuChildren == null || onPressed == null,
+        'onPressed is ignored if menuChildren are provided',
+      );
   final String label;
 
   final MenuSerializableShortcut? shortcut;
@@ -56,10 +59,7 @@ class MenuEntry {
 }
 
 class MyMenuBar extends StatefulWidget {
-  const MyMenuBar({
-    super.key,
-    required this.message,
-  });
+  const MyMenuBar({super.key, required this.message});
 
   final String message;
 
@@ -99,39 +99,31 @@ class _MyMenuBarState extends State<MyMenuBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Expanded(
-              child: MenuBar(
-                children: MenuEntry.build(_getMenus()),
-              ),
-            ),
-          ],
-        ),
-        Expanded(
-          child: Container(
-            alignment: Alignment.center,
-            color: backgroundColor,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text(
-                    showingMessage ? widget.message : '',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
+    return Column(children: <Widget>[
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[Expanded(child: MenuBar(children: MenuEntry.build(_getMenus())))],
+      ),
+      Expanded(
+        child: Container(
+          alignment: Alignment.center,
+          color: backgroundColor,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text(
+                  showingMessage ? widget.message : '',
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
-                Text(_lastSelection != null ? 'Last Selected: $_lastSelection' : ''),
-              ],
-            ),
+              ),
+              Text(_lastSelection != null ? 'Last Selected: $_lastSelection' : ''),
+            ],
           ),
         ),
-      ],
-    );
+      ),
+    ]);
   }
 
   List<MenuEntry> _getMenus() {
@@ -166,14 +158,15 @@ class _MyMenuBarState extends State<MyMenuBar> {
           // already hidden.
           MenuEntry(
             label: 'Reset Message',
-            onPressed: showingMessage
-                ? () {
-                    setState(() {
-                      _lastSelection = 'Reset Message';
-                      showingMessage = false;
-                    });
-                  }
-                : null,
+            onPressed:
+                showingMessage
+                    ? () {
+                      setState(() {
+                        _lastSelection = 'Reset Message';
+                        showingMessage = false;
+                      });
+                    }
+                    : null,
             shortcut: const SingleActivator(LogicalKeyboardKey.escape),
           ),
           MenuEntry(
@@ -229,8 +222,6 @@ class MenuBarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: SafeArea(child: MyMenuBar(message: kMessage))),
-    );
+    return const MaterialApp(home: Scaffold(body: SafeArea(child: MyMenuBar(message: kMessage))));
   }
 }

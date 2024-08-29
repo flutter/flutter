@@ -17,9 +17,7 @@ class ShortcutsExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Shortcuts Sample')),
-        body: const Center(
-          child: ShortcutsExample(),
-        ),
+        body: const Center(child: ShortcutsExample()),
       ),
     );
   }
@@ -96,18 +94,16 @@ class _ShortcutsExampleState extends State<ShortcutsExample> {
         },
         child: Focus(
           autofocus: true,
-          child: Column(
-            children: <Widget>[
-              const Text('Add to the counter by pressing the up arrow key'),
-              const Text('Subtract from the counter by pressing the down arrow key'),
-              ListenableBuilder(
-                listenable: model,
-                builder: (BuildContext context, Widget? child) {
-                  return Text('count: ${model.count}');
-                },
-              ),
-            ],
-          ),
+          child: Column(children: <Widget>[
+            const Text('Add to the counter by pressing the up arrow key'),
+            const Text('Subtract from the counter by pressing the down arrow key'),
+            ListenableBuilder(
+              listenable: model,
+              builder: (BuildContext context, Widget? child) {
+                return Text('count: ${model.count}');
+              },
+            ),
+          ]),
         ),
       ),
     );

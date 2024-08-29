@@ -18,19 +18,20 @@ class EditableTextToolbarBuilderExampleApp extends StatefulWidget {
   const EditableTextToolbarBuilderExampleApp({super.key});
 
   @override
-  State<EditableTextToolbarBuilderExampleApp> createState() => _EditableTextToolbarBuilderExampleAppState();
+  State<EditableTextToolbarBuilderExampleApp> createState() =>
+      _EditableTextToolbarBuilderExampleAppState();
 }
 
-class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolbarBuilderExampleApp> {
-  final TextEditingController _controller = TextEditingController(
-    text: text,
-  );
+class _EditableTextToolbarBuilderExampleAppState
+    extends State<EditableTextToolbarBuilderExampleApp> {
+  final TextEditingController _controller = TextEditingController(text: text);
 
   void _showDialog(BuildContext context) {
     Navigator.of(context).push(
       DialogRoute<void>(
         context: context,
-        builder: (BuildContext context) => const AlertDialog(title: Text('You clicked send email!')),
+        builder:
+            (BuildContext context) => const AlertDialog(title: Text('You clicked send email!')),
       ),
     );
   }
@@ -57,41 +58,38 @@ class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolb
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Custom button for emails'),
-        ),
+        appBar: AppBar(title: const Text('Custom button for emails')),
         body: Center(
-          child: Column(
-            children: <Widget>[
-              Container(height: 20.0),
-              TextField(
-                controller: _controller,
-                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
-                  final List<ContextMenuButtonItem> buttonItems = editableTextState.contextMenuButtonItems;
-                  // Here we add an "Email" button to the default TextField
-                  // context menu for the current platform, but only if an email
-                  // address is currently selected.
-                  final TextEditingValue value = _controller.value;
-                  if (_isValidEmail(value.selection.textInside(value.text))) {
-                    buttonItems.insert(
-                      0,
-                      ContextMenuButtonItem(
-                        label: 'Send email',
-                        onPressed: () {
-                          ContextMenuController.removeAny();
-                          _showDialog(context);
-                        },
-                      ),
-                    );
-                  }
-                  return AdaptiveTextSelectionToolbar.buttonItems(
-                    anchors: editableTextState.contextMenuAnchors,
-                    buttonItems: buttonItems,
+          child: Column(children: <Widget>[
+            Container(height: 20.0),
+            TextField(
+              controller: _controller,
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                final List<ContextMenuButtonItem> buttonItems =
+                    editableTextState.contextMenuButtonItems;
+                // Here we add an "Email" button to the default TextField
+                // context menu for the current platform, but only if an email
+                // address is currently selected.
+                final TextEditingValue value = _controller.value;
+                if (_isValidEmail(value.selection.textInside(value.text))) {
+                  buttonItems.insert(
+                    0,
+                    ContextMenuButtonItem(
+                      label: 'Send email',
+                      onPressed: () {
+                        ContextMenuController.removeAny();
+                        _showDialog(context);
+                      },
+                    ),
                   );
-                },
-              ),
-            ],
-          ),
+                }
+                return AdaptiveTextSelectionToolbar.buttonItems(
+                  anchors: editableTextState.contextMenuAnchors,
+                  buttonItems: buttonItems,
+                );
+              },
+            ),
+          ]),
         ),
       ),
     );

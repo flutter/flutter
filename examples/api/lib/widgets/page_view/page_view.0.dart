@@ -62,15 +62,9 @@ class _PageViewExampleState extends State<PageViewExample> with TickerProviderSt
           controller: _pageViewController,
           onPageChanged: _handlePageViewChanged,
           children: <Widget>[
-            Center(
-              child: Text('First Page', style: textTheme.titleLarge),
-            ),
-            Center(
-              child: Text('Second Page', style: textTheme.titleLarge),
-            ),
-            Center(
-              child: Text('Third Page', style: textTheme.titleLarge),
-            ),
+            Center(child: Text('First Page', style: textTheme.titleLarge)),
+            Center(child: Text('Second Page', style: textTheme.titleLarge)),
+            Center(child: Text('Third Page', style: textTheme.titleLarge)),
           ],
         ),
         PageIndicator(
@@ -162,10 +156,7 @@ class PageIndicator extends StatelessWidget {
               }
               onUpdateCurrentPageIndex(currentPageIndex - 1);
             },
-            icon: const Icon(
-              Icons.arrow_left_rounded,
-              size: 32.0,
-            ),
+            icon: const Icon(Icons.arrow_left_rounded, size: 32.0),
           ),
           TabPageSelector(
             controller: tabController,
@@ -181,10 +172,7 @@ class PageIndicator extends StatelessWidget {
               }
               onUpdateCurrentPageIndex(currentPageIndex + 1);
             },
-            icon: const Icon(
-              Icons.arrow_right_rounded,
-              size: 32.0,
-            ),
+            icon: const Icon(Icons.arrow_right_rounded, size: 32.0),
           ),
         ],
       ),

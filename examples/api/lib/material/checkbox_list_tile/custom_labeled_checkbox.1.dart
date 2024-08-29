@@ -13,10 +13,7 @@ class LabeledCheckboxApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
-      home: const LabeledCheckboxExample(),
-    );
+    return MaterialApp(theme: ThemeData(useMaterial3: true), home: const LabeledCheckboxExample());
   }
 }
 
@@ -42,17 +39,15 @@ class LabeledCheckbox extends StatelessWidget {
       },
       child: Padding(
         padding: padding,
-        child: Row(
-          children: <Widget>[
-            Expanded(child: Text(label)),
-            Checkbox(
-              value: value,
-              onChanged: (bool? newValue) {
-                onChanged(newValue!);
-              },
-            ),
-          ],
-        ),
+        child: Row(children: <Widget>[
+          Expanded(child: Text(label)),
+          Checkbox(
+            value: value,
+            onChanged: (bool? newValue) {
+              onChanged(newValue!);
+            },
+          ),
+        ]),
       ),
     );
   }

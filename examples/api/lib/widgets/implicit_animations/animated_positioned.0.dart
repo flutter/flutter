@@ -19,31 +19,21 @@ class AnimatedPositionedExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('AnimatedPositioned Sample')),
-        body: const Center(
-          child: AnimatedPositionedExample(
-            duration: duration,
-            curve: curve,
-          ),
-        ),
+        body: const Center(child: AnimatedPositionedExample(duration: duration, curve: curve)),
       ),
     );
   }
 }
 
 class AnimatedPositionedExample extends StatefulWidget {
-  const AnimatedPositionedExample({
-    required this.duration,
-    required this.curve,
-    super.key,
-  });
+  const AnimatedPositionedExample({required this.duration, required this.curve, super.key});
 
   final Duration duration;
 
   final Curve curve;
 
   @override
-  State<AnimatedPositionedExample> createState() =>
-      _AnimatedPositionedExampleState();
+  State<AnimatedPositionedExample> createState() => _AnimatedPositionedExampleState();
 }
 
 class _AnimatedPositionedExampleState extends State<AnimatedPositionedExample> {
@@ -54,28 +44,23 @@ class _AnimatedPositionedExampleState extends State<AnimatedPositionedExample> {
     return SizedBox(
       width: 200,
       height: 350,
-      child: Stack(
-        children: <Widget>[
-          AnimatedPositioned(
-            width: selected ? 200.0 : 50.0,
-            height: selected ? 50.0 : 200.0,
-            top: selected ? 50.0 : 150.0,
-            duration: widget.duration,
-            curve: widget.curve,
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  selected = !selected;
-                });
-              },
-              child: const ColoredBox(
-                color: Colors.blue,
-                child: Center(child: Text('Tap me')),
-              ),
-            ),
+      child: Stack(children: <Widget>[
+        AnimatedPositioned(
+          width: selected ? 200.0 : 50.0,
+          height: selected ? 50.0 : 200.0,
+          top: selected ? 50.0 : 150.0,
+          duration: widget.duration,
+          curve: widget.curve,
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                selected = !selected;
+              });
+            },
+            child: const ColoredBox(color: Colors.blue, child: Center(child: Text('Tap me'))),
           ),
-        ],
-      ),
+        ),
+      ]),
     );
   }
 }

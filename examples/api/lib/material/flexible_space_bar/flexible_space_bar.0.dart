@@ -44,10 +44,7 @@ class FlexibleSpaceBarExampleApp extends StatelessWidget {
                       gradient: LinearGradient(
                         begin: Alignment(0.0, 0.5),
                         end: Alignment.center,
-                        colors: <Color>[
-                          Color(0x60000000),
-                          Color(0x00000000),
-                        ],
+                        colors: <Color>[Color(0x60000000), Color(0x00000000)],
                       ),
                     ),
                   ),
@@ -56,21 +53,19 @@ class FlexibleSpaceBarExampleApp extends StatelessWidget {
             ),
           ),
           SliverList(
-            delegate: SliverChildListDelegate(
-              const <Widget>[
-                ListTile(
-                  leading: Icon(Icons.wb_sunny),
-                  title: Text('Sunday'),
-                  subtitle: Text('sunny, h: 80, l: 65'),
-                ),
-                ListTile(
-                  leading: Icon(Icons.wb_sunny),
-                  title: Text('Monday'),
-                  subtitle: Text('sunny, h: 80, l: 65'),
-                ),
-                // ListTiles++
-              ],
-            ),
+            delegate: SliverChildListDelegate(const <Widget>[
+              ListTile(
+                leading: Icon(Icons.wb_sunny),
+                title: Text('Sunday'),
+                subtitle: Text('sunny, h: 80, l: 65'),
+              ),
+              ListTile(
+                leading: Icon(Icons.wb_sunny),
+                title: Text('Monday'),
+                subtitle: Text('sunny, h: 80, l: 65'),
+              ),
+              // ListTiles++
+            ]),
           ),
         ],
       ),

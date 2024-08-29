@@ -13,9 +13,7 @@ class SnackBarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: SnackBarExample(),
-    );
+    return const MaterialApp(home: SnackBarExample());
   }
 }
 
@@ -35,27 +33,25 @@ class _SnackBarExampleState extends State<SnackBarExample> {
       appBar: AppBar(title: const Text('SnackBar Sample')),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: <Widget>[
-            ElevatedButton(
-              onPressed: () {
-                const SnackBar snackBar = SnackBar(
-                  content: Text('A SnackBar has been shown.'),
-                  behavior: SnackBarBehavior.floating,
-                );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              },
-              child: const Text('Show SnackBar'),
-            ),
-            const SizedBox(height: 8.0),
-            ElevatedButton(
-              onPressed: () {
-                setState(() => _largeLogo = !_largeLogo);
-              },
-              child: Text(_largeLogo ? 'Shrink Logo' : 'Grow Logo'),
-            ),
-          ],
-        ),
+        child: Column(children: <Widget>[
+          ElevatedButton(
+            onPressed: () {
+              const SnackBar snackBar = SnackBar(
+                content: Text('A SnackBar has been shown.'),
+                behavior: SnackBarBehavior.floating,
+              );
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            },
+            child: const Text('Show SnackBar'),
+          ),
+          const SizedBox(height: 8.0),
+          ElevatedButton(
+            onPressed: () {
+              setState(() => _largeLogo = !_largeLogo);
+            },
+            child: Text(_largeLogo ? 'Shrink Logo' : 'Grow Logo'),
+          ),
+        ]),
       ),
       // A floating [SnackBar] is positioned above [Scaffold.floatingActionButton].
       // If the Widget provided to the floatingActionButton slot takes up too much space

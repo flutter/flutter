@@ -15,11 +15,7 @@ class ButtonStyleButtonIconAlignmentApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: ButtonStyleButtonIconAlignmentExample(),
-      ),
-    );
+    return const MaterialApp(home: Scaffold(body: ButtonStyleButtonIconAlignmentExample()));
   }
 }
 
@@ -27,10 +23,12 @@ class ButtonStyleButtonIconAlignmentExample extends StatefulWidget {
   const ButtonStyleButtonIconAlignmentExample({super.key});
 
   @override
-  State<ButtonStyleButtonIconAlignmentExample> createState() => _ButtonStyleButtonIconAlignmentExampleState();
+  State<ButtonStyleButtonIconAlignmentExample> createState() =>
+      _ButtonStyleButtonIconAlignmentExampleState();
 }
 
-class _ButtonStyleButtonIconAlignmentExampleState extends State<ButtonStyleButtonIconAlignmentExample> {
+class _ButtonStyleButtonIconAlignmentExampleState
+    extends State<ButtonStyleButtonIconAlignmentExample> {
   TextDirection _textDirection = TextDirection.ltr;
   IconAlignment _iconAlignment = IconAlignment.start;
 
@@ -91,50 +89,41 @@ class _ButtonStyleButtonIconAlignmentExampleState extends State<ButtonStyleButto
                 spacing: 10,
                 overflowSpacing: 10,
                 children: <Widget>[
-                  Column(
-                    children: <Widget>[
-                      const Text('Icon alignment'),
-                      const SizedBox(height: 10),
-                      SegmentedButton<IconAlignment>(
-                        onSelectionChanged: (Set<IconAlignment> value) {
-                          setState(() {
-                            _iconAlignment = value.first;
-                          });
-                        },
-                        selected: <IconAlignment>{ _iconAlignment },
-                        segments: IconAlignment.values.map((IconAlignment iconAlignment) {
-                          return ButtonSegment<IconAlignment>(
-                            value: iconAlignment,
-                            label: Text(iconAlignment.name),
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    children: <Widget>[
-                      const Text('Text direction'),
-                      const SizedBox(height: 10),
-                      SegmentedButton<TextDirection>(
-                        onSelectionChanged: (Set<TextDirection> value) {
-                          setState(() {
-                            _textDirection = value.first;
-                          });
-                        },
-                        selected: <TextDirection>{ _textDirection },
-                        segments: const <ButtonSegment<TextDirection>>[
-                          ButtonSegment<TextDirection>(
-                            value: TextDirection.ltr,
-                            label: Text('LTR'),
-                          ),
-                          ButtonSegment<TextDirection>(
-                            value: TextDirection.rtl,
-                            label: Text('RTL'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                  Column(children: <Widget>[
+                    const Text('Icon alignment'),
+                    const SizedBox(height: 10),
+                    SegmentedButton<IconAlignment>(
+                      onSelectionChanged: (Set<IconAlignment> value) {
+                        setState(() {
+                          _iconAlignment = value.first;
+                        });
+                      },
+                      selected: <IconAlignment>{_iconAlignment},
+                      segments:
+                          IconAlignment.values.map((IconAlignment iconAlignment) {
+                            return ButtonSegment<IconAlignment>(
+                              value: iconAlignment,
+                              label: Text(iconAlignment.name),
+                            );
+                          }).toList(),
+                    ),
+                  ]),
+                  Column(children: <Widget>[
+                    const Text('Text direction'),
+                    const SizedBox(height: 10),
+                    SegmentedButton<TextDirection>(
+                      onSelectionChanged: (Set<TextDirection> value) {
+                        setState(() {
+                          _textDirection = value.first;
+                        });
+                      },
+                      selected: <TextDirection>{_textDirection},
+                      segments: const <ButtonSegment<TextDirection>>[
+                        ButtonSegment<TextDirection>(value: TextDirection.ltr, label: Text('LTR')),
+                        ButtonSegment<TextDirection>(value: TextDirection.rtl, label: Text('RTL')),
+                      ],
+                    ),
+                  ]),
                 ],
               ),
               const Spacer(),

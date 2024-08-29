@@ -21,36 +21,24 @@ void main() {
     });
   }
 
-  testWidgets(
-    'FilterChip displays the correct border when selected',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: example.MaterialStateBorderSideExampleApp(),
-          ),
-        ),
-      );
+  testWidgets('FilterChip displays the correct border when selected', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: example.MaterialStateBorderSideExampleApp())),
+    );
 
-      expect(findBorderColor(Colors.red), findsOne);
-    },
-  );
+    expect(findBorderColor(Colors.red), findsOne);
+  });
 
-  testWidgets(
-    'FilterChip displays the correct border when not selected',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: example.MaterialStateBorderSideExampleApp(),
-          ),
-        ),
-      );
+  testWidgets('FilterChip displays the correct border when not selected', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: example.MaterialStateBorderSideExampleApp())),
+    );
 
-      await tester.tap(find.byType(FilterChip));
-      await tester.pumpAndSettle();
+    await tester.tap(find.byType(FilterChip));
+    await tester.pumpAndSettle();
 
-      expect(findBorderColor(const Color(0xff79747e)), findsOne);
-    },
-  );
+    expect(findBorderColor(const Color(0xff79747e)), findsOne);
+  });
 }

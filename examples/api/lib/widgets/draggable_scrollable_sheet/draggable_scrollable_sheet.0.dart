@@ -15,13 +15,9 @@ class DraggableScrollableSheetExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade100),
-      ),
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade100)),
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('DraggableScrollableSheet Sample'),
-        ),
+        appBar: AppBar(title: const Text('DraggableScrollableSheet Sample')),
         body: const DraggableScrollableSheetExample(),
       ),
     );
@@ -48,38 +44,33 @@ class _DraggableScrollableSheetExampleState extends State<DraggableScrollableShe
       builder: (BuildContext context, ScrollController scrollController) {
         return ColoredBox(
           color: colorScheme.primary,
-          child: Column(
-            children: <Widget>[
-              Grabber(
-                onVerticalDragUpdate: (DragUpdateDetails details) {
-                  setState(() {
-                    _sheetPosition -= details.delta.dy / _dragSensitivity;
-                    if (_sheetPosition < 0.25) {
-                      _sheetPosition = 0.25;
-                    }
-                    if (_sheetPosition > 1.0) {
-                      _sheetPosition = 1.0;
-                    }
-                  });
+          child: Column(children: <Widget>[
+            Grabber(
+              onVerticalDragUpdate: (DragUpdateDetails details) {
+                setState(() {
+                  _sheetPosition -= details.delta.dy / _dragSensitivity;
+                  if (_sheetPosition < 0.25) {
+                    _sheetPosition = 0.25;
+                  }
+                  if (_sheetPosition > 1.0) {
+                    _sheetPosition = 1.0;
+                  }
+                });
+              },
+              isOnDesktopAndWeb: _isOnDesktopAndWeb,
+            ),
+            Flexible(
+              child: ListView.builder(
+                controller: _isOnDesktopAndWeb ? null : scrollController,
+                itemCount: 25,
+                itemBuilder: (BuildContext context, int index) {
+                  return ListTile(
+                    title: Text('Item $index', style: TextStyle(color: colorScheme.surface)),
+                  );
                 },
-                isOnDesktopAndWeb: _isOnDesktopAndWeb,
               ),
-              Flexible(
-                child: ListView.builder(
-                  controller: _isOnDesktopAndWeb ? null : scrollController,
-                  itemCount: 25,
-                  itemBuilder: (BuildContext context, int index) {
-                    return ListTile(
-                      title: Text(
-                        'Item $index',
-                        style: TextStyle(color: colorScheme.surface),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+            ),
+          ]),
         );
       },
     );
@@ -105,11 +96,7 @@ class _DraggableScrollableSheetExampleState extends State<DraggableScrollableShe
 /// A draggable widget that accepts vertical drag gestures
 /// and this is only visible on desktop and web platforms.
 class Grabber extends StatelessWidget {
-  const Grabber({
-    super.key,
-    required this.onVerticalDragUpdate,
-    required this.isOnDesktopAndWeb,
-  });
+  const Grabber({super.key, required this.onVerticalDragUpdate, required this.isOnDesktopAndWeb});
 
   final ValueChanged<DragUpdateDetails> onVerticalDragUpdate;
   final bool isOnDesktopAndWeb;

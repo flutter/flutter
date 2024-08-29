@@ -16,9 +16,7 @@ class AppLifecycleListenerExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: AppLifecycleDisplay()),
-    );
+    return const MaterialApp(home: Scaffold(body: AppLifecycleDisplay()));
   }
 }
 
@@ -86,13 +84,11 @@ class _AppLifecycleDisplayState extends State<AppLifecycleDisplay> {
         width: 300,
         child: SingleChildScrollView(
           controller: _scrollController,
-          child: Column(
-            children: <Widget>[
-              Text('Current State: ${_state ?? 'Not initialized yet'}'),
-              const SizedBox(height: 30),
-              Text('State History:\n  ${_states.join('\n  ')}'),
-            ],
-          ),
+          child: Column(children: <Widget>[
+            Text('Current State: ${_state ?? 'Not initialized yet'}'),
+            const SizedBox(height: 30),
+            Text('State History:\n  ${_states.join('\n  ')}'),
+          ]),
         ),
       ),
     );

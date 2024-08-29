@@ -20,13 +20,12 @@ class PageTransitionsThemeApp extends StatelessWidget {
         // for different target platforms.
         // Non-specified target platforms will default to
         // ZoomPageTransitionsBuilder().
-        pageTransitionsTheme: const PageTransitionsTheme(
-          builders: <TargetPlatform, PageTransitionsBuilder>{
-            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-            TargetPlatform.linux: OpenUpwardsPageTransitionsBuilder(),
-            TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
-          },
-        ),
+        pageTransitionsTheme: const PageTransitionsTheme(builders:
+            <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+              TargetPlatform.linux: OpenUpwardsPageTransitionsBuilder(),
+              TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
+            }),
       ),
       home: const HomePage(),
     );
@@ -44,9 +43,7 @@ class HomePage extends StatelessWidget {
         child: ElevatedButton(
           onPressed: () {
             Navigator.of(context).push(
-              MaterialPageRoute<SecondPage>(
-                builder: (BuildContext context) => const SecondPage(),
-              ),
+              MaterialPageRoute<SecondPage>(builder: (BuildContext context) => const SecondPage()),
             );
           },
           child: const Text('To SecondPage'),

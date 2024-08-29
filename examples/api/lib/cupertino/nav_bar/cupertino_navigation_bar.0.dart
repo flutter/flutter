@@ -37,14 +37,12 @@ class _NavBarExampleState extends State<NavBarExample> {
         middle: const Text('CupertinoNavigationBar Sample'),
         automaticBackgroundVisibility: false,
       ),
-      child: Column(
-        children: <Widget>[
-          Container(height: 50, color: CupertinoColors.systemRed),
-          Container(height: 50, color: CupertinoColors.systemGreen),
-          Container(height: 50, color: CupertinoColors.systemBlue),
-          Container(height: 50, color: CupertinoColors.systemYellow),
-        ],
-      ),
+      child: Column(children: <Widget>[
+        Container(height: 50, color: CupertinoColors.systemRed),
+        Container(height: 50, color: CupertinoColors.systemGreen),
+        Container(height: 50, color: CupertinoColors.systemBlue),
+        Container(height: 50, color: CupertinoColors.systemYellow),
+      ]),
     );
   }
 }

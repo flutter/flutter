@@ -9,9 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Can open menu', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.MenuBarApp(),
-    );
+    await tester.pumpWidget(const example.MenuBarApp());
 
     final Finder menuBarFinder = find.byType(MenuBar);
     final MenuBar menuBar = tester.widget<MenuBar>(menuBarFinder);
@@ -52,9 +50,7 @@ void main() {
     expect(find.text('Last Selected: Show Message'), findsOneWidget);
   });
   testWidgets('Shortcuts work', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.MenuBarApp(),
-    );
+    await tester.pumpWidget(const example.MenuBarApp());
 
     expect(find.text(example.MenuBarApp.kMessage), findsNothing);
 
@@ -96,9 +92,7 @@ void main() {
     const double safeAreaPadding = 100.0;
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(
-          padding: EdgeInsets.symmetric(vertical: safeAreaPadding),
-        ),
+        data: MediaQueryData(padding: EdgeInsets.symmetric(vertical: safeAreaPadding)),
         child: example.MenuBarApp(),
       ),
     );

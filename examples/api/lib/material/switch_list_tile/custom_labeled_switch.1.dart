@@ -17,9 +17,7 @@ class LabeledSwitchApp extends StatelessWidget {
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
         appBar: AppBar(title: const Text('Custom Labeled Switch Sample')),
-        body: const Center(
-          child: LabeledSwitchExample(),
-        ),
+        body: const Center(child: LabeledSwitchExample()),
       ),
     );
   }
@@ -47,17 +45,15 @@ class LabeledSwitch extends StatelessWidget {
       },
       child: Padding(
         padding: padding,
-        child: Row(
-          children: <Widget>[
-            Expanded(child: Text(label)),
-            Switch(
-              value: value,
-              onChanged: (bool newValue) {
-                onChanged(newValue);
-              },
-            ),
-          ],
-        ),
+        child: Row(children: <Widget>[
+          Expanded(child: Text(label)),
+          Switch(
+            value: value,
+            onChanged: (bool newValue) {
+              onChanged(newValue);
+            },
+          ),
+        ]),
       ),
     );
   }

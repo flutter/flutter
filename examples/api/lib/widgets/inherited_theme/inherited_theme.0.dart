@@ -27,19 +27,17 @@ class MyAppBody extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (BuildContext _) {
-              // Wrap the actual child of the route in the previously
-              // captured themes.
-              return themes.wrap(
-                Container(
-                  alignment: Alignment.center,
-                  color: Colors.white,
-                  child: const Text('Hello World'),
-                ),
-              );
-            },
-          ),
+          MaterialPageRoute<void>(builder: (BuildContext _) {
+            // Wrap the actual child of the route in the previously
+            // captured themes.
+            return themes.wrap(
+              Container(
+                alignment: Alignment.center,
+                color: Colors.white,
+                child: const Text('Hello World'),
+              ),
+            );
+          }),
         );
       },
       child: const Center(child: Text('Tap Here')),

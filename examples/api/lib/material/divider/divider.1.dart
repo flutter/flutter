@@ -31,21 +31,11 @@ class DividerExample extends StatelessWidget {
     return const Center(
       child: Padding(
         padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: Card(
-                child: SizedBox.expand(),
-              ),
-            ),
-            Divider(),
-            Expanded(
-              child: Card(
-                child: SizedBox.expand(),
-              ),
-            ),
-          ],
-        ),
+        child: Column(children: <Widget>[
+          Expanded(child: Card(child: SizedBox.expand())),
+          Divider(),
+          Expanded(child: Card(child: SizedBox.expand())),
+        ]),
       ),
     );
   }

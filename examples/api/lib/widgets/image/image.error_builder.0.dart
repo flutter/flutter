@@ -13,13 +13,7 @@ class ErrorBuilderExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: ErrorBuilderExample(),
-        ),
-      ),
-    );
+    return const MaterialApp(home: Scaffold(body: Center(child: ErrorBuilderExample())));
   }
 }
 
@@ -34,18 +28,19 @@ class ErrorBuilderExample extends StatelessWidget {
         border: Border.all(),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Image.network(
-        'https://example.does.not.exist/image.jpg',
-        errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-          // Appropriate logging or analytics, e.g.
-          // myAnalytics.recordError(
-          //   'An error occurred loading "https://example.does.not.exist/image.jpg"',
-          //   exception,
-          //   stackTrace,
-          // );
-          return const Text('😢');
-        },
-      ),
+      child: Image.network('https://example.does.not.exist/image.jpg', errorBuilder: (
+        BuildContext context,
+        Object exception,
+        StackTrace? stackTrace,
+      ) {
+        // Appropriate logging or analytics, e.g.
+        // myAnalytics.recordError(
+        //   'An error occurred loading "https://example.does.not.exist/image.jpg"',
+        //   exception,
+        //   stackTrace,
+        // );
+        return const Text('😢');
+      }),
     );
   }
 }

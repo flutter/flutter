@@ -13,18 +13,12 @@ class FocusExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: FocusExample(),
-    );
+    return const MaterialApp(home: FocusExample());
   }
 }
 
 class FocusableText extends StatelessWidget {
-  const FocusableText(
-    this.data, {
-    super.key,
-    required this.autofocus,
-  });
+  const FocusableText(this.data, {super.key, required this.autofocus});
 
   /// The string to display as the text for this widget.
   final String data;
@@ -62,10 +56,9 @@ class FocusExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView.builder(
-        itemBuilder: (BuildContext context, int index) => FocusableText(
-          'Item $index',
-          autofocus: index == 0,
-        ),
+        itemBuilder:
+            (BuildContext context, int index) =>
+                FocusableText('Item $index', autofocus: index == 0),
         itemCount: 50,
       ),
     );

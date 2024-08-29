@@ -13,10 +13,7 @@ class GeneralDialogApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      restorationScopeId: 'app',
-      home: GeneralDialogExample(),
-    );
+    return const MaterialApp(restorationScopeId: 'app', home: GeneralDialogExample());
   }
 }
 
@@ -40,14 +37,12 @@ class GeneralDialogExample extends StatelessWidget {
 
   @pragma('vm:entry-point')
   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
-    return RawDialogRoute<void>(
-      pageBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-      ) {
-        return const AlertDialog(title: Text('Alert!'));
-      },
-    );
+    return RawDialogRoute<void>(pageBuilder: (
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+    ) {
+      return const AlertDialog(title: Text('Alert!'));
+    });
   }
 }

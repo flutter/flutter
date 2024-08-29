@@ -13,10 +13,7 @@ class TabBarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
-      home: const TabBarExample(),
-    );
+    return MaterialApp(theme: ThemeData(useMaterial3: true), home: const TabBarExample());
   }
 }
 
@@ -34,28 +31,17 @@ class TabBarExample extends StatelessWidget {
           bottom: const TabBar(
             dividerColor: Colors.transparent,
             tabs: <Widget>[
-              Tab(
-                text: 'Flights',
-                icon: Icon(Icons.flight),
-              ),
-              Tab(
-                text: 'Trips',
-                icon: Icon(Icons.luggage),
-              ),
-              Tab(
-                text: 'Explore',
-                icon: Icon(Icons.explore),
-              ),
+              Tab(text: 'Flights', icon: Icon(Icons.flight)),
+              Tab(text: 'Trips', icon: Icon(Icons.luggage)),
+              Tab(text: 'Explore', icon: Icon(Icons.explore)),
             ],
           ),
         ),
-        body: const TabBarView(
-          children: <Widget>[
-            NestedTabBar('Flights'),
-            NestedTabBar('Trips'),
-            NestedTabBar('Explore'),
-          ],
-        ),
+        body: const TabBarView(children: <Widget>[
+          NestedTabBar('Flights'),
+          NestedTabBar('Trips'),
+          NestedTabBar('Explore'),
+        ]),
       ),
     );
   }
@@ -87,31 +73,26 @@ class _NestedTabBarState extends State<NestedTabBar> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        TabBar.secondary(
+    return Column(children: <Widget>[
+      TabBar.secondary(
+        controller: _tabController,
+        tabs: const <Widget>[Tab(text: 'Overview'), Tab(text: 'Specifications')],
+      ),
+      Expanded(
+        child: TabBarView(
           controller: _tabController,
-          tabs: const <Widget>[
-            Tab(text: 'Overview'),
-            Tab(text: 'Specifications'),
+          children: <Widget>[
+            Card(
+              margin: const EdgeInsets.all(16.0),
+              child: Center(child: Text('${widget.outerTab}: Overview tab')),
+            ),
+            Card(
+              margin: const EdgeInsets.all(16.0),
+              child: Center(child: Text('${widget.outerTab}: Specifications tab')),
+            ),
           ],
         ),
-        Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: <Widget>[
-              Card(
-                margin: const EdgeInsets.all(16.0),
-                child: Center(child: Text('${widget.outerTab}: Overview tab')),
-              ),
-              Card(
-                margin: const EdgeInsets.all(16.0),
-                child: Center(child: Text('${widget.outerTab}: Specifications tab')),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
+      ),
+    ]);
   }
 }

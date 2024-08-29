@@ -49,18 +49,16 @@ class LabeledRadio extends StatelessWidget {
       },
       child: Padding(
         padding: padding,
-        child: Row(
-          children: <Widget>[
-            Radio<bool>(
-              groupValue: groupValue,
-              value: value,
-              onChanged: (bool? newValue) {
-                onChanged(newValue!);
-              },
-            ),
-            Text(label),
-          ],
-        ),
+        child: Row(children: <Widget>[
+          Radio<bool>(
+            groupValue: groupValue,
+            value: value,
+            onChanged: (bool? newValue) {
+              onChanged(newValue!);
+            },
+          ),
+          Text(label),
+        ]),
       ),
     );
   }

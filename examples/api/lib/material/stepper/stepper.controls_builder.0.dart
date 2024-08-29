@@ -29,34 +29,14 @@ class ControlsBuilderExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stepper(
       controlsBuilder: (BuildContext context, ControlsDetails details) {
-        return Row(
-          children: <Widget>[
-            TextButton(
-              onPressed: details.onStepContinue,
-              child: const Text('NEXT'),
-            ),
-            TextButton(
-              onPressed: details.onStepCancel,
-              child: const Text('CANCEL'),
-            ),
-          ],
-        );
+        return Row(children: <Widget>[
+          TextButton(onPressed: details.onStepContinue, child: const Text('NEXT')),
+          TextButton(onPressed: details.onStepCancel, child: const Text('CANCEL')),
+        ]);
       },
       steps: const <Step>[
-        Step(
-          title: Text('A'),
-          content: SizedBox(
-            width: 100.0,
-            height: 100.0,
-          ),
-        ),
-        Step(
-          title: Text('B'),
-          content: SizedBox(
-            width: 100.0,
-            height: 100.0,
-          ),
-        ),
+        Step(title: Text('A'), content: SizedBox(width: 100.0, height: 100.0)),
+        Step(title: Text('B'), content: SizedBox(width: 100.0, height: 100.0)),
       ],
     );
   }

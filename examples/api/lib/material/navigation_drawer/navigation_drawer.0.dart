@@ -68,9 +68,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Text('Page Index = $screenIndex'),
-          ],
+          children: <Widget>[Text('Page Index = $screenIndex')],
         ),
       ),
       bottomNavigationBar: NavigationBar(
@@ -80,16 +78,15 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
             screenIndex = index;
           });
         },
-        destinations: destinations.map(
-          (ExampleDestination destination) {
-            return NavigationDestination(
-              label: destination.label,
-              icon: destination.icon,
-              selectedIcon: destination.selectedIcon,
-              tooltip: destination.label,
-            );
-          },
-        ).toList(),
+        destinations:
+            destinations.map((ExampleDestination destination) {
+              return NavigationDestination(
+                label: destination.label,
+                icon: destination.icon,
+                selectedIcon: destination.selectedIcon,
+                tooltip: destination.label,
+              );
+            }).toList(),
       ),
     );
   }
@@ -100,45 +97,39 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
       body: SafeArea(
         bottom: false,
         top: false,
-        child: Row(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5),
-              child: NavigationRail(
-                minWidth: 50,
-                destinations: destinations.map(
-                  (ExampleDestination destination) {
+        child: Row(children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            child: NavigationRail(
+              minWidth: 50,
+              destinations:
+                  destinations.map((ExampleDestination destination) {
                     return NavigationRailDestination(
                       label: Text(destination.label),
                       icon: destination.icon,
                       selectedIcon: destination.selectedIcon,
                     );
-                  },
-                ).toList(),
-                selectedIndex: screenIndex,
-                useIndicator: true,
-                onDestinationSelected: (int index) {
-                  setState(() {
-                    screenIndex = index;
-                  });
-                },
-              ),
+                  }).toList(),
+              selectedIndex: screenIndex,
+              useIndicator: true,
+              onDestinationSelected: (int index) {
+                setState(() {
+                  screenIndex = index;
+                });
+              },
             ),
-            const VerticalDivider(thickness: 1, width: 1),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Text('Page Index = $screenIndex'),
-                  ElevatedButton(
-                    onPressed: openDrawer,
-                    child: const Text('Open Drawer'),
-                  ),
-                ],
-              ),
+          ),
+          const VerticalDivider(thickness: 1, width: 1),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Text('Page Index = $screenIndex'),
+                ElevatedButton(onPressed: openDrawer, child: const Text('Open Drawer')),
+              ],
             ),
-          ],
-        ),
+          ),
+        ]),
       ),
       endDrawer: NavigationDrawer(
         onDestinationSelected: handleScreenChanged,
@@ -146,24 +137,16 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.fromLTRB(28, 16, 16, 10),
-            child: Text(
-              'Header',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+            child: Text('Header', style: Theme.of(context).textTheme.titleSmall),
           ),
-          ...destinations.map(
-            (ExampleDestination destination) {
-              return NavigationDrawerDestination(
-                label: Text(destination.label),
-                icon: destination.icon,
-                selectedIcon: destination.selectedIcon,
-              );
-            },
-          ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
-            child: Divider(),
-          ),
+          ...destinations.map((ExampleDestination destination) {
+            return NavigationDrawerDestination(
+              label: Text(destination.label),
+              icon: destination.icon,
+              selectedIcon: destination.selectedIcon,
+            );
+          }),
+          const Padding(padding: EdgeInsets.fromLTRB(28, 16, 28, 10), child: Divider()),
         ],
       ),
     );

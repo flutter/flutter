@@ -40,18 +40,10 @@ class _TabControllerExampleState extends State<TabControllerExample> {
   Widget build(BuildContext context) {
     return CupertinoTabScaffold(
       controller: controller,
-      tabBar: CupertinoTabBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.square_grid_2x2_fill),
-            label: 'Browse',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.star_circle_fill),
-            label: 'Starred',
-          ),
-        ],
-      ),
+      tabBar: CupertinoTabBar(items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(icon: Icon(CupertinoIcons.square_grid_2x2_fill), label: 'Browse'),
+        BottomNavigationBarItem(icon: Icon(CupertinoIcons.star_circle_fill), label: 'Starred'),
+      ]),
       tabBuilder: (BuildContext context, int index) {
         return Center(
           child: Column(

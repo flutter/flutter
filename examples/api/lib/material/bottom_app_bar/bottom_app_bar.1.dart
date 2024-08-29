@@ -44,17 +44,12 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: const Text('Bottom App Bar Demo'),
-        ),
+        appBar: AppBar(automaticallyImplyLeading: false, title: const Text('Bottom App Bar Demo')),
         body: ListView(
           padding: const EdgeInsets.only(bottom: 88),
           children: <Widget>[
             SwitchListTile(
-              title: const Text(
-                'Floating Action Button',
-              ),
+              title: const Text('Floating Action Button'),
               value: _showFab,
               onChanged: _onShowFabChanged,
             ),
@@ -93,13 +88,14 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
             ),
           ],
         ),
-        floatingActionButton: _showFab
-            ? FloatingActionButton(
-                onPressed: () {},
-                tooltip: 'Create',
-                child: const Icon(Icons.add),
-              )
-            : null,
+        floatingActionButton:
+            _showFab
+                ? FloatingActionButton(
+                  onPressed: () {},
+                  tooltip: 'Create',
+                  child: const Icon(Icons.add),
+                )
+                : null,
         floatingActionButtonLocation: _fabLocation,
         bottomNavigationBar: _DemoBottomAppBar(
           fabLocation: _fabLocation,
@@ -131,26 +127,16 @@ class _DemoBottomAppBar extends StatelessWidget {
       color: Colors.blue,
       child: IconTheme(
         data: IconThemeData(color: Theme.of(context).colorScheme.onPrimary),
-        child: Row(
-          children: <Widget>[
-            IconButton(
-              tooltip: 'Open navigation menu',
-              icon: const Icon(Icons.menu),
-              onPressed: () {},
-            ),
-            if (centerLocations.contains(fabLocation)) const Spacer(),
-            IconButton(
-              tooltip: 'Search',
-              icon: const Icon(Icons.search),
-              onPressed: () {},
-            ),
-            IconButton(
-              tooltip: 'Favorite',
-              icon: const Icon(Icons.favorite),
-              onPressed: () {},
-            ),
-          ],
-        ),
+        child: Row(children: <Widget>[
+          IconButton(
+            tooltip: 'Open navigation menu',
+            icon: const Icon(Icons.menu),
+            onPressed: () {},
+          ),
+          if (centerLocations.contains(fabLocation)) const Spacer(),
+          IconButton(tooltip: 'Search', icon: const Icon(Icons.search), onPressed: () {}),
+          IconButton(tooltip: 'Favorite', icon: const Icon(Icons.favorite), onPressed: () {}),
+        ]),
       ),
     );
   }

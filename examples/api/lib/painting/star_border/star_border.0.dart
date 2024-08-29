@@ -64,79 +64,70 @@ class _StarBorderExampleState extends State<StarBorderExample> {
         fontFamily: 'Roboto',
         fontStyle: FontStyle.normal,
       ),
-      child: ListView(
-        children: <Widget>[
-          ColoredBox(
-            color: Colors.grey.shade200,
-            child: Options(_model),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(18.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Expanded(
-                  child: ExampleBorder(
-                    border: StarBorder(
-                      side: const BorderSide(),
-                      points: _model.points,
-                      innerRadiusRatio: _model.innerRadiusRatio,
-                      pointRounding: _model.pointRounding,
-                      valleyRounding: _model.valleyRounding,
-                      rotation: _model.rotation,
-                      squash: _model.squash,
-                    ),
-                    title: 'Star',
-                  ),
-                ),
-                Expanded(
-                  child: ExampleBorder(
-                    border: StarBorder.polygon(
-                      side: const BorderSide(),
-                      sides: _model.points,
-                      pointRounding: _model.pointRounding,
-                      rotation: _model.rotation,
-                      squash: _model.squash,
-                    ),
-                    title: 'Polygon',
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: ListView(children: <Widget>[
+        ColoredBox(color: Colors.grey.shade200, child: Options(_model)),
+        Padding(
+          padding: const EdgeInsets.all(18.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
               Expanded(
-                child: Container(
-                  color: Colors.black12,
-                  margin: const EdgeInsets.all(16.0),
-                  padding: const EdgeInsets.all(16.0),
-                  child: SelectableText(_model.starCode),
+                child: ExampleBorder(
+                  border: StarBorder(
+                    side: const BorderSide(),
+                    points: _model.points,
+                    innerRadiusRatio: _model.innerRadiusRatio,
+                    pointRounding: _model.pointRounding,
+                    valleyRounding: _model.valleyRounding,
+                    rotation: _model.rotation,
+                    squash: _model.squash,
+                  ),
+                  title: 'Star',
                 ),
               ),
               Expanded(
-                child: Container(
-                  color: Colors.black12,
-                  margin: const EdgeInsets.all(16.0),
-                  padding: const EdgeInsets.all(16.0),
-                  child: SelectableText(_model.polygonCode),
+                child: ExampleBorder(
+                  border: StarBorder.polygon(
+                    side: const BorderSide(),
+                    sides: _model.points,
+                    pointRounding: _model.pointRounding,
+                    rotation: _model.rotation,
+                    squash: _model.squash,
+                  ),
+                  title: 'Polygon',
                 ),
               ),
             ],
           ),
-        ],
-      ),
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                color: Colors.black12,
+                margin: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0),
+                child: SelectableText(_model.starCode),
+              ),
+            ),
+            Expanded(
+              child: Container(
+                color: Colors.black12,
+                margin: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0),
+                child: SelectableText(_model.polygonCode),
+              ),
+            ),
+          ],
+        ),
+      ]),
     );
   }
 }
 
 class ExampleBorder extends StatelessWidget {
-  const ExampleBorder({
-    super.key,
-    required this.border,
-    required this.title,
-  });
+  const ExampleBorder({super.key, required this.border, required this.title});
 
   final StarBorder border;
   final String title;
@@ -148,10 +139,7 @@ class ExampleBorder extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       width: 150,
       height: 100,
-      decoration: ShapeDecoration(
-        color: Colors.blue.shade100,
-        shape: border,
-      ),
+      decoration: ShapeDecoration(color: Colors.blue.shade100, shape: border),
       child: Text(title),
     );
   }
@@ -199,94 +187,86 @@ class _OptionsState extends State<Options> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: ControlSlider(
-                  label: 'Point Rounding',
-                  value: widget.model.pointRounding,
-                  onChanged: (double value) {
-                    widget.model.pointRounding = value;
-                  },
-                ),
+          Row(children: <Widget>[
+            Expanded(
+              child: ControlSlider(
+                label: 'Point Rounding',
+                value: widget.model.pointRounding,
+                onChanged: (double value) {
+                  widget.model.pointRounding = value;
+                },
               ),
-              Expanded(
-                child: ControlSlider(
-                  label: 'Valley Rounding',
-                  value: widget.model.valleyRounding,
-                  onChanged: (double value) {
-                    widget.model.valleyRounding = value;
-                  },
-                ),
+            ),
+            Expanded(
+              child: ControlSlider(
+                label: 'Valley Rounding',
+                value: widget.model.valleyRounding,
+                onChanged: (double value) {
+                  widget.model.valleyRounding = value;
+                },
               ),
-            ],
-          ),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: ControlSlider(
-                  label: 'Squash',
-                  value: widget.model.squash,
-                  onChanged: (double value) {
-                    widget.model.squash = value;
-                  },
-                ),
+            ),
+          ]),
+          Row(children: <Widget>[
+            Expanded(
+              child: ControlSlider(
+                label: 'Squash',
+                value: widget.model.squash,
+                onChanged: (double value) {
+                  widget.model.squash = value;
+                },
               ),
-              Expanded(
-                child: ControlSlider(
-                  label: 'Rotation',
-                  value: widget.model.rotation,
-                  max: 360,
-                  onChanged: (double value) {
-                    widget.model.rotation = value;
-                  },
-                ),
+            ),
+            Expanded(
+              child: ControlSlider(
+                label: 'Rotation',
+                value: widget.model.rotation,
+                max: 360,
+                onChanged: (double value) {
+                  widget.model.rotation = value;
+                },
               ),
-            ],
-          ),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: ControlSlider(
-                        label: 'Points',
-                        value: widget.model.points,
-                        min: 3,
-                        max: 20,
-                        precision: 1,
-                        onChanged: (double value) {
-                          widget.model.points = value;
-                        },
-                      ),
+            ),
+          ]),
+          Row(children: <Widget>[
+            Expanded(
+              child: Row(children: <Widget>[
+                Expanded(
+                  child: ControlSlider(
+                    label: 'Points',
+                    value: widget.model.points,
+                    min: 3,
+                    max: 20,
+                    precision: 1,
+                    onChanged: (double value) {
+                      widget.model.points = value;
+                    },
+                  ),
+                ),
+                Tooltip(
+                  message: 'Round the number of points to the nearest integer.',
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: OutlinedButton(
+                      child: const Text('Nearest'),
+                      onPressed: () {
+                        widget.model.points = widget.model.points.roundToDouble();
+                      },
                     ),
-                    Tooltip(
-                      message: 'Round the number of points to the nearest integer.',
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: OutlinedButton(
-                          child: const Text('Nearest'),
-                          onPressed: () {
-                            widget.model.points = widget.model.points.roundToDouble();
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
+              ]),
+            ),
+            Expanded(
+              child: ControlSlider(
+                label: 'Inner Radius',
+                value: widget.model.innerRadiusRatio,
+                onChanged: (double value) {
+                  widget.model.innerRadiusRatio = value;
+                },
               ),
-              Expanded(
-                child: ControlSlider(
-                  label: 'Inner Radius',
-                  value: widget.model.innerRadiusRatio,
-                  onChanged: (double value) {
-                    widget.model.innerRadiusRatio = value;
-                  },
-                ),
-              ),
-            ],
-          ),
+            ),
+          ]),
           ElevatedButton(
             onPressed: () {
               widget.model.reset();
@@ -425,27 +405,9 @@ class ControlSlider extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Expanded(
-            flex: 2,
-            child: Text(
-              label,
-              textAlign: TextAlign.end,
-            ),
-          ),
-          Expanded(
-            flex: 5,
-            child: Slider(
-              onChanged: onChanged,
-              min: min,
-              max: max,
-              value: value,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value.toStringAsFixed(precision),
-            ),
-          ),
+          Expanded(flex: 2, child: Text(label, textAlign: TextAlign.end)),
+          Expanded(flex: 5, child: Slider(onChanged: onChanged, min: min, max: max, value: value)),
+          Expanded(child: Text(value.toStringAsFixed(precision))),
         ],
       ),
     );

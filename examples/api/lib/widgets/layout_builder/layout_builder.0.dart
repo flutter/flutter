@@ -13,9 +13,7 @@ class LayoutBuilderExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: LayoutBuilderExample(),
-    );
+    return const MaterialApp(home: LayoutBuilderExample());
   }
 }
 
@@ -26,26 +24,18 @@ class LayoutBuilderExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('LayoutBuilder Example')),
-      body: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          if (constraints.maxWidth > 600) {
-            return _buildWideContainers();
-          } else {
-            return _buildNormalContainer();
-          }
-        },
-      ),
+      body: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+        if (constraints.maxWidth > 600) {
+          return _buildWideContainers();
+        } else {
+          return _buildNormalContainer();
+        }
+      }),
     );
   }
 
   Widget _buildNormalContainer() {
-    return Center(
-      child: Container(
-        height: 100.0,
-        width: 100.0,
-        color: Colors.red,
-      ),
-    );
+    return Center(child: Container(height: 100.0, width: 100.0, color: Colors.red));
   }
 
   Widget _buildWideContainers() {
@@ -53,16 +43,8 @@ class LayoutBuilderExample extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          Container(
-            height: 100.0,
-            width: 100.0,
-            color: Colors.red,
-          ),
-          Container(
-            height: 100.0,
-            width: 100.0,
-            color: Colors.yellow,
-          ),
+          Container(height: 100.0, width: 100.0, color: Colors.red),
+          Container(height: 100.0, width: 100.0, color: Colors.yellow),
         ],
       ),
     );

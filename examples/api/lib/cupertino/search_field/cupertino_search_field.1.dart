@@ -33,9 +33,7 @@ class _SearchTextFieldExampleState extends State<SearchTextFieldExample> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('CupertinoSearchTextField Sample'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoSearchTextField Sample')),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -43,13 +41,11 @@ class _SearchTextFieldExampleState extends State<SearchTextFieldExample> {
             Text(text),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: SearchTextField(
-                fieldValue: (String value) {
-                  setState(() {
-                    text = value;
-                  });
-                },
-              ),
+              child: SearchTextField(fieldValue: (String value) {
+                setState(() {
+                  text = value;
+                });
+              }),
             ),
           ],
         ),
@@ -59,10 +55,7 @@ class _SearchTextFieldExampleState extends State<SearchTextFieldExample> {
 }
 
 class SearchTextField extends StatelessWidget {
-  const SearchTextField({
-    super.key,
-    required this.fieldValue,
-  });
+  const SearchTextField({super.key, required this.fieldValue});
 
   final ValueChanged<String> fieldValue;
 

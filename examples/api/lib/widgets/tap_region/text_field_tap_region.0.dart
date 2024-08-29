@@ -35,33 +35,31 @@ class _TextFieldTapRegionExampleState extends State<TextFieldTapRegionExample> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: <Widget>[
-        Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: SizedBox(
-              width: 150,
-              height: 80,
-              child: IntegerSpinnerField(
-                value: value,
-                autofocus: true,
-                onChanged: (int newValue) {
-                  if (value == newValue) {
-                    // Avoid unnecessary redraws.
-                    return;
-                  }
-                  setState(() {
-                    // Update the value and redraw.
-                    value = newValue;
-                  });
-                },
-              ),
+    return ListView(children: <Widget>[
+      Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: SizedBox(
+            width: 150,
+            height: 80,
+            child: IntegerSpinnerField(
+              value: value,
+              autofocus: true,
+              onChanged: (int newValue) {
+                if (value == newValue) {
+                  // Avoid unnecessary redraws.
+                  return;
+                }
+                setState(() {
+                  // Update the value and redraw.
+                  value = newValue;
+                });
+              },
             ),
           ),
         ),
-      ],
-    );
+      ),
+    ]);
   }
 }
 
@@ -93,23 +91,21 @@ class IntegerSpinnerField extends StatelessWidget {
       // Add a text formatter that only allows integer values and a leading
       // minus sign.
       inputFormatters: <TextInputFormatter>[
-        TextInputFormatter.withFunction(
-          (TextEditingValue oldValue, TextEditingValue newValue) {
-            String newString;
-            if (newValue.text.startsWith('-')) {
-              newString = '-${newValue.text.replaceAll(RegExp(r'\D'), '')}';
-            } else {
-              newString = newValue.text.replaceAll(RegExp(r'\D'), '');
-            }
-            return newValue.copyWith(
-              text: newString,
-              selection: newValue.selection.copyWith(
-                baseOffset: newValue.selection.baseOffset.clamp(0, newString.length),
-                extentOffset: newValue.selection.extentOffset.clamp(0, newString.length),
-              ),
-            );
-          },
-        )
+        TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
+          String newString;
+          if (newValue.text.startsWith('-')) {
+            newString = '-${newValue.text.replaceAll(RegExp(r'\D'), '')}';
+          } else {
+            newString = newValue.text.replaceAll(RegExp(r'\D'), '');
+          }
+          return newValue.copyWith(
+            text: newString,
+            selection: newValue.selection.copyWith(
+              baseOffset: newValue.selection.baseOffset.clamp(0, newString.length),
+              extentOffset: newValue.selection.extentOffset.clamp(0, newString.length),
+            ),
+          );
+        }),
       ],
     );
   }
@@ -174,9 +170,10 @@ class _SpinnerFieldState<T> extends State<SpinnerField<T>> {
     if (text != controller.text) {
       controller.value = TextEditingValue(
         text: text,
-        selection: collapsed
-            ? TextSelection.collapsed(offset: text.length)
-            : TextSelection(baseOffset: 0, extentOffset: text.length),
+        selection:
+            collapsed
+                ? TextSelection.collapsed(offset: text.length)
+                : TextSelection(baseOffset: 0, extentOffset: text.length),
       );
     }
   }
@@ -205,46 +202,34 @@ class _SpinnerFieldState<T> extends State<SpinnerField<T>> {
         const SingleActivator(LogicalKeyboardKey.arrowUp): _increment,
         const SingleActivator(LogicalKeyboardKey.arrowDown): _decrement,
       },
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: TextField(
-              autofocus: widget.autofocus,
-              inputFormatters: widget.inputFormatters,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (String value) => widget.onChanged?.call(widget.fromString(value)),
-              controller: controller,
-              textAlign: TextAlign.center,
-            ),
+      child: Row(children: <Widget>[
+        Expanded(
+          child: TextField(
+            autofocus: widget.autofocus,
+            inputFormatters: widget.inputFormatters,
+            decoration: const InputDecoration(border: OutlineInputBorder()),
+            onChanged: (String value) => widget.onChanged?.call(widget.fromString(value)),
+            controller: controller,
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(width: 12),
-          // Without this TextFieldTapRegion, tapping on the buttons below would
-          // increment the value, but it would cause the text field to be
-          // unfocused, since tapping outside of a text field should unfocus it
-          // on non-mobile platforms.
-          TextFieldTapRegion(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _increment,
-                    child: const Icon(Icons.add),
-                  ),
-                ),
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _decrement,
-                    child: const Icon(Icons.remove),
-                  ),
-                ),
-              ],
-            ),
-          )
-        ],
-      ),
+        ),
+        const SizedBox(width: 12),
+        // Without this TextFieldTapRegion, tapping on the buttons below would
+        // increment the value, but it would cause the text field to be
+        // unfocused, since tapping outside of a text field should unfocus it
+        // on non-mobile platforms.
+        TextFieldTapRegion(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Expanded(child: OutlinedButton(onPressed: _increment, child: const Icon(Icons.add))),
+              Expanded(
+                child: OutlinedButton(onPressed: _decrement, child: const Icon(Icons.remove)),
+              ),
+            ],
+          ),
+        ),
+      ]),
     );
   }
 }

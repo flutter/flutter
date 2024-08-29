@@ -16,9 +16,7 @@ class InkWellExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('InkWell Sample')),
-        body: const Center(
-          child: InkWellExample(),
-        ),
+        body: const Center(child: InkWellExample()),
       ),
     );
   }
@@ -43,13 +41,11 @@ class _InkWellExampleState extends State<InkWellExample> {
       curve: Curves.easeIn,
       child: Material(
         color: Colors.yellow,
-        child: InkWell(
-          onTap: () {
-            setState(() {
-              sideLength == 50 ? sideLength = 100 : sideLength = 50;
-            });
-          },
-        ),
+        child: InkWell(onTap: () {
+          setState(() {
+            sideLength == 50 ? sideLength = 100 : sideLength = 50;
+          });
+        }),
       ),
     );
   }

@@ -37,7 +37,9 @@ class _SearchBarAppState extends State<SearchBarApp> {
 
   Iterable<Widget> getSuggestions(SearchController controller) {
     final String input = controller.value.text;
-    return ColorLabel.values.where((ColorLabel color) => color.label.contains(input)).map(
+    return ColorLabel.values
+        .where((ColorLabel color) => color.label.contains(input))
+        .map(
           (ColorLabel filteredColor) => ListTile(
             leading: CircleAvatar(backgroundColor: filteredColor.color),
             title: Text(filteredColor.label),
@@ -77,39 +79,38 @@ class _SearchBarAppState extends State<SearchBarApp> {
         appBar: AppBar(title: const Text('Search Bar Sample')),
         body: Align(
           alignment: Alignment.topCenter,
-          child: Column(
-            children: <Widget>[
-              SearchAnchor.bar(
-                barHintText: 'Search colors',
-                suggestionsBuilder: (BuildContext context, SearchController controller) {
-                  if (controller.text.isEmpty) {
-                    if (searchHistory.isNotEmpty) {
-                      return getHistoryList(controller);
-                    }
-                    return <Widget>[Center(child: Text('No search history.', style: TextStyle(color: colors.outline)))];
+          child: Column(children: <Widget>[
+            SearchAnchor.bar(
+              barHintText: 'Search colors',
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                if (controller.text.isEmpty) {
+                  if (searchHistory.isNotEmpty) {
+                    return getHistoryList(controller);
                   }
-                  return getSuggestions(controller);
-                },
-              ),
-              cardSize,
-              Card(color: colors.primary, child: cardSize),
-              Card(color: colors.onPrimary, child: cardSize),
-              Card(color: colors.primaryContainer, child: cardSize),
-              Card(color: colors.onPrimaryContainer, child: cardSize),
-              Card(color: colors.secondary, child: cardSize),
-              Card(color: colors.onSecondary, child: cardSize),
-            ],
-          ),
+                  return <Widget>[
+                    Center(
+                      child: Text('No search history.', style: TextStyle(color: colors.outline)),
+                    ),
+                  ];
+                }
+                return getSuggestions(controller);
+              },
+            ),
+            cardSize,
+            Card(color: colors.primary, child: cardSize),
+            Card(color: colors.onPrimary, child: cardSize),
+            Card(color: colors.primaryContainer, child: cardSize),
+            Card(color: colors.onPrimaryContainer, child: cardSize),
+            Card(color: colors.secondary, child: cardSize),
+            Card(color: colors.onSecondary, child: cardSize),
+          ]),
         ),
       ),
     );
   }
 }
 
-SizedBox cardSize = const SizedBox(
-  width: 80,
-  height: 30,
-);
+SizedBox cardSize = const SizedBox(width: 80, height: 30);
 
 enum ColorLabel {
   red('red', Colors.red),

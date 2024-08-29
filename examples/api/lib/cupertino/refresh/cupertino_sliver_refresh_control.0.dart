@@ -46,26 +46,15 @@ class _RefreshControlExampleState extends State<RefreshControlExample> {
         middle: Text('CupertinoSliverRefreshControl Sample'),
       ),
       child: CustomScrollView(
-        physics: const BouncingScrollPhysics(
-          parent: AlwaysScrollableScrollPhysics(),
-        ),
+        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         slivers: <Widget>[
-          const CupertinoSliverNavigationBar(
-            largeTitle: Text('Scroll down'),
-          ),
-          CupertinoSliverRefreshControl(
-            onRefresh: () async {
-              await Future<void>.delayed(
-                const Duration(milliseconds: 1000),
-              );
-              setState(() {
-                items.insert(
-                  0,
-                  Container(color: colors[items.length % 3], height: 100.0),
-                );
-              });
-            },
-          ),
+          const CupertinoSliverNavigationBar(largeTitle: Text('Scroll down')),
+          CupertinoSliverRefreshControl(onRefresh: () async {
+            await Future<void>.delayed(const Duration(milliseconds: 1000));
+            setState(() {
+              items.insert(0, Container(color: colors[items.length % 3], height: 100.0));
+            });
+          }),
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) => items[index],

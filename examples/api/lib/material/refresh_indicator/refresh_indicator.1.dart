@@ -15,7 +15,9 @@ class RefreshIndicatorExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      scrollBehavior: const MaterialScrollBehavior().copyWith(dragDevices: PointerDeviceKind.values.toSet()),
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        dragDevices: PointerDeviceKind.values.toSet(),
+      ),
       home: const RefreshIndicatorExample(),
     );
   }
@@ -27,9 +29,7 @@ class RefreshIndicatorExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('RefreshIndicator Sample'),
-      ),
+      appBar: AppBar(title: const Text('RefreshIndicator Sample')),
       body: RefreshIndicator(
         color: Colors.white,
         backgroundColor: Colors.blue,
@@ -49,51 +49,46 @@ class RefreshIndicatorExample extends StatelessWidget {
         notificationPredicate: (ScrollNotification notification) {
           return notification.depth == 1;
         },
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverToBoxAdapter(
-              child: Container(
-                height: 100,
-                alignment: Alignment.center,
-                color: Colors.pink[100],
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'Pull down here',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const Text("RefreshIndicator won't trigger"),
-                  ],
-                ),
+        child: CustomScrollView(slivers: <Widget>[
+          SliverToBoxAdapter(
+            child: Container(
+              height: 100,
+              alignment: Alignment.center,
+              color: Colors.pink[100],
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text('Pull down here', style: Theme.of(context).textTheme.headlineMedium),
+                  const Text("RefreshIndicator won't trigger"),
+                ],
               ),
             ),
-            SliverToBoxAdapter(
-              child: Container(
-                color: Colors.green[100],
-                height: 300,
-                child: ListView.builder(
-                  itemCount: 25,
-                  itemBuilder: (BuildContext context, int index) {
-                    return const ListTile(
-                      title: Text('Pull down here'),
-                      subtitle: Text('RefreshIndicator will trigger'),
-                    );
-                  },
-                ),
+          ),
+          SliverToBoxAdapter(
+            child: Container(
+              color: Colors.green[100],
+              height: 300,
+              child: ListView.builder(
+                itemCount: 25,
+                itemBuilder: (BuildContext context, int index) {
+                  return const ListTile(
+                    title: Text('Pull down here'),
+                    subtitle: Text('RefreshIndicator will trigger'),
+                  );
+                },
               ),
             ),
-            SliverList.builder(
-              itemCount: 20,
-              itemBuilder: (BuildContext context, int index) {
-                return const ListTile(
-                  title: Text('Pull down here'),
-                  subtitle: Text("Refresh indicator won't trigger"),
-                );
-              }
-            )
-          ],
-        ),
+          ),
+          SliverList.builder(
+            itemCount: 20,
+            itemBuilder: (BuildContext context, int index) {
+              return const ListTile(
+                title: Text('Pull down here'),
+                subtitle: Text("Refresh indicator won't trigger"),
+              );
+            },
+          ),
+        ]),
       ),
     );
   }

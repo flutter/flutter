@@ -4,14 +4,16 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/system_context_menu/system_context_menu.0.dart' as example;
+import 'package:flutter_api_samples/widgets/system_context_menu/system_context_menu.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('only shows the system context menu on iOS when MediaQuery says it is supported', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Builder(
-        builder: (BuildContext context) {
+  testWidgets(
+    'only shows the system context menu on iOS when MediaQuery says it is supported',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Builder(builder: (BuildContext context) {
           final MediaQueryData mediaQueryData = MediaQuery.of(context);
           return MediaQuery(
             data: mediaQueryData.copyWith(
@@ -21,47 +23,54 @@ void main() {
             ),
             child: const example.SystemContextMenuExampleApp(),
           );
-        },
-      ),
-    );
+        }),
+      );
 
-    expect(find.byType(SystemContextMenu), findsNothing);
+      expect(find.byType(SystemContextMenu), findsNothing);
 
-    // Show the context menu.
-    final Finder textFinder = find.byType(EditableText);
-    await tester.longPress(textFinder);
-    tester.state<EditableTextState>(textFinder).showToolbar();
-    await tester.pumpAndSettle();
+      // Show the context menu.
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      tester.state<EditableTextState>(textFinder).showToolbar();
+      await tester.pumpAndSettle();
 
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        expect(find.byType(SystemContextMenu), findsOneWidget);
-        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
-        expect(find.byType(SystemContextMenu), findsNothing);
-    }
-  }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          expect(find.byType(SystemContextMenu), findsOneWidget);
+          expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+          expect(find.byType(SystemContextMenu), findsNothing);
+      }
+    },
+    variant: TargetPlatformVariant.all(),
+    skip: kIsWeb,
+  ); // [intended]
 
-  testWidgets('does not show the system context menu when not supported', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      // By default, MediaQueryData.supportsShowingSystemContextMenu is false.
-      const example.SystemContextMenuExampleApp(),
-    );
+  testWidgets(
+    'does not show the system context menu when not supported',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        // By default, MediaQueryData.supportsShowingSystemContextMenu is false.
+        const example.SystemContextMenuExampleApp(),
+      );
 
-    expect(find.byType(SystemContextMenu), findsNothing);
+      expect(find.byType(SystemContextMenu), findsNothing);
 
-    // Show the context menu.
-    final Finder textFinder = find.byType(EditableText);
-    await tester.longPress(textFinder);
-    tester.state<EditableTextState>(textFinder).showToolbar();
-    await tester.pumpAndSettle();
+      // Show the context menu.
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      tester.state<EditableTextState>(textFinder).showToolbar();
+      await tester.pumpAndSettle();
 
-    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
-    expect(find.byType(SystemContextMenu), findsNothing);
-  }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      expect(find.byType(SystemContextMenu), findsNothing);
+    },
+    variant: TargetPlatformVariant.all(),
+    skip: kIsWeb,
+  ); // [intended]
 }

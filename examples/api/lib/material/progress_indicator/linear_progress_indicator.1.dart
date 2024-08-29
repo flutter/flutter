@@ -27,7 +27,8 @@ class ProgressIndicatorExample extends StatefulWidget {
   State<ProgressIndicatorExample> createState() => _ProgressIndicatorExampleState();
 }
 
-class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> with TickerProviderStateMixin {
+class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
+    with TickerProviderStateMixin {
   late AnimationController controller;
   bool determinate = false;
 
@@ -39,8 +40,8 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> wit
       vsync: this,
       duration: const Duration(seconds: 2),
     )..addListener(() {
-        setState(() {});
-      });
+      setState(() {});
+    });
     controller.repeat();
     super.initState();
   }
@@ -59,41 +60,33 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> wit
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'Linear progress indicator',
-              style: TextStyle(fontSize: 20),
-            ),
+            const Text('Linear progress indicator', style: TextStyle(fontSize: 20)),
             const SizedBox(height: 30),
             LinearProgressIndicator(
               value: controller.value,
               semanticsLabel: 'Linear progress indicator',
             ),
             const SizedBox(height: 10),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    'determinate Mode',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                ),
-                Switch(
-                  value: determinate,
-                  onChanged: (bool value) {
-                    setState(() {
-                      determinate = value;
-                      if (determinate) {
-                        controller.stop();
-                      } else {
-                        controller
-                          ..forward(from: controller.value)
-                          ..repeat();
-                      }
-                    });
-                  },
-                ),
-              ],
-            ),
+            Row(children: <Widget>[
+              Expanded(
+                child: Text('determinate Mode', style: Theme.of(context).textTheme.titleSmall),
+              ),
+              Switch(
+                value: determinate,
+                onChanged: (bool value) {
+                  setState(() {
+                    determinate = value;
+                    if (determinate) {
+                      controller.stop();
+                    } else {
+                      controller
+                        ..forward(from: controller.value)
+                        ..repeat();
+                    }
+                  });
+                },
+              ),
+            ]),
           ],
         ),
       ),

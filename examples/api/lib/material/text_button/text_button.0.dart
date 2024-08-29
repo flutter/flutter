@@ -11,7 +11,7 @@ void main() {
 }
 
 class TextButtonExampleApp extends StatefulWidget {
-  const TextButtonExampleApp({ super.key });
+  const TextButtonExampleApp({super.key});
 
   @override
   State<TextButtonExampleApp> createState() => _TextButtonExampleAppState();
@@ -32,7 +32,9 @@ class _TextButtonExampleAppState extends State<TextButtonExampleApp> {
           child: TextButtonExample(
             darkMode: darkMode,
             updateDarkMode: (bool value) {
-              setState(() { darkMode = value; });
+              setState(() {
+                darkMode = value;
+              });
             },
           ),
         ),
@@ -42,7 +44,7 @@ class _TextButtonExampleAppState extends State<TextButtonExampleApp> {
 }
 
 class TextButtonExample extends StatefulWidget {
-  const TextButtonExample({ super.key, required this.darkMode, required this.updateDarkMode });
+  const TextButtonExample({super.key, required this.darkMode, required this.updateDarkMode});
 
   final bool darkMode;
   final ValueChanged<bool> updateDarkMode;
@@ -97,8 +99,16 @@ class _TextButtonExampleState extends State<TextButtonExample> {
     // the current dark/light mode. Used to define TextButton #7's
     // gradients.
     final (Color color1, Color color2, Color color3) = switch (colorScheme.brightness) {
-      Brightness.light => (Colors.blue.withOpacity(1.0),  Colors.orange.withOpacity(1.0), Colors.yellow.withOpacity(1.0)),
-      Brightness.dark  => (Colors.purple.withOpacity(1.0), Colors.cyan.withOpacity(1.0),  Colors.yellow.withOpacity(1.0)),
+      Brightness.light => (
+        Colors.blue.withOpacity(1.0),
+        Colors.orange.withOpacity(1.0),
+        Colors.yellow.withOpacity(1.0),
+      ),
+      Brightness.dark => (
+        Colors.purple.withOpacity(1.0),
+        Colors.cyan.withOpacity(1.0),
+        Colors.yellow.withOpacity(1.0),
+      ),
     };
 
     // This gradient's appearance reflects the button's state.
@@ -111,12 +121,10 @@ class _TextButtonExampleState extends State<TextButtonExample> {
         );
       }
       return BoxDecoration(
-        gradient: LinearGradient(
-          colors: switch (states.contains(WidgetState.hovered)) {
-            true => <Color>[color1, color2],
-            false => <Color>[color2, color1],
-          },
-        ),
+        gradient: LinearGradient(colors: switch (states.contains(WidgetState.hovered)) {
+          true => <Color>[color1, color2],
+          false => <Color>[color2, color1],
+        }),
       );
     }
 
@@ -125,16 +133,10 @@ class _TextButtonExampleState extends State<TextButtonExample> {
     // Card are broken out below.
 
     final List<Widget> columnOneButtons = <Widget>[
-      TextButton(
-        onPressed: () {},
-        child: const Text('Enabled'),
-      ),
+      TextButton(onPressed: () {}, child: const Text('Enabled')),
       verticalSpacer,
 
-      const TextButton(
-        onPressed: null,
-        child: Text('Disabled'),
-      ),
+      const TextButton(onPressed: null, child: Text('Disabled')),
       verticalSpacer,
 
       TextButton.icon(
@@ -159,7 +161,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
           foregroundColor: colorScheme.onError,
           backgroundColor: colorScheme.error,
         ),
-        onPressed: () { },
+        onPressed: () {},
         icon: const Icon(Icons.access_alarm),
         label: const Text('TextButton.icon #2'),
       ),
@@ -176,13 +178,10 @@ class _TextButtonExampleState extends State<TextButtonExample> {
         style: TextButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: const BorderRadius.all(Radius.circular(8)),
-            side: BorderSide(
-              color: colorScheme.primary,
-              width: 5,
-            ),
+            side: BorderSide(color: colorScheme.primary, width: 5),
           ),
         ),
-        onPressed: () { },
+        onPressed: () {},
         child: const Text('TextButton #3'),
       ),
       verticalSpacer,
@@ -195,10 +194,8 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       // If the overlayColor was Colors.transparent, no splash
       // or highlights would be shown.
       TextButton(
-        style: TextButton.styleFrom(
-          overlayColor: Colors.yellow,
-        ),
-        onPressed: () { },
+        style: TextButton.styleFrom(overlayColor: Colors.yellow),
+        onPressed: () {},
         child: const Text('TextButton #4'),
       ),
     ];
@@ -212,25 +209,24 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       // way you can specify a similar foregroundBuilder in a TextButton
       // theme or the MaterialApp theme's ThemeData.textButtonTheme.
       TextButton(
-        style: TextButton.styleFrom(
-          foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
-            return ShaderMask(
-              shaderCallback: (Rect bounds) {
-                return LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: <Color>[
-                    colorScheme.primary,
-                    colorScheme.onPrimary,
-                  ],
-                ).createShader(bounds);
-              },
-              blendMode: BlendMode.srcATop,
-              child: child,
-            );
-          },
-        ),
-        onPressed: () { },
+        style: TextButton.styleFrom(foregroundBuilder: (
+          BuildContext context,
+          Set<WidgetState> states,
+          Widget? child,
+        ) {
+          return ShaderMask(
+            shaderCallback: (Rect bounds) {
+              return LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                colors: <Color>[colorScheme.primary, colorScheme.onPrimary],
+              ).createShader(bounds);
+            },
+            blendMode: BlendMode.srcATop,
+            child: child,
+          );
+        }),
+        onPressed: () {},
         child: const Text('TextButton #5'),
       ),
       verticalSpacer,
@@ -247,19 +243,22 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       // The styleFrom side parameter controls the button's outermost border and it
       // outlines the button's shape.
       TextButton(
-        style: TextButton.styleFrom(
-          foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
-            return DecoratedBox(
-              decoration: BoxDecoration(
-                border: states.contains(WidgetState.hovered)
-                  ? Border(bottom: BorderSide(color: colorScheme.primary))
-                  : const Border(), // essentially "no border"
-              ),
-              child: child,
-            );
-          },
-        ),
-        onPressed: () { },
+        style: TextButton.styleFrom(foregroundBuilder: (
+          BuildContext context,
+          Set<WidgetState> states,
+          Widget? child,
+        ) {
+          return DecoratedBox(
+            decoration: BoxDecoration(
+              border:
+                  states.contains(WidgetState.hovered)
+                      ? Border(bottom: BorderSide(color: colorScheme.primary))
+                      : const Border(), // essentially "no border"
+            ),
+            child: child,
+          );
+        }),
+        onPressed: () {},
         child: const Text('TextButton #6'),
       ),
       verticalSpacer,
@@ -318,10 +317,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
           backgroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
             return Ink(
               decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: grassImage,
-                  fit: BoxFit.cover,
-                ),
+                image: DecorationImage(image: grassImage, fit: BoxFit.cover),
               ),
               child: child,
             );
@@ -351,10 +347,14 @@ class _TextButtonExampleState extends State<TextButtonExample> {
           late final Future<void> thisAction;
           thisAction = Future<void>.delayed(const Duration(seconds: 1), () {
             if (currentAction == thisAction) {
-              setState(() { currentAction = null; });
+              setState(() {
+                currentAction = null;
+              });
             }
           });
-          setState(() { currentAction = thisAction; });
+          setState(() {
+            currentAction = thisAction;
+          });
         },
         style: TextButton.styleFrom(
           overlayColor: Colors.transparent,
@@ -374,12 +374,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
               height: 64,
               duration: const Duration(milliseconds: 300),
               curve: Curves.fastOutSlowIn,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: image,
-                  fit: BoxFit.contain,
-                ),
-              ),
+              decoration: BoxDecoration(image: DecorationImage(image: image, fit: BoxFit.contain)),
             );
           },
         ),
@@ -387,58 +382,52 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       ),
     ];
 
-    return Row(
-      children: <Widget> [
-        // The dark/light and LTR/RTL switches. We use the updateDarkMode function
-        // provided by the parent TextButtonExampleApp to rebuild the MaterialApp
-        // in the appropriate dark/light ThemeMdoe. The directionality of the rest
-        // of the UI is controlled by the Directionality widget below, and the
-        // textDirection local state variable.
-        TextButtonExampleSwitches(
-          darkMode: widget.darkMode,
-          updateDarkMode: widget.updateDarkMode,
-          textDirection: textDirection,
-          updateRTL: (bool value) {
-            setState(() {
-              textDirection = value ? TextDirection.rtl : TextDirection.ltr;
-            });
-          },
-        ),
-        horizontalSpacer,
+    return Row(children: <Widget>[
+      // The dark/light and LTR/RTL switches. We use the updateDarkMode function
+      // provided by the parent TextButtonExampleApp to rebuild the MaterialApp
+      // in the appropriate dark/light ThemeMdoe. The directionality of the rest
+      // of the UI is controlled by the Directionality widget below, and the
+      // textDirection local state variable.
+      TextButtonExampleSwitches(
+        darkMode: widget.darkMode,
+        updateDarkMode: widget.updateDarkMode,
+        textDirection: textDirection,
+        updateRTL: (bool value) {
+          setState(() {
+            textDirection = value ? TextDirection.rtl : TextDirection.ltr;
+          });
+        },
+      ),
+      horizontalSpacer,
 
-        Expanded(
-          child:  Scrollbar(
+      Expanded(
+        child: Scrollbar(
+          controller: scrollController,
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
             controller: scrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              controller: scrollController,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Directionality(
-                    textDirection: textDirection,
-                    child: Column(
-                      children: columnOneButtons,
-                    ),
-                  ),
-                  horizontalSpacer,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Directionality(
+                  textDirection: textDirection,
+                  child: Column(children: columnOneButtons),
+                ),
+                horizontalSpacer,
 
-                  Directionality(
-                    textDirection: textDirection,
-                    child: Column(
-                      children: columnTwoButtons
-                    ),
-                  ),
-                  horizontalSpacer,
-                ],
-              ),
+                Directionality(
+                  textDirection: textDirection,
+                  child: Column(children: columnTwoButtons),
+                ),
+                horizontalSpacer,
+              ],
             ),
           ),
         ),
-      ],
-    );
+      ),
+    ]);
   }
 }
 
@@ -448,7 +437,7 @@ class TextButtonExampleSwitches extends StatelessWidget {
     required this.darkMode,
     required this.updateDarkMode,
     required this.textDirection,
-    required this.updateRTL
+    required this.updateRTL,
   });
 
   final bool darkMode;
@@ -462,31 +451,19 @@ class TextButtonExampleSwitches extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: IntrinsicWidth(
-          child: Column(
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  const Expanded(child: Text('Dark Mode')),
-                  const SizedBox(width: 4),
-                  Switch(
-                    value: darkMode,
-                    onChanged: updateDarkMode,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: <Widget>[
-                  const Expanded(child: Text('RTL Text')),
-                  const SizedBox(width: 4),
-                  Switch(
-                    value: textDirection == TextDirection.rtl,
-                    onChanged: updateRTL,
-                  ),
-                ],
-              ),
-            ],
-          ),
+          child: Column(children: <Widget>[
+            Row(children: <Widget>[
+              const Expanded(child: Text('Dark Mode')),
+              const SizedBox(width: 4),
+              Switch(value: darkMode, onChanged: updateDarkMode),
+            ]),
+            const SizedBox(height: 16),
+            Row(children: <Widget>[
+              const Expanded(child: Text('RTL Text')),
+              const SizedBox(width: 4),
+              Switch(value: textDirection == TextDirection.rtl, onChanged: updateRTL),
+            ]),
+          ]),
         ),
       ),
     );

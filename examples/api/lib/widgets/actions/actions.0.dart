@@ -16,9 +16,7 @@ class ActionsExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Actions Sample')),
-        body: const Center(
-          child: ActionsExample(),
-        ),
+        body: const Center(child: ActionsExample()),
       ),
     );
   }
@@ -142,47 +140,45 @@ class _ActionsExampleState extends State<ActionsExample> {
         ModifyIntent: ModifyAction(_model),
         SaveIntent: SaveAction(_model),
       },
-      child: Builder(
-        builder: (BuildContext context) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              const Spacer(),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  IconButton(
-                    icon: const Icon(Icons.exposure_plus_1),
-                    onPressed: () {
-                      Actions.invoke(context, ModifyIntent(++_count));
-                    },
-                  ),
-                  ListenableBuilder(
-                    listenable: _model.data,
-                    builder: (BuildContext context, Widget? child) {
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          'Value: ${_model.data.value}',
-                          style: Theme.of(context).textTheme.headlineMedium,
-                        ),
-                      );
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.exposure_minus_1),
-                    onPressed: () {
-                      Actions.invoke(context, ModifyIntent(--_count));
-                    },
-                  ),
-                ],
-              ),
-              SaveButton(_model.isDirty),
-              const Spacer(),
-            ],
-          );
-        },
-      ),
+      child: Builder(builder: (BuildContext context) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            const Spacer(),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                IconButton(
+                  icon: const Icon(Icons.exposure_plus_1),
+                  onPressed: () {
+                    Actions.invoke(context, ModifyIntent(++_count));
+                  },
+                ),
+                ListenableBuilder(
+                  listenable: _model.data,
+                  builder: (BuildContext context, Widget? child) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Value: ${_model.data.value}',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.exposure_minus_1),
+                  onPressed: () {
+                    Actions.invoke(context, ModifyIntent(--_count));
+                  },
+                ),
+              ],
+            ),
+            SaveButton(_model.isDirty),
+            const Spacer(),
+          ],
+        );
+      }),
     );
   }
 }
