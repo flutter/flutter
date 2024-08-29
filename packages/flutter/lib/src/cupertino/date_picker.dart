@@ -539,10 +539,11 @@ class CupertinoDatePicker extends StatefulWidget {
     return getColumnWidth(texts: longTexts, context: context);
   }
 
-  /// Returns the width of the widest column in the picker.
+  /// Returns the width of column in the picker.
   ///
   /// This method is intended for testing only. It calculates the width of the
-  /// widest column in the picker based on the provided [testTexts].
+  /// widest column in the picker based on the provided list of texts and the
+  /// given [BuildContext].
   @visibleForTesting
   static double getColumnWidth({
     required List<String> texts,

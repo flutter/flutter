@@ -2454,7 +2454,7 @@ void main() {
     // Get the width of the largest word in the testWords list.
     final double testWidth =CupertinoDatePicker.getColumnWidth(texts: testWords, context: context);
 
-    // Ensure the largest width found is accurate
+    // Ensure the largest width found is accurate.
     expect(largestWidth, greaterThanOrEqualTo(testWidth));
     expect(largestWord, 'WWWWWW');
   });
