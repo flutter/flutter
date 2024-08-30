@@ -27,13 +27,13 @@ INTERNAL NOTE
 ## Flutter 3.24 Changes
 
 ### [3.24.2](https://github.com/flutter/flutter/releases/tag/3.24.2)
-- [flutter/153949](https://github.com/flutter/flutter/issues/153949): Fix a crash when deleting text inside CupertinoPageRoute, with a CJK (chinese, japanese, korean) keyboard on Android. 
+- [flutter/153949](https://github.com/flutter/flutter/issues/153949): Fix a crash when deleting text inside CupertinoPageRoute, with a CJK (chinese, japanese, korean) keyboard on Android.
 - [flutter/153939](https://github.com/flutter/flutter/issues/153939): Fixes an issue where Flutter TextField may stop accepting input on iOS.
-- [flutter/152420](https://github.com/flutter/flutter/issues/152420): Fixes scrolling jank when a SelectionArea/SelectableRegion is used as a child of a Scrollable like ListView or PageView on Android and iOS. 
+- [flutter/152420](https://github.com/flutter/flutter/issues/152420): Fixes scrolling jank when a SelectionArea/SelectableRegion is used as a child of a Scrollable like ListView or PageView on Android and iOS.
 - [flutter/154199](https://github.com/flutter/flutter/pull/154199): Removes log spam when building a freshly created template app for Android.
-- [flutter/153967](https://github.com/flutter/flutter/pull/153967): Fixes macOS host build failure when there are no native asset frameworks to codesign. Impacts users who have enabled experimental native assets feature. 
+- [flutter/153967](https://github.com/flutter/flutter/pull/153967): Fixes macOS host build failure when there are no native asset frameworks to codesign. Impacts users who have enabled experimental native assets feature.
 - [flutter/153769](https://github.com/flutter/flutter/pull/153769): When running a Flutter app, display a concise error message when connection to the device is lost.
-- [flutter/154270](https://github.com/flutter/flutter/pull/154270): Prevent preemptive gradle crash for android builds that would fail to build anyway but with a confusing error message. 
+- [flutter/154270](https://github.com/flutter/flutter/pull/154270): Prevent preemptive gradle crash for android builds that would fail to build anyway but with a confusing error message.
 - [flutter/54735](https://github.com/flutter/engine/pull/54735): When semantics are enabled on Web, the onTap of various widgets (GestureDetector, InkWell) are called twice or the callback from one widget is called when another widget is pressed.
 
 ### [3.24.1](https://github.com/flutter/flutter/releases/tag/3.24.1)
