@@ -10,7 +10,6 @@ import 'package:ui/ui.dart' as ui;
 import '../util.dart';
 import 'canvaskit_api.dart';
 import 'color_filter.dart';
-import 'native_memory.dart';
 
 typedef SkImageFilterBorrow = void Function(SkImageFilter);
 
@@ -22,7 +21,12 @@ typedef SkImageFilterBorrow = void Function(SkImageFilter);
 ///
 /// Currently implemented by [CkImageFilter] and [CkColorFilter].
 abstract class CkManagedSkImageFilterConvertible implements ui.ImageFilter {
-  void imageFilter(SkImageFilterBorrow borrow);
+  /// Creates a temporary [SkImageFilter], passes it to [borrow], and then
+  /// immediately deletes it.
+  ///
+  /// [SkImageFilter] objects are not kept around so that their memory is
+  /// reclaimed immediately, rather than waiting for the GC cycle.
+  void withSkImageFilter(SkImageFilterBorrow borrow);
 
   Matrix4 get transform;
 }
@@ -56,22 +60,15 @@ abstract class CkImageFilter implements CkManagedSkImageFilterConvertible {
 }
 
 class CkColorFilterImageFilter extends CkImageFilter {
-  CkColorFilterImageFilter({required this.colorFilter}) : super._() {
-    final SkImageFilter skImageFilter = colorFilter.initRawImageFilter();
-    _ref = UniqueRef<SkImageFilter>(this, skImageFilter, 'ImageFilter.color');
-  }
+  CkColorFilterImageFilter({required this.colorFilter}) : super._();
 
   final CkColorFilter colorFilter;
 
-  late final UniqueRef<SkImageFilter> _ref;
-
   @override
-  void imageFilter(SkImageFilterBorrow borrow) {
-    borrow(_ref.nativeObject);
-  }
-
-  void dispose() {
-    _ref.dispose();
+  void withSkImageFilter(SkImageFilterBorrow borrow) {
+    final skImageFilter = colorFilter.initRawImageFilter();
+    borrow(skImageFilter);
+    skImageFilter.delete();
   }
 
   @override
@@ -93,7 +90,14 @@ class CkColorFilterImageFilter extends CkImageFilter {
 class _CkBlurImageFilter extends CkImageFilter {
   _CkBlurImageFilter(
       {required this.sigmaX, required this.sigmaY, required this.tileMode})
-      : super._() {
+      : super._();
+
+  final double sigmaX;
+  final double sigmaY;
+  final ui.TileMode tileMode;
+
+  @override
+  void withSkImageFilter(SkImageFilterBorrow borrow) {
     /// Return the identity matrix when both sigmaX and sigmaY are 0. Replicates
     /// effect of applying no filter
     final SkImageFilter skImageFilter;
@@ -110,18 +114,9 @@ class _CkBlurImageFilter extends CkImageFilter {
         null,
       );
     }
-    _ref = UniqueRef<SkImageFilter>(this, skImageFilter, 'ImageFilter.blur');
-  }
 
-  final double sigmaX;
-  final double sigmaY;
-  final ui.TileMode tileMode;
-
-  late final UniqueRef<SkImageFilter> _ref;
-
-  @override
-  void imageFilter(SkImageFilterBorrow borrow) {
-    borrow(_ref.nativeObject);
+    borrow(skImageFilter);
+    skImageFilter.delete();
   }
 
   @override
@@ -149,25 +144,22 @@ class _CkMatrixImageFilter extends CkImageFilter {
       {required Float64List matrix, required this.filterQuality})
       : matrix = Float64List.fromList(matrix),
         _transform = Matrix4.fromFloat32List(toMatrix32(matrix)),
-        super._() {
-    final SkImageFilter skImageFilter =
-        canvasKit.ImageFilter.MakeMatrixTransform(
-      toSkMatrixFromFloat64(matrix),
-      toSkFilterOptions(filterQuality),
-      null,
-    );
-    _ref = UniqueRef<SkImageFilter>(this, skImageFilter, 'ImageFilter.matrix');
-  }
+        super._();
 
   final Float64List matrix;
   final ui.FilterQuality filterQuality;
   final Matrix4 _transform;
 
-  late final UniqueRef<SkImageFilter> _ref;
-
   @override
-  void imageFilter(SkImageFilterBorrow borrow) {
-    borrow(_ref.nativeObject);
+  void withSkImageFilter(SkImageFilterBorrow borrow) {
+    final skImageFilter =
+        canvasKit.ImageFilter.MakeMatrixTransform(
+      toSkMatrixFromFloat64(matrix),
+      toSkFilterOptions(filterQuality),
+      null,
+    );
+    borrow(skImageFilter);
+    skImageFilter.delete();
   }
 
   @override
@@ -192,23 +184,20 @@ class _CkMatrixImageFilter extends CkImageFilter {
 
 class _CkDilateImageFilter extends CkImageFilter {
   _CkDilateImageFilter({required this.radiusX, required this.radiusY})
-      : super._() {
-    final SkImageFilter skImageFilter = canvasKit.ImageFilter.MakeDilate(
-      radiusX,
-      radiusY,
-      null,
-    );
-    _ref = UniqueRef<SkImageFilter>(this, skImageFilter, 'ImageFilter.dilate');
-  }
+      : super._();
 
   final double radiusX;
   final double radiusY;
 
-  late final UniqueRef<SkImageFilter> _ref;
-
   @override
-  void imageFilter(SkImageFilterBorrow borrow) {
-    borrow(_ref.nativeObject);
+  void withSkImageFilter(SkImageFilterBorrow borrow) {
+    final skImageFilter = canvasKit.ImageFilter.MakeDilate(
+      radiusX,
+      radiusY,
+      null,
+    );
+    borrow(skImageFilter);
+    skImageFilter.delete();
   }
 
   @override
@@ -232,23 +221,20 @@ class _CkDilateImageFilter extends CkImageFilter {
 
 class _CkErodeImageFilter extends CkImageFilter {
   _CkErodeImageFilter({required this.radiusX, required this.radiusY})
-      : super._() {
-    final SkImageFilter skImageFilter = canvasKit.ImageFilter.MakeErode(
-      radiusX,
-      radiusY,
-      null,
-    );
-    _ref = UniqueRef<SkImageFilter>(this, skImageFilter, 'ImageFilter.erode');
-  }
+      : super._();
 
   final double radiusX;
   final double radiusY;
 
-  late final UniqueRef<SkImageFilter> _ref;
-
   @override
-  void imageFilter(SkImageFilterBorrow borrow) {
-    borrow(_ref.nativeObject);
+  void withSkImageFilter(SkImageFilterBorrow borrow) {
+    final skImageFilter = canvasKit.ImageFilter.MakeErode(
+      radiusX,
+      radiusY,
+      null,
+    );
+    borrow(skImageFilter);
+    skImageFilter.delete();
   }
 
   @override
@@ -272,27 +258,23 @@ class _CkErodeImageFilter extends CkImageFilter {
 
 class _CkComposeImageFilter extends CkImageFilter {
   _CkComposeImageFilter({required this.outer, required this.inner})
-      : super._() {
-    outer.imageFilter((SkImageFilter outerFilter) {
-      inner.imageFilter((SkImageFilter innerFilter) {
-        final SkImageFilter skImageFilter = canvasKit.ImageFilter.MakeCompose(
-          outerFilter,
-          innerFilter,
-        );
-        _ref = UniqueRef<SkImageFilter>(
-            this, skImageFilter, 'ImageFilter.compose');
-      });
-    });
-  }
+      : super._();
 
   final CkImageFilter outer;
   final CkImageFilter inner;
 
-  late final UniqueRef<SkImageFilter> _ref;
-
   @override
-  void imageFilter(SkImageFilterBorrow borrow) {
-    borrow(_ref.nativeObject);
+  void withSkImageFilter(SkImageFilterBorrow borrow) {
+    outer.withSkImageFilter((skOuter) {
+      inner.withSkImageFilter((skInner) {
+        final skImageFilter = canvasKit.ImageFilter.MakeCompose(
+          skOuter,
+          skInner,
+        );
+        borrow(skImageFilter);
+        skImageFilter.delete();
+      });
+    });
   }
 
   @override

@@ -148,7 +148,7 @@ class SurfacePaint implements ui.Paint {
 
   // TODO(ferhat): see https://github.com/flutter/flutter/issues/33605
   @override
-  double strokeMiterLimit = 0;
+  double strokeMiterLimit = 4.0;
 
   // TODO(ferhat): Implement ImageFilter, flutter/flutter#35156.
   @override

@@ -300,7 +300,6 @@ CkImage scaleImage(SkImage image, int? targetWidth, int? targetHeight) {
     ui.Rect.fromLTWH(0, 0, targetWidth!.toDouble(), targetHeight!.toDouble()),
     paint,
   );
-  paint.dispose();
 
   final CkPicture picture = recorder.endRecording();
   final ui.Image finalImage = picture.toImageSync(targetWidth, targetHeight);

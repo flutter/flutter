@@ -54,16 +54,25 @@ void testMain() {
   setUpCanvasKitTest(withImplicitView: true);
 
   group('ImageFilters', () {
-    test('can be constructed', () {
-      final CkImageFilter imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
-      expect(imageFilter, isA<CkImageFilter>());
-      SkImageFilter? skFilter;
-      imageFilter.imageFilter((SkImageFilter value) {
-        skFilter = value;
-      });
-      expect(skFilter, isNotNull);
-    });
-
+    {
+      final testFilters = createImageFilters();
+      for (final imageFilter in testFilters) {
+        test('${imageFilter.runtimeType}.withSkImageFilter creates temp SkImageFilter', () {
+          expect(imageFilter, isA<CkImageFilter>());
+          SkImageFilter? skFilter;
+          imageFilter.withSkImageFilter((value) {
+            expect(value.isDeleted(), isFalse);
+            skFilter = value;
+          });
+          expect(skFilter, isNotNull);
+          expect(
+            reason: 'Because the SkImageFilter instance is temporary',
+            skFilter!.isDeleted(),
+            isTrue,
+          );
+        });
+      }
+    }
 
     test('== operator', () {
       final List<ui.ImageFilter> filters1 = <ui.ImageFilter>[

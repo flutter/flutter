@@ -1516,6 +1516,9 @@ class SkImageFilter {}
 extension SkImageFilterExtension on SkImageFilter {
   external JSVoid delete();
 
+  @JS('isDeleted')
+  external JSBoolean _isDeleted();
+  bool isDeleted() => _isDeleted().toDart;
 
   @JS('getOutputBounds')
   external JSInt32Array _getOutputBounds(JSFloat32Array bounds);
