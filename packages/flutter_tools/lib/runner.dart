@@ -167,7 +167,7 @@ Future<int> _handleToolError(
 
   bool isDueToGitMissing(ProcessException error) => error.message.contains('git') &&
       !globals.processManager.canRun('git');
-    
+
   if (error is UsageException) {
     globals.printError('${error.message}\n');
     globals.printError("Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
