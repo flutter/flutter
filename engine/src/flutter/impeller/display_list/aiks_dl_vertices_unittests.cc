@@ -12,6 +12,7 @@
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/testing/testing.h"
+#include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 
 namespace impeller {
@@ -375,7 +376,10 @@ TEST_P(AiksTest, DrawVerticesWithInvalidIndices) {
   builder.DrawRect(SkRect::MakeLTRB(0, 0, 400, 400), paint);
   builder.DrawVertices(vertices, flutter::DlBlendMode::kSrc, paint);
 
-  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+  AiksContext renderer(GetContext(), nullptr);
+  std::shared_ptr<Texture> image =
+      DisplayListToTexture(builder.Build(), {1024, 768}, renderer);
+  EXPECT_TRUE(image);
 }
 
 // All four vertices should form a solid red rectangle with no gaps.
