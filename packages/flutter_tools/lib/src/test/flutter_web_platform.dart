@@ -454,9 +454,6 @@ class FlutterWebPlatform extends PlatformPlugin {
         } on FormatException catch (ex) {
           _logger.printError('Caught FormatException: $ex');
           return shelf.Response.ok('Caught exception: $ex');
-        } on IOException catch (ex) {
-          _logger.printError('Caught IOException: $ex');
-          return shelf.Response.ok('Caught exception: $ex');
         }
       }
       final String? errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens);
