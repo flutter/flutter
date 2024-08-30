@@ -193,7 +193,7 @@ Future<int> _handleToolError(
     globals.printError('${error.message}\n');
     globals.printError(
       'An error was encountered when trying to run git.\n'
-      "Please ensure git is installed and available in your system's PATH. "
+      "Please ensure git is installed and available in your system's search path. "
       'See https://docs.flutter.dev/get-started/install for instructions on '
       'installing git for your platform.',
     );
