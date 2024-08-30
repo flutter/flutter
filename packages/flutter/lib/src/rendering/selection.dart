@@ -136,7 +136,8 @@ class SelectedContentRange with Diagnosticable {
         startOffset = -1,
         endOffset = -1;
 
-  /// The length of the content.
+  /// The length of the content in the [Selectable] or [SelectionHandler] that
+  /// created this object.
   ///
   /// The absolute value of the difference between the start offset and end
   /// offset contained by this [SelectedContentRange] must not exceed the
@@ -494,7 +495,6 @@ abstract class SelectionEvent {
   /// The type of this selection event.
   final SelectionEventType type;
 }
-
 
 /// Indicates that the selection is finalized.
 ///
