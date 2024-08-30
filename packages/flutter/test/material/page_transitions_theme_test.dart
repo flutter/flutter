@@ -525,7 +525,7 @@ void main() {
     const Color themeTestSurfaceColor = Color.fromARGB(255, 195, 255, 0);
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => RepaintBoundary(
+      '/': (BuildContext context) => Material(
         child: Scaffold(
           appBar: AppBar(
             title: const Text('Home Page'),
@@ -551,7 +551,7 @@ void main() {
           ),
         ),
       ),
-      '/scaffolded': (BuildContext context) => RepaintBoundary(
+      '/scaffolded': (BuildContext context) => Material(
         child: Scaffold(
           appBar: AppBar(
             title: const Text('Scaffolded Page'),
@@ -566,7 +566,7 @@ void main() {
           ),
         ),
       ),
-      '/not-scaffolded': (BuildContext context) => RepaintBoundary(
+      '/not-scaffolded': (BuildContext context) => Material(
         child: Center(
           child: ElevatedButton(
             onPressed: () {
@@ -579,19 +579,19 @@ void main() {
     };
 
     await tester.pumpWidget(
-      RepaintBoundary(
-        child: MaterialApp(
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, surface: themeTestSurfaceColor),
+      MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, surface: themeTestSurfaceColor),
+          pageTransitionsTheme: PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              // Force all platforms to use ZoomPageTransitionsBuilder to test each one.
+              for (final TargetPlatform platform in TargetPlatform.values) platform: const ZoomPageTransitionsBuilder(),
+            },
           ),
-          routes: routes,
         ),
+        routes: routes,
       ),
     );
-
-    // Verify initial page.
-    expect(find.text('Route with scaffold!'), findsOneWidget);
-    expect(find.text('Route with NO scaffold!'), findsOneWidget);
 
     // Go to scaffolded page.
     await tester.tap(find.text('Route with scaffold!'));
@@ -601,7 +601,7 @@ void main() {
     await tester.pump(const Duration(milliseconds:75));
 
     // Verify that the render box is painting the right color for scaffolded pages.
-    final RenderBox scaffoldedRenderBox = tester.firstRenderObject<RenderBox>(find.byType(RepaintBoundary));
+    final RenderBox scaffoldedRenderBox = tester.firstRenderObject<RenderBox>(find.byType(MaterialApp));
     // Expect the color to be at exactly 12.2% opacity at this time.
     expect(scaffoldedRenderBox, paints..rect(color: themeTestSurfaceColor.withOpacity(0.122)));
 
@@ -617,10 +617,13 @@ void main() {
     await tester.pump(const Duration(milliseconds:125));
 
     // Verify that the render box is painting the right color for non-scaffolded pages.
-    final RenderBox nonScaffoldedRenderBox = tester.firstRenderObject<RenderBox>(find.byType(RepaintBoundary));
+    final RenderBox nonScaffoldedRenderBox = tester.firstRenderObject<RenderBox>(find.byType(MaterialApp));
     // Expect the color to be at exactly 59.6% opacity at this time.
     expect(nonScaffoldedRenderBox, paints..rect(color: themeTestSurfaceColor.withOpacity(0.596)));
 
     await tester.pumpAndSettle();
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    // Verify that the transition successfully completed.
+    expect(find.text('Back to home route...'), findsOneWidget);
+  }, variant: TargetPlatformVariant.all());
 }
