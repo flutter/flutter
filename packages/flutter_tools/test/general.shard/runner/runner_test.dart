@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -19,6 +20,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -29,10 +31,9 @@ import '../../src/fakes.dart';
 const String kCustomBugInstructions = 'These are instructions to report with a custom bug tracker.';
 
 void main() {
-  int? firstExitCode;
-  late MemoryFileSystem fileSystem;
-
-  group('runner', () {
+  group('runner (crash reporting)', () {
+    int? firstExitCode;
+    late MemoryFileSystem fileSystem;
     late FakeAnalytics fakeAnalytics;
     late TestUsage testUsage;
 
@@ -350,6 +351,65 @@ void main() {
     );
   });
 
+  group('runner', () {
+    late FakeAnalytics fakeAnalytics;
+    late MemoryFileSystem fs;
+
+    setUp(() {
+      fs = MemoryFileSystem.test();
+
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fs,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
+
+      Cache.disableLocking();
+    });
+
+    tearDown(() {
+      io.restoreExitFunction();
+      Cache.enableLocking();
+    });
+
+    testUsingContext("catches ProcessException calling git because it's not available", () async {
+      io.setExitFunctionForTests((int exitCode) {});
+
+      final _GitNotFoundFlutterCommand command = _GitNotFoundFlutterCommand();
+
+      await runner.run(
+        <String>[command.name],
+        () => <FlutterCommand>[
+          command,
+        ],
+        // This flutterVersion disables crash reporting.
+        flutterVersion: '[user-branch]/',
+        reportCrashes: false,
+        shutdownHooks: ShutdownHooks(),
+      );
+
+      expect(
+        fakeAnalytics.sentEvents
+            .where((Event e) => e.eventName == DashEvent.exception),
+        isEmpty,
+      );
+      expect(
+          (globals.logger as BufferLogger).errorText,
+          'Failed to find "git" in the search path.\n'
+          '\n'
+          'An error was encountered when trying to run git.\n'
+          "Please ensure git is installed and available in your system's PATH. "
+          'See https://docs.flutter.dev/get-started/install for instructions on installing git for your platform.\n');
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => fs,
+        Artifacts: () => Artifacts.test(),
+        ProcessManager: () =>
+            FakeProcessManager.any()..excludedExecutables.add('git'),
+      },
+    );
+  });
+
   group('unified_analytics', () {
     late FakeAnalytics fakeAnalytics;
     late MemoryFileSystem fs;
@@ -567,6 +627,23 @@ class CrashingFlutterCommand extends FlutterCommand {
     _completer!.complete();
 
     return FlutterCommandResult.success();
+  }
+}
+
+class _GitNotFoundFlutterCommand extends FlutterCommand {
+  @override
+  String get description => '';
+
+  @override
+  String get name => 'git-not-found';
+
+  @override
+  Future<FlutterCommandResult> runCommand() {
+    throw const io.ProcessException(
+      'git',
+      <String>['log'],
+      'Failed to find "git" in the search path.',
+    );
   }
 }
 

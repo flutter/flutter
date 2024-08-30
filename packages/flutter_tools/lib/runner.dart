@@ -164,6 +164,10 @@ Future<int> _handleToolError(
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks,
 ) async {
+
+  bool isDueToGitMissing(ProcessException error) => error.message.contains('git') &&
+      !globals.processManager.canRun('git');
+    
   if (error is UsageException) {
     globals.printError('${error.message}\n');
     globals.printError("Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
@@ -185,6 +189,15 @@ Future<int> _handleToolError(
     } else {
       return exitWithHooks(error.exitCode, shutdownHooks: shutdownHooks);
     }
+  } else if (error is ProcessException && isDueToGitMissing(error)) {
+    globals.printError('${error.message}\n');
+    globals.printError(
+      'An error was encountered when trying to run git.\n'
+      "Please ensure git is installed and available in your system's PATH. "
+      'See https://docs.flutter.dev/get-started/install for instructions on '
+      'installing git for your platform.',
+    );
+    return exitWithHooks(1, shutdownHooks: shutdownHooks);
   } else {
     // We've crashed; emit a log report.
     globals.stdio.stderrWrite('\n');
