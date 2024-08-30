@@ -81,9 +81,8 @@ void main() {
           'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
       late StartCommand startCommand;
       setUp(() {
-        String operatingSystem = const LocalPlatform().operatingSystem;
-        final String pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
-        Map<String, String> environment = <String, String>{
+        final String operatingSystem = const LocalPlatform().operatingSystem;
+        final Map<String, String> environment = <String, String>{
           'HOME': '/path/to/user/home',
         };
         final Directory homeDir = fileSystem.directory(
@@ -94,7 +93,7 @@ void main() {
         platform = FakePlatform(
           environment: environment,
           operatingSystem: operatingSystem,
-          pathSeparator: pathSeparator,
+          pathSeparator: '/',
         );
         processManager = FakeProcessManager.list(<FakeCommand>[]);
         checkouts = Checkouts(
