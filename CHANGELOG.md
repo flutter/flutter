@@ -36,7 +36,6 @@ INTERNAL NOTE
 - [flutter/154270](https://github.com/flutter/flutter/pull/154270): Prevent preemptive gradle crash for android builds that would fail to build anyway but with a confusing error message. 
 - [flutter/54735](https://github.com/flutter/engine/pull/54735): When semantics are enabled on Web, the onTap of various widgets (GestureDetector, InkWell) are called twice or the callback from one widget is called when another widget is pressed.
 
-
 ### [3.24.1](https://github.com/flutter/flutter/releases/tag/3.24.1)
 
 - [dart/56464](https://github.com/dart-lang/sdk/issues/56464) - Fixes resolving `include:` in `analysis_options.yaml` file in a nested folder in the workspace.
