@@ -32,7 +32,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-typedef _GlobalSpanRange = ({int startOffset, int endOffset});
+typedef _LocalSpanRange = ({int startOffset, int endOffset});
 
 class _MyHomePageState extends State<MyHomePage> {
   static const String _aboutLorem =
@@ -67,7 +67,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final ContextMenuController _menuController = ContextMenuController();
   late final List<Widget> _textWidgets;
-  final Map<_GlobalSpanRange, TextSpan> dataSourceMap = <_GlobalSpanRange, TextSpan>{};
+  // The data of the top level TextSpans. Each TextSpan is mapped to a _LocalSpanRange,
+  // which is the range the textspan covers relative to the SelectionListener it is under.
+  final Map<_LocalSpanRange, TextSpan> dataSourceMap = <_LocalSpanRange, TextSpan>{};
   final GlobalKey<SelectionAreaState> selectionAreaKey = GlobalKey<SelectionAreaState>();
 
   @override
@@ -88,11 +90,11 @@ class _MyHomePageState extends State<MyHomePage> {
         break;
       }
       final String paragraphText = text.substring(start, end);
-      final _GlobalSpanRange globalRange = (startOffset: currentPosition, endOffset: end);
-      dataSourceMap[globalRange] = TextSpan(text: paragraphText);
+      final _LocalSpanRange localRange = (startOffset: currentPosition, endOffset: end);
+      dataSourceMap[localRange] = TextSpan(text: paragraphText);
       paragraphWidgets.add(
         Text.rich(
-          dataSourceMap[globalRange]!,
+          dataSourceMap[localRange]!,
         ),
       );
       currentPosition = end;
@@ -107,34 +109,34 @@ class _MyHomePageState extends State<MyHomePage> {
     final List<Widget> newText = <Widget>[];
     final List<InlineSpan> insertedContent = <InlineSpan>[TextSpan(text: plainText)];
     // First pass, find how many text widgets are within the selection.
-    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in dataSourceMap.entries) {
-      final _GlobalSpanRange entryGlobalRange = entry.key;
-      final int normalizedStartOffset = min(selectionDetails.globalStartOffset, selectionDetails.globalEndOffset);
-      final int normalizedEndOffset = max(selectionDetails.globalStartOffset, selectionDetails.globalEndOffset);
-      if (normalizedStartOffset > entryGlobalRange.endOffset) {
+    for (final MapEntry<_LocalSpanRange, TextSpan> entry in dataSourceMap.entries) {
+      final _LocalSpanRange entryLocalRange = entry.key;
+      final int normalizedStartOffset = min(selectionDetails.localStartOffset, selectionDetails.localEndOffset);
+      final int normalizedEndOffset = max(selectionDetails.localStartOffset, selectionDetails.localEndOffset);
+      if (normalizedStartOffset > entryLocalRange.endOffset) {
         continue;
       }
-      if (normalizedEndOffset < entryGlobalRange.startOffset) {
+      if (normalizedEndOffset < entryLocalRange.startOffset) {
         continue;
       }
       textWidgetsInsideSelection += 1;
     }
-    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in dataSourceMap.entries) {
-      final _GlobalSpanRange entryGlobalRange = entry.key;
-      final int normalizedStartOffset = min(selectionDetails.globalStartOffset, selectionDetails.globalEndOffset);
-      final int normalizedEndOffset = max(selectionDetails.globalStartOffset, selectionDetails.globalEndOffset);
-      if (normalizedStartOffset > entryGlobalRange.endOffset) {
+    for (final MapEntry<_LocalSpanRange, TextSpan> entry in dataSourceMap.entries) {
+      final _LocalSpanRange entryLocalRange = entry.key;
+      final int normalizedStartOffset = min(selectionDetails.localStartOffset, selectionDetails.localEndOffset);
+      final int normalizedEndOffset = max(selectionDetails.localStartOffset, selectionDetails.localEndOffset);
+      if (normalizedStartOffset > entryLocalRange.endOffset) {
         continue;
       }
-      if (normalizedEndOffset < entryGlobalRange.startOffset) {
+      if (normalizedEndOffset < entryLocalRange.startOffset) {
         continue;
       }
       final TextSpan rawSpan = entry.value;
-      // Determine local ranges.
-      final int clampedGlobalStart = normalizedStartOffset < entryGlobalRange.startOffset ? entryGlobalRange.startOffset : normalizedStartOffset;
-      final int clampedGlobalEnd = normalizedEndOffset > entryGlobalRange.endOffset ? entryGlobalRange.endOffset : normalizedEndOffset;
-      final int startOffset = (clampedGlobalStart - entryGlobalRange.startOffset).abs();
-      final int endOffset = startOffset + (clampedGlobalEnd - clampedGlobalStart).abs();
+      // Determine local ranges relative to rawSpan.
+      final int clampedLocalStart = normalizedStartOffset < entryLocalRange.startOffset ? entryLocalRange.startOffset : normalizedStartOffset;
+      final int clampedLocalEnd = normalizedEndOffset > entryLocalRange.endOffset ? entryLocalRange.endOffset : normalizedEndOffset;
+      final int startOffset = (clampedLocalStart - entryLocalRange.startOffset).abs();
+      final int endOffset = startOffset + (clampedLocalEnd - clampedLocalStart).abs();
       final List<InlineSpan> beforeSelection = <InlineSpan>[];
       final List<InlineSpan> insideSelection = <InlineSpan>[];
       final List<InlineSpan> afterSelection = <InlineSpan>[];
@@ -214,7 +216,7 @@ class _MyHomePageState extends State<MyHomePage> {
             insideSelection.add(child);
           }
           // We do not increment the count here because the
-          // SelectionListener's global range offsets do not
+          // SelectionListener's local range offsets do not
           // account for un-selectable widgets or widgets
           // not managed by its selection delegate, like the
           // ones being inserted in this example.
@@ -232,26 +234,26 @@ class _MyHomePageState extends State<MyHomePage> {
       rangeIndex += 1;
     }
     // Rebuild column contents.
-    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in dataSourceMap.entries) {
+    for (final MapEntry<_LocalSpanRange, TextSpan> entry in dataSourceMap.entries) {
       newText.add(
         Text.rich(
           entry.value,
         ),
       );
     }
-    // Calculate new global ranges for paragraphs. This is necessary to keep the ranges
+    // Calculate new local ranges for paragraphs. This is necessary to keep the ranges
     // in sync after cutting/inserting new content into the textspan.
-    final Map<_GlobalSpanRange, TextSpan> newData = <_GlobalSpanRange, TextSpan>{};
-    int globalCount = 0;
-    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in dataSourceMap.entries) {
+    final Map<_LocalSpanRange, TextSpan> newData = <_LocalSpanRange, TextSpan>{};
+    int localCount = 0;
+    for (final MapEntry<_LocalSpanRange, TextSpan> entry in dataSourceMap.entries) {
       // Since the non-selectable widgetspan is not included in the SelectionListeners
-      // global range calculation, we should ignore them in the plain text calculation.
+      // local range calculation, we should ignore them in the plain text calculation.
       final int spanLength = entry.value.toPlainText(includePlaceholders: false).length;
-      newData[(startOffset: globalCount, endOffset: globalCount + spanLength)] = entry.value;
-      globalCount += spanLength;
+      newData[(startOffset: localCount, endOffset: localCount + spanLength)] = entry.value;
+      localCount += spanLength;
     }
     dataSourceMap.clear();
-    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in newData.entries) {
+    for (final MapEntry<_LocalSpanRange, TextSpan> entry in newData.entries) {
       dataSourceMap[entry.key] = entry.value;
     }
     newData.clear();

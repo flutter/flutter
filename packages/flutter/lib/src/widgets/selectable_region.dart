@@ -2610,7 +2610,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     ];
     assert(
       selections.isEmpty == selectables.isEmpty,
-      'This selection container delegate should return a list of SelectedContentRange.empty even if no selection is currently active.',
+      'This selection container delegate should return a list of SelectedContentRanges if it has selectable content, even if there is no current active selection. In that case return a list of SelectedContentRange.empty.',
     );
     return selections;
   }
@@ -3078,6 +3078,9 @@ typedef SelectionListenerSelectionChangedCallback = void Function(SelectionDetai
 /// A [SelectionContainer] that allows the user to listen to selection changes
 /// for the child subtree it wraps under a [SelectionArea] or [SelectableRegion].
 ///
+/// The selection updates are provided in the form of a [SelectionDetails] object,
+/// that can be accessed through the [onSelectionChanged] callback.
+///
 /// This widget should have an ancestor [SelectionArea] or [SelectableRegion]
 /// to be able to listen to selection changes in this widgets subtree.
 ///
@@ -3216,7 +3219,7 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
     return true;
   }
 
-  ({int startOffset, int endOffset}) _calculateGlobalOffsets(List<SelectedContentRange> ranges) {
+  ({int startOffset, int endOffset}) _calculateLocalOffsets(List<SelectedContentRange> ranges) {
     int startOffset = 0;
     int endOffset = 0;
     Selectable? startingSelectable;
@@ -3260,12 +3263,12 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
 
   SelectionDetails _getDetails() {
     final List<SelectedContentRange> ranges = getSelections();
-    final ({int startOffset, int endOffset}) globalOffsets = _calculateGlobalOffsets(ranges);
+    final ({int startOffset, int endOffset}) localOffsets = _calculateLocalOffsets(ranges);
     return SelectionDetails(
       status: value.status,
       selectionFinalized: selectionIsFinalized,
-      globalStartOffset: globalOffsets.startOffset,
-      globalEndOffset: globalOffsets.endOffset,
+      localStartOffset: localOffsets.startOffset,
+      localEndOffset: localOffsets.endOffset,
     );
   }
 }

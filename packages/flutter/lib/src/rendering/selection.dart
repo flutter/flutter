@@ -133,7 +133,8 @@ class SelectedContentRange {
     required this.endOffset,
   });
 
-  /// A selected content range that contains nothing.
+  /// A selected content range that represents an empty selection, i.e. nothing
+  /// is selected.
   static SelectedContentRange empty({int? contentLength}) {
     return SelectedContentRange(
       startOffset: -1,
@@ -168,7 +169,10 @@ class SelectedContentRange {
   ///     text: 'Hello world, ',
   ///     children: <InlineSpan>[
   ///       WidgetSpan(
-  ///         child: Text('how are you today?'),
+  ///         child: Text('how are you today? '),
+  ///       ),
+  ///       TextSpan(
+  ///         text: 'Good, thanks for asking.',
   ///       ),
   ///     ],
   ///   ),
@@ -177,14 +181,19 @@ class SelectedContentRange {
   /// {@end-tool}
   ///
   /// If we select from the beginning of 'world' to the
-  /// end of the '?' in the [WidgetSpan], we will receive
-  /// two [SelectedContentRange]s from [SelectionHandler.getSelections].
-  /// The first range will be relative to the root text
-  /// of the [TextSpan], the [startOffset] will be 6,
-  /// and [endOffset] will be 13. The second range
-  /// will be relative to the content inside the
-  /// [WidgetSpan], the [startOffset] will be 0,
-  /// and [endOffset] will be 18.
+  /// end of the '.' at the end of the [TextSpan] tree, we
+  /// will receive three [SelectedContentRange]s from
+  /// [SelectionHandler.getSelections]. The first range
+  /// will be relative to the root text of the [TextSpan],
+  /// the [startOffset] will be 6, and [endOffset] will be
+  /// 13. The second range will be relative to the content
+  /// inside the [WidgetSpan], the [startOffset] will be 0,
+  /// and [endOffset] will be 19. The third range will
+  /// be relative to the root text of the overarching [TextSpan],
+  /// the [startOffset] will be 14, and [endOffset] will be 38.
+  ///
+  /// If [startOffset] and [endOffset] are both -1, the selected content
+  /// range is empty, i.e. nothing is selected.
   /// {@endtemplate}
   final int startOffset;
 
@@ -791,11 +800,11 @@ class SelectionDetails {
   const SelectionDetails({
     required this.status,
     required this.selectionFinalized,
-    required this.globalStartOffset,
-    required this.globalEndOffset,
+    required this.localStartOffset,
+    required this.localEndOffset,
   });
 
-  /// The status of ongoing selection under the [Selectable]
+  /// The status of the selection under the [Selectable]
   /// or [SelectionHandler] that created this object.
   final SelectionStatus status;
 
@@ -803,13 +812,21 @@ class SelectionDetails {
   ///
   /// Returns false if the selection is ongoing and
   /// true if the selection is finalized.
+  ///
+  /// A selection is ongoing in scenarios like an ongoing mouse drag,
+  /// long press drag, or in between states where both selection edges
+  /// have not reached their final position.
   final bool selectionFinalized;
 
-  /// The global start offset.
-  final int globalStartOffset;
+  /// The offset where the selection starts.
+  ///
+  /// This is relative to the [Selectable] subtree of the object creator.
+  final int localStartOffset;
 
-  /// The global end offset.
-  final int globalEndOffset;
+  /// The offset where the selection ends.
+  ///
+  /// This is relative to the [Selectable] subtree of the object creator.
+  final int localEndOffset;
 
   @override
   bool operator ==(Object other) {
@@ -822,8 +839,8 @@ class SelectionDetails {
     return other is SelectionDetails
         && other.status == status
         && other.selectionFinalized == selectionFinalized
-        && other.globalStartOffset == globalStartOffset
-        && other.globalEndOffset == globalEndOffset;
+        && other.localStartOffset == localStartOffset
+        && other.localEndOffset == localEndOffset;
   }
 
   @override
@@ -831,8 +848,8 @@ class SelectionDetails {
     return Object.hash(
       status,
       selectionFinalized,
-      globalStartOffset,
-      globalEndOffset,
+      localStartOffset,
+      localEndOffset,
     );
   }
 
@@ -841,8 +858,8 @@ class SelectionDetails {
     return 'SelectionDetails(\n'
            '  status: $status,\n'
            '  selectionFinalized: $selectionFinalized,\n'
-           '  globalStartOffset: $globalStartOffset\n'
-           '  globalEndOffset: $globalEndOffset,\n'
+           '  localStartOffset: $localStartOffset\n'
+           '  localEndOffset: $localEndOffset,\n'
            ')';
   }
 }
