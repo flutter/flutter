@@ -11,6 +11,7 @@ library;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/foundation/colors.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
@@ -230,7 +231,7 @@ class OutlinedButton extends ButtonStyleButton {
     };
     final MaterialStateProperty<Color?>? overlayColorProp = switch ((foregroundColor, overlayColor)) {
       (null, null) => null,
-      (_, final Color overlayColor) when overlayColor.value == 0 => const MaterialStatePropertyAll<Color?>(Colors.transparent),
+      (_, final Color overlayColor) when overlayColor.isEquivalentTo(const Color(0x00000000)) => const MaterialStatePropertyAll<Color?>(Colors.transparent),
       (_, _) => _OutlinedButtonDefaultOverlay((overlayColor ?? foregroundColor)!),
     };
     final MaterialStateProperty<MouseCursor?> mouseCursor = _OutlinedButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);

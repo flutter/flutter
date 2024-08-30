@@ -11,6 +11,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../color_matcher.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
 // These constants are copied from cupertino/text_selection_toolbar.dart.
@@ -469,10 +470,10 @@ void main() {
         final Brightness effectiveBrightness = themeBrightness ?? mediaBrightness ?? Brightness.light;
 
         expect(
-          text.style!.color!.value,
-          effectiveBrightness == Brightness.dark
-              ? _kToolbarTextColor.darkColor.value
-              : _kToolbarTextColor.color.value,
+          text.style!.color,
+          isEquivalentColor(effectiveBrightness == Brightness.dark
+              ? _kToolbarTextColor.darkColor
+              : _kToolbarTextColor.color),
         );
       }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
     }

@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../color_matcher.dart';
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
@@ -5417,7 +5418,7 @@ void main() {
       expect(getIconData(tester).size, 18.0);
 
       TextStyle labelStyle = getLabelStyle(tester, 'Chip A').style;
-      expect(labelStyle.color?.value, 0xde000000);
+      expect(labelStyle.color, isEquivalentColor(const Color(0xde000000)));
       expect(labelStyle.fontFamily, textTheme.bodyLarge?.fontFamily);
       expect(labelStyle.fontFamilyFallback, textTheme.bodyLarge?.fontFamilyFallback);
       expect(labelStyle.fontFeatures, textTheme.bodyLarge?.fontFeatures);
@@ -5439,12 +5440,12 @@ void main() {
       expect(getMaterial(tester).color, null);
       expect(getMaterial(tester).elevation, 0);
       expect(getMaterial(tester).shape, const StadiumBorder());
-      expect(getIconData(tester).color?.value, 0xffffffff);
+      expect(getIconData(tester).color, isEquivalentColor(const Color(0xffffffff)));
       expect(getIconData(tester).opacity, null);
       expect(getIconData(tester).size, 18.0);
 
       labelStyle = getLabelStyle(tester, 'Chip A').style;
-      expect(labelStyle.color?.value, 0xdeffffff);
+      expect(labelStyle.color, isEquivalentColor(const Color(0xdeffffff)));
       expect(labelStyle.fontFamily, textTheme.bodyLarge?.fontFamily);
       expect(labelStyle.fontFamilyFallback, textTheme.bodyLarge?.fontFamilyFallback);
       expect(labelStyle.fontFeatures, textTheme.bodyLarge?.fontFeatures);

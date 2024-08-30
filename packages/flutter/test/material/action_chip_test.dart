@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../color_matcher.dart';
+
 /// Adds the basic requirements for a Chip.
 Widget wrapForChip({
   required Widget child,
@@ -154,8 +156,8 @@ void main() {
     );
     // Test default label style.
     expect(
-      getLabelStyle(tester, label).style.color!.value,
-      theme.colorScheme.onSurface.value,
+      getLabelStyle(tester, label).style.color,
+      isEquivalentColor(theme.colorScheme.onSurface),
     );
 
     Material chipMaterial = getMaterial(tester);
@@ -228,8 +230,8 @@ void main() {
     );
     // Test default label style.
     expect(
-      getLabelStyle(tester, label).style.color!.value,
-      theme.colorScheme.onSurface.value,
+      getLabelStyle(tester, label).style.color,
+      isEquivalentColor(theme.colorScheme.onSurface),
     );
 
     Material chipMaterial = getMaterial(tester);

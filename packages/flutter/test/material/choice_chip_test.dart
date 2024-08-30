@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../color_matcher.dart';
+
 RenderBox getMaterialBox(WidgetTester tester, Finder type) {
   return tester.firstRenderObject<RenderBox>(
     find.descendant(
@@ -203,8 +205,8 @@ void main() {
     );
     // Test default label style.
     expect(
-      getLabelStyle(tester, label).style.color!.value,
-      theme.colorScheme.onSurfaceVariant.value,
+      getLabelStyle(tester, label).style.color,
+      isEquivalentColor(theme.colorScheme.onSurfaceVariant),
     );
 
     Material chipMaterial = getMaterial(tester);
@@ -338,8 +340,8 @@ void main() {
     );
     // Test default label style.
     expect(
-      getLabelStyle(tester, label).style.color!.value,
-      theme.colorScheme.onSurfaceVariant.value,
+      getLabelStyle(tester, label).style.color,
+      isEquivalentColor(theme.colorScheme.onSurfaceVariant),
     );
 
     Material chipMaterial = getMaterial(tester);

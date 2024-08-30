@@ -130,9 +130,9 @@ abstract final class SystemChannels {
   ///    [String] description, and `primaryColor` giving a 32 bit integer value
   ///    (the lower eight bits being the blue channel, the next eight bits being
   ///    the green channel, the next eight bits being the red channel, and the
-  ///    high eight bits being set, as from [Color.value] for an opaque color).
-  ///    The `primaryColor` can also be zero to indicate that the system default
-  ///    should be used. See [SystemChrome.setApplicationSwitcherDescription].
+  ///    high eight bits being set). The `primaryColor` can also be zero to
+  ///    indicate that the system default should be used. See
+  ///    [SystemChrome.setApplicationSwitcherDescription].
   ///
   ///  * `SystemChrome.setEnabledSystemUIOverlays`: Specifies the set of system
   ///    overlays to have visible when the application is running. The argument

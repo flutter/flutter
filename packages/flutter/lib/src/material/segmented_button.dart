@@ -14,6 +14,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/foundation/colors.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
@@ -303,7 +304,7 @@ class SegmentedButton<T> extends StatefulWidget {
       selectedForegroundColor == null && overlayColor == null)
         ? null
         : switch (overlayColor) {
-            (final Color overlayColor) when overlayColor.value == 0 => const MaterialStatePropertyAll<Color?>(Colors.transparent),
+            (final Color overlayColor) when overlayColor.isEquivalentTo(const Color(0x00000000)) => const MaterialStatePropertyAll<Color?>(Colors.transparent),
             _ => _SegmentedButtonDefaultsM3.resolveStateColor(foregroundColor, selectedForegroundColor, overlayColor),
           };
     return TextButton.styleFrom(

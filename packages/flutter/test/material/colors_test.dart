@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../color_matcher.dart';
+
 const List<int> primaryKeys = <int>[50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
 const List<int> accentKeys = <int>[100, 200, 400, 700];
 
@@ -26,29 +28,29 @@ void main() {
       },
     );
 
-    expect(color.value, 500);
+    expect(color, isEquivalentColor(const Color(0x000001f4)));
 
-    expect(color[50]!.value, 0x00000050);
-    expect(color[100]!.value, 0x00000100);
-    expect(color[200]!.value, 0x00000200);
-    expect(color[300]!.value, 0x00000300);
-    expect(color[400]!.value, 0x00000400);
-    expect(color[500]!.value, 0x00000500);
-    expect(color[600]!.value, 0x00000600);
-    expect(color[700]!.value, 0x00000700);
-    expect(color[800]!.value, 0x00000800);
-    expect(color[900]!.value, 0x00000900);
+    expect(color[50], isEquivalentColor(const Color(0x00000050)));
+    expect(color[100], isEquivalentColor(const Color(0x00000100)));
+    expect(color[200], isEquivalentColor(const Color(0x00000200)));
+    expect(color[300], isEquivalentColor(const Color(0x00000300)));
+    expect(color[400], isEquivalentColor(const Color(0x00000400)));
+    expect(color[500], isEquivalentColor(const Color(0x00000500)));
+    expect(color[600], isEquivalentColor(const Color(0x00000600)));
+    expect(color[700], isEquivalentColor(const Color(0x00000700)));
+    expect(color[800], isEquivalentColor(const Color(0x00000800)));
+    expect(color[900], isEquivalentColor(const Color(0x00000900)));
 
-    expect(color.shade50.value, 0x00000050);
-    expect(color.shade100.value, 0x00000100);
-    expect(color.shade200.value, 0x00000200);
-    expect(color.shade300.value, 0x00000300);
-    expect(color.shade400.value, 0x00000400);
-    expect(color.shade500.value, 0x00000500);
-    expect(color.shade600.value, 0x00000600);
-    expect(color.shade700.value, 0x00000700);
-    expect(color.shade800.value, 0x00000800);
-    expect(color.shade900.value, 0x00000900);
+    expect(color.shade50, isEquivalentColor(const Color(0x00000050)));
+    expect(color.shade100, isEquivalentColor(const Color(0x00000100)));
+    expect(color.shade200, isEquivalentColor(const Color(0x00000200)));
+    expect(color.shade300, isEquivalentColor(const Color(0x00000300)));
+    expect(color.shade400, isEquivalentColor(const Color(0x00000400)));
+    expect(color.shade500, isEquivalentColor(const Color(0x00000500)));
+    expect(color.shade600, isEquivalentColor(const Color(0x00000600)));
+    expect(color.shade700, isEquivalentColor(const Color(0x00000700)));
+    expect(color.shade800, isEquivalentColor(const Color(0x00000800)));
+    expect(color.shade900, isEquivalentColor(const Color(0x00000900)));
   });
 
   test('Colors swatches do not contain duplicates', () {
