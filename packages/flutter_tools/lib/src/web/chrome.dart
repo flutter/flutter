@@ -562,7 +562,7 @@ Future<ChromeTab?> getChromeTabGuarded(
   void Function(Object error, StackTrace stackTrace)? onIoError,
 }) async {
   try {
-    return asyncGuard(
+    return await asyncGuard(
       () => chromeConnection.getTab(
         accept,
         retryFor: retryFor,
