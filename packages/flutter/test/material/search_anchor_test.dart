@@ -3063,14 +3063,7 @@ void main() {
 
     final Finder searchBarFinder = find.byType(SearchAnchor);
     expect(searchBarFinder, findsOneWidget);
-    bool tapFailed = false;
-
-    try {
-      await tester.tap(searchBarFinder);
-    } catch (_) {
-      tapFailed = true;
-    }
-    expect(tapFailed, isTrue);
+    expect(searchBarFinder.hitTestable().tryEvaluate(), false);
   });
 
   testWidgets('SearchAnchor respects headerHeight', (WidgetTester tester) async {
