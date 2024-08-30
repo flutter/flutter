@@ -603,7 +603,6 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds:75));
 
-    // Use golden file to check correct color presence
     await expectLater(
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('page_transitions_theme.zoom_page_canvas.scaffolded.png'),
