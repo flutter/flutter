@@ -35,21 +35,26 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-typedef _GlobalSpanRange = ({int startOffset, int endOffset});
+typedef _LocalSpanRange = ({int startOffset, int endOffset});
 
 class _MyHomePageState extends State<MyHomePage> {
   final ContextMenuController _menuController = ContextMenuController();
   final GlobalKey<SelectionAreaState> selectionAreaKey = GlobalKey<SelectionAreaState>();
 
-  // The data of the top level TextSpans.
-  Map<_GlobalSpanRange, TextSpan> dataSourceMap = <_GlobalSpanRange, TextSpan>{};
-  // The data of the bulleted list contained within a TextSpan.
-  Map<_GlobalSpanRange, TextSpan> bulletSourceMap = <_GlobalSpanRange, TextSpan>{};
-  Map<_GlobalSpanRange, TextSpan> emphasizedTextMap = <_GlobalSpanRange, TextSpan>{};
-  Map<int, Map<_GlobalSpanRange, TextSpan>> widgetSpanMaps = <int, Map<_GlobalSpanRange, TextSpan>>{};
-  late final Map<_GlobalSpanRange, TextSpan> originSourceData;
-  late final Map<_GlobalSpanRange, TextSpan> originBulletSourceData;
-  late final Map<_GlobalSpanRange, TextSpan> originEmphasizedSourceData;
+  // The data of the top level TextSpans. Each TextSpan is mapped to a _LocalSpanRange,
+  // which is the range the textspan covers relative to the SelectionListener it is under.
+  Map<_LocalSpanRange, TextSpan> dataSourceMap = <_LocalSpanRange, TextSpan>{};
+  // The data of the bulleted list contained within a WidgetSpan. Each bullet is mapped
+  // to a _LocalSpanRange, being the range the bullet covers relative to the SelectionListener
+  // it is under.
+  Map<_LocalSpanRange, TextSpan> bulletSourceMap = <_LocalSpanRange, TextSpan>{};
+  // The data of the emphasized text contained within a WidgetSpan.
+  Map<_LocalSpanRange, TextSpan> emphasizedTextMap = <_LocalSpanRange, TextSpan>{};
+  Map<int, Map<_LocalSpanRange, TextSpan>> widgetSpanMaps = <int, Map<_LocalSpanRange, TextSpan>>{};
+  // The origin data used to restore the demo to its initial state.
+  late final Map<_LocalSpanRange, TextSpan> originSourceData;
+  late final Map<_LocalSpanRange, TextSpan> originBulletSourceData;
+  late final Map<_LocalSpanRange, TextSpan> originEmphasizedSourceData;
 
   @override
   void initState() {
@@ -119,42 +124,42 @@ class _MyHomePageState extends State<MyHomePage> {
     dataSourceMap[(startOffset: currentOffset, endOffset: currentOffset + thirdTextParagraph.toPlainText(includeSemanticsLabels: false).length)] = thirdTextParagraph;
 
     // Save the origin data so we can revert our changes.
-    originSourceData = <_GlobalSpanRange, TextSpan>{};
-    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in dataSourceMap.entries) {
+    originSourceData = <_LocalSpanRange, TextSpan>{};
+    for (final MapEntry<_LocalSpanRange, TextSpan> entry in dataSourceMap.entries) {
       originSourceData[entry.key] = entry.value;
     }
-    originBulletSourceData = <_GlobalSpanRange, TextSpan>{};
-    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in bulletSourceMap.entries) {
+    originBulletSourceData = <_LocalSpanRange, TextSpan>{};
+    for (final MapEntry<_LocalSpanRange, TextSpan> entry in bulletSourceMap.entries) {
       originBulletSourceData[entry.key] = entry.value;
     }
-    originEmphasizedSourceData = <_GlobalSpanRange, TextSpan>{};
-    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in emphasizedTextMap.entries) {
+    originEmphasizedSourceData = <_LocalSpanRange, TextSpan>{};
+    for (final MapEntry<_LocalSpanRange, TextSpan> entry in emphasizedTextMap.entries) {
       originEmphasizedSourceData[entry.key] = entry.value;
     }
   }
 
   void _colorSelectionRed(
     SelectionDetails selectionDetails, {
-    required Map<_GlobalSpanRange, TextSpan> dataMap,
+    required Map<_LocalSpanRange, TextSpan> dataMap,
     required bool coloringChildSpan,
   }) {
-    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in dataMap.entries) {
-      final _GlobalSpanRange entryGlobalRange = entry.key;
-      final int normalizedStartOffset = min(selectionDetails.globalStartOffset, selectionDetails.globalEndOffset);
-      final int normalizedEndOffset = max(selectionDetails.globalStartOffset, selectionDetails.globalEndOffset);
-      if (normalizedStartOffset > entryGlobalRange.endOffset) {
+    for (final MapEntry<_LocalSpanRange, TextSpan> entry in dataMap.entries) {
+      final _LocalSpanRange entryLocalRange = entry.key;
+      final int normalizedStartOffset = min(selectionDetails.localStartOffset, selectionDetails.localEndOffset);
+      final int normalizedEndOffset = max(selectionDetails.localStartOffset, selectionDetails.localEndOffset);
+      if (normalizedStartOffset > entryLocalRange.endOffset) {
         continue;
       }
-      if (normalizedEndOffset < entryGlobalRange.startOffset) {
+      if (normalizedEndOffset < entryLocalRange.startOffset) {
         continue;
       }
       // The selection details is covering the current entry so let's color the range red.
       final TextSpan rawSpan = entry.value;
-      // Determine local ranges.
-      final int clampedGlobalStart = normalizedStartOffset < entryGlobalRange.startOffset ? entryGlobalRange.startOffset : normalizedStartOffset;
-      final int clampedGlobalEnd = normalizedEndOffset > entryGlobalRange.endOffset ? entryGlobalRange.endOffset : normalizedEndOffset;
-      final int startOffset = (clampedGlobalStart - entryGlobalRange.startOffset).abs();
-      final int endOffset = startOffset + (clampedGlobalEnd - clampedGlobalStart).abs();
+      // Determine local ranges relative to rawSpan.
+      final int clampedLocalStart = normalizedStartOffset < entryLocalRange.startOffset ? entryLocalRange.startOffset : normalizedStartOffset;
+      final int clampedLocalEnd = normalizedEndOffset > entryLocalRange.endOffset ? entryLocalRange.endOffset : normalizedEndOffset;
+      final int startOffset = (clampedLocalStart - entryLocalRange.startOffset).abs();
+      final int endOffset = startOffset + (clampedLocalEnd - clampedLocalStart).abs();
       final List<InlineSpan> beforeSelection = <InlineSpan>[];
       final List<InlineSpan> insideSelection = <InlineSpan>[];
       final List<InlineSpan> afterSelection = <InlineSpan>[];
@@ -213,7 +218,7 @@ class _MyHomePageState extends State<MyHomePage> {
             // We have arrived at a WidgetSpan but it is unaccounted for.
             return true;
           }
-          final Map<_GlobalSpanRange, TextSpan> widgetSpanSourceMap = widgetSpanMaps[count]!;
+          final Map<_LocalSpanRange, TextSpan> widgetSpanSourceMap = widgetSpanMaps[count]!;
           if (count < startOffset && count + (widgetSpanSourceMap.keys.last.endOffset - widgetSpanSourceMap.keys.first.startOffset).abs() < startOffset) {
             // When the count is less than the startOffset and we are at a widgetspan
             // it is still possible that the startOffset is somewhere within the widgetspan,
@@ -242,7 +247,7 @@ class _MyHomePageState extends State<MyHomePage> {
               WidgetSpan(
                 child: Column(
                   children: <Widget>[
-                    for (final MapEntry<_GlobalSpanRange, TextSpan> entry in widgetSpanSourceMap.entries)
+                    for (final MapEntry<_LocalSpanRange, TextSpan> entry in widgetSpanSourceMap.entries)
                       Padding(
                         padding: const EdgeInsets.only(left: 20.0),
                         child: Text.rich(
@@ -341,7 +346,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                for (final MapEntry<_GlobalSpanRange, TextSpan> entry in dataSourceMap.entries)
+                for (final MapEntry<_LocalSpanRange, TextSpan> entry in dataSourceMap.entries)
                   Text.rich(
                     entry.value,
                   ),
@@ -354,13 +359,13 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () {
           setState(() {
             // Resets the state to the origin data.
-            for (final MapEntry<_GlobalSpanRange, TextSpan> entry in originSourceData.entries) {
+            for (final MapEntry<_LocalSpanRange, TextSpan> entry in originSourceData.entries) {
               dataSourceMap[entry.key] = entry.value;
             }
-            for (final MapEntry<_GlobalSpanRange, TextSpan> entry in originBulletSourceData.entries) {
+            for (final MapEntry<_LocalSpanRange, TextSpan> entry in originBulletSourceData.entries) {
               bulletSourceMap[entry.key] = entry.value;
             }
-            for (final MapEntry<_GlobalSpanRange, TextSpan> entry in originEmphasizedSourceData.entries) {
+            for (final MapEntry<_LocalSpanRange, TextSpan> entry in originEmphasizedSourceData.entries) {
               emphasizedTextMap[entry.key] = entry.value;
             }
           });
