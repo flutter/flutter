@@ -6,7 +6,8 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
+    hide StackTrace;
 
 import '../base/async_guard.dart';
 import '../base/common.dart';
@@ -563,12 +564,37 @@ class Chromium {
   }
 }
 
-// TODO(andrewkolos): Remove when https://github.com/dart-lang/sdk/issues/56566
-//  is fixed.
+
+/// Wrapper for [ChromeConnection.getTab] that will catch any [IOException] or
+/// [StateError], delegate it to the [onIoError] callback, and return null.
+///
+/// This is useful for callers who are want to retrieve a [ChromeTab], but
+/// are okay with the operation failing (e.g. due to an network IO issue or
+/// the Chrome process no longer existing).
 Future<ChromeTab?> getChromeTabGuarded(
   ChromeConnection chromeConnection,
   bool Function(ChromeTab tab) accept, {
   Duration? retryFor,
-}) {
-  return asyncGuard(() => chromeConnection.getTab(accept, retryFor: retryFor));
+  void Function(Object error, StackTrace stackTrace)? onIoError,
+}) async {
+  try {
+    return asyncGuard(
+      () => chromeConnection.getTab(
+        accept,
+        retryFor: retryFor,
+      ),
+    );
+  } on IOException catch (error, stackTrace) {
+    if (onIoError != null) {
+      onIoError(error, stackTrace);
+    }
+    return null;
+    // The underlying HttpClient will throw a StateError when it tries to
+    // perform a request despite the connection already being closed.
+  } on StateError catch (error, stackTrace) {
+    if (onIoError != null) {
+      onIoError(error, stackTrace);
+    }
+    return null;
+  }
 }
