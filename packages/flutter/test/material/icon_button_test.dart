@@ -1124,8 +1124,8 @@ void main() {
       )
     );
 
-    Color? iconColorwithValues(alpha: ) => _iconStyle(tester, Icons.add)?.color;
-    expect(iconColorwithValues(alpha: ), Colors.purple.withValues(alpha: 0.5));
+    Color? iconColorWithOpacity() => _iconStyle(tester, Icons.add)?.color;
+    expect(iconColorWithOpacity(), Colors.purple.withValues(alpha: 0.5));
   });
 
   testWidgets('IconButton defaults - M3', (WidgetTester tester) async {
