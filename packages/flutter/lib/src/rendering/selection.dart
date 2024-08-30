@@ -135,14 +135,11 @@ class SelectedContentRange with Diagnosticable {
 
   /// A selected content range that represents an empty selection, i.e. nothing
   /// is selected.
-  static SelectedContentRange empty({int? contentLength}) {
-    return SelectedContentRange(
-      startOffset: -1,
-      endOffset: -1,
-      contentStart: -1,
-      contentLength: contentLength ?? -1,
-    );
-  }
+  const SelectedContentRange.empty({int contentLength = 0})
+      : contentLength = contentLength,
+        contentStart = -1,
+        startOffset = -1,
+        endOffset = -1;
 
   /// The length of the content.
   ///
