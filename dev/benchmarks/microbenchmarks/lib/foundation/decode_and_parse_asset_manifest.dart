@@ -9,7 +9,7 @@ import '../common.dart';
 
 const int _kNumIterations = 1000;
 
-Future<void> execute() async {
+void main() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
