@@ -140,12 +140,53 @@ projectsEvaluated {
     // as Maven artifacts.
     modulePlugins.each { pluginProject ->
         configurePlugin(pluginProject, moduleProject.property("output-dir"))
-        moduleProject.android.libraryVariants.all { variant ->
-            // Configure the `assembleAar<variantName>` task for each plugin's projects and make
-            // the module's equivalent task depend on the plugin's task.
-            String variantName = variant.name.capitalize()
-            moduleProject.tasks.findByPath("assembleAar$variantName")
-                .dependsOn(pluginProject.tasks.findByPath("assembleAar$variantName"))
+    }
+
+    // Helper function to ensure a task exists or create it
+    def ensureTask = { Project project, String variantName ->
+        String name = variantName.capitalize()
+        String taskName = "assembleAar$name"
+        def task = project.tasks.findByName(taskName)
+        if (task == null) {
+          // Filter to find the matching component
+            def matchingComponent = project.components.find { it.name == variantName }
+            task = project.tasks.create(name: taskName) {
+                // This check is required to be able to configure the archives before `publish` runs.
+                if (!project.gradle.startParameter.taskNames.contains(taskName)) {
+                    return
+                }
+
+                // if the the publication already exists on the project, skip creating the publication creation task
+                if(project.publishing.publications.findByName(variantName) != null) {
+                    finalizedBy "publish"
+                    return
+                }
+
+                if (matchingComponent == null) {
+                    return
+                }
+
+                // Create a default MavenPublication for the variant (except "all" since that is used to publish artifacts in the new way)
+                project.publishing.publications.create(variantName, MavenPublication) { pub ->
+                    groupId = "${pub.groupId}"
+                    artifactId = "${pub.artifactId}_${pub.name}"
+                    version = "${pub.version}"
+                    from matchingComponent
+                }
+                //Generate the Maven artifacts.
+                finalizedBy "publish"
+            }
+        }
+        return task
+    }
+    // Ensure tasks are created for the module project and set up dependencies
+    moduleProject.android.libraryVariants.all { variant ->
+        def moduleTask = ensureTask(moduleProject, variant.name)
+        modulePlugins.each { pluginProject ->
+            // Attempt to find or create the task in the plugin project
+            def pluginTask = ensureTask(pluginProject, variant.name)
+            // Set up the dependency
+            moduleTask.dependsOn(pluginTask)
         }
     }
 }
