@@ -4,7 +4,6 @@
 
 import 'dart:convert' show jsonDecode;
 
-import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:conductor_core/src/proto/conductor_state.pb.dart' as pb;
 import 'package:conductor_core/src/proto/conductor_state.pbenum.dart';
