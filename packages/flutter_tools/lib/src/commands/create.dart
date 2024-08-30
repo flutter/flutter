@@ -968,7 +968,7 @@ Alternatively, to continue using your current Java version, update the AGP
 version in the following file(s) to a compatible version$compatibleAgpVersionMessage:
 $gradleBuildFilePaths
 
-For details on compatible Java and AGP versions, see:
+For details on compatible Java and AGP versions, see
 https://developer.android.com/build/releases/gradle-plugin
 ''',
     emphasis: true
