@@ -2015,7 +2015,7 @@ void main() {
     );
 
     expect(editable, paints..rrect(
-      color: cursorColor.withOpacity(0.75),
+      color: cursorColor.withValues(alpha: 0.75),
       rrect: expectedRRect
     ));
 
@@ -2030,7 +2030,7 @@ void main() {
     pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paints..rrect(
-      color: cursorColor.withOpacity(0.75),
+      color: cursorColor.withValues(alpha: 0.75),
       rrect: expectedRRect
     ));
   });

@@ -1081,8 +1081,8 @@ void main() {
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
         ..rect()
-        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38))
-        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38)),
+        ..circle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38))
+        ..circle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38)),
     );
   });
 

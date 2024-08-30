@@ -890,7 +890,7 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 
   @override
   Color get backgroundColor => _theme.brightness == Brightness.light
-      ? Color.alphaBlend(_colors.onSurface.withOpacity(0.80), _colors.surface)
+      ? Color.alphaBlend(_colors.onSurface.withValues(alpha: 0.80), _colors.surface)
       : _colors.onSurface;
 
   @override
@@ -910,7 +910,7 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 
   @override
   Color get disabledActionTextColor => _colors.onSurface
-      .withOpacity(_theme.brightness == Brightness.light ? 0.38 : 0.3);
+      .withValues(alpha: _theme.brightness == Brightness.light ? 0.38 : 0.3);
 
   @override
   ShapeBorder get shape => const RoundedRectangleBorder(

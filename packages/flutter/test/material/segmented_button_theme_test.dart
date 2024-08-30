@@ -105,7 +105,7 @@ void main() {
       final Material material = tester.widget<Material>(parent);
       expect(material.color, Colors.transparent);
       expect(material.shape, const RoundedRectangleBorder());
-      expect(material.textStyle!.color, theme.colorScheme.onSurface.withOpacity(0.38));
+      expect(material.textStyle!.color, theme.colorScheme.onSurface.withValues(alpha: 0.38));
       expect(material.textStyle!.fontFamily, 'Roboto');
       expect(material.textStyle!.fontSize, 14);
       expect(material.textStyle!.fontWeight, FontWeight.w500);
@@ -520,13 +520,13 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withValues(alpha: 0.08)));
 
     // Hovered unselected segment,
     center = tester.getCenter(find.text('Option 2'));
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withValues(alpha: 0.08)));
 
     // Highlighted unselected segment (pressed).
     center = tester.getCenter(find.text('Option 1'));
@@ -535,8 +535,8 @@ void main() {
     expect(
       getOverlayColor(tester),
       paints
-        ..rect(color: overlayColor.withOpacity(0.08))
-        ..rect(color: overlayColor.withOpacity(0.1)),
+        ..rect(color: overlayColor.withValues(alpha: 0.08))
+        ..rect(color: overlayColor.withValues(alpha: 0.1)),
     );
     // Remove pressed and hovered states,
     await gesture.up();
@@ -551,8 +551,8 @@ void main() {
     expect(
       getOverlayColor(tester),
       paints
-        ..rect(color: overlayColor.withOpacity(0.08))
-        ..rect(color: overlayColor.withOpacity(0.1)),
+        ..rect(color: overlayColor.withValues(alpha: 0.08))
+        ..rect(color: overlayColor.withValues(alpha: 0.1)),
     );
     // Remove pressed and hovered states,
     await gesture.up();
@@ -563,11 +563,11 @@ void main() {
     // Focused unselected segment.
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.1)));
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withValues(alpha: 0.1)));
 
     // Focused selected segment.
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.1)));
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withValues(alpha: 0.1)));
   });
 }

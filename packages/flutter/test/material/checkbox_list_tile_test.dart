@@ -1094,7 +1094,7 @@ void main() {
     expect(
         Material.of(tester.element(find.byType(Checkbox))),
         paints
-          ..circle(color: themeData.colorScheme.error.withOpacity(0.08))
+          ..circle(color: themeData.colorScheme.error.withValues(alpha: 0.08))
           ..path(color: themeData.colorScheme.error)
     );
   });

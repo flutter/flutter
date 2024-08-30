@@ -40,11 +40,11 @@ void main() {
     final BorderSide side3 = side2.copyWith(style: BorderStyle.none);
     BorderSide interpolated = BorderSide.lerp(side2, side3, 0.2);
     expect(interpolated.style, equals(BorderStyle.solid));
-    expect(interpolated.color, equals(side2.color.withOpacity(0.8)));
+    expect(interpolated.color, equals(side2.color.withValues(alpha: 0.8)));
 
     interpolated = BorderSide.lerp(side3, side2, 0.2);
     expect(interpolated.style, equals(BorderStyle.solid));
-    expect(interpolated.color, equals(side2.color.withOpacity(0.2)));
+    expect(interpolated.color, equals(side2.color.withValues(alpha: 0.2)));
   });
 
   test('BorderSide toString test', () {

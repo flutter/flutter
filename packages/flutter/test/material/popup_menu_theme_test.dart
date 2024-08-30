@@ -219,7 +219,7 @@ void main() {
         matching: find.byType(DefaultTextStyle),
       ).last,
     );
-    expect(popupMenuItemLabel.style.color, theme.colorScheme.onSurface.withOpacity(0.38));
+    expect(popupMenuItemLabel.style.color, theme.colorScheme.onSurface.withValues(alpha: 0.38));
 
     final Offset topLeftButton = tester.getTopLeft(find.byType(PopupMenuButton<void>));
     final Offset topLeftMenu = tester.getTopLeft(find.byWidget(button));

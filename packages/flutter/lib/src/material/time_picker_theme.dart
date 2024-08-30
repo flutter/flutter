@@ -93,7 +93,7 @@ class TimePickerThemeData with Diagnosticable {
   /// ```dart
   /// BorderSide(
   ///   color: Color.alphaBlend(
-  ///     Theme.of(context).colorScheme.onSurface.withOpacity(0.38),
+  ///     Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
   ///     Theme.of(context).colorScheme.surface,
   ///   ),
   /// ),
@@ -107,9 +107,9 @@ class TimePickerThemeData with Diagnosticable {
   /// if the segment is selected or not.
   ///
   /// By default, if the segment is selected, the overall theme's
-  /// `ColorScheme.primary.withOpacity(0.12)` is used when the overall theme's
+  /// `ColorScheme.primary.withValues(alpha: 0.12)` is used when the overall theme's
   /// brightness is [Brightness.light] and
-  /// `ColorScheme.primary.withOpacity(0.24)` is used when the overall theme's
+  /// `ColorScheme.primary.withValues(alpha: 0.24)` is used when the overall theme's
   /// brightness is [Brightness.dark].
   /// If the segment is not selected, [Colors.transparent] is used to allow the
   /// [Dialog]'s color to be used.
@@ -148,7 +148,7 @@ class TimePickerThemeData with Diagnosticable {
   /// text is selected or not.
   ///
   /// By default the overall theme's [ColorScheme.primary] color is used when
-  /// the text is selected and `ColorScheme.onSurface.withOpacity(0.60)` when
+  /// the text is selected and `ColorScheme.onSurface.withValues(alpha: 0.60)` when
   /// it's not selected.
   final Color? dayPeriodTextColor;
 
@@ -207,7 +207,7 @@ class TimePickerThemeData with Diagnosticable {
   ///
   ///
   /// ```dart
-  /// Theme.of(context).colorScheme.onSurface.withOpacity(
+  /// Theme.of(context).colorScheme.onSurface.withValues(alpha: 
   ///   Theme.of(context).colorScheme.brightness == Brightness.dark ? 1.0 : 0.6,
   /// )
   /// ```
@@ -226,12 +226,12 @@ class TimePickerThemeData with Diagnosticable {
   /// if the segment is selected or not.
   ///
   /// By default, if the segment is selected, the overall theme's
-  /// `ColorScheme.primary.withOpacity(0.12)` is used when the overall theme's
+  /// `ColorScheme.primary.withValues(alpha: 0.12)` is used when the overall theme's
   /// brightness is [Brightness.light] and
-  /// `ColorScheme.primary.withOpacity(0.24)` is used when the overall theme's
+  /// `ColorScheme.primary.withValues(alpha: 0.24)` is used when the overall theme's
   /// brightness is [Brightness.dark].
   /// If the segment is not selected, the overall theme's
-  /// `ColorScheme.onSurface.withOpacity(0.12)` is used.
+  /// `ColorScheme.onSurface.withValues(alpha: 0.12)` is used.
   final Color? hourMinuteColor;
 
   /// The shape of the hour and minute controls that the time picker uses.

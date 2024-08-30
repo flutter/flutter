@@ -316,7 +316,7 @@ void main() {
         Color(0x44444444),
       ],
     );
-    final LinearGradient actual = testGradient.withOpacity(0.5);
+    final LinearGradient actual = testGradient.withValues(alpha: 0.5);
 
     expect(actual, const LinearGradient(
        begin: Alignment.bottomRight,
@@ -632,7 +632,7 @@ void main() {
         Color(0x44444444),
       ],
     );
-    final RadialGradient actual = testGradient.withOpacity(0.5);
+    final RadialGradient actual = testGradient.withValues(alpha: 0.5);
 
     expect(actual, const RadialGradient(
       center: Alignment.topLeft,
@@ -866,7 +866,7 @@ void main() {
         Color(0x44444444),
       ],
     );
-    final SweepGradient actual = testGradient.withOpacity(0.5);
+    final SweepGradient actual = testGradient.withValues(alpha: 0.5);
 
     expect(actual, const SweepGradient(
       center: Alignment.topLeft,

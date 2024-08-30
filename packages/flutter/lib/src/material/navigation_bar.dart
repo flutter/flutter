@@ -1336,7 +1336,7 @@ class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
     ));
   }
 
-  @override Color? get indicatorColor => _colors.secondary.withOpacity(0.24);
+  @override Color? get indicatorColor => _colors.secondary.withValues(alpha: 0.24);
 
   @override MaterialStateProperty<TextStyle?>? get labelTextStyle => MaterialStatePropertyAll<TextStyle?>(_theme.textTheme.labelSmall!.copyWith(color: _colors.onSurface));
 }
@@ -1371,7 +1371,7 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
       return IconThemeData(
         size: 24.0,
         color: states.contains(MaterialState.disabled)
-          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          ? _colors.onSurfaceVariant.withValues(alpha: 0.38)
           : states.contains(MaterialState.selected)
             ? _colors.onSecondaryContainer
             : _colors.onSurfaceVariant,
@@ -1387,7 +1387,7 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
     final TextStyle style = _textTheme.labelMedium!;
       return style.apply(
         color: states.contains(MaterialState.disabled)
-          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          ? _colors.onSurfaceVariant.withValues(alpha: 0.38)
           : states.contains(MaterialState.selected)
             ? _colors.onSurface
             : _colors.onSurfaceVariant

@@ -350,12 +350,12 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
           ? primaryColor
           : null
         : CupertinoDynamicColor.maybeResolve(widget.color, context)
-    )?.withOpacity(
+    )?.withValues(alpha:
       widget._style == _CupertinoButtonStyle.tinted
         ? CupertinoTheme.brightnessOf(context) == Brightness.light
           ? kCupertinoButtonTintedOpacityLight
           : kCupertinoButtonTintedOpacityDark
-        : widget.color?.opacity ?? 1.0,
+        : widget.color?.a ?? 1.0,
     );
     final Color foregroundColor = widget._style == _CupertinoButtonStyle.filled
       ? themeData.primaryContrastingColor
@@ -366,7 +366,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     final Color effectiveFocusOutlineColor = widget.focusColor ??
       HSLColor
         .fromColor((backgroundColor ?? CupertinoColors.activeBlue)
-          .withOpacity(kCupertinoFocusColorOpacity)
+          .withValues(alpha: kCupertinoFocusColorOpacity)
         ).withLightness(kCupertinoFocusColorBrightness)
         .withSaturation(kCupertinoFocusColorSaturation)
         .toColor();

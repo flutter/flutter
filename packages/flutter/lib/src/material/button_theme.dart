@@ -408,7 +408,7 @@ class ButtonThemeData with Diagnosticable {
   /// If [MaterialButton.textColor] is a [WidgetStateProperty<Color>], it will be
   /// used as the `disabledTextColor`. It will be resolved in the [WidgetState.disabled] state.
   Color getDisabledTextColor(MaterialButton button) {
-    return button.textColor ?? button.disabledTextColor ?? colorScheme!.onSurface.withOpacity(0.38);
+    return button.textColor ?? button.disabledTextColor ?? colorScheme!.onSurface.withValues(alpha: 0.38);
   }
 
   /// The [button]'s background color when [MaterialButton.onPressed] is null
@@ -422,7 +422,7 @@ class ButtonThemeData with Diagnosticable {
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
   /// with its opacity set to 0.38.
   Color getDisabledFillColor(MaterialButton button) {
-    return button.disabledColor ?? _disabledColor ?? colorScheme!.onSurface.withOpacity(0.38);
+    return button.disabledColor ?? _disabledColor ?? colorScheme!.onSurface.withValues(alpha: 0.38);
   }
 
   /// The button's background fill color or null for buttons that don't have
@@ -465,7 +465,7 @@ class ButtonThemeData with Diagnosticable {
       case ButtonTextTheme.primary:
         return button.enabled
           ? _buttonColor ?? colorScheme!.primary
-          : colorScheme!.onSurface.withOpacity(0.12);
+          : colorScheme!.onSurface.withValues(alpha: 0.12);
     }
   }
 
@@ -537,7 +537,7 @@ class ButtonThemeData with Diagnosticable {
       }
     }
 
-    return getTextColor(button).withOpacity(0.12);
+    return getTextColor(button).withValues(alpha: 0.12);
   }
 
   /// The fill color of the button when it has input focus.
@@ -550,7 +550,7 @@ class ButtonThemeData with Diagnosticable {
   ///    otherwise the value of [getTextColor] with opacity 0.12.
   ///  * [ButtonTextTheme.primary], returns [Colors.transparent].
   Color getFocusColor(MaterialButton button) {
-    return button.focusColor ?? _focusColor ?? getTextColor(button).withOpacity(0.12);
+    return button.focusColor ?? _focusColor ?? getTextColor(button).withValues(alpha: 0.12);
   }
 
   /// The fill color of the button when it has input focus.
@@ -563,7 +563,7 @@ class ButtonThemeData with Diagnosticable {
   ///    constructor parameter if it is non-null, otherwise the value of
   ///    [getTextColor] with opacity 0.04.
   Color getHoverColor(MaterialButton button) {
-    return button.hoverColor ?? _hoverColor ?? getTextColor(button).withOpacity(0.04);
+    return button.hoverColor ?? _hoverColor ?? getTextColor(button).withValues(alpha: 0.04);
   }
 
   /// The color of the overlay that appears when the [button] is pressed.
@@ -583,7 +583,7 @@ class ButtonThemeData with Diagnosticable {
     switch (getTextTheme(button)) {
       case ButtonTextTheme.normal:
       case ButtonTextTheme.accent:
-        return _highlightColor ?? getTextColor(button).withOpacity(0.16);
+        return _highlightColor ?? getTextColor(button).withValues(alpha: 0.16);
       case ButtonTextTheme.primary:
         return Colors.transparent;
     }

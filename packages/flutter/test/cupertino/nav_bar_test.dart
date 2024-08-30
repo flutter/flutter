@@ -163,7 +163,7 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.light),
         home:  CupertinoPageScaffold(
           navigationBar: CupertinoNavigationBar(
-            backgroundColor: const Color(0xFFFFFFFF).withOpacity(0),
+            backgroundColor: const Color(0xFFFFFFFF).withValues(alpha: 0),
             middle: const Text('Title'),
             automaticBackgroundVisibility: false,
             enableBackgroundFilterBlur: false,

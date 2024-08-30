@@ -2411,7 +2411,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       bottomSheetKey.currentState!.close();
       setState(() {
         _showBodyScrim = false;
-        _bodyScrimColor = Colors.black.withOpacity(0.0);
+        _bodyScrimColor = Colors.black.withValues(alpha: 0.0);
         _currentBottomSheet = null;
       });
 
@@ -2858,7 +2858,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     }
     setState(() {
       _showBodyScrim = value;
-      _bodyScrimColor = Colors.black.withOpacity(opacity);
+      _bodyScrimColor = Colors.black.withValues(alpha: opacity);
     });
   }
 

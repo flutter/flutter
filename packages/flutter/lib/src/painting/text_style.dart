@@ -95,15 +95,15 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///     children: <TextSpan>[
 ///       TextSpan(
 ///         text: "You don't have the votes.\n",
-///         style: TextStyle(color: Colors.black.withOpacity(0.6)),
+///         style: TextStyle(color: Colors.black.withValues(alpha: 0.6)),
 ///       ),
 ///       TextSpan(
 ///         text: "You don't have the votes!\n",
-///         style: TextStyle(color: Colors.black.withOpacity(0.8)),
+///         style: TextStyle(color: Colors.black.withValues(alpha: 0.8)),
 ///       ),
 ///       TextSpan(
 ///         text: "You're gonna need congressional approval and you don't have the votes!\n",
-///         style: TextStyle(color: Colors.black.withOpacity(1.0)),
+///         style: TextStyle(color: Colors.black.withValues(alpha: 1.0)),
 ///       ),
 ///     ],
 ///   ),

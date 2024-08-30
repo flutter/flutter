@@ -202,7 +202,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
       changed = true;
       _borderColor = borderColor;
     }
-    final Color pressedColor = widget.pressedColor ?? CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
+    final Color pressedColor = widget.pressedColor ?? CupertinoTheme.of(context).primaryColor.withValues(alpha: 0.2);
     if (_pressedColor != pressedColor) {
       changed = true;
       _pressedColor = pressedColor;

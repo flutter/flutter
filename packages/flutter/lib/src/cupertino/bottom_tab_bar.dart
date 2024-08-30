@@ -142,7 +142,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   bool opaque(BuildContext context) {
     final Color backgroundColor =
         this.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor;
-    return CupertinoDynamicColor.resolve(backgroundColor, context).alpha == 0xFF;
+    return CupertinoDynamicColor.resolve(backgroundColor, context).a == 1.0;
   }
 
   @override

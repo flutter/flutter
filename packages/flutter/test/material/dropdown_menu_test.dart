@@ -790,7 +790,7 @@ void main() {
     );
 
     Material item0material = tester.widget<Material>(button0Material);
-    expect(item0material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item0material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
 
     // Press down key one more time, the highlight should move to the next item.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
@@ -800,7 +800,7 @@ void main() {
       matching: find.byType(Material),
     );
     final Material item1material = tester.widget<Material>(button1Material);
-    expect(item1material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item1material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
     button0Material = find.descendant(
       of: find.widgetWithText(MenuItemButton, 'Item 0').last,
       matching: find.byType(Material),
@@ -831,7 +831,7 @@ void main() {
     );
 
     Material item5material = tester.widget<Material>(button5Material);
-    expect(item5material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item5material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
 
     // Press up key one more time, the highlight should move up to the item 4.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
@@ -841,7 +841,7 @@ void main() {
       matching: find.byType(Material),
     );
     final Material item4material = tester.widget<Material>(button4Material);
-    expect(item4material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item4material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
     button5Material = find.descendant(
       of: find.widgetWithText(MenuItemButton, 'Item 5').last,
       matching: find.byType(Material),
@@ -897,28 +897,28 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     Material item0Material = tester.widget<Material>(button0Material);
-    expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item0Material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     Material item1Material = tester.widget<Material>(button1Material);
-    expect(item1Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item1Material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     final Material item2Material = tester.widget<Material>(button2Material);
-    expect(item2Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item2Material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
 
     // Press up key two times, the highlight should up each time.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
     item1Material = tester.widget<Material>(button1Material);
-    expect(item1Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item1Material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
     item0Material = tester.widget<Material>(button0Material);
-    expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item0Material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
 
   }, variant: TargetPlatformVariant.desktop());
 
@@ -947,7 +947,7 @@ void main() {
       matching: find.byType(Material),
     );
     Material item2material = tester.widget<Material>(button2Material);
-    expect(item2material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item2material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
 
     // Search something that matches multiple items.
     await tester.enterText(find.byType(TextField).first, 'Item');
@@ -958,7 +958,7 @@ void main() {
       matching: find.byType(Material),
     );
     item2material = tester.widget<Material>(button2Material);
-    expect(item2material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item2material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
   }, variant: TargetPlatformVariant.desktop());
 
   // Regression test for https://github.com/flutter/flutter/issues/152375.
@@ -1016,28 +1016,28 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
     Material item0Material = tester.widget<Material>(button0Material);
-    expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item0Material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
     Material item1Material = tester.widget<Material>(button1Material);
-    expect(item1Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item1Material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
     final Material item2Material = tester.widget<Material>(button2Material);
-    expect(item2Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item2Material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
 
     // Press up key two times, the highlight should up each time.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pump();
     item1Material = tester.widget<Material>(button1Material);
-    expect(item1Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item1Material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pump();
     item0Material = tester.widget<Material>(button0Material);
-    expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item0Material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
 
   }, variant: TargetPlatformVariant.desktop());
 
@@ -1066,7 +1066,7 @@ void main() {
       matching: find.byType(Material),
     );
     final Material itemMaterial = tester.widget<Material>(buttonMaterial);
-    expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12)); // Menu 1 button is highlighted.
+    expect(itemMaterial.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12)); // Menu 1 button is highlighted.
   }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('The text input should match the label of the menu item '
@@ -1162,7 +1162,7 @@ void main() {
       matching: find.byType(Material),
     );
     final Material item0Material = tester.widget<Material>(button0Material);
-    expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12)); // first item can be highlighted as it's enabled.
+    expect(item0Material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12)); // first item can be highlighted as it's enabled.
 
     // Continue to press down key. Item 3 should be highlighted as Menu 1 and Item 2 are both disabled.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
@@ -1172,7 +1172,7 @@ void main() {
       matching: find.byType(Material),
     );
     final Material item3Material = tester.widget<Material>(button3Material);
-    expect(item3Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item3Material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
   }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('Searching is enabled by default on mobile platforms if initialSelection is non null', (WidgetTester tester) async {
@@ -1195,7 +1195,7 @@ void main() {
       matching: find.byType(Material),
     );
     final Material itemMaterial = tester.widget<Material>(buttonMaterial);
-    expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12)); // Menu 1 button is highlighted.
+    expect(itemMaterial.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12)); // Menu 1 button is highlighted.
   }, variant: TargetPlatformVariant.mobile());
 
   testWidgets('Searching is enabled by default on desktop platform', (WidgetTester tester) async {
@@ -1219,7 +1219,7 @@ void main() {
       matching: find.byType(Material),
     );
     final Material itemMaterial = tester.widget<Material>(buttonMaterial);
-    expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12)); // Menu 1 button is highlighted.
+    expect(itemMaterial.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12)); // Menu 1 button is highlighted.
   }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('Highlight can move up/down starting from the searching result on desktop platforms', (WidgetTester tester) async {
@@ -1243,7 +1243,7 @@ void main() {
       matching: find.byType(Material),
     );
     final Material itemMaterial = tester.widget<Material>(buttonMaterial);
-    expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(itemMaterial.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
 
     // Press up to the upper item (Item 0).
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
@@ -1255,7 +1255,7 @@ void main() {
       matching: find.byType(Material),
     );
     final Material item0Material = tester.widget<Material>(button0Material);
-    expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12)); // Move up, the 'Item 0' is highlighted.
+    expect(item0Material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12)); // Move up, the 'Item 0' is highlighted.
 
     // Continue to move up to the last item (Item 5).
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
@@ -1267,7 +1267,7 @@ void main() {
       matching: find.byType(Material),
     );
     final Material item5Material = tester.widget<Material>(button5Material);
-    expect(item5Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(item5Material.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
   }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('Filtering is disabled by default', (WidgetTester tester) async {
@@ -1578,7 +1578,7 @@ void main() {
 
     // Validate the item 3 is highlighted.
     final Material itemMaterial = tester.widget<Material>(buttonMaterial);
-    expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+    expect(itemMaterial.color, themeData.colorScheme.onSurface.withValues(alpha: 0.12));
   });
 
   testWidgets('The default text input field should not be focused on mobile platforms '
@@ -2179,7 +2179,7 @@ void main() {
           matching: find.byType(Material),
         );
         final Material itemMaterial = tester.widget<Material>(material);
-        expect(itemMaterial.color, theme.colorScheme.onSurface.withOpacity(0.12));
+        expect(itemMaterial.color, theme.colorScheme.onSurface.withValues(alpha: 0.12));
       }
 
       for (final String nonHighlight in otherItems) {

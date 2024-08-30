@@ -2442,7 +2442,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
   @override
   BorderSide? get side => isEnabled
     ? BorderSide(color: _colors.outline)
-    : BorderSide(color: _colors.onSurface.withOpacity(0.12));
+    : BorderSide(color: _colors.onSurface.withValues(alpha: 0.12));
 
   @override
   IconThemeData? get iconTheme => IconThemeData(

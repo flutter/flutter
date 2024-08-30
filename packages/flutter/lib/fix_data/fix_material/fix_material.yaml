@@ -523,14 +523,14 @@ transforms:
         name: 'disabledForegroundColor'
         style: optional_named
         argumentValue:
-          expression: '{% onSurface %}.withOpacity(0.38)'
+          expression: '{% onSurface %}.withValues(alpha: 0.38)'
           requiredIf: "onSurface != ''"
       - kind: 'addParameter'
         index: 3
         name: 'disabledBackgroundColor'
         style: optional_named
         argumentValue:
-          expression: '{% onSurface %}.withOpacity(0.12)'
+          expression: '{% onSurface %}.withValues(alpha: 0.12)'
           requiredIf: "onSurface != ''"
       - kind: 'removeParameter'
         name: 'onSurface'
@@ -574,7 +574,7 @@ transforms:
         name: 'disabledForegroundColor'
         style: optional_named
         argumentValue:
-          expression: '{% onSurface %}.withOpacity(0.38)'
+          expression: '{% onSurface %}.withValues(alpha: 0.38)'
           requiredIf: "onSurface != ''"
       - kind: 'removeParameter'
         name: 'onSurface'
@@ -618,7 +618,7 @@ transforms:
         name: 'disabledForegroundColor'
         style: optional_named
         argumentValue:
-          expression: '{% onSurface %}.withOpacity(0.38)'
+          expression: '{% onSurface %}.withValues(alpha: 0.38)'
           requiredIf: "onSurface != ''"
       - kind: 'removeParameter'
         name: 'onSurface'

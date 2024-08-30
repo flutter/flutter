@@ -299,7 +299,7 @@ class Switch extends StatelessWidget {
   ///   onChanged: (bool value) { },
   ///   thumbColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
-  ///       return Colors.orange.withOpacity(.48);
+  ///       return Colors.orange.withValues(alpha: .48);
   ///     }
   ///     return Colors.orange;
   ///   }),
@@ -340,7 +340,7 @@ class Switch extends StatelessWidget {
   ///   onChanged: (bool value) { },
   ///   thumbColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
-  ///       return Colors.orange.withOpacity(.48);
+  ///       return Colors.orange.withValues(alpha: .48);
   ///     }
   ///     return Colors.orange;
   ///   }),
@@ -381,7 +381,7 @@ class Switch extends StatelessWidget {
   ///   onChanged: (bool value) { },
   ///   trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
-  ///       return Colors.orange.withOpacity(.48);
+  ///       return Colors.orange.withValues(alpha: .48);
   ///     }
   ///     return null; // Use the default color.
   ///   }),
@@ -978,7 +978,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
       ?? switchTheme.overlayColor?.resolve(focusedStates)
       ?? (applyCupertinoTheme
         ? HSLColor
-          .fromColor(cupertinoPrimaryColor.withOpacity(0.80))
+          .fromColor(cupertinoPrimaryColor.withValues(alpha: 0.80))
           .withLightness(0.69).withSaturation(0.835)
           .toColor()
         : null)
@@ -1854,7 +1854,7 @@ class _SwitchDefaultsCupertino extends SwitchThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.focused)) {
         return HSLColor
-            .fromColor(CupertinoDynamicColor.resolve(CupertinoColors.systemGreen, context).withOpacity(0.80))
+            .fromColor(CupertinoDynamicColor.resolve(CupertinoColors.systemGreen, context).withValues(alpha: 0.80))
             .withLightness(0.69).withSaturation(0.835)
             .toColor();
       }
@@ -1879,7 +1879,7 @@ class _SwitchConfigCupertino with _SwitchConfig {
   MaterialStateProperty<Color> get iconColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
-        return _colors.onSurface.withOpacity(0.38);
+        return _colors.onSurface.withValues(alpha: 0.38);
       }
       return _colors.onPrimaryContainer;
     });
@@ -2083,9 +2083,9 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
-          return _colors.surface.withOpacity(1.0);
+          return _colors.surface.withValues(alpha: 1.0);
         }
-        return _colors.onSurface.withOpacity(0.38);
+        return _colors.onSurface.withValues(alpha: 0.38);
       }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
@@ -2117,9 +2117,9 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
-          return _colors.onSurface.withOpacity(0.12);
+          return _colors.onSurface.withValues(alpha: 0.12);
         }
-        return _colors.surfaceContainerHighest.withOpacity(0.12);
+        return _colors.surfaceContainerHighest.withValues(alpha: 0.12);
       }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
@@ -2153,7 +2153,7 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
         return Colors.transparent;
       }
       if (states.contains(MaterialState.disabled)) {
-        return _colors.onSurface.withOpacity(0.12);
+        return _colors.onSurface.withValues(alpha: 0.12);
       }
       return _colors.outline;
     });
@@ -2164,24 +2164,24 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.primary.withOpacity(0.1);
+          return _colors.primary.withValues(alpha: 0.1);
         }
         if (states.contains(MaterialState.hovered)) {
-          return _colors.primary.withOpacity(0.08);
+          return _colors.primary.withValues(alpha: 0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.primary.withOpacity(0.1);
+          return _colors.primary.withValues(alpha: 0.1);
         }
         return null;
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.onSurface.withOpacity(0.1);
+        return _colors.onSurface.withValues(alpha: 0.1);
       }
       if (states.contains(MaterialState.hovered)) {
-        return _colors.onSurface.withOpacity(0.08);
+        return _colors.onSurface.withValues(alpha: 0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface.withOpacity(0.1);
+        return _colors.onSurface.withValues(alpha: 0.1);
       }
       return null;
     });
@@ -2220,9 +2220,9 @@ class _SwitchConfigM3 with _SwitchConfig {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
-          return _colors.onSurface.withOpacity(0.38);
+          return _colors.onSurface.withValues(alpha: 0.38);
         }
-        return _colors.surfaceContainerHighest.withOpacity(0.38);
+        return _colors.surfaceContainerHighest.withValues(alpha: 0.38);
       }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {

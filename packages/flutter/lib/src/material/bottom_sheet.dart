@@ -1138,10 +1138,10 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   @override
   Widget buildModalBarrier() {
     if (barrierColor.alpha != 0 && !offstage) { // changedInternalState is called if barrierColor or offstage updates
-      assert(barrierColor != barrierColor.withOpacity(0.0));
+      assert(barrierColor != barrierColor.withValues(alpha: 0.0));
       final Animation<Color?> color = animation!.drive(
         ColorTween(
-          begin: barrierColor.withOpacity(0.0),
+          begin: barrierColor.withValues(alpha: 0.0),
           end: barrierColor, // changedInternalState is called if barrierColor updates
         ).chain(CurveTween(curve: barrierCurve)), // changedInternalState is called if barrierCurve updates
       );

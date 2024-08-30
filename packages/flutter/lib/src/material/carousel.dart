@@ -390,13 +390,13 @@ class _CarouselViewState extends State<CarouselView> {
     final WidgetStateProperty<Color?> effectiveOverlayColor = widget.overlayColor
       ?? WidgetStateProperty.resolveWith((Set<WidgetState> states) {
         if (states.contains(WidgetState.pressed)) {
-          return theme.colorScheme.onSurface.withOpacity(0.1);
+          return theme.colorScheme.onSurface.withValues(alpha: 0.1);
         }
         if (states.contains(WidgetState.hovered)) {
-          return theme.colorScheme.onSurface.withOpacity(0.08);
+          return theme.colorScheme.onSurface.withValues(alpha: 0.08);
         }
         if (states.contains(WidgetState.focused)) {
-          return theme.colorScheme.onSurface.withOpacity(0.1);
+          return theme.colorScheme.onSurface.withValues(alpha: 0.1);
         }
         return null;
       });

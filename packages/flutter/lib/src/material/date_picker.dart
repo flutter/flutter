@@ -1743,7 +1743,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
     final Color? dialogBackground = themeData.rangePickerBackgroundColor ?? defaults.rangePickerBackgroundColor;
     final Color? headerBackground = themeData.rangePickerHeaderBackgroundColor ?? defaults.rangePickerHeaderBackgroundColor;
     final Color? headerForeground = themeData.rangePickerHeaderForegroundColor ?? defaults.rangePickerHeaderForegroundColor;
-    final Color? headerDisabledForeground = headerForeground?.withOpacity(0.38);
+    final Color? headerDisabledForeground = headerForeground?.withValues(alpha: 0.38);
     final TextStyle? headlineStyle = themeData.rangePickerHeaderHeadlineStyle ?? defaults.rangePickerHeaderHeadlineStyle;
     final TextStyle? headlineHelpStyle = (themeData.rangePickerHeaderHelpStyle ?? defaults.rangePickerHeaderHelpStyle)?.apply(color: headerForeground);
     final String startDateText = _formatRangeStartDate(localizations, selectedStartDate, selectedEndDate);
@@ -2778,10 +2778,10 @@ class _DayItemState extends State<_DayItem> {
         textDirection: textDirection,
       );
       if (widget.isDisabled) {
-        itemStyle = itemStyle?.apply(color: colorScheme.onSurface.withOpacity(0.38));
+        itemStyle = itemStyle?.apply(color: colorScheme.onSurface.withValues(alpha: 0.38));
       }
     } else if (widget.isDisabled) {
-      itemStyle = itemStyle?.apply(color: colorScheme.onSurface.withOpacity(0.38));
+      itemStyle = itemStyle?.apply(color: colorScheme.onSurface.withValues(alpha: 0.38));
     } else if (widget.isToday) {
       // The current day gets a different text color and a circle stroke
       // border.

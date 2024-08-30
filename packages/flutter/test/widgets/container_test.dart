@@ -669,7 +669,7 @@ void main() {
                   clipBehavior: Clip.hardEdge,
                   decoration: decoration,
                   child: ColoredBox(
-                    color: Colors.yellow.withOpacity(0.5),
+                    color: Colors.yellow.withValues(alpha: 0.5),
                   ),
                 ),
               ),

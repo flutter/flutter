@@ -262,13 +262,13 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/105291
   ButtonStyle elevationButtonStyle = ElevatedButton.styleFrom(
-    foregroundColor: Colors.white, backgroundColor: Colors.blue, disabledForegroundColor: Colors.grey.withOpacity(0.38), disabledBackgroundColor: Colors.grey.withOpacity(0.12),
+    foregroundColor: Colors.white, backgroundColor: Colors.blue, disabledForegroundColor: Colors.grey.withValues(alpha: 0.38), disabledBackgroundColor: Colors.grey.withValues(alpha: 0.12),
   );
   ButtonStyle outlinedButtonStyle = OutlinedButton.styleFrom(
-    foregroundColor: Colors.blue, disabledForegroundColor: Colors.grey.withOpacity(0.38),
+    foregroundColor: Colors.blue, disabledForegroundColor: Colors.grey.withValues(alpha: 0.38),
   );
   ButtonStyle textButtonStyle = TextButton.styleFrom(
-    foregroundColor: Colors.blue, disabledForegroundColor: Colors.grey.withOpacity(0.38),
+    foregroundColor: Colors.blue, disabledForegroundColor: Colors.grey.withValues(alpha: 0.38),
   );
 
   // Changes made in https://github.com/flutter/flutter/pull/78588

@@ -145,7 +145,7 @@ void main() {
     expect(
       dial,
       paints
-        ..circle(color: defaultTheme.colorScheme.onSurface.withOpacity(0.08)) // Dial background color.
+        ..circle(color: defaultTheme.colorScheme.onSurface.withValues(alpha: 0.08)) // Dial background color.
         ..circle(color: Color(defaultTheme.colorScheme.primary.value))
     );
 
@@ -178,7 +178,7 @@ void main() {
       pmText.text.style,
       Typography.material2014().englishLike.titleMedium!
         .merge(Typography.material2014().black.titleMedium)
-        .copyWith(color: defaultTheme.colorScheme.onSurface.withOpacity(0.6)),
+        .copyWith(color: defaultTheme.colorScheme.onSurface.withValues(alpha: 0.6)),
     );
 
     final RenderParagraph helperText = _textRenderParagraph(tester, 'SELECT TIME');
@@ -210,27 +210,27 @@ void main() {
     );
 
     final Material hourMaterial = _textMaterial(tester, '7');
-    expect(hourMaterial.color, defaultTheme.colorScheme.primary.withOpacity(0.12));
+    expect(hourMaterial.color, defaultTheme.colorScheme.primary.withValues(alpha: 0.12));
     expect(
       hourMaterial.shape,
       const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
     );
 
     final Material minuteMaterial = _textMaterial(tester, '15');
-    expect(minuteMaterial.color, defaultTheme.colorScheme.onSurface.withOpacity(0.12));
+    expect(minuteMaterial.color, defaultTheme.colorScheme.onSurface.withValues(alpha: 0.12));
     expect(
       minuteMaterial.shape,
       const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
     );
 
     final Material amMaterial = _textMaterial(tester, 'AM');
-    expect(amMaterial.color, defaultTheme.colorScheme.primary.withOpacity(0.12));
+    expect(amMaterial.color, defaultTheme.colorScheme.primary.withValues(alpha: 0.12));
 
     final Material pmMaterial = _textMaterial(tester, 'PM');
     expect(pmMaterial.color, Colors.transparent);
 
     final Color expectedBorderColor = Color.alphaBlend(
-      defaultTheme.colorScheme.onSurface.withOpacity(0.38),
+      defaultTheme.colorScheme.onSurface.withValues(alpha: 0.38),
       defaultTheme.colorScheme.surface,
     );
     final Material dayPeriodMaterial = _dayPeriodMaterial(tester);
@@ -251,7 +251,7 @@ void main() {
     final IconButton entryModeIconButton = _entryModeIconButton(tester);
     expect(
       entryModeIconButton.color,
-      defaultTheme.colorScheme.onSurface.withOpacity(0.6),
+      defaultTheme.colorScheme.onSurface.withValues(alpha: 0.6),
     );
 
     final ButtonStyle cancelButtonStyle = _actionButtonStyle(tester, 'CANCEL');
@@ -420,7 +420,7 @@ void main() {
     expect(
       hourDecoration.fillColor,
       MaterialStateColor.resolveWith((Set<MaterialState> states) =>
-        defaultTheme.colorScheme.onSurface.withOpacity(0.12))
+        defaultTheme.colorScheme.onSurface.withValues(alpha: 0.12))
     );
     expect(
       hourDecoration.enabledBorder,
@@ -441,7 +441,7 @@ void main() {
     expect(
       hourDecoration.hintStyle,
       Typography.material2014().englishLike.displayMedium!
-        .merge(defaultTheme.textTheme.displayMedium!.copyWith(color: defaultTheme.colorScheme.onSurface.withOpacity(0.36)))
+        .merge(defaultTheme.textTheme.displayMedium!.copyWith(color: defaultTheme.colorScheme.onSurface.withValues(alpha: 0.36)))
     );
 
     final ButtonStyle cancelButtonStyle = _actionButtonStyle(tester, 'CANCEL');
@@ -508,7 +508,7 @@ void main() {
     );
     expect(
       hourDecoration.hintStyle,
-      TextStyle(color: defaultTheme.colorScheme.onSurface.withOpacity(0.36))
+      TextStyle(color: defaultTheme.colorScheme.onSurface.withValues(alpha: 0.36))
     );
 
     final ButtonStyle cancelButtonStyle = _actionButtonStyle(tester, 'Cancel');

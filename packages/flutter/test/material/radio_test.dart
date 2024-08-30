@@ -662,8 +662,8 @@ void main() {
           color: const Color(0xffffffff),
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
-        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38))
-        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38)),
+        ..circle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38))
+        ..circle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38)),
     );
     focusNode.dispose();
   });
@@ -830,8 +830,8 @@ void main() {
           color: const Color(0xffffffff),
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
-        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38))
-        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38)),
+        ..circle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38))
+        ..circle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38)),
     );
   });
 
@@ -1293,7 +1293,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       Material.of(tester.element(find.byKey(radioKey))),
-      paints..rect()..circle(color: theme.colorScheme.primary.withOpacity(0.1))..circle(color: focusedFillColor),
+      paints..rect()..circle(color: theme.colorScheme.primary.withValues(alpha: 0.1))..circle(color: focusedFillColor),
     );
 
     // Start hovering
@@ -1310,7 +1310,7 @@ void main() {
           color: const Color(0xffffffff),
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
-        ..circle(color: theme.colorScheme.primary.withOpacity(0.08))
+        ..circle(color: theme.colorScheme.primary.withValues(alpha: 0.08))
         ..circle(color: hoveredFillColor),
     );
 
@@ -1637,7 +1637,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
-        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38))
+        ..circle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38))
     );
   });
 
@@ -1761,7 +1761,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
         Material.of(tester.element(find.byType(Radio<bool>))),
-        paints..circle(color: colors.primary.withOpacity(1))
+        paints..circle(color: colors.primary.withValues(alpha: 1))
     );
 
     // selected radio in pressed state
@@ -1771,8 +1771,8 @@ void main() {
 
     expect(
         Material.of(tester.element(find.byType(Radio<bool>))),
-        paints..circle(color: colors.onSurface.withOpacity(0.1))
-          ..circle(color: colors.primary.withOpacity(1))
+        paints..circle(color: colors.onSurface.withValues(alpha: 0.1))
+          ..circle(color: colors.primary.withValues(alpha: 1))
     );
 
     // unselected radio in pressed state
@@ -1782,7 +1782,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle(color: colors.primary.withOpacity(0.1))..circle(color: colors.onSurfaceVariant.withOpacity(1))
+      paints..circle(color: colors.primary.withValues(alpha: 0.1))..circle(color: colors.onSurfaceVariant.withValues(alpha: 1))
     );
 
     // selected radio in focused state
@@ -1793,7 +1793,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle(color: colors.primary.withOpacity(0.1))..circle(color: colors.primary.withOpacity(1))
+      paints..circle(color: colors.primary.withValues(alpha: 0.1))..circle(color: colors.primary.withValues(alpha: 1))
     );
 
     // unselected radio in focused state
@@ -1804,7 +1804,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle(color: colors.onSurface.withOpacity(0.1))..circle(color: colors.onSurface.withOpacity(1))
+      paints..circle(color: colors.onSurface.withValues(alpha: 0.1))..circle(color: colors.onSurface.withValues(alpha: 1))
     );
 
     // selected radio in hovered state
@@ -1817,7 +1817,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle(color: colors.primary.withOpacity(0.08))..circle(color: colors.primary.withOpacity(1))
+      paints..circle(color: colors.primary.withValues(alpha: 0.08))..circle(color: colors.primary.withValues(alpha: 1))
     );
 
     focusNode.dispose();
@@ -1962,7 +1962,7 @@ void main() {
 
     expect(getRadioMaterial(tester),
       paints
-        ..circle(color: theme.colorScheme.primary.withOpacity(0.08))
+        ..circle(color: theme.colorScheme.primary.withValues(alpha: 0.08))
         ..circle(color: theme.colorScheme.primary)
     );
 
@@ -1972,7 +1972,7 @@ void main() {
 
     expect(getRadioMaterial(tester),
       paints
-        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.1))
+        ..circle(color: theme.colorScheme.onSurface.withValues(alpha: 0.1))
         ..circle(color: theme.colorScheme.primary)
     );
     // Remove pressed and hovered states
@@ -1987,7 +1987,7 @@ void main() {
 
     expect(getRadioMaterial(tester),
       paints
-        ..circle(color: theme.colorScheme.primary.withOpacity(0.1))
+        ..circle(color: theme.colorScheme.primary.withValues(alpha: 0.1))
         ..circle(color: theme.colorScheme.primary)
     );
     focusNode.dispose();

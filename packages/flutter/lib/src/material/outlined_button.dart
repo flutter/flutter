@@ -277,7 +277,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// All of the ButtonStyle's defaults appear below. In this list
   /// "Theme.foo" is shorthand for `Theme.of(context).foo`. Color
   /// scheme values like "onSurface(0.38)" are shorthand for
-  /// `onSurface.withOpacity(0.38)`. [WidgetStateProperty] valued
+  /// `onSurface.withValues(alpha: 0.38)`. [WidgetStateProperty] valued
   /// properties that are not followed by a sublist have the same
   /// value for all states, otherwise the values are as specified for
   /// each state and "others" means all other states.
@@ -367,7 +367,7 @@ class OutlinedButton extends ButtonStyleButton {
       ? _OutlinedButtonDefaultsM3(context)
       : styleFrom(
           foregroundColor: colorScheme.primary,
-          disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
+          disabledForegroundColor: colorScheme.onSurface.withValues(alpha: 0.38),
           backgroundColor: Colors.transparent,
           disabledBackgroundColor: Colors.transparent,
           shadowColor: theme.shadowColor,
@@ -376,7 +376,7 @@ class OutlinedButton extends ButtonStyleButton {
           padding: _scaledPadding(context),
           minimumSize: const Size(64, 36),
           maximumSize: Size.infinite,
-          side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
+          side: BorderSide(color: colorScheme.onSurface.withValues(alpha: 0.12)),
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
           enabledMouseCursor: SystemMouseCursors.click,
           disabledMouseCursor: SystemMouseCursors.basic,
@@ -433,13 +433,13 @@ class _OutlinedButtonDefaultOverlay extends MaterialStateProperty<Color?> with D
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.pressed)) {
-      return foreground.withOpacity(0.1);
+      return foreground.withValues(alpha: 0.1);
     }
     if (states.contains(MaterialState.hovered)) {
-      return foreground.withOpacity(0.08);
+      return foreground.withValues(alpha: 0.08);
     }
     if (states.contains(MaterialState.focused)) {
-      return foreground.withOpacity(0.1);
+      return foreground.withValues(alpha: 0.1);
     }
     return null;
   }
@@ -564,7 +564,7 @@ class _OutlinedButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get foregroundColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
-        return _colors.onSurface.withOpacity(0.38);
+        return _colors.onSurface.withValues(alpha: 0.38);
       }
       return _colors.primary;
     });
@@ -573,13 +573,13 @@ class _OutlinedButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
-        return _colors.primary.withOpacity(0.1);
+        return _colors.primary.withValues(alpha: 0.1);
       }
       if (states.contains(MaterialState.hovered)) {
-        return _colors.primary.withOpacity(0.08);
+        return _colors.primary.withValues(alpha: 0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.primary.withOpacity(0.1);
+        return _colors.primary.withValues(alpha: 0.1);
       }
       return null;
     });
@@ -614,7 +614,7 @@ class _OutlinedButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color>? get iconColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
-        return _colors.onSurface.withOpacity(0.38);
+        return _colors.onSurface.withValues(alpha: 0.38);
       }
       if (states.contains(MaterialState.pressed)) {
         return _colors.primary;
@@ -637,7 +637,7 @@ class _OutlinedButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<BorderSide>? get side =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return BorderSide(color: _colors.onSurface.withOpacity(0.12));
+      return BorderSide(color: _colors.onSurface.withValues(alpha: 0.12));
     }
     if (states.contains(MaterialState.focused)) {
       return BorderSide(color: _colors.primary);

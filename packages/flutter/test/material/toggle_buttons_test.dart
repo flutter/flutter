@@ -58,7 +58,7 @@ void main() {
 
     expect(
       buttonTextStyle('First child').color,
-      theme.colorScheme.onSurface.withOpacity(0.87),
+      theme.colorScheme.onSurface.withValues(alpha: 0.87),
     );
     expect(
       buttonTextStyle('Second child').color,
@@ -102,7 +102,7 @@ void main() {
       expect(isSelected[1], isTrue);
       expect(
         buttonTextStyle('First child').color,
-        theme.colorScheme.onSurface.withOpacity(0.87),
+        theme.colorScheme.onSurface.withValues(alpha: 0.87),
       );
       expect(
         buttonTextStyle('Second child').color,
@@ -116,11 +116,11 @@ void main() {
       expect(isSelected[1], isFalse);
       expect(
         buttonTextStyle('First child').color,
-        theme.colorScheme.onSurface.withOpacity(0.87),
+        theme.colorScheme.onSurface.withValues(alpha: 0.87),
       );
       expect(
         buttonTextStyle('Second child').color,
-        theme.colorScheme.onSurface.withOpacity(0.87),
+        theme.colorScheme.onSurface.withValues(alpha: 0.87),
       );
     },
   );
@@ -153,11 +153,11 @@ void main() {
       expect(isSelected[1], isTrue);
       expect(
         buttonTextStyle('First child').color,
-        theme.colorScheme.onSurface.withOpacity(0.38),
+        theme.colorScheme.onSurface.withValues(alpha: 0.38),
       );
       expect(
         buttonTextStyle('Second child').color,
-        theme.colorScheme.onSurface.withOpacity(0.38),
+        theme.colorScheme.onSurface.withValues(alpha: 0.38),
       );
 
       await tester.tap(find.text('Second child'));
@@ -168,11 +168,11 @@ void main() {
       expect(isSelected[1], isTrue);
       expect(
         buttonTextStyle('First child').color,
-        theme.colorScheme.onSurface.withOpacity(0.38),
+        theme.colorScheme.onSurface.withValues(alpha: 0.38),
       );
       expect(
         buttonTextStyle('Second child').color,
-        theme.colorScheme.onSurface.withOpacity(0.38),
+        theme.colorScheme.onSurface.withValues(alpha: 0.38),
       );
     },
   );
@@ -393,11 +393,11 @@ void main() {
       // Default enabled color
       expect(
         buttonTextStyle('First child').color,
-        theme.colorScheme.onSurface.withOpacity(0.87),
+        theme.colorScheme.onSurface.withValues(alpha: 0.87),
       );
       expect(
         iconTheme(Icons.check).data.color,
-        theme.colorScheme.onSurface.withOpacity(0.87),
+        theme.colorScheme.onSurface.withValues(alpha: 0.87),
       );
 
       await tester.pumpWidget(
@@ -442,11 +442,11 @@ void main() {
       // Default disabled color
       expect(
         buttonTextStyle('First child').color,
-        theme.colorScheme.onSurface.withOpacity(0.38),
+        theme.colorScheme.onSurface.withValues(alpha: 0.38),
       );
       expect(
         iconTheme(Icons.check).data.color,
-        theme.colorScheme.onSurface.withOpacity(0.38),
+        theme.colorScheme.onSurface.withValues(alpha: 0.38),
       );
     },
   );
@@ -474,7 +474,7 @@ void main() {
       // Tests are ineffective if the custom colors are the same as the theme's
       expect(theme.colorScheme.onSurface, isNot(enabledColor));
       expect(theme.colorScheme.primary, isNot(selectedColor));
-      expect(theme.colorScheme.onSurface.withOpacity(0.38), isNot(disabledColor));
+      expect(theme.colorScheme.onSurface.withValues(alpha: 0.38), isNot(disabledColor));
 
       await tester.pumpWidget(
         boilerplate(
@@ -559,7 +559,7 @@ void main() {
     ));
     expect(
       material.color,
-      theme.colorScheme.surface.withOpacity(0.0),
+      theme.colorScheme.surface.withValues(alpha: 0.0),
     );
     expect(material.type, MaterialType.button);
   });
@@ -586,7 +586,7 @@ void main() {
     ));
     expect(
       material.color,
-      theme.colorScheme.primary.withOpacity(0.12),
+      theme.colorScheme.primary.withValues(alpha: 0.12),
     );
     expect(material.type, MaterialType.button);
   });
@@ -612,7 +612,7 @@ void main() {
     ));
     expect(
       material.color,
-      theme.colorScheme.surface.withOpacity(0.0),
+      theme.colorScheme.surface.withValues(alpha: 0.0),
     );
     expect(material.type, MaterialType.button);
   });
@@ -671,7 +671,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(buttonColor('First child').color, theme.colorScheme.surface.withOpacity(0.0));
+    expect(buttonColor('First child').color, theme.colorScheme.surface.withValues(alpha: 0.0));
     expect(buttonColor('Second child').color, selectedFillColor);
 
     await tester.pumpWidget(
@@ -689,8 +689,8 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(buttonColor('First child').color, theme.colorScheme.surface.withOpacity(0.0));
-    expect(buttonColor('Second child').color, theme.colorScheme.surface.withOpacity(0.0));
+    expect(buttonColor('First child').color, theme.colorScheme.surface.withValues(alpha: 0.0));
+    expect(buttonColor('Second child').color, theme.colorScheme.surface.withValues(alpha: 0.0));
   });
 
   testWidgets('Custom button fillColor - MaterialState', (WidgetTester tester) async {
@@ -784,7 +784,7 @@ void main() {
     });
     expect(
       inkFeatures,
-      paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.04)),
+      paints..rect(color: theme.colorScheme.onSurface.withValues(alpha: 0.04)),
     );
 
     // splashColor
@@ -798,7 +798,7 @@ void main() {
     expect(
       inkFeatures,
       paints
-        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.16)),
+        ..circle(color: theme.colorScheme.onSurface.withValues(alpha: 0.16)),
     );
 
     await touchGesture.up();
@@ -812,7 +812,7 @@ void main() {
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
-    expect(inkFeatures, paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+    expect(inkFeatures, paints..rect(color: theme.colorScheme.onSurface.withValues(alpha: 0.12)));
 
     await hoverGesture.removePointer();
 
@@ -850,7 +850,7 @@ void main() {
     });
     expect(
       inkFeatures,
-      paints..rect(color: theme.colorScheme.primary.withOpacity(0.04)),
+      paints..rect(color: theme.colorScheme.primary.withValues(alpha: 0.04)),
     );
     await hoverGesture.moveTo(Offset.zero);
 
@@ -865,7 +865,7 @@ void main() {
     expect(
       inkFeatures,
       paints
-        ..circle(color: theme.colorScheme.primary.withOpacity(0.16)),
+        ..circle(color: theme.colorScheme.primary.withValues(alpha: 0.16)),
     );
 
     await touchGesture.up();
@@ -879,7 +879,7 @@ void main() {
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
-    expect(inkFeatures, paints..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
+    expect(inkFeatures, paints..rect(color: theme.colorScheme.primary.withValues(alpha: 0.12)));
 
     await hoverGesture.removePointer();
 
@@ -985,7 +985,7 @@ void main() {
           ..path()
           ..path(
             style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
             strokeWidth: defaultBorderWidth,
           ),
       );
@@ -1012,7 +1012,7 @@ void main() {
           ..path()
           ..path(
             style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
             strokeWidth: defaultBorderWidth,
           ),
       );
@@ -1038,7 +1038,7 @@ void main() {
           ..path()
           ..path(
             style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
             strokeWidth: defaultBorderWidth,
           ),
       );
@@ -1451,7 +1451,7 @@ void main() {
           // leading side, top and bottom - enabled
           ..path(
             style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
             strokeWidth: _defaultBorderWidth,
           ),
       );
@@ -1466,13 +1466,13 @@ void main() {
           // leading side - selected
           ..path(
             style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
             strokeWidth: _defaultBorderWidth,
           )
           // top and bottom - selected
           ..path(
             style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
             strokeWidth: _defaultBorderWidth,
           ),
       );
@@ -1487,13 +1487,13 @@ void main() {
           // leading side - selected, since previous button is selected
           ..path(
             style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
             strokeWidth: _defaultBorderWidth,
           )
           // trailing side, top and bottom - enabled
           ..path(
             style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
             strokeWidth: _defaultBorderWidth,
           ),
       );
@@ -1538,7 +1538,7 @@ void main() {
         // left side, top and right - enabled.
           ..path(
             style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
             strokeWidth: _defaultBorderWidth,
           ),
       );
@@ -1553,13 +1553,13 @@ void main() {
         // top side - selected.
           ..path(
             style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
             strokeWidth: _defaultBorderWidth,
           )
         // left and right - selected.
           ..path(
             style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
             strokeWidth: _defaultBorderWidth,
           ),
       );
@@ -1574,13 +1574,13 @@ void main() {
         // top side - selected, since previous button is selected.
           ..path(
             style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
             strokeWidth: _defaultBorderWidth,
           )
         // left side, bottom and right - enabled.
           ..path(
             style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
             strokeWidth: _defaultBorderWidth,
           ),
       );
@@ -1786,7 +1786,7 @@ void main() {
       // left side, top and right - enabled.
         ..path(
           style: PaintingStyle.stroke,
-          color: theme.colorScheme.onSurface.withOpacity(0.12),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
           strokeWidth: _defaultBorderWidth,
         ),
     );
@@ -1830,7 +1830,7 @@ void main() {
       // left side, top and right - enabled.
         ..path(
           style: PaintingStyle.stroke,
-          color: theme.colorScheme.onSurface.withOpacity(0.12),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
           strokeWidth: _defaultBorderWidth,
         ),
     );

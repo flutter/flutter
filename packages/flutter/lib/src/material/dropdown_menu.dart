@@ -663,10 +663,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
       // Simulate the focused state because the text field should always be focused
       // during traversal. If the menu item has a custom foreground color, the "focused"
-      // color will also change to foregroundColor.withOpacity(0.12).
+      // color will also change to foregroundColor.withValues(alpha: 0.12).
       effectiveStyle = entry.enabled && i == focusedIndex
         ? effectiveStyle.copyWith(
-            backgroundColor: MaterialStatePropertyAll<Color>(focusedBackgroundColor.withOpacity(0.12))
+            backgroundColor: MaterialStatePropertyAll<Color>(focusedBackgroundColor.withValues(alpha: 0.12))
           )
         : effectiveStyle;
 

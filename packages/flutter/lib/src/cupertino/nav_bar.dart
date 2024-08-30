@@ -183,7 +183,7 @@ Widget _wrapWithBackground({
 
   return ClipRect(
     child: BackdropFilter(
-      enabled: backgroundColor.alpha != 0xFF && enableBackgroundFilterBlur,
+      enabled: backgroundColor.a != 1.0 && enableBackgroundFilterBlur,
       filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
       child: childWithBackground,
     ),
@@ -453,7 +453,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   bool shouldFullyObstruct(BuildContext context) {
     final Color backgroundColor = CupertinoDynamicColor.maybeResolve(this.backgroundColor, context)
                                ?? CupertinoTheme.of(context).barBackgroundColor;
-    return backgroundColor.alpha == 0xFF;
+    return backgroundColor.a == 1.0;
   }
 
   @override
@@ -795,7 +795,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   final Object heroTag;
 
   /// True if the navigation bar's background color has no transparency.
-  bool get opaque => backgroundColor?.alpha == 0xFF;
+  bool get opaque => backgroundColor?.a == 1.0;
 
   /// Whether the nav bar should stretch to fill the over-scroll area.
   ///

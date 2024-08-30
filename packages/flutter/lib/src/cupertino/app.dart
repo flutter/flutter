@@ -624,7 +624,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         child: CupertinoTheme(
           data: effectiveThemeData,
           child: DefaultSelectionStyle(
-            selectionColor: effectiveThemeData.primaryColor.withOpacity(0.2),
+            selectionColor: effectiveThemeData.primaryColor.withValues(alpha: 0.2),
             cursorColor: effectiveThemeData.primaryColor,
             child: HeroControllerScope(
               controller: _heroController,

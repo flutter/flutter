@@ -3161,7 +3161,7 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
   @override
   BorderSide get dayPeriodBorderSide {
     return BorderSide(
-      color: Color.alphaBlend(_colors.onSurface.withOpacity(0.38), _colors.surface),
+      color: Color.alphaBlend(_colors.onSurface.withValues(alpha: 0.38), _colors.surface),
     );
   }
 
@@ -3169,7 +3169,7 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
   Color get dayPeriodColor {
     return MaterialStateColor.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
-        return _colors.primary.withOpacity(_colors.brightness == Brightness.dark ? 0.24 : 0.12);
+        return _colors.primary.withValues(alpha: _colors.brightness == Brightness.dark ? 0.24 : 0.12);
       }
       // The unselected day period should match the overall picker dialog color.
       // Making it transparent enables that without being redundant and allows
@@ -3201,7 +3201,7 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
   @override
   Color get dayPeriodTextColor {
     return  MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      return states.contains(MaterialState.selected) ? _colors.primary : _colors.onSurface.withOpacity(0.60);
+      return states.contains(MaterialState.selected) ? _colors.primary : _colors.onSurface.withValues(alpha: 0.60);
     });
   }
 
@@ -3212,7 +3212,7 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
 
   @override
   Color get dialBackgroundColor {
-    return _colors.onSurface.withOpacity(_colors.brightness == Brightness.dark ? 0.12 : 0.08);
+    return _colors.onSurface.withValues(alpha: _colors.brightness == Brightness.dark ? 0.12 : 0.08);
   }
 
   @override
@@ -3262,7 +3262,7 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
 
   @override
   Color get entryModeIconColor {
-    return _colors.onSurface.withOpacity(_colors.brightness == Brightness.dark ? 1.0 : 0.6);
+    return _colors.onSurface.withValues(alpha: _colors.brightness == Brightness.dark ? 1.0 : 0.6);
   }
 
   @override
@@ -3274,8 +3274,8 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
   Color get hourMinuteColor {
     return MaterialStateColor.resolveWith((Set<MaterialState> states) {
       return states.contains(MaterialState.selected)
-          ? _colors.primary.withOpacity(_colors.brightness == Brightness.dark ? 0.24 : 0.12)
-          : _colors.onSurface.withOpacity(0.12);
+          ? _colors.primary.withValues(alpha: _colors.brightness == Brightness.dark ? 0.24 : 0.12)
+          : _colors.onSurface.withValues(alpha: 0.12);
     });
   }
 
@@ -3320,7 +3320,7 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
     return MaterialStateColor.resolveWith((Set<MaterialState> states) {
       return states.contains(MaterialState.selected)
           ? Colors.transparent
-          : _colors.onSurface.withOpacity(0.12);
+          : _colors.onSurface.withValues(alpha: 0.12);
     });
   }
 
@@ -3343,7 +3343,7 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
       focusedErrorBorder: OutlineInputBorder(
         borderSide: BorderSide(color: _colors.error, width: 2),
       ),
-      hintStyle: hourMinuteTextStyle.copyWith(color: _colors.onSurface.withOpacity(0.36)),
+      hintStyle: hourMinuteTextStyle.copyWith(color: _colors.onSurface.withValues(alpha: 0.36)),
       // Prevent the error text from appearing.
       // TODO(rami-a): Remove this workaround once
       // https://github.com/flutter/flutter/issues/54104
@@ -3544,10 +3544,10 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
           overlayColor = _colors.onPrimaryContainer;
         } else if (states.contains(MaterialState.hovered)) {
           const double hoverOpacity = 0.08;
-          overlayColor = _colors.onPrimaryContainer.withOpacity(hoverOpacity);
+          overlayColor = _colors.onPrimaryContainer.withValues(alpha: hoverOpacity);
         } else if (states.contains(MaterialState.focused)) {
           const double focusOpacity = 0.1;
-          overlayColor = _colors.onPrimaryContainer.withOpacity(focusOpacity);
+          overlayColor = _colors.onPrimaryContainer.withValues(alpha: focusOpacity);
         }
         return Color.alphaBlend(overlayColor, _colors.primaryContainer);
       } else {
@@ -3556,10 +3556,10 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
           overlayColor = _colors.onSurface;
         } else if (states.contains(MaterialState.hovered)) {
           const double hoverOpacity = 0.08;
-          overlayColor = _colors.onSurface.withOpacity(hoverOpacity);
+          overlayColor = _colors.onSurface.withValues(alpha: hoverOpacity);
         } else if (states.contains(MaterialState.focused)) {
           const double focusOpacity = 0.1;
-          overlayColor = _colors.onSurface.withOpacity(focusOpacity);
+          overlayColor = _colors.onSurface.withValues(alpha: focusOpacity);
         }
         return Color.alphaBlend(overlayColor, _colors.surfaceContainerHighest);
       }
@@ -3678,7 +3678,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
         borderRadius: selectorRadius,
         borderSide: BorderSide(color: _colors.error, width: 2),
       ),
-      hintStyle: hourMinuteTextStyle.copyWith(color: _colors.onSurface.withOpacity(0.36)),
+      hintStyle: hourMinuteTextStyle.copyWith(color: _colors.onSurface.withValues(alpha: 0.36)),
       // Prevent the error text from appearing.
       // TODO(rami-a): Remove this workaround once
       // https://github.com/flutter/flutter/issues/54104

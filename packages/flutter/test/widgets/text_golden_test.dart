@@ -162,7 +162,7 @@ void main() {
                 style: TextStyle(
                   color: translucentGreen,
                   background: Paint()
-                    ..color = red.withOpacity(0.5),
+                    ..color = red.withValues(alpha: 0.5),
                 ),
                 children: <InlineSpan>[
                   TextSpan(
@@ -170,7 +170,7 @@ void main() {
                     style: TextStyle(
                       color: translucentDarkRed,
                       background: Paint()
-                        ..color = blue.withOpacity(0.5),
+                        ..color = blue.withValues(alpha: 0.5),
                     ),
                   ),
                 ],

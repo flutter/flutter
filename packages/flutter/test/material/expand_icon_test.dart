@@ -109,7 +109,7 @@ void main() {
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
     expect(
       iconTheme.data.color,
-      equals(theme.colorScheme.onSurface.withOpacity(0.38)),
+      equals(theme.colorScheme.onSurface.withValues(alpha: 0.38)),
     );
 
     theme = ThemeData(brightness: Brightness.dark);
@@ -123,7 +123,7 @@ void main() {
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
     expect(
       iconTheme.data.color,
-      equals(theme.colorScheme.onSurface.withOpacity(0.38)),
+      equals(theme.colorScheme.onSurface.withValues(alpha: 0.38)),
     );
   });
 

@@ -295,7 +295,7 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   MaterialStateProperty<Color?>? get color =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
-        return _colors.onSurface.withOpacity(0.12);
+        return _colors.onSurface.withValues(alpha: 0.12);
       }
       if (states.contains(MaterialState.disabled)) {
         return null;
@@ -330,7 +330,7 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   BorderSide? get side => !isSelected
     ? isEnabled
       ? BorderSide(color: _colors.outline)
-      : BorderSide(color: _colors.onSurface.withOpacity(0.12))
+      : BorderSide(color: _colors.onSurface.withValues(alpha: 0.12))
     : const BorderSide(color: Colors.transparent);
 
   @override

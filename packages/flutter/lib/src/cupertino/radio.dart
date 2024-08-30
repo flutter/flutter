@@ -27,7 +27,7 @@ const double _kOuterRadius = 7.0;
 const double _kInnerRadius = 2.975;
 
 // Eyeballed from a radio on a physical Macbook Pro running macOS version 14.5.
-final Color _kDisabledOuterColor = CupertinoColors.white.withOpacity(0.50);
+final Color _kDisabledOuterColor = CupertinoColors.white.withValues(alpha: 0.50);
 const Color _kDisabledInnerColor = CupertinoDynamicColor.withBrightness(
   color: Color.fromARGB(64, 0, 0, 0),
   darkColor: Color.fromARGB(64, 255, 255, 255),
@@ -329,7 +329,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
     final Color effectiveInactiveColor = _defaultOuterColor.resolve(inactiveStates);
 
     final Color effectiveFocusOverlayColor = widget.focusColor ?? HSLColor
-      .fromColor(effectiveActiveColor.withOpacity(kCupertinoFocusColorOpacity))
+      .fromColor(effectiveActiveColor.withValues(alpha: kCupertinoFocusColorOpacity))
       .withLightness(kCupertinoFocusColorBrightness)
       .withSaturation(kCupertinoFocusColorSaturation)
       .toColor();
@@ -444,8 +444,8 @@ class _RadioPainter extends ToggleablePainter {
   void _drawPressedOverlay(Canvas canvas, Offset center, double radius) {
     final Paint pressedPaint = Paint()
       ..color = brightness == Brightness.light
-        ? CupertinoColors.black.withOpacity(_kPressedOverlayOpacity)
-        : CupertinoColors.white.withOpacity(_kPressedOverlayOpacity);
+        ? CupertinoColors.black.withValues(alpha: _kPressedOverlayOpacity)
+        : CupertinoColors.white.withValues(alpha: _kPressedOverlayOpacity);
     canvas.drawCircle(center, radius, pressedPaint);
   }
 
@@ -502,8 +502,8 @@ class _RadioPainter extends ToggleablePainter {
             canvas,
             center,
             _kOuterRadius,
-            outerPaint.color.withOpacity(isActive ? _kDarkGradientOpacities[0] : _kDisabledDarkGradientOpacities[0]),
-            outerPaint.color.withOpacity(isActive ? _kDarkGradientOpacities[1] : _kDisabledDarkGradientOpacities[1]),
+            outerPaint.color.withValues(alpha: isActive ? _kDarkGradientOpacities[0] : _kDisabledDarkGradientOpacities[0]),
+            outerPaint.color.withValues(alpha: isActive ? _kDarkGradientOpacities[1] : _kDisabledDarkGradientOpacities[1]),
           );
         } else {
           canvas.drawCircle(center, _kOuterRadius, outerPaint);
@@ -526,8 +526,8 @@ class _RadioPainter extends ToggleablePainter {
             canvas,
             center,
             _kOuterRadius,
-            paint.color.withOpacity(isActive ? _kDarkGradientOpacities[0] : _kDisabledDarkGradientOpacities[0]),
-            paint.color.withOpacity(isActive ? _kDarkGradientOpacities[1] : _kDisabledDarkGradientOpacities[1]),
+            paint.color.withValues(alpha: isActive ? _kDarkGradientOpacities[0] : _kDisabledDarkGradientOpacities[0]),
+            paint.color.withValues(alpha: isActive ? _kDarkGradientOpacities[1] : _kDisabledDarkGradientOpacities[1]),
           );
         } else {
           canvas.drawCircle(center, _kOuterRadius, paint);

@@ -83,7 +83,7 @@ void main() {
 
     expect(material.shape, isInstanceOf<RoundedRectangleBorder>());
     final RoundedRectangleBorder materialShape = material.shape! as RoundedRectangleBorder;
-    expect(materialShape.side, BorderSide(color: colorScheme.onSurface.withOpacity(0.12)));
+    expect(materialShape.side, BorderSide(color: colorScheme.onSurface.withValues(alpha: 0.12)));
     expect(materialShape.borderRadius, const BorderRadius.all(Radius.circular(4.0)));
 
     expect(material.textStyle!.color, colorScheme.primary);
@@ -185,8 +185,8 @@ void main() {
       expect(material.elevation, elevation);
       expect(MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, enabled), enabledMouseCursor);
       expect(MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, disabled), disabledMouseCursor);
-      expect(inkWell.overlayColor!.resolve(hovered), foregroundColor.withOpacity(0.08));
-      expect(inkWell.overlayColor!.resolve(focused), foregroundColor.withOpacity(0.1));
+      expect(inkWell.overlayColor!.resolve(hovered), foregroundColor.withValues(alpha: 0.08));
+      expect(inkWell.overlayColor!.resolve(focused), foregroundColor.withValues(alpha: 0.1));
       expect(inkWell.enableFeedback, enableFeedback);
       expect(material.borderRadius, null);
       expect(material.shape, shape);

@@ -4072,7 +4072,7 @@ testWidgets('SnackBarAction backgroundColor works as a Color', (WidgetTester tes
     ).style;
     expect(
       actionButtonStyle?.overlayColor?.resolve(<MaterialState>{MaterialState.hovered}),
-      theme.colorScheme.inversePrimary.withOpacity(0.08),
+      theme.colorScheme.inversePrimary.withValues(alpha: 0.08),
     );
   });
 

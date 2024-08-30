@@ -358,7 +358,7 @@ transforms:
             argumentValue:
               expression: "WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {\n
                         if (states.contains(WidgetState.disabled)) {\n
-                          return CupertinoColors.white.withOpacity(0.5);\n
+                          return CupertinoColors.white.withValues(alpha: 0.5);\n
                         }\n
                         if (states.contains(WidgetState.selected)) {\n
                           return {% activeColor %};\n
@@ -377,7 +377,7 @@ transforms:
             argumentValue:
               expression: "WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {\n
                         if (states.contains(WidgetState.disabled)) {\n
-                          return CupertinoColors.white.withOpacity(0.5);\n
+                          return CupertinoColors.white.withValues(alpha: 0.5);\n
                         }\n
                         if (states.contains(WidgetState.selected)) {\n
                           return CupertinoDynamicColor.resolve(CupertinoDynamicColor.withBrightness(\n

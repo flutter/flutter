@@ -1086,13 +1086,13 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(buttonMaterial(continueStr).color!.value, 0);
     expect(
       buttonMaterial(continueStr).textStyle!.color!.value,
-      colorsLight.onSurface.withOpacity(0.38).value,
+      colorsLight.onSurface.withValues(alpha: 0.38).value,
     );
 
     expect(buttonMaterial(cancelStr).color!.value, 0);
     expect(
       buttonMaterial(cancelStr).textStyle!.color!.value,
-      colorsLight.onSurface.withOpacity(0.38).value,
+      colorsLight.onSurface.withValues(alpha: 0.38).value,
     );
 
     final ThemeData themeDark = ThemeData.dark(useMaterial3: true);
@@ -1103,13 +1103,13 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(buttonMaterial(continueStr).color!.value, 0);
     expect(
       buttonMaterial(continueStr).textStyle!.color!.value,
-      colorsDark.onSurface.withOpacity(0.38).value,
+      colorsDark.onSurface.withValues(alpha: 0.38).value,
     );
 
     expect(buttonMaterial(cancelStr).color!.value, 0);
     expect(
       buttonMaterial(cancelStr).textStyle!.color!.value,
-      colorsDark.onSurface.withOpacity(0.38).value,
+      colorsDark.onSurface.withValues(alpha: 0.38).value,
     );
   });
 
@@ -1207,7 +1207,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(circleFillColor(), light.primary);
     await tester.pumpWidget(buildFrame(isActive: false, brightness: Brightness.light));
     await tester.pumpAndSettle();
-    expect(circleFillColor(), light.onSurface.withOpacity(0.38));
+    expect(circleFillColor(), light.onSurface.withValues(alpha: 0.38));
 
     // Dark theme
     final ColorScheme dark = ThemeData.dark().colorScheme;

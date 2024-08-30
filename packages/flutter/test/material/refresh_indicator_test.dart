@@ -992,14 +992,14 @@ void main() {
 
     await tester.fling(find.text('X'), const Offset(0.0, 600.0), 1000.0);
     await tester.pump();
-    expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, refreshIndicatorColor.withOpacity(1.0));
+    expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, refreshIndicatorColor.withValues(alpha: 1.0));
 
     setState(() {
       refreshIndicatorColor = red;
     });
 
     await tester.pump();
-    expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, red.withOpacity(1.0));
+    expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, red.withValues(alpha: 1.0));
   });
 
   testWidgets('RefreshIndicator - reverse - BouncingScrollPhysics', (WidgetTester tester) async {

@@ -680,15 +680,15 @@ void main() {
         ..save()
         ..rrect(
           style: PaintingStyle.fill,
-          color: colors.surfaceContainerHighest.withOpacity(0.12),
+          color: colors.surfaceContainerHighest.withValues(alpha: 0.12),
           rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
         )
         ..rrect(
           style: PaintingStyle.stroke,
-          color: colors.onSurface.withOpacity(0.12),
+          color: colors.onSurface.withValues(alpha: 0.12),
           rrect: RRect.fromLTRBR(5.0, 9.0, 55.0, 39.0, const Radius.circular(16.0)),
         )
-        ..rrect(color: Color.alphaBlend(colors.onSurface.withOpacity(0.38), colors.surface)), // thumb color
+        ..rrect(color: Color.alphaBlend(colors.onSurface.withValues(alpha: 0.38), colors.surface)), // thumb color
       reason: 'Inactive disabled switch should match these colors',
     );
   });
@@ -717,7 +717,7 @@ void main() {
         ..save()
         ..rrect(
           style: PaintingStyle.fill,
-          color: colors.onSurface.withOpacity(0.12),
+          color: colors.onSurface.withValues(alpha: 0.12),
           rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
         )
         ..rrect()
@@ -801,7 +801,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(getSwitchMaterial(tester),
-      paints..circle(color: theme.colorScheme.primary.withOpacity(0.1))
+      paints..circle(color: theme.colorScheme.primary.withValues(alpha: 0.1))
     );
 
     // On both hovered and focused, the overlay color should show hovered overlay color.
@@ -815,7 +815,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(getSwitchMaterial(tester),
-      paints..circle(color: theme.colorScheme.primary.withOpacity(0.08))
+      paints..circle(color: theme.colorScheme.primary.withValues(alpha: 0.08))
     );
 
     focusNode.dispose();
@@ -1852,15 +1852,15 @@ void main() {
       paints
         ..rrect(
           style: PaintingStyle.fill,
-          color: colors.surfaceContainerHighest.withOpacity(0.12),
+          color: colors.surfaceContainerHighest.withValues(alpha: 0.12),
           rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
         )
         ..rrect(
           style: PaintingStyle.stroke,
-          color: colors.onSurface.withOpacity(0.12),
+          color: colors.onSurface.withValues(alpha: 0.12),
           rrect: RRect.fromLTRBR(5.0, 9.0, 55.0, 39.0, const Radius.circular(16.0)),
         )
-        ..rrect(color: Color.alphaBlend(colors.onSurface.withOpacity(0.38), colors.surface)),
+        ..rrect(color: Color.alphaBlend(colors.onSurface.withValues(alpha: 0.38), colors.surface)),
     );
 
     focusNode.dispose();
@@ -2037,11 +2037,11 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-          color: colors.onSurface.withOpacity(0.12),
+          color: colors.onSurface.withValues(alpha: 0.12),
           rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
         )
         ..rrect()
-        ..rrect(color: colors.surface.withOpacity(1.0)),
+        ..rrect(color: colors.surface.withValues(alpha: 1.0)),
     );
   });
 
@@ -2398,12 +2398,12 @@ void main() {
       paints
         ..rrect(
           style: PaintingStyle.fill,
-          color: colors.surfaceContainerHighest.withOpacity(0.12),
+          color: colors.surfaceContainerHighest.withValues(alpha: 0.12),
           rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
         )
         ..rrect(
           style: PaintingStyle.stroke,
-          color: colors.onSurface.withOpacity(0.12),
+          color: colors.onSurface.withValues(alpha: 0.12),
           rrect: RRect.fromLTRBR(5.0, 9.0, 55.0, 39.0, const Radius.circular(16.0)),
         )
         ..rrect(color: inactiveDisabledThumbColor),
@@ -2418,7 +2418,7 @@ void main() {
       paints
         ..rrect(
           style: PaintingStyle.fill,
-          color: colors.onSurface.withOpacity(0.12),
+          color: colors.onSurface.withValues(alpha: 0.12),
           rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
         )
         ..rrect()
@@ -2589,7 +2589,7 @@ void main() {
           color: colors.primary,
           rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
         )
-        ..circle(color: colors.primary.withOpacity(0.1))
+        ..circle(color: colors.primary.withValues(alpha: 0.1))
         ..rrect(color: focusedThumbColor),
       reason: 'active enabled switch should default track and custom thumb color',
     );
@@ -2609,7 +2609,7 @@ void main() {
           color: colors.primary,
           rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
         )
-        ..circle(color: colors.primary.withOpacity(0.08))
+        ..circle(color: colors.primary.withValues(alpha: 0.08))
         ..rrect(color: hoveredThumbColor),
       reason: 'active enabled switch should default track and custom thumb color',
     );
@@ -2945,7 +2945,7 @@ void main() {
   });
 
   testWidgets('Material2 - Switch thumb color is blended against surface color', (WidgetTester tester) async {
-    final Color activeDisabledThumbColor = Colors.blue.withOpacity(.60);
+    final Color activeDisabledThumbColor = Colors.blue.withValues(alpha: .60);
     final ThemeData theme = ThemeData.light(useMaterial3: false);
 
     Color getThumbColor(Set<MaterialState> states) {
@@ -2997,7 +2997,7 @@ void main() {
   });
 
   testWidgets('Material3 - Switch thumb color is blended against surface color', (WidgetTester tester) async {
-    final Color activeDisabledThumbColor = Colors.blue.withOpacity(.60);
+    final Color activeDisabledThumbColor = Colors.blue.withValues(alpha: .60);
     final ThemeData theme = ThemeData(useMaterial3: true);
     final ColorScheme colors = theme.colorScheme;
 
@@ -3037,7 +3037,7 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-          color: colors.onSurface.withOpacity(0.12),
+          color: colors.onSurface.withValues(alpha: 0.12),
           rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
         )
         ..rrect()
@@ -3594,12 +3594,12 @@ void main() {
 
       expect(Material.of(tester.element(find.byType(Switch))),
         paints..rrect(
-          color: colors.onSurface.withOpacity(0.12), // track color
+          color: colors.onSurface.withValues(alpha: 0.12), // track color
           style: PaintingStyle.fill,
         )..rrect(
           color: Colors.transparent, // track outline color
           style: PaintingStyle.stroke,
-        )..rrect(color: colors.surface.withOpacity(1.0)),
+        )..rrect(color: colors.surface.withValues(alpha: 1.0)),
       );
 
       await tester.pumpWidget(Container());
@@ -3609,12 +3609,12 @@ void main() {
 
       expect(Material.of(tester.element(find.byType(Switch))),
         paints..rrect(
-          color: colors.surfaceContainerHighest.withOpacity(0.12), // track color
+          color: colors.surfaceContainerHighest.withValues(alpha: 0.12), // track color
           style: PaintingStyle.fill,
         )..rrect(
-          color: colors.onSurface.withOpacity(0.12), // track outline color
+          color: colors.onSurface.withValues(alpha: 0.12), // track outline color
           style: PaintingStyle.stroke,
-        )..rrect(color: Color.alphaBlend(colors.onSurface.withOpacity(0.38), colors.surface)),
+        )..rrect(color: Color.alphaBlend(colors.onSurface.withValues(alpha: 0.38), colors.surface)),
       );
     }, variant: TargetPlatformVariant.mobile());
 

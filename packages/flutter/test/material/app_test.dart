@@ -993,7 +993,7 @@ void main() {
     // The overscroll color should be a transparent version of the colorScheme's
     // secondary color.
     const Color secondaryColor = Color(0xff008800);
-    final Color glowSecondaryColor = secondaryColor.withOpacity(0.05);
+    final Color glowSecondaryColor = secondaryColor.withValues(alpha: 0.05);
     final ThemeData theme = ThemeData.from(
       useMaterial3: false,
       colorScheme: const ColorScheme.light().copyWith(secondary: secondaryColor),

@@ -1497,7 +1497,7 @@ void main() {
     await tester.pumpWidget(buildTable(selected: true));
     expect(
       lastTableRowBoxDecoration().color,
-      themeData.colorScheme.primary.withOpacity(0.08),
+      themeData.colorScheme.primary.withValues(alpha: 0.08),
     );
   });
 
@@ -1732,7 +1732,7 @@ void main() {
       box,
       paints
         ..rect()
-        ..rect(rect: const Rect.fromLTRB(0.0, 56.0, 800.0, 104.0), color: pressedColor.withOpacity(0.0)),
+        ..rect(rect: const Rect.fromLTRB(0.0, 56.0, 800.0, 104.0), color: pressedColor.withValues(alpha: 0.0)),
     );
     await gesture.up();
   });

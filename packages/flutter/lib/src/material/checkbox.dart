@@ -234,7 +234,7 @@ class Checkbox extends StatefulWidget {
   ///   onChanged: (_){},
   ///   fillColor: MaterialStateProperty.resolveWith<Color>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
-  ///       return Colors.orange.withOpacity(.32);
+  ///       return Colors.orange.withValues(alpha: .32);
   ///     }
   ///     return Colors.orange;
   ///   })
@@ -922,7 +922,7 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
         if (states.contains(MaterialState.selected)) {
           return const BorderSide(width: 2.0, color: Colors.transparent);
         }
-        return BorderSide(width: 2.0, color: _colors.onSurface.withOpacity(0.38));
+        return BorderSide(width: 2.0, color: _colors.onSurface.withValues(alpha: 0.38));
       }
       if (states.contains(MaterialState.selected)) {
         return const BorderSide(width: 0.0, color: Colors.transparent);
@@ -948,7 +948,7 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
-          return _colors.onSurface.withOpacity(0.38);
+          return _colors.onSurface.withValues(alpha: 0.38);
         }
         return Colors.transparent;
       }
@@ -986,35 +986,35 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.error)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.error.withOpacity(0.1);
+          return _colors.error.withValues(alpha: 0.1);
         }
         if (states.contains(MaterialState.hovered)) {
-          return _colors.error.withOpacity(0.08);
+          return _colors.error.withValues(alpha: 0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.error.withOpacity(0.1);
+          return _colors.error.withValues(alpha: 0.1);
         }
       }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.onSurface.withOpacity(0.1);
+          return _colors.onSurface.withValues(alpha: 0.1);
         }
         if (states.contains(MaterialState.hovered)) {
-          return _colors.primary.withOpacity(0.08);
+          return _colors.primary.withValues(alpha: 0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.primary.withOpacity(0.1);
+          return _colors.primary.withValues(alpha: 0.1);
         }
         return Colors.transparent;
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.primary.withOpacity(0.1);
+        return _colors.primary.withValues(alpha: 0.1);
       }
       if (states.contains(MaterialState.hovered)) {
-        return _colors.onSurface.withOpacity(0.08);
+        return _colors.onSurface.withValues(alpha: 0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface.withOpacity(0.1);
+        return _colors.onSurface.withValues(alpha: 0.1);
       }
       return Colors.transparent;
     });

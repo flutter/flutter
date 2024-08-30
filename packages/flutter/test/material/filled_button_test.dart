@@ -112,11 +112,11 @@ void main() {
     expect(material.borderOnForeground, true);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
-    expect(material.color, colorScheme.onSurface.withOpacity(0.12));
+    expect(material.color, colorScheme.onSurface.withValues(alpha: 0.12));
     expect(material.elevation, 0.0);
     expect(material.shadowColor, const Color(0xff000000));
     expect(material.shape, const StadiumBorder());
-    expect(material.textStyle!.color, colorScheme.onSurface.withOpacity(0.38));
+    expect(material.textStyle!.color, colorScheme.onSurface.withValues(alpha: 0.38));
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
     expect(material.textStyle!.fontWeight, FontWeight.w500);
@@ -415,11 +415,11 @@ void main() {
     expect(material.borderOnForeground, true);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
-    expect(material.color, colorScheme.onSurface.withOpacity(0.12));
+    expect(material.color, colorScheme.onSurface.withValues(alpha: 0.12));
     expect(material.elevation, 0.0);
     expect(material.shadowColor, const Color(0xff000000));
     expect(material.shape, const StadiumBorder());
-    expect(material.textStyle!.color, colorScheme.onSurface.withOpacity(0.38));
+    expect(material.textStyle!.color, colorScheme.onSurface.withValues(alpha: 0.38));
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
     expect(material.textStyle!.fontWeight, FontWeight.w500);
@@ -515,13 +515,13 @@ void main() {
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(elevation(), 1.0);
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.08)));
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onPrimary.withValues(alpha: 0.08)));
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
     expect(elevation(), 0.0);
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onPrimary.withOpacity(0.1)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onPrimary.withValues(alpha: 0.1)));
     // Remove pressed and hovered states
     await gesture.up();
     await tester.pumpAndSettle();
@@ -532,7 +532,7 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(elevation(), 0.0);
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.1)));
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onPrimary.withValues(alpha: 0.1)));
     focusNode.dispose();
   });
 
@@ -581,13 +581,13 @@ void main() {
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(elevation(), 1.0);
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.08)));
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSecondaryContainer.withValues(alpha: 0.08)));
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
     expect(elevation(), 0.0);
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.1)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSecondaryContainer.withValues(alpha: 0.1)));
     // Remove pressed and hovered states
     await gesture.up();
     await tester.pumpAndSettle();
@@ -598,7 +598,7 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(elevation(), 0.0);
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.1)));
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSecondaryContainer.withValues(alpha: 0.1)));
     focusNode.dispose();
   });
 

@@ -2346,7 +2346,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(RangeSlider))),
-      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+      isNot(paints..circle(color: theme.colorScheme.primary.withValues(alpha: 0.12))),
     );
 
     // Start hovering.
@@ -2359,7 +2359,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(RangeSlider))),
-      paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+      paints..circle(color: theme.colorScheme.primary.withValues(alpha: 0.12)),
     );
 
     // RangeSlider does not have an overlay when disabled and hovered.
@@ -2367,7 +2367,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(RangeSlider))),
-      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+      isNot(paints..circle(color: theme.colorScheme.primary.withValues(alpha: 0.12))),
     );
   });
 
@@ -2409,7 +2409,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(RangeSlider))),
-      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+      isNot(paints..circle(color: theme.colorScheme.primary.withValues(alpha: 0.12))),
     );
 
     // Start dragging.
@@ -2423,7 +2423,7 @@ void main() {
     // RangeSlider has overlay when enabled and dragged.
     expect(
       Material.of(tester.element(find.byType(RangeSlider))),
-      paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+      paints..circle(color: theme.colorScheme.primary.withValues(alpha: 0.12)),
     );
   });
 

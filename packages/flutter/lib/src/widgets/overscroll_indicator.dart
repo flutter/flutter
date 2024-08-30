@@ -515,7 +515,7 @@ class _GlowController extends ChangeNotifier {
     final double scaleY = _glowSize.value * baseGlowScale;
     final Rect rect = Rect.fromLTWH(0.0, 0.0, size.width, height);
     final Offset center = Offset((size.width / 2.0) * (0.5 + _displacement), height - radius);
-    final Paint paint = Paint()..color = color.withOpacity(_glowOpacity.value);
+    final Paint paint = Paint()..color = color.withValues(alpha: _glowOpacity.value);
     canvas.save();
     canvas.translate(0.0, _paintOffset + _paintOffsetScrollPixels);
     canvas.scale(1.0, scaleY);

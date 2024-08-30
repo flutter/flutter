@@ -1216,7 +1216,7 @@ void main() {
       await tester.pumpWidget(buildNavigationBar());
 
       // Test default indicator color and shape.
-      expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondary.withOpacity(0.24));
+      expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondary.withValues(alpha: 0.24));
       expect(
         _getIndicatorDecoration(tester)?.shape,
         const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
@@ -1568,7 +1568,7 @@ class IconWithRandomColor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
+    final Color randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withValues(alpha: 1.0);
     return Icon(icon, color: randomColor);
   }
 }

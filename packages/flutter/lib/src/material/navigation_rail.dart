@@ -629,13 +629,13 @@ class _RailDestinationState extends State<_RailDestination> {
 
     final Widget themedIcon = IconTheme(
       data: widget.disabled
-        ? widget.iconTheme.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.38))
+        ? widget.iconTheme.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.38))
         : widget.iconTheme,
       child: widget.icon,
     );
     final Widget styledLabel = DefaultTextStyle(
       style: widget.disabled
-        ? widget.labelTextStyle.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.38))
+        ? widget.labelTextStyle.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.38))
         : widget.labelTextStyle,
       child: widget.label,
     );
@@ -828,10 +828,10 @@ class _RailDestinationState extends State<_RailDestination> {
     final bool primaryColorAlphaModified = colors.primary.alpha < 255.0;
     final Color effectiveSplashColor = primaryColorAlphaModified
       ? colors.primary
-      : colors.primary.withOpacity(0.12);
+      : colors.primary.withValues(alpha: 0.12);
     final Color effectiveHoverColor = primaryColorAlphaModified
       ? colors.primary
-      : colors.primary.withOpacity(0.04);
+      : colors.primary.withValues(alpha: 0.04);
     return Semantics(
       container: true,
       selected: widget.selected,
@@ -1099,7 +1099,7 @@ class _NavigationRailDefaultsM2 extends NavigationRailThemeData {
   @override Color? get backgroundColor => _colors.surface;
 
   @override TextStyle? get unselectedLabelTextStyle {
-    return _theme.textTheme.bodyLarge!.copyWith(color: _colors.onSurface.withOpacity(0.64));
+    return _theme.textTheme.bodyLarge!.copyWith(color: _colors.onSurface.withValues(alpha: 0.64));
   }
 
   @override TextStyle? get selectedLabelTextStyle {

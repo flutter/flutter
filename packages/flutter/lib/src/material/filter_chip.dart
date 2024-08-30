@@ -337,13 +337,13 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
         return _chipVariant == _ChipVariant.flat
-          ? _colors.onSurface.withOpacity(0.12)
-          : _colors.onSurface.withOpacity(0.12);
+          ? _colors.onSurface.withValues(alpha: 0.12)
+          : _colors.onSurface.withValues(alpha: 0.12);
       }
       if (states.contains(MaterialState.disabled)) {
         return _chipVariant == _ChipVariant.flat
           ? null
-          : _colors.onSurface.withOpacity(0.12);
+          : _colors.onSurface.withValues(alpha: 0.12);
       }
       if (states.contains(MaterialState.selected)) {
         return _chipVariant == _ChipVariant.flat
@@ -381,7 +381,7 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   BorderSide? get side => _chipVariant == _ChipVariant.flat && !isSelected
     ? isEnabled
       ? BorderSide(color: _colors.outline)
-      : BorderSide(color: _colors.onSurface.withOpacity(0.12))
+      : BorderSide(color: _colors.onSurface.withValues(alpha: 0.12))
     : const BorderSide(color: Colors.transparent);
 
   @override

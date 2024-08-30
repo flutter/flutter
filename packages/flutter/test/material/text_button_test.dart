@@ -62,7 +62,7 @@ void main() {
     // the effect with paint methods.
     if (!material3) {
       final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-      expect(inkFeatures, paints..circle(color: colorScheme.primary.withOpacity(0.12)));
+      expect(inkFeatures, paints..circle(color: colorScheme.primary.withValues(alpha: 0.12)));
     }
 
     await gesture.up();
@@ -147,7 +147,7 @@ void main() {
     expect(material.shape, material3
       ? const StadiumBorder()
       : const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
-    expect(material.textStyle!.color, colorScheme.onSurface.withOpacity(0.38));
+    expect(material.textStyle!.color, colorScheme.onSurface.withValues(alpha: 0.38));
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
     expect(material.textStyle!.fontWeight, FontWeight.w500);
@@ -453,12 +453,12 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withOpacity(0.08)));
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withValues(alpha: 0.08)));
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withOpacity(0.1)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withValues(alpha: 0.1)));
     // Remove pressed and hovered states
     await gesture.up();
     await tester.pumpAndSettle();
@@ -468,7 +468,7 @@ void main() {
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withOpacity(0.1)));
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withValues(alpha: 0.1)));
 
     focusNode.dispose();
   });
@@ -2053,7 +2053,7 @@ void main() {
     );
 
     material = tester.widget<Material>(buttonMaterial);
-    expect(material.textStyle!.color, colorScheme.onSurface.withOpacity(0.38));
+    expect(material.textStyle!.color, colorScheme.onSurface.withValues(alpha: 0.38));
     expect(iconColor(), equals(Colors.blue));
   });
 
@@ -2454,7 +2454,7 @@ void main() {
 
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withOpacity(0.08)));
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withValues(alpha: 0.08)));
     expect(hasBeenHovered, isTrue);
   });
 }

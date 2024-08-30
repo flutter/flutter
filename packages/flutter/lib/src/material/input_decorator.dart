@@ -1982,10 +1982,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (decoration.filled!) {
       return themeData.hintColor;
     }
-    final Color enabledColor = themeData.colorScheme.onSurface.withOpacity(0.38);
+    final Color enabledColor = themeData.colorScheme.onSurface.withValues(alpha: 0.38);
     if (isHovering) {
       final Color hoverColor = decoration.hoverColor ?? themeData.inputDecorationTheme.hoverColor ?? themeData.hoverColor;
-      return Color.alphaBlend(hoverColor.withOpacity(0.12), enabledColor);
+      return Color.alphaBlend(hoverColor.withValues(alpha: 0.12), enabledColor);
     }
     return enabledColor;
   }
@@ -4746,7 +4746,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return TextStyle(color: _colors.onSurface.withOpacity(0.38));
+      return TextStyle(color: _colors.onSurface.withValues(alpha: 0.38));
     }
     return TextStyle(color: _colors.onSurfaceVariant);
   });
@@ -4754,7 +4754,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   Color? get fillColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return _colors.onSurface.withOpacity(0.04);
+      return _colors.onSurface.withValues(alpha: 0.04);
     }
     return _colors.surfaceContainerHighest;
   });
@@ -4762,7 +4762,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   BorderSide? get activeIndicatorBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return BorderSide(color: _colors.onSurface.withOpacity(0.38));
+      return BorderSide(color: _colors.onSurface.withValues(alpha: 0.38));
     }
     if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
@@ -4785,7 +4785,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   BorderSide? get outlineBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return BorderSide(color: _colors.onSurface.withOpacity(0.12));
+      return BorderSide(color: _colors.onSurface.withValues(alpha: 0.12));
     }
     if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
@@ -4811,7 +4811,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return _colors.onSurface.withOpacity(0.38);
+      return _colors.onSurface.withValues(alpha: 0.38);
     }
     return _colors.onSurfaceVariant;
   });
@@ -4819,7 +4819,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return _colors.onSurface.withOpacity(0.38);
+      return _colors.onSurface.withValues(alpha: 0.38);
     }
     if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.hovered)) {
@@ -4834,7 +4834,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
     if (states.contains(MaterialState.disabled)) {
-      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
+      return textStyle.copyWith(color: _colors.onSurface.withValues(alpha: 0.38));
     }
     if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
@@ -4858,7 +4858,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
     if (states.contains(MaterialState.disabled)) {
-      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
+      return textStyle.copyWith(color: _colors.onSurface.withValues(alpha: 0.38));
     }
     if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
@@ -4882,7 +4882,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
     if (states.contains(MaterialState.disabled)) {
-      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
+      return textStyle.copyWith(color: _colors.onSurface.withValues(alpha: 0.38));
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });

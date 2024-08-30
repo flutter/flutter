@@ -506,7 +506,7 @@ void main() {
             colorScheme: const ColorScheme.dark(),
           ),
           child: buildMaterial(
-            color: surfaceColor.withOpacity(.75),
+            color: surfaceColor.withValues(alpha: .75),
             elevation: 8.0,
           ),
         ),

@@ -791,7 +791,7 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..drrect(
-          color: theme.colorScheme.onSurface.withOpacity(0.38),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
           outer: RRect.fromLTRBR(15.0, 15.0, 33.0, 33.0, const Radius.circular(2.0)),
           inner: RRect.fromLTRBR(17.0, 17.0, 31.0, 31.0, Radius.zero),
         ),
@@ -976,7 +976,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..path(color: theme.colorScheme.onSurface.withOpacity(0.38))
+        ..path(color: theme.colorScheme.onSurface.withValues(alpha: 0.38))
         ..path(color: theme.colorScheme.surface, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
   });
@@ -1467,7 +1467,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: colors.primary.withOpacity(0.1)),
+      paints..circle(color: colors.primary.withValues(alpha: 0.1)),
       reason: 'Default inactive pressed Checkbox should have overlay color from default fillColor',
     );
 
@@ -1477,7 +1477,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: colors.onSurface.withOpacity(0.1)),
+      paints..circle(color: colors.onSurface.withValues(alpha: 0.1)),
       reason: 'Default active pressed Checkbox should have overlay color from default fillColor',
     );
 
@@ -1488,7 +1488,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: colors.onSurface.withOpacity(0.1)),
+      paints..circle(color: colors.onSurface.withValues(alpha: 0.1)),
       reason: 'Focused Checkbox should use default focused overlay color',
     );
 
@@ -1502,7 +1502,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: colors.onSurface.withOpacity(0.08)),
+      paints..circle(color: colors.onSurface.withValues(alpha: 0.08)),
       reason: 'Hovered Checkbox should use default hovered overlay color',
     );
 
@@ -2048,7 +2048,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: themeData.colorScheme.error.withOpacity(0.1))..path(color: themeData.colorScheme.error)..path(color: themeData.colorScheme.onError)
+      paints..circle(color: themeData.colorScheme.error.withValues(alpha: 0.1))..path(color: themeData.colorScheme.error)..path(color: themeData.colorScheme.onError)
     );
 
     // Default color
@@ -2071,7 +2071,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..circle(color: themeData.colorScheme.error.withOpacity(0.08))
+        ..circle(color: themeData.colorScheme.error.withValues(alpha: 0.08))
         ..path(color: themeData.colorScheme.error)
     );
 
@@ -2081,7 +2081,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..circle(color: themeData.colorScheme.error.withOpacity(0.1))
+        ..circle(color: themeData.colorScheme.error.withValues(alpha: 0.1))
         ..path(color: themeData.colorScheme.error)
     );
     await gestureLongPress.up();
@@ -2335,7 +2335,7 @@ void main() {
       getCheckboxRenderer(),
       paints
         ..drrect(
-          color: theme.colorScheme.onSurface.withOpacity(0.38),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
         ),
     );
     expect(getCheckboxRenderer(), paints..path(color: inactiveBackgroundColor));

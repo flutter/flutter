@@ -1633,7 +1633,7 @@ class _PopupMenuDefaultsM3 extends PopupMenuThemeData {
     // TODO(quncheng): Update this hard-coded value to use the latest tokens.
     final TextStyle style = _textTheme.labelLarge!;
       if (states.contains(MaterialState.disabled)) {
-        return style.apply(color: _colors.onSurface.withOpacity(0.38));
+        return style.apply(color: _colors.onSurface.withValues(alpha: 0.38));
       }
       return style.apply(color: _colors.onSurface);
     });

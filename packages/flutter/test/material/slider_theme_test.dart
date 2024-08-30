@@ -111,17 +111,17 @@ void main() {
     const double trackHeight = 4.0;
     final Color activeTrackColor = Color(colorScheme.primary.value);
     final Color inactiveTrackColor = colorScheme.surfaceContainerHighest;
-    final Color secondaryActiveTrackColor = colorScheme.primary.withOpacity(0.54);
-    final Color disabledActiveTrackColor = colorScheme.onSurface.withOpacity(0.38);
-    final Color disabledInactiveTrackColor = colorScheme.onSurface.withOpacity(0.12);
-    final Color disabledSecondaryActiveTrackColor = colorScheme.onSurface.withOpacity(0.12);
+    final Color secondaryActiveTrackColor = colorScheme.primary.withValues(alpha: 0.54);
+    final Color disabledActiveTrackColor = colorScheme.onSurface.withValues(alpha: 0.38);
+    final Color disabledInactiveTrackColor = colorScheme.onSurface.withValues(alpha: 0.12);
+    final Color disabledSecondaryActiveTrackColor = colorScheme.onSurface.withValues(alpha: 0.12);
     final Color shadowColor = colorScheme.shadow;
     final Color thumbColor = Color(colorScheme.primary.value);
-    final Color disabledThumbColor = Color.alphaBlend(colorScheme.onSurface.withOpacity(0.38), colorScheme.surface);
-    final Color activeTickMarkColor = colorScheme.onPrimary.withOpacity(0.38);
-    final Color inactiveTickMarkColor = colorScheme.onSurfaceVariant.withOpacity(0.38);
-    final Color disabledActiveTickMarkColor = colorScheme.onSurface.withOpacity(0.38);
-    final Color disabledInactiveTickMarkColor = colorScheme.onSurface.withOpacity(0.38);
+    final Color disabledThumbColor = Color.alphaBlend(colorScheme.onSurface.withValues(alpha: 0.38), colorScheme.surface);
+    final Color activeTickMarkColor = colorScheme.onPrimary.withValues(alpha: 0.38);
+    final Color inactiveTickMarkColor = colorScheme.onSurfaceVariant.withValues(alpha: 0.38);
+    final Color disabledActiveTickMarkColor = colorScheme.onSurface.withValues(alpha: 0.38);
+    final Color disabledInactiveTickMarkColor = colorScheme.onSurface.withValues(alpha: 0.38);
 
     try {
       double value = 0.45;
@@ -495,7 +495,7 @@ void main() {
           ..rrect(color: const Color(0xfffafafa))
           ..rrect(color: customColor2) // Inactive track
           ..rrect(color: customColor1) // Active track
-          ..circle(color: customColor1.withOpacity(0.12)) // overlay
+          ..circle(color: customColor1.withValues(alpha: 0.12)) // overlay
           ..circle(color: customColor2) // 1st tick mark
           ..circle(color: customColor2) // 2nd tick mark
           ..circle(color: customColor2) // 3rd tick mark
@@ -2559,19 +2559,19 @@ void main() {
       const double trackHeight = 4.0;
       final ColorScheme colorScheme = theme.colorScheme;
       final Color activeTrackColor = Color(colorScheme.primary.value);
-      final Color inactiveTrackColor = colorScheme.primary.withOpacity(0.24);
-      final Color secondaryActiveTrackColor = colorScheme.primary.withOpacity(0.54);
-      final Color disabledActiveTrackColor = colorScheme.onSurface.withOpacity(0.32);
-      final Color disabledInactiveTrackColor = colorScheme.onSurface.withOpacity(0.12);
-      final Color disabledSecondaryActiveTrackColor = colorScheme.onSurface.withOpacity(0.12);
+      final Color inactiveTrackColor = colorScheme.primary.withValues(alpha: 0.24);
+      final Color secondaryActiveTrackColor = colorScheme.primary.withValues(alpha: 0.54);
+      final Color disabledActiveTrackColor = colorScheme.onSurface.withValues(alpha: 0.32);
+      final Color disabledInactiveTrackColor = colorScheme.onSurface.withValues(alpha: 0.12);
+      final Color disabledSecondaryActiveTrackColor = colorScheme.onSurface.withValues(alpha: 0.12);
       final Color shadowColor = colorScheme.shadow;
       final Color thumbColor = Color(colorScheme.primary.value);
-      final Color disabledThumbColor = Color.alphaBlend(colorScheme.onSurface.withOpacity(.38), colorScheme.surface);
-      final Color activeTickMarkColor = colorScheme.onPrimary.withOpacity(0.54);
-      final Color inactiveTickMarkColor = colorScheme.primary.withOpacity(0.54);
-      final Color disabledActiveTickMarkColor = colorScheme.onPrimary.withOpacity(0.12);
-      final Color disabledInactiveTickMarkColor = colorScheme.onSurface.withOpacity(0.12);
-      final Color valueIndicatorColor = Color.alphaBlend(colorScheme.onSurface.withOpacity(0.60), colorScheme.surface.withOpacity(0.90));
+      final Color disabledThumbColor = Color.alphaBlend(colorScheme.onSurface.withValues(alpha: .38), colorScheme.surface);
+      final Color activeTickMarkColor = colorScheme.onPrimary.withValues(alpha: 0.54);
+      final Color inactiveTickMarkColor = colorScheme.primary.withValues(alpha: 0.54);
+      final Color disabledActiveTickMarkColor = colorScheme.onPrimary.withValues(alpha: 0.12);
+      final Color disabledInactiveTickMarkColor = colorScheme.onSurface.withValues(alpha: 0.12);
+      final Color valueIndicatorColor = Color.alphaBlend(colorScheme.onSurface.withValues(alpha: 0.60), colorScheme.surface.withValues(alpha: 0.90));
 
       try {
         double value = 0.45;

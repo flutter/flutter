@@ -1781,7 +1781,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           final String title = widget.onGenerateTitle!(context);
           return Title(
             title: title,
-            color: widget.color.withOpacity(1.0),
+            color: widget.color.withValues(alpha: 1.0),
             child: result,
           );
         },
@@ -1794,7 +1794,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     } else {
       title = Title(
         title: widget.title ?? '',
-        color: widget.color.withOpacity(1.0),
+        color: widget.color.withValues(alpha: 1.0),
         child: result,
       );
     }

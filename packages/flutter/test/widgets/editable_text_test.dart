@@ -17428,7 +17428,7 @@ void main() {
       MaterialApp(
         home: EditableText(
           key: key,
-          cursorColor: cursorColor.withOpacity(opacity),
+          cursorColor: cursorColor.withValues(alpha: opacity),
           backgroundCursorColor: Colors.grey,
           controller: controller,
           focusNode: focusNode,
@@ -17442,7 +17442,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-    expect(state.renderEditable.cursorColor, cursorColor.withOpacity(opacity));
+    expect(state.renderEditable.cursorColor, cursorColor.withValues(alpha: opacity));
   });
 
   testWidgets('should notify on size change', (WidgetTester tester) async {

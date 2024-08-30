@@ -159,7 +159,7 @@ class _OpenUpwardsPageTransitionState extends State<_OpenUpwardsPageTransition> 
           animation: widget.animation,
           builder: (BuildContext context, Widget? child) {
             return Container(
-              color: Colors.black.withOpacity(opacityAnimation.value),
+              color: Colors.black.withValues(alpha: opacityAnimation.value),
               alignment: Alignment.bottomLeft,
               child: ClipRect(
                 child: SizedBox(
@@ -1025,7 +1025,7 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
     if (scrimOpacity > 0.0) {
       context.canvas.drawRect(
         offset & size,
-        Paint()..color = Colors.black.withOpacity(scrimOpacity),
+        Paint()..color = Colors.black.withValues(alpha: scrimOpacity),
       );
     }
   }
@@ -1264,7 +1264,7 @@ class _ZoomEnterTransitionNoCache extends StatelessWidget {
       animation: animation,
       builder: (BuildContext context, Widget? child) {
         return ColoredBox(
-          color: Colors.black.withOpacity(opacity),
+          color: Colors.black.withValues(alpha: opacity),
           child: child,
         );
       },

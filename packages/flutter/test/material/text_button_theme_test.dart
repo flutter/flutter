@@ -187,8 +187,8 @@ void main() {
       expect(material.elevation, elevation);
       expect(MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, enabled), enabledMouseCursor);
       expect(MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, disabled), disabledMouseCursor);
-      expect(inkWell.overlayColor!.resolve(hovered), foregroundColor.withOpacity(0.08));
-      expect(inkWell.overlayColor!.resolve(focused), foregroundColor.withOpacity(0.1));
+      expect(inkWell.overlayColor!.resolve(hovered), foregroundColor.withValues(alpha: 0.08));
+      expect(inkWell.overlayColor!.resolve(focused), foregroundColor.withValues(alpha: 0.1));
       expect(inkWell.enableFeedback, enableFeedback);
       expect(material.borderRadius, null);
       expect(material.shape, shape);

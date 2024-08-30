@@ -416,7 +416,7 @@ void main() {
           expect(findBorderPainter(), paints
             ..path(
               style: PaintingStyle.fill,
-              color: theme.colorScheme.onSurface.withOpacity(0.04),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.04),
             ),
           );
         });
@@ -434,7 +434,7 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          expect(getBorderColor(tester), theme.colorScheme.onSurface.withOpacity(0.38));
+          expect(getBorderColor(tester), theme.colorScheme.onSurface.withValues(alpha: 0.38));
           expect(getBorderWeight(tester), 1.0);
         });
       });
@@ -473,7 +473,7 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          expect(theme.hoverColor, Colors.black.withOpacity(0.04));
+          expect(theme.hoverColor, Colors.black.withValues(alpha: 0.04));
           expect(findBorderPainter(), paints
             ..path(
               style: PaintingStyle.fill,
@@ -834,7 +834,7 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          expect(getBorderColor(tester), theme.colorScheme.onSurface.withOpacity(0.12));
+          expect(getBorderColor(tester), theme.colorScheme.onSurface.withValues(alpha: 0.12));
           expect(getBorderWeight(tester), 1.0);
         });
       });
@@ -1799,7 +1799,7 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          expect(getLabelStyle(tester).color, theme.colorScheme.onSurface.withOpacity(0.38));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onSurface.withValues(alpha: 0.38));
         });
       });
 
@@ -1958,7 +1958,7 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          expect(getLabelStyle(tester).color, theme.colorScheme.onSurface.withOpacity(0.38));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onSurface.withValues(alpha: 0.38));
         });
       });
 
@@ -2941,7 +2941,7 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
+          final Color expectedColor = theme.colorScheme.onSurface.withValues(alpha: 0.38);
           final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
@@ -3517,7 +3517,7 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
+          final Color expectedColor = theme.colorScheme.onSurface.withValues(alpha: 0.38);
           final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
@@ -4618,7 +4618,7 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
+          final Color expectedColor = theme.colorScheme.onSurface.withValues(alpha: 0.38);
           final TextStyle expectedStyle = theme.textTheme.bodySmall!.copyWith(color: expectedColor);
           expect(getHelperStyle(tester), expectedStyle);
           expect(getCounterStyle(tester), expectedStyle);
@@ -4866,7 +4866,7 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
+          final Color expectedColor = theme.colorScheme.onSurface.withValues(alpha: 0.38);
           final TextStyle expectedStyle = theme.textTheme.bodySmall!.copyWith(color: expectedColor);
           expect(getHelperStyle(tester), expectedStyle);
           expect(getCounterStyle(tester), expectedStyle);
@@ -5461,7 +5461,7 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findPrefixIcon()));
-          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
+          final Color expectedColor = theme.colorScheme.onSurface.withValues(alpha: 0.38);
           expect(getPrefixIconStyle(tester).color, expectedColor);
         });
 
@@ -5504,7 +5504,7 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findSuffixIcon()));
-          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
+          final Color expectedColor = theme.colorScheme.onSurface.withValues(alpha: 0.38);
           expect(getSuffixIconStyle(tester).color, expectedColor);
         });
       });
@@ -5935,7 +5935,7 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findPrefixIcon()));
-          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
+          final Color expectedColor = theme.colorScheme.onSurface.withValues(alpha: 0.38);
           expect(getPrefixIconStyle(tester).color, expectedColor);
         });
 
@@ -5978,7 +5978,7 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findSuffixIcon()));
-          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
+          final Color expectedColor = theme.colorScheme.onSurface.withValues(alpha: 0.38);
           expect(getSuffixIconStyle(tester).color, expectedColor);
         });
       });
@@ -12618,9 +12618,9 @@ void main() {
 
     testWidgets('InputDecoration default border uses colorScheme', (WidgetTester tester) async {
       final ThemeData theme = ThemeData.light(useMaterial3: false);
-      final Color enabledColor = theme.colorScheme.onSurface.withOpacity(0.38);
+      final Color enabledColor = theme.colorScheme.onSurface.withValues(alpha: 0.38);
       final Color disabledColor = theme.disabledColor;
-      final Color hoverColor = Color.alphaBlend(theme.hoverColor.withOpacity(0.12), enabledColor);
+      final Color hoverColor = Color.alphaBlend(theme.hoverColor.withValues(alpha: 0.12), enabledColor);
 
       // Enabled
       await tester.pumpWidget(

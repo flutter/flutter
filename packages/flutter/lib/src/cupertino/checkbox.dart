@@ -178,7 +178,7 @@ class CupertinoCheckbox extends StatefulWidget {
   ///   onChanged: (_){},
   ///   fillColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
-  ///       return Colors.orange.withOpacity(.32);
+  ///       return Colors.orange.withValues(alpha: .32);
   ///     }
   ///     return Colors.orange;
   ///   })
@@ -315,7 +315,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
   WidgetStateProperty<Color> get _defaultFillColor {
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
-        return CupertinoColors.white.withOpacity(0.5);
+        return CupertinoColors.white.withValues(alpha: 0.5);
       }
       if (states.contains(WidgetState.selected)) {
         return widget.activeColor ?? CupertinoDynamicColor.resolve(_kDefaultFillColor, context);
@@ -381,7 +381,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
 
     final Color effectiveFocusOverlayColor = widget.focusColor
       ?? HSLColor
-          .fromColor(effectiveActiveColor.withOpacity(kCupertinoFocusColorOpacity))
+          .fromColor(effectiveActiveColor.withValues(alpha: kCupertinoFocusColorOpacity))
           .withLightness(kCupertinoFocusColorBrightness)
           .withSaturation(kCupertinoFocusColorSaturation)
           .toColor();
@@ -521,8 +521,8 @@ class _CheckboxPainter extends ToggleablePainter {
       _drawFillGradient(
         canvas,
         outer,
-        paint.color.withOpacity(isActive ? _kDarkGradientOpacities[0] : _kDisabledDarkGradientOpacities[0]),
-        paint.color.withOpacity(isActive ? _kDarkGradientOpacities[1] : _kDisabledDarkGradientOpacities[1]),
+        paint.color.withValues(alpha: isActive ? _kDarkGradientOpacities[0] : _kDisabledDarkGradientOpacities[0]),
+        paint.color.withValues(alpha: isActive ? _kDarkGradientOpacities[1] : _kDisabledDarkGradientOpacities[1]),
       );
     } else {
       canvas.drawPath(shape.getOuterPath(outer), paint);
@@ -576,8 +576,8 @@ class _CheckboxPainter extends ToggleablePainter {
     if (downPosition != null) {
       final Paint pressedPaint = Paint()
         ..color = brightness == Brightness.light
-          ? CupertinoColors.black.withOpacity(_kPressedOverlayOpacity)
-          : CupertinoColors.white.withOpacity(_kPressedOverlayOpacity);
+          ? CupertinoColors.black.withValues(alpha: _kPressedOverlayOpacity)
+          : CupertinoColors.white.withValues(alpha: _kPressedOverlayOpacity);
       canvas.drawPath(shape.getOuterPath(outer), pressedPaint);
     }
     if (isFocused) {

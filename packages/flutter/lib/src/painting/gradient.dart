@@ -241,7 +241,7 @@ abstract class Gradient {
   Gradient scale(double factor);
 
   /// Returns a new [Gradient] with each color set to the given opacity.
-  Gradient withOpacity(double opacity);
+  Gradient withValues(alpha: double opacity);
 
   /// Linearly interpolates from another [Gradient] to `this`.
   ///
@@ -561,12 +561,12 @@ class LinearGradient extends Gradient {
   }
 
   @override
-  LinearGradient withOpacity(double opacity) {
+  LinearGradient withValues(alpha: double opacity) {
     return LinearGradient(
       begin: begin,
       end: end,
       colors: <Color>[
-        for (final Color color in colors) color.withOpacity(opacity)
+        for (final Color color in colors) color.withValues(alpha: opacity)
       ],
       stops: stops,
       tileMode: tileMode,
@@ -861,12 +861,12 @@ class RadialGradient extends Gradient {
   }
 
   @override
-  RadialGradient withOpacity(double opacity) {
+  RadialGradient withValues(alpha: double opacity) {
     return RadialGradient(
       center: center,
       radius: radius,
       colors: <Color>[
-        for (final Color color in colors) color.withOpacity(opacity)
+        for (final Color color in colors) color.withValues(alpha: opacity)
       ],
       stops: stops,
       tileMode: tileMode,
@@ -1139,13 +1139,13 @@ class SweepGradient extends Gradient {
   }
 
   @override
-  SweepGradient withOpacity(double opacity) {
+  SweepGradient withValues(alpha: double opacity) {
     return SweepGradient(
       center: center,
       startAngle: startAngle,
       endAngle: endAngle,
       colors: <Color>[
-        for (final Color color in colors) color.withOpacity(opacity)
+        for (final Color color in colors) color.withValues(alpha: opacity)
       ],
       stops: stops,
       tileMode: tileMode,

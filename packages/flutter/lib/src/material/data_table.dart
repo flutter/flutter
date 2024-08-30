@@ -216,7 +216,7 @@ class DataRow {
   /// DataRow(
   ///   color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.selected)) {
-  ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///       return Theme.of(context).colorScheme.primary.withValues(alpha: 0.08);
   ///     }
   ///     return null;  // Use the default value.
   ///   }),
@@ -551,7 +551,7 @@ class DataTable extends StatelessWidget {
   /// DataTable(
   ///   dataRowColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.selected)) {
-  ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///       return Theme.of(context).colorScheme.primary.withValues(alpha: 0.08);
   ///     }
   ///     return null;  // Use the default value.
   ///   }),
@@ -626,7 +626,7 @@ class DataTable extends StatelessWidget {
   ///   rows: _rows,
   ///   headingRowColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.hovered)) {
-  ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///       return Theme.of(context).colorScheme.primary.withValues(alpha: 0.08);
   ///     }
   ///     return null;  // Use the default value.
   ///   }),
@@ -958,7 +958,7 @@ class DataTable extends StatelessWidget {
       child: DefaultTextStyle(
         style: DefaultTextStyle.of(context).style
           .merge(effectiveDataTextStyle)
-          .copyWith(color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null),
+          .copyWith(color: placeholder ? effectiveDataTextStyle.color!.withValues(alpha: 0.6) : null),
         child: DropdownButtonHideUnderline(child: label),
       ),
     );
@@ -1003,7 +1003,7 @@ class DataTable extends StatelessWidget {
     final MaterialStateProperty<Color?> defaultRowColor = MaterialStateProperty.resolveWith(
       (Set<MaterialState> states) {
         if (states.contains(MaterialState.selected)) {
-          return theme.colorScheme.primary.withOpacity(0.08);
+          return theme.colorScheme.primary.withValues(alpha: 0.08);
         }
         return null;
       },

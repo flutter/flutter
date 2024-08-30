@@ -302,7 +302,7 @@ class CupertinoSwitch extends StatefulWidget {
   ///   onChanged: (bool value) { },
   ///   trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
-  ///       return CupertinoColors.activeOrange.withOpacity(.48);
+  ///       return CupertinoColors.activeOrange.withValues(alpha: .48);
   ///     }
   ///     return null; // Use the default color.
   ///   }),
@@ -710,7 +710,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
               ..focusColor = CupertinoDynamicColor.resolve(
                   widget.focusColor ??
                   HSLColor
-                    .fromColor(activeColor.withOpacity(kCupertinoFocusColorOpacity))
+                    .fromColor(activeColor.withValues(alpha: kCupertinoFocusColorOpacity))
                     .withLightness(kCupertinoFocusColorBrightness)
                     .withSaturation(kCupertinoFocusColorSaturation)
                     .toColor(),
@@ -1128,13 +1128,13 @@ class _SwitchPainter extends ToggleablePainter {
         height: _kOnLabelHeight,
       );
       final Paint onLabelPaint = Paint()
-        ..color = onLabelColor.withOpacity(onLabelOpacity)
+        ..color = onLabelColor.withValues(alpha: onLabelOpacity)
         ..style = PaintingStyle.fill;
       canvas.drawRect(onLabelRect, onLabelPaint);
 
       // Draws 'O' label.
       final Paint offLabelPaint = Paint()
-        ..color = offLabelColor.withOpacity(offLabelOpacity)
+        ..color = offLabelColor.withValues(alpha: offLabelOpacity)
         ..style = PaintingStyle.stroke
         ..strokeWidth = _kOffLabelWidth;
       canvas.drawCircle(

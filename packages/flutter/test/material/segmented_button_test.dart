@@ -606,13 +606,13 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSurface.withValues(alpha: 0.08)));
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.1)));
+    expect(getOverlayColor(tester), paints..rect()..rect(color: theme.colorScheme.onSurface.withValues(alpha: 0.1)));
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
@@ -774,7 +774,7 @@ void main() {
     await gesture.addPointer();
     await gesture.down(tester.getCenter(find.text('1')));
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: foregroundColor.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: foregroundColor.withValues(alpha: 0.08)));
   });
 
   testWidgets('Disabled SegmentedButton has correct states when rebuilding', (WidgetTester tester) async {
@@ -946,13 +946,13 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withValues(alpha: 0.08)));
 
     // Hovered unselected segment,
     center = tester.getCenter(find.text('Option 2'));
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withValues(alpha: 0.08)));
 
     // Highlighted unselected segment (pressed).
     center = tester.getCenter(find.text('Option 1'));
@@ -961,8 +961,8 @@ void main() {
     expect(
       getOverlayColor(tester),
       paints
-        ..rect(color: overlayColor.withOpacity(0.08))
-        ..rect(color: overlayColor.withOpacity(0.1)),
+        ..rect(color: overlayColor.withValues(alpha: 0.08))
+        ..rect(color: overlayColor.withValues(alpha: 0.1)),
     );
     // Remove pressed and hovered states,
     await gesture.up();
@@ -977,8 +977,8 @@ void main() {
     expect(
       getOverlayColor(tester),
       paints
-        ..rect(color: overlayColor.withOpacity(0.08))
-        ..rect(color: overlayColor.withOpacity(0.1)),
+        ..rect(color: overlayColor.withValues(alpha: 0.08))
+        ..rect(color: overlayColor.withValues(alpha: 0.1)),
     );
     // Remove pressed and hovered states,
     await gesture.up();
@@ -989,12 +989,12 @@ void main() {
     // Focused unselected segment.
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.1)));
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withValues(alpha: 0.1)));
 
     // Focused selected segment.
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.1)));
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withValues(alpha: 0.1)));
   });
 
   testWidgets('SegmentedButton.styleFrom with transparent overlayColor', (WidgetTester tester) async {

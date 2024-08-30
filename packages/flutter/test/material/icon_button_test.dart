@@ -1124,8 +1124,8 @@ void main() {
       )
     );
 
-    Color? iconColorWithOpacity() => _iconStyle(tester, Icons.add)?.color;
-    expect(iconColorWithOpacity(), Colors.purple.withOpacity(0.5));
+    Color? iconColorwithValues(alpha: ) => _iconStyle(tester, Icons.add)?.color;
+    expect(iconColorwithValues(alpha: ), Colors.purple.withValues(alpha: 0.5));
   });
 
   testWidgets('IconButton defaults - M3', (WidgetTester tester) async {
@@ -1242,12 +1242,12 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.08)));
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect()..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.1)));
+    expect(getOverlayColor(tester), paints..rect()..rect(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.1)));
     // Remove pressed and hovered states
     await gesture.up();
     await tester.pumpAndSettle();
@@ -1257,7 +1257,7 @@ void main() {
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.1)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.1)));
 
     focusNode.dispose();
   });
@@ -1339,13 +1339,13 @@ void main() {
     expect(material.borderOnForeground, true);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
-    expect(material.color, colorScheme.onSurface.withOpacity(0.12));
+    expect(material.color, colorScheme.onSurface.withValues(alpha: 0.12));
     expect(material.elevation, 0.0);
     expect(material.shadowColor, Colors.transparent);
     expect(material.shape, const StadiumBorder());
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
-    expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(), colorScheme.onSurface.withValues(alpha: 0.38));
   });
 
   testWidgets('IconButton.fill default overlayColor resolves pressed state', (WidgetTester tester) async {
@@ -1379,12 +1379,12 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onPrimary.withValues(alpha: 0.08)));
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect()..rect(color: theme.colorScheme.onPrimary.withOpacity(0.1)));
+    expect(getOverlayColor(tester), paints..rect()..rect(color: theme.colorScheme.onPrimary.withValues(alpha: 0.1)));
     // Remove pressed and hovered states
     await gesture.up();
     await tester.pumpAndSettle();
@@ -1394,7 +1394,7 @@ void main() {
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.1)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onPrimary.withValues(alpha: 0.1)));
 
     focusNode.dispose();
   });
@@ -1505,13 +1505,13 @@ void main() {
     expect(material.borderOnForeground, true);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
-    expect(material.color, colorScheme.onSurface.withOpacity(0.12));
+    expect(material.color, colorScheme.onSurface.withValues(alpha: 0.12));
     expect(material.elevation, 0.0);
     expect(material.shadowColor, Colors.transparent);
     expect(material.shape, const StadiumBorder());
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
-    expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(), colorScheme.onSurface.withValues(alpha: 0.38));
   });
 
   testWidgets('IconButton.filledTonal defaults - M3', (WidgetTester tester) async {
@@ -1591,13 +1591,13 @@ void main() {
     expect(material.borderOnForeground, true);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
-    expect(material.color, colorScheme.onSurface.withOpacity(0.12));
+    expect(material.color, colorScheme.onSurface.withValues(alpha: 0.12));
     expect(material.elevation, 0.0);
     expect(material.shadowColor, Colors.transparent);
     expect(material.shape, const StadiumBorder());
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
-    expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(), colorScheme.onSurface.withValues(alpha: 0.38));
   });
 
   testWidgets('IconButton.filledTonal default overlayColor resolves pressed state', (WidgetTester tester) async {
@@ -1631,12 +1631,12 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSecondaryContainer.withValues(alpha: 0.08)));
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect()..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.1)));
+    expect(getOverlayColor(tester), paints..rect()..rect(color: theme.colorScheme.onSecondaryContainer.withValues(alpha: 0.1)));
     // Remove pressed and hovered states
     await gesture.up();
     await tester.pumpAndSettle();
@@ -1646,7 +1646,7 @@ void main() {
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.1)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSecondaryContainer.withValues(alpha: 0.1)));
 
     focusNode.dispose();
   });
@@ -1757,13 +1757,13 @@ void main() {
     expect(material.borderOnForeground, true);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
-    expect(material.color, colorScheme.onSurface.withOpacity(0.12));
+    expect(material.color, colorScheme.onSurface.withValues(alpha: 0.12));
     expect(material.elevation, 0.0);
     expect(material.shadowColor, Colors.transparent);
     expect(material.shape, const StadiumBorder());
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
-    expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(), colorScheme.onSurface.withValues(alpha: 0.38));
   });
 
   testWidgets('IconButton.outlined defaults - M3', (WidgetTester tester) async {
@@ -1846,10 +1846,10 @@ void main() {
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shadowColor, Colors.transparent);
-    expect(material.shape, StadiumBorder(side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12))));
+    expect(material.shape, StadiumBorder(side: BorderSide(color: colorScheme.onSurface.withValues(alpha: 0.12))));
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
-    expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(), colorScheme.onSurface.withValues(alpha: 0.38));
   });
 
   testWidgets('IconButton.outlined default overlayColor resolves pressed state', (WidgetTester tester) async {
@@ -1883,12 +1883,12 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.08)));
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.1)));
+    expect(getOverlayColor(tester), paints..rect()..rect(color: theme.colorScheme.onSurface.withValues(alpha: 0.1)));
     // Remove pressed and hovered states
     await gesture.up();
     await tester.pumpAndSettle();
@@ -1898,7 +1898,7 @@ void main() {
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.08)));
 
     focusNode.dispose();
   });
@@ -2009,13 +2009,13 @@ void main() {
     expect(material.borderOnForeground, true);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
-    expect(material.color, colorScheme.onSurface.withOpacity(0.12));
+    expect(material.color, colorScheme.onSurface.withValues(alpha: 0.12));
     expect(material.elevation, 0.0);
     expect(material.shadowColor, Colors.transparent);
     expect(material.shape, const StadiumBorder());
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
-    expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(), colorScheme.onSurface.withValues(alpha: 0.38));
   });
 
   testWidgets('Default IconButton meets a11y contrast guidelines - M3', (WidgetTester tester) async {
@@ -2607,7 +2607,7 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withValues(alpha: 0.08)));
 
     // Highlighted (pressed).
     await gesture.down(center);
@@ -2615,8 +2615,8 @@ void main() {
     expect(
       getOverlayColor(tester),
       paints
-        ..rect(color: overlayColor.withOpacity(0.08))
-        ..rect(color: overlayColor.withOpacity(0.1)),
+        ..rect(color: overlayColor.withValues(alpha: 0.08))
+        ..rect(color: overlayColor.withValues(alpha: 0.1)),
     );
     // Remove pressed and hovered states,
     await gesture.up();
@@ -2627,7 +2627,7 @@ void main() {
     // Focused.
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.1)));
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withValues(alpha: 0.1)));
   });
 
   testWidgets('IconButton.styleFrom highlight, hover, focus colors overrides overlayColor', (WidgetTester tester) async {

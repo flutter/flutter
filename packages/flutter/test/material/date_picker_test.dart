@@ -1288,7 +1288,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(
           Material.of(tester.element(find.text('30'))),
-          paints..circle(color: material3 ? theme.colorScheme.onSurfaceVariant.withOpacity(0.08) : theme.colorScheme.onSurfaceVariant.withOpacity(0.08)),
+          paints..circle(color: material3 ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.08) : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.08)),
         );
 
         // Highlighted (pressed).
@@ -1296,7 +1296,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(
           Material.of(tester.element(find.text('30'))),
-          paints..circle()..circle(color: material3 ? theme.colorScheme.onSurfaceVariant.withOpacity(0.1) : theme.colorScheme.onSurfaceVariant.withOpacity(0.12))
+          paints..circle()..circle(color: material3 ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.1) : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.12))
         );
         await gesture.up();
         await tester.pumpAndSettle();

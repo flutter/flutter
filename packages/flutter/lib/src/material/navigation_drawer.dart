@@ -722,7 +722,7 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
       return IconThemeData(
         size: 24.0,
         color: states.contains(MaterialState.disabled)
-          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          ? _colors.onSurfaceVariant.withValues(alpha: 0.38)
           : states.contains(MaterialState.selected)
             ? _colors.onSecondaryContainer
             : _colors.onSurfaceVariant,
@@ -736,7 +736,7 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
       final TextStyle style = _textTheme.labelLarge!;
       return style.apply(
         color: states.contains(MaterialState.disabled)
-          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          ? _colors.onSurfaceVariant.withValues(alpha: 0.38)
           : states.contains(MaterialState.selected)
             ? _colors.onSecondaryContainer
             : _colors.onSurfaceVariant,

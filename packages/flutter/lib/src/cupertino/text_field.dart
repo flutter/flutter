@@ -1355,7 +1355,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     final Color selectionColor = CupertinoDynamicColor.maybeResolve(
       DefaultSelectionStyle.of(context).selectionColor,
       context,
-    ) ?? CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
+    ) ?? CupertinoTheme.of(context).primaryColor.withValues(alpha: 0.2);
 
     // Set configuration as disabled if not otherwise specified. If specified,
     // ensure that configuration uses Cupertino text style for misspelled words

@@ -719,7 +719,7 @@ void main() {
     const Color activeInnerColor = Color(0xffffffff);
     const Color activeOuterColor = Color(0xff007aff);
     final Color defaultFocusColor = HSLColor
-      .fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
+      .fromColor(CupertinoColors.activeBlue.withValues(alpha: kCupertinoFocusColorOpacity))
       .withLightness(kCupertinoFocusColorBrightness)
       .withSaturation(kCupertinoFocusColorSaturation)
       .toColor();

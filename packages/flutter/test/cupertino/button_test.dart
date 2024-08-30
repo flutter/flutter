@@ -475,7 +475,7 @@ void main() {
         matching: find.byType(DecoratedBox),
       ),
     ).decoration as BoxDecoration;
-    expect(decoration.color, isSameColorAs(CupertinoColors.activeBlue.withOpacity(0.12)));
+    expect(decoration.color, isSameColorAs(CupertinoColors.activeBlue.withValues(alpha: 0.12)));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -530,7 +530,7 @@ void main() {
         matching: find.byType(DecoratedBox),
       ),
     ).decoration as BoxDecoration;
-    expect(decoration.color, isSameColorAs(CupertinoColors.activeBlue.darkColor.withOpacity(0.26)));
+    expect(decoration.color, isSameColorAs(CupertinoColors.activeBlue.darkColor.withValues(alpha: 0.26)));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -595,7 +595,7 @@ void main() {
     final Border defaultFocusBorder = Border.fromBorderSide(
       BorderSide(
         color: HSLColor
-          .fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
+          .fromColor(CupertinoColors.activeBlue.withValues(alpha: kCupertinoFocusColorOpacity))
           .withLightness(kCupertinoFocusColorBrightness)
           .withSaturation(kCupertinoFocusColorSaturation)
           .toColor(),

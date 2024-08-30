@@ -140,9 +140,9 @@ void main() {
       expect(material.elevation, elevation);
       expect(MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, enabled), enabledMouseCursor);
       expect(MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, disabled), disabledMouseCursor);
-      expect(inkWell.overlayColor!.resolve(hovered), foregroundColor.withOpacity(0.08));
-      expect(inkWell.overlayColor!.resolve(focused), foregroundColor.withOpacity(0.1));
-      expect(inkWell.overlayColor!.resolve(pressed), foregroundColor.withOpacity(0.1));
+      expect(inkWell.overlayColor!.resolve(hovered), foregroundColor.withValues(alpha: 0.08));
+      expect(inkWell.overlayColor!.resolve(focused), foregroundColor.withValues(alpha: 0.1));
+      expect(inkWell.overlayColor!.resolve(pressed), foregroundColor.withValues(alpha: 0.1));
       expect(inkWell.enableFeedback, enableFeedback);
       expect(material.borderRadius, null);
       expect(material.shape, shape);
@@ -291,7 +291,7 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.08)));
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withValues(alpha: 0.08)));
 
     // Highlighted (pressed).
     await gesture.down(center);
@@ -299,8 +299,8 @@ void main() {
     expect(
       getOverlayColor(tester),
       paints
-        ..rect(color: overlayColor.withOpacity(0.08))
-        ..rect(color: overlayColor.withOpacity(0.1)),
+        ..rect(color: overlayColor.withValues(alpha: 0.08))
+        ..rect(color: overlayColor.withValues(alpha: 0.1)),
     );
     // Remove pressed and hovered states,
     await gesture.up();
@@ -311,6 +311,6 @@ void main() {
     // Focused.
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pumpAndSettle();
-    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.1)));
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withValues(alpha: 0.1)));
   });
 }

@@ -63,7 +63,7 @@ void main() {
     // the effect with paint methods.
     if (!material3) {
       final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-      expect(inkFeatures, paints..circle(color: colorScheme.onPrimary.withOpacity(0.24)));
+      expect(inkFeatures, paints..circle(color: colorScheme.onPrimary.withValues(alpha: 0.24)));
     }
 
     // Only elevation changes when enabled and pressed.
@@ -146,13 +146,13 @@ void main() {
     expect(material.borderOnForeground, true);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
-    expect(material.color, colorScheme.onSurface.withOpacity(0.12));
+    expect(material.color, colorScheme.onSurface.withValues(alpha: 0.12));
     expect(material.elevation, 0.0);
     expect(material.shadowColor, const Color(0xff000000));
     expect(material.shape, material3
       ? const StadiumBorder()
       : const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
-    expect(material.textStyle!.color, colorScheme.onSurface.withOpacity(0.38));
+    expect(material.textStyle!.color, colorScheme.onSurface.withValues(alpha: 0.38));
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
     expect(material.textStyle!.fontWeight, FontWeight.w500);
@@ -387,13 +387,13 @@ void main() {
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(elevation(), 3.0);
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withOpacity(0.08)));
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withValues(alpha: 0.08)));
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
     expect(elevation(), 1.0);
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withOpacity(0.1)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withValues(alpha: 0.1)));
     // Remove pressed and hovered states
     await gesture.up();
     await tester.pumpAndSettle();
@@ -404,7 +404,7 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(elevation(), 1.0);
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withOpacity(0.1)));
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withValues(alpha: 0.1)));
 
     focusNode.dispose();
   });
@@ -1458,7 +1458,7 @@ void main() {
 
     const ColorScheme colorScheme = ColorScheme.light();
     final Color backgroundColor = colorScheme.primary;
-    final Color disabledBackgroundColor = colorScheme.onSurface.withOpacity(0.12);
+    final Color disabledBackgroundColor = colorScheme.onSurface.withValues(alpha: 0.12);
 
     Widget buildFrame({ required bool enabled }) {
       return MaterialApp(
@@ -1487,7 +1487,7 @@ void main() {
     expect(physicalShape().color, backgroundColor);
 
     // Disabled elevation animates to 0 over 200ms, THEN the background
-    // color changes to onSurface.withOpacity(0.12)
+    // color changes to onSurface.withValues(alpha: 0.12)
     await tester.pumpWidget(buildFrame(enabled: false));
     await tester.pump(const Duration(milliseconds: 50));
     expect(physicalShape().elevation, lessThan(2));

@@ -96,14 +96,14 @@ void main() {
     // On hovered.
     final TestGesture gesture = await hoverPointerOverCarouselItem(tester, key);
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints..rect(color: Colors.red.withOpacity(1.0)));
+    expect(inkFeatures, paints..rect(color: Colors.red.withValues(alpha: 1.0)));
 
     // On pressed.
     await tester.pumpAndSettle();
     await gesture.down(tester.getCenter(find.byKey(key)));
     await tester.pumpAndSettle();
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..rect()..rect(color: Colors.yellow.withOpacity(1.0)));
+    expect(inkFeatures, paints..rect()..rect(color: Colors.yellow.withValues(alpha: 1.0)));
 
     await tester.pumpAndSettle();
     await gesture.up();

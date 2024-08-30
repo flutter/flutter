@@ -1015,7 +1015,7 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
       }),
       foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
-          return _colors.onSurface.withOpacity(0.38);
+          return _colors.onSurface.withValues(alpha: 0.38);
         }
         if (states.contains(MaterialState.selected)) {
           if (states.contains(MaterialState.pressed)) {
@@ -1044,23 +1044,23 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
       overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.selected)) {
           if (states.contains(MaterialState.pressed)) {
-            return _colors.onSecondaryContainer.withOpacity(0.1);
+            return _colors.onSecondaryContainer.withValues(alpha: 0.1);
           }
           if (states.contains(MaterialState.hovered)) {
-            return _colors.onSecondaryContainer.withOpacity(0.08);
+            return _colors.onSecondaryContainer.withValues(alpha: 0.08);
           }
           if (states.contains(MaterialState.focused)) {
-            return _colors.onSecondaryContainer.withOpacity(0.1);
+            return _colors.onSecondaryContainer.withValues(alpha: 0.1);
           }
         } else {
           if (states.contains(MaterialState.pressed)) {
-            return _colors.onSurface.withOpacity(0.1);
+            return _colors.onSurface.withValues(alpha: 0.1);
           }
           if (states.contains(MaterialState.hovered)) {
-            return _colors.onSurface.withOpacity(0.08);
+            return _colors.onSurface.withValues(alpha: 0.08);
           }
           if (states.contains(MaterialState.focused)) {
-            return _colors.onSurface.withOpacity(0.1);
+            return _colors.onSurface.withValues(alpha: 0.1);
           }
         }
         return null;
@@ -1070,7 +1070,7 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
       iconSize: const MaterialStatePropertyAll<double?>(18.0),
       side: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
-          return BorderSide(color: _colors.onSurface.withOpacity(0.12));
+          return BorderSide(color: _colors.onSurface.withValues(alpha: 0.12));
         }
         return BorderSide(color: _colors.outline);
       }),
@@ -1085,23 +1085,23 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return (overlayColor ?? selectedColor)?.withOpacity(0.1);
+          return (overlayColor ?? selectedColor)?.withValues(alpha: 0.1);
         }
         if (states.contains(MaterialState.hovered)) {
-          return (overlayColor ?? selectedColor)?.withOpacity(0.08);
+          return (overlayColor ?? selectedColor)?.withValues(alpha: 0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return (overlayColor ?? selectedColor)?.withOpacity(0.1);
+          return (overlayColor ?? selectedColor)?.withValues(alpha: 0.1);
         }
       } else {
         if (states.contains(MaterialState.pressed)) {
-          return (overlayColor ?? unselectedColor)?.withOpacity(0.1);
+          return (overlayColor ?? unselectedColor)?.withValues(alpha: 0.1);
         }
         if (states.contains(MaterialState.hovered)) {
-          return (overlayColor ?? unselectedColor)?.withOpacity(0.08);
+          return (overlayColor ?? unselectedColor)?.withValues(alpha: 0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return (overlayColor ?? unselectedColor)?.withOpacity(0.1);
+          return (overlayColor ?? unselectedColor)?.withValues(alpha: 0.1);
         }
       }
       return Colors.transparent;

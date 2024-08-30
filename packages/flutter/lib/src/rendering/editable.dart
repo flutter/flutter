@@ -2955,7 +2955,7 @@ class _CaretPainter extends RenderEditablePainter {
       paintRegularCursor(canvas, renderEditable, caretColor, caretTextPosition);
     }
 
-    final Color? floatingCursorColor = this.caretColor?.withOpacity(0.75);
+    final Color? floatingCursorColor = this.caretColor?.withValues(alpha: 0.75);
     // Floating Cursor.
     if (floatingCursorRect == null || floatingCursorColor == null || !shouldPaint) {
       return;

@@ -2032,7 +2032,7 @@ class CupertinoDialogAction extends StatelessWidget {
     }
 
     if (!enabled) {
-      style = style.copyWith(color: style.color!.withOpacity(0.5));
+      style = style.copyWith(color: style.color!.withValues(alpha: 0.5));
     }
     final double fontSize = style.fontSize ?? kDefaultFontSize;
     final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
