@@ -458,7 +458,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
     };
   }
 
-  bool getOpacity() {
+  double getOpacity() {
     if (widget.enabled) {
       return _anchorIsVisible ? 1.0 : 0.0;
     }
