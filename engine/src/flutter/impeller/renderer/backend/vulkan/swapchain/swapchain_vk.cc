@@ -11,6 +11,7 @@
 
 #if FML_OS_ANDROID
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_swapchain_vk.h"
+#include "impeller/toolkit/android/shadow_realm.h"
 #endif  // FML_OS_ANDROID
 
 namespace impeller {
@@ -59,7 +60,8 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
   const auto emulator = ContextVK::Cast(*context).GetDriverInfo()->IsEmulator();
 
   // Try AHB swapchains first.
-  if (!emulator && AHBSwapchainVK::IsAvailableOnPlatform()) {
+  if (!emulator && AHBSwapchainVK::IsAvailableOnPlatform() &&
+      !android::ShadowRealm::ShouldDisableAHB()) {
     auto ahb_swapchain = std::shared_ptr<AHBSwapchainVK>(new AHBSwapchainVK(
         context,             //
         window.GetHandle(),  //

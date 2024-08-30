@@ -19,6 +19,8 @@ impeller_component("android") {
     "native_window.h",
     "proc_table.cc",
     "proc_table.h",
+    "shadow_realm.cc",
+    "shadow_realm.h",
     "surface_control.cc",
     "surface_control.h",
     "surface_transaction.cc",

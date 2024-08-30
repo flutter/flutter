@@ -35,6 +35,8 @@ constexpr VendorVK IdentifyVendor(uint32_t vendor) {
       return VendorVK::kIntel;
     case 0x106B:
       return VendorVK::kApple;
+    case 0x19E5:
+      return VendorVK::kHuawei;
   }
   // Check if the ID is a known Khronos vendor.
   switch (vendor) {
@@ -68,6 +70,8 @@ constexpr const char* VendorToString(VendorVK vendor) {
       return "Mesa";
     case VendorVK::kApple:
       return "Apple";
+    case VendorVK::kHuawei:
+      return "Huawei";
   }
   FML_UNREACHABLE();
 }
