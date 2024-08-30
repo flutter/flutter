@@ -139,9 +139,8 @@ class SelectedContentRange with Diagnosticable {
   /// The length of the content in the [Selectable] or [SelectionHandler] that
   /// created this object.
   ///
-  /// The absolute value of the difference between the start offset and end
-  /// offset contained by this [SelectedContentRange] must not exceed the
-  /// content length.
+  /// The absolute value of the difference between the [startOffset] and [endOffset]
+  /// contained by this [SelectedContentRange] must not exceed the content length.
   final int contentLength;
 
   /// The offset where the content begins.
