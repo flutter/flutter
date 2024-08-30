@@ -10,7 +10,7 @@ import 'apps/button_matrix_app.dart' as button_matrix;
 const int _kNumWarmUpIters = 20;
 const int _kNumIters = 300;
 
-Future<void> execute() async {
+Future<void> main() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   final Stopwatch watch = Stopwatch();
   print('GestureDetector semantics benchmark...');

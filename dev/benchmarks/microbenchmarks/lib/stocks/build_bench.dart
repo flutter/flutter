@@ -55,7 +55,7 @@ Future<List<double>> runBuildBenchmark() async {
   return values;
 }
 
-Future<void> execute() async {
+Future<void> main() async {
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   printer.addResultStatistics(
     description: 'Stock build',

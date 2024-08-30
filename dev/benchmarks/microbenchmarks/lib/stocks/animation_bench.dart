@@ -7,16 +7,35 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stocks/main.dart' as stocks;
 import 'package:stocks/stock_data.dart' as stock_data;
 
-import '../benchmark_binding.dart';
 import '../common.dart';
 
 const Duration kBenchmarkTime = Duration(seconds: 15);
 
-Future<void> execute(BenchmarkingBinding binding) async {
+class BenchmarkingBinding extends LiveTestWidgetsFlutterBinding {
+  BenchmarkingBinding(this.stopwatch);
+
+  final Stopwatch stopwatch;
+
+  @override
+  void handleBeginFrame(Duration? rawTimeStamp) {
+    stopwatch.start();
+    super.handleBeginFrame(rawTimeStamp);
+  }
+
+  @override
+  void handleDrawFrame() {
+    super.handleDrawFrame();
+    stopwatch.stop();
+  }
+}
+
+Future<void> main() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   stock_data.StockData.actuallyFetchData = false;
 
   final Stopwatch wallClockWatch = Stopwatch();
+  final Stopwatch cpuWatch = Stopwatch();
+  BenchmarkingBinding(cpuWatch);
 
   int totalOpenFrameElapsedMicroseconds = 0;
   int totalOpenIterationCount = 0;
@@ -33,27 +52,27 @@ Future<void> execute(BenchmarkingBinding binding) async {
     bool drawerIsOpen = false;
     wallClockWatch.start();
     while (wallClockWatch.elapsed < kBenchmarkTime) {
-      binding.drawFrameWatch.reset();
+      cpuWatch.reset();
       if (drawerIsOpen) {
         await tester.tapAt(const Offset(780.0, 250.0)); // Close drawer
         await tester.pump();
         totalCloseIterationCount += 1;
-        totalCloseFrameElapsedMicroseconds += binding.drawFrameWatch.elapsedMicroseconds;
+        totalCloseFrameElapsedMicroseconds += cpuWatch.elapsedMicroseconds;
       } else {
         await tester.tapAt(const Offset(20.0, 50.0)); // Open drawer
         await tester.pump();
         totalOpenIterationCount += 1;
-        totalOpenFrameElapsedMicroseconds += binding.drawFrameWatch.elapsedMicroseconds;
+        totalOpenFrameElapsedMicroseconds += cpuWatch.elapsedMicroseconds;
       }
       drawerIsOpen = !drawerIsOpen;
 
       // Time how long each frame takes
-      binding.drawFrameWatch.reset();
+      cpuWatch.reset();
       while (SchedulerBinding.instance.hasScheduledFrame) {
         await tester.pump();
         totalSubsequentFramesIterationCount += 1;
       }
-      totalSubsequentFramesElapsedMicroseconds += binding.drawFrameWatch.elapsedMicroseconds;
+      totalSubsequentFramesElapsedMicroseconds += cpuWatch.elapsedMicroseconds;
     }
   });
 
