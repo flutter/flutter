@@ -525,7 +525,10 @@ void main() {
     expect(find.text('page b'), findsNothing);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('ZoomPageTransitionsBuilder uses theme canvasColor during transition effects', (WidgetTester tester) async {
+  testWidgets('ZoomPageTransitionsBuilder uses theme color during transition effects', (WidgetTester tester) async {
+    // Color that is being tested for presence.
+    const Color themeTestSurfaceColor = Color.fromARGB(255, 195, 255, 0);
+
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => RepaintBoundary(
         child: Scaffold(
@@ -584,8 +587,7 @@ void main() {
       RepaintBoundary(
         child: MaterialApp(
           theme: ThemeData(
-            canvasColor: const Color.fromARGB(255, 255, 0, 0),
-            primarySwatch: Colors.blue,
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, surface: themeTestSurfaceColor),
           ),
           routes: routes,
         ),
@@ -603,10 +605,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds:75));
 
-    await expectLater(
-      find.byType(RepaintBoundary).first,
-      matchesGoldenFile('page_transitions_theme.zoom_page_canvas.scaffolded.png'),
-    );
+    // Verify that the render box is painting the right color for scaffolded pages.
+    final RenderBox scaffoldedRenderBox = tester.firstRenderObject<RenderBox>(find.byType(RepaintBoundary));
+    // Expect the color to be at exactly 12.2% opacity at this time.
+    expect(scaffoldedRenderBox, paints..rect(color: themeTestSurfaceColor.withOpacity(0.122)));
 
     await tester.pumpAndSettle();
 
@@ -619,11 +621,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds:125));
 
-    await expectLater(
-      find.byType(RepaintBoundary).first,
-      matchesGoldenFile('page_transitions_theme.zoom_page_canvas.not_scaffolded.png'),
-    );
+    // Verify that the render box is painting the right color for non-scaffolded pages.
+    final RenderBox nonScaffoldedRenderBox = tester.firstRenderObject<RenderBox>(find.byType(RepaintBoundary));
+    // Expect the color to be at exactly 59.6% opacity at this time.
+    expect(nonScaffoldedRenderBox, paints..rect(color: themeTestSurfaceColor.withOpacity(0.596)));
 
     await tester.pumpAndSettle();
+
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 }
