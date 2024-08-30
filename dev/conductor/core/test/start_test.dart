@@ -147,7 +147,7 @@ void main() {
           githubUsername,
           '--$kFrameworkMirrorOption',
           customFrameworkMirror,
-];
+        ];
         final StartContext context =
             startCommand.createContext(startCommand.argParser.parse(args));
         expect(
