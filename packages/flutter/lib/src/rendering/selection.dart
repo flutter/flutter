@@ -92,15 +92,12 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 
   /// Gets the list of selections in this object.
   ///
-  /// The order of this list follows the same
-  /// order as the [Selectable]s contained under
-  /// this [SelectionHandler].
+  /// The order of this list follows the same order as the [Selectable]s
+  /// contained under this [SelectionHandler].
   ///
-  /// Returns a list of [SelectedContentRange.empty]
-  /// when nothing is selected.
+  /// Returns a list of [SelectedContentRange.empty] when nothing is selected.
   ///
-  /// Returns an empty list only if there is no
-  /// content under this [SelectionHandler].
+  /// Returns an empty list only if there is no content under this [SelectionHandler].
   List<SelectedContentRange> getSelections();
 
   /// Handles the [SelectionEvent] sent to this object.
@@ -117,12 +114,11 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   SelectionResult dispatchSelectionEvent(SelectionEvent event);
 }
 
-/// This class stores the information of the selection under
-/// a [Selectable] or [SelectionHandler].
+/// This class stores the information of the selection under a [Selectable]
+/// or [SelectionHandler].
 ///
-/// The [SelectedContentRange]s for a given [Selectable] or
-/// [SelectionHandler] can be retrieved by calling
-/// [SelectionHandler.getSelections].
+/// The [SelectedContentRange]s for a given [Selectable] or [SelectionHandler]
+/// can be retrieved by calling [SelectionHandler.getSelections].
 @immutable
 class SelectedContentRange with Diagnosticable {
   /// Creates a [SelectedContentRange] with the given values.
@@ -135,17 +131,16 @@ class SelectedContentRange with Diagnosticable {
 
   /// A selected content range that represents an empty selection, i.e. nothing
   /// is selected.
-  const SelectedContentRange.empty({int contentLength = 0})
-      : contentLength = contentLength,
-        contentStart = -1,
+  const SelectedContentRange.empty({this.contentLength = 0})
+      : contentStart = -1,
         startOffset = -1,
         endOffset = -1;
 
   /// The length of the content.
   ///
-  /// The absolute value of the difference between the start
-  /// offset and end offset contained by this [SelectedContentRange]
-  /// must not exceed the content length.
+  /// The absolute value of the difference between the start offset and end
+  /// offset contained by this [SelectedContentRange] must not exceed the
+  /// content length.
   final int contentLength;
 
   /// The offset where the content begins.
@@ -777,12 +772,12 @@ enum SelectionStatus {
 
 /// The details of a selection.
 ///
-/// This object is created by callers of the [SelectionListenerSelectionChangedCallback] callback.
+/// This includes information such as the status of the selection indicating
+/// if it is collapsed or uncollapsed, the start and end offsets of the selection
+/// local to the [SelectionListener] that reports this object, and whether
+/// the selection is ongoing.
 ///
-/// This includes information such as the status of the selection
-/// indicating if it is collapsed or uncollapsed, the start and end offsets
-/// of the selection local to the [SelectionListener] that reports this object,
-/// and whether the selection is ongoing.
+/// This object is created by callers of the [SelectionListenerSelectionChangedCallback] callback.
 ///
 /// See also:
 ///
@@ -799,14 +794,14 @@ class SelectionDetails with Diagnosticable {
     required this.localEndOffset,
   });
 
-  /// The status of the selection under the [Selectable]
-  /// or [SelectionHandler] that created this object.
+  /// The status of the selection under the [Selectable] or [SelectionHandler]
+  /// that created this object.
   final SelectionStatus status;
 
   /// Whether the selection is ongoing.
   ///
-  /// This is false if the selection is ongoing and
-  /// true if the selection is finalized.
+  /// This is false if the selection is ongoing and true if the selection
+  /// is finalized.
   ///
   /// A selection is ongoing in scenarios like an ongoing mouse drag,
   /// long press drag, or in between states where both selection edges

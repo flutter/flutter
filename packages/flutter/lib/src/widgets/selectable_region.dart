@@ -3071,8 +3071,8 @@ typedef SelectableRegionContextMenuBuilder = Widget Function(
 /// Signature for the callback that reports when the user changes the selection
 /// under a [SelectionListener].
 ///
-/// The [selectionDetails] object provides information about the active
-/// selection contained under the [SelectionListener] this callback is provided to.
+/// The [selectionDetails] object provides information about the active selection
+/// contained under the [SelectionListener] this callback is provided to.
 typedef SelectionListenerSelectionChangedCallback = void Function(SelectionDetails selectionDetails);
 
 /// A [SelectionContainer] that allows the user to listen to selection changes
@@ -3114,7 +3114,7 @@ class SelectionListener extends StatefulWidget {
     required this.child,
   });
 
-  /// Called when the user changes the selection of children selectables
+  /// Called when the user changes the selection of children [Selectable]s
   /// registered to its local [SelectionRegistrar].
   final SelectionListenerSelectionChangedCallback onSelectionChanged;
 
