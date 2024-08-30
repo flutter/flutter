@@ -270,7 +270,7 @@ class _ZoomPageTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor = Theme.of(context).canvasColor;
+    final Color backgroundColor = Theme.of(context).colorScheme.surface;
     return DualTransitionBuilder(
       animation: animation,
       forwardBuilder: (
