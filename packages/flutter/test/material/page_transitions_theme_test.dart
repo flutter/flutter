@@ -622,6 +622,5 @@ void main() {
     expect(nonScaffoldedRenderBox, paints..rect(color: themeTestSurfaceColor.withOpacity(0.596)));
 
     await tester.pumpAndSettle();
-
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 }
