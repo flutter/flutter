@@ -390,7 +390,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     // Reset the current value color.
     _effectiveValueColor = widget.color ?? Theme.of(context).colorScheme.primary;
     final Color color = _effectiveValueColor;
-    if (color.alpha == 0x00) {
+    if (color.a == 0) {
       // Set an always stopped animation instead of a driven tween.
       _valueColor = AlwaysStoppedAnimation<Color>(color);
     } else {
@@ -398,7 +398,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
       _valueColor = _positionController.drive(
         ColorTween(
           begin: color.withAlpha(0),
-          end: color.withAlpha(color.alpha),
+          end: color.withValues(alpha: color.a),
         ).chain(
           CurveTween(
             curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit),

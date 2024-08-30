@@ -44,7 +44,7 @@ void main() {
       ),
     );
 
-    expect(tester.widget<Image>(find.byType(Image)).color!.alpha, equals(128));
+    expect(tester.widget<Image>(find.byType(Image)).color!.a, closeTo(0.5, 0.01));
 
     imageCache.clear();
   });

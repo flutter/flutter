@@ -241,7 +241,7 @@ abstract class Gradient {
   Gradient scale(double factor);
 
   /// Returns a new [Gradient] with each color set to the given opacity.
-  Gradient withValues(alpha: double opacity);
+  Gradient withOpacity(double opacity);
 
   /// Linearly interpolates from another [Gradient] to `this`.
   ///
@@ -561,7 +561,7 @@ class LinearGradient extends Gradient {
   }
 
   @override
-  LinearGradient withValues(alpha: double opacity) {
+  LinearGradient withOpacity(double opacity) {
     return LinearGradient(
       begin: begin,
       end: end,
@@ -861,7 +861,7 @@ class RadialGradient extends Gradient {
   }
 
   @override
-  RadialGradient withValues(alpha: double opacity) {
+  RadialGradient withOpacity(double opacity) {
     return RadialGradient(
       center: center,
       radius: radius,
@@ -1139,7 +1139,7 @@ class SweepGradient extends Gradient {
   }
 
   @override
-  SweepGradient withValues(alpha: double opacity) {
+  SweepGradient withOpacity(double opacity) {
     return SweepGradient(
       center: center,
       startAngle: startAngle,

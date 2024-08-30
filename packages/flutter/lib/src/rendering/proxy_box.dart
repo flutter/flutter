@@ -2057,7 +2057,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         offsetRRectAsPath,
         shadowColor,
         elevation,
-        color.alpha != 0xFF,
+        color.a != 1,
       );
     }
     final bool usesSaveLayer = clipBehavior == Clip.antiAliasWithSaveLayer;
@@ -2170,7 +2170,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
         offsetPath,
         shadowColor,
         elevation,
-        color.alpha != 0xFF,
+        color.a != 1,
       );
     }
     final bool usesSaveLayer = clipBehavior == Clip.antiAliasWithSaveLayer;

@@ -600,10 +600,10 @@ void main() {
         return true;
       }
       final Paint paint = arguments[2] as Paint;
-      if (paint.color.alpha == 0) {
+      if (paint.color.a == 0) {
         return true;
       }
-      throw 'Expected: paint.color.alpha == 0, found: ${paint.color.alpha}';
+      throw 'Expected: paint.color.alpha == 0, found: ${paint.color.a}';
     }));
   });
 

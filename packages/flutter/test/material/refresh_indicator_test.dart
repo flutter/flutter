@@ -1215,7 +1215,7 @@ void main() {
       final Animation<Color?> valueColorAnimation = positionController.drive(
         ColorTween(
           begin: color.withAlpha(0),
-          end: color.withAlpha(color.alpha),
+          end: color.withValues(alpha: color.a),
         ).chain(
           CurveTween(
             // Correspond to [_kDragSizeFactorLimit].
@@ -1249,8 +1249,8 @@ void main() {
         await tester.pump();
         positionController.value = position / maxPosition;
         expect(
-          getIndicator().valueColor!.value!.alpha,
-          valueColorAnimation.value!.alpha,
+          getIndicator().valueColor!.value!.a,
+          valueColorAnimation.value!.a,
         );
         // Wait until the fling finishes before starting the next fling.
         await tester.pumpAndSettle();

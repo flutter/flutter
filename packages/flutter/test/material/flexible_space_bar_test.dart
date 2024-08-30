@@ -123,7 +123,7 @@ void main() {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(actionTextBox);
 
     final TextStyle effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
-    expect(effectiveStyle.color?.alpha, 128); // Which is alpha of .5
+    expect(effectiveStyle.color?.a, closeTo(0.5, 0.01)); // Which is alpha of .5
 
     // We drag up to fully collapse the space bar.
     await tester.drag(find.byKey(dragTarget), const Offset(0, -400.0));

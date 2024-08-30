@@ -471,7 +471,7 @@ class _BoxDecorationPainter extends BoxPainter {
   }
 
   double _calculateAdjustedSide(BorderSide side) {
-    if (side.color.alpha == 255 && side.style == BorderStyle.solid) {
+    if (side.color.a == 1 && side.style == BorderStyle.solid) {
       return side.strokeInset;
     }
     return 0;

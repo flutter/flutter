@@ -104,11 +104,11 @@ void main() {
     // 200ms animation. Indicator 2 remains transparent throughout.
     await tester.pump(const Duration(milliseconds: 10));
     List<Color> colors = indicatorColors(tester);
-    expect(colors[0].alpha, greaterThan(colors[1].alpha));
+    expect(colors[0].a, greaterThan(colors[1].a));
     expect(colors[2], kUnselectedColor);
     await tester.pump(const Duration(milliseconds: 175));
     colors = indicatorColors(tester);
-    expect(colors[0].alpha, lessThan(colors[1].alpha));
+    expect(colors[0].a, lessThan(colors[1].a));
     expect(colors[2], kUnselectedColor);
     await tester.pumpAndSettle();
     expect(tabController.index, 1);
@@ -348,11 +348,11 @@ void main() {
     // Same animation test as above for indicators 1 and 2.
     await tester.pump(const Duration(milliseconds: 10));
     colors = indicatorColors(tester);
-    expect(colors[1].alpha, greaterThan(colors[2].alpha));
+    expect(colors[1].a, greaterThan(colors[2].a));
     expect(colors[0], kUnselectedColor);
     await tester.pump(const Duration(milliseconds: 175));
     colors = indicatorColors(tester);
-    expect(colors[1].alpha, lessThan(colors[2].alpha));
+    expect(colors[1].a, lessThan(colors[2].a));
     expect(colors[0], kUnselectedColor);
     await tester.pumpAndSettle();
     expect(tabController.index, 2);

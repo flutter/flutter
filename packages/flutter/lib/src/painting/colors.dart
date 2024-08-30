@@ -86,15 +86,15 @@ class HSVColor {
   /// This constructor does not necessarily round-trip with [toColor] because
   /// of floating point imprecision.
   factory HSVColor.fromColor(Color color) {
-    final double red = color.red / 0xFF;
-    final double green = color.green / 0xFF;
-    final double blue = color.blue / 0xFF;
+    final double red = color.r;
+    final double green = color.g;
+    final double blue = color.b;
 
     final double max = math.max(red, math.max(green, blue));
     final double min = math.min(red, math.min(green, blue));
     final double delta = max - min;
 
-    final double alpha = color.alpha / 0xFF;
+    final double alpha = color.a;
     final double hue = _getHue(red, green, blue, max, delta);
     final double saturation = max == 0.0 ? 0.0 : delta / max;
 
@@ -254,15 +254,15 @@ class HSLColor {
   /// This constructor does not necessarily round-trip with [toColor] because
   /// of floating point imprecision.
   factory HSLColor.fromColor(Color color) {
-    final double red = color.red / 0xFF;
-    final double green = color.green / 0xFF;
-    final double blue = color.blue / 0xFF;
+    final double red = color.r;
+    final double green = color.g;
+    final double blue = color.b;
 
     final double max = math.max(red, math.max(green, blue));
     final double min = math.min(red, math.min(green, blue));
     final double delta = max - min;
 
-    final double alpha = color.alpha / 0xFF;
+    final double alpha = color.a;
     final double hue = _getHue(red, green, blue, max, delta);
     final double lightness = (max + min) / 2.0;
     // Saturation can exceed 1.0 with rounding errors, so clamp it.

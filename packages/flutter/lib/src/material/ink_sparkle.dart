@@ -337,10 +337,10 @@ class InkSparkle extends InteractiveInkFeature {
 
     _fragmentShader
       // uColor
-      ..setFloat(0, _color.red / 255.0)
-      ..setFloat(1, _color.green / 255.0)
-      ..setFloat(2, _color.blue / 255.0)
-      ..setFloat(3, _color.alpha / 255.0)
+      ..setFloat(0, _color.r)
+      ..setFloat(1, _color.g)
+      ..setFloat(2, _color.b)
+      ..setFloat(3, _color.a)
       // Composite 1 (u_alpha, u_sparkle_alpha, u_blur, u_radius_scale)
       ..setFloat(4, _alpha.value)
       ..setFloat(5, _sparkleAlpha.value)

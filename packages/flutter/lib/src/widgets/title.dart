@@ -20,7 +20,7 @@ class Title extends StatelessWidget {
     this.title = '',
     required this.color,
     required this.child,
-  }) : assert(color.alpha == 0xFF);
+  }) : assert(color.a == 1);
 
   /// A one-line description of this app for use in the window manager.
   final String title;

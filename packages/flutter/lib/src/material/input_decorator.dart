@@ -129,7 +129,7 @@ class _InputBorderPainter extends CustomPainter {
     final InputBorder borderValue = border.evaluate(borderAnimation);
     final Rect canvasRect = Offset.zero & size;
     final Color blendedFillColor = blendedColor;
-    if (blendedFillColor.alpha > 0) {
+    if (blendedFillColor.a > 0) {
       canvas.drawPath(
         borderValue.getOuterPath(canvasRect, textDirection: textDirection),
         Paint()

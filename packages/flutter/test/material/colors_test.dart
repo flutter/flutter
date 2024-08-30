@@ -67,19 +67,19 @@ void main() {
     for (final MaterialColor color in Colors.primaries) {
       expect(color.value, color.shade500.value);
       for (final int key in primaryKeys) {
-        expect(color[key]!.alpha, 0xFF);
+        expect(color[key]!.a, 1);
       }
     }
 
     expect(Colors.grey.value, Colors.grey.shade500.value);
     for (final int key in primaryKeys) {
-      expect(Colors.grey[key]!.alpha, 0xFF);
+      expect(Colors.grey[key]!.a, 1);
     }
 
     for (final MaterialAccentColor color in Colors.accents) {
       expect(color.value, color.shade200.value);
       for (final int key in accentKeys) {
-        expect(color[key]!.alpha, 0xFF);
+        expect(color[key]!.a, 1);
       }
     }
   });
