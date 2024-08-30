@@ -328,27 +328,6 @@ void main() {
         HttpClientFactory: () => () => FakeHttpClient.any(),
       });
     });
-
-    testUsingContext('do not print welcome on bots', () async {
-        io.setExitFunctionForTests((int exitCode) {});
-
-        await runner.run(
-          <String>['--version', '--machine'],
-          () => <FlutterCommand>[],
-          // This flutterVersion disables crash reporting.
-          flutterVersion: '[user-branch]/',
-          shutdownHooks: ShutdownHooks(),
-        );
-
-        expect(testUsage.printedWelcome, false);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
-        ProcessManager: () => FakeProcessManager.any(),
-        BotDetector: () => const FakeBotDetector(true),
-        Usage: () => testUsage,
-      },
-    );
   });
 
   group('runner', () {
@@ -406,6 +385,27 @@ void main() {
         Artifacts: () => Artifacts.test(),
         ProcessManager: () =>
             FakeProcessManager.any()..excludedExecutables.add('git'),
+      },
+    );
+
+    testUsingContext('do not print welcome on bots', () async {
+        io.setExitFunctionForTests((int exitCode) {});
+
+        await runner.run(
+          <String>['--version', '--machine'],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect((globals.flutterUsage as TestUsage).printedWelcome, false);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        BotDetector: () => const FakeBotDetector(true),
+        Usage: () => TestUsage(),
       },
     );
   });
