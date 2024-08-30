@@ -80,13 +80,16 @@ class CkCanvas {
     CkPaint paint,
   ) {
     const double toDegrees = 180 / math.pi;
+
+    final skPaint = paint.toSkPaint();
     skCanvas.drawArc(
       toSkRect(oval),
       startAngle * toDegrees,
       sweepAngle * toDegrees,
       useCenter,
-      paint.skiaObject,
+      skPaint,
     );
+    skPaint.delete();
   }
 
   // TODO(flar): CanvasKit does not expose sampling options available on SkCanvas.drawAtlas
@@ -98,23 +101,27 @@ class CkCanvas {
     Uint32List? colors,
     ui.BlendMode blendMode,
   ) {
+    final skPaint = paint.toSkPaint();
     skCanvas.drawAtlas(
       atlas.skImage,
       rects,
       rstTransforms,
-      paint.skiaObject,
+      skPaint,
       toSkBlendMode(blendMode),
       colors,
     );
+    skPaint.delete();
   }
 
   void drawCircle(ui.Offset c, double radius, CkPaint paint) {
+    final skPaint = paint.toSkPaint();
     skCanvas.drawCircle(
       c.dx,
       c.dy,
       radius,
-      paint.skiaObject,
+      skPaint,
     );
+    skPaint.delete();
   }
 
   void drawColor(ui.Color color, ui.BlendMode blendMode) {
@@ -125,15 +132,18 @@ class CkCanvas {
   }
 
   void drawDRRect(ui.RRect outer, ui.RRect inner, CkPaint paint) {
+    final skPaint = paint.toSkPaint();
     skCanvas.drawDRRect(
       toSkRRect(outer),
       toSkRRect(inner),
-      paint.skiaObject,
+      skPaint,
     );
+    skPaint.delete();
   }
 
   void drawImage(CkImage image, ui.Offset offset, CkPaint paint) {
     final ui.FilterQuality filterQuality = paint.filterQuality;
+    final skPaint = paint.toSkPaint();
     if (filterQuality == ui.FilterQuality.high) {
       skCanvas.drawImageCubic(
         image.skImage,
@@ -141,7 +151,7 @@ class CkCanvas {
         offset.dy,
         _kMitchellNetravali_B,
         _kMitchellNetravali_C,
-        paint.skiaObject,
+        skPaint,
       );
     } else {
       skCanvas.drawImageOptions(
@@ -150,13 +160,15 @@ class CkCanvas {
         offset.dy,
         toSkFilterMode(filterQuality),
         toSkMipmapMode(filterQuality),
-        paint.skiaObject,
+        skPaint,
       );
     }
+    skPaint.delete();
   }
 
   void drawImageRect(CkImage image, ui.Rect src, ui.Rect dst, CkPaint paint) {
     final ui.FilterQuality filterQuality = paint.filterQuality;
+    final skPaint = paint.toSkPaint();
     if (filterQuality == ui.FilterQuality.high) {
       skCanvas.drawImageRectCubic(
         image.skImage,
@@ -164,7 +176,7 @@ class CkCanvas {
         toSkRect(dst),
         _kMitchellNetravali_B,
         _kMitchellNetravali_C,
-        paint.skiaObject,
+        skPaint,
       );
     } else {
       skCanvas.drawImageRectOptions(
@@ -173,41 +185,50 @@ class CkCanvas {
         toSkRect(dst),
         toSkFilterMode(filterQuality),
         toSkMipmapMode(filterQuality),
-        paint.skiaObject,
+        skPaint,
       );
     }
+    skPaint.delete();
   }
 
   void drawImageNine(
       CkImage image, ui.Rect center, ui.Rect dst, CkPaint paint) {
+    final skPaint = paint.toSkPaint();
     skCanvas.drawImageNine(
       image.skImage,
       toSkRect(center),
       toSkRect(dst),
       toSkFilterMode(paint.filterQuality),
-      paint.skiaObject,
+      skPaint,
     );
+    skPaint.delete();
   }
 
   void drawLine(ui.Offset p1, ui.Offset p2, CkPaint paint) {
+    final skPaint = paint.toSkPaint();
     skCanvas.drawLine(
       p1.dx,
       p1.dy,
       p2.dx,
       p2.dy,
-      paint.skiaObject,
+      skPaint,
     );
+    skPaint.delete();
   }
 
   void drawOval(ui.Rect rect, CkPaint paint) {
+    final skPaint = paint.toSkPaint();
     skCanvas.drawOval(
       toSkRect(rect),
-      paint.skiaObject,
+      skPaint,
     );
+    skPaint.delete();
   }
 
   void drawPaint(CkPaint paint) {
-    skCanvas.drawPaint(paint.skiaObject);
+    final skPaint = paint.toSkPaint();
+    skCanvas.drawPaint(skPaint);
+    skPaint.delete();
   }
 
   void drawParagraph(CkParagraph paragraph, ui.Offset offset) {
@@ -219,7 +240,9 @@ class CkCanvas {
   }
 
   void drawPath(CkPath path, CkPaint paint) {
-    skCanvas.drawPath(path.skiaObject, paint.skiaObject);
+    final skPaint = paint.toSkPaint();
+    skCanvas.drawPath(path.skiaObject, skPaint);
+    skPaint.delete();
   }
 
   void drawPicture(CkPicture picture) {
@@ -228,22 +251,28 @@ class CkCanvas {
   }
 
   void drawPoints(CkPaint paint, ui.PointMode pointMode, Float32List points) {
+    final skPaint = paint.toSkPaint();
     skCanvas.drawPoints(
       toSkPointMode(pointMode),
       points,
-      paint.skiaObject,
+      skPaint,
     );
+    skPaint.delete();
   }
 
   void drawRRect(ui.RRect rrect, CkPaint paint) {
+    final skPaint = paint.toSkPaint();
     skCanvas.drawRRect(
       toSkRRect(rrect),
-      paint.skiaObject,
+      skPaint,
     );
+    skPaint.delete();
   }
 
   void drawRect(ui.Rect rect, CkPaint paint) {
-    skCanvas.drawRect(toSkRect(rect), paint.skiaObject);
+    final skPaint = paint.toSkPaint();
+    skCanvas.drawRect(toSkRect(rect), skPaint);
+    skPaint.delete();
   }
 
   void drawShadow(
@@ -254,11 +283,13 @@ class CkCanvas {
 
   void drawVertices(
       CkVertices vertices, ui.BlendMode blendMode, CkPaint paint) {
+    final skPaint = paint.toSkPaint();
     skCanvas.drawVertices(
       vertices.skiaObject,
       toSkBlendMode(blendMode),
-      paint.skiaObject,
+      skPaint,
     );
+    skPaint.delete();
   }
 
   void restore() {
@@ -278,16 +309,20 @@ class CkCanvas {
   }
 
   void saveLayer(ui.Rect bounds, CkPaint? paint) {
+    final skPaint = paint?.toSkPaint();
     skCanvas.saveLayer(
-      paint?.skiaObject,
+      skPaint,
       toSkRect(bounds),
       null,
       null,
     );
+    skPaint?.delete();
   }
 
   void saveLayerWithoutBounds(CkPaint? paint) {
-    skCanvas.saveLayer(paint?.skiaObject, null, null, null);
+    final skPaint = paint?.toSkPaint();
+    skCanvas.saveLayer(skPaint, null, null, null);
+    skPaint?.delete();
   }
 
   void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter,
@@ -298,13 +333,15 @@ class CkCanvas {
     } else {
       convertible = filter as CkManagedSkImageFilterConvertible;
     }
-    convertible.imageFilter((SkImageFilter filter) {
+    convertible.withSkImageFilter((SkImageFilter filter) {
+      final skPaint = paint?.toSkPaint();
       skCanvas.saveLayer(
-        paint?.skiaObject,
+        skPaint,
         toSkRect(bounds),
         filter,
         0,
       );
+      skPaint?.delete();
     });
   }
 

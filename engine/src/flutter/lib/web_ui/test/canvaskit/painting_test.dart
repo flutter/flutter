@@ -7,7 +7,6 @@ import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart';
 
-import '../common/matchers.dart';
 import 'common.dart';
 
 void main() {
@@ -18,17 +17,11 @@ void testMain() {
   group('CkPaint', () {
     setUpCanvasKitTest();
 
-    test('lifecycle', () {
-      final CkPaint paint = CkPaint();
-      expect(paint.skiaObject, isNotNull);
-      expect(paint.debugRef.isDisposed, isFalse);
-      paint.dispose();
-      expect(paint.debugRef.isDisposed, isTrue);
-      expect(
-        reason: 'Cannot dispose more than once',
-        () => paint.dispose(),
-        throwsA(isAssertionError),
-      );
+    test('toSkPaint', () {
+      final paint = CkPaint();
+      final skPaint = paint.toSkPaint();
+      expect(skPaint, isNotNull);
+      skPaint.delete();
     });
   });
 }

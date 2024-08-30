@@ -1169,38 +1169,47 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
     return _styleStack.last;
   }
 
-  // Used as the paint for background or foreground in the text style when
-  // the other one is not specified. CanvasKit either both background and
-  // foreground paints specified, or neither, but Flutter allows one of them
-  // to go unspecified.
-  //
-  // This object is never deleted. It is effectively a static global constant.
-  // Therefore it doesn't need to be wrapped in CkPaint.
-  static final SkPaint _defaultTextForeground = SkPaint();
-  static final SkPaint _defaultTextBackground = SkPaint()
-    ..setColorInt(0x00000000);
+  static SkPaint createForegroundPaint(CkTextStyle style) {
+    final SkPaint foreground;
+    if (style.foreground != null) {
+      foreground = style.foreground!.toSkPaint();
+    } else {
+      foreground = SkPaint();
+      foreground.setColorInt(
+        style.color?.value ?? 0xFF000000,
+      );
+    }
+    return foreground;
+  }
+
+  static SkPaint createBackgroundPaint(CkTextStyle style) {
+    final SkPaint background;
+    if (style.background != null) {
+      background = style.background!.toSkPaint();
+    } else {
+      background = SkPaint()
+        ..setColorInt(0x00000000);
+    }
+    return background;
+  }
 
   @override
-  void pushStyle(ui.TextStyle style) {
-    final CkTextStyle baseStyle = _peekStyle();
-    final CkTextStyle ckStyle = style as CkTextStyle;
-    final CkTextStyle skStyle = baseStyle.mergeWith(ckStyle);
-    _styleStack.add(skStyle);
-    if (skStyle.foreground != null || skStyle.background != null) {
-      SkPaint? foreground = skStyle.foreground?.skiaObject;
-      if (foreground == null) {
-        _defaultTextForeground.setColorInt(
-          skStyle.color?.value ?? 0xFF000000,
-        );
-        foreground = _defaultTextForeground;
-      }
+  void pushStyle(ui.TextStyle leafStyle) {
+    leafStyle as CkTextStyle;
 
-      final SkPaint background =
-          skStyle.background?.skiaObject ?? _defaultTextBackground;
+    final CkTextStyle baseStyle = _peekStyle();
+    final CkTextStyle mergedStyle = baseStyle.mergeWith(leafStyle);
+    _styleStack.add(mergedStyle);
+
+    if (mergedStyle.foreground != null || mergedStyle.background != null) {
+      final foreground = createForegroundPaint(mergedStyle);
+      final background = createBackgroundPaint(mergedStyle);
       _paragraphBuilder.pushPaintStyle(
-          skStyle.skTextStyle, foreground, background);
+          mergedStyle.skTextStyle, foreground, background);
+      foreground.delete();
+      background.delete();
     } else {
-      _paragraphBuilder.pushStyle(skStyle.skTextStyle);
+      _paragraphBuilder.pushStyle(mergedStyle.skTextStyle);
     }
   }
 }

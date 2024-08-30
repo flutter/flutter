@@ -325,14 +325,6 @@ abstract class Paint {
   factory Paint() => engine.renderer.createPaint();
 
   factory Paint.from(Paint other) {
-    // This is less efficient than copying the underlying buffer or object but
-    // it's a reasonable default, as if a user wanted to implement a copy of a
-    // paint object themselves they are unable to do much better than this.
-    //
-    // TODO(matanlurey): Web team, if important to optimize, could:
-    // 1. Add a `engine.renderer.copyPaint` method.
-    // 2. Use the below code as the default implementation.
-    // 3. Have renderer-specific implementations override with optimized code.
     final Paint paint = Paint();
     paint
       ..blendMode = other.blendMode
