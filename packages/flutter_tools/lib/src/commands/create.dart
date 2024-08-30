@@ -965,8 +965,7 @@ used.
 $incompatibleVersionsAndRecommendedOptionMessage
 
 Alternatively, to continue using your current Java version, update the AGP
-version in the following file to a compatible version$compatibleAgpVersionMessage:
-
+version in the following file(s) to a compatible version$compatibleAgpVersionMessage:
 $gradleBuildFilePaths
 
 For details on compatible Java and AGP versions, see:
