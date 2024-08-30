@@ -1368,9 +1368,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     switch (_appLifecycleState) {
       case null:
       case AppLifecycleState.detached:
-      case AppLifecycleState.inactive:
         // Avoid updating the engine when the app isn't ready.
         return true;
+      case AppLifecycleState.inactive:
       case AppLifecycleState.resumed:
       case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
