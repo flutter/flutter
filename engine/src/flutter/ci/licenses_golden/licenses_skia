@@ -1,4 +1,4 @@
-Signature: 6a24970f9ebc42d3d1e1cad7888bce03
+Signature: e5b90c6c71c1e2bd46550c98fa2f05b0
 
 ====================================================================================================
 LIBRARY: etc1
@@ -397,6 +397,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
+FILE: ../../../flutter/third_party/skia/relnotes/filter-color.md
 FILE: ../../../flutter/third_party/skia/relnotes/ganesh-move.md
 FILE: ../../../flutter/third_party/skia/relnotes/grglconfig.md
 FILE: ../../../flutter/third_party/skia/relnotes/macro.md
