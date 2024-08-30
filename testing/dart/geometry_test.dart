@@ -465,6 +465,18 @@ void main() {
     expect(rrect.brRadiusY, 0);
   });
 
+  test('infinity lerp', (){
+    const Offset a = Offset(double.infinity, double.infinity);
+    const Offset b = Offset(4, 4);
+    final Offset? result = Offset.lerp(a, b, 0.5);
+    if (result == null) {
+      expect(result != null, true);
+    } else {
+      expect(result.dx, double.infinity);
+      expect(result.dy, double.infinity);
+    }
+  });
+
   test('RRect.deflate clamps when deflating past zero', () {
     RRect rrect = RRect.fromRectAndCorners(
       const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0),
