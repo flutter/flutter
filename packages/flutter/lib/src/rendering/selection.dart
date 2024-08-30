@@ -124,7 +124,7 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 /// [SelectionHandler] can be retrieved by calling
 /// [SelectionHandler.getSelections].
 @immutable
-class SelectedContentRange {
+class SelectedContentRange with Diagnosticable {
   /// Creates a [SelectedContentRange] with the given values.
   const SelectedContentRange({
     required this.contentLength,
@@ -228,13 +228,12 @@ class SelectedContentRange {
   }
 
   @override
-  String toString() {
-    return 'SelectedContentRange(\n'
-           '  contentLength: $contentLength,\n'
-           '  contentStart: $contentStart, \n'
-           '  startOffset: $startOffset,\n'
-           '  endOffset: $endOffset,\n'
-           ')';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('contentLength', contentLength));
+    properties.add(IntProperty('contentStart', contentStart));
+    properties.add(IntProperty('startOffset', startOffset));
+    properties.add(IntProperty('endOffset', endOffset));
   }
 }
 
@@ -242,7 +241,7 @@ class SelectedContentRange {
 // TODO(chunhtai): Add more support for rich content.
 // https://github.com/flutter/flutter/issues/104206.
 @immutable
-class SelectedContent {
+class SelectedContent with Diagnosticable {
   /// Creates a selected content object.
   ///
   /// Only supports plain text.
@@ -254,10 +253,9 @@ class SelectedContent {
   final String plainText;
 
   @override
-  String toString() {
-    return 'SelectedContent(\n'
-           '  plainText: $plainText,\n'
-           ')';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('plainText', plainText));
   }
 }
 
@@ -795,7 +793,7 @@ enum SelectionStatus {
 ///     for the selection under its subtree in its [SelectionListener.onSelectionChanged]
 ///     callback.
 @immutable
-class SelectionDetails {
+class SelectionDetails with Diagnosticable {
   /// Creates a selection details object.
   const SelectionDetails({
     required this.status,
@@ -810,7 +808,7 @@ class SelectionDetails {
 
   /// Whether the selection is ongoing.
   ///
-  /// Returns false if the selection is ongoing and
+  /// This is false if the selection is ongoing and
   /// true if the selection is finalized.
   ///
   /// A selection is ongoing in scenarios like an ongoing mouse drag,
@@ -854,13 +852,12 @@ class SelectionDetails {
   }
 
   @override
-  String toString() {
-    return 'SelectionDetails(\n'
-           '  status: $status,\n'
-           '  selectionFinalized: $selectionFinalized,\n'
-           '  localStartOffset: $localStartOffset\n'
-           '  localEndOffset: $localEndOffset,\n'
-           ')';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(EnumProperty<SelectionStatus>('status', status));
+    properties.add(FlagProperty('selectionFinalized', value: selectionFinalized));
+    properties.add(IntProperty('localStartOffset', localStartOffset));
+    properties.add(IntProperty('localEndOffset', localEndOffset));
   }
 }
 
@@ -873,7 +870,7 @@ class SelectionDetails {
 /// The positions in geometry are in local coordinates of the [SelectionHandler]
 /// or [Selectable].
 @immutable
-class SelectionGeometry {
+class SelectionGeometry with Diagnosticable {
   /// Creates a selection geometry object.
   ///
   /// If any of the [startSelectionPoint] and [endSelectionPoint] is not null,
@@ -975,14 +972,13 @@ class SelectionGeometry {
   }
 
   @override
-  String toString() {
-    return 'SelectionGeometry(\n'
-           '  startSelectionPoint: $startSelectionPoint,\n'
-           '  endSelectionPoint: $endSelectionPoint,\n'
-           '  selectionRects: $selectionRects,\n'
-           '  status: $status,\n'
-           '  hasContent: $hasContent,\n'
-           ')';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<SelectionPoint>('startSelectionPoint', startSelectionPoint));
+    properties.add(DiagnosticsProperty<SelectionPoint>('endSelectionPoint', endSelectionPoint));
+    properties.add(IterableProperty<Rect>('selectionRects', selectionRects));
+    properties.add(EnumProperty<SelectionStatus>('status', status));
+    properties.add(FlagProperty('hasContent', value: hasContent));
   }
 }
 

@@ -3183,7 +3183,7 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
     return result;
   }
 
-  // Expects that their is an active selection.
+  // Expects that there is an active selection.
   bool _determineSelectionForward(List<SelectedContentRange> ranges) {
     ({int index, SelectedContentRange range})? firstRange;
     ({int index, SelectedContentRange range})? lastRange;
