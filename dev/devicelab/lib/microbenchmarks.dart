@@ -58,7 +58,7 @@ Future<Map<String, double>> readJsonResults(Process process) {
       try {
         final Map<String, double> results =
             Map<String, double>.from(<String, dynamic>{
-          for(final String data in collectedJson)
+          for (final String data in collectedJson)
             ...json.decode(data) as Map<String, dynamic>
         });
         completer.complete(results);
