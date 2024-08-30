@@ -23,7 +23,7 @@ List<Data> test(int length) {
       (int index) => Data(index * index));
 }
 
-Future<void> main() async {
+Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
   // Warm up lap
