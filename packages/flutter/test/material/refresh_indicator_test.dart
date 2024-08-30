@@ -1310,6 +1310,7 @@ void main() {
       await tester.pump();
       positionController.value = position / maxPosition;
       expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).elevation, elevation);
+      await tester.pumpAndSettle();
     }
   });
 }
