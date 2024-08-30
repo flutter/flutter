@@ -35,7 +35,6 @@ void main() {
     int? firstExitCode;
     late MemoryFileSystem fileSystem;
     late FakeAnalytics fakeAnalytics;
-    late TestUsage testUsage;
 
     setUp(() {
       // Instead of exiting with dart:io exit(), this causes an exception to
@@ -60,8 +59,6 @@ void main() {
         fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
-
-      testUsage = TestUsage();
     });
 
     tearDown(() {
