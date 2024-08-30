@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:test_api/fake.dart';
 import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -385,6 +386,43 @@ void main() {
       },
     );
 
+    testUsingContext('handles ProcessException calling git when ProcessManager.canRun fails', () async {
+      io.setExitFunctionForTests((int exitCode) {});
+
+      final _GitNotFoundFlutterCommand command = _GitNotFoundFlutterCommand();
+
+      await runner.run(
+        <String>[command.name],
+        () => <FlutterCommand>[
+          command,
+        ],
+        // This flutterVersion disables crash reporting.
+        flutterVersion: '[user-branch]/',
+        reportCrashes: false,
+        shutdownHooks: ShutdownHooks(),
+      );
+
+      expect(
+        fakeAnalytics.sentEvents
+            .where((Event e) => e.eventName == DashEvent.exception),
+        isEmpty,
+      );
+      expect(
+          (globals.logger as BufferLogger).errorText,
+          'Failed to find "git" in the search path.\n'
+          '\n'
+          'An error was encountered when trying to run git.\n'
+          "Please ensure git is installed and available in your system's search path. "
+          'See https://docs.flutter.dev/get-started/install for instructions on installing git for your platform.\n');
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => fs,
+        Artifacts: () => Artifacts.test(),
+        ProcessManager: () => _ErrorOnCanRunFakeProcessManager(),
+      },
+    );
+
     testUsingContext('do not print welcome on bots', () async {
         io.setExitFunctionForTests((int exitCode) {});
 
@@ -742,5 +780,16 @@ class WaitingCrashReporter implements CrashReporter {
   Future<void> informUser(CrashDetails details, File crashFile) {
     _details = details;
     return _future;
+  }
+}
+
+class _ErrorOnCanRunFakeProcessManager extends Fake implements FakeProcessManager {
+  final FakeProcessManager delegate = FakeProcessManager.any();
+  @override
+  bool canRun(dynamic executable, {String? workingDirectory}) {
+    if (executable == 'git') {
+      throw Exception("oh no, we couldn't check for git!");
+    }
+    return delegate.canRun(executable, workingDirectory: workingDirectory);
   }
 }
