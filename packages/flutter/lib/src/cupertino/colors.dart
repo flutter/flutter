@@ -8,7 +8,7 @@
 /// @docImport 'nav_bar.dart';
 library;
 
-import 'dart:ui' show Brightness, Color;
+import 'dart:ui' show Brightness, Color, ColorSpace;
 
 import '../../foundation.dart';
 import '../widgets/basic.dart';
@@ -1181,6 +1181,35 @@ class CupertinoDynamicColor with Diagnosticable implements Color {
 
   @override
   Color withRed(int r) => _effectiveColor.withRed(r);
+
+  @override
+  double get a => _effectiveColor.a;
+
+  @override
+  double get r => _effectiveColor.r;
+
+  @override
+  double get g => _effectiveColor.g;
+
+  @override
+  double get b => _effectiveColor.b;
+
+  @override
+  ColorSpace get colorSpace => _effectiveColor.colorSpace;
+
+  @override
+  Color withValues(
+          {double? alpha,
+          double? red,
+          double? green,
+          double? blue,
+          ColorSpace? colorSpace}) =>
+      _effectiveColor.withValues(
+          alpha: alpha,
+          red: red,
+          green: green,
+          blue: blue,
+          colorSpace: colorSpace);
 }
 
 /// Creates a diagnostics property for [CupertinoDynamicColor].
