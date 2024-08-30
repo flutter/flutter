@@ -1234,6 +1234,291 @@ void main() {
     expect(Focus.of(secondChildKey.currentContext!).hasPrimaryFocus, isTrue);
   });
 
+  testWidgets('CheckboxListTile minVerticalPadding = 80.0', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection, { double? themeMinVerticalPadding, double? widgetMinVerticalPadding }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: ListTileTheme(
+              data: ListTileThemeData(minVerticalPadding: themeMinVerticalPadding),
+              child: Container(
+                alignment: Alignment.topLeft,
+                child: CheckboxListTile(
+                  minVerticalPadding: widgetMinVerticalPadding,
+                  title: const Text('title'),
+                  value: false,
+                  onChanged: (bool? value) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, widgetMinVerticalPadding: 80));
+    // 80 + 80 + 16(Title) = 176
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 184.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinVerticalPadding: 80));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 184.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinVerticalPadding: 0, widgetMinVerticalPadding: 80));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 184.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, widgetMinVerticalPadding: 80));
+    // 80 + 80 + 16(Title) = 176
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 184.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeMinVerticalPadding: 80));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 184.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeMinVerticalPadding: 0, widgetMinVerticalPadding: 80));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 184.0));
+  });
+
+  testWidgets('CheckboxListTile minLeadingWidth = 60.0', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection, { double? themeMinLeadingWidth, double? widgetMinLeadingWidth }) {
+      return MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: ListTileTheme(
+              data: ListTileThemeData(minLeadingWidth: themeMinLeadingWidth),
+              child: Container(
+                alignment: Alignment.topLeft,
+                child: CheckboxListTile(
+                  minLeadingWidth: widgetMinLeadingWidth,
+                  title: const Text('title'),
+                  value: false,
+                  onChanged: (bool? value) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    double left(String text) => tester.getTopLeft(find.text(text)).dx;
+    double right(String text) => tester.getTopRight(find.text(text)).dx;
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, widgetMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    // 92.0 = 16.0(Default contentPadding) + 16.0(Default horizontalTitleGap) + 60.0
+    expect(left('title'), 92.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 92.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinLeadingWidth: 0, widgetMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 92.0);
+
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, widgetMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    // 708.0 = 800.0 - (16.0(Default contentPadding) + 16.0(Default horizontalTitleGap) + 60.0)
+    expect(right('title'), 708.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 708.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeMinLeadingWidth: 0, widgetMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 708.0);
+  });
+
+  testWidgets('CheckboxListTile minTileHeight', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection, { double? minTileHeight, }) {
+      return MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: CheckboxListTile(
+                minTileHeight: minTileHeight,
+                value: false,
+                onChanged: (bool? value) {},
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Default list tile with height = 56.0
+    await tester.pumpWidget(buildFrame(TextDirection.ltr));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+
+    // Set list tile height = 30.0
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, minTileHeight: 30));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 30.0));
+
+    // Set list tile height = 60.0
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, minTileHeight: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 60.0));
+  });
+
+  testWidgets('CheckboxListTile titleAlignment position with title widget', (WidgetTester tester) async {
+    final Key leadingKey = GlobalKey();
+    final Key trailingKey = GlobalKey();
+    const double leadingHeight = 24.0;
+    const double titleHeight = 50.0;
+    const double trailingHeight = 24.0;
+    const double minVerticalPadding = 10.0;
+    const double tileHeight = minVerticalPadding * 2 + titleHeight;
+
+    Widget buildFrame({ ListTileTitleAlignment? titleAlignment }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Center(
+            child: CheckboxListTile(
+              titleAlignment: titleAlignment,
+              minVerticalPadding: minVerticalPadding,
+              title: const SizedBox(width: 20.0, height: titleHeight),
+              value: false,
+              onChanged: (bool? value) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    // If [ThemeData.useMaterial3] is true, the default title alignment is
+    // [ListTileTitleAlignment.threeLine], which positions the leading and
+    // trailing widgets center vertically in the tile if the [ListTile.isThreeLine]
+    // property is false.
+    await tester.pumpWidget(buildFrame());
+    Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
+    Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    const double centerPosition = (tileHeight / 2) - (leadingHeight / 2);
+    expect(leadingOffset.dy - tileOffset.dy, centerPosition);
+    expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+    // Test [ListTileTitleAlignment.threeLine] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets are centered vertically in the tile,
+    // If the [ListTile.isThreeLine] property is false.
+    expect(leadingOffset.dy - tileOffset.dy, centerPosition);
+    expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+    // Test [ListTileTitleAlignment.titleHeight] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.titleHeight));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // If the tile height is less than 72.0 pixels, the leading widget is placed
+    // 16.0 pixels below the top of the title widget, and the trailing is centered
+    // vertically in the tile.
+    const double titlePosition = 16.0;
+    expect(leadingOffset.dy - tileOffset.dy, titlePosition);
+    expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+    // Test [ListTileTitleAlignment.top] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.top));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding below
+    // the top of the title widget.
+    const double topPosition = minVerticalPadding;
+    expect(leadingOffset.dy - tileOffset.dy, topPosition);
+    expect(trailingOffset.dy - tileOffset.dy, topPosition);
+
+    // Test [ListTileTitleAlignment.center] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.center));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    expect(leadingOffset.dy - tileOffset.dy, centerPosition);
+    expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+    // Test [ListTileTitleAlignment.bottom] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.bottom));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding above
+    // the bottom of the subtitle widget.
+    const double bottomPosition = tileHeight - minVerticalPadding - leadingHeight;
+    expect(leadingOffset.dy - tileOffset.dy, bottomPosition);
+    expect(trailingOffset.dy - tileOffset.dy, bottomPosition);
+  });
+
+  testWidgets('CheckboxListTile horizontalTitleGap = 0.0', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection, { double? themeHorizontalTitleGap, double? widgetHorizontalTitleGap }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: ListTileTheme(
+              data: ListTileThemeData(horizontalTitleGap: themeHorizontalTitleGap),
+              child: Container(
+                alignment: Alignment.topLeft,
+                child: CheckboxListTile(
+                  horizontalTitleGap: widgetHorizontalTitleGap,
+                  title: const Text('title'),
+                  value: false,
+                  onChanged: (bool? value) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    double left(String text) => tester.getTopLeft(find.text(text)).dx;
+    double right(String text) => tester.getTopRight(find.text(text)).dx;
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, widgetHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 56.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 56.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeHorizontalTitleGap: 10, widgetHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 56.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, widgetHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 744.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 744.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeHorizontalTitleGap: 10, widgetHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 744.0);
+  });
+
   testWidgets('CheckboxListTile uses ListTileTheme controlAffinity', (WidgetTester tester) async {
     Widget buildListTile(ListTileControlAffinity controlAffinity) {
       return MaterialApp(
