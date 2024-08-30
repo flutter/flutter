@@ -487,17 +487,22 @@ targets:
       - .ci.yaml
 
   - name: Linux customer_testing
+    # TODO(Piinks): https://github.com/flutter/flutter/issues/154251
+    bringup: true
     # This really just runs dev/bots/customer_testing/ci.sh,
     # but it does so indirectly via the flutter_drone recipe
     # calling the dev/bots/test.dart script.
     enabled_branches:
       - master
     recipe: flutter/flutter_drone
+    # Timeout in minutes for the whole task.
     timeout: 60
     properties:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Timeout in seconds for each individual step.
+      test_timeout_secs: "2700" # 45 minutes * 60
 
   - name: Linux docs_publish
     recipe: flutter/docs
@@ -3694,11 +3699,14 @@ targets:
     enabled_branches:
       - master
     recipe: flutter/flutter_drone
+    # Timeout in minutes for the whole task.
     timeout: 60
     properties:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      # Timeout in seconds for each individual step.
+      test_timeout_secs: "2700" # 45 minutes * 60
 
   - name: Mac dart_plugin_registry_test
     recipe: devicelab/devicelab_drone
@@ -4524,6 +4532,7 @@ targets:
 
   # mac mokey test
   - name: Mac_mokey run_release_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/153830
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
@@ -5360,11 +5369,14 @@ targets:
     enabled_branches:
       - master
     recipe: flutter/flutter_drone
+    # Timeout in minutes for the whole task.
     timeout: 60
     properties:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      # Timeout in seconds for each individual step.
+      test_timeout_secs: "2700" # 45 minutes * 60
 
   - name: Windows framework_tests_libraries
     recipe: flutter/flutter_drone

@@ -4,6 +4,8 @@
 
 // Logic for native assets shared between all host OSes.
 
+import 'package:native_assets_cli/native_assets_cli.dart';
+
 import '../../../base/os.dart';
 import '../../../base/platform.dart';
 import '../../../build_info.dart';
@@ -22,6 +24,10 @@ class TestCompilerNativeAssetsBuilderImpl
   @override
   Future<Uri?> build(BuildInfo buildInfo) =>
       testCompilerBuildNativeAssets(buildInfo);
+
+  @override
+  String windowsBuildDirectory(FlutterProject project) =>
+      nativeAssetsBuildUri(project.directory.uri, OS.windows).toFilePath();
 }
 
 Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
@@ -32,6 +38,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
     final Uri projectUri = FlutterProject.current().directory.uri;
     final NativeAssetsBuildRunner buildRunner = NativeAssetsBuildRunnerImpl(
       projectUri,
+      buildInfo.packageConfigPath,
       buildInfo.packageConfig,
       globals.fs,
       globals.logger,
