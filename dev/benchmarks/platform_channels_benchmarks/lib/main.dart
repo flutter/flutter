@@ -251,6 +251,8 @@ Future<void> _runTests() async {
     numMessages: numMessages,
   );
   printer.printToStdout();
+  // Signal the end of our benchmark
+  print('\n\n╡ ••• Done ••• ╞\n\n');
 }
 
 class _BenchmarkWidget extends StatefulWidget {

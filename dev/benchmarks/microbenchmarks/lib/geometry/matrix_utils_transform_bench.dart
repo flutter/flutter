@@ -11,7 +11,7 @@ import '../common.dart';
 const int _kNumIterations = 10000000;
 const int _kNumWarmUp = 100000;
 
-void main() {
+Future<void> execute()  async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   print('MatrixUtils.transformRect and .transformPoint benchmark...');
 
