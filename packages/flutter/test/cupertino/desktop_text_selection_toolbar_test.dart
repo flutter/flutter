@@ -111,7 +111,7 @@ void main() {
         .elementAt(1);
 
     expect(
-      (decoratedBox.decoration as BoxDecoration).color!.opacity,
+      (decoratedBox.decoration as BoxDecoration).color!.a,
       lessThan(1.0),
     );
   });

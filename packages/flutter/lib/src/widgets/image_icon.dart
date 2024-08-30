@@ -83,7 +83,7 @@ class ImageIcon extends StatelessWidget {
     Color iconColor = color ?? iconTheme.color!;
 
     if (iconOpacity != null && iconOpacity != 1.0) {
-      iconColor = iconColor.withValues(alpha: iconColor.opacity * iconOpacity);
+      iconColor = iconColor.withValues(alpha: iconColor.a * iconOpacity);
     }
 
     return Semantics(

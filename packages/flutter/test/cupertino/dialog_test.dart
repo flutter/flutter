@@ -345,8 +345,8 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color!.opacity, greaterThanOrEqualTo(127 / 255));
-    expect(widget.style.color!.opacity, lessThanOrEqualTo(128 / 255));
+    expect(widget.style.color!.a, greaterThanOrEqualTo(127 / 255));
+    expect(widget.style.color!.a, lessThanOrEqualTo(128 / 255));
   });
 
   testWidgets('Dialog enabled action style', (WidgetTester tester) async {
@@ -357,7 +357,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color!.opacity, equals(1.0));
+    expect(widget.style.color!.a, equals(1.0));
   });
 
   testWidgets('Message is scrollable, has correct padding with large text sizes', (WidgetTester tester) async {

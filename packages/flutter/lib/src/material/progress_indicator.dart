@@ -990,7 +990,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     }
 
     Color valueColor = widget._getValueColor(context);
-    final double opacity = valueColor.opacity;
+    final double opacity = valueColor.a;
     valueColor = valueColor.withValues(alpha: 1.0);
 
     final Color backgroundColor =

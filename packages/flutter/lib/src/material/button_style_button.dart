@@ -443,8 +443,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         && backgroundColor != null
         && elevation != resolvedElevation
         && backgroundColor!.value != resolvedBackgroundColor!.value
-        && backgroundColor!.opacity == 1
-        && resolvedBackgroundColor.opacity < 1
+        && backgroundColor!.a == 1
+        && resolvedBackgroundColor.a < 1
         && resolvedElevation == 0) {
       if (controller?.duration != resolvedAnimationDuration) {
         controller?.dispose();

@@ -332,7 +332,7 @@ void main() {
     )));
 
     Finder findModalBarrier() => find.descendant(of: find.byType(Scaffold), matching: find.byType(ModalBarrier));
-    double getOpacity() => tester.firstWidget<ModalBarrier>(findModalBarrier()).color!.opacity;
+    double getOpacity() => tester.firstWidget<ModalBarrier>(findModalBarrier()).color!.a;
     double getExpectedOpacity(double visValue) => math.max(kMinBottomSheetScrimOpacity, kMaxBottomSheetScrimOpacity - visValue);
 
     for (double i = 0, extent = i / 10; i <= 10; i++, extent = i / 10) {

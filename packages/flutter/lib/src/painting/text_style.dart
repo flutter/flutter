@@ -73,7 +73,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ### Opacity and Color
 ///
 /// Each line here is progressively more opaque. The base color is
-/// [Colors.black], and [Color.withOpacity] is used to create a
+/// [Colors.black], and [Color.withValues] is used to create a
 /// derivative color with the desired opacity. The root [TextSpan] for this
 /// [RichText] widget is explicitly given the ambient [DefaultTextStyle], since
 /// [RichText] does not do that automatically. The inner [TextStyle] objects are

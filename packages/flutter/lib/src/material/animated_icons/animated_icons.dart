@@ -107,7 +107,7 @@ class AnimatedIcon extends StatelessWidget {
     final double iconOpacity = iconTheme.opacity!;
     Color iconColor = color ?? iconTheme.color!;
     if (iconOpacity != 1.0) {
-      iconColor = iconColor.withValues(alpha: iconColor.opacity * iconOpacity);
+      iconColor = iconColor.withValues(alpha: iconColor.a * iconOpacity);
     }
     return Semantics(
       label: semanticLabel,
@@ -199,7 +199,7 @@ class _PathFrames {
     final double opacity = _interpolate<double?>(opacities, progress, ui.lerpDouble)!;
     final ui.Paint paint = ui.Paint()
       ..style = PaintingStyle.fill
-      ..color = color.withValues(alpha: color.opacity * opacity);
+      ..color = color.withValues(alpha: color.a * opacity);
     final ui.Path path = uiPathFactory();
     for (final _PathCommand command in commands) {
       command.apply(path, progress);

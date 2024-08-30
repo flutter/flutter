@@ -2853,7 +2853,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
   /// Whether to show a [ModalBarrier] over the body of the scaffold.
   void showBodyScrim(bool value, double opacity) {
-    if (_showBodyScrim == value && _bodyScrimColor.opacity == opacity) {
+    if (_showBodyScrim == value && _bodyScrimColor.a == opacity) {
       return;
     }
     setState(() {

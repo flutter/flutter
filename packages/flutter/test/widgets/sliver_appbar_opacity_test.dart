@@ -20,11 +20,11 @@ void main() {
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
-    expect(render.text.style!.color!.opacity, 1.0);
+    expect(render.text.style!.color!.a, 1.0);
 
     controller.jumpTo(200.0);
     await tester.pumpAndSettle();
-    expect(render.text.style!.color!.opacity, 0.0);
+    expect(render.text.style!.color!.a, 0.0);
   });
 
   testWidgets('a11y mode ===> 1.0 opacity', (WidgetTester tester) async {
@@ -43,11 +43,11 @@ void main() {
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
-    expect(render.text.style!.color!.opacity, 1.0);
+    expect(render.text.style!.color!.a, 1.0);
 
     controller.jumpTo(100.0);
     await tester.pumpAndSettle();
-    expect(render.text.style!.color!.opacity, 1.0);
+    expect(render.text.style!.color!.a, 1.0);
   });
 
   testWidgets('turn on/off a11y mode to change opacity', (WidgetTester tester) async {
@@ -74,19 +74,19 @@ void main() {
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
     controller.jumpTo(100.0);
     await tester.pumpAndSettle();
-    expect(render.text.style!.color!.opacity < 1.0, true);
+    expect(render.text.style!.color!.a < 1.0, true);
 
     // Turn on accessibleNavigation
     tester.platformDispatcher.accessibilityFeaturesTestValue =
         const FakeAccessibilityFeatures(accessibleNavigation: true);
     await tester.pumpAndSettle();
-    expect(render.text.style!.color!.opacity, 1.0);
+    expect(render.text.style!.color!.a, 1.0);
 
     // Turn off accessibleNavigation
     tester.platformDispatcher.accessibilityFeaturesTestValue =
         const FakeAccessibilityFeatures();
     await tester.pumpAndSettle();
-    expect(render.text.style!.color!.opacity < 1.0, true);
+    expect(render.text.style!.color!.a < 1.0, true);
   });
   testWidgets('!pinned && !floating && bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -101,11 +101,11 @@ void main() {
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
-    expect(render.text.style!.color!.opacity, 1.0);
+    expect(render.text.style!.color!.a, 1.0);
 
     controller.jumpTo(200.0);
     await tester.pumpAndSettle();
-    expect(render.text.style!.color!.opacity, 0.0);
+    expect(render.text.style!.color!.a, 0.0);
   });
 
   testWidgets('!pinned && floating && !bottom ==> fade opacity', (WidgetTester tester) async {
@@ -121,11 +121,11 @@ void main() {
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
-    expect(render.text.style!.color!.opacity, 1.0);
+    expect(render.text.style!.color!.a, 1.0);
 
     controller.jumpTo(200.0);
     await tester.pumpAndSettle();
-    expect(render.text.style!.color!.opacity, 0.0);
+    expect(render.text.style!.color!.a, 0.0);
   });
 
   testWidgets('!pinned && floating && bottom ==> fade opacity', (WidgetTester tester) async {
@@ -141,11 +141,11 @@ void main() {
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
-    expect(render.text.style!.color!.opacity, 1.0);
+    expect(render.text.style!.color!.a, 1.0);
 
     controller.jumpTo(200.0);
     await tester.pumpAndSettle();
-    expect(render.text.style!.color!.opacity, 0.0);
+    expect(render.text.style!.color!.a, 0.0);
   });
 
   testWidgets('pinned && !floating && !bottom ==> 1.0 opacity', (WidgetTester tester) async {
@@ -161,11 +161,11 @@ void main() {
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
-    expect(render.text.style!.color!.opacity, 1.0);
+    expect(render.text.style!.color!.a, 1.0);
 
     controller.jumpTo(200.0);
     await tester.pumpAndSettle();
-    expect(render.text.style!.color!.opacity, 1.0);
+    expect(render.text.style!.color!.a, 1.0);
   });
 
   testWidgets('pinned && !floating && bottom ==> 1.0 opacity', (WidgetTester tester) async {
@@ -181,11 +181,11 @@ void main() {
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
-    expect(render.text.style!.color!.opacity, 1.0);
+    expect(render.text.style!.color!.a, 1.0);
 
     controller.jumpTo(200.0);
     await tester.pumpAndSettle();
-    expect(render.text.style!.color!.opacity, 1.0);
+    expect(render.text.style!.color!.a, 1.0);
   });
 
   testWidgets('pinned && floating && !bottom ==> 1.0 opacity', (WidgetTester tester) async {
@@ -203,11 +203,11 @@ void main() {
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
-    expect(render.text.style!.color!.opacity, 1.0);
+    expect(render.text.style!.color!.a, 1.0);
 
     controller.jumpTo(200.0);
     await tester.pumpAndSettle();
-    expect(render.text.style!.color!.opacity, 1.0);
+    expect(render.text.style!.color!.a, 1.0);
   });
 
   testWidgets('pinned && floating && bottom && extraToolbarHeight == 0.0 ==> fade opacity', (WidgetTester tester) async {
@@ -225,11 +225,11 @@ void main() {
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
-    expect(render.text.style!.color!.opacity, 1.0);
+    expect(render.text.style!.color!.a, 1.0);
 
     controller.jumpTo(200.0);
     await tester.pumpAndSettle();
-    expect(render.text.style!.color!.opacity, 0.0);
+    expect(render.text.style!.color!.a, 0.0);
   });
 
   testWidgets('pinned && floating && bottom && extraToolbarHeight != 0.0 ==> 1.0 opacity', (WidgetTester tester) async {
@@ -246,11 +246,11 @@ void main() {
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
-    expect(render.text.style!.color!.opacity, 1.0);
+    expect(render.text.style!.color!.a, 1.0);
 
     controller.jumpTo(200.0);
     await tester.pumpAndSettle();
-    expect(render.text.style!.color!.opacity, 1.0);
+    expect(render.text.style!.color!.a, 1.0);
   });
 
   testWidgets('!pinned && !floating && !bottom && extraToolbarHeight != 0.0 ==> fade opacity', (WidgetTester tester) async {
@@ -268,11 +268,11 @@ void main() {
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
-    expect(render.text.style!.color!.opacity, 1.0);
+    expect(render.text.style!.color!.a, 1.0);
 
     controller.jumpTo(collapsedHeight);
     await tester.pumpAndSettle();
-    expect(render.text.style!.color!.opacity, 0.0);
+    expect(render.text.style!.color!.a, 0.0);
   });
 }
 

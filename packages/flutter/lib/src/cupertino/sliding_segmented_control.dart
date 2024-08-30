@@ -247,7 +247,7 @@ class _SegmentSeparatorState extends State<_SegmentSeparator> with TickerProvide
           padding: _kSeparatorInset,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: _kSeparatorColor.withValues(alpha: _kSeparatorColor.opacity * separatorOpacityController.value),
+              color: _kSeparatorColor.withValues(alpha: _kSeparatorColor.a * separatorOpacityController.value),
               borderRadius: const BorderRadius.all(_kSeparatorRadius),
             ),
             child: child,

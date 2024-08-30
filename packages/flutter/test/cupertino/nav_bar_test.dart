@@ -1144,7 +1144,7 @@ void main() {
 
       final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
       final BorderSide side = decoration.border!.bottom;
-      expect(side.color.opacity, 0.0);
+      expect(side.color.a, 0.0);
 
       // Appears transparent since the background color is the same as the scaffold.
       expect(find.byType(CupertinoNavigationBar), paints..rect(color: const Color(0xFFFFFFFF)));
@@ -1160,7 +1160,7 @@ void main() {
 
       final BorderSide borderAfterScroll = (decoratedBoxAfterSroll.decoration as BoxDecoration).border!.bottom;
 
-      expect(borderAfterScroll.color.opacity, 1.0);
+      expect(borderAfterScroll.color.a, 1.0);
 
       expect(find.byType(CupertinoNavigationBar), paints..rect(color: const Color(0xFFE5E5E5)));
     },
@@ -1317,7 +1317,7 @@ void main() {
 
       final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
       final BorderSide side = decoration.border!.bottom;
-      expect(side.color.opacity, 0.0);
+      expect(side.color.a, 0.0);
 
       // Appears transparent since the background color is the same as the scaffold.
       expect(find.byType(CupertinoSliverNavigationBar), paints..rect(color: const Color(0xFFFFFFFF)));
@@ -1333,7 +1333,7 @@ void main() {
 
       final BorderSide borderAfterScroll = (decoratedBoxAfterSroll.decoration as BoxDecoration).border!.bottom;
 
-      expect(borderAfterScroll.color.opacity, 1.0);
+      expect(borderAfterScroll.color.a, 1.0);
 
       expect(find.byType(CupertinoSliverNavigationBar), paints..rect(color: const Color(0xFFE5E5E5)));
     },

@@ -194,7 +194,7 @@ void main() {
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
-    expect(renderEditable.cursorColor!.opacity, 1.0);
+    expect(renderEditable.cursorColor!.a, 1.0);
 
     int walltimeMicrosecond = 0;
     double lastVerifiedOpacity = 1.0;
@@ -208,7 +208,7 @@ void main() {
       // verifies the opacity immediately *before* each key frame to avoid
       // fp precision issues.
       expect(
-        renderEditable.cursorColor!.opacity,
+        renderEditable.cursorColor!.a,
         closeTo(lastVerifiedOpacity, 0.01),
         reason: 'opacity at ${at-delta} microseconds',
       );

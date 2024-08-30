@@ -3817,7 +3817,7 @@ void main() {
           of: find.text(text),
           matching: find.byType(DefaultTextStyle),
         ).first,
-      ).style.color?.opacity;
+      ).style.color?.a;
     }
 
     final double? abcLabelOpacity = defaultTextStyleOpacity('Abc');
