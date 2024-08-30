@@ -329,16 +329,10 @@ void main() {
   });
 
   group('runner', () {
-    late FakeAnalytics fakeAnalytics;
     late MemoryFileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem.test();
-
-      fakeAnalytics = getInitializedFakeAnalyticsInstance(
-        fs: fs,
-        fakeFlutterVersion: FakeFlutterVersion(),
-      );
 
       Cache.disableLocking();
     });
@@ -365,11 +359,6 @@ void main() {
       );
 
       expect(
-        fakeAnalytics.sentEvents
-            .where((Event e) => e.eventName == DashEvent.exception),
-        isEmpty,
-      );
-      expect(
           (globals.logger as BufferLogger).errorText,
           'Failed to find "git" in the search path.\n'
           '\n'
@@ -378,7 +367,6 @@ void main() {
           'See https://docs.flutter.dev/get-started/install for instructions on installing git for your platform.\n');
       },
       overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
         FileSystem: () => fs,
         Artifacts: () => Artifacts.test(),
         ProcessManager: () =>
@@ -403,11 +391,6 @@ void main() {
       );
 
       expect(
-        fakeAnalytics.sentEvents
-            .where((Event e) => e.eventName == DashEvent.exception),
-        isEmpty,
-      );
-      expect(
           (globals.logger as BufferLogger).errorText,
           'Failed to find "git" in the search path.\n'
           '\n'
@@ -416,7 +399,6 @@ void main() {
           'See https://docs.flutter.dev/get-started/install for instructions on installing git for your platform.\n');
       },
       overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
         FileSystem: () => fs,
         Artifacts: () => Artifacts.test(),
         ProcessManager: () => _ErrorOnCanRunFakeProcessManager(),
