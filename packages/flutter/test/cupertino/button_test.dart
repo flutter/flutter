@@ -65,6 +65,36 @@ void main() {
     );
   });
 
+  testWidgets('OnLongPress works!', (WidgetTester tester) async {
+    bool value = false;
+    await tester.pumpWidget(
+      boilerplate(child: CupertinoButton(
+        onPressed: null,
+        onLongPress: () {
+          value = !value;
+        },
+        child: const Text('XXXX', style: testStyle),
+      )),
+    );
+    await tester.pump();
+    final Finder cupertinoBtn = find.byType(CupertinoButton);
+    await tester.longPress(cupertinoBtn);
+    expect(value, isTrue);
+  });
+
+  testWidgets('button is disabled if onLongPress and onPressed are both null', (WidgetTester tester) async {
+   await tester.pumpWidget(
+      boilerplate(child: const CupertinoButton(
+        onPressed: null,
+        child: Text('XXXX', style: testStyle),
+      )),
+    );
+
+    expect(find.byType(CupertinoButton), findsOneWidget);
+    final CupertinoButton button = tester.widget(find.byType(CupertinoButton));
+    expect(button.enabled, isFalse);
+  });
+
   // TODO(LongCatIsLoong): Uncomment once https://github.com/flutter/flutter/issues/44115
   // is fixed.
   /*
