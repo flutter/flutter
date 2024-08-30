@@ -18,6 +18,24 @@ Future<void> testMain() async {
     setUpTestViewDimensions: false,
   );
 
+  test('default field values are as documented on api.flutter.dev', () {
+    final paint = ui.Paint();
+    expect(paint.blendMode, ui.BlendMode.srcOver);
+    expect(paint.color, const ui.Color(0xFF000000));
+    expect(paint.colorFilter, null);
+    expect(paint.filterQuality, ui.FilterQuality.none);
+    expect(paint.imageFilter, null);
+    expect(paint.invertColors, false);
+    expect(paint.isAntiAlias, true);
+    expect(paint.maskFilter, null);
+    expect(paint.shader, null);
+    expect(paint.strokeCap, ui.StrokeCap.butt);
+    expect(paint.strokeJoin, ui.StrokeJoin.miter);
+    expect(paint.strokeMiterLimit, 4.0);
+    expect(paint.strokeWidth, 0.0);
+    expect(paint.style, ui.PaintingStyle.fill);
+  });
+
   test('toString()', () {
     final ui.Paint paint = ui.Paint();
     paint.blendMode = ui.BlendMode.darken;

@@ -187,7 +187,6 @@ class BackdropFilterEngineLayer extends ContainerLayer
     // single canvas, the backdrop filter will be applied multiple times.
     final CkCanvas currentCanvas = paintContext.leafNodesCanvas!;
     currentCanvas.saveLayerWithFilter(paintBounds, _filter, paint);
-    paint.dispose();
     paintChildren(paintContext);
     currentCanvas.restore();
   }
@@ -349,7 +348,6 @@ class OpacityEngineLayer extends ContainerLayer
     final ui.Rect saveLayerBounds = paintBounds.shift(-_offset);
 
     paintContext.internalNodesCanvas.saveLayer(saveLayerBounds, paint);
-    paint.dispose();
     paintChildren(paintContext);
     // Restore twice: once for the translate and once for the saveLayer.
     paintContext.internalNodesCanvas.restore();
@@ -419,16 +417,17 @@ class ImageFilterEngineLayer extends ContainerLayer
     }
     final ui.Rect childPaintBounds =
         prerollChildren(prerollContext, childMatrix);
-    convertible.imageFilter((SkImageFilter filter) {
-      // If the filter is a ColorFilter, the extended paint bounds will be the
-      // entire screen, which is not what we want.
       if (_filter is ui.ColorFilter) {
+        // If the filter is a ColorFilter, the extended paint bounds will be the
+        // entire screen, which is not what we want.
         paintBounds = childPaintBounds;
       } else {
-        paintBounds =
-            rectFromSkIRect(filter.getOutputBounds(toSkRect(childPaintBounds)));
+        convertible.withSkImageFilter((skFilter) {
+          paintBounds = rectFromSkIRect(
+            skFilter.getOutputBounds(toSkRect(childPaintBounds)),
+          );
+        });
       }
-    });
     prerollContext.mutatorsStack.pop();
   }
 
@@ -442,7 +441,6 @@ class ImageFilterEngineLayer extends ContainerLayer
     final CkPaint paint = CkPaint();
     paint.imageFilter = _filter;
     paintContext.internalNodesCanvas.saveLayer(paintBounds, paint);
-    paint.dispose();
     paintChildren(paintContext);
     paintContext.internalNodesCanvas.restore();
     paintContext.internalNodesCanvas.restore();
@@ -479,7 +477,6 @@ class ShaderMaskEngineLayer extends ContainerLayer
 
     paintContext.leafNodesCanvas!.drawRect(
         ui.Rect.fromLTWH(0, 0, maskRect.width, maskRect.height), paint);
-    paint.dispose();
     paintContext.leafNodesCanvas!.restore();
 
     paintContext.internalNodesCanvas.restore();
@@ -547,7 +544,6 @@ class ColorFilterEngineLayer extends ContainerLayer
     paintChildren(paintContext);
     paintContext.internalNodesCanvas.restore();
     paintContext.internalNodesCanvas.restore();
-    paint.dispose();
   }
 }
 

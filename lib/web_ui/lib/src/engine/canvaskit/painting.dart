@@ -21,116 +21,83 @@ import 'shader.dart';
 ///
 /// This class is backed by a Skia object that must be explicitly
 /// deleted to avoid a memory leak. This is done by extending [SkiaObject].
+// TODO(154281): try to unify with SkwasmPaint
 class CkPaint implements ui.Paint {
-  CkPaint() : skiaObject = SkPaint() {
-    skiaObject.setAntiAlias(_isAntiAlias);
-    skiaObject.setColorInt(_defaultPaintColor);
-    _ref = UniqueRef<SkPaint>(this, skiaObject, 'Paint');
-  }
+  CkPaint();
 
-  final SkPaint skiaObject;
-  late final UniqueRef<SkPaint> _ref;
-  CkManagedSkImageFilterConvertible? _imageFilter;
-
-  static const int _defaultPaintColor = 0xFF000000;
-
-  /// Returns the native reference to the underlying [SkPaint] object.
+  /// Creates a new [SkPaint] object and returns it.
   ///
-  /// This should only be used in tests.
-  @visibleForTesting
-  UniqueRef<SkPaint> get debugRef => _ref;
+  /// The caller is responsible for deleting the returned object when it's no
+  /// longer needed.
+  SkPaint toSkPaint() {
+    final skPaint = SkPaint();
+    skPaint.setAntiAlias(isAntiAlias);
+    skPaint.setBlendMode(toSkBlendMode(blendMode));
+    skPaint.setStyle(toSkPaintStyle(style));
+    skPaint.setStrokeWidth(strokeWidth);
+    skPaint.setStrokeCap(toSkStrokeCap(strokeCap));
+    skPaint.setStrokeJoin(toSkStrokeJoin(strokeJoin));
+    skPaint.setColorInt(_colorValue);
+    skPaint.setStrokeMiter(strokeMiterLimit);
 
-  @override
-  ui.BlendMode get blendMode => _blendMode;
-  @override
-  set blendMode(ui.BlendMode value) {
-    if (_blendMode == value) {
-      return;
+    final effectiveColorFilter = _effectiveColorFilter;
+    if (effectiveColorFilter != null) {
+      skPaint.setColorFilter(effectiveColorFilter.skiaObject);
     }
-    _blendMode = value;
-    skiaObject.setBlendMode(toSkBlendMode(value));
+
+    final shader = _shader;
+    if (shader != null) {
+      skPaint.setShader(shader.getSkShader(filterQuality));
+    }
+
+    final localMaskFilter = maskFilter;
+    if (localMaskFilter != null) {
+      // CanvasKit returns `null` if the sigma is `0` or infinite.
+      if (localMaskFilter.webOnlySigma.isFinite && localMaskFilter.webOnlySigma > 0) {
+        skPaint.setMaskFilter(createBlurSkMaskFilter(
+          localMaskFilter.webOnlyBlurStyle,
+          localMaskFilter.webOnlySigma,
+        ));
+      }
+    }
+
+    final localImageFilter = _imageFilter;
+    if (localImageFilter != null) {
+      localImageFilter.withSkImageFilter((skImageFilter) {
+        skPaint.setImageFilter(skImageFilter);
+      });
+    }
+
+    return skPaint;
   }
 
-  ui.BlendMode _blendMode = ui.BlendMode.srcOver;
+  @override
+  ui.BlendMode blendMode = ui.BlendMode.srcOver;
 
   @override
-  ui.PaintingStyle get style => _style;
+  ui.PaintingStyle style = ui.PaintingStyle.fill;
 
   @override
-  set style(ui.PaintingStyle value) {
-    if (_style == value) {
-      return;
-    }
-    _style = value;
-    skiaObject.setStyle(toSkPaintStyle(value));
-  }
-
-  ui.PaintingStyle _style = ui.PaintingStyle.fill;
+  double strokeWidth = 0.0;
 
   @override
-  double get strokeWidth => _strokeWidth;
-  @override
-  set strokeWidth(double value) {
-    if (_strokeWidth == value) {
-      return;
-    }
-    _strokeWidth = value;
-    skiaObject.setStrokeWidth(value);
-  }
-
-  double _strokeWidth = 0.0;
+  ui.StrokeCap strokeCap = ui.StrokeCap.butt;
 
   @override
-  ui.StrokeCap get strokeCap => _strokeCap;
-  @override
-  set strokeCap(ui.StrokeCap value) {
-    if (_strokeCap == value) {
-      return;
-    }
-    _strokeCap = value;
-    skiaObject.setStrokeCap(toSkStrokeCap(value));
-  }
-
-  ui.StrokeCap _strokeCap = ui.StrokeCap.butt;
+  ui.StrokeJoin strokeJoin = ui.StrokeJoin.miter;
 
   @override
-  ui.StrokeJoin get strokeJoin => _strokeJoin;
-  @override
-  set strokeJoin(ui.StrokeJoin value) {
-    if (_strokeJoin == value) {
-      return;
-    }
-    _strokeJoin = value;
-    skiaObject.setStrokeJoin(toSkStrokeJoin(value));
-  }
-
-  ui.StrokeJoin _strokeJoin = ui.StrokeJoin.miter;
+  bool isAntiAlias = true;
 
   @override
-  bool get isAntiAlias => _isAntiAlias;
-  @override
-  set isAntiAlias(bool value) {
-    if (_isAntiAlias == value) {
-      return;
-    }
-    _isAntiAlias = value;
-    skiaObject.setAntiAlias(value);
-  }
-
-  bool _isAntiAlias = true;
-
-  @override
-  ui.Color get color => ui.Color(_color);
+  ui.Color get color => ui.Color(_colorValue);
   @override
   set color(ui.Color value) {
-    if (_color == value.value) {
-      return;
-    }
-    _color = value.value;
-    skiaObject.setColorInt(value.value);
+    _colorValue = value.value;
   }
 
-  int _color = _defaultPaintColor;
+  static const int _defaultPaintColorValue = 0xFF000000;
+  int _colorValue = _defaultPaintColorValue;
 
   @override
   bool get invertColors => _invertColors;
@@ -152,7 +119,6 @@ class CkPaint implements ui.Paint {
         );
       }
     }
-    skiaObject.setColorFilter(_effectiveColorFilter?.skiaObject);
     _invertColors = value;
   }
 
@@ -170,52 +136,15 @@ class CkPaint implements ui.Paint {
       return;
     }
     _shader = value as CkShader?;
-    skiaObject.setShader(_shader?.getSkShader(_filterQuality));
   }
 
   CkShader? _shader;
 
   @override
-  ui.MaskFilter? get maskFilter => _maskFilter;
-  @override
-  set maskFilter(ui.MaskFilter? value) {
-    if (value == _maskFilter) {
-      return;
-    }
-    _maskFilter = value;
-    if (value != null) {
-      // CanvasKit returns `null` if the sigma is `0` or infinite.
-      if (!(value.webOnlySigma.isFinite && value.webOnlySigma > 0)) {
-        // Don't create a [CkMaskFilter].
-        _ckMaskFilter = null;
-      } else {
-        _ckMaskFilter = CkMaskFilter.blur(
-          value.webOnlyBlurStyle,
-          value.webOnlySigma,
-        );
-      }
-    } else {
-      _ckMaskFilter = null;
-    }
-    skiaObject.setMaskFilter(_ckMaskFilter?.skiaObject);
-  }
-
-  ui.MaskFilter? _maskFilter;
-  CkMaskFilter? _ckMaskFilter;
+  ui.MaskFilter? maskFilter;
 
   @override
-  ui.FilterQuality get filterQuality => _filterQuality;
-  @override
-  set filterQuality(ui.FilterQuality value) {
-    if (_filterQuality == value) {
-      return;
-    }
-    _filterQuality = value;
-    skiaObject.setShader(_shader?.getSkShader(value));
-  }
-
-  ui.FilterQuality _filterQuality = ui.FilterQuality.none;
-  EngineColorFilter? _engineColorFilter;
+  ui.FilterQuality filterQuality = ui.FilterQuality.none;
 
   @override
   ui.ColorFilter? get colorFilter => _engineColorFilter;
@@ -244,9 +173,10 @@ class CkPaint implements ui.Paint {
         );
       }
     }
-
-    skiaObject.setColorFilter(_effectiveColorFilter?.skiaObject);
   }
+
+  /// The original color filter objects passed by the framework.
+  EngineColorFilter? _engineColorFilter;
 
   /// The effective color filter.
   ///
@@ -254,17 +184,7 @@ class CkPaint implements ui.Paint {
   ManagedSkColorFilter? _effectiveColorFilter;
 
   @override
-  double get strokeMiterLimit => _strokeMiterLimit;
-  @override
-  set strokeMiterLimit(double value) {
-    if (_strokeMiterLimit == value) {
-      return;
-    }
-    _strokeMiterLimit = value;
-    skiaObject.setStrokeMiter(value);
-  }
-
-  double _strokeMiterLimit = 0.0;
+  double strokeMiterLimit = 4.0;
 
   @override
   ui.ImageFilter? get imageFilter => _imageFilter;
@@ -273,29 +193,15 @@ class CkPaint implements ui.Paint {
     if (_imageFilter == value) {
       return;
     }
-    final CkManagedSkImageFilterConvertible? filter;
+
     if (value is ui.ColorFilter) {
-      filter = createCkColorFilter(value as EngineColorFilter);
+      _imageFilter = createCkColorFilter(value as EngineColorFilter);
+    } else {
+      _imageFilter = value as CkManagedSkImageFilterConvertible?;
     }
-    else {
-      filter = value as CkManagedSkImageFilterConvertible?;
-    }
-
-    if (filter != null) {
-      filter.imageFilter((SkImageFilter skImageFilter) {
-        skiaObject.setImageFilter(skImageFilter);
-      });
-    }
-
-    _imageFilter = filter;
   }
 
-  /// Disposes of this paint object.
-  ///
-  /// This object cannot be used again after calling this method.
-  void dispose() {
-    _ref.dispose();
-  }
+  CkManagedSkImageFilterConvertible? _imageFilter;
 
   // Must be kept in sync with the default in paint.cc.
   static const double _kStrokeMiterLimitDefault = 4.0;
