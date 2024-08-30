@@ -21,25 +21,20 @@
 namespace flutter {
 
 // Indices for 32bit values.
-// Must match //lib/ui/painting.dart.
 constexpr int kIsAntiAliasIndex = 0;
-constexpr int kColorRedIndex = 1;
-constexpr int kColorGreenIndex = 2;
-constexpr int kColorBlueIndex = 3;
-constexpr int kColorAlphaIndex = 4;
-constexpr int kColorSpaceIndex = 5;
-constexpr int kBlendModeIndex = 6;
-constexpr int kStyleIndex = 7;
-constexpr int kStrokeWidthIndex = 8;
-constexpr int kStrokeCapIndex = 9;
-constexpr int kStrokeJoinIndex = 10;
-constexpr int kStrokeMiterLimitIndex = 11;
-constexpr int kFilterQualityIndex = 12;
-constexpr int kMaskFilterIndex = 13;
-constexpr int kMaskFilterBlurStyleIndex = 14;
-constexpr int kMaskFilterSigmaIndex = 15;
-constexpr int kInvertColorIndex = 16;
-constexpr size_t kDataByteCount = 68;  // 4 * (last index + 1)
+constexpr int kColorIndex = 1;
+constexpr int kBlendModeIndex = 2;
+constexpr int kStyleIndex = 3;
+constexpr int kStrokeWidthIndex = 4;
+constexpr int kStrokeCapIndex = 5;
+constexpr int kStrokeJoinIndex = 6;
+constexpr int kStrokeMiterLimitIndex = 7;
+constexpr int kFilterQualityIndex = 8;
+constexpr int kMaskFilterIndex = 9;
+constexpr int kMaskFilterBlurStyleIndex = 10;
+constexpr int kMaskFilterSigmaIndex = 11;
+constexpr int kInvertColorIndex = 12;
+constexpr size_t kDataByteCount = 52;  // 4 * (last index + 1)
 static_assert(kDataByteCount == sizeof(uint32_t) * (kInvertColorIndex + 1),
               "kDataByteCount must match the size of the data array.");
 
@@ -48,6 +43,9 @@ constexpr int kShaderIndex = 0;
 constexpr int kColorFilterIndex = 1;
 constexpr int kImageFilterIndex = 2;
 constexpr int kObjectCount = 3;  // One larger than largest object index.
+
+// Must be kept in sync with the default in painting.dart.
+constexpr uint32_t kColorDefault = 0xFF000000;
 
 // Must be kept in sync with the default in painting.dart.
 constexpr uint32_t kBlendModeDefault =
@@ -59,28 +57,6 @@ constexpr float kStrokeMiterLimitDefault = 4.0f;
 
 // Must be kept in sync with the MaskFilter private constants in painting.dart.
 enum MaskFilterType { kNull, kBlur };
-
-namespace {
-DlColor ReadColor(const tonic::DartByteData& byte_data) {
-  const uint32_t* uint_data = static_cast<const uint32_t*>(byte_data.data());
-  const float* float_data = static_cast<const float*>(byte_data.data());
-
-  float red = float_data[kColorRedIndex];
-  float green = float_data[kColorGreenIndex];
-  float blue = float_data[kColorBlueIndex];
-  // Invert alpha so 0 initialized buffer has default value;
-  float alpha = 1.f - float_data[kColorAlphaIndex];
-  uint32_t colorspace = uint_data[kColorSpaceIndex];
-  (void)colorspace;
-  uint32_t encoded_color =
-      static_cast<uint8_t>(std::round(alpha * 255.f)) << 24 |  //
-      static_cast<uint8_t>(std::round(red * 255.f)) << 16 |    //
-      static_cast<uint8_t>(std::round(green * 255.f)) << 8 |   //
-      static_cast<uint8_t>(std::round(blue * 255.f)) << 0;
-  // TODO(gaaclarke): Pass down color info to DlColor.
-  return DlColor(encoded_color);
-}
-}  // namespace
 
 Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data)
     : paint_objects_(paint_objects), paint_data_(paint_data) {}
@@ -161,7 +137,8 @@ const DlPaint* Paint::paint(DlPaint& paint,
   }
 
   if (flags.applies_alpha_or_color()) {
-    paint.setColor(ReadColor(byte_data));
+    uint32_t encoded_color = uint_data[kColorIndex];
+    paint.setColor(DlColor(encoded_color ^ kColorDefault));
   }
 
   if (flags.applies_blend()) {
@@ -261,7 +238,8 @@ void Paint::toDlPaint(DlPaint& paint) const {
 
   paint.setAntiAlias(uint_data[kIsAntiAliasIndex] == 0);
 
-  paint.setColor(ReadColor(byte_data));
+  uint32_t encoded_color = uint_data[kColorIndex];
+  paint.setColor(DlColor(encoded_color ^ kColorDefault));
 
   uint32_t encoded_blend_mode = uint_data[kBlendModeIndex];
   uint32_t blend_mode = encoded_blend_mode ^ kBlendModeDefault;
