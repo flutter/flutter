@@ -7,6 +7,7 @@
 #include "impeller/toolkit/android/choreographer.h"
 #include "impeller/toolkit/android/hardware_buffer.h"
 #include "impeller/toolkit/android/proc_table.h"
+#include "impeller/toolkit/android/shadow_realm.h"
 #include "impeller/toolkit/android/surface_control.h"
 #include "impeller/toolkit/android/surface_transaction.h"
 
@@ -132,6 +133,14 @@ TEST(ToolkitAndroidTest, CanPostAndWaitForFrameCallbacks) {
   ASSERT_TRUE(choreographer.PostFrameCallback(
       [&event](auto point) { event.Signal(); }));
   event.Wait();
+}
+
+TEST(ToolkitAndroidTest, ShouldDisableAHB) {
+  EXPECT_FALSE(ShadowRealm::ShouldDisableAHB());
+
+  EXPECT_TRUE(ShadowRealm::ShouldDisableAHBInternal("android-huawei", 29));
+  EXPECT_FALSE(ShadowRealm::ShouldDisableAHBInternal("android-huawei", 30));
+  EXPECT_FALSE(ShadowRealm::ShouldDisableAHBInternal("something made up", 29));
 }
 
 }  // namespace impeller::android::testing

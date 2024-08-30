@@ -23,6 +23,7 @@ enum class VendorVK {
   kAMD,
   kNvidia,
   kIntel,
+  kHuawei,
   //----------------------------------------------------------------------------
   /// Includes the LLVM Pipe CPU implementation.
   ///
