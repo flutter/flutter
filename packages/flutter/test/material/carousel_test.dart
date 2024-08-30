@@ -1195,7 +1195,11 @@ void main() {
   });
 
   testWidgets('The shrinkExtent should keep the same when the item is tapped', (WidgetTester tester) async {
-    int offset = 0;
+   final List<Widget> children = List<Widget>.generate(20, (int index) {
+      return Center(
+        child: Text('Item $index'),
+      );
+    });
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -1207,18 +1211,8 @@ void main() {
                   constraints: const BoxConstraints(maxHeight: 200),
                   child: CarouselView(
                     itemExtent: 330,
-                    onTap: (int idx) => setState(() {
-                      offset = idx;
-                    }),
-                    children: List<Widget>.generate(20, (int index) {
-                      index += offset;
-                      return ColoredBox(
-                        color: Colors.primaries[index % Colors.primaries.length].withOpacity(0.5),
-                        child: Center(
-                          child: Text('Item $index'),
-                        ),
-                      );
-                    }),
+                    onTap: (int idx) => setState(() { }),
+                    children: children,
                   ),
                 ),
               ),
@@ -1237,10 +1231,10 @@ void main() {
 
     await tester.pumpAndSettle();
 
+    expect(tester.getRect(getItem(0)).width, 330.0);
     expect(tester.getRect(getItem(1)).width, 330.0);
-    expect(tester.getRect(getItem(2)).width, 330.0);
-    // This should be less than 330.0 because the item is shrank.
-    expect(tester.getRect(getItem(3)).width, 140.0);
+    // This should be less than 330.0 because the item is shrank; width is 800.0 - 330.0 - 330.0
+    expect(tester.getRect(getItem(2)).width, 140.0);
   });
 }
 
