@@ -332,6 +332,8 @@ void main() {
     late MemoryFileSystem fs;
 
     setUp(() {
+      io.setExitFunctionForTests((int exitCode) {});
+
       fs = MemoryFileSystem.test();
 
       Cache.disableLocking();
@@ -343,8 +345,6 @@ void main() {
     });
 
     testUsingContext("catches ProcessException calling git because it's not available", () async {
-      io.setExitFunctionForTests((int exitCode) {});
-
       final _GitNotFoundFlutterCommand command = _GitNotFoundFlutterCommand();
 
       await runner.run(
@@ -375,8 +375,6 @@ void main() {
     );
 
     testUsingContext('handles ProcessException calling git when ProcessManager.canRun fails', () async {
-      io.setExitFunctionForTests((int exitCode) {});
-
       final _GitNotFoundFlutterCommand command = _GitNotFoundFlutterCommand();
 
       await runner.run(
@@ -406,8 +404,6 @@ void main() {
     );
 
     testUsingContext('do not print welcome on bots', () async {
-        io.setExitFunctionForTests((int exitCode) {});
-
         await runner.run(
           <String>['--version', '--machine'],
           () => <FlutterCommand>[],
