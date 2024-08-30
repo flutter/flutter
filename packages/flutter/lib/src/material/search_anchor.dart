@@ -458,11 +458,18 @@ class _SearchAnchorState extends State<SearchAnchor> {
     };
   }
 
+  bool getOpacity() {
+    if (widget.enabled) {
+      return _anchorIsVisible ? 1.0 : 0.0;
+    }
+    return _kDisableSearchBarOpacity;
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedOpacity(
       key: _anchorKey,
-      opacity: widget.enabled ? _anchorIsVisible ? 1.0 : 0.0 : _kDisableSearchBarOpacity,
+      opacity: getOpacity(),
       duration: _kAnchorFadeDuration,
       child: IgnorePointer(
         ignoring: !widget.enabled,
