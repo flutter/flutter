@@ -9,6 +9,9 @@ import 'dart:io';
 /// Reads through the print commands from [process] waiting for the magic phase
 /// that contains microbenchmarks results as defined in
 /// `dev/benchmarks/microbenchmarks/lib/common.dart`.
+///
+/// If you are using this outside of microbenchmarks, ensure you print a single
+/// line with `╡ ••• Done ••• ╞` to signal the end of collection.
 Future<Map<String, double>> readJsonResults(Process process) {
   // IMPORTANT: keep these values in sync with dev/benchmarks/microbenchmarks/lib/common.dart
   const String jsonStart = '================ RESULTS ================';
