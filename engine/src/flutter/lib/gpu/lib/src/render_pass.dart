@@ -95,15 +95,6 @@ base class RenderTarget {
   final DepthStencilAttachment? depthStencilAttachment;
 }
 
-// TODO(gaaclarke): Refactor this to support wide gamut colors.
-int _colorToInt(ui.Color color) {
-  assert(color.colorSpace == ui.ColorSpace.sRGB);
-  return ((color.a * 255.0).round() << 24) |
-      ((color.r * 255.0).round() << 16) |
-      ((color.g * 255.0).round() << 8) |
-      ((color.b * 255.0).round() << 0);
-}
-
 base class RenderPass extends NativeFieldWrapperClass1 {
   /// Creates a new RenderPass.
   RenderPass._(CommandBuffer commandBuffer, RenderTarget renderTarget) {
@@ -114,7 +105,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
           index,
           color.loadAction.index,
           color.storeAction.index,
-          _colorToInt(color.clearValue),
+          color.clearValue.value,
           color.texture,
           color.resolveTexture);
       if (error != null) {
