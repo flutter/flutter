@@ -4359,10 +4359,7 @@ targets:
       - .ci.yaml
 
   - name: Mac_x64 verify_binaries_codesigned
-    enabled_branches:
-      - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4370,10 +4367,7 @@ targets:
       shard: verify_binaries_codesigned
 
   - name: Mac_arm64 verify_binaries_codesigned
-    enabled_branches:
-      - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
