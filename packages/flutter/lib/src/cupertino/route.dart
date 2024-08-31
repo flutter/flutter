@@ -1313,6 +1313,7 @@ Future<T?> showCupertinoDialog<T>({
   bool barrierDismissible = false,
   RouteSettings? routeSettings,
   Offset? anchorPoint,
+  Duration transitionDuration = const Duration(milliseconds: 250),
 }) {
 
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(CupertinoDialogRoute<T>(
@@ -1323,6 +1324,7 @@ Future<T?> showCupertinoDialog<T>({
     barrierColor: CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
     settings: routeSettings,
     anchorPoint: anchorPoint,
+    transitionDuration: transitionDuration,
   ));
 }
 

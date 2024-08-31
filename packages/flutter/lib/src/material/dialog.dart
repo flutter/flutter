@@ -1428,6 +1428,7 @@ Future<T?> showDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   TraversalEdgeBehavior? traversalEdgeBehavior,
+  Duration transitionDuration = const Duration(milliseconds: 150),
 }) {
   assert(_debugIsActive(context));
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1451,6 +1452,7 @@ Future<T?> showDialog<T>({
     themes: themes,
     anchorPoint: anchorPoint,
     traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
+    transitionDuration: transitionDuration,
   ));
 }
 
@@ -1473,6 +1475,7 @@ Future<T?> showAdaptiveDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   TraversalEdgeBehavior? traversalEdgeBehavior,
+  Duration transitionDuration = const Duration(milliseconds: 150),
 }) {
   final ThemeData theme = Theme.of(context);
   switch (theme.platform) {
@@ -1491,6 +1494,7 @@ Future<T?> showAdaptiveDialog<T>({
         routeSettings: routeSettings,
         anchorPoint: anchorPoint,
         traversalEdgeBehavior: traversalEdgeBehavior,
+        transitionDuration: transitionDuration,
       );
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
@@ -1502,6 +1506,7 @@ Future<T?> showAdaptiveDialog<T>({
         useRootNavigator: useRootNavigator,
         anchorPoint: anchorPoint,
         routeSettings: routeSettings,
+        transitionDuration: transitionDuration,
       );
   }
 }
