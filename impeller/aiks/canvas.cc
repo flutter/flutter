@@ -814,8 +814,7 @@ void Canvas::SaveLayer(const Paint& paint,
                        const std::shared_ptr<ImageFilter>& backdrop_filter,
                        ContentBoundsPromise bounds_promise,
                        uint32_t total_content_depth,
-                       bool can_distribute_opacity,
-                       bool bounds_from_caller) {
+                       bool can_distribute_opacity) {
   if (can_distribute_opacity && !backdrop_filter &&
       Paint::CanApplyOpacityPeephole(paint) &&
       bounds_promise != ContentBoundsPromise::kMayClipContents) {
@@ -837,7 +836,7 @@ void Canvas::SaveLayer(const Paint& paint,
 
   auto& new_layer_pass = GetCurrentPass();
   if (bounds) {
-    new_layer_pass.SetBoundsLimit(bounds, bounds_promise);
+    new_layer_pass.SetBoundsLimit(bounds);
   }
 
   // When applying a save layer, absorb any pending distributed opacity.

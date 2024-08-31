@@ -67,32 +67,12 @@ class EntityPass {
 
   void SetDelegate(std::shared_ptr<EntityPassDelegate> delgate);
 
-  /// @brief  Set the bounds limit, which is provided by the user when creating
-  ///         a SaveLayer. This is a hint that allows the user to communicate
-  ///         that it's OK to not render content outside of the bounds.
-  ///
-  ///         For consistency with Skia, we effectively treat this like a
-  ///         rectangle clip by forcing the subpass texture size to never exceed
-  ///         it.
-  ///
-  ///         The entity pass will assume that these bounds cause a clipping
-  ///         effect on the layer unless this call is followed up with a
-  ///         call to |SetBoundsClipsContent()| specifying otherwise.
-  void SetBoundsLimit(
-      std::optional<Rect> bounds_limit,
-      ContentBoundsPromise bounds_promise = ContentBoundsPromise::kUnknown);
+  /// @brief  Set the computed content bounds, or std::nullopt if the contents
+  ///         are unbounded.
+  void SetBoundsLimit(std::optional<Rect> content_bounds);
 
-  /// @brief  Get the bounds limit, which is provided by the user when creating
-  ///         a SaveLayer.
+  /// @brief  Get the bounds limit.
   std::optional<Rect> GetBoundsLimit() const;
-
-  /// @brief  Indicates if the bounds limit set using |SetBoundsLimit()|
-  ///         might clip the contents of the pass.
-  bool GetBoundsLimitMightClipContent() const;
-
-  /// @brief  Indicates if the bounds limit set using |SetBoundsLimit()|
-  ///         is a reasonably tight estimate of the bounds of the contents.
-  bool GetBoundsLimitIsSnug() const;
 
   size_t GetSubpassesDepth() const;
 
@@ -180,30 +160,6 @@ class EntityPass {
   void SetRequiredMipCount(int32_t mip_count) {
     required_mip_count_ = mip_count;
   }
-
-  //----------------------------------------------------------------------------
-  /// @brief  Computes the coverage of a given subpass. This is used to
-  ///         determine the texture size of a given subpass before it's rendered
-  ///         to and passed through the subpass ImageFilter, if any.
-  ///
-  /// @param[in]  subpass         The EntityPass for which to compute
-  ///                             pre-filteredcoverage.
-  /// @param[in]  coverage_limit  Confines coverage to a specified area. This
-  ///                             hint is used to trim coverage to the root
-  ///                             framebuffer area. `std::nullopt` means there
-  ///                             is no limit.
-  ///
-  /// @return  The screen space pixel area that the subpass contents will render
-  ///          into, prior to being transformed by the subpass ImageFilter, if
-  ///          any. `std::nullopt` means rendering the subpass will have no
-  ///          effect on the color attachment.
-  ///
-  std::optional<Rect> GetSubpassCoverage(
-      const EntityPass& subpass,
-      std::optional<Rect> coverage_limit) const;
-
-  std::optional<Rect> GetElementsCoverage(
-      std::optional<Rect> coverage_limit) const;
 
  private:
   struct EntityResult {
@@ -333,7 +289,6 @@ class EntityPass {
   BlendMode blend_mode_ = BlendMode::kSourceOver;
   bool flood_clip_ = false;
   std::optional<Rect> bounds_limit_;
-  ContentBoundsPromise bounds_promise_ = ContentBoundsPromise::kUnknown;
   int32_t required_mip_count_ = 1;
 
   /// These values indicate whether something has been added to the EntityPass

@@ -24,6 +24,7 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_clip_stack.h"
 #include "impeller/entity/inline_pass_context.h"
+#include "impeller/entity/save_layer_utils.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/size.h"
@@ -60,46 +61,12 @@ void EntityPass::SetDelegate(std::shared_ptr<EntityPassDelegate> delegate) {
   delegate_ = std::move(delegate);
 }
 
-void EntityPass::SetBoundsLimit(std::optional<Rect> bounds_limit,
-                                ContentBoundsPromise bounds_promise) {
+void EntityPass::SetBoundsLimit(std::optional<Rect> bounds_limit) {
   bounds_limit_ = bounds_limit;
-  bounds_promise_ = bounds_limit.has_value() ? bounds_promise
-                                             : ContentBoundsPromise::kUnknown;
 }
 
 std::optional<Rect> EntityPass::GetBoundsLimit() const {
   return bounds_limit_;
-}
-
-bool EntityPass::GetBoundsLimitMightClipContent() const {
-  switch (bounds_promise_) {
-    case ContentBoundsPromise::kUnknown:
-      // If the promise is unknown due to not having a bounds limit,
-      // then no clipping will occur. But if we have a bounds limit
-      // and it is unkown, then we can make no promises about whether
-      // it causes clipping of the entity pass contents and we
-      // conservatively return true.
-      return bounds_limit_.has_value();
-    case ContentBoundsPromise::kContainsContents:
-      FML_DCHECK(bounds_limit_.has_value());
-      return false;
-    case ContentBoundsPromise::kMayClipContents:
-      FML_DCHECK(bounds_limit_.has_value());
-      return true;
-  }
-  FML_UNREACHABLE();
-}
-
-bool EntityPass::GetBoundsLimitIsSnug() const {
-  switch (bounds_promise_) {
-    case ContentBoundsPromise::kUnknown:
-      return false;
-    case ContentBoundsPromise::kContainsContents:
-    case ContentBoundsPromise::kMayClipContents:
-      FML_DCHECK(bounds_limit_.has_value());
-      return true;
-  }
-  FML_UNREACHABLE();
 }
 
 void EntityPass::AddEntity(Entity entity) {
@@ -158,115 +125,6 @@ size_t EntityPass::GetSubpassesDepth() const {
     }
   }
   return max_subpass_depth + 1u;
-}
-
-std::optional<Rect> EntityPass::GetElementsCoverage(
-    std::optional<Rect> coverage_limit) const {
-  std::optional<Rect> accumulated_coverage;
-  for (const auto& element : elements_) {
-    std::optional<Rect> element_coverage;
-
-    if (auto entity = std::get_if<Entity>(&element)) {
-      element_coverage = entity->GetCoverage();
-
-      // When the coverage limit is std::nullopt, that means there is no limit,
-      // as opposed to empty coverage.
-      if (element_coverage.has_value() && coverage_limit.has_value()) {
-        const auto* filter = entity->GetContents()->AsFilter();
-        if (!filter || filter->IsTranslationOnly()) {
-          element_coverage =
-              element_coverage->Intersection(coverage_limit.value());
-        }
-      }
-    } else if (auto subpass_ptr =
-                   std::get_if<std::unique_ptr<EntityPass>>(&element)) {
-      auto& subpass = *subpass_ptr->get();
-
-      std::optional<Rect> unfiltered_coverage =
-          GetSubpassCoverage(subpass, std::nullopt);
-
-      // If the current pass elements have any coverage so far and there's a
-      // backdrop filter, then incorporate the backdrop filter in the
-      // pre-filtered coverage of the subpass.
-      if (accumulated_coverage.has_value() && subpass.backdrop_filter_proc_) {
-        std::shared_ptr<FilterContents> backdrop_filter =
-            subpass.backdrop_filter_proc_(
-                FilterInput::Make(accumulated_coverage.value()),
-                subpass.transform_,
-                Entity::RenderingMode::kSubpassAppendSnapshotTransform);
-        if (backdrop_filter) {
-          auto backdrop_coverage = backdrop_filter->GetCoverage({});
-          unfiltered_coverage =
-              Rect::Union(unfiltered_coverage, backdrop_coverage);
-        } else {
-          VALIDATION_LOG << "The EntityPass backdrop filter proc didn't return "
-                            "a valid filter.";
-        }
-      }
-
-      if (!unfiltered_coverage.has_value()) {
-        continue;
-      }
-
-      // Additionally, subpass textures may be passed through filters, which may
-      // modify the coverage.
-      //
-      // Note that we currently only assume that ImageFilters (such as blurs and
-      // matrix transforms) may modify coverage, although it's technically
-      // possible ColorFilters to affect coverage as well. For example: A
-      // ColorMatrixFilter could output a completely transparent result, and
-      // we could potentially detect this case as zero coverage in the future.
-      std::shared_ptr<FilterContents> image_filter =
-          subpass.delegate_->WithImageFilter(*unfiltered_coverage,
-                                             subpass.transform_);
-      if (image_filter) {
-        Entity subpass_entity;
-        subpass_entity.SetTransform(subpass.transform_);
-        element_coverage = image_filter->GetCoverage(subpass_entity);
-      } else {
-        element_coverage = unfiltered_coverage;
-      }
-
-      element_coverage = Rect::Intersection(element_coverage, coverage_limit);
-    } else {
-      FML_UNREACHABLE();
-    }
-
-    accumulated_coverage = Rect::Union(accumulated_coverage, element_coverage);
-  }
-  return accumulated_coverage;
-}
-
-std::optional<Rect> EntityPass::GetSubpassCoverage(
-    const EntityPass& subpass,
-    std::optional<Rect> coverage_limit) const {
-  if (subpass.bounds_limit_.has_value() && subpass.GetBoundsLimitIsSnug()) {
-    return subpass.bounds_limit_->TransformBounds(subpass.transform_);
-  }
-
-  std::shared_ptr<FilterContents> image_filter =
-      subpass.delegate_->WithImageFilter(Rect(), subpass.transform_);
-
-  // If the subpass has an image filter, then its coverage space may deviate
-  // from the parent pass and make intersecting with the pass coverage limit
-  // unsafe.
-  if (image_filter && coverage_limit.has_value()) {
-    coverage_limit = image_filter->GetSourceCoverage(subpass.transform_,
-                                                     coverage_limit.value());
-  }
-
-  auto entities_coverage = subpass.GetElementsCoverage(coverage_limit);
-  // The entities don't cover anything. There is nothing to do.
-  if (!entities_coverage.has_value()) {
-    return std::nullopt;
-  }
-
-  if (!subpass.bounds_limit_.has_value()) {
-    return entities_coverage;
-  }
-  auto user_bounds_coverage =
-      subpass.bounds_limit_->TransformBounds(subpass.transform_);
-  return entities_coverage->Intersection(user_bounds_coverage);
 }
 
 EntityPass* EntityPass::GetSuperpass() const {
@@ -641,10 +499,18 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
       return EntityPass::EntityResult::Skip();
     }
 
-    auto subpass_coverage =
-        (subpass->flood_clip_ || subpass_backdrop_filter_contents)
-            ? coverage_limit
-            : GetSubpassCoverage(*subpass, coverage_limit);
+    std::shared_ptr<FilterContents> image_filter =
+        subpass->delegate_->WithImageFilter(Rect(), subpass->transform_);
+
+    auto subpass_coverage = ComputeSaveLayerCoverage(
+        subpass->bounds_limit_.value_or(Rect::MakeMaximum()),        //
+        subpass->transform_,                                         //
+        coverage_limit.value(),                                      //
+        image_filter,                                                //
+        /*flood_output_coverage=*/subpass->flood_clip_,              //
+        /*flood_input_coverage=*/!!subpass_backdrop_filter_contents  //
+    );
+
     if (!subpass_coverage.has_value()) {
       return EntityPass::EntityResult::Skip();
     }
