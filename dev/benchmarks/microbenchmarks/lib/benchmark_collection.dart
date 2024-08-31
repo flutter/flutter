@@ -9,7 +9,6 @@ import 'package:args/args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_color_utilities/score/score.dart';
 
 import 'benchmark_binding.dart';
 import 'foundation/all_elements_bench.dart' as all_elements_bench;
