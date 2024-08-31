@@ -1366,7 +1366,7 @@ void main() {
             }
             return Material(
               child: MergeSemantics(
-                child: ListTile(
+                child: CupertinoListTile(
                   title: const Text('test'),
                   onTap: () {
                     onChanged(!value);
