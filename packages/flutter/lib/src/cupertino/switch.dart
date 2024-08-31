@@ -19,6 +19,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'constants.dart';
 import 'theme.dart';
 
 // Hand coded defaults eyeballed from an iOS simulator running iOS version 17.5.
@@ -59,12 +60,6 @@ const CupertinoDynamicColor _kOffLabelColor = CupertinoDynamicColor.withBrightne
   highContrastColor: Color.fromARGB(255, 255, 255, 255),
   darkHighContrastColor: Color.fromARGB(255, 255, 255, 255),
 );
-
-// The relative values needed to transform a color to it's equivalent focus
-// outline color.
-const double _kCupertinoFocusColorOpacity = 0.80;
-const double _kCupertinoFocusColorBrightness = 0.69;
-const double _kCupertinoFocusColorSaturation = 0.835;
 
 /// An iOS-style switch.
 ///
@@ -715,10 +710,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
               ..focusColor = CupertinoDynamicColor.resolve(
                   widget.focusColor ??
                   HSLColor
-                    .fromColor(activeColor
-                    .withOpacity(_kCupertinoFocusColorOpacity))
-                    .withLightness(_kCupertinoFocusColorBrightness)
-                    .withSaturation(_kCupertinoFocusColorSaturation)
+                    .fromColor(activeColor.withOpacity(kCupertinoFocusColorOpacity))
+                    .withLightness(kCupertinoFocusColorBrightness)
+                    .withSaturation(kCupertinoFocusColorSaturation)
                     .toColor(),
                   context)
               ..downPosition = downPosition

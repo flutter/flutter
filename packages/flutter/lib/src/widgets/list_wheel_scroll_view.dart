@@ -11,6 +11,7 @@ library;
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 
@@ -429,6 +430,7 @@ class _FixedExtentScrollable extends Scrollable {
     super.physics,
     required this.itemExtent,
     required super.viewportBuilder,
+    required super.dragStartBehavior,
     super.restorationId,
     super.scrollBehavior,
     super.hitTestBehavior,
@@ -580,6 +582,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.restorationId,
     this.scrollBehavior,
+    this.dragStartBehavior = DragStartBehavior.start,
     required List<Widget> children,
   }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(perspective > 0),
@@ -614,6 +617,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.restorationId,
     this.scrollBehavior,
+    this.dragStartBehavior = DragStartBehavior.start,
     required this.childDelegate,
   }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(perspective > 0),
@@ -717,6 +721,9 @@ class ListWheelScrollView extends StatefulWidget {
   /// modified by default to not apply a [Scrollbar].
   final ScrollBehavior? scrollBehavior;
 
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
+
   @override
   State<ListWheelScrollView> createState() => _ListWheelScrollViewState();
 }
@@ -770,6 +777,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
         restorationId: widget.restorationId,
         hitTestBehavior: widget.hitTestBehavior,
         scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        dragStartBehavior: widget.dragStartBehavior,
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return ListWheelViewport(
             diameterRatio: widget.diameterRatio,

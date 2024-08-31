@@ -235,19 +235,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
 
-  bool get useLocalCanvasKit {
-    // If we have specified not to use CDN, use local CanvasKit
-    if (!boolArg(FlutterOptions.kWebResourcesCdnFlag)) {
-      return true;
-    }
-
-    // If we are using a locally built web sdk, we should use local CanvasKit
-    if (stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null) {
-      return true;
-    }
-    return false;
-  }
-
   WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
     stringArg(FlutterOptions.kWebRendererFlag),
     useWasm: useWasm
@@ -287,7 +274,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webHeaders: webHeaders,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
-        webUseLocalCanvaskit: useLocalCanvasKit,
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
         uninstallFirst: uninstallFirst,
@@ -339,7 +325,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webHeaders: webHeaders,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
-        webUseLocalCanvaskit: useLocalCanvasKit,
         vmserviceOutFile: stringArg('vmservice-out-file'),
         fastStart: argParser.options.containsKey('fast-start')
           && boolArg('fast-start')

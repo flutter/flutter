@@ -162,7 +162,14 @@ abstract class Route<T> extends _RoutePlaceholder {
   ///
   /// If the [settings] are not provided, an empty [RouteSettings] object is
   /// used instead.
-  Route({ RouteSettings? settings }) : _settings = settings ?? const RouteSettings() {
+  ///
+  /// If [requestFocus] is not provided, the value of [Navigator.requestFocus] is
+  /// used instead.
+  Route({
+    RouteSettings? settings,
+    bool? requestFocus,
+  }) : _settings = settings ?? const RouteSettings(),
+       _requestFocus = requestFocus {
     if (kFlutterMemoryAllocationsEnabled) {
       FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: 'package:flutter/widgets.dart',
@@ -171,6 +178,12 @@ abstract class Route<T> extends _RoutePlaceholder {
       );
     }
   }
+
+  /// When the route state is updated, request focus if the current route is at the top.
+  ///
+  /// If not provided in the constructor, [Navigator.requestFocus] is used instead.
+  bool get requestFocus => _requestFocus ?? navigator?.widget.requestFocus ?? false;
+  final bool? _requestFocus;
 
   /// The navigator that the route is in, if any.
   NavigatorState? get navigator => _navigator;
@@ -256,7 +269,7 @@ abstract class Route<T> extends _RoutePlaceholder {
   @mustCallSuper
   TickerFuture didPush() {
     return TickerFuture.complete()..then<void>((void _) {
-      if (navigator?.widget.requestFocus ?? false) {
+      if (requestFocus) {
         navigator!.focusNode.enclosingScope?.requestFocus();
       }
     });
@@ -272,7 +285,7 @@ abstract class Route<T> extends _RoutePlaceholder {
   @protected
   @mustCallSuper
   void didAdd() {
-    if (navigator?.widget.requestFocus ?? false) {
+    if (requestFocus) {
       // This TickerFuture serves two purposes. First, we want to make sure that
       // animations triggered by other operations will finish before focusing
       // the navigator. Second, navigator.focusNode might acquire more focused
@@ -397,7 +410,7 @@ abstract class Route<T> extends _RoutePlaceholder {
   @mustCallSuper
   void onPopInvokedWithResult(bool didPop, T? result) {
     if (_isPageBased) {
-      final Page<Object?> page = settings as Page<Object?>;
+      final Page<T> page = settings as Page<T>;
       page.onPopInvoked(didPop, result);
     }
   }
@@ -779,6 +792,17 @@ class NavigatorObserver {
 
   /// The [Navigator] replaced `oldRoute` with `newRoute`.
   void didReplace({ Route<dynamic>? newRoute, Route<dynamic>? oldRoute }) { }
+
+  /// The top most route has changed.
+  ///
+  /// The `topRoute` is the new top most route. This can be a new route pushed
+  /// on top of the screen, or an existing route that becomes the new top-most
+  /// route because the previous top-most route has been popped.
+  ///
+  /// The `previousTopRoute` was the top most route before the change. This can
+  /// be a route that was popped off the screen, or a route that will be covered
+  /// by the `topRoute`. This can also be null if this is the first build.
+  void didChangeTop(Route<dynamic> topRoute, Route<dynamic>? previousTopRoute) { }
 
   /// The [Navigator]'s routes are being moved by a user gesture.
   ///
@@ -1759,6 +1783,9 @@ class Navigator extends StatefulWidget {
 
   /// Whether or not the navigator and it's new topmost route should request focus
   /// when the new route is pushed onto the navigator.
+  ///
+  /// If [Route.requestFocus] is set on the topmost route, that will take precedence
+  /// over this value.
   ///
   /// Defaults to true.
   final bool requestFocus;
@@ -3946,12 +3973,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     for (final NavigatorObserver observer in _effectiveObservers) {
       NavigatorObserver._navigators[observer] = null;
     }
+    _effectiveObservers = <NavigatorObserver>[];
     super.deactivate();
   }
 
   @override
   void activate() {
     super.activate();
+    _updateEffectiveObservers();
     for (final NavigatorObserver observer in _effectiveObservers) {
       assert(observer.navigator == null);
       NavigatorObserver._navigators[observer] = this;
@@ -3965,12 +3994,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       _debugLocked = true;
       return true;
     }());
-    assert(() {
-      for (final NavigatorObserver observer in _effectiveObservers) {
-        assert(observer.navigator != this);
-      }
-      return true;
-    }());
+    assert(_effectiveObservers.isEmpty);
     _updateHeroController(null);
     focusNode.dispose();
     _forcedDisposeAllRouteEntries();
@@ -3995,6 +4019,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     ];
   }
 
+  _RouteEntry? _lastTopmostRoute;
   String? _lastAnnouncedRouteName;
 
   bool _debugUpdatingPage = false;
@@ -4421,9 +4446,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     // notifications.
     _flushRouteAnnouncement();
 
+    final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+    if (lastEntry != null && _lastTopmostRoute != lastEntry) {
+      for (final NavigatorObserver observer in _effectiveObservers) {
+        observer.didChangeTop(lastEntry.route, _lastTopmostRoute?.route);
+      }
+    }
+    _lastTopmostRoute = lastEntry;
     // Announce route name changes.
     if (widget.reportsRouteUpdateToEngine) {
-      final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
       final String? routeName = lastEntry?.route.settings.name;
       if (routeName != null && routeName != _lastAnnouncedRouteName) {
         SystemNavigator.routeInformationUpdated(uri: Uri.parse(routeName));
