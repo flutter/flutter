@@ -55,6 +55,7 @@ import 'dart:io' hide exit;
 import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 
 import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
@@ -71,8 +72,8 @@ import 'suite_runners/run_fuchsia_precache.dart';
 import 'suite_runners/run_realm_checker_tests.dart';
 import 'suite_runners/run_skp_generator_tests.dart';
 import 'suite_runners/run_test_harness_tests.dart';
-import 'suite_runners/run_verify_binaries_codesigned_tests.dart';
 import 'suite_runners/run_web_tests.dart';
+import 'suite_runners/verify_binaries_codesigned.dart';
 import 'utils.dart';
 
 typedef ShardRunner = Future<void> Function();
@@ -152,7 +153,11 @@ Future<void> main(List<String> args) async {
       'fuchsia_precache': fuchsiaPrecacheRunner,
       'snippets': _runSnippetsTests,
       'docs': docsRunner,
-      'verify_binaries_codesigned': verifyCodesignedTestRunner,
+      'verify_binaries_codesigned': Context(
+        flutterRoot: flutterRoot,
+        processManager: const LocalProcessManager(),
+        printer: print,
+      ).verifyCodesignedTestRunner,
       kTestHarnessShardName: testHarnessTestsRunner, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
   } catch (error, stackTrace) {
