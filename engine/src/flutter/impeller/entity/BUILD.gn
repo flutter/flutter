@@ -206,6 +206,8 @@ impeller_component("entity") {
     "inline_pass_context.h",
     "render_target_cache.cc",
     "render_target_cache.h",
+    "save_layer_utils.cc",
+    "save_layer_utils.h",
   ]
 
   public_deps = [
@@ -260,6 +262,7 @@ impeller_component("entity_unittests") {
     "entity_unittests.cc",
     "geometry/geometry_unittests.cc",
     "render_target_cache_unittests.cc",
+    "save_layer_utils_unittests.cc",
   ]
 
   deps = [

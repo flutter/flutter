@@ -173,6 +173,7 @@
 ../../../flutter/impeller/entity/entity_unittests.cc
 ../../../flutter/impeller/entity/geometry/geometry_unittests.cc
 ../../../flutter/impeller/entity/render_target_cache_unittests.cc
+../../../flutter/impeller/entity/save_layer_utils_unittests.cc
 ../../../flutter/impeller/fixtures
 ../../../flutter/impeller/geometry/README.md
 ../../../flutter/impeller/geometry/geometry_unittests.cc

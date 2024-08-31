@@ -8,25 +8,9 @@
 #include <optional>
 
 #include "impeller/base/validation.h"
-#include "impeller/entity/entity.h"
 #include "impeller/renderer/render_target.h"
-#include "impeller/renderer/snapshot.h"
 
 namespace impeller {
-
-std::optional<Snapshot> Picture::Snapshot(AiksContext& context) {
-  auto coverage = pass->GetElementsCoverage(std::nullopt);
-  if (!coverage.has_value() || coverage->IsEmpty()) {
-    return std::nullopt;
-  }
-
-  const auto translate = Matrix::MakeTranslation(-coverage->GetOrigin());
-  auto texture =
-      RenderToTexture(context, ISize(coverage->GetSize()), translate);
-  return impeller::Snapshot{
-      .texture = std::move(texture),
-      .transform = Matrix::MakeTranslation(coverage->GetOrigin())};
-}
 
 std::shared_ptr<Texture> Picture::ToImage(AiksContext& context,
                                           ISize size) const {
