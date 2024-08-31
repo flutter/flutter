@@ -135,7 +135,7 @@ void main() {
 
   // Golden displays the surface color of the CupertinoPopupSurface
   // in light mode.
-  testWidgets('Brightness.light surface', (WidgetTester tester) async {
+  testWidgets('Brightness.light surface color', (WidgetTester tester) async {
     await tester.pumpWidget(
        const _FilterTest(
         CupertinoPopupSurface(
@@ -154,7 +154,7 @@ void main() {
 
   // Golden displays the surface color of the CupertinoPopupSurface
   // in dark mode.
-  testWidgets('Brightness.dark surface', (WidgetTester tester) async {
+  testWidgets('Brightness.dark surface color', (WidgetTester tester) async {
       await tester.pumpWidget(
         const _FilterTest(
           CupertinoPopupSurface(
@@ -236,7 +236,7 @@ void main() {
   // Golden displays a CupertinoPopupSurface with a blur sigma of 0. Because
   // the blur sigma is 0 and vibrance and surface are not painted, no popup
   // surface is displayed.
-  testWidgets('Nonpositive blurSigma removes blur', (WidgetTester tester) async {
+  testWidgets('Setting blurSigma to zero removes blur', (WidgetTester tester) async {
     await tester.pumpWidget(
       const _FilterTest(
         CupertinoPopupSurface(
@@ -273,6 +273,28 @@ void main() {
         ),
       ),
     );
+  });
+
+  testWidgets('Setting a blurSigma to a negative number throws', (WidgetTester tester) async {
+     try {
+      await tester.pumpWidget(
+        _FilterTest(
+          CupertinoPopupSurface(
+            isSurfacePainted: false,
+            debugIsVibrancePainted: false,
+            blurSigma: -1,
+            child: const SizedBox(),
+          ),
+      ),
+      );
+
+      fail('CupertinoPopupSurface did not throw when provided a negative blur sigma.');
+    } on AssertionError catch (error) {
+      expect(
+        error.toString(),
+        contains('CupertinoPopupSurface requires a non-negative blur sigma.'),
+      );
+    }
   });
 
   // Golden displays a CupertinoPopupSurface with all enabled features.

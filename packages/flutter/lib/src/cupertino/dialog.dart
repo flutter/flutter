@@ -536,7 +536,7 @@ class CupertinoPopupSurface extends StatelessWidget {
     this.isSurfacePainted = true,
     this.debugIsVibrancePainted = true,
     required this.child,
-  }) : assert(blurSigma >= 0);
+  }) : assert(blurSigma >= 0, 'CupertinoPopupSurface requires a non-negative blur sigma.');
 
   /// The strength of the gaussian blur applied to the area beneath this
   /// surface.
