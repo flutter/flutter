@@ -1913,6 +1913,9 @@ void main() {
     // Open the dialog.
     await tester.tap(find.text('tap'));
     await tester.pump();
+
+    expect(rootObserver.dialogCount, 1);
+    expect(nestedObserver.dialogCount, 0);
     expect(rootObserver.dialogRoutes.length, equals(1));
     final ModalRoute<dynamic> route = rootObserver.dialogRoutes.last;
     expect(route is CupertinoDialogRoute, true);
