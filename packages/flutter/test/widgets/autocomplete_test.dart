@@ -1432,7 +1432,7 @@ void main() {
     expect(lastOptions, <String>['lemur']);
   });
 
-  testWidgets('update dropdown state when field input changes return to the starting keyword', (WidgetTester tester) async {
+  testWidgets('update options view when field input changes return to the starting keyword', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late FocusNode focusNode;

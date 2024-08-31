@@ -382,8 +382,6 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       _selection = null;
     }
 
-    // Make sure the options are no longer hidden if the content of the field
-    // changes (ignore selection changes).
     _updateOptionsViewVisibility();
   }
 
