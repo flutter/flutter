@@ -23,7 +23,6 @@ import '../../../src/testbed.dart';
 
 const List<String> _kDart2jsLinuxArgs = <String>[
   'Artifact.engineDartBinary.TargetPlatform.web_javascript',
-  '--disable-dart-dev',
   'Artifact.dart2jsSnapshot.TargetPlatform.web_javascript',
   '--platform-binaries=HostArtifact.webPlatformKernelFolder',
   '--invoker=flutter_tool',
@@ -35,8 +34,6 @@ const List<String> _kDart2WasmLinuxArgs = <String> [
   'wasm',
   '--packages=/.dart_tool/package_config.json',
   '--extra-compiler-option=--platform=HostArtifact.webPlatformKernelFolder/dart2wasm_platform.dill',
-  '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
-  '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
 ];
 
 void main() {
@@ -1034,12 +1031,16 @@ void main() {
                 processManager.addCommand(FakeCommand(
                   command: <String>[
                     ..._kDart2WasmLinuxArgs,
+                    '-Ddart.vm.profile=${buildMode == 'profile'}',
+                    '-Ddart.vm.product=${buildMode == 'release'}',
+                    if (buildMode != 'debug') ...<String>[
+                      '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
+                      '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
+                    ],
                     if (renderer == WebRendererMode.skwasm) ...<String>[
                       '--extra-compiler-option=--import-shared-memory',
                       '--extra-compiler-option=--shared-memory-max-pages=32768',
                     ],
-                    if (buildMode != 'debug')
-                      '-Ddart.vm.${buildMode == 'release' ? 'product' : 'profile' }=true',
                     ...defines.map((String define) => '-D$define'),
                     if (renderer == WebRendererMode.skwasm) ...<String>[
                       '-DFLUTTER_WEB_AUTO_DETECT=false',

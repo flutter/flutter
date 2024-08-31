@@ -25,11 +25,9 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'native_assets_builder': '0.8.1', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
   'native_assets_cli': '0.7.1', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
   'material_color_utilities': '0.11.1', // Keep pinned to latest until 1.0.0.
-  'leak_tracker': '10.0.5', // https://github.com/flutter/devtools/issues/3951
+  'leak_tracker': '10.0.7', // https://github.com/flutter/devtools/issues/3951
   'leak_tracker_testing': '3.0.1', // https://github.com/flutter/devtools/issues/3951
-  'leak_tracker_flutter_testing': '3.0.5', // https://github.com/flutter/devtools/issues/3951
-  'path_provider_android':
-      '2.2.1', // https://github.com/flutter/flutter/issues/140796
+  'leak_tracker_flutter_testing': '3.0.8', // https://github.com/flutter/devtools/issues/3951
 };
 
 /// These are packages that are explicitly excluded from appearing in the list
