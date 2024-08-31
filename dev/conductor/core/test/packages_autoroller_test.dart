@@ -295,10 +295,6 @@ void main() {
       ]),
       const FakeCommand(command: <String>[
         '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
-        'help',
-      ]),
-      const FakeCommand(command: <String>[
-        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
         '--verbose',
         'update-packages',
         '--force-upgrade',
@@ -388,10 +384,6 @@ void main() {
         'checkout',
         '-b',
         'packages-autoroller-branch-1',
-      ]),
-      const FakeCommand(command: <String>[
-        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
-        'help',
       ]),
       const FakeCommand(command: <String>[
         '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
