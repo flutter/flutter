@@ -29,7 +29,7 @@ void main() {
     final BuildContext context = tester.element(find.byType(MaterialApp));
     final TextStyle expectedTitleStyle = Theme.of(context).textTheme.headlineSmall!;
 
-    // There are two Text() widgets: expanded and collapsed. The expanded is first.
+    // There are two Text widgets: expanded and collapsed. The expanded is first.
     final Finder titleFinder = find.text(title).first;
     final TextStyle actualTitleStyle = DefaultTextStyle.of(tester.element(titleFinder)).style;
 
