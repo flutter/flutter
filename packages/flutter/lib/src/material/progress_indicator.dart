@@ -360,9 +360,9 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
       : _LinearProgressIndicatorDefaultsM2(context);
 
     final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
-    final Color trackColor = widget.backgroundColor ??
-      indicatorTheme.linearTrackColor ??
-      defaults.linearTrackColor!;
+    final Color backgroundColor = widget.backgroundColor ??
+      indicatorTheme.refreshBackgroundColor ??
+      defaults.refreshBackgroundColor!;
     final double minHeight = widget.minHeight ??
       indicatorTheme.linearMinHeight ??
       defaults.linearMinHeight!;
@@ -375,7 +375,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
             ? Clip.antiAlias
             : Clip.none,
         decoration: ShapeDecoration(
-          color: trackColor,
+          color: backgroundColor,
           shape: RoundedRectangleBorder(borderRadius: widget.borderRadius),
         ),
         constraints: BoxConstraints(
@@ -384,7 +384,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
         ),
         child: CustomPaint(
           painter: _LinearProgressIndicatorPainter(
-            backgroundColor: trackColor,
+            backgroundColor: backgroundColor,
             valueColor: widget._getValueColor(context, defaultColor: defaults.color),
             value: widget.value, // may be null
             animationValue: animationValue, // ignored if widget.value is not null

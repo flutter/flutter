@@ -365,7 +365,36 @@ void main() {
         ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
         ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 4.0), color: indicatorColor),
     );
+  });
 
+  testWidgets('LinearProgressIndicator with ProgressIndicatorTheme backgroundColor', (WidgetTester tester) async {
+    const Color backgroundColor = Color(0xff0000ff);
+    await tester.pumpWidget(
+      Theme(
+        data: theme.copyWith(
+          progressIndicatorTheme: const ProgressIndicatorThemeData(
+            refreshBackgroundColor: backgroundColor,
+          ),
+        ),
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              child: LinearProgressIndicator(
+                value: 0.25,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0), color: backgroundColor)
+    );
   });
 
   testWidgets('LinearProgressIndicator with animation with null colors', (WidgetTester tester) async {
