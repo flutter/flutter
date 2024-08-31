@@ -76,8 +76,7 @@ class Canvas {
       const std::shared_ptr<ImageFilter>& backdrop_filter = nullptr,
       ContentBoundsPromise bounds_promise = ContentBoundsPromise::kUnknown,
       uint32_t total_content_depth = kMaxDepth,
-      bool can_distribute_opacity = false,
-      bool bounds_from_caller = false);
+      bool can_distribute_opacity = false);
 
   virtual bool Restore();
 

@@ -16,8 +16,6 @@ namespace impeller {
 struct Picture {
   std::unique_ptr<EntityPass> pass;
 
-  std::optional<Snapshot> Snapshot(AiksContext& context);
-
   std::shared_ptr<Texture> ToImage(AiksContext& context, ISize size) const;
 
  private:

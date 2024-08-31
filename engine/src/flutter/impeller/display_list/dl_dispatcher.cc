@@ -723,22 +723,18 @@ void DlDispatcherBase::saveLayer(const SkRect& bounds,
                      ? ContentBoundsPromise::kMayClipContents
                      : ContentBoundsPromise::kContainsContents;
   std::optional<Rect> impeller_bounds;
+  // If the content is unbounded but has developer specified bounds, we take
+  // the original bounds so that we clip the content as expected.
   if (!options.content_is_unbounded() || options.bounds_from_caller()) {
     impeller_bounds = skia_conversions::ToRect(bounds);
   }
 
-  // Empty bounds on a save layer that contains a BDF or destructive blend
-  // should be treated as unbounded. All other empty bounds can be skipped.
-  if (impeller_bounds.has_value() && impeller_bounds->IsEmpty() &&
-      (backdrop != nullptr ||
-       Entity::IsBlendModeDestructive(paint.blend_mode))) {
-    impeller_bounds = std::nullopt;
-  }
-
-  GetCanvas().SaveLayer(paint, impeller_bounds, ToImageFilter(backdrop),
-                        promise, total_content_depth,
-                        options.can_distribute_opacity(),
-                        options.bounds_from_caller());
+  GetCanvas().SaveLayer(
+      paint, impeller_bounds, ToImageFilter(backdrop), promise,
+      total_content_depth,
+      // Unbounded content can still have user specified bounds that require a
+      // saveLayer to be created to perform the clip.
+      options.can_distribute_opacity() && !options.content_is_unbounded());
 }
 
 // |flutter::DlOpReceiver|
