@@ -2567,7 +2567,7 @@ void main() {
 
     await tester.tap(find.text('X'));
     await tester.pump();
-    
+
     expect(rootObserver.dialogRoutes.length, equals(1));
     final ModalRoute<dynamic> route = rootObserver.dialogRoutes.last;
     expect(route is DialogRoute, true);
@@ -2909,7 +2909,7 @@ void main() {
 
     await tester.tap(find.text('X'));
     await tester.pump();
-    
+
     expect(rootObserver.dialogRoutes.length, equals(1));
     final ModalRoute<dynamic> route = rootObserver.dialogRoutes.last;
     expect(route is DialogRoute, true);
