@@ -23,6 +23,12 @@ import 'dartdoc_checker.dart';
 const String kDummyPackageName = 'Flutter';
 const String kPlatformIntegrationPackageName = 'platform_integration';
 
+/// Additional package dependencies that we want to have in the docs,
+/// but not actually depend on them.
+const Map<String, (String path, String version)> kFakeDependencies = <String, (String, String)>{
+    'flutter_gpu': ('flutter_gpu/gpu.dart', '\n    sdk: flutter'),
+  };
+
 class PlatformDocsSection {
   const PlatformDocsSection({
     required this.zipName,
@@ -235,6 +241,12 @@ class Configurator {
       }
     }
 
+    // Add a fake references for libraries that we don't actually depend on so
+    // that they will be included in the docs.
+    for (final String package in kFakeDependencies.keys) {
+      yield kFakeDependencies[package]!.$1;
+    }
+
     // Add a fake package for platform integration APIs.
     yield '$kPlatformIntegrationPackageName/android.dart';
     yield '$kPlatformIntegrationPackageName/ios.dart';
@@ -252,8 +264,11 @@ class Configurator {
       'environment:',
       "  sdk: '>=3.2.0-0 <4.0.0'",
       'dependencies:',
-      for (final String package in findPackageNames(filesystem)) '  $package:\n    sdk: flutter',
+      for (final String package in findPackageNames(filesystem))
+        '  $package:\n    sdk: flutter',
       '  $kPlatformIntegrationPackageName: 0.0.1',
+      for (final String package in kFakeDependencies.keys)
+        '  $package: ${kFakeDependencies[package]!.$2}',
       'dependency_overrides:',
       '  $kPlatformIntegrationPackageName:',
       '    path: ${docsRoot.childDirectory(kPlatformIntegrationPackageName).path}',
@@ -326,14 +341,16 @@ class Configurator {
     if (assetsDir.existsSync()) {
       assetsDir.deleteSync(recursive: true);
     }
-    copyDirectorySync(
-      docsRoot.childDirectory('assets'),
-      assetsDir,
-      onFileCopied: (File src, File dest) {
-        print('Copied ${path.canonicalize(src.absolute.path)} to ${path.canonicalize(dest.absolute.path)}');
-      },
-      filesystem: filesystem,
-    );
+    if (assetSource.existsSync()) {
+      copyDirectorySync(
+        assetSource,
+        assetsDir,
+        onFileCopied: (File src, File dest) {
+          print('Copied ${path.canonicalize(src.absolute.path)} to ${path.canonicalize(dest.absolute.path)}');
+        },
+        filesystem: filesystem,
+      );
+    }
   }
 
   /// Generates an OpenSearch XML description that can be used to add a custom
@@ -712,6 +729,9 @@ class DartdocGenerator {
           .childDirectory('flutter_driver')
           .childDirectory('FlutterDriver')
           .childFile('FlutterDriver.connectedTo.html'),
+      flutterDirectory
+          .childDirectory('flutter_gpu')
+          .childFile('flutter_gpu-library.html'),
       flutterDirectory.childDirectory('flutter_test').childDirectory('WidgetTester').childFile('pumpWidget.html'),
       flutterDirectory.childDirectory('material').childFile('Material-class.html'),
       flutterDirectory.childDirectory('material').childFile('Tooltip-class.html'),

@@ -51,7 +51,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8741513191637853009"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8739520057779466577"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       os: Ubuntu
@@ -68,7 +68,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "android_virtual_device", "version": "android_34_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8741513191637853009"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8739520057779466577"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       os: Ubuntu
@@ -403,22 +403,24 @@ targets:
 
   - name: Linux_android_emu android views
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/153445
     properties:
       tags: >
         ["framework","hostonly","linux"]
       task_name: android_views
+      presubmit_max_attempts: "2"
     timeout: 60
 
   - name: Linux_android_emu_34 android views
     recipe: devicelab/devicelab_drone
-    bringup: true
     properties:
       tags: >
         ["framework","hostonly","linux"]
       task_name: android_views
     timeout: 60
 
-  - name: Linux build_tests_1_3
+  - name: Linux build_tests_1_5
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -427,17 +429,18 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       shard: build_tests
-      subshard: "1_3"
+      subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
 
-  - name: Linux build_tests_2_3
+  - name: Linux build_tests_2_5
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -446,17 +449,18 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       shard: build_tests
-      subshard: "2_3"
+      subshard: "2_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
 
-  - name: Linux build_tests_3_3
+  - name: Linux build_tests_3_5
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -465,13 +469,53 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       shard: build_tests
-      subshard: "3_3"
+      subshard: "3_5"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+
+  - name: Linux build_tests_4_5
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
+      shard: build_tests
+      subshard: "4_5"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+
+  - name: Linux build_tests_5_5
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
+      shard: build_tests
+      subshard: "5_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
 
@@ -486,17 +530,22 @@ targets:
       - .ci.yaml
 
   - name: Linux customer_testing
+    # TODO(Piinks): https://github.com/flutter/flutter/issues/154251
+    bringup: true
     # This really just runs dev/bots/customer_testing/ci.sh,
     # but it does so indirectly via the flutter_drone recipe
     # calling the dev/bots/test.dart script.
     enabled_branches:
       - master
     recipe: flutter/flutter_drone
+    # Timeout in minutes for the whole task.
     timeout: 60
     properties:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Timeout in seconds for each individual step.
+      test_timeout_secs: "2700" # 45 minutes * 60
 
   - name: Linux docs_publish
     recipe: flutter/docs
@@ -693,7 +742,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: framework_tests
       subshard: libraries
@@ -744,7 +793,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "ninja", "version": "version:1.9.0"},
@@ -775,7 +824,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: framework_tests
       subshard: widgets
@@ -1107,7 +1156,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "ninja", "version": "version:1.9.0"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
@@ -1133,7 +1182,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "ninja", "version": "version:1.9.0"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
@@ -1159,7 +1208,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "ninja", "version": "version:1.9.0"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
@@ -1185,7 +1234,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "ninja", "version": "version:1.9.0"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
@@ -1215,7 +1264,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "ninja", "version": "version:1.9.0"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
@@ -1240,7 +1289,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "ninja", "version": "version:1.9.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
@@ -1330,6 +1379,7 @@ targets:
 
   - name: Linux_android_emu flutter_driver_android_test
     recipe: flutter/flutter_drone
+    bringup: true # https://github.com/flutter/flutter/issues/153445
     timeout: 60
     properties:
       shard: flutter_driver_android
@@ -1337,12 +1387,12 @@ targets:
          ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
+      presubmit_max_attempts: "2"
 
   - name: Linux_android_emu_34 flutter_driver_android_test
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       shard: flutter_driver_android
@@ -1350,7 +1400,7 @@ targets:
          ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
 
   - name: Linux realm_checker
@@ -1424,7 +1474,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_long_running_tests
       subshard: "1_5"
@@ -1446,7 +1496,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_long_running_tests
       subshard: "2_5"
@@ -1468,7 +1518,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_long_running_tests
       subshard: "3_5"
@@ -1490,7 +1540,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_long_running_tests
       subshard: "4_5"
@@ -1512,7 +1562,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_long_running_tests
       subshard: "5_5"
@@ -1534,7 +1584,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_tests
       subshard: "0"
@@ -1556,7 +1606,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_tests
       subshard: "1"
@@ -1578,7 +1628,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_tests
       subshard: "2"
@@ -1600,7 +1650,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_tests
       subshard: "3"
@@ -1622,7 +1672,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_tests
       subshard: "4"
@@ -1644,7 +1694,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_tests
       subshard: "5"
@@ -1666,7 +1716,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_tests
       subshard: "6"
@@ -1688,7 +1738,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_tests
       subshard: "7_last"
@@ -1710,7 +1760,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_canvaskit_tests
       subshard: "0"
@@ -1732,7 +1782,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_canvaskit_tests
       subshard: "1"
@@ -1754,7 +1804,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_canvaskit_tests
       subshard: "2"
@@ -1776,7 +1826,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_canvaskit_tests
       subshard: "3"
@@ -1798,7 +1848,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_canvaskit_tests
       subshard: "4"
@@ -1820,7 +1870,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_canvaskit_tests
       subshard: "5"
@@ -1842,7 +1892,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_canvaskit_tests
       subshard: "6"
@@ -1864,7 +1914,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_canvaskit_tests
       subshard: "7_last"
@@ -1886,7 +1936,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_skwasm_tests
       subshard: "0"
@@ -1908,7 +1958,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_skwasm_tests
       subshard: "1"
@@ -1930,7 +1980,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_skwasm_tests
       subshard: "2"
@@ -1952,7 +2002,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_skwasm_tests
       subshard: "3"
@@ -1974,7 +2024,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_skwasm_tests
       subshard: "4"
@@ -1996,7 +2046,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_skwasm_tests
       subshard: "5"
@@ -2018,7 +2068,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_skwasm_tests
       subshard: "6"
@@ -2040,7 +2090,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_skwasm_tests
       subshard: "7_last"
@@ -2063,7 +2113,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_tool_tests
       subshard: "1_1"
@@ -2079,15 +2129,16 @@ targets:
 
   - name: Linux_android_emu android_defines_test
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/153445
     timeout: 60
     properties:
       tags: >
         ["devicelab", "linux"]
       task_name: android_defines_test
+      presubmit_max_attempts: "2"
 
   - name: Linux_android_emu_34 android_defines_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2112,17 +2163,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: android_semantics_integration_test
-
-  # linux mokey test
-  - name: Linux_mokey android_stack_size_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux", "mokey"]
-      task_name: android_stack_size_test
 
   # linux mokey benchmark
   - name: Linux_mokey android_view_scroll_perf__timeline_summary
@@ -2512,6 +2552,7 @@ targets:
 
   - name: Linux_android_emu external_textures_integration_test
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/153445
     timeout: 60
     # Functionally the same as "presubmit: false", except that we will run on
     # presubmit during engine rolls. This test is the *only* automated e2e
@@ -2523,10 +2564,10 @@ targets:
       tags: >
         ["devicelab", "linux"]
       task_name: external_textures_integration_test
+      presubmit_max_attempts: "2"
 
   - name: Linux_android_emu_34 external_textures_integration_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     # Functionally the same as "presubmit: false", except that we will run on
     # presubmit during engine rolls. This test is the *only* automated e2e
@@ -3537,7 +3578,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: build_tests
       subshard: "1_4"
@@ -3556,7 +3597,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: build_tests
       subshard: "2_4"
@@ -3575,7 +3616,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: build_tests
       subshard: "3_4"
@@ -3594,7 +3635,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: build_tests
       subshard: "4_4"
@@ -3614,7 +3655,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: build_tests
       subshard: "1_4"
@@ -3632,7 +3673,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: build_tests
       subshard: "2_4"
@@ -3650,7 +3691,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: build_tests
       subshard: "3_4"
@@ -3668,7 +3709,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: build_tests
       subshard: "4_4"
@@ -3701,11 +3742,14 @@ targets:
     enabled_branches:
       - master
     recipe: flutter/flutter_drone
+    # Timeout in minutes for the whole task.
     timeout: 60
     properties:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      # Timeout in seconds for each individual step.
+      test_timeout_secs: "2700" # 45 minutes * 60
 
   - name: Mac dart_plugin_registry_test
     recipe: devicelab/devicelab_drone
@@ -3788,7 +3832,7 @@ targets:
       cpu: x86 # https://github.com/flutter/flutter/issues/119880
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: framework_tests
       subshard: libraries
@@ -3814,7 +3858,7 @@ targets:
       cpu: x86 # https://github.com/flutter/flutter/issues/119880
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: framework_tests
       subshard: impeller
@@ -3839,7 +3883,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "android_sdk", "version": "version:34v3"}
@@ -3869,7 +3913,7 @@ targets:
       os: Mac-13
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "android_sdk", "version": "version:34v3"}
@@ -3899,7 +3943,7 @@ targets:
       cpu: x86 # https://github.com/flutter/flutter/issues/119880
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: framework_tests
       subshard: widgets
@@ -4206,7 +4250,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: tool_integration_tests
       subshard: "1_5"
@@ -4230,7 +4274,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: tool_integration_tests
       subshard: "2_5"
@@ -4254,7 +4298,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: tool_integration_tests
       subshard: "3_5"
@@ -4278,7 +4322,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: tool_integration_tests
       subshard: "4_5"
@@ -4302,7 +4346,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: tool_integration_tests
       subshard: "5_5"
@@ -4396,7 +4440,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_tool_tests
       subshard: "1_1"
@@ -4531,6 +4575,7 @@ targets:
 
   # mac mokey test
   - name: Mac_mokey run_release_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/153830
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
@@ -5247,7 +5292,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
@@ -5265,7 +5310,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
@@ -5283,7 +5328,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
@@ -5301,7 +5346,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
@@ -5319,7 +5364,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
@@ -5337,7 +5382,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
@@ -5355,7 +5400,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
@@ -5367,11 +5412,14 @@ targets:
     enabled_branches:
       - master
     recipe: flutter/flutter_drone
+    # Timeout in minutes for the whole task.
     timeout: 60
     properties:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      # Timeout in seconds for each individual step.
+      test_timeout_secs: "2700" # 45 minutes * 60
 
   - name: Windows framework_tests_libraries
     recipe: flutter/flutter_drone
@@ -5379,7 +5427,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: framework_tests
       subshard: libraries
@@ -5407,7 +5455,7 @@ targets:
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: framework_tests
       subshard: libraries
@@ -5437,7 +5485,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "vs_build", "version": "version:vs2019"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "android_sdk", "version": "version:34v3"}
@@ -5466,7 +5514,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: framework_tests
       subshard: widgets
@@ -5494,7 +5542,7 @@ targets:
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: framework_tests
       subshard: widgets
@@ -5802,7 +5850,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
@@ -5826,7 +5874,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
@@ -5850,7 +5898,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
@@ -5874,7 +5922,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
@@ -5898,7 +5946,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
@@ -5922,7 +5970,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
@@ -5946,7 +5994,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
@@ -6009,7 +6057,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_tool_tests
       subshard: "1_2"
@@ -6031,7 +6079,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_tool_tests
       subshard: "2_2"
