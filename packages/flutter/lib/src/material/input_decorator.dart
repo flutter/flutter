@@ -2163,21 +2163,32 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final TextStyle hintStyle = _getInlineHintStyle(themeData, defaults);
     final String? hintText = decoration.hintText;
-    final bool hintIgnoreHeightOnInput = !isEmpty && decoration.hintIgnoreHeightOnInput;
-    final Widget? hint = hintText == null ? null : AnimatedOpacity(
-      opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
-      duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
-      curve: _kTransitionCurve,
-      child: hintIgnoreHeightOnInput ? null : Text(
+    final bool hintIgnoreHeightOnInput = decoration.hintIgnoreHeightOnInput;
+    const Curve switchInCurve = Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
+    const Curve switchOutCurve = Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
+    Widget? hint;
+    if (hintText != null) {
+      final bool showHint = isEmpty && !_hasInlineLabel;
+      final Text hintTextWidget = Text(
         hintText,
         style: hintStyle,
         textDirection: decoration.hintTextDirection,
         overflow: hintStyle.overflow ?? (decoration.hintMaxLines == null ? null : TextOverflow.ellipsis),
         textAlign: textAlign,
         maxLines: decoration.hintMaxLines,
-      ),
-    );
-
+      );
+      hint = hintIgnoreHeightOnInput ? AnimatedSwitcher(
+        duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
+        switchInCurve: switchInCurve,
+        switchOutCurve: switchOutCurve,
+        child: showHint ? hintTextWidget : null,
+      ) : AnimatedOpacity(
+        opacity: showHint ? 1.0 : 0.0,
+        duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
+        curve: _kTransitionCurve,
+        child: hintTextWidget,
+      );
+    }
     InputBorder? border;
     if (!decoration.enabled) {
       border = _hasError ? decoration.errorBorder : decoration.disabledBorder;
