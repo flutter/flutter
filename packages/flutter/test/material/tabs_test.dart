@@ -5947,6 +5947,55 @@ void main() {
     gesture.removePointer();
   });
 
+  testWidgets('Do not crash if the controller and TabBarView are updated at different phases of the same frame with SliverAppBar', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/154484.
+    final List<String> tabs = <String>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return DefaultTabController(
+              length: tabs.length,
+              child: Scaffold(
+                body: CustomScrollView(
+                  slivers: <Widget>[
+                    SliverAppBar(
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('Add Tab'),
+                          onPressed: () {
+                            setState(() {
+                              tabs.add('Tab ${tabs.length + 1}');
+                            });
+                          },
+                        ),
+                      ],
+                      bottom: TabBar(
+                        tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Initializes with zero tabs.
+    expect(find.text('Tab 1'), findsNothing);
+    expect(find.text('Tab 2'), findsNothing);
+
+    // No crash after tabs added.
+    await tester.tap(find.text('Add Tab'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text('Tab 2'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Do not crash if the controller and TabBarView are updated at different phases(build and layout) of the same frame', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/104994.
     List<String> tabTextContent = <String>[];
