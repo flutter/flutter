@@ -28,8 +28,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 }
 
 void main() {
-  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
+  LeakTesting.settings = LeakTesting.settings.withIgnoredAll(); // The tests leak by design, because of hacky way dealing with images.
 
   late ui.Image testImage;
 

@@ -824,8 +824,7 @@ void main() {
   });
 
   testWidgets('Precache removes original listener immediately after future completes, does not crash on successive calls #25143',
-  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
   (WidgetTester tester) async {
     final _TestImageStreamCompleter imageStreamCompleter = _TestImageStreamCompleter();
     final _TestImageProvider provider = _TestImageProvider(streamCompleter: imageStreamCompleter);
@@ -845,12 +844,17 @@ void main() {
 
     // Make sure the first listener can be called re-entrantly
     final ImageInfo imageInfo = ImageInfo(image: image10x10);
+
     listeners[1].onImage(imageInfo.clone(), false);
     listeners[1].onImage(imageInfo.clone(), false);
 
     // Make sure the second listener can be called re-entrantly.
     listeners[0].onImage(imageInfo.clone(), false);
     listeners[0].onImage(imageInfo.clone(), false);
+
+    imageInfo.dispose();
+    imageStreamCompleter.dispose();
+    imageCache.clear();
   });
 
   testWidgets('Precache completes with onError on error', (WidgetTester tester) async {
@@ -1022,8 +1026,7 @@ void main() {
   });
 
   testWidgets('Image invokes frameBuilder with correct frameNumber argument',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
   (WidgetTester tester) async {
     final ui.Codec codec = (await tester.runAsync(() {
       return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
@@ -1094,8 +1097,7 @@ void main() {
   });
 
   testWidgets('Image invokes frameBuilder with correct wasSynchronouslyLoaded=true',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
   (WidgetTester tester) async {
     final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter(ImageInfo(image: image10x10.clone()));
     final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
@@ -1155,8 +1157,7 @@ void main() {
   });
 
   testWidgets('Image state handles enabling and disabling of tickers',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
   (WidgetTester tester) async {
     final ui.Codec codec = (await tester.runAsync(() {
       return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
@@ -1621,8 +1622,7 @@ void main() {
   });
 
   testWidgets('precacheImage allows time to take over weak reference',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
   (WidgetTester tester) async {
     final _TestImageProvider provider = _TestImageProvider();
     late Future<void> precache;
@@ -1675,8 +1675,7 @@ void main() {
   });
 
   testWidgets('evict an image during precache',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
   (WidgetTester tester) async {
     // This test checks that the live image tracking does not hold on to a
     // pending image that will never complete because it has been evicted from
@@ -1792,8 +1791,7 @@ void main() {
 
   testWidgets(
     'Rotated images',
-    // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
     (WidgetTester tester) async {
       await testRotatedImage(tester, true);
       await testRotatedImage(tester, false);
@@ -1803,8 +1801,7 @@ void main() {
 
   testWidgets(
     'Image opacity',
-    // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
     (WidgetTester tester) async {
       final Key key = UniqueKey();
       await tester.pumpWidget(RepaintBoundary(
@@ -1854,8 +1851,7 @@ void main() {
   );
 
   testWidgets('Reports image size when painted',
-  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
   (WidgetTester tester) async {
     late ImageSizeInfo imageSizeInfo;
     int count = 0;
@@ -1966,8 +1962,7 @@ void main() {
   });
 
   testWidgets('Load a good image after a bad image was loaded should not call errorBuilder',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
   (WidgetTester tester) async {
     final UniqueKey errorKey = UniqueKey();
     final ui.Image image = (await tester.runAsync(() => createTestImage()))!;
@@ -2067,8 +2062,7 @@ void main() {
   });
 
   testWidgets('Animated GIFs do not require layout for subsequent frames',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
   (WidgetTester tester) async {
     final ui.Codec codec = (await tester.runAsync(() {
       return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
@@ -2242,6 +2236,11 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
     for (final ImageStreamListener listener in localListeners) {
       listener.onError?.call(exception, stackTrace);
     }
+  }
+
+  void dispose() {
+    final listenersCopy = this.listeners.toList();
+    listenersCopy.forEach(removeListener);
   }
 }
 
