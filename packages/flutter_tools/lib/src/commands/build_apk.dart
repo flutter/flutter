@@ -48,14 +48,44 @@ class BuildApkCommand extends BuildSubCommand {
           help: 'Generate build files used by flutter but '
                 'do not build any artifacts.')
       ..addMultiOption('target-platform',
-        defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
         // https://github.com/flutter/flutter/issues/153359 tracks debug build type support.
         help:
-            'The target platform for which the app is compiled. Supports release but not debug build types.',
+            'The target platform for which the app is compiled.',
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
+
+  BuildMode get buildMode {
+    if (boolArg('release')) {
+      return BuildMode.release;
+    } else if (boolArg('profile')) {
+      return BuildMode.profile;
+    } else if (boolArg('debug')) {
+      return BuildMode.debug;
+    } else if (boolArg('jit-release')) {
+      return BuildMode.jitRelease;
+    }
+    // The build defaults to release.
+    return BuildMode.release;
+  }
+  static const List<String> _kDefaultJitArchs = <String>[
+    'android-arm',
+    'android-arm64',
+    'android-x86',
+    'android-x64',
+  ];
+  static const List<String> _kDefaultAotArchs = <String>[
+    'android-arm',
+    'android-arm64',
+    'android-x64',
+  ];
+  List<String> get targetArchs => stringsArg('target-platform').isEmpty
+    ? switch (buildMode) {
+      BuildMode.release || BuildMode.profile => _kDefaultAotArchs,
+      BuildMode.debug || BuildMode.jitRelease => _kDefaultJitArchs,
+    }
+    : stringsArg('target-platform');
 
   @override
   final String name = 'apk';
@@ -81,46 +111,20 @@ class BuildApkCommand extends BuildSubCommand {
 
   @override
   Future<CustomDimensions> get usageValues async {
-    String buildMode;
-
-    if (boolArg('release')) {
-      buildMode = 'release';
-    } else if (boolArg('debug')) {
-      buildMode = 'debug';
-    } else if (boolArg('profile')) {
-      buildMode = 'profile';
-    } else {
-      // The build defaults to release.
-      buildMode = 'release';
-    }
-
     return CustomDimensions(
-      commandBuildApkTargetPlatform: stringsArg('target-platform').join(','),
-      commandBuildApkBuildMode: buildMode,
+      commandBuildApkTargetPlatform: targetArchs.join(','),
+      commandBuildApkBuildMode: buildMode.cliName,
       commandBuildApkSplitPerAbi: boolArg('split-per-abi'),
     );
   }
 
   @override
   Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
-    final String buildMode;
-
-    if (boolArg('release')) {
-      buildMode = 'release';
-    } else if (boolArg('debug')) {
-      buildMode = 'debug';
-    } else if (boolArg('profile')) {
-      buildMode = 'profile';
-    } else {
-      // The build defaults to release.
-      buildMode = 'release';
-    }
-
     return Event.commandUsageValues(
       workflow: commandPath,
       commandHasTerminal: hasTerminal,
-      buildApkTargetPlatform: stringsArg('target-platform').join(','),
-      buildApkBuildMode: buildMode,
+      buildApkTargetPlatform: targetArchs.join(','),
+      buildApkBuildMode: buildMode.cliName,
       buildApkSplitPerAbi: boolArg('split-per-abi'),
     );
   }
@@ -131,10 +135,11 @@ class BuildApkCommand extends BuildSubCommand {
       exitWithNoSdkMessage();
     }
     final BuildInfo buildInfo = await getBuildInfo();
+
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(
       buildInfo,
       splitPerAbi: boolArg('split-per-abi'),
-      targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
+      targetArchs: targetArchs.map<AndroidArch>(getAndroidArchForName),
     );
     validateBuild(androidBuildInfo);
     displayNullSafetyMode(androidBuildInfo.buildInfo);
