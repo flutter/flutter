@@ -6,10 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_api_samples/material/app_bar/sliver_app_bar.2.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
-const Offset _kOffset = Offset(0.0, -200.0);
-
 void main() {
-  testWidgets('Visibility of crucial widgets', (WidgetTester tester) async {
+  testWidgets('Visibility and interaction of crucial widgets', (WidgetTester tester) async {
     await tester.pumpWidget(const example.AppBarMediumApp());
 
     const String title = 'Medium App Bar';
@@ -35,9 +33,15 @@ void main() {
 
     expect(actualTitleStyle, expectedTitleStyle);
 
-    expect(tester.getBottomLeft(find.text(title).first).dy, 96.0);
-    await tester.drag(find.text(title).first, _kOffset, touchSlopY: 0, warnIfMissed: false);
+    // Scrolling the screen moves the title up.
+    expect(tester.getBottomLeft(titleFinder).dy, 96.0);
+    await tester.drag(
+      titleFinder,
+      const Offset(0.0, -200.0),
+      touchSlopY: 0,
+      warnIfMissed: false);
+
     await tester.pump();
-    expect(tester.getBottomLeft(find.text(title).first).dy, 48.0);
+    expect(tester.getBottomLeft(titleFinder).dy, 48.0);
   });
 }
