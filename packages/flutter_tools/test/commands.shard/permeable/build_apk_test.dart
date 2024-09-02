@@ -48,8 +48,9 @@ void main() {
     testUsingContext('indicate the default target platforms', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
-      await runBuildApkCommand(projectPath);
 
+      // Without buildMode flag.
+      await runBuildApkCommand(projectPath);
       expect(
         fakeAnalytics.sentEvents,
         contains(
@@ -58,6 +59,157 @@ void main() {
             commandHasTerminal: false,
             buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
             buildApkBuildMode: 'release',
+            buildApkSplitPerAbi: false,
+          ),
+        ),
+      );
+
+      await runBuildApkCommand(projectPath, arguments: <String>['--debug']);
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.commandUsageValues(
+            workflow: 'apk',
+            commandHasTerminal: false,
+            buildApkTargetPlatform: 'android-arm,android-arm64,android-x86,android-x64',
+            buildApkBuildMode: 'debug',
+            buildApkSplitPerAbi: false,
+          ),
+        ),
+      );
+
+      await runBuildApkCommand(projectPath, arguments: <String>['--jit-release']);
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.commandUsageValues(
+            workflow: 'apk',
+            commandHasTerminal: false,
+            buildApkTargetPlatform: 'android-arm,android-arm64,android-x86,android-x64',
+            buildApkBuildMode: 'jit_release',
+            buildApkSplitPerAbi: false,
+          ),
+        ),
+      );
+
+      await runBuildApkCommand(projectPath, arguments: <String>['--profile']);
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.commandUsageValues(
+            workflow: 'apk',
+            commandHasTerminal: false,
+            buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
+            buildApkBuildMode: 'profile',
+            buildApkSplitPerAbi: false,
+          ),
+        ),
+      );
+
+      await runBuildApkCommand(projectPath, arguments: <String>['--release']);
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.commandUsageValues(
+            workflow: 'apk',
+            commandHasTerminal: false,
+            buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
+            buildApkBuildMode: 'release',
+            buildApkSplitPerAbi: false,
+          ),
+        ),
+      );
+
+    }, overrides: <Type, Generator>{
+      AndroidBuilder: () => FakeAndroidBuilder(),
+      Analytics: () => fakeAnalytics,
+    });
+
+    testUsingContext('Each build mode respects --target-platform', () async {
+      final String projectPath = await createProject(tempDir,
+          arguments: <String>['--no-pub', '--template=app']);
+
+      // Without buildMode flag.
+      await runBuildApkCommand(
+        projectPath,
+        arguments: <String>['--target-platform=android-arm'],
+      );
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.commandUsageValues(
+            workflow: 'apk',
+            commandHasTerminal: false,
+            buildApkTargetPlatform: 'android-arm',
+            buildApkBuildMode: 'release',
+            buildApkSplitPerAbi: false,
+          ),
+        ),
+      );
+
+      await runBuildApkCommand(
+        projectPath,
+        arguments: <String>['--debug', '--target-platform=android-arm'],
+      );
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.commandUsageValues(
+            workflow: 'apk',
+            commandHasTerminal: false,
+            buildApkTargetPlatform: 'android-arm',
+            buildApkBuildMode: 'debug',
+            buildApkSplitPerAbi: false,
+          ),
+        ),
+      );
+
+      await runBuildApkCommand(
+        projectPath,
+        arguments: <String>['--release', '--target-platform=android-arm'],
+      );
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.commandUsageValues(
+            workflow: 'apk',
+            commandHasTerminal: false,
+            buildApkTargetPlatform: 'android-arm',
+            buildApkBuildMode: 'release',
+            buildApkSplitPerAbi: false,
+          ),
+        ),
+      );
+
+      await runBuildApkCommand(
+        projectPath,
+        arguments: <String>['--profile', '--target-platform=android-arm'],
+      );
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.commandUsageValues(
+            workflow: 'apk',
+            commandHasTerminal: false,
+            buildApkTargetPlatform: 'android-arm',
+            buildApkBuildMode: 'profile',
+            buildApkSplitPerAbi: false,
+          ),
+        ),
+      );
+
+      await runBuildApkCommand(
+        projectPath,
+        arguments: <String>['--jit-release', '--target-platform=android-arm'],
+      );
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.commandUsageValues(
+            workflow: 'apk',
+            commandHasTerminal: false,
+            buildApkTargetPlatform: 'android-arm',
+            buildApkBuildMode: 'jit_release',
             buildApkSplitPerAbi: false,
           ),
         ),
