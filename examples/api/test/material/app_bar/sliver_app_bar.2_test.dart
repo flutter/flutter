@@ -39,7 +39,8 @@ void main() {
       titleFinder,
       const Offset(0.0, -200.0),
       touchSlopY: 0,
-      warnIfMissed: false);
+      warnIfMissed: false,
+      );
 
     await tester.pump();
     expect(tester.getBottomLeft(titleFinder).dy, 48.0);
