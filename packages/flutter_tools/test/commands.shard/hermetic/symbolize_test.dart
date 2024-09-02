@@ -67,100 +67,124 @@ void main() {
   });
 
   testUsingContext('symbolize exits when --debug-info dwarf file is missing', () async {
+    const String fileName = 'app.debug';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
     final Future<void> result = createTestCommandRunner(command)
-      .run(const <String>['symbolize', '--debug-info=app.debug']);
+      .run(const <String>['symbolize', '--debug-info=$fileName']);
 
-    expect(result, throwsToolExit(message: 'app.debug does not exist.'));
-  }, overrides: <Type, Generator>{
-    OutputPreferences: () => OutputPreferences.test(),
-  });
-
-  testUsingContext('symbolize exits when --debug-info dwarf file is missing', () async {
-    final SymbolizeCommand command = SymbolizeCommand(
-      stdio: stdio,
-      fileSystem: fileSystem,
-      dwarfSymbolizationService: DwarfSymbolizationService.test(),
-    );
-    final Future<void> result = createTestCommandRunner(command)
-      .run(const <String>['symbolize', '--debug-info=app.debug']);
-
-    expect(result, throwsToolExit(message: 'app.debug does not exist.'));
+    expect(result, throwsToolExit(message: 'File not found: $fileName'));
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences.test(),
   });
 
   testUsingContext('symbolize exits when --unit-id-debug-info dwarf file is missing', () async {
+    const String fileName = 'app.debug';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
     final Future<void> result = createTestCommandRunner(command)
-      .run(const <String>['symbolize', '--unit-id-debug-info=$rootLoadingUnitId:app.debug']);
+      .run(const <String>['symbolize', '--unit-id-debug-info=$rootLoadingUnitId:$fileName']);
 
-    expect(result, throwsToolExit(message: 'app.debug does not exist.'));
+    expect(result, throwsToolExit(message: 'File not found: $fileName'));
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences.test(),
   });
 
   testUsingContext('symbolize exits when --debug-info dSYM is missing', () async {
+    const String fileName = 'app.dSYM';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
     final Future<void> result = createTestCommandRunner(command)
-      .run(const <String>['symbolize', '--debug-info=app.dSYM']);
+      .run(const <String>['symbolize', '--debug-info=$fileName']);
 
-    expect(result, throwsToolExit(message: 'app.dSYM does not exist.'));
+    expect(result, throwsToolExit(message: 'File not found: $fileName'));
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences.test(),
   });
 
   testUsingContext('symbolize exits when --unit-id-debug-info dSYM is missing', () async {
+    const String fileName = 'app.dSYM';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
     final Future<void> result = createTestCommandRunner(command)
-      .run(const <String>['symbolize', '--unit-id-debug-info=$rootLoadingUnitId:app.dSYM']);
+      .run(const <String>['symbolize', '--unit-id-debug-info=$rootLoadingUnitId:$fileName']);
 
-    expect(result, throwsToolExit(message: 'app.dSYM does not exist.'));
+    expect(result, throwsToolExit(message: 'File not found: $fileName'));
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
+
+  testUsingContext('symbolize exits when --debug-info dSYM is not a directory', () async {
+    const String fileName = 'app.dSYM';
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
+    fileSystem.file(fileName).createSync();
+    final Future<void> result = createTestCommandRunner(command)
+      .run(const <String>['symbolize', '--debug-info=$fileName']);
+
+    expect(result, throwsToolExit(message: '$fileName is not a dSYM package directory'));
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
+
+  testUsingContext('symbolize exits when --unit-id-debug-info dSYM is not a directory', () async {
+    const String fileName = 'app.dSYM';
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
+    fileSystem.file(fileName).createSync();
+    final Future<void> result = createTestCommandRunner(command)
+      .run(const <String>['symbolize', '--unit-id-debug-info=$rootLoadingUnitId:$fileName']);
+
+    expect(result, throwsToolExit(message: '$fileName is not a dSYM package directory'));
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences.test(),
   });
 
   testUsingContext('symbolize exits if --unit-id-debug-info is just given a path', () async {
+    const String fileName = 'app.debug';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
-    fileSystem.file('app.debug').createSync();
+    fileSystem.file(fileName).createSync();
     final Future<void> result = createTestCommandRunner(command)
-      .run(const <String>['symbolize', '--unit-id-debug-info=app.debug']);
+      .run(const <String>['symbolize', '--unit-id-debug-info=$fileName']);
 
     expect(result, throwsToolExit(message: 'The argument to "--unit-id-debug-info" must contain a unit ID and path,'
-            ' separated by ":": "app.debug".'));
+            ' separated by ":": "$fileName".'));
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences.test(),
   });
 
   testUsingContext('symbolize exits if the unit id for --unit-id-debug-info is not a valid integer', () async {
+    const String fileName = 'app.debug';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
-    fileSystem.file('app.debug').createSync();
+    fileSystem.file(fileName).createSync();
     final Future<void> result = createTestCommandRunner(command)
-      .run(const <String>['symbolize', '--unit-id-debug-info=foo:app.debug']);
+      .run(const <String>['symbolize', '--unit-id-debug-info=foo:$fileName']);
 
     expect(result, throwsToolExit(message: 'The argument to "--unit-id-debug-info" must begin with'
             ' a unit ID: "foo" is not an integer.'));
@@ -169,51 +193,57 @@ void main() {
   });
 
   testUsingContext('symbolize exits when different paths are given for the root loading unit via --debug-info and --unit-id-debug-info', () async {
+    const String fileName1 = 'app.debug';
+    const String fileName2 = 'app2.debug';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
-    fileSystem.file('app.debug').createSync();
-    fileSystem.file('app2.debug').createSync();
+    fileSystem.file(fileName1).createSync();
+    fileSystem.file(fileName2).createSync();
     final Future<void> result = createTestCommandRunner(command)
-      .run(const <String>['symbolize', '--debug-info=app.debug', '--unit-id-debug-info=$rootLoadingUnitId:app2.debug']);
+      .run(const <String>['symbolize', '--debug-info=$fileName1', '--unit-id-debug-info=$rootLoadingUnitId:$fileName2']);
 
     expect(result, throwsToolExit(message: 'Different paths were given for'
-            ' the same loading unit $rootLoadingUnitId: "app.debug" and'
-            ' "app2.debug".'));
+            ' the same loading unit $rootLoadingUnitId: "$fileName1" and'
+            ' "$fileName2".'));
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences.test(),
   });
 
   testUsingContext('symbolize exits when different paths are given for a non-root loading unit via --unit-id-debug-info', () async {
+    const String fileName1 = 'app.debug';
+    const String fileName2 = 'app2.debug';
+    const String fileName3 = 'app3.debug';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
-    fileSystem.file('app.debug').createSync();
-    fileSystem.file('app2.debug').createSync();
-    fileSystem.file('app3.debug').createSync();
+    fileSystem.file(fileName1).createSync();
+    fileSystem.file(fileName2).createSync();
+    fileSystem.file(fileName3).createSync();
     final Future<void> result = createTestCommandRunner(command)
-      .run(const <String>['symbolize', '--debug-info=app.debug', '--unit-id-debug-info=${rootLoadingUnitId+1}:app2.debug', '--unit-id-debug-info=${rootLoadingUnitId+1}:app3.debug']);
+      .run(const <String>['symbolize', '--debug-info=$fileName1', '--unit-id-debug-info=${rootLoadingUnitId+1}:$fileName2', '--unit-id-debug-info=${rootLoadingUnitId+1}:$fileName3']);
 
     expect(result, throwsToolExit(message: 'Different paths were given for'
-            ' the same loading unit ${rootLoadingUnitId+1}: "app2.debug" and'
-            ' "app3.debug".'));
+            ' the same loading unit ${rootLoadingUnitId+1}: "$fileName2" and'
+            ' "$fileName3".'));
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences.test(),
   });
 
   testUsingContext('symbolize exits when --input file is missing', () async {
+    const String fileName = 'app.debug';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
-    fileSystem.file('app.debug').createSync();
+    fileSystem.file(fileName).createSync();
     final Future<void> result = createTestCommandRunner(command)
-      .run(const <String>['symbolize', '--debug-info=app.debug', '--input=foo.stack', '--output=results/foo.result']);
+      .run(const <String>['symbolize', '--debug-info=$fileName', '--input=foo.stack', '--output=results/foo.result']);
 
     expect(result, throwsToolExit(message: ''));
   }, overrides: <Type, Generator>{
@@ -221,14 +251,15 @@ void main() {
   });
 
   testUsingContext('symbolize exits when --debug-info argument is missing and --unit-id-debug-info is not provided for the root loading unit', () async {
+    const String fileName = 'app.debug';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
-    fileSystem.file('app.debug').createSync();
+    fileSystem.file(fileName).createSync();
     final Future<void> result = createTestCommandRunner(command)
-      .run(const <String>['symbolize', '--unit-id-debug-info=${rootLoadingUnitId+1}:app.debug']);
+      .run(const <String>['symbolize', '--unit-id-debug-info=${rootLoadingUnitId+1}:$fileName']);
 
     expect(result, throwsToolExit(message: 'Missing debug info for the root loading unit (id $rootLoadingUnitId).'));
   }, overrides: <Type, Generator>{
@@ -236,92 +267,109 @@ void main() {
   });
 
   testUsingContext('symbolize succeeds when DwarfSymbolizationService does not throw', () async {
+    const String debugName = 'app.debug';
+    const String inputName = 'foo.stack';
+    const String outputPath = 'results/foo.result';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
-    fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
-    fileSystem.file('foo.stack').writeAsStringSync('hello');
+    fileSystem.file(debugName).writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file(inputName).writeAsStringSync('hello');
 
     await createTestCommandRunner(command)
-      .run(const <String>['symbolize', '--debug-info=app.debug', '--input=foo.stack', '--output=results/foo.result']);
+      .run(const <String>['symbolize', '--debug-info=$debugName', '--input=$inputName', '--output=$outputPath']);
 
-    expect(fileSystem.file('results/foo.result'), exists);
-    expect(fileSystem.file('results/foo.result').readAsBytesSync(), <int>[104, 101, 108, 108, 111, 10]); // hello
+    expect(fileSystem.file(outputPath), exists);
+    expect(fileSystem.file(outputPath).readAsBytesSync(), <int>[104, 101, 108, 108, 111, 10]); // hello
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences.test(),
   });
 
   testUsingContext('symbolize succeeds when DwarfSymbolizationService with a single --unit-id-debug-info argument for the root loading unit does not throw', () async {
+    const String debugName = 'app.debug';
+    const String inputName = 'foo.stack';
+    const String outputPath = 'results/foo.result';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
-    fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
-    fileSystem.file('foo.stack').writeAsStringSync('hello');
+    fileSystem.file(debugName).writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file(inputName).writeAsStringSync('hello');
 
     await createTestCommandRunner(command)
-      .run(const <String>['symbolize', '--unit-id-debug-info=$rootLoadingUnitId:app.debug', '--input=foo.stack', '--output=results/foo.result']);
+      .run(const <String>['symbolize', '--unit-id-debug-info=$rootLoadingUnitId:$debugName', '--input=$inputName', '--output=$outputPath']);
 
-    expect(fileSystem.file('results/foo.result'), exists);
-    expect(fileSystem.file('results/foo.result').readAsBytesSync(), <int>[104, 101, 108, 108, 111, 10]); // hello
+    expect(fileSystem.file(outputPath), exists);
+    expect(fileSystem.file(outputPath).readAsBytesSync(), <int>[104, 101, 108, 108, 111, 10]); // hello
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences.test(),
   });
 
   testUsingContext('symbolize succeeds when DwarfSymbolizationService with --debug-info and --unit-id-debug-info arguments does not throw', () async {
+    const String debugName = 'app.debug';
+    const String debugName2 = '$debugName-2.part.so';
+    const String inputName = 'foo.stack';
+    const String outputPath = 'results/foo.result';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
-    fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
-    fileSystem.file('app.debug-2.part.so').writeAsBytesSync(<int>[1, 2, 3]);
-    fileSystem.file('foo.stack').writeAsStringSync('hello');
+    fileSystem.file(debugName).writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file(debugName2).writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file(inputName).writeAsStringSync('hello');
 
     await createTestCommandRunner(command)
-      .run(const <String>['symbolize', '--debug-info=app.debug', '--unit-id-debug-info=${rootLoadingUnitId+1}:app.debug-2.part.so', '--input=foo.stack', '--output=results/foo.result']);
+      .run(const <String>['symbolize', '--debug-info=$debugName', '--unit-id-debug-info=${rootLoadingUnitId+1}:$debugName2', '--input=$inputName', '--output=$outputPath']);
 
-    expect(fileSystem.file('results/foo.result'), exists);
-    expect(fileSystem.file('results/foo.result').readAsBytesSync(), <int>[104, 101, 108, 108, 111, 10]); // hello
+    expect(fileSystem.file(outputPath), exists);
+    expect(fileSystem.file(outputPath).readAsBytesSync(), <int>[104, 101, 108, 108, 111, 10]); // hello
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences.test(),
   });
 
   testUsingContext('symbolize succeeds when DwarfSymbolizationService with multiple --unit-id-debug-info arguments does not throw', () async {
+    const String debugName = 'app.debug';
+    const String debugName2 = '$debugName-2.part.so';
+    const String inputName = 'foo.stack';
+    const String outputPath = 'results/foo.result';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
-    fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
-    fileSystem.file('app.debug-2.part.so').writeAsBytesSync(<int>[1, 2, 3]);
-    fileSystem.file('foo.stack').writeAsStringSync('hello');
+    fileSystem.file(debugName).writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file(debugName2).writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file(inputName).writeAsStringSync('hello');
 
     await createTestCommandRunner(command)
-      .run(const <String>['symbolize', '--unit-id-debug-info=$rootLoadingUnitId:app.debug', '--unit-id-debug-info=${rootLoadingUnitId+1}:app.debug-2.part.so', '--input=foo.stack', '--output=results/foo.result']);
+      .run(const <String>['symbolize', '--unit-id-debug-info=$rootLoadingUnitId:$debugName', '--unit-id-debug-info=${rootLoadingUnitId+1}:$debugName2', '--input=$inputName', '--output=$outputPath']);
 
-    expect(fileSystem.file('results/foo.result'), exists);
-    expect(fileSystem.file('results/foo.result').readAsBytesSync(), <int>[104, 101, 108, 108, 111, 10]); // hello
+    expect(fileSystem.file(outputPath), exists);
+    expect(fileSystem.file(outputPath).readAsBytesSync(), <int>[104, 101, 108, 108, 111, 10]); // hello
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences.test(),
   });
 
   testUsingContext('symbolize throws when DwarfSymbolizationService throws', () async {
+    const String debugName = 'app.debug';
+    const String inputName = 'foo.stack';
+    const String outputPath = 'results/foo.result';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: ThrowingDwarfSymbolizationService(),
     );
 
-    fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
-    fileSystem.file('foo.stack').writeAsStringSync('hello');
+    fileSystem.file(debugName).writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file(inputName).writeAsStringSync('hello');
 
     expect(
       createTestCommandRunner(command).run(const <String>[
-        'symbolize', '--debug-info=app.debug', '--input=foo.stack', '--output=results/foo.result',
+        'symbolize', '--debug-info=$debugName', '--input=$inputName', '--output=$outputPath',
       ]),
       throwsToolExit(message: 'test'),
     );
@@ -330,18 +378,21 @@ void main() {
   });
 
   testUsingContext('symbolize throws when DwarfSymbolizationService with a single --unit-id-debug-info argument for the root loading unit throws', () async {
+    const String debugName = 'app.debug';
+    const String inputName = 'foo.stack';
+    const String outputPath = 'results/foo.result';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: ThrowingDwarfSymbolizationService(),
     );
 
-    fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
-    fileSystem.file('foo.stack').writeAsStringSync('hello');
+    fileSystem.file(debugName).writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file(inputName).writeAsStringSync('hello');
 
     expect(
       createTestCommandRunner(command).run(const <String>[
-        'symbolize', '--unit-id-debug-info=$rootLoadingUnitId:app.debug', '--input=foo.stack', '--output=results/foo.result',
+        'symbolize', '--unit-id-debug-info=$rootLoadingUnitId:$debugName', '--input=$inputName', '--output=$outputPath',
       ]),
       throwsToolExit(message: 'test'),
     );
@@ -350,19 +401,23 @@ void main() {
   });
 
   testUsingContext('symbolize throws when DwarfSymbolizationService with --debug-info and --unit-id-debug-info arguments throws', () async {
+    const String debugName = 'app.debug';
+    const String debugName2 = '$debugName-2.part.so';
+    const String inputName = 'foo.stack';
+    const String outputPath = 'results/foo.result';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: ThrowingDwarfSymbolizationService(),
     );
 
-    fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
-    fileSystem.file('app.debug-2.part.so').writeAsBytesSync(<int>[1, 2, 3]);
-    fileSystem.file('foo.stack').writeAsStringSync('hello');
+    fileSystem.file(debugName).writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file(debugName2).writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file(inputName).writeAsStringSync('hello');
 
     expect(
       createTestCommandRunner(command).run(const <String>[
-        'symbolize', '--debug-info=app.debug', '--unit-id-debug-info=${rootLoadingUnitId+1}:app.debug-2.part.so', '--input=foo.stack', '--output=results/foo.result',
+        'symbolize', '--debug-info=$debugName', '--unit-id-debug-info=${rootLoadingUnitId+1}:$debugName2', '--input=$inputName', '--output=$outputPath',
       ]),
       throwsToolExit(message: 'test'),
     );
@@ -371,19 +426,23 @@ void main() {
   });
 
   testUsingContext('symbolize throws when DwarfSymbolizationService with multiple --unit-id-debug-info arguments throws', () async {
+    const String debugName = 'app.debug';
+    const String debugName2 = '$debugName-2.part.so';
+    const String inputName = 'foo.stack';
+    const String outputPath = 'results/foo.result';
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: ThrowingDwarfSymbolizationService(),
     );
 
-    fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
-    fileSystem.file('app.debug-2.part.so').writeAsBytesSync(<int>[1, 2, 3]);
-    fileSystem.file('foo.stack').writeAsStringSync('hello');
+    fileSystem.file(debugName).writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file(debugName2).writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file(inputName).writeAsStringSync('hello');
 
     expect(
       createTestCommandRunner(command).run(const <String>[
-        'symbolize', '--unit-id-debug-info=$rootLoadingUnitId:app.debug', '--unit-id-debug-info=${rootLoadingUnitId+1}:app.debug-2.part.so', '--input=foo.stack', '--output=results/foo.result',
+        'symbolize', '--unit-id-debug-info=$rootLoadingUnitId:$debugName', '--unit-id-debug-info=${rootLoadingUnitId+1}:$debugName2', '--input=$inputName', '--output=$outputPath',
       ]),
       throwsToolExit(message: 'test'),
     );
