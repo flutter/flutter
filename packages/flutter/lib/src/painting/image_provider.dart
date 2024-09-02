@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Examples can assume:
+// final BuildContext context;
+
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
@@ -1195,9 +1198,16 @@ enum ResizeImagePolicy {
 ///
 /// Logical pixels have roughly the same visual size across devices, whereas
 /// physical pixels correspond to actual device hardware.
-/// The number of physical pixels per logical pixel is described by the `devicePixelRatio`.
+/// The number of physical pixels per logical pixel is described by the [ui.FlutterView.devicePixelRatio].
 ///
-/// For example, if you want to resize the image to half of the screen's width, you can use:
+/// This allows finer control of the size of the image in [ImageCache] and is
+/// generally used to reduce the memory footprint of [ImageCache].
+///
+/// The decoded image may still be displayed at sizes other than the
+/// cached size provided here.
+///
+/// {@tool snippet}
+/// This example shows how to size the image to half of the screen's width.
 ///
 /// ```dart
 ///    Image(
@@ -1207,12 +1217,7 @@ enum ResizeImagePolicy {
 ///      ),
 ///    );
 /// ```
-///
-/// This allows finer control of the size of the image in [ImageCache] and is
-/// generally used to reduce the memory footprint of [ImageCache].
-///
-/// The decoded image may still be displayed at sizes other than the
-/// cached size provided here.
+/// {@end-tool}
 class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// Creates an ImageProvider that decodes the image to the specified size.
   ///
