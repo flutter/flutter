@@ -38,13 +38,12 @@ void main() {
           networkErrorHandler,
           permissionDeniedErrorHandler,
           flavorUndefinedHandler,
-          r8FailureHandler,
+          r8DexingBugInAgp73Handler,
           minSdkVersionHandler,
           transformInputIssueHandler,
           lockFileDepMissingHandler,
-          incompatibleKotlinVersionHandler,
           minCompileSdkVersionHandler,
-          jvm11RequiredHandler,
+          incompatibleJavaAndAgpVersionsHandler,
           outdatedGradleHandler,
           sslExceptionHandler,
           zipExceptionHandler,
@@ -52,6 +51,7 @@ void main() {
           remoteTerminatedHandshakeHandler,
           couldNotOpenCacheDirectoryHandler,
           incompatibleCompileSdk35AndAgpVersionHandler,
+          incompatibleKotlinVersionHandler,
         ])
       );
     });
@@ -983,44 +983,40 @@ Execution failed for task ':app:checkDebugAarMetadata'.
     });
   });
 
-  group('Java 11 requirement', () {
-    testWithoutContext('pattern', () {
-      expect(
-        jvm11RequiredHandler.test('''
+  group('incompatible java and android gradle plugin versions error', () {
+
+    const String errorMessage = '''
 * What went wrong:
-A problem occurred evaluating project ':flutter'.
-> Failed to apply plugin 'com.android.internal.library'.
-   > Android Gradle plugin requires Java 11 to run. You are currently using Java 1.8.
-     You can try some of the following options:
+An exception occurred applying plugin request [id: 'com.android.application']
+> Failed to apply plugin 'com.android.internal.application'.
+   > Android Gradle plugin requires Java 17 to run. You are currently using Java 11.
+      You can try some of the following options:
        - changing the IDE settings.
        - changing the JAVA_HOME environment variable.
-       - changing `org.gradle.java.home` in `gradle.properties`.'''
-        ),
+       - changing `org.gradle.java.home` in `gradle.properties`.
+''';
+
+    testWithoutContext('pattern', () {
+      expect(
+        incompatibleJavaAndAgpVersionsHandler.test(errorMessage),
         isTrue,
       );
     });
 
     testUsingContext('suggestion', () async {
-      await jvm11RequiredHandler.handler(
-        project: FakeFlutterProject(),
+      await incompatibleJavaAndAgpVersionsHandler.handler(
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
-        line: '',
       );
 
-      expect(
-        testLogger.statusText,
-        contains(
-          '\n'
-          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
-          '│ [!] You need Java 11 or higher to build your app with this version of Gradle. │\n'
-          '│                                                                               │\n'
-          '│ To get Java 11, update to the latest version of Android Studio on             │\n'
-          '│ https://developer.android.com/studio/install.                                 │\n'
-          '│                                                                               │\n'
-          '│ To check the Java version used by Flutter, run `flutter doctor -v`.           │\n'
-          '└───────────────────────────────────────────────────────────────────────────────┘\n'
-        )
-      );
+      // Ensure the error notes the required Java version, the Java version currently used,
+      // the android studio and android sdk installation link, the flutter command to set
+      // the Java version Flutter uses, and the flutter doctor command.
+      expect(testLogger.statusText, contains('Android Gradle plugin requires Java 17 to run. You are currently using Java 11.'));
+      expect(testLogger.statusText, contains('https://developer.android.com/studio/install'));
+      expect(testLogger.statusText, contains('`flutter config --jdk-dir=“</path/to/jdk>“`'));
+      expect(testLogger.statusText, contains('`flutter doctor --verbose`'));
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
@@ -1320,7 +1316,6 @@ Execution failed for task ':app:bundleReleaseResources'.
                     '│ /android/settings.gradle,                                                                        │\n'
                     "│ in the 'plugins' closure.                                                                        │\n"
                     '│  Alternatively, if your project was created with an older version of the templates, it is likely │\n'
-                    '│                                                                                                  │\n'
                     '│ in the buildscript.dependencies closure of the top-level build.gradle:                           │\n'
                     '│ /android/build.gradle.                                                                           │\n'
                     '│                                                                                                  │\n'
@@ -1328,6 +1323,43 @@ Execution failed for task ':app:bundleReleaseResources'.
                     '│  compileSdk version in the following file:                                                       │\n'
                     '│ /android/app/build.gradle                                                                        │\n'
                     '└──────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+                ''
+        )
+    );
+  }, overrides: <Type, Generator>{
+    GradleUtils: () => FakeGradleUtils(),
+    Platform: () => fakePlatform('android'),
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('AGP 7.3.0 R8 bug', () async {
+    const String errorExample = r'''
+ERROR:/Users/mackall/.gradle/caches/transforms-3/bd2c84591857c6d4c308221ffece862e/transformed/jetified-media3-exoplayer-dash-1.4.0-runtime.jar: R8: com.android.tools.r8.internal.Y10: Unused argument with users in androidx
+    ''';
+
+    await r8DexingBugInAgp73Handler.handler(
+      line: errorExample,
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      usesAndroidX: true,
+    );
+
+    expect(
+        testLogger.statusText,
+        contains(
+            '\n'
+                '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────────┐\n'
+                '│ [!] Version 7.3 of the Android Gradle Plugin (AGP) uses a version of R8 that contains a bug      │\n'
+                '│ which causes this error (see more info at https://issuetracker.google.com/issues/242308990).     │\n'
+                '│ To fix this error, update to a newer version of AGP (at least 7.4.0).                            │\n'
+                '│                                                                                                  │\n'
+                '│  The version of AGP that your project uses is likely defined in:                                 │\n'
+                '│ /android/settings.gradle,                                                                        │\n'
+                "│ in the 'plugins' closure.                                                                        │\n"
+                '│  Alternatively, if your project was created with an older version of the templates, it is likely │\n'
+                '│ in the buildscript.dependencies closure of the top-level build.gradle:                           │\n'
+                '│ /android/build.gradle.                                                                           │\n'
+                '└──────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
                 ''
         )
     );

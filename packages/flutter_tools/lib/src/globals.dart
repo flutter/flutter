@@ -41,6 +41,7 @@ import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/xcdevice.dart';
 import 'macos/xcode.dart';
+import 'native_assets.dart';
 import 'persistent_tool_state.dart';
 import 'pre_run_validator.dart';
 import 'project.dart';
@@ -305,3 +306,5 @@ NonNullSafeBuilds get nonNullSafeBuilds => context.get<NonNullSafeBuilds>() ?? N
 /// A value of [null] indicates that no installation of java could be found on
 /// the host machine.
 Java? get java => context.get<Java>();
+
+TestCompilerNativeAssetsBuilder? get nativeAssetsBuilder => context.get<TestCompilerNativeAssetsBuilder>();
