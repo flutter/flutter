@@ -1193,8 +1193,8 @@ enum ResizeImagePolicy {
 ///
 /// The [width] and [height] parameters refer to logical pixels.
 ///
-/// Logical pixels are roughly the same visual size across devices.
-/// Physical pixels are the size of the actual hardware pixels on the device.
+/// Logical pixels have roughly the same visual size across devices, whereas
+/// physical pixels correspond to actual device hardware.
 /// The number of physical pixels per logical pixel is described by the `devicePixelRatio`.
 ///
 /// For example, if you want to resize the image to half of the screen's width, you can use:
