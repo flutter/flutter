@@ -1198,7 +1198,8 @@ enum ResizeImagePolicy {
 ///
 /// Logical pixels have roughly the same visual size across devices, whereas
 /// physical pixels correspond to actual device hardware.
-/// The number of physical pixels per logical pixel is described by the [ui.FlutterView.devicePixelRatio].
+/// The number of physical pixels per logical pixel is described by the
+/// [ui.FlutterView.devicePixelRatio].
 ///
 /// This allows finer control of the size of the image in [ImageCache] and is
 /// generally used to reduce the memory footprint of [ImageCache].
