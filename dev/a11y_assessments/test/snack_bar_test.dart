@@ -17,4 +17,11 @@ void main() {
     await tester.pump();
     expect(find.text(snackBarText), findsOneWidget);
   });
+
+  testWidgets('snack bar demo page has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, SnackBarUseCase());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('SnackBar Demo');
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
+  });
 }
