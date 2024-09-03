@@ -55,7 +55,9 @@ void main() {
     return;
   }
 
-  test('analyze_snippet_code smoke test', () {
+  // TODO(scheglov): Restore after landing Dart SDK changes.
+  // See https://github.com/flutter/flutter/issues/154413
+  test('analyze_snippet_code smoke test', skip: true, () {
     final ProcessResult process = Process.runSync(
       '../../bin/cache/dart-sdk/bin/dart',
       <String>[
@@ -78,7 +80,9 @@ void main() {
     expect(process.exitCode, 1);
   });
 
-  test('Analyzes dart:ui code', () {
+  // TODO(scheglov): Restore after landing Dart SDK changes.
+  // See https://github.com/flutter/flutter/issues/154413
+  test('Analyzes dart:ui code', skip: true, () {
     final ProcessResult process = Process.runSync(
       '../../bin/cache/dart-sdk/bin/dart',
       <String>[
