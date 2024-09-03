@@ -43,6 +43,7 @@ if (build_glfw_shell) {
 }
 
 _public_headers = [
+  "public/flutter_linux/fl_application.h",
   "public/flutter_linux/fl_basic_message_channel.h",
   "public/flutter_linux/fl_binary_codec.h",
   "public/flutter_linux/fl_binary_messenger.h",
@@ -99,6 +100,7 @@ source_set("flutter_linux_sources") {
   sources = [
     "fl_accessible_node.cc",
     "fl_accessible_text_field.cc",
+    "fl_application.cc",
     "fl_basic_message_channel.cc",
     "fl_binary_codec.cc",
     "fl_binary_messenger.cc",
@@ -197,6 +199,7 @@ executable("flutter_linux_unittests") {
   sources = [
     "fl_accessible_node_test.cc",
     "fl_accessible_text_field_test.cc",
+    "fl_application_test.cc",
     "fl_basic_message_channel_test.cc",
     "fl_binary_codec_test.cc",
     "fl_binary_messenger_test.cc",

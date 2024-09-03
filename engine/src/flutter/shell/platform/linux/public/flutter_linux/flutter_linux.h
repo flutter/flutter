@@ -7,6 +7,7 @@
 
 #define __FLUTTER_LINUX_INSIDE__
 
+#include <flutter_linux/fl_application.h>
 #include <flutter_linux/fl_basic_message_channel.h>
 #include <flutter_linux/fl_binary_codec.h>
 #include <flutter_linux/fl_binary_messenger.h>
