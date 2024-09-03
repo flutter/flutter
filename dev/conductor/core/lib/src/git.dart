@@ -33,7 +33,7 @@ class Git {
     _reportFailureAndExit(args, workingDirectory, result, explanation);
   }
 
-  Future<ProcessResult> run(
+  Future<int> run(
     List<String> args,
     String explanation, {
     bool allowNonZeroExitCode = false,
@@ -48,7 +48,7 @@ class Git {
     if (result.exitCode != 0 && !allowNonZeroExitCode) {
       _reportFailureAndExit(args, workingDirectory, result, explanation);
     }
-    return result;
+    return result.exitCode;
   }
 
   Future<ProcessResult> _run(List<String> args, String workingDirectory) async {
