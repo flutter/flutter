@@ -80,7 +80,7 @@ void main() {
         '--no-terminate-stray-dart-processes',
         '-t', 'smoke_test_setup_failure',
       ]);
-      
+
       // If this test fails, the reason is usually buried in stderr.
       final Stream<String> stderr = process.stderr.transform(utf8.decoder);
       stderr.listen(printOnFailure);
