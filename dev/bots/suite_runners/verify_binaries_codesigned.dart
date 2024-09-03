@@ -5,7 +5,7 @@
 import 'dart:convert';
 import 'dart:io' as io;
 
-import 'package:path/path.dart' as path;
+import 'package:file/file.dart';
 import 'package:process/process.dart';
 
 import '../run_command.dart';
@@ -16,11 +16,13 @@ class Context {
     required this.flutterRoot,
     required this.printer,
     required this.processManager,
+    required this.fs,
   });
 
   final String flutterRoot;
   final void Function(String) printer;
   final ProcessManager processManager;
+  final FileSystem fs;
 
   Future<void> verifyCodesignedTestRunner() async {
     printer('${green}Running binaries codesign verification$reset');
@@ -85,7 +87,7 @@ class Context {
       'dart-sdk/bin/dartaotruntime',
       'dart-sdk/bin/utils/gen_snapshot',
       'dart-sdk/bin/utils/wasm-opt',
-    ].map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
+    ].map((String relativePath) => fs.path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
   }
 
   /// Binaries that are only expected to be codesigned.
@@ -120,7 +122,7 @@ class Context {
       'artifacts/engine/ios/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
       'artifacts/ios-deploy/ios-deploy',
     ]
-    .map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
+    .map((String relativePath) => fs.path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
   }
 
   /// xcframeworks that are expected to be codesigned.
@@ -139,7 +141,7 @@ class Context {
       'artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework',
       'artifacts/engine/darwin-x64/FlutterMacOS.xcframework',
     ]
-    .map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
+    .map((String relativePath) => fs.path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
   }
 
   /// Verify the existence of all expected binaries in cache.
@@ -150,7 +152,7 @@ class Context {
   /// [binariesWithEntitlements] or [binariesWithoutEntitlements] lists should
   /// be updated accordingly.
   Future<void> verifyExist() async {
-    final List<String> binaryPaths = await findBinaryPaths(path.join(flutterRoot, 'bin', 'cache'));
+    final List<String> binaryPaths = await findBinaryPaths(fs.path.join(flutterRoot, 'bin', 'cache'));
     final List<String> allExpectedFiles = binariesWithEntitlements + binariesWithoutEntitlements;
     final Set<String> foundFiles = <String>{
       for (final String binaryPath in binaryPaths)
@@ -179,7 +181,7 @@ class Context {
     final List<String> unsignedFiles = <String>[];
     final List<String> wrongEntitlementBinaries = <String>[];
     final List<String> unexpectedFiles = <String>[];
-    final String cacheDirectory =  path.join(flutterRoot, 'bin', 'cache');
+    final String cacheDirectory =  fs.path.join(flutterRoot, 'bin', 'cache');
 
     final List<String> binariesAndXcframeworks = <String>[
       ...await findBinaryPaths(cacheDirectory),

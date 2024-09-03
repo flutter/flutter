@@ -54,6 +54,7 @@ import 'dart:io' as system show exit;
 import 'dart:io' hide exit;
 import 'dart:math' as math;
 
+import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
@@ -157,6 +158,7 @@ Future<void> main(List<String> args) async {
         flutterRoot: flutterRoot,
         processManager: const LocalProcessManager(),
         printer: print,
+        fs: const LocalFileSystem(),
       ).verifyCodesignedTestRunner,
       kTestHarnessShardName: testHarnessTestsRunner, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });

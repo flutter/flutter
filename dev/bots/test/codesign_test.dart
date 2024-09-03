@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
+
 import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 import '../suite_runners/verify_binaries_codesigned.dart';
 import './common.dart';
@@ -22,6 +24,7 @@ void main() async {
       flutterRoot: flutterRoot,
       printer: (String _) {},
       processManager: processManager,
+      fs: MemoryFileSystem.test(),
     );
     allExpectedFiles = ctx.binariesWithEntitlements + ctx.binariesWithoutEntitlements;
     allFilesStdout = allExpectedFiles.join('\n');
