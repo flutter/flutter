@@ -287,7 +287,6 @@ class IconTreeShaker {
   ) async {
     final List<String> cmd = <String>[
       dart.path,
-      '--disable-dart-dev',
       constFinder.path,
       '--kernel-file', appDill.path,
       '--class-library-uri', 'package:flutter/src/widgets/icon_data.dart',

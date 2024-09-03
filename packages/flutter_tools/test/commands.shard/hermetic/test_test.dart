@@ -356,10 +356,6 @@ dev_dependencies:
           ).toJson(),
         ),
         FakeVmServiceRequest(
-          method: 'getVersion',
-          jsonResponse: Version(major: 3, minor: 57).toJson(),
-        ),
-        FakeVmServiceRequest(
           method: 'getSourceReport',
           args: <String, Object>{
             'isolateId': '1',
@@ -367,6 +363,7 @@ dev_dependencies:
             'forceCompile': true,
             'reportLines': true,
             'libraryFilters': <String>['package:$currentPackageName/'],
+            'librariesAlreadyCompiled': <Object>[],
           },
           jsonResponse: SourceReport(
             ranges: <SourceReportRange>[],
@@ -411,10 +408,6 @@ dev_dependencies:
           ).toJson(),
         ),
         FakeVmServiceRequest(
-          method: 'getVersion',
-          jsonResponse: Version(major: 3, minor: 57).toJson(),
-        ),
-        FakeVmServiceRequest(
           method: 'getSourceReport',
           args: <String, Object>{
             'isolateId': '1',
@@ -422,6 +415,7 @@ dev_dependencies:
             'forceCompile': true,
             'reportLines': true,
             'libraryFilters': <String>['package:test_api/'],
+            'librariesAlreadyCompiled': <Object>[],
           },
           jsonResponse: SourceReport(
             ranges: <SourceReportRange>[],

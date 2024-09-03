@@ -2427,6 +2427,44 @@ void main() {
     expect(box, paints..rrect(color: theme.colorScheme.primary));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/131120.
+  testWidgets('Focus traversal ignores non visible entries', (WidgetTester tester) async {
+    final FocusNode buttonFocusNode = FocusNode();
+    addTearDown(buttonFocusNode.dispose);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Column(
+          children: <Widget>[
+            DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren),
+            ElevatedButton(
+              focusNode: buttonFocusNode,
+              onPressed: () {},
+              child: const Text('Button'),
+            )
+          ],
+        ),
+      ),
+    ));
+
+    // Move the focus to the text field.
+    primaryFocus!.nextFocus();
+    await tester.pump();
+    final Element textField = tester.element(find.byType(TextField));
+    expect(Focus.of(textField).hasFocus, isTrue);
+
+    // Move the focus to the dropdown trailing icon.
+    primaryFocus!.nextFocus();
+    await tester.pump();
+    final Element iconButton = tester.firstElement(find.byIcon(Icons.arrow_drop_down));
+    expect(Focus.of(iconButton).hasFocus, isTrue);
+
+    // Move the focus to the elevated button.
+    primaryFocus!.nextFocus();
+    await tester.pump();
+    expect(buttonFocusNode.hasFocus, isTrue);
+  });
+
   testWidgets('DropdownMenu honors inputFormatters', (WidgetTester tester) async {
     int called = 0;
     final TextInputFormatter formatter = TextInputFormatter.withFunction(
@@ -2562,7 +2600,7 @@ void main() {
             DropdownMenu<int>(
               dropdownMenuEntries: <DropdownMenuEntry<int>>[],
             ),
-             DropdownMenu<int>(
+            DropdownMenu<int>(
               textAlign: TextAlign.center,
               dropdownMenuEntries: <DropdownMenuEntry<int>>[],
             ),
@@ -2722,6 +2760,36 @@ void main() {
         textDirection: TextDirection.ltr,
       ),
     );
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/151854.
+  testWidgets('scrollToHighlight does not scroll parent', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ListView(
+            controller: controller,
+            children: <Widget>[
+              ListView(
+                shrinkWrap: true,
+                children: <Widget>[DropdownMenu<TestMenu>(
+                  initialSelection: menuChildren.last.value,
+                  dropdownMenuEntries: menuChildren,
+                )],
+              ),
+              const SizedBox(height: 1000.0),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField).first);
+    await tester.pumpAndSettle();
+    expect(controller.offset, 0.0);
   });
 }
 

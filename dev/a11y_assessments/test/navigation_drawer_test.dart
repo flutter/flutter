@@ -23,7 +23,7 @@ void main() {
 
   testWidgets('navigation drawer has one h1 tag', (WidgetTester tester) async {
     await pumpsUseCase(tester, NavigationDrawerUseCase());
-    final Finder findHeadingLevelOnes = find.bySemanticsLabel('Navigation Drawer Demo');
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('NavigationDrawer Demo');
     await tester.pumpAndSettle();
     expect(findHeadingLevelOnes, findsOne);
   });

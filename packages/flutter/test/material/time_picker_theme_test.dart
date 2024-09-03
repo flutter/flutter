@@ -858,6 +858,42 @@ void main() {
     expect(paragraph.text.style!.fontSize, 35.0);
     expect(paragraph.text.style!.fontStyle, FontStyle.italic);
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/153549.
+  testWidgets('Time picker hour minute does not resize on error', (WidgetTester tester) async {
+    final TimePickerThemeData timePickerTheme = _timePickerTheme(includeInputDecoration: true);
+    final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
+    await tester.pumpWidget(_TimePickerLauncher(themeData: theme, entryMode: TimePickerEntryMode.input));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 72.0));
+
+    // Enter invalid hour.
+    await tester.enterText(find.byType(TextField).first, 'AB');
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 72.0));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/153549.
+  testWidgets('Material2 - Time picker hour minute does not resize on error', (WidgetTester tester) async {
+    final TimePickerThemeData timePickerTheme = _timePickerTheme(includeInputDecoration: true);
+    final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme, useMaterial3: false);
+    await tester.pumpWidget(_TimePickerLauncher(themeData: theme, entryMode: TimePickerEntryMode.input));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
+
+    // Enter invalid hour.
+    await tester.enterText(find.byType(TextField).first, 'AB');
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
+  });
 }
 
 final Color _selectedColor = Colors.green[100]!;
@@ -969,4 +1005,11 @@ final Finder findDialPaint = find.descendant(
 
 ButtonStyle _actionButtonStyle(WidgetTester tester, String text) {
   return tester.widget<TextButton>(find.widgetWithText(TextButton, text)).style!;
+}
+
+Finder findBorderPainter() {
+  return find.descendant(
+    of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
+    matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
+  );
 }
