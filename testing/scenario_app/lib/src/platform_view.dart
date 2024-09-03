@@ -680,6 +680,33 @@ class PlatformViewClipRectScenario extends Scenario with _BasePlatformViewScenar
   }
 }
 
+/// Platform view with clip rect, with multiple clips.
+class PlatformViewClipRectMultipleClipsScenario extends Scenario with _BasePlatformViewScenarioMixin {
+  /// Constructs a platform view with clip rect scenario.
+  PlatformViewClipRectMultipleClipsScenario(
+    super.view, {
+    required this.id,
+  });
+
+  /// The platform view identifier.
+  final int id;
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final SceneBuilder builder = SceneBuilder()
+      ..pushClipRect(const Rect.fromLTRB(100, 100, 400, 400))
+      ..pushClipRect(const Rect.fromLTRB(200, 200, 600, 600));
+
+    addPlatformView(
+      id,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+    );
+
+    finishBuilder(builder);
+  }
+}
+
 /// Platform view with clip rect then the PlatformView is moved for 10 frames.
 ///
 /// The clip rect moves with the same transform matrix with the PlatformView.
@@ -735,6 +762,64 @@ class PlatformViewClipRectAfterMovedScenario extends Scenario with _BasePlatform
   }
 }
 
+
+/// Platform view with clip rect with multiple clips then the PlatformView is moved for 10 frames.
+///
+/// The clip rect moves with the same transform matrix with the PlatformView.
+class PlatformViewClipRectAfterMovedMultipleClipsScenario extends Scenario with _BasePlatformViewScenarioMixin {
+  /// Constructs a platform view with clip rect scenario.
+  PlatformViewClipRectAfterMovedMultipleClipsScenario(
+    super.view, {
+    required this.id,
+  });
+
+  /// The platform view identifier.
+  final int id;
+
+  int _numberOfFrames = 0;
+
+  double _y = 100.0;
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final Matrix4 translateMatrix = Matrix4.identity()..translate(0.0, _y);
+    final SceneBuilder builder = SceneBuilder()
+      ..pushTransform(translateMatrix.storage)
+      ..pushClipRect(const Rect.fromLTRB(100, 100, 400, 400))
+      ..pushClipRect(const Rect.fromLTRB(200, 200, 600, 600));
+
+    addPlatformView(
+      _numberOfFrames == 10? 10000: id,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+    );
+
+    // Add a translucent rect that has the same size of PlatformView.
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, 500, 500),
+      Paint()..color = const Color(0x22FF0000),
+    );
+    final Picture picture = recorder.endRecording();
+    builder.addPicture(Offset.zero, picture);
+
+    finishBuilder(builder);
+    super.onBeginFrame(duration);
+  }
+
+  @override
+  void onDrawFrame() {
+    if (_numberOfFrames < 10) {
+      _numberOfFrames ++;
+      _y -= 10;
+      view.platformDispatcher.scheduleFrame();
+    }
+    super.onDrawFrame();
+  }
+}
+
+
 /// Platform view with clip rrect.
 class PlatformViewClipRRectScenario extends PlatformViewScenario {
   /// Constructs a platform view with clip rrect scenario.
@@ -757,6 +842,40 @@ class PlatformViewClipRRectScenario extends PlatformViewScenario {
         bottomLeft: const Radius.circular(50),
       ),
     );
+
+    addPlatformView(
+      id,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+    );
+
+    finishBuilder(builder);
+  }
+}
+
+/// Platform view with clip rrect, with multiple clips.
+class PlatformViewClipRRectMultipleClipsScenario extends PlatformViewScenario {
+  /// Constructs a platform view with clip rrect scenario.
+  PlatformViewClipRRectMultipleClipsScenario(
+    super.view, {
+    super.id = 0,
+  });
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final SceneBuilder builder = SceneBuilder();
+    builder..pushClipRRect(
+      RRect.fromLTRBAndCorners(
+        100,
+        100,
+        400,
+        400,
+        topLeft: const Radius.circular(15),
+        topRight: const Radius.circular(50),
+        bottomLeft: const Radius.circular(50),
+      ),
+    )
+      ..pushClipRect(const Rect.fromLTRB(200, 0, 600, 600));
 
     addPlatformView(
       id,
@@ -802,6 +921,41 @@ class PlatformViewLargeClipRRectScenario extends PlatformViewScenario {
   }
 }
 
+/// Platform view with clip rrect, with multiple clips.
+/// The bounding rect of the rrect is the same as PlatformView and only the corner radii clips the PlatformView.
+class PlatformViewLargeClipRRectMultipleClipsScenario extends PlatformViewScenario {
+  /// Constructs a platform view with large clip rrect scenario.
+  PlatformViewLargeClipRRectMultipleClipsScenario(
+    super.view, {
+    super.id = 0,
+  });
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final SceneBuilder builder = SceneBuilder();
+    builder..pushClipRRect(
+      RRect.fromLTRBAndCorners(
+        0,
+        0,
+        500,
+        500,
+        topLeft: const Radius.circular(15),
+        topRight: const Radius.circular(50),
+        bottomLeft: const Radius.circular(50),
+      ),
+    )
+      ..pushClipRect(const Rect.fromLTRB(200, 0, 600, 600));
+
+    addPlatformView(
+      id,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+    );
+
+    finishBuilder(builder);
+  }
+}
+
 /// Platform view with clip path.
 class PlatformViewClipPathScenario extends PlatformViewScenario {
   /// Constructs a platform view with clip path scenario.
@@ -829,6 +983,35 @@ class PlatformViewClipPathScenario extends PlatformViewScenario {
   }
 }
 
+/// Platform view with clip path, with multiple clips.
+class PlatformViewClipPathMultipleClipsScenario extends PlatformViewScenario {
+  /// Constructs a platform view with clip path scenario.
+  PlatformViewClipPathMultipleClipsScenario(
+    super.view, {
+    super.id = 0,
+  });
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final Path path = Path()
+      ..moveTo(100, 100)
+      ..quadraticBezierTo(50, 250, 100, 400)
+      ..lineTo(350, 400)
+      ..cubicTo(400, 300, 300, 200, 350, 100)
+      ..close();
+
+    final SceneBuilder builder = SceneBuilder()..pushClipPath(path)
+      ..pushClipRect(const Rect.fromLTRB(200, 200, 600, 600));
+
+    addPlatformView(
+      id,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+    );
+    finishBuilder(builder);
+  }
+}
+
 /// Platform view with clip rect after transformed.
 class PlatformViewClipRectWithTransformScenario extends PlatformViewScenario {
   /// Constructs a platform view with clip rect with transform scenario.
@@ -846,6 +1029,45 @@ class PlatformViewClipRectWithTransformScenario extends PlatformViewScenario {
 
     final SceneBuilder builder = SceneBuilder()..pushTransform(matrix4.storage);
     builder.pushClipRect(const Rect.fromLTRB(100, 100, 400, 400));
+
+    addPlatformView(
+      id,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+    );
+
+    // Add a translucent rect that has the same size of PlatformView.
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, 500, 500),
+      Paint()..color = const Color(0x22FF0000),
+    );
+    final Picture picture = recorder.endRecording();
+    builder.addPicture(Offset.zero, picture);
+
+    finishBuilder(builder);
+  }
+}
+
+/// Platform view with clip rect after transformed, with multiple clips.
+class PlatformViewClipRectWithTransformMultipleClipsScenario extends PlatformViewScenario {
+  /// Constructs a platform view with clip rect with transform scenario.
+  PlatformViewClipRectWithTransformMultipleClipsScenario(
+    super.view, {
+    super.id = 0,
+  });
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final Matrix4 matrix4 = Matrix4.identity()
+      ..rotateZ(1)
+      ..scale(0.5, 0.5, 1.0)
+      ..translate(1000.0, 100.0);
+
+    final SceneBuilder builder = SceneBuilder()..pushTransform(matrix4.storage);
+    builder..pushClipRect(const Rect.fromLTRB(100, 100, 400, 400))
+      ..pushClipRect(const Rect.fromLTRB(200, 200, 600, 600));
 
     addPlatformView(
       id,
@@ -914,6 +1136,55 @@ class PlatformViewClipRRectWithTransformScenario extends PlatformViewScenario {
   }
 }
 
+/// Platform view with clip rrect after transformed, with multiple clips.
+class PlatformViewClipRRectWithTransformMultipleClipsScenario extends PlatformViewScenario {
+  /// Constructs a platform view with clip rrect with transform scenario.
+  PlatformViewClipRRectWithTransformMultipleClipsScenario(
+    super.view, {
+    super.id = 0,
+  });
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final Matrix4 matrix4 = Matrix4.identity()
+      ..rotateZ(1)
+      ..scale(0.5, 0.5, 1.0)
+      ..translate(1000.0, 100.0);
+
+    final SceneBuilder builder = SceneBuilder()..pushTransform(matrix4.storage);
+    builder..pushClipRRect(
+      RRect.fromLTRBAndCorners(
+        100,
+        100,
+        400,
+        400,
+        topLeft: const Radius.circular(15),
+        topRight: const Radius.circular(50),
+        bottomLeft: const Radius.circular(50),
+      ),
+    )
+      ..pushClipRect(const Rect.fromLTRB(200, 0, 600, 600));
+
+    addPlatformView(
+      id,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+    );
+
+    // Add a translucent rect that has the same size of PlatformView.
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, 500, 500),
+      Paint()..color = const Color(0x22FF0000),
+    );
+    final Picture picture = recorder.endRecording();
+    builder.addPicture(Offset.zero, picture);
+
+    finishBuilder(builder);
+  }
+}
+
 /// Platform view with clip rrect after transformed.
 /// The bounding rect of the rrect is the same as PlatformView and only the corner radii clips the PlatformView.
 class PlatformViewLargeClipRRectWithTransformScenario extends PlatformViewScenario {
@@ -942,6 +1213,56 @@ class PlatformViewLargeClipRRectWithTransformScenario extends PlatformViewScenar
         bottomLeft: const Radius.circular(50),
       ),
     );
+    addPlatformView(
+      id,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+    );
+
+    // Add a translucent rect that has the same size of PlatformView.
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, 500, 500),
+      Paint()..color = const Color(0x22FF0000),
+    );
+    final Picture picture = recorder.endRecording();
+    builder.addPicture(Offset.zero, picture);
+
+    finishBuilder(builder);
+  }
+}
+
+/// Platform view with clip rrect after transformed, with multiple clips.
+/// The bounding rect of the rrect is the same as PlatformView and only the corner radii clips the PlatformView.
+class PlatformViewLargeClipRRectWithTransformMultipleClipsScenario extends PlatformViewScenario {
+  /// Constructs a platform view with large clip rrect with transform scenario.
+  PlatformViewLargeClipRRectWithTransformMultipleClipsScenario(
+    super.view, {
+    super.id = 0,
+  });
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final Matrix4 matrix4 = Matrix4.identity()
+      ..rotateZ(1)
+      ..scale(0.5, 0.5, 1.0)
+      ..translate(1000.0, 100.0);
+
+    final SceneBuilder builder = SceneBuilder()..pushTransform(matrix4.storage);
+    builder..pushClipRRect(
+      RRect.fromLTRBAndCorners(
+        0,
+        0,
+        500,
+        500,
+        topLeft: const Radius.circular(15),
+        topRight: const Radius.circular(50),
+        bottomLeft: const Radius.circular(50),
+      ),
+    )
+      ..pushClipRect(const Rect.fromLTRB(200, 0, 600, 600));
+
     addPlatformView(
       id,
       dispatcher: view.platformDispatcher,
@@ -1006,6 +1327,52 @@ class PlatformViewClipPathWithTransformScenario extends PlatformViewScenario {
   }
 }
 
+/// Platform view with clip path after transformed, with multiple clips.
+class PlatformViewClipPathWithTransformMultipleClipsScenario extends PlatformViewScenario {
+  /// Constructs a platform view with clip path with transform scenario.
+  PlatformViewClipPathWithTransformMultipleClipsScenario(
+    super.view, {
+    super.id = 0,
+  });
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final Matrix4 matrix4 = Matrix4.identity()
+      ..rotateZ(1)
+      ..scale(0.5, 0.5, 1.0)
+      ..translate(1000.0, 100.0);
+
+    final SceneBuilder builder = SceneBuilder()..pushTransform(matrix4.storage);
+    final Path path = Path()
+      ..moveTo(100, 100)
+      ..quadraticBezierTo(50, 250, 100, 400)
+      ..lineTo(350, 400)
+      ..cubicTo(400, 300, 300, 200, 350, 100)
+      ..close();
+
+    builder..pushClipPath(path)
+      ..pushClipRect(const Rect.fromLTRB(200, 200, 600, 600));
+
+    addPlatformView(
+      id,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+    );
+
+    // Add a translucent rect that has the same size of PlatformView.
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, 500, 500),
+      Paint()..color = const Color(0x22FF0000),
+    );
+    final Picture picture = recorder.endRecording();
+    builder.addPicture(Offset.zero, picture);
+
+    finishBuilder(builder);
+  }
+}
+
 /// Two platform views, both have clip rects
 class TwoPlatformViewClipRect extends Scenario
     with _BasePlatformViewScenarioMixin {
@@ -1048,6 +1415,59 @@ class TwoPlatformViewClipRect extends Scenario
       text: 'platform view 2',
     );
 
+    builder.pop();
+    final Scene scene = builder.build();
+    view.render(scene);
+    scene.dispose();
+  }
+}
+
+/// Two platform views, both have clip rects, with multiple clips.
+class TwoPlatformViewClipRectMultipleClips extends Scenario
+    with _BasePlatformViewScenarioMixin {
+  /// Creates the PlatformView scenario.
+  TwoPlatformViewClipRectMultipleClips(
+    super.view, {
+    required this.firstId,
+    required this.secondId,
+  });
+
+  /// The platform view identifier to use for the first platform view.
+  final int firstId;
+
+  /// The platform view identifier to use for the second platform view.
+  final int secondId;
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final SceneBuilder builder = SceneBuilder();
+    builder.pushOffset(0, 600);
+    builder..pushClipRect(const Rect.fromLTRB(100, 100, 400, 400))
+      ..pushClipRect(const Rect.fromLTRB(200, 200, 600, 600));
+
+    addPlatformView(
+      firstId,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+      text: 'platform view 1',
+    );
+
+    builder.pop();
+    builder.pop();
+    builder.pop();
+
+    // Use a different rect to differentiate from the 1st clip rect.
+    builder..pushClipRect(const Rect.fromLTRB(100, 100, 300, 300))
+      ..pushClipRect(const Rect.fromLTRB(200, 200, 600, 600));
+
+    addPlatformView(
+      secondId,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+      text: 'platform view 2',
+    );
+
+    builder.pop();
     builder.pop();
     final Scene scene = builder.build();
     view.render(scene);
@@ -1124,6 +1544,81 @@ class TwoPlatformViewClipRRect extends Scenario
   }
 }
 
+/// Two platform views, both have clip rrects, with multiple clips.
+class TwoPlatformViewClipRRectMultipleClips extends Scenario
+    with _BasePlatformViewScenarioMixin {
+  /// Creates the PlatformView scenario.
+  TwoPlatformViewClipRRectMultipleClips(
+    super.view, {
+    required this.firstId,
+    required this.secondId,
+  });
+
+  /// The platform view identifier to use for the first platform view.
+  final int firstId;
+
+  /// The platform view identifier to use for the second platform view.
+  final int secondId;
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final SceneBuilder builder = SceneBuilder();
+    builder.pushOffset(0, 600);
+    builder..pushClipRRect(
+      RRect.fromLTRBAndCorners(
+        0,
+        0,
+        500,
+        500,
+        topLeft: const Radius.circular(15),
+        topRight: const Radius.circular(50),
+        bottomLeft: const Radius.circular(50),
+      ),
+    )
+      ..pushClipRect(const Rect.fromLTRB(200, 0, 600, 600));
+
+
+    addPlatformView(
+      firstId,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+      text: 'platform view 1',
+    );
+
+    builder.pop();
+    builder.pop();
+    builder.pop();
+
+    // Use a different rrect to differentiate from the 1st clip rrect.
+    builder..pushClipRRect(
+      RRect.fromLTRBAndCorners(
+        0,
+        0,
+        500,
+        500,
+        topLeft: const Radius.circular(100),
+        topRight: const Radius.circular(50),
+        bottomLeft: const Radius.circular(50),
+      ),
+    )
+      ..pushClipRect(const Rect.fromLTRB(200, 0, 600, 600));
+
+
+    addPlatformView(
+      secondId,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+      text: 'platform view 2',
+    );
+
+    builder.pop();
+    builder.pop();
+    final Scene scene = builder.build();
+    view.render(scene);
+    scene.dispose();
+  }
+}
+
 /// Two platform views, both have clip path
 class TwoPlatformViewClipPath extends Scenario
     with _BasePlatformViewScenarioMixin {
@@ -1180,6 +1675,76 @@ class TwoPlatformViewClipPath extends Scenario
       text: 'platform view 2',
     );
 
+    builder.pop();
+    final Scene scene = builder.build();
+    view.render(scene);
+    scene.dispose();
+  }
+}
+
+
+/// Two platform views, both have clip path, with multiple clips.
+class TwoPlatformViewClipPathMultipleClips extends Scenario
+    with _BasePlatformViewScenarioMixin {
+  /// Creates the PlatformView scenario.
+  TwoPlatformViewClipPathMultipleClips(
+    super.view, {
+    required this.firstId,
+    required this.secondId,
+  });
+
+  /// The platform view identifier to use for the first platform view.
+  final int firstId;
+
+  /// The platform view identifier to use for the second platform view.
+  final int secondId;
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final SceneBuilder builder = SceneBuilder();
+    builder.pushOffset(0, 600);
+    final Path path = Path()
+      ..moveTo(100, 100)
+      ..quadraticBezierTo(50, 250, 100, 400)
+      ..lineTo(350, 400)
+      ..cubicTo(400, 300, 300, 200, 350, 100)
+      ..close();
+
+    builder..pushClipPath(path)
+      ..pushClipRect(const Rect.fromLTRB(200, 200, 600, 600));
+
+
+    addPlatformView(
+      firstId,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+      text: 'platform view 1',
+    );
+
+    builder.pop();
+    builder.pop();
+    builder.pop();
+
+    // Use a different path to differentiate from the 1st clip path.
+    final Path path2 = Path()
+      ..moveTo(100, 100)
+      ..quadraticBezierTo(100, 150, 100, 400)
+      ..lineTo(350, 350)
+      ..cubicTo(400, 300, 300, 200, 350, 200)
+      ..close();
+
+    builder..pushClipPath(path2)
+      ..pushClipRect(const Rect.fromLTRB(200, 200, 600, 600));
+
+
+    addPlatformView(
+      secondId,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+      text: 'platform view 2',
+    );
+
+    builder.pop();
     builder.pop();
     final Scene scene = builder.build();
     view.render(scene);
@@ -1863,6 +2428,94 @@ class PlatformViewsWithClipsScrolling extends Scenario
             bottomLeft: const Radius.circular(50),
           ),
         );
+      }
+      addPlatformView(
+        i,
+        dispatcher: view.platformDispatcher,
+        sceneBuilder: builder,
+        text: 'platform view $i',
+        width: cellWidth,
+        height: cellHeight,
+      );
+      if (addedClipRRect) {
+        builder.pop();
+      }
+      builder.pop();
+      localOffset += cellHeight;
+    }
+
+    final Scene scene = builder.build();
+    view.render(scene);
+    scene.dispose();
+  }
+}
+
+/// Builds a scenario where many platform views with clips scrolling, with multiple clips.
+class PlatformViewsWithClipsScrollingMultipleClips extends Scenario
+    with _BasePlatformViewScenarioMixin {
+  /// Creates the PlatformView scenario.
+  PlatformViewsWithClipsScrollingMultipleClips(
+    super.view, {
+    required int firstPlatformViewId,
+    required int lastPlatformViewId,
+  }) :  _firstPlatformViewId = firstPlatformViewId,
+       _lastPlatformViewId = lastPlatformViewId;
+
+  final int _firstPlatformViewId;
+
+  final int _lastPlatformViewId;
+
+  double _offset = 0;
+
+  bool _movingUp = true;
+
+  @override
+  void onBeginFrame(Duration duration) {
+    _buildOneFrame(_offset);
+  }
+
+  @override
+  void onDrawFrame() {
+    // Scroll up until -1000, then scroll down until -1.
+    if (_offset < -500) {
+      _movingUp = false;
+    } else if (_offset > -1) {
+      _movingUp = true;
+    }
+
+    if (_movingUp) {
+      _offset -= 100;
+    } else {
+      _offset += 100;
+    }
+    view.platformDispatcher.scheduleFrame();
+    super.onDrawFrame();
+  }
+
+  Future<void> _buildOneFrame(double offset) async {
+    const double cellWidth = 1000;
+    double localOffset = offset;
+    final SceneBuilder builder = SceneBuilder();
+    const double cellHeight = 300;
+    for (int i = _firstPlatformViewId; i <= _lastPlatformViewId; i++) {
+      // Build a list view with platform views.
+      builder.pushOffset(0, localOffset);
+      bool addedClipRRect = false;
+      if (localOffset > -1) {
+        addedClipRRect = true;
+        builder..pushClipRRect(
+          RRect.fromLTRBAndCorners(
+            100,
+            100,
+            400,
+            400,
+            topLeft: const Radius.circular(15),
+            topRight: const Radius.circular(50),
+            bottomLeft: const Radius.circular(50),
+          ),
+        )
+      ..pushClipRect(const Rect.fromLTRB(200, 0, 600, 600));
+
       }
       addPlatformView(
         i,
