@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "D:/vscode"
+		}
+	],
+	"settings": {
+		"html.format.enable": false,
+		"githubPullRequests.ignoredPullRequestBranches": [
+			"master"
+		]
+	}
+}

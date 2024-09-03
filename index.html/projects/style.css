@@ -1,0 +1,11 @@
+.mainframe{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: grey;
+    opacity: 0.5;
+    border-radius: 20px;
+    padding: 20px;
+    margin: 20px;
+
+}

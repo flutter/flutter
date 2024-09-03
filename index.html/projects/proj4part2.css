@@ -1,0 +1,230 @@
+*{
+    margin-top: 0px;
+
+    justify-content: flex-start;
+    font-family:Arial, Helvetica, sans-serif
+
+    }
+
+.body{
+
+    text-align: center;
+    justify-content: center;
+
+    }
+
+.bg{
+    height:1150px;
+    width: 1528px;
+    margin-left: -10px;
+    margin-top: -20px;
+    border-color: #301934;
+    padding-left: 10px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-image: linear-gradient(to right , #E03FD8 , #301934)
+
+
+}
+.header{
+    background-color: #301934;
+    height: 70px;
+    width: 1500px;
+    margin-left: -10px;
+    margin-top: -1100px;
+    color: white;
+    border: 2px solid #301934;
+    padding: 2px;
+    border-radius: 25px;
+    margin-bottom: 100px;
+    color: white;
+    text-shadow: 2px 2px 4px #000000;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+
+}
+h3{
+    text-align:left ;
+    justify-content:center;
+    font-size: 200%;
+    margin-left: 40px;
+    margin-top: 19px;
+
+}
+
+.right{
+text-align: right;
+
+}
+.right1{
+    margin-top: -56px;
+    margin-right: 600px;
+}
+.right2{
+    margin-top:-34px ;
+    margin-right: 450px;
+}
+.right3{
+    margin-top: -35px;
+    margin-right: 300px;
+}
+.right4{
+    margin-top: -32px;
+    margin-right: 200px;
+}
+.flex-container{
+    display: flex;
+    align-items: center;
+    text-align: center;
+    padding-left: 400px;
+    margin: 2px 10px;
+    padding: 0px 0px;
+    justify-content: center;
+
+
+}
+.flex-container>div{
+    background-color: #f1f1f1;
+    margin: 10px 20px;
+
+    padding: 20px 0px;
+}
+.flex-container2{
+    display: flex;
+    align-items: center;
+    text-align: center;
+    padding-left: 400px;
+    margin: 2px 10px;
+    padding: 0px 0px;
+    justify-content: center;
+
+
+}
+.flex-container2>div{
+    background-color: #f1f1f1;
+    margin: 100px 20px;
+    padding: 20px 0px;
+    justify-content: center;
+}
+.img1{
+
+    height: 150px;
+    width: 150px;
+box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.p1{
+    padding-top: 50px;
+    padding-left: 50px;
+    height: 300px;
+    width: 280px;
+    padding-right: 50px;
+    transition-property: width height ;
+    transition-duration: 1s;
+    transition: transform 1s ease;
+
+}
+#p1{ transition-timing-function : ease-out;}
+
+.p1:hover{
+    transform: scale(1.05);
+}
+.p2{
+    padding-top: 50px;
+    height: 300px;
+    width: 280px;
+    padding-left: 50px;
+    padding-right: 50px;
+    transition-property: width height ;
+    transition-duration: 1s;
+
+}
+#p2{ transition-timing-function : ease-out ;}
+
+.p2:hover{
+    transform: scale(1.05);
+}
+.p3{
+    padding-top: 50px;
+    padding-left: 50px;
+    padding-right: 50px;
+    transition-property: width  height;
+    transition-duration: 1s;
+    height: 300px;
+    width: 280px;
+
+
+
+}
+#p3{ transition-timing-function : ease-out ;}
+
+.p3:hover{
+    transform: scale(1.05);
+
+}
+.p4{
+    padding-top: 50px;
+    transition-property: width height ;
+    transition-duration: 0.5s;
+    padding-left: 50px;
+    padding-right: 50px;
+    height: 300px;
+    width: 280px;
+
+
+}
+#p4{ transition-timing-function : ease-out ;}
+
+.p4:hover{
+    transform: scale(1.05);
+
+}
+.img2{
+    height: 150px;
+    width: 150px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.img3{
+
+    height: 150px;
+    width: 150px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.img4{
+
+    height: 150px;
+    width: 150px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.foot{
+    background-color: #301934;
+    height: 80px;
+    text-align: center;
+    width: 1500px;
+    margin-left: -10px;
+    margin-top: 5px;
+    color: white;
+    padding-right: 33px;
+    text-shadow: 2px 2px 4px #000000;
+}
+h5{
+    padding-top: 10px;
+    font-size: large;
+    margin-bottom: 10px;
+
+}
+h6{
+    font-size: medium;
+    margin-top: 10px;
+    margin-bottom: 3px;
+}
+button{
+    height: 40px;
+    width: 150px;
+    padding: 2px 2px;
+    border: 0.5px 0.5px;
+}
+@media {
+    min-width: 1535px;
+    min-height: 1200px;
+}
