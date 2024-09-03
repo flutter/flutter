@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // Examples can assume:
-// final BuildContext context;
+// late BuildContext context;
 
 /// @docImport 'package:flutter/widgets.dart';
 library;
