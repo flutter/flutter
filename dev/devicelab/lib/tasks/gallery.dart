@@ -134,7 +134,6 @@ class GalleryTransitionTest {
           : '${testFile}_test');
       section('DRIVE START');
       await flutter('drive', options: <String>[
-        '--no-dds',
         '--profile',
         if (enableImpeller != null && enableImpeller!) '--enable-impeller',
         if (enableImpeller != null && !enableImpeller!) '--no-enable-impeller',

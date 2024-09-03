@@ -246,17 +246,13 @@ class TestPrimaryPointerGestureRecognizer<T extends PointerEvent> extends Primar
   @override
   void acceptGesture(int pointer) {
     super.acceptGesture(pointer);
-    if (onAcceptGesture != null) {
-      onAcceptGesture!();
-    }
+    onAcceptGesture?.call();
   }
 
   @override
   void rejectGesture(int pointer) {
     super.rejectGesture(pointer);
-    if (onRejectGesture != null) {
-      onRejectGesture!();
-    }
+    onRejectGesture?.call();
   }
 
   @override

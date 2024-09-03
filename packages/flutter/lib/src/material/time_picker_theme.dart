@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'color_scheme.dart';
+/// @docImport 'dialog.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'text_field.dart';
+/// @docImport 'text_theme.dart';
+/// @docImport 'time_picker.dart';
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';

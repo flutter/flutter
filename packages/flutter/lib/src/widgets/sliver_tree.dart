@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'viewport.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -31,7 +34,7 @@ class TreeSliverNode<T> {
     T content, {
     List<TreeSliverNode<T>>? children,
     bool expanded = false,
-  }) : _expanded = children != null && children.isNotEmpty && expanded,
+  }) : _expanded = (children?.isNotEmpty ?? false) && expanded,
        _content = content,
        _children = children ?? <TreeSliverNode<T>>[];
 

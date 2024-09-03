@@ -459,9 +459,7 @@ class ReleaseGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void handlePrimaryPointer(PointerEvent event) {
     if (event is PointerUpEvent) {
       resolve(GestureDisposition.accepted);
-      if (onRelease != null) {
-        onRelease!();
-      }
+      onRelease?.call();
     }
   }
 }

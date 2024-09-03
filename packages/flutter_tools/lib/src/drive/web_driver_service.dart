@@ -55,8 +55,7 @@ class WebDriverService extends DriverService {
   Future<void> start(
     BuildInfo buildInfo,
     Device device,
-    DebuggingOptions debuggingOptions,
-    bool ipv6, {
+    DebuggingOptions debuggingOptions, {
     File? applicationBinary,
     String? route,
     String? userIdentifier,
@@ -72,7 +71,6 @@ class WebDriverService extends DriverService {
     _residentRunner = webRunnerFactory!.createWebRunner(
       flutterDevice,
       target: mainPath,
-      ipv6: ipv6,
       debuggingOptions: buildInfo.isRelease ?
         DebuggingOptions.disabled(
           buildInfo,
@@ -80,7 +78,6 @@ class WebDriverService extends DriverService {
           hostname: debuggingOptions.hostname,
           webRenderer: debuggingOptions.webRenderer,
           webUseWasm: debuggingOptions.webUseWasm,
-          webUseLocalCanvaskit: debuggingOptions.webUseLocalCanvaskit,
         )
         : DebuggingOptions.enabled(
           buildInfo,
@@ -89,7 +86,6 @@ class WebDriverService extends DriverService {
           disablePortPublication: debuggingOptions.disablePortPublication,
           webRenderer: debuggingOptions.webRenderer,
           webUseWasm: debuggingOptions.webUseWasm,
-          webUseLocalCanvaskit: debuggingOptions.webUseLocalCanvaskit,
         ),
       stayResident: true,
       flutterProject: FlutterProject.current(),
@@ -197,7 +193,6 @@ class WebDriverService extends DriverService {
       _dartSdkPath,
       ...arguments,
       testFile,
-      '-rexpanded',
     ], environment: <String, String>{
       'VM_SERVICE_URL': _webUri.toString(),
       ..._additionalDriverEnvironment(webDriver, browserName, androidEmulator),
@@ -234,7 +229,7 @@ class WebDriverService extends DriverService {
   }
 
   @override
-  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions, bool ipv6) async {
+  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions) async {
     throwToolExit('--use-existing-app is not supported with flutter web driver');
   }
 }

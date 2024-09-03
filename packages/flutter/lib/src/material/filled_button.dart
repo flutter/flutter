@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'elevated_button.dart';
+/// @docImport 'floating_action_button.dart';
+/// @docImport 'material.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -446,7 +453,7 @@ class FilledButton extends ButtonStyleButton {
   /// * `splashFactory` - Theme.splashFactory
   ///
   /// For the [FilledButton.icon] factory, the start (generally the left) value of
-  /// [padding] is reduced from 24 to 16.
+  /// [ButtonStyle.padding] is reduced from 24 to 16.
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     return switch (_variant) {
@@ -724,6 +731,29 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
   // No default fixedSize
 
   @override
+  MaterialStateProperty<double>? get iconSize =>
+    const MaterialStatePropertyAll<double>(18.0);
+
+  @override
+  MaterialStateProperty<Color>? get iconColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.38);
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onPrimary;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onPrimary;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.onPrimary;
+      }
+      return _colors.onPrimary;
+    });
+  }
+
+  @override
   MaterialStateProperty<Size>? get maximumSize =>
     const MaterialStatePropertyAll<Size>(Size.infinite);
 
@@ -844,6 +874,29 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<Size>(Size(64.0, 40.0));
 
   // No default fixedSize
+
+  @override
+  MaterialStateProperty<double>? get iconSize =>
+    const MaterialStatePropertyAll<double>(18.0);
+
+  @override
+  MaterialStateProperty<Color>? get iconColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.38);
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSecondaryContainer;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onSecondaryContainer;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.onSecondaryContainer;
+      }
+      return _colors.onSecondaryContainer;
+    });
+  }
 
   @override
   MaterialStateProperty<Size>? get maximumSize =>

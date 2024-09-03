@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'action_chip.dart';
+/// @docImport 'app.dart';
+/// @docImport 'choice_chip.dart';
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'filter_chip.dart';
+/// @docImport 'input_chip.dart';
+/// @docImport 'scaffold.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show clampDouble;
@@ -1360,7 +1369,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
     final Widget? avatar = iconTheme != null && hasAvatar
       ? IconTheme.merge(
-          data: theme.useMaterial3 ? chipDefaults.iconTheme!.merge(iconTheme) : iconTheme,
+          data: chipDefaults.iconTheme!.merge(iconTheme),
           child: widget.avatar!,
         )
       : widget.avatar;
@@ -1517,7 +1526,7 @@ class _IndividualOverrides extends MaterialStateProperty<Color?> {
   }
 }
 
-/// Redirects the [buttonRect.dy] passed to [RenderBox.hitTest] to the vertical
+/// Redirects the `buttonRect.dy` passed to [RenderBox.hitTest] to the vertical
 /// center of the widget.
 ///
 /// The primary purpose of this widget is to allow padding around the [RawChip]

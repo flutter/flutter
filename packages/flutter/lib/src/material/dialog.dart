@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/semantics.dart';
+/// @docImport 'package:flutter/services.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'dart:ui' show clampDouble, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
@@ -456,7 +464,7 @@ class AlertDialog extends StatelessWidget {
     Color? surfaceTintColor,
     String? semanticLabel,
     EdgeInsets insetPadding,
-    Clip clipBehavior,
+    Clip? clipBehavior,
     ShapeBorder? shape,
     AlignmentGeometry? alignment,
     bool scrollable,
@@ -1572,6 +1580,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     String? barrierLabel,
     bool useSafeArea = true,
     super.settings,
+    super.requestFocus,
     super.anchorPoint,
     super.traversalEdgeBehavior,
   }) : super(

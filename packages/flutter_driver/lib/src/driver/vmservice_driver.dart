@@ -109,8 +109,10 @@ class VMServiceFlutterDriver extends FlutterDriver {
       while (true) {
         final vms.Isolate isolate = await client.getIsolate(ref.id!);
         if (isolate.pauseEvent!.kind == vms.EventKind.kNone) {
+          _log('Waiting for isolate ${ref.number} to be runnable.');
           await Future<void>.delayed(_kPauseBetweenIsolateRefresh);
         } else {
+          _log('Isolate ${ref.number} is runnable.');
           return isolate;
         }
       }

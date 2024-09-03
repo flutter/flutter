@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'dropdown.dart';
+/// @docImport 'ink_well.dart';
+/// @docImport 'text_field.dart';
+/// @docImport 'text_form_field.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
@@ -903,7 +911,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   }
 
   static double _minWidth(RenderBox? box, double height) => box?.getMinIntrinsicWidth(height) ?? 0.0;
-  static double _maxWidth(RenderBox? box, double height) => box?.getMaxIntrinsicWidth(height) ?? 0.0 ;
+  static double _maxWidth(RenderBox? box, double height) => box?.getMaxIntrinsicWidth(height) ?? 0.0;
   static double _minHeight(RenderBox? box, double width) => box?.getMinIntrinsicHeight(width) ?? 0.0;
   static Size _boxSize(RenderBox? box) => box?.size ?? Size.zero;
   static double _getBaseline(RenderBox box, BoxConstraints boxConstraints) {
@@ -2614,19 +2622,34 @@ class InputDecoration {
   ///
   /// This type of input decoration does not include a border by default.
   ///
+  /// A collapsed decoration cannot have [labelText], [errorText], [counter],
+  /// [icon], prefixes, and suffixes.
+  ///
   /// Sets the [isCollapsed] property to true.
+  /// Sets the [contentPadding] property to [EdgeInsets.zero].
   const InputDecoration.collapsed({
     required this.hintText,
-    this.floatingLabelBehavior,
-    this.floatingLabelAlignment,
+    @Deprecated(
+      'Invalid parameter because a collapsed decoration has no label. '
+      'This feature was deprecated after v3.24.0-0.1.pre.',
+    )
+    FloatingLabelBehavior? floatingLabelBehavior,
+    @Deprecated(
+      'Invalid parameter because a collapsed decoration has no label. '
+      'This feature was deprecated after v3.24.0-0.1.pre.',
+    )
+    FloatingLabelAlignment? floatingLabelAlignment,
     this.hintStyle,
     this.hintTextDirection,
+    this.hintMaxLines,
+    this.hintFadeDuration,
     this.filled = false,
     this.fillColor,
     this.focusColor,
     this.hoverColor,
     this.border = InputBorder.none,
     this.enabled = true,
+    this.constraints,
   }) : icon = null,
        iconColor = null,
        label = null,
@@ -2637,8 +2660,6 @@ class InputDecoration {
        helperText = null,
        helperStyle = null,
        helperMaxLines = null,
-       hintMaxLines = null,
-       hintFadeDuration = null,
        error = null,
        errorText = null,
        errorStyle = null,
@@ -2667,8 +2688,11 @@ class InputDecoration {
        disabledBorder = null,
        enabledBorder = null,
        semanticCounterText = null,
-       alignLabelWithHint = false,
-       constraints = null;
+       // ignore: prefer_initializing_formals, (can't use initializing formals for a deprecated parameter).
+       floatingLabelBehavior = floatingLabelBehavior,
+       // ignore: prefer_initializing_formals, (can't use initializing formals for a deprecated parameter).
+       floatingLabelAlignment = floatingLabelAlignment,
+       alignLabelWithHint = false;
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
@@ -2774,6 +2798,9 @@ class InputDecoration {
   /// of [InputDecoration] that changes the color of the label to the
   /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
+  /// When the input field receives focus, the font size of [InputDecoration.label] is
+  /// scaled down by 75%.
+  ///
   /// {@tool dartpad}
   /// It's possible to override the label style for just the error state, or
   /// just the default state, or both.
@@ -2837,9 +2864,9 @@ class InputDecoration {
   /// Text that suggests what sort of input the field accepts.
   ///
   /// Displayed on top of the [InputDecorator.child] (i.e., at the same location
-  /// on the screen where text may be entered in the [InputDecorator.child])
-  /// when the input [isEmpty] and either (a) [labelText] is null or (b) the
-  /// input has the focus.
+  /// on the screen where text may be entered in the [InputDecorator.child]),
+  /// when [InputDecorator.isEmpty] is true and either (a) [labelText] is null
+  /// or (b) the input has the focus.
   final String? hintText;
 
   /// The style to use for the [hintText].
@@ -3011,7 +3038,8 @@ class InputDecoration {
 
   /// Whether the decoration is the same size as the input field.
   ///
-  /// A collapsed decoration cannot have [labelText], [errorText], an [icon].
+  /// A collapsed decoration cannot have [labelText], [errorText], [counter],
+  /// [icon], prefixes, and suffixes.
   ///
   /// To create a collapsed input decoration, use [InputDecoration.collapsed].
   final bool? isCollapsed;
@@ -3064,9 +3092,10 @@ class InputDecoration {
   /// This can be used to modify the [BoxConstraints] surrounding [prefixIcon].
   ///
   /// This property is particularly useful for getting the decoration's height
-  /// less than 48px. This can be achieved by setting [isDense] to true and
-  /// setting the constraints' minimum height and width to a value lower than
-  /// 48px.
+  /// less than the minimum tappable height (which is 48px when the visual
+  /// density is set to [VisualDensity.standard]). This can be achieved by
+  /// setting [isDense] to true and setting the constraints' minimum height
+  /// and width to a value lower than the minimum tappable size.
   ///
   /// {@tool dartpad}
   /// This example shows the differences between two `TextField` widgets when
@@ -3238,9 +3267,10 @@ class InputDecoration {
   /// This can be used to modify the [BoxConstraints] surrounding [suffixIcon].
   ///
   /// This property is particularly useful for getting the decoration's height
-  /// less than 48px. This can be achieved by setting [isDense] to true and
-  /// setting the constraints' minimum height and width to a value lower than
-  /// 48px.
+  /// less than the minimum tappable height (which is 48px when the visual
+  /// density is set to [VisualDensity.standard]). This can be achieved by
+  /// setting [isDense] to true and setting the constraints' minimum height
+  /// and width to a value lower than the minimum tappable size.
   ///
   /// If null, a [BoxConstraints] with a minimum width and height of 48px is
   /// used.
@@ -3667,8 +3697,10 @@ class InputDecoration {
       iconColor: iconColor ?? theme.iconColor,
       prefixStyle: prefixStyle ?? theme.prefixStyle,
       prefixIconColor: prefixIconColor ?? theme.prefixIconColor,
+      prefixIconConstraints: prefixIconConstraints ?? theme.prefixIconConstraints,
       suffixStyle: suffixStyle ?? theme.suffixStyle,
       suffixIconColor: suffixIconColor ?? theme.suffixIconColor,
+      suffixIconConstraints: suffixIconConstraints ?? theme.suffixIconConstraints,
       counterStyle: counterStyle ?? theme.counterStyle,
       filled: filled ?? theme.filled,
       fillColor: fillColor ?? theme.fillColor,
@@ -3873,7 +3905,7 @@ class InputDecoration {
 /// the current input decoration theme to initialize null [InputDecoration]
 /// properties.
 ///
-/// The [InputDecoration.applyDefaults] method is used to combine a input
+/// The [InputDecoration.applyDefaults] method is used to combine an input
 /// decoration theme with an [InputDecoration] object.
 @immutable
 class InputDecorationTheme with Diagnosticable {
@@ -3896,8 +3928,10 @@ class InputDecorationTheme with Diagnosticable {
     this.iconColor,
     this.prefixStyle,
     this.prefixIconColor,
+    this.prefixIconConstraints,
     this.suffixStyle,
     this.suffixIconColor,
+    this.suffixIconConstraints,
     this.counterStyle,
     this.filled = false,
     this.fillColor,
@@ -4038,6 +4072,21 @@ class InputDecorationTheme with Diagnosticable {
   /// If null, defaults to the [ColorScheme.primary].
   final Color? prefixIconColor;
 
+  /// The constraints to use for [InputDecoration.prefixIconConstraints].
+  ///
+  /// This can be used to modify the [BoxConstraints] surrounding
+  /// [InputDecoration.prefixIcon].
+  ///
+  /// This property is particularly useful for getting the decoration's height
+  /// less than the minimum tappable height (which is 48px when the visual
+  /// density is set to [VisualDensity.standard]). This can be achieved by
+  /// setting [isDense] to true and setting the constraints' minimum height
+  /// and width to a value lower than the minimum tappable size.
+  ///
+  /// If null, [BoxConstraints] with a minimum width and height of 48px is
+  /// used.
+  final BoxConstraints? prefixIconConstraints;
+
   /// The style to use for the [InputDecoration.suffixText].
   ///
   /// If [suffixStyle] is a [WidgetStateTextStyle], then the effective
@@ -4055,6 +4104,21 @@ class InputDecorationTheme with Diagnosticable {
   ///
   /// If null, defaults to the [ColorScheme.primary].
   final Color? suffixIconColor;
+
+  /// The constraints to use for [InputDecoration.suffixIconConstraints].
+  ///
+  /// This can be used to modify the [BoxConstraints] surrounding
+  /// [InputDecoration.suffixIcon].
+  ///
+  /// This property is particularly useful for getting the decoration's height
+  /// less than the minimum tappable height (which is 48px when the visual
+  /// density is set to [VisualDensity.standard]). This can be achieved by
+  /// setting [isDense] to true and setting the constraints' minimum height
+  /// and width to a value lower than the minimum tappable size.
+  ///
+  /// If null, [BoxConstraints] with a minimum width and height of 48px is
+  /// used.
+  final BoxConstraints? suffixIconConstraints;
 
   /// The style to use for the [InputDecoration.counterText].
   ///
@@ -4307,8 +4371,10 @@ class InputDecorationTheme with Diagnosticable {
     Color? iconColor,
     TextStyle? prefixStyle,
     Color? prefixIconColor,
+    BoxConstraints? prefixIconConstraints,
     TextStyle? suffixStyle,
     Color? suffixIconColor,
+    BoxConstraints? suffixIconConstraints,
     TextStyle? counterStyle,
     bool? filled,
     Color? fillColor,
@@ -4342,8 +4408,10 @@ class InputDecorationTheme with Diagnosticable {
       isCollapsed: isCollapsed ?? this.isCollapsed,
       prefixStyle: prefixStyle ?? this.prefixStyle,
       prefixIconColor: prefixIconColor ?? this.prefixIconColor,
+      prefixIconConstraints: prefixIconConstraints ?? this.prefixIconConstraints,
       suffixStyle: suffixStyle ?? this.suffixStyle,
       suffixIconColor: suffixIconColor ?? this.suffixIconColor,
+      suffixIconConstraints: suffixIconConstraints ?? this.suffixIconConstraints,
       counterStyle: counterStyle ?? this.counterStyle,
       filled: filled ?? this.filled,
       fillColor: fillColor ?? this.fillColor,
@@ -4388,8 +4456,10 @@ class InputDecorationTheme with Diagnosticable {
       iconColor: iconColor ?? inputDecorationTheme.iconColor,
       prefixStyle: prefixStyle ?? inputDecorationTheme.prefixStyle,
       prefixIconColor: prefixIconColor ?? inputDecorationTheme.prefixIconColor,
+      prefixIconConstraints: prefixIconConstraints ?? inputDecorationTheme.prefixIconConstraints,
       suffixStyle: suffixStyle ?? inputDecorationTheme.suffixStyle,
       suffixIconColor: suffixIconColor ?? inputDecorationTheme.suffixIconColor,
+      suffixIconConstraints: suffixIconConstraints ?? inputDecorationTheme.suffixIconConstraints,
       counterStyle: counterStyle ?? inputDecorationTheme.counterStyle,
       fillColor: fillColor ?? inputDecorationTheme.fillColor,
       activeIndicatorBorder: activeIndicatorBorder ?? inputDecorationTheme.activeIndicatorBorder,
@@ -4423,11 +4493,13 @@ class InputDecorationTheme with Diagnosticable {
     iconColor,
     prefixStyle,
     prefixIconColor,
+    prefixIconConstraints,
     suffixStyle,
     suffixIconColor,
-    counterStyle,
-    filled,
+    suffixIconConstraints,
     Object.hash(
+      counterStyle,
+      filled,
       fillColor,
       activeIndicatorBorder,
       outlineBorder,
@@ -4468,8 +4540,10 @@ class InputDecorationTheme with Diagnosticable {
         && other.iconColor == iconColor
         && other.prefixStyle == prefixStyle
         && other.prefixIconColor == prefixIconColor
+        && other.prefixIconConstraints == prefixIconConstraints
         && other.suffixStyle == suffixStyle
         && other.suffixIconColor == suffixIconColor
+        && other.suffixIconConstraints == suffixIconConstraints
         && other.counterStyle == counterStyle
         && other.floatingLabelBehavior == floatingLabelBehavior
         && other.floatingLabelAlignment == floatingLabelAlignment
@@ -4509,8 +4583,10 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('isCollapsed', isCollapsed, defaultValue: defaultTheme.isCollapsed));
     properties.add(DiagnosticsProperty<Color>('iconColor', iconColor, defaultValue: defaultTheme.iconColor));
     properties.add(DiagnosticsProperty<Color>('prefixIconColor', prefixIconColor, defaultValue: defaultTheme.prefixIconColor));
+    properties.add(DiagnosticsProperty<BoxConstraints>('prefixIconConstraints', prefixIconConstraints, defaultValue: defaultTheme.prefixIconConstraints));
     properties.add(DiagnosticsProperty<TextStyle>('prefixStyle', prefixStyle, defaultValue: defaultTheme.prefixStyle));
     properties.add(DiagnosticsProperty<Color>('suffixIconColor', suffixIconColor, defaultValue: defaultTheme.suffixIconColor));
+    properties.add(DiagnosticsProperty<BoxConstraints>('suffixIconConstraints', suffixIconConstraints, defaultValue: defaultTheme.suffixIconConstraints));
     properties.add(DiagnosticsProperty<TextStyle>('suffixStyle', suffixStyle, defaultValue: defaultTheme.suffixStyle));
     properties.add(DiagnosticsProperty<TextStyle>('counterStyle', counterStyle, defaultValue: defaultTheme.counterStyle));
     properties.add(DiagnosticsProperty<bool>('filled', filled, defaultValue: defaultTheme.filled));

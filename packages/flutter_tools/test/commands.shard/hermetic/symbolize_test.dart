@@ -46,7 +46,7 @@ void main() {
     ));
 
     await expectLater(
-      output.stream.transform(utf8.decoder),
+      output.stream.transform(utf8.decoder).transform(const LineSplitter()),
       emits('Hello, World'),
     );
   });

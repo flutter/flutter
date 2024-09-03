@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -11,7 +14,6 @@ import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
-import 'layout_builder.dart';
 import 'localizations.dart';
 import 'media_query.dart';
 import 'overlay.dart';
@@ -1084,8 +1086,6 @@ class _ReorderableItemState extends State<_ReorderableItem> {
     }
   }
   bool _dragging = false;
-  BoxConstraints? get childLayoutConstraints => _childLayoutConstraints;
-  BoxConstraints? _childLayoutConstraints;
 
   @override
   void initState() {
@@ -1117,13 +1117,10 @@ class _ReorderableItemState extends State<_ReorderableItem> {
       return SizedBox.fromSize(size: size);
     }
     _listState._registerItem(this);
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      _childLayoutConstraints = constraints;
-      return Transform(
-        transform: Matrix4.translationValues(offset.dx, offset.dy, 0.0),
-        child: widget.child,
-      );
-    });
+    return Transform.translate(
+      offset: offset,
+      child: widget.child,
+    );
   }
 
   @override
@@ -1343,7 +1340,7 @@ class _DragInfo extends Drag {
     dragOffset = itemRenderBox.globalToLocal(initialPosition);
     itemSize = item.context.size!;
     itemExtent = _sizeExtent(itemSize, scrollDirection);
-    itemLayoutConstraints = item.childLayoutConstraints!;
+    itemLayoutConstraints = itemRenderBox.constraints;
     scrollable = Scrollable.of(item.context);
   }
 

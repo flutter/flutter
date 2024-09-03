@@ -40,7 +40,6 @@ abstract class FlutterTestRunner {
     String? tags,
     String? excludeTags,
     bool enableVmService = false,
-    bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
     Map<String, String>? precompiledDillFiles,
@@ -108,7 +107,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String? tags,
     String? excludeTags,
     bool enableVmService = false,
-    bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
     Map<String, String>? precompiledDillFiles,
@@ -239,7 +237,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       ..addAll(testFiles.map((Uri uri) => uri.toString()));
 
     final InternetAddressType serverType =
-        ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
+        debuggingOptions.ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
     final loader.FlutterPlatform platform = loader.installHook(
       testWrapper: testWrapper,
@@ -827,6 +825,8 @@ class SpawnPlugin extends PlatformPlugin {
       'APP_NAME': flutterProject.manifest.appName,
       if (testAssetDirectory != null)
         'UNIT_TEST_ASSETS': testAssetDirectory,
+      if (nativeAssetsBuilder != null && globals.platform.isWindows)
+        'PATH': '${nativeAssetsBuilder.windowsBuildDirectory(flutterProject)};${globals.platform.environment['PATH']}',
     };
 
     globals.logger.printTrace('Starting flutter_tester process with command=$command, environment=$environment');

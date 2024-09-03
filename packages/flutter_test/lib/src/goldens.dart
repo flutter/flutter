@@ -55,8 +55,7 @@ import '_goldens_io.dart' if (dart.library.js_interop) '_goldens_web.dart' as go
 ///
 ///  * [LocalFileComparator] for the default [GoldenFileComparator]
 ///    implementation for `flutter test`.
-///  * [matchesGoldenFile], the function from [flutter_test] that invokes the
-///    comparator.
+///  * [matchesGoldenFile], the function that invokes the comparator.
 abstract class GoldenFileComparator {
   /// Compares the pixels of decoded png [imageBytes] against the golden file
   /// identified by [golden].
@@ -216,8 +215,7 @@ GoldenFileComparator goldenFileComparator = const TrivialComparator._();
 ///    not running in a web browser.
 ///  * [DefaultWebGoldenComparator] for the default [WebGoldenComparator]
 ///    implementation for `flutter test`.
-///  * [matchesGoldenFile], the function from [flutter_test] that invokes the
-///    comparator.
+///  * [matchesGoldenFile], the function that invokes the comparator.
 abstract class WebGoldenComparator {
   /// Compares the rendered pixels of size [width]x[height] that is being
   /// rendered on the top left of the screen against the golden file identified

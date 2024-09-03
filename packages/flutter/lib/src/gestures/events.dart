@@ -1849,9 +1849,7 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
 
   @override
   void respond({required bool allowPlatformDefault}) {
-    if (_onRespond != null) {
-      _onRespond!(allowPlatformDefault: allowPlatformDefault);
-    }
+    _onRespond?.call(allowPlatformDefault: allowPlatformDefault);
   }
 }
 

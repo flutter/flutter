@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app.dart';
+/// @docImport 'checkbox.dart';
+/// @docImport 'radio.dart';
+/// @docImport 'switch.dart';
+/// @docImport 'text_theme.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -706,6 +713,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     if (focused != _focused) {
       setState(() { _focused = focused; });
     }
+    showValueIndicator();
   }
 
   bool _hovering = false;
@@ -1811,6 +1819,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       final double increase = increaseValue();
       onChanged!(increase);
       onChangeEnd!(increase);
+      if (!_state.mounted) {
+        return;
+      }
+      _state.showValueIndicator();
     }
   }
 
@@ -1820,6 +1832,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       final double decrease = decreaseValue();
       onChanged!(decrease);
       onChangeEnd!(decrease);
+      if (!_state.mounted) {
+        return;
+      }
+      _state.showValueIndicator();
     }
   }
 

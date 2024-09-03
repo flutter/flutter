@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'text_button.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'banner_theme.dart';

@@ -7294,4 +7294,110 @@ void main() {
     ));
     expect(tester.getSize(find.byType(TabBar)).width, 800.0);
   });
+
+  testWidgets('TabBar.indicatorAnimation can customize tab indicator animation', (WidgetTester tester) async {
+    const double indicatorWidth = 50.0;
+    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      return Tab(
+        key: ValueKey<int>(index),
+        child: const SizedBox(width: indicatorWidth),
+      );
+    });
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTab({ TabIndicatorAnimation? indicatorAnimation }) {
+      return MaterialApp(
+        home: boilerplate(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              indicatorAnimation: indicatorAnimation,
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test tab indicator animation with TabIndicatorAnimation.linear.
+    await tester.pumpWidget(buildTab(indicatorAnimation: TabIndicatorAnimation.linear));
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+
+    // Idle at tab 0.
+    expect(
+      tabBarBox,
+      paints..rrect(rrect: RRect.fromLTRBAndCorners(
+        75.0, 45.0, 125.0, 48.0,
+        topLeft: const Radius.circular(3.0),
+        topRight: const Radius.circular(3.0),
+      ),
+    ));
+
+    // Start moving tab indicator.
+    controller.offset = 0.2;
+    await tester.pump();
+
+    expect(
+      tabBarBox,
+      paints..rrect(rrect: RRect.fromLTRBAndCorners(
+        115.0, 45.0, 165.0, 48.0,
+        topLeft: const Radius.circular(3.0),
+        topRight: const Radius.circular(3.0),
+      ),
+    ));
+
+    // Reset tab controller offset.
+    controller.offset = 0.0;
+
+    // Test tab indicator animation with TabIndicatorAnimation.elastic.
+    await tester.pumpWidget(buildTab(indicatorAnimation: TabIndicatorAnimation.elastic));
+    await tester.pumpAndSettle();
+
+    // Ease in sine (accelerating).
+    double accelerateIntepolation(double fraction) {
+      return 1.0 - math.cos((fraction * math.pi) / 2.0);
+    }
+
+    void expectIndicatorAttrs(
+      RenderBox tabBarBox, {
+      required Rect rect,
+      required Rect targetRect,
+    }) {
+      const double indicatorWeight = 3.0;
+      final double tabChangeProgress =  (controller.index - controller.animation!.value).abs();
+      final double leftFraction = accelerateIntepolation(tabChangeProgress);
+      final double rightFraction = accelerateIntepolation(tabChangeProgress);
+
+      final RRect rrect = RRect.fromLTRBAndCorners(
+        lerpDouble(rect.left, targetRect.left, leftFraction)!,
+        tabBarBox.size.height - indicatorWeight,
+        lerpDouble(rect.right, targetRect.right, rightFraction)!,
+        tabBarBox.size.height,
+        topLeft: const Radius.circular(3.0),
+        topRight: const Radius.circular(3.0),
+      );
+
+      expect(tabBarBox, paints..rrect(rrect: rrect));
+    }
+
+    Rect rect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    Rect targetRect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+
+    // Idle at tab 0.
+    expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
+
+    // Start moving tab indicator.
+    controller.offset = 0.2;
+    await tester.pump();
+
+    rect = const Rect.fromLTRB(115.0, 0.0, 165.0, 48.0);
+    targetRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
+    expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
+  });
 }

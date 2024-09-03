@@ -14,6 +14,52 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'semantics_tester.dart';
 
 void main() {
+  testWidgets('DefaultTextStyle.merge correctly merges arguments', (WidgetTester tester) async {
+    DefaultTextStyle defaultTextStyle = const DefaultTextStyle.fallback();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DefaultTextStyle(
+          style: const TextStyle(color: Colors.black, fontSize: 20),
+          textAlign: TextAlign.left,
+          softWrap: false,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+          textWidthBasis: TextWidthBasis.longestLine,
+          textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false),
+          child: DefaultTextStyle.merge(
+            style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+            softWrap: true,
+            overflow: TextOverflow.fade,
+            maxLines: 3,
+            textWidthBasis: TextWidthBasis.parent,
+            textHeightBehavior: const TextHeightBehavior(applyHeightToLastDescent: false),
+            child: Builder(
+              builder: (BuildContext context) {
+                defaultTextStyle = DefaultTextStyle.of(context);
+                return const Text('Text');
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(defaultTextStyle.style, const TextStyle(
+        color: Colors.red,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+    ));
+    expect(defaultTextStyle.textAlign, TextAlign.center);
+    expect(defaultTextStyle.softWrap, true);
+    expect(defaultTextStyle.overflow, TextOverflow.fade);
+    expect(defaultTextStyle.maxLines, 3);
+    expect(defaultTextStyle.textWidthBasis, TextWidthBasis.parent);
+    expect(defaultTextStyle.textHeightBehavior, const TextHeightBehavior(applyHeightToLastDescent: false));
+  });
+
   testWidgets('Text respects media query', (WidgetTester tester) async {
     await tester.pumpWidget(MediaQuery.withClampedTextScaling(
       minScaleFactor: 1.3,

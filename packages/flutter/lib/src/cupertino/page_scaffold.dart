@@ -4,8 +4,8 @@
 
 /// @docImport 'button.dart';
 /// @docImport 'nav_bar.dart';
-/// @docImport 'tab_scaffold.dart';
 /// @docImport 'route.dart';
+/// @docImport 'tab_scaffold.dart';
 library;
 
 import 'package:flutter/foundation.dart';

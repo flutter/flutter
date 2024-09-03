@@ -28,7 +28,6 @@ const String kFlushUIThreadTasksMethod = '_flutter.flushUIThreadTasks';
 const String kRunInViewMethod = '_flutter.runInView';
 const String kListViewsMethod = '_flutter.listViews';
 const String kScreenshotSkpMethod = '_flutter.screenshotSkp';
-const String kRenderFrameWithRasterStatsMethod = '_flutter.renderFrameWithRasterStats';
 const String kReloadAssetFonts = '_flutter.reloadAssetFonts';
 
 const String kFlutterToolAlias = 'Flutter Tools';
@@ -504,7 +503,8 @@ class FlutterVmService {
       // and should begin to shutdown due to the service connection closing.
       // Swallow the exception here and let the shutdown logic elsewhere deal
       // with cleaning up.
-      if (e.code == RPCErrorCodes.kServiceDisappeared) {
+      if (e.code == RPCErrorCodes.kServiceDisappeared ||
+          e.message.contains('Service connection disposed')) {
         return null;
       }
       rethrow;
@@ -579,6 +579,25 @@ class FlutterVmService {
       }
     }
 
+    // TODO(andrewkolos): this is to assist in troubleshooting
+    //  https://github.com/flutter/flutter/issues/152220 and should be reverted
+    //  once this issue is resolved.
+    final StreamSubscription<String> onReceiveSubscription = service.onReceive.listen(
+      (String message) {
+        globals.logger.printTrace(
+          'runInView VM service onReceive listener received "$message"',
+        );
+        final dynamic messageAsJson = jsonDecode(message);
+        // ignore: avoid_dynamic_calls -- Temporary code.
+        final dynamic messageKind = messageAsJson['params']?['event']?['kind'];
+        if (messageKind == 'IsolateRunnable') {
+          globals.logger.printTrace(
+            'Received IsolateRunnable event from onReceive.',
+          );
+        }
+      },
+    );
+
     final Future<void> onRunnable = service.onIsolateEvent.firstWhere((vm_service.Event event) {
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
@@ -591,26 +610,7 @@ class FlutterVmService {
       },
     );
     await onRunnable;
-  }
-
-  /// Renders the last frame with additional raster tracing enabled.
-  ///
-  /// When a frame is rendered using this method it will incur additional cost
-  /// for rasterization which is not reflective of how long the frame takes in
-  /// production. This is primarily intended to be used to identify the layers
-  /// that result in the most raster perf degradation.
-  Future<Map<String, Object?>?> renderFrameWithRasterStats({
-    required String? viewId,
-    required String? uiIsolateId,
-  }) async {
-    final vm_service.Response? response = await callMethodWrapper(
-      kRenderFrameWithRasterStatsMethod,
-      isolateId: uiIsolateId,
-      args: <String, String?>{
-        'viewId': viewId,
-      },
-    );
-    return response?.json;
+    await onReceiveSubscription.cancel();
   }
 
   Future<String> flutterDebugDumpApp({
@@ -874,8 +874,9 @@ class FlutterVmService {
     } on vm_service.RPCError catch (err) {
       // If an application is not using the framework or the VM service
       // disappears while handling a request, return null.
-      if ((err.code == RPCErrorCodes.kMethodNotFound)
-          || (err.code == RPCErrorCodes.kServiceDisappeared)) {
+      if ((err.code == RPCErrorCodes.kMethodNotFound) ||
+          (err.code == RPCErrorCodes.kServiceDisappeared) ||
+          (err.message.contains('Service connection disposed'))) {
         return null;
       }
       rethrow;
@@ -987,11 +988,6 @@ class FlutterVmService {
       throw VmServiceDisappearedException();
     } finally {
       await isolateEvents.cancel();
-      try {
-        await service.streamCancel(vm_service.EventStreams.kIsolate);
-      } on vm_service.RPCError {
-        // It's ok for cleanup to fail, such as when the service disappears.
-      }
     }
   }
 

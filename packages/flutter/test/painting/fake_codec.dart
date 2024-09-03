@@ -44,8 +44,8 @@ class FakeCodec implements ui.Codec {
   @override
   Future<ui.FrameInfo> getNextFrame() {
     _numFramesAsked += 1;
-    final SynchronousFuture<ui.FrameInfo> result =
-      SynchronousFuture<ui.FrameInfo>(_frameInfos[_nextFrame]);
+    final Future<ui.FrameInfo> result =
+      Future<ui.FrameInfo>.value(_frameInfos[_nextFrame]);
     _nextFrame = (_nextFrame + 1) % _frameCount;
     return result;
   }

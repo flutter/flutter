@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
 
@@ -2265,10 +2271,7 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
     final MultiChildLayoutParentData parentData = renderObject.parentData! as MultiChildLayoutParentData;
     if (parentData.id != id) {
       parentData.id = id;
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent is RenderObject) {
-        targetParent.markNeedsLayout();
-      }
+      renderObject.parent?.markNeedsLayout();
     }
   }
 
@@ -3400,7 +3403,9 @@ class AspectRatio extends SingleChildRenderObjectWidget {
 ///
 /// This class is useful, for example, when unlimited width is available and
 /// you would like a child that would otherwise attempt to expand infinitely to
-/// instead size itself to a more reasonable width.
+/// instead size itself to a more reasonable width. Additionally, putting a
+/// [Column] inside an [IntrinsicWidth] will allow all [Column] children to be
+/// as wide as the widest child.
 ///
 /// The constraints that this widget passes to its child will adhere to the
 /// parent's constraints, so if the constraints are not large enough to satisfy
@@ -3477,7 +3482,9 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
 ///
 /// This class is useful, for example, when unlimited height is available and
 /// you would like a child that would otherwise attempt to expand infinitely to
-/// instead size itself to a more reasonable height.
+/// instead size itself to a more reasonable height. Additionally, putting a
+/// [Row] inside an [IntrinsicHeight] will allow all [Row] children to be as tall
+/// as the tallest child.
 ///
 /// The constraints that this widget passes to its child will adhere to the
 /// parent's constraints, so if the constraints are not large enough to satisfy
@@ -4371,10 +4378,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
     }
 
     if (needsLayout) {
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent is RenderObject) {
-        targetParent.markNeedsLayout();
-      }
+      renderObject.parent?.markNeedsLayout();
     }
   }
 
@@ -4600,6 +4604,7 @@ class Flex extends MultiChildRenderObjectWidget {
     this.verticalDirection = VerticalDirection.down,
     this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
     this.clipBehavior = Clip.none,
+    this.spacing = 0.0,
     super.children,
   }) : assert(!identical(crossAxisAlignment, CrossAxisAlignment.baseline) || textBaseline != null, 'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline');
   // Cannot use == in the assert above instead of identical because of https://github.com/dart-lang/language/issues/1811.
@@ -4706,6 +4711,9 @@ class Flex extends MultiChildRenderObjectWidget {
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
+  /// {@macro flutter.rendering.RenderFlex.spacing}
+  final double spacing;
+
   bool get _needTextDirection {
     switch (direction) {
       case Axis.horizontal:
@@ -4747,6 +4755,7 @@ class Flex extends MultiChildRenderObjectWidget {
       verticalDirection: verticalDirection,
       textBaseline: textBaseline,
       clipBehavior: clipBehavior,
+      spacing: spacing,
     );
   }
 
@@ -4760,7 +4769,8 @@ class Flex extends MultiChildRenderObjectWidget {
       ..textDirection = getEffectiveTextDirection(context)
       ..verticalDirection = verticalDirection
       ..textBaseline = textBaseline
-      ..clipBehavior = clipBehavior;
+      ..clipBehavior = clipBehavior
+      ..spacing = spacing;
   }
 
   @override
@@ -4773,6 +4783,8 @@ class Flex extends MultiChildRenderObjectWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: VerticalDirection.down));
     properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
+    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.none));
+    properties.add(DoubleProperty('spacing', spacing, defaultValue: 0.0));
   }
 }
 
@@ -4979,6 +4991,7 @@ class Row extends Flex {
     super.textDirection,
     super.verticalDirection,
     super.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
+    super.spacing,
     super.children,
   }) : super(
     direction: Axis.horizontal,
@@ -5170,6 +5183,7 @@ class Column extends Flex {
     super.textDirection,
     super.verticalDirection,
     super.textBaseline,
+    super.spacing,
     super.children,
   }) : super(
     direction: Axis.vertical,
@@ -5240,10 +5254,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
     }
 
     if (needsLayout) {
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent is RenderObject) {
-        targetParent.markNeedsLayout();
-      }
+      renderObject.parent?.markNeedsLayout();
     }
   }
 
@@ -5946,6 +5957,10 @@ class RichText extends MultiChildRenderObjectWidget {
 /// expected to call [dart:ui.Image.dispose] on the [image] once the [RawImage]
 /// is no longer buildable.
 ///
+/// The `scale` argument specifies the linear scale factor for drawing this
+/// image at its intended size and applies to both the width and the height.
+/// {@macro flutter.painting.imageInfo.scale}
+///
 /// This widget is rarely used directly. Instead, consider using [Image].
 class RawImage extends LeafRenderObjectWidget {
   /// Creates a widget that displays an image.
@@ -5994,9 +6009,11 @@ class RawImage extends LeafRenderObjectWidget {
   /// aspect ratio.
   final double? height;
 
-  /// Specifies the image's scale.
+  /// The linear scale factor for drawing this image at its intended size.
   ///
-  /// Used when determining the best display size for the image.
+  /// The scale factor applies to the width and the height.
+  ///
+  /// {@macro flutter.painting.imageInfo.scale}
   final double scale;
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'range_slider.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show Path, lerpDouble;
 
@@ -1560,8 +1563,7 @@ mixin BaseSliderTrackShape {
 ///
 /// {@macro flutter.material.SliderTrackShape.paint.trackSegment}
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the rectangular slider track shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_slider_track_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the rectangular slider track shape.](https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_slider_track_shape.png)
 ///
 /// See also:
 ///
@@ -1662,8 +1664,7 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 ///
 /// {@macro flutter.material.SliderTrackShape.paint.trackSegment}
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the rounded rect slider track shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/rounded_rect_slider_track_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the rounded rect slider track shape.](https://flutter.github.io/assets-for-api-docs/assets/material/rounded_rect_slider_track_shape.png)
 ///
 /// See also:
 ///
@@ -1854,8 +1855,7 @@ mixin BaseRangeSliderTrackShape {
 ///
 /// {@macro flutter.material.RangeSliderTickMarkShape.paint.trackSegment}
 ///
-/// ![A range slider widget, consisting of 5 divisions and showing the rectangular range slider track shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_range_slider_track_shape.png)
+/// ![A range slider widget, consisting of 5 divisions and showing the rectangular range slider track shape.](https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_range_slider_track_shape.png)
 ///
 /// See also:
 ///
@@ -1942,8 +1942,7 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape with BaseRa
 ///
 /// {@macro flutter.material.RangeSliderTickMarkShape.paint.trackSegment}
 ///
-/// ![A range slider widget, consisting of 5 divisions and showing the rounded rect range slider track shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/rounded_rect_range_slider_track_shape.png)
+/// ![A range slider widget, consisting of 5 divisions and showing the rounded rect range slider track shape.](https://flutter.github.io/assets-for-api-docs/assets/material/rounded_rect_range_slider_track_shape.png)
 ///
 /// See also:
 ///
@@ -2064,8 +2063,7 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape with BaseRa
 ///   [SliderThemeData.disabledActiveTrackColor],
 ///   [SliderThemeData.disabledInactiveTrackColor].
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the round slider tick mark shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/rounded_slider_tick_mark_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the round slider tick mark shape.](https://flutter.github.io/assets-for-api-docs/assets/material/rounded_slider_tick_mark_shape.png)
 ///
 /// See also:
 ///
@@ -2144,8 +2142,7 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
 ///   [SliderThemeData.disabledActiveTrackColor],
 ///   [SliderThemeData.disabledInactiveTrackColor].
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the round range slider tick mark shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/round_range_slider_tick_mark_shape.png )
+/// ![A slider widget, consisting of 5 divisions and showing the round range slider tick mark shape.](https://flutter.github.io/assets-for-api-docs/assets/material/round_range_slider_tick_mark_shape.png)
 ///
 /// See also:
 ///
@@ -2244,7 +2241,7 @@ class _EmptySliderTickMarkShape extends SliderTickMarkShape {
 ///
 /// This class is used to create a special instance of a [SliderComponentShape]
 /// that will not paint any component shape. A static reference is stored in
-/// [SliderTickMarkShape.noThumb] and [SliderTickMarkShape.noOverlay]. When this value
+/// [SliderComponentShape.noThumb] and [SliderComponentShape.noOverlay]. When this value
 /// is specified for [SliderThemeData.thumbShape], the thumb painting is
 /// skipped. When this value is specified for [SliderThemeData.overlayShape],
 /// the overlay painting is skipped.
@@ -2275,8 +2272,7 @@ class _EmptySliderComponentShape extends SliderComponentShape {
 ///
 /// There is a shadow for the resting, pressed, hovered, and focused state.
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the round slider thumb shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/round_slider_thumb_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the round slider thumb shape.](https://flutter.github.io/assets-for-api-docs/assets/material/round_slider_thumb_shape.png)
 ///
 /// See also:
 ///
@@ -2391,8 +2387,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
 ///
 /// There is a shadow for the resting and pressed state.
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the round range slider thumb shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/round_range_slider_thumb_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the round range slider thumb shape.](https://flutter.github.io/assets-for-api-docs/assets/material/round_range_slider_thumb_shape.png)
 ///
 /// See also:
 ///
@@ -2565,8 +2560,7 @@ class RoundSliderOverlayShape extends SliderComponentShape {
 
 /// The default shape of a [Slider]'s value indicator.
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the rectangular slider value indicator shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_slider_value_indicator_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the rectangular slider value indicator shape.](https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_slider_value_indicator_shape.png)
 ///
 /// See also:
 ///
@@ -2624,8 +2618,7 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
 
 /// The default shape of a [RangeSlider]'s value indicators.
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the rectangular range slider value indicator shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_range_slider_value_indicator_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the rectangular range slider value indicator shape.](https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_range_slider_value_indicator_shape.png)
 ///
 /// See also:
 ///
@@ -2831,8 +2824,7 @@ class _RectangularSliderValueIndicatorPathPainter {
 /// A variant shape of a [Slider]'s value indicator . The value indicator is in
 /// the shape of an upside-down pear.
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the paddle slider value indicator shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/paddle_slider_value_indicator_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the paddle slider value indicator shape.](https://flutter.github.io/assets-for-api-docs/assets/material/paddle_slider_value_indicator_shape.png)
 ///
 /// See also:
 ///
@@ -2893,8 +2885,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
 /// A variant shape of a [RangeSlider]'s value indicators. The value indicator
 /// is in the shape of an upside-down pear.
 ///
-/// ![A slider widget, consisting of 5 divisions and showing the paddle range slider value indicator shape.]
-/// (https://flutter.github.io/assets-for-api-docs/assets/material/paddle_range_slider_value_indicator_shape.png)
+/// ![A slider widget, consisting of 5 divisions and showing the paddle range slider value indicator shape.](https://flutter.github.io/assets-for-api-docs/assets/material/paddle_range_slider_value_indicator_shape.png)
 ///
 /// See also:
 ///

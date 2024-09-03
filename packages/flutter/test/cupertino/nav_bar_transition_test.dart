@@ -463,7 +463,7 @@ void main() {
     expect(
       flying(
         tester,
-        find.byWidgetPredicate((Widget widget) => widget.key != null),
+        find.byWidgetPredicate((Widget widget) => widget.key != null && widget.key is GlobalKey),
       ),
       findsNothing,
     );
@@ -1376,7 +1376,7 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(
-        749.863556146621704102,
+        721.4629859924316,
         13.5,
       ),
     );
@@ -1443,7 +1443,7 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(
-        350.231143206357955933,
+        351.52365279197693,
         13.5,
       ),
     );

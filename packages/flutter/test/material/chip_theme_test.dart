@@ -613,6 +613,7 @@ void main() {
       selectedShadowColor: Colors.black,
       showCheckmark: false,
       checkmarkColor: Colors.black,
+      iconTheme: const IconThemeData(size: 26.0),
     );
     final ChipThemeData chipThemeWhite = ChipThemeData.fromDefaults(
       secondaryColor: Colors.white,
@@ -630,6 +631,7 @@ void main() {
       selectedShadowColor: Colors.white,
       showCheckmark: true,
       checkmarkColor: Colors.white,
+      iconTheme: const IconThemeData(size: 22.0),
     );
 
     final ChipThemeData lerp = ChipThemeData.lerp(chipThemeBlack, chipThemeWhite, 0.5)!;
@@ -653,7 +655,7 @@ void main() {
     expect(lerp.elevation, 3.0);
     expect(lerp.pressElevation, 7.0);
     expect(lerp.checkmarkColor, equals(middleGrey));
-    expect(lerp.iconTheme, isNull);
+    expect(lerp.iconTheme, const IconThemeData(size: 24.0));
 
     expect(ChipThemeData.lerp(null, null, 0.25), isNull);
 
@@ -677,7 +679,7 @@ void main() {
     expect(lerpANull25.elevation, 1.25);
     expect(lerpANull25.pressElevation, 2.5);
     expect(lerpANull25.checkmarkColor, equals(Colors.white.withAlpha(0x40)));
-    expect(lerp.iconTheme, isNull);
+    expect(lerpANull25.iconTheme, const IconThemeData(size: 5.5));
 
     final ChipThemeData lerpANull75 = ChipThemeData.lerp(null, chipThemeWhite, 0.75)!;
     expect(lerpANull75.backgroundColor, equals(Colors.black.withAlpha(0x17)));
@@ -699,6 +701,7 @@ void main() {
     expect(lerpANull75.elevation, 3.75);
     expect(lerpANull75.pressElevation, 7.5);
     expect(lerpANull75.checkmarkColor, equals(Colors.white.withAlpha(0xbf)));
+    expect(lerpANull75.iconTheme, const IconThemeData(size: 16.5));
 
     final ChipThemeData lerpBNull25 = ChipThemeData.lerp(chipThemeBlack, null, 0.25)!;
     expect(lerpBNull25.backgroundColor, equals(Colors.white.withAlpha(0x17)));
@@ -720,7 +723,7 @@ void main() {
     expect(lerpBNull25.elevation, 0.75);
     expect(lerpBNull25.pressElevation, 3.0);
     expect(lerpBNull25.checkmarkColor, equals(Colors.black.withAlpha(0xbf)));
-    expect(lerp.iconTheme, isNull);
+    expect(lerpBNull25.iconTheme, const IconThemeData(size: 19.5));
 
     final ChipThemeData lerpBNull75 = ChipThemeData.lerp(chipThemeBlack, null, 0.75)!;
     expect(lerpBNull75.backgroundColor, equals(Colors.white.withAlpha(0x08)));
@@ -742,7 +745,7 @@ void main() {
     expect(lerpBNull75.elevation, 0.25);
     expect(lerpBNull75.pressElevation, 1.0);
     expect(lerpBNull75.checkmarkColor, equals(Colors.black.withAlpha(0x40)));
-    expect(lerp.iconTheme, isNull);
+    expect(lerpBNull75.iconTheme, const IconThemeData(size: 6.5));
   });
 
   testWidgets('Chip uses stateful color from chip theme', (WidgetTester tester) async {

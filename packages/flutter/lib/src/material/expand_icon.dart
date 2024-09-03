@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'expansion_panel.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -154,7 +157,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
     widget.onPressed?.call(widget.isExpanded);
   }
 
-  /// Default icon colors and opacities for when [Theme.brightness] is set to
+  /// Default icon colors and opacities for when [ThemeData.brightness] is set to
   /// [Brightness.light] are based on the
   /// [Material Design system icon specifications](https://material.io/design/iconography/system-icons.html#color).
   /// Icon colors and opacities for [Brightness.dark] are based on the

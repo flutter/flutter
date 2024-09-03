@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
+import 'package:dds/dds_launcher.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/java.dart';
@@ -696,6 +697,32 @@ class FakeJava extends Fake implements Java {
   }
 }
 
+class FakeDartDevelopmentServiceLauncher extends Fake
+    implements DartDevelopmentServiceLauncher {
+  FakeDartDevelopmentServiceLauncher({
+    required this.uri,
+    this.devToolsUri,
+    this.dtdUri,
+  });
+
+  @override
+  final Uri uri;
+
+  @override
+  final Uri? devToolsUri;
+
+  @override
+  final Uri? dtdUri;
+
+  @override
+  Future<void> get done => _completer.future;
+
+  @override
+  Future<void> shutdown() async => _completer.complete();
+
+  final Completer<void> _completer = Completer<void>();
+}
+
 class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   FakeDevtoolsLauncher({DevToolsServerAddress? serverAddress})
       : _serverAddress = serverAddress;
@@ -739,6 +766,12 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   Future<void> close() async {
     closed = true;
   }
+}
+
+/// A fake [Logger] that throws the [Invocation] for any method call.
+class FakeLogger implements Logger {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw invocation; // ignore: only_throw_errors
 }
 
 class ClosedStdinController extends Fake implements StreamSink<List<int>> {
