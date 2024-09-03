@@ -54,18 +54,11 @@ Future<bool> runTests({
   print('');
 
   for (final File file in shardedFiles) {
-    if (verbose) {
-      print('Processing ${file.path}...');
-    }
-
-    void printHeader() {
-      if (!verbose) {
-        print('Processing ${file.path}...');
-      }
-    }
+    // Always print name of running task for debugging individual customer test
+    // suites.
+    print('Processing ${file.path}...');
 
     void failure(String message) {
-      printHeader();
       print('ERROR: $message');
       failures += 1;
     }
@@ -92,7 +85,7 @@ Future<bool> runTests({
     try {
       assert(instructions.fetch.isNotEmpty);
       for (final String fetchCommand in instructions.fetch) {
-        success = await shell(fetchCommand, checkout, verbose: verbose, silentFailure: skipOnFetchFailure, failedCallback: printHeader);
+        success = await shell(fetchCommand, checkout, verbose: verbose, silentFailure: skipOnFetchFailure);
         if (!success) {
           if (skipOnFetchFailure) {
             if (verbose) {
@@ -116,7 +109,6 @@ Future<bool> runTests({
             setupCommand,
             customerRepo,
             verbose: verbose,
-            failedCallback: printHeader,
           );
           if (!success) {
             failure('Setup command failed: $setupCommand');
@@ -133,12 +125,12 @@ Future<bool> runTests({
             success = false;
             break;
           }
-          success = await shell('flutter packages get', resolvedUpdateDirectory, verbose: verbose, failedCallback: printHeader);
+          success = await shell('flutter packages get', resolvedUpdateDirectory, verbose: verbose);
           if (!success) {
             failure('Could not run "flutter pub get" in ${updateDirectory.path}, which was specified as an update directory.');
             break;
           }
-          success = await shell('dart fix --apply', resolvedUpdateDirectory, verbose: verbose, failedCallback: printHeader);
+          success = await shell('dart fix --apply', resolvedUpdateDirectory, verbose: verbose);
           if (!success) {
             failure('Could not run "dart fix" in ${updateDirectory.path}, which was specified as an update directory.');
             break;
@@ -162,7 +154,7 @@ Future<bool> runTests({
             }
             for (final String testCommand in instructions.tests) {
               testCount += 1;
-              success = await shell(testCommand, customerRepo, verbose: verbose, failedCallback: printHeader);
+              success = await shell(testCommand, customerRepo, verbose: verbose);
               if (!success) {
                 failure('One or more tests from ${path.basenameWithoutExtension(file.path)} failed.');
                 break;
@@ -170,9 +162,8 @@ Future<bool> runTests({
             }
           }
           stopwatch.stop();
-          if (verbose && success) {
-            print('Tests finished in ${(stopwatch.elapsed.inSeconds / repeat).toStringAsFixed(2)} seconds per iteration.');
-          }
+          // Always print test runtime for debugging.
+          print('Tests finished in ${(stopwatch.elapsed.inSeconds / repeat).toStringAsFixed(2)} seconds per iteration.');
         }
       }
     } finally {
