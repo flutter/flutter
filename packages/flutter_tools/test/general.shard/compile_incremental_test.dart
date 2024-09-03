@@ -31,7 +31,6 @@ void main() {
 
   const List<String> frontendServerCommand = <String>[
     'Artifact.engineDartAotRuntime',
-    '--disable-dart-dev',
     'Artifact.frontendServerSnapshotForEngineDartSdk',
     '--sdk-root',
     'sdkroot/',

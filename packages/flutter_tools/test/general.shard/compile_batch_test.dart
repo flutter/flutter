@@ -54,7 +54,6 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
           'Artifact.engineDartAotRuntime',
-          '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
           '/path/to/sdkroot/',
@@ -100,7 +99,6 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
           'Artifact.engineDartAotRuntime',
-          '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
           '/path/to/sdkroot/',
@@ -146,7 +144,6 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
           'Artifact.engineDartAotRuntime',
-          '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
           '/path/to/sdkroot/',
@@ -192,7 +189,6 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
           'Artifact.engineDartAotRuntime',
-          '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
           '/path/to/sdkroot/',
@@ -242,7 +238,6 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
           'Artifact.engineDartAotRuntime',
-          '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
           '/path/to/sdkroot/',
@@ -292,7 +287,6 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
           'Artifact.engineDartAotRuntime',
-          '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
           '/path/to/sdkroot/',
@@ -344,7 +338,6 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
           'Artifact.engineDartAotRuntime',
-          '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
           '/path/to/sdkroot/',
@@ -394,7 +387,6 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
           'Artifact.engineDartAotRuntime',
-          '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
           '/path/to/sdkroot/',
@@ -454,7 +446,6 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
           'Artifact.engineDartAotRuntime',
-          '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
           '/path/to/sdkroot/',
