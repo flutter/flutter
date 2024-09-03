@@ -80,12 +80,15 @@ void main() {
         '--no-terminate-stray-dart-processes',
         '-t', 'smoke_test_setup_failure',
       ]);
+      
+      // If this test fails, the reason is usually buried in stderr.
+      final Stream<String> stderr = process.stderr.transform(utf8.decoder);
+      stderr.listen(printOnFailure);
 
-      final Stream<String> output = process.stdout.transform(utf8.decoder);
+      final Stream<String> stdout = process.stdout.transform(utf8.decoder);
       await expectLater(
-        output,
+        stdout,
         emitsThrough(contains('VM service still not ready. It is possible the target has failed')),
-        reason: 'Message not found. Stderr was: ${await process.stderr.transform(utf8.decoder).join()}',
       );
       expect(process.kill(), isTrue);
     });
