@@ -25,7 +25,7 @@ jobs:
         with:
           persist-credentials: false
       - name: "setup python"
-        uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f
+        uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3
         with:
           python-version: '3.7.7' # install the python version needed
       - name: "extract deps, find commit hash, pass to osv-scanner"
