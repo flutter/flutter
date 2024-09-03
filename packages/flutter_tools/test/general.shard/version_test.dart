@@ -530,16 +530,13 @@ void main() {
     final MemoryFileSystem fs = MemoryFileSystem.test();
     final Directory flutterRoot = fs.directory('/path/to/flutter');
     flutterRoot.childDirectory('bin').childDirectory('cache').createSync(recursive: true);
-    final FlutterVersion flutterVersion = FlutterVersion(
+    FlutterVersion(
       clock: _testClock,
       fs: fs,
       flutterRoot: flutterRoot.path,
     );
 
     final File versionFile = fs.file('/path/to/flutter/bin/cache/flutter.version.json');
-    expect(versionFile.existsSync(), isFalse);
-
-    flutterVersion.ensureVersionFile();
     expect(versionFile.existsSync(), isTrue);
     expect(versionFile.readAsStringSync(), '''
 {
