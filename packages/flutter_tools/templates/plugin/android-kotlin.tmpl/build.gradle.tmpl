@@ -1,3 +1,6 @@
+group = "{{androidIdentifier}}"
+version = "1.0-SNAPSHOT"
+
 buildscript {
     ext.kotlin_version = "{{kotlinVersion}}"
     repositories {
@@ -11,14 +14,6 @@ buildscript {
     }
 }
 
-plugins {
-    id "com.android.library"
-    id "kotlin-android"
-}
-
-group = "{{androidIdentifier}}"
-version = "1.0-SNAPSHOT"
-
 allprojects {
     repositories {
         google()
@@ -26,19 +21,15 @@ allprojects {
     }
 }
 
-// We recommend using:
-// - flutter.compileSdkVersion
-// - flutter.targetSdkVersion
-// - flutter.minSdkVersion
-// when configuring Android Gradle Plugin's corresponding values, as it will automatically
-// pick the Flutter SDK's preferred version number. You can override this if
-// necessary.
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+
 android {
     if (project.android.hasProperty("namespace")) {
         namespace = "{{androidIdentifier}}"
     }
 
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = {{compileSdkVersion}}
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -55,7 +46,7 @@ android {
     }
 
     defaultConfig {
-        minSdk = flutter.minSdkVersion
+        minSdk = {{minSdkVersion}}
     }
 
     dependencies {

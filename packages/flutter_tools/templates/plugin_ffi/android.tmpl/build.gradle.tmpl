@@ -1,5 +1,8 @@
 // The Android Gradle Plugin builds the native code with the Android NDK.
 
+group = "{{androidIdentifier}}"
+version = "1.0"
+
 buildscript {
     repositories {
         google()
@@ -12,13 +15,6 @@ buildscript {
     }
 }
 
-plugins {
-    id "com.android.library"
-}
-
-group = "{{androidIdentifier}}"
-version = "1.0"
-
 rootProject.allprojects {
     repositories {
         google()
@@ -26,13 +22,8 @@ rootProject.allprojects {
     }
 }
 
-// We recommend using:
-// - flutter.compileSdkVersion
-// - flutter.targetSdkVersion
-// - flutter.minSdkVersion
-// when configuring Android Gradle Plugin's corresponding values, as it will automatically
-// pick the Flutter SDK's preferred version number. You can override this if
-// necessary.
+apply plugin: "com.android.library"
+
 android {
     if (project.android.hasProperty("namespace")) {
         namespace = "{{androidIdentifier}}"
@@ -40,7 +31,7 @@ android {
 
     // Bumping the plugin compileSdk version requires all clients of this plugin
     // to bump the version in their app.
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = {{compileSdkVersion}}
 
     // Use the NDK version
     // declared in /android/app/build.gradle file of the Flutter project.
@@ -69,6 +60,6 @@ android {
     }
 
     defaultConfig {
-        minSdk = flutter.minSdkVersion
+        minSdk = {{minSdkVersion}}
     }
 }

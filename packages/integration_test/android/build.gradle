@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+group 'dev.flutter.plugins.integration_test'
+version '1.0-SNAPSHOT'
+
 buildscript {
     repositories {
         google()
@@ -12,13 +15,6 @@ buildscript {
         classpath 'com.android.tools.build:gradle:8.1.0'
     }
 }
-
-plugins {
-    id "com.android.library"
-}
-
-group 'dev.flutter.plugins.integration_test'
-version '1.0-SNAPSHOT'
 
 rootProject.allprojects {
     repositories {
@@ -34,10 +30,9 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
-    // We recommend using flutter.compileSdkVersion as it will automatically
-    // pick the flutter sdk's preferred version number.
-    compileSdk flutter.compileSdkVersion
     namespace 'dev.flutter.integration_test'
+
+    compileSdk 34
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -45,9 +40,7 @@ android {
     }
 
     defaultConfig {
-        // We recommend using flutter.minSdkVersion as it will automatically
-        // pick the flutter sdk's preferred version number.
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion 21
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'lib-proguard-rules.txt'
     }
