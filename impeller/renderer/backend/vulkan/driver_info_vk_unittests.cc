@@ -4,7 +4,9 @@
 
 #include "impeller/playground/playground_test.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/driver_info_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"
+#include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 
 namespace impeller::testing {
 
@@ -21,6 +23,7 @@ TEST_P(DriverInfoVKTest, CanQueryDriverInfo) {
   ASSERT_NE(driver_info->GetVendor(), VendorVK::kUnknown);
   ASSERT_NE(driver_info->GetDeviceType(), DeviceTypeVK::kUnknown);
   ASSERT_NE(driver_info->GetDriverName(), "");
+  EXPECT_FALSE(driver_info->IsKnownBadDriver());
 }
 
 TEST_P(DriverInfoVKTest, CanDumpToLog) {
@@ -30,7 +33,23 @@ TEST_P(DriverInfoVKTest, CanDumpToLog) {
   ASSERT_NE(driver_info, nullptr);
   fml::testing::LogCapture log;
   driver_info->DumpToLog();
-  ASSERT_TRUE(log.str().find("Driver Information") != std::string::npos);
+  EXPECT_TRUE(log.str().find("Driver Information") != std::string::npos);
+}
+
+TEST(DriverInfoVKTest, DisabledDevices) {
+  std::string name = "Adreno (TM) 630";
+  auto const context = MockVulkanContextBuilder()
+                           .SetPhysicalPropertiesCallback(
+                               [&name](VkPhysicalDevice device,
+                                       VkPhysicalDeviceProperties* prop) {
+                                 prop->vendorID = 0x168C;  // Qualcomm
+                                 name.copy(prop->deviceName, name.size());
+                                 prop->deviceType =
+                                     VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+                               })
+                           .Build();
+
+  EXPECT_TRUE(context->GetDriverInfo()->IsKnownBadDriver());
 }
 
 }  // namespace impeller::testing

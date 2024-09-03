@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
 #include "flutter/impeller/entity/vk/entity_shaders_vk.h"
 #include "flutter/impeller/entity/vk/framebuffer_blend_shaders_vk.h"
@@ -66,6 +67,11 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
     } else {
       FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan).";
     }
+  }
+  if (context->GetDriverInfo()->IsKnownBadDriver()) {
+    FML_LOG(INFO)
+        << "Known bad Vulkan driver encountered, falling back to OpenGLES.";
+    return nullptr;
   }
 
   return context;
