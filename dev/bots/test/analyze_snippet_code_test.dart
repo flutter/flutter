@@ -57,7 +57,7 @@ void main() {
 
   // TODO(scheglov): Restore after landing Dart SDK changes.
   // See https://github.com/flutter/flutter/issues/154413
-  test('analyze_snippet_code smoke test', skip: true, () {
+  test('analyze_snippet_code smoke test', () {
     final ProcessResult process = Process.runSync(
       '../../bin/cache/dart-sdk/bin/dart',
       <String>[
@@ -78,11 +78,11 @@ void main() {
       '', // because we end with a newline, split gives us an extra blank line
     ]);
     expect(process.exitCode, 1);
-  });
+  }, skip: true); // https://github.com/flutter/flutter/issues/154413
 
   // TODO(scheglov): Restore after landing Dart SDK changes.
   // See https://github.com/flutter/flutter/issues/154413
-  test('Analyzes dart:ui code', skip: true, () {
+  test('Analyzes dart:ui code', () {
     final ProcessResult process = Process.runSync(
       '../../bin/cache/dart-sdk/bin/dart',
       <String>[
@@ -104,5 +104,5 @@ void main() {
       '', // because we end with a newline, split gives us an extra blank line
     ]);
     expect(process.exitCode, 1);
-  });
+  }, skip: true); // https://github.com/flutter/flutter/issues/154413
 }
