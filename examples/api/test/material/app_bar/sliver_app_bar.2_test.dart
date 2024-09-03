@@ -35,12 +35,7 @@ void main() {
 
     // Scrolling the screen moves the title up.
     expect(tester.getBottomLeft(titleFinder).dy, 96.0);
-    await tester.drag(
-      titleFinder,
-      const Offset(0.0, -200.0),
-      touchSlopY: 0,
-      warnIfMissed: false,
-      );
+    await tester.drag(titleFinder, const Offset(0.0, -200.0));
 
     await tester.pump();
     expect(tester.getBottomLeft(titleFinder).dy, 48.0);
