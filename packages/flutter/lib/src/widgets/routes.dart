@@ -1432,7 +1432,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// {@macro flutter.widgets.delegatedTransition}
   ///
   /// `receivedTransition` will use the above route's [delegatedTransition] in
-  /// order to play the right route transition when the above route either enters
+  /// order to show the right route transition when the above route either enters
   /// or leaves the navigation stack. If not null, the `receivedTransition` will
   /// wrap the route content through [buildFlexTransitions].
   DelegatedTransition? receivedTransition;
@@ -1442,14 +1442,15 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// It is possible for a route to supply a different [delegatedTransition]
   /// depending on the context of the tree at its location. For example Material's
   /// [ZoomPageTransitionsBuilder] depends on the [Theme] to conditionally provide
-  /// a non-snapshotted [delegatedTransition]. In some cases, the previous route
-  /// may ask for the [delegatedTransition] of a route before it is built.
+  /// a non-snapshotted [delegatedTransition].
   ///
-  /// In these cases, the previous route will call [setDelegatedTransition] on
-  /// on the unbuilt route using its own [BuildContext]. Override this method to
-  /// set the [delegatedTransition] based on the provided [BuildContext]. This
-  /// context will be from the PREVIOUS route, so do not use logic that requires
-  /// the [BuildContext] of the current route.
+  /// In some cases, the previous route may ask for the [delegatedTransition] of
+  /// a route before it is built. In these cases, the previous route will call
+  /// [setDelegatedTransition] on the the unbuilt route using its own
+  /// [BuildContext]. Override this method to set the [delegatedTransition] based
+  /// on the provided [BuildContext]. This context will be from the PREVIOUS
+  /// route, so do not use logic that requires the [BuildContext] of the current
+  /// route.
   void setDelegatedTransition(BuildContext context) {}
 
   /// Wraps the transitions of this route with a [DelegatedTransition], when
@@ -2010,6 +2011,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
+    // In some cases, we need to get the delegated transition from a route before
+    // it is built, but some routes need to derive a delegated transition from
+    // the context. So if the next route does not have a `BuildContext` or a
+    // delegatedTransition, call nextRoute.setDelegatedTransition using the
+    // current `BuildContext`.
     if (nextRoute is ModalRoute<T> && nextRoute.delegatedTransition == null && nextRoute.subtreeContext == null && this.subtreeContext != null) {
       nextRoute.setDelegatedTransition(this.subtreeContext!);
     }

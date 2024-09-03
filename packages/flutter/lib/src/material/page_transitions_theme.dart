@@ -754,10 +754,11 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   DelegatedTransition? get delegatedTransition => ZoomDelegatedTransition(
-    builder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) => snapshotAwareDelegatedTransition(context, animation, secondaryAnimation, child, allowSnapshotting, allowEnterRouteSnapshotting),
+    builder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child)
+      => snapshotAwareDelegatedTransition(context, animation, secondaryAnimation, child, allowSnapshotting, allowEnterRouteSnapshotting),
   );
 
-  /// A transition builder that takes in account the snapshotting properties of
+  /// A transition builder that takes into account the snapshotting properties of
   /// [ZoomPageTransitionsBuilder].
   ///
   /// This is provided to [ZoomDelegatedTransition.builder], to be passed to the

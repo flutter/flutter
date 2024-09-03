@@ -142,8 +142,7 @@ class _AnimatedState extends State<AnimatedWidget> {
   Widget build(BuildContext context) => widget.build(context);
 }
 
-/// Signature for a convenience function for passing around a builder for a
-/// transiton's secondary animation.
+/// Signature for a page transition's secondary transition builder.
 ///
 /// Typically used as the argument for [DelegatedTransition.builder].
 typedef DelegatedTransitionBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child);
@@ -157,6 +156,9 @@ typedef DelegatedTransitionBuilder = Widget Function(BuildContext context, Anima
 /// `DelegatedTransition`, it will use the `builder` from the incoming transition
 /// to animate off the screen.
 /// {@endtemplate}
+///
+/// Typically subclasses of the abstract `DelegatedTransition` would be made for
+/// a page transition, then passed to [ModalRoute.delegatedTransition].
 ///
 /// This check is based on the run time type of the `DelegatedTransition`. So if
 /// the topmost route has a `DelegatedTransition` of the same type as the route

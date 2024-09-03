@@ -104,8 +104,19 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog,
     // or there is no matching transition to use.
-    return ((nextRoute is! PageRoute<T>) || !nextRoute.fullscreenDialog)
-      && ((nextRoute is MaterialRouteTransitionMixin) || (nextRoute is ModalRoute<T> && nextRoute.delegatedTransition != null));
+    // Don't perform outgoing animation if the next route is a fullscreen dialog.
+    final bool nextRouteIsNotFullscreen = (nextRoute is! PageRoute<T>) || !nextRoute.fullscreenDialog;
+
+    // If the next route has a delegated transition, then this route is able to
+    // use that delegated transition to smoothly sync with the next route's
+    // transition.
+    final bool nextRouteHasDelegatedTransition = nextRoute is ModalRoute<T>
+      && nextRoute.delegatedTransition != null;
+
+    // Otherwise if the next route has the same route transition mixin as this
+    // one, then this route will already be synced with its transition.
+    return nextRouteIsNotFullscreen &&
+      ((nextRoute is MaterialRouteTransitionMixin) || nextRouteHasDelegatedTransition);
   }
 
   @override
@@ -190,7 +201,7 @@ class MaterialPage<T> extends Page<T> {
   @override
   Route<T> createRoute(BuildContext context) {
     final _PageBasedMaterialPageRoute<T> route = _PageBasedMaterialPageRoute<T>(page: this, allowSnapshotting: allowSnapshotting);
-    // It is necessary to do this now as this is the earliest the Material Page can
+    // It is necessary to do this now as this is the earliest the MaterialPage can
     // know what its context is for deciding what delegated transition to send.
     // buildTransitions happens after canTransitionTo in a lot of cases.
     route.setDelegatedTransition(context);

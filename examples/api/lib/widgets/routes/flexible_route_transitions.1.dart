@@ -6,6 +6,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+/// This sample demonstrates creating a custom page transition that is able to
+/// override the outgoing transition of the route behind it in the navigation
+/// stack using [DelegatedTransition], using a [MaterialApp.router] pattern of
+/// navigation.
+
 void main() {
   runApp(FlexibleRouteTransitionsApp());
 }

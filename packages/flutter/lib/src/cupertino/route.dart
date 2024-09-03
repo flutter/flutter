@@ -160,11 +160,19 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
-    // Don't perform outgoing animation if the next route is a fullscreen dialog,
-    // or there is no matching transition to use.
-    return ((nextRoute is! PageRoute<T>) || !nextRoute.fullscreenDialog) &&
-      ((nextRoute is ModalRoute<T> && nextRoute.delegatedTransition != null) ||
-      nextRoute is CupertinoRouteTransitionMixin);
+    // Don't perform outgoing animation if the next route is a fullscreen dialog.
+    final bool nextRouteIsNotFullscreen = (nextRoute is! PageRoute<T>) || !nextRoute.fullscreenDialog;
+
+    // If the next route has a delegated transition, then this route is able to
+    // use that delegated transition to smoothly sync with the next route's
+    // transition.
+    final bool nextRouteHasDelegatedTransition = nextRoute is ModalRoute<T>
+      && nextRoute.delegatedTransition != null;
+
+    // Otherwise if the next route has the same route transition mixin as this
+    // one, then this route will already be synced with its transition.
+    return nextRouteIsNotFullscreen &&
+      ((nextRoute is CupertinoRouteTransitionMixin) || nextRouteHasDelegatedTransition);
   }
 
   @override
