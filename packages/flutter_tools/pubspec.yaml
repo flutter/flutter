@@ -16,7 +16,7 @@ dependencies:
   dds: 4.2.6
   dwds: 24.1.0
   completion: 1.0.1
-  coverage: 1.9.1
+  coverage: 1.9.2
   crypto: 3.0.5
   ffi: 2.1.3
   file: 7.0.0
@@ -39,7 +39,7 @@ dependencies:
   native_stack_traces: 0.6.0
   shelf: 1.4.2
   vm_snapshot_analysis: 0.7.6
-  uuid: 4.4.2
+  uuid: 4.5.0
   web_socket_channel: 3.0.1
   stream_channel: 2.1.2
   shelf_web_socket: 2.0.0
@@ -122,4 +122,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: dcf0
+# PUBSPEC CHECKSUM: 2af0
