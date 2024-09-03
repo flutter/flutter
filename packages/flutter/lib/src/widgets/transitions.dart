@@ -154,7 +154,8 @@ typedef DelegatedTransitionBuilder = Widget Function(BuildContext context, Anima
 /// Used for the purposes of coordinating transitions between two routes with
 /// different route transitions. When a route is added to the stack, the original
 /// topmost route will look for this transition, and if diferent from its own
-/// `DelegatedTransition`, it will use this [builder] to animate off the screen.
+/// `DelegatedTransition`, it will use the `builder` from the incoming transition
+/// to animate off the screen.
 /// {@endtemplate}
 ///
 /// This check is based on the run time type of the `DelegatedTransition`. So if
