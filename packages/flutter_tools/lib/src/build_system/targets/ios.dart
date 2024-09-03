@@ -258,19 +258,20 @@ abstract class UnpackIOS extends Target {
 
   @override
   List<Source> get inputs => <Source>[
-        const Source.pattern(
-            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
-        Source.artifact(
-          Artifact.flutterXcframework,
-          platform: TargetPlatform.ios,
-          mode: buildMode,
-        ),
-      ];
+    const Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
+    ),
+    Source.artifact(
+      Artifact.flutterXcframework,
+      platform: TargetPlatform.ios,
+      mode: buildMode,
+    ),
+  ];
 
   @override
   List<Source> get outputs => const <Source>[
-        Source.pattern('{OUTPUT_DIR}/Flutter.framework/Flutter'),
-      ];
+    Source.pattern('{OUTPUT_DIR}/Flutter.framework/Flutter'),
+  ];
 
   @override
   List<Target> get dependencies => <Target>[];
@@ -288,7 +289,11 @@ abstract class UnpackIOS extends Target {
     if (archs == null) {
       throw MissingDefineException(kIosArchs, name);
     }
-    await _copyFramework(environment, sdkRoot);
+    final EnvironmentType? environmentType = environmentTypeFromSdkroot(sdkRoot, environment.fileSystem);
+    if (environmentType == null) {
+      throw Exception('Cannot determine environment type for SDK root $sdkRoot');
+    }
+    await _copyFramework(environment, environmentType);
 
     final File frameworkBinary = environment.outputDir.childDirectory('Flutter.framework').childFile('Flutter');
     final String frameworkBinaryPath = frameworkBinary.path;
@@ -299,9 +304,11 @@ abstract class UnpackIOS extends Target {
     await _signFramework(environment, frameworkBinary, buildMode);
   }
 
-  Future<void> _copyFramework(Environment environment, String sdkRoot) async {
+  Future<void> _copyFramework(
+    Environment environment,
+    EnvironmentType? environmentType,
+  ) async {
     // Copy Flutter framework.
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(sdkRoot, environment.fileSystem);
     final String basePath = environment.artifacts.getArtifactPath(
       Artifact.flutterFramework,
       platform: TargetPlatform.ios,
@@ -377,7 +384,12 @@ abstract class UnpackIOS extends Target {
     ]);
 
     if (verifyResult.exitCode != 0) {
-      throw Exception('Binary $frameworkBinaryPath does not contain $archs. Running lipo -info:\n$lipoInfo');
+      throw Exception(
+        'Binary $frameworkBinaryPath does not contain architectures "$archs".\n'
+        '\n'
+        'lipo -info:\n'
+        '$lipoInfo',
+      );
     }
 
     // Skip thinning for non-fat executables.
@@ -400,7 +412,12 @@ abstract class UnpackIOS extends Target {
     ]);
 
     if (extractResult.exitCode != 0) {
-      throw Exception('Failed to extract $archs for $frameworkBinaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
+      throw Exception(
+        'Failed to extract architectures "$archs" for $frameworkBinaryPath.\n'
+        '${extractResult.stderr}\n'
+        'lipo -info:\n'
+        '$lipoInfo',
+      );
     }
   }
 }

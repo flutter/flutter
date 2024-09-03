@@ -741,7 +741,7 @@ void main() {
         throwsA(isException.having(
           (Exception exception) => exception.toString(),
           'description',
-          contains('does not contain arm64 armv7. Running lipo -info:\nArchitectures in the fat file:'),
+          contains('does not contain architectures "arm64 armv7".\n\nlipo -info:\nArchitectures in the fat file:'),
         )),
       );
     });
@@ -794,7 +794,11 @@ void main() {
         throwsA(isException.having(
           (Exception exception) => exception.toString(),
           'description',
-          contains('Failed to extract arm64 armv7 for output/Flutter.framework/Flutter.\nlipo error\nRunning lipo -info:\nArchitectures in the fat file:'),
+          contains(
+            'Failed to extract architectures "arm64 armv7" for output/Flutter.framework/Flutter.\n'
+            'lipo error\n'
+            'lipo -info:\nArchitectures in the fat file:',
+          ),
         )),
       );
     });

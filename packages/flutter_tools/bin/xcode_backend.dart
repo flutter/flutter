@@ -462,18 +462,16 @@ class Context {
     }
 
     String architectures = environment['ARCHS'] ?? '';
-    if (command == 'prepare') {
+    final String sdkRoot = environment['SDKROOT'] ?? '';
+    if (command == 'prepare' && architectures.contains(' ')) {
       // The "prepare" command runs in a pre-action script, which doesn't always
       // filter the "ARCHS" build setting to only the active arch. To workaround,
-      // if "ONLY_ACTIVE_ARCH" is true and the "NATIVE_ARCH" is arm, assume the
-      // active arch is also arm to improve caching. If this assumption is
-      // incorrect, it will later be corrected by the "build" command.
-      if (environment['ONLY_ACTIVE_ARCH'] == 'YES' && environment['NATIVE_ARCH'] != null) {
-        if (environment['NATIVE_ARCH']!.contains('arm')) {
-          architectures = 'arm64';
-        } else {
-          architectures = 'x86_64';
-        }
+      // use "SDKROOT" to sniff if we can assume the active arch is arm to
+      // improve caching. If this assumption is incorrect, it will later be
+      // corrected by the "build" command.
+      final String sdkRootLowered = sdkRoot.toLowerCase();
+      if (sdkRootLowered.contains('iphone') && !sdkRootLowered.contains('simulator')) {
+        architectures = 'arm64';
       }
     }
 
@@ -486,7 +484,7 @@ class Context {
       '-dBuildMode=$buildMode',
       if (environment['FLAVOR'] != null) '-dFlavor=${environment['FLAVOR']}',
       '-dIosArchs=$architectures',
-      '-dSdkRoot=${environment['SDKROOT'] ?? ''}',
+      '-dSdkRoot=$sdkRoot',
       '-dSplitDebugInfo=${environment['SPLIT_DEBUG_INFO'] ?? ''}',
       '-dTreeShakeIcons=${environment['TREE_SHAKE_ICONS'] ?? ''}',
       '-dTrackWidgetCreation=${environment['TRACK_WIDGET_CREATION'] ?? ''}',
