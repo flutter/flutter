@@ -197,12 +197,14 @@ static BOOL _preparedOnce = NO;
 // information about screen scale.
 @property(nonatomic) CATransform3D reverseScreenScale;
 
-- (void)addTransformedPath:(CGPathRef)path matrix:(CATransform3D)matrix;
+- (fml::CFRef<CGPathRef>)getTransformedPath:(CGPathRef)path matrix:(CATransform3D)matrix;
 
 @end
 
 @implementation FlutterClippingMaskView {
-  CGMutablePathRef pathSoFar_;
+  std::vector<fml::CFRef<CGPathRef>> paths_;
+  BOOL containsNonRectPath_;
+  CGRect rectSoFar_;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
@@ -213,7 +215,8 @@ static BOOL _preparedOnce = NO;
   if (self = [super initWithFrame:frame]) {
     self.backgroundColor = UIColor.clearColor;
     _reverseScreenScale = CATransform3DMakeScale(1 / screenScale, 1 / screenScale, 1);
-    pathSoFar_ = CGPathCreateMutable();
+    rectSoFar_ = self.bounds;
+    containsNonRectPath_ = NO;
   }
   return self;
 }
@@ -227,14 +230,11 @@ static BOOL _preparedOnce = NO;
 }
 
 - (void)reset {
-  CGPathRelease(pathSoFar_);
-  pathSoFar_ = CGPathCreateMutable();
+  paths_.clear();
+  rectSoFar_ = self.bounds;
+  containsNonRectPath_ = NO;
   [self shapeLayer].path = nil;
   [self setNeedsDisplay];
-}
-
-- (void)dealloc {
-  CGPathRelease(pathSoFar_);
 }
 
 // In some scenarios, when we add this view as a maskView of the ChildClippingView, iOS added
@@ -246,16 +246,58 @@ static BOOL _preparedOnce = NO;
   return NO;
 }
 
+- (void)drawRect:(CGRect)rect {
+  // It's hard to compute intersection of arbitrary non-rect paths.
+  // So we fallback to software rendering.
+  if (containsNonRectPath_ && paths_.size() > 1) {
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextSaveGState(context);
+
+    // For mask view, only the alpha channel is used.
+    CGContextSetAlpha(context, 1);
+
+    for (size_t i = 0; i < paths_.size(); i++) {
+      CGContextAddPath(context, paths_.at(i));
+      CGContextClip(context);
+    }
+    CGContextFillRect(context, rect);
+    CGContextRestoreGState(context);
+  } else {
+    // Either a single path, or multiple rect paths.
+    // Use hardware rendering with CAShapeLayer.
+    [super drawRect:rect];
+    if (![self shapeLayer].path) {
+      if (paths_.size() == 1) {
+        // A single path, either rect or non-rect.
+        [self shapeLayer].path = paths_.at(0);
+      } else {
+        // Multiple paths, all paths must be rects.
+        CGPathRef pathSoFar = CGPathCreateWithRect(rectSoFar_, nil);
+        [self shapeLayer].path = pathSoFar;
+        CGPathRelease(pathSoFar);
+      }
+    }
+  }
+}
+
 - (void)clipRect:(const SkRect&)clipSkRect matrix:(const SkMatrix&)matrix {
   CGRect clipRect = GetCGRectFromSkRect(clipSkRect);
   CGPathRef path = CGPathCreateWithRect(clipRect, nil);
   // The `matrix` is based on the physical pixels, convert it to UIKit points.
   CATransform3D matrixInPoints =
       CATransform3DConcat(GetCATransform3DFromSkMatrix(matrix), _reverseScreenScale);
-  [self addTransformedPath:path matrix:matrixInPoints];
+  paths_.push_back([self getTransformedPath:path matrix:matrixInPoints]);
+  CGAffineTransform affine = [self affineWithMatrix:matrixInPoints];
+  // Make sure the rect is not rotated (only translated or scaled).
+  if (affine.b == 0 && affine.c == 0) {
+    rectSoFar_ = CGRectIntersection(rectSoFar_, CGRectApplyAffineTransform(clipRect, affine));
+  } else {
+    containsNonRectPath_ = YES;
+  }
 }
 
 - (void)clipRRect:(const SkRRect&)clipSkRRect matrix:(const SkMatrix&)matrix {
+  containsNonRectPath_ = YES;
   CGPathRef pathRef = nullptr;
   switch (clipSkRRect.getType()) {
     case SkRRect::kEmpty_Type: {
@@ -321,7 +363,7 @@ static BOOL _preparedOnce = NO;
   // TODO(cyanglaz): iOS does not seem to support hard edge on CAShapeLayer. It clearly stated that
   // the CAShaperLayer will be drawn antialiased. Need to figure out a way to do the hard edge
   // clipping on iOS.
-  [self addTransformedPath:pathRef matrix:matrixInPoints];
+  paths_.push_back([self getTransformedPath:pathRef matrix:matrixInPoints]);
 }
 
 - (void)clipPath:(const SkPath&)path matrix:(const SkMatrix&)matrix {
@@ -331,6 +373,7 @@ static BOOL _preparedOnce = NO;
   if (path.isEmpty()) {
     return;
   }
+  containsNonRectPath_ = YES;
   CGMutablePathRef pathRef = CGPathCreateMutable();
 
   // Loop through all verbs and translate them into CGPath
@@ -386,15 +429,20 @@ static BOOL _preparedOnce = NO;
   // The `matrix` is based on the physical pixels, convert it to UIKit points.
   CATransform3D matrixInPoints =
       CATransform3DConcat(GetCATransform3DFromSkMatrix(matrix), _reverseScreenScale);
-  [self addTransformedPath:pathRef matrix:matrixInPoints];
+  paths_.push_back([self getTransformedPath:pathRef matrix:matrixInPoints]);
 }
 
-- (void)addTransformedPath:(CGPathRef)path matrix:(CATransform3D)matrix {
-  CGAffineTransform affine =
-      CGAffineTransformMake(matrix.m11, matrix.m12, matrix.m21, matrix.m22, matrix.m41, matrix.m42);
-  CGPathAddPath(pathSoFar_, &affine, path);
-  [self shapeLayer].path = pathSoFar_;
+- (CGAffineTransform)affineWithMatrix:(CATransform3D)matrix {
+  return CGAffineTransformMake(matrix.m11, matrix.m12, matrix.m21, matrix.m22, matrix.m41,
+                               matrix.m42);
+}
+
+- (fml::CFRef<CGPathRef>)getTransformedPath:(CGPathRef)path matrix:(CATransform3D)matrix {
+  CGAffineTransform affine = [self affineWithMatrix:matrix];
+  CGPathRef transformedPath = CGPathCreateCopyByTransformingPath(path, &affine);
+
   CGPathRelease(path);
+  return fml::CFRef<CGPathRef>(transformedPath);
 }
 
 @end

@@ -1856,6 +1856,102 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   }
 }
 
+- (void)testClipRect_multipleClips {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/GetDefaultTaskRunner(),
+                               /*raster=*/GetDefaultTaskRunner(),
+                               /*ui=*/GetDefaultTaskRunner(),
+                               /*io=*/GetDefaultTaskRunner());
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
+  flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  flutterPlatformViewsController->RegisterViewFactory(
+      factory, @"MockFlutterPlatformView",
+      FlutterPlatformViewGestureRecognizersBlockingPolicyEager);
+  FlutterResult result = ^(id result) {
+  };
+  flutterPlatformViewsController->OnMethodCall(
+      [FlutterMethodCall
+          methodCallWithMethodName:@"create"
+                         arguments:@{@"id" : @2, @"viewType" : @"MockFlutterPlatformView"}],
+      result);
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
+  flutterPlatformViewsController->SetFlutterView(flutterView);
+  // Create embedded view params
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack
+  SkMatrix screenScaleMatrix =
+      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  stack.PushTransform(screenScaleMatrix);
+  // Push a clip rect
+  SkRect rect1 = SkRect::MakeXYWH(2, 2, 3, 3);
+  stack.PushClipRect(rect1);
+  // Push another clip rect
+  SkRect rect2 = SkRect::MakeXYWH(3, 3, 3, 3);
+  stack.PushClipRect(rect2);
+
+  auto embeddedViewParams =
+      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeWithParams(
+      2, flutterPlatformViewsController->GetCompositionParams(2));
+
+  gMockPlatformView.backgroundColor = UIColor.redColor;
+  XCTAssertTrue([gMockPlatformView.superview.superview isKindOfClass:ChildClippingView.class]);
+  ChildClippingView* childClippingView = (ChildClippingView*)gMockPlatformView.superview.superview;
+  [flutterView addSubview:childClippingView];
+
+  [flutterView setNeedsLayout];
+  [flutterView layoutIfNeeded];
+
+  /*
+  clip 1            clip 2
+    2 3 4 5 6         2 3 4 5 6
+  2 + - - +         2
+  3 |     |         3   + - - +
+  4 |     |         4   |     |
+  5 + - - +         5   |     |
+  6                 6   + - - +
+
+  Result should be the intersection of 2 clips
+    2 3 4 5 6
+  2
+  3   + - +
+  4   |   |
+  5   + - +
+  6
+  */
+  CGRect insideClipping = CGRectMake(3, 3, 2, 2);
+  for (int i = 0; i < 10; i++) {
+    for (int j = 0; j < 10; j++) {
+      CGPoint point = CGPointMake(i, j);
+      int alpha = [self alphaOfPoint:CGPointMake(i, j) onView:flutterView];
+      if (CGRectContainsPoint(insideClipping, point)) {
+        XCTAssertEqual(alpha, 255);
+      } else {
+        XCTAssertEqual(alpha, 0);
+      }
+    }
+  }
+}
+
 - (void)testClipRRect {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
@@ -1953,6 +2049,126 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         XCTAssert(0 < alpha && alpha < 255);
       } else {
         // Pixels outside outterClipping should be fully transparent.
+        XCTAssertEqual(alpha, 0);
+      }
+    }
+  }
+}
+
+- (void)testClipRRect_multipleClips {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/GetDefaultTaskRunner(),
+                               /*raster=*/GetDefaultTaskRunner(),
+                               /*ui=*/GetDefaultTaskRunner(),
+                               /*io=*/GetDefaultTaskRunner());
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
+  flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  flutterPlatformViewsController->RegisterViewFactory(
+      factory, @"MockFlutterPlatformView",
+      FlutterPlatformViewGestureRecognizersBlockingPolicyEager);
+  FlutterResult result = ^(id result) {
+  };
+  flutterPlatformViewsController->OnMethodCall(
+      [FlutterMethodCall
+          methodCallWithMethodName:@"create"
+                         arguments:@{@"id" : @2, @"viewType" : @"MockFlutterPlatformView"}],
+      result);
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
+  flutterPlatformViewsController->SetFlutterView(flutterView);
+  // Create embedded view params
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack
+  SkMatrix screenScaleMatrix =
+      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  stack.PushTransform(screenScaleMatrix);
+  // Push a clip rrect
+  SkRRect rrect = SkRRect::MakeRectXY(SkRect::MakeXYWH(2, 2, 6, 6), 1, 1);
+  stack.PushClipRRect(rrect);
+  // Push a clip rect
+  SkRect rect = SkRect::MakeXYWH(4, 2, 6, 6);
+  stack.PushClipRect(rect);
+
+  auto embeddedViewParams =
+      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeWithParams(
+      2, flutterPlatformViewsController->GetCompositionParams(2));
+
+  gMockPlatformView.backgroundColor = UIColor.redColor;
+  XCTAssertTrue([gMockPlatformView.superview.superview isKindOfClass:ChildClippingView.class]);
+  ChildClippingView* childClippingView = (ChildClippingView*)gMockPlatformView.superview.superview;
+  [flutterView addSubview:childClippingView];
+
+  [flutterView setNeedsLayout];
+  [flutterView layoutIfNeeded];
+
+  /*
+  clip 1                 clip 2
+    2 3 4 5 6 7 8 9       2 3 4 5 6 7 8 9
+  2 / - - - - \         2     + - - - - +
+  3 |         |         3     |         |
+  4 |         |         4     |         |
+  5 |         |         5     |         |
+  6 |         |         6     |         |
+  7 \ - - - - /         7     + - - - - +
+
+  Result should be the intersection of 2 clips
+    2 3 4 5 6 7 8 9
+  2     + - - \
+  3     |     |
+  4     |     |
+  5     |     |
+  6     |     |
+  7     + - - /
+  */
+  CGRect clipping = CGRectMake(4, 2, 4, 6);
+  for (int i = 0; i < 10; i++) {
+    for (int j = 0; j < 10; j++) {
+      CGPoint point = CGPointMake(i, j);
+      int alpha = [self alphaOfPoint:CGPointMake(i, j) onView:flutterView];
+      if (i == 7 && (j == 2 || j == 7)) {
+        // Upper and lower right corners should be partially transparent.
+        XCTAssert(0 < alpha && alpha < 255);
+      } else if (
+          // left
+          (i == 4 && j >= 2 && j <= 7) ||
+          // right
+          (i == 7 && j >= 2 && j <= 7) ||
+          // top
+          (j == 2 && i >= 4 && i <= 7) ||
+          // bottom
+          (j == 7 && i >= 4 && i <= 7)) {
+        // Since we are falling back to software rendering for this case
+        // The edge pixels can be anti-aliased, so it may not be fully opaque.
+        XCTAssert(alpha > 127);
+      } else if ((i == 3 && j >= 1 && j <= 8) || (i == 8 && j >= 1 && j <= 8) ||
+                 (j == 1 && i >= 3 && i <= 8) || (j == 8 && i >= 3 && i <= 8)) {
+        // Since we are falling back to software rendering for this case
+        // The edge pixels can be anti-aliased, so it may not be fully transparent.
+        XCTAssert(alpha < 127);
+      } else if (CGRectContainsPoint(clipping, point)) {
+        // Other pixels inside clipping should be fully opaque.
+        XCTAssertEqual(alpha, 255);
+      } else {
+        // Pixels outside clipping should be fully transparent.
         XCTAssertEqual(alpha, 0);
       }
     }
@@ -2057,6 +2273,127 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         XCTAssert(0 < alpha && alpha < 255);
       } else {
         // Pixels outside outterClipping should be fully transparent.
+        XCTAssertEqual(alpha, 0);
+      }
+    }
+  }
+}
+
+- (void)testClipPath_multipleClips {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/GetDefaultTaskRunner(),
+                               /*raster=*/GetDefaultTaskRunner(),
+                               /*ui=*/GetDefaultTaskRunner(),
+                               /*io=*/GetDefaultTaskRunner());
+  auto flutterPlatformViewsController = std::make_shared<flutter::PlatformViewsController>();
+  flutterPlatformViewsController->SetTaskRunner(GetDefaultTaskRunner());
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  flutterPlatformViewsController->RegisterViewFactory(
+      factory, @"MockFlutterPlatformView",
+      FlutterPlatformViewGestureRecognizersBlockingPolicyEager);
+  FlutterResult result = ^(id result) {
+  };
+  flutterPlatformViewsController->OnMethodCall(
+      [FlutterMethodCall
+          methodCallWithMethodName:@"create"
+                         arguments:@{@"id" : @2, @"viewType" : @"MockFlutterPlatformView"}],
+      result);
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
+  flutterPlatformViewsController->SetFlutterView(flutterView);
+  // Create embedded view params
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack
+  SkMatrix screenScaleMatrix =
+      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  stack.PushTransform(screenScaleMatrix);
+  // Push a clip path
+  SkPath path;
+  path.addRoundRect(SkRect::MakeXYWH(2, 2, 6, 6), 1, 1);
+  stack.PushClipPath(path);
+  // Push a clip rect
+  SkRect rect = SkRect::MakeXYWH(4, 2, 6, 6);
+  stack.PushClipRect(rect);
+
+  auto embeddedViewParams =
+      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeWithParams(
+      2, flutterPlatformViewsController->GetCompositionParams(2));
+
+  gMockPlatformView.backgroundColor = UIColor.redColor;
+  XCTAssertTrue([gMockPlatformView.superview.superview isKindOfClass:ChildClippingView.class]);
+  ChildClippingView* childClippingView = (ChildClippingView*)gMockPlatformView.superview.superview;
+  [flutterView addSubview:childClippingView];
+
+  [flutterView setNeedsLayout];
+  [flutterView layoutIfNeeded];
+
+  /*
+  clip 1                 clip 2
+    2 3 4 5 6 7 8 9       2 3 4 5 6 7 8 9
+  2 / - - - - \         2     + - - - - +
+  3 |         |         3     |         |
+  4 |         |         4     |         |
+  5 |         |         5     |         |
+  6 |         |         6     |         |
+  7 \ - - - - /         7     + - - - - +
+
+  Result should be the intersection of 2 clips
+    2 3 4 5 6 7 8 9
+  2     + - - \
+  3     |     |
+  4     |     |
+  5     |     |
+  6     |     |
+  7     + - - /
+  */
+  CGRect clipping = CGRectMake(4, 2, 4, 6);
+  for (int i = 0; i < 10; i++) {
+    for (int j = 0; j < 10; j++) {
+      CGPoint point = CGPointMake(i, j);
+      int alpha = [self alphaOfPoint:CGPointMake(i, j) onView:flutterView];
+      if (i == 7 && (j == 2 || j == 7)) {
+        // Upper and lower right corners should be partially transparent.
+        XCTAssert(0 < alpha && alpha < 255);
+      } else if (
+          // left
+          (i == 4 && j >= 2 && j <= 7) ||
+          // right
+          (i == 7 && j >= 2 && j <= 7) ||
+          // top
+          (j == 2 && i >= 4 && i <= 7) ||
+          // bottom
+          (j == 7 && i >= 4 && i <= 7)) {
+        // Since we are falling back to software rendering for this case
+        // The edge pixels can be anti-aliased, so it may not be fully opaque.
+        XCTAssert(alpha > 127);
+      } else if ((i == 3 && j >= 1 && j <= 8) || (i == 8 && j >= 1 && j <= 8) ||
+                 (j == 1 && i >= 3 && i <= 8) || (j == 8 && i >= 3 && i <= 8)) {
+        // Since we are falling back to software rendering for this case
+        // The edge pixels can be anti-aliased, so it may not be fully transparent.
+        XCTAssert(alpha < 127);
+      } else if (CGRectContainsPoint(clipping, point)) {
+        // Other pixels inside clipping should be fully opaque.
+        XCTAssertEqual(alpha, 255);
+      } else {
+        // Pixels outside clipping should be fully transparent.
         XCTAssertEqual(alpha, 0);
       }
     }

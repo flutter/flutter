@@ -110,14 +110,23 @@ if set -o pipefail && xcodebuild -sdk iphonesimulator \
   -skip-testing ScenariosUITests/MultiplePlatformViewsTest/testPlatformView \
   -skip-testing ScenariosUITests/NonFullScreenFlutterViewPlatformViewUITests/testPlatformView \
   -skip-testing ScenariosUITests/PlatformViewMutationClipPathTests/testPlatformView \
+  -skip-testing ScenariosUITests/PlatformViewMutationClipPathMultipleClipsTests/testPlatformView \
   -skip-testing ScenariosUITests/PlatformViewMutationClipPathWithTransformTests/testPlatformView \
+  -skip-testing ScenariosUITests/PlatformViewMutationClipPathWithTransformMultipleClipsTests/testPlatformView \
   -skip-testing ScenariosUITests/PlatformViewMutationClipRectAfterMovedTests/testPlatformView \
+  -skip-testing ScenariosUITests/PlatformViewMutationClipRectAfterMovedMultipleClipsTests/testPlatformView \
   -skip-testing ScenariosUITests/PlatformViewMutationClipRectTests/testPlatformView \
+  -skip-testing ScenariosUITests/PlatformViewMutationClipRectMultipleClipsTests/testPlatformView \
   -skip-testing ScenariosUITests/PlatformViewMutationClipRectWithTransformTests/testPlatformView \
+  -skip-testing ScenariosUITests/PlatformViewMutationClipRectWithTransformMultipleClipsTests/testPlatformView \
   -skip-testing ScenariosUITests/PlatformViewMutationClipRRectTests/testPlatformView \
+  -skip-testing ScenariosUITests/PlatformViewMutationClipRRectMultipleClipsTests/testPlatformView \
   -skip-testing ScenariosUITests/PlatformViewMutationClipRRectWithTransformTests/testPlatformView \
+  -skip-testing ScenariosUITests/PlatformViewMutationClipRRectWithTransformMultipleClipsTests/testPlatformView \
   -skip-testing ScenariosUITests/PlatformViewMutationLargeClipRRectTests/testPlatformView \
+  -skip-testing ScenariosUITests/PlatformViewMutationLargeClipRRectMultipleClipsTests/testPlatformView \
   -skip-testing ScenariosUITests/PlatformViewMutationLargeClipRRectWithTransformTests/testPlatformView \
+  -skip-testing ScenariosUITests/PlatformViewMutationLargeClipRRectWithTransformMultipleClipsTests/testPlatformView \
   -skip-testing ScenariosUITests/PlatformViewMutationOpacityTests/testPlatformView \
   -skip-testing ScenariosUITests/PlatformViewMutationTransformTests/testPlatformView \
   -skip-testing ScenariosUITests/PlatformViewRotation/testPlatformView \
@@ -126,8 +135,11 @@ if set -o pipefail && xcodebuild -sdk iphonesimulator \
   -skip-testing ScenariosUITests/PlatformViewWithOtherBackdropFilterTests/testPlatformView \
   -skip-testing ScenariosUITests/RenderingSelectionTest/testSoftwareRendering \
   -skip-testing ScenariosUITests/TwoPlatformViewClipPathTests/testPlatformView \
+  -skip-testing ScenariosUITests/TwoPlatformViewClipPathMultipleClipsTests/testPlatformView \
   -skip-testing ScenariosUITests/TwoPlatformViewClipRectTests/testPlatformView \
+  -skip-testing ScenariosUITests/TwoPlatformViewClipRectMultipleClipsTests/testPlatformView \
   -skip-testing ScenariosUITests/TwoPlatformViewClipRRectTests/testPlatformView \
+  -skip-testing ScenariosUITests/TwoPlatformViewClipRRectMultipleClipsTests/testPlatformView \
   -skip-testing ScenariosUITests/TwoPlatformViewsWithOtherBackDropFilterTests/testPlatformView \
   -skip-testing ScenariosUITests/UnobstructedPlatformViewTests/testMultiplePlatformViewsWithOverlays \
   # Plist with FLTEnableImpeller=YES, all projects in the workspace requires this file.
