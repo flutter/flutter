@@ -26,6 +26,17 @@ INTERNAL NOTE
 -->
 ## Flutter 3.24 Changes
 
+### [3.24.2](https://github.com/flutter/flutter/releases/tag/3.24.2)
+- [Dart 3.5.2](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md#352---2024-08-28)
+- [flutter/153949](https://github.com/flutter/flutter/issues/153949): Fixes a crash on Android when deleting `EditableText` inside `CupertinoPageRoute`, with a CJK (chinese, japanese, korean) keyboard.
+- [flutter/153939](https://github.com/flutter/flutter/issues/153939): Fixes an issue on iOS where Flutter `TextField`s may stop accepting input.
+- [flutter/152420](https://github.com/flutter/flutter/issues/152420): Fixes scrolling jank on Android and iOS when a `SelectionArea`/`SelectableRegion` is used as a child of a Scrollable like `ListView` or `PageView`.
+- [flutter/154199](https://github.com/flutter/flutter/pull/154199): Removes excessive logging when building a freshly created template app for Android.
+- [flutter/153967](https://github.com/flutter/flutter/pull/153967): Fixes a host build failure on macOS when the `native assets` experiment is enabled, and there are no native asset frameworks to codesign.
+- [flutter/153769](https://github.com/flutter/flutter/pull/153769): When running a Flutter app, display a concise error message when connection to the device is lost.
+- [flutter/154270](https://github.com/flutter/flutter/pull/154270): Prevent preemptive gradle crash for android builds that would fail to build anyway but with a confusing error message.
+- [flutter/54735](https://github.com/flutter/engine/pull/54735):  Fixes an error on Flutter Web where `onTap` is called twice on various widgets (`GestureDetector`, `InkWell`) when semantics are enabled.
+
 ### [3.24.1](https://github.com/flutter/flutter/releases/tag/3.24.1)
 
 - [dart/56464](https://github.com/dart-lang/sdk/issues/56464) - Fixes resolving `include:` in `analysis_options.yaml` file in a nested folder in the workspace.
