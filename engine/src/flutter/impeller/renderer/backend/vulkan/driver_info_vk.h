@@ -123,6 +123,17 @@ class DriverInfoVK {
   ///
   bool IsEmulator() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Determines if the driver has been tested and determined to be
+  ///             non-functional.
+  ///
+  ///             If true, context setup should fail such that the device falls
+  ///             back to OpenGLES.
+  ///
+  /// @return     True if non-functional device, False otherwiise.
+  ///
+  bool IsKnownBadDriver() const;
+
  private:
   bool is_valid_ = false;
   Version api_version_;

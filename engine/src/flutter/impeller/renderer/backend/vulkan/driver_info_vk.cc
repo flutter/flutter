@@ -6,10 +6,18 @@
 
 #include <iomanip>
 #include <sstream>
+#include <string_view>
 
 #include "flutter/fml/build_config.h"
 
 namespace impeller {
+
+/// Non functional Vulkan driver, see:
+/// https://github.com/flutter/flutter/issues/154103
+///
+/// Reports "VK_INCOMPLETE" when compiling certain entity shader with
+/// vkCreateGraphicsPipelines, which is not a valid return status.
+constexpr std::string_view kAdreno630 = "Adreno (TM) 630";
 
 constexpr VendorVK IdentifyVendor(uint32_t vendor) {
   // Check if the vendor has a PCI ID:
@@ -185,6 +193,13 @@ bool DriverInfoVK::IsEmulator() const {
     return true;
   }
 #endif  // FML_OS_ANDROID
+  return false;
+}
+
+bool DriverInfoVK::IsKnownBadDriver() const {
+  if (vendor_ == VendorVK::kQualcomm && driver_name_ == kAdreno630) {
+    return true;
+  }
   return false;
 }
 
