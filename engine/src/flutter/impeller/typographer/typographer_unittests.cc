@@ -453,9 +453,22 @@ TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
       {4096, 4096}    // Shrinks!
   };
 
+  SkFont sk_font_small = flutter::testing::CreateTestFontOfSize(10);
+
   for (int i = 0; i < 13; i++) {
+    SkTextBlobBuilder builder;
+
+    auto add_char = [&](const SkFont& sk_font, char c) {
+      int count = sk_font.countText(&c, 1, SkTextEncoding::kUTF8);
+      auto buffer = builder.allocRunPos(sk_font, count);
+      sk_font.textToGlyphs(&c, 1, SkTextEncoding::kUTF8, buffer.glyphs, count);
+      sk_font.getPos(buffer.glyphs, count, buffer.points(), {0, 0});
+    };
+
     SkFont sk_font = flutter::testing::CreateTestFontOfSize(50 + i);
-    auto blob = SkTextBlob::MakeFromString("A", sk_font);
+    add_char(sk_font, 'A');
+    add_char(sk_font_small, 'B');
+    auto blob = builder.make();
 
     atlas =
         CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
@@ -465,6 +478,11 @@ TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
     EXPECT_EQ(atlas->GetTexture()->GetTextureDescriptor().size,
               expected_sizes[i]);
   }
+
+  // The final atlas should contain both the "A" glyph (which was not present
+  // in the previous atlas) and the "B" glyph (which existed in the previous
+  // atlas).
+  ASSERT_EQ(atlas->GetGlyphCount(), 2u);
 }
 
 }  // namespace testing
