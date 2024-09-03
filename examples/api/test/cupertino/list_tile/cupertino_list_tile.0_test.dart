@@ -13,7 +13,6 @@ void main() {
 
     final Finder cupertinoListTileFinder= find.byType(CupertinoListTile);
 
-
     // Verify if the 'CupertinoListTile Sample' text is present
     expect(find.text('CupertinoListTile Sample'), findsOneWidget);
 
