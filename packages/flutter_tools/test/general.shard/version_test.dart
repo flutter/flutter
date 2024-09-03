@@ -169,6 +169,10 @@ void main() {
             command: const <String>['git', '-c', 'log.showSignature=false', 'log', 'HEAD', '-n', '1', '--pretty=format:%ad', '--date=iso'],
             stdout: malformedGitLogOutput,
           ),
+          FakeCommand(
+            command: const <String>['git', '-c', 'log.showSignature=false', 'log', 'HEAD', '-n', '1', '--pretty=format:%ad', '--date=iso'],
+            stdout: malformedGitLogOutput,
+          ),
         ]);
 
         final FlutterVersion flutterVersion = FlutterVersion(clock: _testClock, fs: fs, flutterRoot: flutterRoot);
