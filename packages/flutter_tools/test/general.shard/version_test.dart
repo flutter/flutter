@@ -93,6 +93,10 @@ void main() {
             command: const <String>['git', '-c', 'log.showSignature=false', 'log', 'HEAD', '-n', '1', '--pretty=format:%ad', '--date=iso'],
             stdout: getChannelUpToDateVersion().toString(),
           ),
+          FakeCommand(
+            command: const <String>['git', '-c', 'log.showSignature=false', 'log', 'HEAD', '-n', '1', '--pretty=format:%ad', '--date=iso'],
+            stdout: getChannelUpToDateVersion().toString(),
+          ),
           const FakeCommand(
             command: <String>['git', 'fetch', '--tags'],
           ),

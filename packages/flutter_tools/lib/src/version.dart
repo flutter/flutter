@@ -160,7 +160,6 @@ abstract class FlutterVersion {
       gitTagVersion: gitTagVersion,
       fs: fs,
     )..ensureVersionFile();
-    //);
   }
 
   /// Ensure the latest git tags are fetched and recalculate [FlutterVersion].
