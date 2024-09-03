@@ -132,7 +132,7 @@ function generate_docs() {
 
     # Make sure that create_api_docs.dart has all the dependencies it needs.
     (cd "$FLUTTER_ROOT/dev/tools" && "$FLUTTER" pub get)
-    (cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev --enable-asserts "$FLUTTER_ROOT/dev/tools/create_api_docs.dart" --output-dir="$DOC_DIR")
+    (cd "$FLUTTER_ROOT" && "$DART" --enable-asserts "$FLUTTER_ROOT/dev/tools/create_api_docs.dart" --output-dir="$DOC_DIR")
 }
 
 function main() {
