@@ -26,10 +26,14 @@ final DateTime _stampOutOfDate = _testClock.ago(VersionFreshnessValidator.checkA
 void main() {
   late FakeCache cache;
   late FakeProcessManager processManager;
+  late FileSystem fs;
+  const String flutterRoot = '/path/to/flutter';
 
   setUp(() {
     processManager = FakeProcessManager.empty();
     cache = FakeCache();
+    fs = MemoryFileSystem.test();
+    fs.directory(flutterRoot).createSync(recursive: true);
   });
 
   testUsingContext('Channel enum and string transform to each other', () {
@@ -50,12 +54,7 @@ void main() {
     }
 
     group('$FlutterVersion for $channel', () {
-      late FileSystem fs;
-      const String flutterRoot = '/path/to/flutter';
-
       setUpAll(() {
-        fs = MemoryFileSystem.test();
-        fs.directory(flutterRoot).createSync(recursive: true);
         Cache.disableLocking();
         VersionFreshnessValidator.timeToPauseToLetUserReadTheMessage = Duration.zero;
       });
@@ -473,11 +472,10 @@ void main() {
       ),
     ]);
 
-    final MemoryFileSystem fs = MemoryFileSystem.test();
     final FlutterVersion flutterVersion = FlutterVersion(
       clock: _testClock,
       fs: fs,
-      flutterRoot: '/path/to/flutter',
+      flutterRoot: flutterRoot,
     );
     expect(flutterVersion.channel, '[user-branch]');
     expect(flutterVersion.getVersionString(), 'feature-branch/1234abcd');
