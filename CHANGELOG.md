@@ -27,6 +27,13 @@ INTERNAL NOTE
 ## Flutter 3.24 Changes
 
 ### [3.24.2](https://github.com/flutter/flutter/releases/tag/3.24.2)
+- Fixes a bug where `ZLibDecoder` would incorrectly attempt to decompress data
+  past the end of the zlib footer (issue [#56481][]).
+- Fixes issue where running `dart` from `PATH` could result in some commands not
+  working as expected (issues [#56080][], [#56306][], [#56499][]).
+- Fixes analysis server plugins not receiving `setContextRoots` requests or
+  being provided incorrect context roots in multi-package workspaces (issue
+  [#56475][]).
 - [flutter/153949](https://github.com/flutter/flutter/issues/153949): Fixes a crash on Android when deleting `EditableText` inside `CupertinoPageRoute`, with a CJK (chinese, japanese, korean) keyboard.
 - [flutter/153939](https://github.com/flutter/flutter/issues/153939): Fixes an issue on iOS where Flutter `TextField`s may stop accepting input.
 - [flutter/152420](https://github.com/flutter/flutter/issues/152420): Fixes scrolling jank on Android and iOS when a `SelectionArea`/`SelectableRegion` is used as a child of a Scrollable like `ListView` or `PageView`.
@@ -35,6 +42,12 @@ INTERNAL NOTE
 - [flutter/153769](https://github.com/flutter/flutter/pull/153769): When running a Flutter app, display a concise error message when connection to the device is lost.
 - [flutter/154270](https://github.com/flutter/flutter/pull/154270): Prevent preemptive gradle crash for android builds that would fail to build anyway but with a confusing error message.
 - [flutter/54735](https://github.com/flutter/engine/pull/54735):  Fixes an error on Flutter Web where `onTap` is called twice on various widgets (`GestureDetector`, `InkWell`) when semantics are enabled.
+
+[#56481]: https://github.com/dart-lang/sdk/issues/56481
+[#56080]: https://github.com/dart-lang/sdk/issues/56080
+[#56306]: https://github.com/dart-lang/sdk/issues/56306
+[#56499]: https://github.com/dart-lang/sdk/issues/56499
+[#56475]: https://github.com/dart-lang/sdk/issues/56475
 
 ### [3.24.1](https://github.com/flutter/flutter/releases/tag/3.24.1)
 
