@@ -80,13 +80,13 @@ const CupertinoDynamicColor _kOffLabelColor = CupertinoDynamicColor.withBrightne
 ///
 /// {@tool snippet}
 ///
-/// This sample shows how to use a [CupertinoSwitch] in a [ListTile]. The
-/// [MergeSemantics] is used to turn the entire [ListTile] into a single item
+/// This sample shows how to use a [CupertinoSwitch] in a [CupertinoListTile]. The
+/// [MergeSemantics] is used to turn the entire [CupertinoListTile] into a single item
 /// for accessibility tools.
 ///
 /// ```dart
 /// MergeSemantics(
-///   child: ListTile(
+///   child: CupertinoListTile(
 ///     title: const Text('Lights'),
 ///     trailing: CupertinoSwitch(
 ///       value: _lights,
