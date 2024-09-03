@@ -33,7 +33,11 @@ void main() {
     processManager = FakeProcessManager.empty();
     cache = FakeCache();
     fs = MemoryFileSystem.test();
-    fs.directory(flutterRoot).createSync(recursive: true);
+    fs
+      .directory(flutterRoot)
+      .childDirectory('bin')
+      .childDirectory('cache')
+      .createSync(recursive: true);
   });
 
   testUsingContext('Channel enum and string transform to each other', () {
@@ -469,6 +473,14 @@ void main() {
       const FakeCommand(
         command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
         stdout: 'feature-branch',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
+        stdout: 'remote',
+      ),
+      FakeCommand(
+        command: const <String>['git', '-c', 'log.showSignature=false', 'log', 'HEAD', '-n', '1', '--pretty=format:%ad', '--date=iso'],
+        stdout: _testClock.ago(const Duration(hours: 1)).toString(),
       ),
     ]);
 
@@ -972,7 +984,6 @@ void main() {
           command: const <String>['git', '-c', 'log.showSignature=false', 'log', 'HEAD', '-n', '1', '--pretty=format:%ad', '--date=iso'],
           stdout: _testClock.ago(const Duration(hours: 1)).toString(),
         ),
-
       ]);
       final _FakeFlutterVersion version = _FakeFlutterVersion()..channel = 'feature-branch';
       final FlutterVersion nextVersion = version.fetchTagsAndGetVersion();
