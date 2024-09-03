@@ -21,7 +21,8 @@ TaskFunction createMicrobenchmarkTask({
 }) {
 
   // Generate a seed for this test stable around the date.
-  final int seed = DateTime.now().toUtc().subtract(const Duration(hours: 7)).hashCode;
+  final DateTime seedDate = DateTime.now().toUtc().subtract(const Duration(hours: 7));
+  final int seed = DateTime(seedDate.year, seedDate.month, seedDate.day).hashCode;
 
   return () async {
     final Device device = await devices.workingDevice;
