@@ -403,34 +403,14 @@ static Rect ComputeGlyphSize(const SkFont& font,
                         scaled_bounds.fBottom);
 };
 
-std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
-    Context& context,
-    GlyphAtlas::Type type,
-    HostBuffer& host_buffer,
-    const std::shared_ptr<GlyphAtlasContext>& atlas_context,
-    const FontGlyphMap& font_glyph_map) const {
-  TRACE_EVENT0("impeller", __FUNCTION__);
-  if (!IsValid()) {
-    return nullptr;
-  }
-  std::shared_ptr<GlyphAtlas> last_atlas = atlas_context->GetGlyphAtlas();
-  FML_DCHECK(last_atlas->GetType() == type);
-
-  if (font_glyph_map.empty()) {
-    return last_atlas;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Step 1: Determine if the atlas type and font glyph pairs are compatible
-  //         with the current atlas and reuse if possible. For each new font and
-  //         glyph pair, compute the glyph size at scale.
-  // ---------------------------------------------------------------------------
-  std::vector<Rect> glyph_sizes;
-  std::vector<FontGlyphPair> new_glyphs;
+static void CollectNewGlyphs(const std::shared_ptr<GlyphAtlas>& atlas,
+                             const FontGlyphMap& font_glyph_map,
+                             std::vector<FontGlyphPair>& new_glyphs,
+                             std::vector<Rect>& glyph_sizes) {
   for (const auto& font_value : font_glyph_map) {
     const ScaledFont& scaled_font = font_value.first;
     const FontGlyphAtlas* font_glyph_atlas =
-        last_atlas->GetFontGlyphAtlas(scaled_font.font, scaled_font.scale);
+        atlas->GetFontGlyphAtlas(scaled_font.font, scaled_font.scale);
 
     auto metrics = scaled_font.font.GetMetrics();
 
@@ -462,6 +442,33 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
       }
     }
   }
+}
+
+std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
+    Context& context,
+    GlyphAtlas::Type type,
+    HostBuffer& host_buffer,
+    const std::shared_ptr<GlyphAtlasContext>& atlas_context,
+    const FontGlyphMap& font_glyph_map) const {
+  TRACE_EVENT0("impeller", __FUNCTION__);
+  if (!IsValid()) {
+    return nullptr;
+  }
+  std::shared_ptr<GlyphAtlas> last_atlas = atlas_context->GetGlyphAtlas();
+  FML_DCHECK(last_atlas->GetType() == type);
+
+  if (font_glyph_map.empty()) {
+    return last_atlas;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Step 1: Determine if the atlas type and font glyph pairs are compatible
+  //         with the current atlas and reuse if possible. For each new font and
+  //         glyph pair, compute the glyph size at scale.
+  // ---------------------------------------------------------------------------
+  std::vector<FontGlyphPair> new_glyphs;
+  std::vector<Rect> glyph_sizes;
+  CollectNewGlyphs(last_atlas, font_glyph_map, new_glyphs, glyph_sizes);
   if (new_glyphs.size() == 0) {
     return last_atlas;
   }
@@ -528,10 +535,16 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   if (atlas_context->GetAtlasSize().height >= max_texture_height ||
       context.GetBackendType() == Context::BackendType::kOpenGLES) {
     blit_old_atlas = false;
-    first_missing_index = 0;
-    glyph_positions.clear();
-    height_adjustment = 0;
     new_atlas = std::make_shared<GlyphAtlas>(type);
+
+    new_glyphs.clear();
+    glyph_sizes.clear();
+    CollectNewGlyphs(new_atlas, font_glyph_map, new_glyphs, glyph_sizes);
+    glyph_positions.clear();
+    glyph_positions.reserve(new_glyphs.size());
+    first_missing_index = 0;
+
+    height_adjustment = 0;
     atlas_context->UpdateRectPacker(nullptr);
     atlas_context->UpdateGlyphAtlas(new_atlas, {0, 0}, 0);
   }
