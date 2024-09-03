@@ -55,6 +55,7 @@ void main() {
 
       setUpAll(() {
         fs = MemoryFileSystem.test();
+        fs.directory(flutterRoot).createSync(recursive: true);
         Cache.disableLocking();
         VersionFreshnessValidator.timeToPauseToLetUserReadTheMessage = Duration.zero;
       });
@@ -685,19 +686,20 @@ void main() {
 
     // version file exists in a malformed state
     expect(versionFile.existsSync(), isTrue);
-    final FlutterVersion flutterVersion = FlutterVersion(
+    FlutterVersion(
       clock: _testClock,
       fs: fs,
       flutterRoot: flutterRoot.path,
     );
 
-    // version file was deleted because it couldn't be parsed
-    expect(versionFile.existsSync(), isFalse);
-    expect(legacyVersionFile.existsSync(), isFalse);
-    // version file was written to disk
-    flutterVersion.ensureVersionFile();
-    expect(processManager, hasNoRemainingExpectations);
+    // version file was re-recreated
     expect(versionFile.existsSync(), isTrue);
+    // is now a well-formed JSON file
+    expect(
+      jsonDecode(versionFile.readAsStringSync()),
+      isA<Map<String, Object?>>(),
+    );
+    expect(processManager, hasNoRemainingExpectations);
     expect(legacyVersionFile.existsSync(), isTrue);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
@@ -941,6 +943,8 @@ void main() {
   group('fetchTagsAndGetVersion', () {
     testUsingContext('fetches tags if current channel is not an official channel', () async {
       bool calledFetch = false;
+      const String channel = 'foo-channel';
+      const String remoteName = 'remote';
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%H'],
@@ -948,7 +952,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
-          stdout: 'foo-channel',
+          stdout: channel,
         ),
         FakeCommand(
           command: const <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags', '-f'],
@@ -960,6 +964,18 @@ void main() {
         const FakeCommand(
           command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', '1234abcd'],
           stdout: '0.1.2-3-1234abcd',
+        ),
+        const FakeCommand(
+          command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
+          stdout: channel,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
+          stdout: remoteName,
+        ),
+        FakeCommand(
+          command: const <String>['git', '-c', 'log.showSignature=false', 'log', 'HEAD', '-n', '1', '--pretty=format:%ad', '--date=iso'],
+          stdout: _testClock.ago(const Duration(hours: 1)).toString(),
         ),
 
       ]);
@@ -1012,7 +1028,13 @@ class _FakeFlutterVersion extends FlutterVersion {
     flutterRoot: 'foo',
     clock: SystemClock.fixed(DateTime.utc(2015)),
     fs: MemoryFileSystem.test(),
-  );
+  ) {
+    fs
+      .directory(flutterRoot)
+      .childDirectory('bin')
+      .childDirectory('cache')
+      .createSync(recursive: true);
+  }
 
   @override
   late String channel;
