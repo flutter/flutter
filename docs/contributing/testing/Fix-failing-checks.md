@@ -9,7 +9,7 @@
 ![Tree is currently broken.](https://github.com/user-attachments/assets/b611d540-c4cb-47dc-a27f-bef8709f24ce)
 
 A **tree-status** failure indicates that the main branch has problems
-that should be addressed anything else is merged in.
+that should be addressed before anything else is merged in.
 
 The result of this check usually goes back and forth a few times each day:
 once [review requirements](../Tree-hygiene.md#getting-a-code-review) are met
@@ -56,9 +56,10 @@ If you've followed the steps for
 most problems will be caught in static analysis, but oftentimes
 there are changes that inadvertently break expected behavior.
 
-If a **customer_testing** check is unsuccessful, it's a signal that a test from
-[flutter/packages](https://github.com/flutter/packages/) has failed.
-(more info: [Understanding Packages tests](../../ecosystem/testing/Understanding-Packages-tests.md))\
+If a **customer_testing** check is unsuccessful, it's a signal that something in the
+[Flutter customer test registry](https://github.com/flutter/tests/) has failed.
+This includes [package tests](../../ecosystem/testing/Understanding-Packages-tests.md)
+along with other tests from open-source Flutter projects.\
 If a pull request requires an update to those external tests, it qualifies as a
 [**breaking change**](../Tree-hygiene.md#handling-breaking-changes);
 it's great to avoid those when possible.
