@@ -400,7 +400,7 @@ void main() {
     expect(getHighlightedIndex(tester), null);
   });
 
-  testWidgets('Non-null but disabled input for value results in no child initially selected', (WidgetTester tester) async {
+  testWidgets('Disabled segment can be selected programmtically', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
       1: Text('Child 2'),
@@ -425,7 +425,7 @@ void main() {
       ),
     );
 
-    expect(getHighlightedIndex(tester), null);
+    expect(getHighlightedIndex(tester), 0);
   });
 
   testWidgets('Long press not-selected child interactions', (WidgetTester tester) async {
@@ -606,13 +606,13 @@ void main() {
     }
 
     final Size firstChildSize = getChildSize(0);
-    expect(firstChildSize.width, 50 + 9.25 * 2);
+    expect(firstChildSize.width, 50 + 10.0 * 2);
 
     final Size secondChildSize = getChildSize(1);
-    expect(secondChildSize.width, 100 + 9.25 * 2);
+    expect(secondChildSize.width, 100 + 10.0 * 2);
 
     final Size thirdChildSize = getChildSize(2);
-    expect(thirdChildSize.width, 70 + 9.25 * 2);
+    expect(thirdChildSize.width, 70 + 10.0 * 2);
 
     // Overall segment control width is the sum of the segment widths + horizontal paddings + 2 separator width.
     final RenderBox segmentedControl = tester.renderObject(
@@ -655,25 +655,25 @@ void main() {
     }
 
     Size firstChildSize = getChildSize(0);
-    expect(firstChildSize.width, 200 + 9.25 * 2);
+    expect(firstChildSize.width, 200 + 10.0 * 2);
 
     Size secondChildSize = getChildSize(1);
-    expect(secondChildSize.width, 200 + 9.25 * 2);
+    expect(secondChildSize.width, 200 + 10.0 * 2);
 
     Size thirdChildSize = getChildSize(2);
-    expect(thirdChildSize.width, 200 + 9.25 * 2);
+    expect(thirdChildSize.width, 200 + 10.0 * 2);
 
     setState!(() { proportionalWidth = true; });
     await tester.pump();
 
     firstChildSize = getChildSize(0);
-    expect(firstChildSize.width, 50 + 9.25 * 2);
+    expect(firstChildSize.width, 50 + 10.0 * 2);
 
     secondChildSize = getChildSize(1);
-    expect(secondChildSize.width, 200 + 9.25 * 2);
+    expect(secondChildSize.width, 200 + 10.0 * 2);
 
     thirdChildSize = getChildSize(2);
-    expect(thirdChildSize.width, 70 + 9.25 * 2);
+    expect(thirdChildSize.width, 70 + 10.0 * 2);
   });
 
   testWidgets('If proportionalWidth is true, the width of each segmented '
@@ -708,13 +708,13 @@ void main() {
     }
 
     Size firstChildSize = getChildSize(0);
-    expect(firstChildSize.width, 50 + 9.25 * 2);
+    expect(firstChildSize.width, 50 + 10.0 * 2);
 
     Size secondChildSize = getChildSize(1);
-    expect(secondChildSize.width, 100 + 9.25 * 2);
+    expect(secondChildSize.width, 100 + 10.0 * 2);
 
     Size thirdChildSize = getChildSize(2);
-    expect(thirdChildSize.width, 70 + 9.25 * 2);
+    expect(thirdChildSize.width, 70 + 10.0 * 2);
 
     setState!(() {
       children = <int, Widget>{
@@ -726,13 +726,13 @@ void main() {
     await tester.pump();
 
     firstChildSize = getChildSize(0);
-    expect(firstChildSize.width, 0 + 9.25 * 2);
+    expect(firstChildSize.width, 0 + 10.0 * 2);
 
     secondChildSize = getChildSize(1);
-    expect(secondChildSize.width, 220 + 9.25 * 2);
+    expect(secondChildSize.width, 220 + 10.0 * 2);
 
     thirdChildSize = getChildSize(2);
-    expect(thirdChildSize.width, 170 + 9.25 * 2);
+    expect(thirdChildSize.width, 170 + 10.0 * 2);
   });
 
 
@@ -770,19 +770,19 @@ void main() {
       );
     }
 
-    // Without constraints, the overall size should be 405.5:  50 + 100 + 200
-    // + 9.25 * 6(horizontal padding). To fit in 194(allowed max width - padding),
+    // Without constraints, the overall size should be 410:  50 + 100 + 200
+    // + 10.0 * 6(horizontal padding). To fit in 194(allowed max width - padding),
     // each segment width should scale down to original width * (194 - separator) / 413.5.
     final Size firstChildSize = getChildSize(0);
     const double maxAllowedTotal = 200 - 6 - 2;
-    const double originalTotal = 405.5;
-    expect(firstChildSize.width, (50 + 9.25 * 2) * maxAllowedTotal / originalTotal);
+    const double originalTotal = 410;
+    expect(firstChildSize.width, (50 + 10.0 * 2) * maxAllowedTotal / originalTotal);
 
     final Size secondChildSize = getChildSize(1);
-    expect(secondChildSize.width, (100 + 9.25 * 2) * maxAllowedTotal / originalTotal);
+    expect(secondChildSize.width, (100 + 10.0 * 2) * maxAllowedTotal / originalTotal);
 
     final Size thirdChildSize = getChildSize(2);
-    expect(thirdChildSize.width, (200 + 9.25 * 2) * maxAllowedTotal / originalTotal);
+    expect(thirdChildSize.width, (200 + 10.0 * 2) * maxAllowedTotal / originalTotal);
   });
 
   testWidgets('If proportionalWidth is true and the overall segment control width '
@@ -819,19 +819,19 @@ void main() {
       );
     }
 
-    // Without constraints, the overall size should be 155.5:  20 + 30 + 50
-    // + 9.25 * 6(horizontal padding). To fit in 194(allowed max width - padding),
+    // Without constraints, the overall size should be 160.0:  20 + 30 + 50
+    // + 10.0 * 6(horizontal padding). To fit in 194(allowed max width - padding),
     // each segment width should scale up to original width * (194 - separator) / 155.5.
     final Size firstChildSize = getChildSize(0);
     const double constraintsMinWidth = 200 - 6 - 2;
-    const double originalTotal = 155.5;
-    expect(firstChildSize.width, moreOrLessEquals((20 + 9.25 * 2) * constraintsMinWidth / originalTotal));
+    const double originalTotal = 160.0;
+    expect(firstChildSize.width, moreOrLessEquals((20 + 10.0 * 2) * constraintsMinWidth / originalTotal));
 
     final Size secondChildSize = getChildSize(1);
-    expect(secondChildSize.width, moreOrLessEquals((30 + 9.25 * 2) * constraintsMinWidth / originalTotal));
+    expect(secondChildSize.width, moreOrLessEquals((30 + 10.0 * 2) * constraintsMinWidth / originalTotal));
 
     final Size thirdChildSize = getChildSize(2);
-    expect(thirdChildSize.width, moreOrLessEquals((50 + 9.25 * 2) * constraintsMinWidth / originalTotal));
+    expect(thirdChildSize.width, moreOrLessEquals((50 + 10.0 * 2) * constraintsMinWidth / originalTotal));
   });
 
   testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
@@ -1075,13 +1075,13 @@ void main() {
     expect(groupValue, 0);
 
     final Rect firstChild = tester.getRect(find.ancestor(of: find.byWidget(children[0]!), matching: find.byType(MetaData)));
-    expect(firstChild.width, 50.0 + 9.25 * 2);
+    expect(firstChild.width, 50.0 + 10.0 * 2);
 
     final Rect secondChild = tester.getRect(find.ancestor(of: find.byWidget(children[1]!), matching: find.byType(MetaData)));
-    expect(secondChild.width, 0.0 + 9.25 * 2);
+    expect(secondChild.width, 0.0 + 10.0 * 2);
 
     final Rect thirdChild = tester.getRect(find.ancestor(of: find.byWidget(children[2]!), matching: find.byType(MetaData)));
-    expect(thirdChild.width, 100.0  + 9.25 * 2);
+    expect(thirdChild.width, 100.0  + 10.0 * 2);
 
     final Finder child0 = find.ancestor(of: find.byWidget(children[0]!), matching: find.byType(MetaData));
     final Offset centerOfChild0 = tester.getCenter(child0);
@@ -1472,14 +1472,13 @@ void main() {
     expect(callbackCalled, isFalse);
   });
 
-  testWidgets('Disable "highlighted" segment during drag, highlight disappears', (WidgetTester tester) async {
+  testWidgets('Disable "highlighted" segment during drag, highlight stays', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('A'),
       1: Text('B'),
       2: Text('C'),
     };
     Set<int> disabledChildren = <int>{};
-
     await tester.pumpWidget(
       boilerplate(
         builder: (BuildContext context) {
@@ -1518,8 +1517,8 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
 
-    // When dragging stops, highlight disappears.
-    expect(getHighlightedIndex(tester), null);
+    // When dragging stops, highlight stays.
+    expect(getHighlightedIndex(tester), 1);
   });
 
   testWidgets('Disable "highlighted" segment during drag, onValueChanged is still called', (WidgetTester tester) async {
@@ -1571,7 +1570,7 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
 
-    expect(getHighlightedIndex(tester), null);
+    expect(getHighlightedIndex(tester), 1);
     expect(callbackCalled, 1);
   });
 
@@ -1604,8 +1603,8 @@ void main() {
       );
     }
 
-    expect(getChildSize(0).width, 32.5);
-    expect(getChildSize(2).width, 60.5);
+    expect(getChildSize(0).width, 33.0);
+    expect(getChildSize(2).width, 59.0);
 
     // Start dragging.
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('A')));
