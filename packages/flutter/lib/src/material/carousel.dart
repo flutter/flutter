@@ -529,7 +529,7 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderSliverFixedExtentCarousel renderObject) {
     renderObject.maxExtent = itemExtent;
-    renderObject.minExtent = itemExtent;
+    renderObject.minExtent = minExtent;
   }
 }
 
