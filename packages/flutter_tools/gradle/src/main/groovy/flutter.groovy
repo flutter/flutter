@@ -42,7 +42,7 @@ import org.gradle.internal.os.OperatingSystem
 class FlutterExtension {
 
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    public final int compileSdkVersion = 34
+    public final int compileSdkVersion = 35
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
     public  final int minSdkVersion = 21
@@ -53,14 +53,14 @@ class FlutterExtension {
      *
      * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
      */
-    public final int targetSdkVersion = 34
+    public final int targetSdkVersion = 35
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
      * Chosen as default version of the AGP version below as found in
      * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
-    public final String ndkVersion = "23.1.7779620"
+    public final String ndkVersion = "26.1.10909125"
 
     /**
      * Specifies the relative directory to the Flutter project directory.
@@ -340,7 +340,7 @@ class FlutterPlugin implements Plugin<Project> {
                         "dependency_version_checker.gradle.kts")
                 project.apply from: dependencyCheckerPluginPath
             } catch (Exception e) {
-                if (!project.usesUnsupportedDependencyVersions) {
+                if (!project.hasProperty("usesUnsupportedDependencyVersions") || !project.usesUnsupportedDependencyVersions) {
                     // Possible bug in dependency checking code - warn and do not block build.
                     project.logger.error("Warning: Flutter was unable to detect project Gradle, Java, " +
                             "AGP, and KGP versions. Skipping dependency version checking. Error was: "
@@ -381,7 +381,7 @@ class FlutterPlugin implements Plugin<Project> {
                     shrinkResources(isBuiltAsApp(project))
                     // Fallback to `android/app/proguard-rules.pro`.
                     // This way, custom Proguard rules can be configured as needed.
-                    proguardFiles(project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro")
+                    proguardFiles(project.android.getDefaultProguardFile("proguard-android-optimize.txt"), flutterProguardRules, "proguard-rules.pro")
                 }
             }
         }
@@ -765,6 +765,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (pluginProject == null) {
             return
         }
+        // Apply the "flutter" Gradle extension to plugins so that they can use it's vended
+        // compile/target/min sdk values.
+        pluginProject.extensions.create("flutter", FlutterExtension)
         // Add plugin dependency to the app project.
         project.dependencies {
             api(pluginProject)

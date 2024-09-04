@@ -83,7 +83,9 @@ class AndroidRunOutputTest extends RunOutputTask {
     print('uninstalling...');
     final Process uninstall = await startFlutter(
       'install',
-      options:  <String>['--suppress-analytics', '--uninstall-only', '-d', deviceId],
+      // TODO(andrewkolos): consider removing -v after
+      //  https://github.com/flutter/flutter/issues/153367 is troubleshot.
+      options:  <String>['--suppress-analytics', '--uninstall-only', '-d', deviceId, '-v'],
       isBot: false,
     );
     uninstall.stdout

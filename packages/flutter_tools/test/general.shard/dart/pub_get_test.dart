@@ -616,7 +616,7 @@ exit code: 66
         context: PubContext.flutterTests,
       ),
       throwsA(isA<ToolExit>()
-          .having((ToolExit error) => error.message, 'message', null)),
+          .having((ToolExit error) => error.message, 'message', contains('Failed to update packages'))),
     );
     expect(logger.statusText, isEmpty);
     expect(logger.traceText, contains(toolExitMessage));
@@ -626,6 +626,62 @@ exit code: 66
     expect(mockStdio.stderr.writes.map(utf8.decode), <String>[
       'err1\nerr2\nerr3\n',
     ]);
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('pub get with failing exit code even with OutputMode == failuresOnly', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'bin/cache/dart-sdk/bin/dart',
+          'pub',
+          '--suppress-analytics',
+          '--directory',
+          '.',
+          'get',
+          '--example',
+        ],
+        exitCode: 1,
+        stderr: '===pub get failed stderr here===',
+        stdout: 'out1\nout2\nout3\n',
+        environment: <String, String>{
+          'FLUTTER_ROOT': '',
+          'PUB_ENVIRONMENT': 'flutter_cli:update_packages'
+        },
+      ),
+    ]);
+
+    // Intentionally not using pub.test to simulate a real environment, but
+    // we are using non-inherited I/O to avoid printing to the console.
+    final Pub pub = Pub(
+      platform: FakePlatform(),
+      fileSystem: fileSystem,
+      logger: logger,
+      usage: TestUsage(),
+      botDetector: const BotDetectorAlwaysNo(),
+      processManager: processManager,
+    );
+
+    await expectLater(
+      () => pub.get(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        context: PubContext.updatePackages,
+        outputMode: PubOutputMode.failuresOnly,
+      ),
+      throwsToolExit(
+        message: 'Failed to update packages',
+      ),
+    );
+    expect(logger.statusText, isEmpty);
+    expect(logger.errorText, contains('===pub get failed stderr here==='));
+    expect(
+      logger.warningText,
+      contains('git remote set-url upstream'),
+      reason: 'When update-packages fails, it is often because of missing an upsteam remote.',
+    );
     expect(processManager, hasNoRemainingExpectations);
   });
 
@@ -745,7 +801,7 @@ exit code: 66
       await pub.get(
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         context: PubContext.flutterTests,
-        outputMode: PubOutputMode.none,
+        outputMode: PubOutputMode.failuresOnly,
       );
     } on ToolExit {
       // Ignore.

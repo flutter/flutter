@@ -4288,6 +4288,7 @@ void main() {
 
   testWidgets('If requestFocus is false, the original focus should be preserved upon menu appearance.', (WidgetTester tester) async {
     final FocusNode fieldFocusNode = FocusNode();
+    addTearDown(fieldFocusNode.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

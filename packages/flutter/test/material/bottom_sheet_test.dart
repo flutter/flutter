@@ -2609,6 +2609,77 @@ void main() {
     // The bottom sheet is dismissed.
     expect(find.byKey(sheetKey), findsNothing);
   });
+
+  testWidgets('Setting ModalBottomSheetRoute.requestFocus to false does not request focus on the bottom sheet', (WidgetTester tester) async {
+    late BuildContext savedContext;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              savedContext = context;
+              return TextField(focusNode: focusNode);
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    FocusNode? getTextFieldFocusNode() {
+      return tester.widget<Focus>(find.descendant(
+        of: find.byType(TextField),
+        matching: find.byType(Focus),
+      )).focusNode;
+    }
+
+    // Initially, there is no bottom sheet and the text field has no focus.
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(getTextFieldFocusNode()?.hasFocus, false);
+
+    // Request focus on the text field.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(getTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up bottom sheet.
+    final NavigatorState navigator = Navigator.of(savedContext);
+    navigator.push(
+      ModalBottomSheetRoute<void>(
+        isScrollControlled: false,
+        builder: (BuildContext context) => Container(),
+      ),
+    );
+    await tester.pump();
+
+    // The bottom sheet is showing and the text field has lost focus.
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(getTextFieldFocusNode()?.hasFocus, false);
+
+    // Dismiss the bottom sheet.
+    navigator.pop();
+    await tester.pump();
+
+    // The bottom sheet is dismissed and the focus is shifted back to the text field.
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(getTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up bottom sheet again with requestFocus to false.
+    navigator.push(
+      ModalBottomSheetRoute<void>(
+        requestFocus: false,
+        isScrollControlled: false,
+        builder: (BuildContext context) => Container(),
+      ),
+    );
+    await tester.pump();
+
+    // The bottom sheet is showing and the text field still has focus.
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(getTextFieldFocusNode()?.hasFocus, true);
+  });
 }
 
 class _TestPage extends StatelessWidget {
