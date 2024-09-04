@@ -21,7 +21,7 @@ class CanvasGradient : public Shader {
   static void Create(Dart_Handle wrapper);
 
   void initLinear(const tonic::Float32List& end_points,
-                  const tonic::Int32List& colors,
+                  const tonic::Float32List& colors,
                   const tonic::Float32List& color_stops,
                   DlTileMode tile_mode,
                   const tonic::Float64List& matrix4);
@@ -29,14 +29,14 @@ class CanvasGradient : public Shader {
   void initRadial(double center_x,
                   double center_y,
                   double radius,
-                  const tonic::Int32List& colors,
+                  const tonic::Float32List& colors,
                   const tonic::Float32List& color_stops,
                   DlTileMode tile_mode,
                   const tonic::Float64List& matrix4);
 
   void initSweep(double center_x,
                  double center_y,
-                 const tonic::Int32List& colors,
+                 const tonic::Float32List& colors,
                  const tonic::Float32List& color_stops,
                  DlTileMode tile_mode,
                  double start_angle,
@@ -49,7 +49,7 @@ class CanvasGradient : public Shader {
                            double end_x,
                            double end_y,
                            double end_radius,
-                           const tonic::Int32List& colors,
+                           const tonic::Float32List& colors,
                            const tonic::Float32List& color_stops,
                            DlTileMode tile_mode,
                            const tonic::Float64List& matrix4);
