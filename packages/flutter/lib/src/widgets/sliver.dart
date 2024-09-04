@@ -1422,23 +1422,54 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 /// This widget is for use in a [RenderAbstractViewport]s, such as
 /// [Viewport] or [TwoDimensionalViewport].
 ///
-/// This widget is rarely used directly. The [SliverChildBuilderDelegate] and
-/// [SliverChildListDelegate] delegates, used with [SliverList] and
-/// [SliverGrid], as well as the scroll view counterparts [ListView] and
-/// [GridView], have an `addAutomaticKeepAlives` feature, which is enabled by
-/// default, and which causes [AutomaticKeepAlive] widgets to be inserted around
-/// each child, causing [KeepAlive] widgets to be automatically added and
-/// configured in response to [KeepAliveNotification]s.
+/// You can use the [KeepAlive] widget in different ways depending on your needs.
+/// Here are three common approaches:
 ///
-/// The same `addAutomaticKeepAlives` feature is supported by the
-/// [TwoDimensionalChildBuilderDelegate] and [TwoDimensionalChildListDelegate].
+/// 1. Direct Usage:
+/// {@tool dartpad --template=stateless_widget_material}
+/// This example shows how to use [KeepAlive] directly in a [ListView].
+/// In this case, items with even indexes will be kept alive (won't be disposed when scrolled out of view),
+/// while items with odd indexes will be disposed when they leave the screen.
 ///
-/// Therefore, to keep a widget alive, it is more common to use those
-/// notifications than to directly deal with [KeepAlive] widgets.
+/// ** See code in examples/api/lib/widgets/keep_alive/keep_alive.0.dart **
+/// {@end-tool}
 ///
-/// In practice, the simplest way to deal with these notifications is to mix
-/// [AutomaticKeepAliveClientMixin] into one's [State]. See the documentation
-/// for that mixin class for details.
+/// In this example, when you scroll the list, you'll notice:
+/// - Even-indexed items (with a blue background) are created only once and never disposed.
+/// - Odd-indexed items are created when they come into view and disposed when they leave.
+///
+/// This approach gives you direct control over which items should be kept alive, letting you decide
+/// based on your app's requirements.
+///
+/// 2. Automatic Usage:
+/// [ListView], [GridView], [SliverList], and [SliverGrid] all have a feature that automatically
+/// keeps their children alive when you scroll them out of view. This feature is on by default,
+/// so you don't need to do anything special for it to work. If your list or grid has children that
+/// send a signal saying, "I want to stay alive," they will automatically be wrapped in a [KeepAlive]
+/// widget. You can think of this as a built-in way to keep items alive without manually adding
+/// [KeepAlive] widgets.
+///
+/// 3. Using [AutomaticKeepAliveClientMixin]:
+/// If you have a widget that should always stay alive when it's part of a scrolling list or grid,
+/// you can mix in [AutomaticKeepAliveClientMixin] into its state class. This makes the widget
+/// automatically signal that it wants to be kept alive, so you don't have to manually manage it.
+///
+/// Here's how to decide which method to use:
+/// - Use direct [KeepAlive] if you want full control over which items stay alive.
+/// - Use automatic usage for convenience when you don't need specific control over each item.
+/// - Use [AutomaticKeepAliveClientMixin] when you have a widget that should always stay alive,
+///   but you want to avoid managing it manually.
+///
+/// Each method has its own benefits:
+/// - Direct usage gives you the most control.
+/// - Automatic usage is easier for simple cases.
+/// - [AutomaticKeepAliveClientMixin] is helpful when you always want to keep certain items alive.
+///
+/// See also:
+///
+/// * [AutomaticKeepAlive], which listens to signals from its child and keeps it alive if necessary.
+/// * [AutomaticKeepAliveClientMixin], which makes it easy for a widget to signal that it wants to stay alive.
+///
 class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   /// Marks a child as needing to remain alive.
   const KeepAlive({
