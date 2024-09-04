@@ -159,7 +159,7 @@ class MaterialBanner extends StatefulWidget {
 
   /// The optional minimum action bar height.
   ///
-  /// Default is 52.0.
+  /// Default to 52.0.
   final double minActionBarHeight;
 
   /// The color of the surface of this [MaterialBanner].

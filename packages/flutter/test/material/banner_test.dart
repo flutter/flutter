@@ -1152,7 +1152,7 @@ void main() {
   });
 
   testWidgets('MinimumActionBarHeight respected', (WidgetTester tester) async {
-    const double minActionBarHeight = 20;
+    const double minActionBarHeight = 20.0;
     await tester.pumpWidget(
       MaterialApp(
         home:Scaffold(
@@ -1165,7 +1165,6 @@ void main() {
             actions: <Widget>[
               SizedBox.shrink(),
             ],
-
           ),
         )
       ),
@@ -1177,7 +1176,7 @@ void main() {
 
    testWidgets('MinimumActionBarHeight respects with ScaffoldMessenger', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
-    const double minActionBarHeight = 20;
+    const double minActionBarHeight = 20.0;
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
@@ -1208,12 +1207,9 @@ void main() {
     await tester.tap(find.byKey(tapTarget));
     await tester.pumpAndSettle();
 
-
     final Size materialBarSize = tester.getSize(find.byType(MaterialBanner));
     expect(materialBarSize.height, equals(minActionBarHeight));
-
   });
-
 }
 
 Material _getMaterialFromBanner(WidgetTester tester) {
