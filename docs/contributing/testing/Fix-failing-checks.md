@@ -42,7 +42,7 @@ In order for each check to run smoothly, the [.ci.yaml](../../../.ci.yaml)
 file needs to stay in sync with the base branch.
 
 This check failure can be fixed by applying the latest changes from master.\
-(The [Tree hygiene](../../Tree-hygiene.md#using-git) page recommends updating
+(The [Tree hygiene](../Tree-hygiene.md#using-git) page recommends updating
 via rebase, rather than a merge commit.)
 
 ![Update with rebase](https://github.com/user-attachments/assets/8bacd87f-410a-4a9c-8ad0-075dd05f3eff)
