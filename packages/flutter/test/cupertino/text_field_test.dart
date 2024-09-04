@@ -8067,6 +8067,25 @@ void main() {
     );
   });
 
+  testWidgets('Cupertino text field control suffix and prefix widgets alignment', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: CupertinoTextField(
+            prefix: Icon(CupertinoIcons.add),
+            suffix: Icon(CupertinoIcons.clear),
+            crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+        ),
+      );
+
+      final CupertinoTextField cupertinoTextField = tester.widget<CupertinoTextField>(
+        find.byType(CupertinoTextField),
+      );
+
+      expect(cupertinoTextField.crossAxisAlignment, CrossAxisAlignment.start);
+    },
+  );
+
   testWidgets('text selection style 1', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure\nhi\nwassssup!',
