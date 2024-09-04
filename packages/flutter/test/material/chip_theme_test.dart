@@ -198,7 +198,7 @@ void main() {
     expect(tester.getSize(find.byType(RawChip)), const Size(402, 252)); // label + padding + labelPadding
     expect(
       getMaterial(tester).shape,
-      chipTheme.shape?.copyWith(side: BorderSide(color: theme.colorScheme.outline)),
+      chipTheme.shape?.copyWith(side: BorderSide(color: theme.colorScheme.outlineVariant)),
     );
     expect(getLabelStyle(tester).style.fontSize, 32);
     expect(getIconData(tester).color, chipTheme.iconTheme!.color);
@@ -285,7 +285,7 @@ void main() {
     expect(getMaterial(tester).elevation, chipTheme.elevation);
     expect(
       getMaterial(tester).shape,
-      chipTheme.shape?.copyWith(side: BorderSide(color: theme.colorScheme.outline)),
+      chipTheme.shape?.copyWith(side: BorderSide(color: theme.colorScheme.outlineVariant)),
     );
     expect(getLabelStyle(tester).style.fontSize, 32);
     expect(getIconData(tester).color, chipTheme.iconTheme!.color);

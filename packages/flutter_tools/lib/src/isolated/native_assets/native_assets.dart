@@ -138,16 +138,14 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
 
   @override
   Future<bool> hasPackageConfig() {
-    final File packageConfigJson =
-        fileSystem.directory(projectUri.toFilePath()).childDirectory('.dart_tool').childFile('package_config.json');
-    return packageConfigJson.exists();
+    return fileSystem.file(packageConfigPath).exists();
   }
 
   @override
   Future<List<Package>> packagesWithNativeAssets() async {
     final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
       packageConfig,
-      projectUri.resolve('.dart_tool/package_config.json'),
+      Uri.file(packageConfigPath),
     );
     // It suffices to only check for build hooks. If no packages have a build
     // hook. Then no build hook will output any assets for any link hook, and
@@ -164,7 +162,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   }) {
     final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
       packageConfig,
-      projectUri.resolve('.dart_tool/package_config.json'),
+      Uri.file(packageConfigPath),
     );
     return _buildRunner.buildDryRun(
       includeParentEnvironment: includeParentEnvironment,
@@ -192,7 +190,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   }) {
     final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
       packageConfig,
-      projectUri.resolve('.dart_tool/package_config.json'),
+      Uri.file(packageConfigPath),
     );
     return _buildRunner.build(
       buildMode: buildMode,
@@ -221,7 +219,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   }) {
     final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
       packageConfig,
-      projectUri.resolve('.dart_tool/package_config.json'),
+      Uri.file(packageConfigPath),
     );
     return _buildRunner.linkDryRun(
       includeParentEnvironment: includeParentEnvironment,
@@ -249,7 +247,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   }) {
     final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
       packageConfig,
-      projectUri.resolve('.dart_tool/package_config.json'),
+      Uri.file(packageConfigPath),
     );
     return _buildRunner.link(
       buildMode: buildMode,
@@ -407,7 +405,7 @@ void ensureNoLinkModeStatic(List<AssetImpl> nativeAssets) {
 
 /// This should be the same for different archs, debug/release, etc.
 /// It should work for all macOS.
-Uri nativeAssetsBuildUri(Uri projectUri, OSImpl os) {
+Uri nativeAssetsBuildUri(Uri projectUri, OS os) {
   final String buildDir = build_info.getBuildDirectory();
   return projectUri.resolve('$buildDir/native_assets/$os/');
 }
