@@ -120,7 +120,7 @@ class MaterialBanner extends StatefulWidget {
     this.overflowAlignment = OverflowBarAlignment.end,
     this.animation,
     this.onVisible,
-    this.minActionBarHeight = 52.0
+    this.minActionBarHeight = 52.0,
   }) : assert(elevation == null || elevation >= 0.0);
 
   /// The content of the [MaterialBanner].
