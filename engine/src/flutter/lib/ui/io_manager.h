@@ -8,7 +8,7 @@
 #include "flutter/flow/skia_gpu_object.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/synchronization/sync_switch.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 namespace impeller {
 class Context;

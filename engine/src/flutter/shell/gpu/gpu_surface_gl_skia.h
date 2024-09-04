@@ -16,7 +16,7 @@
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 namespace flutter {
 

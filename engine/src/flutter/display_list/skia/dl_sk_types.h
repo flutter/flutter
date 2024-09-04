@@ -29,5 +29,5 @@
 #include "third_party/skia/include/core/SkTextBlob.h"
 #include "third_party/skia/include/core/SkTileMode.h"
 #include "third_party/skia/include/core/SkVertices.h"
-#include "third_party/skia/include/gpu/GrTypes.h"
+#include "third_party/skia/include/gpu/ganesh/GrTypes.h"
 #endif  // FLUTTER_DISPLAY_LIST_SKIA_DL_SK_TYPES_H_

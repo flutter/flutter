@@ -10,7 +10,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/shell/common/context_options.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/mtl/GrMtlBackendContext.h"
 #include "third_party/skia/include/gpu/ganesh/mtl/GrMtlDirectContext.h"
 

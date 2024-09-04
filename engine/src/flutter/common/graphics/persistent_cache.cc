@@ -24,7 +24,7 @@
 #include "flutter/shell/version/version.h"
 #include "openssl/sha.h"
 #include "rapidjson/document.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 namespace flutter {
 

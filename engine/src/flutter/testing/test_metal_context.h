@@ -8,7 +8,7 @@
 #include <map>
 #include <mutex>
 
-#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "third_party/skia/include/ports/SkCFObject.h"
 
 namespace flutter {

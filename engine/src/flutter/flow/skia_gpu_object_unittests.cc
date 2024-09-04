@@ -13,7 +13,7 @@
 #include "flutter/testing/thread_test.h"
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
-#include "third_party/skia/include/gpu/GrTypes.h"
+#include "third_party/skia/include/gpu/ganesh/GrTypes.h"
 
 namespace flutter {
 namespace testing {

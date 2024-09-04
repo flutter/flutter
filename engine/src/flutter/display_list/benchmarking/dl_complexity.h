@@ -7,7 +7,7 @@
 
 #include "flutter/display_list/display_list.h"
 
-#include "third_party/skia/include/gpu/GrTypes.h"
+#include "third_party/skia/include/gpu/ganesh/GrTypes.h"
 
 namespace flutter {
 

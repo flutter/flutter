@@ -22,7 +22,7 @@
 #include "flutter/shell/common/platform_message_handler.h"
 #include "impeller/runtime_stage/runtime_stage.h"
 #include "third_party/dart/runtime/include/dart_api.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "third_party/tonic/dart_microtask_queue.h"
 #include "third_party/tonic/dart_persistent_value.h"
 #include "third_party/tonic/dart_state.h"

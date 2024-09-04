@@ -34,9 +34,9 @@
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
 #include "third_party/skia/include/encode/SkPngEncoder.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
-#include "third_party/skia/include/gpu/GrRecordingContext.h"
-#include "third_party/skia/include/gpu/GrTypes.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/GrRecordingContext.h"
+#include "third_party/skia/include/gpu/ganesh/GrTypes.h"
 #include "txt/platform.h"
 
 namespace flutter {

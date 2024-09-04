@@ -8,11 +8,11 @@
 #define GL_GLEXT_PROTOTYPES
 #include <GLES2/gl2ext.h>
 
-#include "flutter/third_party/skia/include/gpu/GrBackendSurface.h"
-#include "flutter/third_party/skia/include/gpu/GrDirectContext.h"
+#include "flutter/third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
+#include "flutter/third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
-#include "flutter/third_party/skia/include/gpu/gl/GrGLTypes.h"
+#include "flutter/third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h"
 
 namespace flutter {
 

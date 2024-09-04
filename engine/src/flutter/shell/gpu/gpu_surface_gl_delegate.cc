@@ -8,8 +8,8 @@
 
 #include <cstring>
 
-#include "third_party/skia/include/gpu/gl/GrGLAssembleInterface.h"
-#include "third_party/skia/include/gpu/gl/GrGLInterface.h"
+#include "third_party/skia/include/gpu/ganesh/gl/GrGLAssembleInterface.h"
+#include "third_party/skia/include/gpu/ganesh/gl/GrGLInterface.h"
 
 #if defined(FML_OS_ANDROID)
 #include "third_party/skia/include/gpu/ganesh/gl/egl/GrGLMakeEGLInterface.h"

@@ -10,7 +10,7 @@
 #include "flutter/shell/platform/android/surface/android_surface_mock.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 namespace flutter {
 namespace testing {
