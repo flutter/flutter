@@ -4452,10 +4452,25 @@ enum TileMode {
   decal,
 }
 
+Float32List _encodeWideColorList(List<Color> colors) {
+  final int colorCount = colors.length;
+  final Float32List result = Float32List(colorCount * 4);
+  for (int i = 0; i < colorCount; i++) {
+    final Color colorXr =
+        colors[i].withValues(colorSpace: ColorSpace.extendedSRGB);
+    result[i*4+0] = colorXr.a;
+    result[i*4+1] = colorXr.r;
+    result[i*4+2] = colorXr.g;
+    result[i*4+3] = colorXr.b;
+  }
+  return result;
+}
+
+
 Int32List _encodeColorList(List<Color> colors) {
   final int colorCount = colors.length;
   final Int32List result = Int32List(colorCount);
-  for (int i = 0; i < colorCount; ++i) {
+  for (int i = 0; i < colorCount; i++) {
     result[i] = colors[i].value;
   }
   return result;
@@ -4464,7 +4479,7 @@ Int32List _encodeColorList(List<Color> colors) {
 Float32List _encodePointList(List<Offset> points) {
   final int pointCount = points.length;
   final Float32List result = Float32List(pointCount * 2);
-  for (int i = 0; i < pointCount; ++i) {
+  for (int i = 0; i < pointCount; i++) {
     final int xIndex = i * 2;
     final int yIndex = xIndex + 1;
     final Offset point = points[i];
@@ -4535,7 +4550,7 @@ base class Gradient extends Shader {
        super._() {
     _validateColorStops(colors, colorStops);
     final Float32List endPointsBuffer = _encodeTwoPoints(from, to);
-    final Int32List colorsBuffer = _encodeColorList(colors);
+    final Float32List colorsBuffer = _encodeWideColorList(colors);
     final Float32List? colorStopsBuffer = colorStops == null ? null : Float32List.fromList(colorStops);
     _constructor();
     _initLinear(endPointsBuffer, colorsBuffer, colorStopsBuffer, tileMode.index, matrix4);
@@ -4588,8 +4603,8 @@ base class Gradient extends Shader {
        assert(matrix4 == null || _matrix4IsValid(matrix4)),
        super._() {
     _validateColorStops(colors, colorStops);
-    final Int32List colorsBuffer = _encodeColorList(colors);
     final Float32List? colorStopsBuffer = colorStops == null ? null : Float32List.fromList(colorStops);
+    final Float32List colorsBuffer = _encodeWideColorList(colors);
 
     // If focal is null or focal radius is null, this should be treated as a regular radial gradient
     // If focal == center and the focal radius is 0.0, it's still a regular radial gradient
@@ -4647,7 +4662,7 @@ base class Gradient extends Shader {
        assert(matrix4 == null || _matrix4IsValid(matrix4)),
        super._() {
     _validateColorStops(colors, colorStops);
-    final Int32List colorsBuffer = _encodeColorList(colors);
+    final Float32List colorsBuffer = _encodeWideColorList(colors);
     final Float32List? colorStopsBuffer = colorStops == null ? null : Float32List.fromList(colorStops);
     _constructor();
     _initSweep(center.dx, center.dy, colorsBuffer, colorStopsBuffer, tileMode.index, startAngle, endAngle, matrix4);
@@ -4657,14 +4672,14 @@ base class Gradient extends Shader {
   external void _constructor();
 
   @Native<Void Function(Pointer<Void>, Handle, Handle, Handle, Int32, Handle)>(symbol: 'Gradient::initLinear')
-  external void _initLinear(Float32List endPoints, Int32List colors, Float32List? colorStops, int tileMode, Float64List? matrix4);
+  external void _initLinear(Float32List endPoints, Float32List colors, Float32List? colorStops, int tileMode, Float64List? matrix4);
 
   @Native<Void Function(Pointer<Void>, Double, Double, Double, Handle, Handle, Int32, Handle)>(symbol: 'Gradient::initRadial')
   external void _initRadial(
       double centerX,
       double centerY,
       double radius,
-      Int32List colors,
+      Float32List colors,
       Float32List? colorStops,
       int tileMode,
       Float64List? matrix4);
@@ -4677,7 +4692,7 @@ base class Gradient extends Shader {
       double endX,
       double endY,
       double endRadius,
-      Int32List colors,
+      Float32List colors,
       Float32List? colorStops,
       int tileMode,
       Float64List? matrix4);
@@ -4686,7 +4701,7 @@ base class Gradient extends Shader {
   external void _initSweep(
       double centerX,
       double centerY,
-      Int32List colors,
+      Float32List colors,
       Float32List? colorStops,
       int tileMode,
       double startAngle,
@@ -6503,7 +6518,7 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     final Float32List rstTransformBuffer = Float32List(rectCount * 4);
     final Float32List rectBuffer = Float32List(rectCount * 4);
 
-    for (int i = 0; i < rectCount; ++i) {
+    for (int i = 0; i < rectCount; i++) {
       final int index0 = i * 4;
       final int index1 = index0 + 1;
       final int index2 = index0 + 2;
