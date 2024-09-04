@@ -218,7 +218,8 @@ std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type) {
 void ConvertStops(const flutter::DlGradientColorSourceBase* gradient,
                   std::vector<Color>& colors,
                   std::vector<float>& stops) {
-  FML_DCHECK(gradient->stop_count() >= 2);
+  FML_DCHECK(gradient->stop_count() >= 2)
+      << "stop_count:" << gradient->stop_count();
 
   auto* dl_colors = gradient->colors();
   auto* dl_stops = gradient->stops();
