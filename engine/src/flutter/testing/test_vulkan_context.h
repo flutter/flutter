@@ -13,7 +13,7 @@
 #include "flutter/vulkan/vulkan_device.h"
 
 #include "third_party/skia/include/core/SkSize.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 namespace flutter {
 namespace testing {
