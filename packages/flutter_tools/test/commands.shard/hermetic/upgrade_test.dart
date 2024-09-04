@@ -32,6 +32,24 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    (fileSystem
+      .directory(flutterRoot)
+      .childDirectory('bin')
+      .childDirectory('cache')
+      .childDirectory('dart-sdk')
+      .childDirectory('bin')
+      .childDirectory('resources')
+      .childDirectory('devtools')
+      ..createSync(recursive: true))
+      .childFile('version.json')
+      .writeAsStringSync('{"version": "1.2.3"}');
+    (fileSystem
+      .directory(flutterRoot)
+      .childDirectory('bin')
+      .childDirectory('internal')
+      ..createSync(recursive: true))
+      .childFile('engine.version')
+      .writeAsStringSync('deadbeef');
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
     command = UpgradeCommand(
@@ -68,6 +86,28 @@ void main() {
         command: <String>['git', 'tag', '--points-at', upstreamHeadRevision],
         stdout: latestUpstreamTag,
       ),
+
+      // Write new version file to disk
+      const FakeCommand(
+        command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
+        workingDirectory: flutterRoot,
+        stdout: 'beta',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
+        workingDirectory: flutterRoot,
+        stdout: 'origin/beta',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'ls-remote', '--get-url', 'origin'],
+        workingDirectory: flutterRoot,
+        stdout: 'https://githost.com/org/repo.git',
+      ),
+      const FakeCommand(
+        command: <String>['git', '-c', 'log.showSignature=false', 'log', 'HEAD', '-n', '1', '--pretty=format:%ad', '--date=iso'],
+        workingDirectory: flutterRoot,
+      ),
+
       // check for uncommitted changes; empty stdout means clean checkout
       const FakeCommand(
         command: <String>['git', 'status', '-s'],
@@ -150,6 +190,25 @@ void main() {
         stdout: latestUpstreamTag,
       ),
       const FakeCommand(
+        command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
+        workingDirectory: flutterRoot,
+        stdout: 'beta',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
+        workingDirectory: flutterRoot,
+        stdout: 'origin/beta',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'ls-remote', '--get-url', 'origin'],
+        workingDirectory: flutterRoot,
+        stdout: 'https://githost.com/org/repo.git',
+      ),
+      const FakeCommand(
+        command: <String>['git', '-c', 'log.showSignature=false', 'log', 'HEAD', '-n', '1', '--pretty=format:%ad', '--date=iso'],
+        workingDirectory: flutterRoot,
+      ),
+      const FakeCommand(
         command: <String>['git', 'status', '-s'],
       ),
       const FakeCommand(
@@ -230,6 +289,25 @@ void main() {
       const FakeCommand(
         command: <String>['git', 'tag', '--points-at', upstreamHeadRevision],
         stdout: latestUpstreamTag,
+        workingDirectory: flutterRoot,
+      ),
+      const FakeCommand(
+        command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
+        workingDirectory: flutterRoot,
+        stdout: 'beta',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
+        workingDirectory: flutterRoot,
+        stdout: 'origin/beta',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'ls-remote', '--get-url', 'origin'],
+        workingDirectory: flutterRoot,
+        stdout: 'https://githost.com/org/repo.git',
+      ),
+      const FakeCommand(
+        command: <String>['git', '-c', 'log.showSignature=false', 'log', 'HEAD', '-n', '1', '--pretty=format:%ad', '--date=iso'],
         workingDirectory: flutterRoot,
       ),
       const FakeCommand(
