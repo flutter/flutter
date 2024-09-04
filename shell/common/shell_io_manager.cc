@@ -9,8 +9,8 @@
 #include "flutter/fml/message_loop.h"
 #include "flutter/shell/common/context_options.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLDirectContext.h"
-#include "third_party/skia/include/gpu/gl/GrGLInterface.h"
-#include "third_party/skia/include/gpu/gl/GrGLTypes.h"
+#include "third_party/skia/include/gpu/ganesh/gl/GrGLInterface.h"
+#include "third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h"
 
 namespace flutter {
 

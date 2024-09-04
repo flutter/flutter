@@ -11,7 +11,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
 #include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 FLUTTER_ASSERT_NOT_ARC
 namespace flutter {

@@ -16,12 +16,12 @@
 #include "flutter_vma/flutter_skia_vma.h"
 
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/gpu/GrBackendSemaphore.h"
-#include "third_party/skia/include/gpu/GrBackendSurface.h"
+#include "third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h"
+#include "third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkDirectContext.h"
-#include "third_party/skia/include/gpu/vk/GrVkTypes.h"
+#include "third_party/skia/include/gpu/ganesh/vk/GrVkTypes.h"
 #include "third_party/skia/include/gpu/vk/VulkanBackendContext.h"
 #include "third_party/skia/include/gpu/vk/VulkanExtensions.h"
 

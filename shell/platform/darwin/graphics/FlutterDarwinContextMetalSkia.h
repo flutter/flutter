@@ -13,7 +13,7 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

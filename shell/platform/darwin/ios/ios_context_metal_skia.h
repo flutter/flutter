@@ -14,7 +14,7 @@
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 namespace flutter {
 

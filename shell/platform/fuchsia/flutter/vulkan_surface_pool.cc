@@ -11,7 +11,7 @@
 #include <string>
 
 #include "flutter/fml/trace_event.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 namespace flutter_runner {
 

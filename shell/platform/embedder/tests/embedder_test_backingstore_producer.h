@@ -11,7 +11,7 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 #ifdef SHELL_ENABLE_METAL
 #include "flutter/testing/test_metal_context.h"

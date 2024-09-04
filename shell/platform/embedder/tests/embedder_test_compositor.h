@@ -11,7 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test_backingstore_producer.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 namespace flutter {
 namespace testing {

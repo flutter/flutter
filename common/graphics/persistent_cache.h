@@ -15,7 +15,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/unique_fd.h"
-#include "third_party/skia/include/gpu/GrContextOptions.h"
+#include "third_party/skia/include/gpu/ganesh/GrContextOptions.h"
 
 class GrDirectContext;
 

@@ -14,9 +14,9 @@
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/trace_event.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
-#include "third_party/skia/include/gpu/GrBackendSurface.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
-#include "third_party/skia/include/gpu/GrTypes.h"
+#include "third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/GrTypes.h"
 
 namespace flutter {
 
