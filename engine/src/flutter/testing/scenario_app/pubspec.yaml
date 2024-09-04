@@ -24,9 +24,4 @@ dependencies:
   sky_engine: any
 
 dev_dependencies:
-  litetest: any
-
-# TODO(matanlurey): Figure out how sky_engine fits into the pub workspace model.
-dependency_overrides:
-  sky_engine:
-    path: ../../sky/packages/sky_engine
+  test: any

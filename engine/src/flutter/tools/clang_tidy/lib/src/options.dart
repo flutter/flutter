@@ -10,7 +10,7 @@ import 'package:path/path.dart' as path;
 
 import 'lint_target.dart';
 
-final Engine _engineRoot = Engine.findWithin(path.dirname(path.fromUri(io.Platform.script)));
+final Engine _engineRoot = Engine.findWithin();
 
 /// Adds warnings as errors for only specific runs.  This is helpful if migrating one platform at a time.
 String? _platformSpecificWarningsAsErrors(ArgResults options) {

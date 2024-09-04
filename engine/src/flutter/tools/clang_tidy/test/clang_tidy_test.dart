@@ -10,12 +10,11 @@ import 'package:clang_tidy/src/command.dart';
 import 'package:clang_tidy/src/lint_target.dart';
 import 'package:clang_tidy/src/options.dart';
 import 'package:engine_repo_tools/engine_repo_tools.dart';
-import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:process_fakes/process_fakes.dart';
 import 'package:process_runner/process_runner.dart';
-
+import 'package:test/test.dart';
 
 /// A test fixture for the `clang-tidy` tool.
 final class Fixture {
@@ -94,8 +93,7 @@ Use -header-filter=.* to display errors from all non-system headers. Use -system
 1 warning treated as error''';
 
 void _withTempFile(String prefix, void Function(String path) func) {
-  final String filePath =
-      path.join(io.Directory.systemTemp.path, '$prefix-temp-file');
+  final String filePath = path.join(io.Directory.systemTemp.path, '$prefix-temp-file');
   final io.File file = io.File(filePath);
   file.createSync();
   try {
@@ -105,16 +103,27 @@ void _withTempFile(String prefix, void Function(String path) func) {
   }
 }
 
-Future<int> main(List<String> args) async {
-  final String? buildCommands =
-      args.firstOrNull ??
-      Engine.findWithin().latestOutput()?.compileCommandsJson.path;
+final _engineRoot = Engine.findWithin();
 
-  if (buildCommands == null || args.length > 1) {
-    io.stderr.writeln(
-      'Usage: clang_tidy_test.dart [path/to/compile_commands.json]',
-    );
-    return 1;
+void main() {
+  // This test requires a compile_commands.json file to exist.
+  //
+  // We can provide exactly which build to use, i.e.:
+  //    COMPILE_COMMANDS_PATH=/path/to/compile_commands.json dart test
+  //
+  // Or, we can fall back to the latest build output if one isn't provided.
+  final String buildCommands;
+  if (io.Platform.environment['COMPILE_COMMANDS_PATH'] case final String compileCommandsPath) {
+    buildCommands = compileCommandsPath;
+  } else {
+    final String? inferredPath = _engineRoot.latestOutput()?.compileCommandsJson.path;
+    io.stderr.writeln('No COMPILE_COMMANDS_PATH found in environment.');
+    if (inferredPath != null) {
+      io.stderr.writeln('Inferring the last build output: $inferredPath');
+      buildCommands = inferredPath;
+    } else {
+      fail('No outputs or build commands found.');
+    }
   }
 
   test('--help gives help, and uses host_debug by default outside of an engine root', () async {
@@ -253,7 +262,7 @@ Future<int> main(List<String> args) async {
     final int result = await fixture.tool.run();
 
     expect(result, equals(1));
-    expect(fixture.errBuffer.toString().split('\n')[0], hasMatch(
+    expect(fixture.errBuffer.toString().split('\n')[0], matches(
       r"ERROR: Build commands path .*/does/not/exist doesn't exist.",
     ));
   });
@@ -270,7 +279,7 @@ Future<int> main(List<String> args) async {
     final int result = await fixture.tool.run();
 
     expect(result, equals(1));
-    expect(fixture.errBuffer.toString().split('\n')[0], hasMatch(
+    expect(fixture.errBuffer.toString().split('\n')[0], matches(
       r'ERROR: Build commands path .*/does/not/exist'
       r'[/\\]out[/\\]ios_debug_unopt[/\\]compile_commands.json'
       r" doesn't exist.",
@@ -475,7 +484,13 @@ Future<int> main(List<String> args) async {
     );
 
     // This file needs to exist, and be UTF8 line-parsable.
-    final String filePath = io.Platform.script.toFilePath();
+    final String filePath = path.join(
+      _engineRoot.flutterDir.path,
+      'tools',
+      'clang_tidy',
+      'test',
+      'clang_tidy_test.dart',
+    );
     final List<dynamic> buildCommandsData = <Map<String, dynamic>>[
       <String, dynamic>{
         'directory': '/unused',
@@ -657,6 +672,4 @@ Future<int> main(List<String> args) async {
 
     expect(result, 0);
   });
-
-  return 0;
 }

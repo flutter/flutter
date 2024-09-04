@@ -5,14 +5,14 @@
 import 'dart:io';
 
 import 'package:engine_repo_tools/engine_repo_tools.dart';
-import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
+import 'package:test/test.dart';
 import 'package:yaml/yaml.dart' as yaml;
 
 /// Tests that `HeaderFilterRegex` works as expected in `.clang_tidy`.
 void main() {
   // Find the root of the repo.
-  final Engine engine = Engine.findWithin(path.dirname(Platform.script.path));
+  final Engine engine = Engine.findWithin();
 
   // Find the `.clang_tidy` file and "parse" it (it's YAML).
   final yaml.YamlDocument dotClangTidy = yaml.loadYamlDocument(
@@ -62,11 +62,11 @@ void main() {
     // Create a fake file in that path, and assert that it matches the regex.
     for (final String rootDir in rootDirs) {
       final String file = path.join('..', '..', 'flutter', rootDir, 'foo');
-      if (!regexValue.hasMatch(file)) {
-        // This is because reason: ... doesn't work in pkg/litetest.
-        stderr.writeln('Expected "$file" to be caught by HeaderFilterRegex (${regexValue.pattern}).');
-      }
-      expect(regexValue.hasMatch(file), isTrue);
+      expect(
+        file,
+        matches(regexValue),
+        reason: '$rootDir/foo should be allowed by the regex but was not.',
+      );
     }
   });
 }

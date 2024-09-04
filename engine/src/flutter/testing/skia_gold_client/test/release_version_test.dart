@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:litetest/litetest.dart';
 import 'package:skia_gold_client/src/release_version.dart';
+import 'package:test/test.dart';
 
 void main() {
   test('should accept a major and minor version', () {
