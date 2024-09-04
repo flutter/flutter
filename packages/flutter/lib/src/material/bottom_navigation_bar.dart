@@ -845,7 +845,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       );
     });
     _controllers[widget.currentIndex].value = 1.0;
-    _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
+    _backgroundColor = widget.backgroundColor;
   }
 
   // Computes the default value for the [type] parameter.
