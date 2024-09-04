@@ -50,7 +50,7 @@ void main() {
       await tester.tap(find.byType(FilterChip));
       await tester.pumpAndSettle();
 
-      expect(findBorderColor(const Color(0xff79747e)), findsOne);
+      expect(findBorderColor(const Color(0xffcac4d0)), findsOne);
     },
   );
 }

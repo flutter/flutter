@@ -329,7 +329,7 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   @override
   BorderSide? get side => !isSelected
     ? isEnabled
-      ? BorderSide(color: _colors.outline)
+      ? BorderSide(color: _colors.outlineVariant)
       : BorderSide(color: _colors.onSurface.withOpacity(0.12))
     : const BorderSide(color: Colors.transparent);
 
