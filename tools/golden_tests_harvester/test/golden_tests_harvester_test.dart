@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:golden_tests_harvester/golden_tests_harvester.dart';
-import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as p;
+import 'package:test/test.dart';
 
 void main() async {
   Future<void> withTempDirectory(
@@ -24,13 +24,20 @@ void main() async {
   test('should fail on a missing directory', () async {
     await withTempDirectory((io.Directory tempDirectory) async {
       final StringSink stderr = StringBuffer();
-      final ArgumentError error = await _expectThrow<ArgumentError>(() async {
-        await Harvester.create(
+      expect(
+        () async {
+          await Harvester.create(
             io.Directory(p.join(tempDirectory.path, 'non_existent')),
             stderr,
-            addImageToSkiaGold: _alwaysThrowsAddImg);
-      });
-      expect(error.message, contains('non_existent'));
+            addImageToSkiaGold: _alwaysThrowsAddImg,
+          );
+        },
+        throwsA(isA<ArgumentError>().having(
+          (error) => error.message,
+          'message',
+          contains('non_existent'),
+        )),
+      );
       expect(stderr.toString(), isEmpty);
     });
   });
@@ -39,14 +46,22 @@ void main() async {
       () async {
     await withTempDirectory((io.Directory tempDirectory) async {
       final StringSink stderr = StringBuffer();
-
-      final StateError error = await _expectThrow<StateError>(() async {
-        await Harvester.create(
+      await expectLater(
+        () async {
+          await Harvester.create(
             tempDirectory,
             stderr,
-            addImageToSkiaGold: _alwaysThrowsAddImg);
-      });
-      expect(error.toString(), contains('digest.json'));
+            addImageToSkiaGold: _alwaysThrowsAddImg,
+          );
+        },
+        throwsA(
+          isA<StateError>().having(
+            (error) => error.toString(),
+            'toString()',
+            contains('digest.json'),
+          ),
+        ),
+      );
       expect(stderr.toString(), isEmpty);
     });
   });
@@ -58,15 +73,22 @@ void main() async {
           io.File(p.join(tempDirectory.path, 'digest.json'));
       await digestsFile
           .writeAsString('{"dimensions": "not a map", "entries": []}');
-
-      final FormatException error =
-          await _expectThrow<FormatException>(() async {
-        await Harvester.create(
+      await expectLater(
+        () async {
+          await Harvester.create(
             tempDirectory,
             stderr,
-            addImageToSkiaGold: _alwaysThrowsAddImg);
-      });
-      expect(error.message, contains('dimensions'));
+            addImageToSkiaGold: _alwaysThrowsAddImg,
+          );
+        },
+        throwsA(
+          isA<FormatException>().having(
+            (error) => error.message,
+            'message',
+            contains('dimensions'),
+          ),
+        ),
+      );
       expect(stderr.toString(), isEmpty);
     });
   });
@@ -77,30 +99,37 @@ void main() async {
           io.File(p.join(tempDirectory.path, 'digest.json'));
       final StringSink stderr = StringBuffer();
       await digestsFile.writeAsString('''
+      {
+        "dimensions": {},
+        "entries": [
         {
-          "dimensions": {},
-          "entries": [
-            {
-              "filename": "test_name_1.png",
-              "width": 100,
-              "height": 100,
-              "maxDiffPixelsPercent": 0.01,
-              "maxColorDelta": 0
-            }
-          ]
+          "filename": "test_name_1.png",
+          "width": 100,
+          "height": 100,
+          "maxDiffPixelsPercent": 0.01,
+          "maxColorDelta": 0
         }
+        ]
+      }
       ''');
 
-      final FailedComparisonException error =
-          await _expectThrow<FailedComparisonException>(() async {
-        final Harvester harvester = await Harvester.create(
-            tempDirectory,
-            stderr,
-            addImageToSkiaGold: _alwaysThrowsAddImg);
-        await harvest(harvester);
-      });
-      expect(error.testName, 'test_name_1.png');
-      expect(stderr.toString(), contains('IntentionalError'));
+      final Harvester harvester = await Harvester.create(
+        tempDirectory,
+        stderr,
+        addImageToSkiaGold: _alwaysThrowsAddImg,
+      );
+      expect(
+        () => harvest(harvester),
+        throwsA(
+          isA<FailedComparisonException>()
+              .having((e) => e.testName, 'testName', 'test_name_1.png')
+              .having(
+                (e) => e.toString(),
+                'toString()',
+                contains('Failed comparison: test_name_1.png'),
+              ),
+        ),
+      );
     });
   });
 
@@ -186,28 +215,19 @@ void main() async {
   ]}
 ''');
       final Harvester harvester = await Harvester.create(tempDirectory, stderr);
-      final StateError error = await _expectThrow<StateError>(() async {
-        await harvest(harvester);
-      });
-      expect(error.message, contains('GOLDCTL'));
+      expect(
+        () => harvest(harvester),
+        throwsA(
+          isA<StateError>().having(
+            (t) => t.message,
+            'message',
+            contains('GOLDCTL'),
+          ),
+        ),
+      );
       expect(stderr.toString(), isEmpty);
     });
   });
-}
-
-
-FutureOr<T> _expectThrow<T extends Object>(
-    FutureOr<void> Function() callback) async {
-  try {
-    await callback();
-    fail('Expected an exception of type $T');
-  } on T catch (e) {
-    return e;
-  } catch (e) {
-    fail('Expected an exception of type $T, but got $e');
-  }
-  // fail(...) unfortunately does not return Never, but it does always throw.
-  throw UnsupportedError('Unreachable');
 }
 
 final class _IntentionalError extends Error {}

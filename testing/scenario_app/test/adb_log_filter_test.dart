@@ -1,4 +1,4 @@
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 import '../bin/utils/adb_logcat_filtering.dart';
 import 'src/fake_adb_logcat.dart';

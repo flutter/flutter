@@ -19,4 +19,4 @@ dependencies:
   skia_gold_client: any
 
 dev_dependencies:
-  litetest: any
+  test: any
