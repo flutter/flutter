@@ -354,6 +354,14 @@ class KeepAliveHandle extends ChangeNotifier {
 ///
 ///  * [AutomaticKeepAlive], which listens to messages from this mixin.
 ///  * [KeepAliveNotification], the notifications sent by this mixin.
+///
+/// {@tool dartpad}
+/// This example demonstrates how to use the [AutomaticKeepAliveClientMixin]
+/// to keep the state of a widget alive even when it is scrolled out of view.
+///
+/// ** See code in examples/api/lib/widgets/automatic_keep_alive/automatic_keep_alive_client_mixin.0.dart **
+/// {@end-tool}
+///
 @optionalTypeArgs
 mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
   KeepAliveHandle? _keepAliveHandle;
