@@ -597,14 +597,14 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                         opacity: 0.54,
                       ),
                       child: SizedBox(
-                        height: 64.0
-                        ColoredBox(
-                        color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : widget.headerBackgroundColor,
-                        child: Padding(
-                          padding: const EdgeInsetsDirectional.only(start: 24, end: 14.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: headerWidgets,
+                        height: 64.0,
+                        child: ColoredBox(
+                          color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : widget.headerBackgroundColor,
+                          child: Padding(
+                            padding: const EdgeInsetsDirectional.only(start: 24, end: 14.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: headerWidgets,
                             ),
                           ),
                         ),
