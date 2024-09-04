@@ -61,7 +61,7 @@ If a **customer_testing** check is unsuccessful, it's a signal that a test from
 (more info: [Understanding Packages tests](../../ecosystem/testing/Understanding-Packages-tests.md))\
 If a pull request requires an update to those external tests, it qualifies as a
 [**breaking change**](../Tree-hygiene.md#handling-breaking-changes);
-it's great to avoid those if possible.
+it's great to avoid those when possible.
 
 If **Linux Analyze** fails, it's likely that one or more changes in the PR
 violated a [linter rule](https://dart.dev/lints/).
