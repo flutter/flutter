@@ -1193,6 +1193,49 @@ void main() {
     // No exception.
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('The shrinkExtent should keep the same when the item is tapped', (WidgetTester tester) async {
+   final List<Widget> children = List<Widget>.generate(20, (int index) {
+      return Center(
+        child: Text('Item $index'),
+      );
+    });
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  child: CarouselView(
+                    itemExtent: 330,
+                    onTap: (int idx) => setState(() { }),
+                    children: children,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+      )
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(tester.getRect(getItem(0)).width, 330.0);
+
+    final Finder item1 = find.text('Item 1');
+    await tester.tap(find.ancestor(of: item1, matching: find.byType(Stack)));
+
+    await tester.pumpAndSettle();
+
+    expect(tester.getRect(getItem(0)).width, 330.0);
+    expect(tester.getRect(getItem(1)).width, 330.0);
+    // This should be less than 330.0 because the item is shrunk; width is 800.0 - 330.0 - 330.0
+    expect(tester.getRect(getItem(2)).width, 140.0);
+  });
 }
 
 Finder getItem(int index) {
