@@ -19,6 +19,11 @@ TaskFunction createMicrobenchmarkTask({
   bool? enableImpeller,
   Map<String, String> environment = const <String, String>{},
 }) {
+
+  // Generate a seed for this test stable around the date.
+  final DateTime seedDate = DateTime.now().toUtc().subtract(const Duration(hours: 7));
+  final int seed = DateTime(seedDate.year, seedDate.month, seedDate.day).hashCode;
+
   return () async {
     final Device device = await devices.workingDevice;
     await device.unlock();
@@ -43,7 +48,7 @@ TaskFunction createMicrobenchmarkTask({
 
     Future<Map<String, double>> runMicrobench(String benchmarkPath) async {
       Future<Map<String, double>> run() async {
-        print('Running $benchmarkPath');
+        print('Running $benchmarkPath with seed $seed');
 
         final Process flutterProcess = await inDirectory(appDir, () async {
           final List<String> options = <String>[
@@ -55,6 +60,7 @@ TaskFunction createMicrobenchmarkTask({
             if (enableImpeller != null && !enableImpeller) '--no-enable-impeller',
             '-d',
             device.deviceId,
+            '--dart-define=seed=$seed',
             benchmarkPath,
           ];
           return startFlutter(
