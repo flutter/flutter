@@ -19,6 +19,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'constants.dart';
 import 'theme.dart';
 
 // Hand coded defaults eyeballed from an iOS simulator running iOS version 17.5.
@@ -60,12 +61,6 @@ const CupertinoDynamicColor _kOffLabelColor = CupertinoDynamicColor.withBrightne
   darkHighContrastColor: Color.fromARGB(255, 255, 255, 255),
 );
 
-// The relative values needed to transform a color to it's equivalent focus
-// outline color.
-const double _kCupertinoFocusColorOpacity = 0.80;
-const double _kCupertinoFocusColorBrightness = 0.69;
-const double _kCupertinoFocusColorSaturation = 0.835;
-
 /// An iOS-style switch.
 ///
 /// Used to toggle the on/off state of a single setting.
@@ -85,13 +80,13 @@ const double _kCupertinoFocusColorSaturation = 0.835;
 ///
 /// {@tool snippet}
 ///
-/// This sample shows how to use a [CupertinoSwitch] in a [ListTile]. The
-/// [MergeSemantics] is used to turn the entire [ListTile] into a single item
+/// This sample shows how to use a [CupertinoSwitch] in a [CupertinoListTile]. The
+/// [MergeSemantics] is used to turn the entire [CupertinoListTile] into a single item
 /// for accessibility tools.
 ///
 /// ```dart
 /// MergeSemantics(
-///   child: ListTile(
+///   child: CupertinoListTile(
 ///     title: const Text('Lights'),
 ///     trailing: CupertinoSwitch(
 ///       value: _lights,
@@ -120,8 +115,18 @@ class CupertinoSwitch extends StatefulWidget {
     super.key,
     required this.value,
     required this.onChanged,
-    this.activeColor,
-    this.trackColor,
+    @Deprecated(
+      'Use activeTrackColor instead. '
+      'This feature was deprecated after v3.24.0-0.2.pre.'
+    )
+    Color? activeColor,
+    @Deprecated(
+      'Use inactiveTrackColor instead. '
+      'This feature was deprecated after v3.24.0-0.2.pre.'
+    )
+    Color? trackColor,
+    Color? activeTrackColor,
+    Color? inactiveTrackColor,
     this.thumbColor,
     this.inactiveThumbColor,
     this.applyTheme,
@@ -141,7 +146,11 @@ class CupertinoSwitch extends StatefulWidget {
     this.autofocus = false,
     this.dragStartBehavior = DragStartBehavior.start,
   })  : assert(activeThumbImage != null || onActiveThumbImageError == null),
-        assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
+        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
+        assert(activeTrackColor == null || activeColor == null),
+        assert(inactiveTrackColor == null || trackColor == null),
+        activeTrackColor = activeTrackColor ?? activeColor,
+        inactiveTrackColor = inactiveTrackColor ?? trackColor;
 
   /// Whether this switch is on or off.
   final bool value;
@@ -178,8 +187,23 @@ class CupertinoSwitch extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [trackColor], the color to use for the track when the switch is off.
-  final Color? activeColor;
+  ///  * [inactiveTrackColor], the color to use for the track when the switch is off.
+  @Deprecated(
+    'Use activeTrackColor instead. '
+    'This feature was deprecated after v3.24.0-0.2.pre.'
+  )
+  Color? get activeColor => activeTrackColor;
+
+  /// The color to use for the track when the switch is on.
+  ///
+  /// If null and [applyTheme] is false, defaults to [CupertinoColors.systemGreen]
+  /// in accordance to native iOS behavior. Otherwise, defaults to
+  /// [CupertinoThemeData.primaryColor].
+  ///
+  /// See also:
+  ///
+  ///  * [inactiveTrackColor], the color to use for the track when the switch is off.
+  final Color? activeTrackColor;
 
   /// The color to use for the track when the switch is off.
   ///
@@ -187,8 +211,21 @@ class CupertinoSwitch extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [activeColor], the color to use for the track when the switch is on.
-  final Color? trackColor;
+  ///  * [inactiveTrackColor], the color to use for the track when the switch is off.
+  @Deprecated(
+    'Use inactiveTrackColor instead. '
+    'This feature was deprecated after v3.24.0-0.2.pre.'
+  )
+  Color? get trackColor => inactiveTrackColor;
+
+  /// The color to use for the track when the switch is off.
+  ///
+  /// Defaults to [CupertinoColors.secondarySystemFill] when null.
+  ///
+  /// See also:
+  ///
+  ///  * [activeTrackColor], the color to use for the track when the switch is on.
+  final Color? inactiveTrackColor;
 
   /// The color to use for the thumb when the switch is on.
   ///
@@ -483,9 +520,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   WidgetStateProperty<Color?> get _widgetTrackColor {
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.selected)) {
-        return widget.activeColor;
+        return widget.activeTrackColor;
       }
-      return widget.trackColor;
+      return widget.inactiveTrackColor;
     });
   }
 
@@ -584,7 +621,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     final CupertinoThemeData theme = CupertinoTheme.of(context);
 
     final Color activeColor = CupertinoDynamicColor.resolve(
-      widget.activeColor
+      widget.activeTrackColor
       ?? ((widget.applyTheme ?? theme.applyThemeToAll) ? theme.primaryColor : null)
       ?? CupertinoColors.systemGreen,
       context,
@@ -673,10 +710,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
               ..focusColor = CupertinoDynamicColor.resolve(
                   widget.focusColor ??
                   HSLColor
-                    .fromColor(activeColor
-                    .withOpacity(_kCupertinoFocusColorOpacity))
-                    .withLightness(_kCupertinoFocusColorBrightness)
-                    .withSaturation(_kCupertinoFocusColorSaturation)
+                    .fromColor(activeColor.withOpacity(kCupertinoFocusColorOpacity))
+                    .withLightness(kCupertinoFocusColorBrightness)
+                    .withSaturation(kCupertinoFocusColorSaturation)
                     .toColor(),
                   context)
               ..downPosition = downPosition
