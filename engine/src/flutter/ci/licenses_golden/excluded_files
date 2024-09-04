@@ -1532,6 +1532,7 @@
 ../../../flutter/third_party/dart/runtime/vm/heap/freelist_test.cc
 ../../../flutter/third_party/dart/runtime/vm/heap/heap_test.cc
 ../../../flutter/third_party/dart/runtime/vm/heap/safepoint_test.cc
+../../../flutter/third_party/dart/runtime/vm/heap/splay_test.cc
 ../../../flutter/third_party/dart/runtime/vm/heap/weak_table_test.cc
 ../../../flutter/third_party/dart/runtime/vm/instructions_arm64_test.cc
 ../../../flutter/third_party/dart/runtime/vm/instructions_arm_test.cc
