@@ -1,5 +1,5 @@
 {
-  "version": "5_0_0",
+  "version": "6_1_0",
 
   "md.comp.suggestion-chip.container.height": 32.0,
   "md.comp.suggestion-chip.container.shape": "md.sys.shape.corner.small",
@@ -22,7 +22,7 @@
   "md.comp.suggestion-chip.flat.disabled.outline.color": "onSurface",
   "md.comp.suggestion-chip.flat.disabled.outline.opacity": 0.12,
   "md.comp.suggestion-chip.flat.focus.outline.color": "onSurfaceVariant",
-  "md.comp.suggestion-chip.flat.outline.color": "outline",
+  "md.comp.suggestion-chip.flat.outline.color": "outlineVariant",
   "md.comp.suggestion-chip.flat.outline.width": 1.0,
   "md.comp.suggestion-chip.focus.indicator.color": "secondary",
   "md.comp.suggestion-chip.focus.indicator.outline.offset": "md.sys.state.focus-indicator.outer-offset",
