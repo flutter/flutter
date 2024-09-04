@@ -1150,6 +1150,66 @@ void main() {
     /// Compare the offset of banner from top left
     expect(topLeft.dx, margin.left);
   });
+
+  testWidgets('minActionBarHeight is respected', (WidgetTester tester) async {
+    const double minActionBarHeight = 20.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home:Scaffold(
+          appBar: AppBar(),
+          body: const MaterialBanner(
+            minActionBarHeight: minActionBarHeight,
+            padding: EdgeInsets.zero,
+            margin: EdgeInsets.zero,
+            content: SizedBox.shrink(),
+            actions: <Widget>[
+              SizedBox.shrink(),
+            ],
+          ),
+        )
+      ),
+    );
+
+    final Size size = tester.getSize(find.byType(MaterialBanner));
+    expect(size.height, equals(minActionBarHeight));
+  });
+
+   testWidgets('minimumActionBarHeight is respected when presented by ScaffoldMessenger', (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    const double minActionBarHeight = 20.0;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showMaterialBanner(const MaterialBanner(
+                  content: SizedBox.shrink(),
+                  padding: EdgeInsets.zero,
+                  margin:  EdgeInsets.zero,
+                  minActionBarHeight: minActionBarHeight,
+                  actions: <Widget>[
+                     SizedBox.shrink()
+                  ],
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pumpAndSettle();
+
+    final Size materialBarSize = tester.getSize(find.byType(MaterialBanner));
+    expect(materialBarSize.height, equals(minActionBarHeight));
+  });
 }
 
 Material _getMaterialFromBanner(WidgetTester tester) {
