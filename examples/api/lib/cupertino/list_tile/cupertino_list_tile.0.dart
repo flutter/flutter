@@ -30,14 +30,33 @@ class CupertinoListTileExample extends StatelessWidget {
           middle: Text('CupertinoListTile Sample')),
       child: ListView(
         children: const <Widget>[
-           CupertinoListTile(
-              leading: Icon(Icons.leaderboard),
-              title: Text('Here is the title'),
-              backgroundColor: Colors.red,
-              backgroundColorActivated: Colors.green,
-              subtitle: Text('Here is a second line'),
-              trailing: Icon(Icons.more_vert),
-              additionalInfo: Icon(Icons.add)),
+         CupertinoListTile(title: Text('One-line CupertinoListTile')),
+          CupertinoListTile(
+            leading: FlutterLogo(),
+            title: Text('One-line with leading widget'),
+          ),
+          CupertinoListTile(
+            title: Text('One-line with trailing widget'),
+            trailing: Icon(Icons.more_vert),
+          ),
+          CupertinoListTile(
+            leading: FlutterLogo(),
+            title: Text('One-line with both widgets'),
+            trailing: Icon(Icons.more_vert),
+          ),
+          CupertinoListTile(
+            leading: FlutterLogo(size: 56.0),
+            title: Text('Two-line CupertinoListTile'),
+            subtitle: Text('Here is a subtitle'),
+            trailing: Icon(Icons.more_vert),
+            additionalInfo: Icon(Icons.info),
+          ),
+          CupertinoListTile(
+            key: Key('CupertinoListTile with background color'),
+            leading: FlutterLogo(size: 56.0),
+            title: Text('CupertinoListTile with background color'),
+            backgroundColor: Colors.lightBlue,
+          ),      
         ],
       ),
     );

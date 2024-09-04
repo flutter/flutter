@@ -8,24 +8,28 @@ import 'package:flutter_api_samples/cupertino/list_tile/cupertino_list_tile.0.da
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Test CupertinoListTile renders correctly with background color', (WidgetTester tester) async {
+  testWidgets('Test CupertinoListTile respects properties', (WidgetTester tester) async {
     await tester.pumpWidget(const example.CupertinoListTileApp());
 
-    final Finder cupertinoListTileFinder= find.byType(CupertinoListTile);
+    final Finder cupertinoListTileFinder= find.byKey(const Key('CupertinoListTile with background color'));
 
-    // Verify if the 'CupertinoListTile Sample' text is present
+    // Verify if the 'CupertinoListTile Sample' text is present.
     expect(find.text('CupertinoListTile Sample'), findsOneWidget);
 
-    // Verify if the first CupertinoListTile with background color is present
-    expect(find.byType(CupertinoListTile), findsOneWidget);
+    // Verify if the first CupertinoListTile with background color is present.
+    expect(find.byType(CupertinoListTile), findsNWidgets(6));
 
-    // Verify if the CupertinoListTile contains the expected widgets
-    expect(find.byIcon(Icons.leaderboard), findsOneWidget);
-    expect(find.text('Here is the title'), findsOneWidget);
-    expect(find.text('Here is a second line'), findsOneWidget);
-    expect(find.byIcon(Icons.more_vert), findsOneWidget);
-    expect(find.byIcon(Icons.add), findsOneWidget);
-    expect((tester.firstWidget(cupertinoListTileFinder) as CupertinoListTile).backgroundColor, Colors.red);
+    // Verify if the CupertinoListTile contains the expected widgets.
+    expect(find.byType(FlutterLogo), findsNWidgets(4));
+    expect(find.text('One-line with leading widget'), findsOneWidget);
+    expect(find.text('One-line with trailing widget'), findsOneWidget);
+    expect(find.text('One-line CupertinoListTile'), findsOneWidget);
+    expect(find.text('One-line with both widgets'), findsOneWidget);
+    expect(find.text('Two-line CupertinoListTile'), findsOneWidget);
+    expect(find.text('Here is a subtitle'), findsOneWidget);
+    expect(find.text('CupertinoListTile with background color'), findsOneWidget);
+    expect(find.byIcon(Icons.more_vert), findsNWidgets(3));
+    expect(find.byIcon(Icons.info), findsOneWidget);
+    expect((tester.firstWidget(cupertinoListTileFinder) as CupertinoListTile).backgroundColor, Colors.lightBlue);
   });
-
 }
