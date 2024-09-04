@@ -458,7 +458,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
     };
   }
 
-  double getOpacity() {
+  double _getOpacity() {
     if (widget.enabled) {
       return _anchorIsVisible ? 1.0 : 0.0;
     }
@@ -469,7 +469,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
   Widget build(BuildContext context) {
     return AnimatedOpacity(
       key: _anchorKey,
-      opacity: getOpacity(),
+      opacity: _getOpacity(),
       duration: _kAnchorFadeDuration,
       child: IgnorePointer(
         ignoring: !widget.enabled,
