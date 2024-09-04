@@ -82,12 +82,9 @@ Future<Plugin?> _pluginFromPackage(String name, Uri packageRoot, Set<String> app
 Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = true}) async {
   final List<Plugin> plugins = <Plugin>[];
   final FileSystem fs = project.directory.fileSystem;
-  final String packagesFile = fs.path.join(
-    project.directory.path,
-    '.packages',
-  );
+  final File packageConfigFile = findPackageConfigFileOrDefault(project.directory);
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-    fs.file(packagesFile),
+    packageConfigFile,
     logger: globals.logger,
     throwOnError: throwOnError,
   );
@@ -996,8 +993,8 @@ void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<Object?>? pl
         e,
         platform: globals.platform,
         os: globals.os,
-        destination: 'dest',
-        source: 'source',
+        destination: link.path,
+        source: path,
       );
       rethrow;
     }
@@ -1263,7 +1260,7 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
         }
       } else {
         globals.printWarning(
-          'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but the package does not exist.\n'
+          'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but the package does not exist, or is not a plugin package.\n'
           'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
           'or create a plugin named $defaultImplPluginName.\n',
         );

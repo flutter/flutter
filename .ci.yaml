@@ -396,9 +396,12 @@ targets:
     properties:
       tags: >
         ["framework","hostonly","linux"]
+      # Requires Android SDK since we may re-generate Gradle lockfiles
       dependencies: >-
         [
-          {"dependency": "gh_cli", "version": "version:2.8.0-2-g32256d38"}
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "gh_cli", "version": "version:2.8.0-2-g32256d38"},
+          {"dependency": "open_jdk", "version": "version:17"}
         ]
 
   - name: Linux_android_emu android views
@@ -419,7 +422,8 @@ targets:
       task_name: android_views
     timeout: 60
 
-  - name: Linux build_tests_1_3
+  - name: Linux build_tests_1_5
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -434,11 +438,12 @@ targets:
           {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       shard: build_tests
-      subshard: "1_3"
+      subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
 
-  - name: Linux build_tests_2_3
+  - name: Linux build_tests_2_5
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -453,11 +458,12 @@ targets:
           {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       shard: build_tests
-      subshard: "2_3"
+      subshard: "2_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
 
-  - name: Linux build_tests_3_3
+  - name: Linux build_tests_3_5
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -472,7 +478,47 @@ targets:
           {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       shard: build_tests
-      subshard: "3_3"
+      subshard: "3_5"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+
+  - name: Linux build_tests_4_5
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
+      shard: build_tests
+      subshard: "4_5"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+
+  - name: Linux build_tests_5_5
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
+      shard: build_tests
+      subshard: "5_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
 
@@ -493,6 +539,7 @@ targets:
     enabled_branches:
       - master
     recipe: flutter/flutter_drone
+    # Timeout in minutes for the whole task.
     timeout: 60
     properties:
       shard: customer_testing
@@ -3694,6 +3741,7 @@ targets:
     enabled_branches:
       - master
     recipe: flutter/flutter_drone
+    # Timeout in minutes for the whole task.
     timeout: 60
     properties:
       shard: customer_testing
@@ -4524,6 +4572,7 @@ targets:
 
   # mac mokey test
   - name: Mac_mokey run_release_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/153830
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
@@ -5360,6 +5409,7 @@ targets:
     enabled_branches:
       - master
     recipe: flutter/flutter_drone
+    # Timeout in minutes for the whole task.
     timeout: 60
     properties:
       shard: customer_testing

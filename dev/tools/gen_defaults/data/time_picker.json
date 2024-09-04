@@ -1,5 +1,5 @@
 {
-  "version": "5_0_0",
+  "version": "6_1_0",
 
   "md.comp.time-picker.clock-dial.color": "surfaceContainerHighest",
   "md.comp.time-picker.clock-dial.container.size": 256.0,
