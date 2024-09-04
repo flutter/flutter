@@ -501,7 +501,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     }
 
     // FOOTER
-    final TextStyle footerTextStyle = widget.footerStyle ?? themeData.textTheme.bodySmall;
+    final TextStyle footerTextStyle = widget.footerStyle! ?? themeData.textTheme.bodySmall;
     final List<Widget> footerWidgets = <Widget>[];
     if (widget.onRowsPerPageChanged != null) {
       final List<Widget> availableRowsPerPage = widget.availableRowsPerPage
@@ -599,7 +599,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                       child: SizedBox(
                         height: 64.0,
                         child: ColoredBox(
-                          color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : widget.headerBackgroundColor,
+                          color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : widget.headerBackgroundColor!,
                           child: Padding(
                             padding: const EdgeInsetsDirectional.only(start: 24, end: 14.0),
                             child: Row(
@@ -656,7 +656,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     //  https://github.com/flutter/flutter/issues/48522
                     height: 56.0,
                     child: ColoredBox(
-                      color: widget.footerBackgroundColor, // Set footer background color  here
+                      color: widget.footerBackgroundColor!, // Set footer background color  here
                       child: SingleChildScrollView(
                         dragStartBehavior: widget.dragStartBehavior,
                         scrollDirection: Axis.horizontal,
