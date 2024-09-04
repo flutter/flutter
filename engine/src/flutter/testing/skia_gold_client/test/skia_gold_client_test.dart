@@ -8,11 +8,11 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:engine_repo_tools/engine_repo_tools.dart';
-import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as p;
 import 'package:process_fakes/process_fakes.dart';
 import 'package:skia_gold_client/skia_gold_client.dart';
 import 'package:skia_gold_client/src/release_version.dart';
+import 'package:test/test.dart';
 
 void main() {
   /// A mock commit hash that is used to simulate a successful git call.

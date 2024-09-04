@@ -87,7 +87,6 @@ workspace:
   - testing/benchmark
   - testing/dart
   - testing/litetest
-  - testing/pkg_test_demo
   - testing/scenario_app
   - testing/skia_gold_client
   - testing/smoke_test_failure
@@ -263,6 +262,8 @@ dependency_overrides:
     path: ./third_party/dart/third_party/pkg/shelf/pkgs/shelf_static
   shelf_web_socket:
     path: ./third_party/dart/third_party/pkg/shelf/pkgs/shelf_web_socket
+  sky_engine:
+    path: ./sky/packages/sky_engine
   smith:
     path: ./third_party/dart/pkg/smith
   source_map_stack_trace:

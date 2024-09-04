@@ -189,10 +189,6 @@ interface class SkiaGoldClient {
 
   /// The path to the local [Directory] where the `goldctl` tool is hosted.
   String get _goldctl {
-    assert(
-      isAvailable(environment: _environment),
-      'Trying to use `goldctl` in an environment where it is not available',
-    );
     final String? result = _environment[_kGoldctlKey];
     if (result == null || result.isEmpty) {
       throw StateError('The environment variable $_kGoldctlKey is not set.');

@@ -12,4 +12,4 @@ environment:
 resolution: workspace
 
 dev_dependencies:
-  litetest: any
+  test: any
