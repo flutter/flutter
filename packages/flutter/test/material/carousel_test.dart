@@ -1233,7 +1233,7 @@ void main() {
 
     expect(tester.getRect(getItem(0)).width, 330.0);
     expect(tester.getRect(getItem(1)).width, 330.0);
-    // This should be less than 330.0 because the item is shrank; width is 800.0 - 330.0 - 330.0
+    // This should be less than 330.0 because the item is shrunk; width is 800.0 - 330.0 - 330.0
     expect(tester.getRect(getItem(2)).width, 140.0);
   });
 }
