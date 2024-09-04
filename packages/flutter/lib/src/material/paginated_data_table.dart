@@ -93,8 +93,8 @@ class PaginatedDataTable extends StatefulWidget {
     super.key,
     this.header,
     this.headerBackgroundColor = const Color.fromARGB(255,0, 0, 0),
-    this.footerBackground = const Color.fromARGB(255,0, 0, 0),
-    this.footerStyle = themeData.textTheme.bodySmall, //default text style
+    this.footerBackgroundColor = const Color.fromARGB(255,0, 0, 0),
+    this.footerStyle, //default text style
     this.actions,
     required this.columns,
     this.sortColumnIndex,
@@ -285,11 +285,11 @@ class PaginatedDataTable extends StatefulWidget {
 
   ///Defines the color of header background
   ///
-  final Color headerBackgroundColor;
+  final Color? headerBackgroundColor;
 
   ///Defines the color of footer background
   ///
-  final Color footerBackgroundColor;
+  final Color? footerBackgroundColor;
 
   ///Defines the footer text style
   ///
@@ -596,14 +596,16 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                       data: const IconThemeData(
                         opacity: 0.54,
                       ),
-                      child: ColoredBox(
-                        height: 64.0,
-                        color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : widget.headerBackgroundColor,
+                      child: SizedBox(
+                        height: 64.0
+                        ColoredBox(
+                        color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : widget.headerBackgroundColor!,
                         child: Padding(
                           padding: const EdgeInsetsDirectional.only(start: 24, end: 14.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: headerWidgets,
+                            ),
                           ),
                         ),
                       ),
@@ -654,7 +656,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     //  https://github.com/flutter/flutter/issues/48522
                     height: 56.0,
                     child: ColoredBox(
-                      color: widget.footerBackgroundColor, // Set footer background color  here
+                      color: widget.footerBackgroundColor!, // Set footer background color  here
                       child: SingleChildScrollView(
                         dragStartBehavior: widget.dragStartBehavior,
                         scrollDirection: Axis.horizontal,
