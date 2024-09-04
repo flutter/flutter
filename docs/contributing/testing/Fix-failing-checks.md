@@ -9,7 +9,7 @@
 ![Tree is currently broken.](https://github.com/user-attachments/assets/b611d540-c4cb-47dc-a27f-bef8709f24ce)
 
 A **tree-status** failure indicates that the main branch has problems
-that should be addressed anything else is merged in.
+that should be addressed before anything else is merged in.
 
 The result of this check usually goes back and forth a few times each day:
 once [review requirements](../Tree-hygiene.md#getting-a-code-review) are met
