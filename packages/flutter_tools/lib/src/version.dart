@@ -622,6 +622,9 @@ class _FlutterVersionGit extends FlutterVersion {
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     final File newVersionFile = FlutterVersion.getVersionFile(fs, flutterRoot);
     if (!newVersionFile.existsSync()) {
+      if (!newVersionFile.parent.existsSync()) {
+        newVersionFile.parent.createSync(recursive: true);
+      }
       newVersionFile.writeAsStringSync(encoder.convert(toJson()));
     }
   }

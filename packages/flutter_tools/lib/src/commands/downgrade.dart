@@ -109,10 +109,17 @@ class DowngradeCommand extends FlutterCommand {
     final PersistentToolState persistentToolState = _persistentToolState!;
     final String? lastFlutterVersion = persistentToolState.lastActiveVersion(channel);
     final String? currentFlutterVersion = _flutterVersion?.frameworkRevision;
-    if (lastFlutterVersion == null || currentFlutterVersion == lastFlutterVersion) {
+    if (lastFlutterVersion == null) {
       final String trailing = await _createErrorMessage(workingDirectory, channel);
       throwToolExit(
         'There is no previously recorded version for channel "$currentChannel".\n'
+        '$trailing'
+      );
+    }
+    if (currentFlutterVersion == lastFlutterVersion) {
+      final String trailing = await _createErrorMessage(workingDirectory, channel);
+      throwToolExit(
+        'The previously recorded version ($lastFlutterVersion) is equivalent to the current version ($currentFlutterVersion)\n'
         '$trailing'
       );
     }
