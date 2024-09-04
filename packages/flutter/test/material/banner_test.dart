@@ -1175,7 +1175,7 @@ void main() {
     expect(size.height, equals(minActionBarHeight));
   });
 
-   testWidgets('MinimumActionBarHeight respected with ScaffolMessenger', (WidgetTester tester) async {
+   testWidgets('MinimumActionBarHeight respects with ScaffoldMessenger', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
     const double minActionBarHeight = 20;
     await tester.pumpWidget(MaterialApp(

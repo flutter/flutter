@@ -157,7 +157,7 @@ class MaterialBanner extends StatefulWidget {
   /// Typically an [Icon] widget.
   final Widget? leading;
 
-  /// The (optional) minActionBarHeight allows users to set minimum action bar height.
+  /// The optional minimum action bar height.
   ///
   /// Default is 52.0.
   final double minActionBarHeight;
