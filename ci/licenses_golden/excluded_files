@@ -127,7 +127,6 @@
 ../../../flutter/impeller/.clang-format
 ../../../flutter/impeller/.gitignore
 ../../../flutter/impeller/README.md
-../../../flutter/impeller/aiks/aiks_blend_unittests.cc
 ../../../flutter/impeller/aiks/aiks_gradient_unittests.cc
 ../../../flutter/impeller/aiks/aiks_unittests.cc
 ../../../flutter/impeller/aiks/aiks_unittests.h
