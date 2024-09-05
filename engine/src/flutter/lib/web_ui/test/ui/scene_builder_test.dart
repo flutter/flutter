@@ -262,6 +262,31 @@ Future<void> testMain() async {
       await matchGoldenFile('scene_builder_image_filter.png', region: region);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/154303
+    test('image filter layer with offset', () async {
+      final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
+
+      sceneBuilder.pushClipRect(const ui.Rect.fromLTWH(100, 100, 100, 100));
+      sceneBuilder.pushImageFilter(
+        ui.ImageFilter.blur(
+          sigmaX: 5.0,
+          sigmaY: 5.0,
+        ),
+        offset: const ui.Offset(100, 100),
+      );
+
+      sceneBuilder.addPicture(ui.Offset.zero, drawPicture((ui.Canvas canvas) {
+        canvas.drawCircle(const ui.Offset(50, 50), 25,
+            ui.Paint()..color = const ui.Color(0xFF00FF00));
+      }));
+
+      await renderScene(sceneBuilder.build());
+      await matchGoldenFile(
+        'scene_builder_image_filter_with_offset.png',
+        region: region,
+      );
+    });
+
     test('color filter layer', () async {
       final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
       const ui.ColorFilter sepia = ui.ColorFilter.matrix(<double>[
