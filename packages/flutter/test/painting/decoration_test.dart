@@ -29,10 +29,10 @@ class _ColorMatcher extends Matcher {
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     if (item is ui.Color) {
       return item.colorSpace == _target.colorSpace &&
-          (item.a - _target.a).abs() <= 1 / 255 &&
-          (item.r - _target.r).abs() <= 1 / 255 &&
-          (item.g - _target.g).abs() <= 1 / 255 &&
-          (item.b - _target.b).abs() <= 1 / 255;
+          (item.a - _target.a).abs() <= (1 / 255) &&
+          (item.r - _target.r).abs() <= (1 / 255) &&
+          (item.g - _target.g).abs() <= (1 / 255) &&
+          (item.b - _target.b).abs() <= (1 / 255);
     } else {
       return false;
     }
