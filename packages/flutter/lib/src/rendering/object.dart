@@ -2444,8 +2444,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     owner!._nodesNeedingLayout.add(this);
   }
 
-  // Returns a boolean indicating whether the render object should be marked
-  // as needing repaint.
   @pragma('vm:notify-debugger-on-exception')
   void _layoutWithoutResize() {
     assert(_needsLayout);
@@ -4194,6 +4192,26 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
   }
 }
 
+/// A mixin for [RenderObject] subclasses with a layout callback. The mixin
+/// guarantees the layout callback will be called even if this [RenderObject]
+/// skips doing layout.
+///
+/// A layout callback is a callback that mutates the [RenderObject]'s render
+/// subtree, invoked within an [invokeLayoutCallback] during the [RenderObject]'s
+/// layout process. Sometimes such callbacks involve rebuilding dirty widgets,
+/// especially if the widget configuration depends on the layout process (most
+/// notably, the [LayoutBuilder] widget). Unlike render subtrees, typically all
+/// dirty widgets (even the off-screen ones) in a widget tree must be rebuilt.
+/// This mixin makes sure the layout callback will be invoked (such that dirty
+/// [Element]s are rebuilt) even when an ancestor [RenderObject] chose to skip
+/// laying out this [RenderObject].
+///
+/// Subclasses must not invoke the layout callback directly. Instead, call
+/// `super.performLayout` in the [performLayout] implementation.
+///
+/// See also:
+///
+///  * [LayoutBuilder] and [SliverLayoutBuilder], which use the mixin.
 mixin RenderObjectWithLayoutCallbackMixin on RenderObject {
   bool _needsRebuild = true;
 
@@ -4211,10 +4229,16 @@ mixin RenderObjectWithLayoutCallbackMixin on RenderObject {
     _needsPaintAfterLayout = false;
   }
 
+  /// The layout callback to be invoked during [performLayout].
   ///
+  /// This method should not be invoked directly. Instead, call
+  /// `super.performLayout` in the [performLayout] implementation. This
+  /// implementation will be invoked within [invokeLayoutCallback].
   @visibleForOverriding
   void runLayoutCallback(covariant Constraints constraints);
 
+  /// Informs the framework that the layout callback has been updated and must
+  /// be invoked again.
   void scheduleLayoutCallback() {
     if (_needsRebuild) {
       assert(debugNeedsLayout);
