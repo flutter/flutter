@@ -270,6 +270,30 @@ void testMain() {
       expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
       expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.forward);
     });
+
+    test('works even if focus is changed in the middle of a blur call', () {
+      final DomElement input1 = createDomElement('input');
+      final DomElement input2 = createDomElement('input');
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+      final DomEventListener focusInput1Listener = createDomEventListener((DomEvent event) {
+        input1.focusWithoutScroll();
+      });
+
+      view.dom.rootElement.append(input1);
+      view.dom.rootElement.append(input2);
+
+      input1.addEventListener('blur', focusInput1Listener);
+      input1.focusWithoutScroll();
+      // The event handler above should move the focus back to input1.
+      input2.focusWithoutScroll();
+      input1.removeEventListener('blur', focusInput1Listener);
+
+      expect(dispatchedViewFocusEvents, hasLength(1));
+
+      expect(dispatchedViewFocusEvents[0].viewId, view.viewId);
+      expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.forward);
+    });
   });
 }
 
