@@ -1011,7 +1011,9 @@ class _RenderSegmentedButton<T> extends RenderBox with
         } else if (direction == Axis.vertical) {
           final Offset start = Offset(borderRect.left, childRect.top);
           final Offset end = Offset(borderRect.right, childRect.top);
+          context.canvas..save()..clipPath(borderClipPath);
           context.canvas.drawLine(start, end, divider.toPaint());
+          context.canvas.restore();
         }
       }
 
