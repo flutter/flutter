@@ -560,7 +560,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     if (rebuildBundle) {
       _logger.printTrace('Updating assets');
       final int result = await assetBundle.build(
-        packagesPath: debuggingOptions.buildInfo.packageConfigPath,
+        packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         targetPlatform: TargetPlatform.web_javascript,
       );
       if (result != 0) {
@@ -608,10 +608,19 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
   }) async {
     if (_chromiumLauncher != null) {
       final Chromium chrome = await _chromiumLauncher!.connectedInstance;
-      final ChromeTab? chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
-        return !chromeTab.url.startsWith('chrome-extension');
-      }, retryFor: const Duration(seconds: 5));
+      final ChromeTab? chromeTab = await getChromeTabGuarded(
+        chrome.chromeConnection,
+        (ChromeTab chromeTab) {
+          return !chromeTab.url.startsWith('chrome-extension');
+        },
+        retryFor: const Duration(seconds: 5),
+        onIoError: (Object error, StackTrace stackTrace) {
+          // We were unable to unable to communicate with Chrome.
+          _logger.printError(error.toString(), stackTrace: stackTrace);
+        }
+      );
       if (chromeTab == null) {
+        appFailedToStart();
         throwToolExit('Failed to connect to Chrome instance.');
       }
       _wipConnection = await chromeTab.connect();

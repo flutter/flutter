@@ -15,9 +15,9 @@ void main() {
     expect(find.text('Jefferson'), findsOneWidget);
   });
 
-  testWidgets('radio button demo page has one h1 tag', (WidgetTester tester) async {
+  testWidgets('radio list tile demo page has one h1 tag', (WidgetTester tester) async {
     await pumpsUseCase(tester, RadioListTileUseCase());
-    final Finder findHeadingLevelOnes = find.bySemanticsLabel('Radio button demo');
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('RadioListTile Demo');
     await tester.pumpAndSettle();
     expect(findHeadingLevelOnes, findsOne);
   });

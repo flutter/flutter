@@ -157,6 +157,33 @@ void main() {
     );
   });
 
+  testWidgets('Blur affect is disabled when enableBackgroundFilterBlur is false', (WidgetTester test) async {
+    await test.pumpWidget(
+       CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        home:  CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(
+            backgroundColor: const Color(0xFFFFFFFF).withOpacity(0),
+            middle: const Text('Title'),
+            automaticBackgroundVisibility: false,
+            enableBackgroundFilterBlur: false,
+          ),
+          child: const Column(
+            children: <Widget>[
+              Placeholder(),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      test.widget(find.byType(BackdropFilter)),
+      isA<BackdropFilter>().having(
+          (BackdropFilter filter) => filter.enabled, 'filter enabled', false),
+    );
+  });
+
   testWidgets('Nav bar displays correctly', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
