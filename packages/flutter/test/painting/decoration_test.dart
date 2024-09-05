@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' show sqrt;
 import 'dart:ui' as ui show Color, ColorFilter, Image;
 
 import 'package:fake_async/fake_async.dart';
@@ -15,6 +14,7 @@ import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/rendering_tester.dart';
 
+/// Positive result if the colors would be mapped to the same argb8888 color.
 class _ColorMatcher extends Matcher {
   _ColorMatcher(this._target);
 
@@ -28,11 +28,11 @@ class _ColorMatcher extends Matcher {
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     if (item is ui.Color) {
-      final double da = item.a - _target.a;
-      final double dr = item.r - _target.r;
-      final double dg = item.g - _target.g;
-      final double db = item.b - _target.b;
-      return sqrt((da * da) + (dr * dr) + (dg * dg) + (db * db)) < 0.005;
+      return item.colorSpace == _target.colorSpace &&
+          (item.a - _target.a).abs() <= 1 / 255 &&
+          (item.r - _target.r).abs() <= 1 / 255 &&
+          (item.g - _target.g).abs() <= 1 / 255 &&
+          (item.b - _target.b).abs() <= 1 / 255;
     } else {
       return false;
     }
