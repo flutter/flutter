@@ -31,7 +31,7 @@ import 'theme_data.dart';
 
 const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
 
-// The transition duration used for DialogRoute transitions.
+// The transition duration used for [DialogRoute] transitions.
 const Duration _kDialogRouteTransitionDuration = Duration(milliseconds: 150);
 
 /// A Material Design dialog.

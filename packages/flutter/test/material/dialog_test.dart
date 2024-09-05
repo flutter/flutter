@@ -2873,8 +2873,6 @@ void main() {
     expect(find.text('Dialog2'), findsOneWidget);
   });
 
-
-
   testWidgets('showAdaptiveDialog - custom transitionDuration', (WidgetTester tester) async {
     final DialogObserver rootObserver = DialogObserver();
     await tester.pumpWidget(
@@ -2918,7 +2916,6 @@ void main() {
     expect(route.transitionDuration, isNotNull);
     expect(route.transitionDuration.inMilliseconds, 50);
   });
-
 
   testWidgets('Uses open focus traversal when overridden', (WidgetTester tester) async {
     final FocusNode okNode = FocusNode();

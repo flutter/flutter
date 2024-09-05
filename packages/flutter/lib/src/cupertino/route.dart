@@ -57,7 +57,7 @@ const Color kCupertinoModalBarrierColor = CupertinoDynamicColor.withBrightness(
 // The duration of the transition used when a modal popup is shown.
 const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
 
-// The transition duration used for CupertinoDialogRoute transitions.
+// The transition duration used for [CupertinoDialogRoute] transitions.
 const Duration _kCupertinoDialogRouteTransitionDuration = Duration(milliseconds: 250);
 
 // Offset from offscreen to the right to fully on screen.
