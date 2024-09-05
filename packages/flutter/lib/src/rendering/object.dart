@@ -2203,7 +2203,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     return result;
   }
   bool _needsLayout = true;
-  bool _needsPaintAfterLayout = true;
 
   /// The nearest relayout boundary enclosing this render object, if known.
   ///
@@ -2474,9 +2473,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return true;
     }());
     _needsLayout = false;
-    if (_needsPaintAfterLayout) {
-      markNeedsPaint();
-    }
+    markNeedsPaint();
   }
 
   /// Compute the layout for this render object.
@@ -2642,9 +2639,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return true;
     }());
     _needsLayout = false;
-    if (_needsPaintAfterLayout) {
-      markNeedsPaint();
-    }
+    markNeedsPaint();
 
     if (!kReleaseMode && debugProfileLayoutsEnabled) {
       FlutterTimeline.finishSync();
@@ -4213,20 +4208,15 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
 ///
 ///  * [LayoutBuilder] and [SliverLayoutBuilder], which use the mixin.
 mixin RenderObjectWithLayoutCallbackMixin on RenderObject {
+  // The initial value of this flag must be set to true to prevent the layout
+  // callback from being called when the tree has never been laid out.
   bool _needsRebuild = true;
-
-  @override
-  void markNeedsLayout() {
-    _needsPaintAfterLayout = true;
-    super.markNeedsLayout();
-  }
 
   @mustCallSuper
   @override
   void performLayout() {
     invokeLayoutCallback(runLayoutCallback);
     _needsRebuild = false;
-    _needsPaintAfterLayout = false;
   }
 
   /// The layout callback to be invoked during [performLayout].
@@ -4244,6 +4234,7 @@ mixin RenderObjectWithLayoutCallbackMixin on RenderObject {
       assert(debugNeedsLayout);
       return;
     }
+    _needsRebuild = true;
     // This ensures that the layout callback will be run even if an ancestor
     // chooses to not lay out this subtree (for example, OverlayEntries with
     // `maintainState` set to true).

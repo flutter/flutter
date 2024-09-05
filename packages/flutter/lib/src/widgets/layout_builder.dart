@@ -152,14 +152,14 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
     renderObject.updateCallback(_rebuildWithConstraints);
     if (newWidget.updateShouldRebuild(oldWidget)) {
       _needsBuild = true;
-      renderObject.markNeedsLayout();
+      renderObject.scheduleLayoutCallback();
     }
   }
 
   @override
   void markNeedsBuild() {
     super.markNeedsBuild();
-    renderObject.markNeedsLayout();
+    renderObject.scheduleLayoutCallback();
     _needsBuild = true;
   }
 
@@ -171,7 +171,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
     // Force the callback to be called, even if the layout constraints are the
     // same. This is because that callback may depend on the updated widget
     // configuration, or an inherited widget.
-    renderObject.markNeedsLayout();
+    renderObject.scheduleLayoutCallback();
     _needsBuild = true;
     super.performRebuild(); // Calls widget.updateRenderObject (a no-op in this case).
   }

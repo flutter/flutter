@@ -851,52 +851,50 @@ void main() {
     expect(mostRecentOffset, const Offset(60, 60));
   });
 
-  testWidgets('LayoutBuilder in a subtree that skips layout still rebuilds', (WidgetTester tester) async {
-    late final OverlayEntry overlayEntry1;
+  testWidgets('LayoutBuilder in a subtree that skips layout does not rebuild during the initial treewalk', (WidgetTester tester) async {
+    final LayoutBuilder layoutBuilder = LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) => const Placeholder());
+    final OverlayEntry overlayEntry1 = OverlayEntry(maintainState: true, builder: (BuildContext context) => layoutBuilder);
+    // OverlayEntry2 obstructs OverlayEntry1 and forces it to skip layout.
+    final OverlayEntry overlayEntry2 = OverlayEntry(opaque: true, canSizeOverlay: true, builder: (BuildContext context) => Container());
     addTearDown(() => overlayEntry1..remove()..dispose());
-    late final OverlayEntry overlayEntry2;
     addTearDown(() => overlayEntry2..remove()..dispose());
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Overlay(
-          initialEntries: <OverlayEntry>[
-            overlayEntry1 = OverlayEntry(
-              maintainState: true,
-              builder: (BuildContext context) {
-                return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) => const Placeholder());
-              },
-            ),
-            overlayEntry2 = OverlayEntry(
-              opaque: true,
-              builder: (BuildContext context) => Container(),
-            ),
-          ],
-        )
+        // The UnconstrainedBox makes sure the OverlayEntries are not relayout boundaries.
+        child: UnconstrainedBox(child: Overlay(initialEntries: <OverlayEntry>[overlayEntry1, overlayEntry2])),
       ),
     );
 
-    tester.element(find.byType(LayoutBuilder)).markNeedsBuild();
+    final Element layoutBuilderElement = tester.element(find.byWidget(layoutBuilder, skipOffstage: false));
+    layoutBuilderElement.markNeedsBuild();
     await tester.pump();
-    tester.element(find.byType(LayoutBuilder)).markNeedsBuild();
-    await tester.pump();
+    expect(layoutBuilderElement.dirty, isTrue);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('LayoutBuilder does not need repaint on markNeedsBuild', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder in a subtree that skips layout still rebuilds', (WidgetTester tester) async {
+    final LayoutBuilder layoutBuilder = LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) => const Placeholder());
+    final OverlayEntry overlayEntry1 = OverlayEntry(maintainState: true, canSizeOverlay: true, builder: (BuildContext context) => layoutBuilder);
+    // OverlayEntry2 obstructs OverlayEntry1 and forces it to skip layout.
+    final OverlayEntry overlayEntry2 = OverlayEntry(opaque: true, canSizeOverlay: true, builder: (BuildContext context) => const Placeholder());
+    addTearDown(() => overlayEntry1..remove()..dispose());
+    addTearDown(() => overlayEntry2..remove()..dispose());
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) => const Placeholder()),
+        // The UnconstrainedBox makes sure the OverlayEntries are not relayout boundaries.
+        child: UnconstrainedBox(child: Overlay(initialEntries: <OverlayEntry>[overlayEntry1])),
       ),
     );
+    tester.state<OverlayState>(find.byType(Overlay)).insert(overlayEntry2);
+    await tester.pump();
 
-    final RenderObject renderObject = tester.renderObject(find.byType(LayoutBuilder));
-    expect(renderObject.debugNeedsPaint, isFalse);
-    tester.element(find.byType(LayoutBuilder)).markNeedsBuild();
-    expect(renderObject.debugNeedsPaint, isFalse);
-    await tester.pump(null, EnginePhase.layout);
-    expect(renderObject.debugNeedsPaint, isFalse);
+    final Element layoutBuilderElement = tester.element(find.byWidget(layoutBuilder, skipOffstage: false));
+    layoutBuilderElement.markNeedsBuild();
+    expect(layoutBuilderElement.dirty, isTrue);
+    await tester.pump();
+    expect(layoutBuilderElement.dirty, isFalse);
   });
 }
 
