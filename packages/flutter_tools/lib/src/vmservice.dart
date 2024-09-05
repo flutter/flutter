@@ -503,7 +503,8 @@ class FlutterVmService {
       // and should begin to shutdown due to the service connection closing.
       // Swallow the exception here and let the shutdown logic elsewhere deal
       // with cleaning up.
-      if (e.code == RPCErrorCodes.kServiceDisappeared) {
+      if (e.code == RPCErrorCodes.kServiceDisappeared ||
+          e.message.contains('Service connection disposed')) {
         return null;
       }
       rethrow;
@@ -578,6 +579,25 @@ class FlutterVmService {
       }
     }
 
+    // TODO(andrewkolos): this is to assist in troubleshooting
+    //  https://github.com/flutter/flutter/issues/152220 and should be reverted
+    //  once this issue is resolved.
+    final StreamSubscription<String> onReceiveSubscription = service.onReceive.listen(
+      (String message) {
+        globals.logger.printTrace(
+          'runInView VM service onReceive listener received "$message"',
+        );
+        final dynamic messageAsJson = jsonDecode(message);
+        // ignore: avoid_dynamic_calls -- Temporary code.
+        final dynamic messageKind = messageAsJson['params']?['event']?['kind'];
+        if (messageKind == 'IsolateRunnable') {
+          globals.logger.printTrace(
+            'Received IsolateRunnable event from onReceive.',
+          );
+        }
+      },
+    );
+
     final Future<void> onRunnable = service.onIsolateEvent.firstWhere((vm_service.Event event) {
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
@@ -590,6 +610,7 @@ class FlutterVmService {
       },
     );
     await onRunnable;
+    await onReceiveSubscription.cancel();
   }
 
   Future<String> flutterDebugDumpApp({
@@ -853,8 +874,9 @@ class FlutterVmService {
     } on vm_service.RPCError catch (err) {
       // If an application is not using the framework or the VM service
       // disappears while handling a request, return null.
-      if ((err.code == RPCErrorCodes.kMethodNotFound)
-          || (err.code == RPCErrorCodes.kServiceDisappeared)) {
+      if ((err.code == RPCErrorCodes.kMethodNotFound) ||
+          (err.code == RPCErrorCodes.kServiceDisappeared) ||
+          (err.message.contains('Service connection disposed'))) {
         return null;
       }
       rethrow;
@@ -966,11 +988,6 @@ class FlutterVmService {
       throw VmServiceDisappearedException();
     } finally {
       await isolateEvents.cancel();
-      try {
-        await service.streamCancel(vm_service.EventStreams.kIsolate);
-      } on vm_service.RPCError {
-        // It's ok for cleanup to fail, such as when the service disappears.
-      }
     }
   }
 

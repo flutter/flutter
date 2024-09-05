@@ -258,14 +258,21 @@ abstract class Repository {
     );
   }
 
-  /// Verify the repository's git checkout is clean.
-  Future<bool> gitCheckoutClean() async {
-    final String output = await git.getOutput(
+  /// Get the working tree status.
+  ///
+  /// Calls `git status --porcelain` which should output in a stable format
+  /// across git versions.
+  Future<String> gitStatus() async {
+    return git.getOutput(
       <String>['status', '--porcelain'],
       'check that the git checkout is clean',
       workingDirectory: (await checkoutDirectory).path,
     );
-    return output == '';
+  }
+
+  /// Verify the repository's git checkout is clean.
+  Future<bool> gitCheckoutClean() async {
+    return (await gitStatus()).isEmpty;
   }
 
   /// Return the revision for the branch point between two refs.
@@ -598,6 +605,13 @@ class FrameworkRepository extends Repository {
     await processManager.run(<String>[
       fileSystem.path.join((await checkoutDirectory).path, 'bin', 'flutter'),
       'help',
+    ]);
+  }
+
+  Future<io.ProcessResult> runDart(List<String> args) async {
+    return processManager.run(<String>[
+      fileSystem.path.join((await checkoutDirectory).path, 'bin', 'dart'),
+      ...args,
     ]);
   }
 

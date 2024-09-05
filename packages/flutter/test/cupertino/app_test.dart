@@ -70,6 +70,7 @@ void main() {
     );
     await tester.pumpWidget(const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
+      title: '',
       color: dynamicColor,
       home: Placeholder(),
     ));
@@ -79,6 +80,7 @@ void main() {
     await tester.pumpWidget(const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.dark),
       color: dynamicColor,
+      title: '',
       home: Placeholder(),
     ));
 

@@ -328,7 +328,7 @@ class WidgetsApp extends StatefulWidget {
     this.home,
     Map<String, WidgetBuilder> this.routes = const <String, WidgetBuilder>{},
     this.builder,
-    this.title = '',
+    this.title,
     this.onGenerateTitle,
     this.textStyle,
     required this.color,
@@ -425,7 +425,7 @@ class WidgetsApp extends StatefulWidget {
     this.routerConfig,
     this.backButtonDispatcher,
     this.builder,
-    this.title = '',
+    this.title,
     this.onGenerateTitle,
     this.onNavigationNotification,
     this.textStyle,
@@ -828,7 +828,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// To provide a localized title instead, use [onGenerateTitle].
   /// {@endtemplate}
-  final String title;
+  final String? title;
 
   /// {@template flutter.widgets.widgetsApp.onGenerateTitle}
   /// If non-null this callback function is called to produce the app's
@@ -1368,9 +1368,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     switch (_appLifecycleState) {
       case null:
       case AppLifecycleState.detached:
-      case AppLifecycleState.inactive:
         // Avoid updating the engine when the app isn't ready.
         return true;
+      case AppLifecycleState.inactive:
       case AppLifecycleState.resumed:
       case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
@@ -1771,7 +1771,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       return true;
     }());
 
-    final Widget title;
+    final Widget? title;
     if (widget.onGenerateTitle != null) {
       title = Builder(
         // This Builder exists to provide a context below the Localizations widget.
@@ -1786,9 +1786,14 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           );
         },
       );
+    } else if (widget.title == null && kIsWeb) {
+      // Updating the <title /> element in the DOM is problematic in embedded
+      // and multiview modes as title should be managed by host apps.
+      // Refer to https://github.com/flutter/flutter/pull/152003 for more info.
+      title = null;
     } else {
       title = Title(
-        title: widget.title,
+        title: widget.title ?? '',
         color: widget.color.withOpacity(1.0),
         child: result,
       );
@@ -1823,7 +1828,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
                       child: Localizations(
                         locale: appLocale,
                         delegates: _localizationsDelegates.toList(),
-                        child: title,
+                        child: title ?? result,
                       ),
                     ),
                   ),

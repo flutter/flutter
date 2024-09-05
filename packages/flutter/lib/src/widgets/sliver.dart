@@ -174,7 +174,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   /// infinite) number of children because the builder is called only for those
   /// children that are actually visible.
   ///
-  /// Providing a non-null `itemCount` improves the ability of the [SliverGrid]
+  /// Providing a non-null `itemCount` improves the ability of the [SliverList]
   /// to estimate the maximum scroll extent.
   ///
   /// `itemBuilder` will be called only with indices greater than or equal to
@@ -231,7 +231,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   /// infinite) number of children because the builder is called only for those
   /// children that are actually visible.
   ///
-  /// Providing a non-null `itemCount` improves the ability of the [SliverGrid]
+  /// Providing a non-null `itemCount` improves the ability of the [SliverList]
   /// to estimate the maximum scroll extent.
   ///
   /// `itemBuilder` will be called only with indices greater than or equal to
@@ -422,7 +422,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
   /// This constructor is appropriate for sliver lists with a large (or
   /// infinite) number of children whose extent is already determined.
   ///
-  /// Providing a non-null `itemCount` improves the ability of the [SliverGrid]
+  /// Providing a non-null `itemCount` improves the ability of the [SliverFixedExtentList]
   /// to estimate the maximum scroll extent.
   ///
   /// `itemBuilder` will be called only with indices greater than or equal to
@@ -582,7 +582,7 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
   /// This constructor is appropriate for sliver lists with a large (or
   /// infinite) number of children whose extent is already determined.
   ///
-  /// Providing a non-null `itemCount` improves the ability of the [SliverGrid]
+  /// Providing a non-null `itemCount` improves the ability of the [SliverVariedExtentList]
   /// to estimate the maximum scroll extent.
   SliverVariedExtentList.builder({
     super.key,
@@ -1459,9 +1459,8 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
     if (parentData.keepAlive != keepAlive) {
       // No need to redo layout if it became true.
       parentData.keepAlive = keepAlive;
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent is RenderObject && !keepAlive) {
-        targetParent.markNeedsLayout();
+      if (!keepAlive) {
+        renderObject.parent?.markNeedsLayout();
       }
     }
   }
@@ -1556,11 +1555,7 @@ class _SliverZeroFlexParentDataWidget extends ParentDataWidget<SliverPhysicalPar
     }
 
     if (needsLayout) {
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent is RenderObject) {
-        targetParent.markNeedsLayout();
-      }
-
+      renderObject.parent?.markNeedsLayout();
     }
   }
 
@@ -1628,10 +1623,7 @@ class SliverCrossAxisExpanded extends ParentDataWidget<SliverPhysicalContainerPa
     }
 
     if (needsLayout) {
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent is RenderObject) {
-        targetParent.markNeedsLayout();
-      }
+      renderObject.parent?.markNeedsLayout();
     }
   }
 

@@ -37,18 +37,16 @@ class DispatchedEventKey {
 }
 
 class TestWidgetInspectorService extends Object with WidgetInspectorService {
-    TestWidgetInspectorService() {
-    selection.addListener(() {
-      if (selectionChangedCallback != null) {
-        selectionChangedCallback!();
-      }
-    });
+  TestWidgetInspectorService() {
+    selection.addListener(() => selectionChangedCallback?.call());
   }
+
   final Map<String, ServiceExtensionCallback> extensions = <String, ServiceExtensionCallback>{};
 
   final Map<DispatchedEventKey, List<Map<Object, Object?>>> eventsDispatched =
       <DispatchedEventKey, List<Map<Object, Object?>>>{};
-  final  List<Object?> objectsInspected = <Object?>[];
+
+  final List<Object?> objectsInspected = <Object?>[];
 
   @override
   void registerServiceExtension({

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
 ///
 /// @docImport 'primary_scroll_controller.dart';
 /// @docImport 'scroll_configuration.dart';

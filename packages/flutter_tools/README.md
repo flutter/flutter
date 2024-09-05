@@ -26,6 +26,17 @@ $ dart bin/flutter_tools.dart
 ```
 followed by command-line arguments, as usual.
 
+As a convenience for folks developing the `flutter` tool itself,
+you can also use the `bin/flutter-dev` script:
+```shell
+# Assuming flutter/bin is on your PATH
+$ flutter-dev
+```
+
+Note: `flutter-dev` is identical to `flutter`, except it does not
+use a cached on-disk snapshot. In other words, it will be significantly
+slower but you will not need to forget (remember?) to delete the cached
+snapshot.
 
 ### Running the analyzer
 

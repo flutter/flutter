@@ -1642,12 +1642,14 @@ class EditableText extends StatefulWidget {
   final Brightness keyboardAppearance;
 
   /// {@template flutter.widgets.editableText.scrollPadding}
-  /// Configures padding to edges surrounding a [Scrollable] when the Textfield scrolls into view.
+  /// Configures the padding for the edges surrounding a [Scrollable] when the
+  /// text field scrolls into view.
   ///
-  /// When this widget receives focus and is not completely visible (for example scrolled partially
-  /// off the screen or overlapped by the keyboard)
-  /// then it will attempt to make itself visible by scrolling a surrounding [Scrollable], if one is present.
-  /// This value controls how far from the edges of a [Scrollable] the TextField will be positioned after the scroll.
+  /// When this widget receives focus and is not completely visible (for example
+  /// scrolled partially off the screen or overlapped by the keyboard), then it
+  /// will attempt to make itself visible by scrolling a surrounding
+  /// [Scrollable], if one is present. This value controls how far from the
+  /// edges of a [Scrollable] the TextField will be positioned after the scroll.
   ///
   /// Defaults to EdgeInsets.all(20.0).
   /// {@endtemplate}
@@ -2226,7 +2228,7 @@ class EditableText extends StatefulWidget {
   }
 }
 
-/// State for a [EditableText].
+/// State for an [EditableText].
 class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate, TextInputClient implements AutofillClient {
   Timer? _cursorTimer;
   AnimationController get _cursorBlinkOpacityController {
@@ -2734,7 +2736,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   static SpellCheckConfiguration _inferSpellCheckConfiguration(SpellCheckConfiguration? configuration) {
     final SpellCheckService? spellCheckService = configuration?.spellCheckService;
     final bool spellCheckAutomaticallyDisabled = configuration == null || configuration == const SpellCheckConfiguration.disabled();
-    final bool spellCheckServiceIsConfigured = spellCheckService != null || spellCheckService == null && WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
+    final bool spellCheckServiceIsConfigured = spellCheckService != null || WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
     if (spellCheckAutomaticallyDisabled || !spellCheckServiceIsConfigured) {
       // Only enable spell check if a non-disabled configuration is provided
       // and if that configuration does not specify a spell check service,
@@ -5812,6 +5814,23 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
   final TextBoundary Function() getTextBoundary;
   final _ApplyTextBoundary _applyTextBoundary;
 
+  void _hideToolbarIfTextChanged(ReplaceTextIntent intent) {
+    if (state._selectionOverlay == null || !state.selectionOverlay!.toolbarIsVisible) {
+      return;
+    }
+    final TextEditingValue oldValue = intent.currentTextEditingValue;
+    final TextEditingValue newValue = intent.currentTextEditingValue.replaced(
+      intent.replacementRange,
+      intent.replacementText,
+    );
+    if (oldValue.text != newValue.text) {
+      // Hide the toolbar if the text was changed, but only hide the toolbar
+      // overlay; the selection handle's visibility will be handled
+      // by `_handleSelectionChanged`.
+      state.hideToolbar(false);
+    }
+  }
+
   @override
   Object? invoke(T intent, [BuildContext? context]) {
     final TextSelection selection = state._value.selection;
@@ -5827,9 +5846,11 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
         start: atomicBoundary.getLeadingTextBoundaryAt(selection.start) ?? state._value.text.length,
         end: atomicBoundary.getTrailingTextBoundaryAt(selection.end - 1) ?? 0,
       );
+      final ReplaceTextIntent replaceTextIntent = ReplaceTextIntent(state._value, '', range, SelectionChangedCause.keyboard);
+      _hideToolbarIfTextChanged(replaceTextIntent);
       return Actions.invoke(
         context!,
-        ReplaceTextIntent(state._value, '', range, SelectionChangedCause.keyboard),
+        replaceTextIntent,
       );
     }
 
@@ -5841,9 +5862,11 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
         : atomicBoundary.getTrailingTextBoundaryAt(selection.baseOffset - 1) ?? 0,
       extentOffset: target,
     );
+    final ReplaceTextIntent replaceTextIntent = ReplaceTextIntent(state._value, '', rangeToDelete, SelectionChangedCause.keyboard);
+    _hideToolbarIfTextChanged(replaceTextIntent);
     return Actions.invoke(
       context!,
-      ReplaceTextIntent(state._value, '', rangeToDelete, SelectionChangedCause.keyboard),
+      replaceTextIntent,
     );
   }
 

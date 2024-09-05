@@ -529,7 +529,7 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderSliverFixedExtentCarousel renderObject) {
     renderObject.maxExtent = itemExtent;
-    renderObject.minExtent = itemExtent;
+    renderObject.minExtent = minExtent;
   }
 }
 
@@ -1340,7 +1340,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     if (_itemExtent == value) {
       return;
     }
-    if (hasPixels) {
+    if (hasPixels && _itemExtent != null) {
       final double leadingItem = getItemFromPixels(pixels, viewportDimension);
       final double newPixel = getPixelsFromItem(leadingItem, flexWeights, value);
       forcePixels(newPixel);

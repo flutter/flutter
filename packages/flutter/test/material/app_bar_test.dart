@@ -2563,10 +2563,160 @@ void main() {
       expect(getAppBarBackgroundColor(tester), defaultColor);
       expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
     });
+
+    testWidgets('scrolledUnderElevation should be maintained when drawer is opened', (WidgetTester tester) async {
+      final GlobalKey drawerListKey  = GlobalKey();
+      final GlobalKey bodyListKey = GlobalKey();
+       await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+              return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
+            }),
+            title: const Text('AppBar'),
+          ),
+          drawer: Drawer(
+            child: ListView(
+              key: drawerListKey,
+              children: <Widget>[
+                Container(height: 1200, color: Colors.red),
+              ],
+            ),
+          ),
+          body: ListView(
+            key: bodyListKey,
+            children: <Widget>[
+              Container(height: 1200, color: Colors.teal),
+            ],
+          ),
+        ),
+      ));
+
+      // Initial state: AppBar should have the default color.
+      expect(getAppBarBackgroundColor(tester), defaultColor);
+
+      // Scroll the list view.
+      await tester.drag(find.byKey(bodyListKey), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should now have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Open the drawer.
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll the list inside the drawer.
+      await tester.drag(find.byKey(drawerListKey), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll list inside the drawer back to the top.
+      await tester.drag(find.byKey(drawerListKey), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Close the drawer using the Scaffold's method.
+      tester.state<ScaffoldState>(find.byType(Scaffold)).closeDrawer();
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll the list view back to the top.
+      await tester.drag(find.byKey(bodyListKey), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should be back to the default color.
+      expect(getAppBarBackgroundColor(tester), defaultColor);
+    });
+
+    testWidgets('scrolledUnderElevation should be maintained when endDrawer is opened', (WidgetTester tester) async {
+      final GlobalKey drawerListKey  = GlobalKey();
+      final GlobalKey bodyListKey = GlobalKey();
+       await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+              return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
+            }),
+            title: const Text('AppBar'),
+          ),
+          endDrawer: Drawer(
+            child: ListView(
+              key: drawerListKey,
+              children: <Widget>[
+                Container(height: 1200, color: Colors.red),
+              ],
+            ),
+          ),
+          body: ListView(
+            key: bodyListKey,
+            children: <Widget>[
+              Container(height: 1200, color: Colors.teal),
+            ],
+          ),
+        ),
+      ));
+
+      // Initial state: AppBar should have the default color.
+      expect(getAppBarBackgroundColor(tester), defaultColor);
+
+      // Scroll the list view.
+      await tester.drag(find.byKey(bodyListKey), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should now have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Open the drawer.
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll the list inside the drawer.
+      await tester.drag(find.byKey(drawerListKey), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll list inside the drawer back to the top.
+      await tester.drag(find.byKey(drawerListKey), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Close the drawer using the Scaffold's method.
+      tester.state<ScaffoldState>(find.byType(Scaffold)).closeEndDrawer();
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll the list view back to the top.
+      await tester.drag(find.byKey(bodyListKey), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should be back to the default color.
+      expect(getAppBarBackgroundColor(tester), defaultColor);
+    });
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/80256
-  testWidgets('The second page should have a back button even it has a end drawer', (WidgetTester tester) async {
+  testWidgets('The second page should have a back button even it has an end drawer', (WidgetTester tester) async {
     final Page<void> page1 = MaterialPage<void>(
         key: const ValueKey<String>('1'),
         child: Scaffold(

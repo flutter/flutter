@@ -34,7 +34,7 @@ class TreeSliverNode<T> {
     T content, {
     List<TreeSliverNode<T>>? children,
     bool expanded = false,
-  }) : _expanded = children != null && children.isNotEmpty && expanded,
+  }) : _expanded = (children?.isNotEmpty ?? false) && expanded,
        _content = content,
        _children = children ?? <TreeSliverNode<T>>[];
 

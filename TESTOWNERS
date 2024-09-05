@@ -12,6 +12,8 @@
 /dev/devicelab/bin/tasks/analyzer_benchmark.dart @andrewkolos @flutter/tool
 /dev/devicelab/bin/tasks/android_choreographer_do_frame_test.dart @reidbaker @flutter/engine
 /dev/devicelab/bin/tasks/android_defines_test.dart @andrewkolos @flutter/tool
+/dev/devicelab/bin/tasks/android_java11_dependency_smoke_tests.dart @gmackall @flutter/android
+/dev/devicelab/bin/tasks/android_java17_dependency_smoke_tests.dart @gmackall @flutter/android
 /dev/devicelab/bin/tasks/android_lifecycles_test.dart @reidbaker @flutter/engine
 /dev/devicelab/bin/tasks/android_obfuscate_test.dart @andrewkolos @flutter/tool
 /dev/devicelab/bin/tasks/android_picture_cache_complexity_scoring_perf__timeline_summary.dart @flar @flutter/engine
@@ -61,7 +63,7 @@
 /dev/devicelab/bin/tasks/gradient_dynamic_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/gradient_static_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/gradle_java8_compile_test.dart @reidbaker @flutter/tool
-/dev/devicelab/bin/tasks/hot_mode_dev_cycle_linux__benchmark.dart @christopherfujino @flutter/tool
+/dev/devicelab/bin/tasks/hot_mode_dev_cycle_linux__benchmark.dart @andrewkolos @flutter/tool
 /dev/devicelab/bin/tasks/image_list_jit_reported_duration.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/image_list_reported_duration.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/large_image_changer_perf_android.dart @jtmcdole @flutter/engine
@@ -328,12 +330,12 @@
 # flutter_packaging @christopherfujino @flutter/infra
 # flutter_plugins @stuartmorgan @flutter/plugin
 # framework_tests @Piinks @flutter/framework
-# fuchsia_precache @christopherfujino @flutter/tool
+# fuchsia_precache @andrewkolos @flutter/tool
 # realm_checker @eyebrowsoffire @flutter/tool
 # skp_generator @Hixie
 # test_ownership @keyonghan
 # tool_host_cross_arch_tests @andrewkolos @flutter/tool
-# tool_integration_tests @christopherfujino @flutter/tool
+# tool_integration_tests @andrewkolos @flutter/tool
 # android_preview_tool_integration_tests @gmackall @flutter/android
 # android_java11_tool_integration_tests @gmackall @flutter/android
 # tool_tests @andrewkolos @flutter/tool

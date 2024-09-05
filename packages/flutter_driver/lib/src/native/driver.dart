@@ -26,16 +26,6 @@ abstract interface class NativeDriver {
   /// After calling this method, the driver is no longer usable.
   Future<void> close();
 
-  /// Configures the device for screenshot testing.
-  ///
-  /// Where possible, this method should suppress system UI elements that are
-  /// not part of the application under test, such as the status bar or
-  /// navigation bar, and disable animations that might interfere with
-  /// screenshot comparison.
-  ///
-  /// The exact details of what is configured are platform-specific.
-  Future<void> configureForScreenshotTesting();
-
   /// Take a screenshot using a platform-specific mechanism.
   ///
   /// The image is returned as an opaque handle that can be used to retrieve

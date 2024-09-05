@@ -28,7 +28,7 @@ import 'android_sdk.dart';
 // Please see the README before changing any of these values.
 const String templateDefaultGradleVersion = '8.3';
 const String templateAndroidGradlePluginVersion = '8.1.0';
-const String templateAndroidGradlePluginVersionForModule = '7.3.0';
+const String templateAndroidGradlePluginVersionForModule = '8.1.0';
 const String templateKotlinGradlePluginVersion = '1.8.22';
 
 // The Flutter Gradle Plugin is only applied to app projects, and modules that
@@ -38,10 +38,10 @@ const String templateKotlinGradlePluginVersion = '1.8.22';
 // so new versions are picked up after a Flutter upgrade.
 //
 // Please see the README before changing any of these values.
-const String compileSdkVersion = '34';
+const String compileSdkVersion = '35';
 const String minSdkVersion = '21';
-const String targetSdkVersion = '34';
-const String ndkVersion = '23.1.7779620';
+const String targetSdkVersion = '35';
+const String ndkVersion = '26.1.10909125';
 
 
 // Update these when new major versions of Java are supported by new Gradle
