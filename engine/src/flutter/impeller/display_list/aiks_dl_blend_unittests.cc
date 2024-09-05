@@ -18,6 +18,10 @@
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/geometry/scalar.h"
+#include "impeller/aiks/aiks_context.h"
+#include "impeller/display_list/dl_dispatcher.h"
+#include "impeller/playground/playground.h"
+#include "impeller/playground/playground_test.h"
 #include "include/core/SkMatrix.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -564,6 +568,123 @@ TEST_P(AiksTest, FramebufferAdvancedBlendCoverage) {
                     DlImageSampling::kMipmapLinear, &image_paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, ColorWheel) {
+  // Compare with https://fiddle.skia.org/c/@BlendModes
+
+  BlendModeSelection blend_modes = GetBlendModeSelection();
+
+  auto draw_color_wheel = [](DisplayListBuilder& builder) -> void {
+    /// color_wheel_sampler: r=0 -> fuchsia, r=2pi/3 -> yellow, r=4pi/3 ->
+    /// cyan domain: r >= 0 (because modulo used is non euclidean)
+    auto color_wheel_sampler = [](Radians r) {
+      Scalar x = r.radians / k2Pi + 1;
+
+      // https://www.desmos.com/calculator/6nhjelyoaj
+      auto color_cycle = [](Scalar x) {
+        Scalar cycle = std::fmod(x, 6.0f);
+        return std::max(0.0f, std::min(1.0f, 2 - std::abs(2 - cycle)));
+      };
+      return Color(color_cycle(6 * x + 1),  //
+                   color_cycle(6 * x - 1),  //
+                   color_cycle(6 * x - 3),  //
+                   1);
+    };
+
+    DlPaint paint;
+    paint.setBlendMode(DlBlendMode::kSrcOver);
+
+    // Draw a fancy color wheel for the backdrop.
+    // https://www.desmos.com/calculator/xw7kafthwd
+    const int max_dist = 900;
+    for (int i = 0; i <= 900; i++) {
+      Radians r(kPhi / k2Pi * i);
+      Scalar distance = r.radians / std::powf(4.12, 0.0026 * r.radians);
+      Scalar normalized_distance = static_cast<Scalar>(i) / max_dist;
+
+      auto color = color_wheel_sampler(r).WithAlpha(1.0f - normalized_distance);
+      paint.setColor(
+          DlColor::RGBA(color.red, color.green, color.blue, color.alpha));
+      SkPoint position = SkPoint::Make(distance * std::sin(r.radians),
+                                       -distance * std::cos(r.radians));
+
+      builder.DrawCircle(position, 9 + normalized_distance * 3, paint);
+    }
+  };
+
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    // UI state.
+    static bool cache_the_wheel = true;
+    static int current_blend_index = 3;
+    static float dst_alpha = 1;
+    static float src_alpha = 1;
+    static DlColor color0 = DlColor::kRed();
+    static DlColor color1 = DlColor::kGreen();
+    static DlColor color2 = DlColor::kBlue();
+
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::Checkbox("Cache the wheel", &cache_the_wheel);
+      ImGui::ListBox("Blending mode", &current_blend_index,
+                     blend_modes.blend_mode_names.data(),
+                     blend_modes.blend_mode_names.size());
+      ImGui::SliderFloat("Source alpha", &src_alpha, 0, 1);
+      ImGui::ColorEdit4("Color A", reinterpret_cast<float*>(&color0));
+      ImGui::ColorEdit4("Color B", reinterpret_cast<float*>(&color1));
+      ImGui::ColorEdit4("Color C", reinterpret_cast<float*>(&color2));
+      ImGui::SliderFloat("Destination alpha", &dst_alpha, 0, 1);
+      ImGui::End();
+    }
+
+    DisplayListBuilder builder;
+
+    DlPaint paint;
+    paint.setColor(DlColor::kWhite().withAlpha(dst_alpha * 255));
+    paint.setBlendMode(DlBlendMode::kSrc);
+    builder.SaveLayer(nullptr, &paint);
+    {
+      DlPaint paint;
+      paint.setColor(DlColor::kWhite());
+      builder.DrawPaint(paint);
+
+      builder.SaveLayer(nullptr, nullptr);
+      builder.Scale(GetContentScale().x, GetContentScale().y);
+      builder.Translate(500, 400);
+      builder.Scale(3, 3);
+      draw_color_wheel(builder);
+      builder.Restore();
+    }
+    builder.Restore();
+
+    builder.Scale(GetContentScale().x, GetContentScale().y);
+    builder.Translate(500, 400);
+    builder.Scale(3, 3);
+
+    // Draw 3 circles to a subpass and blend it in.
+    DlPaint save_paint;
+    save_paint.setColor(DlColor::kWhite().withAlpha(src_alpha * 255));
+    save_paint.setBlendMode(static_cast<DlBlendMode>(
+        blend_modes.blend_mode_values[current_blend_index]));
+    builder.SaveLayer(nullptr, &save_paint);
+    {
+      DlPaint paint;
+      paint.setBlendMode(DlBlendMode::kPlus);
+      const Scalar x = std::sin(k2Pi / 3);
+      const Scalar y = -std::cos(k2Pi / 3);
+      paint.setColor(color0);
+      builder.DrawCircle(SkPoint::Make(-x * 45, y * 45), 65, paint);
+      paint.setColor(color1);
+      builder.DrawCircle(SkPoint::Make(0, -45), 65, paint);
+      paint.setColor(color2);
+      builder.DrawCircle(SkPoint::Make(x * 45, y * 45), 65, paint);
+    }
+    builder.Restore();
+
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 }  // namespace testing
