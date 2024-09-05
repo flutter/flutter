@@ -121,28 +121,38 @@ def zip_xcframework_archive(dst, args):
   # the framework's `verifyCodeSignedTestRunner`.
   #
   # See: https://github.com/flutter/flutter/blob/62382c7b83a16b3f48dc06c19a47f6b8667005a5/dev/bots/suite_runners/run_verify_binaries_codesigned_tests.dart#L82-L130
+
+  # Binaries that must be codesigned and require entitlements for particular APIs.
   with_entitlements = []
   with_entitlements_file = os.path.join(dst, 'entitlements.txt')
   sky_utils.write_codesign_config(with_entitlements_file, with_entitlements)
 
+  # Binaries that must be codesigned and DO NOT require entitlements.
   without_entitlements = [
       'FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
   ]
-  if args.dsym:
-    without_entitlements.extend([
-        'FlutterMacOS.xcframework/macos-arm64_x86_64/dSYMs/FlutterMacOS.framework.dSYM/Contents/Resources/DWARF/FlutterMacOS',
-    ])
-
   without_entitlements_file = os.path.join(dst, 'without_entitlements.txt')
   sky_utils.write_codesign_config(without_entitlements_file, without_entitlements)
+
+  # Binaries that will not be codesigned.
+  unsigned_binaries = []
+  if args.dsym:
+    unsigned_binaries.extend([
+        'FlutterMacOS.xcframework/macos-arm64_x86_64/dSYMs/FlutterMacOS.framework.dSYM/Contents/Resources/DWARF/FlutterMacOS',
+    ])
+  unsigned_binaries_file = os.path.join(dst, 'unsigned_binaries.txt')
+  sky_utils.write_codesign_config(unsigned_binaries_file, unsigned_binaries)
   # pylint: enable=line-too-long
 
   zip_contents = [
       'FlutterMacOS.xcframework',
       'entitlements.txt',
       'without_entitlements.txt',
+      'unsigned_binaries.txt',
   ]
-  sky_utils.assert_valid_codesign_config(dst, zip_contents, with_entitlements, without_entitlements)
+  sky_utils.assert_valid_codesign_config(
+      dst, zip_contents, with_entitlements, without_entitlements, unsigned_binaries
+  )
   sky_utils.create_zip(dst, 'framework.zip', zip_contents)
 
 
