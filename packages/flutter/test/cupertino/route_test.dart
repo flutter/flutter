@@ -2972,13 +2972,12 @@ class PopupObserver extends NavigatorObserver {
 
 class DialogObserver extends NavigatorObserver {
   final List<ModalRoute<dynamic>> dialogRoutes = <ModalRoute<dynamic>>[];
-  int dialogCount = 0;
+  int get dialogCount => dialogRoutes.length;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route is CupertinoDialogRoute) {
       dialogRoutes.add(route);
-      dialogCount++;
     }
     super.didPush(route, previousRoute);
   }
@@ -2987,7 +2986,6 @@ class DialogObserver extends NavigatorObserver {
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route is CupertinoDialogRoute) {
       dialogRoutes.removeLast();
-      dialogCount--;
     }
     super.didPop(route, previousRoute);
   }

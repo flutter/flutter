@@ -31,6 +31,9 @@ import 'theme_data.dart';
 
 const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
 
+// The transition duration used for DialogRoute transitions.
+const Duration _kDialogRouteTransitionDuration = Duration(milliseconds: 150);
+
 /// A Material Design dialog.
 ///
 /// This dialog widget does not have any opinion about the contents of the
@@ -1428,7 +1431,7 @@ Future<T?> showDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   TraversalEdgeBehavior? traversalEdgeBehavior,
-  Duration transitionDuration = const Duration(milliseconds: 150),
+  Duration? transitionDuration,
 }) {
   assert(_debugIsActive(context));
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1452,7 +1455,7 @@ Future<T?> showDialog<T>({
     themes: themes,
     anchorPoint: anchorPoint,
     traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
-    transitionDuration: transitionDuration,
+    transitionDuration: transitionDuration ?? _kDialogRouteTransitionDuration,
   ));
 }
 
@@ -1475,7 +1478,7 @@ Future<T?> showAdaptiveDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   TraversalEdgeBehavior? traversalEdgeBehavior,
-  Duration transitionDuration = const Duration(milliseconds: 150),
+  Duration? transitionDuration,
 }) {
   final ThemeData theme = Theme.of(context);
   switch (theme.platform) {
@@ -1588,7 +1591,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     super.requestFocus,
     super.anchorPoint,
     super.traversalEdgeBehavior,
-    super.transitionDuration = const Duration(milliseconds: 150),
+    super.transitionDuration = _kDialogRouteTransitionDuration,
   }) : super(
          pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
            final Widget pageChild = Builder(builder: builder);

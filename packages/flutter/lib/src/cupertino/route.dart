@@ -57,6 +57,9 @@ const Color kCupertinoModalBarrierColor = CupertinoDynamicColor.withBrightness(
 // The duration of the transition used when a modal popup is shown.
 const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
 
+// The transition duration used for CupertinoDialogRoute transitions.
+const Duration _kCupertinoDialogRouteTransitionDuration = Duration(milliseconds: 250);
+
 // Offset from offscreen to the right to fully on screen.
 final Animatable<Offset> _kRightMiddleTween = Tween<Offset>(
   begin: const Offset(1.0, 0.0),
@@ -1313,7 +1316,7 @@ Future<T?> showCupertinoDialog<T>({
   bool barrierDismissible = false,
   RouteSettings? routeSettings,
   Offset? anchorPoint,
-  Duration transitionDuration = const Duration(milliseconds: 250),
+  Duration? transitionDuration = _kCupertinoDialogRouteTransitionDuration,
 }) {
 
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(CupertinoDialogRoute<T>(
@@ -1324,7 +1327,7 @@ Future<T?> showCupertinoDialog<T>({
     barrierColor: CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
     settings: routeSettings,
     anchorPoint: anchorPoint,
-    transitionDuration: transitionDuration,
+    transitionDuration: transitionDuration ?? _kCupertinoDialogRouteTransitionDuration,
   ));
 }
 
@@ -1374,7 +1377,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
     Color? barrierColor,
     String? barrierLabel,
     // This transition duration was eyeballed comparing with iOS
-    super.transitionDuration = const Duration(milliseconds: 250),
+    super.transitionDuration = _kCupertinoDialogRouteTransitionDuration,
     this.transitionBuilder,
     super.settings,
     super.requestFocus,
