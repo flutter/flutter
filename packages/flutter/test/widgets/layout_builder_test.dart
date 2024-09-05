@@ -852,20 +852,34 @@ void main() {
   });
 
   testWidgets('LayoutBuilder in a subtree that skips layout still rebuilds', (WidgetTester tester) async {
+    late final OverlayEntry overlayEntry1;
+    addTearDown(() => overlayEntry1..remove()..dispose());
+    late final OverlayEntry overlayEntry2;
+    addTearDown(() => overlayEntry2..remove()..dispose());
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Visibility(
-          visible: false,
-          maintainState: true,
-          child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) => const Placeholder()),
-        ),
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            overlayEntry1 = OverlayEntry(
+              maintainState: true,
+              builder: (BuildContext context) {
+                return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) => const Placeholder());
+              },
+            ),
+            overlayEntry2 = OverlayEntry(
+              opaque: true,
+              builder: (BuildContext context) => Container(),
+            ),
+          ],
+        )
       ),
     );
-    tester.element(find.byType(Visibility)).reassemble();  // ignore: invalid_use_of_protected_member
-    tester.element(find.byType(Visibility)).reassemble();  // ignore: invalid_use_of_protected_member
-    tester.element(find.byType(Visibility)).reassemble();  // ignore: invalid_use_of_protected_member
-    tester.element(find.byType(Visibility)).reassemble();  // ignore: invalid_use_of_protected_member
+
+    tester.element(find.byType(LayoutBuilder)).markNeedsBuild();
+    await tester.pump();
+    tester.element(find.byType(LayoutBuilder)).markNeedsBuild();
+    await tester.pump();
   });
 }
 
