@@ -1272,6 +1272,10 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// By default, `useRootNavigator` is `true` and the dialog route created by
 /// this method is pushed to the root navigator.
 ///
+/// the `transitionDuration` argument is used to specify the duration of 
+/// the dialog's entrance and exit animations. If it's not provided or `null`,
+/// then it uses the default value as set by [CupertinoDialogRoute].
+///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// If the application has multiple [Navigator] objects, it may be necessary to
@@ -1316,7 +1320,7 @@ Future<T?> showCupertinoDialog<T>({
   bool barrierDismissible = false,
   RouteSettings? routeSettings,
   Offset? anchorPoint,
-  Duration? transitionDuration = _kCupertinoDialogRouteTransitionDuration,
+  Duration? transitionDuration,
 }) {
 
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(CupertinoDialogRoute<T>(
@@ -1327,7 +1331,7 @@ Future<T?> showCupertinoDialog<T>({
     barrierColor: CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
     settings: routeSettings,
     anchorPoint: anchorPoint,
-    transitionDuration: transitionDuration ?? _kCupertinoDialogRouteTransitionDuration,
+    transitionDuration: transitionDuration,
   ));
 }
 
@@ -1354,6 +1358,10 @@ Future<T?> showCupertinoDialog<T>({
 /// The `barrierColor` argument is used to specify the color of the modal
 /// barrier that darkens everything below the dialog. If `null`, then
 /// [CupertinoDynamicColor.resolve] is used to compute the modal color.
+/// 
+/// The `transitionDuration` argument is used to specify the duration of
+/// the dialog's entrance and exit animations. If it's not provided or `null`,
+/// then the default duration `Duration(milliseconds: 250)` is used.
 ///
 /// The `settings` argument define the settings for this route. See
 /// [RouteSettings] for details.
@@ -1377,7 +1385,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
     Color? barrierColor,
     String? barrierLabel,
     // This transition duration was eyeballed comparing with iOS
-    super.transitionDuration = _kCupertinoDialogRouteTransitionDuration,
+    Duration? transitionDuration,
     this.transitionBuilder,
     super.settings,
     super.requestFocus,
@@ -1389,6 +1397,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
         transitionBuilder: transitionBuilder ?? _buildCupertinoDialogTransitions,
         barrierLabel: barrierLabel ?? CupertinoLocalizations.of(context).modalBarrierDismissLabel,
         barrierColor: barrierColor ?? CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
+        transitionDuration: transitionDuration ?? _kCupertinoDialogRouteTransitionDuration,
       );
 
   /// Custom transition builder
