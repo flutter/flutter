@@ -880,6 +880,23 @@ void main() {
     await tester.pump();
     tester.element(find.byType(LayoutBuilder)).markNeedsBuild();
     await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('LayoutBuilder does not need repaint on markNeedsBuild', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) => const Placeholder()),
+      ),
+    );
+
+    final RenderObject renderObject = tester.renderObject(find.byType(LayoutBuilder));
+    expect(renderObject.debugNeedsPaint, isFalse);
+    tester.element(find.byType(LayoutBuilder)).markNeedsBuild();
+    expect(renderObject.debugNeedsPaint, isFalse);
+    await tester.pump(null, EnginePhase.layout);
+    expect(renderObject.debugNeedsPaint, isFalse);
   });
 }
 
