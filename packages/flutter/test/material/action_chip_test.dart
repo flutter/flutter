@@ -166,7 +166,7 @@ void main() {
       chipMaterial.shape,
       RoundedRectangleBorder(
         borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-        side: BorderSide(color: theme.colorScheme.outline),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
       ),
     );
 

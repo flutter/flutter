@@ -25,11 +25,7 @@ void main() {
     'FilterChip displays the correct border when selected',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: example.MaterialStateBorderSideExampleApp(),
-          ),
-        ),
+        const example.MaterialStateBorderSideExampleApp(),
       );
 
       expect(findBorderColor(Colors.red), findsOne);
@@ -40,17 +36,13 @@ void main() {
     'FilterChip displays the correct border when not selected',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: example.MaterialStateBorderSideExampleApp(),
-          ),
-        ),
+        const example.MaterialStateBorderSideExampleApp(),
       );
 
       await tester.tap(find.byType(FilterChip));
       await tester.pumpAndSettle();
 
-      expect(findBorderColor(const Color(0xff79747e)), findsOne);
+      expect(findBorderColor(const Color(0xffcac4d0)), findsOne);
     },
   );
 }
