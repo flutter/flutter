@@ -431,10 +431,9 @@ optional("gpu") {
     } else if (is_win) {
       sources += [
         "$_skia_root/src/gpu/ganesh/gl/win/GrGLMakeNativeInterface_win.cpp",
+        "$_skia_root/src/gpu/ganesh/gl/win/GrGLMakeWinInterface.cpp",
       ]
-      if (target_cpu != "arm64") {
-        libs += [ "OpenGL32.lib" ]
-      }
+      libs += [ "OpenGL32.lib" ]
     } else {
       sources +=
           [ "$_skia_root/src/gpu/ganesh/gl/GrGLMakeNativeInterface_none.cpp" ]
