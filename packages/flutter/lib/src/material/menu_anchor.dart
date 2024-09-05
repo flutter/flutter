@@ -395,7 +395,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
 
   @override
   Widget build(BuildContext context) {
-    Widget contents =_buildContents(context);
+    Widget contents = _buildContents(context);
     if (widget.layerLink != null) {
       contents = CompositedTransformTarget(
         link: widget.layerLink!,
