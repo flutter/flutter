@@ -3352,7 +3352,6 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.clock/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.clockimpl/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gpio/meta.json
-../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gpioimpl/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2c.businfo/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2c/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2cimpl/meta.json
