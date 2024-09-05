@@ -1972,7 +1972,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 75));
       expect(find.byKey(containerKey), findsOneWidget);
 
-      // Container have transitioned out after 300ms.
+      // Container have transitioned out after 150ms.
       await tester.pump(const Duration(milliseconds: 1));
       expect(find.byKey(containerKey), findsNothing);
     });
@@ -2086,7 +2086,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 125));
       expect(find.byKey(containerKey), findsOneWidget);
 
-      // Container have transitioned out after 300ms.
+      // Container have transitioned out after 250ms.
       await tester.pump(const Duration(milliseconds: 1));
       expect(find.byKey(containerKey), findsNothing);
     });
@@ -2142,7 +2142,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
       expect(find.byKey(containerKey), findsOneWidget);
 
-      // Container have transitioned out after 300ms.
+      // Container have transitioned out after 100ms.
       await tester.pump(const Duration(milliseconds: 1));
       expect(find.byKey(containerKey), findsNothing);
     });
