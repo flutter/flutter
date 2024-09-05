@@ -385,10 +385,6 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
 
   /// The identifier of the widget that is currently selected.
   ///
-  /// When there is no highlighted segment in the segmented control, but the [groupValue]
-  /// is not null, it means this this segment was highlighted before but it is
-  /// disabled; if [groupValue] is null, it means no segment is highlighted.
-  ///
   /// This must be one of the keys in the [Map] of [children].
   /// If this attribute is null, no widget will be initially selected.
   final T? groupValue;
