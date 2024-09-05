@@ -3638,6 +3638,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   late GlobalKey<OverlayState> _overlayKey;
   final _History _history = _History();
   bool _handlesBackGestures = false;
+  bool? _lastCanPop;
 
   /// A set for entries that are waiting to dispose until their subtrees are
   /// disposed.
@@ -3665,6 +3666,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   void _handleHistoryChanged() {
     final bool navigatorCanPop = canPop();
+    if (navigatorCanPop != _lastCanPop) {
+      ServicesBinding.instance.addPostFrameCallback((Duration timestamp) {
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _lastCanPop = navigatorCanPop;
+        });
+      });
+    }
+
     final bool routeBlocksPop;
     if (!navigatorCanPop) {
       final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
