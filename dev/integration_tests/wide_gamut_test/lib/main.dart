@@ -327,14 +327,14 @@ class _MyHomePageState extends State<MyHomePage> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                const Color.from(
+              colors: <Color>[
+                Color.from(
                   alpha: 1,
                   red: 1,
                   green: 0,
                   blue: 0,
                   colorSpace: ui.ColorSpace.displayP3),
-                const Color.from(
+                Color.from(
                   alpha: 1,
                   red: 0,
                   green: 1,
@@ -349,14 +349,14 @@ class _MyHomePageState extends State<MyHomePage> {
           height: 100,
           decoration: const BoxDecoration(
             gradient: RadialGradient(
-              colors: [
-                const Color.from(
+              colors: <Color>[
+                Color.from(
                   alpha: 1,
                   red: 1,
                   green: 0,
                   blue: 0,
                   colorSpace: ui.ColorSpace.displayP3),
-                const Color.from(
+                Color.from(
                   alpha: 1,
                   red: 0,
                   green: 1,
@@ -372,14 +372,14 @@ class _MyHomePageState extends State<MyHomePage> {
           decoration: const BoxDecoration(
             gradient: RadialGradient(
               focal: Alignment(0.2, 0.2),
-              colors: [
-                const Color.from(
+              colors: <Color>[
+                Color.from(
                   alpha: 1,
                   red: 1,
                   green: 0,
                   blue: 0,
                   colorSpace: ui.ColorSpace.displayP3),
-                const Color.from(
+                Color.from(
                   alpha: 1,
                   red: 0,
                   green: 1,
@@ -394,14 +394,14 @@ class _MyHomePageState extends State<MyHomePage> {
           height: 100,
           decoration: const BoxDecoration(
             gradient: SweepGradient(
-              colors: [
-                const Color.from(
+              colors: <Color>[
+                Color.from(
                   alpha: 1,
                   red: 1,
                   green: 0,
                   blue: 0,
                   colorSpace: ui.ColorSpace.displayP3),
-                const Color.from(
+                Color.from(
                   alpha: 1,
                   red: 0,
                   green: 1,
