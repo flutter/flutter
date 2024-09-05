@@ -235,7 +235,7 @@ dependency_overrides:
   metrics_center:
     path: ./third_party/pkg/flutter_packages/packages/metrics_center
   mime:
-    path: ./third_party/dart/third_party/pkg/mime
+    path: ./third_party/dart/third_party/pkg/tools/pkgs/mime
   node_preamble:
     path: ./third_party/pkg/node_preamble
   package_config:
@@ -267,7 +267,7 @@ dependency_overrides:
   smith:
     path: ./third_party/dart/pkg/smith
   source_map_stack_trace:
-    path: ./third_party/dart/third_party/pkg/source_map_stack_trace
+    path: ./third_party/dart/third_party/pkg/tools/pkgs/source_map_stack_trace
   source_maps:
     path: ./third_party/dart/third_party/pkg/source_maps
   source_span:
