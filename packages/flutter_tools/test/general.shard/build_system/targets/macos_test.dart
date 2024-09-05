@@ -173,10 +173,11 @@ void main() {
     ProcessManager: () => processManager,
   });
 
-  testUsingContext('deletes entitlements.txt and without_entitlements.txt files after copying', () async {
+  testUsingContext('deletes entitlements.txt, without_entitlements.txt, unsigned_binaries.txt files after copying', () async {
     binary.createSync(recursive: true);
     final File entitlements = environment.outputDir.childFile('entitlements.txt');
     final File withoutEntitlements = environment.outputDir.childFile('without_entitlements.txt');
+    final File unsignedBinaries = environment.outputDir.childFile('unsigned_binaries.txt');
     final File nestedEntitlements = environment
         .outputDir
         .childDirectory('first_level')
@@ -201,6 +202,7 @@ void main() {
         onRun: (_) {
           entitlements.writeAsStringSync('foo');
           withoutEntitlements.writeAsStringSync('bar');
+          unsignedBinaries.writeAsStringSync('baz');
           nestedEntitlements.writeAsStringSync('somefile.bin');
         },
       ),
@@ -211,6 +213,7 @@ void main() {
     await const DebugUnpackMacOS().build(environment);
     expect(entitlements.existsSync(), isFalse);
     expect(withoutEntitlements.existsSync(), isFalse);
+    expect(unsignedBinaries.existsSync(), isFalse);
     expect(nestedEntitlements.existsSync(), isFalse);
 
     expect(processManager, hasNoRemainingExpectations);

@@ -1034,7 +1034,11 @@ class ArtifactUpdater {
   final List<File> downloadedFiles = <File>[];
 
   /// These filenames, should they exist after extracting an archive, should be deleted.
-  static const Set<String> _denylistedBasenames = <String>{'entitlements.txt', 'without_entitlements.txt'};
+  static const Set<String> _denylistedBasenames = <String>{
+    'entitlements.txt',
+    'without_entitlements.txt',
+    'unsigned_binaries.txt',
+  };
   void _removeDenylistedFiles(Directory directory) {
     for (final FileSystemEntity entity in directory.listSync(recursive: true)) {
       if (entity is! File) {

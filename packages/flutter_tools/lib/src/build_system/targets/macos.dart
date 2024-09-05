@@ -87,7 +87,12 @@ abstract class UnpackMacOS extends Target {
     await _thinFramework(environment, frameworkBinaryPath);
   }
 
-  static const List<String> _copyDenylist = <String>['entitlements.txt', 'without_entitlements.txt'];
+  /// Files that should not be copied to build output directory if found during framework copy step.
+  static const List<String> _copyDenylist = <String>[
+    'entitlements.txt',
+    'without_entitlements.txt',
+    'unsigned_binaries.txt',
+  ];
 
   void _removeDenylistedFiles(Directory directory) {
     for (final FileSystemEntity entity in directory.listSync(recursive: true)) {
