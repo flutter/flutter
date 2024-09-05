@@ -103,7 +103,7 @@ enum SystemUiMode {
   ///
   /// Available starting at SDK 16 or Android J. Earlier versions of Android
   /// will not be affected by this setting. However, if your app targets
-  /// Android SDK version 15 (Flutter does this by default), then you must
+  /// Android 15 or later (Flutter does this by default), then you must
   /// migrate using the instructions in
   /// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge
   /// to use this mode.
@@ -125,7 +125,7 @@ enum SystemUiMode {
   ///
   /// Available starting at SDK 19 or Android K. Earlier versions of Android
   /// will not be affected by this setting. However, if your app targets
-  /// Android SDK version 15 (Flutter does this by default), then you must
+  /// Android 15 or later (Flutter does this by default), then you must
   /// migrate using the instructions in
   /// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge
   /// to use this mode.
@@ -148,7 +148,7 @@ enum SystemUiMode {
   ///
   /// Available starting at SDK 19 or Android K. Earlier versions of Android
   /// will not be affected by this setting. However, if your app targets
-  /// Android SDK version 15 (Flutter does this by default), then you must
+  /// Android 15 or later (Flutter does this by default), then you must
   /// migrate using the instructions in
   /// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge
   /// to use this mode.
@@ -203,7 +203,7 @@ enum SystemUiMode {
   /// Omitting both overlays will result in the same configuration as
   /// [SystemUiMode.leanBack].
   ///
-  /// If your app targets Android SDK version 15, then you must migrate using
+  /// If your app targets Android 15 or later, then you must migrate using
   /// the instructions in
   /// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge
   /// to use this mode.
