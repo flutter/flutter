@@ -384,6 +384,5 @@ TEST_P(AiksTest, CorrectClipDepthAssignedToEntities) {
 // █         the subdivisions of AiksTest to avoid having one massive file.
 // █
 // █ Subdivisions:
-// █ - aiks_blend_unittests.cc
 // █ - aiks_gradient_unittests.cc
 // █████████████████████████████████████████████████████████████████████████████
