@@ -64,6 +64,16 @@ final class ViewFocusBinding {
   });
 
   late final DomEventListener _handleFocusout = createDomEventListener((DomEvent event) {
+    // During focusout processing, activeElement typically points to <body />.
+    // However, if an element is focused during a blur event, activeElement points to that focused element.
+    // We leverage this behavior to ignore focusout events where the document has focus but activeElement is not <body />.
+    //
+    // Refer to https://github.com/flutter/engine/pull/54965 for more info.
+    final bool wasFocusInvoked = domDocument.hasFocus() && domDocument.activeElement != domDocument.body;
+    if (wasFocusInvoked) {
+      return;
+    }
+
     event as DomFocusEvent;
     _handleFocusChange(event.relatedTarget as DomElement?);
   });

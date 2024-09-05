@@ -339,6 +339,10 @@ extension DomHTMLDocumentExtension on DomHTMLDocument {
   @JS('visibilityState')
   external JSString get _visibilityState;
   String get visibilityState => _visibilityState.toDart;
+
+  @JS('hasFocus')
+  external JSBoolean _hasFocus();
+  bool hasFocus() => _hasFocus().toDart;
 }
 
 @JS('document')
