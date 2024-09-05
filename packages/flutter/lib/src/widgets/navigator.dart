@@ -3637,6 +3637,7 @@ class _History extends Iterable<_RouteEntry> with ChangeNotifier {
 class NavigatorState extends State<Navigator> with TickerProviderStateMixin, RestorationMixin {
   late GlobalKey<OverlayState> _overlayKey;
   final _History _history = _History();
+  bool _handlesBackGestures = false;
 
   /// A set for entries that are waiting to dispose until their subtrees are
   /// disposed.
@@ -3845,6 +3846,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     for (final _RouteEntry entry in _history) {
       entry.route.changedExternalState();
     }
+
+    // If this is a nested Navigator, handle system backs so that the root
+    // Navigator doesn't get all of them.
+    _handlesBackGestures = widget.handlesBacksWhenNested
+        && Navigator.maybeOf(context, rootNavigator: true) != this;
   }
 
   /// Dispose all lingering router entries immediately.
@@ -5705,9 +5711,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       ),
     );
 
-    // If this is a nested Navigator, handle system backs here so that the root
-    // Navigator doesn't get all of them.
-    if (widget.handlesBacksWhenNested && Navigator.maybeOf(context, rootNavigator: true) != this) {
+    if (_handlesBackGestures) {
       return PopScope(
         canPop: !canPop(),
         onPopInvokedWithResult: (bool didPop, Object? result) {
