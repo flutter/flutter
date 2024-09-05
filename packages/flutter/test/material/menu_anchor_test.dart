@@ -3800,6 +3800,59 @@ void main() {
         ]),
       );
     });
+
+    testWidgets('Menu follows content position when a LayerLink is provided', (WidgetTester tester) async {
+      final MenuController controller = MenuController();
+      final UniqueKey contentKey = UniqueKey();
+
+      Widget boilerplate(double bottomInsets) {
+        return MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(
+              viewInsets: EdgeInsets.only(bottom: bottomInsets),
+            ),
+            child: Scaffold(
+              body: Center(
+                child: MenuAnchor(
+                  controller: controller,
+                  layerLink: LayerLink(),
+                  menuChildren: <Widget>[
+                    MenuItemButton(
+                      onPressed: () {},
+                      child: const Text('Button 1'),
+                    ),
+                  ],
+                  builder: (BuildContext context, MenuController controller, Widget? child) {
+                    return SizedBox(key: contentKey, width: 100, height: 100);
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Build once without bottom insets and open the menu.
+      await tester.pumpWidget(boilerplate(0.0));
+      controller.open();
+      await tester.pump();
+
+      // Menu vertical position is just under the content.
+      expect(
+        tester.getRect(findMenuPanels()).top,
+        tester.getRect(find.byKey(contentKey)).bottom,
+      );
+
+      // Simulate the keyboard opening resizing the view.
+      await tester.pumpWidget(boilerplate(100.0));
+      await tester.pump();
+
+      // Menu vertical position is just under the content.
+      expect(
+        tester.getRect(findMenuPanels()).top,
+        tester.getRect(find.byKey(contentKey)).bottom,
+      );
+    });
   });
 
   group('LocalizedShortcutLabeler', () {
