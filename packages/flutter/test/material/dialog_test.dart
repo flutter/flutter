@@ -3087,7 +3087,7 @@ class _RestorableDialogTestWidget extends StatelessWidget {
           },
           child: const Text('X'),
         ),
-    ),
+      ),
     );
   }
 }
