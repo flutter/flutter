@@ -600,8 +600,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     if (highlighted == newValue) {
       return;
     }
-    // If `disabledChildren` set contains the `groupValue`, then no update
-    // needed.
+    // If `disabledChildren` set contains the `newValue`, then no update needed.
     if (widget.disabledChildren.contains(newValue)) {
       return;
     }
