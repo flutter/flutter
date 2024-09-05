@@ -797,6 +797,77 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byKey(key)), Offset.zero);
   });
+
+  testWidgets('SliverMainAxisGroup scrolls to the correct position', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    final FocusNode textFieldFocus = FocusNode();
+    addTearDown(textFieldFocus.dispose);
+    final FocusNode textFieldFocus2 = FocusNode();
+    addTearDown(textFieldFocus2.dispose);
+
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        controller: controller,
+        slivers: <Widget>[
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _SliverTitleDelegate(
+              child: Container(
+                color: Colors.red,
+                height: 60.0,
+              ),
+              height: 60.0,
+            ),
+          ),
+          SliverToBoxAdapter(
+              child: Material(
+            child: TextField(
+              focusNode: textFieldFocus,
+            ),
+          )),
+          SliverToBoxAdapter(
+            child: Container(
+              color: Colors.green,
+              height: 500,
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Container(
+              color: Colors.black,
+              height: 500,
+            ),
+          ),
+          SliverToBoxAdapter(
+              child: Material(
+            child: TextField(
+              focusNode: textFieldFocus2,
+            ),
+          )),
+        ],
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Scroll a bit to make sure the first text field offset be greater than 0.
+    controller.jumpTo(100);
+    await tester.pumpAndSettle();
+
+    // Ensure the first text field is not visible.
+    expect(controller.offset, 100);
+
+    textFieldFocus2.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(controller.offset, equals(556));
+
+    textFieldFocus.requestFocus();
+    await tester.pumpAndSettle();
+
+    // Should be 0 because we scroll to the top.
+    expect(controller.offset, equals(0));
+  });
 }
 
 Widget _buildSliverList({
@@ -874,4 +945,27 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(TestDelegate oldDelegate) => true;
+}
+
+class _SliverTitleDelegate extends SliverPersistentHeaderDelegate {
+  _SliverTitleDelegate({
+    required this.height,
+    required this.child,
+  });
+  final double height;
+  final Widget child;
+
+  @override
+  double get minExtent => height;
+  @override
+  double get maxExtent => height;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return child;
+  }
+
+  @override
+  bool shouldRebuild(_SliverTitleDelegate oldDelegate) => true;
 }

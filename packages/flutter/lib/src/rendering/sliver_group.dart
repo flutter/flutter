@@ -6,6 +6,7 @@
 library;
 
 import 'dart:math' as math;
+
 import 'package:vector_math/vector_math_64.dart';
 
 import 'object.dart';
@@ -213,7 +214,16 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
         double childScrollOffset = 0.0;
         RenderSliver? current = childBefore(child as RenderSliver);
         while (current != null) {
-          childScrollOffset += current.geometry!.scrollExtent;
+          final double scrollExtent = current.geometry!.scrollExtent;
+          childScrollOffset += scrollExtent;
+
+          // If the current child is the first visible child, subtract its scrollExtent
+          // to correct the offset, since we accumulated its scroll extent in the loop.
+          // Here we are assuming that the child is the first visible child.
+          if (childBefore(current) == null && (childAfter(child) != null) ) {
+            childScrollOffset -= scrollExtent;
+          }
+
           current = childBefore(current);
         }
         return childScrollOffset;
