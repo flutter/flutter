@@ -415,32 +415,34 @@ class ImageFilterEngineLayer extends ContainerLayer
     } else {
       convertible = _filter as CkManagedSkImageFilterConvertible;
     }
-    final ui.Rect childPaintBounds =
+    ui.Rect childPaintBounds =
         prerollChildren(prerollContext, childMatrix);
-      if (_filter is ui.ColorFilter) {
-        // If the filter is a ColorFilter, the extended paint bounds will be the
-        // entire screen, which is not what we want.
-        paintBounds = childPaintBounds;
-      } else {
-        convertible.withSkImageFilter((skFilter) {
-          paintBounds = rectFromSkIRect(
-            skFilter.getOutputBounds(toSkRect(childPaintBounds)),
-          );
-        });
-      }
+    childPaintBounds = childPaintBounds.translate(_offset.dx, _offset.dy);
+    if (_filter is ui.ColorFilter) {
+      // If the filter is a ColorFilter, the extended paint bounds will be the
+      // entire screen, which is not what we want.
+      paintBounds = childPaintBounds;
+    } else {
+      convertible.withSkImageFilter((skFilter) {
+        paintBounds = rectFromSkIRect(
+          skFilter.getOutputBounds(toSkRect(childPaintBounds)),
+        );
+      });
+    }
     prerollContext.mutatorsStack.pop();
   }
 
   @override
   void paint(PaintContext paintContext) {
     assert(needsPainting);
+    final ui.Rect offsetPaintBounds = paintBounds.shift(-_offset);
     paintContext.internalNodesCanvas.save();
     paintContext.internalNodesCanvas.translate(_offset.dx, _offset.dy);
     paintContext.internalNodesCanvas
-        .clipRect(paintBounds, ui.ClipOp.intersect, false);
+        .clipRect(offsetPaintBounds, ui.ClipOp.intersect, false);
     final CkPaint paint = CkPaint();
     paint.imageFilter = _filter;
-    paintContext.internalNodesCanvas.saveLayer(paintBounds, paint);
+    paintContext.internalNodesCanvas.saveLayer(offsetPaintBounds, paint);
     paintChildren(paintContext);
     paintContext.internalNodesCanvas.restore();
     paintContext.internalNodesCanvas.restore();
