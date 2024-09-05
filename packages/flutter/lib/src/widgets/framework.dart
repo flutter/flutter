@@ -2911,17 +2911,6 @@ class BuildOwner {
                   'The dirty list for the current build scope is: ${buildScope._dirtyElements}',
         );
       }
-      // When reactivating an inactivate Element, _scheduleBuildFor should only be
-      // called within _flushDirtyElements.
-      if (!_debugBuilding && element._inDirtyList) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('BuildOwner.scheduleBuildFor() called inappropriately.'),
-          ErrorHint(
-            'The BuildOwner.scheduleBuildFor() method should only be called while the '
-            'buildScope() method is actively rebuilding the widget tree.',
-          ),
-        ]);
-      }
       return true;
     }());
     if (!_scheduledFlushDirtyElements && onBuildScheduled != null) {
