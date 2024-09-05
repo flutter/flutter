@@ -672,6 +672,17 @@ abstract final class SystemChrome {
     });
   }
 
+  /// Called by the binding during a transition to a new app lifecycle state.
+  static void handleAppLifecycleStateChanged(AppLifecycleState state) {
+    // When the app is detached, clear the record of the style sent to the host
+    // so that it will be sent again when the app is reattached.
+    if (state == AppLifecycleState.detached) {
+      scheduleMicrotask(() {
+        _latestStyle = null;
+      });
+    }
+  }
+
   static SystemUiOverlayStyle? _pendingStyle;
 
   /// The last style that was set using [SystemChrome.setSystemUIOverlayStyle].
