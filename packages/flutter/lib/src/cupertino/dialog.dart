@@ -508,8 +508,8 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
 ///
 /// The saturation effect can be removed for debugging by setting
 /// [debugIsVibrancePainted] to false. The saturation effect is not supported on
-/// the html web renderer and will not be applied regardless of the value of
-/// [debugIsVibrancePainted].
+/// web with the skwasm renderer and will not be applied regardless of the value
+/// of [debugIsVibrancePainted].
 ///
 /// The surface color can be disabled by setting [isSurfacePainted] to false,
 /// which is useful for more complicated layouts, such as rendering divider gaps
