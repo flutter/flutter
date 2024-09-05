@@ -850,6 +850,23 @@ void main() {
     expect(paintCount, 3);
     expect(mostRecentOffset, const Offset(60, 60));
   });
+
+  testWidgets('LayoutBuilder in a subtree that skips layout still rebuilds', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Visibility(
+          visible: false,
+          maintainState: true,
+          child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) => const Placeholder()),
+        ),
+      ),
+    );
+    tester.element(find.byType(Visibility)).reassemble();  // ignore: invalid_use_of_protected_member
+    tester.element(find.byType(Visibility)).reassemble();  // ignore: invalid_use_of_protected_member
+    tester.element(find.byType(Visibility)).reassemble();  // ignore: invalid_use_of_protected_member
+    tester.element(find.byType(Visibility)).reassemble();  // ignore: invalid_use_of_protected_member
+  });
 }
 
 class _SmartLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
@@ -890,8 +907,7 @@ class _SmartLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
 
 typedef _OnChildWasPaintedCallback = void Function(Offset extraOffset);
 
-class _RenderSmartLayoutBuilder extends RenderProxyBox
-    with RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox> {
+class _RenderSmartLayoutBuilder extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin, RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox> {
   _RenderSmartLayoutBuilder({
     required double offsetPercentage,
     required this.onChildWasPainted,
@@ -918,7 +934,7 @@ class _RenderSmartLayoutBuilder extends RenderProxyBox
 
   @override
   void performLayout() {
-    rebuildIfNecessary();
+    super.performLayout();
     child?.layout(constraints);
   }
 

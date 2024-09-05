@@ -2203,6 +2203,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     return result;
   }
   bool _needsLayout = true;
+  bool _needsPaintAfterLayout = true;
 
   /// The nearest relayout boundary enclosing this render object, if known.
   ///
@@ -2443,10 +2444,11 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     owner!._nodesNeedingLayout.add(this);
   }
 
+  // Returns a boolean indicating whether the render object should be marked
+  // as needing repaint.
   @pragma('vm:notify-debugger-on-exception')
   void _layoutWithoutResize() {
     assert(_needsLayout);
-    assert(_relayoutBoundary == this);
     RenderObject? debugPreviousActiveLayout;
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
@@ -2474,7 +2476,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return true;
     }());
     _needsLayout = false;
-    markNeedsPaint();
+    if (_needsPaintAfterLayout) {
+      markNeedsPaint();
+    }
   }
 
   /// Compute the layout for this render object.
@@ -2640,7 +2644,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return true;
     }());
     _needsLayout = false;
-    markNeedsPaint();
+    if (_needsPaintAfterLayout) {
+      markNeedsPaint();
+    }
 
     if (!kReleaseMode && debugProfileLayoutsEnabled) {
       FlutterTimeline.finishSync();
@@ -4185,6 +4191,40 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
     return child != null ? <DiagnosticsNode>[child!.toDiagnosticsNode(name: 'child')] : <DiagnosticsNode>[];
+  }
+}
+
+mixin RenderObjectWithLayoutCallbackMixin on RenderObject {
+  bool _needsRebuild = true;
+
+  @override
+  void markNeedsLayout() {
+    _needsPaintAfterLayout = true;
+    super.markNeedsLayout();
+  }
+
+  @mustCallSuper
+  @override
+  void performLayout() {
+    invokeLayoutCallback(runLayoutCallback);
+    _needsRebuild = false;
+    _needsPaintAfterLayout = false;
+  }
+
+  ///
+  @visibleForOverriding
+  void runLayoutCallback(covariant Constraints constraints);
+
+  void scheduleLayoutCallback() {
+    if (_needsRebuild) {
+      assert(debugNeedsLayout);
+      return;
+    }
+    // This ensures that the layout callback will be run even if an ancestor
+    // chooses to not lay out this subtree (for example, OverlayEntries with
+    // `maintainState` set to true).
+    owner?._nodesNeedingLayout.add(this);
+    super.markNeedsLayout();
   }
 }
 
