@@ -168,24 +168,31 @@ def zip_archive(dst, args):
   # the framework's `verifyCodeSignedTestRunner`.
   #
   # See: https://github.com/flutter/flutter/blob/62382c7b83a16b3f48dc06c19a47f6b8667005a5/dev/bots/suite_runners/run_verify_binaries_codesigned_tests.dart#L82-L130
+
+  # Binaries that must be codesigned and require entitlements for particular APIs.
   with_entitlements = ['gen_snapshot_arm64']
   with_entitlements_file = os.path.join(dst, 'entitlements.txt')
   sky_utils.write_codesign_config(with_entitlements_file, with_entitlements)
 
+  # Binaries that must be codesigned and DO NOT require entitlements.
   without_entitlements = [
       'Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
       'extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
   ]
+  without_entitlements_file = os.path.join(dst, 'without_entitlements.txt')
+  sky_utils.write_codesign_config(without_entitlements_file, without_entitlements)
+
+  # Binaries that will not be codesigned.
+  unsigned_binaries = []
   if args.dsym:
-    without_entitlements.extend([
+    unsigned_binaries.extend([
         'Flutter.xcframework/ios-arm64/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
         'extension_safe/Flutter.xcframework/ios-arm64/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
     ])
-
-  without_entitlements_file = os.path.join(dst, 'without_entitlements.txt')
-  sky_utils.write_codesign_config(without_entitlements_file, without_entitlements)
+  unsigned_binaries_file = os.path.join(dst, 'unsigned_binaries.txt')
+  sky_utils.write_codesign_config(unsigned_binaries_file, unsigned_binaries)
   # pylint: enable=line-too-long
 
   zip_contents = [
@@ -193,9 +200,12 @@ def zip_archive(dst, args):
       'Flutter.xcframework',
       'entitlements.txt',
       'without_entitlements.txt',
+      'unsigned_binaries.txt',
       'extension_safe/Flutter.xcframework',
   ]
-  sky_utils.assert_valid_codesign_config(dst, zip_contents, with_entitlements, without_entitlements)
+  sky_utils.assert_valid_codesign_config(
+      dst, zip_contents, with_entitlements, without_entitlements, unsigned_binaries
+  )
   sky_utils.create_zip(dst, 'artifacts.zip', zip_contents)
 
 
