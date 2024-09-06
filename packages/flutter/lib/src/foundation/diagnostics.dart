@@ -1768,12 +1768,13 @@ abstract class DiagnosticsNode {
     String? prefixOtherLines,
     TextTreeConfiguration? parentConfiguration,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
+    int wrapWidth = 65,
   }) {
     String result = '';
     assert(() {
       result = TextTreeRenderer(
         minLevel: minLevel,
-        wrapWidth: 65,
+        wrapWidth: wrapWidth,
       ).render(
         this,
         prefixLineOne: prefixLineOne,
@@ -3327,8 +3328,9 @@ abstract class DiagnosticableTree with Diagnosticable {
     String prefixLineOne = '',
     String? prefixOtherLines,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
+    int wrapWidth = 65,
   }) {
-    return toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
+    return toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel, wrapWidth: wrapWidth);
   }
 
   @override
@@ -3400,8 +3402,9 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
     String prefixLineOne = '',
     String? prefixOtherLines,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
+    int wrapWidth = 65,
   }) {
-    return toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
+    return toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel, wrapWidth: wrapWidth);
   }
 
   @override
