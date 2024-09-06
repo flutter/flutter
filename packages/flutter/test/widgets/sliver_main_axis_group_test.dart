@@ -795,7 +795,8 @@ void main() {
     );
     Scrollable.ensureVisible(key.currentContext!);
     await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.byKey(key)), Offset.zero);
+    // Regression test for https://github.com/flutter/flutter/issues/154615
+    expect(tester.getTopLeft(find.byKey(key)), const Offset(0, 300));
   });
 
   testWidgets('SliverMainAxisGroup scrolls to the correct position', (WidgetTester tester) async {
