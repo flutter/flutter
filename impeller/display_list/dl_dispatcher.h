@@ -19,6 +19,8 @@ namespace impeller {
 
 using DlScalar = flutter::DlScalar;
 using DlPoint = flutter::DlPoint;
+using DlRect = flutter::DlRect;
+using DlIRect = flutter::DlIRect;
 
 class DlDispatcherBase : public flutter::DlOpReceiver {
  public:
@@ -37,10 +39,10 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
   void setColor(flutter::DlColor color) override;
 
   // |flutter::DlOpReceiver|
-  void setStrokeWidth(SkScalar width) override;
+  void setStrokeWidth(DlScalar width) override;
 
   // |flutter::DlOpReceiver|
-  void setStrokeMiter(SkScalar limit) override;
+  void setStrokeMiter(DlScalar limit) override;
 
   // |flutter::DlOpReceiver|
   void setStrokeCap(flutter::DlStrokeCap cap) override;
@@ -70,7 +72,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
   void save(uint32_t total_content_depth) override;
 
   // |flutter::DlOpReceiver|
-  void saveLayer(const SkRect& bounds,
+  void saveLayer(const DlRect& bounds,
                  const flutter::SaveLayerOptions& options,
                  uint32_t total_content_depth,
                  flutter::DlBlendMode max_content_mode,
@@ -80,51 +82,51 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
   void restore() override;
 
   // |flutter::DlOpReceiver|
-  void translate(SkScalar tx, SkScalar ty) override;
+  void translate(DlScalar tx, DlScalar ty) override;
 
   // |flutter::DlOpReceiver|
-  void scale(SkScalar sx, SkScalar sy) override;
+  void scale(DlScalar sx, DlScalar sy) override;
 
   // |flutter::DlOpReceiver|
-  void rotate(SkScalar degrees) override;
+  void rotate(DlScalar degrees) override;
 
   // |flutter::DlOpReceiver|
-  void skew(SkScalar sx, SkScalar sy) override;
+  void skew(DlScalar sx, DlScalar sy) override;
 
   // |flutter::DlOpReceiver|
-  void transform2DAffine(SkScalar mxx,
-                         SkScalar mxy,
-                         SkScalar mxt,
-                         SkScalar myx,
-                         SkScalar myy,
-                         SkScalar myt) override;
+  void transform2DAffine(DlScalar mxx,
+                         DlScalar mxy,
+                         DlScalar mxt,
+                         DlScalar myx,
+                         DlScalar myy,
+                         DlScalar myt) override;
 
   // |flutter::DlOpReceiver|
-  void transformFullPerspective(SkScalar mxx,
-                                SkScalar mxy,
-                                SkScalar mxz,
-                                SkScalar mxt,
-                                SkScalar myx,
-                                SkScalar myy,
-                                SkScalar myz,
-                                SkScalar myt,
-                                SkScalar mzx,
-                                SkScalar mzy,
-                                SkScalar mzz,
-                                SkScalar mzt,
-                                SkScalar mwx,
-                                SkScalar mwy,
-                                SkScalar mwz,
-                                SkScalar mwt) override;
+  void transformFullPerspective(DlScalar mxx,
+                                DlScalar mxy,
+                                DlScalar mxz,
+                                DlScalar mxt,
+                                DlScalar myx,
+                                DlScalar myy,
+                                DlScalar myz,
+                                DlScalar myt,
+                                DlScalar mzx,
+                                DlScalar mzy,
+                                DlScalar mzz,
+                                DlScalar mzt,
+                                DlScalar mwx,
+                                DlScalar mwy,
+                                DlScalar mwz,
+                                DlScalar mwt) override;
 
   // |flutter::DlOpReceiver|
   void transformReset() override;
 
   // |flutter::DlOpReceiver|
-  void clipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) override;
+  void clipRect(const DlRect& rect, ClipOp clip_op, bool is_aa) override;
 
   // |flutter::DlOpReceiver|
-  void clipOval(const SkRect& bounds, ClipOp clip_op, bool is_aa) override;
+  void clipOval(const DlRect& bounds, ClipOp clip_op, bool is_aa) override;
 
   // |flutter::DlOpReceiver|
   void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override;
@@ -144,7 +146,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
   void drawPaint() override;
 
   // |flutter::DlOpReceiver|
-  void drawLine(const SkPoint& p0, const SkPoint& p1) override;
+  void drawLine(const DlPoint& p0, const DlPoint& p1) override;
 
   // |flutter::DlOpReceiver|
   void drawDashedLine(const DlPoint& p0,
@@ -153,13 +155,13 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                       DlScalar off_length) override;
 
   // |flutter::DlOpReceiver|
-  void drawRect(const SkRect& rect) override;
+  void drawRect(const DlRect& rect) override;
 
   // |flutter::DlOpReceiver|
-  void drawOval(const SkRect& bounds) override;
+  void drawOval(const DlRect& bounds) override;
 
   // |flutter::DlOpReceiver|
-  void drawCircle(const SkPoint& center, SkScalar radius) override;
+  void drawCircle(const DlPoint& center, DlScalar radius) override;
 
   // |flutter::DlOpReceiver|
   void drawRRect(const SkRRect& rrect) override;
@@ -174,15 +176,15 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
   void drawPath(const CacheablePath& cache) override;
 
   // |flutter::DlOpReceiver|
-  void drawArc(const SkRect& oval_bounds,
-               SkScalar start_degrees,
-               SkScalar sweep_degrees,
+  void drawArc(const DlRect& oval_bounds,
+               DlScalar start_degrees,
+               DlScalar sweep_degrees,
                bool use_center) override;
 
   // |flutter::DlOpReceiver|
   void drawPoints(PointMode mode,
                   uint32_t count,
-                  const SkPoint points[]) override;
+                  const DlPoint points[]) override;
 
   // |flutter::DlOpReceiver|
   void drawVertices(const std::shared_ptr<flutter::DlVertices>& vertices,
@@ -190,63 +192,63 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
 
   // |flutter::DlOpReceiver|
   void drawImage(const sk_sp<flutter::DlImage> image,
-                 const SkPoint point,
+                 const DlPoint& point,
                  flutter::DlImageSampling sampling,
                  bool render_with_attributes) override;
 
   // |flutter::DlOpReceiver|
   void drawImageRect(const sk_sp<flutter::DlImage> image,
-                     const SkRect& src,
-                     const SkRect& dst,
+                     const DlRect& src,
+                     const DlRect& dst,
                      flutter::DlImageSampling sampling,
                      bool render_with_attributes,
                      SrcRectConstraint constraint) override;
 
   // |flutter::DlOpReceiver|
   void drawImageNine(const sk_sp<flutter::DlImage> image,
-                     const SkIRect& center,
-                     const SkRect& dst,
+                     const DlIRect& center,
+                     const DlRect& dst,
                      flutter::DlFilterMode filter,
                      bool render_with_attributes) override;
 
   // |flutter::DlOpReceiver|
   void drawAtlas(const sk_sp<flutter::DlImage> atlas,
                  const SkRSXform xform[],
-                 const SkRect tex[],
+                 const DlRect tex[],
                  const flutter::DlColor colors[],
                  int count,
                  flutter::DlBlendMode mode,
                  flutter::DlImageSampling sampling,
-                 const SkRect* cull_rect,
+                 const DlRect* cull_rect,
                  bool render_with_attributes) override;
 
   // |flutter::DlOpReceiver|
   void drawDisplayList(const sk_sp<flutter::DisplayList> display_list,
-                       SkScalar opacity) override;
+                       DlScalar opacity) override;
 
   // |flutter::DlOpReceiver|
   void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                    SkScalar x,
-                    SkScalar y) override;
+                    DlScalar x,
+                    DlScalar y) override;
 
   // |flutter::DlOpReceiver|
   void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     SkScalar x,
-                     SkScalar y) override;
+                     DlScalar x,
+                     DlScalar y) override;
 
   // |flutter::DlOpReceiver|
   void drawShadow(const SkPath& path,
                   const flutter::DlColor color,
-                  const SkScalar elevation,
+                  const DlScalar elevation,
                   bool transparent_occluder,
-                  SkScalar dpr) override;
+                  DlScalar dpr) override;
 
   // |flutter::DlOpReceiver|
   void drawShadow(const CacheablePath& cache,
                   const flutter::DlColor color,
-                  const SkScalar elevation,
+                  const DlScalar elevation,
                   bool transparent_occluder,
-                  SkScalar dpr) override;
+                  DlScalar dpr) override;
 
   virtual Canvas& GetCanvas() = 0;
 
@@ -282,7 +284,7 @@ class DlDispatcher : public DlDispatcherBase {
   using DlDispatcherBase::save;
 
   // |flutter::DlOpReceiver|
-  void saveLayer(const SkRect& bounds,
+  void saveLayer(const DlRect& bounds,
                  const flutter::SaveLayerOptions options,
                  const flutter::DlImageFilter* backdrop) override {
     // This dispatcher is used from test cases that might not supply
@@ -319,7 +321,7 @@ class ExperimentalDlDispatcher : public DlDispatcherBase {
   using DlDispatcherBase::save;
 
   // |flutter::DlOpReceiver|
-  void saveLayer(const SkRect& bounds,
+  void saveLayer(const DlRect& bounds,
                  const flutter::SaveLayerOptions options,
                  const flutter::DlImageFilter* backdrop) override {
     // This dispatcher should never be used with the saveLayer() variant
@@ -345,40 +347,40 @@ class TextFrameDispatcher : public flutter::IgnoreAttributeDispatchHelper,
                       const Matrix& initial_matrix);
   void save() override;
 
-  void saveLayer(const SkRect& bounds,
+  void saveLayer(const DlRect& bounds,
                  const flutter::SaveLayerOptions options,
                  const flutter::DlImageFilter* backdrop) override;
 
   void restore() override;
 
-  void translate(SkScalar tx, SkScalar ty) override;
+  void translate(DlScalar tx, DlScalar ty) override;
 
-  void scale(SkScalar sx, SkScalar sy) override;
+  void scale(DlScalar sx, DlScalar sy) override;
 
-  void rotate(SkScalar degrees) override;
+  void rotate(DlScalar degrees) override;
 
-  void skew(SkScalar sx, SkScalar sy) override;
+  void skew(DlScalar sx, DlScalar sy) override;
 
   // clang-format off
   // 2x3 2D affine subset of a 4x4 transform in row major order
-  void transform2DAffine(SkScalar mxx, SkScalar mxy, SkScalar mxt,
-                         SkScalar myx, SkScalar myy, SkScalar myt) override;
+  void transform2DAffine(DlScalar mxx, DlScalar mxy, DlScalar mxt,
+                         DlScalar myx, DlScalar myy, DlScalar myt) override;
 
   // full 4x4 transform in row major order
   void transformFullPerspective(
-      SkScalar mxx, SkScalar mxy, SkScalar mxz, SkScalar mxt,
-      SkScalar myx, SkScalar myy, SkScalar myz, SkScalar myt,
-      SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
-      SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) override;
+      DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
+      DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
+      DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
+      DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) override;
 
   void transformReset() override;
 
   void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     SkScalar x,
-                     SkScalar y) override;
+                     DlScalar x,
+                     DlScalar y) override;
 
   void drawDisplayList(const sk_sp<flutter::DisplayList> display_list,
-                       SkScalar opacity) override;
+                       DlScalar opacity) override;
 
   // |flutter::DlOpReceiver|
   void setDrawStyle(flutter::DlDrawStyle style) override;
@@ -387,10 +389,10 @@ class TextFrameDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   void setColor(flutter::DlColor color) override;
 
   // |flutter::DlOpReceiver|
-  void setStrokeWidth(SkScalar width) override;
+  void setStrokeWidth(DlScalar width) override;
 
   // |flutter::DlOpReceiver|
-  void setStrokeMiter(SkScalar limit) override;
+  void setStrokeMiter(DlScalar limit) override;
 
   // |flutter::DlOpReceiver|
   void setStrokeCap(flutter::DlStrokeCap cap) override;

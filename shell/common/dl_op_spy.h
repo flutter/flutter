@@ -39,70 +39,70 @@ class DlOpSpy final : public virtual DlOpReceiver,
   void setColor(DlColor color) override;
   void setColorSource(const DlColorSource* source) override;
   void save() override;
-  void saveLayer(const SkRect& bounds,
+  void saveLayer(const DlRect& bounds,
                  const SaveLayerOptions options,
                  const DlImageFilter* backdrop) override;
   void restore() override;
   void drawColor(DlColor color, DlBlendMode mode) override;
   void drawPaint() override;
-  void drawLine(const SkPoint& p0, const SkPoint& p1) override;
+  void drawLine(const DlPoint& p0, const DlPoint& p1) override;
   void drawDashedLine(const DlPoint& p0,
                       const DlPoint& p1,
                       DlScalar on_length,
                       DlScalar off_length) override;
-  void drawRect(const SkRect& rect) override;
-  void drawOval(const SkRect& bounds) override;
-  void drawCircle(const SkPoint& center, SkScalar radius) override;
+  void drawRect(const DlRect& rect) override;
+  void drawOval(const DlRect& bounds) override;
+  void drawCircle(const DlPoint& center, DlScalar radius) override;
   void drawRRect(const SkRRect& rrect) override;
   void drawDRRect(const SkRRect& outer, const SkRRect& inner) override;
   void drawPath(const SkPath& path) override;
-  void drawArc(const SkRect& oval_bounds,
-               SkScalar start_degrees,
-               SkScalar sweep_degrees,
+  void drawArc(const DlRect& oval_bounds,
+               DlScalar start_degrees,
+               DlScalar sweep_degrees,
                bool use_center) override;
   void drawPoints(PointMode mode,
                   uint32_t count,
-                  const SkPoint points[]) override;
+                  const DlPoint points[]) override;
   void drawVertices(const std::shared_ptr<DlVertices>& vertices,
                     DlBlendMode mode) override;
   void drawImage(const sk_sp<DlImage> image,
-                 const SkPoint point,
+                 const DlPoint& point,
                  DlImageSampling sampling,
                  bool render_with_attributes) override;
   void drawImageRect(
       const sk_sp<DlImage> image,
-      const SkRect& src,
-      const SkRect& dst,
+      const DlRect& src,
+      const DlRect& dst,
       DlImageSampling sampling,
       bool render_with_attributes,
       SrcRectConstraint constraint = SrcRectConstraint::kFast) override;
   void drawImageNine(const sk_sp<DlImage> image,
-                     const SkIRect& center,
-                     const SkRect& dst,
+                     const DlIRect& center,
+                     const DlRect& dst,
                      DlFilterMode filter,
                      bool render_with_attributes) override;
   void drawAtlas(const sk_sp<DlImage> atlas,
                  const SkRSXform xform[],
-                 const SkRect tex[],
+                 const DlRect tex[],
                  const DlColor colors[],
                  int count,
                  DlBlendMode mode,
                  DlImageSampling sampling,
-                 const SkRect* cull_rect,
+                 const DlRect* cull_rect,
                  bool render_with_attributes) override;
   void drawDisplayList(const sk_sp<DisplayList> display_list,
-                       SkScalar opacity = SK_Scalar1) override;
+                       DlScalar opacity = SK_Scalar1) override;
   void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                    SkScalar x,
-                    SkScalar y) override;
+                    DlScalar x,
+                    DlScalar y) override;
   void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     SkScalar x,
-                     SkScalar y) override;
+                     DlScalar x,
+                     DlScalar y) override;
   void drawShadow(const SkPath& path,
                   const DlColor color,
-                  const SkScalar elevation,
+                  const DlScalar elevation,
                   bool transparent_occluder,
-                  SkScalar dpr) override;
+                  DlScalar dpr) override;
 
   // Indicates if the attributes are set to values that will modify the
   // destination. For now, the test only checks if there is a non-transparent

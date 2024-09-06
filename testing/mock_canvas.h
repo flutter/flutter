@@ -255,7 +255,7 @@ class MockCanvas final : public DlCanvas {
                     const DlPaint& paint) override;
 
   void DrawImage(const sk_sp<DlImage>& image,
-                 const SkPoint point,
+                 const SkPoint& point,
                  DlImageSampling sampling,
                  const DlPaint* paint = nullptr) override;
   void DrawImageRect(
