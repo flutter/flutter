@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include "flutter/flow/surface.h"
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/impeller/display_list/dl_dispatcher.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
@@ -126,7 +127,6 @@ void SnapshotControllerImpeller::MakeRasterSnapshot(
     sk_sp<DisplayList> display_list,
     SkISize picture_size,
     std::function<void(const sk_sp<DlImage>&)> callback) {
-  sk_sp<DlImage> result;
   std::shared_ptr<const fml::SyncSwitch> sync_switch =
       GetDelegate().GetIsGpuDisabledSyncSwitch();
   sync_switch->Execute(
@@ -143,10 +143,25 @@ void SnapshotControllerImpeller::MakeRasterSnapshot(
                   },
                   [callback]() { callback(nullptr); });
             } else {
+#if FML_OS_IOS_SIMULATOR
+              callback(impeller::DlImageImpeller::Make(
+                  nullptr, DlImage::OwningContext::kRaster,
+                  /*is_fake_image=*/true));
+#else
               callback(nullptr);
+
+#endif  // FML_OS_IOS_SIMULATOR
             }
           })
           .SetIfFalse([&] {
+#if FML_OS_IOS_SIMULATOR
+            if (!GetDelegate().GetAiksContext()) {
+              callback(impeller::DlImageImpeller::Make(
+                  nullptr, DlImage::OwningContext::kRaster,
+                  /*is_fake_image=*/true));
+              return;
+            }
+#endif
             callback(DoMakeRasterSnapshot(display_list, picture_size,
                                           GetDelegate().GetAiksContext()));
           }));

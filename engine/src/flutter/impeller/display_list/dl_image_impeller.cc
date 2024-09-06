@@ -9,6 +9,17 @@
 
 namespace impeller {
 
+#if FML_OS_IOS_SIMULATOR
+sk_sp<DlImageImpeller> DlImageImpeller::Make(std::shared_ptr<Texture> texture,
+                                             OwningContext owning_context,
+                                             bool is_fake_image) {
+  if (!texture && !is_fake_image) {
+    return nullptr;
+  }
+  return sk_sp<DlImageImpeller>(
+      new DlImageImpeller(std::move(texture), owning_context, is_fake_image));
+}
+#else
 sk_sp<DlImageImpeller> DlImageImpeller::Make(std::shared_ptr<Texture> texture,
                                              OwningContext owning_context) {
   if (!texture) {
@@ -17,6 +28,7 @@ sk_sp<DlImageImpeller> DlImageImpeller::Make(std::shared_ptr<Texture> texture,
   return sk_sp<DlImageImpeller>(
       new DlImageImpeller(std::move(texture), owning_context));
 }
+#endif  // FML_OS_IOS_SIMULATOR
 
 sk_sp<DlImageImpeller> DlImageImpeller::MakeFromYUVTextures(
     AiksContext* aiks_context,
@@ -45,8 +57,20 @@ sk_sp<DlImageImpeller> DlImageImpeller::MakeFromYUVTextures(
 }
 
 DlImageImpeller::DlImageImpeller(std::shared_ptr<Texture> texture,
-                                 OwningContext owning_context)
-    : texture_(std::move(texture)), owning_context_(owning_context) {}
+                                 OwningContext owning_context
+#ifdef FML_OS_IOS_SIMULATOR
+                                 ,
+                                 bool is_fake_image
+#endif  // FML_OS_IOS_SIMULATOR
+                                 )
+    : texture_(std::move(texture)),
+      owning_context_(owning_context)
+#ifdef FML_OS_IOS_SIMULATOR
+      ,
+      is_fake_image_(is_fake_image)
+#endif  // #ifdef FML_OS_IOS_SIMULATOR
+{
+}
 
 // |DlImage|
 DlImageImpeller::~DlImageImpeller() = default;
