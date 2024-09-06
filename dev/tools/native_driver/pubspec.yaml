@@ -8,6 +8,8 @@ dependencies:
     sdk: flutter
   flutter_goldens:
     sdk: flutter
+  flutter_test:
+    sdk: flutter
   matcher: 0.12.16+1
   meta: 1.15.0
   path: 1.9.0

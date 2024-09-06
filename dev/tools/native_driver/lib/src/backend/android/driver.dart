@@ -56,6 +56,12 @@ final class AndroidNativeDriver implements NativeDriver {
   }
 
   @override
+  Future<void> configureForScreenshotTesting() async {
+    await _adb.disableImmersiveModeConfirmations();
+    await _adb.disableAnimations();
+  }
+
+  @override
   Future<NativeScreenshot> screenshot() async {
     return _AdbScreencap(await _adb.screencap(), _tmpDir);
   }

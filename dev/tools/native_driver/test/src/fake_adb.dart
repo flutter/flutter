@@ -14,9 +14,13 @@ final class FakeAdb implements Adb {
     Future<(bool, String?)> Function()? isDeviceConnected,
     Future<Uint8List> Function()? screencap,
     Future<void> Function(int x, int y)? tap,
+    Future<void> Function()? disableImmersiveModeConfirmations,
+    Future<void> Function()? disableAnimations,
   })  : _isDeviceConnected = isDeviceConnected,
         _screencap = screencap,
-        _tap = tap;
+        _tap = tap,
+        _disableImmersiveModeConfirmations = disableImmersiveModeConfirmations,
+        _disableAnimations = disableAnimations;
 
   @override
   Future<(bool, String?)> isDeviceConnected() async {
@@ -38,4 +42,18 @@ final class FakeAdb implements Adb {
   }
 
   final Future<void> Function(int x, int y)? _tap;
+
+  @override
+  Future<void> disableImmersiveModeConfirmations() {
+    return _disableImmersiveModeConfirmations?.call() ?? Future<void>.value();
+  }
+
+  final Future<void> Function()? _disableImmersiveModeConfirmations;
+
+  @override
+  Future<void> disableAnimations() {
+    return _disableAnimations?.call() ?? Future<void>.value();
+  }
+
+  final Future<void> Function()? _disableAnimations;
 }

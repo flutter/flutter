@@ -49,7 +49,7 @@ import 'driver.dart';
 ///
 /// When this is `true`, [matchesGoldenFile] will always report a successful
 /// match, because the bytes being tested implicitly become the new golden.
-bool autoUpdateGoldenFiles = false;
+bool autoUpdateLocalGoldenFiles = false;
 
 /// Compares pixels against those of a golden image file.
 ///
@@ -82,7 +82,7 @@ abstract mixin class GoldenFileComparator {
 
   /// Updates the golden file identified by [golden] with [imageBytes].
   ///
-  /// This will be invoked in lieu of [compare] when [autoUpdateGoldenFiles]
+  /// This will be invoked in lieu of [compare] when [autoUpdateLocalGoldenFiles]
   /// is `true` (which gets set automatically by the test framework when the
   /// user runs `flutter drive --update-goldens`).
   ///
@@ -236,7 +236,7 @@ final class _MatchesGoldenFile extends AsyncMatcher {
       );
     }
 
-    if (autoUpdateGoldenFiles) {
+    if (autoUpdateLocalGoldenFiles) {
       await goldenFileComparator.update(testNameUri, buffer);
       return null;
     }

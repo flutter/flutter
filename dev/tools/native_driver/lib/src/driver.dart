@@ -22,6 +22,15 @@ abstract interface class NativeDriver {
   /// After calling this method, the driver is no longer usable.
   Future<void> close();
 
+  /// Configures the device for (more) deterministic screenshots if possible.
+  ///
+  /// This method should be called during `setUpAll` if tests are going to
+  /// compare screenshots to golden files.
+  ///
+  /// Not all platforms support this method, and it is a no-op on platforms that
+  /// do not.
+  Future<void> configureForScreenshotTesting();
+
   /// Take a screenshot using a platform-specific mechanism.
   ///
   /// The image is returned as an opaque handle that can be used to retrieve

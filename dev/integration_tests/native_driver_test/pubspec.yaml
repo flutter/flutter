@@ -5,8 +5,12 @@ environment:
   sdk: ^3.6.0-216.0.dev
 
 dependencies:
+  native_driver:
+    path: ../../tools/native_driver
   flutter:
+    sdk: flutter
+  flutter_driver:
     sdk: flutter
 
 dev_dependencies:
-  flutter_test:
+  test: 1.25.8

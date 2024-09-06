@@ -111,6 +111,46 @@ class Adb {
       throw StateError('Failed to tap at $x, $y: ${result.stderr}');
     }
   }
+
+  /// Disable confirnations for immersive mode.
+  Future<void> disableImmersiveModeConfirmations() async {
+    final AdbStringResult result = await _runString(<String>[
+      'shell',
+      'settings',
+      'put',
+      'secure',
+      'immersive_mode_confirmations',
+      'confirmed',
+    ]);
+    if (result.exitCode != 0) {
+      throw StateError(
+        'Failed to disable immersive mode confirmations: ${result.stderr}',
+      );
+    }
+  }
+
+  /// Disable animations on the device.
+  Future<void> disableAnimations() async {
+    const Map<String, String> settings = <String, String>{
+      'show_surface_updates': '1',
+      'transition_animation_scale': '0',
+      'window_animation_scale': '0',
+      'animator_duration_scale': '0',
+    };
+    for (final MapEntry<String, String> entry in settings.entries) {
+      final AdbStringResult result = await _runString(<String>[
+        'shell',
+        'settings',
+        'put',
+        'global',
+        entry.key,
+        entry.value,
+      ]);
+      if (result.exitCode != 0) {
+        throw StateError('Failed to disable animations: ${result.stderr}');
+      }
+    }
+  }
 }
 
 /// Possible results of an `adb` command.
