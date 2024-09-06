@@ -66,22 +66,22 @@ class DlCanvas {
   virtual int GetSaveCount() const = 0;
   virtual void RestoreToCount(int restore_count) = 0;
 
-  virtual void Translate(SkScalar tx, SkScalar ty) = 0;
-  virtual void Scale(SkScalar sx, SkScalar sy) = 0;
-  virtual void Rotate(SkScalar degrees) = 0;
-  virtual void Skew(SkScalar sx, SkScalar sy) = 0;
+  virtual void Translate(DlScalar tx, DlScalar ty) = 0;
+  virtual void Scale(DlScalar sx, DlScalar sy) = 0;
+  virtual void Rotate(DlScalar degrees) = 0;
+  virtual void Skew(DlScalar sx, DlScalar sy) = 0;
 
   // clang-format off
 
   // 2x3 2D affine subset of a 4x4 transform in row major order
-  virtual void Transform2DAffine(SkScalar mxx, SkScalar mxy, SkScalar mxt,
-                                 SkScalar myx, SkScalar myy, SkScalar myt) = 0;
+  virtual void Transform2DAffine(DlScalar mxx, DlScalar mxy, DlScalar mxt,
+                                 DlScalar myx, DlScalar myy, DlScalar myt) = 0;
   // full 4x4 transform in row major order
   virtual void TransformFullPerspective(
-      SkScalar mxx, SkScalar mxy, SkScalar mxz, SkScalar mxt,
-      SkScalar myx, SkScalar myy, SkScalar myz, SkScalar myt,
-      SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
-      SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) = 0;
+      DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
+      DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
+      DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
+      DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) = 0;
   // clang-format on
   virtual void TransformReset() = 0;
   virtual void Transform(const SkMatrix* matrix) = 0;
@@ -144,7 +144,7 @@ class DlCanvas {
   virtual void DrawRect(const SkRect& rect, const DlPaint& paint) = 0;
   virtual void DrawOval(const SkRect& bounds, const DlPaint& paint) = 0;
   virtual void DrawCircle(const SkPoint& center,
-                          SkScalar radius,
+                          DlScalar radius,
                           const DlPaint& paint) = 0;
   virtual void DrawRRect(const SkRRect& rrect, const DlPaint& paint) = 0;
   virtual void DrawDRRect(const SkRRect& outer,
@@ -152,8 +152,8 @@ class DlCanvas {
                           const DlPaint& paint) = 0;
   virtual void DrawPath(const SkPath& path, const DlPaint& paint) = 0;
   virtual void DrawArc(const SkRect& bounds,
-                       SkScalar start,
-                       SkScalar sweep,
+                       DlScalar start,
+                       DlScalar sweep,
                        bool useCenter,
                        const DlPaint& paint) = 0;
   virtual void DrawPoints(PointMode mode,
@@ -164,7 +164,7 @@ class DlCanvas {
                             DlBlendMode mode,
                             const DlPaint& paint) = 0;
   virtual void DrawImage(const sk_sp<DlImage>& image,
-                         const SkPoint point,
+                         const SkPoint& point,
                          DlImageSampling sampling,
                          const DlPaint* paint = nullptr) = 0;
   virtual void DrawImageRect(
@@ -205,32 +205,32 @@ class DlCanvas {
                          const SkRect* cullRect,
                          const DlPaint* paint = nullptr) = 0;
   virtual void DrawDisplayList(const sk_sp<DisplayList> display_list,
-                               SkScalar opacity = SK_Scalar1) = 0;
+                               DlScalar opacity = SK_Scalar1) = 0;
 
   virtual void DrawTextFrame(
       const std::shared_ptr<impeller::TextFrame>& text_frame,
-      SkScalar x,
-      SkScalar y,
+      DlScalar x,
+      DlScalar y,
       const DlPaint& paint) = 0;
 
   virtual void DrawTextBlob(const sk_sp<SkTextBlob>& blob,
-                            SkScalar x,
-                            SkScalar y,
+                            DlScalar x,
+                            DlScalar y,
                             const DlPaint& paint) = 0;
   virtual void DrawShadow(const SkPath& path,
                           const DlColor color,
-                          const SkScalar elevation,
+                          const DlScalar elevation,
                           bool transparent_occluder,
-                          SkScalar dpr) = 0;
+                          DlScalar dpr) = 0;
 
   virtual void Flush() = 0;
 
-  static constexpr SkScalar kShadowLightHeight = 600;
-  static constexpr SkScalar kShadowLightRadius = 800;
+  static constexpr DlScalar kShadowLightHeight = 600;
+  static constexpr DlScalar kShadowLightRadius = 800;
 
   static SkRect ComputeShadowBounds(const SkPath& path,
                                     float elevation,
-                                    SkScalar dpr,
+                                    DlScalar dpr,
                                     const SkMatrix& ctm);
 };
 

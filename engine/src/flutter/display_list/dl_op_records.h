@@ -305,10 +305,10 @@ struct SaveOp final : SaveOpBase {
 // The base struct for all saveLayer() ops
 // 16 byte SaveOpBase + 20 byte payload packs into 36 bytes
 struct SaveLayerOpBase : SaveOpBase {
-  SaveLayerOpBase(const SaveLayerOptions& options, const SkRect& rect)
+  SaveLayerOpBase(const SaveLayerOptions& options, const DlRect& rect)
       : SaveOpBase(options), rect(rect) {}
 
-  SkRect rect;
+  DlRect rect;
   DlBlendMode max_blend_mode = DlBlendMode::kClear;
 };
 // 36 byte SaveLayerOpBase with no additional data packs into 40 bytes
@@ -316,7 +316,7 @@ struct SaveLayerOpBase : SaveOpBase {
 struct SaveLayerOp final : SaveLayerOpBase {
   static constexpr auto kType = DisplayListOpType::kSaveLayer;
 
-  SaveLayerOp(const SaveLayerOptions& options, const SkRect& rect)
+  SaveLayerOp(const SaveLayerOptions& options, const DlRect& rect)
       : SaveLayerOpBase(options, rect) {}
 
   void dispatch(DlOpReceiver& receiver) const {
@@ -329,7 +329,7 @@ struct SaveLayerBackdropOp final : SaveLayerOpBase {
   static constexpr auto kType = DisplayListOpType::kSaveLayerBackdrop;
 
   SaveLayerBackdropOp(const SaveLayerOptions& options,
-                      const SkRect& rect,
+                      const DlRect& rect,
                       const DlImageFilter* backdrop)
       : SaveLayerOpBase(options, rect), backdrop(backdrop->shared()) {}
 
@@ -369,10 +369,10 @@ struct TransformClipOpBase : DLOp {
 struct TranslateOp final : TransformClipOpBase {
   static constexpr auto kType = DisplayListOpType::kTranslate;
 
-  TranslateOp(SkScalar tx, SkScalar ty) : tx(tx), ty(ty) {}
+  TranslateOp(DlScalar tx, DlScalar ty) : tx(tx), ty(ty) {}
 
-  const SkScalar tx;
-  const SkScalar ty;
+  const DlScalar tx;
+  const DlScalar ty;
 
   void dispatch(DlOpReceiver& receiver) const {  //
     receiver.translate(tx, ty);
@@ -383,10 +383,10 @@ struct TranslateOp final : TransformClipOpBase {
 struct ScaleOp final : TransformClipOpBase {
   static constexpr auto kType = DisplayListOpType::kScale;
 
-  ScaleOp(SkScalar sx, SkScalar sy) : sx(sx), sy(sy) {}
+  ScaleOp(DlScalar sx, DlScalar sy) : sx(sx), sy(sy) {}
 
-  const SkScalar sx;
-  const SkScalar sy;
+  const DlScalar sx;
+  const DlScalar sy;
 
   void dispatch(DlOpReceiver& receiver) const {  //
     receiver.scale(sx, sy);
@@ -396,9 +396,9 @@ struct ScaleOp final : TransformClipOpBase {
 struct RotateOp final : TransformClipOpBase {
   static constexpr auto kType = DisplayListOpType::kRotate;
 
-  explicit RotateOp(SkScalar degrees) : degrees(degrees) {}
+  explicit RotateOp(DlScalar degrees) : degrees(degrees) {}
 
-  const SkScalar degrees;
+  const DlScalar degrees;
 
   void dispatch(DlOpReceiver& receiver) const {  //
     receiver.rotate(degrees);
@@ -409,10 +409,10 @@ struct RotateOp final : TransformClipOpBase {
 struct SkewOp final : TransformClipOpBase {
   static constexpr auto kType = DisplayListOpType::kSkew;
 
-  SkewOp(SkScalar sx, SkScalar sy) : sx(sx), sy(sy) {}
+  SkewOp(DlScalar sx, DlScalar sy) : sx(sx), sy(sy) {}
 
-  const SkScalar sx;
-  const SkScalar sy;
+  const DlScalar sx;
+  const DlScalar sy;
 
   void dispatch(DlOpReceiver& receiver) const {  //
     receiver.skew(sx, sy);
@@ -424,13 +424,13 @@ struct Transform2DAffineOp final : TransformClipOpBase {
   static constexpr auto kType = DisplayListOpType::kTransform2DAffine;
 
   // clang-format off
-  Transform2DAffineOp(SkScalar mxx, SkScalar mxy, SkScalar mxt,
-                      SkScalar myx, SkScalar myy, SkScalar myt)
+  Transform2DAffineOp(DlScalar mxx, DlScalar mxy, DlScalar mxt,
+                      DlScalar myx, DlScalar myy, DlScalar myt)
       : mxx(mxx), mxy(mxy), mxt(mxt), myx(myx), myy(myy), myt(myt) {}
   // clang-format on
 
-  const SkScalar mxx, mxy, mxt;
-  const SkScalar myx, myy, myt;
+  const DlScalar mxx, mxy, mxt;
+  const DlScalar myx, myy, myt;
 
   void dispatch(DlOpReceiver& receiver) const {
     receiver.transform2DAffine(mxx, mxy, mxt,  //
@@ -444,20 +444,20 @@ struct TransformFullPerspectiveOp final : TransformClipOpBase {
 
   // clang-format off
   TransformFullPerspectiveOp(
-      SkScalar mxx, SkScalar mxy, SkScalar mxz, SkScalar mxt,
-      SkScalar myx, SkScalar myy, SkScalar myz, SkScalar myt,
-      SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
-      SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt)
+      DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
+      DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
+      DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
+      DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt)
       : mxx(mxx), mxy(mxy), mxz(mxz), mxt(mxt),
         myx(myx), myy(myy), myz(myz), myt(myt),
         mzx(mzx), mzy(mzy), mzz(mzz), mzt(mzt),
         mwx(mwx), mwy(mwy), mwz(mwz), mwt(mwt) {}
   // clang-format on
 
-  const SkScalar mxx, mxy, mxz, mxt;
-  const SkScalar myx, myy, myz, myt;
-  const SkScalar mzx, mzy, mzz, mzt;
-  const SkScalar mwx, mwy, mwz, mwt;
+  const DlScalar mxx, mxy, mxz, mxt;
+  const DlScalar myx, myy, myz, myt;
+  const DlScalar mzx, mzy, mzz, mzt;
+  const DlScalar mwx, mwy, mwz, mwt;
 
   void dispatch(DlOpReceiver& receiver) const {
     receiver.transformFullPerspective(mxx, mxy, mxz, mxt,  //
@@ -479,7 +479,7 @@ struct TransformResetOp final : TransformClipOpBase {
 };
 
 // 4 byte header + 4 byte common payload packs into minimum 8 bytes
-// SkRect is 16 more bytes, which packs efficiently into 24 bytes total
+// DlRect is 16 more bytes, which packs efficiently into 24 bytes total
 // SkRRect is 52 more bytes, which rounds up to 56 bytes (4 bytes unused)
 //         which packs into 64 bytes total
 // CacheablePath is 128 more bytes, which packs efficiently into 136 bytes total
@@ -492,22 +492,22 @@ struct TransformResetOp final : TransformClipOpBase {
   struct Clip##clipop##shapename##Op final : TransformClipOpBase {             \
     static constexpr auto kType = DisplayListOpType::kClip##clipop##shapename; \
                                                                                \
-    Clip##clipop##shapename##Op(Sk##shapetype shape, bool is_aa)               \
+    Clip##clipop##shapename##Op(shapetype shape, bool is_aa)                   \
         : is_aa(is_aa), shape(shape) {}                                        \
                                                                                \
     const bool is_aa;                                                          \
-    const Sk##shapetype shape;                                                 \
+    const shapetype shape;                                                     \
                                                                                \
     void dispatch(DlOpReceiver& receiver) const {                              \
       receiver.clip##shapename(shape, DlCanvas::ClipOp::k##clipop, is_aa);     \
     }                                                                          \
   };
-DEFINE_CLIP_SHAPE_OP(Rect, Rect, Intersect)
-DEFINE_CLIP_SHAPE_OP(Oval, Rect, Intersect)
-DEFINE_CLIP_SHAPE_OP(RRect, RRect, Intersect)
-DEFINE_CLIP_SHAPE_OP(Rect, Rect, Difference)
-DEFINE_CLIP_SHAPE_OP(Oval, Rect, Difference)
-DEFINE_CLIP_SHAPE_OP(RRect, RRect, Difference)
+DEFINE_CLIP_SHAPE_OP(Rect, DlRect, Intersect)
+DEFINE_CLIP_SHAPE_OP(Oval, DlRect, Intersect)
+DEFINE_CLIP_SHAPE_OP(RRect, SkRRect, Intersect)
+DEFINE_CLIP_SHAPE_OP(Rect, DlRect, Difference)
+DEFINE_CLIP_SHAPE_OP(Oval, DlRect, Difference)
+DEFINE_CLIP_SHAPE_OP(RRect, SkRRect, Difference)
 #undef DEFINE_CLIP_SHAPE_OP
 
 #define DEFINE_CLIP_PATH_OP(clipop)                                         \
@@ -570,9 +570,9 @@ struct DrawColorOp final : DrawOpBase {
 };
 
 // The common data is a 4 byte header with an unused 4 bytes
-// SkRect is 16 more bytes, using 20 bytes which rounds up to 24 bytes total
+// DlRect is 16 more bytes, using 20 bytes which rounds up to 24 bytes total
 //        (4 bytes unused)
-// SkOval is same as SkRect
+// SkOval is same as DlRect
 // SkRRect is 52 more bytes, which packs efficiently into 56 bytes total
 #define DEFINE_DRAW_1ARG_OP(op_name, arg_type, arg_name)                  \
   struct Draw##op_name##Op final : DrawOpBase {                           \
@@ -586,8 +586,8 @@ struct DrawColorOp final : DrawOpBase {
       receiver.draw##op_name(arg_name);                                   \
     }                                                                     \
   };
-DEFINE_DRAW_1ARG_OP(Rect, SkRect, rect)
-DEFINE_DRAW_1ARG_OP(Oval, SkRect, oval)
+DEFINE_DRAW_1ARG_OP(Rect, DlRect, rect)
+DEFINE_DRAW_1ARG_OP(Oval, DlRect, oval)
 DEFINE_DRAW_1ARG_OP(RRect, SkRRect, rrect)
 #undef DEFINE_DRAW_1ARG_OP
 
@@ -615,9 +615,9 @@ struct DrawPathOp final : DrawOpBase {
 };
 
 // The common data is a 4 byte header with an unused 4 bytes
-// 2 x SkPoint is 16 more bytes, using 20 bytes rounding up to 24 bytes total
+// 2 x DlPoint is 16 more bytes, using 20 bytes rounding up to 24 bytes total
 //             (4 bytes unused)
-// SkPoint + SkScalar is 12 more bytes, packing efficiently into 16 bytes total
+// DlPoint + DlScalar is 12 more bytes, packing efficiently into 16 bytes total
 // 2 x SkRRect is 104 more bytes, using 108 and rounding up to 112 bytes total
 //             (4 bytes unused)
 #define DEFINE_DRAW_2ARG_OP(op_name, type1, name1, type2, name2)     \
@@ -634,8 +634,8 @@ struct DrawPathOp final : DrawOpBase {
       receiver.draw##op_name(name1, name2);                          \
     }                                                                \
   };
-DEFINE_DRAW_2ARG_OP(Line, SkPoint, p0, SkPoint, p1)
-DEFINE_DRAW_2ARG_OP(Circle, SkPoint, center, SkScalar, radius)
+DEFINE_DRAW_2ARG_OP(Line, DlPoint, p0, DlPoint, p1)
+DEFINE_DRAW_2ARG_OP(Circle, DlPoint, center, DlScalar, radius)
 DEFINE_DRAW_2ARG_OP(DRRect, SkRRect, outer, SkRRect, inner)
 #undef DEFINE_DRAW_2ARG_OP
 
@@ -651,8 +651,8 @@ struct DrawDashedLineOp final : DrawOpBase {
 
   const DlPoint p0;
   const DlPoint p1;
-  const SkScalar on_length;
-  const SkScalar off_length;
+  const DlScalar on_length;
+  const DlScalar off_length;
 
   void dispatch(DlOpReceiver& receiver) const {
     receiver.drawDashedLine(p0, p1, on_length, off_length);
@@ -663,12 +663,12 @@ struct DrawDashedLineOp final : DrawOpBase {
 struct DrawArcOp final : DrawOpBase {
   static constexpr auto kType = DisplayListOpType::kDrawArc;
 
-  DrawArcOp(SkRect bounds, SkScalar start, SkScalar sweep, bool center)
+  DrawArcOp(DlRect bounds, DlScalar start, DlScalar sweep, bool center)
       : bounds(bounds), start(start), sweep(sweep), center(center) {}
 
-  const SkRect bounds;
-  const SkScalar start;
-  const SkScalar sweep;
+  const DlRect bounds;
+  const DlScalar start;
+  const DlScalar sweep;
   const bool center;
 
   void dispatch(DlOpReceiver& receiver) const {
@@ -678,7 +678,7 @@ struct DrawArcOp final : DrawOpBase {
 
 // 4 byte header + 4 byte fixed payload packs efficiently into 8 bytes
 // But then there is a list of points following the structure which
-// is guaranteed to be a multiple of 8 bytes (SkPoint is 8 bytes)
+// is guaranteed to be a multiple of 8 bytes (DlPoint is 8 bytes)
 // so this op will always pack efficiently
 // The point type is packed into 3 different OpTypes to avoid expanding
 // the fixed payload beyond the 8 bytes
@@ -691,7 +691,7 @@ struct DrawArcOp final : DrawOpBase {
     const uint32_t count;                                              \
                                                                        \
     void dispatch(DlOpReceiver& receiver) const {                      \
-      const SkPoint* pts = reinterpret_cast<const SkPoint*>(this + 1); \
+      const DlPoint* pts = reinterpret_cast<const DlPoint*>(this + 1); \
       receiver.drawPoints(DlCanvas::PointMode::mode, count, pts);      \
     }                                                                  \
   };
@@ -723,11 +723,11 @@ struct DrawVerticesOp final : DrawOpBase {
     static constexpr auto kType = DisplayListOpType::k##name;          \
                                                                        \
     name##Op(const sk_sp<DlImage>& image,                              \
-             const SkPoint& point,                                     \
+             const DlPoint& point,                                     \
              DlImageSampling sampling)                                 \
         : point(point), sampling(sampling), image(std::move(image)) {} \
                                                                        \
-    const SkPoint point;                                               \
+    const DlPoint point;                                               \
     const DlImageSampling sampling;                                    \
     const sk_sp<DlImage> image;                                        \
                                                                        \
@@ -752,8 +752,8 @@ struct DrawImageRectOp final : DrawOpBase {
   static constexpr auto kType = DisplayListOpType::kDrawImageRect;
 
   DrawImageRectOp(const sk_sp<DlImage>& image,
-                  const SkRect& src,
-                  const SkRect& dst,
+                  const DlRect& src,
+                  const DlRect& dst,
                   DlImageSampling sampling,
                   bool render_with_attributes,
                   DlCanvas::SrcRectConstraint constraint)
@@ -764,8 +764,8 @@ struct DrawImageRectOp final : DrawOpBase {
         constraint(constraint),
         image(image) {}
 
-  const SkRect src;
-  const SkRect dst;
+  const DlRect src;
+  const DlRect dst;
   const DlImageSampling sampling;
   const bool render_with_attributes;
   const DlCanvas::SrcRectConstraint constraint;
@@ -793,13 +793,13 @@ struct DrawImageRectOp final : DrawOpBase {
     static constexpr uint32_t kDepthInc = 9;                               \
                                                                            \
     name##Op(const sk_sp<DlImage>& image,                                  \
-             const SkIRect& center,                                        \
-             const SkRect& dst,                                            \
+             const DlIRect& center,                                        \
+             const DlRect& dst,                                            \
              DlFilterMode mode)                                            \
         : center(center), dst(dst), mode(mode), image(std::move(image)) {} \
                                                                            \
-    const SkIRect center;                                                  \
-    const SkRect dst;                                                      \
+    const DlIRect center;                                                  \
+    const DlRect dst;                                                      \
     const DlFilterMode mode;                                               \
     const sk_sp<DlImage> image;                                            \
                                                                            \
@@ -823,7 +823,7 @@ DEFINE_DRAW_IMAGE_NINE_OP(DrawImageNineWithAttr, true)
 // (4 bytes unused)
 // Each of these is then followed by a number of lists.
 // SkRSXform list is a multiple of 16 bytes so it is always packed well
-// SkRect list is also a multiple of 16 bytes so it also packs well
+// DlRect list is also a multiple of 16 bytes so it also packs well
 // DlColor list only packs well if the count is even, otherwise there
 // can be 4 unusued bytes at the end.
 struct DrawAtlasBaseOp : DrawOpBase {
@@ -855,7 +855,7 @@ struct DrawAtlasBaseOp : DrawOpBase {
                 render_with_attributes == other->render_with_attributes &&
                 sampling == other->sampling && atlas->Equals(other->atlas));
     if (ret) {
-      size_t bytes = count * (sizeof(SkRSXform) + sizeof(SkRect));
+      size_t bytes = count * (sizeof(SkRSXform) + sizeof(DlRect));
       if (has_colors) {
         bytes += count * sizeof(DlColor);
       }
@@ -885,7 +885,7 @@ struct DrawAtlasOp final : DrawAtlasBaseOp {
 
   void dispatch(DlOpReceiver& receiver) const {
     const SkRSXform* xform = reinterpret_cast<const SkRSXform*>(this + 1);
-    const SkRect* tex = reinterpret_cast<const SkRect*>(xform + count);
+    const DlRect* tex = reinterpret_cast<const DlRect*>(xform + count);
     const DlColor* colors =
         has_colors ? reinterpret_cast<const DlColor*>(tex + count) : nullptr;
     const DlBlendMode mode = static_cast<DlBlendMode>(mode_index);
@@ -914,7 +914,7 @@ struct DrawAtlasCulledOp final : DrawAtlasBaseOp {
                     DlBlendMode mode,
                     DlImageSampling sampling,
                     bool has_colors,
-                    const SkRect& cull_rect,
+                    const DlRect& cull_rect,
                     bool render_with_attributes)
       : DrawAtlasBaseOp(atlas,
                         count,
@@ -924,11 +924,11 @@ struct DrawAtlasCulledOp final : DrawAtlasBaseOp {
                         render_with_attributes),
         cull_rect(cull_rect) {}
 
-  const SkRect cull_rect;
+  const DlRect cull_rect;
 
   void dispatch(DlOpReceiver& receiver) const {
     const SkRSXform* xform = reinterpret_cast<const SkRSXform*>(this + 1);
-    const SkRect* tex = reinterpret_cast<const SkRect*>(xform + count);
+    const DlRect* tex = reinterpret_cast<const DlRect*>(xform + count);
     const DlColor* colors =
         has_colors ? reinterpret_cast<const DlColor*>(tex + count) : nullptr;
     const DlBlendMode mode = static_cast<DlBlendMode>(mode_index);
@@ -952,10 +952,10 @@ struct DrawDisplayListOp final : DrawOpBase {
   static constexpr auto kType = DisplayListOpType::kDrawDisplayList;
 
   explicit DrawDisplayListOp(const sk_sp<DisplayList>& display_list,
-                             SkScalar opacity)
+                             DlScalar opacity)
       : opacity(opacity), display_list(display_list) {}
 
-  SkScalar opacity;
+  DlScalar opacity;
   const sk_sp<DisplayList> display_list;
 
   void dispatch(DlOpReceiver& receiver) const {
@@ -975,11 +975,11 @@ struct DrawDisplayListOp final : DrawOpBase {
 struct DrawTextBlobOp final : DrawOpBase {
   static constexpr auto kType = DisplayListOpType::kDrawTextBlob;
 
-  DrawTextBlobOp(const sk_sp<SkTextBlob>& blob, SkScalar x, SkScalar y)
+  DrawTextBlobOp(const sk_sp<SkTextBlob>& blob, DlScalar x, DlScalar y)
       : x(x), y(y), blob(blob) {}
 
-  const SkScalar x;
-  const SkScalar y;
+  const DlScalar x;
+  const DlScalar y;
   const sk_sp<SkTextBlob> blob;
 
   void dispatch(DlOpReceiver& receiver) const {
@@ -991,12 +991,12 @@ struct DrawTextFrameOp final : DrawOpBase {
   static constexpr auto kType = DisplayListOpType::kDrawTextFrame;
 
   DrawTextFrameOp(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                  SkScalar x,
-                  SkScalar y)
+                  DlScalar x,
+                  DlScalar y)
       : x(x), y(y), text_frame(text_frame) {}
 
-  const SkScalar x;
-  const SkScalar y;
+  const DlScalar x;
+  const DlScalar y;
   const std::shared_ptr<impeller::TextFrame> text_frame;
 
   void dispatch(DlOpReceiver& receiver) const {
@@ -1011,13 +1011,13 @@ struct DrawTextFrameOp final : DrawOpBase {
                                                                              \
     Draw##name##Op(const SkPath& path,                                       \
                    DlColor color,                                            \
-                   SkScalar elevation,                                       \
-                   SkScalar dpr)                                             \
+                   DlScalar elevation,                                       \
+                   DlScalar dpr)                                             \
         : color(color), elevation(elevation), dpr(dpr), cached_path(path) {} \
                                                                              \
     const DlColor color;                                                     \
-    const SkScalar elevation;                                                \
-    const SkScalar dpr;                                                      \
+    const DlScalar elevation;                                                \
+    const DlScalar dpr;                                                      \
     const DlOpReceiver::CacheablePath cached_path;                           \
                                                                              \
     void dispatch(DlOpReceiver& receiver) const {                            \

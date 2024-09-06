@@ -123,7 +123,7 @@ class DlSkCanvasAdapter final : public virtual DlCanvas {
                     DlBlendMode mode,
                     const DlPaint& paint) override;
   void DrawImage(const sk_sp<DlImage>& image,
-                 const SkPoint point,
+                 const SkPoint& point,
                  DlImageSampling sampling,
                  const DlPaint* paint = nullptr) override;
   void DrawImageRect(

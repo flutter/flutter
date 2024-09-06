@@ -285,7 +285,7 @@ TEST_F(DisplayListTest, Iteration) {
 
 TEST_F(DisplayListTest, InvalidIndices) {
   DisplayListBuilder builder;
-  builder.DrawRect(kTestBounds, DlPaint());
+  builder.DrawRect(kTestSkBounds, DlPaint());
   auto dl = builder.Build();
   DisplayListGeneralReceiver receiver;
 
@@ -306,7 +306,7 @@ TEST_F(DisplayListTest, InvalidIndices) {
 
 TEST_F(DisplayListTest, ValidIndices) {
   DisplayListBuilder builder;
-  builder.DrawRect(kTestBounds, DlPaint());
+  builder.DrawRect(kTestSkBounds, DlPaint());
   auto dl = builder.Build();
   DisplayListGeneralReceiver receiver;
 
@@ -318,10 +318,10 @@ TEST_F(DisplayListTest, ValidIndices) {
 }
 
 TEST_F(DisplayListTest, BuilderCanBeReused) {
-  DisplayListBuilder builder(kTestBounds);
-  builder.DrawRect(kTestBounds, DlPaint());
+  DisplayListBuilder builder(kTestSkBounds);
+  builder.DrawRect(kTestSkBounds, DlPaint());
   auto dl = builder.Build();
-  builder.DrawRect(kTestBounds, DlPaint());
+  builder.DrawRect(kTestSkBounds, DlPaint());
   auto dl2 = builder.Build();
   ASSERT_TRUE(dl->Equals(dl2));
 }
@@ -1474,13 +1474,13 @@ class SaveLayerExpector : public virtual DlOpReceiver,
     return *this;
   }
 
-  void saveLayer(const SkRect& bounds,
+  void saveLayer(const DlRect& bounds,
                  const SaveLayerOptions options,
                  const DlImageFilter* backdrop) override {
     FML_UNREACHABLE();
   }
 
-  virtual void saveLayer(const SkRect& bounds,
+  virtual void saveLayer(const DlRect& bounds,
                          const SaveLayerOptions& options,
                          uint32_t total_content_depth,
                          DlBlendMode max_content_blend_mode,
@@ -3718,15 +3718,18 @@ class SaveLayerBoundsExpector : public virtual DlOpReceiver,
  public:
   explicit SaveLayerBoundsExpector() {}
 
-  SaveLayerBoundsExpector& addComputedExpectation(const SkRect& bounds) {
+  SaveLayerBoundsExpector& addComputedExpectation(const DlRect& bounds) {
     expected_.emplace_back(BoundsExpectation{
         .bounds = bounds,
         .options = SaveLayerOptions(),
     });
     return *this;
   }
+  SaveLayerBoundsExpector& addComputedExpectation(const SkRect& bounds) {
+    return addComputedExpectation(ToDlRect(bounds));
+  }
 
-  SaveLayerBoundsExpector& addSuppliedExpectation(const SkRect& bounds,
+  SaveLayerBoundsExpector& addSuppliedExpectation(const DlRect& bounds,
                                                   bool clipped = false) {
     SaveLayerOptions options;
     options = options.with_bounds_from_caller();
@@ -3739,8 +3742,12 @@ class SaveLayerBoundsExpector : public virtual DlOpReceiver,
     });
     return *this;
   }
+  SaveLayerBoundsExpector& addSuppliedExpectation(const SkRect& bounds,
+                                                  bool clipped = false) {
+    return addSuppliedExpectation(ToDlRect(bounds), clipped);
+  }
 
-  void saveLayer(const SkRect& bounds,
+  void saveLayer(const DlRect& bounds,
                  const SaveLayerOptions options,
                  const DlImageFilter* backdrop) override {
     ASSERT_LT(save_layer_count_, expected_.size());
@@ -3751,10 +3758,10 @@ class SaveLayerBoundsExpector : public virtual DlOpReceiver,
     EXPECT_EQ(options.content_is_clipped(),
               expected.options.content_is_clipped())
         << "expected bounds index " << save_layer_count_;
-    if (!SkScalarNearlyEqual(bounds.fLeft, expected.bounds.fLeft) ||
-        !SkScalarNearlyEqual(bounds.fTop, expected.bounds.fTop) ||
-        !SkScalarNearlyEqual(bounds.fRight, expected.bounds.fRight) ||
-        !SkScalarNearlyEqual(bounds.fBottom, expected.bounds.fBottom)) {
+    if (!SkScalarNearlyEqual(bounds.GetLeft(), expected.bounds.GetLeft()) ||
+        !SkScalarNearlyEqual(bounds.GetTop(), expected.bounds.GetTop()) ||
+        !SkScalarNearlyEqual(bounds.GetRight(), expected.bounds.GetRight()) ||
+        !SkScalarNearlyEqual(bounds.GetBottom(), expected.bounds.GetBottom())) {
       EXPECT_EQ(bounds, expected.bounds)
           << "expected bounds index " << save_layer_count_;
     }
@@ -3767,7 +3774,7 @@ class SaveLayerBoundsExpector : public virtual DlOpReceiver,
 
  private:
   struct BoundsExpectation {
-    const SkRect bounds;
+    const DlRect bounds;
     const SaveLayerOptions options;
   };
 
@@ -4205,7 +4212,7 @@ class DepthExpector : public virtual DlOpReceiver,
     index_++;
   }
 
-  void saveLayer(const SkRect& bounds,
+  void saveLayer(const DlRect& bounds,
                  SaveLayerOptions options,
                  const DlImageFilter* backdrop) override {
     // This method should not be called since we override the variant with
@@ -4213,7 +4220,7 @@ class DepthExpector : public virtual DlOpReceiver,
     FAIL() << "saveLayer(no depth parameter) method should not be called";
   }
 
-  void saveLayer(const SkRect& bounds,
+  void saveLayer(const DlRect& bounds,
                  const SaveLayerOptions& options,
                  uint32_t total_content_depth,
                  DlBlendMode max_content_mode,
@@ -4609,7 +4616,7 @@ TEST_F(DisplayListTest, DrawDisplayListForwardsBackdropFlag) {
 #define CLIP_EXPECTOR(name) ClipExpector name(__FILE__, __LINE__)
 
 struct ClipExpectation {
-  std::variant<SkRect, SkRRect, SkPath> shape;
+  std::variant<DlRect, SkRRect, SkPath> shape;
   bool is_oval;
   ClipOp clip_op;
   bool is_aa;
@@ -4632,7 +4639,7 @@ struct ClipExpectation {
   os << "Expectation(";
   switch (expect.shape.index()) {
     case 0:
-      os << std::get<SkRect>(expect.shape);
+      os << std::get<DlRect>(expect.shape);
       if (expect.is_oval) {
         os << " (oval)";
       }
@@ -4674,7 +4681,7 @@ class ClipExpector : public virtual DlOpReceiver,
                                ClipOp clip_op = ClipOp::kIntersect,
                                bool is_aa = false) {
     clip_expectations_.push_back({
-        .shape = rect,
+        .shape = ToDlRect(rect),
         .is_oval = false,
         .clip_op = clip_op,
         .is_aa = is_aa,
@@ -4686,7 +4693,7 @@ class ClipExpector : public virtual DlOpReceiver,
                                    ClipOp clip_op = ClipOp::kIntersect,
                                    bool is_aa = false) {
     clip_expectations_.push_back({
-        .shape = rect,
+        .shape = ToDlRect(rect),
         .is_oval = true,
         .clip_op = clip_op,
         .is_aa = is_aa,
@@ -4718,12 +4725,12 @@ class ClipExpector : public virtual DlOpReceiver,
     return *this;
   }
 
-  void clipRect(const SkRect& rect,
+  void clipRect(const DlRect& rect,
                 DlCanvas::ClipOp clip_op,
                 bool is_aa) override {
     check(rect, clip_op, is_aa);
   }
-  void clipOval(const SkRect& bounds,
+  void clipOval(const DlRect& bounds,
                 DlCanvas::ClipOp clip_op,
                 bool is_aa) override {
     check(bounds, clip_op, is_aa, true);

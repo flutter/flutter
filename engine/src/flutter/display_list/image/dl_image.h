@@ -9,7 +9,9 @@
 #include <optional>
 #include <string>
 
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/build_config.h"
+#include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 
@@ -106,6 +108,12 @@ class DlImage : public SkRefCnt {
   ///             convenience method that calls |DlImage::dimensions|.
   ///
   SkIRect bounds() const;
+
+  //----------------------------------------------------------------------------
+  /// @return     The bounds of the pixel grid with 0, 0 as origin. A
+  ///             convenience method that calls |DlImage::dimensions|.
+  ///
+  DlIRect GetBounds() const { return ToDlIRect(bounds()); }
 
   //----------------------------------------------------------------------------
   /// @return     Specifies which context was used to create this image. The

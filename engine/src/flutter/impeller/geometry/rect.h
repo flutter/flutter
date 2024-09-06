@@ -137,6 +137,10 @@ struct TRect {
     return TRect(x, y, saturated::Add(x, width), saturated::Add(y, height));
   }
 
+  constexpr static TRect MakeWH(Type width, Type height) {
+    return TRect(0, 0, width, height);
+  }
+
   constexpr static TRect MakeOriginSize(const TPoint<Type>& origin,
                                         const TSize<Type>& size) {
     return MakeXYWH(origin.x, origin.y, size.width, size.height);
@@ -527,6 +531,10 @@ struct TRect {
     } else {
       return std::nullopt;
     }
+  }
+
+  [[nodiscard]] constexpr TRect IntersectionOrEmpty(const TRect& o) const {
+    return Intersection(o).value_or(TRect());
   }
 
   [[nodiscard]] constexpr bool IntersectsWithRect(const TRect& o) const {

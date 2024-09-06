@@ -268,7 +268,7 @@ void DlSkCanvasAdapter::DrawVertices(
 }
 
 void DlSkCanvasAdapter::DrawImage(const sk_sp<DlImage>& image,
-                                  const SkPoint point,
+                                  const SkPoint& point,
                                   DlImageSampling sampling,
                                   const DlPaint* paint) {
   SkOptionalPaint sk_paint(paint);

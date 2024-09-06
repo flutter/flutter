@@ -130,6 +130,37 @@ TEST(RectTest, IRectSimpleXYWH) {
   EXPECT_FALSE(rect.IsEmpty());
 }
 
+TEST(RectTest, RectSimpleWH) {
+  // Using fractional-power-of-2 friendly values for equality tests
+  Rect rect = Rect::MakeWH(15.5f, 15.125f);
+
+  EXPECT_EQ(rect.GetLeft(), 0.0f);
+  EXPECT_EQ(rect.GetTop(), 0.0f);
+  EXPECT_EQ(rect.GetRight(), 15.5f);
+  EXPECT_EQ(rect.GetBottom(), 15.125f);
+  EXPECT_EQ(rect.GetX(), 0.0f);
+  EXPECT_EQ(rect.GetY(), 0.0f);
+  EXPECT_EQ(rect.GetWidth(), 15.5f);
+  EXPECT_EQ(rect.GetHeight(), 15.125f);
+  EXPECT_FALSE(rect.IsEmpty());
+  EXPECT_TRUE(rect.IsFinite());
+}
+
+TEST(RectTest, IRectSimpleWH) {
+  // Using fractional-power-of-2 friendly values for equality tests
+  IRect rect = IRect::MakeWH(15, 25);
+
+  EXPECT_EQ(rect.GetLeft(), 0);
+  EXPECT_EQ(rect.GetTop(), 0);
+  EXPECT_EQ(rect.GetRight(), 15);
+  EXPECT_EQ(rect.GetBottom(), 25);
+  EXPECT_EQ(rect.GetX(), 0);
+  EXPECT_EQ(rect.GetY(), 0);
+  EXPECT_EQ(rect.GetWidth(), 15);
+  EXPECT_EQ(rect.GetHeight(), 25);
+  EXPECT_FALSE(rect.IsEmpty());
+}
+
 TEST(RectTest, RectOverflowXYWH) {
   auto min = std::numeric_limits<Scalar>::lowest();
   auto max = std::numeric_limits<Scalar>::max();
@@ -1604,18 +1635,28 @@ TEST(RectTest, RectIntersection) {
 
     // unflipped a vs flipped (empty) b yields a
     EXPECT_FALSE(a.Intersection(flip_lr(b)).has_value()) << label;
+    EXPECT_TRUE(a.IntersectionOrEmpty(flip_lr(b)).IsEmpty()) << label;
     EXPECT_FALSE(a.Intersection(flip_tb(b)).has_value()) << label;
+    EXPECT_TRUE(a.IntersectionOrEmpty(flip_tb(b)).IsEmpty()) << label;
     EXPECT_FALSE(a.Intersection(flip_lrtb(b)).has_value()) << label;
+    EXPECT_TRUE(a.IntersectionOrEmpty(flip_lrtb(b)).IsEmpty()) << label;
 
     // flipped (empty) a vs unflipped b yields b
     EXPECT_FALSE(flip_lr(a).Intersection(b).has_value()) << label;
+    EXPECT_TRUE(flip_lr(a).IntersectionOrEmpty(b).IsEmpty()) << label;
     EXPECT_FALSE(flip_tb(a).Intersection(b).has_value()) << label;
+    EXPECT_TRUE(flip_tb(a).IntersectionOrEmpty(b).IsEmpty()) << label;
     EXPECT_FALSE(flip_lrtb(a).Intersection(b).has_value()) << label;
+    EXPECT_TRUE(flip_lrtb(a).IntersectionOrEmpty(b).IsEmpty()) << label;
 
     // flipped (empty) a vs flipped (empty) b yields empty
     EXPECT_FALSE(flip_lr(a).Intersection(flip_lr(b)).has_value()) << label;
+    EXPECT_TRUE(flip_lr(a).IntersectionOrEmpty(flip_lr(b)).IsEmpty()) << label;
     EXPECT_FALSE(flip_tb(a).Intersection(flip_tb(b)).has_value()) << label;
+    EXPECT_TRUE(flip_tb(a).IntersectionOrEmpty(flip_tb(b)).IsEmpty()) << label;
     EXPECT_FALSE(flip_lrtb(a).Intersection(flip_lrtb(b)).has_value()) << label;
+    EXPECT_TRUE(flip_lrtb(a).IntersectionOrEmpty(flip_lrtb(b)).IsEmpty())
+        << label;
   };
 
   auto test_non_empty = [&check_nans, &check_empty_flips](
@@ -1645,7 +1686,9 @@ TEST(RectTest, RectIntersection) {
     auto label = stream.str();
 
     EXPECT_FALSE(a.Intersection(b).has_value()) << label;
+    EXPECT_TRUE(a.IntersectionOrEmpty(b).IsEmpty()) << label;
     EXPECT_FALSE(b.Intersection(a).has_value()) << label;
+    EXPECT_TRUE(b.IntersectionOrEmpty(a).IsEmpty()) << label;
     check_empty_flips(a, b, label);
     check_nans(a, b, label);
   };

@@ -95,8 +95,8 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
   void setAntiAlias(bool aa) override;
   void setDrawStyle(DlDrawStyle style) override;
   void setColor(DlColor color) override;
-  void setStrokeWidth(SkScalar width) override;
-  void setStrokeMiter(SkScalar limit) override;
+  void setStrokeWidth(DlScalar width) override;
+  void setStrokeMiter(DlScalar limit) override;
   void setStrokeCap(DlStrokeCap cap) override;
   void setStrokeJoin(DlStrokeJoin join) override;
   void setColorSource(const DlColorSource* source) override;
@@ -107,90 +107,90 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
   void setImageFilter(const DlImageFilter* filter) override;
 
   void save() override;
-  void saveLayer(const SkRect& bounds,
+  void saveLayer(const DlRect& bounds,
                  const SaveLayerOptions options,
                  const DlImageFilter* backdrop) override;
   void restore() override;
 
-  void translate(SkScalar tx, SkScalar ty) override;
-  void scale(SkScalar sx, SkScalar sy) override;
-  void rotate(SkScalar degrees) override;
-  void skew(SkScalar sx, SkScalar sy) override;
+  void translate(DlScalar tx, DlScalar ty) override;
+  void scale(DlScalar sx, DlScalar sy) override;
+  void rotate(DlScalar degrees) override;
+  void skew(DlScalar sx, DlScalar sy) override;
   // clang-format off
-  void transform2DAffine(SkScalar mxx, SkScalar mxy, SkScalar mxt,
-                                 SkScalar myx, SkScalar myy, SkScalar myt) override;
+  void transform2DAffine(DlScalar mxx, DlScalar mxy, DlScalar mxt,
+                         DlScalar myx, DlScalar myy, DlScalar myt) override;
   void transformFullPerspective(
-      SkScalar mxx, SkScalar mxy, SkScalar mxz, SkScalar mxt,
-      SkScalar myx, SkScalar myy, SkScalar myz, SkScalar myt,
-      SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
-      SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) override;
+      DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
+      DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
+      DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
+      DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) override;
   // clang-format on
   void transformReset() override;
 
-  void clipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) override;
-  void clipOval(const SkRect& bounds, ClipOp clip_op, bool is_aa) override;
+  void clipRect(const DlRect& rect, ClipOp clip_op, bool is_aa) override;
+  void clipOval(const DlRect& bounds, ClipOp clip_op, bool is_aa) override;
   void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override;
   void clipPath(const SkPath& path, ClipOp clip_op, bool is_aa) override;
 
   void drawColor(DlColor color, DlBlendMode mode) override;
   void drawPaint() override;
-  void drawLine(const SkPoint& p0, const SkPoint& p1) override;
+  void drawLine(const DlPoint& p0, const DlPoint& p1) override;
   void drawDashedLine(const DlPoint& p0,
                       const DlPoint& p1,
                       DlScalar on_length,
                       DlScalar off_length) override;
-  void drawRect(const SkRect& rect) override;
-  void drawOval(const SkRect& bounds) override;
-  void drawCircle(const SkPoint& center, SkScalar radius) override;
+  void drawRect(const DlRect& rect) override;
+  void drawOval(const DlRect& bounds) override;
+  void drawCircle(const DlPoint& center, DlScalar radius) override;
   void drawRRect(const SkRRect& rrect) override;
   void drawDRRect(const SkRRect& outer, const SkRRect& inner) override;
   void drawPath(const SkPath& path) override;
-  void drawArc(const SkRect& oval_bounds,
-               SkScalar start_degrees,
-               SkScalar sweep_degrees,
+  void drawArc(const DlRect& oval_bounds,
+               DlScalar start_degrees,
+               DlScalar sweep_degrees,
                bool use_center) override;
   void drawPoints(PointMode mode,
                   uint32_t count,
-                  const SkPoint points[]) override;
+                  const DlPoint points[]) override;
   void drawVertices(const std::shared_ptr<DlVertices>& vertices,
                     DlBlendMode mode) override;
   void drawImage(const sk_sp<DlImage> image,
-                 const SkPoint point,
+                 const DlPoint& point,
                  DlImageSampling sampling,
                  bool render_with_attributes) override;
   void drawImageRect(const sk_sp<DlImage> image,
-                     const SkRect& src,
-                     const SkRect& dst,
+                     const DlRect& src,
+                     const DlRect& dst,
                      DlImageSampling sampling,
                      bool render_with_attributes,
                      SrcRectConstraint constraint) override;
   void drawImageNine(const sk_sp<DlImage> image,
-                     const SkIRect& center,
-                     const SkRect& dst,
+                     const DlIRect& center,
+                     const DlRect& dst,
                      DlFilterMode filter,
                      bool render_with_attributes) override;
   void drawAtlas(const sk_sp<DlImage> atlas,
                  const SkRSXform xform[],
-                 const SkRect tex[],
+                 const DlRect tex[],
                  const DlColor colors[],
                  int count,
                  DlBlendMode mode,
                  DlImageSampling sampling,
-                 const SkRect* cull_rect,
+                 const DlRect* cull_rect,
                  bool render_with_attributes) override;
   void drawDisplayList(const sk_sp<DisplayList> display_list,
-                       SkScalar opacity) override;
+                       DlScalar opacity) override;
   void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                    SkScalar x,
-                    SkScalar y) override;
+                    DlScalar x,
+                    DlScalar y) override;
   void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     SkScalar x,
-                     SkScalar y) override;
+                     DlScalar x,
+                     DlScalar y) override;
   void drawShadow(const SkPath& path,
                   const DlColor color,
-                  const SkScalar elevation,
+                  const DlScalar elevation,
                   bool transparent_occluder,
-                  SkScalar dpr) override;
+                  DlScalar dpr) override;
 
  private:
   std::ostream& os_;
@@ -318,30 +318,30 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
     }
   }
 
-  void translate(SkScalar tx, SkScalar ty) override {
+  void translate(DlScalar tx, DlScalar ty) override {
     RecordByType(DisplayListOpType::kTranslate);
   }
-  void scale(SkScalar sx, SkScalar sy) override {
+  void scale(DlScalar sx, DlScalar sy) override {
     RecordByType(DisplayListOpType::kScale);
   }
-  void rotate(SkScalar degrees) override {
+  void rotate(DlScalar degrees) override {
     RecordByType(DisplayListOpType::kRotate);
   }
-  void skew(SkScalar sx, SkScalar sy) override {
+  void skew(DlScalar sx, DlScalar sy) override {
     RecordByType(DisplayListOpType::kSkew);
   }
   // clang-format off
   // 2x3 2D affine subset of a 4x4 transform in row major order
-  void transform2DAffine(SkScalar mxx, SkScalar mxy, SkScalar mxt,
-                         SkScalar myx, SkScalar myy, SkScalar myt) override {
+  void transform2DAffine(DlScalar mxx, DlScalar mxy, DlScalar mxt,
+                         DlScalar myx, DlScalar myy, DlScalar myt) override {
     RecordByType(DisplayListOpType::kTransform2DAffine);
   }
   // full 4x4 transform in row major order
   void transformFullPerspective(
-      SkScalar mxx, SkScalar mxy, SkScalar mxz, SkScalar mxt,
-      SkScalar myx, SkScalar myy, SkScalar myz, SkScalar myt,
-      SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
-      SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) override {
+      DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
+      DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
+      DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
+      DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) override {
     RecordByType(DisplayListOpType::kTransformFullPerspective);
   }
   // clang-format on
@@ -349,7 +349,7 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
     RecordByType(DisplayListOpType::kTransformReset);
   }
 
-  void clipRect(const SkRect& rect,
+  void clipRect(const DlRect& rect,
                 DlCanvas::ClipOp clip_op,
                 bool is_aa) override {
     switch (clip_op) {
@@ -361,7 +361,7 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
         break;
     }
   }
-  void clipOval(const SkRect& bounds,
+  void clipOval(const DlRect& bounds,
                 DlCanvas::ClipOp clip_op,
                 bool is_aa) override {
     switch (clip_op) {
@@ -399,7 +399,7 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
   }
 
   void save() override { RecordByType(DisplayListOpType::kSave); }
-  void saveLayer(const SkRect& bounds,
+  void saveLayer(const DlRect& bounds,
                  const SaveLayerOptions options,
                  const DlImageFilter* backdrop) override {
     if (backdrop) {
@@ -414,7 +414,7 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
     RecordByType(DisplayListOpType::kDrawColor);
   }
   void drawPaint() override { RecordByType(DisplayListOpType::kDrawPaint); }
-  void drawLine(const SkPoint& p0, const SkPoint& p1) override {
+  void drawLine(const DlPoint& p0, const DlPoint& p1) override {
     RecordByType(DisplayListOpType::kDrawLine);
   }
   void drawDashedLine(const DlPoint& p0,
@@ -423,13 +423,13 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
                       DlScalar off_length) override {
     RecordByType(DisplayListOpType::kDrawDashedLine);
   }
-  void drawRect(const SkRect& rect) override {
+  void drawRect(const DlRect& rect) override {
     RecordByType(DisplayListOpType::kDrawRect);
   }
-  void drawOval(const SkRect& bounds) override {
+  void drawOval(const DlRect& bounds) override {
     RecordByType(DisplayListOpType::kDrawOval);
   }
-  void drawCircle(const SkPoint& center, SkScalar radius) override {
+  void drawCircle(const DlPoint& center, DlScalar radius) override {
     RecordByType(DisplayListOpType::kDrawCircle);
   }
   void drawRRect(const SkRRect& rrect) override {
@@ -441,15 +441,15 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
   void drawPath(const SkPath& path) override {
     RecordByType(DisplayListOpType::kDrawPath);
   }
-  void drawArc(const SkRect& oval_bounds,
-               SkScalar start_degrees,
-               SkScalar sweep_degrees,
+  void drawArc(const DlRect& oval_bounds,
+               DlScalar start_degrees,
+               DlScalar sweep_degrees,
                bool use_center) override {
     RecordByType(DisplayListOpType::kDrawArc);
   }
   void drawPoints(DlCanvas::PointMode mode,
                   uint32_t count,
-                  const SkPoint points[]) override {
+                  const DlPoint points[]) override {
     switch (mode) {
       case DlCanvas::PointMode::kPoints:
         RecordByType(DisplayListOpType::kDrawPoints);
@@ -467,7 +467,7 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
     RecordByType(DisplayListOpType::kDrawVertices);
   }
   void drawImage(const sk_sp<DlImage> image,
-                 const SkPoint point,
+                 const DlPoint& point,
                  DlImageSampling sampling,
                  bool render_with_attributes) override {
     if (render_with_attributes) {
@@ -477,16 +477,16 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
     }
   }
   void drawImageRect(const sk_sp<DlImage> image,
-                     const SkRect& src,
-                     const SkRect& dst,
+                     const DlRect& src,
+                     const DlRect& dst,
                      DlImageSampling sampling,
                      bool render_with_attributes,
                      SrcRectConstraint constraint) override {
     RecordByType(DisplayListOpType::kDrawImageRect);
   }
   void drawImageNine(const sk_sp<DlImage> image,
-                     const SkIRect& center,
-                     const SkRect& dst,
+                     const DlIRect& center,
+                     const DlRect& dst,
                      DlFilterMode filter,
                      bool render_with_attributes) override {
     if (render_with_attributes) {
@@ -497,12 +497,12 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
   }
   void drawAtlas(const sk_sp<DlImage> atlas,
                  const SkRSXform xform[],
-                 const SkRect tex[],
+                 const DlRect tex[],
                  const DlColor colors[],
                  int count,
                  DlBlendMode mode,
                  DlImageSampling sampling,
-                 const SkRect* cull_rect,
+                 const DlRect* cull_rect,
                  bool render_with_attributes) override {
     if (cull_rect) {
       RecordByType(DisplayListOpType::kDrawAtlasCulled);
@@ -511,24 +511,24 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
     }
   }
   void drawDisplayList(const sk_sp<DisplayList> display_list,
-                       SkScalar opacity) override {
+                       DlScalar opacity) override {
     RecordByType(DisplayListOpType::kDrawDisplayList);
   }
   void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                    SkScalar x,
-                    SkScalar y) override {
+                    DlScalar x,
+                    DlScalar y) override {
     RecordByType(DisplayListOpType::kDrawTextBlob);
   }
   void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     SkScalar x,
-                     SkScalar y) override {
+                     DlScalar x,
+                     DlScalar y) override {
     RecordByType(DisplayListOpType::kDrawTextFrame);
   }
   void drawShadow(const SkPath& path,
                   const DlColor color,
-                  const SkScalar elevation,
+                  const DlScalar elevation,
                   bool transparent_occluder,
-                  SkScalar dpr) override {
+                  DlScalar dpr) override {
     if (transparent_occluder) {
       RecordByType(DisplayListOpType::kDrawShadowTransparentOccluder);
     } else {
