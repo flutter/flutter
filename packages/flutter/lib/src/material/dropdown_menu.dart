@@ -804,6 +804,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       controller: _controller,
       menuChildren: menu,
       crossAxisUnconstrained: false,
+      layerLink: LayerLink(),
       builder: (BuildContext context, MenuController controller, Widget? child) {
         assert(_initialMenu != null);
         final Widget trailingButton = Padding(
