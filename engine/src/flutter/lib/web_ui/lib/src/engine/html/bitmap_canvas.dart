@@ -1337,7 +1337,6 @@ String? stringForStrokeCap(ui.StrokeCap? strokeCap) {
     case ui.StrokeCap.round:
       return 'round';
     case ui.StrokeCap.square:
-    default:
       return 'square';
   }
 }
@@ -1349,7 +1348,6 @@ String stringForStrokeJoin(ui.StrokeJoin strokeJoin) {
     case ui.StrokeJoin.bevel:
       return 'bevel';
     case ui.StrokeJoin.miter:
-    default:
       return 'miter';
   }
 }

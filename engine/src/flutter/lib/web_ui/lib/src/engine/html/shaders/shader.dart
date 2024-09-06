@@ -914,7 +914,5 @@ EngineHtmlColorFilter? createHtmlColorFilter(EngineColorFilter? colorFilter) {
         throw UnimplementedError('ColorFilter.linearToSrgbGamma not implemented for HTML renderer');
       case ColorFilterType.srgbToLinearGamma:
         throw UnimplementedError('ColorFilter.srgbToLinearGamma not implemented for HTML renderer.');
-      default:
-        throw StateError('Unknown mode $colorFilter.type for ColorFilter.');
     }
 }

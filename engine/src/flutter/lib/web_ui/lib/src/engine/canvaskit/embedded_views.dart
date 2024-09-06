@@ -844,8 +844,6 @@ class Mutator {
         return matrix == typedOther.matrix;
       case MutatorType.opacity:
         return alpha == typedOther.alpha;
-      default:
-        return false;
     }
   }
 
