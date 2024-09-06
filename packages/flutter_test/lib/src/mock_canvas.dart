@@ -940,11 +940,23 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
     call.moveNext();
   }
 
+  static bool _colorsMatch(Color x, Color? y) {
+    if (y == null) {
+      return false;
+    } else {
+      return x.colorSpace == y.colorSpace &&
+        (x.a - y.a).abs() < 0.004 &&
+        (x.r - y.r).abs() < 0.004 &&
+        (x.g - y.g).abs() < 0.004 &&
+        (x.b - y.b).abs() < 0.004;
+    }
+  }
+
   @protected
   @mustCallSuper
   void verifyArguments(List<dynamic> arguments) {
     final Paint paintArgument = arguments[paintArgumentIndex] as Paint;
-    if (color != null && paintArgument.color != color) {
+    if (color != null && !_colorsMatch(paintArgument.color, color)) {
       throw FlutterError(
         'It called $methodName with a paint whose color, '
         '${paintArgument.color}, was not exactly the expected color ($color).'

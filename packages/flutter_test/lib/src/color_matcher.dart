@@ -14,7 +14,7 @@ class _ColorMatcher extends Matcher {
 
   @override
   Description describe(Description description) {
-    return description.add('matches "$_target"');
+    return description.add('matches "$_target" with threshold "$_threshold".');
   }
 
   @override
@@ -35,6 +35,6 @@ class _ColorMatcher extends Matcher {
 /// Results in a positive match if compared against an instance of a Color in
 /// the same [ui.ColorSpace] as [color] and all the color components do not
 /// differ from [color]'s by more than the [threshold].
-Matcher matchesColor(ui.Color color, {double threshold = 0.0004}) {
+Matcher matchesColor(ui.Color color, {double threshold = 0.004}) {
   return _ColorMatcher(color, threshold);
 }

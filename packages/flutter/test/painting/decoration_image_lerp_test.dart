@@ -15,36 +15,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// TODO(gaaclarke): Unify the different instances of _ColorMatcher.
-/// Positive result if the colors would be mapped to the same argb8888 color.
-class _ColorMatcher extends Matcher {
-  _ColorMatcher(this._target);
-
-  final ui.Color _target;
-
-  @override
-  Description describe(Description description) {
-    return description.add('matches "$_target"');
-  }
-
-  @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item is ui.Color) {
-      return item.colorSpace == _target.colorSpace &&
-          (item.a - _target.a).abs() <= 0.004 &&
-          (item.r - _target.r).abs() <= 0.004 &&
-          (item.g - _target.g).abs() <= 0.004 &&
-          (item.b - _target.b).abs() <= 0.004;
-    } else {
-      return false;
-    }
-  }
-}
-
-Matcher _matchesColor(ui.Color color) {
-  return _ColorMatcher(color);
-}
-
 void main() {
   testWidgets('ImageDecoration.lerp 1', (WidgetTester tester) async {
     final MemoryImage green = MemoryImage(Uint8List.fromList(<int>[
@@ -208,17 +178,17 @@ void main() {
         return getPixel(x, y);
       }
       const Color lime = Color(0xFF00FF00);
-      expect(getBlockPixel(0), _matchesColor(lime)); // pure green
-      expect(getBlockPixel(1), _matchesColor(lime)); // 100% green 0% red
-      expect(getBlockPixel(2), _matchesColor(const Color(0xFF19E600)));
-      expect(getBlockPixel(3), _matchesColor(const Color(0xFF33CC00)));
-      expect(getBlockPixel(4), _matchesColor(const Color(0xFF808000))); // 50-50 mix green/red
-      expect(getBlockPixel(5), _matchesColor(const Color(0xFFCD3200)));
-      expect(getBlockPixel(6), _matchesColor(const Color(0xFFE61900)));
-      expect(getBlockPixel(7), _matchesColor(const Color(0xFFFF0000))); // 0% green 100% red
-      expect(getBlockPixel(8), _matchesColor(const Color(0xFFFF0000))); // pure red
+      expect(getBlockPixel(0), matchesColor(lime)); // pure green
+      expect(getBlockPixel(1), matchesColor(lime)); // 100% green 0% red
+      expect(getBlockPixel(2), matchesColor(const Color(0xFF19E600)));
+      expect(getBlockPixel(3), matchesColor(const Color(0xFF33CC00)));
+      expect(getBlockPixel(4), matchesColor(const Color(0xFF808000))); // 50-50 mix green/red
+      expect(getBlockPixel(5), matchesColor(const Color(0xFFCD3200)));
+      expect(getBlockPixel(6), matchesColor(const Color(0xFFE61900)));
+      expect(getBlockPixel(7), matchesColor(const Color(0xFFFF0000))); // 0% green 100% red
+      expect(getBlockPixel(8), matchesColor(const Color(0xFFFF0000))); // pure red
       for (int index = 9; index < 40; index += 1) {
-        expect(getBlockPixel(index), _matchesColor(lime));
+        expect(getBlockPixel(index), matchesColor(lime));
       }
     }
 
