@@ -116,17 +116,37 @@ allprojects {
    apply plugin: "maven-publish"
 }
 
-afterProject {
+afterProject { project ->
+    // Exit early if either:
+    // 1. The project doesn't have the Android Gradle plugin applied.
+    // 2. The project has already defined which variants to publish (trying to re-define which
+    //    variants to publish will result in an error).
+    if (!project.hasProperty("android")) {
+        return
+    }
+    if (project.android.publishing.singleVariants.size() != 0) {
+        return
+    }
+
     Closure addSingleVariants = {buildType ->
-        rootProject.android {
-            publishing.singleVariant(buildType.name) {
+        if (!project.android.productFlavors.isEmpty()) {
+            project.android.productFlavors.all{productFlavor ->
+                project.android.publishing.singleVariant(
+                        productFlavor.name + buildType.name.capitalize()
+                ) {
+                    withSourcesJar()
+                    withJavadocJar()
+                }
+            }
+        } else {
+            project.android.publishing.singleVariant(buildType.name) {
                 withSourcesJar()
                 withJavadocJar()
             }
         }
     }
 
-    rootProject.android.buildTypes.all(addSingleVariants)
+    project.android.buildTypes.all(addSingleVariants)
 }
 
 projectsEvaluated {
