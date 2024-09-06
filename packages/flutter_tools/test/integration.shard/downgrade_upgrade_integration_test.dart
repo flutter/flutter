@@ -7,6 +7,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -14,14 +15,7 @@ import 'test_utils.dart';
 const String _kInitialVersion = '3.0.0';
 const String _kBranch = 'beta';
 
-final Stdio stdio = Stdio();
-final BufferLogger logger = BufferLogger.test(
-  terminal: AnsiTerminal(
-    platform: platform,
-    stdio: stdio,
-  ),
-  outputPreferences: OutputPreferences.test(wrapText: true),
-);
+final _TestLogger logger = _TestLogger();
 final ProcessUtils processUtils = ProcessUtils(processManager: processManager, logger: logger);
 final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
 
@@ -52,15 +46,7 @@ void main() {
       expect(
         exitCode,
         0,
-        reason: '''
-trace:
-${logger.traceText}
-
-status:
-${logger.statusText}
-
-error:
-${logger.errorText}''',
+        reason: 'oopsies',
       );
     }
 
@@ -115,7 +101,7 @@ ${logger.errorText}''',
       '--tags',
     ], workingDirectory: testDirectory.path);
     expect(versionResult.stdout, isNot(contains(_kInitialVersion)));
-    printOnFailure('current version is ${versionResult.stdout.trim()}\ninitial was $_kInitialVersion');
+    printOnFailure('version after upgrade is ${versionResult.stdout.trim()}\ninitial was $_kInitialVersion');
 
     printOnFailure('Step 6 - downgrade back to the initial version');
     exitCode = await processUtils.stream(<String>[
@@ -123,6 +109,7 @@ ${logger.errorText}''',
       'downgrade',
       '--no-prompt',
       '--working-directory=${testDirectory.path}',
+      '--verbose',
     ], workingDirectory: parentDirectory.path, trace: true);
     checkExitCode(exitCode);
 
@@ -138,4 +125,25 @@ ${logger.errorText}''',
     expect(oldVersionResult.stdout, contains(_kInitialVersion));
     printOnFailure('current version is ${oldVersionResult.stdout.trim()}\ninitial was $_kInitialVersion');
   });
+}
+
+class _TestLogger extends Fake implements Logger {
+  @override
+  void printStatus(String message, {bool? emphasis, TerminalColor? color, bool? newline, int? indent, int? hangingIndent, bool? wrap}) {
+    printOnFailure('[status] $message');
+  }
+  @override
+  void printTrace(String message) {
+    printOnFailure('[trace] $message');
+  }
+
+  @override
+  void printError(String message, {StackTrace? stackTrace, bool? emphasis, TerminalColor? color, int? indent, int? hangingIndent, bool? wrap}) {
+    printOnFailure('[error] $message');
+  }
+
+  @override
+  void printWarning(String message, {bool? emphasis, TerminalColor? color, int? indent, int? hangingIndent, bool? wrap, bool fatal = true}) {
+    printOnFailure('[warning] $message');
+  }
 }
