@@ -2533,50 +2533,6 @@ void main() {
     expect(currentRouteSetting.name, '/');
   });
 
-  testWidgets('showDialog - custom transitionDuration', (WidgetTester tester) async {
-    final DialogObserver rootObserver = DialogObserver();
-    await tester.pumpWidget(
-      MaterialApp(
-        navigatorObservers: <NavigatorObserver>[rootObserver],
-        home: Material(
-          child: Builder(
-            builder: (BuildContext context) {
-              return Center(
-                child: ElevatedButton(
-                  child: const Text('X'),
-                  onPressed: () {
-                    showDialog<void>(
-                      context: context,
-                      transitionDuration: const Duration(milliseconds: 50),
-                      builder: (BuildContext context) {
-                        return const AlertDialog(
-                          title: Text('Title'),
-                          content: Text('Y'),
-                          actions: <Widget>[],
-                        );
-                      },
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.text('X'));
-    await tester.pump();
-
-    expect(rootObserver.dialogRoutes.length, equals(1));
-    final ModalRoute<dynamic> route = rootObserver.dialogRoutes.last;
-    expect(route is DialogRoute, true);
-    expect(route.barrierDismissible, isNotNull);
-    expect(route.barrierColor, isNotNull);
-    expect(route.transitionDuration, isNotNull);
-    expect(route.transitionDuration.inMilliseconds, 50);
-  });
-
   testWidgets('showDialog - custom barrierLabel', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
@@ -2873,50 +2829,6 @@ void main() {
     expect(find.text('Dialog2'), findsOneWidget);
   });
 
-  testWidgets('showAdaptiveDialog - custom transitionDuration', (WidgetTester tester) async {
-    final DialogObserver rootObserver = DialogObserver();
-    await tester.pumpWidget(
-      MaterialApp(
-        navigatorObservers: <NavigatorObserver>[rootObserver],
-        home: Material(
-          child: Builder(
-            builder: (BuildContext context) {
-              return Center(
-                child: ElevatedButton(
-                  child: const Text('X'),
-                  onPressed: () {
-                    showAdaptiveDialog<void>(
-                      context: context,
-                      transitionDuration: const Duration(milliseconds: 50),
-                      builder: (BuildContext context) {
-                        return const AlertDialog(
-                          title: Text('Title'),
-                          content: Text('Y'),
-                          actions: <Widget>[],
-                        );
-                      },
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.text('X'));
-    await tester.pump();
-
-    expect(rootObserver.dialogRoutes.length, equals(1));
-    final ModalRoute<dynamic> route = rootObserver.dialogRoutes.last;
-    expect(route is DialogRoute, true);
-    expect(route.barrierDismissible, isNotNull);
-    expect(route.barrierColor, isNotNull);
-    expect(route.transitionDuration, isNotNull);
-    expect(route.transitionDuration.inMilliseconds, 50);
-  });
-
   testWidgets('Uses open focus traversal when overridden', (WidgetTester tester) async {
     final FocusNode okNode = FocusNode();
     addTearDown(okNode.dispose);
@@ -3090,23 +3002,14 @@ class _RestorableDialogTestWidget extends StatelessWidget {
 }
 
 class DialogObserver extends NavigatorObserver {
-  final List<ModalRoute<dynamic>> dialogRoutes = <ModalRoute<dynamic>>[];
-  int get dialogCount => dialogRoutes.length;
+  int dialogCount = 0;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route is DialogRoute) {
-      dialogRoutes.add(route);
+      dialogCount++;
     }
     super.didPush(route, previousRoute);
-  }
-
-  @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route is DialogRoute) {
-      dialogRoutes.removeLast();
-    }
-    super.didPop(route, previousRoute);
   }
 }
 

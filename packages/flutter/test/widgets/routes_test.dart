@@ -5,7 +5,6 @@
 import 'dart:collection';
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1921,233 +1920,6 @@ void main() {
     });
   });
 
-  group('DialogRoute', () {
-    testWidgets('DialogRoute - default transitionDuration', (WidgetTester tester) async {
-      final GlobalKey containerKey = GlobalKey();
-      final DialogObserver rootObserver = DialogObserver();
-      await tester.pumpWidget(
-        MaterialApp(
-          navigatorObservers: <NavigatorObserver>[rootObserver],
-          home: Builder(
-            builder: (BuildContext context) {
-              return ElevatedButton(
-                onPressed: () {
-                  showDialog<void>(
-                    context: context,
-                    builder: (BuildContext innerContext) {
-                      return Container(
-                        key: containerKey,
-                        color: Colors.green,
-                      );
-                    },
-                  );
-                },
-                child: const Text('Open dialog'),
-              );
-            },
-          ),
-        ),
-      );
-
-      // Open the dialog.
-      await tester.tap(find.byType(ElevatedButton));
-      await tester.pumpAndSettle();
-      expect(find.byKey(containerKey), findsOneWidget);
-
-      expect(rootObserver.dialogCount, 1);
-      final ModalRoute<dynamic> route = rootObserver.dialogRoutes.last;
-      expect(route is RawDialogRoute, true);
-      expect(route.transitionDuration.inMilliseconds, 150);
-
-      // Pop the new route.
-      tester.state<NavigatorState>(find.byType(Navigator)).pop();
-      await tester.pump();
-      expect(find.byKey(containerKey), findsOneWidget);
-
-      // Container should be present halfway through the transition.
-      await tester.pump(const Duration(milliseconds: 75));
-      expect(find.byKey(containerKey), findsOneWidget);
-
-      // Container should be present at the very end of the transition.
-      await tester.pump(const Duration(milliseconds: 75));
-      expect(find.byKey(containerKey), findsOneWidget);
-
-      // Container have transitioned out after 150ms.
-      await tester.pump(const Duration(milliseconds: 1));
-      expect(find.byKey(containerKey), findsNothing);
-    });
-
-    testWidgets('DialogRoute - custom transitionDuration', (WidgetTester tester) async {
-      final GlobalKey containerKey = GlobalKey();
-      final DialogObserver rootObserver = DialogObserver();
-      await tester.pumpWidget(
-        MaterialApp(
-          navigatorObservers: <NavigatorObserver>[rootObserver],
-          home: Builder(
-            builder: (BuildContext context) {
-              return ElevatedButton(
-                onPressed: () {
-                  showDialog<void>(
-                    context: context,
-                    transitionDuration: const Duration(milliseconds: 300),
-                    builder: (BuildContext innerContext) {
-                      return Container(
-                        key: containerKey,
-                        color: Colors.green,
-                      );
-                    },
-                  );
-                },
-                child: const Text('Open dialog'),
-              );
-            },
-          ),
-        ),
-      );
-
-      // Open the dialog.
-      await tester.tap(find.byType(ElevatedButton));
-      await tester.pumpAndSettle();
-      expect(find.byKey(containerKey), findsOneWidget);
-
-      expect(rootObserver.dialogCount, 1);
-      final ModalRoute<dynamic> route = rootObserver.dialogRoutes.last;
-      expect(route is RawDialogRoute, true);
-      expect(route.transitionDuration.inMilliseconds, 300);
-
-      // Pop the new route.
-      tester.state<NavigatorState>(find.byType(Navigator)).pop();
-      await tester.pump();
-      expect(find.byKey(containerKey), findsOneWidget);
-
-      // Container should be present halfway through the transition.
-      await tester.pump(const Duration(milliseconds: 150));
-      expect(find.byKey(containerKey), findsOneWidget);
-
-      // Container should be present at the very end of the transition.
-      await tester.pump(const Duration(milliseconds: 150));
-      expect(find.byKey(containerKey), findsOneWidget);
-
-      // Container have transitioned out after 300ms.
-      await tester.pump(const Duration(milliseconds: 1));
-      expect(find.byKey(containerKey), findsNothing);
-    });
-  });
-
-  group('CupertinoDialogRoute', () {
-    testWidgets('CupertinoDialogRoute - default transitionDuration', (WidgetTester tester) async {
-      final GlobalKey containerKey = GlobalKey();
-      final DialogObserver rootObserver = DialogObserver();
-      await tester.pumpWidget(
-        MaterialApp(
-          navigatorObservers: <NavigatorObserver>[rootObserver],
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: Builder(
-            builder: (BuildContext context) {
-              return ElevatedButton(
-                onPressed: () {
-                  showCupertinoDialog<void>(
-                    context: context,
-                    builder: (BuildContext innerContext) {
-                      return Container(
-                        key: containerKey,
-                        color: Colors.green,
-                      );
-                    },
-                  );
-                },
-                child: const Text('Open dialog'),
-              );
-            },
-          ),
-        ),
-      );
-
-      // Open the dialog.
-      await tester.tap(find.byType(ElevatedButton));
-      await tester.pumpAndSettle();
-      expect(find.byKey(containerKey), findsOneWidget);
-
-      expect(rootObserver.dialogCount, 1);
-      final ModalRoute<dynamic> route = rootObserver.dialogRoutes.last;
-      expect(route is RawDialogRoute, true);
-      expect(route.transitionDuration.inMilliseconds, 250);
-
-      // Pop the new route.
-      tester.state<NavigatorState>(find.byType(Navigator)).pop();
-      await tester.pump();
-      expect(find.byKey(containerKey), findsOneWidget);
-
-      // Container should be present halfway through the transition.
-      await tester.pump(const Duration(milliseconds: 125));
-      expect(find.byKey(containerKey), findsOneWidget);
-
-      // Container should be present at the very end of the transition.
-      await tester.pump(const Duration(milliseconds: 125));
-      expect(find.byKey(containerKey), findsOneWidget);
-
-      // Container have transitioned out after 250ms.
-      await tester.pump(const Duration(milliseconds: 1));
-      expect(find.byKey(containerKey), findsNothing);
-    });
-
-    testWidgets('CupertinoDialogRoute - custom transitionDuration', (WidgetTester tester) async {
-      final GlobalKey containerKey = GlobalKey();
-      final DialogObserver rootObserver = DialogObserver();
-      await tester.pumpWidget(
-        MaterialApp(
-          navigatorObservers: <NavigatorObserver>[rootObserver],
-          home: Builder(
-            builder: (BuildContext context) {
-              return ElevatedButton(
-                onPressed: () {
-                  showDialog<void>(
-                    context: context,
-                    transitionDuration: const Duration(milliseconds: 100),
-                    builder: (BuildContext innerContext) {
-                      return Container(
-                        key: containerKey,
-                        color: Colors.green,
-                      );
-                    },
-                  );
-                },
-                child: const Text('Open dialog'),
-              );
-            },
-          ),
-        ),
-      );
-
-      // Open the dialog.
-      await tester.tap(find.byType(ElevatedButton));
-      await tester.pumpAndSettle();
-      expect(find.byKey(containerKey), findsOneWidget);
-
-      expect(rootObserver.dialogCount, 1);
-      final ModalRoute<dynamic> route = rootObserver.dialogRoutes.last;
-      expect(route is RawDialogRoute, true);
-      expect(route.transitionDuration.inMilliseconds, 100);
-
-      // Pop the new route.
-      tester.state<NavigatorState>(find.byType(Navigator)).pop();
-      await tester.pump();
-      expect(find.byKey(containerKey), findsOneWidget);
-
-      // Container should be present halfway through the transition.
-      await tester.pump(const Duration(milliseconds: 50));
-      expect(find.byKey(containerKey), findsOneWidget);
-
-      // Container should be present at the very end of the transition.
-      await tester.pump(const Duration(milliseconds: 50));
-      expect(find.byKey(containerKey), findsOneWidget);
-
-      // Container have transitioned out after 100ms.
-      await tester.pump(const Duration(milliseconds: 1));
-      expect(find.byKey(containerKey), findsNothing);
-    });
-  });
-
   testWidgets('can be dismissed with escape keyboard shortcut', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(MaterialApp(
@@ -2383,12 +2155,13 @@ class TestPageRouteBuilder extends PageRouteBuilder<void> {
 
 class DialogObserver extends NavigatorObserver {
   final List<ModalRoute<dynamic>> dialogRoutes = <ModalRoute<dynamic>>[];
-  int get dialogCount => dialogRoutes.length;
+  int dialogCount = 0;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route is RawDialogRoute) {
       dialogRoutes.add(route);
+      dialogCount++;
     }
     super.didPush(route, previousRoute);
   }
@@ -2397,6 +2170,7 @@ class DialogObserver extends NavigatorObserver {
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route is RawDialogRoute) {
       dialogRoutes.removeLast();
+      dialogCount--;
     }
     super.didPop(route, previousRoute);
   }
