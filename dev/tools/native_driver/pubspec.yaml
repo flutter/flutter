@@ -1,0 +1,19 @@
+name: native_driver
+
+environment: 
+  sdk: ^3.5.0
+
+dependencies:
+  flutter_driver:
+    sdk: flutter
+  flutter_goldens:
+    sdk: flutter
+  matcher:
+  meta:
+  path:
+  platform:
+  process:
+  test_api:
+
+dev_dependencies:
+  test:
