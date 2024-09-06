@@ -31,6 +31,9 @@ import 'theme_data.dart';
 
 const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
 
+// The transition duration used for [DialogRoute] transitions.
+const Duration _kDialogRouteTransitionDuration = Duration(milliseconds: 150);
+
 /// A Material Design dialog.
 ///
 /// This dialog widget does not have any opinion about the contents of the
@@ -1345,6 +1348,10 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// field from `DialogThemeData` is used. If that is `null` the default color
 /// `Colors.black54` is used.
 ///
+/// the `transitionDuration` argument is used to specify the duration of
+/// the dialog's entrance and exit animations. If it's not provided or `null`,
+/// then it uses the default value as set by [DialogRoute].
+///
 /// The `useSafeArea` argument is used to indicate if the dialog should only
 /// display in 'safe' areas of the screen not used by the operating system
 /// (see [SafeArea] for more details). It is `true` by default, which means
@@ -1428,6 +1435,7 @@ Future<T?> showDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   TraversalEdgeBehavior? traversalEdgeBehavior,
+  Duration? transitionDuration,
 }) {
   assert(_debugIsActive(context));
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1454,6 +1462,7 @@ Future<T?> showDialog<T>({
     themes: themes,
     anchorPoint: anchorPoint,
     traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
+    transitionDuration: transitionDuration,
   ));
 }
 
@@ -1465,6 +1474,10 @@ Future<T?> showDialog<T>({
 ///
 /// On Cupertino platforms, [barrierColor], [useSafeArea], and
 /// [traversalEdgeBehavior] are ignored.
+///
+/// The `transitionDuration` argument is used to specify the duration of
+/// the dialog's entrance and exit animations. If it's not provided or `null`,
+/// then it uses the default value as set by [DialogRoute] or [CupertinoDialogRoute].
 Future<T?> showAdaptiveDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
@@ -1476,6 +1489,7 @@ Future<T?> showAdaptiveDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   TraversalEdgeBehavior? traversalEdgeBehavior,
+  Duration? transitionDuration,
 }) {
   final ThemeData theme = Theme.of(context);
   switch (theme.platform) {
@@ -1494,6 +1508,7 @@ Future<T?> showAdaptiveDialog<T>({
         routeSettings: routeSettings,
         anchorPoint: anchorPoint,
         traversalEdgeBehavior: traversalEdgeBehavior,
+        transitionDuration: transitionDuration,
       );
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
@@ -1505,6 +1520,7 @@ Future<T?> showAdaptiveDialog<T>({
         useRootNavigator: useRootNavigator,
         anchorPoint: anchorPoint,
         routeSettings: routeSettings,
+        transitionDuration: transitionDuration,
       );
   }
 }
@@ -1552,6 +1568,10 @@ bool _debugIsActive(BuildContext context) {
 /// barrier that darkens everything below the dialog. If `null`, the default
 /// color `Colors.black54` is used.
 ///
+/// the `transitionDuration` argument is used to specify the duration of
+/// the dialog's entrance and exit animations. If it's not provided or `null`,
+/// then the default duration `Duration(milliseconds: 150)` is used.
+///
 /// The `useSafeArea` argument is used to indicate if the dialog should only
 /// display in 'safe' areas of the screen not used by the operating system
 /// (see [SafeArea] for more details). It is `true` by default, which means
@@ -1582,6 +1602,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     super.barrierDismissible,
     String? barrierLabel,
     bool useSafeArea = true,
+    Duration? transitionDuration,
     super.settings,
     super.requestFocus,
     super.anchorPoint,
@@ -1596,8 +1617,8 @@ class DialogRoute<T> extends RawDialogRoute<T> {
            return dialog;
          },
          barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
-         transitionDuration: const Duration(milliseconds: 150),
          transitionBuilder: _buildMaterialDialogTransitions,
+         transitionDuration: transitionDuration ?? _kDialogRouteTransitionDuration,
        );
 
   CurvedAnimation? _curvedAnimation;
