@@ -762,7 +762,6 @@ class FlutterPlugin implements Plugin<Project> {
     private void configurePluginProject(Map<String, Object> pluginObject) {
         assert(pluginObject.name instanceof String)
         Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
-        println("HI GRAY, IN " + pluginProject.name)
         if (pluginProject == null) {
             return
         }
@@ -801,15 +800,6 @@ class FlutterPlugin implements Plugin<Project> {
             )
         }
 
-//        Closure addSingleVariants = {buildType ->
-//            pluginProject.android {
-//                publishing.singleVariant(buildType.name) {
-//                    withSourcesJar()
-//                    withJavadocJar()
-//                }
-//            }
-//        }
-
         // Wait until the Android plugin loaded.
         pluginProject.afterEvaluate {
             // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
@@ -819,7 +809,6 @@ class FlutterPlugin implements Plugin<Project> {
             }
 
             project.android.buildTypes.all(addEmbeddingDependencyToPlugin)
-            //project.android.buildTypes.all(addSingleVariants)
         }
     }
 
