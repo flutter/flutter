@@ -72,6 +72,12 @@ void AccumulationRect::accumulate(AccumulationRect& ar) {
   }
 }
 
+DlRect AccumulationRect::GetBounds() const {
+  return (max_x_ >= min_x_ && max_y_ >= min_y_)
+             ? DlRect::MakeLTRB(min_x_, min_y_, max_x_, max_y_)
+             : DlRect();
+}
+
 SkRect AccumulationRect::bounds() const {
   return (max_x_ >= min_x_ && max_y_ >= min_y_)
              ? SkRect::MakeLTRB(min_x_, min_y_, max_x_, max_y_)

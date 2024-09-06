@@ -93,7 +93,7 @@ class DlOpReceiver {
   using SrcRectConstraint = DlCanvas::SrcRectConstraint;
 
  public:
-  // MaxDrawPointsCount * sizeof(SkPoint) must be less than 1 << 32
+  // MaxDrawPointsCount * sizeof(DlPoint) must be less than 1 << 32
   static constexpr int kMaxDrawPointsCount = ((1 << 29) - 1);
 
   // ---------------------------------------------------------------------
@@ -129,9 +129,9 @@ class DlOpReceiver {
   virtual void drawPath(const CacheablePath& cache) { FML_UNREACHABLE(); }
   virtual void drawShadow(const CacheablePath& cache,
                           const DlColor color,
-                          const SkScalar elevation,
+                          const DlScalar elevation,
                           bool transparent_occluder,
-                          SkScalar dpr) {
+                          DlScalar dpr) {
     FML_UNREACHABLE();
   }
   // ---------------------------------------------------------------------
@@ -181,12 +181,12 @@ class DlOpReceiver {
   // specified in calling a |DisplayListBuilder| as they will be ignored.
   // The |backdrop| filter, if not null, is used to initialize the new
   // layer before further rendering happens.
-  virtual void saveLayer(const SkRect& bounds,
+  virtual void saveLayer(const DlRect& bounds,
                          const SaveLayerOptions options,
                          const DlImageFilter* backdrop = nullptr) = 0;
   // Optional variant of saveLayer() that passes the total depth count of
   // all rendering operations that occur until the next restore() call.
-  virtual void saveLayer(const SkRect& bounds,
+  virtual void saveLayer(const DlRect& bounds,
                          const SaveLayerOptions& options,
                          uint32_t total_content_depth,
                          DlBlendMode max_content_blend_mode,
@@ -210,25 +210,25 @@ class DlOpReceiver {
   // public DisplayListBuilder/DlCanvas public interfaces where possible,
   // as tracked in:
   // https://github.com/flutter/flutter/issues/144070
-  virtual void saveLayer(const SkRect* bounds,
+  virtual void saveLayer(const DlRect* bounds,
                          const SaveLayerOptions options,
                          const DlImageFilter* backdrop = nullptr) final {
     if (bounds) {
       saveLayer(*bounds, options.with_bounds_from_caller(), backdrop);
     } else {
-      saveLayer(SkRect(), options.without_bounds_from_caller(), backdrop);
+      saveLayer(DlRect(), options.without_bounds_from_caller(), backdrop);
     }
   }
   // ---------------------------------------------------------------------
 
-  virtual void translate(SkScalar tx, SkScalar ty) = 0;
-  virtual void scale(SkScalar sx, SkScalar sy) = 0;
-  virtual void rotate(SkScalar degrees) = 0;
-  virtual void skew(SkScalar sx, SkScalar sy) = 0;
+  virtual void translate(DlScalar tx, DlScalar ty) = 0;
+  virtual void scale(DlScalar sx, DlScalar sy) = 0;
+  virtual void rotate(DlScalar degrees) = 0;
+  virtual void skew(DlScalar sx, DlScalar sy) = 0;
 
   // The transform methods all assume the following math for transforming
   // an arbitrary 3D homogenous point (x, y, z, w).
-  // All coordinates in the rendering methods (and SkPoint and SkRect objects)
+  // All coordinates in the rendering methods (and DlPoint and DlRect objects)
   // represent a simplified coordinate (x, y, 0, 1).
   //   x' = x * mxx + y * mxy + z * mxz + w * mxt
   //   y' = x * myx + y * myy + z * myz + w * myt
@@ -309,8 +309,8 @@ class DlOpReceiver {
   //   [ myx  myy   0   myt ]
   //   [  0    0    1    0  ]
   //   [  0    0    0    1  ]
-  virtual void transform2DAffine(SkScalar mxx, SkScalar mxy, SkScalar mxt,
-                                 SkScalar myx, SkScalar myy, SkScalar myt) = 0;
+  virtual void transform2DAffine(DlScalar mxx, DlScalar mxy, DlScalar mxt,
+                                 DlScalar myx, DlScalar myy, DlScalar myt) = 0;
   // |transformFullPerspective| is equivalent to concatenating the internal
   // 4x4 transform with the following row major transform matrix:
   //   [ mxx  mxy  mxz  mxt ]
@@ -318,17 +318,17 @@ class DlOpReceiver {
   //   [ mzx  mzy  mzz  mzt ]
   //   [ mwx  mwy  mwz  mwt ]
   virtual void transformFullPerspective(
-      SkScalar mxx, SkScalar mxy, SkScalar mxz, SkScalar mxt,
-      SkScalar myx, SkScalar myy, SkScalar myz, SkScalar myt,
-      SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
-      SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) = 0;
+      DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
+      DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
+      DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
+      DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) = 0;
   // clang-format on
 
   // Clears the transformation stack.
   virtual void transformReset() = 0;
 
-  virtual void clipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) = 0;
-  virtual void clipOval(const SkRect& bounds, ClipOp clip_op, bool is_aa) = 0;
+  virtual void clipRect(const DlRect& rect, ClipOp clip_op, bool is_aa) = 0;
+  virtual void clipOval(const DlRect& bounds, ClipOp clip_op, bool is_aa) = 0;
   virtual void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) = 0;
   virtual void clipPath(const SkPath& path, ClipOp clip_op, bool is_aa) = 0;
 
@@ -341,65 +341,65 @@ class DlOpReceiver {
   // stream, or assume default attributes.
   virtual void drawColor(DlColor color, DlBlendMode mode) = 0;
   virtual void drawPaint() = 0;
-  virtual void drawLine(const SkPoint& p0, const SkPoint& p1) = 0;
+  virtual void drawLine(const DlPoint& p0, const DlPoint& p1) = 0;
   virtual void drawDashedLine(const DlPoint& p0,
                               const DlPoint& p1,
                               DlScalar on_length,
                               DlScalar off_length) = 0;
-  virtual void drawRect(const SkRect& rect) = 0;
-  virtual void drawOval(const SkRect& bounds) = 0;
-  virtual void drawCircle(const SkPoint& center, SkScalar radius) = 0;
+  virtual void drawRect(const DlRect& rect) = 0;
+  virtual void drawOval(const DlRect& bounds) = 0;
+  virtual void drawCircle(const DlPoint& center, DlScalar radius) = 0;
   virtual void drawRRect(const SkRRect& rrect) = 0;
   virtual void drawDRRect(const SkRRect& outer, const SkRRect& inner) = 0;
   virtual void drawPath(const SkPath& path) = 0;
-  virtual void drawArc(const SkRect& oval_bounds,
-                       SkScalar start_degrees,
-                       SkScalar sweep_degrees,
+  virtual void drawArc(const DlRect& oval_bounds,
+                       DlScalar start_degrees,
+                       DlScalar sweep_degrees,
                        bool use_center) = 0;
   virtual void drawPoints(PointMode mode,
                           uint32_t count,
-                          const SkPoint points[]) = 0;
+                          const DlPoint points[]) = 0;
   virtual void drawVertices(const std::shared_ptr<DlVertices>& vertices,
                             DlBlendMode mode) = 0;
   virtual void drawImage(const sk_sp<DlImage> image,
-                         const SkPoint point,
+                         const DlPoint& point,
                          DlImageSampling sampling,
                          bool render_with_attributes) = 0;
   virtual void drawImageRect(
       const sk_sp<DlImage> image,
-      const SkRect& src,
-      const SkRect& dst,
+      const DlRect& src,
+      const DlRect& dst,
       DlImageSampling sampling,
       bool render_with_attributes,
       SrcRectConstraint constraint = SrcRectConstraint::kFast) = 0;
   virtual void drawImageNine(const sk_sp<DlImage> image,
-                             const SkIRect& center,
-                             const SkRect& dst,
+                             const DlIRect& center,
+                             const DlRect& dst,
                              DlFilterMode filter,
                              bool render_with_attributes) = 0;
   virtual void drawAtlas(const sk_sp<DlImage> atlas,
                          const SkRSXform xform[],
-                         const SkRect tex[],
+                         const DlRect tex[],
                          const DlColor colors[],
                          int count,
                          DlBlendMode mode,
                          DlImageSampling sampling,
-                         const SkRect* cull_rect,
+                         const DlRect* cull_rect,
                          bool render_with_attributes) = 0;
   virtual void drawDisplayList(const sk_sp<DisplayList> display_list,
-                               SkScalar opacity = SK_Scalar1) = 0;
+                               DlScalar opacity = SK_Scalar1) = 0;
   virtual void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                            SkScalar x,
-                            SkScalar y) = 0;
+                            DlScalar x,
+                            DlScalar y) = 0;
   virtual void drawTextFrame(
       const std::shared_ptr<impeller::TextFrame>& text_frame,
-      SkScalar x,
-      SkScalar y) = 0;
+      DlScalar x,
+      DlScalar y) = 0;
   virtual void drawShadow(const SkPath& path,
                           const DlColor color,
-                          const SkScalar elevation,
+                          const DlScalar elevation,
                           bool transparent_occluder,
-                          SkScalar dpr) = 0;
+                          DlScalar dpr) = 0;
 };
 
 }  // namespace flutter

@@ -10,6 +10,7 @@
 
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_sampling_options.h"
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/display_list/geometry/dl_rtree.h"
 #include "flutter/fml/logging.h"
 
@@ -320,6 +321,7 @@ class DisplayList : public SkRefCnt {
   uint32_t unique_id() const { return unique_id_; }
 
   const SkRect& bounds() const { return bounds_; }
+  const DlRect& GetBounds() const { return ToDlRect(bounds_); }
 
   bool has_rtree() const { return rtree_ != nullptr; }
   sk_sp<const DlRTree> rtree() const { return rtree_; }

@@ -187,7 +187,7 @@ void MockCanvas::DrawShadow(const SkPath& path,
 }
 
 void MockCanvas::DrawImage(const sk_sp<DlImage>& image,
-                           SkPoint point,
+                           const SkPoint& point,
                            const DlImageSampling options,
                            const DlPaint* paint) {
   if (paint) {

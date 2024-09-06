@@ -145,8 +145,8 @@ class ComplexityCalculatorHelper
 
   void drawImageRect(
       const sk_sp<DlImage> image,
-      const SkRect& src,
-      const SkRect& dst,
+      const DlRect& src,
+      const DlRect& dst,
       DlImageSampling sampling,
       bool render_with_attributes,
       SrcRectConstraint constraint = SrcRectConstraint::kFast) override {
@@ -159,12 +159,12 @@ class ComplexityCalculatorHelper
 
   void drawAtlas(const sk_sp<DlImage> atlas,
                  const SkRSXform xform[],
-                 const SkRect tex[],
+                 const DlRect tex[],
                  const DlColor colors[],
                  int count,
                  DlBlendMode mode,
                  DlImageSampling sampling,
-                 const SkRect* cull_rect,
+                 const DlRect* cull_rect,
                  bool render_with_attributes) override {
     if (IsComplex()) {
       return;
@@ -172,7 +172,7 @@ class ComplexityCalculatorHelper
     // This API just does a series of drawImage calls from the atlas
     // This is equivalent to calling drawImageRect lots of times
     for (int i = 0; i < count; i++) {
-      ImageRect(SkISize::Make(tex[i].width(), tex[i].height()), true,
+      ImageRect(SkISize::Make(tex[i].GetWidth(), tex[i].GetHeight()), true,
                 render_with_attributes, true);
     }
   }

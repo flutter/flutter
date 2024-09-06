@@ -49,7 +49,7 @@ unsigned int DisplayListGLComplexityCalculator::GLHelper::BatchedComplexity() {
 }
 
 void DisplayListGLComplexityCalculator::GLHelper::saveLayer(
-    const SkRect& bounds,
+    const DlRect& bounds,
     const SaveLayerOptions options,
     const DlImageFilter* backdrop) {
   if (IsComplex()) {
@@ -64,8 +64,8 @@ void DisplayListGLComplexityCalculator::GLHelper::saveLayer(
   save_layer_count_++;
 }
 
-void DisplayListGLComplexityCalculator::GLHelper::drawLine(const SkPoint& p0,
-                                                           const SkPoint& p1) {
+void DisplayListGLComplexityCalculator::GLHelper::drawLine(const DlPoint& p0,
+                                                           const DlPoint& p1) {
   if (IsComplex()) {
     return;
   }
@@ -89,7 +89,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawLine(const SkPoint& p0,
 
   // Use an approximation for the distance to avoid floating point or
   // sqrt() calls.
-  SkScalar distance = abs(p0.x() - p1.x()) + abs(p0.y() - p1.y());
+  DlScalar distance = abs(p0.x - p1.x) + abs(p0.y - p1.y);
 
   // The baseline complexity is for a hairline stroke with no AA.
   // m = 1/40
@@ -107,10 +107,10 @@ void DisplayListGLComplexityCalculator::GLHelper::drawDashedLine(
     DlScalar off_length) {
   // Dashing is slightly more complex than a regular drawLine, but this
   // op is so rare it is not worth measuring the difference.
-  drawLine(ToSkPoint(p0), ToSkPoint(p1));
+  drawLine(p0, p1);
 }
 
-void DisplayListGLComplexityCalculator::GLHelper::drawRect(const SkRect& rect) {
+void DisplayListGLComplexityCalculator::GLHelper::drawRect(const DlRect& rect) {
   if (IsComplex()) {
     return;
   }
@@ -126,14 +126,14 @@ void DisplayListGLComplexityCalculator::GLHelper::drawRect(const SkRect& rect) {
   // currently use it anywhere in Flutter.
   if (DrawStyle() == DlDrawStyle::kFill) {
     // No real difference for AA with filled styles
-    unsigned int area = rect.width() * rect.height();
+    unsigned int area = rect.GetWidth() * rect.GetHeight();
 
     // m = 1/3500
     // c = 0
     complexity = area * 2 / 175;
   } else {
     // Take the average of the width and height.
-    unsigned int length = (rect.width() + rect.height()) / 2;
+    unsigned int length = (rect.GetWidth() + rect.GetHeight()) / 2;
 
     if (IsAntiAliased()) {
       // m = 1/30
@@ -160,7 +160,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawRect(const SkRect& rect) {
 }
 
 void DisplayListGLComplexityCalculator::GLHelper::drawOval(
-    const SkRect& bounds) {
+    const DlRect& bounds) {
   if (IsComplex()) {
     return;
   }
@@ -169,7 +169,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawOval(
   //
   // Filled styles and stroked styles with AA scale linearly with the bounding
   // box area.
-  unsigned int area = bounds.width() * bounds.height();
+  unsigned int area = bounds.GetWidth() * bounds.GetHeight();
 
   unsigned int complexity;
 
@@ -187,7 +187,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawOval(
       complexity = area / 20;
     } else {
       // Take the average of the width and height.
-      unsigned int length = (bounds.width() + bounds.height()) / 2;
+      unsigned int length = (bounds.GetWidth() + bounds.GetHeight()) / 2;
 
       // m = 1/75
       // c = 0
@@ -199,8 +199,8 @@ void DisplayListGLComplexityCalculator::GLHelper::drawOval(
 }
 
 void DisplayListGLComplexityCalculator::GLHelper::drawCircle(
-    const SkPoint& center,
-    SkScalar radius) {
+    const DlPoint& center,
+    DlScalar radius) {
   if (IsComplex()) {
     return;
   }
@@ -372,9 +372,9 @@ void DisplayListGLComplexityCalculator::GLHelper::drawPath(const SkPath& path) {
 }
 
 void DisplayListGLComplexityCalculator::GLHelper::drawArc(
-    const SkRect& oval_bounds,
-    SkScalar start_degrees,
-    SkScalar sweep_degrees,
+    const DlRect& oval_bounds,
+    DlScalar start_degrees,
+    DlScalar sweep_degrees,
     bool use_center) {
   if (IsComplex()) {
     return;
@@ -383,7 +383,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawArc(
   // Stroked styles without AA scale linearly with the log of the diameter.
   // Stroked styles with AA scale linearly with the area.
   // Filled styles scale lienarly with the area.
-  unsigned int area = oval_bounds.width() * oval_bounds.height();
+  unsigned int area = oval_bounds.GetWidth() * oval_bounds.GetHeight();
   unsigned int complexity;
 
   // These values were worked out by creating a straight line graph (y=mx+c)
@@ -398,7 +398,8 @@ void DisplayListGLComplexityCalculator::GLHelper::drawArc(
       // c = 12
       complexity = (area + 45600) / 171;
     } else {
-      unsigned int diameter = (oval_bounds.width() + oval_bounds.height()) / 2;
+      unsigned int diameter =
+          (oval_bounds.GetWidth() + oval_bounds.GetHeight()) / 2;
       // m = 15
       // c = -100
       // This should never go negative though, so use std::max to ensure
@@ -426,7 +427,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawArc(
 void DisplayListGLComplexityCalculator::GLHelper::drawPoints(
     DlCanvas::PointMode mode,
     uint32_t count,
-    const SkPoint points[]) {
+    const DlPoint points[]) {
   if (IsComplex()) {
     return;
   }
@@ -514,7 +515,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawVertices(
 
 void DisplayListGLComplexityCalculator::GLHelper::drawImage(
     const sk_sp<DlImage> image,
-    const SkPoint point,
+    const DlPoint& point,
     DlImageSampling sampling,
     bool render_with_attributes) {
   if (IsComplex()) {
@@ -594,8 +595,8 @@ void DisplayListGLComplexityCalculator::GLHelper::ImageRect(
 
 void DisplayListGLComplexityCalculator::GLHelper::drawImageNine(
     const sk_sp<DlImage> image,
-    const SkIRect& center,
-    const SkRect& dst,
+    const DlIRect& center,
+    const DlRect& dst,
     DlFilterMode filter,
     bool render_with_attributes) {
   if (IsComplex()) {
@@ -619,13 +620,13 @@ void DisplayListGLComplexityCalculator::GLHelper::drawImageNine(
 
 void DisplayListGLComplexityCalculator::GLHelper::drawDisplayList(
     const sk_sp<DisplayList> display_list,
-    SkScalar opacity) {
+    DlScalar opacity) {
   if (IsComplex()) {
     return;
   }
   GLHelper helper(Ceiling() - CurrentComplexityScore());
   if (opacity < SK_Scalar1 && !display_list->can_apply_group_opacity()) {
-    auto bounds = display_list->bounds();
+    auto bounds = display_list->GetBounds();
     helper.saveLayer(bounds, SaveLayerOptions::kWithAttributes, nullptr);
   }
   display_list->Dispatch(helper);
@@ -634,8 +635,8 @@ void DisplayListGLComplexityCalculator::GLHelper::drawDisplayList(
 
 void DisplayListGLComplexityCalculator::GLHelper::drawTextBlob(
     const sk_sp<SkTextBlob> blob,
-    SkScalar x,
-    SkScalar y) {
+    DlScalar x,
+    DlScalar y) {
   if (IsComplex()) {
     return;
   }
@@ -650,15 +651,15 @@ void DisplayListGLComplexityCalculator::GLHelper::drawTextBlob(
 
 void DisplayListGLComplexityCalculator::GLHelper::drawTextFrame(
     const std::shared_ptr<impeller::TextFrame>& text_frame,
-    SkScalar x,
-    SkScalar y) {}
+    DlScalar x,
+    DlScalar y) {}
 
 void DisplayListGLComplexityCalculator::GLHelper::drawShadow(
     const SkPath& path,
     const DlColor color,
-    const SkScalar elevation,
+    const DlScalar elevation,
     bool transparent_occluder,
-    SkScalar dpr) {
+    DlScalar dpr) {
   if (IsComplex()) {
     return;
   }

@@ -36,6 +36,7 @@ class AccumulationRect {
   bool is_empty() const { return min_x_ >= max_x_ || min_y_ >= max_y_; }
   bool is_not_empty() const { return min_x_ < max_x_ && min_y_ < max_y_; }
 
+  DlRect GetBounds() const;
   SkRect bounds() const;
 
   void reset();
