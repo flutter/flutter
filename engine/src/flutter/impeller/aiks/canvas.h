@@ -37,6 +37,11 @@ struct CanvasStackEntry {
   size_t num_clips = 0u;
   Scalar distributed_opacity = 1.0f;
   Entity::RenderingMode rendering_mode = Entity::RenderingMode::kDirect;
+  // Whether all entities in the current save should be skipped.
+  bool skipping = false;
+  // Whether subpass coverage was rounded out to pixel coverage, or if false
+  // truncated.
+  bool did_round_out = false;
 };
 
 enum class PointStyle {

@@ -89,6 +89,7 @@ void main() {
     final SceneBuilder sceneBuilder = SceneBuilder();
 
     final Picture redClippedPicture = makePicture((Canvas canvas) {
+      canvas.drawPaint(Paint()..color = const Color(0xFFFFFFFF));
       canvas.clipRect(const Rect.fromLTRB(10, 10, 200, 200));
       canvas.clipRect(const Rect.fromLTRB(11, 10, 300, 200));
       canvas.drawPaint(Paint()..color = const Color(0xFFFF0000));
