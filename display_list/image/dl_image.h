@@ -9,7 +9,7 @@
 #include <optional>
 #include <string>
 
-#include "flutter/fml/macros.h"
+#include "flutter/fml/build_config.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 
@@ -117,6 +117,10 @@ class DlImage : public SkRefCnt {
   /// @return     An error, if any, that occurred when trying to create the
   ///             image.
   virtual std::optional<std::string> get_error() const;
+
+#if FML_OS_IOS_SIMULATOR
+  virtual bool IsFakeImage() const { return false; }
+#endif  // FML_OS_IOS_SIMULATOR
 
   bool Equals(const DlImage* other) const {
     if (!other) {

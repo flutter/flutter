@@ -52,8 +52,7 @@ int CanvasImage::colorSpace() {
     return ImageEncodingImpeller::GetColorSpace(image_->impeller_texture());
 #endif  // IMPELLER_SUPPORTS_RENDERING
   }
-
-  return -1;
+  return ColorSpace::kSRGB;
 }
 
 }  // namespace flutter

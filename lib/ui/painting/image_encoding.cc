@@ -178,6 +178,14 @@ Dart_Handle EncodeImage(CanvasImage* canvas_image,
   auto callback = std::make_unique<DartPersistentValue>(
       tonic::DartState::Current(), callback_handle);
 
+#if IMPELLER_SUPPORTS_RENDERING && FML_OS_IOS_SIMULATOR
+  if (canvas_image->image()->IsFakeImage()) {
+    sk_sp<SkData> data = SkData::MakeEmpty();
+    InvokeDataCallback(std::move(callback), data);
+    return Dart_Null();
+  }
+#endif  // IMPELLER_SUPPORTS_RENDERING && FML_OS_IOS_SIMULATOR
+
   const auto& task_runners = UIDartState::Current()->GetTaskRunners();
 
   // The static leak checker gets confused by the use of fml::MakeCopyable.
