@@ -1883,45 +1883,6 @@ void main() {
     expect(nestedObserver.dialogCount, 0);
   });
 
-  testWidgets('showCupertinoDialog - custom transitionDuration', (WidgetTester tester) async {
-    final DialogObserver rootObserver = DialogObserver();
-    final DialogObserver nestedObserver = DialogObserver();
-
-    await tester.pumpWidget(CupertinoApp(
-      navigatorObservers: <NavigatorObserver>[rootObserver],
-      home: Navigator(
-        observers: <NavigatorObserver>[nestedObserver],
-        onGenerateRoute: (RouteSettings settings) {
-          return PageRouteBuilder<dynamic>(
-            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
-              return GestureDetector(
-                onTap: () async {
-                  await showCupertinoDialog<void>(
-                    context: context,
-                    transitionDuration: const Duration(milliseconds: 50),
-                    builder: (BuildContext context) => const SizedBox(),
-                  );
-                },
-                child: const Text('tap'),
-              );
-            },
-          );
-        },
-      ),
-    ));
-
-    // Open the dialog.
-    await tester.tap(find.text('tap'));
-    await tester.pump();
-
-    expect(rootObserver.dialogCount, 1);
-    expect(nestedObserver.dialogCount, 0);
-    expect(rootObserver.dialogRoutes.length, equals(1));
-    final ModalRoute<dynamic> route = rootObserver.dialogRoutes.last;
-    expect(route is CupertinoDialogRoute, true);
-    expect(route.transitionDuration.inMilliseconds, 50);
-  });
-
   testWidgets('showCupertinoDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
     final DialogObserver rootObserver = DialogObserver();
     final DialogObserver nestedObserver = DialogObserver();
@@ -2971,23 +2932,14 @@ class PopupObserver extends NavigatorObserver {
 }
 
 class DialogObserver extends NavigatorObserver {
-  final List<ModalRoute<dynamic>> dialogRoutes = <ModalRoute<dynamic>>[];
-  int get dialogCount => dialogRoutes.length;
+  int dialogCount = 0;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route is CupertinoDialogRoute) {
-      dialogRoutes.add(route);
+      dialogCount++;
     }
     super.didPush(route, previousRoute);
-  }
-
-  @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route is CupertinoDialogRoute) {
-      dialogRoutes.removeLast();
-    }
-    super.didPop(route, previousRoute);
   }
 }
 
