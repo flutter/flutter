@@ -186,6 +186,7 @@ const Feature swiftPackageManager = Feature(
   environmentOverride: 'SWIFT_PACKAGE_MANAGER',
   master: FeatureChannelSetting(
     available: true,
+    enabledByDefault: true,
   ),
 );
 
