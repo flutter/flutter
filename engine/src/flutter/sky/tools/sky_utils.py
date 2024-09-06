@@ -33,18 +33,25 @@ def assert_valid_codesign_config(
   either entitlements or without_entitlements."""
   if _contains_duplicates(entitlements):
     log_error('ERROR: duplicate value(s) found in entitlements.txt')
+    log_error_items(sorted(entitlements))
     sys.exit(os.EX_DATAERR)
 
   if _contains_duplicates(without_entitlements):
     log_error('ERROR: duplicate value(s) found in without_entitlements.txt')
+    log_error_items(sorted(without_entitlements))
     sys.exit(os.EX_DATAERR)
 
   if _contains_duplicates(unsigned_binaries):
     log_error('ERROR: duplicate value(s) found in unsigned_binaries.txt')
+    log_error_items(sorted(unsigned_binaries))
     sys.exit(os.EX_DATAERR)
 
   if _contains_duplicates(entitlements + without_entitlements + unsigned_binaries):
-    log_error('ERROR: value(s) found in both entitlements and without_entitlements.txt')
+    log_error(
+        'ERROR: duplicate value(s) found between '
+        'entitlements.txt, without_entitlements.txt, unsigned_binaries.txt'
+    )
+    log_error_items(sorted(entitlements + without_entitlements + unsigned_binaries))
     sys.exit(os.EX_DATAERR)
 
   binaries = set()
@@ -252,6 +259,12 @@ def lipo(input_binaries, output_binary):
 def log_error(message):
   """Writes the message to stderr, followed by a newline."""
   print(message, file=sys.stderr)
+
+
+def log_error_items(items):
+  """Writes each item indented to stderr, followed by a newline."""
+  for item in items:
+    log_error('  ' + item)
 
 
 def strip_binary(binary_path, unstripped_copy_path):
