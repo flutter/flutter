@@ -54,8 +54,9 @@ namespace impeller {
 // The watchdog object allocated here will automatically double-check
 // the depth usage at any exit point to the function, or any other
 // point at which it falls out of scope.
-#define AUTO_DEPTH_WATCHER(d) \
-  DepthWatcher _watcher(__FILE__, __LINE__, GetCanvas(), d)
+#define AUTO_DEPTH_WATCHER(d)                            \
+  DepthWatcher _watcher(__FILE__, __LINE__, GetCanvas(), \
+                        paint_.mask_blur_descriptor.has_value(), d)
 
 // While the AUTO_DEPTH_WATCHER macro will check the depth usage at
 // any exit point from the dispatch function, sometimes the dispatch
@@ -75,11 +76,12 @@ struct DepthWatcher {
   DepthWatcher(const std::string& file,
                int line,
                const impeller::Canvas& canvas,
+               bool has_mask_blur,
                int allowed)
       : file_(file),
         line_(line),
         canvas_(canvas),
-        allowed_(allowed),
+        allowed_(has_mask_blur ? allowed + 1 : allowed),
         old_depth_(canvas.GetOpDepth()),
         old_max_(canvas.GetMaxOpDepth()) {}
 
