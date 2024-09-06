@@ -26,7 +26,9 @@ final class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Draw a full-screen blue rectangle.
-    return const DecoratedBox(decoration: BoxDecoration(color: Colors.blue));
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: AndroidView(viewType: 'blue_orange_gradient_platform_view'),
+    );
   }
 }

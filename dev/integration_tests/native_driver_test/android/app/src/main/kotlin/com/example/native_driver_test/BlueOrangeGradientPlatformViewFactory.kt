@@ -4,7 +4,7 @@
 
 @file:Suppress("PackageName")
 
-package com.example.android_driver_test
+package com.example.native_driver_test
 
 import android.content.Context
 import android.graphics.Canvas

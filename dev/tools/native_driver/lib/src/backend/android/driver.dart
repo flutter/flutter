@@ -63,6 +63,8 @@ final class AndroidNativeDriver implements NativeDriver {
 
   @override
   Future<NativeScreenshot> screenshot() async {
+    // Indentical wait to what `FlutterDriver.screenshot` does.
+    await Future<void>.delayed(const Duration(seconds: 2));
     return _AdbScreencap(await _adb.screencap(), _tmpDir);
   }
 

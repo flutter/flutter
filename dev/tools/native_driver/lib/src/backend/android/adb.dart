@@ -41,10 +41,12 @@ class Adb {
   }
 
   Future<AdbStringResult> _runString(List<String> args) async {
-    final io.ProcessResult result = await _proccess.run(<String>[
-      ..._prefixArgs,
-      ...args,
-    ]);
+    final io.ProcessResult result = await _proccess.run(
+      <String>[
+        ..._prefixArgs,
+        ...args,
+      ],
+    );
     return AdbStringResult(
       result.stdout as String,
       exitCode: result.exitCode,
@@ -53,10 +55,13 @@ class Adb {
   }
 
   Future<AdbBinaryResult> _runBinary(List<String> args) async {
-    final io.ProcessResult result = await _proccess.run(<String>[
-      ..._prefixArgs,
-      ...args,
-    ]);
+    final io.ProcessResult result = await _proccess.run(
+      <String>[
+        ..._prefixArgs,
+        ...args,
+      ],
+      stdoutEncoding: null,
+    );
     return AdbBinaryResult(
       result.stdout as Uint8List,
       exitCode: result.exitCode,
