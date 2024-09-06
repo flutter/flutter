@@ -1,0 +1,12 @@
+name: native_driver_test
+publish_to: none
+
+environment:
+  sdk: ^3.6.0-216.0.dev
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:

@@ -29,7 +29,7 @@ GoldenFileComparator goldenFileComparator = const NaiveLocalFileComparator._();
 ///
 /// Instances of this comparator will be used as the backend for
 /// [matchesGoldenFile].
-abstract final class GoldenFileComparator {
+abstract class GoldenFileComparator {
   /// @nodoc
   const GoldenFileComparator();
 
