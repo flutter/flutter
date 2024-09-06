@@ -67,6 +67,7 @@ export 'src/_test_selector_io.dart' if (dart.library.js_interop) 'src/_test_sele
 export 'src/accessibility.dart';
 export 'src/animation_sheet.dart';
 export 'src/binding.dart';
+export 'src/color_matcher.dart';
 export 'src/controller.dart';
 export 'src/deprecated.dart';
 export 'src/event_simulation.dart';

@@ -9,7 +9,6 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_test/src/color_matcher.dart';
 
 import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
