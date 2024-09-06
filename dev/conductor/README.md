@@ -4,14 +4,14 @@ Command-line tool for managing a release of the Flutter SDK. Also see
 [Release Process](../../docs/releases/Release-process.md) for more information on
 the release process.
 
-## Requirements
+## Conductor Requirements
 
-Some basic requirements to conduct a release are:
+Some basic requirements to run conductor are:
 
 - a Linux or macOS computer set up for Flutter development. The conductor does
   not support Windows.
 - git
-- Mirrors on GitHub of the Flutter
+- Mirrors on GitHub of the Flutter **
   [framework](https://github.com/flutter/flutter) and
   [engine](https://github.com/flutter/engine) repositories.
 
@@ -22,6 +22,8 @@ local ssh key is password-protected, it is recommended to use ssh-agent to
 unlock your ssh key for the session; if you do not, each time the conductor
 attempts to interact with a remote, the user will be prompted to enter their ssh
 key password.
+
+** Confirm that your personal github clone of flutter/flutter is named flutter and flutter/engine is named engine. If not you will need to use flags to overide the defaults.
 
 ## Usage
 
