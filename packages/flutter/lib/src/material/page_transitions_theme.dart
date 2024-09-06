@@ -204,7 +204,7 @@ class _ZoomPageTransition extends StatelessWidget {
     required this.secondaryAnimation,
     required this.allowSnapshotting,
     required this.allowEnterRouteSnapshotting,
-    this.scrimColor,
+    this.backgroundColor,
     this.child,
   });
 
@@ -256,8 +256,8 @@ class _ZoomPageTransition extends StatelessWidget {
 
   /// The color of the scrim that fades in and out during the transition.
   ///
-  /// If null, defaults to [Colors.black] to simulate depth.
-  final Color? scrimColor;
+  /// If not provided, defaults to current theme's surface color.
+  final Color? backgroundColor;
 
   /// The widget below this widget in the tree.
   ///
@@ -276,7 +276,7 @@ class _ZoomPageTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor = Theme.of(context).colorScheme.surface;
+    final Color enterTransitionBackgroundColor = backgroundColor ?? Theme.of(context).colorScheme.surface;
     return DualTransitionBuilder(
       animation: animation,
       forwardBuilder: (
@@ -287,7 +287,7 @@ class _ZoomPageTransition extends StatelessWidget {
         return _ZoomEnterTransition(
           animation: animation,
           allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting,
-          backgroundColor: backgroundColor,
+          backgroundColor: enterTransitionBackgroundColor,
           child: child,
         );
       },
@@ -314,7 +314,7 @@ class _ZoomPageTransition extends StatelessWidget {
             animation: animation,
             allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting ,
             reverse: true,
-            backgroundColor: backgroundColor,
+            backgroundColor: enterTransitionBackgroundColor,
             child: child,
           );
         },
@@ -678,7 +678,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   const ZoomPageTransitionsBuilder({
     this.allowSnapshotting = true,
     this.allowEnterRouteSnapshotting = true,
-    this.scrimColor = Colors.black,
+    this.backgroundColor,
   });
 
   /// Whether zoom page transitions will prefer to animate a snapshot of the entering
@@ -717,9 +717,8 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   final bool allowEnterRouteSnapshotting;
 
   /// The color of the scrim that fades in and out during the transition.
-  ///
-  /// If null, defaults to [Colors.black] to simulate depth.
-  final Color? scrimColor;
+  /// If not provided, defaults to current theme's surface color.
+  final Color? backgroundColor;
 
   // Allows devicelab benchmarks to force disable the snapshotting. This is
   // intended to allow us to profile and fix the underlying performance issues
@@ -746,7 +745,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
       secondaryAnimation: secondaryAnimation,
       allowSnapshotting: allowSnapshotting && route.allowSnapshotting,
       allowEnterRouteSnapshotting: allowEnterRouteSnapshotting,
-      scrimColor: scrimColor,
+      backgroundColor: backgroundColor,
       child: child,
     );
   }
