@@ -87,6 +87,10 @@ class ExperimentalCanvas : public Canvas {
   };
 
  private:
+  /// @brief Compute the current coverage limit in screen space, or
+  /// std::nullopt.
+  std::optional<Rect> ComputeCoverageLimit() const;
+
   // clip depth of the previous save or 0.
   size_t GetClipHeightFloor() const {
     if (transform_stack_.size() > 1) {
@@ -94,6 +98,13 @@ class ExperimentalCanvas : public Canvas {
     }
     return 0;
   }
+
+  /// @brief Whether all entites should be skipped until a corresponding
+  ///        restore.
+  bool IsSkipping() { return transform_stack_.back().skipping; }
+
+  /// @brief Skip all rendering/clipping entities until next restore.
+  void SkipUntilMatchingRestore(size_t total_content_depth);
 
   ContentContext& renderer_;
   RenderTarget& render_target_;
@@ -108,7 +119,7 @@ class ExperimentalCanvas : public Canvas {
   void AddClipEntityToCurrentPass(Entity entity) override;
   bool BlitToOnscreen();
 
-  Point GetGlobalPassPosition() {
+  Point GetGlobalPassPosition() const {
     if (save_layer_state_.empty()) {
       return Point(0, 0);
     }
