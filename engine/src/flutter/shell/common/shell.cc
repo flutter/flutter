@@ -1076,10 +1076,10 @@ void Shell::OnPlatformViewDispatchPlatformMessage(
 
   // The static leak checker gets confused by the use of fml::MakeCopyable.
   // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
-  fml::TaskRunner::RunNowOrPostTask(
-      task_runners_.GetUITaskRunner(),
-      fml::MakeCopyable([engine = engine_->GetWeakPtr(),
-                         message = std::move(message)]() mutable {
+  // This logic must always explicitly post a task so that we are guaranteed
+  // to wake up the UI message loop to flush tasks.
+  task_runners_.GetUITaskRunner()->PostTask(fml::MakeCopyable(
+      [engine = engine_->GetWeakPtr(), message = std::move(message)]() mutable {
         if (engine) {
           engine->DispatchPlatformMessage(std::move(message));
         }
