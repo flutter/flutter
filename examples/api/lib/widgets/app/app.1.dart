@@ -64,7 +64,7 @@ class _MyRouteInformationParser extends RouteInformationParser<_MyNavigationConf
       uri: configuration.uri,
       // Pass the state of the navigation stack in the state parameter.
       state: <String, List<String>>{
-        'pages': configuration.pages.map((_MyPage page) => page.toString()).toList(),
+        'pages': configuration.pages.map((_MyPage page) => page.name).toList(),
       },
     );
   }
@@ -307,34 +307,28 @@ class _MyNestedNavigatorState extends State<_MyNestedNavigator> with Restoration
 
   @override
   Widget build(BuildContext context) {
-    return NavigatorPopHandler(
-      onPop: () {
-        assert(_pages.value.isNotEmpty);
-        setState(() {
-          _pages.value = _pages.value.take(_pages.value.length - 1);
-        });
+    return Navigator(
+      restorationScopeId: 'nested-navigator',
+      onDidRemovePage: (Page<void> page) {
+        final _MyNestedPage pageConfiguration = _MyNestedPage.fromName(page.name!);
+        assert(!_pages.value.contains(pageConfiguration) || _pages.value.length > 1);
+        final Iterable<_MyNestedPage> nextPages = _pages.value
+            .where((_MyNestedPage nestedPageConfiguration) {
+              return nestedPageConfiguration != pageConfiguration;
+            });
+        assert(nextPages.length == _pages.value.length - 1);
+        _pages.value = nextPages;
       },
-      child: Navigator(
-        restorationScopeId: 'nested-navigator',
-        onDidRemovePage: (Page<void> page) {
-          final _MyNestedPage pageConfiguration = _MyNestedPage.fromName(page.name!);
-          assert(!_pages.value.contains(pageConfiguration) || _pages.value.length > 1);
-          _pages.value = _pages.value
-              .skipWhile((_MyNestedPage nestedPageConfiguration) {
-                return nestedPageConfiguration == pageConfiguration;
-              });
-        },
-        pages: _pages.value.map((_MyNestedPage page) => switch (page) {
-          _MyNestedPage.unknown => _MyUnknownPage(),
-          _MyNestedPage.home => _MyNestedHomePage(
-            onNavigateToLeaf: _onNavigateToLeaf,
-            onNavigateToRootNavigator: widget.onNavigateToRootNavigator,
-          ),
-          _MyNestedPage.leaf => _MyNestedLeafPage(
-            onNavigateToHome: _onNavigateToHome,
-          ),
-        }).toList(),
-      ),
+      pages: _pages.value.map((_MyNestedPage page) => switch (page) {
+        _MyNestedPage.unknown => _MyUnknownPage(),
+        _MyNestedPage.home => _MyNestedHomePage(
+          onNavigateToLeaf: _onNavigateToLeaf,
+          onNavigateToRootNavigator: widget.onNavigateToRootNavigator,
+        ),
+        _MyNestedPage.leaf => _MyNestedLeafPage(
+          onNavigateToHome: _onNavigateToHome,
+        ),
+      }).toList(),
     );
   }
 }
@@ -469,7 +463,7 @@ enum _MyPage {
   Uri get uri => Uri.parse(uriString);
 
   @override
-  String toString() => name;
+  String toString() => '_MyPage($name)';
 }
 
 enum _MyNestedPage {
@@ -488,4 +482,7 @@ enum _MyNestedPage {
   }
 
   Uri get uri => Uri.parse(uriString);
+
+  @override
+  String toString() => '_MyNestedPage($name)';
 }
