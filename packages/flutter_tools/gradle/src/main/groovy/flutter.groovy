@@ -801,16 +801,14 @@ class FlutterPlugin implements Plugin<Project> {
             )
         }
 
-        Closure addSingleVariants = {buildType ->
-
-            pluginProject.android {
-                publishing.singleVariant(buildType.name) {
-                    withSourcesJar()
-                    withJavadocJar()
-                }
-            }
-            //pluginProject.apply plugin: 'maven-publish'
-        }
+//        Closure addSingleVariants = {buildType ->
+//            pluginProject.android {
+//                publishing.singleVariant(buildType.name) {
+//                    withSourcesJar()
+//                    withJavadocJar()
+//                }
+//            }
+//        }
 
         // Wait until the Android plugin loaded.
         pluginProject.afterEvaluate {
@@ -821,7 +819,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
 
             project.android.buildTypes.all(addEmbeddingDependencyToPlugin)
-            project.android.buildTypes.all(addSingleVariants)
+            //project.android.buildTypes.all(addSingleVariants)
         }
     }
 

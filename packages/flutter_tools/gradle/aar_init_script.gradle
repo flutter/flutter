@@ -116,6 +116,19 @@ allprojects {
    apply plugin: "maven-publish"
 }
 
+afterProject {
+    Closure addSingleVariants = {buildType ->
+        rootProject.android {
+            publishing.singleVariant(buildType.name) {
+                withSourcesJar()
+                withJavadocJar()
+            }
+        }
+    }
+
+    rootProject.android.buildTypes.all(addSingleVariants)
+}
+
 projectsEvaluated {
     assert rootProject.hasProperty("is-plugin")
     if (rootProject.property("is-plugin").toBoolean()) {
