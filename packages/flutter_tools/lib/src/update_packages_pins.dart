@@ -29,7 +29,6 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'leak_tracker_testing': '3.0.1', // https://github.com/flutter/devtools/issues/3951
   'leak_tracker_flutter_testing': '3.0.8', // https://github.com/flutter/devtools/issues/3951
   'path_provider_android': '2.2.1', // https://github.com/flutter/flutter/issues/140796
-  'video_player_android': '2.7.2',
 };
 
 /// These are packages that are explicitly excluded from appearing in the list
