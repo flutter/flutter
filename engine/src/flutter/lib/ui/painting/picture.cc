@@ -207,7 +207,6 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
                          height, ui_task,
                          layer_tree = std::move(layer_tree)]() mutable {
         auto picture_bounds = SkISize::Make(width, height);
-        sk_sp<DlImage> image;
         sk_sp<DisplayList> snapshot_display_list = display_list;
         if (layer_tree) {
           FML_DCHECK(picture_bounds == layer_tree->frame_size());
