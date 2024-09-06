@@ -1118,8 +1118,6 @@ String? _decorationStyleToCssString(ui.TextDecorationStyle decorationStyle) {
       return 'solid';
     case ui.TextDecorationStyle.wavy:
       return 'wavy';
-    default:
-      return null;
   }
 }
 

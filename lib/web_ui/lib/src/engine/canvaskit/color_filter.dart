@@ -266,7 +266,5 @@ CkColorFilter? createCkColorFilter(EngineColorFilter colorFilter) {
         return const CkLinearToSrgbGammaColorFilter();
       case ColorFilterType.srgbToLinearGamma:
         return const CkSrgbToLinearGammaColorFilter();
-      default:
-        throw StateError('Unknown mode $colorFilter.type for ColorFilter.');
     }
 }
