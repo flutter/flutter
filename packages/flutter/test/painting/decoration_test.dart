@@ -14,36 +14,6 @@ import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/rendering_tester.dart';
 
-/// Positive result if the colors would be mapped to the same argb8888 color.
-class _ColorMatcher extends Matcher {
-  _ColorMatcher(this._target);
-
-  final ui.Color _target;
-
-  @override
-  Description describe(Description description) {
-    return description.add('matches "$_target"');
-  }
-
-  @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item is ui.Color) {
-      return item.colorSpace == _target.colorSpace &&
-          (item.a - _target.a).abs() <= (1 / 255) &&
-          (item.r - _target.r).abs() <= (1 / 255) &&
-          (item.g - _target.g).abs() <= (1 / 255) &&
-          (item.b - _target.b).abs() <= (1 / 255);
-    } else {
-      return false;
-    }
-  }
-
-}
-
-Matcher _matchesColor(ui.Color color) {
-  return _ColorMatcher(color);
-}
-
 class TestCanvas implements Canvas {
   final List<Invocation> invocations = <Invocation>[];
 
