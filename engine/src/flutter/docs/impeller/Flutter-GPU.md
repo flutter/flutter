@@ -12,7 +12,7 @@ Currently, our best getting started resource is [this article](https://medium.co
 
 There is also an experimental 3D rendering package powered by Flutter GPU called [Flutter Scene](https://pub.dev/packages/flutter_scene).
 
-Flutter GPU is a low level API for building rendering packages from scratch. Graphics programming has a steep learning curve, and it's likely that most users will opt to use a higher level rendering package rather than build there own.
+Flutter GPU is a low level API for building rendering packages from scratch. Graphics programming has a steep learning curve, and it's likely that most users will opt to use a higher level rendering package rather than build their own.
 
 ## Distribution
 
