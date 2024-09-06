@@ -628,9 +628,8 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
 
-  testWidgets('ZoomPageTransitionsBuilder uses developer-provided color during transition effects when provided instead of the theme color', (WidgetTester tester) async {
+  testWidgets('ZoomPageTransitionsBuilder uses developer-provided color during transition effects if provided', (WidgetTester tester) async {
     // Color that is being tested for presence.
-    const Color themeTestSurfaceColor = Color.fromARGB(255, 195, 255, 0);
     const Color testSurfaceColor = Colors.red;
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -690,7 +689,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, surface: themeTestSurfaceColor),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, surface: Colors.blue),
           pageTransitionsTheme: PageTransitionsTheme(
             builders: <TargetPlatform, PageTransitionsBuilder>{
               // Force all platforms to use ZoomPageTransitionsBuilder to test each one.

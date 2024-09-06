@@ -254,7 +254,7 @@ class _ZoomPageTransition extends StatelessWidget {
   ///    routes.
   final bool allowSnapshotting;
 
-  /// The color of the scrim that fades in and out during the transition.
+  /// The color of the scrim (background) that fades in and out during the transition.
   ///
   /// If not provided, defaults to current theme's surface color.
   final Color? backgroundColor;
@@ -716,7 +716,8 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   /// not be snapshotted.
   final bool allowEnterRouteSnapshotting;
 
-  /// The color of the scrim that fades in and out during the transition.
+  /// The color of the scrim (background) that fades in and out during the transition.
+  ///
   /// If not provided, defaults to current theme's surface color.
   final Color? backgroundColor;
 
