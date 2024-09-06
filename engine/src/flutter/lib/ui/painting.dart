@@ -100,12 +100,8 @@ class Color {
   /// Color(0xFFFF9000)` (`FF` for the alpha, `FF` for the red, `90` for the
   /// green, and `00` for the blue).
   const Color(int value)
-      : _value = value & 0xFFFFFFFF,
-        colorSpace = ColorSpace.sRGB,
-        _a = null,
-        _r = null,
-        _g = null,
-        _b = null;
+      : this._fromARGBC(
+            value >> 24, value >> 16, value >> 8, value, ColorSpace.sRGB);
 
   /// Construct a color with normalized color components.
   ///
@@ -118,11 +114,10 @@ class Color {
       required double green,
       required double blue,
       this.colorSpace = ColorSpace.sRGB})
-      : _value = 0,
-        _a = alpha,
-        _r = red,
-        _g = green,
-        _b = blue;
+      : a = alpha,
+        r = red,
+        g = green,
+        b = blue;
 
   /// Construct an sRGB color from the lower 8 bits of four integers.
   ///
@@ -137,28 +132,12 @@ class Color {
   /// See also [fromRGBO], which takes the alpha value as a floating point
   /// value.
   const Color.fromARGB(int a, int r, int g, int b)
-      : _value = (((a & 0xff) << 24) |
-                ((r & 0xff) << 16) |
-                ((g & 0xff) << 8) |
-                ((b & 0xff) << 0)) &
-            0xFFFFFFFF,
-        colorSpace = ColorSpace.sRGB,
-        _a = null,
-        _r = null,
-        _g = null,
-        _b = null;
+      : this._fromARGBC(a, r, g, b, ColorSpace.sRGB);
 
   const Color._fromARGBC(
-      int alpha, int red, int green, int blue, this.colorSpace)
-      : _value = (((alpha & 0xff) << 24) |
-                ((red & 0xff) << 16) |
-                ((green & 0xff) << 8) |
-                ((blue & 0xff) << 0)) &
-            0xFFFFFFFF,
-        _a = null,
-        _r = null,
-        _g = null,
-        _b = null;
+      int alpha, int red, int green, int blue, ColorSpace colorSpace)
+      : this._fromRGBOC(
+            red, green, blue, (alpha & 0xff) / 255, colorSpace);
 
   /// Create an sRGB color from red, green, blue, and opacity, similar to
   /// `rgba()` in CSS.
@@ -173,41 +152,34 @@ class Color {
   ///
   /// See also [fromARGB], which takes the opacity as an integer value.
   const Color.fromRGBO(int r, int g, int b, double opacity)
-      : _value = ((((opacity * 0xff ~/ 1) & 0xff) << 24) |
-                ((r & 0xff) << 16) |
-                ((g & 0xff) << 8) |
-                ((b & 0xff) << 0)) &
-            0xFFFFFFFF,
-        colorSpace = ColorSpace.sRGB,
-        _a = null,
-        _r = null,
-        _g = null,
-        _b = null;
+      : this._fromRGBOC(r, g, b, opacity, ColorSpace.sRGB);
+
+  const Color._fromRGBOC(int r, int g, int b, double opacity, this.colorSpace)
+      : a = opacity,
+        r = (r & 0xff) / 255,
+        g = (g & 0xff) / 255,
+        b = (b & 0xff) / 255;
 
   /// The alpha channel of this color.
   ///
   /// A value of 0.0 means this color is fully transparent. A value of 1.0 means
   /// this color is fully opaque.
-  double get a => _a ?? (alpha / 255);
-  final double? _a;
+  final double a;
 
   /// The red channel of this color.
-  double get r => _r ?? (red / 255);
-  final double? _r;
+  final double r;
 
   /// The green channel of this color.
-  double get g => _g ?? (green / 255);
-  final double? _g;
+  final double g;
 
   /// The blue channel of this color.
-  double get b => _b ?? (blue / 255);
-  final double? _b;
+  final double b;
 
   /// The color space of this color.
   final ColorSpace colorSpace;
 
   static int _floatToInt8(double x) {
-    return ((x * 255.0).round()) & 0xff;
+    return (x * 255.0).round() & 0xff;
   }
 
   /// A 32 bit value representing this color.
@@ -220,16 +192,11 @@ class Color {
   /// * Bits 0-7 are the blue value.
   @Deprecated('Use component accessors like .r or .g.')
   int get value {
-    if (_a != null && _r != null && _g != null && _b != null) {
-      return _floatToInt8(_a) << 24 |
-          _floatToInt8(_r) << 16 |
-          _floatToInt8(_g) << 8 |
-          _floatToInt8(_b) << 0;
-    } else {
-      return _value;
-    }
+    return _floatToInt8(a) << 24 |
+        _floatToInt8(r) << 16 |
+        _floatToInt8(g) << 8 |
+        _floatToInt8(b) << 0;
   }
-  final int _value;
 
   /// The alpha channel of this color in an 8 bit value.
   ///
