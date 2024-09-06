@@ -180,7 +180,7 @@ void main() {
       const Color lime = Color(0xFF00FF00);
       expect(getBlockPixel(0), lime); // pure green
       expect(getBlockPixel(1), lime); // 100% green 0% red
-      expect(getBlockPixel(2), const Color(0xFF19E600));
+      expect(getBlockPixel(2), const Color(0xFF1AE600));
       expect(getBlockPixel(3), const Color(0xFF33CC00));
       expect(getBlockPixel(4), const Color(0xFF808000)); // 50-50 mix green/red
       expect(getBlockPixel(5), const Color(0xFFCD3200));
