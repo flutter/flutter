@@ -5947,7 +5947,7 @@ void main() {
     gesture.removePointer();
   });
 
-  testWidgets('No crash if the build of TabBar called before didUpdateWidget due to SliverAppBar', (WidgetTester tester) async {
+  testWidgets('No crash if TabBar build called before didUpdateWidget with SliverAppBar', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/154484.
     final List<String> tabs = <String>[];
 
