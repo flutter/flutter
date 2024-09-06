@@ -1348,7 +1348,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// field from `DialogTheme` is used. If that is `null` the default color
 /// `Colors.black54` is used.
 ///
-/// the `transitionDuration` argument is used to specify the duration of 
+/// the `transitionDuration` argument is used to specify the duration of
 /// the dialog's entrance and exit animations. If it's not provided or `null`,
 /// then it uses the default value as set by [DialogRoute].
 ///
@@ -1471,7 +1471,7 @@ Future<T?> showDialog<T>({
 ///
 /// On Cupertino platforms, [barrierColor], [useSafeArea], and
 /// [traversalEdgeBehavior] are ignored.
-/// 
+///
 /// The `transitionDuration` argument is used to specify the duration of
 /// the dialog's entrance and exit animations. If it's not provided or `null`,
 /// then it uses the default value as set by [DialogRoute] or [CupertinoDialogRoute].
@@ -1565,7 +1565,7 @@ bool _debugIsActive(BuildContext context) {
 /// barrier that darkens everything below the dialog. If `null`, the default
 /// color `Colors.black54` is used.
 ///
-/// the `transitionDuration` argument is used to specify the duration of 
+/// the `transitionDuration` argument is used to specify the duration of
 /// the dialog's entrance and exit animations. If it's not provided or `null`,
 /// then the default duration `Duration(milliseconds: 150)` is used.
 ///
