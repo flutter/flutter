@@ -825,7 +825,7 @@ final class SelectionDetails with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<SelectionStatus>('status', status));
-    properties.add(FlagProperty('selectionFinalized', value: selectionFinalized));
+    properties.add(DiagnosticsProperty<bool>('selectionFinalized', selectionFinalized));
     properties.add(IntProperty('localStartOffset', localStartOffset));
     properties.add(IntProperty('localEndOffset', localEndOffset));
   }
