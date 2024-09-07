@@ -8,73 +8,31 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-class SkwasmPaint implements ui.Paint {
-  SkwasmPaint();
+class SkwasmPaint extends SkwasmObjectWrapper<RawPaint> implements ui.Paint {
+  SkwasmPaint() : super(paintCreate(), _registry);
 
-  /// Creates the C++ side paint object based on the current state of this
-  /// paint object, and returns it with ownership.
-  ///
-  /// It is the responsibility of the caller to dispose of the returned handle
-  /// when it's no longer needed.
-  PaintHandle toRawPaint() {
-    final rawPaint = paintCreate(
-      isAntiAlias,
-      blendMode.index,
-      _colorValue,
-      style.index,
-      strokeWidth,
-      strokeCap.index,
-      strokeJoin.index,
-      strokeMiterLimit,
-    );
+  // Must be kept in sync with the default in paint.cc.
+  static const double _kStrokeMiterLimitDefault = 4.0;
 
-    _maybeSetEffectiveColorFilter(rawPaint);
+  // Must be kept in sync with the default in paint.cc.
+  static const int _kColorDefault = 0xFF000000;
 
-    final shaderHandle = _shader?.handle;
-    if (shaderHandle != null) {
-      paintSetShader(rawPaint, shaderHandle);
-    }
+  // Must be kept in sync with the default in paint.cc.
+  static final int _kBlendModeDefault = ui.BlendMode.srcOver.index;
 
-    final localMaskFilter = maskFilter;
-    if (localMaskFilter != null) {
-      final nativeFilter = SkwasmMaskFilter.fromUiMaskFilter(localMaskFilter);
-      paintSetMaskFilter(rawPaint, nativeFilter.handle);
-      nativeFilter.dispose();
-    }
+  static final SkwasmFinalizationRegistry<RawPaint> _registry =
+    SkwasmFinalizationRegistry<RawPaint>(paintDispose);
 
-    final filter = imageFilter;
-    if (filter != null) {
-      final nativeImageFilter = SkwasmImageFilter.fromUiFilter(filter);
-      paintSetImageFilter(rawPaint, nativeImageFilter.handle);
-      nativeImageFilter.dispose();
-    }
+  ui.BlendMode _cachedBlendMode = ui.BlendMode.srcOver;
 
-    return rawPaint;
-  }
+  SkwasmShader? _shader;
+  ui.ImageFilter? _imageFilter;
 
-  /// If `invertColors` is true or `colorFilter` is not null, sets the
-  /// appropriate Skia color filter. Otherwise, does nothing.
-  void _maybeSetEffectiveColorFilter(Pointer<RawPaint> handle) {
-    final nativeFilter = _colorFilter != null
-      ? SkwasmColorFilter.fromEngineColorFilter(_colorFilter!)
-      : null;
-    if (invertColors) {
-      if (nativeFilter != null) {
-        final composedFilter = SkwasmColorFilter.composed(
-          _invertColorFilter,
-          nativeFilter,
-        );
-        nativeFilter.dispose();
-        paintSetColorFilter(handle, composedFilter.handle);
-        composedFilter.dispose();
-      } else {
-        paintSetColorFilter(handle, _invertColorFilter.handle);
-      }
-    } else if (nativeFilter != null) {
-      paintSetColorFilter(handle, nativeFilter.handle);
-      nativeFilter.dispose();
-    }
-  }
+  EngineColorFilter? _colorFilter;
+
+  ui.MaskFilter? _maskFilter;
+
+  bool _invertColors = false;
 
   static final SkwasmColorFilter _invertColorFilter = SkwasmColorFilter.fromEngineColorFilter(
     const EngineColorFilter.matrix(<double>[
@@ -86,71 +44,143 @@ class SkwasmPaint implements ui.Paint {
   );
 
   @override
-  ui.BlendMode blendMode = _kBlendModeDefault;
-
-  // Must be kept in sync with the default in paint.cc.
-  static const ui.BlendMode _kBlendModeDefault = ui.BlendMode.srcOver;
-
-  @override
-  ui.PaintingStyle style = ui.PaintingStyle.fill;
-
-  @override
-  double strokeWidth = 0.0;
-
-  @override
-  ui.StrokeCap strokeCap = ui.StrokeCap.butt;
-
-  @override
-  ui.StrokeJoin strokeJoin = ui.StrokeJoin.miter;
-
-  @override
-  bool isAntiAlias = true;
-
-  @override
-  ui.Color get color => ui.Color(_colorValue);
-  @override
-  set color(ui.Color value) {
-    _colorValue = value.value;
+  ui.BlendMode get blendMode {
+    return _cachedBlendMode;
   }
 
-  static const int _kColorDefault = 0xFF000000;
-  int _colorValue = _kColorDefault;
+  @override
+  set blendMode(ui.BlendMode blendMode) {
+    if (_cachedBlendMode != blendMode) {
+      _cachedBlendMode = blendMode;
+      paintSetBlendMode(handle, blendMode.index);
+    }
+  }
 
   @override
-  double strokeMiterLimit = _kStrokeMiterLimitDefault;
-  static const double _kStrokeMiterLimitDefault = 4.0;
+  ui.PaintingStyle get style => ui.PaintingStyle.values[paintGetStyle(handle)];
+
+  @override
+  set style(ui.PaintingStyle style) => paintSetStyle(handle, style.index);
+
+  @override
+  double get strokeWidth => paintGetStrokeWidth(handle);
+
+  @override
+  set strokeWidth(double width) => paintSetStrokeWidth(handle, width);
+
+  @override
+  ui.StrokeCap get strokeCap => ui.StrokeCap.values[paintGetStrokeCap(handle)];
+
+  @override
+  set strokeCap(ui.StrokeCap cap) => paintSetStrokeCap(handle, cap.index);
+
+  @override
+  ui.StrokeJoin get strokeJoin => ui.StrokeJoin.values[paintGetStrokeJoin(handle)];
+
+  @override
+  set strokeJoin(ui.StrokeJoin join) => paintSetStrokeJoin(handle, join.index);
+
+  @override
+  bool get isAntiAlias => paintGetAntiAlias(handle);
+
+  @override
+  set isAntiAlias(bool value) => paintSetAntiAlias(handle, value);
+
+  @override
+  ui.Color get color => ui.Color(paintGetColorInt(handle));
+
+  @override
+  set color(ui.Color color) => paintSetColorInt(handle, color.value);
+
+  @override
+  double get strokeMiterLimit => paintGetMiterLimit(handle);
+
+  @override
+  set strokeMiterLimit(double limit) => paintSetMiterLimit(handle, limit);
 
   @override
   ui.Shader? get shader => _shader;
 
   @override
   set shader(ui.Shader? uiShader) {
-    uiShader as SkwasmShader?;
-    _shader = uiShader;
+    final SkwasmShader? skwasmShader = uiShader as SkwasmShader?;
+    _shader = skwasmShader;
+    final ShaderHandle shaderHandle =
+      skwasmShader != null ? skwasmShader.handle : nullptr;
+    paintSetShader(handle, shaderHandle);
   }
-  SkwasmShader? _shader;
 
   @override
   ui.FilterQuality filterQuality = ui.FilterQuality.none;
 
   @override
-  ui.ImageFilter? imageFilter;
+  ui.ImageFilter? get imageFilter => _imageFilter;
+
+  @override
+  set imageFilter(ui.ImageFilter? filter) {
+    _imageFilter = filter;
+
+    final SkwasmImageFilter? nativeImageFilter = filter != null
+      ? SkwasmImageFilter.fromUiFilter(filter)
+      : null;
+    paintSetImageFilter(handle, nativeImageFilter != null ? nativeImageFilter.handle : nullptr);
+  }
 
   @override
   ui.ColorFilter? get colorFilter => _colorFilter;
 
+  void _setEffectiveColorFilter() {
+    final SkwasmColorFilter? nativeFilter = _colorFilter != null
+      ? SkwasmColorFilter.fromEngineColorFilter(_colorFilter!) : null;
+    if (_invertColors) {
+      if (nativeFilter != null) {
+        final SkwasmColorFilter composedFilter = SkwasmColorFilter.composed(_invertColorFilter, nativeFilter);
+        nativeFilter.dispose();
+        paintSetColorFilter(handle, composedFilter.handle);
+        composedFilter.dispose();
+      } else {
+        paintSetColorFilter(handle, _invertColorFilter.handle);
+      }
+    } else if (nativeFilter != null) {
+      paintSetColorFilter(handle, nativeFilter.handle);
+      nativeFilter.dispose();
+    } else {
+      paintSetColorFilter(handle, nullptr);
+    }
+  }
+
   @override
   set colorFilter(ui.ColorFilter? filter) {
     _colorFilter = filter as EngineColorFilter?;
+    _setEffectiveColorFilter();
   }
 
-  EngineColorFilter? _colorFilter;
+  @override
+  ui.MaskFilter? get maskFilter => _maskFilter;
 
   @override
-  ui.MaskFilter? maskFilter;
+  set maskFilter(ui.MaskFilter? filter) {
+    _maskFilter = filter;
+    if (filter == null) {
+      paintSetMaskFilter(handle, nullptr);
+    } else {
+      final SkwasmMaskFilter nativeFilter = SkwasmMaskFilter.fromUiMaskFilter(filter);
+      paintSetMaskFilter(handle, nativeFilter.handle);
+      nativeFilter.dispose();
+    }
+  }
 
   @override
-  bool invertColors = false;
+  bool get invertColors => _invertColors;
+
+  @override
+  set invertColors(bool invertColors) {
+    if (_invertColors == invertColors) {
+      return;
+    }
+    _invertColors = invertColors;
+    _setEffectiveColorFilter();
+  }
 
   @override
   String toString() {
@@ -187,7 +217,7 @@ class SkwasmPaint implements ui.Paint {
         result.write('$semicolon$color');
         semicolon = '; ';
       }
-      if (blendMode.index != _kBlendModeDefault.index) {
+      if (blendMode.index != _kBlendModeDefault) {
         result.write('$semicolon$blendMode');
         semicolon = '; ';
       }
