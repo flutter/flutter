@@ -57,7 +57,7 @@ class CupertinoListTileExample extends StatelessWidget {
             leading: FlutterLogo(size: 56.0),
             title: Text('CupertinoListTile with background color'),
             backgroundColor: Colors.lightBlue,
-          ),      
+          ),
         ],
       ),
     );
