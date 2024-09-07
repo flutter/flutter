@@ -2601,18 +2601,68 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     );
   }
 
+  SelectedContentRange _calculateLocalRange(List<SelectedContentRange> ranges) {
+    // Calculate content length.
+    int totalContentLength = 0;
+    for (final SelectedContentRange range in ranges) {
+      totalContentLength += range.contentLength;
+    }
+    if (currentSelectionStartIndex == -1 && currentSelectionEndIndex == -1) {
+      return SelectedContentRange.empty(contentLength: totalContentLength);
+    }
+    int startOffset = 0;
+    int endOffset = 0;
+    bool foundStart = false;
+    bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
+    if (currentSelectionEndIndex == currentSelectionStartIndex) {
+      // Determining selection direction is innacurate if currentSelectionStartIndex == currentSelectionEndIndex.
+      // Use the range from the selectable within the selection as the source of truth for selection direction.
+      final SelectedContentRange rangeAtSelectableInSelection = selectables[currentSelectionStartIndex].getSelection();
+      forwardSelection = rangeAtSelectableInSelection.endOffset >= rangeAtSelectableInSelection.startOffset;
+    }
+    for (int index = 0; index < ranges.length; index++) {
+      final SelectedContentRange range = ranges[index];
+      if (range.startOffset == -1 && range.endOffset == -1) {
+        if (foundStart) {
+          return SelectedContentRange(
+            contentLength: totalContentLength,
+            startOffset: forwardSelection ? startOffset : endOffset,
+            endOffset: forwardSelection ? endOffset : startOffset,
+          );
+        }
+        startOffset += range.contentLength;
+        endOffset = startOffset;
+        continue;
+      }
+      final int selectionStartNormalized = min(range.startOffset, range.endOffset);
+      final int selectionEndNormalized = max(range.startOffset, range.endOffset);
+      if (!foundStart) {
+        startOffset += selectionStartNormalized;
+        endOffset = startOffset + (selectionEndNormalized - selectionStartNormalized).abs();
+        foundStart = true;
+      } else {
+        endOffset += (selectionEndNormalized - selectionStartNormalized).abs();
+      }
+    }
+    return SelectedContentRange(
+      contentLength: totalContentLength,
+      startOffset: forwardSelection ? startOffset : endOffset,
+      endOffset: forwardSelection ? endOffset : startOffset,
+    );
+  }
+
   /// Copies the selections of all [Selectable]s.
   @override
-  List<SelectedContentRange> getSelections() {
+  SelectedContentRange getSelection() {
     final List<SelectedContentRange> selections = <SelectedContentRange>[
       for (final Selectable selectable in selectables)
-        ...selectable.getSelections(),
+        selectable.getSelection(),
     ];
     assert(
       selections.isEmpty == selectables.isEmpty,
       'This selection container delegate should return a list of SelectedContentRanges if it has selectable content, even if there is no current active selection. In that case return a list of SelectedContentRange.empty.',
     );
-    return selections;
+    return _calculateLocalRange(selections);
   }
 
   // Clears the selection on all selectables not in the range of
@@ -3183,92 +3233,13 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
     return result;
   }
 
-  // Expects that there is an active selection.
-  static bool _determineSelectionForward(List<SelectedContentRange> ranges) {
-    ({int index, SelectedContentRange range})? firstRange;
-    ({int index, SelectedContentRange range})? lastRange;
-
-    // Find the first range and last range with a non-empty selection.
-    for (int index = 0; index < ranges.length; index++) {
-      final SelectedContentRange range = ranges[index];
-      if (range.startOffset == -1 && range.endOffset == -1) {
-        if (firstRange == null) {
-          continue;
-        }
-        lastRange ??= (index: index - 1, range: ranges[index - 1]);
-        break;
-      }
-      firstRange ??= (index: index, range: range);
-      if (index == ranges.length - 1) {
-        lastRange ??= (index: index, range: range);
-      }
-    }
-
-    assert(firstRange != null && lastRange != null);
-    if (firstRange!.index == lastRange!.index) {
-      final SelectedContentRange range = firstRange.range;
-      return range.endOffset >= range.startOffset;
-    }
-
-    final bool firstRangeForward = firstRange.range.endOffset >= firstRange.range.startOffset;
-    final bool lastRangeForward = lastRange.range.endOffset >= lastRange.range.startOffset;
-    if (firstRangeForward == lastRangeForward) {
-      return firstRangeForward && lastRangeForward;
-    }
-    // Defaults to forward selection.
-    return true;
-  }
-
-  ({int startOffset, int endOffset}) _calculateLocalOffsets(List<SelectedContentRange> ranges) {
-    int startOffset = 0;
-    int endOffset = 0;
-    Selectable? startingSelectable;
-    bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
-    if (currentSelectionEndIndex == currentSelectionStartIndex) {
-      // Determining forward selection may be innacurate if currentSelectionStartIndex == currentSelectionEndIndex.
-      // Attempt to determine by iterating through the ranges.
-      forwardSelection = _determineSelectionForward(selectables[currentSelectionStartIndex].getSelections());
-    }
-    for (int index = 0; index < selectables.length; index++) {
-      final Selectable selectable = selectables[index];
-      final List<SelectedContentRange> ranges = selectable.getSelections();
-      if (ranges.isNotEmpty) {
-        for (int rangeIndex = 0; rangeIndex < ranges.length; rangeIndex++) {
-          final SelectedContentRange range = ranges[rangeIndex];
-          if (range.startOffset == -1 && range.endOffset == -1) {
-            if (startingSelectable != null) {
-              return (startOffset: forwardSelection ? startOffset : endOffset, endOffset: forwardSelection ? endOffset : startOffset);
-            }
-            startOffset += range.contentLength;
-            endOffset = startOffset;
-            continue;
-          }
-          final int selectionStartNormalized = min(range.startOffset, range.endOffset);
-          final int selectionEndNormalized = max(range.startOffset, range.endOffset);
-          if (startingSelectable == null) {
-            startOffset += (selectionStartNormalized - range.contentStart).abs();
-            endOffset = startOffset + (selectionEndNormalized - selectionStartNormalized).abs();
-            startingSelectable = selectable;
-          } else {
-            endOffset += (selectionEndNormalized - selectionStartNormalized).abs();
-          }
-        }
-      }
-    }
-    return (
-      startOffset: forwardSelection ? startOffset : endOffset,
-      endOffset: forwardSelection ? endOffset : startOffset,
-    );
-  }
-
   SelectionDetails _getDetails() {
-    final List<SelectedContentRange> ranges = getSelections();
-    final ({int startOffset, int endOffset}) localOffsets = _calculateLocalOffsets(ranges);
+    final SelectedContentRange range = getSelection();
     return SelectionDetails(
       status: value.status,
       selectionFinalized: selectionIsFinalized,
-      localStartOffset: localOffsets.startOffset,
-      localEndOffset: localOffsets.endOffset,
+      localStartOffset: range.startOffset,
+      localEndOffset: range.endOffset,
     );
   }
 }
