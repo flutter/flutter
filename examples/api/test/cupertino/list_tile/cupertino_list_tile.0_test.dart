@@ -11,7 +11,7 @@ void main() {
   testWidgets('Test CupertinoListTile respects properties', (WidgetTester tester) async {
     await tester.pumpWidget(const example.CupertinoListTileApp());
 
-    final Finder cupertinoListTileFinder= find.byKey(const Key('CupertinoListTile with background color'));
+    final Finder cupertinoListTileFinder = find.byKey(const Key('CupertinoListTile with background color'));
 
     // Verify if the 'CupertinoListTile Sample' text is present.
     expect(find.text('CupertinoListTile Sample'), findsOneWidget);
