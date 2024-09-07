@@ -2164,8 +2164,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextStyle hintStyle = _getInlineHintStyle(themeData, defaults);
     final String? hintText = decoration.hintText;
     final bool hintIgnoreHeightOnInput = decoration.hintIgnoreHeightOnInput;
-    const Curve switchInCurve = Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
-    const Curve switchOutCurve = Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
     Widget? hint;
     if (hintText != null) {
       final bool showHint = isEmpty && !_hasInlineLabel;
@@ -2179,8 +2177,15 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       );
       hint = hintIgnoreHeightOnInput ? AnimatedSwitcher(
         duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
-        switchInCurve: switchInCurve,
-        switchOutCurve: switchOutCurve,
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return FadeTransition(
+            opacity: CurvedAnimation(
+              parent: animation,
+              curve: _kTransitionCurve,
+            ),
+            child: child,
+          );
+        },
         child: showHint ? hintTextWidget : null,
       ) : AnimatedOpacity(
         opacity: showHint ? 1.0 : 0.0,
