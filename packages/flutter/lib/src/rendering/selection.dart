@@ -90,15 +90,10 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// Return `null` if nothing is selected.
   SelectedContent? getSelectedContent();
 
-  /// Gets the list of selections in this object.
+  /// Gets the [SelectedContentRange] representing the selected range in this object.
   ///
-  /// The order of this list follows the same order as the [Selectable]s
-  /// contained under this [SelectionHandler].
-  ///
-  /// Returns a list of [SelectedContentRange.empty] when nothing is selected.
-  ///
-  /// Returns an empty list only if there is no content under this [SelectionHandler].
-  List<SelectedContentRange> getSelections();
+  /// Returns a [SelectedContentRange.empty] when nothing is selected.
+  SelectedContentRange getSelection();
 
   /// Handles the [SelectionEvent] sent to this object.
   ///
@@ -117,14 +112,13 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 /// This class stores the information of the selection under a [Selectable]
 /// or [SelectionHandler].
 ///
-/// The [SelectedContentRange]s for a given [Selectable] or [SelectionHandler]
-/// can be retrieved by calling [SelectionHandler.getSelections].
+/// The [SelectedContentRange] for a given [Selectable] or [SelectionHandler]
+/// can be retrieved by calling [SelectionHandler.getSelection].
 @immutable
 class SelectedContentRange with Diagnosticable {
   /// Creates a [SelectedContentRange] with the given values.
   const SelectedContentRange({
     required this.contentLength,
-    required this.contentStart,
     required this.startOffset,
     required this.endOffset,
   });
@@ -132,8 +126,7 @@ class SelectedContentRange with Diagnosticable {
   /// A selected content range that represents an empty selection, i.e. nothing
   /// is selected.
   const SelectedContentRange.empty({this.contentLength = 0})
-      : contentStart = -1,
-        startOffset = -1,
+      : startOffset = -1,
         endOffset = -1;
 
   /// The length of the content in the [Selectable] or [SelectionHandler] that
@@ -143,14 +136,10 @@ class SelectedContentRange with Diagnosticable {
   /// contained by this [SelectedContentRange] must not exceed the content length.
   final int contentLength;
 
-  /// The offset where the content begins.
-  final int contentStart;
-
   /// The start of the selection relative to the start of the content.
   ///
   /// {@template flutter.rendering.selection.SelectedContentRange.selectionOffsets}
-  /// For example a [Text] widget's content is in the format
-  /// of an [InlineSpan] tree.
+  /// For example a [Text] widget's content is in the format of an [TextSpan] tree.
   ///
   /// Take the [Text] widget and [TextSpan] tree below:
   ///
@@ -172,20 +161,16 @@ class SelectedContentRange with Diagnosticable {
   /// ```
   /// {@end-tool}
   ///
-  /// If we select from the beginning of 'world' to the
-  /// end of the '.' at the end of the [TextSpan] tree, we
-  /// will receive three [SelectedContentRange]s from
-  /// [SelectionHandler.getSelections]. The first range
-  /// will be relative to the root text of the [TextSpan],
-  /// the [startOffset] will be 6, and [endOffset] will be
-  /// 13. The second range will be relative to the content
-  /// inside the [WidgetSpan], the [startOffset] will be 0,
-  /// and [endOffset] will be 19. The third range will
-  /// be relative to the root text of the overarching [TextSpan],
-  /// the [startOffset] will be 14, and [endOffset] will be 38.
+  /// If we select from the beginning of 'world' to the end of the '.'
+  /// at the end of the [TextSpan] tree, the [SelectedContentRange] from
+  /// [SelectionHandler.getSelection] will be relative to the text of the
+  /// [TextSpan] tree, with [WidgetSpan] content being flattened. The [startOffset]
+  /// will be 6, and [endOffset] will be 38. This takes into account the
+  /// length of the content in the [WidgetSpan], which is 19, so the overall
+  /// [contentLength] will be 56.
   ///
-  /// If [startOffset] and [endOffset] are both -1, the selected content
-  /// range is empty, i.e. nothing is selected.
+  /// If [startOffset] and [endOffset] are both -1, the selected content range is
+  /// empty, i.e. nothing is selected.
   /// {@endtemplate}
   final int startOffset;
 
@@ -204,7 +189,6 @@ class SelectedContentRange with Diagnosticable {
     }
     return other is SelectedContentRange
         && other.contentLength == contentLength
-        && other.contentStart == contentStart
         && other.startOffset == startOffset
         && other.endOffset == endOffset;
   }
@@ -213,7 +197,6 @@ class SelectedContentRange with Diagnosticable {
   int get hashCode {
     return Object.hash(
       contentLength,
-      contentStart,
       startOffset,
       endOffset,
     );
@@ -223,7 +206,6 @@ class SelectedContentRange with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IntProperty('contentLength', contentLength));
-    properties.add(IntProperty('contentStart', contentStart));
     properties.add(IntProperty('startOffset', startOffset));
     properties.add(IntProperty('endOffset', endOffset));
   }
