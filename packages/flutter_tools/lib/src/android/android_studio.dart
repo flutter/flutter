@@ -52,11 +52,10 @@ class AndroidStudio {
       return null;
     }
 
-    final String? versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey] as String?;
-
+    const String versionKey = PlistParser.kCFBundleShortVersionStringKey;
     Version? version;
-    if (versionString != null) {
-      version = Version.parse(versionString);
+    if (plistValues case {versionKey: final String value}) {
+      version = Version.parse(value);
     }
 
     String? pathsSelectorValue;

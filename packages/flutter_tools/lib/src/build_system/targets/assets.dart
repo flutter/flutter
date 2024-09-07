@@ -302,11 +302,11 @@ DevFSContent? processSkSLBundle(String? bundlePath, {
     throw Exception('SkSL bundle was invalid');
   }
 
-  final String? parsedPlatform = bundle['platform'] as String?;
   TargetPlatform? bundleTargetPlatform;
-  if (parsedPlatform != null) {
-    bundleTargetPlatform = getTargetPlatformForName(parsedPlatform);
+  if (bundle case {'platform': final String platform}) {
+    bundleTargetPlatform = getTargetPlatformForName(platform);
   }
+
   if (bundleTargetPlatform == null || bundleTargetPlatform != targetPlatform) {
     logger.printError(
       'The SkSL bundle was created for $bundleTargetPlatform, but the current '

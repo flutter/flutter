@@ -737,9 +737,8 @@ class IOSDevice extends Device {
       maxWaitForCI = Timer(const Duration(minutes: 10), () async {
         _logger.printError('Failed to find Dart VM after 10 minutes.');
         await _xcodeDebug.exit();
-        final String? homePath = _platform.environment['HOME'];
         Directory? derivedData;
-        if (homePath != null) {
+        if (_platform.environment case {'HOME': final String homePath}) {
           derivedData = _fileSystem.directory(
             _fileSystem.path.join(homePath, 'Library', 'Developer', 'Xcode', 'DerivedData'),
           );

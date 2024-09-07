@@ -849,20 +849,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   Future<void> _handleAnnouncementMessage(Object? mockMessage) async {
-    final Map<Object?, Object?> message = mockMessage! as Map<Object?, Object?>;
-    if (message['type'] == 'announce') {
-      final Map<Object?, Object?> data =
-          message['data']! as Map<Object?, Object?>;
-      final String dataMessage = data['message'].toString();
-      final TextDirection textDirection =
-          TextDirection.values[data['textDirection']! as int];
-      final int assertivenessLevel = (data['assertiveness'] as int?) ?? 0;
-      final Assertiveness assertiveness =
-          Assertiveness.values[assertivenessLevel];
-      final CapturedAccessibilityAnnouncement announcement =
-          CapturedAccessibilityAnnouncement._(
-              dataMessage, textDirection, assertiveness);
-      _announcements.add(announcement);
+    if (mockMessage! case {
+      'type': 'announce',
+      'data': final Map<Object?, Object?> data as Map<Object?, Object?>,
+    }) {
+      _announcements.add(CapturedAccessibilityAnnouncement._(
+        data['message'].toString(),
+        TextDirection.values[data['textDirection']! as int],
+        Assertiveness.values[(data['assertiveness'] ?? 0) as int],
+      ));
     }
   }
 

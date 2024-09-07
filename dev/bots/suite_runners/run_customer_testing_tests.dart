@@ -30,9 +30,7 @@ Future<void> customerTestingRunner() async {
     ],
     workingDirectory: flutterRoot,
   );
-  final Map<String, String> env = Platform.environment;
-  final String? revision = env['REVISION'];
-  if (revision != null) {
+  if (Platform.environment case {'REVISION': final String revision}) {
     await runCommand(
       'git',
       <String>[

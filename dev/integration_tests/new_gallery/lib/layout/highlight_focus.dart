@@ -79,15 +79,14 @@ class _HighlightFocusState extends State<HighlightFocus> {
         });
       },
       onKeyEvent: (FocusNode node, KeyEvent event) {
-        if ((event is KeyDownEvent || event is KeyRepeatEvent) &&
-            (event.logicalKey == LogicalKeyboardKey.space ||
-                event.logicalKey == LogicalKeyboardKey.enter ||
-                event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
+        if ((event, event.logicalKey) case (
+          KeyDownEvent() || KeyRepeatEvent(),
+          LogicalKeyboardKey.space || LogicalKeyboardKey.enter || LogicalKeyboardKey.numpadEnter,
+        )) {
           widget.onPressed();
           return KeyEventResult.handled;
-        } else {
-          return KeyEventResult.ignored;
         }
+        return KeyEventResult.ignored;
       },
       child: Container(
         foregroundDecoration: isFocused ? highlightedDecoration : null,

@@ -1700,22 +1700,16 @@ class _TabBarState extends State<TabBar> {
     }
 
     final List<Widget> wrappedTabs = List<Widget>.generate(widget.tabs.length, (int index) {
-      const double verticalAdjustment = (_kTextAndIconTabHeight - _kTabHeight)/2.0;
-      EdgeInsetsGeometry? adjustedPadding;
+      EdgeInsetsGeometry padding = widget.labelPadding ?? tabBarTheme.labelPadding ?? kTabLabelPadding;
+      const double verticalAdjustment = (_kTextAndIconTabHeight - _kTabHeight) / 2.0;
 
-      if (widget.tabs[index] is PreferredSizeWidget) {
-        final PreferredSizeWidget tab = widget.tabs[index] as PreferredSizeWidget;
-        if (widget.tabHasTextAndIcon && tab.preferredSize.height == _kTabHeight) {
-          if (widget.labelPadding != null || tabBarTheme.labelPadding != null) {
-            adjustedPadding = (widget.labelPadding ?? tabBarTheme.labelPadding!).add(const EdgeInsets.symmetric(vertical: verticalAdjustment));
-          }
-          else {
-            adjustedPadding = const EdgeInsets.symmetric(vertical: verticalAdjustment, horizontal: 16.0);
-          }
-        }
+      if (
+        widget.tabs[index] case PreferredSizeWidget(preferredSize: Size(height: _kTabHeight))
+        when widget.tabHasTextAndIcon
+      ) {
+        padding = padding.add(const EdgeInsets.symmetric(vertical: verticalAdjustment));
       }
-
-      _labelPaddings[index] = adjustedPadding ?? widget.labelPadding ?? tabBarTheme.labelPadding ?? kTabLabelPadding;
+      _labelPaddings[index] = padding;
 
       return Center(
         heightFactor: 1.0,
