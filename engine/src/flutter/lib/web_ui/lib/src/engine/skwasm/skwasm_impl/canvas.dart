@@ -29,29 +29,27 @@ class SkwasmCanvas implements SceneCanvas {
 
   @override
   void saveLayer(ui.Rect? bounds, ui.Paint paint) {
-    final paintHandle = (paint as SkwasmPaint).toRawPaint();
+    paint as SkwasmPaint;
     if (bounds != null) {
       withStackScope((StackScope s) {
-        canvasSaveLayer(_handle, s.convertRectToNative(bounds), paintHandle, nullptr);
+        canvasSaveLayer(_handle, s.convertRectToNative(bounds), paint.handle, nullptr);
       });
     } else {
-      canvasSaveLayer(_handle, nullptr, paintHandle, nullptr);
+      canvasSaveLayer(_handle, nullptr, paint.handle, nullptr);
     }
-    paintDispose(paintHandle);
   }
 
   @override
   void saveLayerWithFilter(ui.Rect? bounds, ui.Paint paint, ui.ImageFilter imageFilter) {
     final SkwasmImageFilter nativeFilter = SkwasmImageFilter.fromUiFilter(imageFilter);
-    final paintHandle = (paint as SkwasmPaint).toRawPaint();
+    paint as SkwasmPaint;
     if (bounds != null) {
       withStackScope((StackScope s) {
-        canvasSaveLayer(_handle, s.convertRectToNative(bounds), paintHandle, nativeFilter.handle);
+        canvasSaveLayer(_handle, s.convertRectToNative(bounds), paint.handle, nativeFilter.handle);
       });
     } else {
-      canvasSaveLayer(_handle, nullptr, paintHandle, nativeFilter.handle);
+      canvasSaveLayer(_handle, nullptr, paint.handle, nativeFilter.handle);
     }
-    paintDispose(paintHandle);
   }
 
   @override
@@ -113,78 +111,71 @@ class SkwasmCanvas implements SceneCanvas {
 
   @override
   void drawLine(ui.Offset p1, ui.Offset p2, ui.Paint paint) {
-    final paintHandle = (paint as SkwasmPaint).toRawPaint();
-    canvasDrawLine(_handle, p1.dx, p1.dy, p2.dx, p2.dy, paintHandle);
-    paintDispose(paintHandle);
+    paint as SkwasmPaint;
+    canvasDrawLine(_handle, p1.dx, p1.dy, p2.dx, p2.dy, paint.handle);
   }
 
   @override
   void drawPaint(ui.Paint paint) {
-    final paintHandle = (paint as SkwasmPaint).toRawPaint();
-    canvasDrawPaint(_handle, paintHandle);
-    paintDispose(paintHandle);
+    paint as SkwasmPaint;
+    canvasDrawPaint(_handle, paint.handle);
   }
 
   @override
   void drawRect(ui.Rect rect, ui.Paint paint) {
-    final paintHandle = (paint as SkwasmPaint).toRawPaint();
+    paint as SkwasmPaint;
     withStackScope((StackScope s) {
       canvasDrawRect(
         _handle,
         s.convertRectToNative(rect),
-        paintHandle
+        paint.handle
       );
     });
-    paintDispose(paintHandle);
   }
 
   @override
   void drawRRect(ui.RRect rrect, ui.Paint paint) {
-    final paintHandle = (paint as SkwasmPaint).toRawPaint();
+    paint as SkwasmPaint;
     withStackScope((StackScope s) {
       canvasDrawRRect(
         _handle,
         s.convertRRectToNative(rrect),
-        paintHandle
+        paint.handle
       );
     });
-    paintDispose(paintHandle);
   }
 
   @override
   void drawDRRect(ui.RRect outer, ui.RRect inner, ui.Paint paint) {
-    final paintHandle = (paint as SkwasmPaint).toRawPaint();
+    paint as SkwasmPaint;
     withStackScope((StackScope s) {
       canvasDrawDRRect(
         _handle,
         s.convertRRectToNative(outer),
         s.convertRRectToNative(inner),
-        paintHandle
+        paint.handle
       );
     });
-    paintDispose(paintHandle);
   }
 
   @override
   void drawOval(ui.Rect rect, ui.Paint paint) {
-    final paintHandle = (paint as SkwasmPaint).toRawPaint();
+    paint as SkwasmPaint;
     withStackScope((StackScope s) {
-      canvasDrawOval(_handle, s.convertRectToNative(rect), paintHandle);
+      canvasDrawOval(_handle, s.convertRectToNative(rect), paint.handle);
     });
-    paintDispose(paintHandle);
   }
 
   @override
   void drawCircle(ui.Offset center, double radius, ui.Paint paint) {
-    final paintHandle = (paint as SkwasmPaint).toRawPaint();
-    canvasDrawCircle(_handle, center.dx, center.dy, radius, paintHandle);
-    paintDispose(paintHandle);
+    paint as SkwasmPaint;
+    canvasDrawCircle(_handle, center.dx, center.dy, radius, paint.handle);
   }
 
   @override
   void drawArc(ui.Rect rect, double startAngle, double sweepAngle,
       bool useCenter, ui.Paint paint) {
-    final paintHandle = (paint as SkwasmPaint).toRawPaint();
+    paint as SkwasmPaint;
     withStackScope((StackScope s) {
       canvasDrawArc(
         _handle,
@@ -192,79 +183,64 @@ class SkwasmCanvas implements SceneCanvas {
         ui.toDegrees(startAngle),
         ui.toDegrees(sweepAngle),
         useCenter,
-        paintHandle,
+        paint.handle
       );
     });
-    paintDispose(paintHandle);
   }
 
   @override
   void drawPath(ui.Path path, ui.Paint paint) {
+    paint as SkwasmPaint;
     path as SkwasmPath;
-    final paintHandle = (paint as SkwasmPaint).toRawPaint();
-    canvasDrawPath(_handle, path.handle, paintHandle);
-    paintDispose(paintHandle);
+    canvasDrawPath(_handle, path.handle, paint.handle);
   }
 
   @override
-  void drawImage(ui.Image image, ui.Offset offset, ui.Paint paint) {
-    final paintHandle = (paint as SkwasmPaint).toRawPaint();
+  void drawImage(ui.Image image, ui.Offset offset, ui.Paint paint) =>
     canvasDrawImage(
       _handle,
       (image as SkwasmImage).handle,
       offset.dx,
       offset.dy,
-      paintHandle,
+      (paint as SkwasmPaint).handle,
       paint.filterQuality.index,
     );
-    paintDispose(paintHandle);
-  }
 
   @override
   void drawImageRect(
     ui.Image image,
     ui.Rect src,
     ui.Rect dst,
-    ui.Paint paint,
-  ) {
-    withStackScope((StackScope scope) {
-      final Pointer<Float> sourceRect = scope.convertRectToNative(src);
-      final Pointer<Float> destRect = scope.convertRectToNative(dst);
-      final paintHandle = (paint as SkwasmPaint).toRawPaint();
-      canvasDrawImageRect(
-        _handle,
-        (image as SkwasmImage).handle,
-        sourceRect,
-        destRect,
-        paintHandle,
-        paint.filterQuality.index,
-      );
-      paintDispose(paintHandle);
-    });
-  }
+    ui.Paint paint) => withStackScope((StackScope scope) {
+    final Pointer<Float> sourceRect = scope.convertRectToNative(src);
+    final Pointer<Float> destRect = scope.convertRectToNative(dst);
+    canvasDrawImageRect(
+      _handle,
+      (image as SkwasmImage).handle,
+      sourceRect,
+      destRect,
+      (paint as SkwasmPaint).handle,
+      paint.filterQuality.index,
+    );
+  });
 
   @override
   void drawImageNine(
     ui.Image image,
     ui.Rect center,
     ui.Rect dst,
-    ui.Paint paint,
-  ) {
-    withStackScope((StackScope scope) {
-      final Pointer<Int32> centerRect = scope.convertIRectToNative(center);
-      final Pointer<Float> destRect = scope.convertRectToNative(dst);
-      final paintHandle = (paint as SkwasmPaint).toRawPaint();
-      canvasDrawImageNine(
-        _handle,
-        (image as SkwasmImage).handle,
-        centerRect,
-        destRect,
-        paintHandle,
-        paint.filterQuality.index,
-      );
-      paintDispose(paintHandle);
-    });
-  }
+    ui.Paint paint) => withStackScope((StackScope scope) {
+    final Pointer<Int32> centerRect = scope.convertIRectToNative(center);
+    final Pointer<Float> destRect = scope.convertRectToNative(dst);
+    canvasDrawImageNine(
+      _handle,
+      (image as SkwasmImage).handle,
+      centerRect,
+      destRect,
+      (paint as SkwasmPaint).handle,
+      paint.filterQuality.index,
+    );
+  });
 
   @override
   void drawPicture(ui.Picture picture) {
@@ -288,15 +264,13 @@ class SkwasmCanvas implements SceneCanvas {
     ui.Paint paint
   ) => withStackScope((StackScope scope) {
     final RawPointArray rawPoints = scope.convertPointArrayToNative(points);
-    final paintHandle = (paint as SkwasmPaint).toRawPaint();
     canvasDrawPoints(
       _handle,
       pointMode.index,
       rawPoints,
       points.length,
-      paintHandle,
+      (paint as SkwasmPaint).handle,
     );
-    paintDispose(paintHandle);
   });
 
   @override
@@ -306,15 +280,13 @@ class SkwasmCanvas implements SceneCanvas {
     ui.Paint paint
   ) => withStackScope((StackScope scope) {
     final RawPointArray rawPoints = scope.convertDoublesToNative(points);
-    final paintHandle = (paint as SkwasmPaint).toRawPaint();
     canvasDrawPoints(
       _handle,
       pointMode.index,
       rawPoints,
       points.length ~/ 2,
-      paintHandle,
+      (paint as SkwasmPaint).handle,
     );
-    paintDispose(paintHandle);
   });
 
   @override
@@ -322,16 +294,12 @@ class SkwasmCanvas implements SceneCanvas {
     ui.Vertices vertices,
     ui.BlendMode blendMode,
     ui.Paint paint,
-  ) {
-    final paintHandle = (paint as SkwasmPaint).toRawPaint();
-    canvasDrawVertices(
-      _handle,
-      (vertices as SkwasmVertices).handle,
-      blendMode.index,
-      paintHandle,
-    );
-    paintDispose(paintHandle);
-  }
+  ) => canvasDrawVertices(
+    _handle,
+    (vertices as SkwasmVertices).handle,
+    blendMode.index,
+    (paint as SkwasmPaint).handle,
+  );
 
   @override
   void drawAtlas(
@@ -351,7 +319,6 @@ class SkwasmCanvas implements SceneCanvas {
     final RawRect rawCullRect = cullRect != null
       ? scope.convertRectToNative(cullRect)
       : nullptr;
-    final paintHandle = (paint as SkwasmPaint).toRawPaint();
     canvasDrawAtlas(
       _handle,
       (atlas as SkwasmImage).handle,
@@ -361,9 +328,8 @@ class SkwasmCanvas implements SceneCanvas {
       transforms.length,
       (blendMode ?? ui.BlendMode.src).index,
       rawCullRect,
-      paintHandle,
+      (paint as SkwasmPaint).handle,
     );
-    paintDispose(paintHandle);
   });
 
   @override
@@ -384,7 +350,6 @@ class SkwasmCanvas implements SceneCanvas {
     final RawRect rawCullRect = cullRect != null
       ? scope.convertRectToNative(cullRect)
       : nullptr;
-    final paintHandle = (paint as SkwasmPaint).toRawPaint();
     canvasDrawAtlas(
       _handle,
       (atlas as SkwasmImage).handle,
@@ -394,9 +359,8 @@ class SkwasmCanvas implements SceneCanvas {
       rstTransforms.length ~/ 4,
       (blendMode ?? ui.BlendMode.src).index,
       rawCullRect,
-      paintHandle,
+      (paint as SkwasmPaint).handle,
     );
-    paintDispose(paintHandle);
   });
 
   @override

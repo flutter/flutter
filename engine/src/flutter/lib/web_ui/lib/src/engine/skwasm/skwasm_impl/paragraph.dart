@@ -398,14 +398,10 @@ class SkwasmTextStyle implements ui.TextStyle {
       skStringFree(localeHandle);
     }
     if (background != null) {
-      final backgroundPaint = (background! as SkwasmPaint).toRawPaint();
-      textStyleSetBackground(handle, backgroundPaint);
-      paintDispose(backgroundPaint);
+      textStyleSetBackground(handle, (background! as SkwasmPaint).handle);
     }
     if (foreground != null) {
-      final foregroundPaint = (foreground! as SkwasmPaint).toRawPaint();
-      textStyleSetForeground(handle, foregroundPaint);
-      paintDispose(foregroundPaint);
+      textStyleSetForeground(handle, (foreground! as SkwasmPaint).handle);
     }
     if (shadows != null) {
       for (final ui.Shadow shadow in shadows!) {
