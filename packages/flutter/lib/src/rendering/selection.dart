@@ -766,7 +766,7 @@ enum SelectionStatus {
 ///     for the selection under its subtree in its [SelectionListener.onSelectionChanged]
 ///     callback.
 @immutable
-class SelectionDetails with Diagnosticable {
+final class SelectionDetails with Diagnosticable {
   /// Creates a selection details object.
   const SelectionDetails({
     required this.status,
@@ -803,9 +803,6 @@ class SelectionDetails with Diagnosticable {
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
     }
     return other is SelectionDetails
         && other.status == status
