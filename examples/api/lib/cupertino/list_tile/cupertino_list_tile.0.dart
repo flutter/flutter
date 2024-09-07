@@ -31,7 +31,7 @@ class CupertinoListTileExample extends StatelessWidget {
       ),
       child: ListView(
         children: const <Widget>[
-         CupertinoListTile(title: Text('One-line CupertinoListTile')),
+          CupertinoListTile(title: Text('One-line CupertinoListTile')),
           CupertinoListTile(
             leading: FlutterLogo(),
             title: Text('One-line with leading widget'),
