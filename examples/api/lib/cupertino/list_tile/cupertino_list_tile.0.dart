@@ -27,7 +27,8 @@ class CupertinoListTileExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
-          middle: Text('CupertinoListTile Sample')),
+        middle: Text('CupertinoListTile Sample'),
+      ),
       child: ListView(
         children: const <Widget>[
          CupertinoListTile(title: Text('One-line CupertinoListTile')),
