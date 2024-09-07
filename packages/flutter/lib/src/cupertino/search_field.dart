@@ -326,7 +326,7 @@ class CupertinoSearchTextField extends StatefulWidget {
 }
 
 class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
-    with RestorationMixin {
+    with RestorationMixin, SingleTickerProviderStateMixin {
   /// Default value for the border radius. Radius value was determined using the
   /// comparison tool in https://github.com/flutter/platform_tests/.
   final BorderRadius _kDefaultBorderRadius =
@@ -337,12 +337,34 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   TextEditingController get _effectiveController =>
       widget.controller ?? _controller!.value;
 
+  late AnimationController _animationController;
+  late Animation<double> _opacityAnimation;
+  ScrollController? _ancestorScrollController;
+  double _maxHeight = 0.0;
+  double _previousHeight = 0.0;
+
   @override
   void initState() {
     super.initState();
     if (widget.controller == null) {
       _createLocalController();
     }
+     _animationController = AnimationController(
+      vsync: this,
+      duration: Duration.zero,
+    );
+    _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(_animationController);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _calculateMaxHeight();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _ancestorScrollController?.removeListener(_onScroll);
+    _ancestorScrollController = Scrollable.maybeOf(context)?.widget.controller;
+    _ancestorScrollController?.addListener(_onScroll);
   }
 
   @override
@@ -366,6 +388,8 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
 
   @override
   void dispose() {
+    _ancestorScrollController?.removeListener(_onScroll);
+    _animationController.dispose();
     super.dispose();
     if (widget.controller == null) {
       _controller?.dispose();
@@ -398,13 +422,38 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     }
   }
 
+  void _calculateMaxHeight() {
+    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    setState(() {
+      _maxHeight = renderBox?.size.height ?? 0.0;
+      _previousHeight = _maxHeight;
+    });
+  }
+
+  void _onScroll() {
+    if (_ancestorScrollController == null) {
+      return;
+    }
+    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    final double currentHeight = renderBox?.size.height ?? 0.0;
+
+    if (!_animationController.status.isAnimating){
+      if (currentHeight < _previousHeight) {
+        setState(() { _animationController.forward(); });
+      } else if (currentHeight > _previousHeight && currentHeight > 0.9 * _maxHeight) {
+        setState(() { _animationController.reverse(); });
+      }
+    }
+    _previousHeight = currentHeight;
+  }
+
   @override
   Widget build(BuildContext context) {
     final String placeholder = widget.placeholder ??
         CupertinoLocalizations.of(context).searchTextFieldPlaceholderLabel;
 
     final TextStyle placeholderStyle = widget.placeholderStyle ??
-        const TextStyle(color: CupertinoColors.systemGrey);
+        TextStyle(color: CupertinoColors.systemGrey.withOpacity(_opacityAnimation.value));
 
     // The icon size will be scaled by a factor of the accessibility text scale,
     // to follow the behavior of `UISearchTextField`.
@@ -423,23 +472,29 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       size: scaledIconSize,
     );
 
-    final Widget prefix = Padding(
-      padding: widget.prefixInsets,
-      child: IconTheme(
-        data: iconThemeData,
-        child: widget.prefixIcon,
+    final Widget prefix = Opacity(
+      opacity: _opacityAnimation.value,
+      child: Padding(
+        padding: widget.prefixInsets,
+        child: IconTheme(
+          data: iconThemeData,
+          child: widget.prefixIcon,
+        ),
       ),
     );
 
-    final Widget suffix = Padding(
-      padding: widget.suffixInsets,
-      child: CupertinoButton(
-        onPressed: widget.onSuffixTap ?? _defaultOnSuffixTap,
-        minSize: 0,
-        padding: EdgeInsets.zero,
-        child: IconTheme(
-          data: iconThemeData,
-          child: widget.suffixIcon,
+    final Widget suffix = Opacity(
+      opacity: _opacityAnimation.value,
+      child: Padding(
+        padding: widget.suffixInsets,
+        child: CupertinoButton(
+          onPressed: widget.onSuffixTap ?? _defaultOnSuffixTap,
+          minSize: 0,
+          padding: EdgeInsets.zero,
+          child: IconTheme(
+            data: iconThemeData,
+            child: widget.suffixIcon,
+          ),
         ),
       ),
     );
