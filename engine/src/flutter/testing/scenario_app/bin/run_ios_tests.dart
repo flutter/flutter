@@ -381,7 +381,6 @@ final _skipTestsForImpeller = [
   'ScenariosUITests/PlatformViewUITests/testPlatformView',
   'ScenariosUITests/PlatformViewWithNegativeOtherBackDropFilterTests/testPlatformView',
   'ScenariosUITests/PlatformViewWithOtherBackdropFilterTests/testPlatformView',
-  'ScenariosUITests/RenderingSelectionTest/testSoftwareRendering',
   'ScenariosUITests/TwoPlatformViewClipPathTests/testPlatformView',
   'ScenariosUITests/TwoPlatformViewClipPathMultipleClipsTests/testPlatformView',
   'ScenariosUITests/TwoPlatformViewClipRectTests/testPlatformView',

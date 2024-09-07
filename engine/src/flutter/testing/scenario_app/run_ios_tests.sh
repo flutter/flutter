@@ -133,7 +133,6 @@ if set -o pipefail && xcodebuild -sdk iphonesimulator \
   -skip-testing ScenariosUITests/PlatformViewUITests/testPlatformView \
   -skip-testing ScenariosUITests/PlatformViewWithNegativeOtherBackDropFilterTests/testPlatformView \
   -skip-testing ScenariosUITests/PlatformViewWithOtherBackdropFilterTests/testPlatformView \
-  -skip-testing ScenariosUITests/RenderingSelectionTest/testSoftwareRendering \
   -skip-testing ScenariosUITests/TwoPlatformViewClipPathTests/testPlatformView \
   -skip-testing ScenariosUITests/TwoPlatformViewClipPathMultipleClipsTests/testPlatformView \
   -skip-testing ScenariosUITests/TwoPlatformViewClipRectTests/testPlatformView \

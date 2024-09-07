@@ -37,8 +37,13 @@
 
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  NSArray<NSString*>* processArguments = NSProcessInfo.processInfo.arguments;
+  if ([processArguments containsObject:@"--enable-software-rendering"]) {
+    @throw @"--enable-software-rendering is unsupported in iOS scenario tests";
+  }
+
   self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-  if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--maskview-blocking"]) {
+  if ([processArguments containsObject:@"--maskview-blocking"]) {
     self.window.tintColor = UIColor.systemPinkColor;
   }
   NSDictionary<NSString*, NSString*>* launchArgsMap = @{
@@ -121,21 +126,21 @@
   __block NSString* flutterViewControllerTestName = nil;
   [launchArgsMap
       enumerateKeysAndObjectsUsingBlock:^(NSString* argument, NSString* testName, BOOL* stop) {
-        if ([[[NSProcessInfo processInfo] arguments] containsObject:argument]) {
+        if ([processArguments containsObject:argument]) {
           flutterViewControllerTestName = testName;
           *stop = YES;
         }
       }];
   if (flutterViewControllerTestName) {
     [self setupFlutterViewControllerTest:flutterViewControllerTestName];
-  } else if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--screen-before-flutter"]) {
+  } else if ([processArguments containsObject:@"--screen-before-flutter"]) {
     self.window.rootViewController = [[ScreenBeforeFlutter alloc] initWithEngineRunCompletion:nil];
   } else {
     self.window.rootViewController = [[UIViewController alloc] init];
   }
 
   [self.window makeKeyAndVisible];
-  if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--with-continuous-texture"]) {
+  if ([processArguments containsObject:@"--with-continuous-texture"]) {
     [ContinuousTexture
         registerWithRegistrar:[self registrarForPlugin:@"com.constant.firing.texture"]];
   }
@@ -213,16 +218,6 @@
   }
 
   self.window.rootViewController = rootViewController;
-
-  if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--assert-ca-layer-type"]) {
-    if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--enable-software-rendering"]) {
-      NSAssert([flutterViewController.view.layer isKindOfClass:[CALayer class]],
-               @"Expected CALayer for software rendering.");
-    } else {
-      NSAssert([flutterViewController.view.layer isKindOfClass:[CAMetalLayer class]],
-               @"Expected CAMetalLayer for non-software rendering.");
-    }
-  }
 }
 
 @end
