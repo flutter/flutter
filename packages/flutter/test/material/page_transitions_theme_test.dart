@@ -598,7 +598,7 @@ void main() {
 
     // Pump till animation is half-way through.
     await tester.pump();
-    await tester.pump(const Duration(milliseconds:75));
+    await tester.pump(const Duration(milliseconds: 75));
 
     // Verify that the render box is painting the right color for scaffolded pages.
     final RenderBox scaffoldedRenderBox = tester.firstRenderObject<RenderBox>(find.byType(MaterialApp));
@@ -614,7 +614,7 @@ void main() {
 
     // Pump till animation is half-way through.
     await tester.pump();
-    await tester.pump(const Duration(milliseconds:125));
+    await tester.pump(const Duration(milliseconds: 125));
 
     // Verify that the render box is painting the right color for non-scaffolded pages.
     final RenderBox nonScaffoldedRenderBox = tester.firstRenderObject<RenderBox>(find.byType(MaterialApp));
@@ -626,7 +626,6 @@ void main() {
     // Verify that the transition successfully completed.
     expect(find.text('Back to home route...'), findsOneWidget);
   }, variant: TargetPlatformVariant.all());
-
 
   testWidgets('ZoomPageTransitionsBuilder uses developer-provided color during transition effects if provided', (WidgetTester tester) async {
     // Color that is being tested for presence.
@@ -706,7 +705,7 @@ void main() {
 
     // Pump till animation is half-way through.
     await tester.pump();
-    await tester.pump(const Duration(milliseconds:75));
+    await tester.pump(const Duration(milliseconds: 75));
 
     // Verify that the render box is painting the right color for scaffolded pages.
     final RenderBox scaffoldedRenderBox = tester.firstRenderObject<RenderBox>(find.byType(MaterialApp));
@@ -722,7 +721,7 @@ void main() {
 
     // Pump till animation is half-way through.
     await tester.pump();
-    await tester.pump(const Duration(milliseconds:125));
+    await tester.pump(const Duration(milliseconds: 125));
 
     // Verify that the render box is painting the right color for non-scaffolded pages.
     final RenderBox nonScaffoldedRenderBox = tester.firstRenderObject<RenderBox>(find.byType(MaterialApp));

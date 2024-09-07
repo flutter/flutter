@@ -256,7 +256,7 @@ class _ZoomPageTransition extends StatelessWidget {
 
   /// The color of the scrim (background) that fades in and out during the transition.
   ///
-  /// If not provided, defaults to current theme's surface color.
+  /// If not provided, defaults to current theme's [ColorScheme.surface] color.
   final Color? backgroundColor;
 
   /// The widget below this widget in the tree.
@@ -718,7 +718,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
 
   /// The color of the scrim (background) that fades in and out during the transition.
   ///
-  /// If not provided, defaults to current theme's surface color.
+  /// If not provided, defaults to current theme's [ColorScheme.surface] color.
   final Color? backgroundColor;
 
   // Allows devicelab benchmarks to force disable the snapshotting. This is
