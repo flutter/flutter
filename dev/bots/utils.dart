@@ -343,12 +343,12 @@ Future<void> runDartTest(String workingDirectory, {
 }) async {
   int? cpus;
   // CPU is set in cirrus.yml
-  if (Platform.environment case {'CPU': final String cpuVariable}) {
-    cpus = int.tryParse(cpuVariable, radix: 10);
+  if (Platform.environment case {'CPU': final String cpu}) {
+    cpus = int.tryParse(cpu, radix: 10);
     if (cpus == null) {
       foundError(<String>[
         '${red}The CPU environment variable, if set, must be set to the integer number of available cores.$reset',
-        'Actual value: "$cpuVariable"',
+        'Actual value: "$cpu"',
       ]);
       return;
     }
