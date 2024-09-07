@@ -61,7 +61,6 @@ Engine::Engine(
       task_runners_(task_runners),
       weak_factory_(this) {
   pointer_data_dispatcher_ = dispatcher_maker(*this);
-  initial_route_ = settings_.route;
 }
 
 Engine::Engine(Delegate& delegate,

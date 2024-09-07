@@ -252,27 +252,6 @@ TEST_F(EngineTest, Create) {
   });
 }
 
-TEST_F(EngineTest, CreateWithRoute) {
-  PostUITaskSync([this] {
-    auto settings = settings_;
-    settings.route = "/testo";
-    auto engine = std::make_unique<Engine>(
-        /*delegate=*/delegate_,
-        /*dispatcher_maker=*/dispatcher_maker_,
-        /*image_decoder_task_runner=*/image_decoder_task_runner_,
-        /*task_runners=*/task_runners_,
-        /*settings=*/settings,
-        /*animator=*/std::move(animator_),
-        /*io_manager=*/io_manager_,
-        /*font_collection=*/std::make_shared<FontCollection>(),
-        /*runtime_controller=*/std::move(runtime_controller_),
-        /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
-
-    EXPECT_TRUE(engine);
-    EXPECT_EQ(engine->InitialRoute(), "/testo");
-  });
-}
-
 TEST_F(EngineTest, DispatchPlatformMessageUnknown) {
   PostUITaskSync([this] {
     MockRuntimeDelegate client;

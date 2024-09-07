@@ -201,17 +201,17 @@ FLUTTER_ASSERT_ARC
   // Run with an initial route.
   [engine runWithEntrypoint:FlutterDefaultDartEntrypoint initialRoute:@"test"];
 
-  // Initial route is set directly in the shell/engine and should not send a platform
-  // channel message as it will arrive too late.
+  // Now check that an encoded method call has been made on the binary messenger to set the
+  // initial route to "test".
   FlutterMethodCall* setInitialRouteMethodCall =
       [FlutterMethodCall methodCallWithMethodName:@"setInitialRoute" arguments:@"test"];
   NSData* encodedSetInitialRouteMethod =
       [[FlutterJSONMethodCodec sharedInstance] encodeMethodCall:setInitialRouteMethodCall];
-  OCMReject([mockBinaryMessenger sendOnChannel:@"flutter/navigation"
+  OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/navigation"
                                        message:encodedSetInitialRouteMethod]);
 }
 
-- (void)testInitialRouteSettingsDoesNotSendNavigationMessage {
+- (void)testInitialRouteSettingsSendsNavigationMessage {
   id mockBinaryMessenger = OCMClassMock([FlutterBinaryMessengerRelay class]);
 
   auto settings = FLTDefaultSettingsForBundle();
@@ -221,13 +221,13 @@ FLUTTER_ASSERT_ARC
   [engine setBinaryMessenger:mockBinaryMessenger];
   [engine run];
 
-  // Initial route is set directly in the shell/engine and should not send a platform
-  // channel message as it will arrive too late.
+  // Now check that an encoded method call has been made on the binary messenger to set the
+  // initial route to "test".
   FlutterMethodCall* setInitialRouteMethodCall =
       [FlutterMethodCall methodCallWithMethodName:@"setInitialRoute" arguments:@"test"];
   NSData* encodedSetInitialRouteMethod =
       [[FlutterJSONMethodCodec sharedInstance] encodeMethodCall:setInitialRouteMethodCall];
-  OCMReject([mockBinaryMessenger sendOnChannel:@"flutter/navigation"
+  OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/navigation"
                                        message:encodedSetInitialRouteMethod]);
 }
 
