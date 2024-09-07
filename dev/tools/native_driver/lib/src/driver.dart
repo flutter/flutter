@@ -38,6 +38,14 @@ abstract interface class NativeDriver {
   /// include platform-specific system UI elements, such as the status bar or
   /// navigation bar.
   Future<NativeScreenshot> screenshot();
+
+  /// Rotates the device to landscape orientation.
+  Future<void> rotateToLandscape();
+
+  /// Rotates the device to portrait orientation.
+  ///
+  /// This is typically the default orientation.
+  Future<void> rotateToPortrait();
 }
 
 /// An opaque handle to a screenshot taken on a native device.

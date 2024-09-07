@@ -19,7 +19,10 @@ class MainActivity : FlutterActivity() {
 
         flutterEngine
             .plugins
-            .add(SmileyFaceTexturePlugin());
+            .apply {
+                add(SmileyFaceTexturePlugin())
+                add(NativeDriverSupportPlugin())
+            }
 
         flutterEngine
             .platformViewsController

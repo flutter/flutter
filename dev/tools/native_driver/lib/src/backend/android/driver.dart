@@ -5,6 +5,7 @@
 import 'dart:io' as io;
 import 'dart:typed_data';
 
+import 'package:flutter_driver/flutter_driver.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
@@ -34,7 +35,8 @@ final class AndroidNativeDriver implements NativeDriver {
   ///
   /// If [tempDirectory] is not provided, a temporary directory will be created
   /// in the system's temporary directory.
-  static Future<AndroidNativeDriver> connect({
+  static Future<AndroidNativeDriver> connect(
+    FlutterDriver driver, {
     AndroidDeviceTarget? target,
     String? adbPath,
     io.Directory? tempDirectory,
@@ -66,6 +68,16 @@ final class AndroidNativeDriver implements NativeDriver {
     // Indentical wait to what `FlutterDriver.screenshot` does.
     await Future<void>.delayed(const Duration(seconds: 2));
     return _AdbScreencap(await _adb.screencap(), _tmpDir);
+  }
+
+  @override
+  Future<void> rotateToLandscape() async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> rotateToPortrait() async {
+    throw UnimplementedError();
   }
 
   /// Background the app by pressing the home button.

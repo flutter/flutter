@@ -15,7 +15,7 @@ void main() async {
 
   setUpAll(() async {
     flutterDriver = await FlutterDriver.connect();
-    nativeDriver = await AndroidNativeDriver.connect();
+    nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
   });
 
   tearDownAll(() async {

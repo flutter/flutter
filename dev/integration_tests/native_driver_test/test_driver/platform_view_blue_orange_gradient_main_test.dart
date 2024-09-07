@@ -15,7 +15,7 @@ void main() async {
 
   setUpAll(() async {
     flutterDriver = await FlutterDriver.connect();
-    nativeDriver = await AndroidNativeDriver.connect();
+    nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
   });
 
   tearDownAll(() async {
@@ -27,7 +27,28 @@ void main() async {
     await flutterDriver.waitFor(find.byType('AndroidView'));
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('platform_view_blue_orange_gradient.android.png'),
+      matchesGoldenFile(
+        'platform_view_blue_orange_gradient_portrait.android.png',
+      ),
+    );
+  }, timeout: Timeout.none);
+
+  test('should rotate landscape and screenshot the gradient', () async {
+    await flutterDriver.waitFor(find.byType('AndroidView'));
+    await nativeDriver.rotateToLandscape();
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile(
+        'platform_view_blue_orange_gradient_landscape.android.png',
+      ),
+    );
+
+    await nativeDriver.rotateToPortrait();
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile(
+        'platform_view_blue_orange_gradient_portrait_post_rotation.android.png',
+      ),
     );
   }, timeout: Timeout.none);
 }

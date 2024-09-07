@@ -301,3 +301,18 @@ final class _SingleAnyTarget implements AndroidDeviceTarget {
   @override
   List<String> _toAdbArgs() => const <String>[];
 }
+
+/// Represents the possible screen orientations on Android.
+enum AdbUserRotation {
+  /// Portrait orientation.
+  portrait,
+
+  /// Landscape orientation.
+  landscape,
+
+  /// Reverse portrait orientation, i.e., portrait upside down.
+  reversePortrait,
+
+  /// Reverse landscape orientation, i.e., landscape upside down.
+  reverseLandscape;
+}
