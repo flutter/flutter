@@ -18,6 +18,10 @@ class MainActivity : FlutterActivity() {
         // Intentionally do not use GeneratedPluginRegistrant.
 
         flutterEngine
+            .plugins
+            .add(SmileyFaceTexturePlugin());
+
+        flutterEngine
             .platformViewsController
             .registry
             .registerViewFactory("blue_orange_gradient_platform_view", BlueOrangeGradientPlatformViewFactory())

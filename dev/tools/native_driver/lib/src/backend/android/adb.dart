@@ -117,6 +117,50 @@ class Adb {
     }
   }
 
+  /// Sends the device to the home screen.
+  Future<void> sendToHome() async {
+    final AdbStringResult result = await _runString(<String>[
+      'shell',
+      'input',
+      'keyevent',
+      'KEYCODE_HOME',
+    ]);
+    if (result.exitCode != 0) {
+      throw StateError('Failed to send to home: ${result.stderr}');
+    }
+  }
+
+  /// Simulate low memory conditions on the device.
+  Future<void> trimMemory({required String appName}) async {
+    final AdbStringResult result = await _runString(<String>[
+      'shell',
+      'am',
+      'send-trim-memory',
+      appName,
+      'MODERATE',
+    ]);
+    if (result.exitCode != 0) {
+      throw StateError('Failed to simulate low memory: ${result.stderr}');
+    }
+  }
+
+  /// Resume a backgrounded app (i.e. after [sendToHome]).
+  Future<void> resumeApp({
+    required String appName,
+    String activityName = '.MainActivity',
+  }) async {
+    final AdbStringResult result = await _runString(<String>[
+      'shell',
+      'am',
+      'start',
+      '-n',
+      '$appName/$activityName',
+    ]);
+    if (result.exitCode != 0) {
+      throw StateError('Failed to resume app: ${result.stderr}');
+    }
+  }
+
   /// Disable confirnations for immersive mode.
   Future<void> disableImmersiveModeConfirmations() async {
     final AdbStringResult result = await _runString(<String>[

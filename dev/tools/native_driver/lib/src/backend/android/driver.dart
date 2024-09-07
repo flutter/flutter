@@ -70,17 +70,20 @@ final class AndroidNativeDriver implements NativeDriver {
 
   /// Background the app by pressing the home button.
   Future<void> backgroundApp() async {
-    throw UnimplementedError();
+    await _adb.sendToHome();
+    await Future<void>.delayed(const Duration(seconds: 2));
   }
 
   /// Resumes the app by selecting it from the recent apps list.
-  Future<void> resumeApp() async {
-    throw UnimplementedError();
+  Future<void> resumeApp({required String appName}) async {
+    await _adb.resumeApp(appName: appName);
+    await Future<void>.delayed(const Duration(seconds: 2));
   }
 
   /// Send a trim memory signal to the app to force it to release memory.
-  Future<void> trimMemory() async {
-    throw UnimplementedError();
+  Future<void> simulateLowMemory({required String appName}) async {
+    await _adb.trimMemory(appName: appName);
+    await Future<void>.delayed(const Duration(seconds: 2));
   }
 }
 

@@ -16,11 +16,17 @@ final class FakeAdb implements Adb {
     Future<void> Function(int x, int y)? tap,
     Future<void> Function()? disableImmersiveModeConfirmations,
     Future<void> Function()? disableAnimations,
+    Future<void> Function()? sendToHome,
+    Future<void> Function(String appName, [String? activityName])? resumeApp,
+    Future<void> Function(String appName)? trimMemory,
   })  : _isDeviceConnected = isDeviceConnected,
         _screencap = screencap,
         _tap = tap,
         _disableImmersiveModeConfirmations = disableImmersiveModeConfirmations,
-        _disableAnimations = disableAnimations;
+        _disableAnimations = disableAnimations,
+        _sendToHome = sendToHome,
+        _resumeApp = resumeApp,
+        _trimMemory = trimMemory;
 
   @override
   Future<(bool, String?)> isDeviceConnected() async {
@@ -56,4 +62,28 @@ final class FakeAdb implements Adb {
   }
 
   final Future<void> Function()? _disableAnimations;
+
+  @override
+  Future<void> sendToHome() {
+    return _sendToHome?.call() ?? Future<void>.value();
+  }
+
+  final Future<void> Function()? _sendToHome;
+
+  @override
+  Future<void> resumeApp({required String appName, String? activityName}) {
+    return _resumeApp?.call(appName, activityName) ?? Future<void>.value();
+  }
+
+  final Future<void> Function(
+    String appName, [
+    String? activityName,
+  ])? _resumeApp;
+
+  @override
+  Future<void> trimMemory({required String appName}) {
+    return _trimMemory?.call(appName) ?? Future<void>.value();
+  }
+
+  final Future<void> Function(String appName)? _trimMemory;
 }
