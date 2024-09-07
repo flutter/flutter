@@ -69,7 +69,7 @@ enum _CupertinoListTileType { base, notched }
 /// list tile. This can be used to navigate routes and according to iOS
 /// behavior it should not be used for example to toggle the [CupertinoSwitch]
 /// in the trailing widget.
-/// 
+///
 /// {@tool dartpad}
 /// This example uses a [ListView] to demonstrate different configurations of
 /// [CupertinoListTile]s.
