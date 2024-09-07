@@ -1220,6 +1220,74 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     return a.right > b.right ? 1 : -1;
   }
 
+  SelectedContentRange _calculateLocalRange(List<SelectedContentRange> ranges) {
+    // Calculate content length.
+    int totalContentLength = 0;
+    for (final SelectedContentRange range in ranges) {
+      totalContentLength += range.contentLength;
+    }
+    if (currentSelectionStartIndex == -1 && currentSelectionEndIndex == -1) {
+      return SelectedContentRange.empty(contentLength: totalContentLength);
+    }
+    int startOffset = 0;
+    int endOffset = 0;
+    bool foundStart = false;
+    bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
+    if (currentSelectionEndIndex == currentSelectionStartIndex) {
+      // Determining selection direction is innacurate if currentSelectionStartIndex == currentSelectionEndIndex.
+      // Use the range from the selectable within the selection as the source of truth for selection direction.
+      final SelectedContentRange rangeAtSelectableInSelection = selectables[currentSelectionStartIndex].getSelection();
+      forwardSelection = rangeAtSelectableInSelection.endOffset >= rangeAtSelectableInSelection.startOffset;
+    }
+    for (int index = 0; index < ranges.length; index++) {
+      final SelectedContentRange range = ranges[index];
+      if (range.startOffset == -1 && range.endOffset == -1) {
+        if (foundStart) {
+          return SelectedContentRange(
+            contentLength: totalContentLength,
+            startOffset: forwardSelection ? startOffset : endOffset,
+            endOffset: forwardSelection ? endOffset : startOffset,
+          );
+        }
+        startOffset += range.contentLength;
+        endOffset = startOffset;
+        continue;
+      }
+      final int selectionStartNormalized = min(range.startOffset, range.endOffset);
+      final int selectionEndNormalized = max(range.startOffset, range.endOffset);
+      if (!foundStart) {
+        // Because a RenderParagraph may split its content into multiple selectables
+        // we have to consider at what offset a selectable starts at relative
+        // to the RenderParagraph, when the selectable is not the start of the content.
+        final bool shouldConsiderContentStart = index > 0 && paragraph.selectableBelongsToParagraph(selectables[index]);
+        startOffset += (selectionStartNormalized - (shouldConsiderContentStart ? paragraph.getPositionForOffset(selectables[index].boundingBoxes.first.centerLeft).offset : 0)).abs();
+        endOffset = startOffset + (selectionEndNormalized - selectionStartNormalized).abs();
+        foundStart = true;
+      } else {
+        endOffset += (selectionEndNormalized - selectionStartNormalized).abs();
+      }
+    }
+    return SelectedContentRange(
+      contentLength: totalContentLength,
+      startOffset: forwardSelection ? startOffset : endOffset,
+      endOffset: forwardSelection ? endOffset : startOffset,
+    );
+  }
+
+  /// Copies the selections of all [Selectable]s.
+  @override
+  SelectedContentRange getSelection() {
+    final List<SelectedContentRange> selections = <SelectedContentRange>[
+      for (final Selectable selectable in selectables)
+        selectable.getSelection(),
+    ];
+    assert(
+      selections.isEmpty == selectables.isEmpty,
+      'This selection container delegate should return a list of SelectedContentRanges if it has selectable content, even if there is no current active selection. In that case return a list of SelectedContentRange.empty.',
+    );
+    return _calculateLocalRange(selections);
+  }
+
   // From [SelectableRegion].
 
   // Clears the selection on all selectables not in the range of
