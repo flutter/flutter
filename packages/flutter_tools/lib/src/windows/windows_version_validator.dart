@@ -15,9 +15,31 @@ const List<String> kUnsupportedVersions = <String>[
   '8',
 ];
 
+const kKnownWindowsVersions = {
+  // from: https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information
+  '22631': 'Windows 11 - 23H2',
+  '22621': 'Windows 11 - 22H2',
+  '22000': 'Windows 11 - 21H2',
+  // from: https://learn.microsoft.com/en-us/windows/release-health/release-information
+  '19045': 'Windows 10 - 22H2',
+  '19044': 'Windows 10 - 21H2/LTSC',
+  '19043': 'Windows 10 - 21H1',
+  '19042': 'Windows 10 - 20H2',
+  '19041': 'Windows 10 - 2004',
+  '18363': 'Windows 10 - 1909',
+  '18362': 'Windows 10 - 1903',
+  '17763': 'Windows 10 - 1809/LTSC',
+  '17134': 'Windows 10 - 1803',
+  '16299': 'Windows 10 - 1709',
+  '15063': 'Windows 10 - 1703',
+  '14393': 'Windows 10 - 1607/LTSB',
+  '10586': 'Windows 10 - 1511',
+  '10240': 'Windows 10 - 1507/LTSB',
+};
+
 /// Regex pattern for identifying line from systeminfo stdout with windows version
 /// (ie. 10.5.4123)
-const String kWindowsOSVersionSemVerPattern = r'([0-9]+)\.([0-9]+)\.([0-9\.]+)';
+const String kWindowsOSVersionSemVerPattern = r'([0-9]+)\.([0-9]+)\.([0-9]+)\.?([0-9\.]+)?';
 
 /// Regex pattern for identifying a running instance of the Topaz OFD process.
 /// This is a known process that interferes with the build toolchain.
@@ -61,7 +83,7 @@ class WindowsVersionValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final RegExp regex =
-        RegExp(kWindowsOSVersionSemVerPattern, multiLine: true);
+    RegExp(kWindowsOSVersionSemVerPattern, multiLine: true);
     final String commandResult = _operatingSystemUtils.name;
     final Iterable<RegExpMatch> matches = regex.allMatches(commandResult);
 
@@ -73,7 +95,9 @@ class WindowsVersionValidator extends DoctorValidator {
     if (matches.length == 1 &&
         !kUnsupportedVersions.contains(matches.elementAt(0).group(1))) {
       windowsVersionStatus = ValidationType.success;
-      statusInfo = 'Installed version of Windows is version 10 or higher';
+      final knownVersion = kKnownWindowsVersions[matches.elementAt(0).group(3)];
+      statusInfo = knownVersion ??
+          'Installed version of Windows is version 10 or higher';
 
       // Check if the Topaz OFD security module is running, and warn the user if it is.
       // See https://github.com/flutter/flutter/issues/121366
