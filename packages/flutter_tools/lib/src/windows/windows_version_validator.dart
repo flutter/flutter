@@ -15,7 +15,7 @@ const List<String> kUnsupportedVersions = <String>[
   '8',
 ];
 
-const kKnownWindowsVersions = <String, String> {
+const Map<String, String> kKnownWindowsVersions = <String, String> {
   // from: https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information
   '22631': 'Windows 11 - 23H2',
   '22621': 'Windows 11 - 22H2',
