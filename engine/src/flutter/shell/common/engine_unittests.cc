@@ -144,7 +144,7 @@ class MockRuntimeController : public RuntimeController {
   MockRuntimeController(RuntimeDelegate& client,
                         const TaskRunners& p_task_runners)
       : RuntimeController(client, p_task_runners) {}
-  MOCK_METHOD(bool, IsRootIsolateRunning, (), (override));
+  MOCK_METHOD(bool, IsRootIsolateRunning, (), (override, const));
   MOCK_METHOD(bool,
               DispatchPlatformMessage,
               (std::unique_ptr<PlatformMessage>),

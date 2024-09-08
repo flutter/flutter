@@ -100,7 +100,7 @@ RuntimeController::~RuntimeController() {
   }
 }
 
-bool RuntimeController::IsRootIsolateRunning() {
+bool RuntimeController::IsRootIsolateRunning() const {
   std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
   if (root_isolate) {
     return root_isolate->GetPhase() == DartIsolate::Phase::Running;
