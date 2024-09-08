@@ -1074,16 +1074,38 @@ void Shell::OnPlatformViewDispatchPlatformMessage(
   }
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
 
-  // The static leak checker gets confused by the use of fml::MakeCopyable.
-  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
-  fml::TaskRunner::RunNowOrPostTask(
-      task_runners_.GetUITaskRunner(),
-      fml::MakeCopyable([engine = engine_->GetWeakPtr(),
-                         message = std::move(message)]() mutable {
-        if (engine) {
-          engine->DispatchPlatformMessage(std::move(message));
-        }
-      }));
+  // If the root isolate is not yet running this may be the navigation
+  // channel initial route and must be dispatched immediately so that
+  // it can be set before isolate creation.
+  static constexpr char kNavigationChannel[] = "flutter/navigation";
+  if (!engine_->GetRuntimeController()->IsRootIsolateRunning() &&
+      message->channel() == kNavigationChannel) {
+    // The static leak checker gets confused by the use of fml::MakeCopyable.
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
+    fml::TaskRunner::RunNowOrPostTask(
+        task_runners_.GetUITaskRunner(),
+        fml::MakeCopyable([engine = engine_->GetWeakPtr(),
+                           message = std::move(message)]() mutable {
+          if (engine) {
+            engine->DispatchPlatformMessage(std::move(message));
+          }
+        }));
+  } else {
+    // In all other cases, the message must be dispatched via a new task so
+    // that the completion of the platform channel response future is guaranteed
+    // to wake up the Dart event loop, even in cases where the platform and UI
+    // threads are the same.
+
+    // The static leak checker gets confused by the use of fml::MakeCopyable.
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
+    task_runners_.GetUITaskRunner()->PostTask(
+        fml::MakeCopyable([engine = engine_->GetWeakPtr(),
+                           message = std::move(message)]() mutable {
+          if (engine) {
+            engine->DispatchPlatformMessage(std::move(message));
+          }
+        }));
+  }
 }
 
 // |PlatformView::Delegate|

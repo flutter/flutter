@@ -68,6 +68,33 @@ using ::testing::_;
 using ::testing::Return;
 
 namespace {
+
+std::unique_ptr<PlatformMessage> MakePlatformMessage(
+    const std::string& channel,
+    const std::map<std::string, std::string>& values,
+    const fml::RefPtr<PlatformMessageResponse>& response) {
+  rapidjson::Document document;
+  auto& allocator = document.GetAllocator();
+  document.SetObject();
+
+  for (const auto& pair : values) {
+    rapidjson::Value key(pair.first.c_str(), strlen(pair.first.c_str()),
+                         allocator);
+    rapidjson::Value value(pair.second.c_str(), strlen(pair.second.c_str()),
+                           allocator);
+    document.AddMember(key, value, allocator);
+  }
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  document.Accept(writer);
+  const uint8_t* data = reinterpret_cast<const uint8_t*>(buffer.GetString());
+
+  std::unique_ptr<PlatformMessage> message = std::make_unique<PlatformMessage>(
+      channel, fml::MallocMapping::Copy(data, buffer.GetSize()), response);
+  return message;
+}
+
 class MockPlatformViewDelegate : public PlatformView::Delegate {
   MOCK_METHOD(void,
               OnPlatformViewCreated,
@@ -4258,6 +4285,31 @@ TEST_F(ShellTest, PrintsErrorWhenPlatformMessageSentFromWrongThread) {
   DestroyShell(std::move(shell), task_runners);
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 #endif
+}
+
+TEST_F(ShellTest, NavigationMessageDispachedImmediately) {
+  Settings settings = CreateSettingsForFixture();
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::kPlatform);
+  auto task_runner = thread_host.platform_thread->GetTaskRunner();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+  auto shell = CreateShell(settings, task_runners);
+
+  auto latch = std::make_shared<fml::CountDownLatch>(1u);
+  task_runner->PostTask([&]() {
+    auto message = MakePlatformMessage(
+        "flutter/navigation",
+        {{"method", "setInitialRoute"}, {"args", "/testo"}}, nullptr);
+    SendPlatformMessage(shell.get(), std::move(message));
+    EXPECT_EQ(shell->GetEngine()->InitialRoute(), "/testo");
+
+    latch->CountDown();
+  });
+  latch->Wait();
+
+  DestroyShell(std::move(shell), task_runners);
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
 TEST_F(ShellTest, DiesIfSoftwareRenderingAndImpellerAreEnabledDeathTest) {
