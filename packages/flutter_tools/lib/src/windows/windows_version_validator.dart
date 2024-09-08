@@ -15,7 +15,7 @@ const List<String> kUnsupportedVersions = <String>[
   '8',
 ];
 
-const kKnownWindowsVersions = {
+const kKnownWindowsVersions = <String, String> {
   // from: https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information
   '22631': 'Windows 11 - 23H2',
   '22621': 'Windows 11 - 22H2',
@@ -83,7 +83,7 @@ class WindowsVersionValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final RegExp regex =
-    RegExp(kWindowsOSVersionSemVerPattern, multiLine: true);
+        RegExp(kWindowsOSVersionSemVerPattern, multiLine: true);
     final String commandResult = _operatingSystemUtils.name;
     final Iterable<RegExpMatch> matches = regex.allMatches(commandResult);
 
@@ -95,9 +95,8 @@ class WindowsVersionValidator extends DoctorValidator {
     if (matches.length == 1 &&
         !kUnsupportedVersions.contains(matches.elementAt(0).group(1))) {
       windowsVersionStatus = ValidationType.success;
-      final knownVersion = kKnownWindowsVersions[matches.elementAt(0).group(3)];
-      statusInfo = knownVersion ??
-          'Installed version of Windows is version 10 or higher';
+      final String? knownVersion = kKnownWindowsVersions[matches.elementAt(0).group(3)];
+      statusInfo = knownVersion ?? 'Installed version of Windows is version 10 or higher';
 
       // Check if the Topaz OFD security module is running, and warn the user if it is.
       // See https://github.com/flutter/flutter/issues/121366
