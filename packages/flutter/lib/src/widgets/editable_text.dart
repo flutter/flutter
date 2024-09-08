@@ -1618,10 +1618,10 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final bool cursorOpacityAnimates;
 
-  ///{@macro flutter.rendering.RenderEditable.cursorOffset}
+  /// {@macro flutter.rendering.RenderEditable.cursorOffset}
   final Offset? cursorOffset;
 
-  ///{@macro flutter.rendering.RenderEditable.paintCursorAboveText}
+  /// {@macro flutter.rendering.RenderEditable.paintCursorAboveText}
   final bool paintCursorAboveText;
 
   /// Controls how tall the selection highlight boxes are computed to be.
