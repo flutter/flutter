@@ -452,7 +452,7 @@ class RuntimeController : public PlatformConfigurationClient,
   ///
   /// @return     True if root isolate running, False otherwise.
   ///
-  virtual bool IsRootIsolateRunning();
+  virtual bool IsRootIsolateRunning() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Dispatch the specified platform message to running root
