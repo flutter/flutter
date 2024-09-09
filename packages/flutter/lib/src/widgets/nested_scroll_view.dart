@@ -1191,7 +1191,9 @@ class _NestedScrollController extends ScrollController {
 
   @override
   void attach(ScrollPosition position) {
-    assert(position is _NestedScrollPosition);
+    if (position is! _NestedScrollPosition) {
+      return;
+    }
     super.attach(position);
     coordinator.updateParent();
     coordinator.updateCanDrag();
@@ -1201,8 +1203,10 @@ class _NestedScrollController extends ScrollController {
 
   @override
   void detach(ScrollPosition position) {
-    assert(position is _NestedScrollPosition);
-    (position as _NestedScrollPosition).setParent(null);
+    if (position is! _NestedScrollPosition) {
+      return;
+    }
+    position.setParent(null);
     position.removeListener(_scheduleUpdateShadow);
     super.detach(position);
     _scheduleUpdateShadow();
