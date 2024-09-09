@@ -823,10 +823,10 @@ class _SlidingTapGestureRecognizer extends VerticalDragGestureRecognizer {
 // Multiple `_SlideTarget`s might be nested.
 // `_TargetSelectionGestureRecognizer` uses a simple algorithm that only
 // compares if the inner-most slide target has changed (which suffices our use
-// case).  Semantically, this means that all outer targets will be treated as
-// identical to the inner-most one, i.e. when the pointer enters or leaves a
-// slide target, the corresponding method will be called on all targets that
-// nest it.
+// case). Semantically, this means that all outer targets will be treated as
+// having the identical area as the inner-most one, i.e. when the pointer enters
+// or leaves a slide target, the corresponding method will be called on all
+// targets that nest it.
 abstract class _SlideTarget {
   // A pointer has entered this region.
   //
@@ -839,7 +839,10 @@ abstract class _SlideTarget {
   //
   // The `fromPointerDown` should be true if this callback is triggered by a
   // PointerDownEvent, i.e. the second case from the list above.
-  void didEnter({required bool fromPointerDown});
+  //
+  // The return value of this method is used as the `innerEnabled` for the next
+  // target, while `innerEnabled` of the innermost target is true.
+  bool didEnter({required bool fromPointerDown, required bool innerEnabled});
 
   // A pointer has exited this region.
   //
@@ -932,8 +935,12 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
       _currentTargets
         ..clear()
         ..addAll(foundTargets);
+      bool enabled = true;
       for (final _SlideTarget target in _currentTargets) {
-        target.didEnter(fromPointerDown: fromPointerDown);
+        enabled = target.didEnter(
+          fromPointerDown: fromPointerDown,
+          innerEnabled: enabled,
+        );
       }
     }
   }
@@ -1394,7 +1401,9 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     implements _SlideTarget {
   // |_SlideTarget|
   @override
-  void didEnter({required bool fromPointerDown}) {}
+  bool didEnter({required bool fromPointerDown, required bool innerEnabled}) {
+    return innerEnabled;
+  }
 
   // |_SlideTarget|
   @override
@@ -1537,11 +1546,14 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
 
   // |_SlideTarget|
   @override
-  void didEnter({required bool fromPointerDown}) {
-    widget.onPressStateChange?.call(true);
-    if (!fromPointerDown) {
-      _emitVibration();
+  bool didEnter({required bool fromPointerDown, required bool enabled}) {
+    if (enabled) {
+      widget.onPressStateChange?.call(true);
+      if (!fromPointerDown) {
+        _emitVibration();
+      }
     }
+    return enabled;
   }
 
   // |_SlideTarget|
@@ -1578,7 +1590,7 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
           borderRadius: borderRadius,
         ),
         child: widget.child,
-      )
+      ),
     );
   }
 }
@@ -2049,11 +2061,14 @@ class _AlertDialogButtonBackgroundState extends State<_AlertDialogButtonBackgrou
 
   // |_SlideTarget|
   @override
-  void didEnter({required bool fromPointerDown}) {
-    widget.onPressStateChange?.call(true);
-    if (!fromPointerDown) {
-      _emitVibration();
+  bool didEnter({required bool fromPointerDown, required bool enabled}) {
+    widget.onPressStateChange?.call(enabled);
+    if (enabled) {
+      if (!fromPointerDown) {
+        _emitVibration();
+      }
     }
+    return enabled;
   }
 
   // |_SlideTarget|
@@ -2144,9 +2159,15 @@ class CupertinoDialogAction extends StatefulWidget {
 
 class _CupertinoDialogActionState extends State<CupertinoDialogAction>
     implements _SlideTarget {
+
+  /// The button is enabled when it has [onPressed].
+  bool get enabled => widget.onPressed != null;
+
   // |_SlideTarget|
   @override
-  void didEnter({required bool fromPointerDown}) {}
+  bool didEnter({required bool fromPointerDown, required bool innerEnabled}) {
+    return enabled;
+  }
 
   // |_SlideTarget|
   @override
@@ -2157,11 +2178,6 @@ class _CupertinoDialogActionState extends State<CupertinoDialogAction>
   void didConfirm() {
     widget.onPressed?.call();
   }
-
-  /// Whether the button is enabled or disabled. Buttons are disabled by
-  /// default. To enable a button, set its [onPressed] property to a non-null
-  /// value.
-  bool get enabled => widget.onPressed != null;
 
   // Dialog action content shrinks to fit, up to a certain point, and if it still
   // cannot fit at the minimum size, the text content is ellipsized.
