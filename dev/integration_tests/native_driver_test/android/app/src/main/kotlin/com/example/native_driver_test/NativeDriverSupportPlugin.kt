@@ -13,7 +13,10 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 
-class NativeDriverSupportPlugin : ActivityAware, FlutterPlugin, MethodCallHandler {
+class NativeDriverSupportPlugin :
+    ActivityAware,
+    FlutterPlugin,
+    MethodCallHandler {
     private val tag = "NativeDriverSupportPlugin"
     private lateinit var channel: MethodChannel
     private var activity: Activity? = null
@@ -27,7 +30,10 @@ class NativeDriverSupportPlugin : ActivityAware, FlutterPlugin, MethodCallHandle
         channel.setMethodCallHandler(null)
     }
 
-    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+    override fun onMethodCall(
+        call: MethodCall,
+        result: MethodChannel.Result,
+    ) {
         val activity = this.activity
         if (activity == null) {
             Log.w(tag, "Received method channel, but no current activity")

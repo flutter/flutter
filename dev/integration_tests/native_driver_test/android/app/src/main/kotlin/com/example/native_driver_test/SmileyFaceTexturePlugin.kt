@@ -16,7 +16,10 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.view.TextureRegistry.SurfaceProducer
 
-class SmileyFaceTexturePlugin : FlutterPlugin, MethodCallHandler, SurfaceProducer.Callback {
+class SmileyFaceTexturePlugin :
+    FlutterPlugin,
+    MethodCallHandler,
+    SurfaceProducer.Callback {
     private val tag = "SmileyFaceTexturePlugin"
     private lateinit var channel: MethodChannel
     private lateinit var binding: FlutterPluginBinding
@@ -37,7 +40,10 @@ class SmileyFaceTexturePlugin : FlutterPlugin, MethodCallHandler, SurfaceProduce
         producer.release()
     }
 
-    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+    override fun onMethodCall(
+        call: MethodCall,
+        result: MethodChannel.Result,
+    ) {
         if (call.method == "initTexture") {
             val height = call.argument<Int>("height") ?: 1
             val width = call.argument<Int>("width") ?: 1
@@ -48,7 +54,7 @@ class SmileyFaceTexturePlugin : FlutterPlugin, MethodCallHandler, SurfaceProduce
         }
     }
 
-    private fun updateTexture() : Long {
+    private fun updateTexture(): Long {
         var surface = this.surface
         if (surface == null) {
             surface = producer.surface
@@ -59,11 +65,12 @@ class SmileyFaceTexturePlugin : FlutterPlugin, MethodCallHandler, SurfaceProduce
     }
 
     private fun drawOnSurface(surface: Surface) {
-        val canvas = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            surface.lockHardwareCanvas()
-        } else {
-            surface.lockCanvas(null)
-        }
+        val canvas =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                surface.lockHardwareCanvas()
+            } else {
+                surface.lockCanvas(null)
+            }
 
         // Yellow background
         canvas.drawRGB(255, 230, 15)
