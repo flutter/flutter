@@ -118,15 +118,15 @@ void main() {
         .toList();
 
     expect(description, equalsIgnoringHashCodes(<String>[
-      'backgroundColor: Color(0xff000000)',
-      'collapsedBackgroundColor: Color(0xff6f83fc)',
+      'backgroundColor: ${const Color(0xff000000)}',
+      'collapsedBackgroundColor: ${const Color(0xff6f83fc)}',
       'tilePadding: EdgeInsets.all(20.0)',
       'expandedAlignment: Alignment.bottomCenter',
       'childrenPadding: EdgeInsets.all(10.0)',
-      'iconColor: Color(0xffa7c61c)',
-      'collapsedIconColor: Color(0xffdd0b1f)',
-      'textColor: Color(0xffffffff)',
-      'collapsedTextColor: Color(0xff522bab)',
+      'iconColor: ${const Color(0xffa7c61c)}',
+      'collapsedIconColor: ${const Color(0xffdd0b1f)}',
+      'textColor: ${const Color(0xffffffff)}',
+      'collapsedTextColor: ${const Color(0xff522bab)}',
       'shape: Border.all(BorderSide(width: 0.0, style: none))',
       'collapsedShape: Border.all(BorderSide(width: 0.0, style: none))',
       'clipBehavior: Clip.antiAlias',
