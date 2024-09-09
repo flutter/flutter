@@ -3135,8 +3135,8 @@ typedef SelectionListenerSelectionChangedCallback = void Function(SelectionDetai
 /// to be able to listen to selection changes in this widgets subtree.
 ///
 /// This widget does not listen to selection changes of nested [SelectionArea]s
-/// or [SelectableRegion]s in its subtree because those widgets create their own
-/// [SelectionRegistrar]s that do not register to any ancestor registrar.
+/// or [SelectableRegion]s in its subtree because those widgets are self-contained
+/// and do not bubble up their selection.
 ///
 /// {@tool dartpad}
 /// This example shows how to color the active selection red
