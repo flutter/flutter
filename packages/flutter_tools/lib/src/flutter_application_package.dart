@@ -101,6 +101,10 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
         return applicationBinary == null
             ? WindowsApp.fromWindowsProject(FlutterProject.current().windows)
             : WindowsApp.fromPrebuiltApp(applicationBinary);
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+        // Unsupported yet.
+        return null;
     }
   }
 }
