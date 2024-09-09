@@ -4189,7 +4189,8 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
 
 /// A mixin for [RenderObject] subclasses with a layout callback. The mixin
 /// guarantees the layout callback will be called even if this [RenderObject]
-/// skips doing layout.
+/// skips doing layout, unless the [RenderObject] has never been laid out and
+/// does not have valid [constraints].
 ///
 /// A layout callback is a callback that mutates the [RenderObject]'s render
 /// subtree, invoked within an [invokeLayoutCallback] during the [RenderObject]'s
@@ -4209,7 +4210,8 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
 ///  * [LayoutBuilder] and [SliverLayoutBuilder], which use the mixin.
 mixin RenderObjectWithLayoutCallbackMixin on RenderObject {
   // The initial value of this flag must be set to true to prevent the layout
-  // callback from being called when the tree has never been laid out.
+  // callback from being scheduled when the subtree has never been laid out
+  // (in which case the `constraints` is unknown).
   bool _needsRebuild = true;
 
   @mustCallSuper
