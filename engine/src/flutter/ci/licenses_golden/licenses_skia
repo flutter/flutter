@@ -1,4 +1,4 @@
-Signature: e3b346de6c6c87fa5f8f635b2e63f78b
+Signature: 2590b63c5c328e62d3c0d27ad491362d
 
 ====================================================================================================
 LIBRARY: etc1
@@ -402,7 +402,6 @@ FILE: ../../../flutter/third_party/skia/relnotes/filter-color.md
 FILE: ../../../flutter/third_party/skia/relnotes/ganesh-move.md
 FILE: ../../../flutter/third_party/skia/relnotes/grglconfig.md
 FILE: ../../../flutter/third_party/skia/relnotes/macro.md
-FILE: ../../../flutter/third_party/skia/relnotes/skmsec.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
