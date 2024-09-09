@@ -1226,7 +1226,7 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     for (final SelectedContentRange range in ranges) {
       totalContentLength += range.contentLength;
     }
-    if (currentSelectionStartIndex == -1 && currentSelectionEndIndex == -1) {
+    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
       return SelectedContentRange.empty(contentLength: totalContentLength);
     }
     int startOffset = 0;
