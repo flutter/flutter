@@ -801,6 +801,58 @@ void main() {
     expect(widget.style.color!.opacity, equals(1.0));
   });
 
+  testWidgets('Pressing on disabled buttons does not trigger background', (WidgetTester tester) async {
+    bool pressedEnable = false;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return CupertinoAlertDialog(
+            actions: <Widget>[
+              const CupertinoDialogAction(child: Text('Disabled')),
+              CupertinoDialogAction(
+                isDestructiveAction: true,
+                onPressed: () {
+                  pressedEnable = true;
+                  Navigator.pop(context);
+                },
+                child: const Text('Enabled'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Disabled')));
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    // This should look exactly like an idle dialog.
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('cupertinoAlertDialog.press_disabled.png'),
+    );
+
+    // Verify that gestures that started on a disabled button can slide onto an
+    // enabled button.
+    await gesture.moveTo(tester.getCenter(find.text('Enabled')));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('cupertinoAlertDialog.press_disabled_slide_to_enabled.png'),
+    );
+
+    expect(pressedEnable, false);
+    await gesture.up();
+    expect(pressedEnable, true);
+  });
+
   testWidgets('Message is scrollable, has correct padding with large text sizes', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
