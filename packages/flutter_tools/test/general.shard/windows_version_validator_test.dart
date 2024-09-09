@@ -48,7 +48,7 @@ FakeProcessLister failure() {
 const ValidationResult validWindows10ValidationResult = ValidationResult(
   ValidationType.success,
   <ValidationMessage>[],
-  statusInfo: 'Installed version of Windows is version 10 or higher',
+  statusInfo: 'Windows 11 - 22H2',
 );
 
 /// The expected validation result object for
