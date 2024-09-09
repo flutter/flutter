@@ -97,7 +97,8 @@ TEST(GPUSurfaceMetalImpeller, AcquireFrameFromCAMetalLayerDoesNotRetainThis) {
   ASSERT_TRUE(frame->Submit());
 }
 
-TEST(GPUSurfaceMetalImpeller, ResetHostBufferBasedOnFrameBoundary) {
+// Because each overlay surface gets its own HostBuffer, we always need to reset.
+TEST(GPUSurfaceMetalImpeller, DoesNotResetHostBufferBasedOnFrameBoundary) {
   auto delegate = std::make_shared<TestGPUSurfaceMetalDelegate>();
   delegate->SetDevice();
 
@@ -115,13 +116,13 @@ TEST(GPUSurfaceMetalImpeller, ResetHostBufferBasedOnFrameBoundary) {
   frame->set_submit_info({.frame_boundary = false});
 
   ASSERT_TRUE(frame->Submit());
-  EXPECT_EQ(host_buffer.GetStateForTest().current_frame, 0u);
+  EXPECT_EQ(host_buffer.GetStateForTest().current_frame, 1u);
 
   frame = surface->AcquireFrame(SkISize::Make(100, 100));
   frame->set_submit_info({.frame_boundary = true});
 
   ASSERT_TRUE(frame->Submit());
-  EXPECT_EQ(host_buffer.GetStateForTest().current_frame, 1u);
+  EXPECT_EQ(host_buffer.GetStateForTest().current_frame, 2u);
 }
 
 #ifdef IMPELLER_DEBUG
