@@ -138,6 +138,11 @@ Future<void> _run(
       osVersion: osVersion,
       deviceName: deviceName,
       iosEngineVariant: iosEngineVariant,
+      xcodeBuildExtraArgs: [
+        // Plist with `FTEEnableImpeller=NO`; all projects in the workspace require this file.
+        // For example, `FlutterAppExtensionTestHost` has a dummy file under the below directory.
+        r'INFOPLIST_FILE="$(TARGET_NAME)/Info_Skia.plist"',
+      ],
     );
     cleanup.add(process.kill);
 
@@ -161,10 +166,6 @@ Future<void> _run(
       osVersion: osVersion,
       deviceName: deviceName,
       iosEngineVariant: iosEngineVariant,
-      xcodeBuildExtraArgs: [
-        ..._skipTestsForImpeller,
-        _infoPlistFPathForImpeller(engine),
-      ],
     );
     cleanup.add(process.kill);
 
@@ -347,64 +348,6 @@ Future<io.Process> _runTests({
     ],
     mode: io.ProcessStartMode.inheritStdio,
   );
-}
-
-/// -skip-testing {$name} args required to pass the Impeller tests.
-///
-/// - Skip testFontRenderingWhenSuppliedWithBogusFont: https://github.com/flutter/flutter/issues/113250
-/// - Skip golden tests that use software rendering: https://github.com/flutter/flutter/issues/131888
-final _skipTestsForImpeller = [
-  'ScenariosUITests/MultiplePlatformViewsBackgroundForegroundTest/testPlatformView',
-  'ScenariosUITests/MultiplePlatformViewsTest/testPlatformView',
-  'ScenariosUITests/NonFullScreenFlutterViewPlatformViewUITests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationClipPathTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationClipPathMultipleClipsTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationClipPathWithTransformTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationClipPathWithTransformMultipleClipsTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationClipRectAfterMovedTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationClipRectAfterMovedMultipleClipsTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationClipRectTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationClipRectMultipleClipsTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationClipRectWithTransformTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationClipRectWithTransformMultipleClipsTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationClipRRectTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationClipRRectMultipleClipsTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationClipRRectWithTransformTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationClipRRectWithTransformMultipleClipsTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationLargeClipRRectTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationLargeClipRRectMultipleClipsTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationLargeClipRRectWithTransformTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationLargeClipRRectWithTransformMultipleClipsTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationOpacityTests/testPlatformView',
-  'ScenariosUITests/PlatformViewMutationTransformTests/testPlatformView',
-  'ScenariosUITests/PlatformViewRotation/testPlatformView',
-  'ScenariosUITests/PlatformViewUITests/testPlatformView',
-  'ScenariosUITests/PlatformViewWithNegativeOtherBackDropFilterTests/testPlatformView',
-  'ScenariosUITests/PlatformViewWithOtherBackdropFilterTests/testPlatformView',
-  'ScenariosUITests/TwoPlatformViewClipPathTests/testPlatformView',
-  'ScenariosUITests/TwoPlatformViewClipPathMultipleClipsTests/testPlatformView',
-  'ScenariosUITests/TwoPlatformViewClipRectTests/testPlatformView',
-  'ScenariosUITests/TwoPlatformViewClipRectMultipleClipsTests/testPlatformView',
-  'ScenariosUITests/TwoPlatformViewClipRRectTests/testPlatformView',
-  'ScenariosUITests/TwoPlatformViewClipRRectMultipleClipsTests/testPlatformView',
-  'ScenariosUITests/TwoPlatformViewsWithOtherBackDropFilterTests/testPlatformView',
-  'ScenariosUITests/UnobstructedPlatformViewTests/testMultiplePlatformViewsWithOverlays',
-].map((name) => '-skip-testing:$name').toList();
-
-/// Plist with `FTEEnableImpeller=YES`; all projects in the workspace require this file.
-///
-/// For example, `FlutterAppExtensionTestHost` has a dummy file under the below directory.
-String _infoPlistFPathForImpeller(Engine engine) {
-  final infoPath = path.join(
-    engine.flutterDir.path,
-    'testing',
-    'scenario_app',
-    'ios',
-    'Scenarios',
-    'Scenarios',
-    'Info_Impeller.plist',
-  );
-  return 'INFOPLIST_FILE=$infoPath';
 }
 
 @useResult

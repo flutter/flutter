@@ -85,6 +85,41 @@
 		E0D5A1E82C8115F7003BB890 /* golden_platform_view_large_cliprrect_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = E0D5A1D92C8115F7003BB890 /* golden_platform_view_large_cliprrect_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png */; };
 		E0D5A1E92C8115F7003BB890 /* golden_platform_view_cliprect_after_moved_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = E0D5A1D42C8115F7003BB890 /* golden_platform_view_cliprect_after_moved_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png */; };
 		F26F15B8268B6B5600EC54D3 /* iPadGestureTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F26F15B7268B6B5500EC54D3 /* iPadGestureTests.m */; };
+		F76CA8C92C8BB0E6002A7EF5 /* golden_two_platform_view_clip_path_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8C62C8BB0E6002A7EF5 /* golden_two_platform_view_clip_path_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8CA2C8BB0E6002A7EF5 /* golden_two_platform_view_clip_rrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8C82C8BB0E6002A7EF5 /* golden_two_platform_view_clip_rrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8CB2C8BB0E6002A7EF5 /* golden_platform_view_with_other_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8C52C8BB0E6002A7EF5 /* golden_platform_view_with_other_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8CC2C8BB0E6002A7EF5 /* golden_platform_view_cliprect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8C22C8BB0E6002A7EF5 /* golden_platform_view_cliprect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8CD2C8BB0E6002A7EF5 /* golden_platform_view_cliprect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8C02C8BB0E6002A7EF5 /* golden_platform_view_cliprect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8CE2C8BB0E6002A7EF5 /* golden_platform_view_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8C42C8BB0E6002A7EF5 /* golden_platform_view_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8CF2C8BB0E6002A7EF5 /* golden_platform_view_cliprrect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8C32C8BB0E6002A7EF5 /* golden_platform_view_cliprrect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8D02C8BB0E6002A7EF5 /* golden_platform_view_clippath_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8BF2C8BB0E6002A7EF5 /* golden_platform_view_clippath_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8D12C8BB0E6002A7EF5 /* golden_platform_view_cliprect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8C12C8BB0E6002A7EF5 /* golden_platform_view_cliprect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8D22C8BB0E6002A7EF5 /* golden_two_platform_view_clip_path_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8C72C8BB0E6002A7EF5 /* golden_two_platform_view_clip_path_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8E02C8BB574002A7EF5 /* golden_platform_view_cliprrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8D92C8BB574002A7EF5 /* golden_platform_view_cliprrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8E12C8BB574002A7EF5 /* golden_two_platform_views_with_other_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8DF2C8BB574002A7EF5 /* golden_two_platform_views_with_other_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8E22C8BB574002A7EF5 /* golden_platform_view_cliprrect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8DB2C8BB574002A7EF5 /* golden_platform_view_cliprrect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8E32C8BB574002A7EF5 /* golden_platform_view_cliprect_after_moved_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8D82C8BB574002A7EF5 /* golden_platform_view_cliprect_after_moved_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8E42C8BB574002A7EF5 /* golden_platform_view_opacity_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8DD2C8BB574002A7EF5 /* golden_platform_view_opacity_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8E52C8BB574002A7EF5 /* golden_platform_view_clippath_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8D62C8BB574002A7EF5 /* golden_platform_view_clippath_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8E62C8BB574002A7EF5 /* golden_platform_view_clippath_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8D72C8BB574002A7EF5 /* golden_platform_view_clippath_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8E72C8BB574002A7EF5 /* golden_platform_view_multiple_background_foreground_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8DC2C8BB574002A7EF5 /* golden_platform_view_multiple_background_foreground_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8E82C8BB574002A7EF5 /* golden_platform_view_with_negative_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8DE2C8BB574002A7EF5 /* golden_platform_view_with_negative_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8E92C8BB574002A7EF5 /* golden_darwin_system_font_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8D52C8BB574002A7EF5 /* golden_darwin_system_font_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8EA2C8BB574002A7EF5 /* golden_platform_view_cliprrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8DA2C8BB574002A7EF5 /* golden_platform_view_cliprrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8ED2C8BB5E7002A7EF5 /* golden_non_full_screen_flutter_view_platform_view_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8EB2C8BB5E7002A7EF5 /* golden_non_full_screen_flutter_view_platform_view_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8F02C8BB623002A7EF5 /* golden_platform_view_cliprect_after_moved_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8EF2C8BB623002A7EF5 /* golden_platform_view_cliprect_after_moved_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8F62C8BB73E002A7EF5 /* golden_two_platform_view_clip_rrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8F52C8BB73E002A7EF5 /* golden_two_platform_view_clip_rrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8F82C8BB73E002A7EF5 /* golden_platform_view_clippath_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8F12C8BB73E002A7EF5 /* golden_platform_view_clippath_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8F92C8BB73E002A7EF5 /* golden_platform_view_cliprect_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8F32C8BB73E002A7EF5 /* golden_platform_view_cliprect_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8FA2C8BB73E002A7EF5 /* golden_platform_view_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8F42C8BB73E002A7EF5 /* golden_platform_view_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA8FF2C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8FD2C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA9002C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8FB2C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA9012C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8FC2C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA9022C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA8FE2C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA9042C8BB7FC002A7EF5 /* golden_platform_view_rotate_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA9032C8BB7FC002A7EF5 /* golden_platform_view_rotate_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA9092C8BBAD6002A7EF5 /* golden_platform_view_multiple_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA9062C8BBAD6002A7EF5 /* golden_platform_view_multiple_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA90A2C8BBAD6002A7EF5 /* golden_two_platform_view_clip_rect_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA9072C8BBAD6002A7EF5 /* golden_two_platform_view_clip_rect_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
+		F76CA90B2C8BBAD6002A7EF5 /* golden_two_platform_view_clip_rect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = F76CA9082C8BBAD6002A7EF5 /* golden_two_platform_view_clip_rect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -272,7 +307,42 @@
 		E0D5A1DC2C8115F7003BB890 /* golden_two_platform_view_clip_rect_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_two_platform_view_clip_rect_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
 		E0D5A1DD2C8115F7003BB890 /* golden_two_platform_view_clip_rrect_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_two_platform_view_clip_rrect_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
 		F26F15B7268B6B5500EC54D3 /* iPadGestureTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = iPadGestureTests.m; sourceTree = "<group>"; };
-		F72114B628EF99F500184A2D /* Info_Impeller.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info_Impeller.plist; sourceTree = "<group>"; };
+		F72114B628EF99F500184A2D /* Info_Skia.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info_Skia.plist; sourceTree = "<group>"; };
+		F76CA8BF2C8BB0E6002A7EF5 /* golden_platform_view_clippath_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_clippath_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8C02C8BB0E6002A7EF5 /* golden_platform_view_cliprect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_cliprect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8C12C8BB0E6002A7EF5 /* golden_platform_view_cliprect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_cliprect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8C22C8BB0E6002A7EF5 /* golden_platform_view_cliprect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_cliprect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8C32C8BB0E6002A7EF5 /* golden_platform_view_cliprrect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_cliprrect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8C42C8BB0E6002A7EF5 /* golden_platform_view_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8C52C8BB0E6002A7EF5 /* golden_platform_view_with_other_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_with_other_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8C62C8BB0E6002A7EF5 /* golden_two_platform_view_clip_path_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_two_platform_view_clip_path_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8C72C8BB0E6002A7EF5 /* golden_two_platform_view_clip_path_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_two_platform_view_clip_path_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8C82C8BB0E6002A7EF5 /* golden_two_platform_view_clip_rrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_two_platform_view_clip_rrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8D52C8BB574002A7EF5 /* golden_darwin_system_font_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_darwin_system_font_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8D62C8BB574002A7EF5 /* golden_platform_view_clippath_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_clippath_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8D72C8BB574002A7EF5 /* golden_platform_view_clippath_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_clippath_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8D82C8BB574002A7EF5 /* golden_platform_view_cliprect_after_moved_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_cliprect_after_moved_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8D92C8BB574002A7EF5 /* golden_platform_view_cliprrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_cliprrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8DA2C8BB574002A7EF5 /* golden_platform_view_cliprrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_cliprrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8DB2C8BB574002A7EF5 /* golden_platform_view_cliprrect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_cliprrect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8DC2C8BB574002A7EF5 /* golden_platform_view_multiple_background_foreground_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_multiple_background_foreground_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8DD2C8BB574002A7EF5 /* golden_platform_view_opacity_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_opacity_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8DE2C8BB574002A7EF5 /* golden_platform_view_with_negative_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_with_negative_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8DF2C8BB574002A7EF5 /* golden_two_platform_views_with_other_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_two_platform_views_with_other_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8EB2C8BB5E7002A7EF5 /* golden_non_full_screen_flutter_view_platform_view_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_non_full_screen_flutter_view_platform_view_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8EF2C8BB623002A7EF5 /* golden_platform_view_cliprect_after_moved_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_cliprect_after_moved_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8F12C8BB73E002A7EF5 /* golden_platform_view_clippath_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_clippath_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8F32C8BB73E002A7EF5 /* golden_platform_view_cliprect_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_cliprect_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8F42C8BB73E002A7EF5 /* golden_platform_view_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8F52C8BB73E002A7EF5 /* golden_two_platform_view_clip_rrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_two_platform_view_clip_rrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8FB2C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_large_cliprrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8FC2C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_large_cliprrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8FD2C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_large_cliprrect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA8FE2C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_large_cliprrect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA9032C8BB7FC002A7EF5 /* golden_platform_view_rotate_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_rotate_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA9062C8BBAD6002A7EF5 /* golden_platform_view_multiple_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_multiple_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA9072C8BBAD6002A7EF5 /* golden_two_platform_view_clip_rect_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_two_platform_view_clip_rect_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
+		F76CA9082C8BBAD6002A7EF5 /* golden_two_platform_view_clip_rect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_two_platform_view_clip_rect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -345,7 +415,7 @@
 				248D76CB22E388370012F0C1 /* AppDelegate.m */,
 				248D76D322E388380012F0C1 /* Assets.xcassets */,
 				248D76D822E388380012F0C1 /* Info.plist */,
-				F72114B628EF99F500184A2D /* Info_Impeller.plist */,
+				F72114B628EF99F500184A2D /* Info_Skia.plist */,
 				248D76D922E388380012F0C1 /* main.m */,
 				0A57B3BB2323C4BD00DD9521 /* ScreenBeforeFlutter.h */,
 				0A57B3BC2323C4BD00DD9521 /* ScreenBeforeFlutter.m */,
@@ -427,45 +497,80 @@
 		F7B464DC2759D02B00079189 /* Goldens */ = {
 			isa = PBXGroup;
 			children = (
-				68C9D8082AD9B6C800DF9D79 /* golden_darwin_system_font_iPhone SE (3rd generation)_17.0_simulator.png */,
 				3BFD971E2A990CF40094F51B /* golden_bogus_font_text_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
-				3BFD971F2A990CF40094F51B /* golden_spawn_engine_works_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
-				68D93AED2A46097E0054AB6D /* golden_platform_view_with_negative_backdrop_filter_iPhone SE (3rd generation)_17.0_simulator.png */,
-				6860CE242A01B2FF00B68EC5 /* golden_two_platform_view_clip_path_iPhone SE (3rd generation)_17.0_simulator.png */,
-				6860CE232A01B2FF00B68EC5 /* golden_two_platform_view_clip_rect_iPhone SE (3rd generation)_17.0_simulator.png */,
-				6860CE222A01B2FF00B68EC5 /* golden_two_platform_view_clip_rrect_iPhone SE (3rd generation)_17.0_simulator.png */,
 				684FFF7229F9C10500281002 /* golden_bogus_font_text_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8D52C8BB574002A7EF5 /* golden_darwin_system_font_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				68C9D8082AD9B6C800DF9D79 /* golden_darwin_system_font_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8EB2C8BB5E7002A7EF5 /* golden_non_full_screen_flutter_view_platform_view_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
 				684FFF7029F9C10500281002 /* golden_non_full_screen_flutter_view_platform_view_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8D62C8BB574002A7EF5 /* golden_platform_view_clippath_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
 				684FFF7729F9C10600281002 /* golden_platform_view_clippath_iPhone SE (3rd generation)_17.0_simulator.png */,
-				684FFF7629F9C10600281002 /* golden_platform_view_clippath_with_transform_iPhone SE (3rd generation)_17.0_simulator.png */,
-				684FFF6C29F9C10400281002 /* golden_platform_view_cliprect_after_moved_iPhone SE (3rd generation)_17.0_simulator.png */,
-				684FFF7429F9C10500281002 /* golden_platform_view_cliprect_iPhone SE (3rd generation)_17.0_simulator.png */,
-				684FFF6929F9C10300281002 /* golden_platform_view_cliprect_with_transform_iPhone SE (3rd generation)_17.0_simulator.png */,
-				684FFF7129F9C10500281002 /* golden_platform_view_cliprrect_iPhone SE (3rd generation)_17.0_simulator.png */,
-				684FFF6829F9C10300281002 /* golden_platform_view_cliprrect_with_transform_iPhone SE (3rd generation)_17.0_simulator.png */,
-				684FFF7829F9C10600281002 /* golden_platform_view_iPhone SE (3rd generation)_17.0_simulator.png */,
-				684FFF7929F9C10600281002 /* golden_platform_view_large_cliprrect_iPhone SE (3rd generation)_17.0_simulator.png */,
-				684FFF6D29F9C10400281002 /* golden_platform_view_large_cliprrect_with_transform_iPhone SE (3rd generation)_17.0_simulator.png */,
-				684FFF7529F9C10600281002 /* golden_platform_view_multiple_background_foreground_iPhone SE (3rd generation)_17.0_simulator.png */,
-				684FFF7329F9C10500281002 /* golden_platform_view_multiple_iPhone SE (3rd generation)_17.0_simulator.png */,
-				684FFF6A29F9C10300281002 /* golden_platform_view_opacity_iPhone SE (3rd generation)_17.0_simulator.png */,
-				684FFF6B29F9C10400281002 /* golden_platform_view_rotate_iPhone SE (3rd generation)_17.0_simulator.png */,
-				684FFF6F29F9C10400281002 /* golden_platform_view_transform_iPhone SE (3rd generation)_17.0_simulator.png */,
-				684FFF7B29F9C10700281002 /* golden_platform_view_with_other_backdrop_filter_iPhone SE (3rd generation)_17.0_simulator.png */,
-				684FFF7A29F9C10700281002 /* golden_spawn_engine_works_iPhone SE (3rd generation)_17.0_simulator.png */,
-				684FFF6E29F9C10400281002 /* golden_two_platform_views_with_other_backdrop_filter_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8BF2C8BB0E6002A7EF5 /* golden_platform_view_clippath_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
 				E0D5A1D22C8115F7003BB890 /* golden_platform_view_clippath_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8D72C8BB574002A7EF5 /* golden_platform_view_clippath_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				684FFF7629F9C10600281002 /* golden_platform_view_clippath_with_transform_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8F12C8BB73E002A7EF5 /* golden_platform_view_clippath_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
 				E0D5A1D32C8115F7003BB890 /* golden_platform_view_clippath_with_transform_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8EF2C8BB623002A7EF5 /* golden_platform_view_cliprect_after_moved_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				684FFF6C29F9C10400281002 /* golden_platform_view_cliprect_after_moved_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8D82C8BB574002A7EF5 /* golden_platform_view_cliprect_after_moved_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
 				E0D5A1D42C8115F7003BB890 /* golden_platform_view_cliprect_after_moved_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8F32C8BB73E002A7EF5 /* golden_platform_view_cliprect_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				684FFF7429F9C10500281002 /* golden_platform_view_cliprect_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8C02C8BB0E6002A7EF5 /* golden_platform_view_cliprect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
 				E0D5A1D52C8115F7003BB890 /* golden_platform_view_cliprect_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8C12C8BB0E6002A7EF5 /* golden_platform_view_cliprect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				684FFF6929F9C10300281002 /* golden_platform_view_cliprect_with_transform_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8C22C8BB0E6002A7EF5 /* golden_platform_view_cliprect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
 				E0D5A1D62C8115F7003BB890 /* golden_platform_view_cliprect_with_transform_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8D92C8BB574002A7EF5 /* golden_platform_view_cliprrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				684FFF7129F9C10500281002 /* golden_platform_view_cliprrect_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8DA2C8BB574002A7EF5 /* golden_platform_view_cliprrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
 				E0D5A1D72C8115F7003BB890 /* golden_platform_view_cliprrect_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8C32C8BB0E6002A7EF5 /* golden_platform_view_cliprrect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				684FFF6829F9C10300281002 /* golden_platform_view_cliprrect_with_transform_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8DB2C8BB574002A7EF5 /* golden_platform_view_cliprrect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
 				E0D5A1D82C8115F7003BB890 /* golden_platform_view_cliprrect_with_transform_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8F42C8BB73E002A7EF5 /* golden_platform_view_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				684FFF7829F9C10600281002 /* golden_platform_view_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8FB2C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				684FFF7929F9C10600281002 /* golden_platform_view_large_cliprrect_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8FC2C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
 				E0D5A1D92C8115F7003BB890 /* golden_platform_view_large_cliprrect_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8FD2C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				684FFF6D29F9C10400281002 /* golden_platform_view_large_cliprrect_with_transform_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8FE2C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
 				E0D5A1DA2C8115F7003BB890 /* golden_platform_view_large_cliprrect_with_transform_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8DC2C8BB574002A7EF5 /* golden_platform_view_multiple_background_foreground_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				684FFF7529F9C10600281002 /* golden_platform_view_multiple_background_foreground_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA9062C8BBAD6002A7EF5 /* golden_platform_view_multiple_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				684FFF7329F9C10500281002 /* golden_platform_view_multiple_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8DD2C8BB574002A7EF5 /* golden_platform_view_opacity_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				684FFF6A29F9C10300281002 /* golden_platform_view_opacity_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA9032C8BB7FC002A7EF5 /* golden_platform_view_rotate_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				684FFF6B29F9C10400281002 /* golden_platform_view_rotate_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8C42C8BB0E6002A7EF5 /* golden_platform_view_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				684FFF6F29F9C10400281002 /* golden_platform_view_transform_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8DE2C8BB574002A7EF5 /* golden_platform_view_with_negative_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				68D93AED2A46097E0054AB6D /* golden_platform_view_with_negative_backdrop_filter_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8C52C8BB0E6002A7EF5 /* golden_platform_view_with_other_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				684FFF7B29F9C10700281002 /* golden_platform_view_with_other_backdrop_filter_iPhone SE (3rd generation)_17.0_simulator.png */,
+				3BFD971F2A990CF40094F51B /* golden_spawn_engine_works_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				684FFF7A29F9C10700281002 /* golden_spawn_engine_works_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8C62C8BB0E6002A7EF5 /* golden_two_platform_view_clip_path_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				6860CE242A01B2FF00B68EC5 /* golden_two_platform_view_clip_path_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8C72C8BB0E6002A7EF5 /* golden_two_platform_view_clip_path_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
 				E0D5A1DB2C8115F7003BB890 /* golden_two_platform_view_clip_path_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA9072C8BBAD6002A7EF5 /* golden_two_platform_view_clip_rect_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				6860CE232A01B2FF00B68EC5 /* golden_two_platform_view_clip_rect_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA9082C8BBAD6002A7EF5 /* golden_two_platform_view_clip_rect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
 				E0D5A1DC2C8115F7003BB890 /* golden_two_platform_view_clip_rect_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8C82C8BB0E6002A7EF5 /* golden_two_platform_view_clip_rrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				6860CE222A01B2FF00B68EC5 /* golden_two_platform_view_clip_rrect_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8F52C8BB73E002A7EF5 /* golden_two_platform_view_clip_rrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
 				E0D5A1DD2C8115F7003BB890 /* golden_two_platform_view_clip_rrect_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png */,
+				F76CA8DF2C8BB574002A7EF5 /* golden_two_platform_views_with_other_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png */,
+				684FFF6E29F9C10400281002 /* golden_two_platform_views_with_other_backdrop_filter_iPhone SE (3rd generation)_17.0_simulator.png */,
 			);
 			name = Goldens;
 			sourceTree = "<group>";
@@ -638,11 +743,27 @@
 				684FFF8C29F9C10700281002 /* golden_platform_view_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				684FFF8E29F9C10700281002 /* golden_spawn_engine_works_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				684FFF8229F9C10700281002 /* golden_two_platform_views_with_other_backdrop_filter_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8ED2C8BB5E7002A7EF5 /* golden_non_full_screen_flutter_view_platform_view_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				684FFF7D29F9C10700281002 /* golden_platform_view_cliprect_with_transform_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				684FFF8829F9C10700281002 /* golden_platform_view_cliprect_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				684FFF8529F9C10700281002 /* golden_platform_view_cliprrect_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8FF2C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA9002C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA9012C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA9022C8BB7BF002A7EF5 /* golden_platform_view_large_cliprrect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				6860CE252A01B2FF00B68EC5 /* golden_two_platform_view_clip_rrect_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				684FFF8F29F9C10700281002 /* golden_platform_view_with_other_backdrop_filter_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8E02C8BB574002A7EF5 /* golden_platform_view_cliprrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8E12C8BB574002A7EF5 /* golden_two_platform_views_with_other_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8E22C8BB574002A7EF5 /* golden_platform_view_cliprrect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8E32C8BB574002A7EF5 /* golden_platform_view_cliprect_after_moved_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8E42C8BB574002A7EF5 /* golden_platform_view_opacity_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8E52C8BB574002A7EF5 /* golden_platform_view_clippath_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8E62C8BB574002A7EF5 /* golden_platform_view_clippath_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8E72C8BB574002A7EF5 /* golden_platform_view_multiple_background_foreground_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8E82C8BB574002A7EF5 /* golden_platform_view_with_negative_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8E92C8BB574002A7EF5 /* golden_darwin_system_font_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8EA2C8BB574002A7EF5 /* golden_platform_view_cliprrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				6860CE262A01B2FF00B68EC5 /* golden_two_platform_view_clip_rect_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				684FFF8A29F9C10700281002 /* golden_platform_view_clippath_with_transform_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				3BFD97212A990CF50094F51B /* golden_spawn_engine_works_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
@@ -652,11 +773,30 @@
 				684FFF8029F9C10700281002 /* golden_platform_view_cliprect_after_moved_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				684FFF8929F9C10700281002 /* golden_platform_view_multiple_background_foreground_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				684FFF8629F9C10700281002 /* golden_bogus_font_text_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8F62C8BB73E002A7EF5 /* golden_two_platform_view_clip_rrect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8F82C8BB73E002A7EF5 /* golden_platform_view_clippath_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8F92C8BB73E002A7EF5 /* golden_platform_view_cliprect_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA9092C8BBAD6002A7EF5 /* golden_platform_view_multiple_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA90A2C8BBAD6002A7EF5 /* golden_two_platform_view_clip_rect_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA90B2C8BBAD6002A7EF5 /* golden_two_platform_view_clip_rect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8FA2C8BB73E002A7EF5 /* golden_platform_view_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				684FFF7E29F9C10700281002 /* golden_platform_view_opacity_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				684FFF8729F9C10700281002 /* golden_platform_view_multiple_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				68D93AEE2A46097E0054AB6D /* golden_platform_view_with_negative_backdrop_filter_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				3BFD97202A990CF50094F51B /* golden_bogus_font_text_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8C92C8BB0E6002A7EF5 /* golden_two_platform_view_clip_path_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8CA2C8BB0E6002A7EF5 /* golden_two_platform_view_clip_rrect_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8CB2C8BB0E6002A7EF5 /* golden_platform_view_with_other_backdrop_filter_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8CC2C8BB0E6002A7EF5 /* golden_platform_view_cliprect_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8CD2C8BB0E6002A7EF5 /* golden_platform_view_cliprect_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8CE2C8BB0E6002A7EF5 /* golden_platform_view_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8CF2C8BB0E6002A7EF5 /* golden_platform_view_cliprrect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8D02C8BB0E6002A7EF5 /* golden_platform_view_clippath_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8F02C8BB623002A7EF5 /* golden_platform_view_cliprect_after_moved_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8D12C8BB0E6002A7EF5 /* golden_platform_view_cliprect_with_transform_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA8D22C8BB0E6002A7EF5 /* golden_two_platform_view_clip_path_multiple_clips_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				E0D5A1DE2C8115F7003BB890 /* golden_platform_view_cliprect_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
+				F76CA9042C8BB7FC002A7EF5 /* golden_platform_view_rotate_impeller_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				E0D5A1DF2C8115F7003BB890 /* golden_platform_view_clippath_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				E0D5A1E02C8115F7003BB890 /* golden_platform_view_cliprect_with_transform_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,
 				E0D5A1E12C8115F7003BB890 /* golden_platform_view_cliprrect_with_transform_multiple_clips_iPhone SE (3rd generation)_17.0_simulator.png in Resources */,

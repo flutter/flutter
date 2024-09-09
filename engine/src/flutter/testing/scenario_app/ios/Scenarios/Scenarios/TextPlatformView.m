@@ -75,7 +75,8 @@
                viewIdentifier:(int64_t)viewId
                     arguments:(id _Nullable)args
               binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger {
-  if ([super init]) {
+  self = [super init];
+  if (self) {
     _containerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 250, 100)];
     _containerView.backgroundColor = UIColor.lightGrayColor;
     _containerView.clipsToBounds = YES;
