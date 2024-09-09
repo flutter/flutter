@@ -32,7 +32,7 @@ class NativeDriverSupportPlugin :
 
     override fun onMethodCall(
         call: MethodCall,
-        result: MethodChannel.Result,
+        result: MethodChannel.Result
     ) {
         val activity = this.activity
         if (activity == null) {

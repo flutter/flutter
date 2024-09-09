@@ -42,7 +42,7 @@ class SmileyFaceTexturePlugin :
 
     override fun onMethodCall(
         call: MethodCall,
-        result: MethodChannel.Result,
+        result: MethodChannel.Result
     ) {
         if (call.method == "initTexture") {
             val height = call.argument<Int>("height") ?: 1
