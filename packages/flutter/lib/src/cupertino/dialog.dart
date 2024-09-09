@@ -2152,12 +2152,6 @@ class CupertinoDialogAction extends StatelessWidget {
   bool get enabled => onPressed != null;
 
 
-  ValueChanged<bool> get onPressedUpdate => onPressed == null ? (bool _) {} : (bool isPressed) {
-    if (isPressed) {
-      onPressed!();
-    }
-  };
-
   // Dialog action content shrinks to fit, up to a certain point, and if it still
   // cannot fit at the minimum size, the text content is ellipsized.
   //
