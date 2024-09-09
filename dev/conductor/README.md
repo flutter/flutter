@@ -23,7 +23,7 @@ unlock your ssh key for the session; if you do not, each time the conductor
 attempts to interact with a remote, the user will be prompted to enter their ssh
 key password.
 
-** Confirm that your personal github clone of flutter/flutter is named flutter and flutter/engine is named engine. If not you will need to use flags to overide the defaults.
+** Confirm that your personal github clone of flutter/flutter is named flutter and flutter/engine is named engine. If not you will need to use flags to override the defaults.
 
 ## Usage
 
