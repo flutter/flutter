@@ -62,6 +62,9 @@ final class NativeDriverExtension implements CommandExtension {
     return _MethodChannelResult(result);
   }
 
+  // While these could have been implemented in native code, they are already
+  // available as engine-bundled platform plugins, so using them directly
+  // reduces the amount of code to be written and maintained.
   Future<Result?> _builtInCall(String method) async {
     switch (method) {
       case 'rotate_landscape':
