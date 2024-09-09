@@ -8,6 +8,7 @@ import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 
+import 'adaptive_text_selection_toolbar.dart';
 import 'back_button.dart';
 import 'button_style.dart';
 import 'color_scheme.dart';
@@ -1208,6 +1209,7 @@ class SearchBar extends StatefulWidget {
     this.textInputAction,
     this.keyboardType,
     this.scrollPadding = const EdgeInsets.all(20.0),
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1356,6 +1358,21 @@ class SearchBar extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.scrollPadding}
   final EdgeInsets scrollPadding;
 
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
+  ///
+  /// If not provided, will build a default menu based on the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [AdaptiveTextSelectionToolbar], which is built by default.
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
+    );
+  }
+
   @override
   State<SearchBar> createState() => _SearchBarState();
 }
@@ -1497,6 +1514,7 @@ class _SearchBarState extends State<SearchBar> {
                           textInputAction: widget.textInputAction,
                           keyboardType: widget.keyboardType,
                           scrollPadding: widget.scrollPadding,
+                          contextMenuBuilder: widget.contextMenuBuilder,
                         ),
                       ),
                     ),
