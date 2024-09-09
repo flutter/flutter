@@ -6,6 +6,7 @@
 /// @docImport 'package:flutter/scheduler.dart';
 library;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -962,7 +963,7 @@ class _WidgetStateMapper<T> implements WidgetStateProperty<T> {
   }
 
   @override
-  int get hashCode => Object.hashAll(<Object?>[...map.keys, ...map.values]);
+  int get hashCode => MapEquality<WidgetStatesConstraint, T>().hash(map);
 
   @override
   String toString() => '$map';
