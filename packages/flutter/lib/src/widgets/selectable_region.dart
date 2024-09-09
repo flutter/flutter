@@ -3036,7 +3036,7 @@ typedef SelectionListenerSelectionChangedCallback = void Function(SelectionDetai
 ///
 /// See also:
 ///
-///   * [SelectionArea], which provides an overview of the selection system.
+///   * [SelectableRegion], which provides an overview of the selection system.
 class SelectionListener extends StatefulWidget {
   /// Create a new [SelectionListener] widget.
   const SelectionListener({
