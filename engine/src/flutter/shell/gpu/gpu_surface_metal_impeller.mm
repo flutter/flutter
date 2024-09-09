@@ -166,7 +166,6 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
 
         impeller::IRect cull_rect = surface->coverage();
         SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.GetWidth(), cull_rect.GetHeight());
-        const bool reset_host_buffer = surface_frame.submit_info().frame_boundary;
 
         impeller::RenderTarget render_target = surface->GetTargetRenderPassDescriptor();
         surface->SetFrameBoundary(surface_frame.submit_info().frame_boundary);
@@ -183,9 +182,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
         display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
         impeller_dispatcher.FinishRecording();
         aiks_context->GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
-        if (reset_host_buffer) {
-          aiks_context->GetContentContext().GetTransientsBuffer().Reset();
-        }
+        aiks_context->GetContentContext().GetTransientsBuffer().Reset();
 
         if (!surface->PreparePresent()) {
           return false;
@@ -196,7 +193,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
         impeller::DlDispatcher impeller_dispatcher(cull_rect);
         display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
         auto picture = impeller_dispatcher.EndRecordingAsPicture();
-        auto result = aiks_context->Render(picture, render_target, reset_host_buffer);
+        auto result = aiks_context->Render(picture, render_target, /*reset_host_buffer=*/true);
 
         if (!surface->PreparePresent()) {
           return false;
