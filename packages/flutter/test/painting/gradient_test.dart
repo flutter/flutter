@@ -12,6 +12,68 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+bool _listDoubleMatches(List<double>? x, List<double>? y) {
+  if (x == null && y == null) {
+    return true;
+  }
+  if (x == null || y == null) {
+    return false;
+  }
+  if (x.length != y.length) {
+    return false;
+  }
+  for (int i = 0; i < x.length; i++) {
+    if ((x[i] - y[i]).abs() >= 0.0001) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool _listColorMatches(List<Color> x, List<Color> y) {
+  if (x.length != y.length) {
+    return false;
+  }
+  const double limit = 1/255;
+  for (int i = 0; i < x.length; i++) {
+    if ((x[i].a - y[i].a).abs() >= limit ||
+        (x[i].r - y[i].r).abs() >= limit ||
+        (x[i].g - y[i].g).abs() >= limit ||
+        (x[i].b - y[i].b).abs() >= limit) {
+      return false;
+    }
+  }
+  return true;
+}
+
+class _LinearGradientMatcher extends Matcher {
+  _LinearGradientMatcher(this._target);
+  final LinearGradient _target;
+
+  @override
+  Description describe(Description description) {
+    description.add('expected $_target');
+    return description;
+  }
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item is LinearGradient) {
+      return item.begin == _target.begin &&
+          item.end == _target.end &&
+          item.tileMode == _target.tileMode &&
+          item.transform == _target.transform &&
+          _listColorMatches(item.colors, _target.colors) &&
+          _listDoubleMatches(item.stops, _target.stops);
+    } else {
+      return false;
+    }
+  }
+}
+
+Matcher _matchesLinearGradient(LinearGradient target) =>
+    _LinearGradientMatcher(target);
+
 void main() {
   test('LinearGradient scale test', () {
     const LinearGradient testGradient = LinearGradient(
@@ -25,7 +87,7 @@ void main() {
     );
     final LinearGradient? actual = LinearGradient.lerp(null, testGradient, 0.25);
 
-    expect(actual, const LinearGradient(
+    expect(actual, _matchesLinearGradient(const LinearGradient(
       begin: Alignment.bottomRight,
       end: Alignment(0.7, 1.0),
       colors: <Color>[
@@ -33,7 +95,7 @@ void main() {
         Color(0x04777777),
         Color(0x11444444),
       ],
-    ));
+    )));
   });
 
   test('LinearGradient lerp test', () {
@@ -55,7 +117,7 @@ void main() {
     );
 
     final LinearGradient? actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
-    expect(actual, const LinearGradient(
+    expect(actual, _matchesLinearGradient(const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.centerLeft,
       colors: <Color>[
@@ -63,7 +125,7 @@ void main() {
         Color(0x77777777),
       ],
       stops: <double>[0, 1],
-    ));
+    )));
   });
 
   test('LinearGradient.lerp identical a,b', () {
@@ -104,7 +166,7 @@ void main() {
     );
 
     final LinearGradient? actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
-    expect(actual, const LinearGradient(
+    expect(actual, _matchesLinearGradient(const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.centerLeft,
       colors: <Color>[
@@ -117,7 +179,7 @@ void main() {
         0.5,
         1.0,
       ],
-    ));
+    )));
   });
 
   test('LinearGradient lerp test with unequal number of colors', () {
@@ -136,7 +198,7 @@ void main() {
     );
 
     final LinearGradient? actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
-    expect(actual, const LinearGradient(
+    expect(actual, _matchesLinearGradient(const LinearGradient(
       colors: <Color>[
         Color(0x33333333),
         Color(0x55555555),
@@ -147,7 +209,7 @@ void main() {
         0.5,
         1.0,
       ],
-    ));
+    )));
   });
 
   test('LinearGradient lerp test with stops and unequal number of colors', () {
@@ -175,7 +237,7 @@ void main() {
     );
 
     final LinearGradient? actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
-    expect(actual, const LinearGradient(
+    expect(actual, _matchesLinearGradient(const LinearGradient(
       colors: <Color>[
         Color(0x3B3B3B3B),
         Color(0x55555555),
@@ -188,7 +250,7 @@ void main() {
         0.7,
         1.0,
       ],
-    ));
+    )));
   });
 
   test('LinearGradient lerp test with transforms', () {
@@ -229,7 +291,7 @@ void main() {
         ],
       ).toString(),
       equals(
-        'LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomLeft, colors: [Color(0x33333333), Color(0x66666666)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 1.6))',
+        'LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomLeft, colors: [${const Color(0x33333333)}, ${const Color(0x66666666)}], tileMode: TileMode.clamp, transform: GradientRotation(radians: 1.6))',
       ),
     );
   });
