@@ -45,7 +45,6 @@ abstract class HtmlImageElementCodec implements ui.Codec {
     imgElement = createDomHTMLImageElement();
     imgElement!.src = src;
     setJsProperty<String>(imgElement!, 'decoding', 'async');
-    setJsProperty<String>(imgElement!, 'crossOrigin', 'anonymous');
 
     // Ignoring the returned future on purpose because we're communicating
     // through the `completer`.
