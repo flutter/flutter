@@ -128,9 +128,7 @@ A check might "flake", or randomly fail, due to an
 or for other reasons unrelated to the PR's changes.
 
 Sometimes a flake will resolve itself once some more changes are pushed to
-re-trigger the checks.
-
-This can be as simple as [performing a rebase](#ciyaml-validation)
+re-trigger the checks. This can be as simple as [performing a rebase](#ciyaml-validation)
 to include the latest changes from the main branch.
 
 If that doesn't work, head over to the [tree status](https://flutter-dashboard.appspot.com/#/build?repo=flutter)
