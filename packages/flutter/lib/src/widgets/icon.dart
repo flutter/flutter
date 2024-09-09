@@ -250,7 +250,7 @@ class Icon extends StatelessWidget {
 
   /// The [BlendMode] to apply to the foreground of the icon.
   ///
-  /// When null, the default behavior is to use [color] as-is.
+  /// Defaults to [BlendMode.srcOver]
   final BlendMode? blendMode;
 
   @override
