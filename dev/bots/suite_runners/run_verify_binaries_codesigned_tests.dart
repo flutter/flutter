@@ -109,6 +109,21 @@ List<String> binariesWithoutEntitlements(String flutterRoot) {
   .map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
 }
 
+/// Binaries that are not expected to be codesigned.
+///
+/// This list should be kept in sync with the actual contents of Flutter's cache.
+List<String> unsignedBinaries(String flutterRoot) {
+  return <String>[
+    'artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework/macos-arm64_x86_64/dSYMs/FlutterMacOS.framework.dSYM/Contents/Resources/DWARF/FlutterMacOS',
+    'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
+    'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64_x86_64-simulator/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
+    'artifacts/engine/ios-release/extension_safe/Flutter.xcframework/ios-arm64/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
+    'artifacts/engine/ios-release/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
+  ]
+  .map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
+}
+
+
 /// xcframeworks that are expected to be codesigned.
 ///
 /// This list should be kept in sync with the actual contents of Flutter's
@@ -133,8 +148,8 @@ List<String> signedXcframeworks(String flutterRoot) {
 /// This function ignores code signatures and entitlements, and is intended to
 /// be run on every commit. It should throw if either new binaries are added
 /// to the cache or expected binaries removed. In either case, this class'
-/// [binariesWithEntitlements] or [binariesWithoutEntitlements] lists should
-/// be updated accordingly.
+/// [binariesWithEntitlements], [binariesWithoutEntitlements], and
+/// [unsignedBinaries] lists should be updated accordingly.
 Future<void> verifyExist(
   String flutterRoot,
   {@visibleForTesting ProcessManager processManager = const LocalProcessManager()
@@ -143,16 +158,18 @@ Future<void> verifyExist(
     path.join(flutterRoot, 'bin', 'cache'),
     processManager: processManager,
   );
-  final List<String> allExpectedFiles = binariesWithEntitlements(flutterRoot) + binariesWithoutEntitlements(flutterRoot);
+  final List<String> expectedSigned = binariesWithEntitlements(flutterRoot) + binariesWithoutEntitlements(flutterRoot);
+  final List<String> expectedUnsigned = unsignedBinaries(flutterRoot);
   final Set<String> foundFiles = <String>{
     for (final String binaryPath in binaryPaths)
-      if (allExpectedFiles.contains(binaryPath)) binaryPath
+      if (expectedSigned.contains(binaryPath)) binaryPath
+      else if (expectedUnsigned.contains(binaryPath)) binaryPath
       else throw Exception('Found unexpected binary in cache: $binaryPath'),
   };
 
-  if (foundFiles.length < allExpectedFiles.length) {
+  if (foundFiles.length < expectedSigned.length) {
     final List<String> unfoundFiles = <String>[
-      for (final String file in allExpectedFiles) if (!foundFiles.contains(file)) file,
+      for (final String file in expectedSigned) if (!foundFiles.contains(file)) file,
     ];
     print(
       'Expected binaries not found in cache:\n\n${unfoundFiles.join('\n')}\n\n'
@@ -192,6 +209,11 @@ Future<void> verifySignatures(
     if (signedXcframeworks(flutterRoot).contains(pathToCheck)) {
       verifySignature = true;
     }
+    if (unsignedBinaries(flutterRoot).contains(pathToCheck)) {
+      // Binary is expected to be unsigned. No need to check signature, entitlements.
+      continue;
+    }
+
     if (!verifySignature && !verifyEntitlements) {
       unexpectedFiles.add(pathToCheck);
       print('Unexpected binary or xcframework $pathToCheck found in cache!');

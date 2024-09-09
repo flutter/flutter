@@ -1413,4 +1413,62 @@ void main() {
     expect(find.text('null'), findsNothing);
     expect(currentPage, 'not empty');
   });
+
+  testWidgets('Does not crash when calling jumpToPage before layout', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/86222.
+    final PageController controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Navigator(
+          onDidRemovePage: (Page<Object?> page) {},
+          pages: <Page<void>>[
+            MaterialPage<void>(child: Scaffold(
+              body: PageView(
+                controller: controller,
+                children: const <Widget>[
+                  Scaffold(body: Text('One')),
+                  Scaffold(body: Text('Two')),
+                ],
+              ),
+            )),
+            const MaterialPage<void>(child: Scaffold()),
+          ],
+        ),
+      )
+    ));
+
+    controller.jumpToPage(1);
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('Does not crash when calling animateToPage before layout', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/86222.
+    final PageController controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Navigator(
+          onDidRemovePage: (Page<Object?> page) {},
+          pages: <Page<void>>[
+            MaterialPage<void>(child: Scaffold(
+              body: PageView(
+                controller: controller,
+                children: const <Widget>[
+                  Scaffold(body: Text('One')),
+                  Scaffold(body: Text('Two')),
+                ],
+              ),
+            )),
+            const MaterialPage<void>(child: Scaffold()),
+          ],
+        ),
+      )
+    ));
+
+    controller.animateToPage(1, duration: const Duration(milliseconds: 50), curve: Curves.bounceIn);
+    expect(tester.takeException(), null);
+  });
 }

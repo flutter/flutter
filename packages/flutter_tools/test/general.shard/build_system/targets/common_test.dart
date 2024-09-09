@@ -104,7 +104,6 @@ native-assets:
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
-        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         '$flutterPatchedSdkPath/',
@@ -144,7 +143,6 @@ native-assets:
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
-        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         '$flutterPatchedSdkPath/',
@@ -185,7 +183,6 @@ native-assets:
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
-        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         '$flutterPatchedSdkPath/',
@@ -227,7 +224,6 @@ native-assets:
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
-        '--disable-dart-dev',
         'path/to/frontend_server_starter.dart',
         '--sdk-root',
         '$flutterPatchedSdkPath/',
@@ -269,7 +265,6 @@ native-assets:
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
-        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         '$flutterPatchedSdkPath/',
@@ -314,7 +309,6 @@ native-assets:
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
-        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         '$flutterPatchedSdkPath/',
@@ -356,7 +350,6 @@ native-assets:
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
-        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         '$flutterPatchedSdkPath/',
@@ -410,7 +403,6 @@ native-assets:
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
-        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         '$flutterPatchedSdkPath/',
@@ -458,7 +450,6 @@ native-assets:
           if (!empty)
             FakeCommand(command: <String>[
               artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
-              '--disable-dart-dev',
               artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
               '--sdk-root',
               '$flutterPatchedSdkPath/',

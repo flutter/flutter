@@ -20,7 +20,10 @@ import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 
-final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
+final Platform macPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{},
+);
 
 const List<String> _kSharedConfig = <String>[
   '-dynamiclib',
@@ -526,6 +529,8 @@ void main() {
     late Directory outputDir;
     late File binary;
     late FakeCommand copyPhysicalFrameworkCommand;
+    late FakeCommand copyPhysicalFrameworkDsymCommand;
+    late FakeCommand copyPhysicalFrameworkDsymCommandFailure;
     late FakeCommand lipoCommandNonFatResult;
     late FakeCommand lipoVerifyArm64Command;
     late FakeCommand xattrCommand;
@@ -535,6 +540,7 @@ void main() {
       final FileSystem fileSystem = MemoryFileSystem.test();
       outputDir = fileSystem.directory('output');
       binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter');
+
       copyPhysicalFrameworkCommand = FakeCommand(command: <String>[
         'rsync',
         '-av',
@@ -545,6 +551,28 @@ void main() {
         'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
         outputDir.path,
       ]);
+
+      copyPhysicalFrameworkDsymCommand = FakeCommand(command: <String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        'Artifact.flutterFrameworkDsym.TargetPlatform.ios.debug.EnvironmentType.physical',
+        outputDir.path,
+      ]);
+
+      copyPhysicalFrameworkDsymCommandFailure = FakeCommand(command: <String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        'Artifact.flutterFrameworkDsym.TargetPlatform.ios.debug.EnvironmentType.physical',
+        outputDir.path,
+      ], exitCode: 1);
 
       lipoCommandNonFatResult = FakeCommand(command: <String>[
         'lipo',
@@ -643,6 +671,42 @@ void main() {
         )));
     });
 
+    testWithoutContext('fails when framework dSYM copy fails', () async {
+      binary.createSync(recursive: true);
+      final Directory dSYM = fileSystem.directory(
+       artifacts.getArtifactPath(Artifact.flutterFrameworkDsym,
+         platform: TargetPlatform.ios,
+         mode: BuildMode.debug,
+         environmentType: EnvironmentType.physical,
+       ),
+      );
+      dSYM.createSync(recursive: true);
+
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kIosArchs: 'arm64',
+          kSdkRoot: 'path/to/iPhoneOS.sdk',
+        },
+      );
+      processManager.addCommands(<FakeCommand>[
+        copyPhysicalFrameworkCommand,
+        copyPhysicalFrameworkDsymCommandFailure,
+      ]);
+      await expectLater(
+        const DebugUnpackIOS().build(environment),
+        throwsA(isException.having(
+          (Exception exception) => exception.toString(),
+          'description',
+          contains('Failed to copy framework dSYM'),
+        )));
+    });
+
     testWithoutContext('fails when requested archs missing from framework', () async {
       binary.createSync(recursive: true);
 
@@ -654,7 +718,7 @@ void main() {
         fileSystem: fileSystem,
         outputDir: outputDir,
         defines: <String, String>{
-          kIosArchs: 'arm64 armv7',
+          kIosArchs: 'arm64 x86_64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
         },
       );
@@ -671,7 +735,7 @@ void main() {
           binary.path,
           '-verify_arch',
           'arm64',
-          'armv7',
+          'x86_64',
         ], exitCode: 1),
       ]);
 
@@ -680,7 +744,10 @@ void main() {
         throwsA(isException.having(
           (Exception exception) => exception.toString(),
           'description',
-          contains('does not contain arm64 armv7. Running lipo -info:\nArchitectures in the fat file:'),
+          contains(
+            'does not contain architectures "arm64 x86_64".\n\n'
+            'lipo -info:\nArchitectures in the fat file:',
+          ),
         )),
       );
     });
@@ -696,7 +763,7 @@ void main() {
         fileSystem: fileSystem,
         outputDir: outputDir,
         defines: <String, String>{
-          kIosArchs: 'arm64 armv7',
+          kIosArchs: 'arm64 x86_64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
         },
       );
@@ -713,7 +780,7 @@ void main() {
           binary.path,
           '-verify_arch',
           'arm64',
-          'armv7',
+          'x86_64',
         ]),
         FakeCommand(command: <String>[
           'lipo',
@@ -722,7 +789,7 @@ void main() {
           '-extract',
           'arm64',
           '-extract',
-          'armv7',
+          'x86_64',
           binary.path,
         ], exitCode: 1,
         stderr: 'lipo error'),
@@ -733,7 +800,12 @@ void main() {
         throwsA(isException.having(
           (Exception exception) => exception.toString(),
           'description',
-          contains('Failed to extract arm64 armv7 for output/Flutter.framework/Flutter.\nlipo error\nRunning lipo -info:\nArchitectures in the fat file:'),
+          contains(
+            'Failed to extract architectures "arm64 x86_64" for output/Flutter.framework/Flutter.\n\n'
+            'stderr:\n'
+            'lipo error\n\n'
+            'lipo -info:\nArchitectures in the fat file:',
+          ),
         )),
       );
     });
@@ -779,7 +851,7 @@ void main() {
         fileSystem: fileSystem,
         outputDir: outputDir,
         defines: <String, String>{
-          kIosArchs: 'arm64 armv7',
+          kIosArchs: 'arm64 x86_64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
         },
       );
@@ -796,7 +868,7 @@ void main() {
           binary.path,
           '-verify_arch',
           'arm64',
-          'armv7',
+          'x86_64',
         ]),
         FakeCommand(command: <String>[
           'lipo',
@@ -805,7 +877,7 @@ void main() {
           '-extract',
           'arm64',
           '-extract',
-          'armv7',
+          'x86_64',
           binary.path,
         ]),
         xattrCommand,
@@ -894,6 +966,14 @@ void main() {
 
     testWithoutContext('codesigns framework', () async {
       binary.createSync(recursive: true);
+      final Directory dSYM = fileSystem.directory(
+       artifacts.getArtifactPath(Artifact.flutterFrameworkDsym,
+         platform: TargetPlatform.ios,
+         mode: BuildMode.debug,
+         environmentType: EnvironmentType.physical,
+       ),
+      );
+      dSYM.createSync(recursive: true);
 
       final Environment environment = Environment.test(
         fileSystem.currentDirectory,
@@ -911,6 +991,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        copyPhysicalFrameworkDsymCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,

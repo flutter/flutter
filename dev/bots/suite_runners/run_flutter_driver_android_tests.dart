@@ -44,6 +44,32 @@ Future<void> runFlutterDriverAndroidTests() async {
     'flutter',
     <String>[
       'drive',
+      'lib/blue_rectangle_main.dart',
+      // There are no reason to enable development flags for this test.
+      // Disable them to work around flakiness issues, and in general just
+      // make less things start up unnecessarily.
+      '--no-dds',
+      '--no-enable-dart-profiling',
+      '--test-arguments=test',
+      '--test-arguments=--reporter=expanded',
+    ],
+    workingDirectory: path.join(
+      'dev',
+      'integration_tests',
+      'android_driver_test',
+    ),
+  );
+
+  await runCommand(
+    'flutter',
+    <String>[
+      'drive',
+      'lib/blue_orange_gradient_platform_view_main.dart',
+      // There are no reason to enable development flags for this test.
+      // Disable them to work around flakiness issues, and in general just
+      // make less things start up unnecessarily.
+      '--no-dds',
+      '--no-enable-dart-profiling',
       '--test-arguments=test',
       '--test-arguments=--reporter=expanded',
     ],

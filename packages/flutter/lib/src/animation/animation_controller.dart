@@ -84,34 +84,29 @@ enum AnimationBehavior {
 /// * Create a [fling] animation effect using a physics simulation.
 ///
 /// By default, an [AnimationController] linearly produces values that range
-/// from 0.0 to 1.0, during a given duration. The animation controller generates
-/// a new value whenever the device running your app is ready to display a new
-/// frame (typically, this rate is around 60 values per second).
+/// from 0.0 to 1.0, during a given duration.
+///
+/// When the animation is actively animating, the animation controller generates
+/// a new value each time the device running your app is ready to display a new
+/// frame (typically, this rate is around 60–120 values per second).
+/// If the animation controller is associated with a [State]
+/// through a [TickerProvider], then its updates will be silenced when that
+/// [State]'s subtree is disabled as defined by [TickerMode]; time will still
+/// elapse, and methods like [forward] and [stop] can still be called and
+/// will change the value, but the controller will not generate new values
+/// on its own.
 ///
 /// ## Ticker providers
 ///
 /// An [AnimationController] needs a [TickerProvider], which is configured using
 /// the `vsync` argument on the constructor.
+/// The constructor uses the [TickerProvider] to create a [Ticker], which
+/// the [AnimationController] uses to step through the animation it controls.
 ///
-/// The [TickerProvider] interface describes a factory for [Ticker] objects. A
-/// [Ticker] is an object that knows how to register itself with the
-/// [SchedulerBinding] and fires a callback every frame. The
-/// [AnimationController] class uses a [Ticker] to step through the animation
-/// that it controls.
-///
-/// If an [AnimationController] is being created from a [State], then the State
-/// can use the [TickerProviderStateMixin] and [SingleTickerProviderStateMixin]
-/// classes to implement the [TickerProvider] interface. The
-/// [TickerProviderStateMixin] class always works for this purpose; the
-/// [SingleTickerProviderStateMixin] is slightly more efficient in the case of
-/// the class only ever needing one [Ticker] (e.g. if the class creates only a
-/// single [AnimationController] during its entire lifetime).
-///
-/// The widget test framework [WidgetTester] object can be used as a ticker
-/// provider in the context of tests. In other contexts, you will have to either
-/// pass a [TickerProvider] from a higher level (e.g. indirectly from a [State]
-/// that mixes in [TickerProviderStateMixin]), or create a custom
-/// [TickerProvider] subclass.
+/// For advice on obtaining a ticker provider, see [TickerProvider].
+/// Typically the relevant [State] serves as the ticker provider,
+/// after applying a suitable mixin (like [SingleTickerProviderStateMixin])
+/// to cause the [State] subclass to implement [TickerProvider].
 ///
 /// ## Life cycle
 ///
@@ -223,7 +218,7 @@ enum AnimationBehavior {
 ///
 /// ** See code in examples/api/lib/animation/animation_controller/animated_digit.0.dart **
 /// {@end-tool}
-
+///
 /// See also:
 ///
 ///  * [Tween], the base class for converting an [AnimationController] to a
@@ -241,12 +236,10 @@ class AnimationController extends Animation<double>
   ///   debugging (used by [toString]).
   ///
   /// * [lowerBound] is the smallest value this animation can obtain and the
-  ///   value at which this animation is deemed to be dismissed. It cannot be
-  ///   null.
+  ///   value at which this animation is deemed to be dismissed.
   ///
   /// * [upperBound] is the largest value this animation can obtain and the
-  ///   value at which this animation is deemed to be completed. It cannot be
-  ///   null.
+  ///   value at which this animation is deemed to be completed.
   ///
   /// * `vsync` is the required [TickerProvider] for the current context. It can
   ///   be changed by calling [resync]. See [TickerProvider] for advice on
@@ -455,6 +448,10 @@ class AnimationController extends Animation<double>
   /// controller's ticker might get muted, in which case the animation
   /// controller's callbacks will no longer fire even though time is continuing
   /// to pass. See [Ticker.muted] and [TickerMode].
+  ///
+  /// If the animation was stopped (e.g. with [stop] or by setting a new [value]),
+  /// [isAnimating] will return `false` but the [status] will not change,
+  /// so the value of [AnimationStatus.isAnimating] might still be `true`.
   @override
   bool get isAnimating => _ticker != null && _ticker!.isActive;
 
@@ -580,7 +577,7 @@ class AnimationController extends Animation<double>
     });
   }
 
-  /// Drives the animation from its current value to target.
+  /// Drives the animation from its current value to the given target, "forward".
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
@@ -617,7 +614,7 @@ class AnimationController extends Animation<double>
     return _animateToInternal(target, duration: duration, curve: curve);
   }
 
-  /// Drives the animation from its current value to target.
+  /// Drives the animation from its current value to the given target, "backward".
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
@@ -629,6 +626,10 @@ class AnimationController extends Animation<double>
   /// regardless of whether `target` < [value] or not. At the end of the
   /// animation, when `target` is reached, [status] is reported as
   /// [AnimationStatus.dismissed].
+  ///
+  /// If the `target` argument is the same as the current [value] of the
+  /// animation, then this won't animate, and the returned [TickerFuture] will
+  /// be already complete.
   TickerFuture animateBack(double target, { Duration? duration, Curve curve = Curves.linear }) {
     assert(() {
       if (this.duration == null && reverseDuration == null && duration == null) {

@@ -137,6 +137,7 @@ class SearchAnchor extends StatefulWidget {
     required this.suggestionsBuilder,
     this.textInputAction,
     this.keyboardType,
+    this.enabled = true,
   });
 
   /// Create a [SearchAnchor] that has a [SearchBar] which opens a search view.
@@ -184,6 +185,7 @@ class SearchAnchor extends StatefulWidget {
     required SuggestionsBuilder suggestionsBuilder,
     TextInputAction? textInputAction,
     TextInputType? keyboardType,
+    EdgeInsets scrollPadding,
   }) = _SearchAnchorWithSearchBar;
 
   /// Whether the search view grows to fill the entire screen when the
@@ -349,6 +351,13 @@ class SearchAnchor extends StatefulWidget {
   /// Defaults to the default value specified in [TextField].
   final TextInputType? keyboardType;
 
+  /// Whether or not this widget is currently interactive.
+  ///
+  /// When false, the widget will ignore taps and appear dimmed.
+  ///
+  /// Defaults to true.
+  final bool enabled;
+
   @override
   State<SearchAnchor> createState() => _SearchAnchorState();
 }
@@ -449,15 +458,25 @@ class _SearchAnchorState extends State<SearchAnchor> {
     };
   }
 
+  double _getOpacity() {
+    if (widget.enabled) {
+      return _anchorIsVisible ? 1.0 : 0.0;
+    }
+    return _kDisableSearchBarOpacity;
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedOpacity(
       key: _anchorKey,
-      opacity: _anchorIsVisible ? 1.0 : 0.0,
+      opacity: _getOpacity(),
       duration: _kAnchorFadeDuration,
-      child: GestureDetector(
-        onTap: _openView,
-        child: widget.builder(context, _searchController),
+      child: IgnorePointer(
+        ignoring: !widget.enabled,
+        child: GestureDetector(
+          onTap: _openView,
+          child: widget.builder(context, _searchController),
+        ),
       ),
     );
   }
@@ -1033,6 +1052,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     required super.suggestionsBuilder,
     super.textInputAction,
     super.keyboardType,
+    EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
   }) : super(
     viewHintText: viewHintText ?? barHintText,
     headerHeight: viewHeaderHeight,
@@ -1066,6 +1086,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
         textCapitalization: textCapitalization,
         textInputAction: textInputAction,
         keyboardType: keyboardType,
+        scrollPadding: scrollPadding,
       );
     }
   );
@@ -1186,6 +1207,7 @@ class SearchBar extends StatefulWidget {
     this.autoFocus = false,
     this.textInputAction,
     this.keyboardType,
+    this.scrollPadding = const EdgeInsets.all(20.0),
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1313,7 +1335,11 @@ class SearchBar extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
 
-  /// If false the text field is "disabled" so the SearchBar will ignore taps.
+  /// Whether or not this widget is currently interactive.
+  ///
+  /// When false, the widget will ignore taps and appear dimmed.
+  ///
+  /// Defaults to true.
   final bool enabled;
 
   /// {@macro flutter.widgets.editableText.autofocus}
@@ -1326,6 +1352,9 @@ class SearchBar extends StatefulWidget {
   ///
   /// Defaults to the default value specified in [TextField].
   final TextInputType? keyboardType;
+
+  /// {@macro flutter.widgets.editableText.scrollPadding}
+  final EdgeInsets scrollPadding;
 
   @override
   State<SearchBar> createState() => _SearchBarState();
@@ -1467,6 +1496,7 @@ class _SearchBarState extends State<SearchBar> {
                           textCapitalization: effectiveTextCapitalization,
                           textInputAction: widget.textInputAction,
                           keyboardType: widget.keyboardType,
+                          scrollPadding: widget.scrollPadding,
                         ),
                       ),
                     ),

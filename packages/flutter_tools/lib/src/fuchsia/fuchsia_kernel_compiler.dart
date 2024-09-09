@@ -78,7 +78,6 @@ class FuchsiaKernelCompiler {
     }
     final List<String> command = <String>[
       engineDartBinaryPath,
-      '--disable-dart-dev',
       kernelCompiler,
       ...flags,
     ];

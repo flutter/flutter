@@ -82,12 +82,9 @@ Future<Plugin?> _pluginFromPackage(String name, Uri packageRoot, Set<String> app
 Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = true}) async {
   final List<Plugin> plugins = <Plugin>[];
   final FileSystem fs = project.directory.fileSystem;
-  final String packagesFile = fs.path.join(
-    project.directory.path,
-    '.packages',
-  );
+  final File packageConfigFile = findPackageConfigFileOrDefault(project.directory);
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-    fs.file(packagesFile),
+    packageConfigFile,
     logger: globals.logger,
     throwOnError: throwOnError,
   );
@@ -627,19 +624,19 @@ const String _dartPluginRegistryForNonWebTemplate = '''
 
 import 'dart:io'; // flutter_ignore: dart_io_import.
 {{#android}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
+import 'package:{{pluginName}}/{{dartFileName}}';
 {{/android}}
 {{#ios}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
+import 'package:{{pluginName}}/{{dartFileName}}';
 {{/ios}}
 {{#linux}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
+import 'package:{{pluginName}}/{{dartFileName}}';
 {{/linux}}
 {{#macos}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
+import 'package:{{pluginName}}/{{dartFileName}}';
 {{/macos}}
 {{#windows}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
+import 'package:{{pluginName}}/{{dartFileName}}';
 {{/windows}}
 
 @pragma('vm:entry-point')
@@ -996,8 +993,8 @@ void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<Object?>? pl
         e,
         platform: globals.platform,
         os: globals.os,
-        destination: 'dest',
-        source: 'source',
+        destination: link.path,
+        source: path,
       );
       rethrow;
     }
@@ -1263,7 +1260,7 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
         }
       } else {
         globals.printWarning(
-          'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but the package does not exist.\n'
+          'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but the package does not exist, or is not a plugin package.\n'
           'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
           'or create a plugin named $defaultImplPluginName.\n',
         );
@@ -1435,8 +1432,8 @@ bool _hasPluginInlineImpl(
 
 /// Determine if the plugin provides an inline Dart implementation.
 bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
-  return plugin.pluginDartClassPlatforms[platformKey] != null &&
-      plugin.pluginDartClassPlatforms[platformKey] != 'none';
+  final DartPluginClassAndFilePair? platformInfo = plugin.pluginDartClassPlatforms[platformKey];
+  return platformInfo != null && platformInfo.dartClass != 'none';
 }
 
 /// Get the resolved plugin [resolution] from the [candidates] serving as implementation for

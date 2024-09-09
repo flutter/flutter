@@ -4,6 +4,7 @@
 
 /// @docImport 'package:flutter/cupertino.dart';
 /// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
 ///
 /// @docImport 'editable_text.dart';
 /// @docImport 'list_wheel_scroll_view.dart';
