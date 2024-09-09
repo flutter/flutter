@@ -105,6 +105,35 @@ Matcher _matchesRadialGradient(RadialGradient target) =>
     _RadialGradientMatcher(target);
 
 
+class _SweepGradientMatcher extends Matcher {
+  _SweepGradientMatcher(this._target);
+  final SweepGradient _target;
+
+  @override
+  Description describe(Description description) {
+    description.add('expected $_target');
+    return description;
+  }
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item is SweepGradient) {
+      return item.center == _target.center &&
+          item.startAngle == _target.startAngle &&
+          item.endAngle == _target.endAngle &&
+          item.tileMode == _target.tileMode &&
+          item.transform == _target.transform &&
+          _listColorMatches(item.colors, _target.colors) &&
+          _listDoubleMatches(item.stops, _target.stops);
+    } else {
+      return false;
+    }
+  }
+}
+
+Matcher _matchesSweepGradient(SweepGradient target) =>
+    _SweepGradientMatcher(target);
+
 void main() {
   test('LinearGradient scale test', () {
     const LinearGradient testGradient = LinearGradient(
@@ -759,7 +788,7 @@ void main() {
     );
 
     final SweepGradient? actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
-    expect(actual, const SweepGradient(
+    expect(actual, _matchesSweepGradient(const SweepGradient(
       center: Alignment.topCenter,
       startAngle: math.pi / 4,
       endAngle: math.pi * 3/4,
@@ -771,7 +800,7 @@ void main() {
         0.0,
         1.0,
       ],
-    ));
+    )));
   });
 
   test('SweepGradient.lerp identical a,b', () {
@@ -813,7 +842,7 @@ void main() {
     );
 
     final SweepGradient? actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
-    expect(actual, const SweepGradient(
+    expect(actual, _matchesSweepGradient(const SweepGradient(
       center: Alignment.topCenter,
       startAngle: math.pi / 4,
       endAngle: math.pi * 3/4,
@@ -827,7 +856,7 @@ void main() {
         0.5,
         1.0,
       ],
-    ));
+    )));
   });
 
   test('SweepGradient lerp test with unequal number of colors', () {
@@ -846,7 +875,7 @@ void main() {
     );
 
     final SweepGradient? actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
-    expect(actual, const SweepGradient(
+    expect(actual, _matchesSweepGradient(const SweepGradient(
       colors: <Color>[
         Color(0x33333333),
         Color(0x55555555),
@@ -857,7 +886,7 @@ void main() {
         0.5,
         1.0,
       ],
-    ));
+    )));
   });
 
   test('SweepGradient lerp test with stops and unequal number of colors', () {
@@ -885,7 +914,7 @@ void main() {
     );
 
     final SweepGradient? actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
-    expect(actual, const SweepGradient(
+    expect(actual, _matchesSweepGradient(const SweepGradient(
       colors: <Color>[
         Color(0x3B3B3B3B),
         Color(0x55555555),
@@ -898,7 +927,7 @@ void main() {
         0.7,
         1.0,
       ],
-    ));
+    )));
   });
 
   test('SweepGradient lerp test with transforms', () {
@@ -939,14 +968,14 @@ void main() {
 
     final SweepGradient actual = testGradient.scale(0.5);
 
-    expect(actual, const SweepGradient(
+    expect(actual, _matchesSweepGradient(const SweepGradient(
       center: Alignment.topLeft,
       endAngle: math.pi / 2,
       colors: <Color>[
         Color(0x80333333),
         Color(0x80666666),
       ],
-    ));
+    )));
   });
 
   test('SweepGradient withOpacity test', () {
