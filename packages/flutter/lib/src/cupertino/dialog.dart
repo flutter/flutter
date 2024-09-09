@@ -2061,14 +2061,14 @@ class _AlertDialogButtonBackgroundState extends State<_AlertDialogButtonBackgrou
 
   // |_SlideTarget|
   @override
-  bool didEnter({required bool fromPointerDown, required bool enabled}) {
-    widget.onPressStateChange?.call(enabled);
-    if (enabled) {
+  bool didEnter({required bool fromPointerDown, required bool innerEnabled}) {
+    widget.onPressStateChange?.call(innerEnabled);
+    if (innerEnabled) {
       if (!fromPointerDown) {
         _emitVibration();
       }
     }
-    return enabled;
+    return innerEnabled;
   }
 
   // |_SlideTarget|
@@ -2160,7 +2160,7 @@ class CupertinoDialogAction extends StatefulWidget {
 class _CupertinoDialogActionState extends State<CupertinoDialogAction>
     implements _SlideTarget {
 
-  /// The button is enabled when it has [onPressed].
+  // The button is enabled when it has [onPressed].
   bool get enabled => widget.onPressed != null;
 
   // |_SlideTarget|
