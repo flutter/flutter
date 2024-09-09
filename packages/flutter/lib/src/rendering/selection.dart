@@ -123,13 +123,17 @@ class SelectedContentRange with Diagnosticable {
     required this.contentLength,
     required this.startOffset,
     required this.endOffset,
-  });
+  }) : assert((startOffset >= 0 && endOffset >= 0)
+              || (startOffset == -1 && endOffset == -1));
 
   /// A selected content range that represents an empty selection, i.e. nothing
   /// is selected.
-  const SelectedContentRange.empty({this.contentLength = 0})
-      : startOffset = -1,
-        endOffset = -1;
+  const SelectedContentRange.empty({int contentLength = 0})
+      : this(
+          contentLength: contentLength,
+          startOffset: -1,
+          endOffset: -1,
+        );
 
   /// The length of the content in the [Selectable] or [SelectionHandler] that
   /// created this object.
