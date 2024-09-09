@@ -4350,14 +4350,14 @@ void main() {
     }
 
     await tester.pumpWidget(build());
-    observer._checkInvocations(<Symbol>[#navigator, #didPush]);
+    observer._checkInvocations(<Symbol>[#navigator, #didPush, #didChangeTop]);
     await tester.pumpWidget(Container(child: build()));
-    observer._checkInvocations(<Symbol>[#navigator, #didPush, #navigator]);
+    observer._checkInvocations(<Symbol>[#navigator, #didPush, #didChangeTop]);
     await tester.pumpWidget(Container());
-    observer._checkInvocations(<Symbol>[#navigator]);
+    observer._checkInvocations(<Symbol>[]);
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(build(key));
-    observer._checkInvocations(<Symbol>[#navigator, #didPush]);
+    observer._checkInvocations(<Symbol>[#navigator, #didPush, #didChangeTop]);
     await tester.pumpWidget(Container(child: build(key)));
     observer._checkInvocations(<Symbol>[#navigator, #navigator]);
   });

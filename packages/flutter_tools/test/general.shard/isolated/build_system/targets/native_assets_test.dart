@@ -122,7 +122,61 @@ void main() {
     'NativeAssets with an asset',
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager.list(
+        <FakeCommand>[
+          // Create the framework dylib.
+          const FakeCommand(
+            command: <Pattern>[
+              'lipo',
+              '-create',
+              '-output',
+              '/build/native_assets/ios/foo.framework/foo',
+              'foo.framework/foo',
+            ],
+          ),
+          // Lookup the original install names of the dylib.
+          // There can be different install names for different architectures.
+          FakeCommand(
+            command: const <Pattern>[
+              'otool',
+              '-D',
+              '/build/native_assets/ios/foo.framework/foo',
+            ],
+            stdout: <String>[
+              '/build/native_assets/ios/foo.framework/foo (architecture x86_64):',
+              '@rpath/libfoo.dylib',
+              '/build/native_assets/ios/foo.framework/foo (architecture arm64):',
+              '@rpath/libfoo.dylib',
+            ].join('\n'),
+          ),
+          // Change the instal name of the binary itself and of its dependencies.
+          // We pass the old to new install name mappings of all native assets dylibs,
+          // even for the dylib that is being updated, since the `-change` option
+          // is ignored if the dylib does not depend on the target dylib.
+          const FakeCommand(
+            command: <Pattern>[
+              'install_name_tool',
+              '-id',
+              '@rpath/foo.framework/foo',
+              '-change',
+              '@rpath/libfoo.dylib',
+              '@rpath/foo.framework/foo',
+              '/build/native_assets/ios/foo.framework/foo',
+            ],
+          ),
+          // Only after all changes to the dylib have been made do we sign it.
+          const FakeCommand(
+            command: <Pattern>[
+              'codesign',
+              '--force',
+              '--sign',
+              '-',
+              '--timestamp=none',
+              '/build/native_assets/ios/foo.framework',
+            ],
+          ),
+        ],
+      ),
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     },
     () async {

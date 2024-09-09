@@ -159,8 +159,10 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
+    this.elevation = 2.0,
   })  : _indicatorType = _IndicatorType.material,
-        onStatusChange = null;
+        onStatusChange = null,
+        assert(elevation >= 0.0);
 
   /// Creates an adaptive [RefreshIndicator] based on whether the target
   /// platform is iOS or macOS, following Material design's
@@ -191,8 +193,10 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
+    this.elevation = 2.0,
   })  : _indicatorType = _IndicatorType.adaptive,
-        onStatusChange = null;
+        onStatusChange = null,
+        assert(elevation >= 0.0);
 
   /// Creates a [RefreshIndicator] with no spinner and calls `onRefresh` when
   /// successfully armed by a drag event.
@@ -207,6 +211,7 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsLabel,
     this.semanticsValue,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
+    this.elevation = 2.0,
   })  : _indicatorType = _IndicatorType.noSpinner,
         // The following parameters aren't used because [_IndicatorType.noSpinner] is being used,
         // which involves showing no spinner, hence the following parameters are useless since
@@ -215,7 +220,8 @@ class RefreshIndicator extends StatefulWidget {
         edgeOffset = 0.0,
         color = null,
         backgroundColor = null,
-        strokeWidth = 0.0;
+        strokeWidth = 0.0,
+        assert(elevation >= 0.0);
 
   /// The widget below this widget in the tree.
   ///
@@ -304,6 +310,11 @@ class RefreshIndicator extends StatefulWidget {
   ///
   /// Defaults to [RefreshIndicatorTriggerMode.onEdge].
   final RefreshIndicatorTriggerMode triggerMode;
+
+  /// Defines the elevation of the underlying [RefreshIndicator].
+  ///
+  /// Defaults to 2.0.
+  final double elevation;
 
   @override
   RefreshIndicatorState createState() => RefreshIndicatorState();
@@ -681,6 +692,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
                       valueColor: _valueColor,
                       backgroundColor: widget.backgroundColor,
                       strokeWidth: widget.strokeWidth,
+                      elevation: widget.elevation,
                     );
 
                     final Widget cupertinoIndicator = CupertinoActivityIndicator(
