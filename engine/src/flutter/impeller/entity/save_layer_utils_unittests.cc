@@ -224,6 +224,62 @@ TEST(SaveLayerUtilsTest,
   ASSERT_FALSE(coverage.has_value());
 }
 
+TEST(
+    SaveLayerUtilsTest,
+    CoverageLimitIgnoredIfIntersectedValueIsCloseToActualCoverageSmallerWithImageFilter) {
+  // Create an image filter that slightly shrinks the coverage limit
+  auto image_filter = FilterContents::MakeMatrixFilter(
+      FilterInput::Make(Rect()), Matrix::MakeScale({1.1, 1.1, 1}), {});
+
+  auto coverage = ComputeSaveLayerCoverage(
+      /*content_coverage=*/Rect::MakeLTRB(0, 0, 100, 100),  //
+      /*effect_transform=*/{},                              //
+      /*coverage_limit=*/Rect::MakeLTRB(0, 0, 100, 100),    //
+      /*image_filter=*/image_filter                         //
+  );
+
+  ASSERT_TRUE(coverage.has_value());
+  // The transfomed coverage limit is ((0, 0), (90.9091, 90.9091)).
+  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 100, 100));
+}
+
+TEST(
+    SaveLayerUtilsTest,
+    CoverageLimitIgnoredIfIntersectedValueIsCloseToActualCoverageLargerWithImageFilter) {
+  // Create an image filter that slightly stretches the coverage limit. Even
+  // without the special logic for using the original content coverage, we
+  // verify that we don't introduce any artifacts from the intersection.
+  auto image_filter = FilterContents::MakeMatrixFilter(
+      FilterInput::Make(Rect()), Matrix::MakeScale({0.9, 0.9, 1}), {});
+
+  auto coverage = ComputeSaveLayerCoverage(
+      /*content_coverage=*/Rect::MakeLTRB(0, 0, 100, 100),  //
+      /*effect_transform=*/{},                              //
+      /*coverage_limit=*/Rect::MakeLTRB(0, 0, 100, 100),    //
+      /*image_filter=*/image_filter                         //
+  );
+
+  ASSERT_TRUE(coverage.has_value());
+  // The transfomed coverage limit is ((0, 0), (111.111, 111.111)).
+  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 100, 100));
+}
+
+TEST(SaveLayerUtilsTest,
+     CoverageLimitRespectedIfSubstantiallyDifferentFromContentCoverge) {
+  auto image_filter = FilterContents::MakeMatrixFilter(
+      FilterInput::Make(Rect()), Matrix::MakeScale({2, 2, 1}), {});
+
+  auto coverage = ComputeSaveLayerCoverage(
+      /*content_coverage=*/Rect::MakeLTRB(0, 0, 1000, 1000),  //
+      /*effect_transform=*/{},                                //
+      /*coverage_limit=*/Rect::MakeLTRB(0, 0, 100, 100),      //
+      /*image_filter=*/image_filter                           //
+  );
+
+  ASSERT_TRUE(coverage.has_value());
+  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 50, 50));
+}
+
 }  // namespace testing
 }  // namespace impeller
 
