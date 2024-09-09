@@ -2660,7 +2660,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     ];
     assert(
       selections.isEmpty == selectables.isEmpty,
-      'This selection container delegate should return a SelectedContentRanges if it has selectable content, even if there is no current active selection. In that case return a SelectedContentRange.empty.',
+      'This selection container delegate should return a SelectedContentRange if it has selectable content, even if there is no current active selection. In that case return a SelectedContentRange.empty.',
     );
     return _calculateLocalRange(selections);
   }
