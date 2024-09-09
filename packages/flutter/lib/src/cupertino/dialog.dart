@@ -1396,9 +1396,7 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
 
   // |_SlideTarget|
   @override
-  void didLeave() {
-    widget.onPressed();
-  }
+  void didLeave() {}
 
   // |_SlideTarget|
   @override
