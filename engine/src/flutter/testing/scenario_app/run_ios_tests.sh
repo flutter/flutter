@@ -79,7 +79,7 @@ echo "Creating $DEVICE_NAME $DEVICE $OS_RUNTIME ..."
 xcrun simctl create "$DEVICE_NAME" "$DEVICE" "$OS_RUNTIME"
 echo ""
 
-echo "Running simulator tests with Skia"
+echo "Running simulator tests with Impeller"
 echo ""
 
 if set -o pipefail && xcodebuild -sdk iphonesimulator \
@@ -95,55 +95,18 @@ else
 fi
 rm -rf $RESULT_BUNDLE_PATH
 
-echo "Running simulator tests with Impeller"
+echo "Running simulator tests with Skia"
 echo ""
 
-# Skip testFontRenderingWhenSuppliedWithBogusFont: https://github.com/flutter/flutter/issues/113250
-# Skip golden tests that use software rendering: https://github.com/flutter/flutter/issues/131888
+# Override Info.plist with FLTEnableImpeller=NO, all projects in the workspace requires a Info_Skia.plist.
+# For example, FlutterAppExtensionTestHost has a Info_Skia.plist dummy file in its directory.
 if set -o pipefail && xcodebuild -sdk iphonesimulator \
   -scheme Scenarios \
   -resultBundlePath "$RESULT_BUNDLE_PATH/ios_scenario.xcresult" \
   -destination "platform=iOS Simulator,OS=$OS,name=$DEVICE_NAME" \
   clean test \
   FLUTTER_ENGINE="$FLUTTER_ENGINE" \
-  -skip-testing ScenariosUITests/MultiplePlatformViewsBackgroundForegroundTest/testPlatformView \
-  -skip-testing ScenariosUITests/MultiplePlatformViewsTest/testPlatformView \
-  -skip-testing ScenariosUITests/NonFullScreenFlutterViewPlatformViewUITests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationClipPathTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationClipPathMultipleClipsTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationClipPathWithTransformTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationClipPathWithTransformMultipleClipsTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationClipRectAfterMovedTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationClipRectAfterMovedMultipleClipsTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationClipRectTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationClipRectMultipleClipsTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationClipRectWithTransformTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationClipRectWithTransformMultipleClipsTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationClipRRectTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationClipRRectMultipleClipsTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationClipRRectWithTransformTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationClipRRectWithTransformMultipleClipsTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationLargeClipRRectTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationLargeClipRRectMultipleClipsTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationLargeClipRRectWithTransformTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationLargeClipRRectWithTransformMultipleClipsTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationOpacityTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewMutationTransformTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewRotation/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewUITests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewWithNegativeOtherBackDropFilterTests/testPlatformView \
-  -skip-testing ScenariosUITests/PlatformViewWithOtherBackdropFilterTests/testPlatformView \
-  -skip-testing ScenariosUITests/TwoPlatformViewClipPathTests/testPlatformView \
-  -skip-testing ScenariosUITests/TwoPlatformViewClipPathMultipleClipsTests/testPlatformView \
-  -skip-testing ScenariosUITests/TwoPlatformViewClipRectTests/testPlatformView \
-  -skip-testing ScenariosUITests/TwoPlatformViewClipRectMultipleClipsTests/testPlatformView \
-  -skip-testing ScenariosUITests/TwoPlatformViewClipRRectTests/testPlatformView \
-  -skip-testing ScenariosUITests/TwoPlatformViewClipRRectMultipleClipsTests/testPlatformView \
-  -skip-testing ScenariosUITests/TwoPlatformViewsWithOtherBackDropFilterTests/testPlatformView \
-  -skip-testing ScenariosUITests/UnobstructedPlatformViewTests/testMultiplePlatformViewsWithOverlays \
-  # Plist with FLTEnableImpeller=YES, all projects in the workspace requires this file.
-  # For example, FlutterAppExtensionTestHost has a dummy file under the below directory.
-  INFOPLIST_FILE="Scenarios/Info_Impeller.plist"; then
+  INFOPLIST_FILE="\$(TARGET_NAME)/Info_Skia.plist"; then
   echo "test success."
 else
   echo "test failed."

@@ -99,7 +99,7 @@
   return YES;
 }
 
-NS_INLINE NSString* _platformName() {
+NS_INLINE NSString* _platformName(void) {
   NSString* systemVersion = UIDevice.currentDevice.systemVersion;
   NSString* simulatorName =
       [[NSProcessInfo processInfo].environment objectForKey:@"SIMULATOR_DEVICE_NAME"];
