@@ -102,6 +102,7 @@ class Checkbox extends StatefulWidget {
     this.side,
     this.isError = false,
     this.semanticLabel,
+    this.dimension = 18.0,
   }) : _checkboxType = _CheckboxType.material,
        assert(tristate || value != null);
 
@@ -142,6 +143,7 @@ class Checkbox extends StatefulWidget {
     this.side,
     this.isError = false,
     this.semanticLabel,
+    this.dimension = 18.0,
   }) : _checkboxType = _CheckboxType.adaptive,
        assert(tristate || value != null);
 
@@ -408,6 +410,13 @@ class Checkbox extends StatefulWidget {
   /// {@endtemplate}
   final String? semanticLabel;
 
+  /// {@template flutter.material.checkbox.dimension}
+  /// The dimension for the checkbox.
+  ///
+  /// This is used to render a checkbox with a custom size
+  /// {@endtemplate}
+  final double dimension;
+
   /// The width of a checkbox widget.
   static const double width = 18.0;
 
@@ -633,13 +642,13 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..previousValue = _previousValue
           ..shape = widget.shape ?? checkboxTheme.shape ?? defaults.shape!
           ..activeSide = activeSide
-          ..inactiveSide = inactiveSide,
+          ..inactiveSide = inactiveSide
+          ..edgeSize = widget.dimension,
       ),
     );
   }
 }
 
-const double _kEdgeSize = Checkbox.width;
 const double _kStrokeWidth = 2.0;
 
 class _CheckboxPainter extends ToggleablePainter {
@@ -703,13 +712,23 @@ class _CheckboxPainter extends ToggleablePainter {
     notifyListeners();
   }
 
+  double get edgeSize => _edgeSize!;
+  double? _edgeSize;
+  set edgeSize(double? value) {
+    if (_edgeSize == value) {
+      return;
+    }
+    _edgeSize = value;
+    notifyListeners();
+  }
+
   // The square outer bounds of the checkbox at t, with the specified origin.
   // At t == 0.0, the outer rect's size is _kEdgeSize (Checkbox.width)
   // At t == 0.5, .. is _kEdgeSize - _kStrokeWidth
   // At t == 1.0, .. is _kEdgeSize
   Rect _outerRectAt(Offset origin, double t) {
     final double inset = 1.0 - (t - 0.5).abs() * 2.0;
-    final double size = _kEdgeSize - inset * _kStrokeWidth;
+    final double size = _edgeSize! - inset * _kStrokeWidth;
     final Rect rect = Rect.fromLTWH(origin.dx + inset, origin.dy + inset, size, size);
     return rect;
   }
@@ -740,9 +759,9 @@ class _CheckboxPainter extends ToggleablePainter {
     // As t goes from 0.0 to 1.0, animate the two check mark strokes from the
     // short side to the long side.
     final Path path = Path();
-    const Offset start = Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
-    const Offset mid = Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
-    const Offset end = Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
+    final Offset start = Offset(_edgeSize! * 0.15, _edgeSize! * 0.45);
+    final Offset mid = Offset(_edgeSize! * 0.4, _edgeSize! * 0.7);
+    final Offset end = Offset(_edgeSize! * 0.85, _edgeSize! * 0.25);
     if (t < 0.5) {
       final double strokeT = t * 2.0;
       final Offset drawMid = Offset.lerp(start, mid, strokeT)!;
@@ -762,9 +781,9 @@ class _CheckboxPainter extends ToggleablePainter {
     assert(t >= 0.0 && t <= 1.0);
     // As t goes from 0.0 to 1.0, animate the horizontal line from the
     // mid point outwards.
-    const Offset start = Offset(_kEdgeSize * 0.2, _kEdgeSize * 0.5);
-    const Offset mid = Offset(_kEdgeSize * 0.5, _kEdgeSize * 0.5);
-    const Offset end = Offset(_kEdgeSize * 0.8, _kEdgeSize * 0.5);
+    final Offset start = Offset(_edgeSize! * 0.2, _edgeSize! * 0.5);
+    final Offset mid = Offset(_edgeSize! * 0.5, _edgeSize! * 0.5);
+    final Offset end = Offset(_edgeSize! * 0.8, _edgeSize! * 0.5);
     final Offset drawStart = Offset.lerp(start, mid, 1.0 - t)!;
     final Offset drawEnd = Offset.lerp(mid, end, t)!;
     canvas.drawLine(origin + drawStart, origin + drawEnd, paint);
@@ -775,7 +794,7 @@ class _CheckboxPainter extends ToggleablePainter {
     paintRadialReaction(canvas: canvas, origin: size.center(Offset.zero));
 
     final Paint strokePaint = _createStrokePaint();
-    final Offset origin = size / 2.0 - const Size.square(_kEdgeSize) / 2.0 as Offset;
+    final Offset origin = size / 2.0 - Size.square(_edgeSize!) / 2.0 as Offset;
     final double tNormalized = switch (position.status) {
       AnimationStatus.forward || AnimationStatus.completed => position.value,
       AnimationStatus.reverse || AnimationStatus.dismissed => 1.0 - position.value,
