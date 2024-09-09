@@ -3361,6 +3361,38 @@ void main() {
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.scrollPadding, scrollPadding);
   });
+
+  testWidgets('SearchAnchor.bar.contextMenuBuilder is passed through to EditableText', (WidgetTester tester) async {
+    Widget contextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+      return const Placeholder();
+    }
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor.bar(
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+            contextMenuBuilder: contextMenuBuilder,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(EditableText), findsOneWidget);
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.contextMenuBuilder, contextMenuBuilder);
+
+    expect(find.byType(Placeholder), findsNothing);
+
+    await tester.tap(
+      find.byType(SearchBar),
+      buttons: kSecondaryButton,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Placeholder), findsOneWidget);
+  });
 }
 
 Future<void> checkSearchBarDefaults(WidgetTester tester, ColorScheme colorScheme, Material material) async {
