@@ -64,7 +64,7 @@ Future<void> runFlutterDriverAndroidTests() async {
     'flutter',
     <String>[
       'drive',
-      'lib/lib/external_texture_smiley_face_main.dart',
+      'lib/external_texture_smiley_face_main.dart',
       // There are no reason to enable development flags for this test.
       // Disable them to work around flakiness issues, and in general just
       // make less things start up unnecessarily.
