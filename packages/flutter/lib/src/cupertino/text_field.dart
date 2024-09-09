@@ -522,7 +522,7 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// Defaults to [CrossAxisAlignment.center].
   ///
-  /// Has no effect when the [suffix] and the [prefix] is null.
+  /// Has no effect when the [suffix] and the [prefix] are null.
   final CrossAxisAlignment crossAxisAlignment;
 
   /// Show an iOS-style clear button to clear the current text entry.
