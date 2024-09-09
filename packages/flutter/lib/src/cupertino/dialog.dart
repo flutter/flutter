@@ -346,7 +346,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
     );
   }
 
-  void _onPressedUpdate(int actionIndex, bool isPressed, {VoidCallback? onPressed}) {
+  void _onPressedUpdate(int actionIndex, bool isPressed, VoidCallback? onPressed) {
     if (isPressed) {
       setState(() {
         _pressedIndex = actionIndex;
@@ -1164,7 +1164,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     );
   }
 
-  void _onPressedUpdate(int actionIndex, bool state, {VoidCallback? onPressed}) {
+  void _onPressedUpdate(int actionIndex, bool state, VoidCallback? onPressed) {
     if (!state) {
       if (_pressedIndex == actionIndex) {
         setState(() {
@@ -1189,7 +1189,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
         isCancel: true,
         pressed: _pressedIndex == _kCancelButtonIndex,
         onPressStateChange: (bool state) {
-          _onPressedUpdate(_kCancelButtonIndex, state);
+          _onPressedUpdate(_kCancelButtonIndex, state, null);
         },
         child: widget.cancelButton!,
       ),
@@ -1710,7 +1710,7 @@ class _OverscrollBackgroundState extends State<_OverscrollBackground> {
   }
 }
 
-typedef _PressedUpdateHandler = void Function(int actionIndex, bool state, {VoidCallback? onPressed});
+typedef _PressedUpdateHandler = void Function(int actionIndex, bool state, VoidCallback? onPressed);
 
 // The list of actions in an action sheet.
 //
@@ -1742,6 +1742,7 @@ class _ActionSheetActionSection extends StatelessWidget {
     }
     final List<Widget> column = <Widget>[];
     for (int actionIndex = 0; actionIndex < actions!.length; actionIndex += 1) {
+      final VoidCallback? onPressed = _getOnPressedCallback(actions![actionIndex]);
       if (actionIndex != 0) {
         column.add(_Divider(
           dividerColor: dividerColor,
@@ -1752,7 +1753,7 @@ class _ActionSheetActionSection extends StatelessWidget {
       column.add(_ActionSheetButtonBackground(
         pressed: pressedIndex == actionIndex,
         onPressStateChange: (bool state) {
-          onPressedUpdate(actionIndex, state);
+          onPressedUpdate(actionIndex, state, onPressed);
         },
         child: actions![actionIndex],
       ));
@@ -1767,6 +1768,16 @@ class _ActionSheetActionSection extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // TODO(Mairramer): Fix dumb implementation logic
+  VoidCallback? _getOnPressedCallback(Widget child) {
+    if (child is CupertinoActionSheetAction) {
+      return child.onPressed;
+    } else if (child is CupertinoDialogAction) {
+      return child.onPressed;
+    }
+    return null;
   }
 }
 
@@ -1989,7 +2000,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
         pressedColor: dialogPressedColor,
         pressed: pressedIndex == actionIndex,
         onPressStateChange: (bool state) {
-          onPressedUpdate(actionIndex, state, onPressed: onPressed);
+          onPressedUpdate(actionIndex, state, onPressed);
         },
         child: actions[actionIndex],
       ));
