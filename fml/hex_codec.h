@@ -5,6 +5,7 @@
 #ifndef FLUTTER_FML_HEX_CODEC_H_
 #define FLUTTER_FML_HEX_CODEC_H_
 
+#include <string>
 #include <string_view>
 
 namespace fml {
