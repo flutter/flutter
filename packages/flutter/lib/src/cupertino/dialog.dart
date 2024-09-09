@@ -1546,14 +1546,15 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
 
   // |_SlideTarget|
   @override
-  bool didEnter({required bool fromPointerDown, required bool enabled}) {
-    if (enabled) {
-      widget.onPressStateChange?.call(true);
-      if (!fromPointerDown) {
-        _emitVibration();
-      }
+  bool didEnter({required bool fromPointerDown, required bool innerEnabled}) {
+    // Action sheet doesn't support disabled buttons, therefore `innerEnabled`
+    // is always true.
+    assert(innerEnabled);
+    widget.onPressStateChange?.call(true);
+    if (!fromPointerDown) {
+      _emitVibration();
     }
-    return enabled;
+    return innerEnabled;
   }
 
   // |_SlideTarget|
