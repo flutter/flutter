@@ -80,7 +80,6 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
       return false;
     }
 
-    const bool reset_host_buffer = surface_frame.submit_info().frame_boundary;
 #if EXPERIMENTAL_CANVAS
     impeller::TextFrameDispatcher collector(aiks_context->GetContentContext(),
                                             impeller::Matrix());
@@ -94,11 +93,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
     display_list->Dispatch(impeller_dispatcher,
                            SkIRect::MakeWH(cull_rect.width, cull_rect.height));
     impeller_dispatcher.FinishRecording();
-    aiks_context->GetContentContext().GetTransientsBuffer().Reset();
     aiks_context->GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
-    if (reset_host_buffer) {
-      aiks_context->GetContentContext().GetTransientsBuffer().Reset();
-    }
+    aiks_context->GetContentContext().GetTransientsBuffer().Reset();
     return true;
 #else
     impeller::Rect dl_cull_rect = impeller::Rect::MakeSize(cull_rect);
@@ -106,7 +102,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
     display_list->Dispatch(impeller_dispatcher,
                            SkIRect::MakeWH(cull_rect.width, cull_rect.height));
     auto picture = impeller_dispatcher.EndRecordingAsPicture();
-    return aiks_context->Render(picture, render_target, reset_host_buffer);
+    return aiks_context->Render(picture, render_target,
+                                /*reset_host_buffer=*/false);
 #endif
   };
 
