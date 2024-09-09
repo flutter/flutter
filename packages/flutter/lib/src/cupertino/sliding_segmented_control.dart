@@ -372,13 +372,13 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   /// The set of identifying keys that correspond to the segments that should be
   /// disabled.
   ///
-  /// Disabled children cannot be highlighted by dragging, but they can be highlighted
+  /// Disabled children cannot be selected by dragging, but they can be selected
   /// programmatically. For example, if the [groupValue] is set to a disabled
-  /// segment, the segment is still highlighted but the segment content looks disabled.
+  /// segment, the segment is still selected but the segment content looks disabled.
   ///
   /// If an enabled segment is selected by dragging gesture and becomes disabled
   /// before dragging finishes, [onValueChanged] will be triggered when finger is
-  /// released and the disabled segment is highlighted.
+  /// released and the disabled segment is selected.
   ///
   /// By default, all segments are selectable.
   final Set<T> disabledChildren;
@@ -543,13 +543,13 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
 
   // Whether the current drag gesture started on a disabled segment. When this
   // flag is true, the `onDown` and `onUpdate` methods will return directly.
-  bool? _startedOnDisagledSegment;
+  bool _startedOnDisabledSegment = false;
 
   // Whether an ongoing horizontal drag gesture that started on the thumb is
   // present. When true, defer/ignore changes to the `highlighted` variable
   // from other sources (except for semantics) until the gesture ends, preventing
   // them from interfering with the active drag gesture.
-  bool get isThumbDragging => (_startedOnSelectedSegment ?? false) && !(_startedOnDisagledSegment ?? false);
+  bool get isThumbDragging => (_startedOnSelectedSegment ?? false) && !_startedOnDisabledSegment;
 
   // Converts local coordinate to segments.
   T segmentForXPosition(double dx) {
@@ -600,10 +600,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     if (highlighted == newValue) {
       return;
     }
-    // If `disabledChildren` set contains the `newValue`, then no update needed.
-    if (widget.disabledChildren.contains(newValue)) {
-      return;
-    }
+
     setState(() { highlighted = newValue; });
     // Additionally, start the thumb animation if the highlighted segment
     // changes. If the thumbController is already running, the render object's
@@ -616,9 +613,6 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   }
 
   void onPressedChangedByGesture(T? newValue) {
-    if (widget.disabledChildren.contains(newValue)) {
-      return;
-    }
     if (pressed != newValue) {
       setState(() { pressed = newValue; });
     }
@@ -631,11 +625,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     }
     final T segment = segmentForXPosition(details.localPosition.dx);
     onPressedChangedByGesture(null);
-    if (segment != widget.groupValue) {
-      // When disabled segment is tapped, `onValueChanged` should not be called.
-      if (widget.disabledChildren.contains(segment)) {
-        return;
-      }
+    if (segment != widget.groupValue && !widget.disabledChildren.contains(segment)) {
       widget.onValueChanged(segment);
     }
   }
@@ -643,7 +633,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   void onDown(DragDownDetails details) {
     final T touchDownSegment = segmentForXPosition(details.localPosition.dx);
     _startedOnSelectedSegment = touchDownSegment == highlighted;
-    _startedOnDisagledSegment = widget.disabledChildren.contains(touchDownSegment);
+    _startedOnDisabledSegment = widget.disabledChildren.contains(touchDownSegment);
     if (widget.disabledChildren.contains(touchDownSegment)) {
       return;
     }
@@ -656,10 +646,17 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
 
   void onUpdate(DragUpdateDetails details) {
     final T touchDownSegment = segmentForXPosition(details.localPosition.dx);
-    if (_startedOnDisagledSegment ?? false) {
+
+    // If drag gesture starts on disabled segment, no update needed.
+    if (_startedOnDisabledSegment) {
       return;
     }
 
+    // If drag gesture starts on enabled segment and dragging on disabled segment,
+    // no update needed.
+    if (widget.disabledChildren.contains(touchDownSegment)) {
+      return;
+    }
     if (isThumbDragging) {
       onPressedChangedByGesture(touchDownSegment);
       onHighlightChangedByGesture(touchDownSegment);
