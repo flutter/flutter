@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@file:Suppress("PackageName")
+
 package com.example.native_driver_test
 
 import android.graphics.Color
