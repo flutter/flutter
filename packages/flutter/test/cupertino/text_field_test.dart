@@ -8067,13 +8067,15 @@ void main() {
     );
   });
 
-  testWidgets('Cupertino text field control suffix and prefix widgets alignment', (WidgetTester tester) async {
+  testWidgets('Cupertino text field can control suffix and prefix widgets alignment', (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
-          home: CupertinoTextField(
-            prefix: Icon(CupertinoIcons.add),
-            suffix: Icon(CupertinoIcons.clear),
-            crossAxisAlignment: CrossAxisAlignment.start,
+          home: Center(
+            child: CupertinoTextField(
+              prefix: Icon(CupertinoIcons.add),
+              suffix: Icon(CupertinoIcons.clear),
+              crossAxisAlignment: CrossAxisAlignment.start,
+            ),
           ),
         ),
       );
@@ -8082,7 +8084,16 @@ void main() {
         find.byType(CupertinoTextField),
       );
 
+      expect(find.widgetWithIcon(CupertinoTextField, CupertinoIcons.clear), findsOneWidget);
+      expect(find.widgetWithIcon(CupertinoTextField, CupertinoIcons.add), findsOneWidget);
       expect(cupertinoTextField.crossAxisAlignment, CrossAxisAlignment.start);
+
+      final Offset prefixPosition = tester.getTopLeft(find.byIcon(CupertinoIcons.add));
+      final Offset suffixPosition = tester.getTopRight(find.byIcon(CupertinoIcons.clear));
+      final Offset textFieldPosition = tester.getTopLeft(find.byType(CupertinoTextField));
+
+      expect(prefixPosition.dy == textFieldPosition.dy, isTrue);
+      expect(suffixPosition.dy == textFieldPosition.dy, isTrue);
     },
   );
 
