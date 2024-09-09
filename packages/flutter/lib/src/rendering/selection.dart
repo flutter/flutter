@@ -92,7 +92,9 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 
   /// Gets the [SelectedContentRange] representing the selected range in this object.
   ///
-  /// Returns a [SelectedContentRange.empty] when nothing is selected.
+  /// When nothing is selected, subclasses should return a [SelectedContentRange.empty],
+  /// with a [SelectedContentRange.contentLength] that represents the length
+  /// of the content under it.
   SelectedContentRange getSelection();
 
   /// Handles the [SelectionEvent] sent to this object.
