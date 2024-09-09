@@ -40,7 +40,6 @@ T getJsProperty<T>(Object object, String name) {
 }
 
 const Set<String> _safeJsProperties = <String>{
-  'crossOrigin',
   'decoding',
   '__flutter_state',
 };
