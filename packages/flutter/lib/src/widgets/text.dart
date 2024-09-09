@@ -1281,10 +1281,6 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
       for (final Selectable selectable in selectables)
         selectable.getSelection(),
     ];
-    assert(
-      selections.isEmpty == selectables.isEmpty,
-      'This selection container delegate should return a list of SelectedContentRanges if it has selectable content, even if there is no current active selection. In that case return a list of SelectedContentRange.empty.',
-    );
     return _calculateLocalRange(selections);
   }
 
