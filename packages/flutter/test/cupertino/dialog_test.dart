@@ -801,7 +801,7 @@ void main() {
     expect(widget.style.color!.opacity, equals(1.0));
   });
 
-  testWidgets('Pressing on disabled buttons does not trigger background', (WidgetTester tester) async {
+  testWidgets('Pressing on disabled buttons does not trigger highlight', (WidgetTester tester) async {
     bool pressedEnable = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -851,6 +851,42 @@ void main() {
     expect(pressedEnable, false);
     await gesture.up();
     expect(pressedEnable, true);
+  });
+
+  testWidgets('Action buttons shows pressed highlight as soon as the pointer is down', (WidgetTester tester) async {
+    // Verifies that the the pressed color is not delayed for some milliseconds,
+    // a symptom if the color relies on a tap gesture timing out.
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return CupertinoAlertDialog(
+            title: const Text('The title'),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                child: const Text('One'),
+                onPressed: () { },
+              ),
+              CupertinoDialogAction(
+                child: const Text('Two'),
+                onPressed: () { },
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture pointer = await tester.startGesture(tester.getCenter(find.text('Two')));
+    // Just `pump`, not `pumpAndSettle`, as we want to verify the very next frame.
+    await tester.pump();
+    await expectLater(
+      find.byType(CupertinoActionSheet),
+      matchesGoldenFile('cupertinoAlertDialog.pressed.png'),
+    );
+    await pointer.up();
   });
 
   testWidgets('Message is scrollable, has correct padding with large text sizes', (WidgetTester tester) async {
