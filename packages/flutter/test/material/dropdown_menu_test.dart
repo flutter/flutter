@@ -13,10 +13,24 @@ void main() {
 
   const String longText = 'one two three four five six seven eight nine ten eleven twelve';
   final List<DropdownMenuEntry<TestMenu>> menuChildren = <DropdownMenuEntry<TestMenu>>[];
+  final List<DropdownMenuEntry<TestMenu>> menuChildrenWithIcons = <DropdownMenuEntry<TestMenu>>[];
 
   for (final TestMenu value in TestMenu.values) {
     final DropdownMenuEntry<TestMenu> entry = DropdownMenuEntry<TestMenu>(value: value, label: value.label);
     menuChildren.add(entry);
+  }
+
+  ValueKey<String> leadingIconKey(TestMenu menuEntry) => ValueKey<String>('leading-${menuEntry.label}');
+  ValueKey<String> trailingIconKey(TestMenu menuEntry) => ValueKey<String>('trailing-${menuEntry.label}');
+
+  for (final TestMenu value in TestMenu.values) {
+    final DropdownMenuEntry<TestMenu> entry = DropdownMenuEntry<TestMenu>(
+      value: value,
+      label: value.label,
+      leadingIcon: Icon(key: leadingIconKey(value), Icons.alarm),
+      trailingIcon: Icon(key: trailingIconKey(value), Icons.abc),
+    );
+    menuChildrenWithIcons.add(entry);
   }
 
   Widget buildTest<T extends Enum>(ThemeData themeData, List<DropdownMenuEntry<T>> entries,
@@ -33,6 +47,13 @@ void main() {
         ),
       ),
     );
+  }
+
+  Material getButtonMaterial(WidgetTester tester, String itemLabel) {
+    return tester.widget<Material>(find.descendant(
+      of: find.widgetWithText(MenuItemButton, itemLabel).last,
+      matching: find.byType(Material),
+    ));
   }
 
   testWidgets('DropdownMenu defaults', (WidgetTester tester) async {
@@ -81,6 +102,356 @@ void main() {
     expect(material.textStyle?.color, themeData.colorScheme.onSurface);
     expect(material.textStyle?.fontSize, 14.0);
     expect(material.textStyle?.height, 1.43);
+  });
+
+  group('Item style', () {
+    const Color focusedBackgroundColor = Color(0xffff0000);
+    const Color focusedForegroundColor = Color(0xff00ff00);
+    const Color focusedIconColor = Color(0xff0000ff);
+    const Color focusedOverlayColor = Color(0xffff00ff);
+    const Color defaultBackgroundColor = Color(0xff00ffff);
+    const Color defaultForegroundColor = Color(0xff000000);
+    const Color defaultIconColor = Color(0xffffffff);
+    const Color defaultOverlayColor = Color(0xffffff00);
+
+    final ButtonStyle customButtonStyle = ButtonStyle(
+      backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.focused)) {
+          return focusedBackgroundColor;
+        }
+        return defaultBackgroundColor;
+      }),
+      foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.focused)) {
+          return focusedForegroundColor;
+        }
+        return defaultForegroundColor;
+      }),
+      iconColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.focused)) {
+          return focusedIconColor;
+        }
+        return defaultIconColor;
+      }),
+      overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.focused)) {
+          return focusedOverlayColor;
+        }
+        return defaultOverlayColor;
+      }),
+    );
+
+    final List<DropdownMenuEntry<TestMenu>> styledMenuEntries = <DropdownMenuEntry<TestMenu>>[];
+    for (final DropdownMenuEntry<TestMenu> entryWithIcons in menuChildrenWithIcons) {
+      styledMenuEntries.add(DropdownMenuEntry<TestMenu>(
+        value: entryWithIcons.value,
+        label: entryWithIcons.label,
+        leadingIcon: entryWithIcons.leadingIcon,
+        trailingIcon: entryWithIcons.trailingIcon,
+        style: customButtonStyle,
+      ));
+    }
+
+    TextStyle? iconStyle(WidgetTester tester, Key key) {
+      final RichText iconRichText = tester.widget<RichText>(
+        find.descendant(of: find.byKey(key), matching: find.byType(RichText)).last,
+      );
+      return iconRichText.text.style;
+    }
+
+    RenderObject overlayPainter(WidgetTester tester, TestMenu menuItem) {
+      return tester.renderObject(find.descendant(
+        of: find.widgetWithText(MenuItemButton, menuItem.label).last,
+        matching: find.byElementPredicate(
+          (Element element) => element.renderObject.runtimeType.toString() == '_RenderInkFeatures',
+        ),
+      ).last);
+    }
+
+    testWidgets('defaults are correct', (WidgetTester tester) async {
+      const TestMenu selectedItem = TestMenu.mainMenu3;
+      const TestMenu nonSelectedItem = TestMenu.mainMenu2;
+
+      final ThemeData themeData = ThemeData();
+      await tester.pumpWidget(MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            initialSelection: selectedItem,
+            dropdownMenuEntries: menuChildrenWithIcons,
+          ),
+        ),
+      ));
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      final Material selectedButtonMaterial = getButtonMaterial(tester, selectedItem.label);
+      expect(selectedButtonMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+      expect(selectedButtonMaterial.textStyle?.color, themeData.colorScheme.onSurface);
+      expect(iconStyle(tester, leadingIconKey(selectedItem))?.color, themeData.colorScheme.onSurfaceVariant);
+
+      final Material nonSelectedButtonMaterial = getButtonMaterial(tester, nonSelectedItem.label);
+      expect(nonSelectedButtonMaterial.color, Colors.transparent);
+      expect(nonSelectedButtonMaterial.textStyle?.color, themeData.colorScheme.onSurface);
+      expect(iconStyle(tester, leadingIconKey(nonSelectedItem))?.color, themeData.colorScheme.onSurfaceVariant);
+
+      // Hover the selected item.
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(() async {
+        return gesture.removePointer();
+      });
+      await gesture.addPointer();
+      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, selectedItem.label).last));
+      await tester.pump();
+
+      expect(
+        overlayPainter(tester, selectedItem),
+        paints..rect(color: themeData.colorScheme.onSurface.withOpacity(0.1).withAlpha(0)),
+      );
+
+      // Hover a non-selected item.
+      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, nonSelectedItem.label).last));
+      await tester.pump();
+
+      expect(
+        overlayPainter(tester, nonSelectedItem),
+        paints..rect(color: themeData.colorScheme.onSurface.withOpacity(0.08).withAlpha(0)),
+      );
+    });
+
+    testWidgets('can be overridden at application theme level', (WidgetTester tester) async {
+      const TestMenu selectedItem = TestMenu.mainMenu3;
+      const TestMenu nonSelectedItem = TestMenu.mainMenu2;
+
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(menuButtonTheme: MenuButtonThemeData(style: customButtonStyle)),
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            initialSelection: selectedItem,
+            dropdownMenuEntries: menuChildrenWithIcons,
+          ),
+        ),
+      ));
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      final Material selectedButtonMaterial = getButtonMaterial(tester, selectedItem.label);
+      expect(selectedButtonMaterial.color, focusedBackgroundColor);
+      expect(selectedButtonMaterial.textStyle?.color, focusedForegroundColor);
+      expect(iconStyle(tester, leadingIconKey(selectedItem))?.color, focusedIconColor);
+
+      final Material nonSelectedButtonMaterial = getButtonMaterial(tester, nonSelectedItem.label);
+      expect(nonSelectedButtonMaterial.color, defaultBackgroundColor);
+      expect(nonSelectedButtonMaterial.textStyle?.color, defaultForegroundColor);
+      expect(iconStyle(tester, leadingIconKey(nonSelectedItem))?.color, defaultIconColor);
+
+      // Hover the selected item.
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(() async {
+        return gesture.removePointer();
+      });
+      await gesture.addPointer();
+      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, selectedItem.label).last));
+      await tester.pump();
+
+      expect(
+        overlayPainter(tester, selectedItem),
+        paints..rect(color: focusedOverlayColor.withAlpha(0)),
+      );
+
+      // Hover a non-selected item.
+      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, nonSelectedItem.label).last));
+      await tester.pump();
+
+      expect(
+        overlayPainter(tester, nonSelectedItem),
+        paints..rect(color: defaultOverlayColor.withAlpha(0)),
+      );
+    });
+
+    testWidgets('can be overridden at menu entry level', (WidgetTester tester) async {
+      const TestMenu selectedItem = TestMenu.mainMenu3;
+      const TestMenu nonSelectedItem = TestMenu.mainMenu2;
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            initialSelection: selectedItem,
+            dropdownMenuEntries: styledMenuEntries,
+          ),
+        ),
+      ));
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      final Material selectedButtonMaterial = getButtonMaterial(tester, selectedItem.label);
+      expect(selectedButtonMaterial.color, focusedBackgroundColor);
+      expect(selectedButtonMaterial.textStyle?.color, focusedForegroundColor);
+      expect(iconStyle(tester, leadingIconKey(selectedItem))?.color, focusedIconColor);
+
+      final Material nonSelectedButtonMaterial = getButtonMaterial(tester, nonSelectedItem.label);
+      expect(nonSelectedButtonMaterial.color, defaultBackgroundColor);
+      expect(nonSelectedButtonMaterial.textStyle?.color, defaultForegroundColor);
+      expect(iconStyle(tester, leadingIconKey(nonSelectedItem))?.color, defaultIconColor);
+
+      // Hover the selected item.
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(() async {
+        return gesture.removePointer();
+      });
+      await gesture.addPointer();
+      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, selectedItem.label).last));
+      await tester.pump();
+
+      expect(
+        overlayPainter(tester, selectedItem),
+        paints..rect(color: focusedOverlayColor.withAlpha(0)),
+      );
+
+      // Hover a non-selected item.
+      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, nonSelectedItem.label).last));
+      await tester.pump();
+
+      expect(
+        overlayPainter(tester, nonSelectedItem),
+        paints..rect(color: defaultOverlayColor.withAlpha(0)),
+      );
+    });
+
+    testWidgets('defined at menu entry level takes precedence', (WidgetTester tester) async {
+      const TestMenu selectedItem = TestMenu.mainMenu3;
+      const TestMenu nonSelectedItem = TestMenu.mainMenu2;
+
+      const Color luckyColor = Color(0xff777777);
+      final ButtonStyle singleColorButtonStyle = ButtonStyle(
+        backgroundColor: MaterialStateProperty.all(luckyColor),
+        foregroundColor: MaterialStateProperty.all(luckyColor),
+        iconColor: MaterialStateProperty.all(luckyColor),
+        overlayColor: MaterialStateProperty.all(luckyColor),
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(menuButtonTheme: MenuButtonThemeData(style: singleColorButtonStyle)),
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            initialSelection: selectedItem,
+            dropdownMenuEntries: styledMenuEntries,
+          ),
+        ),
+      ));
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      final Material selectedButtonMaterial = getButtonMaterial(tester, selectedItem.label);
+      expect(selectedButtonMaterial.color, focusedBackgroundColor);
+      expect(selectedButtonMaterial.textStyle?.color, focusedForegroundColor);
+      expect(iconStyle(tester, leadingIconKey(selectedItem))?.color, focusedIconColor);
+
+      final Material nonSelectedButtonMaterial = getButtonMaterial(tester, nonSelectedItem.label);
+      expect(nonSelectedButtonMaterial.color, defaultBackgroundColor);
+      expect(nonSelectedButtonMaterial.textStyle?.color, defaultForegroundColor);
+      expect(iconStyle(tester, leadingIconKey(nonSelectedItem))?.color, defaultIconColor);
+
+      // Hover the selected item.
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(() async {
+        return gesture.removePointer();
+      });
+      await gesture.addPointer();
+      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, selectedItem.label).last));
+      await tester.pump();
+
+      expect(
+        overlayPainter(tester, selectedItem),
+        paints..rect(color: focusedOverlayColor.withAlpha(0)),
+      );
+
+      // Hover a non-selected item.
+      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, nonSelectedItem.label).last));
+      await tester.pump();
+
+      expect(
+        overlayPainter(tester, nonSelectedItem),
+        paints..rect(color: defaultOverlayColor.withAlpha(0)),
+      );
+    });
+
+    testWidgets('defined at menu entry level and application level are merged', (WidgetTester tester) async {
+      const TestMenu selectedItem = TestMenu.mainMenu3;
+      const TestMenu nonSelectedItem = TestMenu.mainMenu2;
+
+      const Color luckyColor = Color(0xff777777);
+      final ButtonStyle partialButtonStyle = ButtonStyle(
+        backgroundColor: MaterialStateProperty.all(luckyColor),
+        foregroundColor: MaterialStateProperty.all(luckyColor),
+      );
+
+      final List<DropdownMenuEntry<TestMenu>> partiallyStyledMenuEntries = <DropdownMenuEntry<TestMenu>>[];
+      for (final DropdownMenuEntry<TestMenu> entryWithIcons in menuChildrenWithIcons) {
+        partiallyStyledMenuEntries.add(DropdownMenuEntry<TestMenu>(
+          value: entryWithIcons.value,
+          label: entryWithIcons.label,
+          leadingIcon: entryWithIcons.leadingIcon,
+          trailingIcon: entryWithIcons.trailingIcon,
+          style: partialButtonStyle,
+        ));
+      }
+
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(menuButtonTheme: MenuButtonThemeData(style: customButtonStyle)),
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            initialSelection: selectedItem,
+            dropdownMenuEntries: partiallyStyledMenuEntries,
+          ),
+        ),
+      ));
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      final Material selectedButtonMaterial = getButtonMaterial(tester, selectedItem.label);
+      expect(selectedButtonMaterial.color, luckyColor);
+      expect(selectedButtonMaterial.textStyle?.color, luckyColor);
+      expect(iconStyle(tester, leadingIconKey(selectedItem))?.color, focusedIconColor);
+
+      final Material nonSelectedButtonMaterial = getButtonMaterial(tester, nonSelectedItem.label);
+      expect(nonSelectedButtonMaterial.color, luckyColor);
+      expect(nonSelectedButtonMaterial.textStyle?.color, luckyColor);
+      expect(iconStyle(tester, leadingIconKey(nonSelectedItem))?.color, defaultIconColor);
+
+      // Hover the selected item.
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(() async {
+        return gesture.removePointer();
+      });
+      await gesture.addPointer();
+      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, selectedItem.label).last));
+      await tester.pump();
+
+      expect(
+        overlayPainter(tester, selectedItem),
+        paints..rect(color: focusedOverlayColor.withAlpha(0)),
+      );
+
+      // Hover a non-selected item.
+      await gesture.moveTo(tester.getCenter(find.widgetWithText(MenuItemButton, nonSelectedItem.label).last));
+      await tester.pump();
+
+      expect(
+        overlayPainter(tester, nonSelectedItem),
+        paints..rect(color: defaultOverlayColor.withAlpha(0)),
+      );
+    });
   });
 
   testWidgets('Inner TextField is disabled when DropdownMenu is disabled', (WidgetTester tester) async {
@@ -343,7 +714,6 @@ void main() {
     final Rect containerRect = tester.getRect(find.byType(SizedBox).first);
     final Rect dropdownMenuRect = tester.getRect(find.byType(TextField));
     expect(dropdownMenuRect.top, containerRect.top);
-
 
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
@@ -2790,6 +3160,47 @@ void main() {
     await tester.tap(find.byType(TextField).first);
     await tester.pumpAndSettle();
     expect(controller.offset, 0.0);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/149037.
+  testWidgets('Dropdown menu follows the text field when keyboard opens', (WidgetTester tester) async {
+    Widget boilerplate(double bottomInsets) {
+      return MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: bottomInsets)),
+          child: Scaffold(
+            body: Center(
+              child: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Build once without bottom insets and open the menu.
+    await tester.pumpWidget(boilerplate(0.0));
+    await tester.tap(find.byType(TextField).first);
+    await tester.pump();
+
+    Finder findMenuPanels() {
+      return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuPanel');
+    }
+
+    // Menu vertical position is just under the text field.
+    expect(
+      tester.getRect(findMenuPanels()).top,
+      tester.getRect(find.byType(TextField).first).bottom,
+    );
+
+    // Simulate the keyboard opening resizing the view.
+    await tester.pumpWidget(boilerplate(100.0));
+    await tester.pump();
+
+    // Menu vertical position is just under the text field.
+    expect(
+      tester.getRect(findMenuPanels()).top,
+      tester.getRect(find.byType(TextField).first).bottom,
+    );
   });
 }
 
