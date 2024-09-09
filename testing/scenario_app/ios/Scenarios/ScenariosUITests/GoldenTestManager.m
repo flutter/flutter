@@ -80,15 +80,15 @@ const double kDefaultRmseThreshold = 0.5;
     });
     _identifier = launchArgsMap[launchArg];
 
-    NSString* impeller = @"";
-    NSNumber* enableImpeller = [[NSBundle bundleWithIdentifier:@"dev.flutter.ScenariosUITests"]
+    NSString* impeller = @"impeller_";
+    NSNumber* enableImpeller = [[NSBundle bundleWithIdentifier:@"dev.flutter.Scenarios"]
         objectForInfoDictionaryKey:@"FLTEnableImpeller"];
-    if (enableImpeller != nil) {
-      impeller = enableImpeller.boolValue ? @"impeller_" : @"";
+    if (enableImpeller != nil && !enableImpeller.boolValue) {
+      impeller = @"";
+      NSLog(@"Testing Skia: FLTEnableImpeller is NO");
     } else {
-      NSLog(@"FLTEnableImpeller was nil");
+      NSLog(@"Testing Impeller");
     }
-    NSLog(@"impeller = '%@'", impeller);
 
     NSString* prefix = [NSString stringWithFormat:@"golden_%@_%@", _identifier, impeller];
     _goldenImage = [[GoldenImage alloc] initWithGoldenNamePrefix:prefix];
