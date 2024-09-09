@@ -389,7 +389,9 @@ targets:
   - name: Linux packages_autoroller
     presubmit: false
     recipe: pub_autoroller/pub_autoroller
-    timeout: 30
+    # This takes a while because we need to fetch network dependencies and run
+    # Gradle for every android app in the repo
+    timeout: 45
     enabled_branches:
       # Don't run this on release branches
       - master
