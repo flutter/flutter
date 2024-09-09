@@ -62,7 +62,7 @@ void main() {
 
   test('toString formats correctly', () {
     const WidgetStateProperty<Color?> colorProperty = WidgetStatePropertyAll<Color?>(Color(0xFFFFFFFF));
-    expect(colorProperty.toString(), equals('WidgetStatePropertyAll(Color(0xffffffff))'));
+    expect(colorProperty.toString(), equals('WidgetStatePropertyAll(${const Color(0xffffffff)})'));
 
     const WidgetStateProperty<double?> doubleProperty = WidgetStatePropertyAll<double?>(33 + 1/3);
     expect(doubleProperty.toString(), equals('WidgetStatePropertyAll(33.3)'));
@@ -124,7 +124,7 @@ void main() {
       borderSide2,
       0.0,
     )!.resolve(enabled)!;
-    expect(borderSide.color, const Color(0xffff0000));
+    expect(borderSide.color, matchesColor(const Color(0xffff0000)));
     expect(borderSide.width, 4.0);
 
     // Using `0.5` interpolation value.
@@ -133,7 +133,7 @@ void main() {
       borderSide2,
       0.5,
     )!.resolve(enabled)!;
-    expect(borderSide.color, const Color(0xff7f007f));
+    expect(borderSide.color, matchesColor(const Color(0xff7f007f)));
     expect(borderSide.width, 8.0);
 
     // Using `1.0` interpolation value.
@@ -142,7 +142,7 @@ void main() {
       borderSide2,
       1.0,
     )!.resolve(enabled)!;
-    expect(borderSide.color, const Color(0xff0000ff));
+    expect(borderSide.color, matchesColor(const Color(0xff0000ff)));
     expect(borderSide.width, 12.0);
   });
 }
