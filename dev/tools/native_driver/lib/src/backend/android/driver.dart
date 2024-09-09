@@ -69,6 +69,11 @@ final class AndroidNativeDriver implements NativeDriver {
     await _adb.disableAnimations();
   }
 
+  @override
+  Future<void> tap(NativeFinder finder) async {
+    await _driver.sendCommand(NativeCommand.tap(finder));
+  }
+
   /// Waits for 2 seconds before completing.
   ///
   /// There is no perfect way, outside of polling, to know when the device is

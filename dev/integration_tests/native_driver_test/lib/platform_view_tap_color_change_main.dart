@@ -27,7 +27,7 @@ final class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: AndroidView(viewType: 'blue_orange_gradient_platform_view'),
+      home: AndroidView(viewType: 'changing_color_button_platform_view'),
     );
   }
 }

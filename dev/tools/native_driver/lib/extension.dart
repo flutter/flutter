@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'src/common.dart';
 
 /// An extension that forwards [NativeCommand]s to a registered plugin.
-const CommandExtension nativeDriverExtension = NativeDriverExtension(
+const CommandExtension nativeDriverCommands = NativeDriverCommandExtension(
   flt.MethodChannel('native_driver'),
 );
 
@@ -23,13 +23,13 @@ const CommandExtension nativeDriverExtension = NativeDriverExtension(
 /// [NativeResult], both thin wrappers around a `Map<String, Object?>` (JSON
 /// compatible object).
 ///
-/// A singleton default instance of this class is [nativeDriverExtension].
-final class NativeDriverExtension implements CommandExtension {
-  /// Creates a new [NativeDriverExtension] with the given [channel].
+/// A singleton default instance of this class is [nativeDriverCommands].
+final class NativeDriverCommandExtension implements CommandExtension {
+  /// Creates a new [NativeDriverCommandExtension] with the given [channel].
   ///
   /// Can be used in exceptional cases where a custom [MethodChannel] is needed;
-  /// otherwise, use the singleton [nativeDriverExtension].
-  const NativeDriverExtension(this._channel);
+  /// otherwise, use the singleton [nativeDriverCommands].
+  const NativeDriverCommandExtension(this._channel);
   final flt.MethodChannel _channel;
 
   @override

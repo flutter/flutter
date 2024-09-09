@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.native_driver_test.extensions.NativeDriverSupportPlugin
 import com.example.native_driver_test.fixtures.BlueOrangeGradientPlatformViewFactory
+import com.example.native_driver_test.fixtures.ChangingColorButtonPlatformViewFactory
 import com.example.native_driver_test.fixtures.SmileyFaceTexturePlugin
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -30,7 +31,10 @@ class MainActivity : FlutterActivity() {
         flutterEngine
             .platformViewsController
             .registry
-            .registerViewFactory("blue_orange_gradient_platform_view", BlueOrangeGradientPlatformViewFactory())
+            .apply {
+                registerViewFactory("blue_orange_gradient_platform_view", BlueOrangeGradientPlatformViewFactory())
+                registerViewFactory("changing_color_button_platform_view", ChangingColorButtonPlatformViewFactory())
+            }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

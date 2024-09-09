@@ -58,6 +58,13 @@ abstract interface class NativeDriver {
 
   /// Returns the device to its default orientation.
   Future<void> rotateResetDefault();
+
+  /// Taps on a native view found by a selector.
+  /// 
+  /// The [finder] is a platform-specific object that describes how to search
+  /// for a view to tap on. The method completes when the tap is complete,
+  /// or throws if a view cannot be found or tapped.
+  Future<void> tap(NativeFinder finder);
 }
 
 /// An opaque handle to a screenshot taken on a native device.

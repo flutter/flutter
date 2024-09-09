@@ -17,7 +17,11 @@ import 'package:matcher/src/expect/async_matcher.dart';
 import 'package:path/path.dart' as path;
 import 'package:test_api/test_api.dart';
 
+import 'src/common.dart';
+
 export 'src/backend/android.dart' show AndroidDeviceTarget, AndroidNativeDriver;
+export 'src/common.dart'
+    show ByNativeAccessibilityLabel, ByNativeIntegerId, NativeFinder;
 
 part 'src/driver.dart';
 part 'src/goldens.dart';

@@ -7,7 +7,8 @@
 package com.example.native_driver_test.extensions
 
 import android.app.Activity
-import android.view.View
+import android.os.SystemClock
+import android.view.MotionEvent
 import io.flutter.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -44,6 +45,43 @@ class NativeDriverSupportPlugin :
         }
         when (call.method) {
             "ping" -> {
+                result.success(null)
+            }
+            "tap_view" -> {
+                // Decode the selector.
+                val kind = call.argument<String>("kind")
+                lateinit var selector: NativeSelector
+                when (kind) {
+                    "byNativeAccessibilityLabel" -> {
+                        selector = NativeSelector.ByContentDescription(call.argument("label")!!)
+                    }
+                    "byNativeIntegerId" -> {
+                        selector = NativeSelector.ByViewId(call.argument("id")!!)
+                    }
+                    else -> {
+                        result.error("INVALID_SELECTOR", "Not supported", kind)
+                    }
+                }
+
+                // Fail if not found.
+                val found = selector.find(activity.window.decorView.rootView)
+                if (found == null) {
+                    result.error("VIEW_NOT_FOUND", "No view was found", call.arguments())
+                    return
+                }
+
+                // Send tap event.
+                val x = found.x + found.width / 2
+                val y = found.y + found.height / 2
+                val downTime = SystemClock.uptimeMillis()
+
+                val pressDown = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN, x, y, 0)
+                found.dispatchTouchEvent(pressDown)
+                pressDown.recycle()
+
+                val pressUp = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_UP, x, y, 0)
+                found.dispatchTouchEvent(pressUp)
+                pressUp.recycle()
                 result.success(null)
             }
             else -> {
