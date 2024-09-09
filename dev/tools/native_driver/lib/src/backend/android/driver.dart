@@ -49,11 +49,13 @@ final class AndroidNativeDriver implements NativeDriver {
       target: target,
     );
     tempDirectory ??= io.Directory.systemTemp.createTempSync('native_driver.');
-    return AndroidNativeDriver.forTesting(
+    final AndroidNativeDriver nativeDriver = AndroidNativeDriver.forTesting(
       adb: adb,
       driver: driver,
       tempDirectory: tempDirectory,
     );
+    await nativeDriver.ping();
+    return nativeDriver;
   }
 
   @override
@@ -67,39 +69,56 @@ final class AndroidNativeDriver implements NativeDriver {
     await _adb.disableAnimations();
   }
 
+  /// Waits for 2 seconds before completing.
+  ///
+  /// There is no perfect way, outside of polling, to know when the device is
+  /// "stable" or has "stabilized" after a state change. The way that commands
+  /// such as [FlutterDriver.screenshot] handle this is to wait for 2 seconds
+  /// as a baseline, and then proceed with the command.
+  static Future<void> _waitFor2s() async {
+    await Future<void>.delayed(const Duration(seconds: 2));
+  }
+
   @override
   Future<NativeScreenshot> screenshot() async {
     // Indentical wait to what `FlutterDriver.screenshot` does.
-    await Future<void>.delayed(const Duration(seconds: 2));
+    await _waitFor2s();
     return _AdbScreencap(await _adb.screencap(), _tmpDir);
   }
 
   @override
+  Future<Duration> ping() async {
+    final Stopwatch stopwatch = Stopwatch()..start();
+    await _driver.sendCommand(NativeCommand.ping);
+    return stopwatch.elapsed;
+  }
+
+  @override
   Future<void> rotateToLandscape() async {
-    _driver.sendCommand(const NativeCommand('rotate_landscape'));
+    _driver.sendCommand(NativeCommand.rotateLandscape);
   }
 
   @override
   Future<void> rotateResetDefault() async {
-    _driver.sendCommand(const NativeCommand('rotate_default'));
+    _driver.sendCommand(NativeCommand.rotateDefault);
   }
 
   /// Background the app by pressing the home button.
   Future<void> backgroundApp() async {
     await _adb.sendToHome();
-    await Future<void>.delayed(const Duration(seconds: 2));
+    await _waitFor2s();
   }
 
   /// Resumes the app by selecting it from the recent apps list.
   Future<void> resumeApp({required String appName}) async {
     await _adb.resumeApp(appName: appName);
-    await Future<void>.delayed(const Duration(seconds: 2));
+    await _waitFor2s();
   }
 
   /// Send a trim memory signal to the app to force it to release memory.
   Future<void> simulateLowMemory({required String appName}) async {
     await _adb.trimMemory(appName: appName);
-    await Future<void>.delayed(const Duration(seconds: 2));
+    await _waitFor2s();
   }
 }
 

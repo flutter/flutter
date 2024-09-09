@@ -4,9 +4,10 @@
 
 @file:Suppress("PackageName")
 
-package com.example.native_driver_test
+package com.example.native_driver_test.extensions
 
 import android.app.Activity
+import android.view.View
 import io.flutter.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware

@@ -4,7 +4,7 @@
 
 @file:Suppress("PackageName")
 
-package com.example.native_driver_test
+package com.example.native_driver_test.fixtures
 
 import android.graphics.Color
 import android.graphics.Paint

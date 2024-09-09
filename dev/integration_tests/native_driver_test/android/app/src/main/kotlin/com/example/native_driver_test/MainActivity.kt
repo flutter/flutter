@@ -10,6 +10,9 @@ import android.os.Bundle
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.native_driver_test.extensions.NativeDriverSupportPlugin
+import com.example.native_driver_test.fixtures.BlueOrangeGradientPlatformViewFactory
+import com.example.native_driver_test.fixtures.SmileyFaceTexturePlugin
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 

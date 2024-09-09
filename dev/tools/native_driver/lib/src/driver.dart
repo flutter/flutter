@@ -31,6 +31,20 @@ abstract interface class NativeDriver {
   /// do not.
   Future<void> configureForScreenshotTesting();
 
+  /// Pings the device to ensure it is responsive.
+  ///
+  /// The implementation should return a future that completes when a command
+  /// is passed to the device (from the driver script), and to the native driver
+  /// plugin (if applicable), and back to the driver script.
+  ///
+  /// The duration of the round trip is returned, typically calculated as:
+  /// ```dart
+  /// final Stopwatch stopwatch = Stopwatch()..start();
+  /// await doPing();
+  /// return stopwatch.elapsed;
+  /// ```
+  Future<Duration> ping();
+
   /// Take a screenshot using a platform-specific mechanism.
   ///
   /// The image is returned as an opaque handle that can be used to retrieve
