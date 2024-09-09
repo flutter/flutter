@@ -1396,7 +1396,9 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
 
   // |_SlideTarget|
   @override
-  void didLeave() {}
+  void didLeave() {
+    widget.onPressed();
+  }
 
   // |_SlideTarget|
   @override
@@ -1463,20 +1465,23 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
           constraints: const BoxConstraints(
             minHeight: _kActionSheetButtonMinHeight,
           ),
-          child: Semantics(
-            button: true,
+          child: GestureDetector(
             onTap: widget.onPressed,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                _kActionSheetButtonHorizontalPadding,
-                verticalPadding,
-                _kActionSheetButtonHorizontalPadding,
-                verticalPadding,
-              ),
-              child: DefaultTextStyle(
-                style: style,
-                textAlign: TextAlign.center,
-                child: Center(child: widget.child),
+            child: Semantics(
+              button: true,
+              onTap: widget.onPressed,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  _kActionSheetButtonHorizontalPadding,
+                  verticalPadding,
+                  _kActionSheetButtonHorizontalPadding,
+                  verticalPadding,
+                ),
+                child: DefaultTextStyle(
+                  style: style,
+                  textAlign: TextAlign.center,
+                  child: Center(child: widget.child),
+                ),
               ),
             ),
           ),

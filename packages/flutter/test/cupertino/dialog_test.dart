@@ -1318,6 +1318,61 @@ void main() {
     expect(scrollbars[0].controller != scrollbars[1].controller, isTrue);
   });
 
+  testWidgets('CupertinoButton displays CupertinoAlertDialog and button works', (WidgetTester tester) async {
+    // Build the widget tree.
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          brightness: Brightness.light,
+        ),
+        home: CupertinoPageScaffold(
+          child: Center(
+            child: Builder(builder: (BuildContext context) {
+              return CupertinoButton(
+                onPressed: () {
+                  showCupertinoModalPopup<void>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return CupertinoAlertDialog(
+                        title: const Text('Title'),
+                        actions: <Widget>[
+                          CupertinoActionSheetAction(
+                            child: const Text('One'),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: const Text('Go'),
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+
+    // Tap the "Go" button to show the dialog.
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    // Verify that the CupertinoAlertDialog is displayed with the correct title.
+    expect(find.text('Title'), findsOneWidget);
+
+    // Verify that the "One" button in the dialog is present.
+    expect(find.text('One'), findsOneWidget);
+
+    // Tap the "One" button and trigger the action.
+    await tester.tap(find.text('One'));
+    await tester.pumpAndSettle(); // Wait for the dialog to close.
+
+    // Verify that the dialog has been dismissed.
+    expect(find.text('The title'), findsNothing);
+  });
+
   group('showCupertinoDialog avoids overlapping display features', () {
     testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
       await tester.pumpWidget(
