@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../native_driver.dart';
+import '../../common.dart';
 import 'adb.dart';
 
 /// Drives an Android device or emulator that is running a Flutter application.
@@ -20,11 +21,13 @@ final class AndroidNativeDriver implements NativeDriver {
   @visibleForTesting
   AndroidNativeDriver.forTesting({
     required Adb adb,
+    required FlutterDriver driver,
     required io.Directory tempDirectory,
-  }) : this._(adb, tempDirectory);
+  }) : this._(adb, driver, tempDirectory);
 
-  AndroidNativeDriver._(this._adb, this._tmpDir);
+  AndroidNativeDriver._(this._adb, this._driver, this._tmpDir);
   final Adb _adb;
+  final FlutterDriver _driver;
   final io.Directory _tmpDir;
 
   /// Connects to a device or emulator identified by [target], which defaults to
@@ -48,6 +51,7 @@ final class AndroidNativeDriver implements NativeDriver {
     tempDirectory ??= io.Directory.systemTemp.createTempSync('native_driver.');
     return AndroidNativeDriver.forTesting(
       adb: adb,
+      driver: driver,
       tempDirectory: tempDirectory,
     );
   }
@@ -72,12 +76,12 @@ final class AndroidNativeDriver implements NativeDriver {
 
   @override
   Future<void> rotateToLandscape() async {
-    throw UnimplementedError();
+    _driver.sendCommand(const NativeCommand('rotate_landscape'));
   }
 
   @override
-  Future<void> rotateToPortrait() async {
-    throw UnimplementedError();
+  Future<void> rotateResetDefault() async {
+    _driver.sendCommand(const NativeCommand('rotate_default'));
   }
 
   /// Background the app by pressing the home button.

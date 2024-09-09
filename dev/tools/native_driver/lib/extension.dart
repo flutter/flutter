@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' as flt;
 import 'package:flutter_driver/driver_extension.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,7 +13,7 @@ import 'src/common.dart';
 
 /// An extension that forwards [NativeCommand]s to a registered plugin.
 const CommandExtension nativeDriverExtension = NativeDriverExtension(
-  MethodChannel('native_driver'),
+  flt.MethodChannel('native_driver'),
 );
 
 /// An extension that forwards [NativeCommand]s to a registered plugin.
@@ -30,7 +30,7 @@ final class NativeDriverExtension implements CommandExtension {
   /// Can be used in exceptional cases where a custom [MethodChannel] is needed;
   /// otherwise, use the singleton [nativeDriverExtension].
   const NativeDriverExtension(this._channel);
-  final MethodChannel _channel;
+  final flt.MethodChannel _channel;
 
   @override
   Future<Result> call(
@@ -41,6 +41,9 @@ final class NativeDriverExtension implements CommandExtension {
   ) async {
     if (command is! NativeCommand) {
       throw ArgumentError.value(command, 'command', 'Expected a NativeCommand');
+    }
+    if (await _builtInCall(command.method) case final Result result) {
+      return result;
     }
     final Object? result = await _channel.invokeMethod<Object>(
       command.method,
@@ -57,6 +60,23 @@ final class NativeDriverExtension implements CommandExtension {
       );
     }
     return _MethodChannelResult(result);
+  }
+
+  Future<Result?> _builtInCall(String method) async {
+    switch (method) {
+      case 'rotate_landscape':
+        await flt.SystemChrome.setPreferredOrientations(
+          const <flt.DeviceOrientation>[flt.DeviceOrientation.landscapeLeft],
+        );
+        return Result.empty;
+      case 'rotate_default':
+        await flt.SystemChrome.setPreferredOrientations(
+          const <flt.DeviceOrientation>[],
+        );
+        return Result.empty;
+      default:
+        return null;
+    }
   }
 
   @override
@@ -87,7 +107,7 @@ final class NativeDriverExtension implements CommandExtension {
       }
       decoded = intermediate;
     }
-    throw UnimplementedError();
+    return NativeCommand(method, arguments: decoded);
   }
 }
 

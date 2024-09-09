@@ -43,7 +43,7 @@ void main() async {
       ),
     );
 
-    await nativeDriver.rotateToPortrait();
+    await nativeDriver.rotateResetDefault();
     await expectLater(
       nativeDriver.screenshot(),
       matchesGoldenFile(

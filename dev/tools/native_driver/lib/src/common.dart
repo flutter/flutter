@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 // This code has to be available in both the Flutter app and Dart VM test.
 // ignore: implementation_imports
 import 'package:flutter_driver/src/common/message.dart';
@@ -19,6 +21,16 @@ final class NativeCommand extends Command {
 
   @override
   String get kind => 'native_driver';
+
+  @override
+  Map<String, String> serialize() {
+    final Map<String, String> serialized = super.serialize();
+    serialized['method'] = method;
+    if (arguments != null) {
+      serialized['arguments'] = jsonEncode(arguments);
+    }
+    return serialized;
+  }
 }
 
 /// A result from a [NativeCommand].

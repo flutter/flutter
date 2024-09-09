@@ -9,15 +9,14 @@ import 'package:native_driver/extension.dart';
 
 import 'src/allow_list_devices.dart';
 
-void main() {
+void main() async {
   ensureAndroidOrIosDevice();
   enableFlutterDriverExtension(commands: <CommandExtension>[
     nativeDriverExtension,
   ]);
 
   // Run on full screen.
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
   runApp(const MainApp());
 }
 

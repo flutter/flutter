@@ -9,6 +9,7 @@ import 'package:native_driver/native_driver.dart';
 import 'package:test/test.dart';
 
 import 'src/fake_adb.dart';
+import 'src/fake_driver.dart';
 
 void main() async {
   test('screenshot calls ADB screencap', () async {
@@ -18,6 +19,7 @@ void main() async {
     final io.Directory tmpDir = io.Directory.systemTemp.createTempSync();
     final AndroidNativeDriver driver = AndroidNativeDriver.forTesting(
       adb: adb,
+      driver: const NullFlutterDriver(),
       tempDirectory: tmpDir,
     );
 
@@ -36,6 +38,7 @@ void main() async {
     final io.Directory tmpDir = io.Directory.systemTemp.createTempSync();
     final AndroidNativeDriver driver = AndroidNativeDriver.forTesting(
       adb: adb,
+      driver: const NullFlutterDriver(),
       tempDirectory: tmpDir,
     );
 

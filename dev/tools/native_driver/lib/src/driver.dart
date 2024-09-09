@@ -42,10 +42,8 @@ abstract interface class NativeDriver {
   /// Rotates the device to landscape orientation.
   Future<void> rotateToLandscape();
 
-  /// Rotates the device to portrait orientation.
-  ///
-  /// This is typically the default orientation.
-  Future<void> rotateToPortrait();
+  /// Returns the device to its default orientation.
+  Future<void> rotateResetDefault();
 }
 
 /// An opaque handle to a screenshot taken on a native device.
