@@ -21,6 +21,44 @@ void main() {
     expect(dawn.primaryColor, Color.lerp(dark.primaryColor, light.primaryColor, 0.25));
   });
 
+  test('ThemeData objects with .styleFrom() members are equal', () {
+    ThemeData createThemeData() {
+      return ThemeData(
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Colors.black,
+            backgroundColor: Colors.black,
+            elevation: 1.0,
+          ),
+        ),
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            foregroundColor: Colors.black,
+            disabledForegroundColor: Colors.black,
+            backgroundColor: Colors.black,
+            disabledBackgroundColor: Colors.black,
+            overlayColor: Colors.black,
+          ),
+        ),
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(
+            hoverColor: Colors.black,
+            focusColor: Colors.black,
+            highlightColor: Colors.black,
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            enabledMouseCursor: MouseCursor.defer,
+            disabledMouseCursor: MouseCursor.uncontrolled,
+          ),
+        ),
+      );
+    }
+
+    expect(createThemeData() == createThemeData(), isTrue);
+  });
+
   test('Defaults to the default typography for the platform', () {
     for (final TargetPlatform platform in TargetPlatform.values) {
       final ThemeData theme = ThemeData(platform: platform, useMaterial3: false);

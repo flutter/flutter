@@ -246,6 +246,23 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// A convenience method for subclasses.
   static MaterialStateProperty<T>? allOrNull<T>(T? value) => value == null ? null : MaterialStatePropertyAll<T>(value);
 
+  /// Returns null if [enabled] and [disabled] are null.
+  /// Otherwise, returns a [WidgetStateProperty] that resolves to [disabled]
+  /// when [WidgetState.disabled] is active, and [enabled] otherwise.
+  ///
+  /// A convenience method for subclasses.
+  static WidgetStateProperty<Color?>? defaultColor(Color? enabled, Color? disabled) {
+    if ((enabled ?? disabled) == null) {
+      return null;
+    }
+    return WidgetStateProperty<Color?>.fromMap(
+      <WidgetStatesConstraint, Color?>{
+        WidgetState.disabled: disabled,
+        WidgetState.any: enabled,
+      },
+    );
+  }
+
   /// A convenience method used by subclasses in the framework, that returns an
   /// interpolated value based on the [fontSizeMultiplier] parameter:
   ///

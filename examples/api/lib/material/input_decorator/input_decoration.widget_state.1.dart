@@ -32,7 +32,7 @@ class MaterialStateExample extends StatelessWidget {
     return Theme(
       data: themeData.copyWith(
         inputDecorationTheme: themeData.inputDecorationTheme.copyWith(
-          prefixIconColor: WidgetStateColor.fromMap(
+          prefixIconColor: const WidgetStateColor.fromMap(
             <WidgetStatesConstraint, Color>{
               WidgetState.error:   Colors.red,
               WidgetState.focused: Colors.blue,
