@@ -883,7 +883,7 @@ void main() {
     // Just `pump`, not `pumpAndSettle`, as we want to verify the very next frame.
     await tester.pump();
     await expectLater(
-      find.byType(CupertinoActionSheet),
+      find.byType(CupertinoAlertDialog),
       matchesGoldenFile('cupertinoAlertDialog.pressed.png'),
     );
     await pointer.up();
