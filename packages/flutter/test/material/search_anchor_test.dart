@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -3362,36 +3363,55 @@ void main() {
     expect(editableText.scrollPadding, scrollPadding);
   });
 
-  testWidgets('SearchAnchor.bar.contextMenuBuilder is passed through to EditableText', (WidgetTester tester) async {
-    Widget contextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
-      return const Placeholder();
-    }
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: SearchAnchor.bar(
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return <Widget>[];
-            },
-            contextMenuBuilder: contextMenuBuilder,
+  group('contextMenuBuilder', () {
+    setUp(() async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.contextMenu,
+        (MethodCall call) {
+          // Just complete successfully, so that BrowserContextMenu thinks that
+          // the engine successfully received its call.
+          return Future<void>.value();
+        },
+      );
+      await BrowserContextMenu.disableContextMenu();
+    });
+
+    tearDown(() async {
+      await BrowserContextMenu.enableContextMenu();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, null);
+    });
+
+    testWidgets('SearchAnchor.bar.contextMenuBuilder is passed through to EditableText', (WidgetTester tester) async {
+      Widget contextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+        return const Placeholder();
+      }
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: SearchAnchor.bar(
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+              contextMenuBuilder: contextMenuBuilder,
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(find.byType(EditableText), findsOneWidget);
-    final EditableText editableText = tester.widget(find.byType(EditableText));
-    expect(editableText.contextMenuBuilder, contextMenuBuilder);
+      expect(find.byType(EditableText), findsOneWidget);
+      final EditableText editableText = tester.widget(find.byType(EditableText));
+      expect(editableText.contextMenuBuilder, contextMenuBuilder);
 
-    expect(find.byType(Placeholder), findsNothing);
+      expect(find.byType(Placeholder), findsNothing);
 
-    await tester.tap(
-      find.byType(SearchBar),
-      buttons: kSecondaryButton,
-    );
-    await tester.pumpAndSettle();
+      await tester.tap(
+        find.byType(SearchBar),
+        buttons: kSecondaryButton,
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.byType(Placeholder), findsOneWidget);
+      expect(find.byType(Placeholder), findsOneWidget);
+    });
   });
 }
 
