@@ -256,7 +256,7 @@ class SelectedContent with Diagnosticable {
 /// {@macro flutter.rendering.SelectionHandler}
 ///
 /// See also:
-///  * [SelectionArea], which provides an overview of selection system.
+///  * [SelectableRegion], which provides an overview of selection system.
 mixin Selectable implements SelectionHandler {
   /// {@macro flutter.rendering.RenderObject.getTransformTo}
   Matrix4 getTransformTo(RenderObject? ancestor);
