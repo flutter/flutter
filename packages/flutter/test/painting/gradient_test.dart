@@ -74,6 +74,37 @@ class _LinearGradientMatcher extends Matcher {
 Matcher _matchesLinearGradient(LinearGradient target) =>
     _LinearGradientMatcher(target);
 
+class _RadialGradientMatcher extends Matcher {
+  _RadialGradientMatcher(this._target);
+  final RadialGradient _target;
+
+  @override
+  Description describe(Description description) {
+    description.add('expected $_target');
+    return description;
+  }
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item is RadialGradient) {
+      return item.center == _target.center &&
+          item.radius == _target.radius &&
+          item.tileMode == _target.tileMode &&
+          item.transform == _target.transform &&
+          item.focal == _target.focal &&
+          item.focalRadius == _target.focalRadius &&
+          _listColorMatches(item.colors, _target.colors) &&
+          _listDoubleMatches(item.stops, _target.stops);
+    } else {
+      return false;
+    }
+  }
+}
+
+Matcher _matchesRadialGradient(RadialGradient target) =>
+    _RadialGradientMatcher(target);
+
+
 void main() {
   test('LinearGradient scale test', () {
     const LinearGradient testGradient = LinearGradient(
@@ -450,7 +481,7 @@ void main() {
     );
 
     final RadialGradient? actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
-    expect(actual, const RadialGradient(
+    expect(actual, _matchesRadialGradient(const RadialGradient(
       center: Alignment.topCenter,
       radius: 15.0,
       colors: <Color>[
@@ -461,7 +492,7 @@ void main() {
         0.0,
         1.0,
       ],
-    ));
+    )));
   });
 
   test('RadialGradient.lerp identical a,b', () {
@@ -503,7 +534,7 @@ void main() {
 
     final RadialGradient? actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
 
-    expect(actual, const RadialGradient(
+    expect(actual, _matchesRadialGradient(const RadialGradient(
       center: Alignment.topCenter,
       radius: 15.0,
       colors: <Color>[
@@ -516,7 +547,7 @@ void main() {
         0.5,
         1.0,
       ],
-    ));
+    )));
 
     expect(actual!.focal, isNull);
   });
@@ -537,7 +568,7 @@ void main() {
     );
 
     final RadialGradient? actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
-    expect(actual, const RadialGradient(
+    expect(actual, _matchesRadialGradient(const RadialGradient(
       colors: <Color>[
         Color(0x33333333),
         Color(0x55555555),
@@ -548,7 +579,7 @@ void main() {
         0.5,
         1.0,
       ],
-    ));
+    )));
   });
 
   test('RadialGradient lerp test with stops and unequal number of colors', () {
@@ -576,7 +607,7 @@ void main() {
     );
 
     final RadialGradient? actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
-    expect(actual, const RadialGradient(
+    expect(actual, _matchesRadialGradient(const RadialGradient(
       colors: <Color>[
         Color(0x3B3B3B3B),
         Color(0x55555555),
@@ -589,7 +620,7 @@ void main() {
         0.7,
         1.0,
       ],
-    ));
+    )));
   });
 
   test('RadialGradient lerp test with transforms', () {
@@ -649,7 +680,7 @@ void main() {
     );
 
     final RadialGradient? actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
-    expect(actual, const RadialGradient(
+    expect(actual, _matchesRadialGradient(const RadialGradient(
       center: Alignment.topCenter,
       focal: Alignment.center,
       radius: 15.0,
@@ -662,10 +693,10 @@ void main() {
         0.0,
         1.0,
       ],
-    ));
+    )));
 
     final RadialGradient? actual2 = RadialGradient.lerp(testGradient1, testGradient3, 0.5);
-    expect(actual2, const RadialGradient(
+    expect(actual2, _matchesRadialGradient(const RadialGradient(
       center: Alignment.topCenter,
       focal: Alignment(-0.5, 0.0),
       radius: 15.0,
@@ -678,7 +709,7 @@ void main() {
         0.0,
         1.0,
       ],
-    ));
+    )));
   });
 
 
@@ -978,12 +1009,12 @@ void main() {
       ],
     );
 
-    expect(Gradient.lerp(testGradient1, testGradient3, 0.0), testGradient1);
-    expect(Gradient.lerp(testGradient1, testGradient3, 0.5), testGradient2);
-    expect(Gradient.lerp(testGradient1, testGradient3, 1.0), testGradient3);
-    expect(Gradient.lerp(testGradient3, testGradient1, 0.0), testGradient3);
-    expect(Gradient.lerp(testGradient3, testGradient1, 0.5), testGradient2);
-    expect(Gradient.lerp(testGradient3, testGradient1, 1.0), testGradient1);
+    expect(Gradient.lerp(testGradient1, testGradient3, 0.0), _matchesRadialGradient(testGradient1));
+    expect(Gradient.lerp(testGradient1, testGradient3, 0.5), _matchesRadialGradient(testGradient2));
+    expect(Gradient.lerp(testGradient1, testGradient3, 1.0), _matchesRadialGradient(testGradient3));
+    expect(Gradient.lerp(testGradient3, testGradient1, 0.0), _matchesRadialGradient(testGradient3));
+    expect(Gradient.lerp(testGradient3, testGradient1, 0.5), _matchesRadialGradient(testGradient2));
+    expect(Gradient.lerp(testGradient3, testGradient1, 1.0), _matchesRadialGradient(testGradient1));
   });
 
   test('Gradient lerp test (LinearGradient to RadialGradient)', () {
