@@ -3365,6 +3365,9 @@ void main() {
 
   group('contextMenuBuilder', () {
     setUp(() async {
+      if (!kIsWeb) {
+        return;
+      }
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.contextMenu,
         (MethodCall call) {
@@ -3377,6 +3380,9 @@ void main() {
     });
 
     tearDown(() async {
+      if (!kIsWeb) {
+        return;
+      }
       await BrowserContextMenu.enableContextMenu();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, null);
     });
