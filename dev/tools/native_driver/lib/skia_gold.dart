@@ -33,7 +33,7 @@ const String _kGoldctlPresubmitKey = 'GOLD_TRYJOB';
 /// for more information.
 ///
 /// May optionally provide a [namePrefix] to be used when uploading images.
-Future<void> useSkiaGold({String? namePrefix}) async {
+Future<void> enableSkiaGoldComparator({String? namePrefix}) async {
   assert(
     goldenFileComparator is NaiveLocalFileComparator,
     'The flutter_goldens_fork library should be used from a *_test.dart file '

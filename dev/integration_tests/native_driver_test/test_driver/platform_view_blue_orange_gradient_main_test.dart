@@ -4,16 +4,22 @@
 
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:native_driver/native_driver.dart';
+import 'package:native_driver/skia_gold.dart';
 import 'package:test/test.dart';
+
+import '_luci_skia_gold_prelude.dart';
 
 void main() async {
   // To test the golden file generation locally, comment out the following line.
-  autoUpdateGoldenFiles = true;
+  // autoUpdateGoldenFiles = true;
 
   late final FlutterDriver flutterDriver;
   late final NativeDriver nativeDriver;
 
   setUpAll(() async {
+    if (isLuci) {
+      await enableSkiaGoldComparator();
+    }
     flutterDriver = await FlutterDriver.connect();
     nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
   });
