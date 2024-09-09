@@ -7,7 +7,7 @@ Googler facing documentation can be found at go/flutter-release-workflow.
 Release engineer is responsible for:
 * Branch alignment and/or Sheparding cherry picks
 * Decision making related to cherry pick risk
-* Verificaion that pre and post submits pass prior to publishing
+* Verification that pre and post submits pass prior to publishing
 * Contributor facing communication
 * Some public facing post release comunication
 
