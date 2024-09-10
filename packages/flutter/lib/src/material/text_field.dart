@@ -838,6 +838,8 @@ class TextField extends StatefulWidget {
   /// See also:
   ///
   ///  * [AdaptiveTextSelectionToolbar], which is built by default.
+  ///  * [BrowserContextMenu], which allows the browser's context menu on web to
+  ///    be disabled and Flutter-rendered context menus to appear.
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
   /// Determine whether this text field can request the primary focus.
