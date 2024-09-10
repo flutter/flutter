@@ -820,7 +820,10 @@ void main() {
 
 void setUpIOSProject(FileSystem fileSystem, {bool createWorkspace = true}) {
   fileSystem.file('pubspec.yaml').createSync();
-  fileSystem.file('.packages').writeAsStringSync('\n');
+  fileSystem
+    .directory('.dart_tool')
+    .childFile('package_config.json')
+    .createSync(recursive: true);
   fileSystem.directory('ios').createSync();
   if (createWorkspace) {
     fileSystem.directory('ios/Runner.xcworkspace').createSync();

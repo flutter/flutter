@@ -51,8 +51,6 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      globals.fs.file('.packages')
-        .writeAsStringSync('\n');
       globals.fs.file(globals.fs.path.join('build', 'app.dill'))
         ..createSync(recursive: true)
         ..writeAsStringSync('ABC');
@@ -1172,9 +1170,6 @@ dependencies:
     }
   ]
 }
-''');
-    globals.fs.file('.packages').writeAsStringSync('''
-path_provider_linux:/path_provider_linux/lib/
 ''');
     final Directory fakePluginDir = globals.fs.directory('path_provider_linux');
     final File pluginPubspec = fakePluginDir.childFile('pubspec.yaml');

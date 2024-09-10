@@ -129,7 +129,10 @@ void main() {
         globals.fs.file(globals.fs.path.join('fuchsia', 'meta', '$appName.cm'))
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
-        globals.fs.file('.packages').createSync();
+        globals.fs
+          .directory('.dart_tool')
+          .childFile('package_config.json')
+          .createSync(recursive: true);
         globals.fs
             .file(globals.fs.path.join('lib', 'main.dart'))
             .createSync(recursive: true);
