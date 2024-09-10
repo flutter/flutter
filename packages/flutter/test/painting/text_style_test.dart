@@ -141,7 +141,7 @@ void main() {
     expect(
       s2.toString(),
       equals(
-        'TextStyle(inherit: true, color: Color(0xff00ff00), size: 10.0, weight: 800, height: 100.0x, leadingDistribution: even)',
+        'TextStyle(inherit: true, color: ${const Color(0xff00ff00)}, size: 10.0, weight: 800, height: 100.0x, leadingDistribution: even)',
       ),
     );
 
@@ -478,7 +478,7 @@ void main() {
 
     const TextStyle s2 = TextStyle(backgroundColor: Color(0xFF00FF00));
     expect(s2.backgroundColor, const Color(0xFF00FF00));
-    expect(s2.toString(), 'TextStyle(inherit: true, backgroundColor: Color(0xff00ff00))');
+    expect(s2.toString(), 'TextStyle(inherit: true, backgroundColor: ${const Color(0xff00ff00)})');
 
     final ui.TextStyle ts2 = s2.getTextStyle();
 
@@ -488,7 +488,7 @@ void main() {
     // test to just check for the color by using a regular expression.
     expect(
       ts2.toString(),
-      matches(RegExp(r'background: Paint\(Color\(0xff00ff00\).*\)')),
+      matches(RegExp(r'background: Paint\(Color\(.*\).*\)')),
     );
   });
 

@@ -74,9 +74,9 @@ void main() {
       .toList();
 
     expect(description[0], 'clipBehavior: Clip.antiAlias');
-    expect(description[1], 'color: MaterialColor(primary value: Color(0xffffc107))');
-    expect(description[2], 'shadowColor: MaterialColor(primary value: Color(0xff4caf50))');
-    expect(description[3], 'surfaceTintColor: MaterialColor(primary value: Color(0xff9c27b0))');
+    expect(description[1], 'color: MaterialColor(primary value: ${const Color(0xffffc107)})');
+    expect(description[2], 'shadowColor: MaterialColor(primary value: ${const Color(0xff4caf50)})');
+    expect(description[3], 'surfaceTintColor: MaterialColor(primary value: ${const Color(0xff9c27b0)})');
     expect(description[4], 'elevation: 10.5');
     expect(description[5], 'margin: EdgeInsets.all(20.5)');
     expect(description[6], 'shape: BeveledRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(20.5))');

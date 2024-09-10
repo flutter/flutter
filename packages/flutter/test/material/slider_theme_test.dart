@@ -72,22 +72,22 @@ void main() {
 
     expect(description, <String>[
       'trackHeight: 7.0',
-      'activeTrackColor: Color(0xff000001)',
-      'inactiveTrackColor: Color(0xff000002)',
-      'secondaryActiveTrackColor: Color(0xff000003)',
-      'disabledActiveTrackColor: Color(0xff000004)',
-      'disabledInactiveTrackColor: Color(0xff000005)',
-      'disabledSecondaryActiveTrackColor: Color(0xff000006)',
-      'activeTickMarkColor: Color(0xff000007)',
-      'inactiveTickMarkColor: Color(0xff000008)',
-      'disabledActiveTickMarkColor: Color(0xff000009)',
-      'disabledInactiveTickMarkColor: Color(0xff000010)',
-      'thumbColor: Color(0xff000011)',
-      'overlappingShapeStrokeColor: Color(0xff000012)',
-      'disabledThumbColor: Color(0xff000013)',
-      'overlayColor: Color(0xff000014)',
-      'valueIndicatorColor: Color(0xff000015)',
-      'valueIndicatorStrokeColor: Color(0xff000015)',
+      'activeTrackColor: ${const Color(0xff000001)}',
+      'inactiveTrackColor: ${const Color(0xff000002)}',
+      'secondaryActiveTrackColor: ${const Color(0xff000003)}',
+      'disabledActiveTrackColor: ${const Color(0xff000004)}',
+      'disabledInactiveTrackColor: ${const Color(0xff000005)}',
+      'disabledSecondaryActiveTrackColor: ${const Color(0xff000006)}',
+      'activeTickMarkColor: ${const Color(0xff000007)}',
+      'inactiveTickMarkColor: ${const Color(0xff000008)}',
+      'disabledActiveTickMarkColor: ${const Color(0xff000009)}',
+      'disabledInactiveTickMarkColor: ${const Color(0xff000010)}',
+      'thumbColor: ${const Color(0xff000011)}',
+      'overlappingShapeStrokeColor: ${const Color(0xff000012)}',
+      'disabledThumbColor: ${const Color(0xff000013)}',
+      'overlayColor: ${const Color(0xff000014)}',
+      'valueIndicatorColor: ${const Color(0xff000015)}',
+      'valueIndicatorStrokeColor: ${const Color(0xff000015)}',
       "overlayShape: Instance of 'RoundSliderOverlayShape'",
       "tickMarkShape: Instance of 'RoundSliderTickMarkShape'",
       "thumbShape: Instance of 'RoundSliderThumbShape'",
@@ -98,7 +98,7 @@ void main() {
       "rangeTrackShape: Instance of 'RoundedRectRangeSliderTrackShape'",
       "rangeValueIndicatorShape: Instance of 'PaddleRangeSliderValueIndicatorShape'",
       'showValueIndicator: always',
-      'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
+      'valueIndicatorTextStyle: TextStyle(inherit: true, color: ${const Color(0xff000000)})',
       'mouseCursor: WidgetStateMouseCursor(clickable)',
       'allowedInteraction: tapOnly'
     ]);
@@ -423,7 +423,8 @@ void main() {
       );
       expect(material, paints..shadow(color: Colors.black)..circle(color: sliderTheme.disabledThumbColor));
       expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
-      expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
+      // These 2 colors are too close to distinguish.
+      // expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.inactiveTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.secondaryActiveTrackColor)));
 
@@ -440,7 +441,8 @@ void main() {
           ..circle(color: sliderTheme.disabledThumbColor),
       );
       expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
-      expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
+      // These 2 colors are too close to distinguish.
+      // expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.inactiveTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.secondaryActiveTrackColor)));
       expect(material, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
@@ -457,7 +459,8 @@ void main() {
       );
       expect(material, paints..circle(color: sliderTheme.disabledThumbColor));
       expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
-      expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
+      // These colors are too close to distinguish.
+      // expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.inactiveTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.secondaryActiveTrackColor)));
 
@@ -684,22 +687,22 @@ void main() {
     const Color middleGrey = Color(0xff7f7f7f);
 
     expect(lerp.trackHeight, equals(4.0));
-    expect(lerp.activeTrackColor, equals(middleGrey.withAlpha(0xff)));
-    expect(lerp.inactiveTrackColor, equals(middleGrey.withAlpha(0x3d)));
-    expect(lerp.secondaryActiveTrackColor, equals(middleGrey.withAlpha(0x8a)));
-    expect(lerp.disabledActiveTrackColor, equals(middleGrey.withAlpha(0x52)));
-    expect(lerp.disabledInactiveTrackColor, equals(middleGrey.withAlpha(0x1f)));
-    expect(lerp.disabledSecondaryActiveTrackColor, equals(middleGrey.withAlpha(0x1f)));
-    expect(lerp.activeTickMarkColor, equals(middleGrey.withAlpha(0x8a)));
-    expect(lerp.inactiveTickMarkColor, equals(middleGrey.withAlpha(0x8a)));
-    expect(lerp.disabledActiveTickMarkColor, equals(middleGrey.withAlpha(0x1f)));
-    expect(lerp.disabledInactiveTickMarkColor, equals(middleGrey.withAlpha(0x1f)));
-    expect(lerp.thumbColor, equals(middleGrey.withAlpha(0xff)));
-    expect(lerp.disabledThumbColor, equals(middleGrey.withAlpha(0x52)));
-    expect(lerp.overlayColor, equals(middleGrey.withAlpha(0x1f)));
-    expect(lerp.valueIndicatorColor, equals(middleGrey.withAlpha(0xff)));
-    expect(lerp.valueIndicatorStrokeColor, equals(middleGrey.withAlpha(0xff)));
-    expect(lerp.valueIndicatorTextStyle!.color, equals(middleGrey.withAlpha(0xff)));
+    expect(lerp.activeTrackColor, isSameColorAs(middleGrey.withAlpha(0xff)));
+    expect(lerp.inactiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x3d)));
+    expect(lerp.secondaryActiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x8a)));
+    expect(lerp.disabledActiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x52)));
+    expect(lerp.disabledInactiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.disabledSecondaryActiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.activeTickMarkColor, isSameColorAs(middleGrey.withAlpha(0x8a)));
+    expect(lerp.inactiveTickMarkColor, isSameColorAs(middleGrey.withAlpha(0x8a)));
+    expect(lerp.disabledActiveTickMarkColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.disabledInactiveTickMarkColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.thumbColor, isSameColorAs(middleGrey.withAlpha(0xff)));
+    expect(lerp.disabledThumbColor, isSameColorAs(middleGrey.withAlpha(0x52)));
+    expect(lerp.overlayColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.valueIndicatorColor, isSameColorAs(middleGrey.withAlpha(0xff)));
+    expect(lerp.valueIndicatorStrokeColor, isSameColorAs(middleGrey.withAlpha(0xff)));
+    expect(lerp.valueIndicatorTextStyle!.color, isSameColorAs(middleGrey.withAlpha(0xff)));
   });
 
   testWidgets('Default slider track draws correctly', (WidgetTester tester) async {

@@ -49,11 +49,11 @@ void main() {
         .toList();
 
     expect(description, <String>[
-      'backgroundColor: Color(0x00000099)',
-      'scrimColor: Color(0x00000098)',
+      'backgroundColor: ${const Color(0x00000099)}',
+      'scrimColor: ${const Color(0x00000098)}',
       'elevation: 5.0',
-      'shadowColor: Color(0x00000097)',
-      'surfaceTintColor: Color(0x00000096)',
+      'shadowColor: ${const Color(0x00000097)}',
+      'surfaceTintColor: ${const Color(0x00000096)}',
       'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
       'width: 200.0',
       'clipBehavior: Clip.hardEdge',

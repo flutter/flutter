@@ -1087,19 +1087,19 @@ void main() {
       description,
       equalsIgnoringHashCodes(
         <String>[
-          'backgroundColor: Color(0xff000000)',
-          'foregroundColor: Color(0xff000001)',
+          'backgroundColor: ${const Color(0xff000000)}',
+          'foregroundColor: ${const Color(0xff000001)}',
           'elevation: 8.0',
           'scrolledUnderElevation: 3.0',
-          'shadowColor: Color(0xff000002)',
-          'surfaceTintColor: Color(0xff000003)',
+          'shadowColor: ${const Color(0xff000002)}',
+          'surfaceTintColor: ${const Color(0xff000003)}',
           'shape: StadiumBorder(BorderSide(width: 0.0, style: none))',
-          'iconTheme: IconThemeData#00000(color: Color(0xff000004))',
+          'iconTheme: IconThemeData#00000(color: ${const Color(0xff000004)})',
           'centerTitle: true',
           'titleSpacing: 40.0',
           'toolbarHeight: 96.0',
-          'toolbarTextStyle: TextStyle(inherit: true, color: Color(0xff000005))',
-          'titleTextStyle: TextStyle(inherit: true, color: Color(0xff000006))'
+          'toolbarTextStyle: TextStyle(inherit: true, color: ${const Color(0xff000005)})',
+          'titleTextStyle: TextStyle(inherit: true, color: ${const Color(0xff000006)})'
         ],
       ),
     );
