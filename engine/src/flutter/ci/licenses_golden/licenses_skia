@@ -1,4 +1,4 @@
-Signature: acf78a9b05a664331688e2663df3ff39
+Signature: 3682605b798a619c7f25e517a90df6f7
 
 ====================================================================================================
 LIBRARY: etc1
@@ -328,6 +328,8 @@ TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/.bazelignore
 FILE: ../../../flutter/third_party/skia/.bazelproject
 FILE: ../../../flutter/third_party/skia/Cargo.toml
+FILE: ../../../flutter/third_party/skia/MODULE.bazel
+FILE: ../../../flutter/third_party/skia/MODULE.bazel.lock
 FILE: ../../../flutter/third_party/skia/OWNERS_build_files.android
 FILE: ../../../flutter/third_party/skia/RELEASE_NOTES.md
 FILE: ../../../flutter/third_party/skia/go.mod
