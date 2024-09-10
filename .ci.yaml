@@ -371,7 +371,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: build_aar_module_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
