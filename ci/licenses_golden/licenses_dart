@@ -1,4 +1,4 @@
-Signature: 0d1eb1503a6d5425fca3b40d86a66cfb
+Signature: ed23dd85687bb6a423eb4721fa54e653
 
 ====================================================================================================
 LIBRARY: dart
@@ -3695,14 +3695,13 @@ ORIGIN: ../../../flutter/third_party/dart/runtime/vm/simulator_x64.cc + ../../..
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/simulator_x64.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_http/http_testing.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/private/js_names.dart + ../../../flutter/third_party/dart/LICENSE
-ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/load_library_priority.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_shared/lib/js_util_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_shared/lib/synced/embedded_names.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/vm/lib/ffi_native_finalizer_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/vm/lib/finalizer_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/vm/lib/hash_factories.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/vm/lib/record_patch.dart + ../../../flutter/third_party/dart/LICENSE
-ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/bool.dart + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/boxed_bool.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/class_id.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/convert_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/core_patch.dart + ../../../flutter/third_party/dart/LICENSE
@@ -3767,14 +3766,13 @@ FILE: ../../../flutter/third_party/dart/runtime/vm/simulator_x64.cc
 FILE: ../../../flutter/third_party/dart/runtime/vm/simulator_x64.h
 FILE: ../../../flutter/third_party/dart/sdk/lib/_http/http_testing.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/private/js_names.dart
-FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/load_library_priority.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_shared/lib/js_util_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_shared/lib/synced/embedded_names.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/vm/lib/ffi_native_finalizer_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/vm/lib/finalizer_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/vm/lib/hash_factories.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/vm/lib/record_patch.dart
-FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/bool.dart
+FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/boxed_bool.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/class_id.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/convert_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/core_patch.dart
@@ -4785,7 +4783,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/0f783bdb7a4d7b73187fe5d2971eb98149235c80
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/a60078a23978998f6ff42f581e549c2314b01d91
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
