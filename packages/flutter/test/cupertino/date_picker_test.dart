@@ -2452,7 +2452,7 @@ void main() {
     final double largestWidth = testWords.map(getColumnWidth).reduce((double a, double b) => a > b ? a : b);
 
     // Get the width of the largest word in the testWords list.
-    final double testWidth =CupertinoDatePicker.getColumnWidth(texts: testWords, context: context);
+    final double testWidth = CupertinoDatePicker.getColumnWidth(texts: testWords, context: context);
 
     // Ensure the largest width found is accurate.
     expect(largestWidth, greaterThanOrEqualTo(testWidth));
