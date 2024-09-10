@@ -117,4 +117,36 @@ transforms:
       - kind: 'rename'
         newName: 'fromViewPadding'
 
+  - title: "Rename from 'opacity' to 'a'"
+    date: 2024-09-10
+    element:
+      uris: [ 'painting.dart' ]
+      method: 'opacity'
+      inClass: 'Color'
+    changes:
+      - kind: 'rename'
+        newName: 'a'
+
+  - title: "Rename 'withOpacity'"
+    date: 2024-09-10
+    element:
+      uris: [ 'painting.dart' ]
+      method: 'withOpacity'
+      inClass: 'Color'
+    changes:
+      - kind: 'rename'
+        newName: 'withValues'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addParameter'
+        index: 0
+        name: 'alpha'
+        style: optional_named
+        argumentValue:
+          expression: '{% opacity %}'
+          requiredIf: "opacity != ''"
+    variables:
+      opacity:
+        kind: 'fragment'
+        value: 'arguments[0]'
 # Before adding a new fix: read instructions at the top of this file.
