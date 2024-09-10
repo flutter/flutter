@@ -1268,7 +1268,7 @@ target-device (mobile) • xxx • ios • iOS 16 (unsupported)
           final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
           expect(logger.statusText, equals('''
-To use 'target-device' for development, enable Developer Mode in Settings → Privacy & Security.
+To use 'target-device' for development, open Xcode, reconnect the 'target-device' and enable Developer Mode in Settings → Privacy & Security.
 '''));
           expect(devices, isNull);
         });
@@ -1279,7 +1279,7 @@ To use 'target-device' for development, enable Developer Mode in Settings → Pr
 
           final List<Device>? devices = await targetDevices.findAllTargetDevices();
           expect(logger.statusText, equals('''
-To use 'target-device-1' for development, enable Developer Mode in Settings → Privacy & Security.
+To use 'target-device-1' for development, open Xcode, reconnect the 'target-device-1' and enable Developer Mode in Settings → Privacy & Security.
 Checking for wireless devices...
 '''));
           expect(devices, isNotNull);
@@ -1292,8 +1292,8 @@ Checking for wireless devices...
           final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
           expect(logger.statusText, equals('''
-To use 'target-device-1' for development, enable Developer Mode in Settings → Privacy & Security.
-To use 'target-device-2' for development, enable Developer Mode in Settings → Privacy & Security.
+To use 'target-device-1' for development, open Xcode, reconnect the 'target-device-1' and enable Developer Mode in Settings → Privacy & Security.
+To use 'target-device-2' for development, open Xcode, reconnect the 'target-device-2' and enable Developer Mode in Settings → Privacy & Security.
 No devices found yet. Checking for wireless devices...
 
 No supported devices found with name or id matching 'target-device'.
