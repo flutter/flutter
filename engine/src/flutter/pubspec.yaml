@@ -297,7 +297,7 @@ dependency_overrides:
   watcher:
     path: ./third_party/dart/third_party/pkg/watcher
   web:
-    path: ./third_party/dart/third_party/pkg/web
+    path: ./third_party/dart/third_party/pkg/web/web
   web_socket:
     path: ./third_party/dart/third_party/pkg/http/pkgs/web_socket
   web_socket_channel:
