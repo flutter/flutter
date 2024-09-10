@@ -72,15 +72,15 @@ std::optional<Rect> ComputeSaveLayerCoverage(
     }
 
     // Trimming the content coverage by the coverage limit can reduce memory
-    // coverage. limit can reduce memory bandwith. But in cases where there are
-    // animated matrix filters, such as in the framework's zoom transition, the
-    // changing scale values continually change the source_coverage_limit.
-    // Intersecting the source_coverage_limit with the coverage may result in
-    // slightly different texture sizes each frame of the animation. This leads
-    // to non-optimal allocation patterns as differently sized textures cannot
-    // be reused. Hence the following herustic: If the coverage is within a
-    // semi-arbitrary percentage of the intersected coverage, then just use the
-    // transformed coverage. In other cases, use the intersection.
+    // bandwith. But in cases where there are animated matrix filters, such as
+    // in the framework's zoom transition, the changing scale values continually
+    // change the source_coverage_limit. Intersecting the source_coverage_limit
+    // with the coverage may result in slightly different texture sizes each
+    // frame of the animation. This leads to non-optimal allocation patterns as
+    // differently sized textures cannot be reused. Hence the following
+    // herustic: If the coverage is within a semi-arbitrary percentage of the
+    // intersected coverage, then just use the transformed coverage. In other
+    // cases, use the intersection.
     auto transformed_coverage = coverage.TransformBounds(effect_transform);
     auto intersected_coverage =
         transformed_coverage.Intersection(source_coverage_limit.value());
