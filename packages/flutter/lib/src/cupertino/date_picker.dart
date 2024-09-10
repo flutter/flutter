@@ -492,8 +492,7 @@ class CupertinoDatePicker extends StatefulWidget {
     switch (columnType) {
       case _PickerColumnType.date:
         for (int i = 1; i <= 12; i++) {
-          final String date =
-              localizations.datePickerMediumDate(DateTime(2018, i, 25));
+          final String date = localizations.datePickerMediumDate(DateTime(2018, i, 25));
           longTexts.add(date);
         }
       case _PickerColumnType.hour:
@@ -518,8 +517,7 @@ class CupertinoDatePicker extends StatefulWidget {
         }
         if (showDayOfWeek) {
           for (int wd = 1; wd < DateTime.daysPerWeek; wd++) {
-            final String dayOfMonth =
-                localizations.datePickerDayOfMonth(longestDayOfMonth, wd);
+            final String dayOfMonth = localizations.datePickerDayOfMonth(longestDayOfMonth, wd);
             longTexts.add(dayOfMonth);
           }
         }
@@ -534,7 +532,7 @@ class CupertinoDatePicker extends StatefulWidget {
         longTexts.add(localizations.datePickerYear(2018));
     }
 
-    assert(longTexts.isNotEmpty, 'column type is not appropriate');
+    assert(longTexts.isNotEmpty && longTexts.every((String text) => text.isNotEmpty), 'column type is not appropriate');
 
     return getColumnWidth(texts: longTexts, context: context);
   }
