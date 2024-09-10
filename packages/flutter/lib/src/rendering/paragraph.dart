@@ -2941,8 +2941,8 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         caretOffset = end.offset;
     }
     final int offset = forward
-      ? textBoundary.getTrailingTextBoundaryAt(caretOffset) ?? range.end
-      : textBoundary.getLeadingTextBoundaryAt(caretOffset) ?? range.start;
+      ? textBoundary.getTrailingTextBoundaryAt(caretOffset)?.clamp(range.start, range.end) ?? range.end
+      : textBoundary.getLeadingTextBoundaryAt(caretOffset)?.clamp(range.start, range.end) ?? range.start;
     return TextPosition(offset: offset);
   }
 
@@ -3132,9 +3132,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   @override
   TextSelection getLineAtOffset(TextPosition position) {
     final TextRange line = paragraph._getLineAtOffset(position);
-    final int start = line.start.clamp(range.start, range.end);
-    final int end = line.end.clamp(range.start, range.end);
-    return TextSelection(baseOffset: start, extentOffset: end);
+    return TextSelection(baseOffset: line.start, extentOffset: line.end);
   }
 
   @override

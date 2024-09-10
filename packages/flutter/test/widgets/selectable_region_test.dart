@@ -2045,6 +2045,343 @@ void main() {
       await gesture.up();
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
+    testWidgets('mouse can select line-by-line with a triple click drag on Linux', (WidgetTester tester) async {
+      const String longText = 'Hello world this is some long piece of text '
+          'that will represent a long paragraph, when triple clicking this block '
+          'of text all of it will be selected.\n'
+          'This will be the start of a new line. When triple clicking this block '
+          'of text all of it should be selected.';
+
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: const Center(
+              child: Text(longText),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text(longText), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraph, 2));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraph, 2));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 17));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 155));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 167));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 170));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 182));
+
+      // Check backward selection.
+      await gesture.moveTo(textOffsetToPosition(paragraph, 1));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 17));
+
+      // Start a new triple-click drag.
+      await gesture.up();
+      await tester.pumpAndSettle(kDoubleTapTimeout);
+      await gesture.down(textOffsetToPosition(paragraph, 151));
+      await tester.pumpAndSettle();
+      await gesture.up();
+      expect(paragraph.selections.isNotEmpty, isTrue);
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections.first, const TextSelection.collapsed(offset: 151));
+      await tester.pump(kDoubleTapTimeout);
+
+      // Triple-click.
+      await gesture.down(textOffsetToPosition(paragraph, 151));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      await gesture.down(textOffsetToPosition(paragraph, 151));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      await gesture.down(textOffsetToPosition(paragraph, 151));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 150, extentOffset: 167));
+
+      // Selecting across line should select to the end.
+      await gesture.moveTo(textOffsetToPosition(paragraph, 5) + const Offset(0.0, -200.0));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 167, extentOffset: 0));
+      await gesture.up();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.linux),
+       skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+
+    testWidgets('mouse can select multiple widgets on triple click drag when selecting inside a WidgetSpan on Linux', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: const Text.rich(
+              WidgetSpan(
+                child: Column(
+                  children: <Widget>[
+                    Text('Text widget A.'),
+                    Text('Text widget B.'),
+                    Text('Text widget C.'),
+                    Text('Text widget D.'),
+                    Text('Text widget E.'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraphC = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('Text widget C.'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraphC, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraphC, 2));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraphC, 2));
+      await tester.pumpAndSettle();
+      expect(paragraphC.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+
+      await gesture.moveTo(textOffsetToPosition(paragraphC, 7));
+      await tester.pump();
+      expect(paragraphC.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+
+      final RenderParagraph paragraphE = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('Text widget E.'), matching: find.byType(RichText)));
+      final RenderParagraph paragraphD = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('Text widget D.'), matching: find.byType(RichText)));
+      await gesture.moveTo(textOffsetToPosition(paragraphE, 5));
+      // Should select line C-E.
+      expect(paragraphC.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+      expect(paragraphD.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+      expect(paragraphE.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+
+      await gesture.up();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.linux),
+       skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+
+    testWidgets('mouse can select multiple widgets line-by-line with a triple click drag on Linux', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: const Column(
+              children: <Widget>[
+                Text('How are you?\nThis is the first text widget.'),
+                Text('Good, and you?\nThis is the second text widget.'),
+                Text('Fine, thank you.\nThis is the third text widget.'),
+              ],
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('first text widget'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraph1, 2));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraph1, 2));
+      await tester.pumpAndSettle();
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 12));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph1, 14));
+      await tester.pump();
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 25));
+
+      final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('second text widget'), matching: find.byType(RichText)));
+      await gesture.moveTo(textOffsetToPosition(paragraph2, 5));
+      // Should select line 1 of text widget 2.
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 43));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph2, 16));
+      // Should select the rest of text widget 2.
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 43));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 27));
+
+      final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('third text widget'), matching: find.byType(RichText)));
+      await gesture.moveTo(textOffsetToPosition(paragraph3, 6));
+      // Should select line 1 of text widget 3.
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 43));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 46));
+      expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 16));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph3, 18));
+      // Should select the rest of text widget 3.
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 43));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 46));
+      expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 29));
+
+      await gesture.up();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.linux),
+       skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+
+    testWidgets('mouse can select multiple widgets line-by-line on triple click drag and return to origin paragraph on Linux', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: const Column(
+              children: <Widget>[
+                Text('How are you?\nThis is the first text widget.'),
+                Text('Good, and you?\nThis is the second text widget.'),
+                Text('Fine, thank you.\nThis is the third text widget.'),
+              ],
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('second text widget'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph2, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraph2, 2));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraph2, 2));
+      await tester.pumpAndSettle();
+      // Should select line 1 of text widget 2.
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+
+      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('first text widget'), matching: find.byType(RichText)));
+
+      // Should select line 2 of text widget 1.
+      await gesture.moveTo(textOffsetToPosition(paragraph1, 14));
+      await tester.pump();
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 43, extentOffset: 13));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 14, extentOffset: 0));
+
+      final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('third text widget'), matching: find.byType(RichText)));
+      await gesture.moveTo(textOffsetToPosition(paragraph1, 5));
+      // Should select rest of text widget 1.
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 43, extentOffset: 0));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 14, extentOffset: 0));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph2, 2));
+      // Should clear the selection on paragraph 1 and return to the origin paragraph.
+      expect(paragraph1.selections.isEmpty, true);
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 14, extentOffset: 0));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph3, 6));
+      // Should select line 1 of text widget 3.
+      expect(paragraph1.selections.isEmpty, true);
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 46));
+      expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 16));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph3, 18));
+      // Should select line 2 of text widget 3.
+      expect(paragraph1.selections.isEmpty, true);
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 46));
+      expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 29));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph2, 5));
+      // Should clear the selection on paragraph 3 and return to the origin paragraph.
+      expect(paragraph1.selections.isEmpty, true);
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+      expect(paragraph3.selections.isEmpty, true);
+
+      await gesture.up();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.linux),
+       skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+
+    testWidgets('mouse can reverse selection across multiple widgets line-by-line with a triple click drag on Linux', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: const Column(
+              children: <Widget>[
+                Text('How are you?\nThis is the first text widget.'),
+                Text('Good, and you?\nThis is the second text widget.'),
+                Text('Fine, thank you.\nThis is the third text widget.'),
+              ],
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('Fine, thank you.'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph3, 18), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraph3, 18));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraph3, 18));
+      await tester.pumpAndSettle();
+      expect(paragraph3.selections[0], const TextSelection(baseOffset: 17, extentOffset: 29));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph3, 4));
+      await tester.pump();
+      expect(paragraph3.selections[0], const TextSelection(baseOffset: 29, extentOffset: 0));
+
+      final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('Good, and you?'), matching: find.byType(RichText)));
+      await gesture.moveTo(textOffsetToPosition(paragraph2, 5));
+      expect(paragraph3.selections[0], const TextSelection(baseOffset: 29, extentOffset: 0));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 46, extentOffset: 0));
+
+      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('How are you?'), matching: find.byType(RichText)));
+      await gesture.moveTo(textOffsetToPosition(paragraph1, 6));
+      expect(paragraph3.selections[0], const TextSelection(baseOffset: 29, extentOffset: 0));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 46, extentOffset: 0));
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 43, extentOffset: 0));
+
+      await gesture.up();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.linux),
+       skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+
     testWidgets('mouse can select multiple widgets', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
