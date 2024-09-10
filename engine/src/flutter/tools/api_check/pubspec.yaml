@@ -14,12 +14,8 @@ resolution: workspace
 
 dependencies:
   analyzer: any
-  _fe_analyzer_shared: any
-  pub_semver: any
 
 dev_dependencies:
-  async_helper: any
-  expect: any
-  litetest: any
+  engine_repo_tools: any
   path: any
-  smith: any
+  test: any

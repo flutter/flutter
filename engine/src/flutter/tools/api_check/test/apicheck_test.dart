@@ -2,21 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:apicheck/apicheck.dart';
-import 'package:litetest/litetest.dart';
+import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:path/path.dart' as path;
+import 'package:test/test.dart';
 
-void main(List<String> arguments) {
-  if (arguments.isEmpty) {
-    print('usage: dart bin/apicheck.dart path/to/engine/src/flutter');
-    exit(1);
-  }
-
-  final String flutterRoot = arguments[0];
+void main() {
+  final String flutterRoot = Engine.findWithin().flutterDir.path;
 
   checkApiConsistency(flutterRoot);
   checkNativeApi(flutterRoot);
@@ -45,12 +39,14 @@ void checkApiConsistency(String flutterRoot) {
     );
     // C values: kFlutterAccessibilityFeatureFooBar = 1 << N,
     final List<String> embedderEnumValues = getCppEnumValues(
-      sourcePath: path.join(flutterRoot, 'shell', 'platform', 'embedder', 'embedder.h'),
+      sourcePath:
+          path.join(flutterRoot, 'shell', 'platform', 'embedder', 'embedder.h'),
       enumName: 'FlutterAccessibilityFeature',
     );
     // C++ values: kFooBar = 1 << N,
     final List<String> internalEnumValues = getCppEnumClassValues(
-      sourcePath: path.join(flutterRoot, 'lib','ui', 'window', 'platform_configuration.h'),
+      sourcePath: path.join(
+          flutterRoot, 'lib', 'ui', 'window', 'platform_configuration.h'),
       enumName: 'AccessibilityFeatureFlag',
     );
     // Java values: FOO_BAR(1 << N).
@@ -72,17 +68,20 @@ void checkApiConsistency(String flutterRoot) {
       className: 'SemanticsAction',
     );
     final List<String> webuiFields = getDartClassFields(
-      sourcePath: path.join(flutterRoot, 'lib', 'web_ui', 'lib', 'semantics.dart'),
+      sourcePath:
+          path.join(flutterRoot, 'lib', 'web_ui', 'lib', 'semantics.dart'),
       className: 'SemanticsAction',
     );
     // C values: kFlutterSemanticsActionFooBar = 1 << N.
     final List<String> embedderEnumValues = getCppEnumValues(
-      sourcePath: path.join(flutterRoot, 'shell', 'platform', 'embedder', 'embedder.h'),
+      sourcePath:
+          path.join(flutterRoot, 'shell', 'platform', 'embedder', 'embedder.h'),
       enumName: 'FlutterSemanticsAction',
     );
     // C++ values: kFooBar = 1 << N.
     final List<String> internalEnumValues = getCppEnumClassValues(
-      sourcePath: path.join(flutterRoot, 'lib', 'ui', 'semantics', 'semantics_node.h'),
+      sourcePath:
+          path.join(flutterRoot, 'lib', 'ui', 'semantics', 'semantics_node.h'),
       enumName: 'SemanticsAction',
     );
     // Java values: FOO_BAR(1 << N).
@@ -101,22 +100,34 @@ void checkApiConsistency(String flutterRoot) {
   test('AppLifecycleState enums match', () {
     // Dart values: _kFooBarIndex = 1 << N.
     final List<String> uiFields = getDartClassFields(
-      sourcePath: path.join(flutterRoot, 'lib', 'ui', 'platform_dispatcher.dart'),
+      sourcePath:
+          path.join(flutterRoot, 'lib', 'ui', 'platform_dispatcher.dart'),
       className: 'AppLifecycleState',
     );
     final List<String> webuiFields = getDartClassFields(
-      sourcePath: path.join(flutterRoot, 'lib', 'web_ui', 'lib', 'platform_dispatcher.dart'),
+      sourcePath: path.join(
+          flutterRoot, 'lib', 'web_ui', 'lib', 'platform_dispatcher.dart'),
       className: 'AppLifecycleState',
     );
     // C++ values: kFooBar = 1 << N.
     final List<String> internalEnumValues = getCppEnumClassValues(
-      sourcePath: path.join(flutterRoot, 'shell', 'platform', 'common', 'app_lifecycle_state.h'),
+      sourcePath: path.join(
+          flutterRoot, 'shell', 'platform', 'common', 'app_lifecycle_state.h'),
       enumName: 'AppLifecycleState',
     );
     // Java values: FOO_BAR(1 << N).
     final List<String> javaEnumValues = getJavaEnumValues(
-      sourcePath: path.join(flutterRoot, 'shell', 'platform', 'android', 'io',
-          'flutter', 'embedding', 'engine', 'systemchannels', 'LifecycleChannel.java'),
+      sourcePath: path.join(
+          flutterRoot,
+          'shell',
+          'platform',
+          'android',
+          'io',
+          'flutter',
+          'embedding',
+          'engine',
+          'systemchannels',
+          'LifecycleChannel.java'),
       enumName: 'AppLifecycleState',
     ).map(allCapsToCamelCase).toList();
 
@@ -137,12 +148,14 @@ void checkApiConsistency(String flutterRoot) {
     );
     // C values: kFlutterSemanticsFlagFooBar = 1 << N.
     final List<String> embedderEnumValues = getCppEnumValues(
-      sourcePath: path.join(flutterRoot, 'shell', 'platform', 'embedder', 'embedder.h'),
+      sourcePath:
+          path.join(flutterRoot, 'shell', 'platform', 'embedder', 'embedder.h'),
       enumName: 'FlutterSemanticsFlag',
     );
     // C++ values: kFooBar = 1 << N.
     final List<String> internalEnumValues = getCppEnumClassValues(
-      sourcePath: path.join(flutterRoot, 'lib', 'ui', 'semantics', 'semantics_node.h'),
+      sourcePath:
+          path.join(flutterRoot, 'lib', 'ui', 'semantics', 'semantics_node.h'),
       enumName: 'SemanticsFlags',
     );
     // Java values: FOO_BAR(1 << N).
@@ -185,7 +198,8 @@ class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitNativeFunctionBody(NativeFunctionBody node) {
-    final MethodDeclaration? method = node.thisOrAncestorOfType<MethodDeclaration>();
+    final MethodDeclaration? method =
+        node.thisOrAncestorOfType<MethodDeclaration>();
     if (method != null) {
       if (method.parameters != null) {
         check(method.toString(), method.parameters!);
@@ -193,7 +207,8 @@ class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
       return;
     }
 
-    final FunctionDeclaration? func = node.thisOrAncestorOfType<FunctionDeclaration>();
+    final FunctionDeclaration? func =
+        node.thisOrAncestorOfType<FunctionDeclaration>();
     if (func != null) {
       final FunctionExpression funcExpr = func.functionExpression;
       if (funcExpr.parameters != null) {
