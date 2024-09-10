@@ -320,9 +320,9 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
         display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
         auto picture = impeller_dispatcher.EndRecordingAsPicture();
 
-        const bool reset_host_buffer = surface_frame.submit_info().frame_boundary;
         const impeller::RenderTarget& render_target = surface->GetTargetRenderPassDescriptor();
-        bool render_result = aiks_context->Render(picture, render_target, reset_host_buffer);
+        bool render_result =
+            aiks_context->Render(picture, render_target, /*reset_host_buffer=*/true);
 #endif
         if (!render_result) {
           FML_LOG(ERROR) << "Failed to render Impeller frame";

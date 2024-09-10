@@ -141,7 +141,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
     auto picture = impeller_dispatcher.EndRecordingAsPicture();
 
     return aiks_context->Render(picture, render_target,
-                                /*reset_host_buffer=*/false);
+                                /*reset_host_buffer=*/true);
 
 #endif  // EXPERIMENTAL_CANVAS
   };
