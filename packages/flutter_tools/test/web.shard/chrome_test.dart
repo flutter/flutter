@@ -823,12 +823,12 @@ void main() {
 
   testWithoutContext('chrome.close can recover if getTab throws an HttpException', () async {
     final BufferLogger logger = BufferLogger.test();
-    final FakeChromeConnection chromeConnection = FakeChromeConnection(
-      maxRetries: 4,
-      error: io.HttpException(
+    final FakeChromeConnectionWithTab chromeConnection = FakeChromeConnectionWithTab(
+      onGetTab: () {
+        throw io.HttpException(
         'Connection closed before full header was received',
-        uri: Uri.parse('http://localhost:52097/json'),
-      ),
+        uri: Uri.parse('http://localhost:52097/json'),);
+      },
     );
     final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
@@ -839,7 +839,14 @@ void main() {
       logger: logger,
     );
     final FakeProcess process = FakeProcess();
-    final Chromium chrome = Chromium(0, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger,);
+    final Chromium chrome = Chromium(
+      0,
+      chromeConnection,
+      chromiumLauncher: chromiumLauncher,
+      process: process,
+      logger: logger,
+    );
+    await chromiumLauncher.connect(chrome, false);
     await chrome.close();
     expect(logger.errorText, isEmpty);
   });
