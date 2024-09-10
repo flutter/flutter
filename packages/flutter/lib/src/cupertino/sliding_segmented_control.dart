@@ -542,7 +542,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   bool? _startedOnSelectedSegment;
 
   // Whether the current drag gesture started on a disabled segment. When this
-  // flag is true, the `onDown` and `onUpdate` methods will return directly.
+  // flag is true, drag gestures will be ignored.
   bool _startedOnDisabledSegment = false;
 
   // Whether an ongoing horizontal drag gesture that started on the thumb is
