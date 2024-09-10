@@ -37,7 +37,7 @@ void main() {
     );
 
     flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-    
+
     fileSystem
       .directory('.dart_tool')
       .childFile('package_config.json')

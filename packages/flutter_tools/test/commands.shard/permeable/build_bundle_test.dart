@@ -254,7 +254,7 @@ void main() {
   testUsingContext('passes track widget creation through', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
-    
+
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
       logger: BufferLogger.test(),
     ));
