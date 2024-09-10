@@ -570,6 +570,7 @@ class LinearGradient extends Gradient {
       ],
       stops: stops,
       tileMode: tileMode,
+      transform: transform,
     );
   }
 }
