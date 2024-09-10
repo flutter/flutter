@@ -74,7 +74,7 @@ vars = {
   'dart_pub_rev': '31fa75baa5872e7f094a554c0ec7741742889530',
   'dart_tools_rev': 'b98c535537101eff0484ba279bd4090a5b9ac2ad',
   'dart_watcher_rev': '0484625589d8512b36a7ad898a6cc6351d24c556',
-  'dart_web_rev': '4996dc2acd30ff06f7e500ec76fde8a66db82c0c',
+  'dart_web_rev': 'fb3019264edbed87b40c29d7777b2f98ae562008',
   'dart_webdev_rev': '5f30c560dc4e3df341356c43ec1a766ee6b74a7c',
   'dart_webkit_inspection_protocol_rev': '119b877ae82bd2ca4cf7e5144d3a5ec104055164',
   'dart_yaml_edit_rev': '5c54d455f272bbb83c948ac420c677371e69ae77',
