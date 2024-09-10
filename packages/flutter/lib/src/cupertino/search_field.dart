@@ -338,10 +338,8 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       widget.controller ?? _controller!.value;
 
   late AnimationController _animationController;
-  late Animation<double> _opacityAnimation;
   ScrollController? _ancestorScrollController;
   double _maxHeight = 0.0;
-  double _previousHeight = 0.0;
 
   @override
   void initState() {
@@ -351,9 +349,9 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     }
      _animationController = AnimationController(
       vsync: this,
-      duration: Duration.zero,
+      duration: const Duration(milliseconds: 300),
+      value: 1.0,
     );
-    _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(_animationController);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _calculateMaxHeight();
     });
@@ -426,7 +424,6 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
     setState(() {
       _maxHeight = renderBox?.size.height ?? 0.0;
-      _previousHeight = _maxHeight;
     });
   }
 
@@ -437,14 +434,24 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
     final double currentHeight = renderBox?.size.height ?? 0.0;
 
-    if (!_animationController.status.isAnimating){
-      if (currentHeight < _previousHeight) {
-        setState(() { _animationController.forward(); });
-      } else if (currentHeight > _previousHeight && currentHeight > 0.9 * _maxHeight) {
-        setState(() { _animationController.reverse(); });
-      }
+    setState(() {
+      _animationController.value = _calculateScrollOpacity(currentHeight, _maxHeight);
+    });
+  }
+
+  double _calculateScrollOpacity(double currentHeight, double maxHeight) {
+    // Eyeballed on an iPhone 15 simulator running iOS 17.5.
+    final double thresholdHeight = maxHeight * 8 / 9;
+    if (currentHeight >= maxHeight) {
+      return 1.0;
+    } else if (currentHeight <= thresholdHeight) {
+      return 0.0;
+    } else {
+      // Calculate a value between 0 and 1 based on the current height.
+      final double range = maxHeight - thresholdHeight;
+      final double progress = (currentHeight - thresholdHeight) / range;
+      return progress;
     }
-    _previousHeight = currentHeight;
   }
 
   @override
@@ -453,7 +460,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
         CupertinoLocalizations.of(context).searchTextFieldPlaceholderLabel;
 
     final TextStyle placeholderStyle = widget.placeholderStyle ??
-        TextStyle(color: CupertinoColors.systemGrey.withOpacity(_opacityAnimation.value));
+        TextStyle(color: CupertinoColors.systemGrey.withOpacity(_animationController.value));
 
     // The icon size will be scaled by a factor of the accessibility text scale,
     // to follow the behavior of `UISearchTextField`.
@@ -473,7 +480,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     );
 
     final Widget prefix = Opacity(
-      opacity: _opacityAnimation.value,
+      opacity: _animationController.value,
       child: Padding(
         padding: widget.prefixInsets,
         child: IconTheme(
@@ -484,7 +491,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     );
 
     final Widget suffix = Opacity(
-      opacity: _opacityAnimation.value,
+      opacity: _animationController.value,
       child: Padding(
         padding: widget.suffixInsets,
         child: CupertinoButton(
