@@ -933,7 +933,7 @@ def gather_dart_package_tests(build_dir, package_path, extra_opts):
     if not dart_tests:
       raise Exception('No tests found for Dart package at %s' % package_path)
     for dart_test_file in dart_tests:
-      opts = ['--disable-dart-dev', dart_test_file] + extra_opts
+      opts = [dart_test_file] + extra_opts
       yield EngineExecutableTask(
           build_dir, os.path.join('dart-sdk', 'bin', 'dart'), None, flags=opts, cwd=package_path
       )
