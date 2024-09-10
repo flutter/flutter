@@ -65,7 +65,6 @@ Future<void> main() async {
           '    path: ../plugin_with_android$platformLineSep'
           '  plugin_without_android:$platformLineSep'
           '    path: ../plugin_without_android$platformLineSep'
-          '  webcrypto: 0.5.2$platformLineSep', // Plugin that uses NDK.
       );
       modulePubspec.writeAsStringSync(content, flush: true);
 
