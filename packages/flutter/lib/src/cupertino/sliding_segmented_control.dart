@@ -645,8 +645,6 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   }
 
   void onUpdate(DragUpdateDetails details) {
-    final T touchDownSegment = segmentForXPosition(details.localPosition.dx);
-
     // If drag gesture starts on disabled segment, no update needed.
     if (_startedOnDisabledSegment) {
       return;
@@ -654,6 +652,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
 
     // If drag gesture starts on enabled segment and dragging on disabled segment,
     // no update needed.
+    final T touchDownSegment = segmentForXPosition(details.localPosition.dx);
     if (widget.disabledChildren.contains(touchDownSegment)) {
       return;
     }
