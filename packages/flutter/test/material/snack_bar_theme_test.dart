@@ -127,7 +127,7 @@ void main() {
     final RenderParagraph content = _getSnackBarTextRenderObject(tester, text);
 
     expect(content.text.style, Typography.material2018().white.titleMedium);
-    expect(material.color, matchesColor(const Color(0xFF333333)));
+    expect(material.color, isSameColorAs(const Color(0xFF333333)));
     expect(material.elevation, 6.0);
     expect(material.shape, null);
   });

@@ -222,9 +222,11 @@ const Matcher isNotInCard = _IsNotInCard();
 
 /// Asserts that the object represents the same color as [color] when used to paint.
 ///
-/// Specifically this matcher checks the object is of type [Color] and its [Color.value]
-/// equals to that of the given [color].
-Matcher isSameColorAs(Color color) => _ColorMatcher(targetColor: color);
+/// Specifically this matcher checks the object is of type [Color] and its color
+/// components fall below the specified delta specified by [threshold].
+Matcher isSameColorAs(Color color, {double threshold = 0.004}) {
+  return _ColorMatcher(color, threshold);
+}
 
 /// Asserts that an object's toString() is a plausible one-line description.
 ///
@@ -2117,22 +2119,28 @@ class _CoversSameAreaAs extends Matcher {
 }
 
 class _ColorMatcher extends Matcher {
-  const _ColorMatcher({
-    required this.targetColor,
-  });
+  _ColorMatcher(this._target, this._threshold);
 
-  final Color targetColor;
+  final ui.Color _target;
+  final double _threshold;
 
   @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item is Color) {
-      return item == targetColor || item.value == targetColor.value;
-    }
-    return false;
+  Description describe(Description description) {
+    return description.add('matches color "$_target" with threshold "$_threshold".');
   }
 
   @override
-  Description describe(Description description) => description.add('matches color $targetColor');
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item is ui.Color) {
+      return item.colorSpace == _target.colorSpace &&
+          (item.a - _target.a).abs() <= _threshold &&
+          (item.r - _target.r).abs() <= _threshold &&
+          (item.g - _target.g).abs() <= _threshold &&
+          (item.b - _target.b).abs() <= _threshold;
+    } else {
+      return false;
+    }
+  }
 }
 
 int _countDifferentPixels(Uint8List imageA, Uint8List imageB) {

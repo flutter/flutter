@@ -194,10 +194,10 @@ void main() {
       begin: const Color(0xff000000),
       end: const Color(0xffffffff),
     );
-    expect(tween.lerp(0.0), matchesColor(const Color(0xff000000)));
-    expect(tween.lerp(0.5), matchesColor(const Color(0xff7f7f7f)));
-    expect(tween.lerp(0.7), matchesColor(const Color(0xffb2b2b2)));
-    expect(tween.lerp(1.0), matchesColor(const Color(0xffffffff)));
+    expect(tween.lerp(0.0), isSameColorAs(const Color(0xff000000)));
+    expect(tween.lerp(0.5), isSameColorAs(const Color(0xff7f7f7f)));
+    expect(tween.lerp(0.7), isSameColorAs(const Color(0xffb2b2b2)));
+    expect(tween.lerp(1.0), isSameColorAs(const Color(0xffffffff)));
   });
 
   test('StepTween', () {

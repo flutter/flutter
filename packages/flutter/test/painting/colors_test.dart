@@ -443,23 +443,23 @@ void main() {
     const ColorSwatch<int> swatchB = ColorSwatch<int>(0xFFFFFFFF, <int, Color>{1: Color(0xFFFFFFFF)});
     expect(
       ColorSwatch.lerp(swatchA, swatchB, 0.0),
-      matchesColor(const ColorSwatch<int>(0x00000000, <int, Color>{1: Color(0x00000000)})),
+      isSameColorAs(const ColorSwatch<int>(0x00000000, <int, Color>{1: Color(0x00000000)})),
     );
     expect(
       ColorSwatch.lerp(swatchA, swatchB, 0.5),
-      matchesColor(const ColorSwatch<int>(0x7F7F7F7F, <int, Color>{1: Color(0x7F7F7F7F)})),
+      isSameColorAs(const ColorSwatch<int>(0x7F7F7F7F, <int, Color>{1: Color(0x7F7F7F7F)})),
     );
     expect(
       ColorSwatch.lerp(swatchA, swatchB, 1.0),
-      matchesColor(const ColorSwatch<int>(0xFFFFFFFF, <int, Color>{1: Color(0xFFFFFFFF)})),
+      isSameColorAs(const ColorSwatch<int>(0xFFFFFFFF, <int, Color>{1: Color(0xFFFFFFFF)})),
     );
     expect(
       ColorSwatch.lerp(swatchA, swatchB, -0.1),
-      matchesColor(const ColorSwatch<int>(0x00000000, <int, Color>{1: Color(0x00000000)})),
+      isSameColorAs(const ColorSwatch<int>(0x00000000, <int, Color>{1: Color(0x00000000)})),
     );
     expect(
       ColorSwatch.lerp(swatchA, swatchB, 1.1),
-      matchesColor(const ColorSwatch<int>(0xFFFFFFFF, <int, Color>{1: Color(0xFFFFFFFF)})),
+      isSameColorAs(const ColorSwatch<int>(0xFFFFFFFF, <int, Color>{1: Color(0xFFFFFFFF)})),
     );
   });
 

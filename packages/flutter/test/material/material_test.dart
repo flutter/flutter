@@ -392,7 +392,7 @@ void main() {
       final RenderPhysicalShape tintModel = getModel(tester);
 
       // Final color should be the base with a tint of 0.14 opacity or 0xff192c33
-      expect(tintModel.color, matchesColor(const Color(0xff192c33)));
+      expect(tintModel.color, isSameColorAs(const Color(0xff192c33)));
     });
 
   }); // Surface Tint Overlay group
@@ -452,7 +452,7 @@ void main() {
         );
         await tester.pumpAndSettle(); // wait for the elevation animation to finish
         final RenderPhysicalShape model = getModel(tester);
-        expect(model.color, matchesColor(test.color));
+        expect(model.color, isSameColorAs(test.color));
       }
     });
 
@@ -513,8 +513,8 @@ void main() {
       );
 
       final RenderPhysicalShape model = getModel(tester);
-      expect(model.color, matchesColor(surfaceColorWithOverlay));
-      expect(model.color, isNot(matchesColor(surfaceColor)));
+      expect(model.color, isSameColorAs(surfaceColorWithOverlay));
+      expect(model.color, isNot(isSameColorAs(surfaceColor)));
     });
 
     testWidgets('Expected overlay color can be computed using colorWithOverlay', (WidgetTester tester) async {

@@ -437,7 +437,7 @@ void main() {
     // There is a somewhat complicated background color calculation based
     // off of the surface color. For the default light theme it
     // should be this value.
-    expect(renderModel.color, matchesColor(const Color(0xFF333333)));
+    expect(renderModel.color, isSameColorAs(const Color(0xFF333333)));
   });
 
   testWidgets('Material3 - Light theme SnackBar has dark background', (WidgetTester tester) async {

@@ -428,9 +428,9 @@ void main() {
     );
     final CheckboxThemeData lerped = CheckboxThemeData.lerp(theme, null, 0.5);
 
-    expect(lerped.fillColor!.resolve(<MaterialState>{}), matchesColor(const Color(0x80fffff0)));
-    expect(lerped.checkColor!.resolve(<MaterialState>{}), matchesColor(const Color(0x80fffff1)));
-    expect(lerped.overlayColor!.resolve(<MaterialState>{}), matchesColor(const Color(0x80fffff2)));
+    expect(lerped.fillColor!.resolve(<MaterialState>{}), isSameColorAs(const Color(0x80fffff0)));
+    expect(lerped.checkColor!.resolve(<MaterialState>{}), isSameColorAs(const Color(0x80fffff1)));
+    expect(lerped.overlayColor!.resolve(<MaterialState>{}), isSameColorAs(const Color(0x80fffff2)));
     expect(lerped.splashRadius, 1.5);
     expect(lerped.materialTapTargetSize, null);
     expect(lerped.visualDensity, null);
@@ -462,9 +462,9 @@ void main() {
     );
     final CheckboxThemeData lerped = CheckboxThemeData.lerp(themeA, themeB, 0.5);
 
-    expect(lerped.fillColor!.resolve(<MaterialState>{}), matchesColor(const Color(0xfffffff1)));
-    expect(lerped.checkColor!.resolve(<MaterialState>{}), matchesColor(const Color(0xfffffff2)));
-    expect(lerped.overlayColor!.resolve(<MaterialState>{}), matchesColor(const Color(0xfffffff3)));
+    expect(lerped.fillColor!.resolve(<MaterialState>{}), isSameColorAs(const Color(0xfffffff1)));
+    expect(lerped.checkColor!.resolve(<MaterialState>{}), isSameColorAs(const Color(0xfffffff2)));
+    expect(lerped.overlayColor!.resolve(<MaterialState>{}), isSameColorAs(const Color(0xfffffff3)));
     expect(lerped.splashRadius, 6);
     expect(lerped.materialTapTargetSize, MaterialTapTargetSize.shrinkWrap);
     expect(lerped.visualDensity,  const VisualDensity(vertical: 2.0, horizontal: 2.0));

@@ -178,17 +178,17 @@ void main() {
         return getPixel(x, y);
       }
       const Color lime = Color(0xFF00FF00);
-      expect(getBlockPixel(0), matchesColor(lime)); // pure green
-      expect(getBlockPixel(1), matchesColor(lime)); // 100% green 0% red
-      expect(getBlockPixel(2), matchesColor(const Color(0xFF19E600)));
-      expect(getBlockPixel(3), matchesColor(const Color(0xFF33CC00)));
-      expect(getBlockPixel(4), matchesColor(const Color(0xFF808000))); // 50-50 mix green/red
-      expect(getBlockPixel(5), matchesColor(const Color(0xFFCD3200)));
-      expect(getBlockPixel(6), matchesColor(const Color(0xFFE61900)));
-      expect(getBlockPixel(7), matchesColor(const Color(0xFFFF0000))); // 0% green 100% red
-      expect(getBlockPixel(8), matchesColor(const Color(0xFFFF0000))); // pure red
+      expect(getBlockPixel(0), isSameColorAs(lime)); // pure green
+      expect(getBlockPixel(1), isSameColorAs(lime)); // 100% green 0% red
+      expect(getBlockPixel(2), isSameColorAs(const Color(0xFF19E600)));
+      expect(getBlockPixel(3), isSameColorAs(const Color(0xFF33CC00)));
+      expect(getBlockPixel(4), isSameColorAs(const Color(0xFF808000))); // 50-50 mix green/red
+      expect(getBlockPixel(5), isSameColorAs(const Color(0xFFCD3200)));
+      expect(getBlockPixel(6), isSameColorAs(const Color(0xFFE61900)));
+      expect(getBlockPixel(7), isSameColorAs(const Color(0xFFFF0000))); // 0% green 100% red
+      expect(getBlockPixel(8), isSameColorAs(const Color(0xFFFF0000))); // pure red
       for (int index = 9; index < 40; index += 1) {
-        expect(getBlockPixel(index), matchesColor(lime));
+        expect(getBlockPixel(index), isSameColorAs(lime));
       }
     }
 

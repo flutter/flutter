@@ -326,7 +326,7 @@ void main() {
     expect(call.positionalArguments[3], isA<Paint>());
     final Paint paint = call.positionalArguments[3] as Paint;
     expect(paint.colorFilter, colorFilter);
-    expect(paint.color, matchesColor(const Color(0x7F000000))); // 0.5 opacity
+    expect(paint.color, isSameColorAs(const Color(0x7F000000))); // 0.5 opacity
     expect(paint.filterQuality, FilterQuality.high);
     expect(paint.isAntiAlias, true);
     expect(paint.invertColors, isTrue);

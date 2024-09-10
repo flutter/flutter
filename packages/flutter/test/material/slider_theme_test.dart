@@ -687,22 +687,22 @@ void main() {
     const Color middleGrey = Color(0xff7f7f7f);
 
     expect(lerp.trackHeight, equals(4.0));
-    expect(lerp.activeTrackColor, matchesColor(middleGrey.withAlpha(0xff)));
-    expect(lerp.inactiveTrackColor, matchesColor(middleGrey.withAlpha(0x3d)));
-    expect(lerp.secondaryActiveTrackColor, matchesColor(middleGrey.withAlpha(0x8a)));
-    expect(lerp.disabledActiveTrackColor, matchesColor(middleGrey.withAlpha(0x52)));
-    expect(lerp.disabledInactiveTrackColor, matchesColor(middleGrey.withAlpha(0x1f)));
-    expect(lerp.disabledSecondaryActiveTrackColor, matchesColor(middleGrey.withAlpha(0x1f)));
-    expect(lerp.activeTickMarkColor, matchesColor(middleGrey.withAlpha(0x8a)));
-    expect(lerp.inactiveTickMarkColor, matchesColor(middleGrey.withAlpha(0x8a)));
-    expect(lerp.disabledActiveTickMarkColor, matchesColor(middleGrey.withAlpha(0x1f)));
-    expect(lerp.disabledInactiveTickMarkColor, matchesColor(middleGrey.withAlpha(0x1f)));
-    expect(lerp.thumbColor, matchesColor(middleGrey.withAlpha(0xff)));
-    expect(lerp.disabledThumbColor, matchesColor(middleGrey.withAlpha(0x52)));
-    expect(lerp.overlayColor, matchesColor(middleGrey.withAlpha(0x1f)));
-    expect(lerp.valueIndicatorColor, matchesColor(middleGrey.withAlpha(0xff)));
-    expect(lerp.valueIndicatorStrokeColor, matchesColor(middleGrey.withAlpha(0xff)));
-    expect(lerp.valueIndicatorTextStyle!.color, matchesColor(middleGrey.withAlpha(0xff)));
+    expect(lerp.activeTrackColor, isSameColorAs(middleGrey.withAlpha(0xff)));
+    expect(lerp.inactiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x3d)));
+    expect(lerp.secondaryActiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x8a)));
+    expect(lerp.disabledActiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x52)));
+    expect(lerp.disabledInactiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.disabledSecondaryActiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.activeTickMarkColor, isSameColorAs(middleGrey.withAlpha(0x8a)));
+    expect(lerp.inactiveTickMarkColor, isSameColorAs(middleGrey.withAlpha(0x8a)));
+    expect(lerp.disabledActiveTickMarkColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.disabledInactiveTickMarkColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.thumbColor, isSameColorAs(middleGrey.withAlpha(0xff)));
+    expect(lerp.disabledThumbColor, isSameColorAs(middleGrey.withAlpha(0x52)));
+    expect(lerp.overlayColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.valueIndicatorColor, isSameColorAs(middleGrey.withAlpha(0xff)));
+    expect(lerp.valueIndicatorStrokeColor, isSameColorAs(middleGrey.withAlpha(0xff)));
+    expect(lerp.valueIndicatorTextStyle!.color, isSameColorAs(middleGrey.withAlpha(0xff)));
   });
 
   testWidgets('Default slider track draws correctly', (WidgetTester tester) async {
