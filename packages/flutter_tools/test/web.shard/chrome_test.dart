@@ -846,9 +846,10 @@ void main() {
 
   testWithoutContext('chrome.close can recover if getTab throws a StateError', () async {
     final BufferLogger logger = BufferLogger.test();
-    final FakeChromeConnection chromeConnection = FakeChromeConnection(
-      maxRetries: 4,
-      error: StateError('Client is closed.'),
+    final FakeChromeConnectionWithTab chromeConnection = FakeChromeConnectionWithTab(
+      onGetTab: () {
+        throw StateError('Client is closed.');
+      },
     );
     final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
@@ -859,7 +860,14 @@ void main() {
       logger: logger,
     );
     final FakeProcess process = FakeProcess();
-    final Chromium chrome = Chromium(0, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger,);
+    final Chromium chrome = Chromium(
+      0,
+      chromeConnection,
+      chromiumLauncher: chromiumLauncher,
+      process: process,
+      logger: logger,
+    );
+    await chromiumLauncher.connect(chrome, false);
     await chrome.close();
     expect(logger.errorText, isEmpty);
   });
@@ -926,14 +934,16 @@ typedef OnSendCommand = void Function(String);
 
 /// Fake chrome connection that returns a tab.
 class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
-  FakeChromeConnectionWithTab({OnSendCommand? onSendCommand})
+  FakeChromeConnectionWithTab({OnSendCommand? onSendCommand, this.onGetTab})
       : _tab = FakeChromeTab(onSendCommand);
 
   final FakeChromeTab _tab;
+  void Function()? onGetTab;
   bool throwSocketExceptions = false;
 
   @override
   Future<ChromeTab?> getTab(bool Function(ChromeTab tab) accept, {Duration? retryFor}) async {
+    onGetTab?.call();
     if (throwSocketExceptions) {
       throw const io.SocketException('test');
     }
