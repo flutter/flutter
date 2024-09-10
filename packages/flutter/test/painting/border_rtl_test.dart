@@ -37,14 +37,12 @@ class _BorderMatches extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item is Border && _target is Border) {
-      return _sideMatches(item.top, _target.top) &&
-          _sideMatches(item.right, _target.right) &&
-          _sideMatches(item.bottom, _target.bottom) &&
-          _sideMatches(item.left, _target.left);
-    } else {
-      return false;
-    }
+    return item is Border &&
+        _target is Border &&
+        _sideMatches(item.top, _target.top) &&
+        _sideMatches(item.right, _target.right) &&
+        _sideMatches(item.bottom, _target.bottom) &&
+        _sideMatches(item.left, _target.left);
   }
 }
 
@@ -63,14 +61,12 @@ class _BorderDirectionalMatches extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item is BorderDirectional && _target is BorderDirectional) {
-      return _sideMatches(item.top, _target.top) &&
-          _sideMatches(item.start, _target.start) &&
-          _sideMatches(item.bottom, _target.bottom) &&
-          _sideMatches(item.end, _target.end);
-    } else {
-      return false;
-    }
+    return item is BorderDirectional &&
+        _target is BorderDirectional &&
+        _sideMatches(item.top, _target.top) &&
+        _sideMatches(item.start, _target.start) &&
+        _sideMatches(item.bottom, _target.bottom) &&
+        _sideMatches(item.end, _target.end);
   }
 }
 

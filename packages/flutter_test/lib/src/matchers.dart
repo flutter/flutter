@@ -223,7 +223,7 @@ const Matcher isNotInCard = _IsNotInCard();
 /// Asserts that the object represents the same color as [color] when used to paint.
 ///
 /// Specifically this matcher checks the object is of type [Color] and its color
-/// components fall below the specified delta specified by [threshold].
+/// components fall below the delta specified by [threshold].
 Matcher isSameColorAs(Color color, {double threshold = 0.004}) {
   return _ColorMatcher(color, threshold);
 }
@@ -2131,15 +2131,12 @@ class _ColorMatcher extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item is ui.Color) {
-      return item.colorSpace == _target.colorSpace &&
-          (item.a - _target.a).abs() <= _threshold &&
-          (item.r - _target.r).abs() <= _threshold &&
-          (item.g - _target.g).abs() <= _threshold &&
-          (item.b - _target.b).abs() <= _threshold;
-    } else {
-      return false;
-    }
+    return item is ui.Color &&
+        item.colorSpace == _target.colorSpace &&
+        (item.a - _target.a).abs() <= _threshold &&
+        (item.r - _target.r).abs() <= _threshold &&
+        (item.g - _target.g).abs() <= _threshold &&
+        (item.b - _target.b).abs() <= _threshold;
   }
 }
 

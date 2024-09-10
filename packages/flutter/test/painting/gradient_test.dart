@@ -58,16 +58,13 @@ class _LinearGradientMatcher extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item is LinearGradient) {
-      return item.begin == _target.begin &&
-          item.end == _target.end &&
-          item.tileMode == _target.tileMode &&
-          item.transform == _target.transform &&
-          _listColorMatches(item.colors, _target.colors) &&
-          _listDoubleMatches(item.stops, _target.stops);
-    } else {
-      return false;
-    }
+    return item is LinearGradient &&
+        item.begin == _target.begin &&
+        item.end == _target.end &&
+        item.tileMode == _target.tileMode &&
+        item.transform == _target.transform &&
+        _listColorMatches(item.colors, _target.colors) &&
+        _listDoubleMatches(item.stops, _target.stops);
   }
 }
 

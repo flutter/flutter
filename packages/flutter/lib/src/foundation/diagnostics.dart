@@ -1753,6 +1753,9 @@ abstract class DiagnosticsNode {
   /// `minLevel` specifies the minimum [DiagnosticLevel] for properties included
   /// in the output.
   ///
+  /// `wrapWidth` specifies the column number where word wrapping will be
+  /// applied.
+  ///
   /// The [toStringDeep] method takes other arguments, but those are intended
   /// for internal use when recursing to the descendants, and so can be ignored.
   ///
@@ -3315,6 +3318,9 @@ abstract class DiagnosticableTree with Diagnosticable {
   ///
   /// `minLevel` specifies the minimum [DiagnosticLevel] for properties included
   /// in the output.
+  ///
+  /// `wrapWidth` specifies the column number where word wrapping will be
+  /// applied.
   ///
   /// The [toStringDeep] method takes other arguments, but those are intended
   /// for internal use when recursing to the descendants, and so can be ignored.
