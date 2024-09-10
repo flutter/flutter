@@ -329,6 +329,31 @@ void main() {
     ),);
   });
 
+    test('LinearGradient withOpacity test - preserves transform', () {
+    const LinearGradient testGradient = LinearGradient(
+      begin: Alignment.bottomRight,
+      end: Alignment.topCenter,
+      colors: <Color>[
+        Color(0xFFFFFFFF),
+        Color(0xAF777777),
+        Color(0x44444444),
+      ],
+      transform: GradientRotation(1);
+    );
+    final LinearGradient actual = testGradient.withOpacity(0.5);
+
+    expect(actual, const LinearGradient(
+      begin: Alignment.bottomRight,
+      end: Alignment.topCenter,
+      colors: <Color>[
+        Color(0x80FFFFFF),
+        Color(0x80777777),
+        Color(0x80444444),
+      ],
+      transform: GradientRotation(1);
+    ),);
+  });
+
   test('RadialGradient with AlignmentDirectional', () {
     expect(
       () {
