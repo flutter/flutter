@@ -2911,6 +2911,16 @@ class BuildOwner {
                   'The dirty list for the current build scope is: ${buildScope._dirtyElements}',
         );
       }
+      if (!_debugBuilding && element._inDirtyList) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('BuildOwner.scheduleBuildFor() called inappropriately.'),
+          ErrorHint(
+            'The BuildOwner.scheduleBuildFor() method called on an Element '
+            'that is already in the dirty list.',
+          ),
+          element.describeElement('the dirty Element was'),
+        ]);
+      }
       return true;
     }());
     if (!_scheduledFlushDirtyElements && onBuildScheduled != null) {
