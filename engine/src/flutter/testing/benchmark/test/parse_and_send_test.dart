@@ -4,9 +4,9 @@
 
 import 'dart:io';
 
-import 'package:litetest/litetest.dart';
 import 'package:metrics_center/metrics_center.dart';
 import 'package:path/path.dart' as p;
+import 'package:test/test.dart';
 
 import '../bin/parse_and_send.dart' as pas;
 
