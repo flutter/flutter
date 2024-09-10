@@ -1298,7 +1298,7 @@ void main() {
       expect(
         description.join('\n'),
         equalsIgnoringHashCodes(
-            'style: MenuStyle#00000(backgroundColor: WidgetStatePropertyAll(MaterialColor(primary value: Color(0xfff44336))), elevation: WidgetStatePropertyAll(10.0))\n'
+            'style: MenuStyle#00000(backgroundColor: WidgetStatePropertyAll(MaterialColor(primary value: ${const Color(0xfff44336)})), elevation: WidgetStatePropertyAll(10.0))\n'
             'clipBehavior: Clip.none'),
       );
     });
@@ -2972,7 +2972,7 @@ void main() {
         equalsIgnoringHashCodes(
           <String>[
             'focusNode: null',
-            'menuStyle: MenuStyle#00000(backgroundColor: WidgetStatePropertyAll(MaterialColor(primary value: Color(0xff4caf50))), elevation: WidgetStatePropertyAll(20.0), shape: WidgetStatePropertyAll(RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)))',
+            'menuStyle: MenuStyle#00000(backgroundColor: WidgetStatePropertyAll(MaterialColor(primary value: ${const Color(0xff4caf50)})), elevation: WidgetStatePropertyAll(20.0), shape: WidgetStatePropertyAll(RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)))',
             'alignmentOffset: null',
             'clipBehavior: hardEdge',
           ],
