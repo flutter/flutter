@@ -777,6 +777,7 @@ void _handlePosixException(Exception e, String? message, int errorCode, String? 
 void _handleMacOSException(Exception e, String? message, int errorCode, String? posixPermissionSuggestion) {
   // https://github.com/apple/darwin-xnu/blob/main/bsd/dev/dtrace/scripts/errno.d
   const int ebadarch = 86;
+  const int eagain = 35;
   if (errorCode == ebadarch) {
     final StringBuffer errorBuffer = StringBuffer();
     if (message != null) {
@@ -786,6 +787,17 @@ void _handleMacOSException(Exception e, String? message, int errorCode, String? 
     errorBuffer.writeln('If you are on an ARM Apple Silicon Mac, Flutter requires the Rosetta translation environment. Try running:');
     errorBuffer.writeln('  sudo softwareupdate --install-rosetta --agree-to-license');
     _throwFileSystemException(errorBuffer.toString());
+  }
+  if (errorCode == eagain) {
+    final StringBuffer errorBuffer = StringBuffer();
+    if (message != null) {
+      errorBuffer.writeln('$message.');
+    }
+    errorBuffer.writeln(
+      'Your system may be running into its process limits. '
+      'Consider quitting unused apps and trying again.',
+    );
+    throwToolExit(errorBuffer.toString());
   }
   _handlePosixException(e, message, errorCode, posixPermissionSuggestion);
 }
