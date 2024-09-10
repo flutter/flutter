@@ -383,11 +383,16 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// advancing the offset by this [InlineSpan]'s length in UTF16 code units,
   /// such that the `offset` points to the end (enclusive) of this [InlineSpan]
   /// when this method returns.
+  ///
+  /// This method is typically for overriding only and should not be called
+  /// directly. Use [updateAttributes] instead.
   @protected
   InlineSpan updateAttributesAtOffset(covariant InlineSpanAttributes newAttributes, TextRange textRange, Accumulator offset);
 
   /// Creates a new [InlineSpan] from this [InlineSpan] by applying
   /// `newAttributes` to the given [TextRange] within this span.
+  ///
+  /// This method calls [updateAttributesAtOffset] and overriding is rarely needed.
   @useResult
   InlineSpan updateAttributes(covariant InlineSpanAttributes newAttributes, TextRange textRange) => updateAttributesAtOffset(newAttributes, textRange, Accumulator());
 
@@ -443,7 +448,7 @@ abstract class InlineSpan extends DiagnosticableTree {
 ///
 /// See also:
 ///
-///  * [InlineSpan.updateAttributesAtOffset], which takes an [InlineSpanAttributes], and
+///  * [InlineSpan.updateAttributes], which takes an [InlineSpanAttributes], and
 ///    updates a given [TextRange] within the receiver [InlineSpan] using the
 ///    [InlineSpanAttributes].
 class InlineSpanAttributes {
@@ -594,11 +599,11 @@ class InlineSpanAttributes {
 
   /// An attribute which overwrites [TextSpan.recognizer] if set to non-null.
   ///
-  /// When a recognizer is specified, the [InlineSpan.updateAttributesAtOffset] method
+  /// When a recognizer is specified, the [InlineSpan.updateAttributes] method
   /// replaces existing recognizers (if any) within the given range with the
   /// specified recognizer.
   ///
-  /// When this value is set to [remove], the [InlineSpan.updateAttributesAtOffset]
+  /// When this value is set to [remove], the [InlineSpan.updateAttributes]
   /// method sets [TextSpan.recognizer] to null in the given range of the returned
   /// [TextSpan].
   final GestureRecognizer? recognizer;
@@ -637,7 +642,7 @@ class InlineSpanAttributes {
   /// comparison function `identical`, performing any other operation on this
   /// object may crash the program.
   ///
-  /// [InlineSpan.updateAttributesAtOffset] does not mutate the target
+  /// [InlineSpan.updateAttributes] does not mutate the target
   /// [InlineSpan]. Rather, when [recognizer] is set to [remove], that method
   /// returns a new [InlineSpan] with [recognizer] set to null.
   static const RemoveInlineSpanAttribute remove = _PoorMansBottomType._();
