@@ -357,6 +357,16 @@ void main() {
       const _CustomColor(0xFF123456),
       isSameColorAs(const _CustomColor(0xFF123456, isEqual: false)),
     );
+
+    expect(
+      const Color(0x00000000),
+      isNot(isSameColorAs(const Color(0x00000002))),
+    );
+
+    expect(
+      const Color(0x00000000),
+      isSameColorAs(const Color(0x00000002), threshold: 0.008),
+    );
   });
 
   group('coversSameAreaAs', () {
