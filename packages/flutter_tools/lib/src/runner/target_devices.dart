@@ -29,7 +29,7 @@ String _foundSpecifiedDevicesMessage(int count, String deviceId) =>
 String _noMatchingDeviceMessage(String deviceId) => 'No supported devices found with name or id '
     "matching '$deviceId'.";
 String flutterSpecifiedDeviceDevModeDisabled(String deviceName) => 'To use '
-    "'$deviceName' for development, enable Developer Mode in Settings → Privacy & Security.";
+    "'$deviceName' for development, open Xcode, reconnect the '$deviceName' and enable Developer Mode in Settings → Privacy & Security.";
 String flutterSpecifiedDeviceUnpaired(String deviceName) => "'$deviceName' is not paired. "
     'Open Xcode and trust this computer when prompted.';
 
