@@ -2601,6 +2601,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     );
   }
 
+  /// This method calculates a local [SelectedContentRange] based on the list 
+  /// of [ranges] that are accumulated from the [Selectable] children under this
+  /// delegate. This calculation takes into account the accumulated content
+  /// length before the active selection, and returns a [SelectedContentRange.empty]
+  /// when either selection edge has not been set.
   SelectedContentRange _calculateLocalRange(List<SelectedContentRange> ranges) {
     // Calculate content length.
     int totalContentLength = 0;
@@ -2651,7 +2656,12 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     );
   }
 
-  /// Copies the selections of all [Selectable]s.
+  /// Returns a [SelectedContentRange] considering the [SelectedContentRange]
+  /// from each [Selectable] child managed under this delegate.
+  ///
+  /// When nothing is selected or either selection edge has not been set,
+  /// this method will return a [SelectedContentRange.empty] with a content
+  /// length accumulated from each [Selectable] child managed under this delegate.
   @override
   SelectedContentRange getSelection() {
     final List<SelectedContentRange> selections = <SelectedContentRange>[
@@ -3132,7 +3142,7 @@ typedef SelectionListenerSelectionChangedCallback = void Function(SelectionDetai
 ///
 /// This widget does not listen to selection changes of nested [SelectionArea]s
 /// or [SelectableRegion]s in its subtree because those widgets are self-contained
-/// and do not bubble up their selection. To listen selection changes of a
+/// and do not bubble up their selection. To listen to selection changes of a
 /// [SelectionArea] or [SelectableRegion] under this [SelectionListener], add
 /// an additional [SelectionListener] under each one.
 ///

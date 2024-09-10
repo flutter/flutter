@@ -94,7 +94,7 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   ///
   /// When nothing is selected, subclasses should return a [SelectedContentRange.empty],
   /// with a [SelectedContentRange.contentLength] that represents the length
-  /// of the content under it.
+  /// of the content under this [SelectionHandler].
   SelectedContentRange getSelection();
 
   /// Handles the [SelectionEvent] sent to this object.
@@ -797,12 +797,12 @@ final class SelectionDetails with Diagnosticable {
 
   /// The offset where the selection starts.
   ///
-  /// This is relative to the [Selectable] subtree of the object creator.
+  /// This is relative to the [Selectable] subtree of the creator of this [SelectionDetails] instance.
   final int localStartOffset;
 
   /// The offset where the selection ends.
   ///
-  /// This is relative to the [Selectable] subtree of the object creator.
+  /// This is relative to the [Selectable] subtree of the creator of this [SelectionDetails] instance.
   final int localEndOffset;
 
   @override

@@ -1220,6 +1220,11 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     return a.right > b.right ? 1 : -1;
   }
 
+  /// This method calculates a local [SelectedContentRange] based on the list 
+  /// of [ranges] that are accumulated from the [Selectable] children under this
+  /// delegate. This calculation takes into account the accumulated content
+  /// length before the active selection, and returns a [SelectedContentRange.empty]
+  /// when either selection edge has not been set.
   SelectedContentRange _calculateLocalRange(List<SelectedContentRange> ranges) {
     // Calculate content length.
     int totalContentLength = 0;
@@ -1274,7 +1279,12 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     );
   }
 
-  /// Copies the selections of all [Selectable]s.
+  /// Returns a [SelectedContentRange] considering the [SelectedContentRange]
+  /// from each [Selectable] child managed under this delegate.
+  ///
+  /// When nothing is selected or either selection edge has not been set,
+  /// this method will return a [SelectedContentRange.empty] with a content
+  /// length accumulated from each [Selectable] child managed under this delegate.
   @override
   SelectedContentRange getSelection() {
     final List<SelectedContentRange> selections = <SelectedContentRange>[
