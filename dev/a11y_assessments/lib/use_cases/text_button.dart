@@ -40,7 +40,7 @@ class MainWidgetState extends State<MainWidget> {
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          children: <Widget>[
             TextFormField(
             // The validator receives the text that the user has entered.
               validator: (String? value) {
