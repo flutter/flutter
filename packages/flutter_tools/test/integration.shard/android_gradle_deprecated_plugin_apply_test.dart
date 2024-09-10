@@ -124,7 +124,6 @@ apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
     compileSdkVersion flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
     namespace "com.example.testapp"
 
     compileOptions {

@@ -177,7 +177,6 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   android {
       namespace = "com.example.splitaot"
       compileSdk flutter.compileSdkVersion
-      ndkVersion flutter.ndkVersion
 
       compileOptions {
           sourceCompatibility = JavaVersion.VERSION_1_8

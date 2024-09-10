@@ -462,7 +462,6 @@ abstract class CreateBase extends FlutterCommand {
       'gradleVersion': gradleVersion,
       'compileSdkVersion': gradle.compileSdkVersion,
       'minSdkVersion': gradle.minSdkVersion,
-      'ndkVersion': gradle.ndkVersion,
       'targetSdkVersion': gradle.targetSdkVersion,
     };
   }
