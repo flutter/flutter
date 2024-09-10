@@ -13,5 +13,6 @@ environment:
 resolution: workspace
 
 dev_dependencies:
-  litetest: any
+  engine_repo_tools: any
   path: any
+  test: any
