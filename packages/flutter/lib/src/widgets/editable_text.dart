@@ -4375,11 +4375,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   TextSelection? _adjustedSelectionWhenFocused() {
     TextSelection? selection;
-    final bool shouldSelectAll = widget.selectionEnabled && kIsWeb
-        && !_isMultiline && !_nextFocusChangeIsInternal;
+    final bool isDesktop = switch (defaultTargetPlatform) {
+      TargetPlatform.android || TargetPlatform.iOS || TargetPlatform.fuchsia => false,
+      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
+    };
+    final bool shouldSelectAll = widget.selectionEnabled
+        && (kIsWeb || isDesktop)
+        && !_isMultiline
+        && !_nextFocusChangeIsInternal;
     if (shouldSelectAll) {
-      // On native web, single line <input> tags select all when receiving
-      // focus.
+      // On native web and desktop platforms, single line <input> tags
+      // select all when receiving focus.
       selection = TextSelection(
         baseOffset: 0,
         extentOffset: _value.text.length,
