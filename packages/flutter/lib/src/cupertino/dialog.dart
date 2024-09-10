@@ -1455,33 +1455,35 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     final double verticalPadding = _kActionSheetButtonVerticalPaddingBase
         + fontSize * _kActionSheetButtonVerticalPaddingFactor;
 
+    // The GestureDetector only will be active if the button is in a CupertinoAlertDialog.
+    final bool isInCupertinoAlertDialog = context.findAncestorWidgetOfExactType<CupertinoAlertDialog>() != null;
+
     return MouseRegion(
       cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
-      child: MetaData(
-        metaData: this,
+      child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        child: _ActionSheetGestureDetector(
-          child: ColoredBox(
-            color: Colors.transparent,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: _kActionSheetButtonMinHeight,
-              ),
-              child: Semantics(
-                button: true,
-                onTap: widget.onPressed,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    _kActionSheetButtonHorizontalPadding,
-                    verticalPadding,
-                    _kActionSheetButtonHorizontalPadding,
-                    verticalPadding,
-                  ),
-                  child: DefaultTextStyle(
-                    style: style,
-                    textAlign: TextAlign.center,
-                    child: Center(child: widget.child),
-                  ),
+        onTap: isInCupertinoAlertDialog ? widget.onPressed : null,
+        child: MetaData(
+          metaData: this,
+          behavior: HitTestBehavior.opaque,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: _kActionSheetButtonMinHeight,
+            ),
+            child: Semantics(
+              button: true,
+              onTap: widget.onPressed,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  _kActionSheetButtonHorizontalPadding,
+                  verticalPadding,
+                  _kActionSheetButtonHorizontalPadding,
+                  verticalPadding,
+                ),
+                child: DefaultTextStyle(
+                  style: style,
+                  textAlign: TextAlign.center,
+                  child: Center(child: widget.child),
                 ),
               ),
             ),
