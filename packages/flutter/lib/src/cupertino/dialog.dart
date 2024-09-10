@@ -1461,24 +1461,27 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
         metaData: this,
         behavior: HitTestBehavior.opaque,
         child: _ActionSheetGestureDetector(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: _kActionSheetButtonMinHeight,
-            ),
-            child: Semantics(
-              button: true,
-              onTap: widget.onPressed,
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  _kActionSheetButtonHorizontalPadding,
-                  verticalPadding,
-                  _kActionSheetButtonHorizontalPadding,
-                  verticalPadding,
-                ),
-                child: DefaultTextStyle(
-                  style: style,
-                  textAlign: TextAlign.center,
-                  child: Center(child: widget.child),
+          child: ColoredBox(
+            color: Colors.transparent,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: _kActionSheetButtonMinHeight,
+              ),
+              child: Semantics(
+                button: true,
+                onTap: widget.onPressed,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    _kActionSheetButtonHorizontalPadding,
+                    verticalPadding,
+                    _kActionSheetButtonHorizontalPadding,
+                    verticalPadding,
+                  ),
+                  child: DefaultTextStyle(
+                    style: style,
+                    textAlign: TextAlign.center,
+                    child: Center(child: widget.child),
+                  ),
                 ),
               ),
             ),
