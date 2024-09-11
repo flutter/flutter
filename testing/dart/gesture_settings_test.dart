@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 void main() {
   test('GestureSettings has a reasonable toString', () {
@@ -23,11 +23,11 @@ void main() {
     expect(settingsA, equals(settingsC));
     expect(settingsC, equals(settingsA));
 
-    expect(settingsA, notEquals(settingsB));
-    expect(settingsC, notEquals(settingsB));
+    expect(settingsA, isNot(settingsB));
+    expect(settingsC, isNot(settingsB));
 
-    expect(settingsB, notEquals(settingsA));
-    expect(settingsB, notEquals(settingsC));
+    expect(settingsB, isNot(settingsA));
+    expect(settingsB, isNot(settingsC));
   });
 
   test('GestureSettings copyWith preserves already set values', () {

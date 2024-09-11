@@ -4,7 +4,9 @@
 
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
+
+const precisionErrorTolerance = 1e-4;
 
 // These tests should be kept in sync with the web tests in
 // lib/web_ui/test/lerp_test.dart.
@@ -103,23 +105,23 @@ void main() {
   });
 
   test('lerpDouble should throw AssertionError if interpolation value is NaN and a != b', () {
-    expectAssertion(() => lerpDouble(0.0, 10.0, double.nan));
+    expect(() => lerpDouble(0.0, 10.0, double.nan), throwsA(isA<AssertionError>()));
   });
 
   test('lerpDouble should throw AssertionError if interpolation value is +/- infinity and a != b', () {
-    expectAssertion(() => lerpDouble(0.0, 10.0, double.infinity));
-    expectAssertion(() => lerpDouble(0.0, 10.0, -double.infinity));
+    expect(() => lerpDouble(0.0, 10.0, double.infinity), throwsA(isA<AssertionError>()));
+    expect(() => lerpDouble(0.0, 10.0, -double.infinity), throwsA(isA<AssertionError>()));
   });
 
   test('lerpDouble should throw AssertionError if either start or end are NaN', () {
-    expectAssertion(() => lerpDouble(double.nan, 10.0, 5.0));
-    expectAssertion(() => lerpDouble(0.0, double.nan, 5.0));
+    expect(() => lerpDouble(double.nan, 10.0, 5.0), throwsA(isA<AssertionError>()));
+    expect(() => lerpDouble(0.0, double.nan, 5.0), throwsA(isA<AssertionError>()));
   });
 
   test('lerpDouble should throw AssertionError if either start or end are +/- infinity', () {
-    expectAssertion(() => lerpDouble(double.infinity, 10.0, 5.0));
-    expectAssertion(() => lerpDouble(-double.infinity, 10.0, 5.0));
-    expectAssertion(() => lerpDouble(0.0, double.infinity, 5.0));
-    expectAssertion(() => lerpDouble(0.0, -double.infinity, 5.0));
+    expect(() => lerpDouble(double.infinity, 10.0, 5.0), throwsA(isA<AssertionError>()));
+    expect(() => lerpDouble(-double.infinity, 10.0, 5.0), throwsA(isA<AssertionError>()));
+    expect(() => lerpDouble(0.0, double.infinity, 5.0), throwsA(isA<AssertionError>()));
+    expect(() => lerpDouble(0.0, -double.infinity, 5.0), throwsA(isA<AssertionError>()));
   });
 }

@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 typedef StringFunction = String Function();
 typedef IntFunction = int Function();
@@ -21,14 +21,14 @@ void main() {
   test('PluginUtilities Callback Handles', () {
     // Top level callback.
     final CallbackHandle hTop = PluginUtilities.getCallbackHandle(top)!;
-    expect(hTop, notEquals(0));
+    expect(hTop, isNot(0));
     expect(PluginUtilities.getCallbackHandle(top), hTop);
     final StringFunction topClosure = PluginUtilities.getCallbackFromHandle(hTop)! as StringFunction;
     expect(topClosure(), 'top');
 
     // Static method callback.
     final CallbackHandle hGetInt = PluginUtilities.getCallbackHandle(Foo.getInt)!;
-    expect(hGetInt, notEquals(0));
+    expect(hGetInt, isNot(0));
     expect(PluginUtilities.getCallbackHandle(Foo.getInt), hGetInt);
     final IntFunction getIntClosure = PluginUtilities.getCallbackFromHandle(hGetInt)! as IntFunction;
     expect(getIntClosure(), 1);

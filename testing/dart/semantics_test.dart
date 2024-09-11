@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 // The body of this file is the same as ../../lib/web_ui/test/engine/semantics/semantics_api_test.dart
 // Please keep them in sync.

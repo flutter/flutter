@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 void main() {
   // Ahem font uses a constant ideographic/alphabetic baseline ratio.
@@ -311,7 +311,7 @@ void main() {
     final GlyphInfo? bottomRight = paragraph.getClosestGlyphInfoForOffset(const Offset(99.0, 99.0));
     final GlyphInfo? last = paragraph.getGlyphInfoAt(8);
     expect(bottomRight, equals(last));
-    expect(bottomRight, notEquals(paragraph.getGlyphInfoAt(0)));
+    expect(bottomRight, isNot(paragraph.getGlyphInfoAt(0)));
 
     expect(bottomRight?.graphemeClusterLayoutBounds, const Rect.fromLTWH(30, 10, 10, 10));
     expect(bottomRight?.graphemeClusterCodeUnitRange, const TextRange(start: 8, end: 9));
@@ -326,11 +326,8 @@ void main() {
     final Canvas canvas = Canvas(recorder);
 
     void callback() { canvas.drawParagraph(paragraph, Offset.zero); }
-    if (assertStatementsEnabled) {
-      expectAssertion(callback);
-    } else {
-      expect(callback, throwsStateError);
-    }
+
+    expect(callback, throwsA(isA<AssertionError>()));
   });
 
   test('rounding hack disabled', () {

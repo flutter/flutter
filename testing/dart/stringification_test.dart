@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 final Uint8List imageData = Uint8List.fromList(<int>[ // Small WebP file
   0x52, 0x49, 0x46, 0x46, 0x12, 0x00, 0x00, 0x00,  0x57, 0x45, 0x42, 0x50, 0x56, 0x50, 0x38, 0x4c, // |RIFF....WEBPVP8L|
