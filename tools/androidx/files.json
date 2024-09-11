@@ -86,5 +86,11 @@
     "out_file_name": "core-1.10.3.aar",
     "maven_dependency": "com.google.android.play:core:1.10.3",
     "provides": []
+  },
+  {
+    "url": "https://repo1.maven.org/maven2/com/getkeepsafe/relinker/relinker/1.4.5/relinker-1.4.5.aar",
+    "out_file_name": "relinker-1.4.5.aar",
+    "maven_dependency": "com.getkeepsafe.relinker:relinker:1.4.5",
+    "provides": ["com.getkeepsafe.relinker.ReLinker"]
   }
 ]
