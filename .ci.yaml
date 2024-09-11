@@ -5022,6 +5022,7 @@ targets:
       task_name: platform_channels_benchmarks_ios
 
   - name: Mac_ios platform_interaction_test_ios
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/155002
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
