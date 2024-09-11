@@ -2761,50 +2761,44 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
 
   _TextBoundaryRecord _getParagraphBoundaryAtPosition(TextPosition position, String text) {
     final ParagraphBoundary paragraphBoundary = ParagraphBoundary(text);
-    // Use position.offset - 1 when `position` is at the end of the selectable to retrieve
-    // the previous text boundary's location.
-    final int paragraphStart = paragraphBoundary.getLeadingTextBoundaryAt(position.offset == text.length || position.affinity == TextAffinity.upstream ? position.offset - 1 : position.offset) ?? 0;
-    final int paragraphEnd = paragraphBoundary.getTrailingTextBoundaryAt(position.offset) ?? text.length;
-    final TextRange paragraphRange = TextRange(start: paragraphStart, end: paragraphEnd);
-    assert(paragraphRange.isNormalized);
-    return _adjustTextBoundaryAtPosition(paragraphRange, position);
+    return _getTextBoundaryAtPosition(paragraphBoundary, position, text);
   }
 
   _TextBoundaryRecord _getClampedParagraphBoundaryAtPosition(TextPosition position) {
     final ParagraphBoundary paragraphBoundary = ParagraphBoundary(fullText);
-    // Use position.offset - 1 when `position` is at the end of the selectable to retrieve
-    // the previous text boundary's location.
-    int paragraphStart = paragraphBoundary.getLeadingTextBoundaryAt(position.offset == fullText.length || position.affinity == TextAffinity.upstream ? position.offset - 1 : position.offset) ?? 0;
-    int paragraphEnd = paragraphBoundary.getTrailingTextBoundaryAt(position.offset) ?? fullText.length;
-    paragraphStart = paragraphStart < range.start ? range.start : paragraphStart > range.end ? range.end : paragraphStart;
-    paragraphEnd = paragraphEnd > range.end ? range.end : paragraphEnd < range.start ? range.start : paragraphEnd;
-    final TextRange paragraphRange = TextRange(start: paragraphStart, end: paragraphEnd);
-    assert(paragraphRange.isNormalized);
-    return _adjustTextBoundaryAtPosition(paragraphRange, position);
+    return _clampTextBoundaryAtPosition(paragraphBoundary, position);
   }
 
   _TextBoundaryRecord _getLineBoundaryAtPosition(TextPosition position, String text) {
     final LineBoundary lineBoundary = LineBoundary(this);
-    // Use position.offset - 1 when `position` is at the end of the selectable to retrieve
-    // the previous text boundary's location.
-    final int lineStart = lineBoundary.getLeadingTextBoundaryAt(position.offset == text.length || position.affinity == TextAffinity.upstream ? position.offset - 1 : position.offset) ?? 0;
-    final int lineEnd = lineBoundary.getTrailingTextBoundaryAt(position.offset) ?? text.length;
-    final TextRange lineRange = TextRange(start: lineStart, end: lineEnd);
-    assert(lineRange.isNormalized);
-    return _adjustTextBoundaryAtPosition(lineRange, position);
+    return _getTextBoundaryAtPosition(lineBoundary, position, text);
   }
 
   _TextBoundaryRecord _getClampedLineBoundaryAtPosition(TextPosition position) {
     final LineBoundary lineBoundary = LineBoundary(this);
+    return _clampTextBoundaryAtPosition(lineBoundary, position);
+  }
+
+  _TextBoundaryRecord _getTextBoundaryAtPosition(TextBoundary textBoundary, TextPosition position, String text) {
     // Use position.offset - 1 when `position` is at the end of the selectable to retrieve
     // the previous text boundary's location.
-    int lineStart = lineBoundary.getLeadingTextBoundaryAt(position.offset == fullText.length || position.affinity == TextAffinity.upstream ? position.offset - 1 : position.offset) ?? 0;
-    int lineEnd = lineBoundary.getTrailingTextBoundaryAt(position.offset) ?? fullText.length;
-    lineStart = lineStart < range.start ? range.start : lineStart > range.end ? range.end : lineStart;
-    lineEnd = lineEnd > range.end ? range.end : lineEnd < range.start ? range.start : lineEnd;
-    final TextRange lineRange = TextRange(start: lineStart, end: lineEnd);
-    assert(lineRange.isNormalized);
-    return _adjustTextBoundaryAtPosition(lineRange, position);
+    final int boundaryStart = textBoundary.getLeadingTextBoundaryAt(position.offset == text.length || position.affinity == TextAffinity.upstream ? position.offset - 1 : position.offset) ?? 0;
+    final int boundaryEnd = textBoundary.getTrailingTextBoundaryAt(position.offset) ?? text.length;
+    final TextRange boundaryRange = TextRange(start: boundaryStart, end: boundaryEnd);
+    assert(boundaryRange.isNormalized);
+    return _adjustTextBoundaryAtPosition(boundaryRange, position);
+  }
+
+  _TextBoundaryRecord _clampTextBoundaryAtPosition(TextBoundary textBoundary, TextPosition position) {
+    // Use position.offset - 1 when `position` is at the end of the selectable to retrieve
+    // the previous text boundary's location.
+    int boundaryStart = textBoundary.getLeadingTextBoundaryAt(position.offset == fullText.length || position.affinity == TextAffinity.upstream ? position.offset - 1 : position.offset) ?? 0;
+    int boundaryEnd = textBoundary.getTrailingTextBoundaryAt(position.offset) ?? fullText.length;
+    boundaryStart = boundaryStart < range.start ? range.start : boundaryStart > range.end ? range.end : boundaryStart;
+    boundaryEnd = boundaryEnd > range.end ? range.end : boundaryEnd < range.start ? range.start : boundaryEnd;
+    final TextRange boundaryRange = TextRange(start: boundaryStart, end: boundaryEnd);
+    assert(boundaryRange.isNormalized);
+    return _adjustTextBoundaryAtPosition(boundaryRange, position);
   }
 
   SelectionResult _handleDirectionallyExtendSelection(double horizontalBaseline, bool isExtent, SelectionExtendDirection movement) {
