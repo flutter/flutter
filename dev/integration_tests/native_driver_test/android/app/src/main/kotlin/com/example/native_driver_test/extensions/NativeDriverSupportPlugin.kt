@@ -60,6 +60,7 @@ class NativeDriverSupportPlugin :
                     }
                     else -> {
                         result.error("INVALID_SELECTOR", "Not supported", kind)
+                        return
                     }
                 }
 
