@@ -1,4 +1,4 @@
-Signature: 7958fa6261f6e2de4ba2948c10d76542
+Signature: 4c53db5e5726aeb614c5a5dc5914d490
 
 ====================================================================================================
 LIBRARY: etc1
@@ -405,6 +405,7 @@ FILE: ../../../flutter/third_party/skia/relnotes/fourbytetag.md
 FILE: ../../../flutter/third_party/skia/relnotes/ganesh-move.md
 FILE: ../../../flutter/third_party/skia/relnotes/grglconfig.md
 FILE: ../../../flutter/third_party/skia/relnotes/macro.md
+FILE: ../../../flutter/third_party/skia/relnotes/skslbuilders.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
