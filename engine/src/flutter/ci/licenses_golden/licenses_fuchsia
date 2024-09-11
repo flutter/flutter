@@ -1,4 +1,4 @@
-Signature: b963130de1cc4ca2b0e3162280e21ceb
+Signature: 55828fc03e3f8b24310c43dcf89ea807
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -5863,6 +5863,9 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/include/lib/media
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/timeline_function.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/timeline_rate.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sync/include/lib/sync/completion.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/include/lib/syslog/cpp/log_level.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/include/lib/syslog/cpp/log_settings.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/include/lib/syslog/cpp/macros.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/channel.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/event.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/eventpair.cc + ../../../fuchsia/sdk/linux/LICENSE
@@ -6340,6 +6343,9 @@ FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/include/lib/media/c
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/timeline_function.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/timeline_rate.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sync/include/lib/sync/completion.h
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/include/lib/syslog/cpp/log_level.h
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/include/lib/syslog/cpp/log_settings.h
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/include/lib/syslog/cpp/macros.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/channel.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/event.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/eventpair.cc
@@ -14433,6 +14439,8 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/memory.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/source_location.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/version.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/include/lib/syslog/cpp/logging_backend_fuchsia_globals.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/logging_backend_fuchsia.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/msi.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/result.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/stream.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -14751,6 +14759,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/bi
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/memory.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/source_location.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/version.h
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/include/lib/syslog/cpp/logging_backend_fuchsia_globals.h
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/logging_backend_fuchsia.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/msi.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/result.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/stream.h
@@ -16224,6 +16234,8 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_metadata_cpp/include/lib/driver/me
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_metadata_cpp/include/lib/driver/metadata/cpp/metadata_server.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_node_cpp/add_child.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_node_cpp/include/lib/driver/node/cpp/add_child.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/include/lib/syslog/cpp/log_message_impl.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/log_message_impl.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/vulkan/offer.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/availability_levels.inc
@@ -16287,6 +16299,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/driver_metadata_cpp/include/lib/driver/meta
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_metadata_cpp/include/lib/driver/metadata/cpp/metadata_server.h
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_node_cpp/add_child.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_node_cpp/include/lib/driver/node/cpp/add_child.h
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/include/lib/syslog/cpp/log_message_impl.h
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/log_message_impl.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/offer.shard.cml
 ----------------------------------------------------------------------------------------------------
 Copyright 2024 The Fuchsia Authors. All rights reserved.
