@@ -737,8 +737,8 @@ void main() {
         0.5,
       );
 
-      expect(lerped.extension<MyThemeExtensionA>()!.color1, const Color(0xff7f7f7f));
-      expect(lerped.extension<MyThemeExtensionA>()!.color2, const Color(0xff90ab7d));
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, isSameColorAs(const Color(0xff7f7f7f)));
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, isSameColorAs(const Color(0xff90ab7d)));
       expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 75));
 
       // Missing from 2nd ThemeData
@@ -756,8 +756,8 @@ void main() {
         ),
         0.5,
       );
-      expect(lerped.extension<MyThemeExtensionA>()!.color1, Colors.black); // Not lerped
-      expect(lerped.extension<MyThemeExtensionA>()!.color2, Colors.amber); // Not lerped
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, isSameColorAs(Colors.black)); // Not lerped
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, isSameColorAs(Colors.amber)); // Not lerped
       expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 75));
 
       // Missing from 1st ThemeData
@@ -775,8 +775,8 @@ void main() {
         ),
         0.5,
       );
-      expect(lerped.extension<MyThemeExtensionA>()!.color1, const Color(0xff7f7f7f));
-      expect(lerped.extension<MyThemeExtensionA>()!.color2, const Color(0xff90ab7d));
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, isSameColorAs(const Color(0xff7f7f7f)));
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, isSameColorAs(const Color(0xff90ab7d)));
       expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 100)); // Not lerped
     });
 

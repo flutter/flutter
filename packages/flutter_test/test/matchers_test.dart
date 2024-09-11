@@ -194,6 +194,26 @@ void main() {
     );
   });
 
+  test('equalsIgnoringHashCodes - wrong line', () {
+    TestFailure? failure;
+    try {
+      expect(
+        '1\n2\n3\n4\n5\n6\n7\n8\n9\n10',
+        equalsIgnoringHashCodes('1\n2\n3\n4\n5\n6\na\n8\n9\n10'),
+      );
+    } on TestFailure catch (e) {
+      failure = e;
+    }
+
+    expect(failure, isNotNull);
+    if (failure != null) {
+      final String? message = failure.message;
+      expect(message, contains('Lines 7 differed'));
+      expect(message, contains("'a'"));
+      expect(message, contains("'7'"));
+    }
+  });
+
   test('moreOrLessEquals', () {
     expect(0.0, moreOrLessEquals(1e-11));
     expect(1e-11, moreOrLessEquals(0.0));
@@ -356,6 +376,16 @@ void main() {
     expect(
       const _CustomColor(0xFF123456),
       isSameColorAs(const _CustomColor(0xFF123456, isEqual: false)),
+    );
+
+    expect(
+      const Color(0x00000000),
+      isNot(isSameColorAs(const Color(0x00000002))),
+    );
+
+    expect(
+      const Color(0x00000000),
+      isSameColorAs(const Color(0x00000002), threshold: 0.008),
     );
   });
 
