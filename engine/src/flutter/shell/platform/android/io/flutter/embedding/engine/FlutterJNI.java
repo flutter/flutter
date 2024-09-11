@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
+import com.getkeepsafe.relinker.ReLinker;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine.EngineLifecycleListener;
 import io.flutter.embedding.engine.dart.PlatformMessageHandler;
@@ -139,12 +140,11 @@ public class FlutterJNI {
    *
    * <p>This method should only be called once across all FlutterJNI instances.
    */
-  public void loadLibrary() {
+  public void loadLibrary(Context context) {
     if (FlutterJNI.loadLibraryCalled) {
       Log.w(TAG, "FlutterJNI.loadLibrary called more than once");
     }
-
-    System.loadLibrary("flutter");
+    ReLinker.loadLibrary(context, "flutter");
     FlutterJNI.loadLibraryCalled = true;
   }
 

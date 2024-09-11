@@ -182,7 +182,7 @@ public class FlutterLoader {
                 ResourceExtractor resourceExtractor = initResources(appContext);
 
                 try {
-                  flutterJNI.loadLibrary();
+                  flutterJNI.loadLibrary(appContext);
                 } catch (UnsatisfiedLinkError unsatisfiedLinkError) {
                   String couldntFindVersion = "couldn't find \"libflutter.so\"";
                   String notFoundVersion = "dlopen failed: library \"libflutter.so\" not found";
