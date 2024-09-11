@@ -56,7 +56,7 @@ void main() {
     );
 
     expect(side1.toString(), equals('BorderSide'));
-    expect(side2.toString(), equals('BorderSide(color: Color(0xff00ffff), width: 2.0)'));
+    expect(side2.toString(), equals('BorderSide(color: ${const Color(0xff00ffff)}, width: 2.0)'));
   });
 
   test('Border control test', () {
@@ -156,8 +156,8 @@ void main() {
   });
 
   test('BoxShadow toString test', () {
-    expect(const BoxShadow(blurRadius: 4.0).toString(), equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0, BlurStyle.normal)'));
-    expect(const BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.solid).toString(), equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0, BlurStyle.solid)'));
+    expect(const BoxShadow(blurRadius: 4.0).toString(), equals('BoxShadow(${const Color(0xff000000)}, Offset(0.0, 0.0), 4.0, 0.0, BlurStyle.normal)'));
+    expect(const BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.solid).toString(), equals('BoxShadow(${const Color(0xff000000)}, Offset(0.0, 0.0), 4.0, 0.0, BlurStyle.solid)'));
   });
 
   testWidgets('BoxShadow BoxStyle.solid', (WidgetTester tester) async {

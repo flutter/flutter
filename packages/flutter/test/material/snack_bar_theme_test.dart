@@ -82,17 +82,17 @@ void main() {
         .toList();
 
     expect(description, <String>[
-      'backgroundColor: Color(0xffffffff)',
-      'actionTextColor: Color(0xff0000aa)',
-      'disabledActionTextColor: Color(0xff00aa00)',
-      'contentTextStyle: TextStyle(inherit: true, color: Color(0xff123456))',
+      'backgroundColor: ${const Color(0xffffffff)}',
+      'actionTextColor: ${const Color(0xff0000aa)}',
+      'disabledActionTextColor: ${const Color(0xff00aa00)}',
+      'contentTextStyle: TextStyle(inherit: true, color: ${const Color(0xff123456)})',
       'elevation: 2.0',
       'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
       'behavior: SnackBarBehavior.floating',
       'width: 400.0',
       'insetPadding: EdgeInsets.all(10.0)',
       'showCloseIcon: false',
-      'closeIconColor: Color(0xff0000aa)',
+      'closeIconColor: ${const Color(0xff0000aa)}',
       'actionOverflowThreshold: 0.5',
       'dismissDirection: DismissDirection.down',
     ]);
@@ -127,7 +127,7 @@ void main() {
     final RenderParagraph content = _getSnackBarTextRenderObject(tester, text);
 
     expect(content.text.style, Typography.material2018().white.titleMedium);
-    expect(material.color, const Color(0xFF333333));
+    expect(material.color, isSameColorAs(const Color(0xFF333333)));
     expect(material.elevation, 6.0);
     expect(material.shape, null);
   });

@@ -1618,10 +1618,10 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final bool cursorOpacityAnimates;
 
-  ///{@macro flutter.rendering.RenderEditable.cursorOffset}
+  /// {@macro flutter.rendering.RenderEditable.cursorOffset}
   final Offset? cursorOffset;
 
-  ///{@macro flutter.rendering.RenderEditable.paintCursorAboveText}
+  /// {@macro flutter.rendering.RenderEditable.paintCursorAboveText}
   final bool paintCursorAboveText;
 
   /// Controls how tall the selection highlight boxes are computed to be.
@@ -1902,10 +1902,10 @@ class EditableText extends StatefulWidget {
   /// The [TextSelectionToolbarLayoutDelegate] class may be particularly useful
   /// in honoring the preferred anchor positions.
   ///
-  /// For backwards compatibility, when [selectionControls] is set to an object
-  /// that does not mix in [TextSelectionHandleControls], [contextMenuBuilder]
-  /// is ignored and the [TextSelectionControls.buildToolbar] method is used
-  /// instead.
+  /// For backwards compatibility, when [EditableText.selectionControls] is set
+  /// to an object that does not mix in [TextSelectionHandleControls],
+  /// [contextMenuBuilder] is ignored and the
+  /// [TextSelectionControls.buildToolbar] method is used instead.
   ///
   /// {@tool dartpad}
   /// This example shows how to customize the menu, in this case by keeping the

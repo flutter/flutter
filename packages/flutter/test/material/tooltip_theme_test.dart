@@ -87,7 +87,7 @@ void main() {
       'vertical offset: 10.0',
       'position: above',
       'semantics: excluded',
-      'decoration: BoxDecoration(color: Color(0xffffffff))',
+      'decoration: BoxDecoration(color: ${const Color(0xffffffff)})',
       'textStyle: TextStyle(inherit: true, decoration: TextDecoration.underline)',
       'textAlign: TextAlign.center',
       'wait duration: $wait',
