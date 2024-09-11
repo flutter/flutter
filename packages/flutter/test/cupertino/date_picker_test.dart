@@ -2416,7 +2416,7 @@ void main() {
     expect(find.byType(CupertinoPickerDefaultSelectionOverlay), findsExactly(4));
   });
 
-  testWidgets('CupertinoDatePicker getColumnWidth', (WidgetTester tester) async {
+  testWidgets('CupertinoDatePicker column width accommodates widest text', (WidgetTester tester) async {
     const List<String> testWords = <String>[
       'aaaaaii',  // Narrow characters - 7 characters
       'WWWWWW',   // Wide characters - 6 characters
