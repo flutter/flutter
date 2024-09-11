@@ -1261,7 +1261,7 @@ void main() {
 
     expect(element, hasAGoodToStringDeep);
     expect(
-      element.toStringDeep(),
+      element.toStringDeep(wrapWidth: 200),
       equalsIgnoringHashCodes(
         'Column-[GlobalKey#00000](direction: vertical, mainAxisAlignment: start, crossAxisAlignment: center, renderObject: RenderFlex#00000)\n'
         '├Container\n'
@@ -1270,7 +1270,7 @@ void main() {
         '├Container-[GlobalKey#00000]\n'
         '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
         '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
-        '├ColoredBox(color: MaterialColor(primary value: Color(0xff4caf50)), renderObject: _RenderColoredBox#00000 relayoutBoundary=up1)\n'
+        '├ColoredBox(color: MaterialColor(primary value: ${const Color(0xff4caf50)}), renderObject: _RenderColoredBox#00000 relayoutBoundary=up1)\n'
         '│└Container\n'
         '│ └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up2)\n'
         '│  └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up3)\n'
