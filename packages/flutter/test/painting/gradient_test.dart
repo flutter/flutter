@@ -457,7 +457,7 @@ void main() {
         Color(0xAF777777),
         Color(0x44444444),
       ],
-      transform: GradientRotation(1);
+      transform: GradientRotation(1),
     );
     final LinearGradient actual = testGradient.withOpacity(0.5);
 
@@ -469,7 +469,7 @@ void main() {
         Color(0x80777777),
         Color(0x80444444),
       ],
-      transform: GradientRotation(1);
+      transform: GradientRotation(1),
     ),);
   });
 
