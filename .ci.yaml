@@ -446,7 +446,6 @@ targets:
       - .ci.yaml
 
   - name: Linux build_tests_1_5
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
