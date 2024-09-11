@@ -382,7 +382,7 @@ String _zipAndStoreFailedTestResults({
   required io.Directory resultBundle,
   required String storePath,
 }) {
-  final outputPath = path.join(storePath, '$iosEngineVariant.zip');
+  final outputPath = path.join(storePath, '${iosEngineVariant.replaceAll('/', '_')}.zip');
   final result = io.Process.runSync(
     'zip',
     [
