@@ -5004,6 +5004,7 @@ targets:
       task_name: platform_channel_sample_test_ios
 
   - name: Mac_ios platform_channel_sample_test_swift
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/154988
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
