@@ -2336,6 +2336,7 @@ class _LoggingTestFocusNode extends FocusNode {
     String prefixLineOne = '',
     String? prefixOtherLines,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
+    int wrapWidth = 65,
   }) {
     throw StateError("Shouldn't call toStringDeep here");
   }

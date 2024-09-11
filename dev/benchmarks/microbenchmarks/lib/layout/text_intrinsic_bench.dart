@@ -20,7 +20,7 @@ final Widget intrinsicTextHeight = Directionality(
   ),
 );
 
-Future<void> main() async {
+Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
   // We control the framePolicy below to prevent us from scheduling frames in

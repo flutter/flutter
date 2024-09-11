@@ -114,18 +114,18 @@ void main() {
         .toList();
 
     expect(description, <String>[
-      'color: Color(0xfffffff1)',
+      'color: ${const Color(0xfffffff1)}',
       'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
       'menuPadding: EdgeInsets(0.0, 12.0, 0.0, 12.0)',
       'elevation: 2.0',
-      'shadowColor: Color(0xfffffff2)',
-      'surfaceTintColor: Color(0xfffffff3)',
-      'text style: TextStyle(inherit: true, color: Color(0xfffffff4))',
+      'shadowColor: ${const Color(0xfffffff2)}',
+      'surfaceTintColor: ${const Color(0xfffffff3)}',
+      'text style: TextStyle(inherit: true, color: ${const Color(0xfffffff4)})',
       "labelTextStyle: Instance of '_WidgetStatePropertyWith<TextStyle?>'",
       'enableFeedback: false',
       'mouseCursor: WidgetStateMouseCursor(clickable)',
       'position: over',
-      'iconColor: Color(0xfffffff8)',
+      'iconColor: ${const Color(0xfffffff8)}',
       'iconSize: 31.0'
     ]);
   });

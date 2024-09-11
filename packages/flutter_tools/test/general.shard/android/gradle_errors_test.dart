@@ -43,7 +43,7 @@ void main() {
           transformInputIssueHandler,
           lockFileDepMissingHandler,
           minCompileSdkVersionHandler,
-          jvm11RequiredHandler,
+          incompatibleJavaAndAgpVersionsHandler,
           outdatedGradleHandler,
           sslExceptionHandler,
           zipExceptionHandler,
@@ -983,44 +983,40 @@ Execution failed for task ':app:checkDebugAarMetadata'.
     });
   });
 
-  group('Java 11 requirement', () {
-    testWithoutContext('pattern', () {
-      expect(
-        jvm11RequiredHandler.test('''
+  group('incompatible java and android gradle plugin versions error', () {
+
+    const String errorMessage = '''
 * What went wrong:
-A problem occurred evaluating project ':flutter'.
-> Failed to apply plugin 'com.android.internal.library'.
-   > Android Gradle plugin requires Java 11 to run. You are currently using Java 1.8.
-     You can try some of the following options:
+An exception occurred applying plugin request [id: 'com.android.application']
+> Failed to apply plugin 'com.android.internal.application'.
+   > Android Gradle plugin requires Java 17 to run. You are currently using Java 11.
+      You can try some of the following options:
        - changing the IDE settings.
        - changing the JAVA_HOME environment variable.
-       - changing `org.gradle.java.home` in `gradle.properties`.'''
-        ),
+       - changing `org.gradle.java.home` in `gradle.properties`.
+''';
+
+    testWithoutContext('pattern', () {
+      expect(
+        incompatibleJavaAndAgpVersionsHandler.test(errorMessage),
         isTrue,
       );
     });
 
     testUsingContext('suggestion', () async {
-      await jvm11RequiredHandler.handler(
-        project: FakeFlutterProject(),
+      await incompatibleJavaAndAgpVersionsHandler.handler(
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
-        line: '',
       );
 
-      expect(
-        testLogger.statusText,
-        contains(
-          '\n'
-          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
-          '│ [!] You need Java 11 or higher to build your app with this version of Gradle. │\n'
-          '│                                                                               │\n'
-          '│ To get Java 11, update to the latest version of Android Studio on             │\n'
-          '│ https://developer.android.com/studio/install.                                 │\n'
-          '│                                                                               │\n'
-          '│ To check the Java version used by Flutter, run `flutter doctor -v`.           │\n'
-          '└───────────────────────────────────────────────────────────────────────────────┘\n'
-        )
-      );
+      // Ensure the error notes the required Java version, the Java version currently used,
+      // the android studio and android sdk installation link, the flutter command to set
+      // the Java version Flutter uses, and the flutter doctor command.
+      expect(testLogger.statusText, contains('Android Gradle plugin requires Java 17 to run. You are currently using Java 11.'));
+      expect(testLogger.statusText, contains('https://developer.android.com/studio/install'));
+      expect(testLogger.statusText, contains('`flutter config --jdk-dir=“</path/to/jdk>“`'));
+      expect(testLogger.statusText, contains('`flutter doctor --verbose`'));
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),

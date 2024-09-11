@@ -920,6 +920,7 @@ plugins {
             <String>[
               'applinks:example.com',
               'applinks:example2.com',
+              'applinks:example3.com?mode=developer',
             ],
           );
           final String outputFilePath = await project.ios.outputsUniversalLinkSettings(
@@ -935,6 +936,7 @@ plugins {
               <String>[
                 'example.com',
                 'example2.com',
+                'example3.com',
               ],
             ),
           );

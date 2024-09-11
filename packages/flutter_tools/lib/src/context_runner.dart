@@ -214,6 +214,7 @@ Future<T> runInContext<T>(
         fuchsiaSdk: globals.fuchsiaSdk!,
         operatingSystemUtils: globals.os,
         customDevicesConfig: globals.customDevicesConfig,
+        nativeAssetsBuilder: globals.nativeAssetsBuilder,
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,

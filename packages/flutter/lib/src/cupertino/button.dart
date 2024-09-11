@@ -80,6 +80,7 @@ class CupertinoButton extends StatefulWidget {
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
+    this.onLongPress,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        _style = _CupertinoButtonStyle.plain;
@@ -108,6 +109,7 @@ class CupertinoButton extends StatefulWidget {
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
+    this.onLongPress,
     required this.onPressed,
   }) : _style = _CupertinoButtonStyle.tinted;
 
@@ -131,6 +133,7 @@ class CupertinoButton extends StatefulWidget {
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
+    this.onLongPress,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        color = null,
@@ -164,8 +167,11 @@ class CupertinoButton extends StatefulWidget {
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
-  /// If this is set to null, the button will be disabled.
+  /// If [onPressed] and [onLongPress] callbacks are null, then the button will be disabled.
   final VoidCallback? onPressed;
+
+  /// If [onPressed] and [onLongPress] callbacks are null, then the button will be disabled.
+  final VoidCallback? onLongPress;
 
   /// Minimum size of the button.
   ///
@@ -223,8 +229,8 @@ class CupertinoButton extends StatefulWidget {
   final _CupertinoButtonStyle _style;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
-  /// enable a button, set its [onPressed] property to a non-null value.
-  bool get enabled => onPressed != null;
+  /// enable a button, set [onPressed] or [onLongPress] to a non-null value.
+  bool get enabled => onPressed != null || onLongPress != null;
 
   @override
   State<CupertinoButton> createState() => _CupertinoButtonState();
@@ -392,6 +398,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
           onTapUp: enabled ? _handleTapUp : null,
           onTapCancel: enabled ? _handleTapCancel : null,
           onTap: widget.onPressed,
+          onLongPress: widget.onLongPress,
           child: Semantics(
             button: true,
             child: ConstrainedBox(
