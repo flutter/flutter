@@ -654,4 +654,67 @@ void main() {
     final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
     expect(textField.enableIMEPersonalizedLearning, false);
   });
+
+  testWidgets('Prefix icon and placeholder fade while resizing on scroll', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverResizingHeader(
+                child: CupertinoSearchTextField(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder searchTextFieldFinder = find.byType(CupertinoSearchTextField);
+    final double intrinsicHeight = tester.getSize(searchTextFieldFinder).height;
+    expect(searchTextFieldFinder, findsOneWidget);
+
+    final Finder prefixIconFinder = find.descendant(
+      of: searchTextFieldFinder,
+      matching: find.byType(IconTheme),
+    );
+    final Finder placeholderFinder = find.descendant(
+      of: searchTextFieldFinder,
+      matching: find.text('Search'),
+    );
+    final double initialOpacity = tester.widget<Opacity>(
+      find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity)),
+    ).opacity;
+
+    // Initially, the prefix icon and placeholder text are fully opaque.
+    expect(
+      tester.widget<Opacity>(
+        find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity)),
+      ).opacity,
+      equals(initialOpacity),
+    );
+    expect(
+      tester.widget<Text>(placeholderFinder).style?.color?.a,
+      equals(initialOpacity),
+    );
+
+    // Scroll until the search text field starts resizing.
+    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
+    await scrollGesture.moveBy(Offset(0, -0.5 * intrinsicHeight));
+    await tester.pumpAndSettle();
+    await scrollGesture.up();
+    await tester.pumpAndSettle();
+
+    // The prefix icon and placeholder text start to fade.
+    expect(
+      tester.widget<Opacity>(
+        find.ancestor(of: prefixIconFinder,matching: find.byType(Opacity)),
+      ).opacity,
+      lessThan(initialOpacity),
+    );
+    expect(
+      tester.widget<Text>(placeholderFinder).style?.color?.a,
+      lessThan(initialOpacity),
+    );
+  }, variant: TargetPlatformVariant.mobile());
 }

@@ -15,6 +15,8 @@ export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 
 // The fraction of the height of the search text field after which its contents
 // completely fade out when resized on scroll.
+//
+// Eyeballed on an iPhone 15 simulator running iOS 17.5.
 const double _kMinHeightBeforeTotalTransparency = 4 / 5;
 
 /// A [CupertinoTextField] that mimics the look and behavior of UIKit's
@@ -444,7 +446,6 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   }
 
   double _calculateScrollOpacity(double currentHeight) {
-    // Eyeballed on an iPhone 15 simulator running iOS 17.5.
     final double thresholdHeight = _maxHeight * _kMinHeightBeforeTotalTransparency;
     if (currentHeight >= _maxHeight) {
       return 1.0;
@@ -483,10 +484,10 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       size: scaledIconSize,
     );
 
-    EdgeInsetsGeometry? padding;
+    // Animate the top padding so that the placeholder and editable text are
+    // moved upwards when the search text field is resized on scroll.
     final EdgeInsets currentInsets = widget.padding.resolve(Directionality.of(context));
-
-    padding = EdgeInsetsGeometry.lerp(
+    final EdgeInsetsGeometry? padding = EdgeInsetsGeometry.lerp(
       widget.padding,
       widget.padding.resolve(Directionality.of(context)).copyWith(top: currentInsets.top / 2),
       1.0 - _animationController.value,
