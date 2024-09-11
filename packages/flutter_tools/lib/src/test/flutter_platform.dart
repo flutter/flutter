@@ -11,6 +11,7 @@ import 'package:package_config/package_config.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 
+import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -530,7 +531,18 @@ class FlutterPlatform extends PlatformPlugin {
       globals.printTrace('test $ourTestCount: starting test device');
       final TestDevice testDevice = _createTestDevice(ourTestCount);
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Run);
-      final Future<StreamChannel<String>> remoteChannelFuture = testDevice.start(mainDart!);
+      final Completer<StreamChannel<String>> remoteChannelCompleter = Completer<StreamChannel<String>>();
+      unawaited(asyncGuard(
+        () async {
+          final StreamChannel<String> channel = await testDevice.start(mainDart!);
+          remoteChannelCompleter.complete(channel);
+        },
+        onError: (Object err, StackTrace stackTrace) {
+          print('in onError! $err\n$stackTrace');
+          remoteChannelCompleter.completeError(err, stackTrace);
+        },
+      ));
+      print('right after async guard!'); // TODO
       finalizers.add(() async {
         globals.printTrace('test $ourTestCount: ensuring test device is terminated.');
         await testDevice.kill();
@@ -545,7 +557,19 @@ class FlutterPlatform extends PlatformPlugin {
       await Future.any<void>(<Future<void>>[
         testDevice.finished,
         () async {
-          final Uri? processVmServiceUri = await testDevice.vmServiceUri;
+          print('right before await!');
+          // These must be await-ed together, and if the first errors the second will never complete
+          final [Object? first, Object? second] = await Future.wait<Object?>(
+            <Future<Object?>>[remoteChannelCompleter.future, testDevice.vmServiceUri],
+            eagerError: true,
+          );
+          final StreamChannel<String> remoteChannel = first! as StreamChannel<String>;
+          final Uri? processVmServiceUri = second as Uri?;
+          //final (StreamChannel<String> remoteChannel, Uri? processVmServiceUri) = await (
+          //  remoteChannelCompleter.future,
+          //  testDevice.vmServiceUri,
+          //).wait;
+          //final Uri? processVmServiceUri = await testDevice.vmServiceUri;
           if (processVmServiceUri != null) {
             globals.printTrace('test $ourTestCount: VM Service uri is available at $processVmServiceUri');
           } else {
@@ -553,7 +577,6 @@ class FlutterPlatform extends PlatformPlugin {
           }
           watcher?.handleStartedDevice(processVmServiceUri);
 
-          final StreamChannel<String> remoteChannel = await remoteChannelFuture;
           globals.printTrace('test $ourTestCount: connected to test device, now awaiting test result');
 
           await _pipeHarnessToRemote(
@@ -569,7 +592,8 @@ class FlutterPlatform extends PlatformPlugin {
           testTimeRecorder?.stop(TestTimePhases.WatcherFinishedTest, watchTestTimeRecorderStopwatch!);
         }()
       ]);
-    } on Exception catch (error, stackTrace) {
+    } on Object catch (error, stackTrace) { // TODO Don't catch error!
+      print('caught!'); // TODO
       Object reportedError = error;
       StackTrace reportedStackTrace = stackTrace;
       if (error is TestDeviceException) {
