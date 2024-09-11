@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "impeller/geometry/matrix.h"
+#include "impeller/geometry/point.h"
 #include "impeller/typographer/font.h"
 #include "impeller/typographer/glyph.h"
 
