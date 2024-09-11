@@ -5103,6 +5103,7 @@ targets:
       task_name: wide_gamut_ios
 
   - name: Mac_x64_ios hot_mode_dev_cycle_ios__benchmark
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/155008
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
