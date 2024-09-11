@@ -192,7 +192,10 @@ static void quit_application() {
   // Break them so the application object can cleanup.
   // See https://gitlab.gnome.org/GNOME/gtk/-/issues/6190
   if (GTK_IS_APPLICATION(app)) {
-    GList* windows = gtk_application_get_windows(GTK_APPLICATION(app));
+    // List is copied as it will be modified as windows are disconnected from
+    // the application.
+    g_autoptr(GList) windows =
+        g_list_copy(gtk_application_get_windows(GTK_APPLICATION(app)));
     for (GList* link = windows; link != NULL; link = link->next) {
       GtkWidget* window = GTK_WIDGET(link->data);
       gtk_window_set_application(GTK_WINDOW(window), NULL);
