@@ -893,14 +893,14 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   @override
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
     final SelectionResult result = _handleSelectMultiSelectableBoundary(event);
-    _updateInternalSelectionStateForBoundaryEvents();
+    _didReceiveSelectionBoundaryEvents();
     return result;
   }
 
   @override
   SelectionResult handleSelectLine(SelectLineSelectionEvent event) {
     final SelectionResult result = _handleSelectMultiSelectableBoundary(event);
-    _updateInternalSelectionStateForBoundaryEvents();
+    _didReceiveSelectionBoundaryEvents();
     return result;
   }
 
@@ -1293,7 +1293,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   @override
   SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
     final SelectionResult result = super.handleSelectAll(event);
-    _updateInternalSelectionStateForBoundaryEvents();
+    _didReceiveSelectionBoundaryEvents();
     return result;
   }
 
@@ -1302,11 +1302,11 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   @override
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
     final SelectionResult result = super.handleSelectWord(event);
-    _updateInternalSelectionStateForBoundaryEvents();
+    _didReceiveSelectionBoundaryEvents();
     return result;
   }
 
-  void _updateInternalSelectionStateForBoundaryEvents() {
+  void _didReceiveSelectionBoundaryEvents() {
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
       return;
     }

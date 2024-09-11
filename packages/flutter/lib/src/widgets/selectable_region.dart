@@ -1889,7 +1889,7 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
   @override
   SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
     final SelectionResult result = super.handleSelectAll(event);
-    _updateInternalSelectionStateForBoundaryEvents();
+    _didReceiveSelectionBoundaryEvents();
     return result;
   }
 
@@ -1898,7 +1898,7 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
   @override
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
     final SelectionResult result = super.handleSelectWord(event);
-    _updateInternalSelectionStateForBoundaryEvents();
+    _didReceiveSelectionBoundaryEvents();
     return result;
   }
 
@@ -1907,7 +1907,7 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
   @override
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
     final SelectionResult result = super.handleSelectParagraph(event);
-    _updateInternalSelectionStateForBoundaryEvents();
+    _didReceiveSelectionBoundaryEvents();
     return result;
   }
 
@@ -1916,11 +1916,11 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
   @override
   SelectionResult handleSelectLine(SelectLineSelectionEvent event) {
     final SelectionResult result = super.handleSelectLine(event);
-    _updateInternalSelectionStateForBoundaryEvents();
+    _didReceiveSelectionBoundaryEvents();
     return result;
   }
 
-  void _updateInternalSelectionStateForBoundaryEvents() {
+  void _didReceiveSelectionBoundaryEvents() {
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
       return;
     }
