@@ -555,13 +555,15 @@ class FlutterPlatform extends PlatformPlugin {
       await Future.any<void>(<Future<void>>[
         testDevice.finished,
         () async {
-          // These must be await-ed together, and if the first errors the second will never complete
-          final [Object? first, Object? second] = await Future.wait<Object?>(
-            <Future<Object?>>[remoteChannelCompleter.future, testDevice.vmServiceUri],
-            eagerError: true,
-          );
-          final StreamChannel<String> remoteChannel = first! as StreamChannel<String>;
-          final Uri? processVmServiceUri = second as Uri?;
+          final StreamChannel<String> remoteChannel = await remoteChannelCompleter.future;
+          final Uri? processVmServiceUri = await testDevice.vmServiceUri;
+          //// These must be await-ed together, and if the first errors the second will never complete
+          //final [Object? first, Object? second] = await Future.wait<Object?>(
+          //  <Future<Object?>>[remoteChannelCompleter.future, testDevice.vmServiceUri],
+          //  eagerError: true,
+          //);
+          //final StreamChannel<String> remoteChannel = first! as StreamChannel<String>;
+          //final Uri? processVmServiceUri = second as Uri?;
           if (processVmServiceUri != null) {
             globals.printTrace('test $ourTestCount: VM Service uri is available at $processVmServiceUri');
           } else {
