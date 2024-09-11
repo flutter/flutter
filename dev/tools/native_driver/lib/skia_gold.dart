@@ -29,7 +29,7 @@ const String _kGoldctlPresubmitKey = 'GOLD_TRYJOB';
 ///
 /// If the `GOLD_TRYJOB` environment variable is set, the test will be run in
 /// presubmit mode; that is, the test will not fail if the comparison fails.
-/// See <https://github.com/flutter/flutter/blob/master/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md>
+/// See <https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md>
 /// for more information.
 ///
 /// May optionally provide a [namePrefix] to be used when uploading images.
