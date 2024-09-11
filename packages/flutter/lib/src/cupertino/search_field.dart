@@ -13,6 +13,10 @@ import 'text_field.dart';
 
 export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 
+// The fraction of the height of the search text field after which its contents
+// completely fade out when resized on scroll.
+const double _kMinHeightBeforeTotalTransparency = 4 / 5;
+
 /// A [CupertinoTextField] that mimics the look and behavior of UIKit's
 /// `UISearchTextField`.
 ///
@@ -435,20 +439,20 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     final double currentHeight = renderBox?.size.height ?? 0.0;
 
     setState(() {
-      _animationController.value = _calculateScrollOpacity(currentHeight, _maxHeight);
+      _animationController.value = _calculateScrollOpacity(currentHeight);
     });
   }
 
-  double _calculateScrollOpacity(double currentHeight, double maxHeight) {
+  double _calculateScrollOpacity(double currentHeight) {
     // Eyeballed on an iPhone 15 simulator running iOS 17.5.
-    final double thresholdHeight = maxHeight * 8 / 9;
-    if (currentHeight >= maxHeight) {
+    final double thresholdHeight = _maxHeight * _kMinHeightBeforeTotalTransparency;
+    if (currentHeight >= _maxHeight) {
       return 1.0;
     } else if (currentHeight <= thresholdHeight) {
       return 0.0;
     } else {
       // Calculate a value between 0 and 1 based on the current height.
-      final double range = maxHeight - thresholdHeight;
+      final double range = _maxHeight - thresholdHeight;
       final double progress = (currentHeight - thresholdHeight) / range;
       return progress;
     }
@@ -477,6 +481,15 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     final IconThemeData iconThemeData = IconThemeData(
       color: CupertinoDynamicColor.resolve(widget.itemColor, context),
       size: scaledIconSize,
+    );
+
+    EdgeInsetsGeometry? padding;
+    final EdgeInsets currentInsets = widget.padding.resolve(Directionality.of(context));
+
+    padding = EdgeInsetsGeometry.lerp(
+      widget.padding,
+      widget.padding.resolve(Directionality.of(context)).copyWith(top: currentInsets.top / 2),
+      1.0 - _animationController.value,
     );
 
     final Widget prefix = Opacity(
@@ -518,7 +531,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       suffixMode: widget.suffixMode,
       placeholder: placeholder,
       placeholderStyle: placeholderStyle,
-      padding: widget.padding,
+      padding: padding ?? widget.padding,
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
       focusNode: widget.focusNode,
