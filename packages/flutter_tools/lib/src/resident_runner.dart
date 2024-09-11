@@ -417,7 +417,15 @@ class FlutterDevice {
   }
 
   Future<void> initLogReader() async {
-    final vm_service.VM vm = await vmService!.service.getVM();
+    final vm_service.VM? vm = await vmService!.getVmGuarded();
+    if (vm == null) {
+      globals.printError(
+        'Unable to initiate log reader for device'
+        '${device?.name}, because the Flutter VM service connection '
+        'is closed.',
+      );
+      return;
+    }
     final DeviceLogReader logReader = await device!.getLogReader(app: package);
     logReader.appPid = vm.pid;
   }
