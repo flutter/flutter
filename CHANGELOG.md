@@ -27,7 +27,16 @@ INTERNAL NOTE
 ## Flutter 3.24 Changes
 
 ### [3.24.3](https://github.com/flutter/flutter/releases/tag/3.24.3)
-- [Dart 3.5.3 Changelog](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md)
+- [dart 3.5.3 changelog](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md#353---2024-09-11)
+- [flutter/154275](https://github.com/flutter/flutter/issues/154275) - [Android] Fixes performance issues on Android caused by engine threads not matching the core count.
+- [flutter/154276](https://github.com/flutter/flutter/issues/154276) - [Impeller] Fixes an issue on iOS preventing mesh gradients from rendering correctly.
+- [flutter/154349](https://github.com/flutter/flutter/issues/154349) - [Wasm] Fixes an issue on web causing Platform Views to break when compiled to Wasm.
+- [flutter/154564](https://github.com/flutter/flutter/issues/154564) - [Impeller][iOS] Fixes an issue when using Impeller on iOS when using backdrop filers on older iPads,causing the GPU to hand.
+- [flutter/154712](https://github.com/flutter/flutter/issues/154712) - [iOS] Fixes an issue on iOS causing video playback to flicker.
+- [flutter/154892](https://github.com/flutter/flutter/issues/154892) - [Impeller][iOS] Fixes an issue when using Impeller on iOS causing a memory leak when using Platform Views.
+- [flutter/154536](https://github.com/flutter/flutter/issues/154536) - [Tool] Fixes a CLI crash that occurs when shutting down after running a Flutter app on a browser.
+- [flutter/154720](https://github.com/flutter/flutter/pull/154720) - Fixes an issue with the `Drawer` widget, causing it to open or close incorrectly.
+- [flutter/154944](https://github.com/flutter/flutter/pull/154944) - [Tool] Fixes a Flutter tool crash that occurs when building Flutter modules for Android when using AGP 8.0+.
 
 ### [3.24.2](https://github.com/flutter/flutter/releases/tag/3.24.2)
 - [Dart 3.5.2 Changelog](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md#352---2024-08-28)
