@@ -671,40 +671,38 @@ class RefreshIndicatorState extends State<RefreshIndicator>
           child: SizeTransition(
             axisAlignment: _isIndicatorAtTop! ? 1.0 : -1.0,
             sizeFactor: _positionFactor, // This is what brings it down.
-            child: Container(
+            child: Padding(
               padding: _isIndicatorAtTop!
                   ? EdgeInsets.only(top: widget.displacement)
                   : EdgeInsets.only(bottom: widget.displacement),
-              alignment: _isIndicatorAtTop!
-                  ? Alignment.topCenter
-                  : Alignment.bottomCenter,
-              child: ScaleTransition(
-                scale: _scaleFactor,
-                child: AnimatedBuilder(
-                  animation: _positionController,
-                  builder: (BuildContext context, Widget? child) {
-                    final Widget materialIndicator = RefreshProgressIndicator(
-                      semanticsLabel: widget.semanticsLabel ??
-                        MaterialLocalizations.of(context)
-                          .refreshIndicatorSemanticLabel,
-                      semanticsValue: widget.semanticsValue,
-                      value: showIndeterminateIndicator ? null : _value.value,
-                      valueColor: _valueColor,
-                      backgroundColor: widget.backgroundColor,
-                      strokeWidth: widget.strokeWidth,
-                      elevation: widget.elevation,
-                    );
+              child: Align(
+                alignment: _isIndicatorAtTop!
+                    ? Alignment.topCenter
+                    : Alignment.bottomCenter,
+                child: ScaleTransition(
+                  scale: _scaleFactor,
+                  child: AnimatedBuilder(
+                    animation: _positionController,
+                    builder: (BuildContext context, Widget? child) {
+                      final Widget materialIndicator = RefreshProgressIndicator(
+                        semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
+                        semanticsValue: widget.semanticsValue,
+                        value: showIndeterminateIndicator ? null : _value.value,
+                        valueColor: _valueColor,
+                        backgroundColor: widget.backgroundColor,
+                        strokeWidth: widget.strokeWidth,
+                        elevation: widget.elevation,
+                      );
 
-                    final Widget cupertinoIndicator = CupertinoActivityIndicator(
-                      color: widget.color,
-                    );
+                      final Widget cupertinoIndicator = CupertinoActivityIndicator(
+                        color: widget.color,
+                      );
 
-                    switch (widget._indicatorType) {
-                      case _IndicatorType.material:
-                        return materialIndicator;
+                      switch (widget._indicatorType) {
+                        case _IndicatorType.material:
+                          return materialIndicator;
 
-                      case _IndicatorType.adaptive:
-                        {
+                        case _IndicatorType.adaptive:
                           final ThemeData theme = Theme.of(context);
                           switch (theme.platform) {
                             case TargetPlatform.android:
@@ -716,11 +714,12 @@ class RefreshIndicatorState extends State<RefreshIndicator>
                             case TargetPlatform.macOS:
                               return cupertinoIndicator;
                           }
-                        }
-                      case _IndicatorType.noSpinner:
-                        return Container();
-                    }
-                  },
+
+                        case _IndicatorType.noSpinner:
+                          return Container();
+                      }
+                    },
+                  ),
                 ),
               ),
             ),
