@@ -2417,11 +2417,10 @@ void main() {
 
   testWidgets('CupertinoDatePicker getColumnWidth', (WidgetTester tester) async {
     const List<String> testWords = <String>[
-      'aaaaaii',    // Narrow characters - 7 characters
-      'WWWWWW',    // Wide characters - 6 characters
+      'aaaaaii',  // Narrow characters - 7 characters
+      'WWWWWW',   // Wide characters - 6 characters
     ];
 
-    String largestWord = '';
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -2438,25 +2437,17 @@ void main() {
     // Use CupertinoTheme to get the text style used in the picker.
     final TextStyle textStyle = CupertinoTheme.of(context).textTheme.dateTimePickerTextStyle;
 
-    double getColumnWidth(String text) {
-      final TextPainter textPainter = TextPainter(
-        text: TextSpan(text: text, style: textStyle),
-        textDirection: TextDirection.ltr,
-      )..layout();
-      if (textPainter.size.width > textPainter.size.height) {
-        largestWord = text;
-      }
-      return textPainter.size.width;
-    }
+    // Calculate the largest width from testWords.
+    final double largestWidth = testWords
+        .map((String word) => getColumnWidth(word, textStyle))
+        .reduce((double a, double b) => a > b ? a : b);
 
-    final double largestWidth = testWords.map(getColumnWidth).reduce((double a, double b) => a > b ? a : b);
-
-    // Get the width of the largest word in the testWords list.
+    // Get the column width using CupertinoDatePicker method.
     final double testWidth = CupertinoDatePicker.getColumnWidth(texts: testWords, context: context);
 
-    // Ensure the largest width found is accurate.
+    // Ensure the largest width is accurately calculated.
     expect(largestWidth, greaterThanOrEqualTo(testWidth));
-    expect(largestWord, 'WWWWWW');
+    expect(testWords.firstWhere((String word) => getColumnWidth(word, textStyle) == largestWidth), 'aaaaaii');
   });
 }
 
@@ -2481,4 +2472,13 @@ Widget _buildPicker({
       }),
     ),
   );
+}
+
+double getColumnWidth(String text, TextStyle textStyle) {
+  final TextPainter textPainter = TextPainter(
+    text: TextSpan(text: text, style: textStyle),
+    textDirection: TextDirection.ltr,
+  )..layout();
+
+  return textPainter.size.width;
 }
