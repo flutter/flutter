@@ -555,21 +555,22 @@ class FlutterPlatform extends PlatformPlugin {
       await Future.any<void>(<Future<void>>[
         testDevice.finished,
         () async {
-          final StreamChannel<String> remoteChannel = await remoteChannelCompleter.future;
-          final Uri? processVmServiceUri = await testDevice.vmServiceUri;
-          //// These must be await-ed together, and if the first errors the second will never complete
-          //final [Object? first, Object? second] = await Future.wait<Object?>(
-          //  <Future<Object?>>[remoteChannelCompleter.future, testDevice.vmServiceUri],
-          //  eagerError: true,
-          //);
-          //final StreamChannel<String> remoteChannel = first! as StreamChannel<String>;
-          //final Uri? processVmServiceUri = second as Uri?;
-          if (processVmServiceUri != null) {
-            globals.printTrace('test $ourTestCount: VM Service uri is available at $processVmServiceUri');
-          } else {
-            globals.printTrace('test $ourTestCount: VM Service uri is not available');
-          }
-          watcher?.handleStartedDevice(processVmServiceUri);
+          // These must be await-ed together, and if the first errors the second will never complete
+          final [Object? first, Object? _] = await Future.wait<Object?>(
+            <Future<Object?>>[
+              remoteChannelCompleter.future,
+              testDevice.vmServiceUri.then<void>((Uri? processVmServiceUri) {
+                if (processVmServiceUri != null) {
+                  globals.printTrace('test $ourTestCount: VM Service uri is available at $processVmServiceUri');
+                } else {
+                  globals.printTrace('test $ourTestCount: VM Service uri is not available');
+                }
+                watcher?.handleStartedDevice(processVmServiceUri);
+              }),
+            ],
+            eagerError: true,
+          );
+          final StreamChannel<String> remoteChannel = first! as StreamChannel<String>;
 
           globals.printTrace('test $ourTestCount: connected to test device, now awaiting test result');
 

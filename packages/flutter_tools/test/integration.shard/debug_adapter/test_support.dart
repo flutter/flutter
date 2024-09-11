@@ -138,9 +138,7 @@ class DapTestSession {
   }
 
   static Future<DapTestSession> setUp({List<String>? additionalArgs}) async {
-    print('starting server...');
     final DapTestServer server = await _startServer(additionalArgs: additionalArgs);
-    print('connecting client...');
     final DapTestClient client = await DapTestClient.connect(
       server,
       captureVmServiceTraffic: verboseLogging,

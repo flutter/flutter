@@ -36,7 +36,6 @@ void main() {
 
   void standardTests({List<String>? toolArgs}) {
     test('can run in debug mode', () async {
-      print('pre collectTestOutput...');
       // Collect output and test events while running the script.
       final TestEvents outputEvents = await client.collectTestOutput(
         launch: () => client.launch(
@@ -45,7 +44,6 @@ void main() {
           toolArgs: toolArgs,
         ),
       );
-      print('post collectTestOutput...');
 
       // Check the printed output shows that the run finished, and it's exit
       // code (which is 1 due to the failing test).
