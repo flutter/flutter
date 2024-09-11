@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 void main() {
   test('Loading an asset that does not exist returns null', () async {
@@ -81,7 +81,7 @@ void main() {
     final List<int> bundledFontImage = await _createPictureFromFont('Roboto2');
     // Bundling fonts is disabled, so the font selected in both cases should be ahem.
     // Therefore each buffer will contain identical contents.
-    expect(ahemImage, notEquals(bundledFontImage));
+    expect(ahemImage, isNot(bundledFontImage));
   });
 }
 

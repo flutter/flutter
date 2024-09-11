@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 void main() {
   test('toImage succeeds', () async {

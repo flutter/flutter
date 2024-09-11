@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 /// Verifies Dart semantics governed by flags set by Flutter tooling.
 void main() {

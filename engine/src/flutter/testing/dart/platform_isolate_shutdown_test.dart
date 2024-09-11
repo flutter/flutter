@@ -7,7 +7,7 @@ import 'dart:ffi';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 void main() {
   test('PlatformIsolate runOnPlatformThread, cancels pending jobs if shutdown', () async {
