@@ -1430,10 +1430,10 @@ class FlutterPlugin implements Plugin<Project> {
                         }
                     }
                 }
-                // Copy the native assets created by build.dart and placed here by flutter assemble.
-                String nativeAssetsDir = "${project.buildDir}/../native_assets/android/jniLibs/lib/"
-                project.android.sourceSets.main.jniLibs.srcDir(nativeAssetsDir)
             }
+            // Copy the native assets created by build.dart and placed here by flutter assemble.
+            String nativeAssetsDir = "${project.buildDir}/../native_assets/android/jniLibs/lib/"
+            project.android.sourceSets.main.jniLibs.srcDir(nativeAssetsDir)
             configurePlugins(project)
             detectLowCompileSdkVersionOrNdkVersion()
             return
