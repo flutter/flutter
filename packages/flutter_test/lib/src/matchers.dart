@@ -5,6 +5,7 @@
 /// @docImport '_goldens_io.dart';
 library;
 
+import 'dart:convert' show LineSplitter;
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -1198,19 +1199,24 @@ class _HasOneLineDescription extends Matcher {
 }
 
 class _EqualsIgnoringHashCodes extends Matcher {
-  _EqualsIgnoringHashCodes(Object v) : _value = _normalize(v);
+  _EqualsIgnoringHashCodes(Object v)
+      : _value = _normalize(v),
+        _stringValue = v is String ? _normalizeString(v) : null;
 
-  final Object _value;
+  final Iterable<String> _value;
+  final String? _stringValue;
 
-  static final Object _mismatchedValueKey = Object();
+  static final Object _lineNumberValueKey = Object();
+  static final Object _expectedLineValueKey = Object();
+  static final Object _seenLineValueKey = Object();
 
   static String _normalizeString(String value) {
     return value.replaceAll(RegExp(r'#[\da-fA-F]{5}'), '#00000');
   }
 
-  static Object _normalize(Object value, {bool expected = true}) {
+  static Iterable<String> _normalize(Object value, {bool expected = true}) {
     if (value is String) {
-      return _normalizeString(value);
+      return LineSplitter.split(value).map<String>((dynamic item) => _normalizeString(item.toString()));
     }
     if (value is Iterable<String>) {
       return value.map<String>((dynamic item) => _normalizeString(item.toString()));
@@ -1222,20 +1228,33 @@ class _EqualsIgnoringHashCodes extends Matcher {
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
-    final Object normalized = _normalize(object as Object, expected: false);
-    if (!equals(_value).matches(normalized, matchState)) {
-      matchState[_mismatchedValueKey] = normalized;
-      return false;
+    final Iterable<String> normalized = _normalize(object as Object, expected: false);
+    final Iterator<String> expectedIt = _value.iterator;
+    final Iterator<String> seenIt = normalized.iterator;
+
+    int lineNumber = 1;
+
+    bool hasExpected = expectedIt.moveNext();
+    bool hasSeen = seenIt.moveNext();
+    while (hasExpected && hasSeen) {
+      if (!equals(expectedIt.current).matches(seenIt.current, matchState)) {
+        matchState[_lineNumberValueKey] = lineNumber;
+        matchState[_expectedLineValueKey] = expectedIt.current;
+        matchState[_seenLineValueKey] = seenIt.current;
+        return false;
+      }
+
+      lineNumber += 1;
+      hasExpected = expectedIt.moveNext();
+      hasSeen = seenIt.moveNext();
     }
-    return true;
+
+    return !hasExpected && !hasSeen;
   }
 
   @override
   Description describe(Description description) {
-    if (_value is String) {
-      return description.add('normalized value matches $_value');
-    }
-    return description.add('normalized value matches\n').addDescriptionOf(_value);
+    return description.add('normalized value matches\n').addDescriptionOf(_stringValue ?? _value);
   }
 
   @override
@@ -1245,16 +1264,17 @@ class _EqualsIgnoringHashCodes extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    if (matchState.containsKey(_mismatchedValueKey)) {
-      final Object actualValue = matchState[_mismatchedValueKey] as Object;
-      // Leading whitespace is added so that lines in the multiline
-      // description returned by addDescriptionOf are all indented equally
-      // which makes the output easier to read for this case.
-      return mismatchDescription
-          .add('was expected to be normalized value\n')
-          .addDescriptionOf(_value)
+    if (matchState.containsKey(_lineNumberValueKey) &&
+        matchState.containsKey(_expectedLineValueKey) &&
+        matchState.containsKey(_seenLineValueKey)) {
+      final int lineNumber = matchState[_lineNumberValueKey] as int;
+      if (lineNumber > 1) {
+        mismatchDescription = mismatchDescription
+          .add('Lines $lineNumber differed, expected: \n')
+          .addDescriptionOf(matchState[_expectedLineValueKey])
           .add('\nbut got\n')
-          .addDescriptionOf(actualValue);
+          .addDescriptionOf(matchState[_seenLineValueKey]);
+      }
     }
     return mismatchDescription;
   }
