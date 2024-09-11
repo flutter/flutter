@@ -268,8 +268,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "apple_signing", "version": "version:to_2025"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       os: Mac-13|Mac-14
       cpu: x86
@@ -286,8 +285,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "apple_signing", "version": "version:to_2025"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       os: Mac-13|Mac-14
       cpu: x86
@@ -304,8 +302,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "apple_signing", "version": "none"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       os: Mac-13|Mac-14
       cpu: arm64
