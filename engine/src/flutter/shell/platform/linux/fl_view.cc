@@ -40,6 +40,9 @@ struct _FlView {
   // Engine this view is showing.
   FlEngine* engine;
 
+  // Handler for engine restart signal.
+  guint on_pre_engine_restart_handler;
+
   // ID for this view.
   FlutterViewId view_id;
 
@@ -274,9 +277,7 @@ static void update_semantics_cb(FlEngine* engine,
 // This method should reset states to be as if the engine had just been started,
 // which usually indicates the user has requested a hot restart (Shift-R in the
 // Flutter CLI.)
-static void on_pre_engine_restart_cb(FlEngine* engine, gpointer user_data) {
-  FlView* self = FL_VIEW(user_data);
-
+static void on_pre_engine_restart_cb(FlView* self) {
   init_keyboard(self);
   init_scrolling(self);
 }
@@ -652,8 +653,12 @@ static void fl_view_dispose(GObject* object) {
   if (self->engine != nullptr) {
     fl_engine_set_update_semantics_handler(self->engine, nullptr, nullptr,
                                            nullptr);
-    fl_engine_set_on_pre_engine_restart_handler(self->engine, nullptr, nullptr,
-                                                nullptr);
+  }
+
+  if (self->on_pre_engine_restart_handler != 0) {
+    g_signal_handler_disconnect(self->engine,
+                                self->on_pre_engine_restart_handler);
+    self->on_pre_engine_restart_handler = 0;
   }
 
   g_clear_object(&self->engine);
@@ -784,8 +789,9 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
 
   fl_engine_set_update_semantics_handler(self->engine, update_semantics_cb,
                                          self, nullptr);
-  fl_engine_set_on_pre_engine_restart_handler(
-      self->engine, on_pre_engine_restart_cb, self, nullptr);
+  self->on_pre_engine_restart_handler =
+      g_signal_connect_swapped(engine, "on-pre-engine-restart",
+                               G_CALLBACK(on_pre_engine_restart_cb), self);
 
   return self;
 }
