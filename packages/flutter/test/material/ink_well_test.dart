@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/keyboard_key.g.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
@@ -2299,5 +2300,59 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     expect(controller.value.contains(MaterialState.pressed), isFalse);
 
     controller.dispose();
+  });
+
+  testWidgets('InkWell cannot be focused when focusable is false and canRequestFocus is true', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            focusNode: focusNode,
+            autofocus: true,
+            focusable: false,
+            onTap: () {},
+            child: const Text('Foo'),
+          ),
+        ),
+      ),
+    ));
+
+
+    // Simulate an Enter key event to attempt focus.
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+
+    // Check if the InkWell is not focused.
+    expect(focusNode.hasFocus, isFalse);
+  });
+
+  testWidgets('InkWell can be focused when focusable is true and canRequestFocus is true', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            focusNode: focusNode,
+            autofocus: true,
+            child: const Text('Foo'),
+            onTap: () {},
+          ),
+        ),
+      ),
+    ));
+
+    // Simulate an Enter key event to attempt focus.
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+
+    // Check if the InkWell is focused.
+    expect(focusNode.hasFocus, isTrue);
   });
 }

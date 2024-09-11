@@ -674,7 +674,7 @@ class InkResponse extends StatelessWidget {
       enableFeedback: enableFeedback,
       excludeFromSemantics: excludeFromSemantics,
       focusNode: focusNode,
-      focusable: focusable || canRequestFocus,
+      focusable: focusable && canRequestFocus,
       onFocusChange: onFocusChange,
       autofocus: autofocus,
       parentState: parentState,
