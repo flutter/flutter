@@ -89,6 +89,10 @@ void TextFrame::CollectUniqueFontGlyphPairs(
     Scalar scale,
     Point offset,
     const GlyphProperties& properties) const {
+  std::optional<GlyphProperties> lookup =
+      (properties.stroke || HasColor())
+          ? std::optional<GlyphProperties>(properties)
+          : std::nullopt;
   for (const TextRun& run : GetRuns()) {
     const Font& font = run.GetFont();
     auto rounded_scale =
@@ -98,7 +102,7 @@ void TextFrame::CollectUniqueFontGlyphPairs(
          run.GetGlyphPositions()) {
       Point subpixel = ComputeSubpixelPosition(
           glyph_position, font.GetAxisAlignment(), offset, scale);
-      set.emplace(glyph_position.glyph, subpixel, properties);
+      set.emplace(glyph_position.glyph, subpixel, lookup);
     }
   }
 }
