@@ -90,7 +90,7 @@ found in the LICENSE file. -->
 
   <title>Web Test</title>
   <!-- iOS meta tags & icons -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Web Test">
   <link rel="manifest" href="manifest.json">
@@ -180,7 +180,7 @@ found in the LICENSE file. -->
 
   <title>Integration test. App load with flutter.js and onEntrypointLoaded API</title>
   <!-- iOS meta tags & icons -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Web Test">
   <link rel="manifest" href="manifest.json">
@@ -212,7 +212,7 @@ found in the LICENSE file. -->
 
   <title>Web Test</title>
   <!-- iOS meta tags & icons -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Web Test">
   <link rel="manifest" href="manifest.json">
@@ -236,7 +236,7 @@ found in the LICENSE file. -->
 
   <title>Web Test</title>
   <!-- iOS meta tags & icons -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Web Test">
   <link rel="manifest" href="manifest.json">
