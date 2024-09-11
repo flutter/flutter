@@ -7,7 +7,7 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 import '../../lib/gpu/lib/gpu.dart' as gpu;
 import 'impeller_enabled.dart';

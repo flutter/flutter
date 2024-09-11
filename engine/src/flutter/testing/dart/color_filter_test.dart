@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 import 'impeller_enabled.dart';
 

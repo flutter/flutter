@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 void main() {
   test('Scene.toImageSync succeeds', () async {
@@ -76,7 +76,7 @@ void main() {
     if (assertsEnabled) {
       expect(
         () => builder.addPicture(Offset.zero, picture),
-        throwsA(isInstanceOf<AssertionError>()),
+        throwsA(const isInstanceOf<AssertionError>()),
       );
     } else {
       builder.addPicture(Offset.zero, picture);
@@ -105,7 +105,7 @@ void main() {
     assert(() {
       expect(
         () => builder.pushTransform(matrix4WrongLength),
-        expectAssertion,
+        throwsA(isA<AssertionError>()),
       );
       return true;
     }());
@@ -119,7 +119,7 @@ void main() {
     assert(() {
       expect(
         () => builder.pushTransform(matrix4NaN),
-        expectAssertion,
+        throwsA(isA<AssertionError>()),
       );
       return true;
     }());
@@ -133,7 +133,7 @@ void main() {
     assert(() {
       expect(
         () => builder.pushTransform(matrix4Infinity),
-        expectAssertion,
+        throwsA(isA<AssertionError>()),
       );
       return true;
     }());

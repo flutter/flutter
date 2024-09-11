@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 void main() {
   test('Locale', () {
@@ -45,19 +45,19 @@ void main() {
 
   test('Locale equality', () {
     expect(const Locale.fromSubtags(languageCode: 'en'),
-           notEquals(const Locale.fromSubtags(languageCode: 'en', scriptCode: 'Latn')));
+           isNot(const Locale.fromSubtags(languageCode: 'en', scriptCode: 'Latn')));
     expect(const Locale.fromSubtags(languageCode: 'en').hashCode,
-           notEquals(const Locale.fromSubtags(languageCode: 'en', scriptCode: 'Latn').hashCode));
+           isNot(const Locale.fromSubtags(languageCode: 'en', scriptCode: 'Latn').hashCode));
 
     expect(const Locale('en', ''), const Locale('en'));
     expect(const Locale('en'), const Locale('en', ''));
     expect(const Locale('en'), const Locale('en'));
     expect(const Locale('en', ''), const Locale('en', ''));
 
-    expect(const Locale('en', ''), notEquals(const Locale('en', 'GB')));
-    expect(const Locale('en'), notEquals(const Locale('en', 'GB')));
-    expect(const Locale('en', 'GB'), notEquals(const Locale('en', '')));
-    expect(const Locale('en', 'GB'), notEquals(const Locale('en')));
+    expect(const Locale('en', ''), isNot(const Locale('en', 'GB')));
+    expect(const Locale('en'), isNot(const Locale('en', 'GB')));
+    expect(const Locale('en', 'GB'), isNot(const Locale('en', '')));
+    expect(const Locale('en', 'GB'), isNot(const Locale('en')));
   });
 
   test("Locale toString does not include separator for ''", () {

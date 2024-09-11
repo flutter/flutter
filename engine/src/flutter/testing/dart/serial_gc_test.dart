@@ -4,7 +4,7 @@
 
 // FlutterTesterOptions=--enable-serial-gc
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 int use(List<int> a) {
   return a[0];

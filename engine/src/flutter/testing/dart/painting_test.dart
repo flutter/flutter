@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 typedef CanvasCallback = void Function(Canvas canvas);

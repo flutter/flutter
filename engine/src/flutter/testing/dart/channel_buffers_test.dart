@@ -9,7 +9,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 ByteData _makeByteData(String str) {
   final Uint8List list = utf8.encode(str);

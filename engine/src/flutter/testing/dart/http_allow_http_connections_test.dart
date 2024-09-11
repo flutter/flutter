@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 import 'http_disallow_http_connections_test.dart';
 
