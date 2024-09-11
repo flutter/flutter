@@ -416,7 +416,10 @@ class FlutterDevice {
     _loggingSubscription = null;
   }
 
-  Future<void> initLogReader() async {
+  /// Attempts to set up reading logs from the Flutter app on the device.
+  ///
+  /// This can fail if the device if no longer connected.
+  Future<void> tryInitLogReader() async {
     final vm_service.VM? vm = await vmService!.getVmGuarded();
     if (vm == null) {
       globals.printError(

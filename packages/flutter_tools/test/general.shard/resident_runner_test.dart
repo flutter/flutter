@@ -1948,7 +1948,7 @@ flutter:
     );
     final TestFlutterDevice flutterDevice = TestFlutterDevice(device);
     flutterDevice.vmService = fakeVmServiceHost!.vmService;
-    await flutterDevice.initLogReader();
+    await flutterDevice.tryInitLogReader();
     final BufferLogger logger = globals.logger as BufferLogger;
     expect(
       logger.traceText,
