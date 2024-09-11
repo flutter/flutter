@@ -62,17 +62,16 @@ struct _FlEngine {
   FlEngineUpdateSemanticsHandler update_semantics_handler;
   gpointer update_semantics_handler_data;
   GDestroyNotify update_semantics_handler_destroy_notify;
-
-  // Function to call right before the engine is restarted.
-  FlEngineOnPreEngineRestartHandler on_pre_engine_restart_handler;
-  gpointer on_pre_engine_restart_handler_data;
-  GDestroyNotify on_pre_engine_restart_handler_destroy_notify;
 };
 
 G_DEFINE_QUARK(fl_engine_error_quark, fl_engine_error)
 
 static void fl_engine_plugin_registry_iface_init(
     FlPluginRegistryInterface* iface);
+
+enum { kSignalOnPreEngineRestart, kSignalLastSignal };
+
+static guint fl_engine_signals[kSignalLastSignal];
 
 G_DEFINE_TYPE_WITH_CODE(
     FlEngine,
@@ -343,10 +342,7 @@ static void fl_engine_update_semantics_cb(const FlutterSemanticsUpdate2* update,
 static void fl_engine_on_pre_engine_restart_cb(void* user_data) {
   FlEngine* self = FL_ENGINE(user_data);
 
-  if (self->on_pre_engine_restart_handler != nullptr) {
-    self->on_pre_engine_restart_handler(
-        self, self->on_pre_engine_restart_handler_data);
-  }
+  g_signal_emit(self, fl_engine_signals[kSignalOnPreEngineRestart], 0);
 }
 
 // Called when a response to a sent platform message is received from the
@@ -427,13 +423,6 @@ static void fl_engine_dispose(GObject* object) {
   self->update_semantics_handler_data = nullptr;
   self->update_semantics_handler_destroy_notify = nullptr;
 
-  if (self->on_pre_engine_restart_handler_destroy_notify) {
-    self->on_pre_engine_restart_handler_destroy_notify(
-        self->on_pre_engine_restart_handler_data);
-  }
-  self->on_pre_engine_restart_handler_data = nullptr;
-  self->on_pre_engine_restart_handler_destroy_notify = nullptr;
-
   G_OBJECT_CLASS(fl_engine_parent_class)->dispose(object);
 }
 
@@ -448,6 +437,10 @@ static void fl_engine_class_init(FlEngineClass* klass) {
           fl_binary_messenger_get_type(),
           static_cast<GParamFlags>(G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY |
                                    G_PARAM_STATIC_STRINGS)));
+
+  fl_engine_signals[kSignalOnPreEngineRestart] = g_signal_new(
+      "on-pre-engine-restart", fl_engine_get_type(), G_SIGNAL_RUN_LAST, 0,
+      nullptr, nullptr, nullptr, G_TYPE_NONE, 0);
 }
 
 static void fl_engine_init(FlEngine* self) {
@@ -733,23 +726,6 @@ void fl_engine_set_update_semantics_handler(
   self->update_semantics_handler = handler;
   self->update_semantics_handler_data = user_data;
   self->update_semantics_handler_destroy_notify = destroy_notify;
-}
-
-void fl_engine_set_on_pre_engine_restart_handler(
-    FlEngine* self,
-    FlEngineOnPreEngineRestartHandler handler,
-    gpointer user_data,
-    GDestroyNotify destroy_notify) {
-  g_return_if_fail(FL_IS_ENGINE(self));
-
-  if (self->on_pre_engine_restart_handler_destroy_notify) {
-    self->on_pre_engine_restart_handler_destroy_notify(
-        self->on_pre_engine_restart_handler_data);
-  }
-
-  self->on_pre_engine_restart_handler = handler;
-  self->on_pre_engine_restart_handler_data = user_data;
-  self->on_pre_engine_restart_handler_destroy_notify = destroy_notify;
 }
 
 // Note: This function can be called from any thread.
