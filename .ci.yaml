@@ -524,7 +524,6 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
 
   - name: Linux build_tests_5_5
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
