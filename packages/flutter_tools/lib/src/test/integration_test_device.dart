@@ -59,7 +59,6 @@ class IntegrationTestTestDevice implements TestDevice {
       debuggingOptions: debuggingOptions,
       userIdentifier: userIdentifier,
     );
-    //throw TestDeviceException('Test failure!', StackTrace.current);
     if (!launchResult.started) {
       throw TestDeviceException('Unable to start the app on the device.', StackTrace.current);
     }

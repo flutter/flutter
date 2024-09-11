@@ -538,11 +538,9 @@ class FlutterPlatform extends PlatformPlugin {
           remoteChannelCompleter.complete(channel);
         },
         onError: (Object err, StackTrace stackTrace) {
-          print('in onError! $err\n$stackTrace');
           remoteChannelCompleter.completeError(err, stackTrace);
         },
       ));
-      print('right after async guard!'); // TODO
       finalizers.add(() async {
         globals.printTrace('test $ourTestCount: ensuring test device is terminated.');
         await testDevice.kill();
@@ -557,7 +555,6 @@ class FlutterPlatform extends PlatformPlugin {
       await Future.any<void>(<Future<void>>[
         testDevice.finished,
         () async {
-          print('right before await!');
           // These must be await-ed together, and if the first errors the second will never complete
           final [Object? first, Object? second] = await Future.wait<Object?>(
             <Future<Object?>>[remoteChannelCompleter.future, testDevice.vmServiceUri],
@@ -565,11 +562,6 @@ class FlutterPlatform extends PlatformPlugin {
           );
           final StreamChannel<String> remoteChannel = first! as StreamChannel<String>;
           final Uri? processVmServiceUri = second as Uri?;
-          //final (StreamChannel<String> remoteChannel, Uri? processVmServiceUri) = await (
-          //  remoteChannelCompleter.future,
-          //  testDevice.vmServiceUri,
-          //).wait;
-          //final Uri? processVmServiceUri = await testDevice.vmServiceUri;
           if (processVmServiceUri != null) {
             globals.printTrace('test $ourTestCount: VM Service uri is available at $processVmServiceUri');
           } else {
@@ -592,8 +584,7 @@ class FlutterPlatform extends PlatformPlugin {
           testTimeRecorder?.stop(TestTimePhases.WatcherFinishedTest, watchTestTimeRecorderStopwatch!);
         }()
       ]);
-    } on Object catch (error, stackTrace) { // TODO Don't catch error!
-      print('caught!'); // TODO
+    } on Exception catch (error, stackTrace) {
       Object reportedError = error;
       StackTrace reportedStackTrace = stackTrace;
       if (error is TestDeviceException) {
