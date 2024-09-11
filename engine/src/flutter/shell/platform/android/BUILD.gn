@@ -394,6 +394,7 @@ embedding_dependencies_jars = [
   "//flutter/third_party/android_embedding_dependencies/lib/viewpager-1.0.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/window-1.2.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/window-java-1.2.0.jar",
+  "//flutter/third_party/android_embedding_dependencies/lib/relinker-1.4.5.jar",
 ]
 
 action("check_imports") {
