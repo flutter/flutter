@@ -1,7 +1,9 @@
 {
+  "clearButtonTooltip": "Obriši tekst",
+  "selectedDateLabel": "Izabrano",
   "lookUpButtonLabel": "Pogled nagore",
   "searchWebButtonLabel": "Pretraži veb",
-  "shareButtonLabel": "Deli…",
+  "shareButtonLabel": "Deli",
   "scanTextButtonLabel": "Skeniraj tekst",
   "menuDismissLabel": "Odbacite meni",
   "expansionTileExpandedHint": "dvaput dodirnite da biste skupili",

@@ -144,7 +144,7 @@
   "menuDismissLabel": "Stäng menyn",
   "lookUpButtonLabel": "Titta upp",
   "searchWebButtonLabel": "Sök på webben",
-  "shareButtonLabel": "Dela …",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "Dela",
+  "clearButtonTooltip": "Rensa text",
+  "selectedDateLabel": "Markerat"
 }

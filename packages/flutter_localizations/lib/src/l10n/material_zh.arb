@@ -144,7 +144,7 @@
   "menuDismissLabel": "关闭菜单",
   "lookUpButtonLabel": "查询",
   "searchWebButtonLabel": "搜索",
-  "shareButtonLabel": "共享…",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "分享",
+  "clearButtonTooltip": "清除文字",
+  "selectedDateLabel": "已选择"
 }

@@ -144,7 +144,7 @@
   "menuDismissLabel": "Menü bezárása",
   "lookUpButtonLabel": "Felfelé nézés",
   "searchWebButtonLabel": "Keresés az interneten",
-  "shareButtonLabel": "Megosztás…",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "Megosztás",
+  "clearButtonTooltip": "Szöveg törlése",
+  "selectedDateLabel": "Kijelölve"
 }

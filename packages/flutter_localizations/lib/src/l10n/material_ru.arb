@@ -152,6 +152,6 @@
   "lookUpButtonLabel": "Найти",
   "searchWebButtonLabel": "Искать в интернете",
   "shareButtonLabel": "Поделиться",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "clearButtonTooltip": "Удалить текст",
+  "selectedDateLabel": "Выбрано"
 }

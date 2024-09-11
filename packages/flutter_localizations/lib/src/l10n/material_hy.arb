@@ -150,7 +150,7 @@
   "menuDismissLabel": "Փակել ընտրացանկը",
   "lookUpButtonLabel": "Փնտրել",
   "searchWebButtonLabel": "Որոնել համացանցում",
-  "shareButtonLabel": "Կիսվել...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "Կիսվել",
+  "clearButtonTooltip": "Մաքրել տեքստը",
+  "selectedDateLabel": "Ընտրված է"
 }

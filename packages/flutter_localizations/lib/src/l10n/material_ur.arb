@@ -144,7 +144,7 @@
   "menuDismissLabel": "مینو برخاست کریں",
   "lookUpButtonLabel": "تفصیل دیکھیں",
   "searchWebButtonLabel": "ویب تلاش کریں",
-  "shareButtonLabel": "اشتراک کریں...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "اشتراک کریں",
+  "clearButtonTooltip": "ٹیکسٹ صاف کریں",
+  "selectedDateLabel": "منتخب کردہ"
 }

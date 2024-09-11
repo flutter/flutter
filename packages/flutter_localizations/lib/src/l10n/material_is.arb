@@ -144,7 +144,7 @@
   "menuDismissLabel": "Loka valmynd",
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Leita á vefnum",
-  "shareButtonLabel": "Deila...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "Deila",
+  "clearButtonTooltip": "Hreinsa texta",
+  "selectedDateLabel": "Valið"
 }
