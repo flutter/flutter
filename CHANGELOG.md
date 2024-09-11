@@ -26,8 +26,11 @@ INTERNAL NOTE
 -->
 ## Flutter 3.24 Changes
 
+### [3.24.3](https://github.com/flutter/flutter/releases/tag/3.24.3)
+- [Dart 3.5.3 Changelog](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md)
+
 ### [3.24.2](https://github.com/flutter/flutter/releases/tag/3.24.2)
-- [Dart 3.5.2](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md#352---2024-08-28)
+- [Dart 3.5.2 Changelog](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md#352---2024-08-28)
 - [flutter/153949](https://github.com/flutter/flutter/issues/153949): Fixes a crash on Android when deleting `EditableText` inside `CupertinoPageRoute`, with a CJK (chinese, japanese, korean) keyboard.
 - [flutter/153939](https://github.com/flutter/flutter/issues/153939): Fixes an issue on iOS where Flutter `TextField`s may stop accepting input.
 - [flutter/152420](https://github.com/flutter/flutter/issues/152420): Fixes scrolling jank on Android and iOS when a `SelectionArea`/`SelectableRegion` is used as a child of a Scrollable like `ListView` or `PageView`.
