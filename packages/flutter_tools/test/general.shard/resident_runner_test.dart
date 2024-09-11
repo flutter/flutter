@@ -1947,7 +1947,7 @@ flutter:
       bool enableServicePortFallback = false,
       List<String> cachedUserTags = const <String>[],
       String? dartExecutable,
-      Uri? google3WorkspaceRoot,
+      String? google3WorkspaceRoot,
     }) {
       throw DartDevelopmentServiceException.existingDdsInstance(
         'Existing DDS at http://localhost/existingDdsInMessage.',
@@ -1996,7 +1996,7 @@ flutter:
         bool enableServicePortFallback = false,
         List<String> cachedUserTags = const <String>[],
         String? dartExecutable,
-        Uri? google3WorkspaceRoot,
+        String? google3WorkspaceRoot,
       }) async {
       expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isFalse);
@@ -2043,7 +2043,7 @@ flutter:
         bool enableServicePortFallback = false,
         List<String> cachedUserTags = const <String>[],
         String? dartExecutable,
-        Uri? google3WorkspaceRoot,
+        String? google3WorkspaceRoot,
       }) {
       expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isTrue);
