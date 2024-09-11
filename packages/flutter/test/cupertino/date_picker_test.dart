@@ -8,6 +8,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -2440,7 +2441,7 @@ void main() {
     // Calculate the largest width from testWords.
     final double largestWidth = testWords
         .map((String word) => getColumnWidth(word, textStyle))
-        .reduce((double a, double b) => a > b ? a : b);
+        .reduce(math.max);
 
     // Get the column width using CupertinoDatePicker method.
     final double testWidth = CupertinoDatePicker.getColumnWidth(texts: testWords, context: context);
