@@ -1490,7 +1490,9 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
 
   @override
   SelectedContentRange getSelection() {
-    final int contentLength = (range.end - range.start).abs();
+    assert(range.isNormalized);
+    final int contentLength = range.end - range.start;
+    assert(!contentLength.isNegative);
     if (_textSelectionStart == null || _textSelectionEnd == null) {
       return SelectedContentRange.empty(contentLength: contentLength);
     }

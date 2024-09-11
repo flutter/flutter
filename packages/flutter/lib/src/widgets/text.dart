@@ -1220,7 +1220,7 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     return a.right > b.right ? 1 : -1;
   }
 
-  /// This method calculates a local [SelectedContentRange] based on the list 
+  /// This method calculates a local [SelectedContentRange] based on the list
   /// of [ranges] that are accumulated from the [Selectable] children under this
   /// delegate. This calculation takes into account the accumulated content
   /// length before the active selection, and returns a [SelectedContentRange.empty]

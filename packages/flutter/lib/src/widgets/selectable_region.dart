@@ -2601,7 +2601,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     );
   }
 
-  /// This method calculates a local [SelectedContentRange] based on the list 
+  /// This method calculates a local [SelectedContentRange] based on the list
   /// of [ranges] that are accumulated from the [Selectable] children under this
   /// delegate. This calculation takes into account the accumulated content
   /// length before the active selection, and returns a [SelectedContentRange.empty]
@@ -3242,11 +3242,91 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
 
   SelectionDetails _getDetails() {
     final SelectedContentRange range = getSelection();
-    return SelectionDetails(
+    return SelectionDetails._(
       status: value.status,
       selectionFinalized: selectionIsFinalized,
       localStartOffset: range.startOffset,
       localEndOffset: range.endOffset,
     );
+  }
+}
+
+/// The details of a selection.
+///
+/// This includes information such as the status of the selection indicating
+/// if it is collapsed or uncollapsed, the start and end offsets of the selection
+/// local to the [SelectionListener] that reports this object, and whether
+/// the selection is ongoing.
+///
+/// This object is created by callers of the [SelectionListenerSelectionChangedCallback] callback.
+///
+/// See also:
+///
+///   * [SelectionListener], which provides a [SelectionDetails] object
+///     for the selection under its subtree in its [SelectionListener.onSelectionChanged]
+///     callback.
+@immutable
+final class SelectionDetails with Diagnosticable {
+  /// Creates a selection details object.
+  const SelectionDetails._({
+    required this.status,
+    required this.selectionFinalized,
+    required this.localStartOffset,
+    required this.localEndOffset,
+  });
+
+  /// The status that indicates whether there is a selection and whether the
+  /// selection is collapsed.
+  final SelectionStatus status;
+
+  /// Whether the selection is finalized.
+  ///
+  /// This is false if the selection is ongoing and true if the selection
+  /// is finalized.
+  ///
+  /// A selection is ongoing in scenarios like an ongoing mouse drag,
+  /// long press drag, or in between states where both selection edges
+  /// have not reached their final position.
+  final bool selectionFinalized;
+
+  /// The offset where the selection starts.
+  ///
+  /// This is relative to the [Selectable] subtree of the creator of this [SelectionDetails] instance.
+  final int localStartOffset;
+
+  /// The offset where the selection ends.
+  ///
+  /// This is relative to the [Selectable] subtree of the creator of this [SelectionDetails] instance.
+  final int localEndOffset;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is SelectionDetails
+        && other.status == status
+        && other.selectionFinalized == selectionFinalized
+        && other.localStartOffset == localStartOffset
+        && other.localEndOffset == localEndOffset;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      status,
+      selectionFinalized,
+      localStartOffset,
+      localEndOffset,
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(EnumProperty<SelectionStatus>('status', status));
+    properties.add(DiagnosticsProperty<bool>('selectionFinalized', selectionFinalized));
+    properties.add(IntProperty('localStartOffset', localStartOffset));
+    properties.add(IntProperty('localEndOffset', localEndOffset));
   }
 }
