@@ -87,10 +87,10 @@ Future<void> main() async {
       'foundation/all_elements_bench.dart',
       () async {
         binding.framePolicy =
-            LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
+            LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
         runApp(const SizedBox.shrink()); // ensure dispose
         await SchedulerBinding.instance.endOfFrame;
-        all_elements_bench.execute();
+        await all_elements_bench.execute();
       }
     ),
   ];
