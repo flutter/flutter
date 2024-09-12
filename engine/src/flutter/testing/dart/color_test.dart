@@ -6,19 +6,6 @@ import 'dart:ui';
 
 import 'package:test/test.dart';
 
-/// Positive result when the Colors will map to the same argb8888 color.
-Matcher colorMatches(dynamic o) => (v) {
-  Expect.isTrue(o is Color);
-  Expect.isTrue(v is Color);
-  if (o is Color && v is Color) {
-    Expect.equals(o.colorSpace, v.colorSpace);
-    Expect.approxEquals(o.a, v.a, 1 / 255);
-    Expect.approxEquals(o.r, v.r, 1 / 255);
-    Expect.approxEquals(o.g, v.g, 1 / 255);
-    Expect.approxEquals(o.b, v.b, 1 / 255);
-  }
-};
-
 class NotAColor extends Color {
   const NotAColor(super.value);
 }
@@ -36,7 +23,7 @@ void main() {
     const Color c = Color(0x00000000);
     final Paint p = Paint();
     p.color = c;
-    expect(c, equals(const Color(0x00000000)));
+    expect(c.toString(), equals('Color(0x00000000)'));
   });
 
   test('color created with out of bounds value', () {
@@ -67,7 +54,7 @@ void main() {
     );
     expect(
       Color.lerp(const Color(0x00000000), const Color(0xFFFFFFFF), 0.5),
-      colorMatches(const Color(0x7F7F7F7F)),
+      const Color(0x7F7F7F7F),
     );
     expect(
       Color.lerp(const Color(0x00000000), const Color(0xFFFFFFFF), 1.0),
@@ -157,23 +144,23 @@ void main() {
     );
     expect(
       Color.alphaBlend(const Color(0x80808080), const Color(0xFFFFFFFF)),
-      colorMatches(const Color(0xFFBFBFBF)),
+      const Color(0xFFBFBFBF),
     );
     expect(
       Color.alphaBlend(const Color(0x80808080), const Color(0xFF000000)),
-      colorMatches(const Color(0xFF404040)),
+      const Color(0xFF404040),
     );
     expect(
       Color.alphaBlend(const Color(0x01020304), const Color(0xFF000000)),
-      colorMatches(const Color(0xFF000000)),
+      const Color(0xFF000000),
     );
     expect(
       Color.alphaBlend(const Color(0x11223344), const Color(0xFF000000)),
-      colorMatches(const Color(0xFF020304)),
+      const Color(0xFF020304),
     );
     expect(
       Color.alphaBlend(const Color(0x11223344), const Color(0x80000000)),
-      colorMatches(const Color(0x88040608)),
+      const Color(0x88040608),
     );
   });
 
