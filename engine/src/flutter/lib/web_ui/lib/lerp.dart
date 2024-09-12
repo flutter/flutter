@@ -28,10 +28,3 @@ double? lerpDouble(num? a, num? b, double t) {
 double _lerpDouble(double a, double b, double t) {
   return a * (1.0 - t) + b * t;
 }
-
-/// Linearly interpolate between two integers.
-///
-/// Same as [lerpDouble] but specialized for non-null `int` type.
-double _lerpInt(int a, int b, double t) {
-  return a * (1.0 - t) + b * t;
-}

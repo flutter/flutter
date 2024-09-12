@@ -122,9 +122,9 @@ Future<void> testMain() async {
     expect(
       style.toString(),
       'TextStyle('
-      'color: Color(0xff000000), '
+      'color: ${const ui.Color(0xff000000)}, '
       'decoration: TextDecoration.none, '
-      'decorationColor: Color(0xffaa0000), '
+      'decorationColor: ${const ui.Color(0xffaa0000)}, '
       'decorationStyle: TextDecorationStyle.solid, '
       'decorationThickness: ${1.0}, '
       'fontWeight: FontWeight.w400, '
@@ -140,7 +140,7 @@ Future<void> testMain() async {
       'locale: en_US, '
       'background: Paint(), '
       'foreground: unspecified, '
-      'shadows: [TextShadow(Color(0xff000000), Offset(0.0, 0.0), ${0.0})], '
+      'shadows: [TextShadow(${const ui.Color(0xff000000)}, Offset(0.0, 0.0), ${0.0})], '
       "fontFeatures: [FontFeature('case', 1)], "
       "fontVariations: [FontVariation('ital', 0.1)]"
       ')',
@@ -165,7 +165,7 @@ Future<void> testMain() async {
       'TextStyle('
       'color: unspecified, '
       'decoration: TextDecoration.none, '
-      'decorationColor: Color(0xffaa0000), '
+      'decorationColor: ${const ui.Color(0xffaa0000)}, '
       'decorationStyle: TextDecorationStyle.solid, '
       'decorationThickness: ${1.0}, '
       'fontWeight: FontWeight.w400, '
@@ -181,7 +181,7 @@ Future<void> testMain() async {
       'locale: en_US, '
       'background: Paint(), '
       'foreground: Paint(), '
-      'shadows: [TextShadow(Color(0xff000000), Offset(0.0, 0.0), ${0.0})], '
+      'shadows: [TextShadow(${const ui.Color(0xff000000)}, Offset(0.0, 0.0), ${0.0})], '
       "fontFeatures: [FontFeature('case', 1)], "
       "fontVariations: [FontVariation('ital', 0.1)]"
       ')',
