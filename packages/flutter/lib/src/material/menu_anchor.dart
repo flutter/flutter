@@ -164,7 +164,7 @@ class MenuAnchor extends StatefulWidget {
   final MenuController? controller;
 
   /// The [childFocusNode] attribute is the optional [FocusNode] also associated
-  /// the [child] or [builder] widget that opens the menu.
+  /// to the [child] or [builder] widget that opens the menu.
   ///
   /// The focus node should be attached to the widget that should receive focus
   /// if keyboard focus traversal moves the focus off of the submenu with the
@@ -390,7 +390,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     Widget child = OverlayPortal(
       controller: _overlayController,
       overlayChildBuilder: (BuildContext context) {
-       return _Submenu(
+        return _Submenu(
           anchor: this,
           menuStyle: widget.style,
           alignmentOffset: widget.alignmentOffset ?? Offset.zero,
@@ -472,7 +472,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     assert(_debugMenuInfo('Removing:\n${child.widget.toStringDeep()}'));
     _anchorChildren.remove(child);
     assert(_debugMenuInfo('Tree:\n${widget.toStringDeep()}'));
-}
+  }
 
   _MenuAnchorState get _root {
     _MenuAnchorState anchor = this;
@@ -496,7 +496,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
         });
       });
     }
-
   }
 
   void _focusButton() {
@@ -886,7 +885,7 @@ class MenuItemButton extends StatefulWidget {
   /// A screen reader will default to reading the derived text on the
   /// [MenuItemButton] itself, which is not guaranteed to be readable.
   /// (For some shortcuts, such as comma, semicolon, and other
-  /// punctuation, screen readers read silence)
+  /// punctuation, screen readers read silence).
   ///
   /// Setting this label overwrites the semantics properties of the entire
   /// Widget, including its children. Consider wrapping this widget in
@@ -934,7 +933,7 @@ class MenuItemButton extends StatefulWidget {
   /// this property is ignored.
   ///
   /// If [overflowAxis] is [Axis.vertical], the menu will be expanded vertically.
-  /// If [overflowAxis] is [Axis.horizontal], then the menu  will be
+  /// If [overflowAxis] is [Axis.horizontal], then the menu will be
   /// expanded horizontally.
   ///
   /// Defaults to [Axis.horizontal].
@@ -1940,96 +1939,96 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         onClose: _onClose,
         onOpen: _onOpen,
         style: widget.menuStyle,
-        builder:
-            (BuildContext context, MenuController controller, Widget? child) {
+        builder: (BuildContext context, MenuController controller, Widget? child) {
           // Since we don't want to use the theme style or default style from the
           // TextButton, we merge the styles, merging them in the right order when
           // each type of style exists. Each "*StyleOf" function is only called
           // once.
-        ButtonStyle mergedStyle = widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context))
-          ?? widget.defaultStyleOf(context);
-        mergedStyle = widget.style?.merge(mergedStyle) ?? mergedStyle;
+          ButtonStyle mergedStyle = widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context))
+            ?? widget.defaultStyleOf(context);
+          mergedStyle = widget.style?.merge(mergedStyle) ?? mergedStyle;
 
-        void toggleShowMenu() {
-          if (controller._anchor == null) {
-            return;
-          }
-          if (controller.isOpen) {
-            controller.close();
-          } else {
-            controller.open();
-          }
-        }
-
-        void handlePointerExit(PointerExitEvent event) {
-          if (_isHovered) {
-            widget.onHover?.call(false);
-            _isHovered = false;
-          }
-        }
-
-        // MouseRegion.onEnter and TextButton.onHover are called
-        // if a button is hovered after scrolling. This interferes with
-        // focus traversal and scroll position. MouseRegion.onHover avoids
-        // this issue.
-        void handlePointerHover(PointerHoverEvent event) {
-          if (!_isHovered) {
-            _isHovered = true;
-            widget.onHover?.call(true);
-            // Don't open the root menu bar menus on hover unless something else
-            // is already open. This means that the user has to first click to
-            // open a menu on the menu bar before hovering allows them to traverse
-            // it.
-            if (controller._anchor!._root._orientation == Axis.horizontal && !controller._anchor!._root._isOpen) {
+          void toggleShowMenu() {
+            if (controller._anchor == null) {
               return;
             }
-
-            controller.open();
-            controller._anchor!._focusButton();
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
           }
-        }
-        child = MergeSemantics(
-          child: Semantics(
-            expanded: _enabled && controller.isOpen,
-            child: TextButton(
-              style: mergedStyle,
-              focusNode: _buttonFocusNode,
-              onFocusChange: _enabled ? widget.onFocusChange : null,
-              onPressed: _enabled ? toggleShowMenu : null,
-              isSemanticButton: null,
-              child: _MenuItemLabel(
-                leadingIcon: widget.leadingIcon,
-                trailingIcon: widget.trailingIcon,
-                hasSubmenu: true,
-                showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
-                child: child,
+
+          void handlePointerExit(PointerExitEvent event) {
+            if (_isHovered) {
+              widget.onHover?.call(false);
+              _isHovered = false;
+            }
+          }
+
+          // MouseRegion.onEnter and TextButton.onHover are called
+          // if a button is hovered after scrolling. This interferes with
+          // focus traversal and scroll position. MouseRegion.onHover avoids
+          // this issue.
+          void handlePointerHover(PointerHoverEvent event) {
+            if (!_isHovered) {
+              _isHovered = true;
+              widget.onHover?.call(true);
+              // Don't open the root menu bar menus on hover unless something else
+              // is already open. This means that the user has to first click to
+              // open a menu on the menu bar before hovering allows them to traverse
+              // it.
+              if (controller._anchor!._root._orientation == Axis.horizontal && !controller._anchor!._root._isOpen) {
+                return;
+              }
+
+              controller.open();
+              controller._anchor!._focusButton();
+            }
+          }
+
+          child = MergeSemantics(
+            child: Semantics(
+              expanded: _enabled && controller.isOpen,
+              child: TextButton(
+                style: mergedStyle,
+                focusNode: _buttonFocusNode,
+                onFocusChange: _enabled ? widget.onFocusChange : null,
+                onPressed: _enabled ? toggleShowMenu : null,
+                isSemanticButton: null,
+                child: _MenuItemLabel(
+                  leadingIcon: widget.leadingIcon,
+                  trailingIcon: widget.trailingIcon,
+                  hasSubmenu: true,
+                  showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
+                  child: child,
+                ),
               ),
             ),
-          ),
-        );
+          );
 
-        if (!_enabled) {
-          return child;
-        }
+          if (!_enabled) {
+            return child;
+          }
 
-        child = MouseRegion(
-          onHover: handlePointerHover,
-          onExit: handlePointerExit,
-          child: child,
-        );
-
-        if (_platformSupportsAccelerators) {
-          return MenuAcceleratorCallbackBinding(
-            onInvoke: toggleShowMenu,
-            hasSubmenu: true,
+          child = MouseRegion(
+            onHover: handlePointerHover,
+            onExit: handlePointerExit,
             child: child,
           );
-        }
 
-        return child;
-      },
-      menuChildren: widget.menuChildren,
-      child: widget.child,
+          if (_platformSupportsAccelerators) {
+            return MenuAcceleratorCallbackBinding(
+              onInvoke: toggleShowMenu,
+              hasSubmenu: true,
+              child: child,
+            );
+          }
+
+          return child;
+        },
+        menuChildren: widget.menuChildren,
+        child: widget.child,
       )
     );
   }
@@ -2089,7 +2088,9 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
   _SubmenuDirectionalFocusAction({
     required this.submenu,
   });
+
   final _SubmenuButtonState submenu;
+
   _MenuAnchorState get _anchor => submenu._menuController._anchor!;
   FocusNode get _buttonFocusNode => submenu._buttonFocusNode;
   _MenuAnchorState? get _parent => _anchor._parent;
@@ -2292,11 +2293,11 @@ class _LocalizedShortcutLabeler {
     final ShortcutSerialization serialized = shortcut.serializeForMenu();
     final String keySeparator;
     if (_usesSymbolicModifiers) {
-        // Use "⌃ ⇧ A" style on macOS and iOS.
-        keySeparator = ' ';
+      // Use "⌃ ⇧ A" style on macOS and iOS.
+      keySeparator = ' ';
     } else {
-        // Use "Ctrl+Shift+A" style.
-        keySeparator = '+';
+      // Use "Ctrl+Shift+A" style.
+      keySeparator = '+';
     }
     if (serialized.trigger != null) {
       final LogicalKeyboardKey trigger = serialized.trigger!;
@@ -3161,7 +3162,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
   // List of rectangles that we should avoid overlapping. Unusable screen area.
   final Set<Rect> avoidBounds;
 
-  // The orientation of this menu
+  // The orientation of this menu.
   final Axis orientation;
 
   // The orientation of this menu's parent.

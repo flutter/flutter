@@ -63,7 +63,6 @@ class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolb
                     // buttons depending on the platform.
                     children: editableTextState.contextMenuButtonItems.map((ContextMenuButtonItem buttonItem) {
                       return CupertinoButton(
-                        borderRadius: null,
                         color: const Color(0xffaaaa00),
                         disabledColor: const Color(0xffaaaaff),
                         onPressed: buttonItem.onPressed,

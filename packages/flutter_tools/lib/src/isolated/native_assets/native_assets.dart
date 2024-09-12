@@ -102,12 +102,14 @@ abstract class NativeAssetsBuildRunner {
 class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   NativeAssetsBuildRunnerImpl(
     this.projectUri,
+    this.packageConfigPath,
     this.packageConfig,
     this.fileSystem,
     this.logger,
   );
 
   final Uri projectUri;
+  final String packageConfigPath;
   final PackageConfig packageConfig;
   final FileSystem fileSystem;
   final Logger logger;
@@ -136,16 +138,14 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
 
   @override
   Future<bool> hasPackageConfig() {
-    final File packageConfigJson =
-        fileSystem.directory(projectUri.toFilePath()).childDirectory('.dart_tool').childFile('package_config.json');
-    return packageConfigJson.exists();
+    return fileSystem.file(packageConfigPath).exists();
   }
 
   @override
   Future<List<Package>> packagesWithNativeAssets() async {
     final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
       packageConfig,
-      projectUri.resolve('.dart_tool/package_config.json'),
+      Uri.file(packageConfigPath),
     );
     // It suffices to only check for build hooks. If no packages have a build
     // hook. Then no build hook will output any assets for any link hook, and
@@ -162,7 +162,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   }) {
     final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
       packageConfig,
-      projectUri.resolve('.dart_tool/package_config.json'),
+      Uri.file(packageConfigPath),
     );
     return _buildRunner.buildDryRun(
       includeParentEnvironment: includeParentEnvironment,
@@ -190,7 +190,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   }) {
     final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
       packageConfig,
-      projectUri.resolve('.dart_tool/package_config.json'),
+      Uri.file(packageConfigPath),
     );
     return _buildRunner.build(
       buildMode: buildMode,
@@ -219,7 +219,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   }) {
     final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
       packageConfig,
-      projectUri.resolve('.dart_tool/package_config.json'),
+      Uri.file(packageConfigPath),
     );
     return _buildRunner.linkDryRun(
       includeParentEnvironment: includeParentEnvironment,
@@ -247,7 +247,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   }) {
     final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
       packageConfig,
-      projectUri.resolve('.dart_tool/package_config.json'),
+      Uri.file(packageConfigPath),
     );
     return _buildRunner.link(
       buildMode: buildMode,
@@ -418,11 +418,13 @@ class HotRunnerNativeAssetsBuilderImpl implements HotRunnerNativeAssetsBuilder {
     required Uri projectUri,
     required FileSystem fileSystem,
     required List<FlutterDevice> flutterDevices,
+    required String packageConfigPath,
     required PackageConfig packageConfig,
     required Logger logger,
   }) async {
     final NativeAssetsBuildRunner buildRunner = NativeAssetsBuildRunnerImpl(
       projectUri,
+      packageConfigPath,
       packageConfig,
       fileSystem,
       globals.logger,

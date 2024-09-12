@@ -21,7 +21,7 @@ import '../framework/utils.dart';
 /// Must match flutter_driver/lib/src/common.dart.
 ///
 /// Redefined here to avoid taking a dependency on flutter_driver.
-String _testOutputDirectory(String testDirectory) {
+String testOutputDirectory(String testDirectory) {
   return Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '$testDirectory/build';
 }
 
@@ -105,6 +105,7 @@ TaskFunction createAndroidTextureScrollPerfTest({bool? enableImpeller}) {
     testDriver: 'test_driver/scroll_perf_test.dart',
     needsFullTimeline: false,
     enableImpeller: enableImpeller,
+    enableMergedPlatformThread: true,
   ).run;
 }
 
@@ -114,6 +115,7 @@ TaskFunction createAndroidViewScrollPerfTest() {
     'test_driver/android_view_scroll_perf.dart',
     'platform_views_scroll_perf_hybrid_composition',
     testDriver: 'test_driver/scroll_perf_test.dart',
+    enableMergedPlatformThread: true,
   ).run;
 }
 
@@ -351,43 +353,6 @@ TaskFunction createSlidersPerfTest() {
   ).run;
 }
 
-TaskFunction createStackSizeTest() {
-  final String testDirectory =
-      '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
-  const String testTarget = 'test_driver/run_app.dart';
-  const String testDriver = 'test_driver/stack_size_perf_test.dart';
-  return () {
-    return inDirectory<TaskResult>(testDirectory, () async {
-      final Device device = await devices.workingDevice;
-      await device.unlock();
-      final String deviceId = device.deviceId;
-      await flutter('packages', options: <String>['get']);
-
-      await flutter('drive', options: <String>[
-        '--no-android-gradle-daemon',
-        '-v',
-        '--verbose-system-logs',
-        '--profile',
-        '-t', testTarget,
-        '--driver', testDriver,
-        '-d',
-        deviceId,
-      ]);
-      final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory)}/stack_size.json').readAsStringSync(),
-      ) as Map<String, dynamic>;
-
-      final Map<String, dynamic> result = <String, dynamic>{
-        'stack_size_per_nesting_level': data['stack_size'],
-      };
-      return TaskResult.success(
-        result,
-        benchmarkScoreKeys: result.keys.toList(),
-      );
-    });
-  };
-}
-
 TaskFunction createFullscreenTextfieldPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -519,7 +484,7 @@ TaskFunction createsScrollSmoothnessPerfTest() {
         deviceId,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory)}/scroll_smoothness_test.json').readAsStringSync(),
+        file('${testOutputDirectory(testDirectory)}/scroll_smoothness_test.json').readAsStringSync(),
       ) as Map<String, dynamic>;
 
       final Map<String, dynamic> result = <String, dynamic>{};
@@ -570,7 +535,7 @@ TaskFunction createFramePolicyIntegrationTest() {
         deviceId,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory)}/frame_policy_event_delay.json').readAsStringSync(),
+        file('${testOutputDirectory(testDirectory)}/frame_policy_event_delay.json').readAsStringSync(),
       ) as Map<String, dynamic>;
       final Map<String, dynamic> fullLiveData = data['fullyLive'] as Map<String, dynamic>;
       final Map<String, dynamic> benchmarkLiveData = data['benchmarkLive'] as Map<String, dynamic>;
@@ -896,6 +861,13 @@ void _addMetadataToManifest(String testDirectory, List<(String, String)> keyPair
   file.writeAsStringSync(xmlDoc.toXmlString(pretty: true, indent: '    '));
 }
 
+void _addMergedPlatformThreadSupportToManifest(String testDirectory) {
+    final List<(String, String)> keyPairs = <(String, String)>[
+    ('io.flutter.embedding.android.EnableMergedPlatformUIThread', 'true'),
+  ];
+  _addMetadataToManifest(testDirectory, keyPairs);
+}
+
 /// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
 /// <meta-data
 ///   android:name="io.flutter.embedding.android.EnableVulkanGPUTracing"
@@ -1053,7 +1025,7 @@ class StartupTest {
         timer.cancel();
         if (result == 0) {
           final Map<String, dynamic> data = json.decode(
-            file('${_testOutputDirectory(testDirectory)}/start_up_info.json').readAsStringSync(),
+            file('${testOutputDirectory(testDirectory)}/start_up_info.json').readAsStringSync(),
           ) as Map<String, dynamic>;
           results.add(data);
         } else {
@@ -1339,6 +1311,8 @@ class PerfTest {
       late Device selectedDevice;
       selectedDevice = device ?? await devices.workingDevice;
       await selectedDevice.unlock();
+      await selectedDevice.toggleFixedPerformanceMode(true);
+
       final String deviceId = selectedDevice.deviceId;
       final String? localEngine = localEngineFromEnv;
       final String? localEngineHost = localEngineHostFromEnv;
@@ -1388,6 +1362,9 @@ class PerfTest {
           _addVulkanGPUTracingToManifest(testDirectory);
           if (forceOpenGLES ?? false) {
             _addOpenGLESToManifest(testDirectory);
+          }
+          if (enableMergedPlatformThread) {
+            _addMergedPlatformThreadSupportToManifest(testDirectory);
           }
         }
         if (disablePartialRepaint || enableMergedPlatformThread) {
@@ -1440,10 +1417,11 @@ class PerfTest {
       } finally {
         await resetManifest();
         await resetPlist();
+        await selectedDevice.toggleFixedPerformanceMode(false);
       }
 
       final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory)}/$resultFilename.json').readAsStringSync(),
+        file('${testOutputDirectory(testDirectory)}/$resultFilename.json').readAsStringSync(),
       ) as Map<String, dynamic>;
 
       if (data['frame_count'] as int < 5) {
@@ -1460,7 +1438,7 @@ class PerfTest {
         case DeviceOperatingSystem.android:
         case DeviceOperatingSystem.androidArm:
         case DeviceOperatingSystem.androidArm64:
-          recordGPU = enableImpeller ?? false;
+          recordGPU = true;
         case DeviceOperatingSystem.fake:
         case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.linux:
@@ -1476,7 +1454,7 @@ class PerfTest {
         data,
         detailFiles: <String>[
           if (saveTraceFile)
-            '${_testOutputDirectory(testDirectory)}/$traceFilename.json',
+            '${testOutputDirectory(testDirectory)}/$traceFilename.json',
         ],
         benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
           ..._kCommonScoreKeys,
@@ -2160,6 +2138,7 @@ class DevToolsMemoryTest {
 
       await flutter(
         'drive',
+        driveWithDds: true,
         options: <String>[
           '-d', _device.deviceId,
           '--profile',

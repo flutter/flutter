@@ -162,7 +162,14 @@ abstract class Route<T> extends _RoutePlaceholder {
   ///
   /// If the [settings] are not provided, an empty [RouteSettings] object is
   /// used instead.
-  Route({ RouteSettings? settings }) : _settings = settings ?? const RouteSettings() {
+  ///
+  /// If [requestFocus] is not provided, the value of [Navigator.requestFocus] is
+  /// used instead.
+  Route({
+    RouteSettings? settings,
+    bool? requestFocus,
+  }) : _settings = settings ?? const RouteSettings(),
+       _requestFocus = requestFocus {
     if (kFlutterMemoryAllocationsEnabled) {
       FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: 'package:flutter/widgets.dart',
@@ -171,6 +178,12 @@ abstract class Route<T> extends _RoutePlaceholder {
       );
     }
   }
+
+  /// When the route state is updated, request focus if the current route is at the top.
+  ///
+  /// If not provided in the constructor, [Navigator.requestFocus] is used instead.
+  bool get requestFocus => _requestFocus ?? navigator?.widget.requestFocus ?? false;
+  final bool? _requestFocus;
 
   /// The navigator that the route is in, if any.
   NavigatorState? get navigator => _navigator;
@@ -256,7 +269,7 @@ abstract class Route<T> extends _RoutePlaceholder {
   @mustCallSuper
   TickerFuture didPush() {
     return TickerFuture.complete()..then<void>((void _) {
-      if (navigator?.widget.requestFocus ?? false) {
+      if (requestFocus) {
         navigator!.focusNode.enclosingScope?.requestFocus();
       }
     });
@@ -272,7 +285,7 @@ abstract class Route<T> extends _RoutePlaceholder {
   @protected
   @mustCallSuper
   void didAdd() {
-    if (navigator?.widget.requestFocus ?? false) {
+    if (requestFocus) {
       // This TickerFuture serves two purposes. First, we want to make sure that
       // animations triggered by other operations will finish before focusing
       // the navigator. Second, navigator.focusNode might acquire more focused
@@ -397,7 +410,7 @@ abstract class Route<T> extends _RoutePlaceholder {
   @mustCallSuper
   void onPopInvokedWithResult(bool didPop, T? result) {
     if (_isPageBased) {
-      final Page<Object?> page = settings as Page<Object?>;
+      final Page<T> page = settings as Page<T>;
       page.onPopInvoked(didPop, result);
     }
   }
@@ -1759,6 +1772,9 @@ class Navigator extends StatefulWidget {
 
   /// Whether or not the navigator and it's new topmost route should request focus
   /// when the new route is pushed onto the navigator.
+  ///
+  /// If [Route.requestFocus] is set on the topmost route, that will take precedence
+  /// over this value.
   ///
   /// Defaults to true.
   final bool requestFocus;
