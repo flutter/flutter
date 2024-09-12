@@ -250,14 +250,6 @@ void DisplayListBuilder::onSetColorSource(const DlColorSource* source) {
         Push<SetRuntimeEffectColorSourceOp>(0, effect);
         break;
       }
-#ifdef IMPELLER_ENABLE_3D
-      case DlColorSourceType::kScene: {
-        const DlSceneColorSource* scene = source->asScene();
-        FML_DCHECK(scene);
-        Push<SetSceneColorSourceOp>(0, scene);
-        break;
-      }
-#endif  // IMPELLER_ENABLE_3D
     }
   }
 }

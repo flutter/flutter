@@ -218,14 +218,6 @@ impeller_component("entity") {
     "../typographer",
   ]
 
-  if (impeller_enable_3d) {
-    sources += [
-      "contents/scene_contents.cc",
-      "contents/scene_contents.h",
-    ]
-    public_deps += [ "../scene" ]
-  }
-
   deps = [ "//flutter/fml" ]
   defines = [ "_USE_MATH_DEFINES" ]
 }

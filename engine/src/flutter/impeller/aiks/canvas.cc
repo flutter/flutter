@@ -109,12 +109,6 @@ struct GetTextureColorSourceDataVisitor {
   std::optional<ImageData> operator()(const std::monostate& data) {
     return std::nullopt;
   }
-
-#if IMPELLER_ENABLE_3D
-  std::optional<ImageData> operator()(const SceneData& data) {
-    return std::nullopt;
-  }
-#endif  // IMPELLER_ENABLE_3D
 };
 
 static std::optional<ImageData> GetImageColorSourceData(

@@ -12,10 +12,6 @@ if (is_fuchsia) {
 
 config("display_list_config") {
   defines = []
-
-  if (impeller_enable_3d) {
-    defines += [ "IMPELLER_ENABLE_3D" ]
-  }
 }
 
 source_set("display_list") {

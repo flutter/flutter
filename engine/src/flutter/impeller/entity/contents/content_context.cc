@@ -246,9 +246,6 @@ ContentContext::ContentContext(
       lazy_glyph_atlas_(
           std::make_shared<LazyGlyphAtlas>(std::move(typographer_context))),
       tessellator_(std::make_shared<Tessellator>()),
-#if IMPELLER_ENABLE_3D
-      scene_context_(std::make_shared<scene::SceneContext>(context_)),
-#endif  // IMPELLER_ENABLE_3D
       render_target_cache_(render_target_allocator == nullptr
                                ? std::make_shared<RenderTargetCache>(
                                      context_->GetResourceAllocator())
@@ -545,12 +542,6 @@ fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
 
   return subpass_target;
 }
-
-#if IMPELLER_ENABLE_3D
-std::shared_ptr<scene::SceneContext> ContentContext::GetSceneContext() const {
-  return scene_context_;
-}
-#endif  // IMPELLER_ENABLE_3D
 
 std::shared_ptr<Tessellator> ContentContext::GetTessellator() const {
   return tessellator_;

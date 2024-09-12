@@ -30,10 +30,6 @@
 #include "impeller/geometry/sigma.h"
 #include "impeller/typographer/font_glyph_pair.h"
 
-#if IMPELLER_ENABLE_3D
-#include "impeller/entity/contents/scene_contents.h"
-#endif  // IMPELLER_ENABLE_3D
-
 namespace impeller {
 
 #if EXPERIMENTAL_CANVAS && !defined(NDEBUG)
@@ -356,10 +352,6 @@ static std::optional<ColorSource::Type> ToColorSourceType(
       return ColorSource::Type::kSweepGradient;
     case flutter::DlColorSourceType::kRuntimeEffect:
       return ColorSource::Type::kRuntimeEffect;
-#ifdef IMPELLER_ENABLE_3D
-    case flutter::DlColorSourceType::kScene:
-      return ColorSource::Type::kScene;
-#endif  // IMPELLER_ENABLE_3D
   }
 }
 
@@ -505,21 +497,6 @@ void DlDispatcherBase::setColorSource(const flutter::DlColorSource* source) {
 
       paint_.color_source = ColorSource::MakeRuntimeEffect(
           runtime_stage, uniform_data, texture_inputs);
-      return;
-    }
-    case ColorSource::Type::kScene: {
-#ifdef IMPELLER_ENABLE_3D
-      const flutter::DlSceneColorSource* scene_color_source = source->asScene();
-      std::shared_ptr<scene::Node> scene_node =
-          scene_color_source->scene_node();
-      Matrix camera_transform = scene_color_source->camera_matrix();
-
-      paint_.color_source =
-          ColorSource::MakeScene(scene_node, camera_transform);
-#else   // IMPELLER_ENABLE_3D
-      FML_LOG(ERROR) << "ColorSourceType::kScene can only be used if Impeller "
-                        "Scene is enabled.";
-#endif  // IMPELLER_ENABLE_3D
       return;
     }
   }
