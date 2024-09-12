@@ -1,5 +1,5 @@
 {
-  "version": "5_0_0",
+  "version": "6_1_0",
 
   "md.comp.input-chip.container.elevation": "md.sys.elevation.level0",
   "md.comp.input-chip.container.height": 32.0,
@@ -41,7 +41,7 @@
   "md.comp.input-chip.unselected.hover.state-layer.color": "onSurfaceVariant",
   "md.comp.input-chip.unselected.hover.state-layer.opacity": "md.sys.state.hover.state-layer-opacity",
   "md.comp.input-chip.unselected.label-text.color": "onSurfaceVariant",
-  "md.comp.input-chip.unselected.outline.color": "outline",
+  "md.comp.input-chip.unselected.outline.color": "outlineVariant",
   "md.comp.input-chip.unselected.outline.width": 1.0,
   "md.comp.input-chip.unselected.pressed.label-text.color": "onSurfaceVariant",
   "md.comp.input-chip.unselected.pressed.state-layer.color": "onSurfaceVariant",

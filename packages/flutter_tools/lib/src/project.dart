@@ -453,6 +453,11 @@ class AndroidProject extends FlutterProjectPlatform {
   static const String javaGradleCompatUrl =
     'https://docs.gradle.org/current/userguide/compatibility.html#java';
 
+  // User facing link that describes instructions for downloading
+  // the latest version of Android Studio.
+  static const String installAndroidStudioUrl =
+    'https://developer.android.com/studio/install';
+
   /// The parent of this project.
   final FlutterProject parent;
 
@@ -861,6 +866,8 @@ $javaGradleCompatUrl
     }
     for (final XmlElement metaData in document.findAllElements('meta-data')) {
       final String? name = metaData.getAttribute('android:name');
+      // External code checks for this string to indentify flutter android apps.
+      // See cl/667760684 as an example.
       if (name == 'flutterEmbedding') {
         final String? embeddingVersionString = metaData.getAttribute('android:value');
         if (embeddingVersionString == '1') {

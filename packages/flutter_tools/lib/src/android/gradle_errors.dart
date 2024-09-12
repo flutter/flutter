@@ -72,7 +72,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   transformInputIssueHandler,
   lockFileDepMissingHandler,
   minCompileSdkVersionHandler,
-  jvm11RequiredHandler,
+  incompatibleJavaAndAgpVersionsHandler,
   outdatedGradleHandler,
   sslExceptionHandler,
   zipExceptionHandler,
@@ -503,25 +503,38 @@ final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
   eventLabel: 'min-compile-sdk-version',
 );
 
+final RegExp _agpJavaError = RegExp(r'Android Gradle plugin requires Java (\d+\.?\d*) to run');
+
+// If an incompatible Java and Android Gradle Plugin error is caught,
+// Android Gradle Plugin throws the required Java version to fix the error.
+// Android Gradle Plugin handles the error here: http://shortn/_SgUWyRdywL.
+
+// If we ever need to reference or check the thrown requirements,
+// we can find the Java and Android Gradle Plugin compatability here:
+// 'https://developer.android.com/build/releases/past-releases'
 @visibleForTesting
-final GradleHandledError jvm11RequiredHandler = GradleHandledError(
+final GradleHandledError incompatibleJavaAndAgpVersionsHandler= GradleHandledError(
   test: (String line) {
-    return line.contains('Android Gradle plugin requires Java 11 to run');
+    return _agpJavaError.hasMatch(line);
   },
   handler: ({
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
   }) async {
+    final String helpfulGradleError = line.trim().substring(2);
+
     globals.printBox(
-      '${globals.logger.terminal.warningMark} You need Java 11 or higher to build your app with this version of Gradle.\n\n'
-      'To get Java 11, update to the latest version of Android Studio on https://developer.android.com/studio/install.\n\n'
-      'To check the Java version used by Flutter, run `flutter doctor -v`.',
+      '${globals.logger.terminal.warningMark} $helpfulGradleError\n\n'
+      'To fix this issue, try updating to the latest Android SDK and Android Studio on: ${AndroidProject.installAndroidStudioUrl}\n'
+      'If that does not work, you can set the Java version used by Flutter by \n'
+      'running `flutter config --jdk-dir=“</path/to/jdk>“`\n\n'
+      'To check the Java version used by Flutter, run `flutter doctor --verbose`',
       title: _boxTitle,
     );
     return GradleBuildStatus.exit;
   },
-  eventLabel: 'java11-required',
+  eventLabel: 'incompatible-java-agp-version',
 );
 
 /// Handles SSL exceptions: https://github.com/flutter/flutter/issues/104628

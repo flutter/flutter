@@ -1298,7 +1298,7 @@ void main() {
       expect(
         description.join('\n'),
         equalsIgnoringHashCodes(
-            'style: MenuStyle#00000(backgroundColor: WidgetStatePropertyAll(MaterialColor(primary value: Color(0xfff44336))), elevation: WidgetStatePropertyAll(10.0))\n'
+            'style: MenuStyle#00000(backgroundColor: WidgetStatePropertyAll(MaterialColor(primary value: ${const Color(0xfff44336)})), elevation: WidgetStatePropertyAll(10.0))\n'
             'clipBehavior: Clip.none'),
       );
     });
@@ -2972,7 +2972,7 @@ void main() {
         equalsIgnoringHashCodes(
           <String>[
             'focusNode: null',
-            'menuStyle: MenuStyle#00000(backgroundColor: WidgetStatePropertyAll(MaterialColor(primary value: Color(0xff4caf50))), elevation: WidgetStatePropertyAll(20.0), shape: WidgetStatePropertyAll(RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)))',
+            'menuStyle: MenuStyle#00000(backgroundColor: WidgetStatePropertyAll(MaterialColor(primary value: ${const Color(0xff4caf50)})), elevation: WidgetStatePropertyAll(20.0), shape: WidgetStatePropertyAll(RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)))',
             'alignmentOffset: null',
             'clipBehavior: hardEdge',
           ],
@@ -3798,6 +3798,59 @@ void main() {
           Rect.fromLTRB(329.5, 60.0, 543.5, 220.0),
           Rect.fromLTRB(81.5, 108.0, 329.5, 316.0),
         ]),
+      );
+    });
+
+    testWidgets('Menu follows content position when a LayerLink is provided', (WidgetTester tester) async {
+      final MenuController controller = MenuController();
+      final UniqueKey contentKey = UniqueKey();
+
+      Widget boilerplate(double bottomInsets) {
+        return MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(
+              viewInsets: EdgeInsets.only(bottom: bottomInsets),
+            ),
+            child: Scaffold(
+              body: Center(
+                child: MenuAnchor(
+                  controller: controller,
+                  layerLink: LayerLink(),
+                  menuChildren: <Widget>[
+                    MenuItemButton(
+                      onPressed: () {},
+                      child: const Text('Button 1'),
+                    ),
+                  ],
+                  builder: (BuildContext context, MenuController controller, Widget? child) {
+                    return SizedBox(key: contentKey, width: 100, height: 100);
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Build once without bottom insets and open the menu.
+      await tester.pumpWidget(boilerplate(0.0));
+      controller.open();
+      await tester.pump();
+
+      // Menu vertical position is just under the content.
+      expect(
+        tester.getRect(findMenuPanels()).top,
+        tester.getRect(find.byKey(contentKey)).bottom,
+      );
+
+      // Simulate the keyboard opening resizing the view.
+      await tester.pumpWidget(boilerplate(100.0));
+      await tester.pump();
+
+      // Menu vertical position is just under the content.
+      expect(
+        tester.getRect(findMenuPanels()).top,
+        tester.getRect(find.byKey(contentKey)).bottom,
       );
     });
   });

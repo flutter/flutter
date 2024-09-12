@@ -624,19 +624,19 @@ const String _dartPluginRegistryForNonWebTemplate = '''
 
 import 'dart:io'; // flutter_ignore: dart_io_import.
 {{#android}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
+import 'package:{{pluginName}}/{{dartFileName}}';
 {{/android}}
 {{#ios}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
+import 'package:{{pluginName}}/{{dartFileName}}';
 {{/ios}}
 {{#linux}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
+import 'package:{{pluginName}}/{{dartFileName}}';
 {{/linux}}
 {{#macos}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
+import 'package:{{pluginName}}/{{dartFileName}}';
 {{/macos}}
 {{#windows}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
+import 'package:{{pluginName}}/{{dartFileName}}';
 {{/windows}}
 
 @pragma('vm:entry-point')
@@ -993,8 +993,8 @@ void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<Object?>? pl
         e,
         platform: globals.platform,
         os: globals.os,
-        destination: 'dest',
-        source: 'source',
+        destination: link.path,
+        source: path,
       );
       rethrow;
     }
@@ -1432,8 +1432,8 @@ bool _hasPluginInlineImpl(
 
 /// Determine if the plugin provides an inline Dart implementation.
 bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
-  return plugin.pluginDartClassPlatforms[platformKey] != null &&
-      plugin.pluginDartClassPlatforms[platformKey] != 'none';
+  final DartPluginClassAndFilePair? platformInfo = plugin.pluginDartClassPlatforms[platformKey];
+  return platformInfo != null && platformInfo.dartClass != 'none';
 }
 
 /// Get the resolved plugin [resolution] from the [candidates] serving as implementation for
