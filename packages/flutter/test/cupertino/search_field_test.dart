@@ -760,4 +760,52 @@ void main() {
       equals(0.0),
     );
   });
+
+  testWidgets('Top padding animates while resizing on scroll', (WidgetTester tester) async {
+    const TextDirection direction = TextDirection.ltr;
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: direction,
+        child: CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverResizingHeader(child: CupertinoSearchTextField()),
+                SliverFillRemaining(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder searchTextFieldFinder = find.byType(CupertinoSearchTextField);
+    expect(searchTextFieldFinder, findsOneWidget);
+
+    final double initialPadding = tester.widget<CupertinoTextField>(
+      find.descendant(
+        of: searchTextFieldFinder,
+        matching: find.byType(CupertinoTextField),
+      ),
+    ).padding.resolve(direction).top;
+    expect(initialPadding, equals(8.0));
+
+    final double searchTextFieldHeight = tester.getSize(searchTextFieldFinder).height;
+
+    // Scroll until the search text field starts resizing.
+    final TestGesture scrollGesture1 = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
+    await scrollGesture1.moveBy(Offset(0, -searchTextFieldHeight / 2));
+    await scrollGesture1.up();
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<CupertinoTextField>(
+        find.descendant(
+          of: searchTextFieldFinder,
+          matching: find.byType(CupertinoTextField),
+        ),
+      ).padding.resolve(direction).top,
+      lessThan(initialPadding),
+    );
+  });
 }

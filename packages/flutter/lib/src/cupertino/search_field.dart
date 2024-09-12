@@ -482,8 +482,8 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       size: scaledIconSize,
     );
 
-    // Animate the top padding so that the placeholder and editable text are
-    // moved upwards when the search text field is resized on scroll.
+    // Animate the top padding so that the placeholder and editable text
+    // move when the search text field is resized on scroll.
     final EdgeInsets currentInsets = widget.padding.resolve(Directionality.of(context));
     final EdgeInsetsGeometry? padding = EdgeInsetsGeometry.lerp(
       widget.padding,
