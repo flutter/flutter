@@ -1,4 +1,4 @@
-Signature: c243461bb9b7e0bd26beb6c3298b6f32
+Signature: bc9935cb47e12e3655a810bb02a32ec2
 
 ====================================================================================================
 LIBRARY: dart
@@ -4098,6 +4098,7 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_shared/lib/date_t
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_shared/lib/synced/async_status_codes.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/vm/lib/concurrent_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/compact_hash.dart + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/ffi_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/js_helper_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/js_helper_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/concurrent/concurrent.dart + ../../../flutter/third_party/dart/LICENSE
@@ -4142,6 +4143,7 @@ FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_shared/lib/date_tim
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_shared/lib/synced/async_status_codes.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/vm/lib/concurrent_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/compact_hash.dart
+FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/ffi_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/js_helper_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/js_helper_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/concurrent/concurrent.dart
@@ -4783,7 +4785,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/072945e0b45732a1ef0c0c86ebf092fec21ded40
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/aa27c61f5859e198e42f7f36575a87ac44296340
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
