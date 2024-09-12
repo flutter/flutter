@@ -234,26 +234,6 @@ struct SetRuntimeEffectColorSourceOp : DLOp {
   }
 };
 
-#ifdef IMPELLER_ENABLE_3D
-struct SetSceneColorSourceOp : DLOp {
-  static constexpr auto kType = DisplayListOpType::kSetSceneColorSource;
-
-  explicit SetSceneColorSourceOp(const DlSceneColorSource* source)
-      : source(source->scene_node(), source->camera_matrix()) {}
-
-  const DlSceneColorSource source;
-
-  void dispatch(DlOpReceiver& receiver) const {
-    receiver.setColorSource(&source);
-  }
-
-  DisplayListCompare equals(const SetSceneColorSourceOp* other) const {
-    return (source == other->source) ? DisplayListCompare::kEqual
-                                     : DisplayListCompare::kNotEqual;
-  }
-};
-#endif  // IMPELLER_ENABLE_3D
-
 // 4 byte header + 16 byte payload uses 24 total bytes (4 bytes unused)
 struct SetSharedImageFilterOp : DLOp {
   static constexpr auto kType = DisplayListOpType::kSetSharedImageFilter;

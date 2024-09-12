@@ -150,11 +150,6 @@ extern std::ostream& operator<<(std::ostream& os,
     FOR_EACH_DISPLAY_LIST_OP(DLT_OP_TYPE_CASE)
     DLT_OP_TYPE_CASE(InvalidOp)
 
-#ifdef IMPELLER_ENABLE_3D
-    DLT_OP_TYPE_CASE(SetSceneColorSource)
-#endif  // IMPELLER_ENABLE_3D
-
-
 #undef DLT_OP_TYPE_CASE
   }
   // Not a valid enum, should never happen, but in case we encounter bad data.
@@ -527,12 +522,6 @@ void DisplayListStreamDispatcher::setColorSource(const DlColorSource* source) {
                                  << sweep_src->tile_mode() << ", " << sweep_src->matrix_ptr() << ")";
       break;
     }
-#ifdef IMPELLER_ENABLE_3D
-    case DlColorSourceType::kScene: {
-      os_ << "DlSceneColorSource()";
-      break;
-    }
-#endif  // IMPELLER_ENABLE_3D
     default:
       os_ << "?DlUnknownColorSource?()";
       break;

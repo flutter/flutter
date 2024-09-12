@@ -23,11 +23,6 @@
 #include "impeller/geometry/scalar.h"
 #include "impeller/runtime_stage/runtime_stage.h"
 
-#if IMPELLER_ENABLE_3D
-#include "impeller/entity/contents/scene_contents.h"  // nogncheck
-#include "impeller/scene/node.h"                      // nogncheck
-#endif                                                // IMPELLER_ENABLE_3D
-
 namespace impeller {
 
 namespace {
@@ -142,16 +137,6 @@ struct CreateContentsVisitor {
     contents->SetColor(paint.color);
     return contents;
   }
-
-#if IMPELLER_ENABLE_3D
-  std::shared_ptr<ColorSourceContents> operator()(const SceneData& data) {
-    auto contents = std::make_shared<SceneContents>();
-    contents->SetOpacityFactor(paint.color.alpha);
-    contents->SetNode(data.scene_node);
-    contents->SetCameraTransform(data.camera_transform);
-    return contents;
-  }
-#endif  // IMPELLER_ENABLE_3D
 };
 }  // namespace
 
@@ -246,16 +231,6 @@ ColorSource ColorSource::MakeRuntimeEffect(
                         std::move(texture_inputs)};
   return result;
 }
-
-#if IMPELLER_ENABLE_3D
-ColorSource ColorSource::MakeScene(std::shared_ptr<scene::Node> scene_node,
-                                   Matrix camera_transform) {
-  ColorSource result;
-  result.type_ = Type::kScene;
-  result.color_source_data_ = SceneData{scene_node, camera_transform};
-  return result;
-}
-#endif  // IMPELLER_ENABLE_3D
 
 ColorSource::Type ColorSource::GetType() const {
   return type_;
