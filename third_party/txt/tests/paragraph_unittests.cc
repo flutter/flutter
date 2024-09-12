@@ -75,14 +75,14 @@ class DlOpRecorder final : public virtual DlOpReceiver,
 
   void drawRect(const DlRect& rect) override { rects_.push_back(rect); }
 
-  void drawPath(const SkPath& path) override { paths_.push_back(path); }
+  void drawPath(const DlPath& path) override { paths_.push_back(path); }
 
   std::vector<std::shared_ptr<impeller::TextFrame>> text_frames_;
   std::vector<sk_sp<SkTextBlob>> blobs_;
   std::vector<std::pair<DlPoint, DlPoint>> lines_;
   std::vector<std::tuple<DlPoint, DlPoint, DlPoint>> dashed_lines_;
   std::vector<DlRect> rects_;
-  std::vector<SkPath> paths_;
+  std::vector<DlPath> paths_;
 };
 
 template <typename T>
