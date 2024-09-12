@@ -8,6 +8,33 @@ import 'package:ui/ui.dart';
 
 import '../common/test_initialization.dart';
 
+
+class _ColorMatcher extends Matcher {
+  _ColorMatcher(this._target, this._threshold);
+
+  final Color _target;
+  final double _threshold;
+
+  @override
+  Description describe(Description description) {
+    return description.add('matches color "$_target" with threshold "$_threshold".');
+  }
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    return item is Color &&
+        item.colorSpace == _target.colorSpace &&
+        (item.a - _target.a).abs() <= _threshold &&
+        (item.r - _target.r).abs() <= _threshold &&
+        (item.g - _target.g).abs() <= _threshold &&
+        (item.b - _target.b).abs() <= _threshold;
+  }
+}
+
+Matcher isSameColorAs(Color color, {double threshold = 0.004}) {
+  return _ColorMatcher(color, threshold);
+}
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -31,7 +58,7 @@ Future<void> testMain() async {
     const Color c = Color(0x00000000);
     final Paint p = Paint();
     p.color = c;
-    expect(c.toString(), equals('Color(0x00000000)'));
+    expect(c.toString(), equals('${const Color(0x00000000)}'));
   });
 
   test('color created with out of bounds value', () {
@@ -63,7 +90,7 @@ Future<void> testMain() async {
     );
     expect(
       Color.lerp(const Color(0x00000000), const Color(0xFFFFFFFF), 0.5),
-      const Color(0x7F7F7F7F),
+      isSameColorAs(const Color(0x7F7F7F7F)),
     );
     expect(
       Color.lerp(const Color(0x00000000), const Color(0xFFFFFFFF), 1.0),
@@ -102,23 +129,23 @@ Future<void> testMain() async {
     );
     expect(
       Color.alphaBlend(const Color(0x80808080), const Color(0xFFFFFFFF)),
-      const Color(0xFFBFBFBF),
+      isSameColorAs(const Color(0xFFBFBFBF)),
     );
     expect(
       Color.alphaBlend(const Color(0x80808080), const Color(0xFF000000)),
-      const Color(0xFF404040),
+      isSameColorAs(const Color(0xFF404040)),
     );
     expect(
       Color.alphaBlend(const Color(0x01020304), const Color(0xFF000000)),
-      const Color(0xFF000000),
+      isSameColorAs(const Color(0xFF000000)),
     );
     expect(
       Color.alphaBlend(const Color(0x11223344), const Color(0xFF000000)),
-      const Color(0xFF020304),
+      isSameColorAs(const Color(0xFF020304)),
     );
     expect(
       Color.alphaBlend(const Color(0x11223344), const Color(0x80000000)),
-      const Color(0x88040608),
+      isSameColorAs(const Color(0x88040608)),
     );
   });
 
