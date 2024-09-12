@@ -33,7 +33,7 @@ Future<void> execute() async {
   await benchmarkWidgets((WidgetTester tester) async {
     runApp(intrinsicTextHeight);
     // Wait for the UI to stabilize.
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
 
     final TestViewConfiguration big = TestViewConfiguration.fromView(
       size: const Size(360.0, 640.0),
