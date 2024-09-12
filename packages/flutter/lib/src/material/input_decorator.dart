@@ -2186,7 +2186,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
             child: child,
           );
         },
-        child: showHint ? hintTextWidget : null,
+        child: showHint ? hintTextWidget : const SizedBox.shrink(),
       ) : AnimatedOpacity(
         opacity: showHint ? 1.0 : 0.0,
         duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
