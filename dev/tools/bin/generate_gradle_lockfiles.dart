@@ -157,6 +157,11 @@ void main(List<String> arguments) {
       continue;
     }
 
+    if (androidDirectory.path.contains('ios/.symlinks')) {
+      print('${rootBuildGradle.path} is in the ios subdirectory, skipping');
+      continue;
+    }
+
     print('Processing ${androidDirectory.path}');
 
     try {
