@@ -492,6 +492,22 @@ class FlutterVmService {
   final Uri? wsAddress;
   final Uri? httpAddress;
 
+  /// Calls [service.getVM]. However, in the case that an [vm_service.RPCError]
+  /// is thrown due to the service being disconnected, the error is discarded
+  /// and null is returned.
+  Future<vm_service.VM?> getVmGuarded() async {
+    try {
+      return await service.getVM();
+    } on vm_service.RPCError catch (err) {
+      if (err.code == RPCErrorCodes.kServiceDisappeared ||
+          err.message.contains('Service connection disposed')) {
+        globals.printTrace('VmService.getVm call failed: $err');
+        return null;
+      }
+      rethrow;
+    }
+  }
+
   Future<vm_service.Response?> callMethodWrapper(
     String method, {
     String? isolateId,
