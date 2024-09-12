@@ -86,7 +86,6 @@ workspace:
   - shell/vmservice
   - testing/benchmark
   - testing/dart
-  - testing/litetest
   - testing/scenario_app
   - testing/skia_gold_client
   - testing/smoke_test_failure
@@ -138,8 +137,6 @@ dependencies:
   smith: any
 
 dev_dependencies:
-  litetest:
-    path: ./testing/litetest
   process_fakes:
     path: ./tools/pkg/process_fakes
   skia_gold_client:
