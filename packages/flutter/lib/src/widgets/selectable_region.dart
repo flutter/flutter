@@ -2608,10 +2608,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// when either selection edge has not been set.
   SelectedContentRange _calculateLocalRange(List<SelectedContentRange> ranges) {
     // Calculate content length.
-    int totalContentLength = 0;
-    for (final SelectedContentRange range in ranges) {
-      totalContentLength += range.contentLength;
-    }
+    final int totalContentLength = ranges.fold<int>(0, (int sum, SelectedContentRange range) => sum + range.contentLength);
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
       return SelectedContentRange.empty(contentLength: totalContentLength);
     }
