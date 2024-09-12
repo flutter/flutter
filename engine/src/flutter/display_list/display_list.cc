@@ -231,10 +231,6 @@ void DisplayList::DispatchOneOp(DlOpReceiver& receiver,
 
     FOR_EACH_DISPLAY_LIST_OP(DL_OP_DISPATCH)
 
-#ifdef IMPELLER_ENABLE_3D
-    DL_OP_DISPATCH(SetSceneColorSource)
-#endif  // IMPELLER_ENABLE_3D
-
 #undef DL_OP_DISPATCH
 
     case DisplayListOpType::kInvalidOp:
@@ -258,10 +254,6 @@ void DisplayList::DisposeOps(const uint8_t* ptr, const uint8_t* end) {
     break;
 
       FOR_EACH_DISPLAY_LIST_OP(DL_OP_DISPOSE)
-
-#ifdef IMPELLER_ENABLE_3D
-      DL_OP_DISPOSE(SetSceneColorSource)
-#endif  // IMPELLER_ENABLE_3D
 
 #undef DL_OP_DISPOSE
 
@@ -297,9 +289,6 @@ DisplayListOpCategory DisplayList::GetOpCategory(DisplayListOpType type) {
     case DisplayListOpType::kSetSharedImageFilter:
     case DisplayListOpType::kClearMaskFilter:
     case DisplayListOpType::kSetPodMaskFilter:
-#ifdef IMPELLER_ENABLE_3D
-    case DisplayListOpType::kSetSceneColorSource:
-#endif  // IMPELLER_ENABLE_3D
       return DisplayListOpCategory::kAttribute;
 
     case DisplayListOpType::kSave:
@@ -447,10 +436,6 @@ static bool CompareOps(const uint8_t* ptrA,
     break;
 
       FOR_EACH_DISPLAY_LIST_OP(DL_OP_EQUALS)
-
-#ifdef IMPELLER_ENABLE_3D
-      DL_OP_EQUALS(SetSceneColorSource)
-#endif  // IMPELLER_ENABLE_3D
 
 #undef DL_OP_EQUALS
 

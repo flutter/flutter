@@ -212,9 +212,6 @@
 ../../../flutter/impeller/renderer/renderer_unittests.cc
 ../../../flutter/impeller/renderer/testing
 ../../../flutter/impeller/runtime_stage/runtime_stage_unittests.cc
-../../../flutter/impeller/scene/README.md
-../../../flutter/impeller/scene/importer/importer_unittests.cc
-../../../flutter/impeller/scene/scene_unittests.cc
 ../../../flutter/impeller/shader_archive/shader_archive_unittests.cc
 ../../../flutter/impeller/tessellator/dart/.dart_tool
 ../../../flutter/impeller/tessellator/dart/pubspec.yaml

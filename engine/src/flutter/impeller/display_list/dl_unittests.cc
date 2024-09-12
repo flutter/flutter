@@ -29,7 +29,6 @@
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/playground/widgets.h"
-#include "impeller/scene/node.h"
 #include "third_party/imgui/imgui.h"
 #include "third_party/skia/include/core/SkBlurTypes.h"
 #include "third_party/skia/include/core/SkClipOp.h"
@@ -1495,33 +1494,6 @@ static std::optional<Rect> GetCoverageOfFirstEntity(const Picture& picture) {
   });
   return coverage;
 }
-
-#ifdef IMPELLER_ENABLE_3D
-TEST_P(DisplayListTest, SceneColorSource) {
-  // Load up the scene.
-  auto mapping =
-      flutter::testing::OpenFixtureAsMapping("flutter_logo_baked.glb.ipscene");
-  ASSERT_NE(mapping, nullptr);
-
-  std::shared_ptr<scene::Node> gltf_scene =
-      impeller::scene::Node::MakeFromFlatbuffer(
-          *mapping, *GetContext()->GetResourceAllocator());
-  ASSERT_NE(gltf_scene, nullptr);
-
-  flutter::DisplayListBuilder builder;
-
-  auto color_source = std::make_shared<flutter::DlSceneColorSource>(
-      gltf_scene,
-      Matrix::MakePerspective(Degrees(45), GetWindowSize(), 0.1, 1000) *
-          Matrix::MakeLookAt({3, 2, -5}, {0, 0, 0}, {0, 1, 0}));
-
-  flutter::DlPaint paint = flutter::DlPaint().setColorSource(color_source);
-
-  builder.DrawPaint(paint);
-
-  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
-}
-#endif
 
 TEST_P(DisplayListTest, DrawPaintIgnoresMaskFilter) {
   flutter::DisplayListBuilder builder;

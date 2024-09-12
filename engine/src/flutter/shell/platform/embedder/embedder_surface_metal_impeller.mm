@@ -17,10 +17,6 @@
 #include "impeller/entity/mtl/modern_shaders.h"
 #include "impeller/renderer/backend/metal/context_mtl.h"
 
-#if IMPELLER_ENABLE_3D
-#include "impeller/scene/shaders/mtl/scene_shaders.h"  // nogncheck
-#endif                                                 // IMPELLER_ENABLE_3D
-
 FLUTTER_ASSERT_NOT_ARC
 
 namespace flutter {
@@ -36,10 +32,6 @@ EmbedderSurfaceMetalImpeller::EmbedderSurfaceMetalImpeller(
   std::vector<std::shared_ptr<fml::Mapping>> shader_mappings = {
       std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_data,
                                              impeller_entity_shaders_length),
-#if IMPELLER_ENABLE_3D
-      std::make_shared<fml::NonOwnedMapping>(impeller_scene_shaders_data,
-                                             impeller_scene_shaders_length),
-#endif  // IMPELLER_ENABLE_3D
       std::make_shared<fml::NonOwnedMapping>(impeller_modern_shaders_data,
                                              impeller_modern_shaders_length),
       std::make_shared<fml::NonOwnedMapping>(impeller_framebuffer_blend_shaders_data,

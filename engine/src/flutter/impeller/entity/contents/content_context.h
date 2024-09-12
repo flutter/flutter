@@ -73,10 +73,6 @@
 #include "impeller/entity/tiled_texture_fill_external.frag.h"
 #endif  // IMPELLER_ENABLE_OPENGLES
 
-#if IMPELLER_ENABLE_3D
-#include "impeller/scene/scene_context.h"  // nogncheck
-#endif
-
 namespace impeller {
 
 using FastGradientPipeline =
@@ -377,10 +373,6 @@ class ContentContext {
   ~ContentContext();
 
   bool IsValid() const;
-
-#if IMPELLER_ENABLE_3D
-  std::shared_ptr<scene::SceneContext> GetSceneContext() const;
-#endif  // IMPELLER_ENABLE_3D
 
   std::shared_ptr<Tessellator> GetTessellator() const;
 
@@ -1010,9 +1002,6 @@ class ContentContext {
 
   bool is_valid_ = false;
   std::shared_ptr<Tessellator> tessellator_;
-#if IMPELLER_ENABLE_3D
-  std::shared_ptr<scene::SceneContext> scene_context_;
-#endif  // IMPELLER_ENABLE_3D
   std::shared_ptr<RenderTargetAllocator> render_target_cache_;
   std::shared_ptr<HostBuffer> host_buffer_;
   std::shared_ptr<Texture> empty_texture_;

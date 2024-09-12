@@ -38,51 +38,6 @@ namespace testing {
 
 INSTANTIATE_PLAYGROUND_SUITE(AiksTest);
 
-#if IMPELLER_ENABLE_3D
-TEST_P(AiksTest, SceneColorSource) {
-  // Load up the scene.
-  auto mapping =
-      flutter::testing::OpenFixtureAsMapping("flutter_logo_baked.glb.ipscene");
-  ASSERT_NE(mapping, nullptr);
-
-  std::shared_ptr<scene::Node> gltf_scene = scene::Node::MakeFromFlatbuffer(
-      *mapping, *GetContext()->GetResourceAllocator());
-  ASSERT_NE(gltf_scene, nullptr);
-
-  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
-    Paint paint;
-
-    static Scalar distance = 2;
-    static Scalar y_pos = 0;
-    static Scalar fov = 45;
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
-      ImGui::SliderFloat("Distance", &distance, 0, 4);
-      ImGui::SliderFloat("Y", &y_pos, -3, 3);
-      ImGui::SliderFloat("FOV", &fov, 1, 180);
-      ImGui::End();
-    }
-
-    Scalar angle = GetSecondsElapsed();
-    auto camera_position =
-        Vector3(distance * std::sin(angle), y_pos, -distance * std::cos(angle));
-
-    paint.color_source = ColorSource::MakeScene(
-        gltf_scene,
-        Matrix::MakePerspective(Degrees(fov), GetWindowSize(), 0.1, 1000) *
-            Matrix::MakeLookAt(camera_position, {0, 0, 0}, {0, 1, 0}));
-
-    Canvas canvas;
-    canvas.DrawPaint(Paint{.color = Color::MakeRGBA8(0xf9, 0xf9, 0xf9, 0xff)});
-    canvas.Scale(GetContentScale());
-    canvas.DrawPaint(paint);
-    return canvas.EndRecordingAsPicture();
-  };
-
-  ASSERT_TRUE(OpenPlaygroundHere(callback));
-}
-#endif  // IMPELLER_ENABLE_3D
-
 TEST_P(AiksTest, PaintWithFilters) {
   // validate that a paint with a color filter "HasFilters", no other filters
   // impact this setting.

@@ -10,6 +10,3 @@ import("//flutter/impeller/tools/component.gni")
 
 # Templates for compiling, reflecting, and packaging shaders used by Impeller.
 import("//flutter/impeller/tools/shaders.gni")
-
-# Templates for the experimental 3D renderer.
-import("//flutter/impeller/tools/scene.gni")
