@@ -664,6 +664,7 @@ void main() {
               SliverResizingHeader(
                 child: CupertinoSearchTextField(),
               ),
+              SliverFillRemaining(),
             ],
           ),
         ),
@@ -682,27 +683,23 @@ void main() {
       of: searchTextFieldFinder,
       matching: find.text('Search'),
     );
-    final double initialOpacity = tester.widget<Opacity>(
-      find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity)),
-    ).opacity;
 
     // Initially, the prefix icon and placeholder text are fully opaque.
     expect(
       tester.widget<Opacity>(
         find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity)),
       ).opacity,
-      equals(initialOpacity),
+      equals(1.0),
     );
     expect(
       tester.widget<Text>(placeholderFinder).style?.color?.a,
-      equals(initialOpacity),
+      equals(1.0),
     );
 
     // Scroll until the search text field starts resizing.
-    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
-    await scrollGesture.moveBy(Offset(0, -0.5 * intrinsicHeight));
-    await tester.pumpAndSettle();
-    await scrollGesture.up();
+    final TestGesture scrollGesture1 = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
+    await scrollGesture1.moveBy(Offset(0, -intrinsicHeight / 2));
+    await scrollGesture1.up();
     await tester.pumpAndSettle();
 
     // The prefix icon and placeholder text start to fade.
@@ -710,11 +707,39 @@ void main() {
       tester.widget<Opacity>(
         find.ancestor(of: prefixIconFinder,matching: find.byType(Opacity)),
       ).opacity,
-      lessThan(initialOpacity),
+      greaterThan(0.0),
+    );
+    expect(
+      tester.widget<Opacity>(
+        find.ancestor(of: prefixIconFinder,matching: find.byType(Opacity)),
+      ).opacity,
+      lessThan(1.0),
     );
     expect(
       tester.widget<Text>(placeholderFinder).style?.color?.a,
-      lessThan(initialOpacity),
+      greaterThan(0.0),
     );
-  }, variant: TargetPlatformVariant.mobile());
+    expect(
+      tester.widget<Text>(placeholderFinder).style?.color?.a,
+      lessThan(1.0),
+    );
+
+    // Scroll far enough that the placeholder and prefix icon are completely transparent.
+    final TestGesture scrollGesture2 = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
+    await scrollGesture2.moveBy(Offset(0, -4 * intrinsicHeight / 5));
+    await scrollGesture2.up();
+    await tester.pumpAndSettle();
+
+    // The prefix icon and placeholder text have faded completely.
+    expect(
+      tester.widget<Opacity>(
+        find.ancestor(of: prefixIconFinder,matching: find.byType(Opacity)),
+      ).opacity,
+      equals(0.0),
+    );
+    expect(
+      tester.widget<Text>(placeholderFinder).style?.color?.a,
+      equals(0.0),
+    );
+  });
 }

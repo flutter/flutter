@@ -344,7 +344,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       widget.controller ?? _controller!.value;
 
   late AnimationController _animationController;
-  ScrollController? _ancestorScrollController;
+  ScrollPosition? _ancestorScrollPosition;
   double _maxHeight = 0.0;
 
   @override
@@ -366,9 +366,9 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _ancestorScrollController?.removeListener(_onScroll);
-    _ancestorScrollController = Scrollable.maybeOf(context)?.widget.controller;
-    _ancestorScrollController?.addListener(_onScroll);
+    _ancestorScrollPosition?.removeListener(_onScroll);
+    _ancestorScrollPosition = Scrollable.maybeOf(context)?.position;
+    _ancestorScrollPosition?.addListener(_onScroll);
   }
 
   @override
@@ -392,7 +392,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
 
   @override
   void dispose() {
-    _ancestorScrollController?.removeListener(_onScroll);
+    _ancestorScrollPosition?.removeListener(_onScroll);
     _animationController.dispose();
     super.dispose();
     if (widget.controller == null) {
@@ -434,12 +434,10 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   }
 
   void _onScroll() {
-    if (_ancestorScrollController == null) {
+    if (_ancestorScrollPosition == null) {
       return;
     }
-    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
-    final double currentHeight = renderBox?.size.height ?? 0.0;
-
+    final double currentHeight = _maxHeight - _ancestorScrollPosition!.pixels;
     setState(() {
       _animationController.value = _calculateScrollOpacity(currentHeight);
     });
