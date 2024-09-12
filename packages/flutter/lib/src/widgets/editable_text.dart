@@ -3975,9 +3975,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       case SelectionChangedCause.toolbar:
         requestKeyboard();
       case SelectionChangedCause.keyboard:
-        if (_hasFocus) {
-          requestKeyboard();
-        }
     }
     if (widget.selectionControls == null && widget.contextMenuBuilder == null) {
       _selectionOverlay?.dispose();

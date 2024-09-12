@@ -3883,6 +3883,37 @@ void main() {
   });
 
   testWidgets(
+    'does not request keyboard after the keyboard changes the selection',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/154156.
+      final Widget widget = MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          style: Typography.material2018().black.titleMedium!,
+          cursorColor: Colors.blue,
+          focusNode: focusNode,
+          controller: controller,
+        ),
+      );
+      controller.value = const TextEditingValue(text: '123', selection: TextSelection.collapsed(offset: 0));
+      await tester.pumpWidget(widget);
+
+      focusNode.requestFocus();
+      await tester.pump();
+
+      assert(focusNode.hasFocus);
+      tester.testTextInput.log.clear();
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      state.userUpdateTextEditingValue(const TextEditingValue(text: '123', selection: TextSelection.collapsed(offset: 1)), SelectionChangedCause.keyboard);
+
+      expect(
+        tester.testTextInput.log.map((MethodCall m) => m.method),
+        isNot(contains('TextInput.show')),
+      );
+  });
+
+  testWidgets(
     'iOS autocorrection rectangle should appear on demand and dismiss when the text changes or when focus is lost',
     (WidgetTester tester) async {
       const Color rectColor = Color(0xFFFF0000);
@@ -10396,14 +10427,8 @@ void main() {
       'TextInput.setEditingState',
       'TextInput.show',
       'TextInput.setCaretRect',
-      'TextInput.show',
     ];
-    expect(tester.testTextInput.log.length, logOrder.length);
-    int index = 0;
-    for (final MethodCall m in tester.testTextInput.log) {
-      expect(m.method, logOrder[index]);
-      index++;
-    }
+    expect(tester.testTextInput.log.map((MethodCall m) => m.method), logOrder);
     expect(tester.testTextInput.editingState!['text'], 'flutter is the best!');
   });
 
@@ -10638,7 +10663,6 @@ void main() {
 
     // setEditingState is called when remote value modified by the formatter.
     state.updateEditingValue(collapsedAtEnd('I will be modified by the formatter.'));
-    expect(log.length, 2);
     expect(log, contains(matchesMethodCall(
       'TextInput.setEditingState',
       args: allOf(
@@ -10649,7 +10673,6 @@ void main() {
     log.clear();
 
     state.updateEditingValue(collapsedAtEnd('I will be modified by the formatter.'));
-    expect(log.length, 2);
     expect(log, contains(matchesMethodCall(
       'TextInput.setEditingState',
       args: allOf(
