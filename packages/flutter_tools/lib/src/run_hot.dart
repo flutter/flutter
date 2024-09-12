@@ -263,7 +263,7 @@ class HotRunner extends ResidentRunner {
     }
 
     for (final FlutterDevice? device in flutterDevices) {
-      await device!.initLogReader();
+      await device!.tryInitLogReader();
       device
         .developmentShaderCompiler
         .configureCompiler(device.targetPlatform);
