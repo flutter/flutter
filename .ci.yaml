@@ -434,7 +434,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "17"}
+          {"dependency": "open_jdk", "version": "version:17"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -446,7 +446,6 @@ targets:
       - .ci.yaml
 
   - name: Linux build_tests_1_5
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -466,7 +465,6 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
 
   - name: Linux build_tests_2_5
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -486,7 +484,6 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
 
   - name: Linux build_tests_3_5
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -526,7 +523,6 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
 
   - name: Linux build_tests_5_5
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
