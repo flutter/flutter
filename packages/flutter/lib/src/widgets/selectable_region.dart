@@ -3221,9 +3221,6 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
     final SelectionGeometry lastSelectionGeometry = value;
     final SelectionResult result = super.dispatchSelectionEvent(event);
-    if (value.status == SelectionStatus.none) {
-      return result;
-    }
     if (lastSelectionGeometry != value) {
       onSelectionChanged.call(_getDetails());
     }
