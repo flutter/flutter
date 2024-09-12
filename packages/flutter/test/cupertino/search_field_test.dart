@@ -655,14 +655,16 @@ void main() {
     expect(textField.enableIMEPersonalizedLearning, false);
   });
 
-  testWidgets('Prefix icon and placeholder fade while resizing on scroll', (WidgetTester tester) async {
+  testWidgets('Icons and placeholder fade while resizing on scroll', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
           child: CustomScrollView(
             slivers: <Widget>[
               SliverResizingHeader(
-                child: CupertinoSearchTextField(),
+                child: CupertinoSearchTextField(
+                  suffixMode: OverlayVisibilityMode.always,
+                ),
               ),
               SliverFillRemaining(),
             ],
@@ -672,47 +674,61 @@ void main() {
     );
 
     final Finder searchTextFieldFinder = find.byType(CupertinoSearchTextField);
-    final double intrinsicHeight = tester.getSize(searchTextFieldFinder).height;
     expect(searchTextFieldFinder, findsOneWidget);
 
     final Finder prefixIconFinder = find.descendant(
       of: searchTextFieldFinder,
-      matching: find.byType(IconTheme),
+      matching: find.byIcon(CupertinoIcons.search),
+    );
+    final Finder suffixIconFinder = find.descendant(
+      of: searchTextFieldFinder,
+      matching: find.byIcon(CupertinoIcons.xmark_circle_fill),
     );
     final Finder placeholderFinder = find.descendant(
       of: searchTextFieldFinder,
       matching: find.text('Search'),
     );
+    expect(prefixIconFinder, findsOneWidget);
+    expect(suffixIconFinder, findsOneWidget);
+    expect(placeholderFinder, findsOneWidget);
 
-    // Initially, the prefix icon and placeholder text are fully opaque.
+    // Initially, the icons and placeholder text are fully opaque.
     expect(
-      tester.widget<Opacity>(
-        find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity)),
-      ).opacity,
+      tester.widget<Opacity>(find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity))).opacity,
+      equals(1.0),
+    );
+    expect(
+      tester.widget<Opacity>(find.ancestor(of: suffixIconFinder, matching: find.byType(Opacity))).opacity,
       equals(1.0),
     );
     expect(
       tester.widget<Text>(placeholderFinder).style?.color?.a,
       equals(1.0),
     );
+
+    final double searchTextFieldHeight = tester.getSize(searchTextFieldFinder).height;
 
     // Scroll until the search text field starts resizing.
     final TestGesture scrollGesture1 = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
-    await scrollGesture1.moveBy(Offset(0, -intrinsicHeight / 2));
+    await scrollGesture1.moveBy(Offset(0, -searchTextFieldHeight / 2));
     await scrollGesture1.up();
     await tester.pumpAndSettle();
 
-    // The prefix icon and placeholder text start to fade.
+    // The icons and placeholder text start to fade.
     expect(
-      tester.widget<Opacity>(
-        find.ancestor(of: prefixIconFinder,matching: find.byType(Opacity)),
-      ).opacity,
+      tester.widget<Opacity>(find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity))).opacity,
       greaterThan(0.0),
     );
     expect(
-      tester.widget<Opacity>(
-        find.ancestor(of: prefixIconFinder,matching: find.byType(Opacity)),
-      ).opacity,
+      tester.widget<Opacity>(find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity))).opacity,
+      lessThan(1.0),
+    );
+    expect(
+      tester.widget<Opacity>(find.ancestor(of: suffixIconFinder, matching: find.byType(Opacity))).opacity,
+      greaterThan(0.0),
+    );
+    expect(
+      tester.widget<Opacity>(find.ancestor(of: suffixIconFinder, matching: find.byType(Opacity))).opacity,
       lessThan(1.0),
     );
     expect(
@@ -724,17 +740,19 @@ void main() {
       lessThan(1.0),
     );
 
-    // Scroll far enough that the placeholder and prefix icon are completely transparent.
+    // Scroll far enough that the placeholder and icons are completely transparent.
     final TestGesture scrollGesture2 = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
-    await scrollGesture2.moveBy(Offset(0, -4 * intrinsicHeight / 5));
+    await scrollGesture2.moveBy(Offset(0, -4 * searchTextFieldHeight / 5));
     await scrollGesture2.up();
     await tester.pumpAndSettle();
 
-    // The prefix icon and placeholder text have faded completely.
+    // The icons and placeholder text have faded completely.
     expect(
-      tester.widget<Opacity>(
-        find.ancestor(of: prefixIconFinder,matching: find.byType(Opacity)),
-      ).opacity,
+      tester.widget<Opacity>(find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity))).opacity,
+      equals(0.0),
+    );
+    expect(
+      tester.widget<Opacity>(find.ancestor(of: suffixIconFinder, matching: find.byType(Opacity))).opacity,
       equals(0.0),
     );
     expect(
