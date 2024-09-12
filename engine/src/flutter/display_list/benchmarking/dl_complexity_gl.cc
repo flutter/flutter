@@ -332,7 +332,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawDRRect(
   AccumulateComplexity(complexity);
 }
 
-void DisplayListGLComplexityCalculator::GLHelper::drawPath(const SkPath& path) {
+void DisplayListGLComplexityCalculator::GLHelper::drawPath(const DlPath& path) {
   if (IsComplex()) {
     return;
   }
@@ -655,7 +655,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawTextFrame(
     DlScalar y) {}
 
 void DisplayListGLComplexityCalculator::GLHelper::drawShadow(
-    const SkPath& path,
+    const DlPath& path,
     const DlColor color,
     const DlScalar elevation,
     bool transparent_occluder,

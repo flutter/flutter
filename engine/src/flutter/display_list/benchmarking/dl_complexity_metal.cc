@@ -329,7 +329,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawDRRect(
 }
 
 void DisplayListMetalComplexityCalculator::MetalHelper::drawPath(
-    const SkPath& path) {
+    const DlPath& path) {
   if (IsComplex()) {
     return;
   }
@@ -599,7 +599,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawTextFrame(
     DlScalar y) {}
 
 void DisplayListMetalComplexityCalculator::MetalHelper::drawShadow(
-    const SkPath& path,
+    const DlPath& path,
     const DlColor color,
     const DlScalar elevation,
     bool transparent_occluder,

@@ -9,6 +9,7 @@
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/dl_vertices.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
+#include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/display_list/image/dl_image.h"
 
 #include "third_party/skia/include/core/SkM44.h"
@@ -114,6 +115,11 @@ class DlCanvas {
   virtual void ClipPath(const SkPath& path,
                         ClipOp clip_op = ClipOp::kIntersect,
                         bool is_aa = false) = 0;
+  virtual void ClipPath(const DlPath& path,
+                        ClipOp clip_op = ClipOp::kIntersect,
+                        bool is_aa = false) {
+    ClipPath(path.GetSkPath(), clip_op, is_aa);
+  }
 
   /// Conservative estimate of the bounds of all outstanding clip operations
   /// measured in the coordinate space within which this DisplayList will
@@ -151,6 +157,9 @@ class DlCanvas {
                           const SkRRect& inner,
                           const DlPaint& paint) = 0;
   virtual void DrawPath(const SkPath& path, const DlPaint& paint) = 0;
+  virtual void DrawPath(const DlPath& path, const DlPaint& paint) {
+    DrawPath(path.GetSkPath(), paint);
+  }
   virtual void DrawArc(const SkRect& bounds,
                        DlScalar start,
                        DlScalar sweep,
@@ -222,6 +231,13 @@ class DlCanvas {
                           const DlScalar elevation,
                           bool transparent_occluder,
                           DlScalar dpr) = 0;
+  virtual void DrawShadow(const DlPath& path,
+                          const DlColor color,
+                          const DlScalar elevation,
+                          bool transparent_occluder,
+                          DlScalar dpr) {
+    DrawShadow(path.GetSkPath(), color, elevation, transparent_occluder, dpr);
+  }
 
   virtual void Flush() = 0;
 

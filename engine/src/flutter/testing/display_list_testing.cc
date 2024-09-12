@@ -57,6 +57,7 @@ using DlImageSampling = flutter::DlImageSampling;
 using SaveLayerOptions = flutter::SaveLayerOptions;
 using DisplayListOpType = flutter::DisplayListOpType;
 using DisplayListOpCategory = flutter::DisplayListOpCategory;
+using DlPath = flutter::DlPath;
 
 using DisplayListStreamDispatcher = flutter::testing::DisplayListStreamDispatcher;
 
@@ -218,9 +219,9 @@ static std::ostream& operator<<(std::ostream& os, const SkRRect& rrect) {
             << ")";
 }
 
-static std::ostream& operator<<(std::ostream& os, const SkPath& path) {
-  return os << "SkPath("
-            << "bounds: " << path.getBounds()
+extern std::ostream& operator<<(std::ostream& os, const DlPath& path) {
+  return os << "DlPath("
+            << "bounds: " << path.GetSkBounds()
             // should iterate over verbs and coordinates...
             << ")";
 }
@@ -813,7 +814,7 @@ void DisplayListStreamDispatcher::clipRRect(const SkRRect& rrect,
            << "isaa: " << is_aa
            << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::clipPath(const SkPath& path, ClipOp clip_op,
+void DisplayListStreamDispatcher::clipPath(const DlPath& path, ClipOp clip_op,
                                            bool is_aa) {
   startl() << "clipPath("
            << path << ", "
@@ -864,7 +865,7 @@ void DisplayListStreamDispatcher::drawDRRect(const SkRRect& outer,
   startl() << "drawDRRect(outer: " << outer << ", " << std::endl;
   startl() << "           inner: " << inner << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::drawPath(const SkPath& path) {
+void DisplayListStreamDispatcher::drawPath(const DlPath& path) {
   startl() << "drawPath(" << path << ");" << std::endl;
 }
 void DisplayListStreamDispatcher::drawArc(const DlRect& oval_bounds,
@@ -974,7 +975,7 @@ void DisplayListStreamDispatcher::drawTextFrame(
     << x << ", " << y << ");" << std::endl;
 }
 
-void DisplayListStreamDispatcher::drawShadow(const SkPath& path,
+void DisplayListStreamDispatcher::drawShadow(const DlPath& path,
                                              const DlColor color,
                                              const DlScalar elevation,
                                              bool transparent_occluder,

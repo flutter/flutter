@@ -65,7 +65,7 @@ void DlOpSpy::drawRRect(const SkRRect& rrect) {
 void DlOpSpy::drawDRRect(const SkRRect& outer, const SkRRect& inner) {
   did_draw_ |= will_draw_;
 }
-void DlOpSpy::drawPath(const SkPath& path) {
+void DlOpSpy::drawPath(const DlPath& path) {
   did_draw_ |= will_draw_;
 }
 void DlOpSpy::drawArc(const DlRect& oval_bounds,
@@ -142,7 +142,7 @@ void DlOpSpy::drawTextFrame(
   did_draw_ |= will_draw_;
 }
 
-void DlOpSpy::drawShadow(const SkPath& path,
+void DlOpSpy::drawShadow(const DlPath& path,
                          const DlColor color,
                          const DlScalar elevation,
                          bool transparent_occluder,

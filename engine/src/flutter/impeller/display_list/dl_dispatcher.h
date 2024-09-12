@@ -7,6 +7,7 @@
 
 #include "flutter/display_list/dl_op_receiver.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
+#include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/display_list/utils/dl_receiver_utils.h"
 #include "fml/logging.h"
 #include "impeller/aiks/canvas.h"
@@ -21,13 +22,11 @@ using DlScalar = flutter::DlScalar;
 using DlPoint = flutter::DlPoint;
 using DlRect = flutter::DlRect;
 using DlIRect = flutter::DlIRect;
+using DlPath = flutter::DlPath;
 
 class DlDispatcherBase : public flutter::DlOpReceiver {
  public:
   Picture EndRecordingAsPicture();
-
-  // |flutter::DlOpReceiver|
-  bool PrefersImpellerPaths() const override { return true; }
 
   // |flutter::DlOpReceiver|
   void setAntiAlias(bool aa) override;
@@ -132,12 +131,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
   void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override;
 
   // |flutter::DlOpReceiver|
-  void clipPath(const SkPath& path, ClipOp clip_op, bool is_aa) override;
-
-  // |flutter::DlOpReceiver|
-  void clipPath(const CacheablePath& cache,
-                ClipOp clip_op,
-                bool is_aa) override;
+  void clipPath(const DlPath& path, ClipOp clip_op, bool is_aa) override;
 
   // |flutter::DlOpReceiver|
   void drawColor(flutter::DlColor color, flutter::DlBlendMode mode) override;
@@ -170,10 +164,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
   void drawDRRect(const SkRRect& outer, const SkRRect& inner) override;
 
   // |flutter::DlOpReceiver|
-  void drawPath(const SkPath& path) override;
-
-  // |flutter::DlOpReceiver|
-  void drawPath(const CacheablePath& cache) override;
+  void drawPath(const DlPath& path) override;
 
   // |flutter::DlOpReceiver|
   void drawArc(const DlRect& oval_bounds,
@@ -237,14 +228,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                      DlScalar y) override;
 
   // |flutter::DlOpReceiver|
-  void drawShadow(const SkPath& path,
-                  const flutter::DlColor color,
-                  const DlScalar elevation,
-                  bool transparent_occluder,
-                  DlScalar dpr) override;
-
-  // |flutter::DlOpReceiver|
-  void drawShadow(const CacheablePath& cache,
+  void drawShadow(const DlPath& path,
                   const flutter::DlColor color,
                   const DlScalar elevation,
                   bool transparent_occluder,
@@ -256,10 +240,8 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
   Paint paint_;
   Matrix initial_matrix_;
 
-  static const Path& GetOrCachePath(const CacheablePath& cache);
-
   static void SimplifyOrDrawPath(Canvas& canvas,
-                                 const CacheablePath& cache,
+                                 const DlPath& cache,
                                  const Paint& paint);
 };
 

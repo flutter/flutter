@@ -127,6 +127,12 @@ class DisplayListBuilder final : public virtual DlCanvas,
   // |DlCanvas|
   void ClipPath(const SkPath& path,
                 ClipOp clip_op = ClipOp::kIntersect,
+                bool is_aa = false) override {
+    ClipPath(DlPath(path), clip_op, is_aa);
+  }
+  // |DlCanvas|
+  void ClipPath(const DlPath& path,
+                ClipOp clip_op = ClipOp::kIntersect,
                 bool is_aa = false) override;
 
   /// Conservative estimate of the bounds of all outstanding clip operations
@@ -180,6 +186,8 @@ class DisplayListBuilder final : public virtual DlCanvas,
                   const DlPaint& paint) override;
   // |DlCanvas|
   void DrawPath(const SkPath& path, const DlPaint& paint) override;
+  // |DlCanvas|
+  void DrawPath(const DlPath& path, const DlPaint& paint) override;
   // |DlCanvas|
   void DrawArc(const SkRect& bounds,
                DlScalar start,
@@ -245,6 +253,14 @@ class DisplayListBuilder final : public virtual DlCanvas,
 
   // |DlCanvas|
   void DrawShadow(const SkPath& path,
+                  const DlColor color,
+                  const DlScalar elevation,
+                  bool transparent_occluder,
+                  DlScalar dpr) override {
+    DrawShadow(DlPath(path), color, elevation, transparent_occluder, dpr);
+  }
+  // |DlCanvas|
+  void DrawShadow(const DlPath& path,
                   const DlColor color,
                   const DlScalar elevation,
                   bool transparent_occluder,
@@ -412,7 +428,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
     ClipRRect(rrect, clip_op, is_aa);
   }
   // |DlOpReceiver|
-  void clipPath(const SkPath& path, ClipOp clip_op, bool is_aa) override {
+  void clipPath(const DlPath& path, ClipOp clip_op, bool is_aa) override {
     ClipPath(path, clip_op, is_aa);
   }
 
@@ -440,7 +456,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
   // |DlOpReceiver|
   void drawDRRect(const SkRRect& outer, const SkRRect& inner) override;
   // |DlOpReceiver|
-  void drawPath(const SkPath& path) override;
+  void drawPath(const DlPath& path) override;
   // |DlOpReceiver|
   void drawArc(const DlRect& bounds,
                DlScalar start,
@@ -492,7 +508,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
                     DlScalar x,
                     DlScalar y) override;
   // |DlOpReceiver|
-  void drawShadow(const SkPath& path,
+  void drawShadow(const DlPath& path,
                   const DlColor color,
                   const DlScalar elevation,
                   bool transparent_occluder,

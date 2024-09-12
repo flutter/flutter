@@ -3618,98 +3618,6 @@ TEST_F(DisplayListTest, NopOperationsOmittedFromRecords) {
             });
 }
 
-TEST_F(DisplayListTest, ImpellerPathPreferenceIsHonored) {
-  class Tester : public virtual DlOpReceiver,
-                 public IgnoreClipDispatchHelper,
-                 public IgnoreDrawDispatchHelper,
-                 public IgnoreAttributeDispatchHelper,
-                 public IgnoreTransformDispatchHelper {
-   public:
-    explicit Tester(bool prefer_impeller_paths)
-        : prefer_impeller_paths_(prefer_impeller_paths) {}
-
-    bool PrefersImpellerPaths() const override {
-      return prefer_impeller_paths_;
-    }
-
-    void drawPath(const SkPath& path) override { skia_draw_path_calls_++; }
-
-    void drawPath(const CacheablePath& cache) override {
-      impeller_draw_path_calls_++;
-    }
-
-    void clipPath(const SkPath& path, ClipOp op, bool is_aa) override {
-      skia_clip_path_calls_++;
-    }
-
-    void clipPath(const CacheablePath& cache, ClipOp op, bool is_aa) override {
-      impeller_clip_path_calls_++;
-    }
-
-    virtual void drawShadow(const SkPath& sk_path,
-                            const DlColor color,
-                            const SkScalar elevation,
-                            bool transparent_occluder,
-                            SkScalar dpr) override {
-      skia_draw_shadow_calls_++;
-    }
-
-    virtual void drawShadow(const CacheablePath& cache,
-                            const DlColor color,
-                            const SkScalar elevation,
-                            bool transparent_occluder,
-                            SkScalar dpr) override {
-      impeller_draw_shadow_calls_++;
-    }
-
-    int skia_draw_path_calls() const { return skia_draw_path_calls_; }
-    int skia_clip_path_calls() const { return skia_draw_path_calls_; }
-    int skia_draw_shadow_calls() const { return skia_draw_path_calls_; }
-    int impeller_draw_path_calls() const { return impeller_draw_path_calls_; }
-    int impeller_clip_path_calls() const { return impeller_draw_path_calls_; }
-    int impeller_draw_shadow_calls() const { return impeller_draw_path_calls_; }
-
-   private:
-    const bool prefer_impeller_paths_;
-    int skia_draw_path_calls_ = 0;
-    int skia_clip_path_calls_ = 0;
-    int skia_draw_shadow_calls_ = 0;
-    int impeller_draw_path_calls_ = 0;
-    int impeller_clip_path_calls_ = 0;
-    int impeller_draw_shadow_calls_ = 0;
-  };
-
-  DisplayListBuilder builder;
-  builder.DrawPath(SkPath::Rect(SkRect::MakeLTRB(0, 0, 100, 100)), DlPaint());
-  builder.ClipPath(SkPath::Rect(SkRect::MakeLTRB(0, 0, 100, 100)),
-                   ClipOp::kIntersect, true);
-  builder.DrawShadow(SkPath::Rect(SkRect::MakeLTRB(20, 20, 80, 80)),
-                     DlColor::kBlue(), 1.0f, true, 1.0f);
-  auto display_list = builder.Build();
-
-  {
-    Tester skia_tester(false);
-    display_list->Dispatch(skia_tester);
-    EXPECT_EQ(skia_tester.skia_draw_path_calls(), 1);
-    EXPECT_EQ(skia_tester.skia_clip_path_calls(), 1);
-    EXPECT_EQ(skia_tester.skia_draw_shadow_calls(), 1);
-    EXPECT_EQ(skia_tester.impeller_draw_path_calls(), 0);
-    EXPECT_EQ(skia_tester.impeller_clip_path_calls(), 0);
-    EXPECT_EQ(skia_tester.impeller_draw_shadow_calls(), 0);
-  }
-
-  {
-    Tester impeller_tester(true);
-    display_list->Dispatch(impeller_tester);
-    EXPECT_EQ(impeller_tester.skia_draw_path_calls(), 0);
-    EXPECT_EQ(impeller_tester.skia_clip_path_calls(), 0);
-    EXPECT_EQ(impeller_tester.skia_draw_shadow_calls(), 0);
-    EXPECT_EQ(impeller_tester.impeller_draw_path_calls(), 1);
-    EXPECT_EQ(impeller_tester.impeller_clip_path_calls(), 1);
-    EXPECT_EQ(impeller_tester.impeller_draw_shadow_calls(), 1);
-  }
-}
-
 class SaveLayerBoundsExpector : public virtual DlOpReceiver,
                                 public IgnoreAttributeDispatchHelper,
                                 public IgnoreClipDispatchHelper,
@@ -4616,7 +4524,7 @@ TEST_F(DisplayListTest, DrawDisplayListForwardsBackdropFlag) {
 #define CLIP_EXPECTOR(name) ClipExpector name(__FILE__, __LINE__)
 
 struct ClipExpectation {
-  std::variant<DlRect, SkRRect, SkPath> shape;
+  std::variant<DlRect, SkRRect, DlPath> shape;
   bool is_oval;
   ClipOp clip_op;
   bool is_aa;
@@ -4628,7 +4536,7 @@ struct ClipExpectation {
       case 1:
         return "SkRRect";
       case 2:
-        return "SkPath";
+        return "DlPath";
       default:
         return "Unknown";
     }
@@ -4648,7 +4556,7 @@ struct ClipExpectation {
       os << std::get<SkRRect>(expect.shape);
       break;
     case 2:
-      os << std::get<SkPath>(expect.shape);
+      os << std::get<DlPath>(expect.shape).GetSkPath();
       break;
     case 3:
       os << "Unknown";
@@ -4713,7 +4621,7 @@ class ClipExpector : public virtual DlOpReceiver,
     return *this;
   }
 
-  ClipExpector& addExpectation(const SkPath& path,
+  ClipExpector& addExpectation(const DlPath& path,
                                ClipOp clip_op = ClipOp::kIntersect,
                                bool is_aa = false) {
     clip_expectations_.push_back({
@@ -4723,6 +4631,12 @@ class ClipExpector : public virtual DlOpReceiver,
         .is_aa = is_aa,
     });
     return *this;
+  }
+
+  ClipExpector& addExpectation(const SkPath& path,
+                               ClipOp clip_op = ClipOp::kIntersect,
+                               bool is_aa = false) {
+    return addExpectation(DlPath(path), clip_op, is_aa);
   }
 
   void clipRect(const DlRect& rect,
@@ -4740,7 +4654,7 @@ class ClipExpector : public virtual DlOpReceiver,
                  bool is_aa) override {
     check(rrect, clip_op, is_aa);
   }
-  void clipPath(const SkPath& path,
+  void clipPath(const DlPath& path,
                 DlCanvas::ClipOp clip_op,
                 bool is_aa) override {
     check(path, clip_op, is_aa);

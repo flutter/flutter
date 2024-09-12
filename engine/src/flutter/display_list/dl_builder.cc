@@ -1044,30 +1044,30 @@ void DisplayListBuilder::ClipRRect(const SkRRect& rrect,
       break;
   }
 }
-void DisplayListBuilder::ClipPath(const SkPath& path,
+void DisplayListBuilder::ClipPath(const DlPath& path,
                                   ClipOp clip_op,
                                   bool is_aa) {
   if (current_info().is_nop) {
     return;
   }
-  if (!path.isInverseFillType()) {
+  if (!path.IsInverseFillType()) {
     SkRect rect;
-    if (path.isRect(&rect)) {
+    if (path.IsSkRect(&rect)) {
       ClipRect(rect, clip_op, is_aa);
       return;
     }
-    if (path.isOval(&rect)) {
+    if (path.IsSkOval(&rect)) {
       ClipOval(rect, clip_op, is_aa);
       return;
     }
     SkRRect rrect;
-    if (path.isRRect(&rrect)) {
+    if (path.IsSkRRect(&rrect)) {
       ClipRRect(rrect, clip_op, is_aa);
       return;
     }
   }
-  global_state().clipPath(path, clip_op, is_aa);
-  layer_local_state().clipPath(path, clip_op, is_aa);
+  global_state().clipPath(path.GetSkPath(), clip_op, is_aa);
+  layer_local_state().clipPath(path.GetSkPath(), clip_op, is_aa);
   if (global_state().is_cull_rect_empty() ||
       layer_local_state().is_cull_rect_empty()) {
     current_info().is_nop = true;
@@ -1234,13 +1234,14 @@ void DisplayListBuilder::DrawDRRect(const SkRRect& outer,
   SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawDRRectFlags);
   drawDRRect(outer, inner);
 }
-void DisplayListBuilder::drawPath(const SkPath& path) {
+void DisplayListBuilder::drawPath(const DlPath& path) {
   DisplayListAttributeFlags flags = kDrawPathFlags;
   OpResult result = PaintResult(current_, flags);
   if (result != OpResult::kNoEffect) {
-    bool is_visible = path.isInverseFillType()
-                          ? AccumulateUnbounded()
-                          : AccumulateOpBounds(path.getBounds(), flags);
+    bool is_visible =
+        path.IsInverseFillType()
+            ? AccumulateUnbounded()
+            : AccumulateOpBounds(ToSkRect(path.GetBounds()), flags);
     if (is_visible) {
       Push<DrawPathOp>(0, path);
       CheckLayerOpacityHairlineCompatibility();
@@ -1249,6 +1250,11 @@ void DisplayListBuilder::drawPath(const SkPath& path) {
   }
 }
 void DisplayListBuilder::DrawPath(const SkPath& path, const DlPaint& paint) {
+  SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawPathFlags);
+  DlPath dl_path(path);
+  drawPath(dl_path);
+}
+void DisplayListBuilder::DrawPath(const DlPath& path, const DlPaint& paint) {
   SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawPathFlags);
   drawPath(path);
 }
@@ -1731,15 +1737,15 @@ void DisplayListBuilder::DrawTextFrame(
   drawTextFrame(text_frame, x, y);
 }
 
-void DisplayListBuilder::DrawShadow(const SkPath& path,
+void DisplayListBuilder::DrawShadow(const DlPath& path,
                                     const DlColor color,
                                     const DlScalar elevation,
                                     bool transparent_occluder,
                                     DlScalar dpr) {
   OpResult result = PaintResult(DlPaint(color));
   if (result != OpResult::kNoEffect) {
-    SkRect shadow_bounds =
-        DlCanvas::ComputeShadowBounds(path, elevation, dpr, GetTransform());
+    SkRect shadow_bounds = DlCanvas::ComputeShadowBounds(
+        path.GetSkPath(), elevation, dpr, GetTransform());
     if (AccumulateOpBounds(shadow_bounds, kDrawShadowFlags)) {
       transparent_occluder  //
           ? Push<DrawShadowTransparentOccluderOp>(0, path, color, elevation,
