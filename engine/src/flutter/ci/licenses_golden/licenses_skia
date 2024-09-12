@@ -1,4 +1,4 @@
-Signature: 94dcbc15fbfa882f8f7f1d62f664f9c7
+Signature: cd90356c816e1637333eaaa82a3714d6
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9598,6 +9598,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnBackendTextu
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnTextureInfo.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/geom/AnalyticBlurMask.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/geom/AnalyticBlurMask.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/geom/AnalyticClip.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/mtl/MtlBackendSemaphore.mm + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/mtl/MtlBackendTexture.mm + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/mtl/MtlTextureInfo.mm + ../../../flutter/third_party/skia/LICENSE
@@ -9713,6 +9714,7 @@ FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnBackendTexture
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/dawn/DawnTextureInfo.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/geom/AnalyticBlurMask.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/geom/AnalyticBlurMask.h
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/geom/AnalyticClip.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/mtl/MtlBackendSemaphore.mm
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/mtl/MtlBackendTexture.mm
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/mtl/MtlTextureInfo.mm
