@@ -8,7 +8,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../convert.dart';
-import '../features.dart' show featureFlags;
 import '../globals.dart' as globals;
 
 import 'fuchsia_ffx.dart';
