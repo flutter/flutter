@@ -7,7 +7,7 @@ import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:ffi/ffi.dart';
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 // This import is used in a test, but not in a way that the analyzer can understand.
 // ignore: unused_import
@@ -43,8 +43,7 @@ const String kTestEntrypointRouteName = 'testEntrypoint';
 
 @pragma('vm:entry-point')
 void testEntrypoint() {
-  expect(PlatformDispatcher.instance.defaultRouteName, kTestEntrypointRouteName);
-  IsolateNameServer.lookupPortByName(kTestEntrypointRouteName)!.send(null);
+  IsolateNameServer.lookupPortByName(kTestEntrypointRouteName)!.send(PlatformDispatcher.instance.defaultRouteName);
 }
 
 void main() {
@@ -54,7 +53,7 @@ void main() {
   test('Spawn a different entrypoint with a special route name', () async {
     final ReceivePort port = ReceivePort();
     spawn(port: port.sendPort, entrypoint: 'testEntrypoint', route: kTestEntrypointRouteName);
-    expect(await port.first, isNull);
+    expect(await port.first, kTestEntrypointRouteName);
     port.close();
   });
 

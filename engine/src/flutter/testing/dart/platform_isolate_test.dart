@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 int counter = 0;
 
@@ -62,34 +62,47 @@ void main() {
     expect(await future3, 3);
   });
 
-  test('PlatformIsolate runOnPlatformThread, send and receive messages',
-      () async {
-    // Send numbers 1 to 10 to the platform isolate. The platform isolate
-    // multiplies them by 100 and sends them back.
-    int sum = 0;
-    final RawReceivePort recvPort = RawReceivePort((Object message) {
-      if (message is SendPort) {
-        for (int i = 1; i <= 10; ++i) {
-          message.send(i);
-        }
-      } else {
-        sum += message as int;
+  test('PlatformIsolate runOnPlatformThread, send/receive messages', () async {
+    late SendPort toPlatformThread;
+    var sumOfReceivedMessages = 0;
+    var countofReceivedMessages = 0;
+    final recvPort = RawReceivePort((Object message) {
+      switch (message) {
+        case final SendPort sendPort:
+          toPlatformThread = sendPort;
+          for (int i = 1; i <= 10; i++) {
+            sendPort.send(i);
+          }
+        case final int value:
+          sumOfReceivedMessages += value;
+          countofReceivedMessages++;
+          if (countofReceivedMessages == 10) {
+            toPlatformThread.send(true);
+          }
+        default:
+          fail('Unexpected message: $message');
       }
     });
-    final SendPort sendPort = recvPort.sendPort;
+
+    final sendPort = recvPort.sendPort;
     await runOnPlatformThread(() async {
-      final Completer<void> completer = Completer<void>();
-      final RawReceivePort recvPort = RawReceivePort((Object message) {
-        sendPort.send((message as int) * 100);
-        if (message == 10) {
-          completer.complete();
+      final completer = Completer<void>();
+      final recvPort = RawReceivePort((Object message) {
+        switch (message) {
+          case final int value:
+            sendPort.send(value * 100);
+          case true:
+            completer.complete();
+          default:
+            fail('Unexpected message: $message');
         }
       });
       sendPort.send(recvPort.sendPort);
       await completer.future;
       recvPort.close();
     });
-    expect(sum, 5500); // sum(1 to 10) * 100
+
+    expect(sumOfReceivedMessages, 5500); // sum(1 to 10) * 100
     recvPort.close();
   });
 
@@ -122,9 +135,11 @@ void main() {
 
   test('PlatformIsolate runOnPlatformThread, disabled on helper isolates',
       () async {
-    await Isolate.run(() {
-      expect(() => runOnPlatformThread(() => print('Unreachable')), throws);
-    });
+    await expectLater(() async {
+      await Isolate.run(() {
+        return runOnPlatformThread(() => print('Unreachable'));
+      });
+    }, throws);
   });
 
   test('PlatformIsolate runOnPlatformThread, on platform isolate', () async {
@@ -134,7 +149,7 @@ void main() {
   });
 
   test('PlatformIsolate runOnPlatformThread, exit disabled', () async {
-    await runOnPlatformThread(() => expect(() => Isolate.exit(), throws));
+    await expectLater(runOnPlatformThread(() => Isolate.exit()), throws);
   });
 
   test('PlatformIsolate runOnPlatformThread, unsendable object', () async {

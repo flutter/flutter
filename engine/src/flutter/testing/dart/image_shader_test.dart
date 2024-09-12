@@ -5,16 +5,11 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
+
 import 'canvas_test.dart' show createImage, testCanvas;
 
 void main() {
-  bool assertsEnabled = false;
-  assert(() {
-    assertsEnabled = true;
-    return true;
-  }());
-
   test('Construct an ImageShader', () async {
     final Image image = await createImage(50, 50);
     final ImageShader shader = ImageShader(image, TileMode.clamp, TileMode.clamp, Float64List(16));
@@ -22,13 +17,9 @@ void main() {
     const Rect rect = Rect.fromLTRB(0, 0, 100, 100);
     testCanvas((Canvas canvas) => canvas.drawRect(rect, paint));
 
-    if (assertsEnabled) {
-      expect(shader.debugDisposed, false);
-    }
+    expect(shader.debugDisposed, false);
     shader.dispose();
-    if (assertsEnabled) {
-      expect(shader.debugDisposed, true);
-    }
+    expect(shader.debugDisposed, true);
 
     image.dispose();
   });
@@ -37,11 +28,10 @@ void main() {
     final Image image = await createImage(50, 50);
     image.dispose();
 
-    if (assertsEnabled) {
-      expectAssertion(() => ImageShader(image, TileMode.clamp, TileMode.clamp, Float64List(16)));
-    } else {
-      throwsException(() => ImageShader(image, TileMode.clamp, TileMode.clamp, Float64List(16)));
-    }
+    expect(
+      () => ImageShader(image, TileMode.clamp, TileMode.clamp, Float64List(16)),
+      throwsA(isA<AssertionError>()),
+    );
   });
 
   test('Disposed image shader in a paint', () async {
@@ -49,15 +39,7 @@ void main() {
     final ImageShader shader = ImageShader(image, TileMode.clamp, TileMode.clamp, Float64List(16));
     shader.dispose();
 
-    if (assertsEnabled) {
-      expectAssertion(() => Paint()..shader = shader);
-      return;
-    }
-    final Paint paint = Paint()..shader = shader;
-    const Rect rect = Rect.fromLTRB(0, 0, 100, 100);
-    testCanvas((Canvas canvas) => canvas.drawRect(rect, paint));
-    image.dispose();
-
+    expect(() => Paint()..shader = shader, throwsA(isA<AssertionError>()));
   });
 
   test('Construct an ImageShader - GPU image', () async {
@@ -73,13 +55,9 @@ void main() {
     const Rect rect = Rect.fromLTRB(0, 0, 100, 100);
     testCanvas((Canvas canvas) => canvas.drawRect(rect, paint));
 
-    if (assertsEnabled) {
-      expect(shader.debugDisposed, false);
-    }
+    expect(shader.debugDisposed, false);
     shader.dispose();
-    if (assertsEnabled) {
-      expect(shader.debugDisposed, true);
-    }
+    expect(shader.debugDisposed, true);
 
     image.dispose();
   });

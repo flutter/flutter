@@ -10,10 +10,10 @@ import 'package:test/test.dart';
 
 void main() {
   final engine = Engine.findWithin();
-  final manualBuildDir = io.Platform.environment['ENGINE_BUILD_DIR'];
+  final manualBuildDir = io.Platform.environment['FLUTTER_BUILD_DIRECTORY'];
   final buildDir = manualBuildDir ?? engine.latestOutput()?.path.path;
   if (buildDir == null) {
-    fail('No build directory found. Set ENGINE_BUILD_DIR');
+    fail('No build directory found. Set FLUTTER_BUILD_DIRECTORY');
   }
   final frontendServer = path.join(
     buildDir,
