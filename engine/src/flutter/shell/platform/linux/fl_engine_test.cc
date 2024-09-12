@@ -355,7 +355,7 @@ TEST(FlEngineTest, DartEntrypointArgs) {
 }
 
 TEST(FlEngineTest, Locales) {
-  gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
+  g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
   g_setenv("LANGUAGE", "de:en_US", TRUE);
   g_autoptr(FlDartProject) project = fl_dart_project_new();
 
@@ -404,7 +404,137 @@ TEST(FlEngineTest, Locales) {
   } else {
     g_unsetenv("LANGUAGE");
   }
-  g_free(initial_language);
+}
+
+TEST(FlEngineTest, CLocale) {
+  g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
+  g_setenv("LANGUAGE", "C", TRUE);
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+
+  g_autoptr(FlEngine) engine = make_mock_engine_with_project(project);
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  bool called = false;
+  embedder_api->UpdateLocales = MOCK_ENGINE_PROC(
+      UpdateLocales, ([&called](auto engine, const FlutterLocale** locales,
+                                size_t locales_count) {
+        called = true;
+
+        EXPECT_EQ(locales_count, static_cast<size_t>(1));
+
+        EXPECT_STREQ(locales[0]->language_code, "C");
+        EXPECT_STREQ(locales[0]->country_code, nullptr);
+        EXPECT_STREQ(locales[0]->script_code, nullptr);
+        EXPECT_STREQ(locales[0]->variant_code, nullptr);
+
+        return kSuccess;
+      }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+
+  EXPECT_TRUE(called);
+
+  if (initial_language) {
+    g_setenv("LANGUAGE", initial_language, TRUE);
+  } else {
+    g_unsetenv("LANGUAGE");
+  }
+}
+
+TEST(FlEngineTest, DuplicateLocale) {
+  g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
+  g_setenv("LANGUAGE", "en:en", TRUE);
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+
+  g_autoptr(FlEngine) engine = make_mock_engine_with_project(project);
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  bool called = false;
+  embedder_api->UpdateLocales = MOCK_ENGINE_PROC(
+      UpdateLocales, ([&called](auto engine, const FlutterLocale** locales,
+                                size_t locales_count) {
+        called = true;
+
+        EXPECT_EQ(locales_count, static_cast<size_t>(2));
+
+        EXPECT_STREQ(locales[0]->language_code, "en");
+        EXPECT_STREQ(locales[0]->country_code, nullptr);
+        EXPECT_STREQ(locales[0]->script_code, nullptr);
+        EXPECT_STREQ(locales[0]->variant_code, nullptr);
+
+        EXPECT_STREQ(locales[1]->language_code, "C");
+        EXPECT_STREQ(locales[1]->country_code, nullptr);
+        EXPECT_STREQ(locales[1]->script_code, nullptr);
+        EXPECT_STREQ(locales[1]->variant_code, nullptr);
+
+        return kSuccess;
+      }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+
+  EXPECT_TRUE(called);
+
+  if (initial_language) {
+    g_setenv("LANGUAGE", initial_language, TRUE);
+  } else {
+    g_unsetenv("LANGUAGE");
+  }
+}
+
+TEST(FlEngineTest, EmptyLocales) {
+  g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
+  g_setenv("LANGUAGE", "de:: :en_US", TRUE);
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+
+  g_autoptr(FlEngine) engine = make_mock_engine_with_project(project);
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  bool called = false;
+  embedder_api->UpdateLocales = MOCK_ENGINE_PROC(
+      UpdateLocales, ([&called](auto engine, const FlutterLocale** locales,
+                                size_t locales_count) {
+        called = true;
+
+        EXPECT_EQ(locales_count, static_cast<size_t>(4));
+
+        EXPECT_STREQ(locales[0]->language_code, "de");
+        EXPECT_STREQ(locales[0]->country_code, nullptr);
+        EXPECT_STREQ(locales[0]->script_code, nullptr);
+        EXPECT_STREQ(locales[0]->variant_code, nullptr);
+
+        EXPECT_STREQ(locales[1]->language_code, "en");
+        EXPECT_STREQ(locales[1]->country_code, "US");
+        EXPECT_STREQ(locales[1]->script_code, nullptr);
+        EXPECT_STREQ(locales[1]->variant_code, nullptr);
+
+        EXPECT_STREQ(locales[2]->language_code, "en");
+        EXPECT_STREQ(locales[2]->country_code, nullptr);
+        EXPECT_STREQ(locales[2]->script_code, nullptr);
+        EXPECT_STREQ(locales[2]->variant_code, nullptr);
+
+        EXPECT_STREQ(locales[3]->language_code, "C");
+        EXPECT_STREQ(locales[3]->country_code, nullptr);
+        EXPECT_STREQ(locales[3]->script_code, nullptr);
+        EXPECT_STREQ(locales[3]->variant_code, nullptr);
+
+        return kSuccess;
+      }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+
+  EXPECT_TRUE(called);
+
+  if (initial_language) {
+    g_setenv("LANGUAGE", initial_language, TRUE);
+  } else {
+    g_unsetenv("LANGUAGE");
+  }
 }
 
 TEST(FlEngineTest, SwitchesEmpty) {

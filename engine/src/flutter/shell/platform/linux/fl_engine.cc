@@ -149,28 +149,50 @@ static void view_removed_cb(const FlutterRemoveViewResult* result) {
   }
 }
 
+static void free_locale(FlutterLocale* locale) {
+  free(const_cast<gchar*>(locale->language_code));
+  free(const_cast<gchar*>(locale->country_code));
+  free(locale);
+}
+
 // Passes locale information to the Flutter engine.
 static void setup_locales(FlEngine* self) {
   const gchar* const* languages = g_get_language_names();
-  g_autoptr(GPtrArray) locales_array = g_ptr_array_new_with_free_func(g_free);
-  // Helper array to take ownership of the strings passed to Flutter.
-  g_autoptr(GPtrArray) locale_strings = g_ptr_array_new_with_free_func(g_free);
+  g_autoptr(GPtrArray) locales_array = g_ptr_array_new_with_free_func(
+      reinterpret_cast<GDestroyNotify>(free_locale));
   for (int i = 0; languages[i] != nullptr; i++) {
-    gchar *language, *territory;
-    parse_locale(languages[i], &language, &territory, nullptr, nullptr);
-    if (language != nullptr) {
-      g_ptr_array_add(locale_strings, language);
+    g_autofree gchar* locale_string = g_strstrip(g_strdup(languages[i]));
+
+    // Ignore empty locales, caused by settings like `LANGUAGE=pt_BR:`
+    if (strcmp(locale_string, "") == 0) {
+      continue;
     }
-    if (territory != nullptr) {
-      g_ptr_array_add(locale_strings, territory);
+
+    g_autofree gchar* language = nullptr;
+    g_autofree gchar* territory = nullptr;
+    parse_locale(locale_string, &language, &territory, nullptr, nullptr);
+
+    // Ignore duplicate locales, caused by settings like `LANGUAGE=C` (returns
+    // two "C") or `LANGUAGE=en:en`
+    gboolean has_locale = FALSE;
+    for (guint j = 0; !has_locale && j < locales_array->len; j++) {
+      FlutterLocale* locale =
+          reinterpret_cast<FlutterLocale*>(g_ptr_array_index(locales_array, j));
+      has_locale = g_strcmp0(locale->language_code, language) == 0 &&
+                   g_strcmp0(locale->country_code, territory) == 0;
+    }
+    if (has_locale) {
+      continue;
     }
 
     FlutterLocale* locale =
         static_cast<FlutterLocale*>(g_malloc0(sizeof(FlutterLocale)));
     g_ptr_array_add(locales_array, locale);
     locale->struct_size = sizeof(FlutterLocale);
-    locale->language_code = language;
-    locale->country_code = territory;
+    locale->language_code =
+        reinterpret_cast<const gchar*>(g_steal_pointer(&language));
+    locale->country_code =
+        reinterpret_cast<const gchar*>(g_steal_pointer(&territory));
     locale->script_code = nullptr;
     locale->variant_code = nullptr;
   }
