@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 /// Positive result when the Colors will map to the same argb8888 color.
 Matcher colorMatches(dynamic o) => (v) {
@@ -22,10 +22,6 @@ Matcher colorMatches(dynamic o) => (v) {
 class NotAColor extends Color {
   const NotAColor(super.value);
 }
-
-Matcher approxEquals(dynamic o) => (v) {
-  Expect.approxEquals(o as num, v as num);
-};
 
 void main() {
   test('color accessors should work', () {
@@ -58,9 +54,9 @@ void main() {
   test('two colors are only == if they have the same runtime type', () {
     expect(const Color(0x12345678), equals(const Color(0x12345678)));
     expect(const Color(0x12345678), equals(Color(0x12345678))); // ignore: prefer_const_constructors
-    expect(const Color(0x12345678), notEquals(const Color(0x87654321)));
-    expect(const Color(0x12345678), notEquals(const NotAColor(0x12345678)));
-    expect(const NotAColor(0x12345678), notEquals(const Color(0x12345678)));
+    expect(const Color(0x12345678), isNot(const Color(0x87654321)));
+    expect(const Color(0x12345678), isNot(const NotAColor(0x12345678)));
+    expect(const NotAColor(0x12345678), isNot(const Color(0x12345678)));
     expect(const NotAColor(0x12345678), equals(const NotAColor(0x12345678)));
   });
 
@@ -257,9 +253,9 @@ void main() {
         alpha: 1, red: 1, green: 0, blue: 0, colorSpace: ColorSpace.displayP3);
     final Color srgb = p3.withValues(colorSpace: ColorSpace.extendedSRGB);
     expect(srgb.a, equals(1.0));
-    expect(srgb.r, approxEquals(1.0931));
-    expect(srgb.g, approxEquals(-0.22684034705162098));
-    expect(srgb.b, approxEquals(-0.15007957816123998));
+    expect(srgb.r, closeTo(1.0931, 1e-4));
+    expect(srgb.g, closeTo(-0.22684034705162098, 1e-4));
+    expect(srgb.b, closeTo(-0.15007957816123998, 1e-4));
     expect(srgb.colorSpace, equals(ColorSpace.extendedSRGB));
   });
 
@@ -268,9 +264,9 @@ void main() {
         alpha: 1, red: 1, green: 0, blue: 0, colorSpace: ColorSpace.displayP3);
     final Color srgb = p3.withValues(colorSpace: ColorSpace.sRGB);
     expect(srgb.a, equals(1.0));
-    expect(srgb.r, approxEquals(1));
-    expect(srgb.g, approxEquals(0));
-    expect(srgb.b, approxEquals(0));
+    expect(srgb.r, closeTo(1, 1e-4));
+    expect(srgb.g, closeTo(0, 1e-4));
+    expect(srgb.b, closeTo(0, 1e-4));
     expect(srgb.colorSpace, equals(ColorSpace.sRGB));
   });
 
@@ -283,9 +279,9 @@ void main() {
         colorSpace: ColorSpace.extendedSRGB);
     final Color p3 = srgb.withValues(colorSpace: ColorSpace.displayP3);
     expect(p3.a, equals(1.0));
-    expect(p3.r, approxEquals(1));
-    expect(p3.g, approxEquals(0));
-    expect(p3.b, approxEquals(0));
+    expect(p3.r, closeTo(1, 1e-4));
+    expect(p3.g, closeTo(0, 1e-4));
+    expect(p3.b, closeTo(0, 1e-4));
     expect(p3.colorSpace, equals(ColorSpace.displayP3));
   });
 
@@ -311,7 +307,7 @@ void main() {
         alpha: 1, red: 1, green: 0, blue: 0);
     const Color p3 = Color.from(
         alpha: 1, red: 1, green: 0, blue: 0, colorSpace: ColorSpace.displayP3);
-    expect(srgb.hashCode, notEquals(p3.hashCode));
+    expect(srgb.hashCode, isNot(p3.hashCode));
   });
 
   test('equality considers colorspace', () {
@@ -319,7 +315,7 @@ void main() {
         alpha: 1, red: 1, green: 0, blue: 0);
     const Color p3 = Color.from(
         alpha: 1, red: 1, green: 0, blue: 0, colorSpace: ColorSpace.displayP3);
-    expect(srgb, notEquals(p3));
+    expect(srgb, isNot(p3));
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/41257
