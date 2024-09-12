@@ -5147,7 +5147,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// [markNeedsBuild] has been called. The flag is typically reset to false in
   /// the [performRebuild] implementation, but certain elements (that of the
   /// [LayoutBuilder] widget, for example) may choose to override [markNeedsBuild]
-  /// such that it does not set the [dirty] flag to `true` at all.
+  /// such that it does not set the [dirty] flag to `true` when called.
   bool get dirty => _dirty;
   bool _dirty = true;
 
