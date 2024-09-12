@@ -214,11 +214,12 @@ class ComplexityCalculatorHelper
   inline unsigned int Ceiling() { return ceiling_; }
   inline unsigned int CurrentComplexityScore() { return complexity_score_; }
 
-  unsigned int CalculatePathComplexity(const SkPath& path,
+  unsigned int CalculatePathComplexity(const DlPath& dl_path,
                                        unsigned int line_verb_cost,
                                        unsigned int quad_verb_cost,
                                        unsigned int conic_verb_cost,
                                        unsigned int cubic_verb_cost) {
+    const SkPath& path = dl_path.GetSkPath();
     int verb_count = path.countVerbs();
     std::vector<uint8_t> verbs(verb_count);
     path.getVerbs(verbs.data(), verbs.size());

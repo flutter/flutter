@@ -87,89 +87,6 @@ PathBuilder::RoundingRadii ToRoundingRadii(const SkRRect& rrect) {
   return radii;
 }
 
-Path ToPath(const SkPath& path, Point shift) {
-  auto iterator = SkPath::Iter(path, false);
-
-  struct PathData {
-    union {
-      SkPoint points[4];
-    };
-  };
-
-  PathBuilder builder;
-  PathData data;
-  // Reserve a path size with some arbitrarily additional padding.
-  builder.Reserve(path.countPoints() + 8, path.countVerbs() + 8);
-  auto verb = SkPath::Verb::kDone_Verb;
-  do {
-    verb = iterator.next(data.points);
-    switch (verb) {
-      case SkPath::kMove_Verb:
-        builder.MoveTo(ToPoint(data.points[0]));
-        break;
-      case SkPath::kLine_Verb:
-        builder.LineTo(ToPoint(data.points[1]));
-        break;
-      case SkPath::kQuad_Verb:
-        builder.QuadraticCurveTo(ToPoint(data.points[1]),
-                                 ToPoint(data.points[2]));
-        break;
-      case SkPath::kConic_Verb: {
-        constexpr auto kPow2 = 1;  // Only works for sweeps up to 90 degrees.
-        constexpr auto kQuadCount = 1 + (2 * (1 << kPow2));
-        SkPoint points[kQuadCount];
-        const auto curve_count =
-            SkPath::ConvertConicToQuads(data.points[0],          //
-                                        data.points[1],          //
-                                        data.points[2],          //
-                                        iterator.conicWeight(),  //
-                                        points,                  //
-                                        kPow2                    //
-            );
-
-        for (int curve_index = 0, point_index = 0;  //
-             curve_index < curve_count;             //
-             curve_index++, point_index += 2        //
-        ) {
-          builder.QuadraticCurveTo(ToPoint(points[point_index + 1]),
-                                   ToPoint(points[point_index + 2]));
-        }
-      } break;
-      case SkPath::kCubic_Verb:
-        builder.CubicCurveTo(ToPoint(data.points[1]), ToPoint(data.points[2]),
-                             ToPoint(data.points[3]));
-        break;
-      case SkPath::kClose_Verb:
-        builder.Close();
-        break;
-      case SkPath::kDone_Verb:
-        break;
-    }
-  } while (verb != SkPath::Verb::kDone_Verb);
-
-  FillType fill_type;
-  switch (path.getFillType()) {
-    case SkPathFillType::kWinding:
-      fill_type = FillType::kNonZero;
-      break;
-    case SkPathFillType::kEvenOdd:
-      fill_type = FillType::kOdd;
-      break;
-    case SkPathFillType::kInverseWinding:
-    case SkPathFillType::kInverseEvenOdd:
-      // Flutter doesn't expose these path fill types. These are only visible
-      // via the receiver interface. We should never get here.
-      fill_type = FillType::kNonZero;
-      break;
-  }
-  builder.SetConvexity(path.isConvex() ? Convexity::kConvex
-                                       : Convexity::kUnknown);
-  builder.Shift(shift);
-  auto sk_bounds = path.getBounds().makeOutset(shift.x, shift.y);
-  builder.SetBounds(ToRect(sk_bounds));
-  return builder.TakePath(fill_type);
-}
-
 Path ToPath(const SkRRect& rrect) {
   return PathBuilder{}
       .AddRoundedRect(ToRect(rrect.getBounds()), ToRoundingRadii(rrect))
@@ -212,14 +129,6 @@ std::vector<Matrix> ToRSXForms(const SkRSXform xform[], int count) {
     result.push_back(matrix);
   }
   return result;
-}
-
-Path PathDataFromTextBlob(const sk_sp<SkTextBlob>& blob, Point shift) {
-  if (!blob) {
-    return {};
-  }
-
-  return ToPath(skia::textlayout::Paragraph::GetPath(blob.get()), shift);
 }
 
 std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type) {

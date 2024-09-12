@@ -50,7 +50,7 @@ class IgnoreClipDispatchHelper : public virtual DlOpReceiver {
   void clipRRect(const SkRRect& rrect,
                  DlCanvas::ClipOp clip_op,
                  bool is_aa) override {}
-  void clipPath(const SkPath& path,
+  void clipPath(const DlPath& path,
                 DlCanvas::ClipOp clip_op,
                 bool is_aa) override {}
 };
@@ -96,7 +96,7 @@ class IgnoreDrawDispatchHelper : public virtual DlOpReceiver {
   void drawCircle(const DlPoint& center, DlScalar radius) override {}
   void drawRRect(const SkRRect& rrect) override {}
   void drawDRRect(const SkRRect& outer, const SkRRect& inner) override {}
-  void drawPath(const SkPath& path) override {}
+  void drawPath(const DlPath& path) override {}
   void drawArc(const DlRect& oval_bounds,
                DlScalar start_degrees,
                DlScalar sweep_degrees,
@@ -138,7 +138,7 @@ class IgnoreDrawDispatchHelper : public virtual DlOpReceiver {
   void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
                      DlScalar x,
                      DlScalar y) override {}
-  void drawShadow(const SkPath& path,
+  void drawShadow(const DlPath& path,
                   const DlColor color,
                   const DlScalar elevation,
                   bool transparent_occluder,

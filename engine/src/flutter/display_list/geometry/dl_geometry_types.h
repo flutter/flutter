@@ -51,6 +51,10 @@ inline const DlIRect& ToDlIRect(const SkIRect& rect) {
   return *reinterpret_cast<const DlIRect*>(&rect);
 }
 
+inline DlRect* ToDlRect(SkRect* rect) {
+  return rect == nullptr ? nullptr : reinterpret_cast<DlRect*>(rect);
+}
+
 inline const DlRect* ToDlRect(const SkRect* rect) {
   return rect == nullptr ? nullptr : reinterpret_cast<const DlRect*>(rect);
 }
@@ -98,6 +102,10 @@ inline const SkIRect& ToSkIRect(const DlIRect& rect) {
 
 inline const SkRect* ToSkRect(const DlRect* rect) {
   return rect == nullptr ? nullptr : reinterpret_cast<const SkRect*>(rect);
+}
+
+inline SkRect* ToSkRect(DlRect* rect) {
+  return rect == nullptr ? nullptr : reinterpret_cast<SkRect*>(rect);
 }
 
 inline const SkRect* ToSkRects(const DlRect* rects) {
