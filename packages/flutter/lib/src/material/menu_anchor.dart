@@ -13,6 +13,7 @@ library;
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -1159,8 +1160,30 @@ class _MenuItemButtonState extends State<MenuItemButton> {
 
     if (widget.onHover != null || widget.requestFocusOnHover) {
       child = MouseRegion(
-        onHover: _handlePointerHover,
-        onExit: _handlePointerExit,
+        onHover: (PointerHoverEvent event) {
+          switch (event.kind) {
+            case PointerDeviceKind.mouse:
+            case PointerDeviceKind.trackpad:
+              _handlePointerHover(event);
+            case PointerDeviceKind.stylus:
+            case PointerDeviceKind.invertedStylus:
+            case PointerDeviceKind.unknown:
+            case PointerDeviceKind.touch:
+              break;
+            }
+        },
+        onExit: (PointerExitEvent event) {
+          switch (event.kind) {
+            case PointerDeviceKind.mouse:
+            case PointerDeviceKind.trackpad:
+              _handlePointerExit(event);
+            case PointerDeviceKind.stylus:
+            case PointerDeviceKind.invertedStylus:
+            case PointerDeviceKind.unknown:
+            case PointerDeviceKind.touch:
+              break;
+          }
+        },
         child: child,
       );
     }
@@ -2029,8 +2052,30 @@ class _SubmenuButtonState extends State<SubmenuButton> {
           }
 
           child = MouseRegion(
-            onHover: handlePointerHover,
-            onExit: handlePointerExit,
+            onHover: (PointerHoverEvent event) {
+              switch (event.kind) {
+                case PointerDeviceKind.mouse:
+                case PointerDeviceKind.trackpad:
+                  handlePointerHover(event);
+                case PointerDeviceKind.stylus:
+                case PointerDeviceKind.invertedStylus:
+                case PointerDeviceKind.unknown:
+                case PointerDeviceKind.touch:
+                  break;
+              }
+            },
+            onExit: (PointerExitEvent event) {
+              switch (event.kind) {
+                case PointerDeviceKind.mouse:
+                case PointerDeviceKind.trackpad:
+                  handlePointerExit(event);
+                case PointerDeviceKind.stylus:
+                case PointerDeviceKind.invertedStylus:
+                case PointerDeviceKind.unknown:
+                case PointerDeviceKind.touch:
+                  break;
+              }
+            },
             child: child,
           );
 

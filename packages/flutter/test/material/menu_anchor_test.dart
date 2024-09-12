@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -4508,6 +4510,55 @@ void main() {
       expect(state.target, isNull);
     }, skip: kIsWeb // [intended] ForceGC does not work in web and in release mode. See https://api.flutter.dev/flutter/package-leak_tracker_leak_tracker/forceGC.html
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/154842
+  testWidgets('SubmenuButton mouse onHover is not triggered on Android', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: MenuAnchor(
+          builder: (BuildContext context, MenuController controller, Widget? child) => TextButton(
+            onPressed: () {
+              controller.isOpen ? controller.close() : controller.open();
+            },
+            child: const Text('Tap me'),
+          ),
+          menuChildren: <Widget>[
+            SubmenuButton(
+              menuChildren: <Widget>[
+                MenuItemButton(
+                  onPressed: () {},
+                  child: const Text('Menu item'),
+                ),
+              ],
+              child: const Text('Submenu'),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    // Touch the button to open the menu.
+    await tester.tap(find.text('Tap me'));
+    await tester.pump();
+
+    // Check that the submenu is open.
+    expect(find.text('Submenu'), findsOneWidget);
+
+    // Tap the submenu button.
+    final Offset subMenuPhysicalCenter = tester.getCenter(find.text('Submenu')) * tester.view.devicePixelRatio;
+    final ui.PointerDataPacket packet = ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.hover, physicalX: subMenuPhysicalCenter.dx, physicalY: subMenuPhysicalCenter.dy),
+        ui.PointerData(change: ui.PointerChange.down, physicalX: subMenuPhysicalCenter.dx, physicalY: subMenuPhysicalCenter.dy),
+        ui.PointerData(change: ui.PointerChange.up, physicalX: subMenuPhysicalCenter.dx, physicalY: subMenuPhysicalCenter.dy),
+      ],
+    );
+    GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
+    await tester.pump();
+
+    // Check that the menu item is open.
+    expect(find.text('Menu item'), findsOneWidget);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 }
 
 List<Widget> createTestMenus({
