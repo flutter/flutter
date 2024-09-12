@@ -59,11 +59,27 @@ dart_library("async_helper") {
 
   pubspec = "$package_root/pubspec.yaml"
 
-  deps = []
+  deps = [ ":expect" ]
 
   sources = [
     "async_helper.dart",
     "async_minitest.dart",
+  ]
+}
+
+dart_library("expect") {
+  package_root = "$dart_src/pkg/expect"
+  package_name = "expect"
+
+  pubspec = "$package_root/pubspec.yaml"
+
+  deps = []
+
+  sources = [
+    "config.dart",
+    "expect.dart",
+    "minitest.dart",
+    "variations.dart",
   ]
 }
 
@@ -79,45 +95,6 @@ dart_library("meta") {
     "dart2js.dart",
     "meta.dart",
     "meta_meta.dart",
-  ]
-}
-
-dart_library("expect") {
-  package_root = "$dart_src/pkg/expect"
-  package_name = "expect"
-
-  pubspec = "$package_root/pubspec.yaml"
-
-  deps = [ ":meta" ]
-
-  sources = [
-    "config.dart",
-    "expect.dart",
-    "minitest.dart",
-    "variations.dart",
-  ]
-}
-
-dart_library("litetest") {
-  package_root = "//flutter/testing/litetest"
-  package_name = "litetest"
-
-  pubspec = "$package_root/pubspec.yaml"
-
-  source_dir = "lib"
-
-  deps = [
-    ":async_helper",
-    ":expect",
-    ":meta",
-  ]
-
-  sources = [
-    "litetest.dart",
-    "src/async_minitest.dart",
-    "src/matchers.dart",
-    "src/test.dart",
-    "src/test_suite.dart",
   ]
 }
 

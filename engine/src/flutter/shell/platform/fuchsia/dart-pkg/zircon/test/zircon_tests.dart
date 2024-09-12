@@ -8,7 +8,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:zircon';
 
-import 'package:litetest/litetest.dart';
+import 'package:async_helper/async_minitest.dart';
 
 /// Helper method to turn a [String] into a [ByteData] containing the
 /// text of the string encoded as UTF-8.
@@ -198,7 +198,7 @@ void main() {
       final HandleResult vmo = System.vmoCreate(0);
       expect(vmo.status, equals(ZX.OK));
       int originalKoid = vmo.handle.koid;
-      expect(originalKoid, notEquals(ZX.KOID_INVALID));
+      expect(originalKoid != ZX.KOID_INVALID, true);
       // Cached koid should be same value.
       expect(originalKoid, equals(vmo.handle.koid));
       vmo.handle.close();
