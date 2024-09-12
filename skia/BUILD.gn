@@ -99,6 +99,11 @@ skia_library_configs = [
   ":skia_library",
 ]
 
+config("our_vulkan_headers") {
+  include_dirs = [ "include/third_party/vulkan" ]
+  defines = [ "SK_USE_INTERNAL_VULKAN_HEADERS" ]
+}
+
 # Use for CPU-specific Skia code that needs particular compiler flags.
 template("opts") {
   if (invoker.enabled) {
@@ -351,6 +356,7 @@ optional("fontmgr_win") {
 optional("gpu_shared") {
   enabled = skia_enable_ganesh
 
+  configs = []
   deps = []
   libs = []
   public_defines = []
@@ -364,6 +370,7 @@ optional("gpu_shared") {
   if (skia_use_vulkan) {
     public_defines += [ "SK_VULKAN" ]
     sources += skia_shared_vk_sources
+    configs += [ ":our_vulkan_headers" ]
     if (skia_enable_vulkan_debug_layers) {
       public_defines += [ "SK_ENABLE_VK_LAYERS" ]
     }
@@ -380,6 +387,8 @@ optional("gpu_shared") {
 
 optional("gpu") {
   enabled = skia_enable_ganesh
+
+  configs = []
   deps = [ ":gpu_shared" ]
   public_defines = []
   public_configs = []
@@ -445,6 +454,7 @@ optional("gpu") {
   if (skia_use_vulkan) {
     public += skia_gpu_vk_public
     sources += skia_gpu_vk_private
+    configs += [ ":our_vulkan_headers" ]
     if (is_fuchsia) {
       public_deps += [ "${fuchsia_sdk}/pkg/vulkan" ]
     }
