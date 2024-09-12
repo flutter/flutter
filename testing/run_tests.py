@@ -978,7 +978,7 @@ def uses_package_test_runner(package):
 def build_dart_host_test_list(build_dir):
   dart_host_tests = [
       (os.path.join('flutter', 'ci'), []),
-      (os.path.join('flutter', 'flutter_frontend_server'), {'ENGINE_BUILD_DIR': build_dir}),
+      (os.path.join('flutter', 'flutter_frontend_server'), []),
       (os.path.join('flutter', 'testing', 'litetest'), []),
       (os.path.join('flutter', 'testing', 'skia_gold_client'), []),
       (os.path.join('flutter', 'testing', 'scenario_app'), []),

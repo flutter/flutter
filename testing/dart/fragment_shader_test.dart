@@ -9,8 +9,8 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
+import 'package:test/test.dart';
 
 import 'impeller_enabled.dart';
 import 'shader_test_file_utils.dart';
@@ -402,7 +402,6 @@ void main() async {
     path.join('supported_glsl_op_shaders', 'iplr'),
     '.iplr',
   );
-  expect(iplrSupportedGLSLOpShaders.isNotEmpty, true);
   _expectFragmentShadersRenderGreen(iplrSupportedGLSLOpShaders);
 
   // Test all supported instructions. See lib/spirv/lib/src/constants.dart
@@ -410,7 +409,6 @@ void main() async {
     path.join('supported_op_shaders', 'iplr'),
     '.iplr',
   );
-  expect(iplrSupportedOpShaders.isNotEmpty, true);
   _expectFragmentShadersRenderGreen(iplrSupportedOpShaders);
 }
 
@@ -418,6 +416,9 @@ void main() async {
 // Keeping the outer loop of the test synchronous allows for easy printing
 // of the file name within the test case.
 void _expectFragmentShadersRenderGreen(Map<String, FragmentProgram> programs) {
+  if (programs.isEmpty) {
+    fail('No shaders found.');
+  }
   for (final String key in programs.keys) {
     test('FragmentProgram $key renders green', () async {
       final FragmentProgram program = programs[key]!;

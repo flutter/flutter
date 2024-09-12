@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:litetest/litetest.dart';
+import 'package:test/test.dart';
 
 import 'goldens.dart';
 import 'impeller_enabled.dart';
@@ -133,9 +133,9 @@ void main() async {
           expect(a[i].hashCode, equals(b[j].hashCode));
           expect(a[i].toString(), equals(b[j].toString()));
         } else {
-          expect(a[i], notEquals(b[j]));
+          expect(a[i], isNot(b[j]));
           // No expectations on hashCode if objects are not equal
-          expect(a[i].toString(), notEquals(b[j].toString()));
+          expect(a[i].toString(), isNot(b[j].toString()));
         }
       }
     }
@@ -301,7 +301,7 @@ void main() async {
   });
 
   // Tests that FilterQuality.<value> produces the expected golden file.
-  group('ImageFilter|FilterQuality', () async {
+  group('ImageFilter|FilterQuality', () {
     /// Draw a red-green checkerboard pattern with 1x1 squares (pixels).
     Future<Image> drawCheckerboard({
       int width = 100,
