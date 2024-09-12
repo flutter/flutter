@@ -37,3 +37,15 @@ double _lerpDouble(double a, double b, double t) {
 double _lerpInt(int a, int b, double t) {
   return a + (b - a) * t;
 }
+
+/// Same as [num.clamp] but specialized for non-null [int].
+int _clampInt(int value, int min, int max) {
+  assert(min <= max);
+  if (value < min) {
+    return min;
+  } else if (value > max) {
+    return max;
+  } else {
+    return value;
+  }
+}
