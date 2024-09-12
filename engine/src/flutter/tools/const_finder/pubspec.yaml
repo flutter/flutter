@@ -18,4 +18,6 @@ dependencies:
 
 dev_dependencies:
   collection: any
+  engine_repo_tools: any
   path: any
+  test: any
