@@ -208,12 +208,6 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
     settings.enable_dart_profiling = enableDartProfiling.boolValue;
   }
 
-  NSNumber* enableMergedPlatformUIThread =
-      [mainBundle objectForInfoDictionaryKey:@"FLTEnableMergedPlatformUIThread"];
-  if (enableMergedPlatformUIThread != nil) {
-    settings.merged_platform_ui_thread = enableMergedPlatformUIThread.boolValue;
-  }
-
   // Leak Dart VM settings, set whether leave or clean up the VM after the last shell shuts down.
   NSNumber* leakDartVM = [mainBundle objectForInfoDictionaryKey:@"FLTLeakDartVM"];
   // It will change the default leak_vm value in settings only if the key exists.
