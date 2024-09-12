@@ -11,4 +11,4 @@
 # why this is the case.
 # See https://github.com/flutter/flutter/issues/154580.
 -if class * implements io.flutter.embedding.engine.plugins.FlutterPlugin
--keep,allowoptimization,allowshrinking,allowobfuscation class <1>
+-keep,allowshrinking,allowobfuscation class <1>

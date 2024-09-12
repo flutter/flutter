@@ -58,16 +58,16 @@ void main() {
         .toList();
 
     expect(description[0], 'height: 200.0');
-    expect(description[1], 'backgroundColor: Color(0x00000099)');
+    expect(description[1], 'backgroundColor: ${const Color(0x00000099)}');
     expect(description[2], 'elevation: 20.0');
-    expect(description[3], 'indicatorColor: Color(0x00000098)');
+    expect(description[3], 'indicatorColor: ${const Color(0x00000098)}');
     expect(description[4], 'indicatorShape: CircleBorder(BorderSide(width: 0.0, style: none))');
     expect(description[5], 'labelTextStyle: WidgetStatePropertyAll(TextStyle(inherit: true, size: 7.0))');
     // Ignore instance address for IconThemeData.
     expect(description[6].contains('iconTheme: WidgetStatePropertyAll(IconThemeData'), isTrue);
-    expect(description[6].contains('(color: Color(0x00000097))'), isTrue);
+    expect(description[6].contains('(color: ${const Color(0x00000097)})'), isTrue);
     expect(description[7], 'labelBehavior: NavigationDestinationLabelBehavior.alwaysHide');
-    expect(description[8], 'overlayColor: WidgetStatePropertyAll(Color(0x00000096))');
+    expect(description[8], 'overlayColor: WidgetStatePropertyAll(${const Color(0x00000096)})');
   });
 
   testWidgets('NavigationBarThemeData values are used when no NavigationBar properties are specified', (WidgetTester tester) async {
