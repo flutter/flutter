@@ -155,11 +155,11 @@ export class FlutterEntrypointLoader {
       }
       const jsSupportRuntime = await import(jsSupportRuntimeUri);
 
-      const dartModulePromise = jsSupportRuntime.compileStreaming(fetch(moduleUri));
+      const compiledDartAppPromise = jsSupportRuntime.compileStreaming(fetch(moduleUri));
 
-      let imports;
+      let importsPromise;
       if (build.renderer === "skwasm") {
-        imports = (async () => {
+        importsPromise = (async () => {
           const skwasmInstance = await deps.skwasm;
           window._flutter_skwasmInstance = skwasmInstance;
           return {
@@ -171,10 +171,11 @@ export class FlutterEntrypointLoader {
           };
         })();
       } else {
-        imports = {};
+        importsPromise = Promise.resolve({});
       }
-      const moduleInstance = await jsSupportRuntime.instantiate(dartModulePromise, imports);
-      await jsSupportRuntime.invoke(moduleInstance);
+      const compiledDartApp = await compiledDartAppPromise;
+      const dartApp = await compiledDartApp.instantiate(await importsPromise);
+      await dartApp.invokeMain();
     }
   }
 
