@@ -244,6 +244,7 @@ Future<T> runInContext<T>(
         fs: globals.fs,
         flutterRoot: Cache.flutterRoot!,
       ),
+      FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),
       FuchsiaWorkflow: () => FuchsiaWorkflow(
