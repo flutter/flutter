@@ -2483,7 +2483,9 @@ testWidgets('CupertinoDatePicker column width accommodates widest text with defa
     const TextStyle textStyle = TextStyle(
       fontFamily: 'Roboto',
       fontSize: 21,
-      color: CupertinoColors.black,
+      letterSpacing: 0.4,
+      fontWeight: FontWeight.normal,
+      color: CupertinoColors.label,
     );
 
     // Calculate the width of each word using the custom text style.
