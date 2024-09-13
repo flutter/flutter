@@ -32,6 +32,7 @@ import android.media.Image.Plane;
 import android.media.ImageReader;
 import android.os.Build;
 import android.provider.Settings;
+import android.util.DisplayMetrics;
 import android.view.DisplayCutout;
 import android.view.Surface;
 import android.view.View;
@@ -879,6 +880,47 @@ public class FlutterViewTest {
     Integer accessibilityViewId = (Integer) getAccessibilityViewIdMethod.invoke(flutterView);
 
     assertEquals(null, flutterView.findViewByAccessibilityIdTraversal(accessibilityViewId));
+  }
+
+  @SuppressWarnings("deprecation")
+  // Robolectric.setupActivity
+  @Test
+  public void itSendsTextShowPasswordToFrameworkOnAttach() {
+    // Setup test.
+    AtomicReference<Boolean> reportedShowPassword = new AtomicReference<>();
+
+    FlutterView flutterView = new FlutterView(Robolectric.setupActivity(Activity.class));
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    Settings.System.putInt(
+        flutterView.getContext().getContentResolver(), Settings.System.TEXT_SHOW_PASSWORD, 1);
+
+    SettingsChannel fakeSettingsChannel = mock(SettingsChannel.class);
+    SettingsChannel.MessageBuilder fakeMessageBuilder = mock(SettingsChannel.MessageBuilder.class);
+    when(fakeMessageBuilder.setTextScaleFactor(any(Float.class))).thenReturn(fakeMessageBuilder);
+    when(fakeMessageBuilder.setDisplayMetrics(any(DisplayMetrics.class)))
+        .thenReturn(fakeMessageBuilder);
+    when(fakeMessageBuilder.setNativeSpellCheckServiceDefined(any(Boolean.class)))
+        .thenReturn(fakeMessageBuilder);
+    when(fakeMessageBuilder.setPlatformBrightness(any(SettingsChannel.PlatformBrightness.class)))
+        .thenReturn(fakeMessageBuilder);
+    when(fakeMessageBuilder.setUse24HourFormat(any(Boolean.class))).thenReturn(fakeMessageBuilder);
+    when(fakeMessageBuilder.setBrieflyShowPassword(any(Boolean.class)))
+        .thenAnswer(
+            new Answer<SettingsChannel.MessageBuilder>() {
+              @Override
+              public SettingsChannel.MessageBuilder answer(InvocationOnMock invocation)
+                  throws Throwable {
+                reportedShowPassword.set((Boolean) invocation.getArguments()[0]);
+                return fakeMessageBuilder;
+              }
+            });
+    when(fakeSettingsChannel.startMessage()).thenReturn(fakeMessageBuilder);
+    when(flutterEngine.getSettingsChannel()).thenReturn(fakeSettingsChannel);
+
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    // Verify results.
+    assertTrue(reportedShowPassword.get());
   }
 
   public void ViewportMetrics_initializedPhysicalTouchSlop() {
