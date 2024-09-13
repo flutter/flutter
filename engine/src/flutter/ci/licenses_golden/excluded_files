@@ -2728,7 +2728,6 @@
 ../../../flutter/third_party/skia/include/private/gpu/ganesh/BUILD.bazel
 ../../../flutter/third_party/skia/include/private/gpu/vk/BUILD.bazel
 ../../../flutter/third_party/skia/include/sksl/BUILD.bazel
-../../../flutter/third_party/skia/include/sksl/OWNERS
 ../../../flutter/third_party/skia/include/svg/BUILD.bazel
 ../../../flutter/third_party/skia/include/third_party/vulkan/BUILD.bazel
 ../../../flutter/third_party/skia/include/utils/BUILD.bazel
