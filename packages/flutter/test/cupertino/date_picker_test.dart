@@ -2455,7 +2455,7 @@ testWidgets('CupertinoDatePicker column width accommodates widest text with defa
     expect(testWidth, equals(largestWidth));
     expect(testWidth, getColumnWidth(testWords[0], textStyle, context),
         reason: 'Column width should match the width of the first word.');
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 
   testWidgets('CupertinoDatePicker column width accommodates widest text with custom font',
       (WidgetTester tester) async {
@@ -2500,7 +2500,7 @@ testWidgets('CupertinoDatePicker column width accommodates widest text with defa
     expect(testWidth, equals(largestWidth));
     expect(testWidth, getColumnWidth(testWords[1], textStyle, context),
         reason: 'The width of the second word should be the largest with roboto font.');
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }
 
 Widget _buildPicker({
