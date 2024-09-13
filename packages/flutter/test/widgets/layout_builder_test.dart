@@ -850,6 +850,27 @@ void main() {
     expect(paintCount, 3);
     expect(mostRecentOffset, const Offset(60, 60));
   });
+
+  testWidgets('LayoutBuilder in a subtree that skips layout does not throw during the initial treewalk', (WidgetTester tester) async {
+    final OverlayEntry overlayEntry1 = OverlayEntry(maintainState: true, builder: (BuildContext context) => LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) => const Placeholder()));
+    // OverlayEntry2 obstructs OverlayEntry1 and forces it to skip layout.
+    final OverlayEntry overlayEntry2 = OverlayEntry(opaque: true, canSizeOverlay: true, builder: (BuildContext context) => Container());
+    addTearDown(() => overlayEntry1..remove()..dispose());
+    addTearDown(() => overlayEntry2..remove()..dispose());
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        // The UnconstrainedBox makes sure the OverlayEntries are not relayout boundaries.
+        child: UnconstrainedBox(child: Overlay(initialEntries: <OverlayEntry>[overlayEntry1, overlayEntry2])),
+      ),
+    );
+
+    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.rootElement!);
+    await tester.pump();
+    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.rootElement!);
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class _SmartLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
