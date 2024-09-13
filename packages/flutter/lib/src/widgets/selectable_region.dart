@@ -1309,7 +1309,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _collapseSelectionAt({required Offset offset}) {
     // There may be other selection ongoing.
     _finalizeSelection();
-    _selectable?.dispatchSelectionEvent(CollapseSelectionEvent(globalPosition: offset));
+    _selectStartTo(offset: offset);
+    _selectEndTo(offset: offset);
   }
 
   /// Selects a whole word at the `offset` location.
@@ -1883,21 +1884,6 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
     return result;
   }
 
-  /// Collapse the selection in a [Selectable] at the location
-  /// [CollapseSelectionEvent.globalPosition].
-  @override
-  SelectionResult handleCollapseSelection(CollapseSelectionEvent event) {
-    final SelectionResult result = super.handleCollapseSelection(event);
-    if (currentSelectionStartIndex != -1) {
-      _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
-    }
-    if (currentSelectionEndIndex != -1) {
-      _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
-    }
-    _updateLastEdgeEventsFromGeometries();
-    return result;
-  }
-
   /// Selects a word in a [Selectable] at the location
   /// [SelectWordSelectionEvent.globalPosition].
   @override
@@ -1969,7 +1955,6 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
         _hasReceivedEndEvent.remove(selectable);
       case SelectionEventType.selectionFinalized:
       case SelectionEventType.selectAll:
-      case SelectionEventType.collapseSelection:
       case SelectionEventType.selectWord:
       case SelectionEventType.selectParagraph:
         break;
@@ -2603,14 +2588,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   }
 
   SelectionResult _handleSelectBoundary(SelectionEvent event) {
-    assert(event is SelectWordSelectionEvent
-           || event is SelectParagraphSelectionEvent
-           || event is CollapseSelectionEvent,
-           'This method should only be given selection events that select boundaries.');
+    assert(event is SelectWordSelectionEvent || event is SelectParagraphSelectionEvent, 'This method should only be given selection events that select text boundaries.');
     late final Offset effectiveGlobalPosition;
-    if (event.type == SelectionEventType.collapseSelection) {
-      effectiveGlobalPosition = (event as CollapseSelectionEvent).globalPosition;
-    } else if (event.type == SelectionEventType.selectWord) {
+    if (event.type == SelectionEventType.selectWord) {
       effectiveGlobalPosition = (event as SelectWordSelectionEvent).globalPosition;
     } else if (event.type == SelectionEventType.selectParagraph) {
       effectiveGlobalPosition = (event as SelectParagraphSelectionEvent).globalPosition;
@@ -2657,13 +2637,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     }
     assert(lastSelectionResult == null);
     return SelectionResult.end;
-  }
-
-  /// Collapses the selection in a [Selectable] at the location
-  /// [CollapseSelectionEvent.globalPosition].
-  @protected
-  SelectionResult handleCollapseSelection(CollapseSelectionEvent event) {
-    return _handleSelectBoundary(event);
   }
 
   /// Selects a word in a [Selectable] at the location
@@ -2819,9 +2792,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       case SelectionEventType.selectAll:
         _extendSelectionInProgress = false;
         result = handleSelectAll(event as SelectAllSelectionEvent);
-      case SelectionEventType.collapseSelection:
-        _extendSelectionInProgress = false;
-        result = handleCollapseSelection(event as CollapseSelectionEvent);
       case SelectionEventType.selectWord:
         _extendSelectionInProgress = false;
         result = handleSelectWord(event as SelectWordSelectionEvent);
