@@ -75,6 +75,10 @@ class DlSkCanvasAdapter final : public virtual DlCanvas {
   void ClipOval(const SkRect& bounds, ClipOp clip_op, bool is_aa) override;
   void ClipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override;
   void ClipPath(const SkPath& path, ClipOp clip_op, bool is_aa) override;
+  void ClipPath(const DlPath& path, ClipOp clip_op, bool is_aa) override {
+    path.WillRenderSkPath();
+    ClipPath(path.GetSkPath(), clip_op, is_aa);
+  }
 
   /// Conservative estimate of the bounds of all outstanding clip operations
   /// measured in the coordinate space within which this DisplayList will
@@ -110,6 +114,10 @@ class DlSkCanvasAdapter final : public virtual DlCanvas {
                   const SkRRect& inner,
                   const DlPaint& paint) override;
   void DrawPath(const SkPath& path, const DlPaint& paint) override;
+  void DrawPath(const DlPath& path, const DlPaint& paint) override {
+    path.WillRenderSkPath();
+    DrawPath(path.GetSkPath(), paint);
+  }
   void DrawArc(const SkRect& bounds,
                SkScalar start,
                SkScalar sweep,
@@ -162,6 +170,14 @@ class DlSkCanvasAdapter final : public virtual DlCanvas {
                   const SkScalar elevation,
                   bool transparent_occluder,
                   SkScalar dpr) override;
+  void DrawShadow(const DlPath& path,
+                  const DlColor color,
+                  const SkScalar elevation,
+                  bool transparent_occluder,
+                  SkScalar dpr) override {
+    path.WillRenderSkPath();
+    DrawShadow(path.GetSkPath(), color, elevation, transparent_occluder, dpr);
+  }
 
   void Flush() override;
 

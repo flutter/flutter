@@ -132,8 +132,6 @@ source_set("ui") {
     "text/paragraph_builder.h",
     "ui_dart_state.cc",
     "ui_dart_state.h",
-    "volatile_path_tracker.cc",
-    "volatile_path_tracker.h",
     "window/key_data.cc",
     "window/key_data.h",
     "window/key_data_packet.cc",

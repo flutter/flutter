@@ -38,7 +38,7 @@ UIDartState::Context::Context(
     fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
     std::string advisory_script_uri,
     std::string advisory_script_entrypoint,
-    std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
+    bool deterministic_rendering_enabled,
     std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
     bool enable_impeller,
     impeller::RuntimeStageBackend runtime_stage_backend)
@@ -50,7 +50,7 @@ UIDartState::Context::Context(
       image_generator_registry(std::move(image_generator_registry)),
       advisory_script_uri(std::move(advisory_script_uri)),
       advisory_script_entrypoint(std::move(advisory_script_entrypoint)),
-      volatile_path_tracker(std::move(volatile_path_tracker)),
+      deterministic_rendering_enabled(deterministic_rendering_enabled),
       concurrent_task_runner(std::move(concurrent_task_runner)),
       enable_impeller(enable_impeller),
       runtime_stage_backend(runtime_stage_backend) {}
@@ -81,6 +81,10 @@ UIDartState::~UIDartState() {
 
 const std::string& UIDartState::GetAdvisoryScriptURI() const {
   return context_.advisory_script_uri;
+}
+
+bool UIDartState::IsDeterministicRenderingEnabled() const {
+  return context_.deterministic_rendering_enabled;
 }
 
 bool UIDartState::IsImpellerEnabled() const {
@@ -146,11 +150,6 @@ fml::WeakPtr<IOManager> UIDartState::GetIOManager() const {
 
 fml::RefPtr<flutter::SkiaUnrefQueue> UIDartState::GetSkiaUnrefQueue() const {
   return context_.unref_queue;
-}
-
-std::shared_ptr<VolatilePathTracker> UIDartState::GetVolatilePathTracker()
-    const {
-  return context_.volatile_path_tracker;
 }
 
 std::shared_ptr<fml::ConcurrentTaskRunner>

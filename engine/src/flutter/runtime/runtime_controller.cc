@@ -69,7 +69,7 @@ std::unique_ptr<RuntimeController> RuntimeController::Spawn(
                                        std::move(image_generator_registry),
                                        advisory_script_uri,
                                        advisory_script_entrypoint,
-                                       context_.volatile_path_tracker,
+                                       context_.deterministic_rendering_enabled,
                                        context_.concurrent_task_runner,
                                        context_.enable_impeller,
                                        context_.runtime_stage_backend};
