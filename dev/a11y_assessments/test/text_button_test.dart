@@ -24,7 +24,7 @@ void main() {
     await tester.tap(submitButton);
     await tester.pump();
 
-    // Verify that the snackbar is visible
+    // Verify that the snackbar is visible.
     expect(find.text('Form submitted'), findsOneWidget);
   });
 
