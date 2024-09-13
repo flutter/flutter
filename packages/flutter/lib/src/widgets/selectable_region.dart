@@ -659,6 +659,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             final bool isShiftPressedValid = _isShiftPressed && _selectionDelegate.value.startSelectionPoint != null;
             if (isShiftPressedValid) {
               _selectEndTo(offset: details.globalPosition);
+              _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
               return;
             }
             _collapseSelectionAt(offset: details.globalPosition);
