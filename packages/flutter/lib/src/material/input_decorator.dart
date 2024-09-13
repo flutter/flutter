@@ -2163,7 +2163,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final TextStyle hintStyle = _getInlineHintStyle(themeData, defaults);
     final String? hintText = decoration.hintText;
-    final bool hintIgnoreHeightOnInput = decoration.hintIgnoreHeightOnInput;
+    final bool maintainHintHeight = decoration.maintainHintHeight;
     Widget? hint;
     if (hintText != null) {
       final bool showHint = isEmpty && !_hasInlineLabel;
@@ -2175,7 +2175,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         textAlign: textAlign,
         maxLines: decoration.hintMaxLines,
       );
-      hint = hintIgnoreHeightOnInput ? AnimatedSwitcher(
+      hint = maintainHintHeight ? AnimatedOpacity(
+        opacity: showHint ? 1.0 : 0.0,
+        duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
+        curve: _kTransitionCurve,
+        child: hintTextWidget,
+      ) : AnimatedSwitcher(
         duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
         transitionBuilder: (Widget child, Animation<double> animation) {
           return FadeTransition(
@@ -2187,11 +2192,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           );
         },
         child: showHint ? hintTextWidget : const SizedBox.shrink(),
-      ) : AnimatedOpacity(
-        opacity: showHint ? 1.0 : 0.0,
-        duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
-        curve: _kTransitionCurve,
-        child: hintTextWidget,
       );
     }
     InputBorder? border;
@@ -2591,7 +2591,7 @@ class InputDecoration {
     this.hintTextDirection,
     this.hintMaxLines,
     this.hintFadeDuration,
-    this.hintIgnoreHeightOnInput = false,
+    this.maintainHintHeight = true,
     this.error,
     this.errorText,
     this.errorStyle,
@@ -2661,7 +2661,7 @@ class InputDecoration {
     this.hintTextDirection,
     this.hintMaxLines,
     this.hintFadeDuration,
-    this.hintIgnoreHeightOnInput = false,
+    this.maintainHintHeight = true,
     this.filled = false,
     this.fillColor,
     this.focusColor,
@@ -2923,14 +2923,11 @@ class InputDecoration {
   /// If [InputDecorationTheme.hintFadeDuration] is null defaults to 20ms.
   final Duration? hintFadeDuration;
 
-  /// Whether the input field's height should always be greater than or equal to
-  /// the height of the [hintText], even if the [hintText] is not visible.
+  /// The [InputDecorator] widget ignores [hintText] during layout when
+  /// it's not visible, if this flag is set to false.
   ///
-  /// This is useful, If true, while inputting it will ignore the height of the [hintText]
-  /// use the height of the inputted content instead.
-  ///
-  /// Defaults to false.
-  final bool hintIgnoreHeightOnInput;
+  /// Defaults to true.
+  final bool maintainHintHeight;
 
   /// Optional widget that appears below the [InputDecorator.child] and the border.
   ///
@@ -3606,7 +3603,7 @@ class InputDecoration {
     TextDirection? hintTextDirection,
     Duration? hintFadeDuration,
     int? hintMaxLines,
-    bool? hintIgnoreHeightOnInput,
+    bool? maintainHintHeight,
     Widget? error,
     String? errorText,
     TextStyle? errorStyle,
@@ -3662,7 +3659,7 @@ class InputDecoration {
       hintTextDirection: hintTextDirection ?? this.hintTextDirection,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
       hintFadeDuration: hintFadeDuration ?? this.hintFadeDuration,
-      hintIgnoreHeightOnInput: hintIgnoreHeightOnInput ?? this.hintIgnoreHeightOnInput,
+      maintainHintHeight: maintainHintHeight ?? this.maintainHintHeight,
       error: error ?? this.error,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
@@ -3771,7 +3768,7 @@ class InputDecoration {
         && other.hintTextDirection == hintTextDirection
         && other.hintMaxLines == hintMaxLines
         && other.hintFadeDuration == hintFadeDuration
-        && other.hintIgnoreHeightOnInput == hintIgnoreHeightOnInput
+        && other.maintainHintHeight == maintainHintHeight
         && other.error == error
         && other.errorText == errorText
         && other.errorStyle == errorStyle
@@ -3830,7 +3827,7 @@ class InputDecoration {
       hintTextDirection,
       hintMaxLines,
       hintFadeDuration,
-      hintIgnoreHeightOnInput,
+      maintainHintHeight,
       error,
       errorText,
       errorStyle,
@@ -3887,7 +3884,7 @@ class InputDecoration {
       if (hintText != null) 'hintText: "$hintText"',
       if (hintMaxLines != null) 'hintMaxLines: "$hintMaxLines"',
       if (hintFadeDuration != null) 'hintFadeDuration: "$hintFadeDuration"',
-      if (hintIgnoreHeightOnInput) 'hintIgnoreHeightOnInput: true',
+      if (!maintainHintHeight) 'maintainHintHeight: false',
       if (error != null) 'error: "$error"',
       if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',

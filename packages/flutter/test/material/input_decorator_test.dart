@@ -4510,7 +4510,7 @@ void main() {
       final String hintText = 'hint text' * 20;
       final InputDecoration decoration = InputDecoration(
         hintText: hintText,
-        hintIgnoreHeightOnInput: true,
+        maintainHintHeight: false,
       );
 
       await tester.pumpWidget(
