@@ -2641,6 +2641,7 @@
 ../../../flutter/third_party/skia/bench
 ../../../flutter/third_party/skia/codereview.settings
 ../../../flutter/third_party/skia/demos.skia.org
+../../../flutter/third_party/skia/dm/BUILD.bazel
 ../../../flutter/third_party/skia/docker/Makefile
 ../../../flutter/third_party/skia/docker/README.md
 ../../../flutter/third_party/skia/docker/binary-size/Dockerfile
