@@ -345,7 +345,7 @@ void main() {
     final PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
 
     // For the default dark theme the overlay color for elevation 8 is 0xFF2D2D2D
-    expect(physicalShape.color, const Color(0xFF2D2D2D));
+    expect(physicalShape.color, isSameColorAs(const Color(0xFF2D2D2D)));
   });
 
   testWidgets('Material3 - Dark theme applies an elevation overlay color', (WidgetTester tester) async {

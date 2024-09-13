@@ -1929,6 +1929,43 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
+  testUsingContext('FlutterDevice does not throw when unable to initiate log reader due to VM service disconnection', () async {
+    fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'getVM',
+          error: FakeRPCError(
+            code: RPCErrorCodes.kServerError,
+            error: 'Service connection disposed',
+          ),
+        ),
+      ],
+    );
+    final TestFlutterDevice flutterDevice = TestFlutterDevice(device);
+    flutterDevice.vmService = fakeVmServiceHost!.vmService;
+    await flutterDevice.tryInitLogReader();
+    final BufferLogger logger = globals.logger as BufferLogger;
+    expect(
+      logger.traceText,
+      contains(
+        'VmService.getVm call failed: getVM: (-32000) '
+        'Service connection disposed\n',
+      ),
+    );
+    expect(
+      logger.errorText,
+      contains(
+        'Unable to initiate log reader for deviceFakeDevice, because '
+        'the Flutter VM service connection is closed.\n',
+      ),
+    );
+  }, overrides: <Type, Generator>{
+    Logger: () => BufferLogger.test(),
+    Artifacts: () => Artifacts.test(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
   testUsingContext('Uses existing DDS URI from exception field', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice()
@@ -1942,7 +1979,7 @@ flutter:
       bool enableServicePortFallback = false,
       List<String> cachedUserTags = const <String>[],
       String? dartExecutable,
-      Uri? google3WorkspaceRoot,
+      String? google3WorkspaceRoot,
     }) {
       throw DartDevelopmentServiceException.existingDdsInstance(
         'Existing DDS at http://localhost/existingDdsInMessage.',
@@ -1991,7 +2028,7 @@ flutter:
         bool enableServicePortFallback = false,
         List<String> cachedUserTags = const <String>[],
         String? dartExecutable,
-        Uri? google3WorkspaceRoot,
+        String? google3WorkspaceRoot,
       }) async {
       expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isFalse);
@@ -2038,7 +2075,7 @@ flutter:
         bool enableServicePortFallback = false,
         List<String> cachedUserTags = const <String>[],
         String? dartExecutable,
-        Uri? google3WorkspaceRoot,
+        String? google3WorkspaceRoot,
       }) {
       expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isTrue);

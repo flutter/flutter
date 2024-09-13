@@ -137,13 +137,13 @@ dependencies:
         );
       });
 
-      testWithoutContext('handles empty pubspec with .packages', () async {
-        final String packagesPath = fileSystem.path.join('fuchsia_test', 'main', '.dart_tool', 'package_config.json');
+      testWithoutContext('handles empty pubspec with .dart_tool/package_config.json', () async {
+        final String packageConfigPath = fileSystem.path.join('fuchsia_test', 'main', '.dart_tool', 'package_config.json');
         final String manifestPath =
             fileSystem.path.join('fuchsia_test', 'main', 'pubspec.yaml');
 
         fileSystem.directory(fileSystem.file(manifestPath)).parent.createSync(recursive: true);
-        fileSystem.directory(fileSystem.file(packagesPath)).parent.createSync(recursive: true);
+        fileSystem.directory(fileSystem.file(packageConfigPath)).parent.createSync(recursive: true);
 
         final ManifestAssetBundle assetBundle = ManifestAssetBundle(
           logger: logger,
@@ -155,7 +155,7 @@ dependencies:
 
         await assetBundle.build(
           manifestPath: manifestPath, // file doesn't exist
-          packageConfigPath: packagesPath,
+          packageConfigPath: packageConfigPath,
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.file(manifestPath).parent),
         );
 
