@@ -19,7 +19,7 @@ void main() {
     final Finder textFormField = find.byType(TextFormField);
     final Finder submitButton = find.text('Submit');
 
-    // Enter text in field and submit
+    // Enter text in field and submit.
     await tester.enterText(textFormField, 'test text');
     await tester.tap(submitButton);
     await tester.pump();
