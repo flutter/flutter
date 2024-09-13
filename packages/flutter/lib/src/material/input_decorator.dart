@@ -2926,6 +2926,9 @@ class InputDecoration {
   /// The [InputDecorator] widget ignores [hintText] during layout when
   /// it's not visible, if this flag is set to false.
   ///
+  /// This is useful, If false, while inputting it will ignore the height of the [hintText]
+  /// use the height of the inputted content instead.
+  ///
   /// Defaults to true.
   final bool maintainHintHeight;
 
