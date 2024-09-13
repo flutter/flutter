@@ -10,12 +10,6 @@ import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 void main() {
-  bool assertsEnabled = false;
-  assert(() {
-    assertsEnabled = true;
-    return true;
-  }());
-
   test('Handles are distinct', () async {
     final Uint8List bytes = await _readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes);
@@ -89,7 +83,7 @@ void main() {
 
     frame.image.dispose();
     expect(frame.image.debugGetOpenHandleStackTraces(), isEmpty);
-  }, skip: !assertsEnabled);
+  });
 
   test('Clones can be compared', () async {
     final Uint8List bytes = await _readFile('2x2.png');
@@ -119,18 +113,10 @@ void main() {
     final Codec codec = await instantiateImageCodec(bytes);
     final FrameInfo frame = await codec.getNextFrame();
 
-    if (assertsEnabled) {
-      expect(frame.image.debugDisposed, false);
-    } else {
-      expect(() => frame.image.debugDisposed, throwsStateError);
-    }
+    expect(frame.image.debugDisposed, false);
 
     frame.image.dispose();
-    if (assertsEnabled) {
-      expect(frame.image.debugDisposed, true);
-    } else {
-      expect(() => frame.image.debugDisposed, throwsStateError);
-    }
+    expect(frame.image.debugDisposed, true);
   });
 }
 

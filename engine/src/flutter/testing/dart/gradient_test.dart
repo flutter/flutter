@@ -52,21 +52,18 @@ void main() {
   // this would result in div/0 on skia side.
   test('radial center and focal == Offset.zero and focalRadius != 0.0 assert',
     () {
-      assert(() {
-        expect(
-          () => Gradient.radial(
-                Offset.zero,
-                0.0,
-                <Color>[const Color(0xFFFFFFFF), const Color(0xFFFFFFFF)],
-                <double>[0.0, 1.0],
-                TileMode.mirror,
-                null,
-                Offset.zero,
-                1.0,
-              ),
-          throwsA(isA<AssertionError>()),
-        );
-        return true;
-      }());
+      expect(
+        () => Gradient.radial(
+              Offset.zero,
+              0.0,
+              <Color>[const Color(0xFFFFFFFF), const Color(0xFFFFFFFF)],
+              <double>[0.0, 1.0],
+              TileMode.mirror,
+              null,
+              Offset.zero,
+              1.0,
+            ),
+        throwsA(isA<AssertionError>()),
+      );
   });
 }
