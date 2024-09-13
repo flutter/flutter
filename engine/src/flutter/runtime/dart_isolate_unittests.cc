@@ -769,10 +769,9 @@ TEST_F(DartIsolateTest, PlatformIsolateCreationAndShutdown) {
                              ui_thread,             // ui
                              ui_thread              // io
     );
-    auto isolate =
-        RunDartCodeInIsolate(vm_ref, settings, task_runners, "emptyMain", {},
-                             GetDefaultKernelFilePath(), {}, nullptr,
-                             std::move(platform_configuration));
+    auto isolate = RunDartCodeInIsolate(
+        vm_ref, settings, task_runners, "emptyMain", {},
+        GetDefaultKernelFilePath(), {}, std::move(platform_configuration));
     ASSERT_TRUE(isolate);
     auto root_isolate = isolate->get();
     ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::Running);
@@ -842,10 +841,9 @@ TEST_F(DartIsolateTest, PlatformIsolateEarlyShutdown) {
                            ui_thread,             // ui
                            ui_thread              // io
   );
-  auto isolate =
-      RunDartCodeInIsolate(vm_ref, settings, task_runners, "emptyMain", {},
-                           GetDefaultKernelFilePath(), {}, nullptr,
-                           std::move(platform_configuration));
+  auto isolate = RunDartCodeInIsolate(
+      vm_ref, settings, task_runners, "emptyMain", {},
+      GetDefaultKernelFilePath(), {}, std::move(platform_configuration));
   ASSERT_TRUE(isolate);
   auto root_isolate = isolate->get();
   ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::Running);
@@ -925,10 +923,9 @@ TEST_F(DartIsolateTest, PlatformIsolateSendAndReceive) {
                            ui_thread,             // ui
                            ui_thread              // io
   );
-  auto isolate =
-      RunDartCodeInIsolate(vm_ref, settings, task_runners, "emptyMain", {},
-                           GetDefaultKernelFilePath(), {}, nullptr,
-                           std::move(platform_configuration));
+  auto isolate = RunDartCodeInIsolate(
+      vm_ref, settings, task_runners, "emptyMain", {},
+      GetDefaultKernelFilePath(), {}, std::move(platform_configuration));
   ASSERT_TRUE(isolate);
   auto root_isolate = isolate->get();
   ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::Running);
@@ -992,10 +989,9 @@ TEST_F(DartIsolateTest, PlatformIsolateCreationAfterManagerShutdown) {
                            ui_thread,             // ui
                            ui_thread              // io
   );
-  auto isolate =
-      RunDartCodeInIsolate(vm_ref, settings, task_runners, "emptyMain", {},
-                           GetDefaultKernelFilePath(), {}, nullptr,
-                           std::move(platform_configuration));
+  auto isolate = RunDartCodeInIsolate(
+      vm_ref, settings, task_runners, "emptyMain", {},
+      GetDefaultKernelFilePath(), {}, std::move(platform_configuration));
   ASSERT_TRUE(isolate);
   auto root_isolate = isolate->get();
   ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::Running);
@@ -1060,10 +1056,9 @@ TEST_F(DartIsolateTest, PlatformIsolateManagerShutdownBeforeMainRuns) {
                            ui_thread,             // ui
                            ui_thread              // io
   );
-  auto isolate =
-      RunDartCodeInIsolate(vm_ref, settings, task_runners, "emptyMain", {},
-                           GetDefaultKernelFilePath(), {}, nullptr,
-                           std::move(platform_configuration));
+  auto isolate = RunDartCodeInIsolate(
+      vm_ref, settings, task_runners, "emptyMain", {},
+      GetDefaultKernelFilePath(), {}, std::move(platform_configuration));
   ASSERT_TRUE(isolate);
   auto root_isolate = isolate->get();
   ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::Running);
@@ -1146,10 +1141,9 @@ TEST_F(DartIsolateTest, PlatformIsolateMainThrowsError) {
                            ui_thread,             // ui
                            ui_thread              // io
   );
-  auto isolate =
-      RunDartCodeInIsolate(vm_ref, settings, task_runners, "emptyMain", {},
-                           GetDefaultKernelFilePath(), {}, nullptr,
-                           std::move(platform_configuration));
+  auto isolate = RunDartCodeInIsolate(
+      vm_ref, settings, task_runners, "emptyMain", {},
+      GetDefaultKernelFilePath(), {}, std::move(platform_configuration));
   ASSERT_TRUE(isolate);
   auto root_isolate = isolate->get();
   ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::Running);

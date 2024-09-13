@@ -136,6 +136,7 @@ void DlSkCanvasDispatcher::clipRRect(const SkRRect& rrect,
 void DlSkCanvasDispatcher::clipPath(const DlPath& path,
                                     ClipOp clip_op,
                                     bool is_aa) {
+  path.WillRenderSkPath();
   canvas_->clipPath(path.GetSkPath(), ToSk(clip_op), is_aa);
 }
 
@@ -185,6 +186,7 @@ void DlSkCanvasDispatcher::drawDRRect(const SkRRect& outer,
   canvas_->drawDRRect(outer, inner, paint());
 }
 void DlSkCanvasDispatcher::drawPath(const DlPath& path) {
+  path.WillRenderSkPath();
   canvas_->drawPath(path.GetSkPath(), paint());
 }
 void DlSkCanvasDispatcher::drawArc(const DlRect& bounds,
@@ -333,6 +335,7 @@ void DlSkCanvasDispatcher::drawShadow(const DlPath& path,
                                       const DlScalar elevation,
                                       bool transparent_occluder,
                                       DlScalar dpr) {
+  path.WillRenderSkPath();
   DrawShadow(canvas_, path.GetSkPath(), color, elevation, transparent_occluder,
              dpr);
 }

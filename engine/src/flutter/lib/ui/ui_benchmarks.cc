@@ -4,7 +4,6 @@
 
 #include "flutter/benchmarking/benchmarking.h"
 #include "flutter/common/settings.h"
-#include "flutter/lib/ui/volatile_path_tracker.h"
 #include "flutter/lib/ui/window/platform_message_response_dart.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/shell/common/thread_host.h"
@@ -67,54 +66,7 @@ static void BM_PlatformMessageResponseDartComplete(benchmark::State& state) {
   }
 }
 
-static void BM_PathVolatilityTracker(benchmark::State& state) {
-  ThreadHost thread_host(ThreadHost::ThreadHostConfig(
-      "test", ThreadHost::Type::kPlatform | ThreadHost::Type::kRaster |
-                  ThreadHost::Type::kIo | ThreadHost::Type::kUi));
-  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
-                           thread_host.raster_thread->GetTaskRunner(),
-                           thread_host.ui_thread->GetTaskRunner(),
-                           thread_host.io_thread->GetTaskRunner());
-
-  VolatilePathTracker tracker(task_runners.GetUITaskRunner(), true);
-
-  while (state.KeepRunning()) {
-    std::vector<std::shared_ptr<VolatilePathTracker::TrackedPath>> paths;
-    constexpr int path_count = 1000;
-    for (int i = 0; i < path_count; i++) {
-      auto path = std::make_shared<VolatilePathTracker::TrackedPath>();
-      path->path = SkPath();
-      path->path.setIsVolatile(true);
-      paths.push_back(std::move(path));
-    }
-
-    fml::AutoResetWaitableEvent latch;
-    task_runners.GetUITaskRunner()->PostTask([&]() {
-      for (const auto& path : paths) {
-        tracker.Track(path);
-      }
-      latch.Signal();
-    });
-
-    latch.Wait();
-
-    task_runners.GetUITaskRunner()->PostTask([&]() { tracker.OnFrame(); });
-
-    for (int i = 0; i < path_count - 10; ++i) {
-      paths[i].reset();
-    }
-
-    task_runners.GetUITaskRunner()->PostTask([&]() { tracker.OnFrame(); });
-
-    latch.Reset();
-    task_runners.GetUITaskRunner()->PostTask([&]() { latch.Signal(); });
-    latch.Wait();
-  }
-}
-
 BENCHMARK(BM_PlatformMessageResponseDartComplete)
     ->Unit(benchmark::kMicrosecond);
-
-BENCHMARK(BM_PathVolatilityTracker)->Unit(benchmark::kMillisecond);
 
 }  // namespace flutter

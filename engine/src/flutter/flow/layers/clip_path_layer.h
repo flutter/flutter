@@ -7,11 +7,13 @@
 
 #include "flutter/flow/layers/clip_shape_layer.h"
 
+#include "flutter/display_list/geometry/dl_path.h"
+
 namespace flutter {
 
-class ClipPathLayer : public ClipShapeLayer<SkPath> {
+class ClipPathLayer : public ClipShapeLayer<DlPath> {
  public:
-  explicit ClipPathLayer(const SkPath& clip_path,
+  explicit ClipPathLayer(const DlPath& clip_path,
                          Clip clip_behavior = Clip::kAntiAlias);
 
  protected:

@@ -54,7 +54,6 @@ void RunDartCodeInIsolate(
     const std::vector<std::string>& args,
     const std::string& fixtures_path,
     fml::WeakPtr<IOManager> io_manager = {},
-    std::shared_ptr<VolatilePathTracker> volatile_path_tracker = nullptr,
     std::unique_ptr<PlatformConfiguration> platform_configuration = nullptr);
 
 std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolate(
@@ -65,7 +64,6 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolate(
     const std::vector<std::string>& args,
     const std::string& fixtures_path,
     fml::WeakPtr<IOManager> io_manager = {},
-    std::shared_ptr<VolatilePathTracker> volatile_path_tracker = nullptr,
     std::unique_ptr<PlatformConfiguration> platform_configuration = nullptr);
 
 }  // namespace testing

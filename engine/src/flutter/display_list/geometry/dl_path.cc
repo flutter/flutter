@@ -10,61 +10,69 @@
 namespace flutter {
 
 const SkPath& DlPath::GetSkPath() const {
-  return sk_path_;
+  return data_->sk_path;
 }
 
 impeller::Path DlPath::GetPath() const {
-  if (path_.IsEmpty() && !sk_path_.isEmpty()) {
-    path_ = ConvertToImpellerPath(sk_path_);
+  if (!data_->path.has_value()) {
+    data_->path = ConvertToImpellerPath(data_->sk_path);
   }
 
-  return path_;
+  // Covered by check above.
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+  return data_->path.value();
+}
+
+void DlPath::WillRenderSkPath() const {
+  if (data_->render_count >= kMaxVolatileUses) {
+    data_->sk_path.setIsVolatile(false);
+  } else {
+    data_->render_count++;
+  }
 }
 
 bool DlPath::IsInverseFillType() const {
-  return sk_path_.isInverseFillType();
+  return data_->sk_path.isInverseFillType();
 }
 
 bool DlPath::IsRect(DlRect* rect, bool* is_closed) const {
-  return sk_path_.isRect(ToSkRect(rect), is_closed);
+  return data_->sk_path.isRect(ToSkRect(rect), is_closed);
 }
 
 bool DlPath::IsOval(DlRect* bounds) const {
-  return sk_path_.isOval(ToSkRect(bounds));
+  return data_->sk_path.isOval(ToSkRect(bounds));
 }
 
 bool DlPath::IsSkRect(SkRect* rect, bool* is_closed) const {
-  return sk_path_.isRect(rect, is_closed);
+  return data_->sk_path.isRect(rect, is_closed);
 }
 
 bool DlPath::IsSkOval(SkRect* bounds) const {
-  return sk_path_.isOval(bounds);
+  return data_->sk_path.isOval(bounds);
 }
 
 bool DlPath::IsSkRRect(SkRRect* rrect) const {
-  return sk_path_.isRRect(rrect);
+  return data_->sk_path.isRRect(rrect);
 }
 
 SkRect DlPath::GetSkBounds() const {
-  return sk_path_.getBounds();
+  return data_->sk_path.getBounds();
 }
 
 DlRect DlPath::GetBounds() const {
-  return ToDlRect(sk_path_.getBounds());
+  return ToDlRect(data_->sk_path.getBounds());
 }
 
 bool DlPath::operator==(const DlPath& other) const {
-  return sk_path_ == other.sk_path_;
+  return data_->sk_path == other.data_->sk_path;
 }
 
 bool DlPath::IsConverted() const {
-  if (!path_.IsEmpty()) {
-    return true;
-  }
-  if (sk_path_.isEmpty()) {
-    return true;
-  }
-  return false;
+  return data_->path.has_value();
+}
+
+bool DlPath::IsVolatile() const {
+  return data_->sk_path.isVolatile();
 }
 
 using Path = impeller::Path;

@@ -249,7 +249,6 @@ class EngineContext {
           /*io_manager=*/io_manager_,
           /*unref_queue=*/nullptr,
           /*snapshot_delegate=*/snapshot_delegate_,
-          /*volatile_path_tracker=*/nullptr,
           /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
     });
   }

@@ -409,15 +409,6 @@ void ShellTest::DestroyShell(std::unique_ptr<Shell> shell,
   latch.Wait();
 }
 
-size_t ShellTest::GetLiveTrackedPathCount(
-    const std::shared_ptr<VolatilePathTracker>& tracker) {
-  return std::count_if(
-      tracker->paths_.begin(), tracker->paths_.end(),
-      [](const std::weak_ptr<VolatilePathTracker::TrackedPath>& path) {
-        return path.lock();
-      });
-}
-
 void ShellTest::TurnOffGPU(Shell* shell, bool value) {
   shell->is_gpu_disabled_sync_switch_->SetSwitch(value);
 }
