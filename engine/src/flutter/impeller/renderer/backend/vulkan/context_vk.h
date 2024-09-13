@@ -49,6 +49,7 @@ class ContextVK final : public Context,
     fml::UniqueFD cache_directory;
     bool enable_validation = false;
     bool enable_gpu_tracing = false;
+    bool disable_surface_control = false;
     /// If validations are requested but cannot be enabled, log a fatal error.
     bool fatal_missing_validations = false;
 
@@ -168,6 +169,10 @@ class ContextVK final : public Context,
 
   void InitializeCommonlyUsedShadersIfNeeded() const override;
 
+  /// @brief Whether the Android Surface control based swapchain should be
+  /// disabled, even if the device is capable of supporting it.
+  bool GetShouldDisableSurfaceControlSwapchain() const;
+
  private:
   struct DeviceHolderImpl : public DeviceHolderVK {
     // |DeviceHolder|
@@ -200,6 +205,7 @@ class ContextVK final : public Context,
   std::shared_ptr<GPUTracerVK> gpu_tracer_;
   std::shared_ptr<DescriptorPoolRecyclerVK> descriptor_pool_recycler_;
   std::shared_ptr<CommandQueue> command_queue_vk_;
+  bool should_disable_surface_control_ = false;
 
   const uint64_t hash_;
 

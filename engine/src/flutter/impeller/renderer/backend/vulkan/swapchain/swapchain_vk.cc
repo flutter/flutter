@@ -57,11 +57,14 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
   }
 
   // TODO(147533): AHB swapchains on emulators are not functional.
-  const auto emulator = ContextVK::Cast(*context).GetDriverInfo()->IsEmulator();
+  auto& context_vk = ContextVK::Cast(*context);
+  const auto emulator = context_vk.GetDriverInfo()->IsEmulator();
+  const auto should_disable_sc =
+      context_vk.GetShouldDisableSurfaceControlSwapchain();
 
   // Try AHB swapchains first.
   if (!emulator && AHBSwapchainVK::IsAvailableOnPlatform() &&
-      !android::ShadowRealm::ShouldDisableAHB()) {
+      !android::ShadowRealm::ShouldDisableAHB() && !should_disable_sc) {
     auto ahb_swapchain = std::shared_ptr<AHBSwapchainVK>(new AHBSwapchainVK(
         context,             //
         window.GetHandle(),  //

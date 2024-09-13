@@ -10,14 +10,13 @@
 #include "flutter/impeller/entity/vk/framebuffer_blend_shaders_vk.h"
 #include "flutter/impeller/entity/vk/modern_shaders_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/context_vk.h"
+#include "shell/platform/android/context/android_context.h"
 
 namespace flutter {
 
 static std::shared_ptr<impeller::Context> CreateImpellerContext(
     const fml::RefPtr<fml::NativeLibrary>& vulkan_dylib,
-    bool enable_vulkan_validation,
-    bool enable_gpu_tracing,
-    bool quiet) {
+    const AndroidContext::ContextSettings& p_settings) {
   if (!vulkan_dylib) {
     VALIDATION_LOG << "Could not open the Vulkan dylib.";
     return nullptr;
@@ -46,12 +45,13 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   settings.proc_address_callback = instance_proc_addr.value();
   settings.shader_libraries_data = std::move(shader_mappings);
   settings.cache_directory = fml::paths::GetCachesDirectory();
-  settings.enable_validation = enable_vulkan_validation;
-  settings.enable_gpu_tracing = enable_gpu_tracing;
+  settings.enable_validation = p_settings.enable_validation;
+  settings.enable_gpu_tracing = p_settings.enable_gpu_tracing;
+  settings.disable_surface_control = p_settings.disable_surface_control;
 
   auto context = impeller::ContextVK::Create(std::move(settings));
 
-  if (!quiet) {
+  if (!p_settings.quiet) {
     if (context && impeller::CapabilitiesVK::Cast(*context->GetCapabilities())
                        .AreValidationsEnabled()) {
       FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan with "
@@ -69,13 +69,11 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   return context;
 }
 
-AndroidContextVKImpeller::AndroidContextVKImpeller(bool enable_validation,
-                                                   bool enable_gpu_tracing,
-                                                   bool quiet)
+AndroidContextVKImpeller::AndroidContextVKImpeller(
+    const AndroidContext::ContextSettings& settings)
     : AndroidContext(AndroidRenderingAPI::kImpellerVulkan),
       vulkan_dylib_(fml::NativeLibrary::Create("libvulkan.so")) {
-  auto impeller_context = CreateImpellerContext(
-      vulkan_dylib_, enable_validation, enable_gpu_tracing, quiet);
+  auto impeller_context = CreateImpellerContext(vulkan_dylib_, settings);
   SetImpellerContext(impeller_context);
   is_valid_ = !!impeller_context;
 }

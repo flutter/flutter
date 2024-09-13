@@ -23,6 +23,7 @@
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
+#include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "impeller/base/validation.h"
 #include "impeller/toolkit/android/proc_table.h"
@@ -269,9 +270,9 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     // checking if it is valid.
     impeller::ScopedValidationDisable disable_validation;
     auto vulkan_backend = std::make_unique<AndroidContextVKImpeller>(
-        /*enable_vulkan_validation=*/false,
-        /*enable_vulkan_gpu_tracing=*/false,
-        /*quiet=*/true);
+        AndroidContext::ContextSettings{.enable_validation = false,
+                                        .enable_gpu_tracing = false,
+                                        .quiet = true});
     if (!vulkan_backend->IsValid()) {
       return kVulkanUnsupportedFallback;
     }

@@ -22,6 +22,13 @@ class AndroidContext {
 
   virtual ~AndroidContext();
 
+  struct ContextSettings {
+    bool enable_validation = false;
+    bool enable_gpu_tracing = false;
+    bool disable_surface_control = false;
+    bool quiet = false;
+  };
+
   AndroidRenderingAPI RenderingApi() const;
 
   virtual bool IsValid() const;
