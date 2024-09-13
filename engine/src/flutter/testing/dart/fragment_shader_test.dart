@@ -16,12 +16,6 @@ import 'impeller_enabled.dart';
 import 'shader_test_file_utils.dart';
 
 void main() async {
-  bool assertsEnabled = false;
-  assert(() {
-    assertsEnabled = true;
-    return true;
-  }());
-
   test('impellerc produces reasonable JSON encoded IPLR files', () async {
     final Directory directory = shaderDirectory('iplr-json');
     final Object? rawData = convert.json.decode(
@@ -80,9 +74,6 @@ void main() async {
   });
 
   test('FragmentShader with sampler asserts if sampler is missing when assigned to paint', () async {
-    if (!assertsEnabled) {
-      return;
-    }
     final FragmentProgram program = await FragmentProgram.fromAsset(
       'blue_green_sampler.frag.iplr',
     );
@@ -107,14 +98,9 @@ void main() async {
     final FragmentShader shader = program.fragmentShader()
       ..setImageSampler(0, blueGreenImage);
     shader.dispose();
-    try {
-      final Paint paint = Paint()..shader = shader;  // ignore: unused_local_variable
-      if (assertsEnabled) {
-        fail('Unreachable');
-      }
-    } catch (e) {
-      expect(e.toString(), contains('Attempted to set a disposed shader'));
-    }
+    expect(() {
+      Paint().shader = shader;
+    }, throwsA(isA<AssertionError>().having((AssertionError e) => e.message, 'message', contains('Attempted to set a disposed shader'))));
     blueGreenImage.dispose();
   });
 
@@ -125,21 +111,10 @@ void main() async {
     final FragmentShader shader = program.fragmentShader()
       ..setFloat(0, 0.0);
     shader.dispose();
-    try {
+
+    expect(() {
       shader.setFloat(0, 0.0);
-      if (assertsEnabled) {
-        fail('Unreachable');
-      }
-    } catch (e) {
-      if (assertsEnabled) {
-        expect(
-          e.toString(),
-          contains('Tried to accesss uniforms on a disposed Shader'),
-        );
-      } else {
-        expect(e is RangeError, true);
-      }
-    }
+    }, throwsA(isA<AssertionError>().having((AssertionError e) => e.message, 'message', contains('Tried to accesss uniforms on a disposed Shader'))));
   });
 
   test('Disposed FragmentShader setImageSampler', () async {
@@ -151,22 +126,9 @@ void main() async {
     final FragmentShader shader = program.fragmentShader()
       ..setImageSampler(0, blueGreenImage);
     shader.dispose();
-    try {
+    expect(() {
       shader.setImageSampler(0, blueGreenImage);
-      if (assertsEnabled) {
-        fail('Unreachable');
-      }
-    } on AssertionError catch (e) {
-      expect(
-        e.toString(),
-        contains('Tried to access uniforms on a disposed Shader'),
-      );
-    } on StateError catch (e) {
-      expect(
-        e.toString(),
-        contains('the native peer has been collected'),
-      );
-    }
+    }, throwsA(isA<AssertionError>().having((AssertionError e) => e.message, 'message', contains('Tried to access uniforms on a disposed Shader'))));
     blueGreenImage.dispose();
   });
 
@@ -177,18 +139,9 @@ void main() async {
     final FragmentShader shader = program.fragmentShader()
       ..setFloat(0, 0.0);
     shader.dispose();
-    try {
+    expect(() {
       shader.dispose();
-      if (assertsEnabled) {
-        fail('Unreachable');
-      }
-    } catch (e) {
-      if (assertsEnabled) {
-        expect(e is AssertionError, true);
-      } else {
-        expect(e is StateError, true);
-      }
-    }
+    }, throwsA(isA<AssertionError>().having((AssertionError e) => e.message, 'message', contains('Shader cannot be disposed more than once'))));
   });
 
   test('FragmentShader simple shader renders correctly', () async {

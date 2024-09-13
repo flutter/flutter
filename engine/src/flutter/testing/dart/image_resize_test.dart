@@ -11,12 +11,6 @@ import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 void main() {
-  bool assertsEnabled = false;
-  assert(() {
-    assertsEnabled = true;
-    return true;
-  }());
-
   test('no resize by default', () async {
     final Uint8List bytes = await readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes);
@@ -119,8 +113,7 @@ void main() {
 
   test('pixels: upscale image by 5x - no upscaling', () async {
     final BlackSquare blackSquare = BlackSquare.create();
-    bool threw = false;
-    try {
+    expect(() {
       decodeImageFromPixels(
         blackSquare.pixels,
         blackSquare.width,
@@ -130,12 +123,8 @@ void main() {
         targetHeight: 10,
         allowUpscaling: false,
       );
-    } catch (e) {
-      expect(e is AssertionError, true);
-      threw = true;
-    }
-    expect(threw, true);
-  }, skip: !assertsEnabled);
+    }, throwsA(isA<AssertionError>()));
+  });
 
   test('pixels: upscale image varying width and height', () async {
     final BlackSquare blackSquare = BlackSquare.create();
@@ -147,8 +136,7 @@ void main() {
 
   test('pixels: upscale image varying width and height - no upscaling', () async {
     final BlackSquare blackSquare = BlackSquare.create();
-    bool threw = false;
-    try {
+    expect(() {
       decodeImageFromPixels(
         blackSquare.pixels,
         blackSquare.width,
@@ -159,12 +147,8 @@ void main() {
         targetWidth: 1,
         allowUpscaling: false,
       );
-    } catch (e) {
-      expect(e is AssertionError, true);
-      threw = true;
-    }
-    expect(threw, true);
-  }, skip: !assertsEnabled);
+    }, throwsA(isA<AssertionError>()));
+  });
 
   test('pixels: large negative dimensions', () async {
     final BlackSquare blackSquare = BlackSquare.create();

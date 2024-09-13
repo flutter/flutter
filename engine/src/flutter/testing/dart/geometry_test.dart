@@ -378,15 +378,6 @@ void main() {
   });
 
   test('RRect asserts when corner radii are negative', () {
-    bool assertsEnabled = false;
-    assert(() {
-      assertsEnabled = true;
-      return true;
-    }());
-    if (!assertsEnabled) {
-      return;
-    }
-
     expect(() {
       RRect.fromRectAndCorners(
         const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0),

@@ -4322,7 +4322,7 @@ base class Shader extends NativeFieldWrapperClass1 {
   /// Classes that override this method must call `super.dispose()`.
   void dispose() {
     assert(() {
-      assert(!_debugDisposed);
+      assert(!_debugDisposed, 'A Shader cannot be disposed more than once.');
       _debugDisposed = true;
       return true;
     }());
