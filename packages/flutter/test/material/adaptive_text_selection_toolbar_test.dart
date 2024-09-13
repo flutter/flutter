@@ -324,7 +324,11 @@ void main() {
       expect(buttonTypes, isNot(contains(ContextMenuButtonType.selectAll)));
 
       // With text but no selection.
-      controller.text = 'lorem ipsum';
+      const String text = 'lorem ipsum';
+      controller.value = const TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      );
       await tester.pump();
 
       expect(buttonTypes, isNot(contains(ContextMenuButtonType.cut)));
