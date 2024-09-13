@@ -2923,11 +2923,11 @@ class InputDecoration {
   /// If [InputDecorationTheme.hintFadeDuration] is null defaults to 20ms.
   final Duration? hintFadeDuration;
 
+  /// Whether the input field's height should always be greater than or equal to
+  /// the height of the [hintText], even if the [hintText] is not visible.
+  ///
   /// The [InputDecorator] widget ignores [hintText] during layout when
   /// it's not visible, if this flag is set to false.
-  ///
-  /// This is useful, If false, while inputting it will ignore the height of the [hintText]
-  /// use the height of the inputted content instead.
   ///
   /// Defaults to true.
   final bool maintainHintHeight;
