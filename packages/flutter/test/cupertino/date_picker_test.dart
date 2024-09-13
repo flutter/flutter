@@ -11,10 +11,14 @@ library;
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:file/file.dart';
+import 'package:file/local.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:platform/platform.dart';
 
 import '../impeller_test_helpers.dart';
 
@@ -2416,10 +2420,11 @@ void main() {
     expect(find.byType(CupertinoPickerDefaultSelectionOverlay), findsExactly(4));
   });
 
-  testWidgets('CupertinoDatePicker column width accommodates widest text', (WidgetTester tester) async {
+testWidgets('CupertinoDatePicker column width accommodates widest text with default font',
+      (WidgetTester tester) async {
     const List<String> testWords = <String>[
-      'aaaaaii',  // Narrow characters - 7 characters
-      'WWWWWW',   // Wide characters - 6 characters
+      'Fevereiro', // February - 9 characters - Portuguese
+      'Novembro', // November - 8 characters - Portuguese
     ];
 
     await tester.pumpWidget(
@@ -2435,20 +2440,64 @@ void main() {
 
     final BuildContext context = tester.element(find.byType(CupertinoDatePicker));
 
-    // Use CupertinoTheme to get the text style used in the picker.
+    // Retrieve the default text style used in the CupertinoDatePicker.
     final TextStyle textStyle = CupertinoTheme.of(context).textTheme.dateTimePickerTextStyle;
 
-    // Calculate the largest width from testWords.
-    final double largestWidth = testWords
-        .map((String word) => getColumnWidth(word, textStyle))
-        .reduce(math.max);
+    // Calculate the width of each word using the default text style.
+    final double largestWidth =
+        testWords.map((String word) => getColumnWidth(word, textStyle, context)).reduce(math.max);
 
-    // Get the column width using CupertinoDatePicker method.
-    final double testWidth = CupertinoDatePicker.getColumnWidth(texts: testWords, context: context);
+    // Retrieve the column width for the widest text using CupertinoDatePicker method.
+    final double testWidth =
+        CupertinoDatePicker.getColumnWidth(texts: testWords, context: context, textStyle: textStyle);
 
-    // Ensure the largest width is accurately calculated.
-    expect(largestWidth, greaterThanOrEqualTo(testWidth));
-    expect(testWords.firstWhere((String word) => getColumnWidth(word, textStyle) == largestWidth), 'aaaaaii');
+    // With the default font, the width of the column should match the longest word.
+    expect(testWidth, equals(largestWidth));
+    expect(testWidth, getColumnWidth(testWords[0], textStyle, context),
+        reason: 'Column width should match the width of the first word.');
+  });
+
+  testWidgets('CupertinoDatePicker column width accommodates widest text with custom font',
+      (WidgetTester tester) async {
+    await _loadFonts();
+
+    const List<String> testWords = <String>[
+      'Fevereiro', // February - 9 characters - Portuguese
+      'Novembro', // November - 8 characters - Portuguese
+    ];
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDatePicker(
+            onDateTimeChanged: (DateTime date) {},
+            initialDateTime: DateTime(2018, 9, 15),
+          ),
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.byType(CupertinoDatePicker));
+
+    // Retrieve the custom text style.
+    const TextStyle textStyle = TextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 21,
+      color: CupertinoColors.black,
+    );
+
+    // Calculate the width of each word using the custom text style.
+    final double largestWidth =
+        testWords.map((String word) => getColumnWidth(word, textStyle, context)).reduce(math.max);
+
+    // Retrieve the column width for the widest text using CupertinoDatePicker method.
+    final double testWidth =
+        CupertinoDatePicker.getColumnWidth(texts: testWords, context: context, textStyle: textStyle);
+
+    // Assert that the column width matches the width of the widest word.
+    expect(testWidth, equals(largestWidth));
+    expect(testWidth, getColumnWidth(testWords[1], textStyle, context),
+        reason: 'The width of the second word should be the largest with roboto font.');
   });
 }
 
@@ -2475,11 +2524,28 @@ Widget _buildPicker({
   );
 }
 
-double getColumnWidth(String text, TextStyle textStyle) {
-  final TextPainter textPainter = TextPainter(
-    text: TextSpan(text: text, style: textStyle),
-    textDirection: TextDirection.ltr,
-  )..layout();
+double getColumnWidth(String text, TextStyle textStyle, BuildContext context) {
+  return TextPainter.computeMaxIntrinsicWidth(
+    text: TextSpan(
+      text: text,
+      style: textStyle,
+    ),
+    textDirection: Directionality.of(context),
+  );
+}
 
-  return textPainter.size.width;
+/// Loads the cached font file for the Roboto font.
+Future<void> _loadFonts() async {
+  const FileSystem fs = LocalFileSystem();
+  const Platform platform = LocalPlatform();
+  final Directory flutterRoot =
+      fs.directory(platform.environment['FLUTTER_ROOT']);
+
+   Future<void> loadFont(String fontName, String fontPath) async {
+    final File fontFile = flutterRoot.childFile(fs.path.join('bin', 'cache', 'artifacts', 'material_fonts', fontPath));
+    final ByteData fontData = fontFile.readAsBytesSync().buffer.asByteData();
+    await (FontLoader(fontName)..addFont(Future<ByteData>.value(fontData))).load();
+  }
+
+  await loadFont('Roboto', 'Roboto-Regular.ttf');
 }

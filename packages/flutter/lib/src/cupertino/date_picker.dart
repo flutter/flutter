@@ -546,10 +546,11 @@ class CupertinoDatePicker extends StatefulWidget {
   static double getColumnWidth({
     required List<String> texts,
     required BuildContext context,
+    TextStyle? textStyle,
   }) {
     return texts.map((String text) => TextPainter.computeMaxIntrinsicWidth(
         text: TextSpan(
-          style: _themeTextStyle(context),
+          style: textStyle ?? _themeTextStyle(context),
           text: text,
         ),
         textDirection: Directionality.of(context),
