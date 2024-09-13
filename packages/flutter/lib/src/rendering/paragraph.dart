@@ -1439,6 +1439,9 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         result = _handleClearSelection();
       case SelectionEventType.selectAll:
         result = _handleSelectAll();
+      case SelectionEventType.collapseSelection:
+        final CollapseSelectionEvent collapseSelection = event as CollapseSelectionEvent;
+        result = _handleCollapseSelection(event.globalPosition);
       case SelectionEventType.selectWord:
         final SelectWordSelectionEvent selectWord = event as SelectWordSelectionEvent;
         result = _handleSelectWord(selectWord.globalPosition);
@@ -2665,7 +2668,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return SelectionResult.none;
   }
 
-  SelectionResult _handleSelectTextBoundary(_TextBoundaryRecord textBoundary) {
+  SelectionResult _handleSelectTextBoundary(_TextBoundaryRecord textBoundary, { bool markOrigin = true }) {
     // This fragment may not contain the boundary, decide what direction the target
     // fragment is located in. Because fragments are separated by placeholder
     // spans, we also check if the beginning or end of the boundary is touching
@@ -2680,7 +2683,9 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     assert(textBoundary.boundaryStart.offset >= range.start && textBoundary.boundaryEnd.offset <= range.end);
     _textSelectionStart = textBoundary.boundaryStart;
     _textSelectionEnd = textBoundary.boundaryEnd;
-    _selectableContainsOriginTextBoundary = true;
+    if (markOrigin) {
+      _selectableContainsOriginTextBoundary = true;
+    }
     return SelectionResult.end;
   }
 
@@ -2730,6 +2735,12 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       end = TextPosition(offset: textBoundary.end, affinity: TextAffinity.upstream);
     }
     return (boundaryStart: start, boundaryEnd: end);
+  }
+
+  SelectionResult _handleCollapseSelection(Offset globalPosition) {
+    final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
+    final _TextBoundaryRecord collapsedBoundary = (boundaryStart: position, boundaryEnd: position);
+    return _handleSelectTextBoundary(collapsedBoundary, markOrigin: false);
   }
 
   SelectionResult _handleSelectWord(Offset globalPosition) {

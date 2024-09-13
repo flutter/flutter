@@ -424,6 +424,12 @@ enum SelectionEventType {
   /// Used by [SelectAllSelectionEvent].
   selectAll,
 
+  /// An event to select collapse the selection at the location
+  /// [CollapseSelectionEvent.globalPosition].
+  ///
+  /// Used by [CollapseSelectionEvent].
+  collapseSelection,
+
   /// An event to select a word at the location
   /// [SelectWordSelectionEvent.globalPosition].
   ///
@@ -508,6 +514,17 @@ class SelectAllSelectionEvent extends SelectionEvent {
 class ClearSelectionEvent extends SelectionEvent {
   /// Create a clear selection event.
   const ClearSelectionEvent(): super._(SelectionEventType.clear);
+}
+
+/// Collapses the selection at the location.
+///
+/// This event can be sent as the result of a single tap or click.
+class CollapseSelectionEvent extends SelectionEvent {
+  /// Creates a collapse selection event at the [globalPosition].
+  const CollapseSelectionEvent({required this.globalPosition}): super._(SelectionEventType.collapseSelection);
+
+  /// The position in global coordinates to collapse the selection at.
+  final Offset globalPosition;
 }
 
 /// Selects the whole word at the location.
