@@ -38,6 +38,17 @@
 
 namespace flutter {
 
+namespace {
+AndroidContext::ContextSettings CreateContextSettings(
+    const Settings& p_settings) {
+  AndroidContext::ContextSettings settings;
+  settings.enable_gpu_tracing = p_settings.enable_vulkan_gpu_tracing;
+  settings.enable_validation = p_settings.enable_vulkan_validation;
+  settings.disable_surface_control = p_settings.disable_surface_control;
+  return settings;
+}
+}  // namespace
+
 AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
     const std::shared_ptr<AndroidContext>& context,
     bool enable_impeller)
@@ -66,9 +77,8 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
     bool use_software_rendering,
     const flutter::TaskRunners& task_runners,
     AndroidRenderingAPI android_rendering_api,
-    bool enable_vulkan_validation,
     bool enable_opengl_gpu_tracing,
-    bool enable_vulkan_gpu_tracing) {
+    const AndroidContext::ContextSettings& settings) {
   switch (android_rendering_api) {
     case AndroidRenderingAPI::kSoftware:
       return std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
@@ -77,8 +87,7 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
           std::make_unique<impeller::egl::Display>(),
           enable_opengl_gpu_tracing);
     case AndroidRenderingAPI::kImpellerVulkan:
-      return std::make_unique<AndroidContextVKImpeller>(
-          enable_vulkan_validation, enable_vulkan_gpu_tracing);
+      return std::make_unique<AndroidContextVKImpeller>(settings);
     case AndroidRenderingAPI::kSkiaOpenGLES:
       return std::make_unique<AndroidContextGLSkia>(
           fml::MakeRefCounted<AndroidEnvironmentGL>(),  //
@@ -101,10 +110,8 @@ PlatformViewAndroid::PlatformViewAndroid(
               use_software_rendering,
               task_runners,
               delegate.OnPlatformViewGetSettings().android_rendering_api,
-              delegate.OnPlatformViewGetSettings().enable_vulkan_validation,
               delegate.OnPlatformViewGetSettings().enable_opengl_gpu_tracing,
-              delegate.OnPlatformViewGetSettings().enable_vulkan_gpu_tracing)) {
-}
+              CreateContextSettings(delegate.OnPlatformViewGetSettings()))) {}
 
 PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,

@@ -297,6 +297,9 @@ DEF_SWITCH(EnablePlatformIsolates,
 DEF_SWITCH(EnableMergedPlatformUIThread,
            "enable-merged-platform-ui-thread",
            "Merge the ui thread and platform thread.")
+DEF_SWITCH(DisableAndroidSurfaceControl,
+           "disable-surface-control",
+           "Disable the SurfaceControl backed swapchain even when supported.")
 DEF_SWITCHES_END
 
 void PrintUsage(const std::string& executable_name);

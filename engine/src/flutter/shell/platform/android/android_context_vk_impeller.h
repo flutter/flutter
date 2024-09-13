@@ -14,9 +14,8 @@ namespace flutter {
 
 class AndroidContextVKImpeller : public AndroidContext {
  public:
-  AndroidContextVKImpeller(bool enable_validation,
-                           bool enable_gpu_tracing,
-                           bool quiet = false);
+  explicit AndroidContextVKImpeller(
+      const AndroidContext::ContextSettings& settings);
 
   ~AndroidContextVKImpeller();
 
