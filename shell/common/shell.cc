@@ -64,22 +64,20 @@ std::unique_ptr<Engine> CreateEngine(
     const fml::WeakPtr<IOManager>& io_manager,
     const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
     const fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>& snapshot_delegate,
-    const std::shared_ptr<VolatilePathTracker>& volatile_path_tracker,
     const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
     impeller::RuntimeStageBackend runtime_stage_backend) {
-  return std::make_unique<Engine>(delegate,               //
-                                  dispatcher_maker,       //
-                                  vm,                     //
-                                  isolate_snapshot,       //
-                                  task_runners,           //
-                                  platform_data,          //
-                                  settings,               //
-                                  std::move(animator),    //
-                                  io_manager,             //
-                                  unref_queue,            //
-                                  snapshot_delegate,      //
-                                  volatile_path_tracker,  //
-                                  gpu_disabled_switch,    //
+  return std::make_unique<Engine>(delegate,             //
+                                  dispatcher_maker,     //
+                                  vm,                   //
+                                  isolate_snapshot,     //
+                                  task_runners,         //
+                                  platform_data,        //
+                                  settings,             //
+                                  std::move(animator),  //
+                                  io_manager,           //
+                                  unref_queue,          //
+                                  snapshot_delegate,    //
+                                  gpu_disabled_switch,  //
                                   runtime_stage_backend);
 }
 
@@ -232,11 +230,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
 
   auto shell = std::unique_ptr<Shell>(
       new Shell(std::move(vm), task_runners, std::move(parent_merger),
-                resource_cache_limit_calculator, settings,
-                std::make_shared<VolatilePathTracker>(
-                    task_runners.GetUITaskRunner(),
-                    !settings.skia_deterministic_rendering_on_cpu),
-                is_gpu_disabled));
+                resource_cache_limit_calculator, settings, is_gpu_disabled));
 
   // Create the platform view on the platform thread (this thread).
   auto platform_view = on_create_platform_view(*shell.get());
@@ -355,7 +349,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
             weak_io_manager_future.get(),         //
             unref_queue_future.get(),             //
             snapshot_delegate_future.get(),       //
-            shell->volatile_path_tracker_,        //
             shell->is_gpu_disabled_sync_switch_,  //
             runtime_stage_backend                 //
             ));
@@ -439,7 +432,6 @@ Shell::Shell(DartVMRef vm,
              const std::shared_ptr<ResourceCacheLimitCalculator>&
                  resource_cache_limit_calculator,
              const Settings& settings,
-             std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
              bool is_gpu_disabled)
     : task_runners_(task_runners),
       parent_raster_thread_merger_(std::move(parent_merger)),
@@ -447,7 +439,6 @@ Shell::Shell(DartVMRef vm,
       settings_(settings),
       vm_(std::move(vm)),
       is_gpu_disabled_sync_switch_(new fml::SyncSwitch(is_gpu_disabled)),
-      volatile_path_tracker_(std::move(volatile_path_tracker)),
       weak_factory_gpu_(nullptr),
       weak_factory_(this) {
   FML_CHECK(!settings.enable_software_rendering || !settings.enable_impeller)
@@ -611,7 +602,6 @@ std::unique_ptr<Shell> Shell::Spawn(
           const fml::WeakPtr<IOManager>& io_manager,
           const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
           fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-          const std::shared_ptr<VolatilePathTracker>& volatile_path_tracker,
           const std::shared_ptr<fml::SyncSwitch>& is_gpu_disabled_sync_switch,
           impeller::RuntimeStageBackend runtime_stage_backend) {
         return engine->Spawn(
@@ -1278,7 +1268,6 @@ void Shell::OnAnimatorNotifyIdle(fml::TimeDelta deadline) {
 
   if (engine_) {
     engine_->NotifyIdle(deadline);
-    volatile_path_tracker_->OnFrame();
   }
 }
 

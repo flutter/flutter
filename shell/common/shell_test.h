@@ -15,7 +15,6 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/time/time_point.h"
-#include "flutter/lib/ui/volatile_path_tracker.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/shell_test_external_view_embedder.h"
@@ -154,9 +153,6 @@ class ShellTest : public FixtureTest {
   // Otherwise those tests will be flaky as the clearing of unreported timings
   // is unpredictive.
   static int UnreportedTimingsCount(Shell* shell);
-
-  static size_t GetLiveTrackedPathCount(
-      const std::shared_ptr<VolatilePathTracker>& tracker);
 
   static void TurnOffGPU(Shell* shell, bool value);
 

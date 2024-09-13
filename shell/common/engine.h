@@ -19,7 +19,6 @@
 #include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/lib/ui/text/font_collection.h"
-#include "flutter/lib/ui/volatile_path_tracker.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/runtime/dart_vm.h"
@@ -399,7 +398,6 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
          fml::WeakPtr<IOManager> io_manager,
          const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
          fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-         std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
          const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
          impeller::RuntimeStageBackend runtime_stage_type =
              impeller::RuntimeStageBackend::kSkSL);

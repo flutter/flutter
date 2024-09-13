@@ -137,7 +137,7 @@ struct SetStrokeMiterOp final : DLOp {
   }
 };
 
-// 4 byte header + 4 byte payload packs into minimum 8 bytes
+// 4 byte header + 20 byte payload packs into minimum 24 bytes
 struct SetColorOp final : DLOp {
   static constexpr auto kType = DisplayListOpType::kSetColor;
 
@@ -490,6 +490,7 @@ DEFINE_CLIP_SHAPE_OP(Oval, DlRect, Difference)
 DEFINE_CLIP_SHAPE_OP(RRect, SkRRect, Difference)
 #undef DEFINE_CLIP_SHAPE_OP
 
+// 4 byte header + 20 byte payload packs evenly into 24 bytes
 #define DEFINE_CLIP_PATH_OP(clipop)                                       \
   struct Clip##clipop##PathOp final : TransformClipOpBase {               \
     static constexpr auto kType = DisplayListOpType::kClip##clipop##Path; \
@@ -566,8 +567,8 @@ DEFINE_DRAW_1ARG_OP(Oval, DlRect, oval)
 DEFINE_DRAW_1ARG_OP(RRect, SkRRect, rrect)
 #undef DEFINE_DRAW_1ARG_OP
 
-// 4 byte header + 128 byte payload uses 132 bytes but is rounded
-// up to 136 bytes (4 bytes unused)
+// 4 byte header + 16 byte payload uses 20 bytes but is rounded
+// up to 24 bytes (4 bytes unused)
 struct DrawPathOp final : DrawOpBase {
   static constexpr auto kType = DisplayListOpType::kDrawPath;
 
@@ -975,7 +976,7 @@ struct DrawTextFrameOp final : DrawOpBase {
   }
 };
 
-// 4 byte header + 140 byte payload packs evenly into 140 bytes
+// 4 byte header + 44 byte payload packs evenly into 48 bytes
 #define DEFINE_DRAW_SHADOW_OP(name, transparent_occluder)                     \
   struct Draw##name##Op final : DrawOpBase {                                  \
     static constexpr auto kType = DisplayListOpType::kDraw##name;             \

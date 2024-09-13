@@ -74,7 +74,6 @@ Engine::Engine(Delegate& delegate,
                fml::WeakPtr<IOManager> io_manager,
                const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
                fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-               std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
                const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
                impeller::RuntimeStageBackend runtime_stage_type)
     : Engine(delegate,
@@ -105,10 +104,11 @@ Engine::Engine(Delegate& delegate,
           image_generator_registry_.GetWeakPtr(),  // image generator registry
           settings_.advisory_script_uri,           // advisory script uri
           settings_.advisory_script_entrypoint,    // advisory script entrypoint
-          std::move(volatile_path_tracker),        // volatile path tracker
-          vm.GetConcurrentWorkerTaskRunner(),      // concurrent task runner
-          settings_.enable_impeller,               // enable impeller
-          runtime_stage_type,                      // runtime stage type
+          settings_
+              .skia_deterministic_rendering_on_cpu,  // deterministic rendering
+          vm.GetConcurrentWorkerTaskRunner(),        // concurrent task runner
+          settings_.enable_impeller,                 // enable impeller
+          runtime_stage_type,                        // runtime stage type
       });
 }
 

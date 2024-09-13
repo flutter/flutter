@@ -28,7 +28,6 @@
 #include "flutter/lib/ui/painting/image_generator_registry.h"
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
-#include "flutter/lib/ui/volatile_path_tracker.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/runtime/platform_data.h"
@@ -130,7 +129,6 @@ class Shell final : public PlatformView::Delegate,
       fml::WeakPtr<IOManager> io_manager,
       fml::RefPtr<SkiaUnrefQueue> unref_queue,
       fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-      std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
       const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
       impeller::RuntimeStageBackend runtime_stage_type)>
       EngineCreateCallback;
@@ -451,7 +449,6 @@ class Shell final : public PlatformView::Delegate,
   std::unique_ptr<Rasterizer> rasterizer_;       // on raster task runner
   std::shared_ptr<ShellIOManager> io_manager_;   // on IO task runner
   std::shared_ptr<fml::SyncSwitch> is_gpu_disabled_sync_switch_;
-  std::shared_ptr<VolatilePathTracker> volatile_path_tracker_;
   std::shared_ptr<PlatformMessageHandler> platform_message_handler_;
   std::atomic<bool> route_messages_through_platform_thread_ = false;
 
@@ -513,7 +510,6 @@ class Shell final : public PlatformView::Delegate,
         const std::shared_ptr<ResourceCacheLimitCalculator>&
             resource_cache_limit_calculator,
         const Settings& settings,
-        std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
         bool is_gpu_disabled);
 
   static std::unique_ptr<Shell> CreateShellOnPlatformThread(
