@@ -42,7 +42,7 @@ class MainWidgetState extends State<MainWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             TextFormField(
-            // The validator receives the text that the user has entered.
+              // The validator receives the text that the user has entered.
               validator: (String? value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';
