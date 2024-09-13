@@ -108,7 +108,7 @@ void main() {
   // Sets up the minimal mock project files necessary to look like a Flutter project.
   void createCoreMockProjectFiles() {
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
@@ -277,7 +277,7 @@ void main() {
       osUtils: FakeOperatingSystemUtils(),
     );
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
 

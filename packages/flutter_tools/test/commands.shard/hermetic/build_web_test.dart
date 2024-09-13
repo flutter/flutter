@@ -47,7 +47,7 @@ void main() {
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('name: foo\n');
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     artifacts = Artifacts.test(fileSystem: fileSystem);
@@ -430,10 +430,28 @@ void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
   }
 
   // Project files.
-  fileSystem.file('.packages')
-      .writeAsStringSync('''
-foo:lib/
-fizz:bar/lib/
+  fileSystem
+    .directory('.dart_tool')
+    .childFile('package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+{
+  "packages": [
+    {
+      "name": "foo",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "fizz",
+      "rootUri": "../bar",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    }
+  ],
+  "configVersion": 2
+}
 ''');
   fileSystem.file('pubspec.yaml')
       .writeAsStringSync('''

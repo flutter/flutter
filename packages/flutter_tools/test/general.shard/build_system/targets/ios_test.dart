@@ -196,7 +196,10 @@ void main() {
       .createSync();
     // Project info
     fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello');
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
     // Plist file
     fileSystem.file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
       .createSync(recursive: true);
@@ -271,7 +274,10 @@ void main() {
       .createSync();
     // Project info
     fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello\nflutter:\n  shaders:\n    - shader.glsl');
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
     // Plist file
     fileSystem.file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
       .createSync(recursive: true);
@@ -341,7 +347,10 @@ void main() {
 
     // Project info
     fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello');
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
     // Plist file
     fileSystem.file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
       .createSync(recursive: true);

@@ -37,7 +37,11 @@ void main() {
     );
 
     flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-    fileSystem.file('.packages').createSync();
+
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
   });
 
   testUsingContext('WebBuilder sets environment on success', () async {

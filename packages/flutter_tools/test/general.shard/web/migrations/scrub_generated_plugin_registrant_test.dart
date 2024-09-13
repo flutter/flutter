@@ -200,7 +200,7 @@ void writeGeneratedPluginRegistrant(FileSystem fs) {
 // (taken from commands.shard/hermetic/build_web_test.dart)
 void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
   final List<String> dependencies = <String>[
-    '.packages',
+    fileSystem.path.join('.dart_tool', 'package_config.json'),
     fileSystem.path.join('web', 'index.html'),
     fileSystem.path.join('lib', 'main.dart'),
     fileSystem.path.join('packages', 'flutter_tools', 'lib', 'src', 'build_system', 'targets', 'web.dart'),
@@ -214,11 +214,6 @@ void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
   }
 
   // Project files.
-  fileSystem.file('.packages')
-      .writeAsStringSync('''
-foo:lib/
-fizz:bar/lib/
-''');
   fileSystem.file('pubspec.yaml')
       .writeAsStringSync('''
 name: foo

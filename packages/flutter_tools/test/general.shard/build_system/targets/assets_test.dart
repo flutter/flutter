@@ -49,8 +49,10 @@ void main() {
       .createSync(recursive: true);
     fileSystem.file('assets/wildcard/#bar.png')
       .createSync(recursive: true);
-    fileSystem.file('.packages')
-      .createSync();
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('''
@@ -65,8 +67,22 @@ flutter:
   });
 
   testUsingContext('includes LICENSE file inputs in dependencies', () async {
-    fileSystem.file('.packages')
-      .writeAsStringSync('foo:file:///bar/lib');
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "foo",
+      "rootUri": "file:///bar",
+      "packageUri": "lib/"
+    }
+  ]
+}
+''');
     fileSystem.file('bar/LICENSE')
       ..createSync(recursive: true)
       ..writeAsStringSync('THIS IS A LICENSE');
@@ -185,7 +201,10 @@ flutter:
       },
     );
 
-    await fileSystem.file('.packages').create();
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
 
     fileSystem.file('pubspec.yaml')
       ..createSync()
@@ -272,7 +291,10 @@ flutter:
       },
     );
 
-    await fileSystem.file('.packages').create();
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
 
     fileSystem.file('pubspec.yaml')
       ..createSync()
@@ -370,7 +392,10 @@ flutter:
       },
     );
 
-    await fileSystem.file('.packages').create();
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
 
     fileSystem.file('pubspec.yaml')
       ..createSync()
