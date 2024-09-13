@@ -11,6 +11,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -1988,6 +1989,9 @@ class _SubmenuButtonState extends State<SubmenuButton> {
           // focus traversal and scroll position. MouseRegion.onHover avoids
           // this issue.
           void handlePointerHover(PointerHoverEvent event) {
+            if (event.kind != PointerDeviceKind.mouse && event.kind != PointerDeviceKind.stylus) {
+              return;
+            }
             if (!_isHovered) {
               _isHovered = true;
               widget.onHover?.call(true);
