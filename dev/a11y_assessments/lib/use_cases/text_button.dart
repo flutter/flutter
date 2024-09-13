@@ -25,7 +25,6 @@ class MainWidget extends StatefulWidget {
 }
 
 class MainWidgetState extends State<MainWidget> {
-
   String pageTitle = getUseCaseName(TextButtonUseCase());
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
