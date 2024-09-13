@@ -22,12 +22,6 @@ void _resize(ui.ChannelBuffers buffers, String name, int newSize) {
 }
 
 void main() {
-  bool assertsEnabled = false;
-  assert(() {
-    assertsEnabled = true;
-    return true;
-  }());
-
   test('push drain', () async {
     const String channel = 'foo';
     final ByteData data = _makeByteData('bar');
@@ -363,19 +357,17 @@ void main() {
     const String channel = 'foo\u0000bar';
     final ByteData blabla = _makeByteData('blabla');
     final ui.ChannelBuffers buffers = ui.ChannelBuffers();
-    try {
-      buffers.push(channel, blabla, (ByteData? data) { });
-      fail('did not throw as expected');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('U+0000 NULL'));
-    }
-    try {
-      buffers.setListener(channel, (ByteData? data, ui.PlatformMessageResponseCallback callback) { });
-      fail('did not throw as expected');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('U+0000 NULL'));
-    }
-  }, skip: !assertsEnabled);
+
+    expect(
+      () => buffers.push(channel, blabla, (ByteData? data) { }),
+      throwsA(isA<AssertionError>().having((AssertionError e) => e.toString(), 'toString', contains('U+0000 NULL'))),
+    );
+
+    expect(
+      () => buffers.setListener(channel, (ByteData? data, ui.PlatformMessageResponseCallback callback) { }),
+      throwsA(isA<AssertionError>().having((AssertionError e) => e.toString(), 'toString', contains('U+0000 NULL'))),
+    );
+  });
 }
 
 class _TestChannelBuffers extends ui.ChannelBuffers {
