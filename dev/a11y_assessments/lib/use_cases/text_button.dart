@@ -67,7 +67,7 @@ class MainWidgetState extends State<MainWidget> {
             ),
           ],
         ),
-      )
+      ),
     );
   }
 }
