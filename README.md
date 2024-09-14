@@ -53,7 +53,7 @@ your choice.
 ### Beautiful user experiences
 
 We want to enable designers to deliver their full creative vision without being
-forced to water it down due to limitations of the underlying framework.
+forced to water it down due to the limitations of the underlying framework.
 Flutter's [layered architecture] gives you control over every pixel on the
 screen and its powerful compositing capabilities let you overlay and animate
 graphics, video, text, and controls without limitation. Flutter includes a full
@@ -66,7 +66,7 @@ support for customizing or creating entirely new visual components.
 ### Fast results
 
 Flutter is fast. It's powered by hardware-accelerated 2D graphics
-libraries like [Skia] (that underpins Chrome and Android) and
+libraries like [Skia] (which underpins Chrome and Android) and
 [Impeller]. We architected Flutter to
 support glitch-free, jank-free graphics at the native speed of your device.
 
