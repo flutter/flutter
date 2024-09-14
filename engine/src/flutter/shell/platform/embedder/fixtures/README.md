@@ -71,9 +71,9 @@ $ $ENGINE/out/$TARGET/embedder_unittests --gtest_filter="EmbedderTest.VerifyB143
 # Or, a suite of tests:
 $ $ENGINE/out/$TARGET/embedder_unittests --gtest_filter="EmbedderTest.*"
 
-# 3. Now, copy the output to the golden file:
+# 3. Now, copy the output to the golden file (notice the "actual_" prefix):
 $ cp \
-  $ENGINE/out/$TARGET/gen/flutter/shell/platform/embedder/assets/expectation_verifyb143464703_soft_noxform.png \
+  $ENGINE/out/$TARGET/gen/flutter/shell/platform/embedder/assets/actual_verifyb143464703_soft_noxform.png \
   $ENGINE/flutter/shell/platform/embedder/fixtures/verifyb143464703_soft_noxform.png
 ```
 

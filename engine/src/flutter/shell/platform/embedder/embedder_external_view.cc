@@ -137,6 +137,7 @@ bool EmbedderExternalView::Render(const EmbedderRenderTarget& render_target,
 
     impeller::TextFrameDispatcher collector(aiks_context->GetContentContext(),
                                             impeller::Matrix());
+    display_list->Dispatch(collector, sk_cull_rect);
 
     impeller::ExperimentalDlDispatcher impeller_dispatcher(
         aiks_context->GetContentContext(), *impeller_target,
