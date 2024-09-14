@@ -170,10 +170,10 @@ abstract class TokenTemplate {
 
   String? _numToString(Object? value, [int? digits]) {
     return switch (value) {
-      null => null,
+      null            => null,
       double.infinity => 'double.infinity',
-      num() => digits == null ? value.toString() : value.toStringAsFixed(digits),
-      _ => getToken(value as String).toString(),
+      num()           => digits == null ? value.toString() : value.toStringAsFixed(digits),
+      _               => getToken(value as String).toString(),
     };
   }
 

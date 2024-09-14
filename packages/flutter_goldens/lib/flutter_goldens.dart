@@ -211,8 +211,8 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   }) {
     final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
     final Directory comparisonRoot = switch (suffix) {
-      _?   => fs.systemTempDirectory.createTempSync(suffix),
       null => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'skia_goldens')),
+      _    => fs.systemTempDirectory.createTempSync(suffix),
     };
 
     final String testPath = fs.directory(defaultComparator.basedir).path;
