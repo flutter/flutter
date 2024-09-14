@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 /// Flutter code sample for [GlowingOverscrollIndicator].
@@ -14,6 +15,8 @@ class GlowingOverscrollIndicatorExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: const AlwaysGlow(),
+      theme: ThemeData(colorSchemeSeed: Colors.amber),
       home: Scaffold(
         appBar: AppBar(title: const Text('GlowingOverscrollIndicator Sample')),
         body: const GlowingOverscrollIndicatorExample(),
@@ -22,29 +25,69 @@ class GlowingOverscrollIndicatorExampleApp extends StatelessWidget {
   }
 }
 
+const Set<PointerDeviceKind> allPointers = <PointerDeviceKind>{...PointerDeviceKind.values};
+
+class AlwaysGlow extends MaterialScrollBehavior {
+  const AlwaysGlow();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => allPointers;
+
+  @override
+  Widget buildOverscrollIndicator(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    return GlowingOverscrollIndicator(
+      axisDirection: details.direction,
+      color: Colors.amberAccent,
+      child: child,
+    );
+  }
+}
+
+
 class GlowingOverscrollIndicatorExample extends StatelessWidget {
   const GlowingOverscrollIndicatorExample({super.key});
 
   @override
   Widget build(BuildContext context) {
+    const ScrollView scrollView = CustomScrollView(slivers: <Widget>[
+      SliverAppBar(title: Text('Custom PaintOffset')),
+      SliverToBoxAdapter(
+        child: DefaultTextStyle(
+          style: TextStyle(
+            color: Colors.amberAccent,
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+          ),
+          child: ColoredBox(
+            color: Colors.grey,
+            child: SizedBox(
+              width: double.infinity,
+              height: 80,
+              child: Center(child: Text('Glow all day!')),
+            ),
+          ),
+        ),
+      ),
+      SliverFillRemaining(
+        child: Icon(
+          Icons.sunny,
+          color: Colors.amberAccent,
+          size: 128,
+        ),
+      ),
+    ]);
+
     return NestedScrollView(
       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
         return const <Widget>[
           SliverAppBar(title: Text('Custom NestedScrollViews')),
         ];
       },
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverToBoxAdapter(
-            child: Container(
-              color: Colors.amberAccent,
-              height: 100,
-              child: const Center(child: Text('Glow all day!')),
-            ),
-          ),
-          const SliverFillRemaining(child: FlutterLogo()),
-        ],
-      ),
+      body: scrollView,
     );
   }
 }
