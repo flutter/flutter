@@ -1236,6 +1236,116 @@ void main() {
     // This should be less than 330.0 because the item is shrunk; width is 800.0 - 330.0 - 330.0
     expect(tester.getRect(getItem(2)).width, 140.0);
   });
+
+  testWidgets('CarouselView onTap is clickable', (WidgetTester tester) async {
+    int tappedIndex = -1;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 350,
+            onTap: (index) {
+              tappedIndex = index;
+            },
+            children: List<Widget>.generate(3, (int index) {
+              return Center(
+                child: Text('Item $index'),
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final Finder carouselItem = find.text('Item 1');
+    await tester.tap(carouselItem, warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    // Verify that the onTap callback was called with the correct index
+    expect(tappedIndex, 1);
+
+    // Test tapping another item
+    final Finder anotherCarouselItem = find.text('Item 2');
+    await tester.tap(anotherCarouselItem, warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    // Verify that the onTap callback was called with the new index
+    expect(tappedIndex, 2);
+  });
+
+  testWidgets('CarouselView with disabledChildrenInteraction true - children are not directly interactive', (WidgetTester tester) async {
+    bool buttonPressed = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 350,
+            children: List<Widget>.generate(3, (int index) {
+              return Center(
+                child: ElevatedButton(
+                  onPressed: () => buttonPressed = true,
+                  child: Text('Button $index'),
+                ),
+              );
+            }),
+          ),
+        ),
+      )
+    );
+    await tester.pumpAndSettle();
+
+    // Attempt to tap the button (should not work)
+    await tester.tap(find.byType(ElevatedButton).at(1), warnIfMissed: false);
+    expect(buttonPressed, isFalse);
+  });
+
+  testWidgets('CarouselView with disabledChildrenInteraction false - children are directly interactive', (WidgetTester tester) async {
+    bool buttonPressed = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 350,
+            disabledChildrenInteraction: false,
+            children: List<Widget>.generate(3, (int index) {
+              return Center(
+                child: ElevatedButton(
+                  onPressed: () => buttonPressed = true,
+                  child: Text('Button $index'),
+                ),
+              );
+            }),
+          ),
+        ),
+      )
+    );
+    await tester.pumpAndSettle();
+
+    // Verify button can be pressed
+    await tester.tap(find.text('Button 1'));
+    expect(buttonPressed, isTrue);
+  });
+
+  testWidgets('CarouselView throws assertion error when disabledChildrenInteraction is false and onTap is set', (WidgetTester tester) async {
+    expect(() => tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 350,
+            disabledChildrenInteraction: false,
+            onTap: (index) {},
+            children: List<Widget>.generate(3, (int index) {
+              return Center(
+                child: Text('Item $index'),
+              );
+            }),
+          ),
+        ),
+      )
+    ), throwsAssertionError);
+  });
 }
 
 Finder getItem(int index) {

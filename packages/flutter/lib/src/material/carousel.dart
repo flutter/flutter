@@ -130,10 +130,13 @@ class CarouselView extends StatefulWidget {
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     this.onTap,
+    this.disabledChildrenInteraction = true,
     required double this.itemExtent,
     required this.children,
-  }) : consumeMaxWeight = true,
-       flexWeights = null;
+  })  : consumeMaxWeight = true,
+        flexWeights = null,
+        assert(disabledChildrenInteraction == true ||
+            (disabledChildrenInteraction == false && onTap == null));
 
   /// Creates a scrollable list where the size of each child widget is dynamically
   /// determined by the provided [flexWeights].
@@ -190,9 +193,12 @@ class CarouselView extends StatefulWidget {
     this.reverse = false,
     this.consumeMaxWeight = true,
     this.onTap,
+    this.disabledChildrenInteraction = true,
     required List<int> this.flexWeights,
     required this.children,
-  }) : itemExtent = null;
+  })  : itemExtent = null,
+        assert(disabledChildrenInteraction == true ||
+            (disabledChildrenInteraction == false && onTap == null));
 
   /// The amount of space to surround each carousel item with.
   ///
@@ -289,6 +295,11 @@ class CarouselView extends StatefulWidget {
 
   /// Called when one of the [children] is tapped.
   final ValueChanged<int>? onTap;
+
+  /// Whether the children tap is disabled.
+  /// Noted that this will disable the tap event for all children by covering InkWell.
+  /// Defaults to true.
+  final bool disabledChildrenInteraction;
 
   /// The extent the children are forced to have in the main axis.
   ///
@@ -412,7 +423,7 @@ class _CarouselViewState extends State<CarouselView> {
           fit: StackFit.expand,
           children: <Widget>[
             widget.children[index],
-            if (widget.onTap != null)
+            if (widget.disabledChildrenInteraction)
               Material(
                 color: Colors.transparent,
                 child: InkWell(
