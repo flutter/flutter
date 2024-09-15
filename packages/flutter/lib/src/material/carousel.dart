@@ -296,9 +296,18 @@ class CarouselView extends StatefulWidget {
   /// Called when one of the [children] is tapped.
   final ValueChanged<int>? onTap;
 
-  /// Whether the children tap is disabled.
-  /// Noted that this will disable the tap event for all children by covering InkWell.
+  /// Whether the default tap interaction for children is disabled.
+  ///
+  /// If true, tap events for all children are disabled by covering them with an [InkWell].
+  /// This prevents direct interaction with child widgets.
+  ///
+  /// If false, tap events are passed through to the child widgets, allowing them
+  /// to handle interactions directly.
+  ///
   /// Defaults to true.
+  ///
+  /// Note: Setting this to false while also providing an [onTap] callback will
+  /// throw an assertion error, as these options are mutually exclusive.
   final bool disabledChildrenInteraction;
 
   /// The extent the children are forced to have in the main axis.
