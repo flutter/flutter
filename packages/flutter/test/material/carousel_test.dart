@@ -8,6 +8,85 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('Widget renders correctly with onTap', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    final ColorScheme colorScheme = theme.colorScheme;
+
+    int? tappedIndex;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: CarouselView(
+            onTap: (int index) {
+              tappedIndex = index;
+            },
+            itemExtent: 100,
+            children: List<Widget>.generate(1, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    final Finder carouselViewMaterial = find.descendant(
+      of: find.byType(CarouselView),
+      matching: find.byType(Material),
+    ).first;
+
+    final Material material = tester.widget<Material>(carouselViewMaterial);
+    expect(material.clipBehavior, Clip.antiAlias);
+    expect(material.color, colorScheme.surface);
+    expect(material.elevation, 0.0);
+    expect(material.shape, const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(28.0))
+    ));
+
+    // Tap on the InkWell
+    await tester.tap(find.byType(InkWell));
+    await tester.pumpAndSettle();
+
+    // Verify that onTap has been called, index value has been updated
+    expect(tappedIndex, isNotNull);
+  });
+
+  testWidgets('Widget renders correctly without onTap', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    final ColorScheme colorScheme = theme.colorScheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 200,
+            children: List<Widget>.generate(10, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    final Finder carouselViewMaterial = find.descendant(
+      of: find.byType(CarouselView),
+      matching: find.byType(Material),
+    ).first;
+
+    final Material material = tester.widget<Material>(carouselViewMaterial);
+    expect(material.clipBehavior, Clip.antiAlias);
+    expect(material.color, colorScheme.surface);
+    expect(material.elevation, 0.0);
+    expect(material.shape, const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(28.0))
+    ));
+
+    // Verify that InkWell is not present
+    expect(find.byType(InkWell), findsNothing);
+  });
+
   testWidgets('CarouselView defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
