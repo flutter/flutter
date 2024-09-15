@@ -410,9 +410,10 @@ class _SearchAnchorState extends State<SearchAnchor> {
     // if the search route is still actice, the searchController would be
     // disposed by the route instead of here.
     if (_internalSearchController != null) {
-      _internalSearchController!._disposeByRoute = true;
       if (!_internalSearchController!._usedByRoute) {
         _internalSearchController!.dispose();
+      } else {
+        _internalSearchController!._disposeByRoute = true;
       }
     }
     super.dispose();
@@ -449,6 +450,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       keyboardType: widget.keyboardType,
     );
     navigator.push(_route!);
+    _searchController._usedByRoute = true;
   }
 
   void _closeView(String? selectedText) {
@@ -585,7 +587,6 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     assert(anchorKey.currentContext != null);
     updateViewConfig(anchorKey.currentContext!);
     updateTweens(anchorKey.currentContext!);
-    searchController._usedByRoute = true;
     toggleVisibility?.call();
     return super.didPush();
   }
@@ -602,9 +603,10 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   void dispose() {
     curvedAnimation?.dispose();
     viewFadeOnIntervalCurve?.dispose();
-    searchController._usedByRoute = false;
     if (searchController._disposeByRoute) {
       searchController.dispose();
+    }else {
+      searchController._usedByRoute = false;
     }
     super.dispose();
   }
@@ -864,7 +866,7 @@ class _ViewContentState extends State<_ViewContent> {
       curve: _kViewDividerFadeOnInterval,
       reverseCurve: _kViewFadeOnInterval.flipped,
     );
-    viewListFadeOnIntervalCurve = CurvedAnimation(
+      viewListFadeOnIntervalCurve = CurvedAnimation(
       parent: widget.animation,
       curve: _kViewListFadeOnInterval,
       reverseCurve: _kViewListFadeOnInterval.flipped,
@@ -883,7 +885,7 @@ class _ViewContentState extends State<_ViewContent> {
         context: context,
         removeTop: true,
         child: ListView(
-          children: suggestions.toList(),
+          children: suggestions.toList()
         ),
       );
     }
@@ -1129,7 +1131,6 @@ class SearchController extends TextEditingController {
   // This is set automatically when a [SearchController] is given to the anchor
   // it controls.
   _SearchAnchorState? _anchor;
-
   bool _usedByRoute = false;
   bool _disposeByRoute = false;
 
