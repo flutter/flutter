@@ -171,11 +171,15 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
     switch (event.type) {
       case SelectionEventType.startEdgeUpdate:
       case SelectionEventType.endEdgeUpdate:
+      case SelectionEventType.collapseSelection:
+
         final Rect renderObjectRect = Rect.fromLTWH(0, 0, size.width, size.height);
         // Normalize offset in case it is out side of the rect.
         final Offset point = globalToLocal((event as SelectionEdgeUpdateEvent).globalPosition);
         final Offset adjustedPoint = SelectionUtils.adjustDragOffset(renderObjectRect, point);
-        if (event.type == SelectionEventType.startEdgeUpdate) {
+        if (event.type == SelectionEventType.collapseSelection) {
+          _start = _end = adjustedPoint;
+        } else if (event.type == SelectionEventType.startEdgeUpdate) {
           _start = adjustedPoint;
         } else {
           _end = adjustedPoint;
