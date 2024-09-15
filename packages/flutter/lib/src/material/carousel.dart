@@ -401,6 +401,21 @@ class _CarouselViewState extends State<CarouselView> {
         return null;
       });
 
+      Widget child = widget.children.elementAt(index);
+
+      if (widget.onTap != null) {
+        child = Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              widget.onTap!(index);
+            },
+            overlayColor: effectiveOverlayColor,
+            child: widget.children.elementAt(index),
+          ),
+        );
+      }
+
     return Padding(
       padding: effectivePadding,
       child: Material(
@@ -412,15 +427,7 @@ class _CarouselViewState extends State<CarouselView> {
           fit: StackFit.expand,
           children: <Widget>[
             widget.children[index],
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  widget.onTap?.call(index);
-                },
-                overlayColor: effectiveOverlayColor,
-              ),
-            ),
+            child,
           ],
         ),
       ),
