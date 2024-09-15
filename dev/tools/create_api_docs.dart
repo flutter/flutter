@@ -659,7 +659,8 @@ class DartdocGenerator {
 
     String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
     print('Executing: (cd "${packageRoot.path}" ; '
-        '${FlutterInformation.instance.getDartBinaryPath().path} '
+        '${FlutterInformation.instance.getFlutterBinaryPath().path} '
+	'pub '
         '${dartdocArgs.map<String>(quote).join(' ')})');
 
     process = ProcessWrapper(await runPubProcess(
