@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:process/process.dart';
 
 import '../base/io.dart';
@@ -14,28 +16,6 @@ const List<String> kUnsupportedVersions = <String>[
   '7',
   '8',
 ];
-
-const Map<String, String> kKnownWindowsVersions = <String, String> {
-  // from: https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information
-  '22631': 'Windows 11 - 23H2',
-  '22621': 'Windows 11 - 22H2',
-  '22000': 'Windows 11 - 21H2',
-  // from: https://learn.microsoft.com/en-us/windows/release-health/release-information
-  '19045': 'Windows 10 - 22H2',
-  '19044': 'Windows 10 - 21H2/LTSC',
-  '19043': 'Windows 10 - 21H1',
-  '19042': 'Windows 10 - 20H2',
-  '19041': 'Windows 10 - 2004',
-  '18363': 'Windows 10 - 1909',
-  '18362': 'Windows 10 - 1903',
-  '17763': 'Windows 10 - 1809/LTSC',
-  '17134': 'Windows 10 - 1803',
-  '16299': 'Windows 10 - 1709',
-  '15063': 'Windows 10 - 1703',
-  '14393': 'Windows 10 - 1607/LTSB',
-  '10586': 'Windows 10 - 1511',
-  '10240': 'Windows 10 - 1507/LTSB',
-};
 
 /// Regex pattern for identifying line from systeminfo stdout with windows version
 /// (ie. 10.5.4123)
@@ -51,12 +31,15 @@ class WindowsVersionValidator extends DoctorValidator {
   const WindowsVersionValidator({
     required OperatingSystemUtils operatingSystemUtils,
     required ProcessLister processLister,
+    required VersionExtractor versionExtractor,
   })  : _operatingSystemUtils = operatingSystemUtils,
         _processLister = processLister,
+        _versionExtractor = versionExtractor,
         super('Windows Version');
 
   final OperatingSystemUtils _operatingSystemUtils;
   final ProcessLister _processLister;
+  final VersionExtractor _versionExtractor;
 
   Future<ValidationResult> _topazScan() async {
       final ProcessResult getProcessesResult = await _processLister.getProcessesWithPath();
@@ -95,8 +78,18 @@ class WindowsVersionValidator extends DoctorValidator {
     if (matches.length == 1 &&
         !kUnsupportedVersions.contains(matches.elementAt(0).group(1))) {
       windowsVersionStatus = ValidationType.success;
-      final String? knownVersion = kKnownWindowsVersions[matches.elementAt(0).group(3)];
-      statusInfo = knownVersion ?? 'Installed version of Windows is version 10 or higher';
+      final Map<String, String> details = await _versionExtractor.getDetails();
+      if (details.isEmpty) {
+        final bool isWindows10 = matches.elementAt(0).group(3) > 20000;
+        if (isWindows10) {
+          statusInfo = 'Windows 10';
+        } else {
+          statusInfo = 'Windows 11 or higher';
+        }
+      } else {
+        statusInfo = '${details['OsName']} ${details['OSDisplayVersion']} '
+            '(${details['WindowsVersion']})';
+      }
 
       // Check if the Topaz OFD security module is running, and warn the user if it is.
       // See https://github.com/flutter/flutter/issues/121366
@@ -132,5 +125,23 @@ class ProcessLister {
   Future<ProcessResult> getProcessesWithPath() async {
     const String argument = 'Get-Process | Format-List Path';
     return processManager.run(<String>['powershell', '-command', argument]);
+  }
+}
+
+class VersionExtractor {
+  VersionExtractor(this.processManager);
+
+  final ProcessManager processManager;
+
+  Future<Map<String, String>> getDetails() async {
+    const String argument = 'Get-ComputerInfo -Property OsName, OSDisplayVersion, WindowsVersion | ConvertTo-Json';
+    final ProcessResult getProcessesResult = await processManager.run(
+        <String>['powershell', '-command', argument]);
+    if (getProcessesResult.exitCode != 0) {
+      return <String, String>{};
+    }
+    final String json = getProcessesResult.stdout as String;
+    return (jsonDecode(json) as Map<String, dynamic>)
+        .map((key, value) => MapEntry(key, value.toString()));
   }
 }
