@@ -66,6 +66,12 @@ const String samplesIndexJson = '''
   { "id": "sample2" }
 ]''';
 
+/// These files are generated for all project types.
+const List<String> flutterPluginsIgnores = <String>[
+  '.flutter-plugins',
+  '.flutter-plugins-dependencies',
+];
+
 void main() {
   late Directory tempDir;
   late Directory projectDir;
@@ -177,6 +183,7 @@ void main() {
         'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png',
         'lib/main.dart',
       ],
+      expectedGitignoreLines: flutterPluginsIgnores,
     );
     expect(logger.statusText, contains('In order to run your application, type:'));
     // Check that we're telling them about documentation
@@ -246,6 +253,7 @@ void main() {
         'pubspec.yaml',
         'README.md',
       ],
+      expectedGitignoreLines: flutterPluginsIgnores,
     );
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
@@ -288,22 +296,28 @@ void main() {
   });
 
   testUsingContext('creates a module project correctly', () async {
-    await _createAndAnalyzeProject(projectDir, <String>[
-      '--template=module',
-    ], <String>[
-      '.android/app/',
-      '.gitignore',
-      '.ios/Flutter',
-      '.metadata',
-      'analysis_options.yaml',
-      'lib/main.dart',
-      'pubspec.yaml',
-      'README.md',
-      'test/widget_test.dart',
-    ], unexpectedPaths: <String>[
-      'android/',
-      'ios/',
-    ]);
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>[
+        '--template=module',
+      ],
+      <String>[
+        '.android/app/',
+        '.gitignore',
+        '.ios/Flutter',
+        '.metadata',
+        'analysis_options.yaml',
+        'lib/main.dart',
+        'pubspec.yaml',
+        'README.md',
+        'test/widget_test.dart',
+      ],
+      unexpectedPaths: <String>[
+        'android/',
+        'ios/',
+      ],
+      expectedGitignoreLines: flutterPluginsIgnores,
+    );
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
     Pub: () => Pub.test(
@@ -568,6 +582,7 @@ void main() {
         'linux/flutter/generated_plugins.cmake',
         'macos/Flutter/GeneratedPluginRegistrant.swift',
       ],
+      expectedGitignoreLines: flutterPluginsIgnores,
     );
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
@@ -599,6 +614,7 @@ void main() {
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
         'lib/flutter_project_web.dart',
       ],
+      expectedGitignoreLines: flutterPluginsIgnores,
     );
     return _runFlutterTest(projectDir.childDirectory('example'));
   }, overrides: <Type, Generator>{
@@ -2148,6 +2164,7 @@ void main() {
         'ios/Flutter/AppFrameworkInfo.plist',
       ],
       unexpectedPaths: <String>['test'],
+      expectedGitignoreLines: flutterPluginsIgnores,
     );
     expect(projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
       contains("Text('Hello World!')"));
@@ -2236,6 +2253,7 @@ void main() {
         'ios/Flutter/AppFrameworkInfo.plist',
       ],
       unexpectedPaths: <String>['test'],
+      expectedGitignoreLines: flutterPluginsIgnores,
     );
     expect(projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
       contains('void main() {}'));
@@ -3908,6 +3926,22 @@ void main() {
     ),
     ProcessManager: () => fakeProcessManager,
   });
+
+  testUsingContext('flutter create should show the incompatible java AGP message', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
+
+    final String expectedMessage = getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'app');
+
+    expect(logger.warningText, contains(expectedMessage));
+  }, overrides: <Type, Generator>{
+    Java: () => FakeJava(version: const software.Version.withText(500, 0, 0, '500.0.0')), // Too high a version for template Gradle versions.
+    Logger: () => logger,
+  });
 }
 
 Future<void> _createProject(
@@ -3915,6 +3949,7 @@ Future<void> _createProject(
   List<String> createArgs,
   List<String> expectedPaths, {
   List<String> unexpectedPaths = const <String>[],
+  List<String> expectedGitignoreLines = const <String>[],
 }) async {
   Cache.flutterRoot = '../..';
   final CreateCommand command = CreateCommand();
@@ -3930,7 +3965,7 @@ Future<void> _createProject(
     return globals.fs.typeSync(fullPath) != FileSystemEntityType.notFound;
   }
 
-  final List<String> failures = <String>[
+  final List<String> pathFailures = <String>[
     for (final String path in expectedPaths)
       if (!pathExists(path))
         'Path "$path" does not exist.',
@@ -3938,7 +3973,17 @@ Future<void> _createProject(
       if (pathExists(path))
         'Path "$path" exists when it shouldn\'t.',
   ];
-  expect(failures, isEmpty, reason: failures.join('\n'));
+  expect(pathFailures, isEmpty, reason: pathFailures.join('\n'));
+
+  final String gitignorePath = globals.fs.path.join(dir.path, '.gitignore');
+  final List<String> gitignore = globals.fs.file(gitignorePath).readAsLinesSync();
+
+  final List<String> gitignoreFailures = <String>[
+    for (final String line in expectedGitignoreLines)
+      if (!gitignore.contains(line))
+        'Expected .gitignore to contain "$line".',
+  ];
+  expect(gitignoreFailures, isEmpty, reason: gitignoreFailures.join('\n'));
 }
 
 Future<void> _createAndAnalyzeProject(
@@ -3946,8 +3991,15 @@ Future<void> _createAndAnalyzeProject(
   List<String> createArgs,
   List<String> expectedPaths, {
   List<String> unexpectedPaths = const <String>[],
+  List<String> expectedGitignoreLines = const <String>[],
 }) async {
-  await _createProject(dir, createArgs, expectedPaths, unexpectedPaths: unexpectedPaths);
+  await _createProject(
+    dir,
+    createArgs,
+    expectedPaths,
+    unexpectedPaths: unexpectedPaths,
+    expectedGitignoreLines: expectedGitignoreLines,
+  );
   await _analyzeProject(dir.path);
 }
 

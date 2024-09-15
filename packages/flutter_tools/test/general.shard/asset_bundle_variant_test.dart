@@ -52,8 +52,14 @@ void main() {
         fileSystem: fs,
         userMessages: UserMessages(),
       );
-
-      fs.file('.packages').createSync();
+      fs.directory('.dart_tool').childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": []
+}
+''');
     });
 
     void createPubspec({
@@ -99,7 +105,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       );
 
       await bundle.build(
-        packageConfigPath: '.packages',
+        packageConfigPath: '.dart_tool/package_config.json',
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
@@ -154,7 +160,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       );
 
       await bundle.build(
-        packageConfigPath: '.packages',
+        packageConfigPath: '.dart_tool/package_config.json',
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
@@ -210,7 +216,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       );
 
       await bundle.build(
-        packageConfigPath: '.packages',
+        packageConfigPath: '.dart_tool/package_config.json',
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
@@ -256,7 +262,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       );
 
       await bundle.build(
-        packageConfigPath: '.packages',
+        packageConfigPath: '.dart_tool/package_config.json',
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
@@ -290,7 +296,14 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         userMessages: UserMessages()
       );
 
-      fs.file('.packages').createSync();
+      fs.directory('.dart_tool').childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": []
+}
+''');
 
       fs.file('pubspec.yaml').writeAsStringSync(
 '''
@@ -328,7 +341,7 @@ flutter:
       );
 
       await bundle.build(
-        packageConfigPath: '.packages',
+        packageConfigPath: '.dart_tool/package_config.json',
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
