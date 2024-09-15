@@ -1438,7 +1438,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         result = _handleSelectAll();
       case SelectionEventType.collapseSelection:
         final CollapseSelectionEvent collapseSelection = event as CollapseSelectionEvent;
-        result = _handleCollapseSelection(event.globalPosition);
+        result = _handleCollapseSelection(collapseSelection.globalPosition);
       case SelectionEventType.selectWord:
         final SelectWordSelectionEvent selectWord = event as SelectWordSelectionEvent;
         result = _handleSelectWord(selectWord.globalPosition);
