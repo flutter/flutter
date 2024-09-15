@@ -371,6 +371,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
   bool get _viewIsOpen => !_anchorIsVisible;
   SearchController? _internalSearchController;
   SearchController get _searchController => widget.searchController ?? (_internalSearchController ??= SearchController());
+  _SearchViewRoute? _route;
 
   @override
   void initState() {
@@ -401,15 +402,25 @@ class _SearchAnchorState extends State<SearchAnchor> {
 
   @override
   void dispose() {
-    super.dispose();
     widget.searchController?._detach(this);
     _internalSearchController?._detach(this);
-    _internalSearchController?.dispose();
+    if (_route != null && _route!.isActive) {
+      _route!.navigator!.removeRoute(_route!);
+    }
+    // if the search route is still actice, the searchController would be
+    // disposed by the route instead of here.
+    if (_internalSearchController != null) {
+      _internalSearchController!._disposeByRoute = true;
+      if (!_internalSearchController!._usedByRoute) {
+        _internalSearchController!.dispose();
+      }
+    }
+    super.dispose();
   }
 
   void _openView() {
     final NavigatorState navigator = Navigator.of(context);
-    navigator.push(_SearchViewRoute(
+    _route = _SearchViewRoute(
       viewOnChanged: widget.viewOnChanged,
       viewOnSubmitted: widget.viewOnSubmitted,
       viewLeading: widget.viewLeading,
@@ -436,7 +447,8 @@ class _SearchAnchorState extends State<SearchAnchor> {
       capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
       textInputAction: widget.textInputAction,
       keyboardType: widget.keyboardType,
-    ));
+    );
+    navigator.push(_route!);
   }
 
   void _closeView(String? selectedText) {
@@ -573,6 +585,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     assert(anchorKey.currentContext != null);
     updateViewConfig(anchorKey.currentContext!);
     updateTweens(anchorKey.currentContext!);
+    searchController._usedByRoute = true;
     toggleVisibility?.call();
     return super.didPush();
   }
@@ -589,6 +602,10 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   void dispose() {
     curvedAnimation?.dispose();
     viewFadeOnIntervalCurve?.dispose();
+    searchController._usedByRoute = false;
+    if (searchController._disposeByRoute) {
+      searchController.dispose();
+    }
     super.dispose();
   }
 
@@ -847,7 +864,7 @@ class _ViewContentState extends State<_ViewContent> {
       curve: _kViewDividerFadeOnInterval,
       reverseCurve: _kViewFadeOnInterval.flipped,
     );
-      viewListFadeOnIntervalCurve = CurvedAnimation(
+    viewListFadeOnIntervalCurve = CurvedAnimation(
       parent: widget.animation,
       curve: _kViewListFadeOnInterval,
       reverseCurve: _kViewListFadeOnInterval.flipped,
@@ -866,7 +883,7 @@ class _ViewContentState extends State<_ViewContent> {
         context: context,
         removeTop: true,
         child: ListView(
-          children: suggestions.toList()
+          children: suggestions.toList(),
         ),
       );
     }
@@ -1112,6 +1129,9 @@ class SearchController extends TextEditingController {
   // This is set automatically when a [SearchController] is given to the anchor
   // it controls.
   _SearchAnchorState? _anchor;
+
+  bool _usedByRoute = false;
+  bool _disposeByRoute = false;
 
   /// Whether this controller has associated search anchor.
   bool get isAttached => _anchor != null;
