@@ -2446,13 +2446,10 @@ void main() {
       color: CupertinoColors.label,
     );
 
-    // Measure the widths of the test words
     final List<double> widths = testWords.map((String word) => getColumnWidth(word, textStyle, context)).toList();
 
-    // Determine the largest width
     final double largestWidth = widths.reduce(math.max);
 
-    // Retrieve the column width using CupertinoDatePicker method
     final double testWidth = CupertinoDatePicker.getColumnWidth(
       texts: testWords,
       context: context,
