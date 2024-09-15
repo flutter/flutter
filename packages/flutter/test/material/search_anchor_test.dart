@@ -3454,8 +3454,9 @@ void main() {
     expect(tester.takeException(), isNull);
     ChangeNotifier.debugAssertNotDisposed(controller);
   });
+
   // Regression test for https://github.com/flutter/flutter/issues/155180.
-  testWidgets('SearchAnchor close menu when disposed', (WidgetTester tester) async {
+  testWidgets('SearchAnchor closes menu when disposed', (WidgetTester tester) async {
     bool disposed = false;
     late StateSetter setState;
     await tester.pumpWidget(
