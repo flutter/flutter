@@ -3363,80 +3363,6 @@ void main() {
     expect(editableText.scrollPadding, scrollPadding);
   });
 
-  testWidgets('SearchAnchor does not dispose external SeachController', (WidgetTester tester) async {
-    final SearchController controller = SearchController();
-    await tester.pumpWidget(
-     MaterialApp(
-      home: Material(
-        child: SearchAnchor(
-          searchController: controller,
-          builder: (BuildContext context, SearchController controller) {
-            return IconButton(
-              onPressed: () async {
-                controller.openView();
-              },
-              icon: const Icon(Icons.search),
-            );
-          },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
-            return <Widget>[];
-          },
-        ),
-      ),
-    ));
-
-    await tester.tap(find.byIcon(Icons.search));
-    await tester.pumpAndSettle();
-    await tester.pumpWidget(
-    const MaterialApp(
-      home: Material(
-        child: Text('disposed'),
-      ),
-    ));
-    expect(tester.takeException(), isNull);
-    ChangeNotifier.debugAssertNotDisposed(controller);
-  });
-
-  testWidgets('SearchAnchor does not crash when disposed', (WidgetTester tester) async {
-    bool disposed = false;
-    await tester.pumpWidget(
-     MaterialApp(
-      home: Material(
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            if (disposed) {
-              return const Text('disposed');
-            }
-            return SearchAnchor(
-              builder: (BuildContext context, SearchController controller) {
-                return IconButton(
-                  onPressed: () async {
-                    controller.openView();
-                    Future<void>.delayed(const Duration(milliseconds: 20), () {
-                      setState(() {
-                        disposed = true;
-                      });
-                    });
-                  },
-                  icon: const Icon(Icons.search),
-                );
-              },
-              suggestionsBuilder: (BuildContext context, SearchController controller) {
-                return <Widget>[
-                  const Text('suggestion'),
-                ];
-              },
-            );
-          }
-        ),
-      ),
-    ));
-
-    await tester.tap(find.byIcon(Icons.search));
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
-  });
-
   group('contextMenuBuilder', () {
     setUp(() async {
       if (!kIsWeb) {
@@ -3492,6 +3418,89 @@ void main() {
 
       expect(find.byType(Placeholder), findsOneWidget);
     });
+  });
+
+  testWidgets('SearchAnchor does not dispose external SeachController',
+  (WidgetTester tester) async {
+    final SearchController controller = SearchController();
+    await tester.pumpWidget(
+     MaterialApp(
+      home: Material(
+        child: SearchAnchor(
+          searchController: controller,
+          builder: (BuildContext context, SearchController controller) {
+            return IconButton(
+              onPressed: () async {
+                controller.openView();
+              },
+              icon: const Icon(Icons.search),
+            );
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return <Widget>[];
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(
+    const MaterialApp(
+      home: Material(
+        child: Text('disposed'),
+      ),
+    ));
+    expect(tester.takeException(), isNull);
+    ChangeNotifier.debugAssertNotDisposed(controller);
+  });
+  // Regression test for https://github.com/flutter/flutter/issues/155180.
+  testWidgets('SearchAnchor close menu when disposed', (WidgetTester tester) async {
+    bool disposed = false;
+    late StateSetter setState;
+    await tester.pumpWidget(
+     MaterialApp(
+      home: Material(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            if (disposed) {
+              return const Text('disposed');
+            }
+            return SearchAnchor(
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  onPressed: () async {
+                    controller.openView();
+                  },
+                  icon: const Icon(Icons.search),
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[
+                  const Text('suggestion'),
+                ];
+              },
+            );
+          }
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    setState(() {
+      disposed = true;
+    });
+    await tester.pump();
+    // The search menu starts to close, but still disposed yet.
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    ChangeNotifier.debugAssertNotDisposed(editableText.controller);
+
+    await tester.pumpAndSettle();
+    // The search menu is now disposed.
+    expect(tester.takeException(), isNull);
+    expect(find.byType(TextField), findsNothing);
   });
 }
 
