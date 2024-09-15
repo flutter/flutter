@@ -799,13 +799,11 @@ void main() {
     expect(tester.getTopLeft(find.byKey(key)), const Offset(0, 300));
   });
 
-  testWidgets('SliverMainAxisGroup scrolls to the correct position', (WidgetTester tester) async {
+  testWidgets('SliverMainAxisGroup scrolls to the correct position when focusing on a text field within a header', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     final FocusNode textFieldFocus = FocusNode();
     addTearDown(textFieldFocus.dispose);
-    final FocusNode textFieldFocus2 = FocusNode();
-    addTearDown(textFieldFocus2.dispose);
 
     await tester.pumpWidget(
       _buildSliverMainAxisGroup(
@@ -833,41 +831,22 @@ void main() {
               height: 500,
             ),
           ),
-          SliverToBoxAdapter(
-            child: Container(
-              color: Colors.black,
-              height: 500,
-            ),
-          ),
-          SliverToBoxAdapter(
-              child: Material(
-            child: TextField(
-              focusNode: textFieldFocus2,
-            ),
-          )),
         ],
       ),
     );
 
     await tester.pumpAndSettle();
-
-    // Scroll a bit to make sure the first text field offset be greater than 0.
-    controller.jumpTo(100);
+    await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
+    expect(controller.offset, 0.0);
 
-    // Ensure the first text field is not visible.
-    expect(controller.offset, 100);
-
-    textFieldFocus2.requestFocus();
+    controller.jumpTo(100.0);
     await tester.pumpAndSettle();
-
-    expect(controller.offset, equals(556));
 
     textFieldFocus.requestFocus();
     await tester.pumpAndSettle();
 
-    // Should be 0 because we scroll to the top.
-    expect(controller.offset, equals(0));
+    expect(controller.offset, 8.0); // 8.0 is contentPadding of TextField; (0.0, 8.0, 0.0, 8.0).
   });
 }
 

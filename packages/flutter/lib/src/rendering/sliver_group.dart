@@ -214,16 +214,13 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
         double childScrollOffset = 0.0;
         RenderSliver? current = childBefore(child as RenderSliver);
         while (current != null) {
-          final double scrollExtent = current.geometry!.scrollExtent;
-          childScrollOffset += scrollExtent;
-
           // If the current item is the first visible item, we subtract its scrollExtent
           // to correct the offset, since we accumulated the scrollExtent of this item in the loop.
           // We are not assuming that this is the first item in the list, but rather the first visible one.
-          if (childBefore(current) == null && (childAfter(child) != null) ) {
-            childScrollOffset -= scrollExtent;
+          if (childBefore(current) != null || childAfter(child) == null) {
+          final double scrollExtent = current.geometry!.scrollExtent;
+            childScrollOffset += scrollExtent;
           }
-
           current = childBefore(current);
         }
         return childScrollOffset;
