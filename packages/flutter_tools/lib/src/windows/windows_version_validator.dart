@@ -80,7 +80,7 @@ class WindowsVersionValidator extends DoctorValidator {
       windowsVersionStatus = ValidationType.success;
       final Map<String, String> details = await _versionExtractor.getDetails();
       if (details.isEmpty) {
-        final bool isWindows10 = matches.elementAt(0).group(3) > 20000;
+        final bool isWindows10 = int.parse(matches.elementAt(0).group(3)!) > 20000;
         if (isWindows10) {
           statusInfo = 'Windows 10';
         } else {
