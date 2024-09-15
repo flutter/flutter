@@ -864,6 +864,7 @@ void main() {
 
         // Prev/Next month buttons.
         expect(tester.getSemantics(previousMonthIcon), matchesSemantics(
+          label: 'Previous month',
           tooltip: 'Previous month',
           isButton: true,
           hasTapAction: true,
@@ -873,6 +874,7 @@ void main() {
           isFocusable: true,
         ));
         expect(tester.getSemantics(nextMonthIcon), matchesSemantics(
+          label: 'Next month',
           tooltip: 'Next month',
           isButton: true,
           hasTapAction: true,
