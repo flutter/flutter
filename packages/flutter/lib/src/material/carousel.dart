@@ -412,15 +412,16 @@ class _CarouselViewState extends State<CarouselView> {
           fit: StackFit.expand,
           children: <Widget>[
             widget.children[index],
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  widget.onTap?.call(index);
-                },
-                overlayColor: effectiveOverlayColor,
+            if (widget.onTap != null)
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    widget.onTap!.call(index);
+                  },
+                  overlayColor: effectiveOverlayColor,
+                ),
               ),
-            ),
           ],
         ),
       ),
