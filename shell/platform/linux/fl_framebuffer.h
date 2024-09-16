@@ -21,6 +21,7 @@ G_DECLARE_FINAL_TYPE(FlFramebuffer, fl_framebuffer, FL, FRAMEBUFFER, GObject)
 
 /**
  * fl_framebuffer_new:
+ * @format: format, e.g. GL_RGB, GL_BGR
  * @width: width of texture.
  * @height: height of texture.
  *
@@ -28,7 +29,7 @@ G_DECLARE_FINAL_TYPE(FlFramebuffer, fl_framebuffer, FL, FRAMEBUFFER, GObject)
  *
  * Returns: a new #FlFramebuffer.
  */
-FlFramebuffer* fl_framebuffer_new(size_t width, size_t height);
+FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height);
 
 /**
  * fl_framebuffer_get_id:
@@ -59,16 +60,6 @@ GLuint fl_framebuffer_get_texture_id(FlFramebuffer* framebuffer);
  * Returns: target texture.
  */
 GLenum fl_framebuffer_get_target(FlFramebuffer* framebuffer);
-
-/**
- * fl_framebuffer_get_format:
- * @framebuffer: an #FlFramebuffer.
- *
- * Gets format of texture backing the framebuffer (example GL_RGBA8).
- *
- * Returns: texture format.
- */
-GLenum fl_framebuffer_get_format(FlFramebuffer* framebuffer);
 
 /**
  * fl_framebuffer_get_width:
