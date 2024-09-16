@@ -159,8 +159,10 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
+    this.elevation = 2.0,
   })  : _indicatorType = _IndicatorType.material,
-        onStatusChange = null;
+        onStatusChange = null,
+        assert(elevation >= 0.0);
 
   /// Creates an adaptive [RefreshIndicator] based on whether the target
   /// platform is iOS or macOS, following Material design's
@@ -191,8 +193,10 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
+    this.elevation = 2.0,
   })  : _indicatorType = _IndicatorType.adaptive,
-        onStatusChange = null;
+        onStatusChange = null,
+        assert(elevation >= 0.0);
 
   /// Creates a [RefreshIndicator] with no spinner and calls `onRefresh` when
   /// successfully armed by a drag event.
@@ -207,6 +211,7 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsLabel,
     this.semanticsValue,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
+    this.elevation = 2.0,
   })  : _indicatorType = _IndicatorType.noSpinner,
         // The following parameters aren't used because [_IndicatorType.noSpinner] is being used,
         // which involves showing no spinner, hence the following parameters are useless since
@@ -215,7 +220,8 @@ class RefreshIndicator extends StatefulWidget {
         edgeOffset = 0.0,
         color = null,
         backgroundColor = null,
-        strokeWidth = 0.0;
+        strokeWidth = 0.0,
+        assert(elevation >= 0.0);
 
   /// The widget below this widget in the tree.
   ///
@@ -304,6 +310,11 @@ class RefreshIndicator extends StatefulWidget {
   ///
   /// Defaults to [RefreshIndicatorTriggerMode.onEdge].
   final RefreshIndicatorTriggerMode triggerMode;
+
+  /// Defines the elevation of the underlying [RefreshIndicator].
+  ///
+  /// Defaults to 2.0.
+  final double elevation;
 
   @override
   RefreshIndicatorState createState() => RefreshIndicatorState();
@@ -660,39 +671,38 @@ class RefreshIndicatorState extends State<RefreshIndicator>
           child: SizeTransition(
             axisAlignment: _isIndicatorAtTop! ? 1.0 : -1.0,
             sizeFactor: _positionFactor, // This is what brings it down.
-            child: Container(
+            child: Padding(
               padding: _isIndicatorAtTop!
                   ? EdgeInsets.only(top: widget.displacement)
                   : EdgeInsets.only(bottom: widget.displacement),
-              alignment: _isIndicatorAtTop!
-                  ? Alignment.topCenter
-                  : Alignment.bottomCenter,
-              child: ScaleTransition(
-                scale: _scaleFactor,
-                child: AnimatedBuilder(
-                  animation: _positionController,
-                  builder: (BuildContext context, Widget? child) {
-                    final Widget materialIndicator = RefreshProgressIndicator(
-                      semanticsLabel: widget.semanticsLabel ??
-                        MaterialLocalizations.of(context)
-                          .refreshIndicatorSemanticLabel,
-                      semanticsValue: widget.semanticsValue,
-                      value: showIndeterminateIndicator ? null : _value.value,
-                      valueColor: _valueColor,
-                      backgroundColor: widget.backgroundColor,
-                      strokeWidth: widget.strokeWidth,
-                    );
+              child: Align(
+                alignment: _isIndicatorAtTop!
+                    ? Alignment.topCenter
+                    : Alignment.bottomCenter,
+                child: ScaleTransition(
+                  scale: _scaleFactor,
+                  child: AnimatedBuilder(
+                    animation: _positionController,
+                    builder: (BuildContext context, Widget? child) {
+                      final Widget materialIndicator = RefreshProgressIndicator(
+                        semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
+                        semanticsValue: widget.semanticsValue,
+                        value: showIndeterminateIndicator ? null : _value.value,
+                        valueColor: _valueColor,
+                        backgroundColor: widget.backgroundColor,
+                        strokeWidth: widget.strokeWidth,
+                        elevation: widget.elevation,
+                      );
 
-                    final Widget cupertinoIndicator = CupertinoActivityIndicator(
-                      color: widget.color,
-                    );
+                      final Widget cupertinoIndicator = CupertinoActivityIndicator(
+                        color: widget.color,
+                      );
 
-                    switch (widget._indicatorType) {
-                      case _IndicatorType.material:
-                        return materialIndicator;
+                      switch (widget._indicatorType) {
+                        case _IndicatorType.material:
+                          return materialIndicator;
 
-                      case _IndicatorType.adaptive:
-                        {
+                        case _IndicatorType.adaptive:
                           final ThemeData theme = Theme.of(context);
                           switch (theme.platform) {
                             case TargetPlatform.android:
@@ -704,11 +714,12 @@ class RefreshIndicatorState extends State<RefreshIndicator>
                             case TargetPlatform.macOS:
                               return cupertinoIndicator;
                           }
-                        }
-                      case _IndicatorType.noSpinner:
-                        return Container();
-                    }
-                  },
+
+                        case _IndicatorType.noSpinner:
+                          return Container();
+                      }
+                    },
+                  ),
                 ),
               ),
             ),

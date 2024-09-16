@@ -1684,7 +1684,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           name: 'test',
           path: '/path/to/test/',
           defaultPackagePlatforms: const <String, String>{},
-          pluginDartClassPlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
           platforms: const <String, PluginPlatform>{
             IOSPlugin.kConfigKey: IOSPlugin(name: 'test', classPrefix: ''),
             MacOSPlugin.kConfigKey: MacOSPlugin(name: 'test'),
@@ -1709,7 +1709,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           name: 'test',
           path: '/path/to/test/',
           defaultPackagePlatforms: const <String, String>{},
-          pluginDartClassPlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
           platforms: const <String, PluginPlatform>{
             IOSPlugin.kConfigKey: IOSPlugin(name: 'test', classPrefix: '', sharedDarwinSource: true),
             MacOSPlugin.kConfigKey: MacOSPlugin(name: 'test', sharedDarwinSource: true),
@@ -1734,7 +1734,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           name: 'test',
           path: '/path/to/test/',
           defaultPackagePlatforms: const <String, String>{},
-          pluginDartClassPlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
           platforms: const <String, PluginPlatform>{
             WindowsPlugin.kConfigKey: WindowsPlugin(name: 'test', pluginClass: ''),
           },
@@ -1762,7 +1762,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           name: 'test',
           path: '/path/to/test/',
           defaultPackagePlatforms: const <String, String>{},
-          pluginDartClassPlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
           platforms: const <String, PluginPlatform>{
             IOSPlugin.kConfigKey: IOSPlugin(name: 'test', classPrefix: ''),
             MacOSPlugin.kConfigKey: MacOSPlugin(name: 'test'),
@@ -1787,7 +1787,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           name: 'test',
           path: '/path/to/test/',
           defaultPackagePlatforms: const <String, String>{},
-          pluginDartClassPlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
           platforms: const <String, PluginPlatform>{
             IOSPlugin.kConfigKey: IOSPlugin(name: 'test', classPrefix: '', sharedDarwinSource: true),
             MacOSPlugin.kConfigKey: MacOSPlugin(name: 'test', sharedDarwinSource: true),
@@ -1812,7 +1812,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           name: 'test',
           path: '/path/to/test/',
           defaultPackagePlatforms: const <String, String>{},
-          pluginDartClassPlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
           platforms: const <String, PluginPlatform>{
             WindowsPlugin.kConfigKey: WindowsPlugin(name: 'test', pluginClass: ''),
           },
@@ -1844,24 +1844,73 @@ The Flutter Preview device does not support the following plugins from your pubs
       );
     });
 
-    testWithoutContext('Symlink ERROR_ACCESS_DENIED failures show developers paths that were used', () async {
-      final Platform platform = FakePlatform(operatingSystem: 'windows');
-      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14972.1]');
+    testUsingContext('Symlink ERROR_ACCESS_DENIED failures show developers paths that were used', () async {
+      final FakeFlutterProject flutterProject = FakeFlutterProject()
+        ..directory = globals.fs.currentDirectory.childDirectory('app');
+      final Directory windowsManagedDirectory = flutterProject.directory
+          .childDirectory('windows')
+          .childDirectory('flutter');
+      final FakeWindowsProject windowsProject = FakeWindowsProject()
+        ..managedDirectory = windowsManagedDirectory
+        ..pluginSymlinkDirectory = windowsManagedDirectory
+            .childDirectory('ephemeral')
+            .childDirectory('.plugin_symlinks')
+        ..exists = true;
 
-      const FileSystemException e = FileSystemException('', '', OSError('', 5));
+      final File dependenciesFile = flutterProject.directory
+        .childFile('.flutter-plugins-dependencies');
+      flutterProject
+        ..flutterPluginsDependenciesFile = dependenciesFile
+        ..windows = windowsProject;
+
+      flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
+
+      const String dependenciesFileContents = r'''
+{
+  "plugins": {
+    "windows": [
+      {
+        "name": "some_plugin",
+        "path": "C:\\some_plugin"
+      }
+    ]
+  }
+}
+''';
+      dependenciesFile.writeAsStringSync(dependenciesFileContents);
+
+      const String expectedMessage =
+        'ERROR_ACCESS_DENIED file system exception thrown while trying to '
+        r'create a symlink from C:\some_plugin to '
+        r'C:\app\windows\flutter\ephemeral\.plugin_symlinks\some_plugin';
 
       expect(
-        () => handleSymlinkException(
-          e,
-          platform: platform,
-          os: os,
-          source: pubCachePath,
-          destination: ephemeralPackagePath,
+        () => createPluginSymlinks(
+          flutterProject,
+          featureFlagsOverride: TestFeatureFlags(isWindowsEnabled: true),
         ),
-        throwsToolExit(
-          message: 'ERROR_ACCESS_DENIED file system exception thrown while trying to create a symlink from $pubCachePath to $ephemeralPackagePath',
-        ),
+        throwsToolExit(message: expectedMessage),
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () {
+        final FileExceptionHandler handle = FileExceptionHandler();
+        final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+          platform: FakePlatform(),
+          delegate: MemoryFileSystem.test(
+            style: FileSystemStyle.windows,
+            opHandle: handle.opHandle,
+          ),
+        );
+        const String pluginSymlinkPath = r'C:\app\windows\flutter\ephemeral\.plugin_symlinks\some_plugin';
+        handle.addError(
+          fileSystem.link(pluginSymlinkPath),
+          FileSystemOp.create,
+          const FileSystemException('', '', OSError('', 5)),
+        );
+        return fileSystem;
+      },
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
+      ProcessManager: () => FakeProcessManager.empty(),
     });
 
     testWithoutContext('Symlink failures instruct developers to run as administrator on older versions of Windows', () async {
@@ -1944,7 +1993,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           flutterProject.directory.childFile('.flutter-plugins-dependencies')
       ..windows = windowsProject;
 
-    flutterProject.directory.childFile('.packages').createSync(recursive: true);
+    flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
 
     createPluginSymlinks(
       flutterProject,

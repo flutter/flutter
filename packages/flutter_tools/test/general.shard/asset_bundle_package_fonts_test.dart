@@ -46,10 +46,25 @@ $fontsSection
 ''');
   }
 
-  void writePackagesFile(String packages) {
-    globals.fs.file('.packages')
-      ..createSync()
-      ..writeAsStringSync(packages);
+  void writePackageConfigFile(Map<String, String> packages) {
+    globals.fs.directory('.dart_tool').childFile('package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(
+        json.encode(<String, dynamic>{
+          'packages': <dynamic>[
+            ...packages.entries.map((MapEntry<String, String> entry) {
+              return <String, dynamic>{
+                'name': entry.key,
+                'rootUri': '../${entry.value}',
+                'packageUri': 'lib/',
+                'languageVersion': '3.2',
+              };
+            }),
+          ],
+          'configVersion': 2,
+        },
+      ),
+    );
   }
 
   Future<void> buildAndVerifyFonts(
@@ -59,7 +74,7 @@ $fontsSection
     String expectedAssetManifest,
   ) async {
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-    await bundle.build(packageConfigPath: '.packages');
+    await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
 
     for (final String packageName in packages) {
       for (final String packageFont in packageFonts) {
@@ -106,11 +121,11 @@ $fontsSection
 
     testUsingContext('App includes neither font manifest nor fonts when no defines fonts', () async {
       writePubspecFile('pubspec.yaml', 'test');
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packageConfigPath: '.packages');
+      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
       expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.bin',
         'AssetManifest.json', 'FontManifest.json', 'NOTICES.Z']));
     }, overrides: <Type, Generator>{
@@ -125,7 +140,7 @@ $fontsSection
            - asset: packages/test_package/bar
 ''';
       writePubspecFile('pubspec.yaml', 'test', fontsSection: fontsSection);
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
       const String font = 'bar';
@@ -152,7 +167,7 @@ $fontsSection
            - asset: a/bar
 ''';
       writePubspecFile('pubspec.yaml', 'test', fontsSection: fontsSection);
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
       const String packageFont = 'bar';
@@ -176,7 +191,7 @@ $fontsSection
 
     testUsingContext('App uses package font with own font file', () async {
       writePubspecFile('pubspec.yaml', 'test');
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
       const String fontsSection = '''
        - family: foo
          fonts:
@@ -207,7 +222,12 @@ $fontsSection
 
     testUsingContext('App uses package font with font file from another package', () async {
       writePubspecFile('pubspec.yaml', 'test');
-      writePackagesFile('test_package:p/p/lib/\ntest_package2:p2/p/lib/');
+      writePackageConfigFile(
+        <String, String>{
+          'test_package': 'p/p/',
+          'test_package2': 'p2/p/',
+        },
+      );
       const String fontsSection = '''
        - family: foo
          fonts:
@@ -239,7 +259,7 @@ $fontsSection
 
     testUsingContext('App uses package font with properties and own font file', () async {
       writePubspecFile('pubspec.yaml', 'test');
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
 
       const String pubspec = '''
        - family: foo
@@ -281,7 +301,7 @@ $fontsSection
         'test',
         fontsSection: fontsSection,
       );
-      writePackagesFile('test_package:p/p/lib/');
+      writePackageConfigFile(<String, String>{'test_package': 'p/p/'});
       writePubspecFile(
         'p/p/pubspec.yaml',
         'test_package',
