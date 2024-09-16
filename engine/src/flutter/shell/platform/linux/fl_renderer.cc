@@ -42,6 +42,15 @@ typedef struct {
   // Engine we are rendering.
   GWeakRef engine;
 
+  // Flag to track lazy initialization.
+  gboolean initialized;
+
+  // The pixel format passed to the engine.
+  GLint sized_format;
+
+  // The format used to create textures.
+  GLint general_format;
+
   // Views being rendered.
   GHashTable* views;
 
@@ -103,6 +112,25 @@ static gchar* get_program_log(GLuint program) {
 /// Converts a pixel co-ordinate from 0..pixels to OpenGL -1..1.
 static GLfloat pixels_to_gl_coords(GLfloat position, GLfloat pixels) {
   return (2.0 * position / pixels) - 1.0;
+}
+
+// Perform single run OpenGL initialization.
+static void initialize(FlRenderer* self) {
+  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
+      fl_renderer_get_instance_private(self));
+
+  if (priv->initialized) {
+    return;
+  }
+  priv->initialized = TRUE;
+
+  if (epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888")) {
+    priv->sized_format = GL_BGRA8_EXT;
+    priv->general_format = GL_BGRA_EXT;
+  } else {
+    priv->sized_format = GL_RGBA8;
+    priv->general_format = GL_RGBA;
+  }
 }
 
 static void fl_renderer_unblock_main_thread(FlRenderer* self) {
@@ -328,13 +356,18 @@ guint32 fl_renderer_get_fbo(FlRenderer* self) {
 }
 
 gboolean fl_renderer_create_backing_store(
-    FlRenderer* renderer,
+    FlRenderer* self,
     const FlutterBackingStoreConfig* config,
     FlutterBackingStore* backing_store_out) {
-  fl_renderer_make_current(renderer);
+  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
+      fl_renderer_get_instance_private(self));
 
-  FlFramebuffer* framebuffer =
-      fl_framebuffer_new(config->size.width, config->size.height);
+  fl_renderer_make_current(self);
+
+  initialize(self);
+
+  FlFramebuffer* framebuffer = fl_framebuffer_new(
+      priv->general_format, config->size.width, config->size.height);
   if (!framebuffer) {
     g_warning("Failed to create backing store");
     return FALSE;
@@ -345,8 +378,7 @@ gboolean fl_renderer_create_backing_store(
   backing_store_out->open_gl.framebuffer.user_data = framebuffer;
   backing_store_out->open_gl.framebuffer.name =
       fl_framebuffer_get_id(framebuffer);
-  backing_store_out->open_gl.framebuffer.target =
-      fl_framebuffer_get_format(framebuffer);
+  backing_store_out->open_gl.framebuffer.target = priv->sized_format;
   backing_store_out->open_gl.framebuffer.destruction_callback = [](void* p) {
     // Backing store destroyed in fl_renderer_collect_backing_store(), set
     // on FlutterCompositor.collect_backing_store_callback during engine start.
