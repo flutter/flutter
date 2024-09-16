@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dds/dap.dart' hide PidTracker;
 import 'package:vm_service/vm_service.dart' as vm;
@@ -150,11 +151,11 @@ abstract class FlutterBaseDebugAdapter extends DartDebugAdapter<FlutterLaunchReq
     this.process = process;
 
     process.stdout.transform(ByteToLineTransformer()).listen(handleStdout);
-    process.stderr.listen(handleStderr);
+    process.stderr.transform(utf8.decoder).listen(handleStderr);
     unawaited(process.exitCode.then(handleExitCode));
   }
 
   void handleExitCode(int code);
-  void handleStderr(List<int> data);
+  void handleStderr(String data);
   void handleStdout(String data);
 }
