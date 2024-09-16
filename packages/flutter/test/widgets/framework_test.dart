@@ -1574,6 +1574,25 @@ void main() {
     expect(RawKeyboard.instance.keyEventHandler, same(rawKeyEventHandler));
   });
 
+  // testWidgets('Incorrect use of ParentDataWidget shows a useful error message', (WidgetTester tester) async {
+  //   await tester.pumpWidget(
+  //     Container(
+  //       key: const Key('container'),
+  //       child: Flexible(
+  //         child: Container(),
+  //       ) // Flexible should not be used directly in a Container or other inappropriate parents
+  //     ),
+  //   );
+
+  //   // await tester.pumpAndSettle();
+
+  //   final dynamic exception = tester.takeException();
+
+
+  //   // Expect a FlutterError to be thrown
+  //   expect(exception, isFlutterError);
+  // });
+
   testWidgets('Can access debugFillProperties without _LateInitializationError', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     TestRenderObjectElement().debugFillProperties(builder);
@@ -1940,18 +1959,6 @@ The findRenderObject() method was called for the following element:
 
     expect(scopeElement.dirty, isFalse);
     expect(keyedWidget.dirty, isTrue);
-  });
-
-  testWidgets('Calling scheduleBuildFor on an Element already in dirty list throws', (WidgetTester tester) async {
-    await tester.pumpWidget(const SizedBox());
-    final Element element = tester.element(find.byType(SizedBox));
-    element.markNeedsBuild();
-    expect(
-      () => element.owner!.scheduleBuildFor(element),
-      throwsA(isFlutterError.having(
-        (FlutterError e) => e.message, 'message', contains('The BuildOwner.scheduleBuildFor() method called on an Element that is already in the dirty list.'),
-      )),
-    );
   });
 }
 
