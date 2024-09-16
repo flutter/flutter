@@ -3420,51 +3420,53 @@ void main() {
     });
   });
 
-  testWidgets('SearchAnchor does not dispose external SeachController',
-  (WidgetTester tester) async {
-    final SearchController controller = SearchController();
-    await tester.pumpWidget(
-     MaterialApp(
-      home: Material(
-        child: SearchAnchor(
-          searchController: controller,
-          builder: (BuildContext context, SearchController controller) {
-            return IconButton(
-              onPressed: () async {
-                controller.openView();
-              },
-              icon: const Icon(Icons.search),
-            );
-          },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
-            return <Widget>[];
-          },
+  testWidgets(
+    'SearchAnchor does not dispose external SeachController',
+    (WidgetTester tester) async {
+      final SearchController controller = SearchController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            searchController: controller,
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                onPressed: () async {
+                  controller.openView();
+                },
+                icon: const Icon(Icons.search),
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
         ),
-      ),
-    ));
+      ));
 
-    await tester.tap(find.byIcon(Icons.search));
-    await tester.pumpAndSettle();
-    await tester.pumpWidget(
-    const MaterialApp(
-      home: Material(
-        child: Text('disposed'),
-      ),
-    ));
-    expect(tester.takeException(), isNull);
-    ChangeNotifier.debugAssertNotDisposed(controller);
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Text('disposed'),
+        ),
+      ));
+      expect(tester.takeException(), isNull);
+      ChangeNotifier.debugAssertNotDisposed(controller);
   });
-
+  
   // Regression test for https://github.com/flutter/flutter/issues/155180.
-  testWidgets('SearchAnchor closes menu when disposed', (WidgetTester tester) async {
+  testWidgets('SearchAnchor close menu when disposed', (WidgetTester tester) async {
     bool disposed = false;
     late StateSetter setState;
     await tester.pumpWidget(
      MaterialApp(
       home: Material(
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setter) {
-            setState = setter;
+          builder: (BuildContext context, StateSetter stateSetter) {
+            setState = stateSetter;
             if (disposed) {
               return const Text('disposed');
             }
@@ -3496,12 +3498,30 @@ void main() {
     await tester.pump();
     // The search menu starts to close, but still disposed yet.
     final EditableText editableText = tester.widget(find.byType(EditableText));
-    ChangeNotifier.debugAssertNotDisposed(editableText.controller);
+    final TextEditingController controller = editableText.controller;
+    ChangeNotifier.debugAssertNotDisposed(controller);
 
     await tester.pumpAndSettle();
-    // The search menu is now disposed.
+    // The search menu and the interal search controller is now disposed.
     expect(tester.takeException(), isNull);
     expect(find.byType(TextField), findsNothing);
+    FlutterError? error;
+    try {
+      ChangeNotifier.debugAssertNotDisposed(controller);
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error, isFlutterError);
+    expect(
+      error!.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   A SearchController was used after being disposed.\n'
+        '   Once you have called dispose() on a SearchController, it can no\n'
+        '   longer be used.\n',
+      ),
+    );
   });
 }
 
