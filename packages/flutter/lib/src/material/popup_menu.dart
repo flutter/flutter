@@ -375,15 +375,22 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     if (!widget.enabled && !theme.useMaterial3) {
       style = style.copyWith(color: theme.disabledColor);
     }
+    final EdgeInsetsGeometry padding = widget.padding
+      ?? (theme.useMaterial3 ? _PopupMenuDefaultsM3.menuItemPadding : _PopupMenuDefaultsM2.menuItemPadding);
 
     Widget item = AnimatedDefaultTextStyle(
       style: style,
       duration: kThemeChangeDuration,
-      child: Container(
-        alignment: AlignmentDirectional.centerStart,
+      child: ConstrainedBox(
         constraints: BoxConstraints(minHeight: widget.height),
-        padding: widget.padding ?? (theme.useMaterial3 ? _PopupMenuDefaultsM3.menuItemPadding : _PopupMenuDefaultsM2.menuItemPadding),
-        child: buildChild(),
+        child: Padding(
+          key: const Key('menu item padding'),
+          padding: padding,
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: buildChild(),
+          ),
+        ),
       ),
     );
 
