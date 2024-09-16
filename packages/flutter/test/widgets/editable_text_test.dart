@@ -12799,7 +12799,7 @@ void main() {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(MaterialApp(
       home: Column(
-        children: [
+        children: <Widget>[
           SizedBox(
             key: key,
             width: 200,
