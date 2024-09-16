@@ -5104,33 +5104,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// The default behavior used if [EditableText.onTapOutside] is null.
   ///
   /// The `event` argument is the [PointerDownEvent] that caused the notification.
-  void _defaultOnTapOutside(PointerDownEvent event) {
-    /// The focus dropping behavior is only present on desktop platforms
-    /// and mobile browsers.
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-      // On mobile platforms, we don't unfocus on touch events unless they're
-      // in the web browser, but we do unfocus for all other kinds of events.
-        switch (event.kind) {
-          case ui.PointerDeviceKind.touch:
-            if (kIsWeb) {
-              widget.focusNode.unfocus();
-            }
-          case ui.PointerDeviceKind.mouse:
-          case ui.PointerDeviceKind.stylus:
-          case ui.PointerDeviceKind.invertedStylus:
-          case ui.PointerDeviceKind.unknown:
-            widget.focusNode.unfocus();
-          case ui.PointerDeviceKind.trackpad:
-            throw UnimplementedError('Unexpected pointer down event for trackpad');
-        }
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        widget.focusNode.unfocus();
-    }
+  void _defaultOnTapOutside(BuildContext context, PointerDownEvent event) {
+    Actions.invoke(context, EditableTextTapOutsideIntent(focusNode: widget.focusNode, pointerDownEvent: event));
   }
 
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
@@ -5169,6 +5144,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     PasteTextIntent: _makeOverridable(CallbackAction<PasteTextIntent>(onInvoke: (PasteTextIntent intent) => pasteText(intent.cause))),
 
     TransposeCharactersIntent: _makeOverridable(_transposeCharactersAction),
+    EditableTextTapOutsideIntent: _makeOverridable(_EditableTextTapOutsideAction()),
   };
 
   @override
@@ -5186,150 +5162,154 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return _CompositionCallback(
       compositeCallback: _compositeCallback,
       enabled: _hasInputConnection,
-      child: TextFieldTapRegion(
-        groupId: widget.groupId,
-        onTapOutside: _hasFocus ? widget.onTapOutside ?? _defaultOnTapOutside : null,
-        debugLabel: kReleaseMode ? null : 'EditableText',
-        child: MouseRegion(
-          cursor: widget.mouseCursor ?? SystemMouseCursors.text,
-          child: Actions(
-            actions: _actions,
-            child: UndoHistory<TextEditingValue>(
-              value: widget.controller,
-              onTriggered: (TextEditingValue value) {
-                userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
-              },
-              shouldChangeUndoStack: (TextEditingValue? oldValue, TextEditingValue newValue) {
-                if (!newValue.selection.isValid) {
-                  return false;
-                }
-
-                if (oldValue == null) {
-                  return true;
-                }
-
-                switch (defaultTargetPlatform) {
-                  case TargetPlatform.iOS:
-                  case TargetPlatform.macOS:
-                  case TargetPlatform.fuchsia:
-                  case TargetPlatform.linux:
-                  case TargetPlatform.windows:
-                    // Composing text is not counted in history coalescing.
-                    if (!widget.controller.value.composing.isCollapsed) {
+      child: Actions(
+        actions: _actions,
+        child: Builder(
+          builder: (BuildContext context) {
+            return TextFieldTapRegion(
+              groupId: widget.groupId,
+              onTapOutside: _hasFocus ? widget.onTapOutside ?? (PointerDownEvent event) => _defaultOnTapOutside(context, event) : null,
+              debugLabel: kReleaseMode ? null : 'EditableText',
+              child: MouseRegion(
+                cursor: widget.mouseCursor ?? SystemMouseCursors.text,
+                child: UndoHistory<TextEditingValue>(
+                  value: widget.controller,
+                  onTriggered: (TextEditingValue value) {
+                    userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
+                  },
+                  shouldChangeUndoStack: (TextEditingValue? oldValue, TextEditingValue newValue) {
+                    if (!newValue.selection.isValid) {
                       return false;
                     }
-                  case TargetPlatform.android:
-                    // Gboard on Android puts non-CJK words in composing regions. Coalesce
-                    // composing text in order to allow the saving of partial words in that
-                    // case.
-                    break;
-                }
 
-                return oldValue.text != newValue.text || oldValue.composing != newValue.composing;
-              },
-              undoStackModifier: (TextEditingValue value) {
-                // On Android we should discard the composing region when pushing
-                // a new entry to the undo stack. This prevents the TextInputPlugin
-                // from restarting the input on every undo/redo when the composing
-                // region is changed by the framework.
-                return defaultTargetPlatform == TargetPlatform.android ? value.copyWith(composing: TextRange.empty) : value;
-              },
-              focusNode: widget.focusNode,
-              controller: widget.undoController,
-              child: Focus(
-                focusNode: widget.focusNode,
-                includeSemantics: false,
-                debugLabel: kReleaseMode ? null : 'EditableText',
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (ScrollNotification notification) {
-                    _handleContextMenuOnScroll(notification);
-                    _scribbleCacheKey = null;
-                    return false;
+                    if (oldValue == null) {
+                      return true;
+                    }
+
+                    switch (defaultTargetPlatform) {
+                      case TargetPlatform.iOS:
+                      case TargetPlatform.macOS:
+                      case TargetPlatform.fuchsia:
+                      case TargetPlatform.linux:
+                      case TargetPlatform.windows:
+                        // Composing text is not counted in history coalescing.
+                        if (!widget.controller.value.composing.isCollapsed) {
+                          return false;
+                        }
+                      case TargetPlatform.android:
+                        // Gboard on Android puts non-CJK words in composing regions. Coalesce
+                        // composing text in order to allow the saving of partial words in that
+                        // case.
+                        break;
+                    }
+
+                    return oldValue.text != newValue.text || oldValue.composing != newValue.composing;
                   },
-                  child: Scrollable(
-                    key: _scrollableKey,
-                    excludeFromSemantics: true,
-                    axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
-                    controller: _scrollController,
-                    physics: widget.scrollPhysics,
-                    dragStartBehavior: widget.dragStartBehavior,
-                    restorationId: widget.restorationId,
-                    // If a ScrollBehavior is not provided, only apply scrollbars when
-                    // multiline. The overscroll indicator should not be applied in
-                    // either case, glowing or stretching.
-                    scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
-                      scrollbars: _isMultiline,
-                      overscroll: false,
-                    ),
-                    viewportBuilder: (BuildContext context, ViewportOffset offset) {
-                      return CompositedTransformTarget(
-                        link: _toolbarLayerLink,
-                        child: Semantics(
-                          onCopy: _semanticsOnCopy(controls),
-                          onCut: _semanticsOnCut(controls),
-                          onPaste: _semanticsOnPaste(controls),
-                          child: _ScribbleFocusable(
-                            focusNode: widget.focusNode,
-                            editableKey: _editableKey,
-                            enabled: widget.scribbleEnabled,
-                            updateSelectionRects: () {
-                              _openInputConnection();
-                              _updateSelectionRects(force: true);
-                            },
-                            child: SizeChangedLayoutNotifier(
-                              child: _Editable(
-                                key: _editableKey,
-                                startHandleLayerLink: _startHandleLayerLink,
-                                endHandleLayerLink: _endHandleLayerLink,
-                                inlineSpan: buildTextSpan(),
-                                value: _value,
-                                cursorColor: _cursorColor,
-                                backgroundCursorColor: widget.backgroundCursorColor,
-                                showCursor: _cursorVisibilityNotifier,
-                                forceLine: widget.forceLine,
-                                readOnly: widget.readOnly,
-                                hasFocus: _hasFocus,
-                                maxLines: widget.maxLines,
-                                minLines: widget.minLines,
-                                expands: widget.expands,
-                                strutStyle: widget.strutStyle,
-                                selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
-                                    ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
-                                    : widget.selectionColor,
-                                textScaler: effectiveTextScaler,
-                                textAlign: widget.textAlign,
-                                textDirection: _textDirection,
-                                locale: widget.locale,
-                                textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
-                                textWidthBasis: widget.textWidthBasis,
-                                obscuringCharacter: widget.obscuringCharacter,
-                                obscureText: widget.obscureText,
-                                offset: offset,
-                                rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                                cursorWidth: widget.cursorWidth,
-                                cursorHeight: widget.cursorHeight,
-                                cursorRadius: widget.cursorRadius,
-                                cursorOffset: widget.cursorOffset ?? Offset.zero,
-                                selectionHeightStyle: widget.selectionHeightStyle,
-                                selectionWidthStyle: widget.selectionWidthStyle,
-                                paintCursorAboveText: widget.paintCursorAboveText,
-                                enableInteractiveSelection: widget._userSelectionEnabled,
-                                textSelectionDelegate: this,
-                                devicePixelRatio: _devicePixelRatio,
-                                promptRectRange: _currentPromptRectRange,
-                                promptRectColor: widget.autocorrectionTextRectColor,
-                                clipBehavior: widget.clipBehavior,
+                  undoStackModifier: (TextEditingValue value) {
+                    // On Android we should discard the composing region when pushing
+                    // a new entry to the undo stack. This prevents the TextInputPlugin
+                    // from restarting the input on every undo/redo when the composing
+                    // region is changed by the framework.
+                    return defaultTargetPlatform == TargetPlatform.android ? value.copyWith(composing: TextRange.empty) : value;
+                  },
+                  focusNode: widget.focusNode,
+                  controller: widget.undoController,
+                  child: Focus(
+                    focusNode: widget.focusNode,
+                    includeSemantics: false,
+                    debugLabel: kReleaseMode ? null : 'EditableText',
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (ScrollNotification notification) {
+                        _handleContextMenuOnScroll(notification);
+                        _scribbleCacheKey = null;
+                        return false;
+                      },
+                      child: Scrollable(
+                        key: _scrollableKey,
+                        excludeFromSemantics: true,
+                        axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
+                        controller: _scrollController,
+                        physics: widget.scrollPhysics,
+                        dragStartBehavior: widget.dragStartBehavior,
+                        restorationId: widget.restorationId,
+                        // If a ScrollBehavior is not provided, only apply scrollbars when
+                        // multiline. The overscroll indicator should not be applied in
+                        // either case, glowing or stretching.
+                        scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
+                          scrollbars: _isMultiline,
+                          overscroll: false,
+                        ),
+                        viewportBuilder: (BuildContext context, ViewportOffset offset) {
+                          return CompositedTransformTarget(
+                            link: _toolbarLayerLink,
+                            child: Semantics(
+                              onCopy: _semanticsOnCopy(controls),
+                              onCut: _semanticsOnCut(controls),
+                              onPaste: _semanticsOnPaste(controls),
+                              child: _ScribbleFocusable(
+                                focusNode: widget.focusNode,
+                                editableKey: _editableKey,
+                                enabled: widget.scribbleEnabled,
+                                updateSelectionRects: () {
+                                  _openInputConnection();
+                                  _updateSelectionRects(force: true);
+                                },
+                                child: SizeChangedLayoutNotifier(
+                                  child: _Editable(
+                                    key: _editableKey,
+                                    startHandleLayerLink: _startHandleLayerLink,
+                                    endHandleLayerLink: _endHandleLayerLink,
+                                    inlineSpan: buildTextSpan(),
+                                    value: _value,
+                                    cursorColor: _cursorColor,
+                                    backgroundCursorColor: widget.backgroundCursorColor,
+                                    showCursor: _cursorVisibilityNotifier,
+                                    forceLine: widget.forceLine,
+                                    readOnly: widget.readOnly,
+                                    hasFocus: _hasFocus,
+                                    maxLines: widget.maxLines,
+                                    minLines: widget.minLines,
+                                    expands: widget.expands,
+                                    strutStyle: widget.strutStyle,
+                                    selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
+                                        ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
+                                        : widget.selectionColor,
+                                    textScaler: effectiveTextScaler,
+                                    textAlign: widget.textAlign,
+                                    textDirection: _textDirection,
+                                    locale: widget.locale,
+                                    textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
+                                    textWidthBasis: widget.textWidthBasis,
+                                    obscuringCharacter: widget.obscuringCharacter,
+                                    obscureText: widget.obscureText,
+                                    offset: offset,
+                                    rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                                    cursorWidth: widget.cursorWidth,
+                                    cursorHeight: widget.cursorHeight,
+                                    cursorRadius: widget.cursorRadius,
+                                    cursorOffset: widget.cursorOffset ?? Offset.zero,
+                                    selectionHeightStyle: widget.selectionHeightStyle,
+                                    selectionWidthStyle: widget.selectionWidthStyle,
+                                    paintCursorAboveText: widget.paintCursorAboveText,
+                                    enableInteractiveSelection: widget._userSelectionEnabled,
+                                    textSelectionDelegate: this,
+                                    devicePixelRatio: _devicePixelRatio,
+                                    promptRectRange: _currentPromptRectRange,
+                                    promptRectColor: widget.autocorrectionTextRectColor,
+                                    clipBehavior: widget.clipBehavior,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                      );
-                    },
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          }
         ),
       ),
     );
@@ -6081,5 +6061,39 @@ class _WebClipboardStatusNotifier extends ClipboardStatusNotifier {
   @override
   Future<void> update() {
     return Future<void>.value();
+  }
+}
+
+class _EditableTextTapOutsideAction extends ContextAction<EditableTextTapOutsideIntent> {
+  _EditableTextTapOutsideAction();
+
+  @override
+  void invoke(EditableTextTapOutsideIntent intent, [BuildContext? context]) {
+    /// The focus dropping behavior is only present on desktop platforms
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      // On mobile platforms, we don't unfocus on touch events unless they're
+      // in the web browser, but we do unfocus for all other kinds of events.
+        switch (intent.pointerDownEvent.kind) {
+          case ui.PointerDeviceKind.touch:
+            if (kIsWeb) {
+              intent.focusNode.unfocus();
+            }
+          case ui.PointerDeviceKind.mouse:
+          case ui.PointerDeviceKind.stylus:
+          case ui.PointerDeviceKind.invertedStylus:
+          case ui.PointerDeviceKind.unknown:
+            intent.focusNode.unfocus();
+          case ui.PointerDeviceKind.trackpad:
+            throw UnimplementedError(
+                'Unexpected pointer down event for trackpad');
+        }
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        intent.focusNode.unfocus();
+    }
   }
 }

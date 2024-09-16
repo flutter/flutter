@@ -8,6 +8,8 @@ library;
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
+import 'basic.dart';
+import 'focus_manager.dart';
 
 /// An [Intent] to send the event straight to the engine.
 ///
@@ -386,4 +388,16 @@ class UpdateSelectionIntent extends Intent {
 class TransposeCharactersIntent extends Intent {
   /// Creates a [TransposeCharactersIntent].
   const TransposeCharactersIntent();
+}
+
+/// An [Intent] that represents a tap outside the field.
+class EditableTextTapOutsideIntent extends Intent {
+  /// Creates a [EditableTextTapOutsideIntent].
+  const EditableTextTapOutsideIntent({required this.focusNode, required this.pointerDownEvent});
+
+  /// The [FocusNode] that this [Intent]'s action should perform on.
+  final FocusNode focusNode;
+
+  /// The [PointerDownEvent] that initiated this [Intent].
+  final PointerDownEvent pointerDownEvent;
 }

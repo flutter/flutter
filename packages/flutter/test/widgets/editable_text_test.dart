@@ -12791,6 +12791,41 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb); // [intended]
 
+  testWidgets('can change tap outside behavior by overriding actions', (WidgetTester tester) async {
+    bool myIntentWasCalled = false;
+    final CallbackAction<EditableTextTapOutsideIntent> overrideAction = CallbackAction<EditableTextTapOutsideIntent>(
+      onInvoke: (EditableTextTapOutsideIntent intent) { myIntentWasCalled = true; return null; },
+    );
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: [
+          SizedBox(
+            key: key,
+            width: 200,
+            height: 200,
+          ),
+          Actions(
+            actions: <Type, Action<Intent>>{ EditableTextTapOutsideIntent: overrideAction, },
+            child: EditableText(
+              autofocus: true,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ],
+      ),
+    ));
+    await tester.pump();
+    await tester.tap(find.byKey(key), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    expect(myIntentWasCalled, isTrue);
+    expect(focusNode.hasFocus, true);
+  });
+
   testWidgets('ignore key event from web platform', (WidgetTester tester) async {
     controller.text = 'test\ntest';
     controller.selection = const TextSelection(
