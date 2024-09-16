@@ -334,6 +334,10 @@ class CupertinoDatePicker extends StatefulWidget {
       'initial date ${this.initialDateTime} is not less than or equal to maximumDate $maximumDate',
     );
     assert(
+      (mode != CupertinoDatePickerMode.monthYear && mode != CupertinoDatePickerMode.time &&  mode != CupertinoDatePickerMode.dateAndTime) || showDayOfWeek,
+      'showDayOfWeek is only supported in date mode',
+    );
+    assert(
       this.initialDateTime.minute % minuteInterval == 0,
       'initial minute is not divisible by minute interval',
     );
