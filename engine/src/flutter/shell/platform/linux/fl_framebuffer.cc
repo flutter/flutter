@@ -39,7 +39,7 @@ static void fl_framebuffer_class_init(FlFramebufferClass* klass) {
 
 static void fl_framebuffer_init(FlFramebuffer* self) {}
 
-FlFramebuffer* fl_framebuffer_new(size_t width, size_t height) {
+FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height) {
   FlFramebuffer* provider =
       FL_FRAMEBUFFER(g_object_new(fl_framebuffer_get_type(), nullptr));
 
@@ -56,12 +56,12 @@ FlFramebuffer* fl_framebuffer_new(size_t width, size_t height) {
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA,
+  glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format,
                GL_UNSIGNED_BYTE, NULL);
   glBindTexture(GL_TEXTURE_2D, 0);
 
-  glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-                         GL_TEXTURE_2D, provider->texture_id, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                         provider->texture_id, 0);
 
   return provider;
 }
@@ -76,31 +76,6 @@ GLuint fl_framebuffer_get_texture_id(FlFramebuffer* self) {
 
 GLenum fl_framebuffer_get_target(FlFramebuffer* self) {
   return GL_TEXTURE_2D;
-}
-
-GLenum fl_framebuffer_get_format(FlFramebuffer* self) {
-  // Flutter defines SK_R32_SHIFT=16, so SK_PMCOLOR_BYTE_ORDER should be BGRA.
-  // In Linux kN32_SkColorType is assumed to be kBGRA_8888_SkColorType.
-  // So we must choose a valid gl format to be compatible with surface format
-  // BGRA8.
-  // Following logic is copied from Skia GrGLCaps.cpp:
-  // https://github.com/google/skia/blob/4738ed711e03212aceec3cd502a4adb545f38e63/src/gpu/ganesh/gl/GrGLCaps.cpp#L1963-L2116
-
-  if (epoxy_is_desktop_gl()) {
-    // For OpenGL.
-    if (epoxy_gl_version() >= 12 || epoxy_has_gl_extension("GL_EXT_bgra")) {
-      return GL_RGBA8;
-    }
-  } else {
-    // For OpenGL ES.
-    if (epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888") ||
-        (epoxy_has_gl_extension("GL_APPLE_texture_format_BGRA8888") &&
-         epoxy_gl_version() >= 30)) {
-      return GL_BGRA8_EXT;
-    }
-  }
-  g_critical("Failed to determine valid GL format for Flutter rendering");
-  return GL_RGBA8;
 }
 
 size_t fl_framebuffer_get_width(FlFramebuffer* self) {
