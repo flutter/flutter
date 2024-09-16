@@ -140,7 +140,7 @@ class SymbolizeCommand extends FlutterCommand {
     late final Map<int, File> map;
     try {
       map = _unitDebugInfoPathMap();
-    } on Object catch(e) {
+    } on Object catch (e) {
       throwToolExit(e.toString());
     }
     if (!map.containsKey(rootLoadingUnitId)) {
