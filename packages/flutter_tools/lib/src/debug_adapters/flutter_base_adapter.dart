@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:dds/dap.dart' hide PidTracker;
 import 'package:vm_service/vm_service.dart' as vm;
@@ -12,6 +11,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../cache.dart';
+import '../convert.dart';
 import 'flutter_adapter_args.dart';
 import 'mixins.dart';
 
