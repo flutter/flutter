@@ -407,8 +407,8 @@ class _SearchAnchorState extends State<SearchAnchor> {
     if (_route != null && _route!.isActive) {
       _route!.navigator!.removeRoute(_route!);
     }
-    // If the search view is currently open, the search controller would be
-    // disposed by search view instead of here.
+    // If the search controller is currently being used by the search view,
+    // then it will be disposed by search view instead of here.
     if (_internalSearchController != null) {
       if (!_internalSearchController!._usedByView) {
         _internalSearchController!.dispose();
