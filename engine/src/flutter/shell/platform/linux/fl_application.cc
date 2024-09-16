@@ -31,6 +31,16 @@ G_DEFINE_TYPE_WITH_CODE(FlApplication,
                         GTK_TYPE_APPLICATION,
                         G_ADD_PRIVATE(FlApplication))
 
+// Called when the first frame is received.
+static void first_frame_cb(FlApplication* self, FlView* view) {
+  GtkWidget* window = gtk_widget_get_toplevel(GTK_WIDGET(view));
+
+  // Show the main window.
+  if (window != nullptr && GTK_IS_WINDOW(window)) {
+    gtk_window_present(GTK_WINDOW(window));
+  }
+}
+
 // Default implementation of FlApplication::register_plugins
 static void fl_application_register_plugins(FlApplication* self,
                                             FlPluginRegistry* registry) {}
@@ -80,17 +90,20 @@ static void fl_application_activate(GApplication* application) {
       project, priv->dart_entrypoint_arguments);
 
   FlView* view = fl_view_new(project);
+  g_signal_connect_swapped(view, "first-frame", G_CALLBACK(first_frame_cb),
+                           self);
   gtk_widget_show(GTK_WIDGET(view));
 
   GtkWindow* window;
   g_signal_emit(self, fl_application_signals[kSignalCreateWindow], 0, view,
                 &window);
-  gtk_widget_show(GTK_WIDGET(window));
+
+  // Make the resources for the view so rendering can start.
+  // We'll show the view when we have the first frame.
+  gtk_widget_realize(GTK_WIDGET(view));
 
   g_signal_emit(self, fl_application_signals[kSignalRegisterPlugins], 0,
                 FL_PLUGIN_REGISTRY(view));
-
-  gtk_widget_grab_focus(GTK_WIDGET(view));
 }
 
 // Implements GApplication::local_command_line.

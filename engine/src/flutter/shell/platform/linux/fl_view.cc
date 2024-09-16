@@ -52,6 +52,9 @@ struct _FlView {
   // Background color.
   GdkRGBA* background_color;
 
+  // TRUE if have got the first frame to render.
+  gboolean have_first_frame;
+
   // Pointer button state recorded for sending status updates.
   int64_t button_state;
 
@@ -82,7 +85,9 @@ struct _FlView {
   FlViewAccessible* view_accessible;
 };
 
-enum { kPropFlutterProject = 1, kPropLast };
+enum { kSignalFirstFrame, kSignalLastSignal };
+
+static guint fl_view_signals[kSignalLastSignal];
 
 static void fl_view_plugin_registry_iface_init(
     FlPluginRegistryInterface* iface);
@@ -108,6 +113,15 @@ G_DEFINE_TYPE_WITH_CODE(
                                   fl_view_scrolling_delegate_iface_init)
                 G_IMPLEMENT_INTERFACE(fl_text_input_view_delegate_get_type(),
                                       fl_view_text_input_delegate_iface_init))
+
+// Emit the first frame signal in the main thread.
+static gboolean first_frame_idle_cb(gpointer user_data) {
+  FlView* self = FL_VIEW(user_data);
+
+  g_signal_emit(self, fl_view_signals[kSignalFirstFrame], 0);
+
+  return FALSE;
+}
 
 // Signal handler for GtkWidget::delete-event
 static gboolean window_delete_event_cb(FlView* self) {
@@ -678,6 +692,16 @@ static void fl_view_dispose(GObject* object) {
   G_OBJECT_CLASS(fl_view_parent_class)->dispose(object);
 }
 
+// Implements GtkWidget::realize.
+static void fl_view_realize(GtkWidget* widget) {
+  FlView* self = FL_VIEW(widget);
+
+  GTK_WIDGET_CLASS(fl_view_parent_class)->realize(widget);
+
+  // Realize the child widgets.
+  gtk_widget_realize(GTK_WIDGET(self->gl_area));
+}
+
 // Implements GtkWidget::key_press_event.
 static gboolean fl_view_key_press_event(GtkWidget* widget, GdkEventKey* event) {
   FlView* self = FL_VIEW(widget);
@@ -702,8 +726,13 @@ static void fl_view_class_init(FlViewClass* klass) {
   object_class->dispose = fl_view_dispose;
 
   GtkWidgetClass* widget_class = GTK_WIDGET_CLASS(klass);
+  widget_class->realize = fl_view_realize;
   widget_class->key_press_event = fl_view_key_press_event;
   widget_class->key_release_event = fl_view_key_release_event;
+
+  fl_view_signals[kSignalFirstFrame] =
+      g_signal_new("first-frame", fl_view_get_type(), G_SIGNAL_RUN_LAST, 0,
+                   NULL, NULL, NULL, G_TYPE_NONE, 0);
 
   gtk_widget_class_set_accessible_type(GTK_WIDGET_CLASS(klass),
                                        fl_socket_accessible_get_type());
@@ -810,7 +839,15 @@ G_MODULE_EXPORT void fl_view_set_background_color(FlView* self,
 
 void fl_view_redraw(FlView* self) {
   g_return_if_fail(FL_IS_VIEW(self));
+
   gtk_widget_queue_draw(GTK_WIDGET(self->gl_area));
+
+  if (!self->have_first_frame) {
+    self->have_first_frame = TRUE;
+    // This is not the main thread, so the signal needs to be done via an idle
+    // callback.
+    g_idle_add(first_frame_idle_cb, self);
+  }
 }
 
 GHashTable* fl_view_get_keyboard_state(FlView* self) {
