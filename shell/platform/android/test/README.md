@@ -39,3 +39,8 @@ See [Updating Embedding Dependencies](/tools/cipd/android_embedding_bundle).
 ### My new test won't compile. It can't find one of my imports.
 
 See [Updating Embedding Dependencies](/tools/cipd/android_embedding_bundle).
+
+### My test does not show log output in the console
+
+Import `org.robolectric.shadows.ShadowLog;` then
+Use `ShadowLog.stream = System.out;` in your test or setup method.
