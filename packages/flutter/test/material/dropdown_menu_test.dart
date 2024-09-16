@@ -1315,6 +1315,28 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/154532.
+  testWidgets('keyboard navigation does not throw when entries are filtered empty',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            enableFilter: true,
+            dropdownMenuEntries: menuChildren,
+          ),
+        ),
+      ));
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+      await tester.enterText(find.byType(TextField).first, 'No match');
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      await tester.enterText(find.byType(TextField).first, 'No match 2');
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+  }, variant: TargetPlatformVariant.desktop());
+
   // Regression test for https://github.com/flutter/flutter/issues/147253.
   testWidgets('Default search prioritises the current highlight on desktop platforms',
       (WidgetTester tester) async {
