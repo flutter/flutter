@@ -463,7 +463,7 @@ InferOpenGLPlatformViewCreationCallback(
   } else {
 #if FML_OS_LINUX || FML_OS_WIN
     gl_proc_resolver = DefaultGLProcResolver;
-#endif
+#endif  // FML_OS_LINUX || FML_OS_WIN
   }
 
   bool fbo_reset_after_present =
@@ -508,9 +508,10 @@ InferOpenGLPlatformViewCreationCallback(
             view_embedder             // external view embedder
         );
       });
-#else
+#else   // SHELL_ENABLE_GL
+  FML_LOG(ERROR) << "This Flutter Engine does not support OpenGL rendering.";
   return nullptr;
-#endif
+#endif  // SHELL_ENABLE_GL
 }
 
 static flutter::Shell::CreateCallback<flutter::PlatformView>
@@ -601,9 +602,10 @@ InferMetalPlatformViewCreationCallback(
             std::move(external_view_embedder)  // external view embedder
         );
       });
-#else
+#else   // SHELL_ENABLE_METAL
+  FML_LOG(ERROR) << "This Flutter Engine does not support Metal rendering.";
   return nullptr;
-#endif
+#endif  // SHELL_ENABLE_METAL
 }
 
 static flutter::Shell::CreateCallback<flutter::PlatformView>
@@ -688,9 +690,10 @@ InferVulkanPlatformViewCreationCallback(
             std::move(external_view_embedder)  // external view embedder
         );
       });
-#else
+#else   // SHELL_ENABLE_VULKAN
+  FML_LOG(ERROR) << "This Flutter Engine does not support Vulkan rendering.";
   return nullptr;
-#endif
+#endif  // SHELL_ENABLE_VULKAN
 }
 
 static flutter::Shell::CreateCallback<flutter::PlatformView>
