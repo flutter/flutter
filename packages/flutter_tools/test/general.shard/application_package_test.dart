@@ -424,7 +424,6 @@ void main() {
 
     testUsingContext('returns null when there is no ios or .ios directory', () async {
       globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('.packages').createSync();
       final BuildableIOSApp? iosApp = await IOSApp.fromIosProject(
         FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp?;
 
@@ -433,7 +432,6 @@ void main() {
 
     testUsingContext('returns null when there is no Runner.xcodeproj', () async {
       globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('.packages').createSync();
       globals.fs.file('ios/FooBar.xcodeproj').createSync(recursive: true);
       final BuildableIOSApp? iosApp = await IOSApp.fromIosProject(
         FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp?;
@@ -443,7 +441,6 @@ void main() {
 
     testUsingContext('returns null when there is no Runner.xcodeproj/project.pbxproj', () async {
       globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('.packages').createSync();
       globals.fs.file('ios/Runner.xcodeproj').createSync(recursive: true);
       final BuildableIOSApp? iosApp = await IOSApp.fromIosProject(
         FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp?;
@@ -453,7 +450,6 @@ void main() {
 
     testUsingContext('returns null when there with no product identifier', () async {
       globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('.packages').createSync();
       final Directory project = globals.fs.directory('ios/Runner.xcodeproj')..createSync(recursive: true);
       project.childFile('project.pbxproj').createSync();
       final BuildableIOSApp? iosApp = await IOSApp.fromIosProject(
