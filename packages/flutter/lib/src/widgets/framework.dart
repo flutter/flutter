@@ -2911,15 +2911,14 @@ class BuildOwner {
                   'The dirty list for the current build scope is: ${buildScope._dirtyElements}',
         );
       }
-      // When reactivating an inactivate Element, _scheduleBuildFor should only be
-      // called within _flushDirtyElements.
       if (!_debugBuilding && element._inDirtyList) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('BuildOwner.scheduleBuildFor() called inappropriately.'),
           ErrorHint(
-            'The BuildOwner.scheduleBuildFor() method should only be called while the '
-            'buildScope() method is actively rebuilding the widget tree.',
+            'The BuildOwner.scheduleBuildFor() method called on an Element '
+            'that is already in the dirty list.',
           ),
+          element.describeElement('the dirty Element was'),
         ]);
       }
       return true;
@@ -5145,8 +5144,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Returns true if the element has been marked as needing rebuilding.
   ///
   /// The flag is true when the element is first created and after
-  /// [markNeedsBuild] has been called. The flag is reset to false in the
-  /// [performRebuild] implementation.
+  /// [markNeedsBuild] has been called. The flag is typically reset to false in
+  /// the [performRebuild] implementation, but certain elements (that of the
+  /// [LayoutBuilder] widget, for example) may choose to override [markNeedsBuild]
+  /// such that it does not set the [dirty] flag to `true` when called.
   bool get dirty => _dirty;
   bool _dirty = true;
 
