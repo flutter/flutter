@@ -28,6 +28,7 @@ If you intend to contribute to Flutter, welcome! You are encouraged to start wit
 * [Reviewing code](./contributing/Tree-hygiene.md#getting-a-code-review)
 * [RFC process](./contributing/issue_hygiene/README.md#how-to-propose-a-specific-change)
 * [Status of popular issues](./contributing/issue_hygiene/Popular-issues.md)
+* [Style guide for Flutter repo](./contributing/Style-guide-for-Flutter-repo.md)
 * [Submitting code, process for](./contributing/Tree-hygiene.md#overview)
 * [Support levels, definitions of](./about/Values.md#support)
 * [Symbolicating stack traces](./engine/Crashes.md)

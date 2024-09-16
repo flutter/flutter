@@ -127,7 +127,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:to_2024"}
+          {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
       os: Mac-13|Mac-14
       device_type: none
@@ -143,7 +143,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:to_2024"}
+          {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
       os: Mac-13|Mac-14
       device_type: none
@@ -160,7 +160,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:to_2024"}
+          {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
       device_type: none
       mac_model: "Macmini8,1"
@@ -179,7 +179,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:to_2024"}
+          {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
       os: Mac-13|Mac-14
       device_type: none
@@ -197,7 +197,7 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "apple_signing", "version": "version:to_2024"}
+          {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
       os: Mac-13|Mac-14
       device_type: none
@@ -269,7 +269,7 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "apple_signing", "version": "version:to_2024"}
+          {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
       os: Mac-13|Mac-14
       cpu: x86
@@ -287,7 +287,7 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "apple_signing", "version": "version:to_2024"}
+          {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
       os: Mac-13|Mac-14
       cpu: x86
@@ -389,16 +389,21 @@ targets:
   - name: Linux packages_autoroller
     presubmit: false
     recipe: pub_autoroller/pub_autoroller
-    timeout: 30
+    # This takes a while because we need to fetch network dependencies and run
+    # Gradle for every android app in the repo
+    timeout: 45
     enabled_branches:
       # Don't run this on release branches
       - master
     properties:
       tags: >
         ["framework","hostonly","linux"]
+      # Requires Android SDK since we may re-generate Gradle lockfiles
       dependencies: >-
         [
-          {"dependency": "gh_cli", "version": "version:2.8.0-2-g32256d38"}
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "gh_cli", "version": "version:2.8.0-2-g32256d38"},
+          {"dependency": "open_jdk", "version": "version:17"}
         ]
 
   - name: Linux_android_emu android views
@@ -419,8 +424,28 @@ targets:
       task_name: android_views
     timeout: 60
 
-  - name: Linux build_tests_1_5
+  - name: Linux build_aar_module_test
     bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      tags: >
+        ["devicelab","hostonly"]
+      task_name: build_aar_module_test
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux build_tests_1_5
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -440,7 +465,6 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
 
   - name: Linux build_tests_2_5
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -460,7 +484,6 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
 
   - name: Linux build_tests_3_5
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -500,7 +523,6 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
 
   - name: Linux build_tests_5_5
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -530,8 +552,6 @@ targets:
       - .ci.yaml
 
   - name: Linux customer_testing
-    # TODO(Piinks): https://github.com/flutter/flutter/issues/154251
-    bringup: true
     # This really just runs dev/bots/customer_testing/ci.sh,
     # but it does so indirectly via the flutter_drone recipe
     # calling the dev/bots/test.dart script.
@@ -544,8 +564,6 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Timeout in seconds for each individual step.
-      test_timeout_secs: "2700" # 45 minutes * 60
 
   - name: Linux docs_publish
     recipe: flutter/docs
@@ -3748,8 +3766,6 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      # Timeout in seconds for each individual step.
-      test_timeout_secs: "2700" # 45 minutes * 60
 
   - name: Mac dart_plugin_registry_test
     recipe: devicelab/devicelab_drone
@@ -5418,8 +5434,6 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      # Timeout in seconds for each individual step.
-      test_timeout_secs: "2700" # 45 minutes * 60
 
   - name: Windows framework_tests_libraries
     recipe: flutter/flutter_drone

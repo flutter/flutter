@@ -185,7 +185,6 @@ void main() {
     ));
     environment.buildDir.createSync(recursive: true);
     environment.buildDir.childFile('app.dill').createSync();
-    environment.projectDir.childFile('.packages').writeAsStringSync('\n');
     const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
 
     await androidAot.build(environment);
@@ -224,7 +223,6 @@ void main() {
     ));
     environment.buildDir.createSync(recursive: true);
     environment.buildDir.childFile('app.dill').createSync();
-    environment.projectDir.childFile('.packages').writeAsStringSync('\n');
     const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
 
     await androidAot.build(environment);
@@ -266,7 +264,6 @@ void main() {
     ));
     environment.buildDir.createSync(recursive: true);
     environment.buildDir.childFile('app.dill').createSync();
-    environment.projectDir.childFile('.packages').writeAsStringSync('\n');
 
     await const AndroidAot(TargetPlatform.android_arm64, BuildMode.release)
       .build(environment);
@@ -304,7 +301,6 @@ void main() {
     ));
     environment.buildDir.createSync(recursive: true);
     environment.buildDir.childFile('app.dill').createSync();
-    environment.projectDir.childFile('.packages').writeAsStringSync('\n');
 
     await const AndroidAot(TargetPlatform.android_arm64, BuildMode.release)
       .build(environment);
@@ -529,7 +525,10 @@ void main() {
       .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
       .createSync(recursive: true);
     fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello\nflutter:\n  shaders:\n    - shader.glsl');
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
     fileSystem.file('shader.glsl').writeAsStringSync('test');
 
     processManager.addCommands(<FakeCommand>[

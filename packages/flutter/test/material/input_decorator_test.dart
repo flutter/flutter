@@ -7140,8 +7140,8 @@ void main() {
     // Spot check
     expect(debugString, contains('labelStyle: TextStyle(inherit: true, height: 1.0x)'));
     expect(debugString, contains('isDense: true'));
-    expect(debugString, contains('fillColor: Color(0x00000010)'));
-    expect(debugString, contains('focusColor: Color(0x00000020)'));
+    expect(debugString, contains('fillColor: ${const Color(0x00000010)}'));
+    expect(debugString, contains('focusColor: ${const Color(0x00000020)}'));
     expect(debugString, contains('errorBorder: UnderlineInputBorder()'));
     expect(debugString, contains('focusedBorder: OutlineInputBorder()'));
   });
@@ -7201,20 +7201,20 @@ void main() {
       'isDense: true',
       'contentPadding: EdgeInsetsDirectional(40.0, 12.0, 0.0, 12.0)',
       'isCollapsed: true',
-      'iconColor: MaterialColor(primary value: Color(0xfff44336))',
-      'prefixIconColor: MaterialColor(primary value: Color(0xff2196f3))',
+      'iconColor: MaterialColor(primary value: ${const Color(0xfff44336)})',
+      'prefixIconColor: MaterialColor(primary value: ${const Color(0xff2196f3)})',
       'prefixIconConstraints: BoxConstraints(w=10.0, h=30.0)',
       'prefixStyle: TextStyle(<all styles inherited>)',
-      'suffixIconColor: MaterialColor(primary value: Color(0xff2196f3))',
+      'suffixIconColor: MaterialColor(primary value: ${const Color(0xff2196f3)})',
       'suffixIconConstraints: BoxConstraints(w=10.0, h=30.0)',
       'suffixStyle: TextStyle(<all styles inherited>)',
       'counterStyle: TextStyle(<all styles inherited>)',
       'filled: true',
-      'fillColor: MaterialColor(primary value: Color(0xfff44336))',
+      'fillColor: MaterialColor(primary value: ${const Color(0xfff44336)})',
       'activeIndicatorBorder: BorderSide',
       'outlineBorder: BorderSide',
-      'focusColor: MaterialColor(primary value: Color(0xff2196f3))',
-      'hoverColor: MaterialColor(primary value: Color(0xff4caf50))',
+      'focusColor: MaterialColor(primary value: ${const Color(0xff2196f3)})',
+      'hoverColor: MaterialColor(primary value: ${const Color(0xff4caf50)})',
       'errorBorder: UnderlineInputBorder()',
       'focusedBorder: UnderlineInputBorder()',
       'focusedErrorBorder: UnderlineInputBorder()',
@@ -12443,57 +12443,57 @@ void main() {
 
       // Test filled text field.
       await pumpDecorator(hovering: false);
-      expect(getContainerColor(tester), equals(fillColor));
+      expect(getContainerColor(tester), isSameColorAs(fillColor));
       await tester.pump(const Duration(seconds: 10));
-      expect(getContainerColor(tester), equals(fillColor));
+      expect(getContainerColor(tester), isSameColorAs(fillColor));
 
       await pumpDecorator(hovering: true);
-      expect(getContainerColor(tester), equals(fillColor));
+      expect(getContainerColor(tester), isSameColorAs(fillColor));
       await tester.pump(const Duration(milliseconds: 15));
-      expect(getContainerColor(tester), equals(hoverColor));
+      expect(getContainerColor(tester), isSameColorAs(hoverColor));
 
       await pumpDecorator(hovering: false);
-      expect(getContainerColor(tester), equals(hoverColor));
+      expect(getContainerColor(tester), isSameColorAs(hoverColor));
       await tester.pump(const Duration(milliseconds: 15));
-      expect(getContainerColor(tester), equals(fillColor));
+      expect(getContainerColor(tester), isSameColorAs(fillColor));
 
       await pumpDecorator(hovering: false, enabled: false);
-      expect(getContainerColor(tester), equals(disabledColor));
+      expect(getContainerColor(tester), isSameColorAs(disabledColor));
       await tester.pump(const Duration(seconds: 10));
-      expect(getContainerColor(tester), equals(disabledColor));
+      expect(getContainerColor(tester), isSameColorAs(disabledColor));
 
       await pumpDecorator(hovering: true, enabled: false);
-      expect(getContainerColor(tester), equals(disabledColor));
+      expect(getContainerColor(tester), isSameColorAs(disabledColor));
       await tester.pump(const Duration(seconds: 10));
-      expect(getContainerColor(tester), equals(disabledColor));
+      expect(getContainerColor(tester), isSameColorAs(disabledColor));
 
       // Test outline text field.
       const Color blendedHoverColor = Color(0x74004400);
       await pumpDecorator(hovering: false, filled: false);
       await tester.pumpAndSettle();
-      expect(getBorderColor(tester), equals(enabledBorderColor));
+      expect(getBorderColor(tester), isSameColorAs(enabledBorderColor));
       await tester.pump(const Duration(seconds: 10));
-      expect(getBorderColor(tester), equals(enabledBorderColor));
+      expect(getBorderColor(tester), isSameColorAs(enabledBorderColor));
 
       await pumpDecorator(hovering: true, filled: false);
-      expect(getBorderColor(tester), equals(enabledBorderColor));
+      expect(getBorderColor(tester), isSameColorAs(enabledBorderColor));
       await tester.pump(const Duration(milliseconds: 167));
-      expect(getBorderColor(tester), equals(blendedHoverColor));
+      expect(getBorderColor(tester), isSameColorAs(blendedHoverColor));
 
       await pumpDecorator(hovering: false, filled: false);
-      expect(getBorderColor(tester), equals(blendedHoverColor));
+      expect(getBorderColor(tester), isSameColorAs(blendedHoverColor));
       await tester.pump(const Duration(milliseconds: 167));
-      expect(getBorderColor(tester), equals(enabledBorderColor));
+      expect(getBorderColor(tester), isSameColorAs(enabledBorderColor));
 
       await pumpDecorator(hovering: false, filled: false, enabled: false);
-      expect(getBorderColor(tester), equals(enabledBorderColor));
+      expect(getBorderColor(tester), isSameColorAs(enabledBorderColor));
       await tester.pump(const Duration(milliseconds: 167));
-      expect(getBorderColor(tester), equals(disabledColor));
+      expect(getBorderColor(tester), isSameColorAs(disabledColor));
 
       await pumpDecorator(hovering: true, filled: false, enabled: false);
-      expect(getBorderColor(tester), equals(disabledColor));
+      expect(getBorderColor(tester), isSameColorAs(disabledColor));
       await tester.pump(const Duration(seconds: 10));
-      expect(getBorderColor(tester), equals(disabledColor));
+      expect(getBorderColor(tester), isSameColorAs(disabledColor));
     });
 
     testWidgets('InputDecorator draws and animates focusColor', (WidgetTester tester) async {
