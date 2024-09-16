@@ -100,7 +100,7 @@ class SymbolizeCommand extends FlutterCommand {
     final Map<int, File> map = <int, File>{};
     final String? rootInfo = stringArg('debug-info');
     if (rootInfo != null) {
-      map[rootLoadingUnitId] = _fileSystem.file(rootInfo);
+      map[rootLoadingUnitId] = _handleDSYM(rootInfo);
     }
     for (final String arg in stringsArg('unit-id-debug-info')) {
       final int separatorIndex = arg.indexOf(':');
