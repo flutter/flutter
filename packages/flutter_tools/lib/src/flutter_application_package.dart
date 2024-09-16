@@ -104,7 +104,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
         // Unsupported yet.
-        return null;
+        throw UnimplementedError();
     }
   }
 }
