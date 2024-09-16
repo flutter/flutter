@@ -48,6 +48,8 @@ xcuserdata
 .classpath
 .project
 .settings/
+.vscode/
+!.vscode/extensions.json
 
 # packages file containing multi-root paths
 .packages.generated
