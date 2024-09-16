@@ -398,7 +398,7 @@ class HSLColor {
 
 /// A color that has a small table of related colors called a "swatch".
 ///
-/// The table is indexed by values of type `T`.
+/// The table is accessed by key values of type `T`.
 ///
 /// See also:
 ///
@@ -420,7 +420,7 @@ class ColorSwatch<T> extends Color {
   final Map<T, Color> _swatch;
 
   /// Returns an element of the swatch table.
-  Color? operator [](T index) => _swatch[index];
+  Color? operator [](T key) => _swatch[key];
 
   /// Returns the valid keys for accessing operator[].
   Iterable<T> get keys => _swatch.keys;
