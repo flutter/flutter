@@ -863,6 +863,10 @@ abstract class _SlideTarget {
 
 // Recognizes sliding taps and thereupon interacts with
 // `_SlideTarget`s.
+//
+// TODO(dkwingsmt): It should recompute hit testing when the app is updated,
+// or better, share code with `MouseTracker`.
+// https://github.com/flutter/flutter/issues/155266
 class _TargetSelectionGestureRecognizer extends GestureRecognizer {
   _TargetSelectionGestureRecognizer({super.debugOwner, required this.hitTest})
     : _slidingTap = _SlidingTapGestureRecognizer(debugOwner: debugOwner) {
