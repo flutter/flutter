@@ -445,7 +445,7 @@ void main() {
         Color(0x80777777),
         Color(0x80444444),
       ],
-    ),);
+    ));
   });
 
   test('LinearGradient withOpacity test - preserves transform', () {
@@ -470,7 +470,7 @@ void main() {
         Color(0x80444444),
       ],
       transform: GradientRotation(1),
-    ),);
+    ));
   });
 
   test('RadialGradient with AlignmentDirectional', () {
@@ -790,6 +790,36 @@ void main() {
       ],
     ));
   });
+
+  test('RadialGradient withOpacity test - preserves transform', () {
+    const RadialGradient testGradient = RadialGradient(
+      center: Alignment.topLeft,
+      focal: Alignment.centerLeft,
+      radius: 20.0,
+      focalRadius: 10.0,
+      colors: <Color>[
+        Color(0xFFFFFFFF),
+        Color(0xAF777777),
+        Color(0x44444444),
+      ],
+      transform: GradientRotation(1),
+    );
+    final RadialGradient actual = testGradient.withOpacity(0.5);
+
+    expect(actual, const RadialGradient(
+      center: Alignment.topLeft,
+      focal: Alignment.centerLeft,
+      radius: 20.0,
+      focalRadius: 10.0,
+      colors: <Color>[
+        Color(0x80FFFFFF),
+        Color(0x80777777),
+        Color(0x80444444),
+      ],
+      transform: GradientRotation(1),
+    ));
+  });
+
   test('SweepGradient lerp test', () {
     const SweepGradient testGradient1 = SweepGradient(
       center: Alignment.topLeft,
@@ -1022,6 +1052,32 @@ void main() {
       ],
     ));
   });
+
+  test('SweepGradient withOpacity test - preserves transform', () {
+    const SweepGradient testGradient = SweepGradient(
+      center: Alignment.topLeft,
+      endAngle: math.pi / 2,
+      colors: <Color>[
+        Color(0xFFFFFFFF),
+        Color(0xAF777777),
+        Color(0x44444444),
+      ],
+      transform: GradientRotation(1),
+    );
+    final SweepGradient actual = testGradient.withOpacity(0.5);
+
+    expect(actual, const SweepGradient(
+      center: Alignment.topLeft,
+      endAngle: math.pi / 2,
+      colors: <Color>[
+        Color(0x80FFFFFF),
+        Color(0x80777777),
+        Color(0x80444444),
+      ],
+      transform: GradientRotation(1),
+    ));
+  });
+
   test('Gradient lerp test (with RadialGradient)', () {
     const RadialGradient testGradient1 = RadialGradient(
       center: Alignment.topLeft,
