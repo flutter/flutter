@@ -407,13 +407,13 @@ class _SearchAnchorState extends State<SearchAnchor> {
     if (_route != null && _route!.isActive) {
       _route!.navigator!.removeRoute(_route!);
     }
-    // if the search route is still actice, the searchController would be
-    // disposed by the route instead of here.
+    // If the search view is currently open, the search controller would be
+    // disposed by search view instead of here.
     if (_internalSearchController != null) {
-      if (!_internalSearchController!._usedByRoute) {
+      if (!_internalSearchController!._usedByView) {
         _internalSearchController!.dispose();
       } else {
-        _internalSearchController!._disposeByRoute = true;
+        _internalSearchController!._disposedByView = true;
       }
     }
     super.dispose();
@@ -450,7 +450,6 @@ class _SearchAnchorState extends State<SearchAnchor> {
       keyboardType: widget.keyboardType,
     );
     navigator.push(_route!);
-    _searchController._usedByRoute = true;
   }
 
   void _closeView(String? selectedText) {
@@ -603,11 +602,6 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   void dispose() {
     curvedAnimation?.dispose();
     viewFadeOnIntervalCurve?.dispose();
-    if (searchController._disposeByRoute) {
-      searchController.dispose();
-    }else {
-      searchController._usedByRoute = false;
-    }
     super.dispose();
   }
 
@@ -803,6 +797,7 @@ class _ViewContentState extends State<_ViewContent> {
     super.initState();
     _viewRect = widget.viewRect;
     _controller = widget.searchController;
+    _controller._usedByView = true;
     _controller.addListener(updateSuggestions);
     _setupAnimations();
   }
@@ -849,6 +844,10 @@ class _ViewContentState extends State<_ViewContent> {
   @override
   void dispose() {
     _controller.removeListener(updateSuggestions);
+    _controller._usedByView = false;
+    if (_controller._disposedByView) {
+      _controller.dispose();
+    }
     _disposeAnimations();
     _timer?.cancel();
     _timer = null;
@@ -1131,8 +1130,11 @@ class SearchController extends TextEditingController {
   // This is set automatically when a [SearchController] is given to the anchor
   // it controls.
   _SearchAnchorState? _anchor;
-  bool _usedByRoute = false;
-  bool _disposeByRoute = false;
+
+  // Whether this controller is used by search view.
+  bool _usedByView = false;
+  // Whether the search view manages the disposal of this controller.
+  bool _disposedByView = false;
 
   /// Whether this controller has associated search anchor.
   bool get isAttached => _anchor != null;
