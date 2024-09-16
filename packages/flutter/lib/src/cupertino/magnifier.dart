@@ -258,7 +258,9 @@ class CupertinoMagnifier extends StatelessWidget {
     this.borderSide =
         const BorderSide(color: Color.fromARGB(255, 232, 232, 232)),
     this.inOutAnimation,
-  });
+    this.magnificationScale = 1,
+  }) : assert(magnificationScale != 0,
+            'Magnification scale of 0 results in undefined behavior.');
 
   /// A list of shadows cast by the [Magnifier].
   ///
@@ -333,6 +335,11 @@ class CupertinoMagnifier extends StatelessWidget {
   /// Any additional focal point offset, applied over the regular focal
   /// point offset defined in [kMagnifierAboveFocalPoint].
   final Offset additionalFocalPointOffset;
+
+  /// How "zoomed in" the magnification subject is in the lens.
+  ///
+  /// The default is 1.0, which is no magnification.
+  final double magnificationScale;
 
   @override
   Widget build(BuildContext context) {
