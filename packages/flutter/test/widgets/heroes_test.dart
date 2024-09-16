@@ -2347,6 +2347,246 @@ Future<void> main() async {
     expect(tester.getSize(find.byKey(smallContainer)), const Size(100,100));
   });
 
+  testWidgets('Can add two page with heroes simultaneously using page API.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/115358.
+
+    const String heroTag = 'foo';
+    final GlobalKey<NavigatorState> navigator = GlobalKey();
+    final Key smallContainer = UniqueKey();
+    final Key largeContainer = UniqueKey();
+    final MaterialPage<void> page1 = MaterialPage<void>(
+      child: Center(
+        child: Card(
+          child: Hero(
+            tag: heroTag,
+            child: Container(
+              key: largeContainer,
+              color: Colors.red,
+              height: 200.0,
+              width: 200.0,
+            ),
+          ),
+        ),
+      ),
+    );
+    final MaterialPage<void> page2 = MaterialPage<void>(
+      child: Center(
+        child: Card(
+          child: Hero(
+            tag: heroTag,
+            child: Container(
+              color: Colors.red,
+              height: 1000.0,
+              width: 1000.0,
+            ),
+          ),
+        ),
+      ),
+    );
+    final MaterialPage<void> page3 = MaterialPage<void>(
+      child: Center(
+        child: Card(
+          child: Hero(
+            tag: heroTag,
+            child: Container(
+              key: smallContainer,
+              color: Colors.red,
+              height: 100.0,
+              width: 100.0,
+            ),
+          ),
+        ),
+      ),
+    );
+    final HeroController controller = HeroController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        home: Navigator(
+          observers: <NavigatorObserver>[controller],
+          pages: <Page<void>>[page1],
+          onPopPage: (_, __) => false,
+        ),
+      )
+    );
+
+    // The initial setup.
+    expect(find.byKey(largeContainer), isOnstage);
+    expect(find.byKey(largeContainer), isInCard);
+    expect(find.byKey(smallContainer, skipOffstage: false), findsNothing);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        home: Navigator(
+          observers: <NavigatorObserver>[controller],
+          pages: <Page<void>>[page1, page2, page3],
+          onPopPage: (_, __) => false,
+        ),
+      ),
+    );
+
+    expect(find.byKey(largeContainer), isOnstage);
+    expect(find.byKey(largeContainer), isInCard);
+    expect(find.byKey(smallContainer, skipOffstage: false), isOffstage);
+    expect(find.byKey(smallContainer, skipOffstage: false), isInCard);
+
+    await tester.pump();
+
+    // The hero started flying.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isNotInCard);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The hero is in-flight.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isNotInCard);
+    final Size size = tester.getSize(find.byKey(smallContainer));
+    expect(size.height, greaterThan(100));
+    expect(size.width, greaterThan(100));
+    expect(size.height, lessThan(200));
+    expect(size.width, lessThan(200));
+
+    await tester.pumpAndSettle();
+
+    // The transition has ended.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isInCard);
+    expect(tester.getSize(find.byKey(smallContainer)), const Size(100,100));
+  });
+
+  testWidgets('Can still trigger hero even if page underneath changes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/88578.
+
+    const String heroTag = 'foo';
+    final GlobalKey<NavigatorState> navigator = GlobalKey();
+    final Key smallContainer = UniqueKey();
+    final Key largeContainer = UniqueKey();
+    final MaterialPage<void> unrelatedPage1 = MaterialPage<void>(
+      key: UniqueKey(),
+      child: Center(
+        child: Card(
+          child: Container(
+            color: Colors.red,
+            height: 1000.0,
+            width: 1000.0,
+          ),
+        ),
+      ),
+    );
+    final MaterialPage<void> unrelatedPage2 = MaterialPage<void>(
+      key: UniqueKey(),
+      child: Center(
+        child: Card(
+          child: Container(
+            color: Colors.red,
+            height: 1000.0,
+            width: 1000.0,
+          ),
+        ),
+      ),
+    );
+    final MaterialPage<void> page1 = MaterialPage<void>(
+      key: UniqueKey(),
+      child: Center(
+        child: Card(
+          child: Hero(
+            tag: heroTag,
+            child: Container(
+              key: largeContainer,
+              color: Colors.red,
+              height: 200.0,
+              width: 200.0,
+            ),
+          ),
+        ),
+      ),
+    );
+    final MaterialPage<void> page2 = MaterialPage<void>(
+      key: UniqueKey(),
+      child: Center(
+        child: Card(
+          child: Hero(
+            tag: heroTag,
+            child: Container(
+              key: smallContainer,
+              color: Colors.red,
+              height: 100.0,
+              width: 100.0,
+            ),
+          ),
+        ),
+      ),
+    );
+    final HeroController controller = HeroController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: navigator,
+          home: Navigator(
+            observers: <NavigatorObserver>[controller],
+            pages: <Page<void>>[unrelatedPage1, page1],
+            onPopPage: (_, __) => false,
+          ),
+        )
+    );
+
+    // The initial setup.
+    expect(find.byKey(largeContainer), isOnstage);
+    expect(find.byKey(largeContainer), isInCard);
+    expect(find.byKey(smallContainer, skipOffstage: false), findsNothing);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        home: Navigator(
+          observers: <NavigatorObserver>[controller],
+          pages: <Page<void>>[unrelatedPage2, page2],
+          onPopPage: (_, __) => false,
+        ),
+      ),
+    );
+
+    expect(find.byKey(largeContainer), isOnstage);
+    expect(find.byKey(largeContainer), isInCard);
+    expect(find.byKey(smallContainer, skipOffstage: false), isOffstage);
+    expect(find.byKey(smallContainer, skipOffstage: false), isInCard);
+
+    await tester.pump();
+
+    // The hero started flying.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isNotInCard);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The hero is in-flight.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isNotInCard);
+    final Size size = tester.getSize(find.byKey(smallContainer));
+    expect(size.height, greaterThan(100));
+    expect(size.width, greaterThan(100));
+    expect(size.height, lessThan(200));
+    expect(size.width, lessThan(200));
+
+    await tester.pumpAndSettle();
+
+    // The transition has ended.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isInCard);
+    expect(tester.getSize(find.byKey(smallContainer)), const Size(100,100));
+  });
+
   testWidgets('On an iOS back swipe and snap, only a single flight should take place', (WidgetTester tester) async {
     int shuttlesBuilt = 0;
     Widget shuttleBuilder(

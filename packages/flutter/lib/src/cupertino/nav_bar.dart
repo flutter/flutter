@@ -146,6 +146,7 @@ Widget _wrapWithBackground({
   Brightness? brightness,
   required Widget child,
   bool updateSystemUiOverlay = true,
+  bool enableBackgroundFilterBlur = true,
 }) {
   Widget result = child;
   if (updateSystemUiOverlay) {
@@ -182,7 +183,7 @@ Widget _wrapWithBackground({
 
   return ClipRect(
     child: BackdropFilter(
-      enabled: backgroundColor.alpha != 0xFF,
+      enabled: backgroundColor.alpha != 0xFF && enableBackgroundFilterBlur,
       filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
       child: childWithBackground,
     ),
@@ -266,6 +267,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.border = _kDefaultNavBarBorder,
     this.backgroundColor,
     this.automaticBackgroundVisibility = true,
+    this.enableBackgroundFilterBlur = true,
     this.brightness,
     this.padding,
     this.transitionBetweenRoutes = true,
@@ -342,7 +344,8 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@template flutter.cupertino.CupertinoNavigationBar.backgroundColor}
   /// The background color of the navigation bar. If it contains transparency, the
   /// tab bar will automatically produce a blurring effect to the content
-  /// behind it.
+  /// behind it. This behavior can be disabled by setting [enableBackgroundFilterBlur]
+  /// to false.
   ///
   /// By default, the navigation bar's background is visible only when scrolled under.
   /// This behavior can be controlled with [automaticBackgroundVisibility].
@@ -416,6 +419,17 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// This value defaults to true.
   /// {@endtemplate}
   final bool transitionBetweenRoutes;
+
+  /// {@template flutter.cupertino.CupertinoNavigationBar.enableBackgroundFilterBlur}
+  /// Whether to have a blur effect when a non-opaque background color is used.
+  ///
+  /// When [enableBackgroundFilterBlur] is set to false, the blur effect will be
+  /// disabled. The behaviour of [enableBackgroundFilterBlur] will only be respected when
+  /// [automaticBackgroundVisibility] is false or until content scrolls under the navbar.
+  ///
+  /// This value defaults to true.
+  /// {@endtemplate}
+  final bool enableBackgroundFilterBlur;
 
   /// {@template flutter.cupertino.CupertinoNavigationBar.heroTag}
   /// Tag for the navigation bar's Hero widget if [transitionBetweenRoutes] is true.
@@ -552,6 +566,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       border: effectiveBorder,
       backgroundColor: effectiveBackgroundColor,
       brightness: widget.brightness,
+      enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
         child: _PersistentNavigationBar(
@@ -676,6 +691,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.border = _kDefaultNavBarBorder,
     this.backgroundColor,
     this.automaticBackgroundVisibility = true,
+    this.enableBackgroundFilterBlur = true,
     this.brightness,
     this.padding,
     this.transitionBetweenRoutes = true,
@@ -760,6 +776,9 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// {@macro flutter.cupertino.CupertinoNavigationBar.automaticBackgroundVisibility}
   final bool automaticBackgroundVisibility;
 
+  /// {@macro flutter.cupertino.CupertinoNavigationBar.enableBackgroundFilterBlur}
+  final bool enableBackgroundFilterBlur;
+
   /// {@macro flutter.cupertino.CupertinoNavigationBar.brightness}
   final Brightness? brightness;
 
@@ -840,6 +859,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           persistentHeight: _kNavBarPersistentHeight + MediaQuery.paddingOf(context).top,
           alwaysShowMiddle: widget.alwaysShowMiddle && widget.middle != null,
           stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
+          enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
         ),
       ),
     );
@@ -863,6 +883,7 @@ class _LargeTitleNavigationBarSliverDelegate
     required this.persistentHeight,
     required this.alwaysShowMiddle,
     required this.stretchConfiguration,
+    required this.enableBackgroundFilterBlur,
   });
 
   final _NavigationBarStaticComponentsKeys keys;
@@ -878,6 +899,7 @@ class _LargeTitleNavigationBarSliverDelegate
   final Object heroTag;
   final double persistentHeight;
   final bool alwaysShowMiddle;
+  final bool enableBackgroundFilterBlur;
 
   @override
   double get minExtent => persistentHeight;
@@ -922,6 +944,7 @@ class _LargeTitleNavigationBarSliverDelegate
       border: effectiveBorder,
       backgroundColor: effectiveBackgroundColor,
       brightness: brightness,
+      enableBackgroundFilterBlur: enableBackgroundFilterBlur,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
         child: Stack(
@@ -1014,7 +1037,8 @@ class _LargeTitleNavigationBarSliverDelegate
         || transitionBetweenRoutes != oldDelegate.transitionBetweenRoutes
         || persistentHeight != oldDelegate.persistentHeight
         || alwaysShowMiddle != oldDelegate.alwaysShowMiddle
-        || heroTag != oldDelegate.heroTag;
+        || heroTag != oldDelegate.heroTag
+        || enableBackgroundFilterBlur != oldDelegate.enableBackgroundFilterBlur;
   }
 }
 

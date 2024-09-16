@@ -51,8 +51,6 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      globals.fs.file('.packages')
-        .writeAsStringSync('\n');
       globals.fs.file(globals.fs.path.join('build', 'app.dill'))
         ..createSync(recursive: true)
         ..writeAsStringSync('ABC');
@@ -1173,9 +1171,6 @@ dependencies:
   ]
 }
 ''');
-    globals.fs.file('.packages').writeAsStringSync('''
-path_provider_linux:/path_provider_linux/lib/
-''');
     final Directory fakePluginDir = globals.fs.directory('path_provider_linux');
     final File pluginPubspec = fakePluginDir.childFile('pubspec.yaml');
     pluginPubspec.createSync(recursive: true);
@@ -1934,18 +1929,58 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
+  testUsingContext('FlutterDevice does not throw when unable to initiate log reader due to VM service disconnection', () async {
+    fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'getVM',
+          error: FakeRPCError(
+            code: RPCErrorCodes.kServerError,
+            error: 'Service connection disposed',
+          ),
+        ),
+      ],
+    );
+    final TestFlutterDevice flutterDevice = TestFlutterDevice(device);
+    flutterDevice.vmService = fakeVmServiceHost!.vmService;
+    await flutterDevice.tryInitLogReader();
+    final BufferLogger logger = globals.logger as BufferLogger;
+    expect(
+      logger.traceText,
+      contains(
+        'VmService.getVm call failed: getVM: (-32000) '
+        'Service connection disposed\n',
+      ),
+    );
+    expect(
+      logger.errorText,
+      contains(
+        'Unable to initiate log reader for deviceFakeDevice, because '
+        'the Flutter VM service connection is closed.\n',
+      ),
+    );
+  }, overrides: <Type, Generator>{
+    Logger: () => BufferLogger.test(),
+    Artifacts: () => Artifacts.test(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
   testUsingContext('Uses existing DDS URI from exception field', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService(logger: testLogger);
-    ddsLauncherCallback = (Uri uri,
-                            {bool enableDevTools = false,
-                            bool enableAuthCodes = true,
-                            bool ipv6 = false, Uri? serviceUri,
-                            List<String> cachedUserTags = const <String>[],
-                            String? google3WorkspaceRoot,
-                            Uri? devToolsServerAddress,
-                          }) {
+    ddsLauncherCallback = ({
+      required Uri remoteVmServiceUri,
+      Uri? serviceUri,
+      bool enableAuthCodes = true,
+      bool serveDevTools = false,
+      Uri? devToolsServerAddress,
+      bool enableServicePortFallback = false,
+      List<String> cachedUserTags = const <String>[],
+      String? dartExecutable,
+      String? google3WorkspaceRoot,
+    }) {
       throw DartDevelopmentServiceException.existingDdsInstance(
         'Existing DDS at http://localhost/existingDdsInMessage.',
         ddsUri: Uri.parse('http://localhost/existingDdsInField'),
@@ -1984,21 +2019,23 @@ flutter:
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService(logger: testLogger);
     final Completer<void>done = Completer<void>();
-    ddsLauncherCallback = (Uri uri,
-                            {bool enableDevTools = false,
-                            bool enableAuthCodes = true,
-                            bool ipv6 = false, Uri? serviceUri,
-                            List<String> cachedUserTags = const <String>[],
-                            String? google3WorkspaceRoot,
-                            Uri? devToolsServerAddress,
-                          }) async {
-      expect(uri, Uri(scheme: 'foo', host: 'bar'));
+    ddsLauncherCallback = ({
+        required Uri remoteVmServiceUri,
+        Uri? serviceUri,
+        bool enableAuthCodes = true,
+        bool serveDevTools = false,
+        Uri? devToolsServerAddress,
+        bool enableServicePortFallback = false,
+        List<String> cachedUserTags = const <String>[],
+        String? dartExecutable,
+        String? google3WorkspaceRoot,
+      }) async {
+      expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isFalse);
-      expect(ipv6, isTrue);
       expect(serviceUri, Uri(scheme: 'http', host: '::1', port: 0));
       expect(cachedUserTags, isEmpty);
       done.complete();
-      return fakeDartDevelopmentServiceInstance;
+      return FakeDartDevelopmentServiceLauncher(uri: remoteVmServiceUri);
     };
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       device,
@@ -2029,19 +2066,19 @@ flutter:
     // See https://github.com/flutter/flutter/issues/72385 for context.
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService(logger: testLogger);
-    ddsLauncherCallback = (
-      Uri uri, {
-      bool enableDevTools = false,
-      bool enableAuthCodes = false,
-      bool ipv6 = false,
-      Uri? serviceUri,
-      List<String> cachedUserTags = const <String>[],
-      String? google3WorkspaceRoot,
-      Uri? devToolsServerAddress,
-    }) {
-      expect(uri, Uri(scheme: 'foo', host: 'bar'));
+    ddsLauncherCallback = ({
+        required Uri remoteVmServiceUri,
+        Uri? serviceUri,
+        bool enableAuthCodes = true,
+        bool serveDevTools = false,
+        Uri? devToolsServerAddress,
+        bool enableServicePortFallback = false,
+        List<String> cachedUserTags = const <String>[],
+        String? dartExecutable,
+        String? google3WorkspaceRoot,
+      }) {
+      expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isTrue);
-      expect(ipv6, isFalse);
       expect(serviceUri, Uri(scheme: 'http', host: '127.0.0.1', port: 0));
       expect(cachedUserTags, isEmpty);
       throw FakeDartDevelopmentServiceException(message: 'No URI');
