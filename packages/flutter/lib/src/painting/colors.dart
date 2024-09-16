@@ -422,6 +422,9 @@ class ColorSwatch<T> extends Color {
   /// Returns an element of the swatch table.
   Color? operator [](T index) => _swatch[index];
 
+  /// Returns the valid keys for accessing operator[].
+  Iterable<T> get keys => _swatch.keys;
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
