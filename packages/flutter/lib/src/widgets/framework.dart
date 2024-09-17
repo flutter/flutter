@@ -6698,7 +6698,7 @@ abstract class RenderObjectElement extends Element {
       // original error in debug mode.
       assert(() {
         try {
-          final String parentDataWidgetType = parentDataWidget.toString();
+          final String parentDataWidgetType = parentDataWidget.toStringShort();
           String errorMessage = 'Incorrect use of ParentDataWidget.\n';
 
           if (parentDataWidgetType == 'Positioned') {
