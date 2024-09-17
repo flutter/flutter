@@ -1085,7 +1085,6 @@ void main() {
       ),
     );
 
-    // Função utilitária para construir páginas
     Widget buildPage(Widget body, {FloatingActionButton? fab}) {
       return Scaffold(
         appBar: AppBar(
@@ -1097,7 +1096,6 @@ void main() {
       );
     }
 
-    // Página inicial
     await tester.pumpWidget(
       MaterialApp(
         home: buildPage(
@@ -1117,14 +1115,11 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // Função para simular o clique fora da TapRegion
-
-    // Tap fora da primeira TapRegion para acionar onTapOutside
+    // Tap outside the first TapRegion to trigger onTapOutside.
     await tapOutside(tester, find.byKey(tapRegion1Key));
     expect(count1, 1);
     expect(count2, 0);
 
-    // Navegar para a página de edição
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
 
@@ -1147,7 +1142,7 @@ void main() {
 }
 
 Future<void> tapOutside(WidgetTester tester, Finder regionFinder, {int times = 1}) async {
-  // Encontra o Scaffold mais próximo da região fornecida
+  // Find the RenderBox of the region.
   final RenderBox renderBox = tester.firstRenderObject(find.byType(Scaffold).last);
   final Offset outsidePoint = renderBox.localToGlobal(Offset.zero) + const Offset(200, 200);
 
