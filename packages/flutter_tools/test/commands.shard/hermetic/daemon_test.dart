@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/preview_device.dart';
@@ -497,6 +498,7 @@ void main() {
     }, overrides: <Type, Generator>{
       AndroidWorkflow: () => FakeAndroidWorkflow(),
       IOSWorkflow: () => FakeIOSWorkflow(),
+      FuchsiaWorkflow: () => FakeFuchsiaWorkflow(),
       WindowsWorkflow: () => FakeWindowsWorkflow(),
     });
 
@@ -1102,6 +1104,13 @@ bool _isConnectedEvent(DaemonMessage message) => message.data['event'] == 'daemo
 
 class FakeWindowsWorkflow extends Fake implements WindowsWorkflow {
   FakeWindowsWorkflow({ this.canListDevices = true });
+
+  @override
+  final bool canListDevices;
+}
+
+class FakeFuchsiaWorkflow extends Fake implements FuchsiaWorkflow {
+  FakeFuchsiaWorkflow({ this.canListDevices = true });
 
   @override
   final bool canListDevices;

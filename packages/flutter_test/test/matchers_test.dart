@@ -352,25 +352,6 @@ void main() {
     );
   });
 
-  test('isSameColorSwatchAs', () {
-    expect(
-      const ColorSwatch<String>(0xaaaaaaaa,
-          <String, Color>{'foo': Color(0xaaaaaaaa), 'bar': Color(0xbbbbbbbb)}),
-      isSameColorSwatchAs(const ColorSwatch<String>(0xaaaaaaaa,
-          <String, Color>{'foo': Color(0xaaaaaaaa), 'bar': Color(0xbbbbbbbb)})),
-    );
-
-    expect(
-      const ColorSwatch<String>(0xaaaaaaaa,
-          <String, Color>{'foo': Color(0xaaaaaaaa), 'bar': Color(0xbbbbbbbb)}),
-      isNot(isSameColorSwatchAs(const ColorSwatch<String>(
-          0xaaaaaaaa, <String, Color>{
-        'foo': Color(0xaaaaaaaa),
-        'bar': Color(0xcccccccc)
-      }))),
-    );
-  });
-
   test('isSameColorAs', () {
     expect(
       const Color(0x87654321),

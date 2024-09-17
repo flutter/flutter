@@ -12,6 +12,7 @@ import 'base/logger.dart';
 import 'base/process.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
+import 'fuchsia/application_package.dart';
 import 'globals.dart' as globals;
 import 'ios/application_package.dart';
 import 'linux/application_package.dart';
@@ -103,8 +104,9 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
             : WindowsApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
-        // Unsupported yet.
-        throw UnimplementedError();
+        return applicationBinary == null
+            ? FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia)
+            : FuchsiaApp.fromPrebuiltApp(applicationBinary);
     }
   }
 }
