@@ -336,7 +336,9 @@ class CupertinoMagnifier extends StatelessWidget {
   /// point offset defined in [kMagnifierAboveFocalPoint].
   final Offset additionalFocalPointOffset;
 
-  /// How "zoomed in" the magnification subject is in the lens.
+  /// The magnification scale for the magnifier.
+  ///
+  /// Defaults to 1.0, which indicates that the magnifier does not apply any magnification.
   ///
   /// The default is 1.0, which is no magnification.
   final double magnificationScale;
