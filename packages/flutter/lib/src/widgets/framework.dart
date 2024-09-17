@@ -6733,10 +6733,6 @@ abstract class RenderObjectElement extends Element {
 
   @override
   void attachRenderObject(Object? newSlot) {
-      print("2222 ${StackTrace.current}");
-
-
-
     assert(_ancestorRenderObjectElement == null);
     _slot = newSlot;
     _ancestorRenderObjectElement = _findAncestorRenderObjectElement();
