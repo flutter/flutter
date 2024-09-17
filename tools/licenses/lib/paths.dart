@@ -175,7 +175,6 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/stb',
   r'flutter/third_party/swiftshader/third_party', // See: https://github.com/flutter/flutter/issues/145726
   r'flutter/third_party/test_shaders', // for tests only
-  r'flutter/third_party/tinygltf',
   r'flutter/third_party/txt/third_party/fonts',
   r'flutter/third_party/vulkan-deps/glslang/LICENSE', // excluded to make sure we don't accidentally apply it as a default license
   r'flutter/third_party/vulkan-deps/glslang/src/LICENSE.txt', // redundant with licenses inside files
