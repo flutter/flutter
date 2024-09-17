@@ -448,7 +448,7 @@ void main() {
     ));
   });
 
-  test('LinearGradient withOpacity test - preserves transform', () {
+  test('LinearGradient withOpacity() preserves transform', () {
     const LinearGradient testGradient = LinearGradient(
       begin: Alignment.bottomRight,
       end: Alignment.topCenter,
