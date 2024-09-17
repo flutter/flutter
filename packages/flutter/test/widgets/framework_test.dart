@@ -1578,7 +1578,8 @@ void main() {
     await tester.pumpWidget(
       SizedBox(
         key: const Key('container'),
-        child: Flexible( // Flexible should not be used directly in a Container or other inappropriate parents
+        // Flexible should only be used inside Flex widgets, such as a Column or Row.
+        child: Flexible(
           child: Container(),
         )
       ),
