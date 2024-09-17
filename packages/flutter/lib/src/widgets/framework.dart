@@ -6698,8 +6698,8 @@ abstract class RenderObjectElement extends Element {
       // original error in debug mode.
       assert(() {
         try {
-          String errorMessage = "Incorrect use of ParentDataWidget.\n";
-          String parentDataWidgetType = parentDataWidget.toString();
+          final String parentDataWidgetType = parentDataWidget.toString();
+          String errorMessage = 'Incorrect use of ParentDataWidget.\n';
 
           if (parentDataWidgetType == 'Positioned') {
             errorMessage += 'The widget `Positioned` must be a descendent of a `Stack` widget.\n';

@@ -1577,10 +1577,10 @@ void main() {
   testWidgets('Incorrect use of ParentDataWidget shows a useful error message', (WidgetTester tester) async {
     await tester.pumpWidget(
       const SizedBox(
-        key: const Key('container'),
+        key: Key('container'),
         // Flexible should only be used inside Flex widgets, such as a Column or Row.
         child: Flexible(
-          child: const SizedBox(),
+          child: SizedBox(),
         )
       ),
     );
