@@ -368,6 +368,7 @@ class CupertinoMagnifier extends StatelessWidget {
           shadows: shadows,
         ),
         clipBehavior: clipBehavior,
+        magnificationScale: magnificationScale,
       ),
     );
   }
