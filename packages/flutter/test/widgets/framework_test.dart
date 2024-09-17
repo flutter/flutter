@@ -1591,11 +1591,9 @@ void main() {
       isFlutterError.having(
         (FlutterError e) => e.message,
         'message',
-        contains(
-          '''
-Incorrect use of ParentDataWidget.
-The widget `Flexible` must be a direct child of a `Row`, `Column`, or `Flex` widget.
-'''
+        startsWith(
+          'Incorrect use of ParentDataWidget.\n'
+          'The widget `Flexible` must be a direct child of a `Row`, `Column`, or `Flex` widget.\n'
         )
       )
     );
