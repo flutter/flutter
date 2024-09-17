@@ -1053,7 +1053,7 @@ void main() {
     ));
   });
 
-  test('SweepGradient withOpacity test - preserves transform', () {
+  test('SweepGradient withOpacity() preserves transform', () {
     const SweepGradient testGradient = SweepGradient(
       center: Alignment.topLeft,
       endAngle: math.pi / 2,
