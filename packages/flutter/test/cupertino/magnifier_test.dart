@@ -263,5 +263,27 @@ void main() {
         expect(magnifierController.overlayEntry, isNotNull);
       });
     });
+
+    group('magnificationScale',(){
+      testWidgets('Throw assertion error when magnificationScale is zero', (WidgetTester tester) async {
+        expect((){
+          MaterialApp(
+            home: Scaffold(
+              body: CupertinoMagnifier(magnificationScale: 0,)
+            ),
+          );
+        }, throwsAssertionError);
+      });
+      testWidgets('Throw assertion error when magnificationScale is negative', (WidgetTester tester) async {
+        expect((){
+          MaterialApp(
+            home: Scaffold(
+              body: CupertinoMagnifier(magnificationScale: -1,)
+            ),
+          );
+        }, throwsAssertionError);
+      });
+    });
+
   });
 }
