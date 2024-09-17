@@ -1133,7 +1133,7 @@ class SearchController extends TextEditingController {
   // it controls.
   _SearchAnchorState? _anchor;
 
-  // Whether this controller is used by search view.
+  // Whether this controller is being used by search view.
   bool _usedByView = false;
   // Whether the search view manages the disposal of this controller.
   bool _disposedByView = false;
