@@ -6699,11 +6699,12 @@ abstract class RenderObjectElement extends Element {
       assert(() {
         try {
           String errorMessage = "Incorrect use of ParentDataWidget.\n";
+          String parentDataWidgetType = parentDataWidget.toString();
 
-          if (parentDataWidget.toStringShort() == 'Positioned') {
+          if (parentDataWidgetType == 'Positioned') {
             errorMessage += 'The widget `Positioned` must be a descendent of a `Stack` widget.\n';
-          } else {
-            errorMessage += 'The widget `${parentDataWidget.toStringShort()}` must be a direct child of a `Row`, `Column`, or `Flex` widget.\n';
+          } else if (parentDataWidgetType == 'Flexible' || parentDataWidgetType == 'Expanded') {
+            errorMessage += 'The widget `$parentDataWidget` must be a direct child of a `Row`, `Column`, or `Flex` widget.\n';
           }
 
           throw FlutterError.fromParts(<DiagnosticsNode>[
