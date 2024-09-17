@@ -436,6 +436,7 @@ void main() {
     expect(greens1.hashCode, greens2.hashCode);
     expect(greens1['2259 C'], const Color(0xFF027223));
     expect(greens1.value, 0xFF027223);
+    expect(listEquals(greens1.keys.toList(), greens2.keys.toList()), isTrue);
   });
 
   test('ColorSwatch.lerp', () {
