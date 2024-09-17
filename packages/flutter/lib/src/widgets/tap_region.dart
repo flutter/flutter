@@ -12,10 +12,10 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/widgets/navigator.dart';
 
 import 'editable_text.dart';
 import 'framework.dart';
+import 'navigator.dart';
 
 // Enable if you want verbose logging about tap region changes.
 const bool _kDebugTapRegion = false;
@@ -276,7 +276,10 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior implement
   @override
   void unregisterTapRegion(RenderTapRegion region) {
     assert(_tapRegionDebug('Region $region unregistered.'));
-    assert(_registeredRegions.contains(region));
+    if (!_registeredRegions.contains(region)) {
+      assert(_tapRegionDebug('Region $region was not registered.'));
+      return;
+    }
     _registeredRegions.remove(region);
     if (region.groupId != null) {
       assert(_groupIdToRegions.containsKey(region.groupId));
