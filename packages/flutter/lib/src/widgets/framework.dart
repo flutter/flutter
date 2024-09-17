@@ -6704,7 +6704,7 @@ abstract class RenderObjectElement extends Element {
           if (parentDataWidgetType == 'Positioned') {
             errorMessage += 'The widget `Positioned` must be a descendent of a `Stack` widget.\n';
           } else if (parentDataWidgetType == 'Flexible' || parentDataWidgetType == 'Expanded') {
-            errorMessage += 'The widget `$parentDataWidget` must be a direct child of a `Row`, `Column`, or `Flex` widget.\n';
+            errorMessage += 'The widget `$parentDataWidgetType` must be a direct child of a `Row`, `Column`, or `Flex` widget.\n';
           }
 
           throw FlutterError.fromParts(<DiagnosticsNode>[

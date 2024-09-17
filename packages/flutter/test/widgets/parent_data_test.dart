@@ -507,6 +507,7 @@ void main() {
       exception.toString(),
       startsWith(
         'Incorrect use of ParentDataWidget.\n'
+        'The widget `Expanded` must be a direct child of a `Row`, `Column`, or `Flex` widget.\n'
         'The ParentDataWidget Expanded(flex: 1) wants to apply ParentData of type '
         'FlexParentData to a RenderObject, which has been set up to accept ParentData of '
         'incompatible type StackParentData.\n'
