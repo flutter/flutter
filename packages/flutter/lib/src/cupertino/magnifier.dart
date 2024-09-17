@@ -258,7 +258,7 @@ class CupertinoMagnifier extends StatelessWidget {
     this.borderSide =
         const BorderSide(color: Color.fromARGB(255, 232, 232, 232)),
     this.inOutAnimation,
-    this.magnificationScale = 1,
+    this.magnificationScale = 1.0,
   }) : assert(magnificationScale != 0,
             'Magnification scale of 0 results in undefined behavior.');
 
