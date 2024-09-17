@@ -186,6 +186,10 @@ class TapRegionNavigatorObserver extends NavigatorObserver {
 
     final List<RenderTapRegion> regions = _findTapRegionsInElementTree(context);
 
+    if (regions.isEmpty) {
+      return;
+    }
+
     for (final RenderTapRegion region in regions) {
       if (!registry.registeredRegions.contains(region)) {
         registry.registerTapRegion(region);
