@@ -1574,24 +1574,22 @@ void main() {
     expect(RawKeyboard.instance.keyEventHandler, same(rawKeyEventHandler));
   });
 
-  // testWidgets('Incorrect use of ParentDataWidget shows a useful error message', (WidgetTester tester) async {
-  //   await tester.pumpWidget(
-  //     Container(
-  //       key: const Key('container'),
-  //       child: Flexible(
-  //         child: Container(),
-  //       ) // Flexible should not be used directly in a Container or other inappropriate parents
-  //     ),
-  //   );
+  testWidgets('Incorrect use of ParentDataWidget shows a useful error message', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Container(
+        key: const Key('container'),
+        child: Flexible(
+          child: Container(),
+        ) // Flexible should not be used directly in a Container or other inappropriate parents
+      ),
+    );
 
-  //   // await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
 
-  //   final dynamic exception = tester.takeException();
+    final dynamic exception = tester.takeException();
 
-
-  //   // Expect a FlutterError to be thrown
-  //   expect(exception, isFlutterError);
-  // });
+    expect(exception, isFlutterError);
+  });
 
   testWidgets('Can access debugFillProperties without _LateInitializationError', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
