@@ -221,11 +221,27 @@ const Matcher isInCard = _IsInCard();
 ///  * [isInCard], the opposite.
 const Matcher isNotInCard = _IsNotInCard();
 
+/// Default threshold for [isSameColorAs] and [isSameColorSwatchAs].
+const double colorEpsilon = 0.004;
+
+/// Asserts that the object represents the same color swatch as [color] when
+/// used to paint.
+///
+/// Specifically this matcher checks the object is of type [ColorSwatch] and its
+/// color components fall below the delta specified by [threshold].
+///
+/// Note: This doesn't recurse into the swatches [Color] type, instead treating
+/// them as [Color]s.
+Matcher isSameColorSwatchAs<T>(ColorSwatch<T> color,
+    {double threshold = colorEpsilon}) {
+  return _ColorSwatchMatcher<T>(color, threshold);
+}
+
 /// Asserts that the object represents the same color as [color] when used to paint.
 ///
 /// Specifically this matcher checks the object is of type [Color] and its color
 /// components fall below the delta specified by [threshold].
-Matcher isSameColorAs(Color color, {double threshold = 0.004}) {
+Matcher isSameColorAs(Color color, {double threshold = colorEpsilon}) {
   return _ColorMatcher(color, threshold);
 }
 
@@ -2136,6 +2152,39 @@ class _CoversSameAreaAs extends Matcher {
   @override
   Description describe(Description description) =>
     description.add('covers expected area and only expected area');
+}
+
+class _ColorSwatchMatcher<T> extends Matcher {
+  _ColorSwatchMatcher(this._target, this._threshold);
+
+  final ColorSwatch<T> _target;
+  final double _threshold;
+
+  @override
+  Description describe(Description description) {
+    return description.add('matches color swatch "$_target" with threshold "$_threshold".');
+  }
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item is ColorSwatch) {
+      final _ColorMatcher matcher = _ColorMatcher(_target, _threshold);
+      if (!matcher.matches(item, matchState)) {
+        return false;
+      }
+
+      for (final T key in _target.keys) {
+        final _ColorMatcher matcher = _ColorMatcher(_target[key]!, _threshold);
+        if (!matcher.matches(item[key], matchState)) {
+          return false;
+        }
+      }
+
+      return item.keys.length == _target.keys.length;
+    } else {
+      return false;
+    }
+  }
 }
 
 class _ColorMatcher extends Matcher {
