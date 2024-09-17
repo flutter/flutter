@@ -367,7 +367,7 @@ abstract class SearchDelegate<T> {
   /// Defaults to the default value specified in [TextField].
   final TextInputType? keyboardType;
 
-  /// {@macro flutter.services.TextInputConfiguration.autocorrect}
+  /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
 
   /// {@macro flutter.services.TextInputConfiguration.enableSuggestions}
