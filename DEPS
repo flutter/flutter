@@ -234,7 +234,6 @@ vars = {
   "upstream_term_glyph": "https://github.com/dart-lang/term_glyph.git",
   "upstream_test_reflective_loader": "https://github.com/dart-lang/test_reflective_loader.git",
   "upstream_test": "https://github.com/dart-lang/test.git",
-  "upstream_tinygltf": "https://github.com/syoyo/tinygltf.git",
   "upstream_typed_data": "https://github.com/dart-lang/typed_data.git",
   "upstream_usage": "https://github.com/dart-lang/usage.git",
   "upstream_vector_math": "https://github.com/google/vector_math.dart.git",
@@ -714,9 +713,6 @@ deps = {
 
   'src/flutter/third_party/imgui':
   Var('flutter_git') + '/third_party/imgui.git' + '@' + '3ea0fad204e994d669f79ed29dcaf61cd5cb571d',
-
-  'src/flutter/third_party/tinygltf':
-  Var('flutter_git') + '/third_party/tinygltf.git' + '@' + '9bb5806df4055ac973b970ba5b3e27ce27d98148',
 
   'src/flutter/third_party/json':
   Var('flutter_git') + '/third_party/json.git' + '@' + '17d9eacd248f58b73f4d1be518ef649fe2295642',
