@@ -339,8 +339,6 @@ class CupertinoMagnifier extends StatelessWidget {
   /// The magnification scale for the magnifier.
   ///
   /// Defaults to 1.0, which indicates that the magnifier does not apply any magnification.
-  ///
-  /// The default is 1.0, which is no magnification.
   final double magnificationScale;
 
   @override
