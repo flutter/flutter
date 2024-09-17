@@ -9,6 +9,7 @@
 #include "flutter/lib/gpu/formats.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "fml/make_copyable.h"
+#include "impeller/core/platform.h"
 #include "tonic/converter/dart_converter.h"
 
 namespace flutter {
@@ -104,4 +105,9 @@ extern int InternalFlutterGpu_Context_GetDefaultDepthStencilFormat(
       wrapper->GetContext()
           ->GetCapabilities()
           ->GetDefaultDepthStencilFormat()));
+}
+
+extern int InternalFlutterGpu_Context_GetMinimumUniformByteAlignment(
+    flutter::gpu::Context* wrapper) {
+  return impeller::DefaultUniformAlignment();
 }
