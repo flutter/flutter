@@ -791,7 +791,7 @@ void main() {
     ));
   });
 
-  test('RadialGradient withOpacity test - preserves transform', () {
+  test('RadialGradient withOpacity() preserves transform', () {
     const RadialGradient testGradient = RadialGradient(
       center: Alignment.topLeft,
       focal: Alignment.centerLeft,
