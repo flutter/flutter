@@ -221,6 +221,9 @@ const Matcher isInCard = _IsInCard();
 ///  * [isInCard], the opposite.
 const Matcher isNotInCard = _IsNotInCard();
 
+/// Default threshold for [isSameColorAs] and [isSameColorSwatchAs].
+const double colorEpsilon = 0.004;
+
 /// Asserts that the object represents the same color swatch as [color] when
 /// used to paint.
 ///
@@ -229,7 +232,8 @@ const Matcher isNotInCard = _IsNotInCard();
 ///
 /// Note: This doesn't recurse into the swatches [Color] type, instead treating
 /// them as [Color]s.
-Matcher isSameColorSwatchAs<T>(ColorSwatch<T> color, {double threshold = 0.004}) {
+Matcher isSameColorSwatchAs<T>(ColorSwatch<T> color,
+    {double threshold = colorEpsilon}) {
   return _ColorSwatchMatcher<T>(color, threshold);
 }
 
@@ -237,7 +241,7 @@ Matcher isSameColorSwatchAs<T>(ColorSwatch<T> color, {double threshold = 0.004})
 ///
 /// Specifically this matcher checks the object is of type [Color] and its color
 /// components fall below the delta specified by [threshold].
-Matcher isSameColorAs(Color color, {double threshold = 0.004}) {
+Matcher isSameColorAs(Color color, {double threshold = colorEpsilon}) {
   return _ColorMatcher(color, threshold);
 }
 
@@ -2176,7 +2180,7 @@ class _ColorSwatchMatcher<T> extends Matcher {
         }
       }
 
-      return true;
+      return item.keys.length == _target.keys.length;
     } else {
       return false;
     }
