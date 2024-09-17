@@ -403,17 +403,19 @@ class _SearchAnchorState extends State<SearchAnchor> {
   @override
   void dispose() {
     widget.searchController?._detach(this);
-    _internalSearchController?._detach(this);
-    if (_route != null && _route!.isActive) {
-      _route!.navigator!.removeRoute(_route!);
+    final _SearchViewRoute? route = _route;
+    final SearchController? internalController = _internalSearchController;
+    if (route != null && route.isActive) {
+      route.navigator!.removeRoute(route);
     }
-    // If the search controller is currently being used by the search view,
-    // then it will be disposed by search view instead of here.
-    if (_internalSearchController != null) {
-      if (!_internalSearchController!._usedByView) {
-        _internalSearchController!.dispose();
+    if (internalController != null) {
+      internalController._detach(this);
+      // If the search controller is currently being used by the search view,
+      // then it will be disposed by search view instead of here.
+      if (internalController._usedByView) {
+        internalController._disposedByView = true;
       } else {
-        _internalSearchController!._disposedByView = true;
+        internalController.dispose();
       }
     }
     super.dispose();
@@ -1131,7 +1133,7 @@ class SearchController extends TextEditingController {
   // it controls.
   _SearchAnchorState? _anchor;
 
-  // Whether this controller is being used by search view.
+  // Whether this controller is used by search view.
   bool _usedByView = false;
   // Whether the search view manages the disposal of this controller.
   bool _disposedByView = false;
