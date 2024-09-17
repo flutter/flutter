@@ -50,20 +50,20 @@ class WebTemplate {
       return '';
     }
 
-    if (!baseHref.startsWith('/')) {
-      throw ToolExit(
-        'Error: The base href in "web/index.html" must be absolute (i.e. start '
-        'with a "/"), but found: `${baseElement!.outerHtml}`.\n'
-        '$_kBasePathExample',
-      );
-    }
+    // if (!baseHref.startsWith('/')) {
+    //   throw ToolExit(
+    //     'Error: The base href in "web/index.html" must be absolute (i.e. start '
+    //     'with a "/"), but found: `${baseElement!.outerHtml}`.\n'
+    //     '$_kBasePathExample',
+    //   );
+    // }
 
-    if (!baseHref.endsWith('/')) {
-      throw ToolExit(
-        'Error: The base href in "web/index.html" must end with a "/", but found: `${baseElement!.outerHtml}`.\n'
-        '$_kBasePathExample',
-      );
-    }
+    // if (!baseHref.endsWith('/')) {
+    //   throw ToolExit(
+    //     'Error: The base href in "web/index.html" must end with a "/", but found: `${baseElement!.outerHtml}`.\n'
+    //     '$_kBasePathExample',
+    //   );
+    // }
 
     return stripLeadingSlash(stripTrailingSlash(baseHref));
   }

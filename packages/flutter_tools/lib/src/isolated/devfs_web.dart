@@ -1243,7 +1243,7 @@ String? _stripBasePath(String path, String basePath) {
     path = path.substring(basePath.length);
   } else {
     // The given path isn't under base path, return null to indicate that.
-    return null;
+    return path;
   }
   return stripLeadingSlash(path);
 }
