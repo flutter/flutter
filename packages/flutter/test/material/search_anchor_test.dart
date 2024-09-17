@@ -3420,9 +3420,7 @@ void main() {
     });
   });
 
-  testWidgets(
-    'SearchAnchor does not dispose external SeachController',
-    (WidgetTester tester) async {
+  testWidgets('SearchAnchor does not dispose external SeachController', (WidgetTester tester) async {
       final SearchController controller = SearchController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
@@ -3458,7 +3456,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/155180.
-  testWidgets('SearchAnchor close menu when disposed', (WidgetTester tester) async {
+  testWidgets('SearchAnchor close gracefully closes its search view when disposed', (WidgetTester tester) async {
     bool disposed = false;
     late StateSetter setState;
     await tester.pumpWidget(
@@ -3496,13 +3494,13 @@ void main() {
       disposed = true;
     });
     await tester.pump();
-    // The search menu starts to close, but still disposed yet.
+    // The search menu starts to close but is not disposed yet.
     final EditableText editableText = tester.widget(find.byType(EditableText));
     final TextEditingController controller = editableText.controller;
     ChangeNotifier.debugAssertNotDisposed(controller);
 
     await tester.pumpAndSettle();
-    // The search menu and the interal search controller is now disposed.
+    // The search menu and the internal search controller are now disposed.
     expect(tester.takeException(), isNull);
     expect(find.byType(TextField), findsNothing);
     FlutterError? error;
