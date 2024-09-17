@@ -1576,19 +1576,29 @@ void main() {
 
   testWidgets('Incorrect use of ParentDataWidget shows a useful error message', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Container(
+      SizedBox(
         key: const Key('container'),
-        child: Flexible(
+        child: Flexible( // Flexible should not be used directly in a Container or other inappropriate parents
           child: Container(),
-        ) // Flexible should not be used directly in a Container or other inappropriate parents
+        )
       ),
     );
 
     await tester.pumpAndSettle();
 
-    final dynamic exception = tester.takeException();
-
-    expect(exception, isFlutterError);
+    expect(
+      tester.takeException(),
+      isFlutterError.having(
+        (FlutterError e) => e.message,
+        'message',
+        contains(
+          '''
+Incorrect use of ParentDataWidget.
+The widget `Flexible` must be a direct child of a `Row`, `Column`, or `Flex` widget.
+'''
+        )
+      )
+    );
   });
 
   testWidgets('Can access debugFillProperties without _LateInitializationError', (WidgetTester tester) async {

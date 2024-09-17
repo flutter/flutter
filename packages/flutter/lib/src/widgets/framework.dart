@@ -6699,9 +6699,10 @@ abstract class RenderObjectElement extends Element {
       assert(() {
         try {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('Incorrect use of ParentDataWidget. The widget `${
-              parentDataWidget.runtimeType
-            }` must be a direct child of a `Row`, `Column`, or `Flex` widget.'),
+            ErrorSummary('''
+Incorrect use of ParentDataWidget.
+The widget `${parentDataWidget.toStringShort()}` must be a direct child of a `Row`, `Column`, or `Flex` widget.
+'''),
             ...parentDataWidget._debugDescribeIncorrectParentDataType(
               parentData: renderObject.parentData,
               parentDataCreator:
