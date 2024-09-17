@@ -3883,6 +3883,37 @@ void main() {
   });
 
   testWidgets(
+    'does not request keyboard after the keyboard changes the selection',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/154156.
+      final Widget widget = MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          style: Typography.material2018().black.titleMedium!,
+          cursorColor: Colors.blue,
+          focusNode: focusNode,
+          controller: controller,
+        ),
+      );
+      controller.value = const TextEditingValue(text: '123', selection: TextSelection.collapsed(offset: 0));
+      await tester.pumpWidget(widget);
+
+      focusNode.requestFocus();
+      await tester.pump();
+
+      assert(focusNode.hasFocus);
+      tester.testTextInput.log.clear();
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      state.userUpdateTextEditingValue(const TextEditingValue(text: '123', selection: TextSelection.collapsed(offset: 1)), SelectionChangedCause.keyboard);
+
+      expect(
+        tester.testTextInput.log.map((MethodCall m) => m.method),
+        isNot(contains('TextInput.show')),
+      );
+  });
+
+  testWidgets(
     'iOS autocorrection rectangle should appear on demand and dismiss when the text changes or when focus is lost',
     (WidgetTester tester) async {
       const Color rectColor = Color(0xFFFF0000);
@@ -10396,14 +10427,8 @@ void main() {
       'TextInput.setEditingState',
       'TextInput.show',
       'TextInput.setCaretRect',
-      'TextInput.show',
     ];
-    expect(tester.testTextInput.log.length, logOrder.length);
-    int index = 0;
-    for (final MethodCall m in tester.testTextInput.log) {
-      expect(m.method, logOrder[index]);
-      index++;
-    }
+    expect(tester.testTextInput.log.map((MethodCall m) => m.method), logOrder);
     expect(tester.testTextInput.editingState!['text'], 'flutter is the best!');
   });
 
@@ -10638,7 +10663,6 @@ void main() {
 
     // setEditingState is called when remote value modified by the formatter.
     state.updateEditingValue(collapsedAtEnd('I will be modified by the formatter.'));
-    expect(log.length, 2);
     expect(log, contains(matchesMethodCall(
       'TextInput.setEditingState',
       args: allOf(
@@ -10649,7 +10673,6 @@ void main() {
     log.clear();
 
     state.updateEditingValue(collapsedAtEnd('I will be modified by the formatter.'));
-    expect(log.length, 2);
     expect(log, contains(matchesMethodCall(
       'TextInput.setEditingState',
       args: allOf(
@@ -13429,6 +13452,11 @@ void main() {
       selection: TextSelection.collapsed(offset: textA.length),
     );
 
+    const TextEditingValue textASelected = TextEditingValue(
+      text: textA,
+      selection: TextSelection(baseOffset: 0, extentOffset: textA.length),
+    );
+
     const TextEditingValue textABCollapsedAtEnd = TextEditingValue(
       text: textAB,
       selection: TextSelection.collapsed(offset: textAB.length),
@@ -13438,6 +13466,12 @@ void main() {
       text: textAC,
       selection: TextSelection.collapsed(offset: textAC.length),
     );
+
+    bool isDeskop() {
+      return debugDefaultTargetPlatformOverride == TargetPlatform.macOS
+          || debugDefaultTargetPlatformOverride == TargetPlatform.windows
+          || debugDefaultTargetPlatformOverride == TargetPlatform.linux;
+    }
 
     testWidgets('Should have no effect on an empty and non-focused field', (WidgetTester tester) async {
       await tester.pumpWidget(boilerplate());
@@ -13621,7 +13655,7 @@ void main() {
       focusNode.requestFocus();
       await tester.pump();
       await waitForThrottling(tester);
-      expect(controller.value, textACollapsedAtEnd);
+      expect(controller.value, isDeskop() ? textASelected : textACollapsedAtEnd);
 
       // Insert some text.
       await tester.enterText(find.byType(EditableText), textAB);
@@ -13630,7 +13664,7 @@ void main() {
       // Undo the insertion without waiting for the throttling delay.
       await sendUndo(tester);
       expect(controller.value.selection.isValid, true);
-      expect(controller.value, textACollapsedAtEnd);
+      expect(controller.value, isDeskop() ? textASelected : textACollapsedAtEnd);
 
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
@@ -13645,7 +13679,7 @@ void main() {
       await tester.pump();
       await sendUndo(tester);
       await waitForThrottling(tester);
-      expect(controller.value, textACollapsedAtEnd);
+      expect(controller.value, isDeskop() ? textASelected : textACollapsedAtEnd);
 
       // Insert some text.
       await tester.enterText(find.byType(EditableText), textAB);
@@ -13655,7 +13689,7 @@ void main() {
       await sendUndo(tester);
 
       // Initial text should have been recorded and restored.
-      expect(controller.value, textACollapsedAtEnd);
+      expect(controller.value, isDeskop() ? textASelected : textACollapsedAtEnd);
 
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
@@ -16675,6 +16709,10 @@ void main() {
 
   group('selection behavior when receiving focus', () {
     testWidgets('tabbing between fields', (WidgetTester tester) async {
+      final bool isDesktop = debugDefaultTargetPlatformOverride == TargetPlatform.macOS
+          || debugDefaultTargetPlatformOverride == TargetPlatform.windows
+          || debugDefaultTargetPlatformOverride == TargetPlatform.linux;
+
       final TextEditingController controller1 = TextEditingController();
       addTearDown(controller1.dispose);
       final TextEditingController controller2 = TextEditingController();
@@ -16734,7 +16772,7 @@ void main() {
       expect(focusNode2.hasFocus, isFalse);
       expect(
         controller1.selection,
-        kIsWeb
+        kIsWeb || isDesktop
           ? TextSelection(
               baseOffset: 0,
               extentOffset: controller1.text.length,
@@ -16791,7 +16829,7 @@ void main() {
       expect(focusNode2.hasFocus, isFalse);
       expect(
         controller1.selection,
-        kIsWeb
+        kIsWeb || isDesktop
           ? TextSelection(
               baseOffset: 0,
               extentOffset: controller1.text.length,
@@ -16812,7 +16850,7 @@ void main() {
           offset: controller2.text.length - 1,
         ),
       );
-    });
+    }, variant: TargetPlatformVariant.all());
 
     testWidgets('Selection is updated when the field has focus and the new selection is invalid', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/120631.

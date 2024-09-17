@@ -4,6 +4,8 @@
 
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
+@Tags(<String>['reduced-test-set'])
+library;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -1122,6 +1124,86 @@ void main() {
         ),
     );
   }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+
+  testWidgets('SegmentedButton vertical aligned children', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(
+                  value: 0,
+                  label: Text('Option 0'),
+                ),
+                ButtonSegment<int>(
+                  value: 1,
+                  label: Text('Option 1'),
+                ),
+                ButtonSegment<int>(
+                  value: 2,
+                  label: Text('Option 2'),
+                ),
+                ButtonSegment<int>(
+                  value: 3,
+                  label: Text('Option 3'),
+                ),
+              ],
+              onSelectionChanged: (Set<int> selected) {},
+              selected: const <int>{-1}, // Prevent any of ButtonSegment to be selected
+              direction: Axis.vertical,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Rect? previewsChildRect;
+    for (int i = 0; i <= 3; i++) {
+      final Rect currentChildRect = tester.getRect(find.widgetWithText(TextButton, 'Option $i'));
+      if (previewsChildRect != null) {
+        expect(currentChildRect.left, previewsChildRect.left);
+        expect(currentChildRect.right, previewsChildRect.right);
+        expect(currentChildRect.top, previewsChildRect.top + previewsChildRect.height);
+      }
+      previewsChildRect = currentChildRect;
+    }
+  });
+
+
+  testWidgets('SegmentedButton vertical aligned golden image', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: RepaintBoundary(
+              key: key,
+              child: SegmentedButton<int>(
+                segments: const <ButtonSegment<int>>[
+                  ButtonSegment<int>(
+                    value: 0,
+                    label: Text('Option 0'),
+                  ),
+                  ButtonSegment<int>(
+                    value: 1,
+                    label: Text('Option 1'),
+                  ),
+                ],
+                selected: const <int>{0}, // Prevent any of ButtonSegment to be selected
+                direction: Axis.vertical,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('segmented_button_test_vertical.png'),
+    );
+  });
 }
 
 Set<MaterialState> enabled = const <MaterialState>{};
