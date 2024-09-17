@@ -291,6 +291,7 @@ static sk_sp<DisplayList> MaskBlurVariantTest(
   builder.Scale(test_context.GetContentScale().x,
                 test_context.GetContentScale().y);
   builder.Scale(0.8f, 0.8f);
+  builder.Translate(50.f, 50.f);
 
   DlPaint draw_paint;
   draw_paint.setColor(
