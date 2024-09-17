@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Flutter GPU API tests.
+// The flutter_gpu package is located at //flutter/impeller/lib/gpu.
+
 // ignore_for_file: avoid_relative_lib_imports
 
 import 'dart:typed_data';
@@ -10,9 +13,28 @@ import 'dart:ui' as ui;
 import 'package:test/test.dart';
 
 import '../../lib/gpu/lib/gpu.dart' as gpu;
+
+import 'goldens.dart';
 import 'impeller_enabled.dart';
 
-void main() {
+ByteData float32(List<double> values) {
+  return Float32List.fromList(values).buffer.asByteData();
+}
+
+gpu.RenderPipeline createUnlitRenderPipeline() {
+  final gpu.ShaderLibrary? library =
+      gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+  assert(library != null);
+  final gpu.Shader? vertex = library!['UnlitVertex'];
+  assert(vertex != null);
+  final gpu.Shader? fragment = library['UnlitFragment'];
+  assert(fragment != null);
+  return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
+}
+
+void main() async {
+  final ImageComparer comparer = await ImageComparer.create();
+
   // TODO(131346): Remove this once we migrate the Dart GPU API into this space.
   test('smoketest', () async {
     final int result = gpu.testProc();
@@ -185,5 +207,51 @@ void main() {
           contains(
               'Only shader readable Flutter GPU textures can be used as UI Images'));
     }
+  }, skip: !impellerEnabled);
+
+  test('Can render triangle', () async {
+    final gpu.Texture? renderTexture =
+        gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 100, 100);
+    assert(renderTexture != null);
+
+    final gpu.CommandBuffer commandBuffer =
+        gpu.gpuContext.createCommandBuffer();
+
+    final gpu.RenderTarget renderTarget = gpu.RenderTarget.singleColor(
+      gpu.ColorAttachment(texture: renderTexture!),
+    );
+    final gpu.RenderPass encoder = commandBuffer.createRenderPass(renderTarget);
+
+    final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+    encoder.bindPipeline(pipeline);
+
+    // Configure blending with defaults (just to test the bindings).
+    encoder.setColorBlendEnable(true);
+    encoder.setColorBlendEquation(gpu.ColorBlendEquation());
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BufferView vertices = transients.emplace(float32(<double>[
+      -0.5, 0.5, //
+      0.0, -0.5, //
+      0.5, 0.5, //
+    ]));
+    final gpu.BufferView vertInfoData = transients.emplace(float32(<double>[
+      1, 0, 0, 0, // mvp
+      0, 1, 0, 0, // mvp
+      0, 0, 1, 0, // mvp
+      0, 0, 0, 1, // mvp
+      0, 1, 0, 1, // color
+    ]));
+    encoder.bindVertexBuffer(vertices, 3);
+
+    final gpu.UniformSlot vertInfo =
+        pipeline.vertexShader.getUniformSlot('VertInfo');
+    encoder.bindUniform(vertInfo, vertInfoData);
+    encoder.draw();
+
+    commandBuffer.submit();
+
+    final ui.Image image = renderTexture.asImage();
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
   }, skip: !impellerEnabled);
 }
