@@ -54,8 +54,6 @@ source_set("gpu") {
       "shader.h",
       "shader_library.cc",
       "shader_library.h",
-      "smoketest.cc",
-      "smoketest.h",
       "texture.cc",
       "texture.h",
     ]

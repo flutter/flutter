@@ -35,20 +35,6 @@ gpu.RenderPipeline createUnlitRenderPipeline() {
 void main() async {
   final ImageComparer comparer = await ImageComparer.create();
 
-  // TODO(131346): Remove this once we migrate the Dart GPU API into this space.
-  test('smoketest', () async {
-    final int result = gpu.testProc();
-    expect(result, 1);
-
-    final String? message = gpu.testProcWithCallback((int result) {
-      expect(result, 1234);
-    });
-    expect(message, null);
-
-    final gpu.FlutterGpuTestClass a = gpu.FlutterGpuTestClass();
-    a.coolMethod(9847);
-  });
-
   test('gpu.context throws exception for incompatible embedders', () async {
     try {
       // ignore: unnecessary_statements
