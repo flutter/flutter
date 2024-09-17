@@ -99,3 +99,12 @@ bool InternalFlutterGpu_DeviceBuffer_Overwrite(
   return device_buffer->Overwrite(tonic::DartByteData(source_byte_data),
                                   destination_offset_in_bytes);
 }
+
+bool InternalFlutterGpu_DeviceBuffer_Flush(
+    flutter::gpu::DeviceBuffer* device_buffer,
+    int offset_in_bytes,
+    int size_in_bytes) {
+  device_buffer->GetBuffer()->Flush(
+      impeller::Range(offset_in_bytes, size_in_bytes));
+  return true;
+}

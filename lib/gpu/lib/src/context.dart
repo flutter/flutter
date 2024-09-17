@@ -40,6 +40,12 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return PixelFormat.values[_getDefaultDepthStencilFormat()];
   }
 
+  /// The minimum alignment required when referencing uniform blocks stored in a
+  /// `DeviceBuffer`.
+  int get minimumUniformByteAlignment {
+    return _getMinimumUniformByteAlignment();
+  }
+
   /// Allocates a new region of GPU-resident memory.
   ///
   /// The [storageMode] must be either [StorageMode.hostVisible] or
@@ -124,6 +130,10 @@ base class GpuContext extends NativeFieldWrapperClass1 {
   @Native<Int Function(Pointer<Void>)>(
       symbol: 'InternalFlutterGpu_Context_GetDefaultDepthStencilFormat')
   external int _getDefaultDepthStencilFormat();
+
+  @Native<Int Function(Pointer<Void>)>(
+      symbol: 'InternalFlutterGpu_Context_GetMinimumUniformByteAlignment')
+  external int _getMinimumUniformByteAlignment();
 }
 
 /// The default graphics context.

@@ -93,10 +93,14 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 with Buffer {
       symbol: 'InternalFlutterGpu_DeviceBuffer_InitializeWithHostData')
   external bool _initializeWithHostData(GpuContext gpuContext, ByteData data);
 
-  /// Overwrite a range of bytes in the already created [DeviceBuffer].
+  /// Overwrite a range of bytes within an existing [DeviceBuffer].
   ///
   /// This method can only be used if the [DeviceBuffer] was created with
   /// [StorageMode.hostVisible]. An exception will be thrown otherwise.
+  ///
+  /// After new writes have been staged, the [DeviceBuffer.flush] should be
+  /// called prior to accessing the data. Otherwise, the updated data will not
+  /// be copied to the GPU on devices that don't have host coherent memory.
   ///
   /// The entire length of [sourceBytes] will be copied into the [DeviceBuffer],
   /// starting at byte index [destinationOffsetInBytes] in the [DeviceBuffer].
@@ -119,6 +123,37 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 with Buffer {
   @Native<Bool Function(Pointer<Void>, Handle, Int)>(
       symbol: 'InternalFlutterGpu_DeviceBuffer_Overwrite')
   external bool _overwrite(ByteData bytes, int destinationOffsetInBytes);
+
+  /// Flush the contents of the [DeviceBuffer] to the GPU.
+  ///
+  /// This method can only be used if the [DeviceBuffer] was created with
+  /// [StorageMode.hostVisible]. An exception will be thrown otherwise.
+  ///
+  /// If [lengthInBytes] is set to -1, the entire buffer will be flushed.
+  ///
+  /// On devices with coherent host memory (memory shared between the CPU and
+  /// GPU), this method is a no-op.
+  void flush({int offsetInBytes = 0, int lengthInBytes = -1}) {
+    if (storageMode != StorageMode.hostVisible) {
+      throw Exception(
+          'DeviceBuffer.flush can only be used with DeviceBuffers that are host visible');
+    }
+    if (offsetInBytes < 0 || offsetInBytes >= sizeInBytes) {
+      throw Exception('offsetInBytes must be within the bounds of the buffer');
+    }
+    if (lengthInBytes < -1) {
+      throw Exception('lengthInBytes must be either positive or -1');
+    }
+    if (lengthInBytes != -1 && offsetInBytes + lengthInBytes > sizeInBytes) {
+      throw Exception(
+          'The provided range must not be too large to fit within the buffer');
+    }
+    _flush(offsetInBytes, lengthInBytes);
+  }
+
+  @Native<Void Function(Pointer<Void>, Int, Int)>(
+      symbol: 'InternalFlutterGpu_DeviceBuffer_Flush')
+  external void _flush(int offsetInBytes, int lengthInBytes);
 }
 
 /// [HostBuffer] is a [Buffer] which is allocated on the host (native CPU
