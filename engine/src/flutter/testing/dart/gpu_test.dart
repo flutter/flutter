@@ -67,6 +67,11 @@ void main() async {
     }
   });
 
+  test('GpuContext.minimumUniformByteAlignment', () async {
+    final int alignment = gpu.gpuContext.minimumUniformByteAlignment;
+    expect(alignment, greaterThanOrEqualTo(16));
+  }, skip: !impellerEnabled);
+
   test('HostBuffer.emplace', () async {
     final gpu.HostBuffer hostBuffer = gpu.gpuContext.createHostBuffer();
 
@@ -96,6 +101,7 @@ void main() async {
 
     final bool success = deviceBuffer!
         .overwrite(Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData());
+    deviceBuffer.flush();
     expect(success, true);
   }, skip: !impellerEnabled);
 
@@ -107,6 +113,7 @@ void main() async {
     final bool success = deviceBuffer!.overwrite(
         Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData(),
         destinationOffsetInBytes: 1);
+    deviceBuffer.flush();
     expect(success, false);
   }, skip: !impellerEnabled);
 
@@ -120,6 +127,7 @@ void main() async {
       deviceBuffer!.overwrite(
           Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData(),
           destinationOffsetInBytes: -1);
+      deviceBuffer.flush();
       fail('Exception not thrown for negative destination offset.');
     } catch (e) {
       expect(

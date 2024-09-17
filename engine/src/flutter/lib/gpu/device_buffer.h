@@ -62,6 +62,12 @@ extern bool InternalFlutterGpu_DeviceBuffer_Overwrite(
     Dart_Handle source_byte_data,
     int destination_offset_in_bytes);
 
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_DeviceBuffer_Flush(
+    flutter::gpu::DeviceBuffer* wrapper,
+    int offset_in_bytes,
+    int size_in_bytes);
+
 }  // extern "C"
 
 #endif  // FLUTTER_LIB_GPU_DEVICE_BUFFER_H_
