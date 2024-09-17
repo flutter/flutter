@@ -48,13 +48,28 @@ if (enable_unittests) {
     iplr = true
   }
 
+  impellerc("flutter_gpu_shaders") {
+    shaders = [
+      "//flutter/impeller/fixtures/flutter_gpu_unlit.frag",
+      "//flutter/impeller/fixtures/flutter_gpu_unlit.vert",
+      "//flutter/impeller/fixtures/flutter_gpu_texture.frag",
+      "//flutter/impeller/fixtures/flutter_gpu_texture.vert",
+    ]
+
+    fixtures = rebase_path("//flutter/impeller/fixtures")
+    shader_bundle = "{\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_unlit.vert\"}, \"TextureFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_texture.frag\"}, \"TextureVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_texture.vert\"}}"
+    shader_bundle_output = "test.shaderbundle"
+  }
+
   test_fixtures("fixtures") {
     deps = [
+      ":flutter_gpu_shaders",
       ":ink_sparkle",
       ":ink_sparkle_web",
       ":sampler_order_fixture",
     ]
-    fixtures = get_target_outputs(":ink_sparkle")
+    fixtures = get_target_outputs(":ink_sparkle") +
+               get_target_outputs(":flutter_gpu_shaders")
     dest = "$root_gen_dir/flutter/lib/ui"
   }
 }
