@@ -6688,27 +6688,37 @@ abstract class RenderObjectElement extends Element {
   }
 
   void _updateParentData(ParentDataWidget<ParentData> parentDataWidget) {
-    assert(() {
-      try {
-        if (!parentDataWidget.debugIsValidRenderObject(renderObject)) {
+    if (parentDataWidget.debugIsValidRenderObject(renderObject)) {
+      parentDataWidget.applyParentData(renderObject);
+    } else {
+      // If it's not a valid render object, then don't show the ErrorWidget, or
+      // throw an exception, just report the error and move on.
+      //
+      // This prevents it from crashing in release mode and still reports the
+      // original error in debug mode.
+      assert(() {
+        try {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('Incorrect use of ParentDataWidget.'),
+            ErrorSummary('Incorrect use of ParentDataWidget. The widget `${
+              parentDataWidget.runtimeType
+            }` must be a direct child of a `Row`, `Column`, or `Flex` widget.'),
             ...parentDataWidget._debugDescribeIncorrectParentDataType(
               parentData: renderObject.parentData,
-              parentDataCreator: _ancestorRenderObjectElement?.widget as RenderObjectWidget?,
+              parentDataCreator:
+                _ancestorRenderObjectElement?.widget as RenderObjectWidget?,
               ownershipChain: ErrorDescription(debugGetCreatorChain(10)),
             ),
           ]);
+        } on FlutterError catch (e) {
+          // We catch the exception directly to avoid activating the ErrorWidget,
+          // while still allowing debuggers to break on exception. Since the tree
+          // is in a broken state, adding the ErrorWidget would likely cause more
+          // exceptions, which is not good for the debugging experience.
+          _reportException(ErrorSummary('while applying parent data.'), e, e.stackTrace);
         }
-      } on FlutterError catch (e) {
-        // We catch the exception directly to avoid activating the ErrorWidget,
-        // while still allowing debuggers to break on exception. Since the tree
-        // is in a broken state, adding the ErrorWidget would likely cause more
-        // exceptions, which is not good for the debugging experience.
-        _reportException(ErrorSummary('while applying parent data.'), e, e.stackTrace);
-      }
-      return true;
-    }());
+        return true;
+      }());
+    }
   }
 
   @override
@@ -6723,6 +6733,10 @@ abstract class RenderObjectElement extends Element {
 
   @override
   void attachRenderObject(Object? newSlot) {
+      print("2222 ${StackTrace.current}");
+
+
+
     assert(_ancestorRenderObjectElement == null);
     _slot = newSlot;
     _ancestorRenderObjectElement = _findAncestorRenderObjectElement();
