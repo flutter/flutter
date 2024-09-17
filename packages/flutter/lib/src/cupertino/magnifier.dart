@@ -260,7 +260,7 @@ class CupertinoMagnifier extends StatelessWidget {
     this.inOutAnimation,
     this.magnificationScale = 1.0,
   }) : assert(magnificationScale > 0, 'The magnification scale should be greater than zero.');
-            'Magnification scale of 0 results in undefined behavior.');
+
 
   /// A list of shadows cast by the [Magnifier].
   ///
