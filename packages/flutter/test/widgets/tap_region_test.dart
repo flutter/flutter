@@ -1053,4 +1053,106 @@ void main() {
     await click(find.text('Outside Surface'));
     expect(tappedInside, isEmpty);
   });
+
+  testWidgets('TapRegion should register and unregister correctly on push and pop', (WidgetTester tester) async {
+    const ValueKey<String> tapRegion1Key = ValueKey<String>('TapRegion');
+    const ValueKey<String> tapRegion2Key = ValueKey<String>('TapRegion2');
+
+    int count1 = 0;
+    int count2 = 0;
+
+    final TapRegion tapRegion1 = TapRegion(
+      key: tapRegion1Key,
+      onTapOutside: (PointerEvent event) {
+        count1++;
+      },
+      child: Container(
+        width: 100,
+        height: 100,
+        color: Colors.red,
+      ),
+    );
+
+    final TapRegion tapRegion2 = TapRegion(
+      key: tapRegion2Key,
+      onTapOutside: (PointerEvent event) {
+        count2++;
+      },
+      child: Container(
+        width: 100,
+        height: 100,
+        color: Colors.red,
+      ),
+    );
+
+    // Função utilitária para construir páginas
+    Widget buildPage(Widget body, {FloatingActionButton? fab}) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.blue,
+          title: const Text('Test Page'),
+        ),
+        body: Center(child: body),
+        floatingActionButton: fab,
+      );
+    }
+
+    // Página inicial
+    await tester.pumpWidget(
+      MaterialApp(
+        home: buildPage(
+          tapRegion1,
+          fab: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                tester.element(find.byType(FloatingActionButton)),
+                MaterialPageRoute<Widget>(builder: (BuildContext context) => buildPage(tapRegion2)),
+              );
+            },
+            child: const Icon(Icons.add),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Função para simular o clique fora da TapRegion
+
+    // Tap fora da primeira TapRegion para acionar onTapOutside
+    await tapOutside(tester, find.byKey(tapRegion1Key));
+    expect(count1, 1);
+    expect(count2, 0);
+
+    // Navegar para a página de edição
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    // Tap outside the second TapRegion to trigger onTapOutside
+    await tapOutside(tester, find.byKey(tapRegion2Key), times: 10);
+    expect(count1, 2); // When the Fab is pressed, the first TapRegion is still active.
+    expect(count2, 10);
+
+
+
+    // Back to the first page.
+    Navigator.pop(tester.element(find.byType(Scaffold).last));
+    await tester.pumpAndSettle();
+
+    // Tap outside the first TapRegion to trigger onTapOutside
+    await tapOutside(tester, find.byKey(tapRegion1Key));
+    expect(count1, 3);
+    expect(count2, 10);
+  });
+}
+
+Future<void> tapOutside(WidgetTester tester, Finder regionFinder, {int times = 1}) async {
+  // Encontra o Scaffold mais próximo da região fornecida
+  final RenderBox renderBox = tester.firstRenderObject(find.byType(Scaffold).last);
+  final Offset outsidePoint = renderBox.localToGlobal(Offset.zero) + const Offset(200, 200);
+
+  for (int i = 0; i < times; i++) {
+    await tester.tapAt(outsidePoint);
+    await tester.pump();
+  }
 }
