@@ -1910,10 +1910,8 @@ class _AlertDialogButtonBackgroundState extends State<_AlertDialogButtonBackgrou
   @override
   bool didEnter({required bool fromPointerDown, required bool innerEnabled}) {
     widget.onPressStateChange?.call(innerEnabled);
-    if (innerEnabled) {
-      if (!fromPointerDown) {
-        _emitVibration();
-      }
+    if (innerEnabled && !fromPointerDown) {
+      _emitVibration();
     }
     return innerEnabled;
   }
