@@ -320,7 +320,7 @@ void main() {
 
     expect(painter.shadow.color, const Color(0xFF008000));
     expect(painter.shadow.blurRadius, 8.0);
-  
+    
     debugDisableShadows = true;
   });
 }
