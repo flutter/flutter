@@ -186,7 +186,10 @@ class TapRegionNavigatorObserver extends NavigatorObserver {
   }
 
   void _registerTapRegions(Route<dynamic> route, TapRegionRegistry registry) {
-    final BuildContext context = route.navigator!.context;
+    final BuildContext? context = route.navigator?.context;
+    if (context == null) {
+      return;
+    }
     final List<RenderTapRegion> regions = _findTapRegionsInElementTree(context);
 
     for (final RenderTapRegion region in regions) {
