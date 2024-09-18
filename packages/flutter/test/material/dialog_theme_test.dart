@@ -244,6 +244,111 @@ void main() {
     expect(padding.padding, themeActionsPadding);
   });
 
+  testWidgets('Local DialogThemeData overrides global dialogTheme', (WidgetTester tester) async {
+    const Color themeBackgroundColor = Color(0xff123456);
+    const double themeElevation = 8.0;
+    const Color themeShadowColor = Color(0xff000001);
+    const Color themeSurfaceTintColor = Color(0xff000002);
+    const BeveledRectangleBorder themeShape = BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20.5)));
+    const AlignmentGeometry themeAlignment = Alignment.bottomLeft;
+    const Color themeIconColor = Color(0xff654321);
+    const TextStyle themeTitleTextStyle = TextStyle(color: Color(0xffffffff));
+    const TextStyle themeContentTextStyle = TextStyle(color: Color(0xff000000));
+    const EdgeInsetsGeometry themeActionsPadding = EdgeInsets.all(8.0);
+    const Color themeBarrierColor = Color(0xff000005);
+    const EdgeInsets themeInsetPadding = EdgeInsets.all(30.0);
+    const Clip themeClipBehavior = Clip.antiAlias;
+
+    const Color globalBackgroundColor = Color(0xff654321);
+    const double globalElevation = 7.0;
+    const Color globalShadowColor = Color(0xff200001);
+    const Color globalSurfaceTintColor = Color(0xff222002);
+    const BeveledRectangleBorder globalShape = BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25.5)));
+    const AlignmentGeometry globalAlignment = Alignment.centerRight;
+    const Color globalIconColor = Color(0xff666666);
+    const TextStyle globalTitleTextStyle = TextStyle(color: Color(0xff000000));
+    const TextStyle globalContentTextStyle = TextStyle(color: Color(0xffdddddd));
+    const EdgeInsetsGeometry globalActionsPadding = EdgeInsets.all(18.0);
+    const Color globalBarrierColor = Color(0xff111115);
+    const EdgeInsets globalInsetPadding = EdgeInsets.all(35.0);
+    const Clip globalClipBehavior = Clip.hardEdge;
+    const AlertDialog dialog = AlertDialog(
+      title: Text('Title'),
+      content: Text('Content'),
+      icon: Icon(Icons.search),
+      actions: <Widget>[
+        Icon(Icons.cancel)
+      ],
+    );
+
+    const DialogThemeData dialogTheme = DialogThemeData(
+      backgroundColor: themeBackgroundColor,
+      elevation: themeElevation,
+      shadowColor: themeShadowColor,
+      surfaceTintColor: themeSurfaceTintColor,
+      shape: themeShape,
+      alignment: themeAlignment,
+      iconColor: themeIconColor,
+      titleTextStyle: themeTitleTextStyle,
+      contentTextStyle: themeContentTextStyle,
+      actionsPadding: themeActionsPadding,
+      barrierColor: themeBarrierColor,
+      insetPadding: themeInsetPadding,
+      clipBehavior: themeClipBehavior,
+    );
+
+    const DialogThemeData globalDialogTheme = DialogThemeData(
+      backgroundColor: globalBackgroundColor,
+      elevation: globalElevation,
+      shadowColor: globalShadowColor,
+      surfaceTintColor: globalSurfaceTintColor,
+      shape: globalShape,
+      alignment: globalAlignment,
+      iconColor: globalIconColor,
+      titleTextStyle: globalTitleTextStyle,
+      contentTextStyle: globalContentTextStyle,
+      actionsPadding: globalActionsPadding,
+      barrierColor: globalBarrierColor,
+      insetPadding: globalInsetPadding,
+      clipBehavior: globalClipBehavior,
+    );
+
+    await tester.pumpWidget(_appWithDialog(
+      tester,
+      dialog,
+      dialogTheme: dialogTheme,
+      theme: ThemeData(dialogTheme: globalDialogTheme),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = _getMaterialAlertDialog(tester);
+    expect(materialWidget.color, themeBackgroundColor);
+    expect(materialWidget.elevation, themeElevation);
+    expect(materialWidget.shadowColor, themeShadowColor);
+    expect(materialWidget.surfaceTintColor, themeSurfaceTintColor);
+    expect(materialWidget.shape, themeShape);
+    expect(materialWidget.clipBehavior, Clip.antiAlias);
+    final Offset bottomLeft = tester.getBottomLeft(find.descendant(
+      of: find.byType(Dialog),
+      matching: find.byType(Material)
+    ));
+    expect(bottomLeft.dx, 30.0); // 30 is the padding value.
+    expect(bottomLeft.dy, 570.0); // 600 - 30
+    expect(_getIconRenderObject(tester, Icons.search).text.style?.color, themeIconColor);
+    expect(_getTextRenderObject(tester, 'Title').text.style?.color, themeTitleTextStyle.color);
+    expect(_getTextRenderObject(tester, 'Content').text.style?.color, themeContentTextStyle.color);
+    final ModalBarrier modalBarrier = tester.widget(find.byType(ModalBarrier).last);
+    expect(modalBarrier.color, themeBarrierColor);
+
+    final Finder findPadding = find.ancestor(
+      of: find.byIcon(Icons.cancel),
+      matching: find.byType(Padding)
+    ).first;
+    final Padding padding = tester.widget<Padding>(findPadding);
+    expect(padding.padding, themeActionsPadding);
+  });
+
   testWidgets('Dialog background color', (WidgetTester tester) async {
     const Color customColor = Colors.pink;
     const AlertDialog dialog = AlertDialog(
