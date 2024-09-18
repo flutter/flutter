@@ -598,6 +598,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   /// calling setState from stale callbacks, e.g. after disposal of this state,
   /// or after widget reconfiguration to a new Future.
   Object? _activeCallbackIdentity;
+  AsyncWidgetBuilder<T>? _builder;
   late AsyncSnapshot<T> _snapshot;
 
   @override
@@ -623,7 +624,10 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.builder(context, _snapshot);
+  Widget build(BuildContext context) {
+    final builder = _builder ?? widget.builder;
+    return builder(context, _snapshot);
+  }
 
   @override
   void dispose() {
@@ -641,12 +645,14 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
     widget.future!.then<void>((T data) {
       if (_activeCallbackIdentity == callbackIdentity) {
         setState(() {
+          _builder = widget.builder;
           _snapshot = AsyncSnapshot<T>.withData(ConnectionState.done, data);
         });
       }
     }, onError: (Object error, StackTrace stackTrace) {
       if (_activeCallbackIdentity == callbackIdentity) {
         setState(() {
+          _builder = widget.builder;
           _snapshot = AsyncSnapshot<T>.withError(ConnectionState.done, error, stackTrace);
         });
       }
