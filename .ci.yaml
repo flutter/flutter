@@ -3061,6 +3061,7 @@ targets:
 
   # Pixel 7 Pro, Impeller (Vulkan)
   - name: Linux_pixel_7pro new_gallery_impeller_old_zoom__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/155347
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
