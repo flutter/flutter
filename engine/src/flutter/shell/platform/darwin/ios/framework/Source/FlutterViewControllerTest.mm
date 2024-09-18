@@ -1881,6 +1881,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   [vc discreteScrollEvent:mockPanGestureRecognizer];
 
+  // The mouse position within panGestureRecognizer should be checked
+  [[mockPanGestureRecognizer verify] locationInView:[OCMArg any]];
   [[[self.mockEngine verify] ignoringNonObjectArgs]
       dispatchPointerDataPacket:std::make_unique<flutter::PointerDataPacket>(0)];
 }
