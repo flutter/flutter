@@ -402,24 +402,13 @@ class _SearchAnchorState extends State<SearchAnchor> {
 
   @override
   void dispose() {
-    widget.searchController?._detach(this);
-    final _SearchViewRoute? route = _route;
-    final SearchController? internalController = _internalSearchController;
-    if (route != null && route.isActive) {
-      route.navigator!.removeRoute(route);
-    }
-    if (internalController != null) {
-      internalController._detach(this);
-      // If the search controller is currently being used by the search view,
-      // then it will be disposed by search view instead of here.
-      if (internalController._usedByView) {
-        internalController._disposedByView = true;
-      } else {
-        internalController.dispose();
-      }
-    }
-    super.dispose();
-  }
+  widget.searchController?._detach(this);
+  _internalSearchController?._detach(this);
+  _route?._dismiss(
+    dismissController: widget.searchController == null,
+  );
+   super.dispose();
+}
 
   void _openView() {
     final NavigatorState navigator = Navigator.of(context);
@@ -557,6 +546,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final TextInputType? keyboardType;
   CurvedAnimation? curvedAnimation;
   CurvedAnimation? viewFadeOnIntervalCurve;
+  bool dismissController = false;
 
   @override
   Color? get barrierColor => Colors.transparent;
@@ -600,10 +590,22 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     return super.didPop(result);
   }
 
+  void _dismiss({bool dismissController = false}) {
+    if (dismissController) {
+      this.dismissController = true;
+    }
+    if (isActive) {
+      navigator?.removeRoute(this);
+    }
+  }
+
   @override
   void dispose() {
     curvedAnimation?.dispose();
     viewFadeOnIntervalCurve?.dispose();
+    if (dismissController) {
+      searchController.dispose();
+    }
     super.dispose();
   }
 
@@ -799,7 +801,6 @@ class _ViewContentState extends State<_ViewContent> {
     super.initState();
     _viewRect = widget.viewRect;
     _controller = widget.searchController;
-    _controller._usedByView = true;
     _controller.addListener(updateSuggestions);
     _setupAnimations();
   }
@@ -846,10 +847,6 @@ class _ViewContentState extends State<_ViewContent> {
   @override
   void dispose() {
     _controller.removeListener(updateSuggestions);
-    _controller._usedByView = false;
-    if (_controller._disposedByView) {
-      _controller.dispose();
-    }
     _disposeAnimations();
     _timer?.cancel();
     _timer = null;
@@ -1132,11 +1129,6 @@ class SearchController extends TextEditingController {
   // This is set automatically when a [SearchController] is given to the anchor
   // it controls.
   _SearchAnchorState? _anchor;
-
-  // Whether this controller is being used by search view.
-  bool _usedByView = false;
-  // Whether the search view manages the disposal of this controller.
-  bool _disposedByView = false;
 
   /// Whether this controller has associated search anchor.
   bool get isAttached => _anchor != null;
