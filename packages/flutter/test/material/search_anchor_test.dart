@@ -3522,7 +3522,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/155180.
-  testWidgets('disposing SearchController does not crash when search view route are popping',
+  testWidgets('disposing SearchAnchor during search view exit animation does not crash',
     (WidgetTester tester) async {
       final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
