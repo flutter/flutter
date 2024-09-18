@@ -213,14 +213,14 @@ void main() {
       FutureBuilder.debugRethrowError = false;
     });
     testWidgets('The variable captured by FutureBuilder should be equal to the return value of the future.', (WidgetTester tester) async {
-      final streamController = StreamController<Null>();
-      await tester.pumpWidget(StreamBuilder(
+      final StreamController<Null> streamController = StreamController<Null>();
+      await tester.pumpWidget(StreamBuilder<Null>(
         stream: streamController.stream,
         builder: (BuildContext context, AsyncSnapshot<Null> snapshot) {
-          final identifier = Object();
-          return FutureBuilder(
+          final Object identifier = Object();
+          return FutureBuilder<Object>(
             initialData: identifier,
-            future: Future.value(identifier),
+            future: Future<Object>.value(identifier),
             builder: (BuildContext context, AsyncSnapshot<Object> snapshot) {
               expect(identifier, snapshot.data, reason: '“identifier” should be equal to “snapshot.data”.');
               return Container();
@@ -229,7 +229,7 @@ void main() {
         },
       ));
       await tester.pump();
-      for (var i = 0; i < 10; i++) {
+      for (int i = 0; i < 10; i++) {
         streamController.add(null);
         await tester.pump();
       }

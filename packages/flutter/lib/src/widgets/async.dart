@@ -625,7 +625,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final builder = _builder ?? widget.builder;
+    final AsyncWidgetBuilder<T> builder = _builder ?? widget.builder;
     return builder(context, _snapshot);
   }
 
