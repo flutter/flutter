@@ -1705,8 +1705,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           onUnknownRoute: _onUnknownRoute,
           observers: <NavigatorObserver>[
             TapRegionNavigatorObserver(),
-            if (widget.navigatorObservers != null)
-              ...widget.navigatorObservers!,
+            ...?widget.navigatorObservers,
           ],
           routeTraversalEdgeBehavior: kIsWeb ? TraversalEdgeBehavior.leaveFlutterView : TraversalEdgeBehavior.parentScope,
           reportsRouteUpdateToEngine: true,
