@@ -4506,10 +4506,11 @@ void main() {
       expect(hintTextWidget.style!.overflow, decoration.hintStyle!.overflow);
     });
 
-    testWidgets('hint should be ignore its height when input text', (WidgetTester tester) async {
-      final String hintText = 'hint text' * 20;
+    testWidgets('Not Maintain hint height on non-empty text', (WidgetTester tester) async {
+      final String hintText = 'hint' * 20;
       final InputDecoration decoration = InputDecoration(
         hintText: hintText,
+        hintMaxLines: 3,
         maintainHintHeight: false,
       );
 
@@ -4518,6 +4519,104 @@ void main() {
           decoration: decoration,
         ),
       );
+      expect(tester.getSize(find.byType(InputDecorator)).height, 48.0);
+    });
+
+    testWidgets('Maintain hint height on non-empty text', (WidgetTester tester) async {
+      final String hintText = 'hint' * 20;
+      final InputDecoration decoration = InputDecoration(
+        hintMaxLines: 3,
+        hintText: hintText,
+      );
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decoration,
+        ),
+      );
+      final double hintHeight = tester.getSize(find.text(hintText)).height;
+      final double inputHeight = tester.getSize(find.byType(InputDecorator)).height;
+      expect(inputHeight, hintHeight + 16.0);
+    });
+
+    testWidgets('Not Maintain hint height from non-empty to empty text accepts hintFadeDuration', (WidgetTester tester) async {
+      const InputDecoration decoration = InputDecoration(
+        hintText: hintText,
+        hintMaxLines: 3,
+        hintFadeDuration: Duration(milliseconds: 120),
+        maintainHintHeight: false,
+      );
+
+      // Build once with empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decoration,
+        ),
+      );
+
+      // Hint is not exist.
+      expect(find.text(hintText), findsNothing);
+
+      // Rebuild with empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: decoration,
+        ),
+      );
+
+      // The hint's opacity animates from 0.0 to 1.0.
+      // The animation's default duration is 20ms.
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getHintOpacity(tester);
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getHintOpacity(tester);
+      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+      await tester.pump(const Duration(milliseconds: 20));
+      final double hintOpacity120ms = getHintOpacity(tester);
+      expect(hintOpacity120ms, 1.0);
+    });
+
+    testWidgets('Not Maintain hint height from empty to non-empty text accepts hintFadeDuration', (WidgetTester tester) async {
+      const InputDecoration decoration = InputDecoration(
+        hintText: hintText,
+        hintMaxLines: 3,
+        hintFadeDuration: Duration(milliseconds: 120),
+        maintainHintHeight: false,
+      );
+
+      // Build once with empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: decoration,
+        ),
+      );
+
+      // Hint is visible (opacity 1.0).
+      expect(getHintOpacity(tester), 1.0);
+
+      // Rebuild with non-empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decoration,
+        ),
+      );
+
+      // The hint's opacity animates from 1.0 to 0.0.
+      // The animation's default duration is 20ms.
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getHintOpacity(tester);
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getHintOpacity(tester);
+      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+      await tester.pump(const Duration(milliseconds: 20));
+      final double hintOpacity120ms = getHintOpacity(tester);
+      expect(hintOpacity120ms, 0);
+      await tester.pump(const Duration(milliseconds: 1));
+      // The hintText replaced with SizeBox.
       expect(find.text(hintText), findsNothing);
     });
   });
