@@ -402,12 +402,12 @@ class _SearchAnchorState extends State<SearchAnchor> {
 
   @override
   void dispose() {
-  widget.searchController?._detach(this);
-  _internalSearchController?._detach(this);
-  _route?._dismiss(
-    dismissController: widget.searchController == null,
-  );
-   super.dispose();
+    widget.searchController?._detach(this);
+    _internalSearchController?._detach(this);
+    _route?._dismiss(
+      dismissController: widget.searchController == null,
+    );
+    super.dispose();
 }
 
   void _openView() {
