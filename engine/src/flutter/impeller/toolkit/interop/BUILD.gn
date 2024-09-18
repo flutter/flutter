@@ -1,0 +1,87 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/impeller/tools/impeller.gni")
+
+impeller_component("interop_public") {
+  public = [ "impeller.h" ]
+
+  sources = [ "impeller_c.c" ]
+}
+
+impeller_component("interop") {
+  sources = [
+    "color_filter.cc",
+    "color_filter.h",
+    "color_source.cc",
+    "color_source.h",
+    "context.cc",
+    "context.h",
+    "dl.cc",
+    "dl.h",
+    "dl_builder.cc",
+    "dl_builder.h",
+    "formats.cc",
+    "formats.h",
+    "image_filter.cc",
+    "image_filter.h",
+    "impeller.cc",
+    "mask_filter.cc",
+    "mask_filter.h",
+    "object.cc",
+    "object.h",
+    "paint.cc",
+    "paint.h",
+    "path.cc",
+    "path.h",
+    "path_builder.cc",
+    "path_builder.h",
+    "surface.cc",
+    "surface.h",
+    "texture.cc",
+    "texture.h",
+  ]
+
+  public_deps = [ ":interop_public" ]
+
+  deps = [
+    "../../base",
+    "../../display_list",
+    "../../entity",
+    "../../renderer/backend",
+    "//flutter/display_list",
+    "//flutter/fml",
+  ]
+}
+
+impeller_component("example") {
+  target_type = "executable"
+
+  output_name = "impeller_interop_example"
+
+  sources = [ "example.c" ]
+
+  deps = [
+    ":interop",
+    "//flutter/third_party/glfw",
+  ]
+}
+
+impeller_component("interop_unittests") {
+  testonly = true
+
+  sources = [
+    "impeller_unittests.cc",
+    "object_unittests.cc",
+    "playground_test.cc",
+    "playground_test.h",
+  ]
+
+  deps = [
+    ":interop",
+    "../../fixtures",
+    "../../playground:playground_test",
+    "//flutter/testing:testing_lib",
+  ]
+}
