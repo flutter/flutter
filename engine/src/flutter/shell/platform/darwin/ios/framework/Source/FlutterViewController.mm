@@ -2412,7 +2412,11 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   return self.presentedViewController != nil || self.isPresentingViewControllerAnimating;
 }
 
-- (flutter::PointerData)generatePointerDataAtLastMouseLocation API_AVAILABLE(ios(13.4)) {
+- (flutter::PointerData)updateMousePointerDataFrom:(UIGestureRecognizer*)gestureRecognizer
+    API_AVAILABLE(ios(13.4)) {
+  CGPoint location = [gestureRecognizer locationInView:self.view];
+  CGFloat scale = [self flutterScreenIfViewLoaded].scale;
+  _mouseState.location = {location.x * scale, location.y * scale};
   flutter::PointerData pointer_data;
   pointer_data.Clear();
   pointer_data.time_stamp = [[NSProcessInfo processInfo] systemUptime] * kMicrosecondsPerSecond;
@@ -2432,7 +2436,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (gestureRecognizer == _continuousScrollingPanGestureRecognizer &&
       event.type == UIEventTypeScroll) {
     // Events with type UIEventTypeScroll are only received when running on macOS under emulation.
-    flutter::PointerData pointer_data = [self generatePointerDataAtLastMouseLocation];
+    flutter::PointerData pointer_data = [self updateMousePointerDataFrom:gestureRecognizer];
     pointer_data.device = reinterpret_cast<int64_t>(_continuousScrollingPanGestureRecognizer);
     pointer_data.kind = flutter::PointerData::DeviceKind::kTrackpad;
     pointer_data.signal_kind = flutter::PointerData::SignalKind::kScrollInertiaCancel;
@@ -2451,13 +2455,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   return YES;
 }
 
-- (void)hoverEvent:(UIPanGestureRecognizer*)recognizer API_AVAILABLE(ios(13.4)) {
-  CGPoint location = [recognizer locationInView:self.view];
-  CGFloat scale = [self flutterScreenIfViewLoaded].scale;
+- (void)hoverEvent:(UIHoverGestureRecognizer*)recognizer API_AVAILABLE(ios(13.4)) {
   CGPoint oldLocation = _mouseState.location;
-  _mouseState.location = {location.x * scale, location.y * scale};
 
-  flutter::PointerData pointer_data = [self generatePointerDataAtLastMouseLocation];
+  flutter::PointerData pointer_data = [self updateMousePointerDataFrom:recognizer];
   pointer_data.device = reinterpret_cast<int64_t>(recognizer);
   pointer_data.kind = flutter::PointerData::DeviceKind::kMouse;
   pointer_data.view_id = self.viewIdentifier;
@@ -2517,7 +2518,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   translation.x *= scale;
   translation.y *= scale;
 
-  flutter::PointerData pointer_data = [self generatePointerDataAtLastMouseLocation];
+  flutter::PointerData pointer_data = [self updateMousePointerDataFrom:recognizer];
   pointer_data.device = reinterpret_cast<int64_t>(recognizer);
   pointer_data.kind = flutter::PointerData::DeviceKind::kMouse;
   pointer_data.signal_kind = flutter::PointerData::SignalKind::kScroll;
@@ -2544,7 +2545,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   CGPoint translation = [recognizer translationInView:self.view];
   const CGFloat scale = [self flutterScreenIfViewLoaded].scale;
 
-  flutter::PointerData pointer_data = [self generatePointerDataAtLastMouseLocation];
+  flutter::PointerData pointer_data = [self updateMousePointerDataFrom:recognizer];
   pointer_data.device = reinterpret_cast<int64_t>(recognizer);
   pointer_data.kind = flutter::PointerData::DeviceKind::kTrackpad;
   pointer_data.view_id = self.viewIdentifier;
@@ -2593,7 +2594,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 - (void)pinchEvent:(UIPinchGestureRecognizer*)recognizer API_AVAILABLE(ios(13.4)) {
-  flutter::PointerData pointer_data = [self generatePointerDataAtLastMouseLocation];
+  flutter::PointerData pointer_data = [self updateMousePointerDataFrom:recognizer];
   pointer_data.device = reinterpret_cast<int64_t>(recognizer);
   pointer_data.kind = flutter::PointerData::DeviceKind::kTrackpad;
   pointer_data.view_id = self.viewIdentifier;
