@@ -154,7 +154,7 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
 /// regions when a new route is pushed, and to re-register the tap regions when
 /// a route is popped.
 class TapRegionNavigatorObserver extends NavigatorObserver {
-  /// Cria um [TapRegionNavigatorObserver].
+  /// Creates a [TapRegionNavigatorObserver].
   TapRegionNavigatorObserver();
 
   @override
