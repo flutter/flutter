@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_PLAYGROUND_PLAYGROUND_IMPL_H_
 #define FLUTTER_IMPELLER_PLAYGROUND_PLAYGROUND_IMPL_H_
 
+#include <functional>
 #include <memory>
 
 #include "impeller/playground/playground.h"
@@ -34,6 +35,8 @@ class PlaygroundImpl {
 
   virtual fml::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities) = 0;
+
+  virtual Playground::GLProcAddressResolver CreateGLProcAddressResolver() const;
 
  protected:
   const PlaygroundSwitches switches_;

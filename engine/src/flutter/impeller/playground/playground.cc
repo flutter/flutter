@@ -513,4 +513,9 @@ bool Playground::WillRenderSomething() const {
   return switches_.enable_playground;
 }
 
+Playground::GLProcAddressResolver Playground::CreateGLProcAddressResolver()
+    const {
+  return impl_->CreateGLProcAddressResolver();
+}
+
 }  // namespace impeller

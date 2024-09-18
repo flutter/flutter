@@ -127,19 +127,7 @@ ShaderLibraryMappingsForPlayground() {
 
 // |PlaygroundImpl|
 std::shared_ptr<Context> PlaygroundImplGLES::GetContext() const {
-  auto resolver = use_angle_ ? [](const char* name) -> void* {
-    void* symbol = nullptr;
-#if IMPELLER_PLAYGROUND_SUPPORTS_ANGLE
-    void* angle_glesv2 = dlopen("libGLESv2.dylib", RTLD_LAZY);
-    symbol = dlsym(angle_glesv2, name);
-#endif
-    FML_CHECK(symbol);
-    return symbol;
-  }
-  : [](const char* name) -> void* {
-      return reinterpret_cast<void*>(::glfwGetProcAddress(name));
-    };
-  auto gl = std::make_unique<ProcTableGLES>(resolver);
+  auto gl = std::make_unique<ProcTableGLES>(CreateGLProcAddressResolver());
   if (!gl->IsValid()) {
     FML_LOG(ERROR) << "Proc table when creating a playground was invalid.";
     return nullptr;
@@ -158,6 +146,23 @@ std::shared_ptr<Context> PlaygroundImplGLES::GetContext() const {
     return nullptr;
   }
   return context;
+}
+
+// |PlaygroundImpl|
+Playground::GLProcAddressResolver
+PlaygroundImplGLES::CreateGLProcAddressResolver() const {
+  return use_angle_ ? [](const char* name) -> void* {
+    void* symbol = nullptr;
+#if IMPELLER_PLAYGROUND_SUPPORTS_ANGLE
+    void* angle_glesv2 = dlopen("libGLESv2.dylib", RTLD_LAZY);
+    symbol = dlsym(angle_glesv2, name);
+#endif
+    FML_CHECK(symbol);
+    return symbol;
+  }
+  : [](const char* name) -> void* {
+      return reinterpret_cast<void*>(::glfwGetProcAddress(name));
+    };
 }
 
 // |PlaygroundImpl|

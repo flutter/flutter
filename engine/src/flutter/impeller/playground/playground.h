@@ -114,6 +114,9 @@ class Playground {
   /// Returns true if `OpenPlaygroundHere` will actually render anything.
   bool WillRenderSomething() const;
 
+  using GLProcAddressResolver = std::function<void*(const char* proc_name)>;
+  GLProcAddressResolver CreateGLProcAddressResolver() const;
+
  protected:
   const PlaygroundSwitches switches_;
 
