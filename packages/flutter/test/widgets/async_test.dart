@@ -213,10 +213,10 @@ void main() {
       FutureBuilder.debugRethrowError = false;
     });
     testWidgets('The variable captured by FutureBuilder should be equal to the return value of the future.', (WidgetTester tester) async {
-      final StreamController<Null> streamController = StreamController<Null>();
-      await tester.pumpWidget(StreamBuilder<Null>(
+      final StreamController<Object?> streamController = StreamController<Object?>();
+      await tester.pumpWidget(StreamBuilder<Object?>(
         stream: streamController.stream,
-        builder: (BuildContext context, AsyncSnapshot<Null> snapshot) {
+        builder: (BuildContext context, AsyncSnapshot<Object?> snapshot) {
           final Object identifier = Object();
           return FutureBuilder<Object>(
             initialData: identifier,
