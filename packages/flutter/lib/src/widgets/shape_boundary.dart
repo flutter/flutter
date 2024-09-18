@@ -8,14 +8,14 @@ import 'framework.dart';
 
 /// An abstract class that defines the boundaries of a geometric shape.
 ///
-/// [isWithinBoundary] Returns whether the specified shape is within the boundary
+/// [isWithinBoundary] return whether the specified shape is within the boundary.
 ///
-/// [nearestShapeWithinBoundary] Returns the shape closest to the specified shape
-/// within the boundary, or returns the shape as is if it is within the boundary.
+/// [nearestShapeWithinBoundary] returns a shape within the boundary closest to
+/// the given shape, or returns the given shape if it is within the boundary.
 ///
 /// See also:
-/// * [OffsetBoundaryProvider], A widget that provides the [Offset] of a [ShapeBoundary]
-/// * [RectBoundaryProvider], A widget that provides the [Rect] of a [ShapeBoundary]
+/// * [OffsetBoundaryProvider], A widget that provides a [ShapeBoundary] for an [Offset].
+/// * [RectBoundaryProvider], A widget that provides a [ShapeBoundary] for a [Rect].
 abstract class ShapeBoundary<T> {
   /// Returns whether the specified shape is within the boundary.
   bool isWithinBoundary(T shape);
@@ -29,7 +29,7 @@ abstract class ShapeBoundary<T> {
 /// whose bounds is the current position of this widget.
 ///
 /// [ShapeBoundary.isWithinBoundary] returns whether the specified [Offset]
-/// is within the range of this widget. [Offset] should be specified in global coordinates
+/// is within the range of this widget. [Offset] should be specified in global coordinates.
 ///
 /// [ShapeBoundary.nearestShapeWithinBoundary] returns the [Offset] closest to the specified [Offset]
 /// within the boundary, or returns the [Offset] as is if it is within the boundary.
@@ -42,7 +42,7 @@ class OffsetBoundaryProvider extends InheritedWidget {
 
   /// Retrieve the [OffsetBoundaryProvider] from the nearest ancestor to
   /// get its [ShapeBoundary] of [Offset].
-  static ShapeBoundary<Offset>? of(BuildContext context) {
+  static ShapeBoundary<Offset>? maybeOf(BuildContext context) {
     final InheritedElement? element = context.getElementForInheritedWidgetOfExactType<OffsetBoundaryProvider>();
     if (element == null) {
       return null;
@@ -84,8 +84,8 @@ class _OffsetBoundaryInheritedElement extends InheritedElement implements ShapeB
 /// [ShapeBoundary.isWithinBoundary] returns whether the specified [Rect]
 /// is within the range of this widget. [Rect] should be specified in global coordinates
 ///
-/// [ShapeBoundary.nearestShapeWithinBoundary] returns the [Rect] closest to the specified [Rect]
-/// within the boundary, or returns the [Rect] as is if it is within the boundary.
+/// [ShapeBoundary.nearestShapeWithinBoundary] returns the [Rect] with the boundary
+/// that is closest to the specified [Rect], or returns the [Rect] if it is within the boundary.
 ///
 /// {@tool dartpad}
 /// This example demonstrates dragging a red box, constrained within the bounds
@@ -102,7 +102,7 @@ class RectBoundaryProvider extends InheritedWidget {
 
   /// Retrieve the [RectBoundaryProvider] from the nearest ancestor to
   /// get its [ShapeBoundary] of [Rect].
-  static ShapeBoundary<Rect>? of(BuildContext context) {
+  static ShapeBoundary<Rect>? maybeOf(BuildContext context) {
     final InheritedElement? element = context.getElementForInheritedWidgetOfExactType<RectBoundaryProvider>();
     if (element == null) {
       return null;

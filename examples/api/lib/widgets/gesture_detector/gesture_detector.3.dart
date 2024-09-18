@@ -40,7 +40,7 @@ class DragBoundaryExampleAppState extends State<DragBoundaryExampleApp> {
                         onPanUpdate: (DragUpdateDetails details) {
                           final RenderBox containerBox = context.findRenderObject()! as RenderBox;
                           _currentPosition += details.delta;
-                          final Rect? withinBoundary = RectBoundaryProvider.of(context)?.nearestShapeWithinBoundary(
+                          final Rect? withinBoundary = RectBoundaryProvider.maybeOf(context)?.nearestShapeWithinBoundary(
                             containerBox.localToGlobal(_currentPosition) & _boxSize,
                           );
                           if (withinBoundary != null) {
