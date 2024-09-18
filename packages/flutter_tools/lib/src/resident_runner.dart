@@ -227,7 +227,9 @@ class FlutterDevice {
   final DevelopmentSceneImporter? developmentSceneImporter;
 
   DevFSWriter? devFSWriter;
-  Stream<Uri?>? vmServiceUris;
+  StreamController<Uri?>? _vmServiceUrisController;
+  Stream<Uri?> get vmServiceUris => _vmServiceUrisController?.stream ?? const Stream<Uri?>.empty();
+  set vmServiceUris(Stream<Uri?> value) => _vmServiceUrisController?.sink.addStream(value);
   FlutterVmService? vmService;
   DevFS? devFS;
   ApplicationPackage? package;
@@ -264,7 +266,7 @@ class FlutterDevice {
     late StreamSubscription<void> subscription;
     bool isWaitingForVm = false;
 
-    subscription = vmServiceUris!.listen((Uri? vmServiceUri) async {
+    subscription = vmServiceUris.listen((Uri? vmServiceUri) async {
       // FYI, this message is used as a sentinel in tests.
       globals.printTrace('Connecting to service protocol: $vmServiceUri');
       isWaitingForVm = true;
