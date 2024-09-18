@@ -16,16 +16,23 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-Widget boilerplate({required Widget child}) {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: Center(child: child),
-  );
-}
-
 void main() {
   RenderObject getOverlayColor(WidgetTester tester) {
     return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+  }
+
+  Widget boilerplate({required Widget child}) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(child: child),
+    );
+  }
+
+  TextStyle iconStyle(WidgetTester tester, IconData icon) {
+    final RichText iconRichText = tester.widget<RichText>(
+      find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+    );
+    return iconRichText.text.style!;
   }
 
   testWidgets('SegmentsButton when compositing does not crash', (WidgetTester tester) async {
@@ -1203,6 +1210,52 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('segmented_button_test_vertical.png'),
     );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/154798.
+  testWidgets('SegmentedButton.styleFrom can customize the button icon', (WidgetTester tester) async {
+    const Color iconColor = Color(0xFFF000FF);
+    const double iconSize = 32.0;
+    const Color disabledIconColor = Color(0xFFFFF000);
+    Widget buildButton({ bool enabled = true }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: SegmentedButton<int>(
+              style: SegmentedButton.styleFrom(
+                iconColor: iconColor,
+                iconSize: iconSize,
+                disabledIconColor: disabledIconColor,
+              ),
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(
+                  value: 0,
+                  label: Text('Add'),
+                  icon: Icon(Icons.add),
+                ),
+                ButtonSegment<int>(
+                  value: 1,
+                  label: Text('Subtract'),
+                  icon: Icon(Icons.remove),
+                ),
+              ],
+              showSelectedIcon: false,
+              onSelectionChanged: enabled ? (Set<int> selected) {} : null,
+              selected: const <int>{0},
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test enabled button.
+    await tester.pumpWidget(buildButton());
+    expect(tester.getSize(find.byIcon(Icons.add)), const Size(iconSize, iconSize));
+    expect(iconStyle(tester, Icons.add).color, iconColor);
+
+    // Test disabled button.
+    await tester.pumpWidget(buildButton(enabled: false));
+    expect(iconStyle(tester, Icons.add).color, disabledIconColor);
   });
 }
 
