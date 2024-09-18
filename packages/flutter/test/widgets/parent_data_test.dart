@@ -408,7 +408,7 @@ void main() {
       exception.toString(),
       startsWith(
         'Incorrect use of ParentDataWidget.\n'
-        'The widget `Positioned` must be a descendent of a `Stack` widget.\n'
+        'The widget `Positioned` must be a descendant of a `Stack` widget.\n'
         'The ParentDataWidget Positioned(left: 7.0, top: 6.0) wants to apply ParentData of type '
         'StackParentData to a RenderObject, which has been set up to accept ParentData of '
         'incompatible type FlexParentData.\n'

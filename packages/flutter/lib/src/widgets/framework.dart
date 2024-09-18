@@ -6702,7 +6702,7 @@ abstract class RenderObjectElement extends Element {
           String errorMessage = 'Incorrect use of ParentDataWidget.\n';
 
           if (parentDataWidgetType == 'Positioned') {
-            errorMessage += 'The widget `Positioned` must be a descendent of a `Stack` widget.\n';
+            errorMessage += 'The widget `Positioned` must be a descendant of a `Stack` widget.\n';
           } else if (parentDataWidgetType == 'Flexible' || parentDataWidgetType == 'Expanded') {
             errorMessage += 'The widget `$parentDataWidgetType` must be a direct child of a `Row`, `Column`, or `Flex` widget.\n';
           }
