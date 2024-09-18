@@ -197,7 +197,6 @@ class TapRegionNavigatorObserver extends NavigatorObserver {
     }
   }
 
-  //
   List<RenderTapRegion> _findTapRegionsInElementTree(BuildContext context) {
     final List<RenderTapRegion> regions = <RenderTapRegion>[];
 
