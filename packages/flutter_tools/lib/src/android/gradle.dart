@@ -440,7 +440,12 @@ class AndroidGradleBuilder implements AndroidBuilder {
     GradleHandledError? detectedGradleError;
     String? detectedGradleErrorLine;
     String? consumeLog(String line) {
-      if (detectedGradleError != null) {
+      // The log lines that trigger incompatibleKotlinVersionHandler don't
+      // always indicate an error, and there are times that that handler
+      // covers up a more important error handler. Uniquely set it to be
+      // the lowest priority handler by allowing it to be overridden.
+      if (detectedGradleError != null
+          && detectedGradleError != incompatibleKotlinVersionHandler) {
         // Pipe stdout/stderr from Gradle.
         return line;
       }

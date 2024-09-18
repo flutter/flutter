@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:io';
+library;
+
 import 'dart:async' show FutureOr;
 import 'dart:io' as io show HttpClient, OSError, SocketException;
 

@@ -416,8 +416,19 @@ class FlutterDevice {
     _loggingSubscription = null;
   }
 
-  Future<void> initLogReader() async {
-    final vm_service.VM vm = await vmService!.service.getVM();
+  /// Attempts to set up reading logs from the Flutter app on the device.
+  ///
+  /// This can fail if the device if no longer connected.
+  Future<void> tryInitLogReader() async {
+    final vm_service.VM? vm = await vmService!.getVmGuarded();
+    if (vm == null) {
+      globals.printError(
+        'Unable to initiate log reader for device'
+        '${device?.name}, because the Flutter VM service connection '
+        'is closed.',
+      );
+      return;
+    }
     final DeviceLogReader logReader = await device!.getLogReader(app: package);
     logReader.appPid = vm.pid;
   }
@@ -1202,6 +1213,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       projectDir: globals.fs.currentDirectory,
+      packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
       generateDartPluginRegistry: generateDartPluginRegistry,
       defines: <String, String>{
         // Needed for Dart plugin registry generation.
