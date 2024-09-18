@@ -163,9 +163,11 @@ class TextButton extends ButtonStyleButton {
   /// used to create a [WidgetStateProperty] [ButtonStyle.backgroundColor].
   ///
   /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
-  /// parameters are used to construct [ButtonStyle.mouseCursor] and
-  /// [iconColor], [disabledIconColor] are used to construct
-  /// [ButtonStyle.iconColor].
+  /// parameters are used to construct [ButtonStyle.mouseCursor].
+  ///
+  /// The [iconColor], [disabledIconColor] are used to construct
+  /// [ButtonStyle.iconColor] and [iconSize] is used to construct
+  /// [ButtonStyle.iconSize].
   ///
   /// If [overlayColor] is specified and its value is [Colors.transparent]
   /// then the pressed/focused/hovered highlights are effectively defeated.
@@ -201,6 +203,7 @@ class TextButton extends ButtonStyleButton {
     Color? shadowColor,
     Color? surfaceTintColor,
     Color? iconColor,
+    double? iconSize,
     Color? disabledIconColor,
     Color? overlayColor,
     double? elevation,
@@ -250,6 +253,7 @@ class TextButton extends ButtonStyleButton {
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
       iconColor: iconColorProp,
+      iconSize: ButtonStyleButton.allOrNull<double>(iconSize),
       elevation: ButtonStyleButton.allOrNull<double>(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
