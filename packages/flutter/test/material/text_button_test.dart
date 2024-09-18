@@ -10,6 +10,13 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
+  TextStyle iconStyle(WidgetTester tester, IconData icon) {
+    final RichText iconRichText = tester.widget<RichText>(
+      find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+    );
+    return iconRichText.text.style!;
+  }
+
   testWidgets('TextButton, TextButton.icon defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
@@ -584,14 +591,13 @@ void main() {
       ),
     );
 
-    Color? iconColor() => _iconStyle(tester, Icons.add)?.color;
     // Default, not disabled.
-    expect(iconColor(), equals(defaultColor));
+    expect(iconStyle(tester, Icons.add).color, equals(defaultColor));
 
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(iconColor(), focusedColor);
+    expect(iconStyle(tester, Icons.add).color, focusedColor);
 
     // Hovered.
     final Offset center = tester.getCenter(find.byKey(buttonKey));
@@ -601,13 +607,13 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(iconColor(), hoverColor);
+    expect(iconStyle(tester, Icons.add).color, hoverColor);
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
-    expect(iconColor(), pressedColor);
+    expect(iconStyle(tester, Icons.add).color, pressedColor);
 
     focusNode.dispose();
   });
@@ -2028,8 +2034,7 @@ void main() {
     Material material = tester.widget<Material>(buttonMaterial);
     expect(material.textStyle!.color, colorScheme.primary);
 
-    Color? iconColor() => _iconStyle(tester, Icons.add)?.color;
-    expect(iconColor(), equals(Colors.red));
+    expect(iconStyle(tester, Icons.add).color, equals(Colors.red));
 
     // disabled button
     await tester.pumpWidget(
@@ -2054,7 +2059,7 @@ void main() {
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.textStyle!.color, colorScheme.onSurface.withOpacity(0.38));
-    expect(iconColor(), equals(Colors.blue));
+    expect(iconStyle(tester, Icons.add).color, equals(Colors.blue));
   });
 
   testWidgets("TextButton.styleFrom doesn't throw exception on passing only one cursor", (WidgetTester tester) async {
@@ -2457,11 +2462,38 @@ void main() {
     expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withOpacity(0.08)));
     expect(hasBeenHovered, isTrue);
   });
-}
 
-TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
-  final RichText iconRichText = tester.widget<RichText>(
-    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
-  );
-  return iconRichText.text.style;
+  // Regression test for https://github.com/flutter/flutter/issues/154798.
+  testWidgets('TextButton.styleFrom can customize the button icon', (WidgetTester tester) async {
+    const Color iconColor = Color(0xFFF000FF);
+    const double iconSize = 32.0;
+    const Color disabledIconColor = Color(0xFFFFF000);
+    Widget buildButton({ bool enabled = true }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextButton.icon(
+              style: TextButton.styleFrom(
+                iconColor: iconColor,
+                iconSize: iconSize,
+                disabledIconColor: disabledIconColor,
+              ),
+              onPressed: enabled ? () {} : null,
+              icon: const Icon(Icons.add),
+              label: const Text('Button'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test enabled button.
+    await tester.pumpWidget(buildButton());
+    expect(tester.getSize(find.byIcon(Icons.add)), const Size(iconSize, iconSize));
+    expect(iconStyle(tester, Icons.add).color, iconColor);
+
+    // Test disabled button.
+    await tester.pumpWidget(buildButton(enabled: false));
+    expect(iconStyle(tester, Icons.add).color, disabledIconColor);
+  });
 }
