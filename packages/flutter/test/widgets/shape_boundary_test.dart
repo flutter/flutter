@@ -18,7 +18,7 @@ void main() {
             height: 100,
             child: Builder(
               builder: (BuildContext context) {
-                boundary = OffsetBoundaryProvider.of(context);
+                boundary = OffsetBoundaryProvider.maybeOf(context);
                 return const SizedBox();
               },
             ),
@@ -45,7 +45,7 @@ void main() {
             height: 100,
             child: Builder(
               builder: (BuildContext context) {
-                boundary = RectBoundaryProvider.of(context);
+                boundary = RectBoundaryProvider.maybeOf(context);
                 return const SizedBox();
               },
             ),
