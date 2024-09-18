@@ -3524,36 +3524,32 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/155180.
   testWidgets('disposing SearchController does not crash when search view route are popping',
     (WidgetTester tester) async {
-      late BuildContext navigatorContext;
+      final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
       MaterialApp(
+        navigatorKey: key,
         home: Material(
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter stateSetter) {
-              navigatorContext = context;
-              return SearchAnchor(
-                builder: (BuildContext context, SearchController controller) {
-                  return IconButton(
-                    onPressed: () async {
-                      controller.openView();
-                    },
-                    icon: const Icon(Icons.search),
-                  );
+          child: SearchAnchor(
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                onPressed: () async {
+                  controller.openView();
                 },
-                suggestionsBuilder: (BuildContext context, SearchController controller) {
-                  return <Widget>[
-                    const Text('suggestion'),
-                  ];
-                },
+                icon: const Icon(Icons.search),
               );
-            }
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[
+                const Text('suggestion'),
+              ];
+            },
           ),
         ),
       ));
 
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
-      Navigator.of(navigatorContext).pop();
+      key.currentState!.pop();
       await tester.pump();
       await tester.pumpWidget(
       const MaterialApp(
