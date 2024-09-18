@@ -29,25 +29,17 @@ class WidgetStatePropertyExampleApp extends StatelessWidget {
 class WidgetStatePropertyExample extends StatelessWidget {
   const WidgetStatePropertyExample({super.key});
 
-  Color _getButtonColor(Set<WidgetState> states) {
-    const Set<WidgetState> interactiveStates = <WidgetState>{
-      WidgetState.pressed,
-      WidgetState.hovered,
-      WidgetState.focused,
-    };
-
-    if (states.any(interactiveStates.contains)) {
-      return Colors.blue;
-    }
-
-    return Colors.red;
-  }
-
   @override
   Widget build(BuildContext context) {
     return TextButton(
       style: ButtonStyle(
-        foregroundColor: WidgetStateProperty.resolveWith(_getButtonColor),
+        foregroundColor: WidgetStateProperty<Color>.fromMap(
+          <WidgetStatesConstraint, Color>{
+            WidgetState.pressed | WidgetState.hovered | WidgetState.focused:
+                Colors.blue,
+            WidgetState.any: Colors.red,
+          },
+        ),
       ),
       onPressed: () {},
       child: const Text('TextButton'),
