@@ -219,6 +219,8 @@
 ../../../flutter/impeller/toolkit/android/README.md
 ../../../flutter/impeller/toolkit/android/toolkit_android_unittests.cc
 ../../../flutter/impeller/toolkit/glvk/README.md
+../../../flutter/impeller/toolkit/interop/impeller_unittests.cc
+../../../flutter/impeller/toolkit/interop/object_unittests.cc
 ../../../flutter/impeller/tools/malioc_cores.py
 ../../../flutter/impeller/tools/malioc_diff.py
 ../../../flutter/impeller/tools/metal_library.py

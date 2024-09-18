@@ -38,6 +38,10 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
   std::unique_ptr<Surface> AcquireSurfaceFrame(
       std::shared_ptr<Context> context) override;
 
+  // |PlaygroundImpl|
+  Playground::GLProcAddressResolver CreateGLProcAddressResolver()
+      const override;
+
   PlaygroundImplGLES(const PlaygroundImplGLES&) = delete;
 
   PlaygroundImplGLES& operator=(const PlaygroundImplGLES&) = delete;
