@@ -12,6 +12,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'editable_text.dart';
 import 'framework.dart';
@@ -153,44 +154,43 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
 /// regions when a new route is pushed, and to re-register the tap regions when
 /// a route is popped.
 class TapRegionNavigatorObserver extends NavigatorObserver {
-  /// Creates a [TapRegionNavigatorObserver].
+  /// Cria um [TapRegionNavigatorObserver].
   TapRegionNavigatorObserver();
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didPush(route, previousRoute);
-    _updateRoute(route);
+    final TapRegionRegistry? registry = _getRegistry(route);
+    registry?.clear();
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didPop(route, previousRoute);
     if (previousRoute != null) {
-      _updateRoute(previousRoute, isPush: false);
+      final TapRegionRegistry? registry = _getRegistry(previousRoute);
+      if (registry != null) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          _registerTapRegions(previousRoute, registry);
+        });
+      }
     }
   }
 
-  void _updateRoute(Route<dynamic> route, {bool isPush = true}) {
-    final NavigatorState navigator = route.navigator!;
-    final BuildContext context = navigator.context;
-    final TapRegionRegistry? registry = TapRegionRegistry.maybeOf(context);
-
-    if (registry == null) {
-      return;
+  TapRegionRegistry? _getRegistry(Route<dynamic> route) {
+    final NavigatorState? navigator = route.navigator;
+    if (navigator == null){
+      return null;
     }
+    return TapRegionRegistry.maybeOf(navigator.context);
+  }
 
-    if (isPush) {
-     registry.clear();
-     return;
-    }
-
+  void _registerTapRegions(Route<dynamic> route, TapRegionRegistry registry) {
+    final BuildContext context = route.navigator!.context;
     final List<RenderTapRegion> regions = _findTapRegionsInElementTree(context);
 
-    if (regions.isEmpty) {
-      return;
-    }
-
     for (final RenderTapRegion region in regions) {
+      // Only register the region if it's not already registered.
       if (!registry.registeredRegions.contains(region)) {
         registry.registerTapRegion(region);
       }
@@ -201,9 +201,8 @@ class TapRegionNavigatorObserver extends NavigatorObserver {
     final List<RenderTapRegion> regions = <RenderTapRegion>[];
 
     void visitor(Element element) {
-      if (element.renderObject != null && element.renderObject.runtimeType == RenderTapRegion) {
-        final RenderTapRegion renderObject = element.renderObject! as RenderTapRegion;
-          regions.add(renderObject);
+      if (element.renderObject.runtimeType == RenderTapRegion) {
+        regions.add(element.renderObject! as RenderTapRegion);
       }
       element.visitChildren(visitor);
     }
