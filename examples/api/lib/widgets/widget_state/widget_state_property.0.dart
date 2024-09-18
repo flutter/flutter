@@ -35,8 +35,8 @@ class WidgetStatePropertyExample extends StatelessWidget {
       style: ButtonStyle(
         foregroundColor: WidgetStateProperty<Color>.fromMap(
           <WidgetStatesConstraint, Color>{
-            WidgetState.pressed | WidgetState.hovered | WidgetState.focused:
-                Colors.blue,
+            WidgetState.focused: Colors.blueAccent,
+            WidgetState.pressed | WidgetState.hovered: Colors.blue,
             WidgetState.any: Colors.red,
           },
         ),

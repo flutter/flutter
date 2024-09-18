@@ -89,7 +89,7 @@ void main() {
 
     expect(
       await getTextColor(tester),
-      equals(Colors.blue),
+      equals(Colors.blueAccent),
     );
   });
 }
