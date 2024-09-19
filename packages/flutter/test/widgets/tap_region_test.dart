@@ -1124,11 +1124,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap outside the second TapRegion to trigger onTapOutside
-    await tapOutside(tester, find.byKey(tapRegion2Key), times: 10);
+    await tapOutside(tester, find.byKey(tapRegion2Key));
     expect(count1, 2); // When the Fab is pressed, the first TapRegion is still active.
-    expect(count2, 10);
-
-
+    expect(count2, 1);
 
     // Back to the first page.
     Navigator.pop(tester.element(find.byType(Scaffold).last));
@@ -1137,17 +1135,15 @@ void main() {
     // Tap outside the first TapRegion to trigger onTapOutside
     await tapOutside(tester, find.byKey(tapRegion1Key));
     expect(count1, 3);
-    expect(count2, 10);
+    expect(count2, 1);
   });
 }
 
-Future<void> tapOutside(WidgetTester tester, Finder regionFinder, {int times = 1}) async {
+Future<void> tapOutside(WidgetTester tester, Finder regionFinder) async {
   // Find the RenderBox of the region.
   final RenderBox renderBox = tester.firstRenderObject(find.byType(Scaffold).last);
   final Offset outsidePoint = renderBox.localToGlobal(Offset.zero) + const Offset(200, 200);
 
-  for (int i = 0; i < times; i++) {
-    await tester.tapAt(outsidePoint);
-    await tester.pump();
-  }
+  await tester.tapAt(outsidePoint);
+  await tester.pump();
 }

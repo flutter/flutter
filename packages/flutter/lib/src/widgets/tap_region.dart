@@ -158,14 +158,14 @@ class TapRegionNavigatorObserver extends NavigatorObserver {
   TapRegionNavigatorObserver();
 
   @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void didPush(Route<Object?> route, Route<Object?>? previousRoute) {
     super.didPush(route, previousRoute);
     final TapRegionRegistry? registry = _getRegistry(route);
     registry?.clear();
   }
 
   @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void didPop(Route<Object?> route, Route<Object?>? previousRoute) {
     super.didPop(route, previousRoute);
     if (previousRoute != null) {
       final TapRegionRegistry? registry = _getRegistry(previousRoute);
@@ -177,7 +177,7 @@ class TapRegionNavigatorObserver extends NavigatorObserver {
     }
   }
 
-  TapRegionRegistry? _getRegistry(Route<dynamic> route) {
+  TapRegionRegistry? _getRegistry(Route<Object?> route) {
     final NavigatorState? navigator = route.navigator;
     if (navigator == null){
       return null;
@@ -204,8 +204,8 @@ class TapRegionNavigatorObserver extends NavigatorObserver {
     final List<RenderTapRegion> regions = <RenderTapRegion>[];
 
     void visitor(Element element) {
-      if (element.renderObject.runtimeType == RenderTapRegion) {
-        regions.add(element.renderObject! as RenderTapRegion);
+      if (element.renderObject case final RenderTapRegion region) {
+        regions.add(region);
       }
       element.visitChildren(visitor);
     }
