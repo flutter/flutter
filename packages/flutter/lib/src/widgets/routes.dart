@@ -136,6 +136,16 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   /// non-essential work while this handle is active.
   PerformanceModeRequestHandle? _performanceModeRequestHandle;
 
+  bool get useSimulation => false;
+
+  Simulation? get simulation => _simulation;
+  Simulation? _simulation;
+
+  Simulation createSimulation({required double end}) {
+    assert(!useSimulation, 'This method must not be called if useSimulation is false.');
+    throw UnimplementedError;
+  }
+
   /// {@template flutter.widgets.TransitionRoute.transitionDuration}
   /// The duration the transition going forwards.
   ///
@@ -292,7 +302,12 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
     assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     super.didPush();
-    return _controller!.forward();
+    if (!useSimulation) {
+      return _controller!.forward();
+    } else {
+      _simulation = createSimulation(end: _controller!.upperBound);
+      return _controller!.animateWith(_simulation!);
+    }
   }
 
   @override
@@ -318,7 +333,12 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
     assert(_controller != null, '$runtimeType.didPop called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     _result = result;
-    _controller!.reverse();
+    if (!useSimulation) {
+      _controller!.reverse();
+    } else {
+      _simulation = createSimulation(end: _controller!.lowerBound);
+      _controller!.animateWith(_simulation!, isReverse: true);
+    }
     return super.didPop(result);
   }
 

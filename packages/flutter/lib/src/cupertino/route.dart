@@ -20,6 +20,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -1068,6 +1069,9 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   }) : _barrierDismissible = barrierDismissible,
        _semanticsDismissible = semanticsDismissible;
 
+  @override
+  bool get useSimulation => true;
+
   /// A builder that builds the widget tree for the [CupertinoModalPopupRoute].
   ///
   /// The [builder] argument typically builds a [CupertinoActionSheet] widget.
@@ -1097,29 +1101,32 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
-  CurvedAnimation? _animation;
-
-  late Tween<Offset> _offsetTween;
+  final Tween<Offset> _offsetTween = Tween<Offset>(
+    begin: const Offset(0.0, 1.0),
+    end: Offset.zero,
+  );
 
   /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   final Offset? anchorPoint;
 
   @override
-  Animation<double> createAnimation() {
-    assert(_animation == null);
-    _animation = CurvedAnimation(
-      parent: super.createAnimation(),
+  AnimationController createAnimationController() {
+    return AnimationController(
+      duration: const Duration(milliseconds: 800), // TODO
+      debugLabel: debugLabel,
+      vsync: navigator!,
+      animationBehavior: AnimationBehavior.normal,
+    );
+  }
 
-      // These curves were initially measured from native iOS horizontal page
-      // route animations and seemed to be a good match here as well.
-      curve: Curves.linearToEaseOut,
-      reverseCurve: Curves.linearToEaseOut.flipped,
+  @override
+  Simulation createSimulation({required double end}) {
+    const spring = SpringDescription(
+      mass: 1,
+      stiffness: 522.35,
+      damping: 45.71,
     );
-    _offsetTween = Tween<Offset>(
-      begin: const Offset(0.0, 1.0),
-      end: Offset.zero,
-    );
-    return _animation!;
+    return SpringSimulation(spring, controller!.value, end, 0);
   }
 
   @override
@@ -1138,7 +1145,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     return Align(
       alignment: Alignment.bottomCenter,
       child: FractionalTranslation(
-        translation: _offsetTween.evaluate(_animation!),
+        translation: _offsetTween.evaluate(animation!),
         child: child,
       ),
     );
@@ -1146,7 +1153,6 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 
   @override
   void dispose() {
-    _animation?.dispose();
     super.dispose();
   }
 }
