@@ -416,7 +416,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       _internalSearchController?.dispose();
     }
     super.dispose();
-}
+  }
 
   void _openView() {
     final NavigatorState navigator = Navigator.of(context);
