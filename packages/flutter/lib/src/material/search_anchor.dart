@@ -409,7 +409,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       _route?._dismiss(
         disposeController: !usingExternalController,
       );
-      if (usingExternalController){
+      if (usingExternalController) {
         _internalSearchController?.dispose();
       }
     } else {
