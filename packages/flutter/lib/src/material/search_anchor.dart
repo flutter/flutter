@@ -404,10 +404,18 @@ class _SearchAnchorState extends State<SearchAnchor> {
   void dispose() {
     widget.searchController?._detach(this);
     _internalSearchController?._detach(this);
-    _route?._dismiss(
-      disposeController: widget.searchController == null,
-    );
-   super.dispose();
+    final bool usingExternalController = widget.searchController != null;
+    if (_viewIsOpen) {
+      _route?._dismiss(
+        disposeController: !usingExternalController,
+      );
+      if (usingExternalController){
+        _internalSearchController?.dispose();
+      }
+    } else {
+      _internalSearchController?.dispose();
+    }
+    super.dispose();
 }
 
   void _openView() {
