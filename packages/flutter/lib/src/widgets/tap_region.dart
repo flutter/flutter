@@ -185,7 +185,7 @@ class TapRegionNavigatorObserver extends NavigatorObserver {
     return TapRegionRegistry.maybeOf(navigator.context);
   }
 
-  void _registerTapRegions(Route<dynamic> route, TapRegionRegistry registry) {
+  void _registerTapRegions(Route<Object?> route, TapRegionRegistry registry) {
     final BuildContext? context = route.navigator?.context;
     if (context == null) {
       return;
