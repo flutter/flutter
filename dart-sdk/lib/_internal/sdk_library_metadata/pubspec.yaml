@@ -1,0 +1,7 @@
+# Note: This package is not meant to be uploaded to pub. This file is used to
+# make it easer to depend on libraries.dart from sdk packages like dart2js.
+name: sdk_library_metadata
+publish_to: none
+
+environment:
+  sdk: '>=2.19.0 <3.0.0'

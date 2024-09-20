@@ -1,0 +1,14 @@
+{{ #getter }}
+  <section id="getter">
+
+    <section class="multi-line-signature">
+      {{ >annotations }}
+      <span class="returntype">{{{ modelType.returnType.linkedName }}}</span>
+      {{ >name_summary }}
+      {{ >attributes }}
+    </section>
+
+    {{ >documentation }}
+    {{ >source_code }}
+  </section>
+{{ /getter }}

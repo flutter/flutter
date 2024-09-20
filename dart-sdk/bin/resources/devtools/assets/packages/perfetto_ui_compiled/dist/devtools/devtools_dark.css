@@ -1,0 +1,229 @@
+/**
+Copyright 2022 The Chromium Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
+**/
+
+@import "devtools_shared.css";
+
+:root {
+    /* DevTools-specific CSS variables. Prefix with 'devtools' so that
+    we are less likely to be broken by a CSS var name upstream. */
+
+    /* Matches [darkColorScheme.surface] color from DevTools. */
+    --devtools-dark-background-color: #1B1B1F;
+    /* Matches [darkColorScheme.onSurface] color from DevTools. */
+    --devtools-dark-on-background-color: #E3E2E6;
+    /* Matches [darkColorScheme.primary] color from DevTools. */
+    --devtools-dark-primary-color: #ADC6FF;
+    /* Matches [darkColorScheme.onPrimary] color from DevTools. */
+    --devtools-dark-on-primary-color: #002E69;
+    /* Matches [Theme.focusColor] from DevTools. */
+    --devtools-dark-border-color: #37373A;
+    /* Matches [DevToolsColorScheme.alternatingBackgroundColor1] from DevTools. */
+    --devtools-alternating-row-color-1: #1B1B1F;
+    /* Matches [DevToolsColorScheme.alternatingBackgroundColor2] from DevTools. */
+    --devtools-alternating-row-color-2: #303033;
+    /* Matches [DevToolsColorScheme.subtleTextColor] from DevTools. */
+    --devtools-subtle-text-color: #919094;
+    /* Matches dialog backgorund color in Devtools. */
+    --devtools-dialog-background-color: #2b2d37;
+
+    /* Perfetto CSS variable overrides. */
+    --overview-timeline-non-visible-color: #6e6e6e80 !important;
+    --track-border-color: var(--devtools-dark-border-color) !important;
+    --main-background-color: var(--devtools-dark-background-color) !important;
+    --main-foreground-color: var(--devtools-dark-on-background-color) !important;
+}
+
+/* Selectors that require both default 'background-color' and 'color' properties. */
+.topbar .omnibox, 
+header.overview,
+.details-panel-heading,
+.handle .tabs .tab,
+.notes-editor-panel input,
+.popup-menu,
+.pf-popup,
+.pf-select,
+.pf-header-bar,
+.modal-textarea,
+input,
+.rows .row {
+  background-color: var(--devtools-dark-background-color) !important;
+  color: var(--devtools-dark-on-background-color) !important;
+}
+
+/* Selectors that require only the default 'background-color' property. */
+body,
+.topbar,
+.material-icons.grey,
+.track-shell,
+.handle {
+  background-color: var(--devtools-dark-background-color) !important;
+}
+
+/* Selectors that require only the default 'color' property. */
+body > main,
+.home-page,
+h1,
+.pf-button.pf-minimal,
+.pf-text-input, 
+.pf-menu .pf-menu-item,
+.query-table, .query-table thead td,
+.notes-editor-panel,
+.modal-dialog,
+.modal-logs,
+.modal-dialog main,
+::placeholder,
+.pivot-table,
+.details-panel:not(.flamegraph) {
+  color: var(--devtools-dark-on-background-color) !important;
+}
+
+/* Selectors that require only the default primary 'color' property. */
+.material-icons,
+.pf-anchor {
+  color: var(--devtools-dark-primary-color) !important;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--devtools-dark-background-color) !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #6e6e6e !important;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b7b7b7 !important;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+.topbar .omnibox {
+  border-color: var(--devtools-dark-on-background-color) !important;
+}
+
+.topbar .omnibox input {
+  margin: 0px 10px 0px 0px !important;
+  padding: 0px 0px !important;
+}
+
+.pf-keycap .material-icons {
+  color: #444d56 !important;
+}
+
+.track-shell {
+  border-right: 1px solid var(--devtools-dark-border-color) !important;
+}
+
+.track .track-shell .track-button {
+  color: var(--devtools-dark-primary-color) !important;
+}
+
+.track-group-panel[collapsed=true], .track-group-panel[collapsed=true] .shell {
+  background-color: #6e6e6e !important;
+}
+
+.track-group-panel[collapsed=false], .track-group-panel[collapsed=false] .shell {
+  background-color: #6e6e6e !important;
+}
+
+.track-group-panel .shell {
+  border-right: 1px solid var(--devtools-dark-border-color) !important;
+}
+
+header.overview {
+  border-style: none !important;
+}
+
+header.overview .code {
+  color: var(--devtools-subtle-text-color) !important;
+}
+
+.pf-text-input {
+  border-bottom: solid 1px var(--devtools-dark-on-background-color) !important;
+}
+
+.pf-ptree-grid .pf-tree-node:hover,
+.pf-button.pf-minimal.pf-active {
+  background-color: var(--devtools-dark-border-color) !important;
+}
+
+.query-table, .query-table thead td {
+  background-color: var(--devtools-alternating-row-color-2) !important;
+  border-color: var(--devtools-alternating-row-color-2) !important;
+}
+
+.query-table tbody tr {
+  background-color: var(--devtools-alternating-row-color-1) !important;
+}
+
+.query-table tbody tr:nth-child(even) {
+  background-color: var(--devtools-alternating-row-color-2) !important;
+}
+
+.popup-menu button.open-menu {
+  color: inherit !important;
+}
+
+.popup-menu button.open-menu:hover {
+  background-color: var(--devtools-dark-border-color) !important;
+}
+
+table tr:hover td, table tr:hover th,
+.details-panel table tr:hover td, .details-panel table tr:hover th {
+  background-color: #6e6e6e !important;
+}
+
+.handle {
+  border-top: 1px solid var(--devtools-dark-border-color) !important;
+  border-bottom: 1px solid var(--devtools-dark-border-color) !important;
+}
+
+.handle .tabs .tab {
+  border: none !important;
+  z-index: 0 !important;
+  box-shadow: none !important;
+}
+
+.handle .tabs .tab[active] {
+  text-decoration: underline !important;
+  text-decoration-color: var(--devtools-dark-primary-color) !important;
+  text-decoration-thickness: 3px !important;
+}
+
+.handle .tabs .tab:hover,
+.button {
+  background-color: var(--devtools-dark-border-color) !important;
+}
+
+.notes-editor-panel button {
+  background: transparent !important;
+  border-color: var(--devtools-dark-on-background-color) !important;
+  border-width: thin !important;
+  border: solid !important;
+}
+.notes-editor-panel input {
+  border-color: var(--devtools-dark-on-background-color) !important;
+}
+
+.sum .sum-data {
+  border-bottom: 1px solid var(--devtools-dark-on-background-color) !important;
+}
+
+.modal-dialog, .modal-logs {
+  background-color: var(--devtools-dialog-background-color) !important;
+}
+
+.modal-logs, .modal-textarea {
+  border: 1px solid var(--devtools-dark-border-color) !important;
+}
+
+button.pf-minimal.pf-active {
+  background: var(--selection-highlight-color) !important;
+}
+
+input:focus-visible {
+  outline-color: var(--devtools-dark-primary-color) !important;
+}

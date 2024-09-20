@@ -1,0 +1,7 @@
+# Note: This package is not meant to be uploaded to pub. This file is used to
+# make it easier to develop on dart2js.
+name: js_runtime
+publish_to: none
+
+environment:
+  sdk: '>=2.2.2'

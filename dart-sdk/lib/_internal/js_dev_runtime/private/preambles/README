@@ -1,0 +1,17 @@
+The files in this directory polyfill some of the functionality that browsers
+provide. When running command-line JS evaluators it is frequently necessary to
+execute the preambles before executing the output of dart2js.
+
+=Usage=
+- d8:
+    d8 <sdk>/lib/_internal/compiler/js_lib/preambles/d8.js <output>.js
+
+- jsshell:
+    jsshell -f <sdk>/lib/_internal/compiler/js_lib/preambles/d8.js -f <output>.js
+
+- node.js:
+  The d8 preamble file works for most programs.
+
+  Unfortunately we are not aware of any easy way to provide multiple input files
+  to node. It seems to be necessary to concatenate the d8 preamble and the
+  dart2js output.

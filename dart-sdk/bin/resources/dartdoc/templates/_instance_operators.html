@@ -1,0 +1,12 @@
+{{ #hasPublicInstanceOperators }}
+  <section
+      class="summary offset-anchor{{ #publicInheritedInstanceOperators }} inherited{{ /publicInheritedInstanceOperators }}"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+      {{ #publicInstanceOperatorsSorted }}
+        {{ >callable }}
+      {{ /publicInstanceOperatorsSorted }}
+    </dl>
+  </section>
+{{ /hasPublicInstanceOperators }}

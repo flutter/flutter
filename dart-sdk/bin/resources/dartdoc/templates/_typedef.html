@@ -1,0 +1,17 @@
+{{#isCallable}}
+  {{#asCallable}}
+  <dt id="{{htmlId}}" class="callable{{ #isInherited }} inherited{{ /isInherited}}">
+    <span class="name{{#isDeprecated}} deprecated{{/isDeprecated}}">{{{linkedName}}}</span>{{{linkedGenericParameters}}}<span class="signature">
+      <span class="returntype parameter">= {{{ modelType.linkedName }}}</span>
+    </span>
+    {{>categorization}}
+  </dt>
+  <dd{{ #isInherited }} class="inherited"{{ /isInherited}}>
+    {{{ oneLineDoc }}}
+    {{ >attributes }}
+  </dd>
+  {{/asCallable}}
+{{/isCallable}}
+{{^isCallable}}
+  {{>type}}
+{{/isCallable}}

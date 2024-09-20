@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+  <meta charset="utf-8">
+  <title>Perfetto UI</title>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
+  <link rel="shortcut icon" id="favicon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=">
+  <link id="devtools-style" rel="stylesheet" href="devtools/devtools_dark.css">
+  <script src="devtools/devtools_theme_handler.js"></script>
+</head>
+<body data-perfetto_version='{"stable":"v34.0-16f63abe3"}'>
+  <!--
+    Don't add any content here. The whole <body> is replaced by
+    frontend/index.ts when bootstrapping. This is only used for very early
+    error reporting.
+  -->
+  <style>
+  #app_load_failure {opacity:0;transition:opacity 1s ease;position:absolute;overflow:auto;background:#080082;top:0;left:0;width:100%;height:100%;bottom:0;right:0;margin:0;opacity:0;user-select:text}
+  #app_load_failure > pre {color:#fff;position:absolute;margin:auto;white-space:pre-wrap;top:10vh;max-width:90vw;width:880px;left:0;right:0;font-size:16px;line-height:30px;font-weight:700}
+  #app_load_failure > pre span {background:#fff;color:#080082;padding:2px}
+  #app_load_failure_dbg { overflow-wrap: break-word; font-size: 12px; line-height: 1; font-weight: initial;}
+  #app_load_failure a {color:#fff}
+  #app_load { position: absolute; top: 0; left: 0; right:0; bottom: 0; background-color: #2c3e50;}
+  #app_load_spinner { margin: 30vh auto; width: 150px; height: 150px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; animation: app_load_spin 1s ease-in-out infinite; }
+  @keyframes app_load_spin { to { transform: rotate(360deg); } }
+  </style>
+  <div id="app_load"><div id="app_load_spinner"></div></div>
+  <div id="app_load_failure">
+<pre>
+<span>Perfetto UI - An unrecoverable problem occurred</span>
+
+If you are seeing this message, something went wrong while loading the UI.
+Please file a bug (details below) and try these remediation steps:
+
+* Force-reload the page with Ctrl+Shift+R (Mac: Meta+Shift+R) or
+  Shift + click on the refresh button.
+
+* <a href="javascript:clearAllCaches();">Clear all the site storage and caches</a> and reload the page.
+
+* Clear the site data and caches from devtools, following <a target="_blank" href="https://developers.google.com/web/tools/chrome-devtools/storage/cache#deletecache">these instructions</a>.
+
+In any case, **FILE A BUG** attaching logs and screenshots from devtools.
+  Googlers:      <a href="http://go/perfetto-ui-bug" target="_blank">go/perfetto-ui-bug</a>
+  Non-googlers:  <a href="https://github.com/google/perfetto/issues/new" target="_blank">github.com/google/perfetto/issues/new</a>
+
+<div id=app_load_failure_err></div>
+Technical Information:
+<div id=app_load_failure_dbg></div>
+</pre>
+  </div>
+  <script type="text/javascript">
+    'use strict';
+    (function () {
+      const TIMEOUT_MS = 20000;
+      let errTimerId = undefined;
+
+      function errHandler(err) {
+        // Note: we deliberately don't clearTimeout(), which means that this
+        // handler is called also in the happy case when the UI loads. In that
+        // case, though, the onCssLoaded() in frontend/index.ts will empty the
+        // <body>, so |div| below will be null and this function becomes a
+        // no-op.
+        const div = document.getElementById('app_load_failure');
+        if (!div) return;
+        div.style.opacity ='1';
+        const errDom = document.getElementById('app_load_failure_err');
+        if (!errDom) return;
+        console.error(err);
+        errDom.innerText += `${err}\n`;
+        const storageJson = JSON.stringify(window.localStorage);
+        const dbg = document.getElementById('app_load_failure_dbg');
+        if (!dbg) return;
+        dbg.innerText = `LocalStorage: ${storageJson}\n`;
+        if (errTimerId !== undefined) clearTimeout(errTimerId);
+      }
+
+      // For the 'Click here to clear all caches'.
+      window.clearAllCaches = () => {
+        if (window.localStorage) window.localStorage.clear();
+        if (window.sessionStorage) window.sessionStorage.clear();
+        const promises = [];
+        if (window.caches) {
+          window.caches.keys().then(
+            keys => keys.forEach(k => promises.push(window.caches.delete(k))));
+        }
+        if (navigator.serviceWorker) {
+          navigator.serviceWorker.getRegistrations().then(regs => {
+            regs.forEach(reg => promises.push(reg.unregister()));
+          });
+        }
+        Promise.all(promises).then(() => window.location.reload());
+      }
+
+      // If the frontend doesn't come up, make the error page above visible.
+      errTimerId = setTimeout(() => errHandler('Timed out'), TIMEOUT_MS);
+      window.onerror = errHandler;
+      window.onunhandledrejection = errHandler;
+
+      const versionStr = document.body.dataset['perfetto_version'] || '{}';
+      const versionMap = JSON.parse(versionStr);
+      const channel = localStorage.getItem('perfettoUiChannel') || 'stable';
+
+      // The '.' below is a fallback for the case of opening a pinned version
+      // (e.g., ui.perfetto.dev/v1.2.3./). In that case, the index.html has no
+      // valid version map; we want to load the frontend from the same
+      // sub-directory directory, hence ./frontend_bundle.js.
+      const version = versionMap[channel] || versionMap['stable'] || '.';
+
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = version + '/frontend_bundle.js';
+      script.onerror = () => errHandler(`Failed to load ${script.src}`);
+
+      document.head.append(script);
+    })();
+  </script>
+</body>
+</html>

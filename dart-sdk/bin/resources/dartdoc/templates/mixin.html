@@ -1,0 +1,64 @@
+{{>head}}
+
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="{{ aboveSidebarPath }}"
+    data-below-sidebar="{{ belowSidebarPath }}">
+  {{ #self }}
+    <div>{{ >source_link }}<h1><span class="kind-mixin">{{{ nameWithGenerics }}}</span> {{ kind }} {{ >feature_set }} {{ >categorization }}</h1></div>
+  {{ /self }}
+
+  {{ #mixin }}
+    {{ >documentation }}
+
+    {{ #hasModifiers }}
+      <section>
+        <dl class="dl-horizontal">
+          {{ #hasPublicSuperclassConstraints }}
+            <dt>Superclass Constraints</dt>
+            <dd><ul class="comma-separated dark mixin-relationships">
+              {{ #publicSuperclassConstraints }}
+                <li>{{{ linkedName }}}</li>
+              {{ /publicSuperclassConstraints }}
+            </ul></dd>
+          {{ /hasPublicSuperclassConstraints }}
+
+          {{ >super_chain }}
+          {{ >interfaces }}
+
+          {{ #hasPublicImplementers }}
+            <dt>Mixin Applications</dt>
+            <dd>
+              <ul class="comma-separated mixin-relationships">
+                {{ #publicImplementersSorted }}
+                <li>{{{ linkedName }}}</li>
+                {{ /publicImplementersSorted }}
+              </ul>
+            </dd>
+          {{ /hasPublicImplementers }}
+
+          {{ >annotations }}
+        </dl>
+      </section>
+    {{ /hasModifiers }}
+
+    {{ >instance_fields }}
+    {{ >instance_methods }}
+    {{ >instance_operators }}
+    {{ >static_properties }}
+    {{ >static_methods }}
+    {{ >static_constants }}
+  {{ /mixin }}
+</div> <!-- /.main-content -->
+
+<div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+  {{>search_sidebar}}
+  <h5>{{parent.name}} {{parent.kind}}</h5>
+  <div id="dartdoc-sidebar-left-content"></div>
+</div>
+
+<div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+
+{{ >footer }}

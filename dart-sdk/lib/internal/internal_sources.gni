@@ -1,0 +1,21 @@
+# Copyright (c) 2017, the Dart project authors.  Please see the AUTHORS file
+# for details. All rights reserved. Use of this source code is governed by a
+# BSD-style license that can be found in the LICENSE file.
+
+# This file contains all sources for the dart:_internal library.
+internal_sdk_sources = [
+  "internal.dart",
+
+  # The above file needs to be first as it lists the parts below.
+  "async_cast.dart",
+  "bytes_builder.dart",
+  "cast.dart",
+  "errors.dart",
+  "iterable.dart",
+  "linked_list.dart",
+  "list.dart",
+  "lowering.dart",
+  "print.dart",
+  "sort.dart",
+  "symbol.dart",
+]
