@@ -3925,6 +3925,22 @@ void main() {
     ),
     ProcessManager: () => fakeProcessManager,
   });
+
+  testUsingContext('flutter create should show the incompatible java AGP message', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
+
+    final String expectedMessage = getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'app');
+
+    expect(logger.warningText, contains(expectedMessage));
+  }, overrides: <Type, Generator>{
+    Java: () => FakeJava(version: const software.Version.withText(500, 0, 0, '500.0.0')), // Too high a version for template Gradle versions.
+    Logger: () => logger,
+  });
 }
 
 Future<void> _createProject(
