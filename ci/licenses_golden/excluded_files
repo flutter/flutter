@@ -2700,7 +2700,6 @@
 ../../../flutter/third_party/skia/include/effects/BUILD.bazel
 ../../../flutter/third_party/skia/include/encode/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/BUILD.bazel
-../../../flutter/third_party/skia/include/gpu/d3d/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/ganesh/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/ganesh/d3d/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/ganesh/gl/BUILD.bazel
@@ -2713,11 +2712,9 @@
 ../../../flutter/third_party/skia/include/gpu/ganesh/mock/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/ganesh/mtl/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/ganesh/vk/BUILD.bazel
-../../../flutter/third_party/skia/include/gpu/gl/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/graphite/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/graphite/mtl/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/graphite/vk/BUILD.bazel
-../../../flutter/third_party/skia/include/gpu/mock/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/mtl/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/vk/BUILD.bazel
 ../../../flutter/third_party/skia/include/pathops/BUILD.bazel
