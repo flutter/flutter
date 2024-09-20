@@ -45,10 +45,10 @@ FakeProcessLister failure() {
 
 /// The expected validation result object for
 /// a passing windows version test
-const ValidationResult validWindows10ValidationResult = ValidationResult(
+const ValidationResult validWindows11ValidationResult = ValidationResult(
   ValidationType.success,
   <ValidationMessage>[],
-  statusInfo: 'Windows 11 - 22H2',
+  statusInfo: 'Microsoft Windows 11 Pro 23H2 (2009)',
 );
 
 /// The expected validation result object for
@@ -104,9 +104,9 @@ void main() {
 
     final ValidationResult result = await windowsVersionValidator.validate();
 
-    expect(result.type, validWindows10ValidationResult.type,
+    expect(result.type, validWindows11ValidationResult.type,
         reason: 'The ValidationResult type should be the same (installed)');
-    expect(result.statusInfo, validWindows10ValidationResult.statusInfo,
+    expect(result.statusInfo, validWindows11ValidationResult.statusInfo,
         reason: 'The ValidationResult statusInfo messages should be the same');
   });
 
@@ -122,9 +122,9 @@ void main() {
 
     final ValidationResult result = await windowsVersionValidator.validate();
 
-    expect(result.type, validWindows10ValidationResult.type,
+    expect(result.type, validWindows11ValidationResult.type,
         reason: 'The ValidationResult type should be the same (installed)');
-    expect(result.statusInfo, validWindows10ValidationResult.statusInfo,
+    expect(result.statusInfo, validWindows11ValidationResult.statusInfo,
         reason: 'The ValidationResult statusInfo messages should be the same');
   });
 
