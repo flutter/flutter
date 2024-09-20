@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/android/gradle_utils.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
