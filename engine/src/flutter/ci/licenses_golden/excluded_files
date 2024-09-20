@@ -1488,6 +1488,7 @@
 ../../../flutter/third_party/dart/runtime/vm/compiler/backend/flow_graph_test.cc
 ../../../flutter/third_party/dart/runtime/vm/compiler/backend/il_test.cc
 ../../../flutter/third_party/dart/runtime/vm/compiler/backend/inliner_test.cc
+../../../flutter/third_party/dart/runtime/vm/compiler/backend/linearscan_test.cc
 ../../../flutter/third_party/dart/runtime/vm/compiler/backend/locations_helpers_test.cc
 ../../../flutter/third_party/dart/runtime/vm/compiler/backend/loops_test.cc
 ../../../flutter/third_party/dart/runtime/vm/compiler/backend/memory_copy_test.cc
