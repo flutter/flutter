@@ -85,6 +85,13 @@ self.addEventListener("fetch", (event) => {
     return;
   }
   var origin = self.location.origin;
+
+  // Only handle requests for resources in this app
+  var requestURL = new URL(event.request.url);
+  if (requestURL.origin !== origin) {
+    return;
+  }
+
   var key = event.request.url.substring(origin.length + 1);
   // Redirect URLs to the index.html
   if (key.indexOf('?v=') != -1) {
