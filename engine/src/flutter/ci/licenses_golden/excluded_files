@@ -18,7 +18,6 @@
 ../../../flutter/.github
 ../../../flutter/.gitignore
 ../../../flutter/.style.yapf
-../../../flutter/.vscode
 ../../../flutter/AUTHORS
 ../../../flutter/CODEOWNERS
 ../../../flutter/CONTRIBUTING.md
@@ -50,6 +49,7 @@
 ../../../flutter/display_list/utils/dl_accumulation_rect_unittests.cc
 ../../../flutter/display_list/utils/dl_matrix_clip_tracker_unittests.cc
 ../../../flutter/docs
+../../../flutter/engine.code-workspace
 ../../../flutter/examples
 ../../../flutter/flow/README.md
 ../../../flutter/flow/diff_context_unittests.cc
