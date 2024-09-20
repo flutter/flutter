@@ -356,6 +356,27 @@ targets:
       task_name: android_views
     timeout: 60
 
+  - name: Linux build_aar_module_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      tags: >
+        ["devicelab","hostonly"]
+      task_name: build_aar_module_test
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Linux build_tests_1_3
     recipe: flutter/flutter_drone
     timeout: 60

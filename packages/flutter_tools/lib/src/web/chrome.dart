@@ -6,8 +6,10 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
+    hide StackTrace;
 
+import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -507,14 +509,8 @@ class Chromium {
     // Send a command to shut down the browser cleanly.
     Duration sigtermDelay = Duration.zero;
     if (_hasValidChromeConnection) {
-      ChromeTab? tab;
-      try {
-        tab = await chromeConnection.getTab(
+      final ChromeTab? tab = await getChromeTabGuarded(chromeConnection,
             (_) => true, retryFor: const Duration(seconds: 1));
-      } on SocketException {
-        // Chrome is not responding to the debug protocol and probably has
-        // already been closed.
-      }
       if (tab != null) {
         final WipConnection wipConnection = await tab.connect();
         await wipConnection.sendCommand('Browser.close');
@@ -550,5 +546,39 @@ class Chromium {
         return 0;
       });
     });
+  }
+}
+
+/// Wrapper for [ChromeConnection.getTab] that will catch any [IOException] or
+/// [StateError], delegate it to the [onIoError] callback, and return null.
+///
+/// This is useful for callers who are want to retrieve a [ChromeTab], but
+/// are okay with the operation failing (e.g. due to an network IO issue or
+/// the Chrome process no longer existing).
+Future<ChromeTab?> getChromeTabGuarded(
+  ChromeConnection chromeConnection,
+  bool Function(ChromeTab tab) accept, {
+  Duration? retryFor,
+  void Function(Object error, StackTrace stackTrace)? onIoError,
+}) async {
+  try {
+    return await asyncGuard(
+      () => chromeConnection.getTab(
+        accept,
+        retryFor: retryFor,
+      ),
+    );
+  } on IOException catch (error, stackTrace) {
+    if (onIoError != null) {
+      onIoError(error, stackTrace);
+    }
+    return null;
+    // The underlying HttpClient will throw a StateError when it tries to
+    // perform a request despite the connection already being closed.
+  } on StateError catch (error, stackTrace) {
+    if (onIoError != null) {
+      onIoError(error, stackTrace);
+    }
+    return null;
   }
 }
