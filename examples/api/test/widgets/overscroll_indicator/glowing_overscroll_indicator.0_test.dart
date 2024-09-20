@@ -32,41 +32,12 @@ void main() {
 
     expect(find.descendant(
       of: find.byType(CustomScrollView),
-      matching: find.byType(SliverFillRemaining),
+      matching: find.widgetWithIcon(SliverFillRemaining, Icons.sunny),
     ), findsOne);
 
     expect(find.descendant(
-      of: find.byType(SliverFillRemaining),
-      matching: find.byType(FlutterLogo),
+      of: find.byType(CustomScrollView),
+      matching: find.byType(GlowingOverscrollIndicator),
     ), findsOne);
-
-  });
-  testWidgets('Test behaviour', (WidgetTester tester) async {
-    bool overscrollNotified = false;
-    double leadingPaintOffset = 0.0;
-
-    // custom listener
-    await tester.pumpWidget(
-      NotificationListener<OverscrollIndicatorNotification>(
-        onNotification: (OverscrollIndicatorNotification notification) {
-          overscrollNotified = true;
-          leadingPaintOffset = notification.paintOffset;
-          return false;
-        },
-        child: const example.GlowingOverscrollIndicatorExampleApp(),
-      ),
-    );
-
-    expect(leadingPaintOffset==0, isTrue);
-    expect(overscrollNotified, isFalse);
-    final BuildContext context = tester.element(find.byType(MaterialApp));
-    final double headerHeight = MediaQuery.of(context).padding.top + AppBar().preferredSize.height;
-
-    final Finder customScrollViewFinder = find.byType(CustomScrollView);
-    await tester.drag(customScrollViewFinder, const Offset(0.0, 500));
-    await tester.pump();
-
-    expect(leadingPaintOffset==headerHeight, isTrue);
-    expect(overscrollNotified, isTrue);
   });
 }

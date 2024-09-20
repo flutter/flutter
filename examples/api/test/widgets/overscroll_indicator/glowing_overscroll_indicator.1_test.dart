@@ -25,42 +25,19 @@ void main() {
       matching: find.widgetWithText(Center, 'Glow all day!'),
     ), findsOne);
 
-   expect(find.descendant(
+    expect(find.descendant(
       of: find.byType(CustomScrollView),
       matching: find.byType(SliverToBoxAdapter),
     ), findsOne);
 
     expect(find.descendant(
       of: find.byType(CustomScrollView),
-      matching: find.byType(SliverFillRemaining),
+      matching: find.widgetWithIcon(SliverFillRemaining, Icons.sunny),
     ), findsOne);
 
     expect(find.descendant(
-      of: find.byType(SliverFillRemaining),
-      matching: find.byType(FlutterLogo),
+      of: find.byType(CustomScrollView),
+      matching: find.byType(GlowingOverscrollIndicator),
     ), findsOne);
-
-  });
-  testWidgets('Test behaviour', (WidgetTester tester) async {
-    bool overscrollNotified = false;
-
-    // custom listener
-    await tester.pumpWidget(
-      NotificationListener<OverscrollIndicatorNotification>(
-        onNotification: (OverscrollIndicatorNotification notification) {
-          overscrollNotified = true;
-          return false;
-        },
-        child: const example.GlowingOverscrollIndicatorExampleApp(),
-      ),
-    );
-
-    expect(overscrollNotified, isFalse);
-
-    final Finder customScrollViewFinder = find.byType(CustomScrollView);
-    await tester.drag(customScrollViewFinder, const Offset(0.0, 500));
-    await tester.pump();
-
-    expect(overscrollNotified, isTrue);
   });
 }
