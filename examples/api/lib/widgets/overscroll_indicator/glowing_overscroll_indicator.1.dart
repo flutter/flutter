@@ -54,7 +54,6 @@ class GlowingOverscrollIndicatorExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const ScrollView scrollView = CustomScrollView(slivers: <Widget>[
-      SliverAppBar(title: Text('Custom PaintOffset')),
       SliverToBoxAdapter(
         child: DefaultTextStyle(
           style: TextStyle(

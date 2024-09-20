@@ -40,4 +40,32 @@ void main() {
       matching: find.byType(GlowingOverscrollIndicator),
     ), findsOne);
   });
+
+  testWidgets('Test behavior', (WidgetTester tester) async {
+    bool overscrollNotified = false;
+    double leadingPaintOffset = 0.0;
+
+    await tester.pumpWidget(
+      NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: (OverscrollIndicatorNotification notification) {
+          overscrollNotified = true;
+          leadingPaintOffset = notification.paintOffset;
+          return false;
+        },
+        child: const example.GlowingOverscrollIndicatorExampleApp(),
+      ),
+    );
+
+    expect(leadingPaintOffset, 0);
+    expect(overscrollNotified, isFalse);
+    final BuildContext context = tester.element(find.byType(MaterialApp));
+    final double headerHeight = MediaQuery.paddingOf(context).top + kToolbarHeight;
+
+    final Finder customScrollViewFinder = find.byType(CustomScrollView);
+    await tester.drag(customScrollViewFinder, const Offset(0, 500));
+    await tester.pump();
+
+    expect(leadingPaintOffset, headerHeight);
+    expect(overscrollNotified, isTrue);
+  });
 }
