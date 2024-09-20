@@ -41,7 +41,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion = 21
+        minSdk = 21
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("lib-proguard-rules.txt")
     }
