@@ -142,6 +142,6 @@ class VersionExtractor {
     }
     final String json = getProcessesResult.stdout as String;
     return (jsonDecode(json) as Map<String, dynamic>)
-        .map((key, value) => MapEntry(key, value.toString()));
+        .map((String key, dynamic value) => MapEntry<String, String>(key, value.toString()));
   }
 }
