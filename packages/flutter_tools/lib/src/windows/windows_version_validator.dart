@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:process/process.dart';
 
 import '../base/io.dart';
 import '../base/os.dart';
+import '../convert.dart';
 import '../doctor_validator.dart';
 
 /// Flutter only supports development on Windows host machines version 10 and greater.
