@@ -48,7 +48,7 @@ void main() {
 
     // Bump up plugin ndkVersion to 21.4.7075529.
     final RegExp androidCompileSdkVersionRegExp = RegExp(r'compileSdk = ([0-9\.]+|flutter.compileSdkVersion|android.compileSdkVersion)');
-    final String newPluginGradleFile = pluginBuildGradle.replaceAll(androidCompileSdkVersionRegExp, 'compileSdk = $compileSdkVersion\nndkVersion = "21.4.7075529"');
+    final String newPluginGradleFile = pluginBuildGradle.replaceAll(androidCompileSdkVersionRegExp, 'compileSdk = $compileSdkVersion\n    ndkVersion = "21.4.7075529"');
     expect(newPluginGradleFile, contains('21.4.7075529'));
     pluginGradleFile.writeAsStringSync(newPluginGradleFile);
 
@@ -60,7 +60,7 @@ void main() {
     final String projectBuildGradle = projectGradleFile.readAsStringSync();
 
     // Bump down plugin example app ndkVersion to 21.1.6352462.
-    final String newProjectGradleFile = projectBuildGradle.replaceAll(androidCompileSdkVersionRegExp, 'compileSdk = flutter.compileSdkVersion\nndkVersion = "21.1.6352462"');
+    final String newProjectGradleFile = projectBuildGradle.replaceAll(androidCompileSdkVersionRegExp, 'compileSdk = flutter.compileSdkVersion\n    ndkVersion = "21.1.6352462"');
     expect(newProjectGradleFile, contains('21.1.6352462'));
     projectGradleFile.writeAsStringSync(newProjectGradleFile);
 
