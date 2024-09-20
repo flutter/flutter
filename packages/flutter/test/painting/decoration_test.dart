@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui show Color, ColorFilter, Image;
+import 'dart:ui' as ui show ColorFilter, Image;
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
@@ -13,36 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/rendering_tester.dart';
-
-/// Positive result if the colors would be mapped to the same argb8888 color.
-class _ColorMatcher extends Matcher {
-  _ColorMatcher(this._target);
-
-  final ui.Color _target;
-
-  @override
-  Description describe(Description description) {
-    return description.add('matches "$_target"');
-  }
-
-  @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item is ui.Color) {
-      return item.colorSpace == _target.colorSpace &&
-          (item.a - _target.a).abs() <= (1 / 255) &&
-          (item.r - _target.r).abs() <= (1 / 255) &&
-          (item.g - _target.g).abs() <= (1 / 255) &&
-          (item.b - _target.b).abs() <= (1 / 255);
-    } else {
-      return false;
-    }
-  }
-
-}
-
-Matcher _matchesColor(ui.Color color) {
-  return _ColorMatcher(color);
-}
 
 class TestCanvas implements Canvas {
   final List<Invocation> invocations = <Invocation>[];
@@ -356,7 +326,7 @@ void main() {
     expect(call.positionalArguments[3], isA<Paint>());
     final Paint paint = call.positionalArguments[3] as Paint;
     expect(paint.colorFilter, colorFilter);
-    expect(paint.color, _matchesColor(const Color(0x7F000000))); // 0.5 opacity
+    expect(paint.color, isSameColorAs(const Color(0x7F000000))); // 0.5 opacity
     expect(paint.filterQuality, FilterQuality.high);
     expect(paint.isAntiAlias, true);
     expect(paint.invertColors, isTrue);
@@ -407,19 +377,24 @@ void main() {
     expect(error.diagnostics.length, 4);
     expect(error.diagnostics[2], isA<DiagnosticsProperty<DecorationImage>>());
     expect(error.diagnostics[3], isA<DiagnosticsProperty<ImageConfiguration>>());
-    expect(error.toStringDeep(),
+    expect(error.toStringDeep(wrapWidth: 640),
       'FlutterError\n'
-      '   DecorationImage.matchTextDirection can only be used when a\n'
-      '   TextDirection is available.\n'
-      '   When DecorationImagePainter.paint() was called, there was no text\n'
-      '   direction provided in the ImageConfiguration object to match.\n'
+      '   DecorationImage.matchTextDirection can only be used when a '
+      'TextDirection is available.\n'
+      '   When DecorationImagePainter.paint() was called, there was no text '
+      'direction provided in the ImageConfiguration object to match.\n'
       '   The DecorationImage was:\n'
-      '     DecorationImage(SynchronousTestImageProvider(),\n'
-      '     ColorFilter.mode(Color(0xff00ff00), BlendMode.src),\n'
-      '     BoxFit.contain, Alignment.center, centerSlice:\n'
-      '     Rect.fromLTRB(10.0, 20.0, 40.0, 60.0), ImageRepeat.repeatY,\n'
-      '     match text direction, scale 0.5, opacity 0.5,\n'
-      '     FilterQuality.medium, invert colors, use anti-aliasing)\n'
+      '     DecorationImage(SynchronousTestImageProvider(), '
+      'ColorFilter.mode(${const Color(0xff00ff00)}, BlendMode.src), '
+      'BoxFit.contain, Alignment.center, '
+      'centerSlice: Rect.fromLTRB(10.0, 20.0, 40.0, 60.0), '
+      'ImageRepeat.repeatY, '
+      'match text direction, '
+      'scale 0.5, '
+      'opacity 0.5, '
+      'FilterQuality.medium, '
+      'invert colors, '
+      'use anti-aliasing)\n'
       '   The ImageConfiguration was:\n'
       '     ImageConfiguration(size: Size(100.0, 100.0))\n',
     );
@@ -520,17 +495,17 @@ void main() {
       BoxDecoration.lerp(
         const BoxDecoration(),
         const BoxDecoration(gradient: gradient),
-        0.25,
+        0.2,
       ),
-      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0x40FFFFFF) ])),
+      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0x33FFFFFF) ])),
     );
     expect(
       BoxDecoration.lerp(
         const BoxDecoration(),
         const BoxDecoration(gradient: gradient),
-        0.75,
+        1/3,
       ),
-      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0xBFFFFFFF) ])),
+      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0x55FFFFFF) ])),
     );
     expect(
       BoxDecoration.lerp(

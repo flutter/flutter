@@ -40,7 +40,7 @@ void main() {
         (FlutterError error) => error.diagnostics.map((DiagnosticsNode node) => node.toString()),
         'diagnostics',
         <String>[
-          'Cannot lerp between "Color(0xff000000)" and "Color(0xffffffff)".',
+          'Cannot lerp between "${const Color(0xff000000)}" and "${const Color(0xffffffff)}".',
           'The type Color might not fully implement `+`, `-`, and/or `*`. $kApiDocsLink',
           'To lerp colors, consider ColorTween instead.',
         ],
@@ -194,10 +194,10 @@ void main() {
       begin: const Color(0xff000000),
       end: const Color(0xffffffff),
     );
-    expect(tween.lerp(0.0), const Color(0xff000000));
-    expect(tween.lerp(0.5), const Color(0xff7f7f7f));
-    expect(tween.lerp(0.7), const Color(0xffb2b2b2));
-    expect(tween.lerp(1.0), const Color(0xffffffff));
+    expect(tween.lerp(0.0), isSameColorAs(const Color(0xff000000)));
+    expect(tween.lerp(0.5), isSameColorAs(const Color(0xff7f7f7f)));
+    expect(tween.lerp(0.7), isSameColorAs(const Color(0xffb2b2b2)));
+    expect(tween.lerp(1.0), isSameColorAs(const Color(0xffffffff)));
   });
 
   test('StepTween', () {
