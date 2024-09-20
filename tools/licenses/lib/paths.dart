@@ -25,6 +25,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/buildtools', // only used by build
   r'flutter/ci',
   r'flutter/docs',
+  r'flutter/engine.code-workspace',
   r'flutter/flutter_frontend_server',
   r'flutter/impeller/docs',
   r'flutter/lib/web_ui/build', // this is compiler-generated output
