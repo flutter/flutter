@@ -1844,7 +1844,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
             'message',
-            contains('The placeholder, springStartDate, has its "type" resource attribute set to the "DateTime" type.'),
+            contains('The placeholder, springStartDate, has its "type" resource attribute set to the "String" type in locale "ja", but it is "DateTime" in the template placeholders.'),
           )),
         );
       });
@@ -2678,6 +2678,84 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(getGeneratedFileContent(locale: 'en'), contains('intl.NumberFormat.currency('));
       expect(getGeneratedFileContent(locale: 'ja'), contains('intl.NumberFormat.decimalPatternDigits('));
       expect(getGeneratedFileContent(locale: 'ja'), contains('decimalDigits: 3'));
+    });
+
+    testWithoutContext('handle number with multiple locale specifying a format only in template', () {
+      setupLocalizations(<String, String>{
+        'en': '''
+{
+"@@locale": "en",
+"money": "Sum {number}",
+"@money": {
+  "placeholders": {
+    "number": {
+      "type": "int",
+      "format": "decimalPatternDigits",
+      "optionalParameters": {
+        "decimalDigits": 3
+      }
+    }
+  }
+}
+}''',
+        'ja': '''
+{
+"@@locale": "ja",
+"money": "合計 {number}",
+"@money": {
+  "placeholders": {
+    "number": {
+      "type": "int"
+    }
+  }
+}
+}'''
+      });
+
+      expect(getGeneratedFileContent(locale: 'en'), contains('intl.NumberFormat.decimalPatternDigits('));
+      expect(getGeneratedFileContent(locale: 'en'), contains('decimalDigits: 3'));
+      expect(getGeneratedFileContent(locale: 'en'), contains(r"return 'Sum $numberString'"));
+      expect(getGeneratedFileContent(locale: 'ja'), isNot(contains('intl.NumberFormat')));
+      expect(getGeneratedFileContent(locale: 'ja'), contains(r"return '合計 $number'"));
+    });
+
+    testWithoutContext('handle number with multiple locale specifying a format only in non-template', () {
+      setupLocalizations(<String, String>{
+        'en': '''
+{
+"@@locale": "en",
+"money": "Sum {number}",
+"@money": {
+  "placeholders": {
+    "number": {
+      "type": "int"
+    }
+  }
+}
+}''',
+        'ja': '''
+{
+"@@locale": "ja",
+"money": "合計 {number}",
+"@money": {
+  "placeholders": {
+    "number": {
+      "type": "int",
+      "format": "decimalPatternDigits",
+      "optionalParameters": {
+        "decimalDigits": 3
+      }
+    }
+  }
+}
+}'''
+      });
+
+      expect(getGeneratedFileContent(locale: 'en'), isNot(contains('intl.NumberFormat')));
+      expect(getGeneratedFileContent(locale: 'en'), contains(r"return 'Sum $number'"));
+      expect(getGeneratedFileContent(locale: 'ja'), contains('intl.NumberFormat.decimalPatternDigits('));
+      expect(getGeneratedFileContent(locale: 'ja'), contains('decimalDigits: 3'));
+      expect(getGeneratedFileContent(locale: 'ja'), contains(r"return '合計 $numberString'"));
     });
   });
 

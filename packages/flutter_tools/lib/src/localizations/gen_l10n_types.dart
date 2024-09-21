@@ -382,7 +382,7 @@ class Message {
       }
     }
     // Infer the placeholders
-    _inferPlaceholders(filenames);
+    _inferPlaceholders();
   }
 
   final String resourceId;
@@ -397,7 +397,14 @@ class Message {
   final Logger? logger;
   bool hadErrors = false;
 
-  bool get placeholdersRequireFormatting => templatePlaceholders.values.any((Placeholder p) => p.requiresFormatting);
+  Iterable<Placeholder> getPlaceholders(LocaleInfo locale) {
+    final Map<String, Placeholder>? placeholders = localePlaceholders[locale];
+    if (placeholders == null) {
+      return templatePlaceholders.values;
+    }
+    return templatePlaceholders.values
+      .map((Placeholder templatePlaceholder) => placeholders[templatePlaceholder.name] ?? templatePlaceholder);
+  }
 
   static String _value(Map<String, Object?> bundle, String resourceId) {
     final Object? value = bundle[resourceId];
@@ -493,12 +500,15 @@ class Message {
 
   // Using parsed translations, attempt to infer types of placeholders used by plurals and selects.
   // For undeclared placeholders, create a new placeholder.
-  void _inferPlaceholders(Map<LocaleInfo, String> filenames) {
+  void _inferPlaceholders() {
     // We keep the undeclared placeholders separate so that we can sort them alphabetically afterwards.
     final Map<String, Placeholder> undeclaredPlaceholders = <String, Placeholder>{};
     // Helper for getting placeholder by name.
-    Placeholder? getPlaceholder(String name) => templatePlaceholders[name] ?? undeclaredPlaceholders[name];
     for (final LocaleInfo locale in parsedMessages.keys) {
+      Placeholder? getPlaceholder(String name) =>
+          localePlaceholders[locale]?[name] ??
+          templatePlaceholders[name] ??
+          undeclaredPlaceholders[name];
       if (parsedMessages[locale] == null) {
         continue;
       }
