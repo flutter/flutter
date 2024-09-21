@@ -232,6 +232,10 @@ class SegmentedButton<T> extends StatefulWidget {
   /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
   /// parameters are used to construct [ButtonStyle.mouseCursor].
   ///
+  /// The [iconColor], [disabledIconColor] are used to construct
+  /// [ButtonStyle.iconColor] and [iconSize] is used to construct
+  /// [ButtonStyle.iconSize].
+  ///
   /// All of the other parameters are either used directly or used to
   /// create a [WidgetStateProperty] with a single value for all
   /// states.
@@ -282,6 +286,9 @@ class SegmentedButton<T> extends StatefulWidget {
     Color? disabledBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
+    Color? iconColor,
+    double? iconSize,
+    Color? disabledIconColor,
     Color? overlayColor,
     double? elevation,
     TextStyle? textStyle,
@@ -311,6 +318,9 @@ class SegmentedButton<T> extends StatefulWidget {
       textStyle: textStyle,
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
+      iconColor: iconColor,
+      iconSize: iconSize,
+      disabledIconColor: disabledIconColor,
       elevation: elevation,
       padding: padding,
       minimumSize: minimumSize,
