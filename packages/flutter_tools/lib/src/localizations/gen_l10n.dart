@@ -124,14 +124,14 @@ String _syntheticL10nPackagePath(FileSystem fileSystem) => fileSystem.path.join(
 // automatically set to 'num'. Similarly, if such placeholders are used for selects, then the type
 // will be set to 'String'. For such placeholders that are used for both, we should throw an error.
 List<String> generateMethodParameters(Message message, bool useNamedParameters) {
-  return message.placeholders.values.map((Placeholder placeholder) {
+  return message.templatePlaceholders.values.map((Placeholder placeholder) {
     return '${useNamedParameters ? 'required ' : ''}${placeholder.type} ${placeholder.name}';
   }).toList();
 }
 
 // Similar to above, but is used for passing arguments into helper functions.
 List<String> generateMethodArguments(Message message) {
-  return message.placeholders.values.map((Placeholder placeholder) => placeholder.name).toList();
+  return message.templatePlaceholders.values.map((Placeholder placeholder) => placeholder.name).toList();
 }
 
 Placeholder? _localePlaceholder(Message message, LocaleInfo locale, String placeholderName) {
@@ -143,11 +143,11 @@ Placeholder? _localePlaceholder(Message message, LocaleInfo locale, String place
 }
 
 String generateDateFormattingLogic(Message message, LocaleInfo locale) {
-  if (message.placeholders.isEmpty || !message.placeholdersRequireFormatting) {
+  if (message.templatePlaceholders.isEmpty || !message.placeholdersRequireFormatting) {
     return '@(none)';
   }
 
-  final Iterable<String> formatStatements = message.placeholders.values
+  final Iterable<String> formatStatements = message.templatePlaceholders.values
     .where((Placeholder placeholder) => placeholder.requiresDateFormatting)
     .map((Placeholder templatePlaceholder) {
       final String placeholderName = templatePlaceholder.name;
@@ -188,11 +188,11 @@ String generateDateFormattingLogic(Message message, LocaleInfo locale) {
 }
 
 String generateNumberFormattingLogic(Message message, LocaleInfo locale) {
-  if (message.placeholders.isEmpty || !message.placeholdersRequireFormatting) {
+  if (message.templatePlaceholders.isEmpty || !message.placeholdersRequireFormatting) {
     return '@(none)';
   }
 
-  final Iterable<String> formatStatements = message.placeholders.values
+  final Iterable<String> formatStatements = message.templatePlaceholders.values
     .where((Placeholder placeholder) => placeholder.requiresNumFormatting)
     .map((Placeholder templatePlaceholder) {
       final String placeholderName = templatePlaceholder.name;
@@ -254,7 +254,7 @@ String generateBaseClassMethod(Message message, LocaleInfo? templateArbLocale, b
   /// In $templateArbLocale, this message translates to:
   /// **'${generateString(message.value)}'**''';
 
-  if (message.placeholders.isNotEmpty) {
+  if (message.templatePlaceholders.isNotEmpty) {
     return (useNamedParameters ? baseClassMethodWithNamedParameterTemplate : baseClassMethodTemplate)
       .replaceAll('@(comment)', comment)
       .replaceAll('@(templateLocaleTranslationComment)', templateLocaleTranslationComment)
@@ -1174,7 +1174,7 @@ class LocalizationsGenerator {
       final String translationForMessage = message.messages[locale]!;
       final Node node = message.parsedMessages[locale]!;
       // If the placeholders list is empty, then return a getter method.
-      if (message.placeholders.isEmpty) {
+      if (message.templatePlaceholders.isEmpty) {
         // Use the parsed translation to handle escaping with the same behavior.
         return getterTemplate
           .replaceAll('@(name)', message.resourceId)
@@ -1208,7 +1208,7 @@ class LocalizationsGenerator {
           case ST.placeholderExpr:
             assert(node.children[1].type == ST.identifier);
             final String identifier = node.children[1].value!;
-            final Placeholder placeholder = message.placeholders[identifier]!;
+            final Placeholder placeholder = message.templatePlaceholders[identifier]!;
             if (placeholder.requiresFormatting) {
               return '\$${node.children[1].value}String';
             }

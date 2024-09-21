@@ -347,7 +347,7 @@ class Message {
   ) : assert(resourceId.isNotEmpty),
       value = _value(templateBundle.resources, resourceId),
       description = _description(templateBundle.resources, resourceId, isResourceAttributeRequired),
-      placeholders = _placeholders(templateBundle.resources, resourceId, isResourceAttributeRequired),
+      templatePlaceholders = _placeholders(templateBundle.resources, resourceId, isResourceAttributeRequired),
       localePlaceholders = <LocaleInfo, Map<String, Placeholder>>{},
       messages = <LocaleInfo, String?>{},
       parsedMessages = <LocaleInfo, Node?>{} {
@@ -363,7 +363,7 @@ class Message {
 
       List<String>? validPlaceholders;
       if (useRelaxedSyntax) {
-        validPlaceholders = placeholders.entries.map((MapEntry<String, Placeholder> e) => e.key).toList();
+        validPlaceholders = templatePlaceholders.entries.map((MapEntry<String, Placeholder> e) => e.key).toList();
       }
       try {
         parsedMessages[bundle.locale] = translation == null ? null : Parser(
@@ -391,13 +391,13 @@ class Message {
   late final Map<LocaleInfo, String?> messages;
   final Map<LocaleInfo, Node?> parsedMessages;
   final Map<LocaleInfo, Map<String, Placeholder>> localePlaceholders;
-  final Map<String, Placeholder> placeholders;
+  final Map<String, Placeholder> templatePlaceholders;
   final bool useEscaping;
   final bool useRelaxedSyntax;
   final Logger? logger;
   bool hadErrors = false;
 
-  bool get placeholdersRequireFormatting => placeholders.values.any((Placeholder p) => p.requiresFormatting);
+  bool get placeholdersRequireFormatting => templatePlaceholders.values.any((Placeholder p) => p.requiresFormatting);
 
   static String _value(Map<String, Object?> bundle, String resourceId) {
     final Object? value = bundle[resourceId];
@@ -497,7 +497,7 @@ class Message {
     // We keep the undeclared placeholders separate so that we can sort them alphabetically afterwards.
     final Map<String, Placeholder> undeclaredPlaceholders = <String, Placeholder>{};
     // Helper for getting placeholder by name.
-    Placeholder? getPlaceholder(String name) => placeholders[name] ?? undeclaredPlaceholders[name];
+    Placeholder? getPlaceholder(String name) => templatePlaceholders[name] ?? undeclaredPlaceholders[name];
     for (final LocaleInfo locale in parsedMessages.keys) {
       if (parsedMessages[locale] == null) {
         continue;
@@ -534,7 +534,7 @@ class Message {
         traversalStack.addAll(node.children);
       }
     }
-    placeholders.addEntries(
+    templatePlaceholders.addEntries(
       undeclaredPlaceholders.entries
         .toList()
         ..sort((MapEntry<String, Placeholder> p1, MapEntry<String, Placeholder> p2) => p1.key.compareTo(p2.key))
@@ -547,7 +547,7 @@ class Message {
         || !x && !y && !z;
     }
 
-    for (final Placeholder placeholder in placeholders.values) {
+    for (final Placeholder placeholder in templatePlaceholders.values) {
       if (!atMostOneOf(placeholder.isPlural, placeholder.isDateTime, placeholder.isSelect)) {
         throw L10nException('Placeholder is used as plural/select/datetime in certain languages.');
       } else if (placeholder.isPlural) {
