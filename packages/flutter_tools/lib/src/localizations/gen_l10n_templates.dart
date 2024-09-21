@@ -171,7 +171,8 @@ const String dateVariableTemplate = '''
     String @(varName) = intl.DateFormat.@(formatType)(localeName).format(@(argument));''';
 
 const String classFileTemplate = '''
-@(header)@(requiresIntlImport)import '@(fileName)';
+@(header)import 'package:intl/intl.dart' as intl;
+import '@(fileName)';
 
 // ignore_for_file: type=lint
 

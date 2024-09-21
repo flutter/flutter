@@ -792,6 +792,7 @@ flutter:
       expect(fs.file('/lib/l10n/bar_en.dart').readAsStringSync(), '''
 HEADER
 
+import 'package:intl/intl.dart' as intl;
 import 'bar.dart';
 
 // ignore_for_file: type=lint
@@ -894,6 +895,7 @@ flutter:\r
       );
 
       expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
+import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -927,6 +929,7 @@ class AppLocalizationsEn extends AppLocalizations {
     expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
 HEADER
 
+import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -1979,7 +1982,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           'en': singleMessageArbFileString,
           'es': singleEsMessageArbFileString,
         });
-        expect(getGeneratedFileContent(locale: 'es'), isNot(contains(intlImportDartCode)));
+        expect(getGeneratedFileContent(locale: 'es'), contains(intlImportDartCode));
       });
 
       testWithoutContext('warnings are generated when plural parts are repeated', () {
@@ -2728,7 +2731,7 @@ String orderNumber(int number) {
   return 'This is order #$number.';
 }
 '''));
-    expect(getGeneratedFileContent(locale: 'en'), isNot(contains(intlImportDartCode)));
+    expect(getGeneratedFileContent(locale: 'en'), contains(intlImportDartCode));
   });
 
   testWithoutContext('app localizations lookup is a public method', () {

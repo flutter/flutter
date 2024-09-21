@@ -622,10 +622,6 @@ class LocalizationsGenerator {
   /// ['es', 'en'] is passed in, the 'es' locale will take priority over 'en'.
   final List<LocaleInfo> preferredSupportedLocales;
 
-  // Whether we need to import intl or not. This flag is updated after parsing
-  // all of the messages.
-  bool requiresIntlImport = false;
-
   // Whether we want to use escaping for ICU messages.
   bool useEscaping = false;
 
@@ -1005,8 +1001,7 @@ class LocalizationsGenerator {
       .replaceAll('@(fileName)', fileName)
       .replaceAll('@(class)', '$className${locale.camelCase()}')
       .replaceAll('@(localeName)', locale.toString())
-      .replaceAll('@(methods)', methods.join('\n\n'))
-      .replaceAll('@(requiresIntlImport)', requiresIntlImport ? "import 'package:intl/intl.dart' as intl;\n\n" : '');
+      .replaceAll('@(methods)', methods.join('\n\n'));
   }
 
   String _generateSubclass(
@@ -1155,7 +1150,6 @@ class LocalizationsGenerator {
       .replaceAll('@(messageClassImports)', sortedClassImports.join('\n'))
       .replaceAll('@(delegateClass)', delegateClass)
       .replaceAll('@(requiresFoundationImport)', useDeferredLoading ? '' : "import 'package:flutter/foundation.dart';")
-      .replaceAll('@(requiresIntlImport)', requiresIntlImport ? "import 'package:intl/intl.dart' as intl;" : '')
       .replaceAll('@(canBeNullable)', usesNullableGetter ? '?' : '')
       .replaceAll('@(needsNullCheck)', usesNullableGetter ? '' : '!')
       // Removes all trailing whitespace from the generated file.
@@ -1166,11 +1160,6 @@ class LocalizationsGenerator {
 
   String _generateMethod(Message message, LocaleInfo locale) {
     try {
-      // Determine if we must import intl for date or number formatting.
-      if (message.placeholdersRequireFormatting) {
-        requiresIntlImport = true;
-      }
-
       final String translationForMessage = message.messages[locale]!;
       final Node node = message.parsedMessages[locale]!;
       // If the placeholders list is empty, then return a getter method.
@@ -1215,7 +1204,6 @@ class LocalizationsGenerator {
             return '\$${node.children[1].value}';
 
           case ST.pluralExpr:
-            requiresIntlImport = true;
             final Map<String, String> pluralLogicArgs = <String, String>{};
             // Recall that pluralExpr are of the form
             // pluralExpr := "{" ID "," "plural" "," pluralParts "}"
@@ -1271,7 +1259,6 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
             return '\$$tempVarName';
 
           case ST.selectExpr:
-            requiresIntlImport = true;
             // Recall that pluralExpr are of the form
             // pluralExpr := "{" ID "," "plural" "," pluralParts "}"
             assert(node.children[1].type == ST.identifier);
@@ -1296,7 +1283,6 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
             );
             return '\$$tempVarName';
           case ST.argumentExpr:
-            requiresIntlImport = true;
             assert(node.children[1].type == ST.identifier);
             assert(node.children[3].type == ST.argType);
             assert(node.children[7].type == ST.identifier);
