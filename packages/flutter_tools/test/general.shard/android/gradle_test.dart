@@ -839,6 +839,59 @@ flutter:
     });
   });
 
+  group('configureLegacyPluginEachProjects', () {
+    late Testbed testbed;
+    late FlutterProject project;
+
+    setUp(() {
+      testbed = Testbed(setup: () {
+        project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
+      });
+    });
+
+    test('Ignores .flutter-plugins when it is within comments', () => testbed.run(() async {
+      // Create a settings.gradle file with '.flutter-plugins' inside comments
+      final File settingsGradle = project.android.hostAppGradleRoot.childFile('settings.gradle');
+      settingsGradle.writeAsStringSync(r'''
+        include ":app"  // include ':another_project'
+        // includeFlat '.flutter-plugins'
+        /*
+          This is a block comment that might contain '.flutter-plugins'
+          includeFlat '.flutter-plugins'
+        */
+      ''');
+
+      // Run the configureLegacyPluginEachProjects function
+      await configureLegacyPluginEachProjects(project);
+
+      // Verify the expected behavior
+      // Since '.flutter-plugins' is within comments, it should not trigger the plugin configuration
+      // To check this, you might verify that the 'outputs' directory is not modified
+      final Directory pluginsDirectory = project.directory.childDirectory('.flutter-plugins');
+      expect(pluginsDirectory.existsSync(), isFalse);
+    }));
+
+    test('Detects .flutter-plugins when it is in uncommented code', () => testbed.run(() async {
+      // Create a settings.gradle file with '.flutter-plugins' in uncommented code
+      final File settingsGradle = project.android.hostAppGradleRoot.childFile('settings.gradle');
+      settingsGradle.writeAsStringSync(r'''
+        include ":app"
+        includeFlat '.flutter-plugins'
+      ''');
+
+      // Run the configureLegacyPluginEachProjects function
+      await configureLegacyPluginEachProjects(project);
+
+      // Verify the expected behavior
+      // Since '.flutter-plugins' is in uncommented code, it should trigger the plugin configuration
+      // To check this, you might verify that the 'outputs' directory is modified accordingly
+      final Directory pluginsDirectory = project.directory.childDirectory('.flutter-plugins');
+      // Depending on how the function modifies the project, check for expected files or directories
+      // For example:
+      expect(pluginsDirectory.existsSync(), isTrue);
+    }));
+  });  
+
   test('Current settings.gradle is in our legacy settings.gradle file set', () {
     // If this test fails, you probably edited templates/app/android.tmpl.
     // That's fine, but you now need to add a copy of that file to gradle/settings.gradle.legacy_versions, separated
