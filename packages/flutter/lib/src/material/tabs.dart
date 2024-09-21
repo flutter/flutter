@@ -186,8 +186,8 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Container(
-            margin: effectiveIconMargin,
+          Padding(
+            padding: effectiveIconMargin,
             child: icon,
           ),
           _buildLabelText(),
@@ -1693,8 +1693,9 @@ class _TabBarState extends State<TabBar> {
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller!.length == 0) {
-      return Container(
-        height: _kTabHeight + widget.indicatorWeight,
+      return LimitedBox(
+        maxWidth: 0.0,
+        child: SizedBox(width: double.infinity, height: _kTabHeight + widget.indicatorWeight),
       );
     }
 
@@ -1742,9 +1743,11 @@ class _TabBarState extends State<TabBar> {
         wrappedTabs[previousIndex] = _buildStyledTab(wrappedTabs[previousIndex], false, animation, _defaults);
       } else {
         // The user is dragging the TabBarView's PageView left or right.
-        final int tabIndex = _currentIndex!;
-        final Animation<double> centerAnimation = _DragAnimation(_controller!, tabIndex);
-        wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation, _defaults);
+        if (_currentIndex! < widget.tabs.length) {
+          final int tabIndex = _currentIndex!;
+          final Animation<double> centerAnimation = _DragAnimation(_controller!, tabIndex);
+          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation, _defaults);
+        }
         if (_currentIndex! > 0) {
           final int tabIndex = _currentIndex! - 1;
           final Animation<double> previousAnimation = ReverseAnimation(_DragAnimation(_controller!, tabIndex));

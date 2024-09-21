@@ -1649,6 +1649,12 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   benchmarkLive,
 }
 
+enum _HandleDrawFrame {
+  reset,
+  drawFrame,
+  skipFrame,
+}
+
 /// A variant of [TestWidgetsFlutterBinding] for executing tests
 /// on a device, typically via `flutter run`, or via integration tests.
 /// This is intended to allow interactive test development.
@@ -1779,31 +1785,35 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     return super.reassembleApplication();
   }
 
-  bool? _doDrawThisFrame;
+  _HandleDrawFrame _drawFrame = _HandleDrawFrame.reset;
 
   @override
   void handleBeginFrame(Duration? rawTimeStamp) {
-    assert(_doDrawThisFrame == null);
+    if (_drawFrame != _HandleDrawFrame.reset) {
+      throw StateError('handleBeginFrame() called before previous handleDrawFrame()');
+    }
     if (_expectingFrame ||
         _expectingFrameToReassemble ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fadePointers && _viewNeedsPaint)) {
-      _doDrawThisFrame = true;
+      _drawFrame = _HandleDrawFrame.drawFrame;
       super.handleBeginFrame(rawTimeStamp);
     } else {
-      _doDrawThisFrame = false;
+      _drawFrame = _HandleDrawFrame.skipFrame;
     }
   }
 
   @override
   void handleDrawFrame() {
-    assert(_doDrawThisFrame != null);
-    if (_doDrawThisFrame!) {
+    if (_drawFrame == _HandleDrawFrame.reset) {
+      throw StateError('handleDrawFrame() called without paired handleBeginFrame()');
+    }
+    if (_drawFrame == _HandleDrawFrame.drawFrame) {
       super.handleDrawFrame();
     }
-    _doDrawThisFrame = null;
+    _drawFrame = _HandleDrawFrame.reset;
     _viewNeedsPaint = false;
     _expectingFrameToReassemble = false;
     if (_expectingFrame) { // set during pump
@@ -1832,7 +1842,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     fontSize: 10.0,
   );
 
-  void _setDescription(String value) {
+  /// Label describing the test.
+  @visibleForTesting
+  TextPainter? get label => _label;
+
+  /// Set a description label that is drawn into the test output.
+  @protected
+  void setLabel(String value) {
     if (value.isEmpty) {
       _label = null;
       return;
@@ -2033,7 +2049,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }) {
     assert(!inTest);
     _inTest = true;
-    _setDescription(description);
+    setLabel(description);
     return _runTest(testBody, invariantTester, description);
   }
 

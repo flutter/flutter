@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 import 'border_radius.dart';
+import 'borders.dart';
 import 'box_border.dart';
 import 'box_shadow.dart';
 import 'colors.dart';
@@ -462,8 +463,61 @@ class _BoxDecorationPainter extends BoxPainter {
 
   void _paintBackgroundColor(Canvas canvas, Rect rect, TextDirection? textDirection) {
     if (_decoration.color != null || _decoration.gradient != null) {
-      _paintBox(canvas, rect, _getBackgroundPaint(rect, textDirection), textDirection);
+      // When border is filled, the rect is reduced to avoid anti-aliasing
+      // rounding error leaking the background color around the clipped shape.
+      final Rect adjustedRect = _adjustedRectOnOutlinedBorder(rect, textDirection);
+      _paintBox(canvas, adjustedRect, _getBackgroundPaint(rect, textDirection), textDirection);
     }
+  }
+
+  double _calculateAdjustedSide(BorderSide side) {
+    if (side.color.alpha == 255 && side.style == BorderStyle.solid) {
+      return side.strokeInset;
+    }
+    return 0;
+  }
+
+  Rect _adjustedRectOnOutlinedBorder(Rect rect, TextDirection? textDirection) {
+    if (_decoration.border == null) {
+      return rect;
+    }
+
+    if (_decoration.border is Border) {
+      final Border border = _decoration.border! as Border;
+
+      final EdgeInsets insets = EdgeInsets.fromLTRB(
+        _calculateAdjustedSide(border.left),
+        _calculateAdjustedSide(border.top),
+        _calculateAdjustedSide(border.right),
+        _calculateAdjustedSide(border.bottom),
+      ) / 2;
+
+      return Rect.fromLTRB(
+        rect.left + insets.left,
+        rect.top + insets.top,
+        rect.right - insets.right,
+        rect.bottom - insets.bottom,
+      );
+    } else if (_decoration.border is BorderDirectional && textDirection != null) {
+      final BorderDirectional border = _decoration.border! as BorderDirectional;
+      final BorderSide leftSide = textDirection == TextDirection.rtl ? border.end : border.start;
+      final BorderSide rightSide = textDirection == TextDirection.rtl ? border.start : border.end;
+
+      final EdgeInsets insets = EdgeInsets.fromLTRB(
+        _calculateAdjustedSide(leftSide),
+        _calculateAdjustedSide(border.top),
+        _calculateAdjustedSide(rightSide),
+        _calculateAdjustedSide(border.bottom),
+      ) / 2;
+
+      return Rect.fromLTRB(
+        rect.left + insets.left,
+        rect.top + insets.top,
+        rect.right - insets.right,
+        rect.bottom - insets.bottom,
+      );
+    }
+    return rect;
   }
 
   DecorationImagePainter? _imagePainter;

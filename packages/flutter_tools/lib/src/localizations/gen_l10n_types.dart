@@ -283,6 +283,9 @@ class Placeholder {
     if (value == null) {
       return null;
     }
+    if (value is bool) {
+      return value;
+    }
     if (value != 'true' && value != 'false') {
       throw L10nException(
         'The "$attributeName" value of the "$name" placeholder in message $resourceId '

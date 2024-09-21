@@ -2047,7 +2047,14 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
     final bool alwaysUse24HourFormat = MediaQuery.alwaysUse24HourFormatOf(context);
 
     final InputDecorationTheme inputDecorationTheme = timePickerTheme.inputDecorationTheme ?? defaultTheme.inputDecorationTheme;
-    InputDecoration inputDecoration = const InputDecoration().applyDefaults(inputDecorationTheme);
+    InputDecoration inputDecoration = InputDecoration(
+      // Prevent the error text from appearing when
+      // timePickerTheme.inputDecorationTheme is used.
+      // TODO(tahatesser): Remove this workaround once
+      // https://github.com/flutter/flutter/issues/54104
+      // is fixed.
+      errorStyle: defaultTheme.inputDecorationTheme.errorStyle,
+    ).applyDefaults(inputDecorationTheme);
     // Remove the hint text when focused because the centered cursor
     // appears odd above the hint text.
     final String? hintText = focusNode.hasFocus ? null : _formattedValue;
@@ -2415,27 +2422,29 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
                   : MaterialLocalizations.of(context).dialModeButtonLabel,
             ),
           Expanded(
-            child: Container(
-              alignment: AlignmentDirectional.centerEnd,
+            child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 36),
-              child: OverflowBar(
-                spacing: 8,
-                overflowAlignment: OverflowBarAlignment.end,
-                children: <Widget>[
-                  TextButton(
-                    style: pickerTheme.cancelButtonStyle ?? defaultTheme.cancelButtonStyle,
-                    onPressed: _handleCancel,
-                    child: Text(widget.cancelText ??
-                        (theme.useMaterial3
-                            ? localizations.cancelButtonLabel
-                            : localizations.cancelButtonLabel.toUpperCase())),
-                  ),
-                  TextButton(
-                    style: pickerTheme.confirmButtonStyle ?? defaultTheme.confirmButtonStyle,
-                    onPressed: _handleOk,
-                    child: Text(widget.confirmText ?? localizations.okButtonLabel),
-                  ),
-                ],
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: OverflowBar(
+                  spacing: 8,
+                  overflowAlignment: OverflowBarAlignment.end,
+                  children: <Widget>[
+                    TextButton(
+                      style: pickerTheme.cancelButtonStyle ?? defaultTheme.cancelButtonStyle,
+                      onPressed: _handleCancel,
+                      child: Text(widget.cancelText ??
+                          (theme.useMaterial3
+                              ? localizations.cancelButtonLabel
+                              : localizations.cancelButtonLabel.toUpperCase())),
+                    ),
+                    TextButton(
+                      style: pickerTheme.confirmButtonStyle ?? defaultTheme.confirmButtonStyle,
+                      onPressed: _handleOk,
+                      child: Text(widget.confirmText ?? localizations.okButtonLabel),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -3341,7 +3350,7 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
       // TODO(rami-a): Remove this workaround once
       // https://github.com/flutter/flutter/issues/54104
       // is fixed.
-      errorStyle: const TextStyle(fontSize: 0, height: 0),
+      errorStyle: const TextStyle(fontSize: 0, height: 1),
     );
   }
 
@@ -3676,7 +3685,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
       // TODO(rami-a): Remove this workaround once
       // https://github.com/flutter/flutter/issues/54104
       // is fixed.
-      errorStyle: const TextStyle(fontSize: 0, height: 0),
+      errorStyle: const TextStyle(fontSize: 0),
     );
   }
 

@@ -16,6 +16,40 @@ Future<PackageConfig> currentPackageConfig() async {
   return loadPackageConfigUri(Isolate.packageConfigSync!);
 }
 
+/// Locates the `.dart_tool/package_config.json` relevant to [dir].
+///
+/// Searches [dir] and all parent directories.
+///
+/// Returns `null` if no package_config.json was found.
+// TODO(sigurdm): Only call this once per run - and read in from BuildInfo.
+File? findPackageConfigFile(Directory dir) {
+  final FileSystem fileSystem = dir.fileSystem;
+
+  Directory candidateDir = fileSystem.directory(dir.path).absolute;
+  while (true) {
+    final File candidatePackageConfigFile = candidateDir
+        .childDirectory('.dart_tool')
+        .childFile('package_config.json');
+    if (candidatePackageConfigFile.existsSync()) {
+      return candidatePackageConfigFile;
+    }
+    final Directory parentDir = candidateDir.parent;
+    if (fileSystem.identicalSync(parentDir.path, candidateDir.path)) {
+      return null;
+    }
+    candidateDir = parentDir;
+  }
+}
+
+/// Locates the `.dart_tool/package_config.json` relevant to [dir].
+///
+/// Like [findPackageConfigFile] but returns
+/// `$dir/.dart_tool/package_config.json` if no package config could be found.
+File findPackageConfigFileOrDefault(Directory dir) {
+  return findPackageConfigFile(dir) ??
+      dir.childDirectory('.dart_tool').childFile('package_config.json');
+}
+
 /// Load the package configuration from [file] or throws a [ToolExit]
 /// if the operation would fail.
 ///

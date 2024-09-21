@@ -53,7 +53,7 @@ void main() {
         platform: FakePlatform(
             environment: <String, String>{},
             script: Uri.parse('package:flutter_tools/flutter_tools.dart'),
-            packageConfig: 'flutter/packages/flutter_tools/.packages'
+            packageConfig: 'flutter/packages/flutter_tools/.dart_tool/package_config.json'
         )
     );
 

@@ -144,7 +144,7 @@
   "menuDismissLabel": "メニューを閉じる",
   "lookUpButtonLabel": "調べる",
   "searchWebButtonLabel": "ウェブを検索",
-  "shareButtonLabel": "共有...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "共有",
+  "clearButtonTooltip": "テキストを消去",
+  "selectedDateLabel": "選択済み"
 }
