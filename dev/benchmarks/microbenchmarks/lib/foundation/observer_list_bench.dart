@@ -11,7 +11,7 @@ import '../common.dart';
 const int _kNumIterationsList = 2 << 14;
 const int _kNumIterationsHashed = 2 << 19;
 const int _kNumWarmUp = 2 << 6;
-const List<int> callbackCounts = <int>[1, 10, 100, 500];
+const List<int> callbackCounts = <int>[1, 10, 50, 200];
 
 class TestAnimationController extends AnimationController {
   TestAnimationController() : super(vsync: const TestVSync());
