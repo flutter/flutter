@@ -1090,13 +1090,6 @@ class FlutterInformation {
   /// The path to the Dart binary in the Flutter repo.
   ///
   /// This is probably a shell script.
-  File getDartBinaryPath() {
-    return getFlutterRoot().childDirectory('bin').childFile('dart');
-  }
-
-  /// The path to the Dart binary in the Flutter repo.
-  ///
-  /// This is probably a shell script.
   File getFlutterBinaryPath() {
     return getFlutterRoot().childDirectory('bin').childFile('flutter');
   }
