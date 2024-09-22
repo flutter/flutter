@@ -58,6 +58,38 @@ typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
   Iterable<T> options,
 );
 
+/// The type of the [RawAutocomplete] callback which returns a [Widget] that
+/// can be displayed while [optionsBuilder] is being resolved.
+///
+/// The returned widget from this callback will be wrapped in an
+/// [AutocompleteHighlightedOption] inherited widget. This will allow
+/// this callback to determine which option is currently highlighted for
+/// keyboard navigation.
+///
+/// See also:
+///
+///   * [RawAutocomplete.optionsViewBuilder], which is of this type.
+typedef AutocompleteLoadingStateBuilder<T extends Object> = Widget Function(
+  BuildContext context,
+  Iterable<T> lastOptions,
+);
+
+/// The type of the [RawAutocomplete] callback which returns a [Widget] that
+/// can be displayed when [options] is empty.
+///
+/// The returned widget from this callback will be wrapped in an
+/// [AutocompleteHighlightedOption] inherited widget. This will allow
+/// this callback to determine which option is currently highlighted for
+/// keyboard navigation.
+///
+/// See also:
+///
+///   * [RawAutocomplete.optionsViewBuilder], which is of this type.
+typedef AutocompleteEmptyStateBuilder<T extends Object> = Widget Function(
+  BuildContext context,
+  String text,
+);
+
 /// The type of the Autocomplete callback which returns the widget that
 /// contains the input [TextField] or [TextFormField].
 ///
@@ -156,6 +188,8 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
     this.displayStringForOption = defaultStringForOption,
     this.fieldViewBuilder,
+    this.loadingStateBuilder,
+    this.emptyStateBuilder,
     this.focusNode,
     this.onSelected,
     this.textEditingController,
@@ -226,6 +260,28 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///
   /// {@endtemplate}
   final AutocompleteOptionsViewBuilder<T> optionsViewBuilder;
+
+  /// {@template flutter.widgets.RawAutocomplete.loadingViewBuilder}
+  /// Builds a loading view while [optionsBuilder] is being resolved.
+  ///
+  /// The loading view is displayed floating below or above the field using a
+  /// [CompositedTransformFollower] inside of an [Overlay], not at the same
+  /// place in the widget tree as [RawAutocomplete]. To control whether it opens
+  /// upward or downward, use [optionsViewOpenDirection].
+  ///
+  /// {@endtemplate}
+  final AutocompleteLoadingStateBuilder<T>? loadingStateBuilder;
+
+  /// {@template flutter.widgets.RawAutocomplete.emptyStateBuilder}
+  /// Builds a loading view when [options] is empty.
+  ///
+  /// The loading view is displayed floating below or above the field using a
+  /// [CompositedTransformFollower] inside of an [Overlay], not at the same
+  /// place in the widget tree as [RawAutocomplete]. To control whether it opens
+  /// upward or downward, use [optionsViewOpenDirection].
+  ///
+  /// {@endtemplate}
+  final AutocompleteEmptyStateBuilder<T>? emptyStateBuilder;
 
   /// {@template flutter.widgets.RawAutocomplete.optionsViewOpenDirection}
   /// The direction in which to open the options-view overlay.
@@ -343,7 +399,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     SingleActivator(LogicalKeyboardKey.arrowDown): AutocompleteNextOptionIntent(),
   };
 
-  bool get _canShowOptionsView => _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
+  bool get _canShowOptionsView => _focusNode.hasFocus && _selection == null
+      && !(_isLoadingOptions && widget.loadingStateBuilder == null)
+      && !(_options.isEmpty && widget.emptyStateBuilder == null);
+
 
   void _updateOptionsViewVisibility() {
     if (_canShowOptionsView) {
@@ -357,6 +416,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   // situation where _options is updated by an older call when multiple
   // _onChangedField calls are running simultaneously.
   int _onChangedCallId = 0;
+
+  // Tracks the loading state of optionsBuilder.
+  bool _isLoadingOptions = false;
+
   // Called when _textEditingController changes.
   Future<void> _onChangedField() async {
     final TextEditingValue value = _textEditingController.value;
@@ -366,9 +429,12 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     if (value.text != _lastFieldText) {
       shouldUpdateOptions = true;
       _onChangedCallId += 1;
+      _isLoadingOptions = true;
+      _updateOptionsViewVisibility();
     }
     _lastFieldText = value.text;
     final int callId = _onChangedCallId;
+
     final Iterable<T> options = await widget.optionsBuilder(value);
 
     // Makes sure that previous call results do not replace new ones.
@@ -382,6 +448,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       _selection = null;
     }
 
+    _isLoadingOptions = false;
     _updateOptionsViewVisibility();
   }
 
@@ -454,7 +521,15 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
         child: AutocompleteHighlightedOption(
           highlightIndexNotifier: _highlightedOptionIndex,
           child: Builder(
-            builder: (BuildContext context) => widget.optionsViewBuilder(context, _select, _options),
+            builder: (BuildContext context) {
+              if (_isLoadingOptions && widget.loadingStateBuilder != null) {
+                return widget.loadingStateBuilder!(context, _options);
+              }
+              if (_options.isEmpty && widget.emptyStateBuilder != null) {
+                return widget.emptyStateBuilder!(context, _textEditingController.text);
+              }
+              return widget.optionsViewBuilder(context, _select, _options);
+            },
           ),
         ),
       ),
