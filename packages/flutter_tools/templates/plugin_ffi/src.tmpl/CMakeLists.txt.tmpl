@@ -15,3 +15,4 @@ set_target_properties({{projectName}} PROPERTIES
 )
 
 target_compile_definitions({{projectName}} PUBLIC DART_SHARED_LIB)
+target_link_options({{projectName}} PRIVATE "-Wl,-z,max-page-size=16384")
