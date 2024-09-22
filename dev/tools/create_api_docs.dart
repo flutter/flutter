@@ -659,7 +659,8 @@ class DartdocGenerator {
 
     String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
     print('Executing: (cd "${packageRoot.path}" ; '
-        '${FlutterInformation.instance.getDartBinaryPath().path} '
+        '${FlutterInformation.instance.getFlutterBinaryPath().path} '
+	'pub '
         '${dartdocArgs.map<String>(quote).join(' ')})');
 
     process = ProcessWrapper(await runPubProcess(
@@ -1085,13 +1086,6 @@ class FlutterInformation {
 
   @visibleForTesting
   static set instance(FlutterInformation? value) => _instance = value;
-
-  /// The path to the Dart binary in the Flutter repo.
-  ///
-  /// This is probably a shell script.
-  File getDartBinaryPath() {
-    return getFlutterRoot().childDirectory('bin').childFile('dart');
-  }
 
   /// The path to the Dart binary in the Flutter repo.
   ///
