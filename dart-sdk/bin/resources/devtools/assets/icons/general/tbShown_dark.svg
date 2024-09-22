@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-  <g fill="none" fill-rule="evenodd">
-    <path fill="#AFB1B3" d="M3,3 L13,3 L13,13 L3,13 L3,3 Z M4,4 L4,12 L12,12 L12,4 L4,4 Z"/>
-    <rect width="1" height="10" x="1" y="3" fill="#AFB1B3"/>
-    <rect width="1" height="10" x="14" y="3" fill="#AFB1B3"/>
-  </g>
-</svg>

@@ -1,7 +1,0 @@
-# Describes the SDK vendored packages shipped with the Dart SDK.
-version: 1
-sdk: dart
-# Note that paths are relative to the root of the built SDK.
-packages:
-  - name: _macros
-    path: pkg/_macros
