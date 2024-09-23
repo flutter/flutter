@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_CORE_RANGE_H_
 #define FLUTTER_IMPELLER_CORE_RANGE_H_
 
+#include <algorithm>
 #include <cstddef>
 
 namespace impeller {
@@ -20,6 +21,19 @@ struct Range {
 
   constexpr bool operator==(const Range& o) const {
     return offset == o.offset && length == o.length;
+  }
+
+  /// @brief Create a new range that is a union of this range and other.
+  constexpr Range Merge(const Range& other) {
+    if (other.length == 0) {
+      return *this;
+    }
+    if (length == 0) {
+      return other;
+    }
+    auto end_offset = std::max(offset + length, other.offset + other.length);
+    auto start_offset = std::min(offset, other.offset);
+    return Range{start_offset, end_offset - start_offset};
   }
 };
 
