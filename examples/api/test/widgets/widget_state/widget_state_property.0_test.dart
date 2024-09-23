@@ -33,8 +33,7 @@ void main() {
     expect(getTextColor(tester), Colors.red);
 
     // Hover over the TextButton.
-    final TestGesture gesture =
-        await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.moveTo(tester.getCenter(find.byType(TextButton)));
 
     await tester.pumpAndSettle();

@@ -766,11 +766,11 @@ class _WidgetTextStyleMapper extends WidgetStateTextStyle {
 /// material state properties when their value is needed.
 ///
 /// {@tool dartpad}
-/// This example shows how you can override the default text and icon
-/// color (the "foreground color") of a [TextButton] with a
-/// [WidgetStateProperty]. In this example, the button's text color
-/// will be `Colors.blue` when the button is being pressed, hovered,
-/// or focused. Otherwise, the text color will be `Colors.red`.
+/// This example shows how the default text and icon color
+/// (the "foreground color") of a [TextButton] can be overridden with a
+/// [WidgetStateProperty]. In this example, the button's text color will be
+/// `Colors.blue` when the button is being pressed, hovered, or focused.
+/// Otherwise, the text color will be `Colors.red`.
 ///
 /// ** See code in examples/api/lib/widgets/widget_state/widget_state_property.0.dart **
 /// {@end-tool}
