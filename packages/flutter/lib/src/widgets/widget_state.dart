@@ -390,7 +390,7 @@ class _WidgetStateColorMapper extends _WidgetStateColorTransparent {
 /// This example defines a mouse cursor that resolves to
 /// [SystemMouseCursors.forbidden] when its widget is disabled.
 ///
-/// ** See code in examples/api/lib/material/material_state/material_state_mouse_cursor.0.dart **
+/// ** See code in examples/api/lib/widgets/widget_state/widget_state_mouse_cursor.0.dart **
 /// {@end-tool}
 ///
 /// This class should only be used for parameters which are documented to take
