@@ -5829,5 +5829,6 @@ resting in the night sky.
     expect(data, isNotNull);
     expect(data!.text, testValue);
 
-  }, variant: TargetPlatformVariant.all());
+  }, variant: KeySimulatorTransitModeVariant.all());
+
 }
