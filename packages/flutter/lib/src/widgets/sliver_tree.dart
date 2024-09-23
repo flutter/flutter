@@ -886,13 +886,11 @@ class _TreeSliverState<T> extends State<TreeSliver<T>> with TickerProviderStateM
               _currentAnimationForParent[node]!.controller.dispose();
               _currentAnimationForParent.remove(node);
               _updateActiveAnimations();
-              // If the node is collapsing, we need to rebuild the active nodes
-              // to reflect the new state.
-              // This is because the node's children are no longer active.
+              // If the node is collapsing, we need to unpack the active
+              // nodes to remove the ones that were removed from the tree.
+              // This is only necessary if the node is collapsing.
               if (!node._expanded) {
-                setState(() {
-                   _unpackActiveNodes();
-                });
+                _unpackActiveNodes();
               }
             case AnimationStatus.forward:
             case AnimationStatus.reverse:
