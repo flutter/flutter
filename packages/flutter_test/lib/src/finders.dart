@@ -579,7 +579,51 @@ class CommonFinders {
       skipOffstage: skipOffstage,
     );
   }
+
+
+  /// Finds [Semantics] widgets matching the given `identifier`, either by
+  /// [RegExp.hasMatch] or string equality.
+  ///
+  /// This allows matching against the identifier of a [Semantics] widget, which
+  /// is a unique identifier for the widget in the semantics tree. This is
+  /// exposed to offer a unified way widget tests and e2e tests can match
+  /// against a [Semantics] widget.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// expect(find.bySemanticsIdentifier('Back'), findsOneWidget);
+  /// ```
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder bySemanticsIdentifier(Pattern identifier, {bool skipOffstage = true}) {
+      if (!SemanticsBinding.instance.semanticsEnabled) {
+        throw StateError('Semantics are not enabled. '
+            'Make sure to call tester.ensureSemantics() before using '
+            'this finder, and call dispose on its return value after.');
+      }
+      return byElementPredicate(
+        (Element element) {
+          // Multiple elements can have the same renderObject - we want the "owner"
+          // of the renderObject, i.e. the RenderObjectElement.
+          if (element is! RenderObjectElement) {
+            return false;
+          }
+          final String? semanticsIdentifier =
+              element.renderObject.debugSemantics?.identifier;
+          if (semanticsIdentifier == null) {
+            return false;
+          }
+          return identifier is RegExp
+              ? identifier.hasMatch(semanticsIdentifier)
+              : identifier == semanticsIdentifier;
+        },
+        skipOffstage: skipOffstage,
+      );
+    }
 }
+
 
 /// Provides lightweight syntax for getting frequently used semantics finders.
 ///

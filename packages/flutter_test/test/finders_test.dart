@@ -299,6 +299,45 @@ void main() {
       expect(find.bySemanticsLabel('Foo'), findsOneWidget);
       semanticsHandle.dispose();
     });
+
+    testWidgets('finds Semantically labeled widgets by identifier',
+        (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(
+        Semantics(
+          identifier: 'Add',
+          button: true,
+          child: const TextButton(
+            onPressed: null,
+            child: Text('+'),
+          ),
+        ),
+      ));
+      expect(find.bySemanticsIdentifier('Add'), findsOneWidget);
+      semanticsHandle.dispose();
+    });
+
+    testWidgets('finds Semantically labeled widgets by identifier RegExp',
+        (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+      // list of elements with a prefixed identifier
+      await tester.pumpWidget(_boilerplate(
+        Row(children: <Widget>[
+          Semantics(
+            identifier: 'item-1',
+            child: const Text('Item 1'),
+          ),
+          Semantics(
+            identifier: 'item-2',
+            child: const Text('Item 2'),
+          ),
+        ]),
+      ));
+      expect(find.bySemanticsIdentifier('item'), findsNothing);
+      expect(find.bySemanticsIdentifier(RegExp(r'^item-')), findsNWidgets(2));
+      semanticsHandle.dispose();
+    });
+
   });
 
   group('byTooltip', () {
