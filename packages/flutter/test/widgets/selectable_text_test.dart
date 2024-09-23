@@ -5828,6 +5828,5 @@ resting in the night sky.
     final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
     expect(data, isNotNull);
     expect(data!.text, testValue);
-
   }, variant: TargetPlatformVariant.all());
 }
