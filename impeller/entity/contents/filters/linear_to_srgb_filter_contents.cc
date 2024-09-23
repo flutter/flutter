@@ -51,17 +51,15 @@ std::optional<Entity> LinearToSrgbFilterContents::RenderFilter(
     pass.SetPipeline(renderer.GetLinearToSrgbFilterPipeline(options));
 
     auto size = input_snapshot->texture->GetSize();
-
-    VertexBufferBuilder<VS::PerVertexData> vtx_builder;
-    vtx_builder.AddVertices({
-        {Point(0, 0)},
-        {Point(1, 0)},
-        {Point(0, 1)},
-        {Point(1, 1)},
-    });
+    std::array<VS::PerVertexData, 4> vertices = {
+        VS::PerVertexData{Point(0, 0)},
+        VS::PerVertexData{Point(1, 0)},
+        VS::PerVertexData{Point(0, 1)},
+        VS::PerVertexData{Point(1, 1)},
+    };
 
     auto& host_buffer = renderer.GetTransientsBuffer();
-    pass.SetVertexBuffer(vtx_builder.CreateVertexBuffer(host_buffer));
+    pass.SetVertexBuffer(CreateVertexBuffer(vertices, host_buffer));
 
     VS::FrameInfo frame_info;
     frame_info.mvp = Entity::GetShaderTransform(
