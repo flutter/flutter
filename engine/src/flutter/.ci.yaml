@@ -98,9 +98,10 @@ targets:
     bringup: true
     enabled_branches:
       - main
-    recipe: engine_v2/engine_v2
+    recipe: engine_v2/builder
     properties:
       config_name: linux_android_emulator_skia
+      kvm: "1"
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
@@ -118,9 +119,10 @@ targets:
   - name: Linux linux_android_emulator_skia_tests_34
     enabled_branches:
       - main
-    recipe: engine_v2/engine_v2
+    recipe: engine_v2/builder
     properties:
       config_name: linux_android_emulator_skia_34
+      kvm: "1"
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
@@ -382,7 +384,7 @@ targets:
       - flutter_frontend_server/**
 
   - name: Linux clangd
-    recipe: engine_v2/engine_v2
+    recipe: engine_v2/builder
     properties:
       config_name: linux_unopt_debug_no_rbe
 
