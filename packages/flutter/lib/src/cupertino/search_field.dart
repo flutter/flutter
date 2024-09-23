@@ -343,7 +343,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   TextEditingController get _effectiveController =>
       widget.controller ?? _controller!.value;
 
-  late AnimationController _animationController;
+  double _fadeExtent = 0.0;
   ScrollPosition? _ancestorScrollPosition;
   double _maxHeight = 0.0;
 
@@ -353,11 +353,6 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     if (widget.controller == null) {
       _createLocalController();
     }
-     _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-      value: 1.0,
-    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _calculateMaxHeight();
     });
@@ -393,7 +388,6 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   @override
   void dispose() {
     _ancestorScrollPosition?.removeListener(_onScroll);
-    _animationController.dispose();
     super.dispose();
     if (widget.controller == null) {
       _controller?.dispose();
@@ -434,26 +428,26 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   }
 
   void _onScroll() {
-    if (_ancestorScrollPosition == null) {
+    if (_ancestorScrollPosition == null || !_ancestorScrollPosition!.hasPixels) {
       return;
     }
     final double currentHeight = _maxHeight - _ancestorScrollPosition!.pixels;
     setState(() {
-      _animationController.value = _calculateScrollOpacity(currentHeight);
+      _fadeExtent = _calculateScrollOpacity(currentHeight);
     });
   }
 
   double _calculateScrollOpacity(double currentHeight) {
     final double thresholdHeight = _maxHeight * _kMinHeightBeforeTotalTransparency;
     if (currentHeight >= _maxHeight) {
-      return 1.0;
-    } else if (currentHeight <= thresholdHeight) {
       return 0.0;
+    } else if (currentHeight <= thresholdHeight) {
+      return 1.0;
     } else {
       // Calculate a value between 0 and 1 based on the current height.
       final double range = _maxHeight - thresholdHeight;
       final double progress = (currentHeight - thresholdHeight) / range;
-      return progress;
+      return 1.0 - progress;
     }
   }
 
@@ -463,7 +457,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
         CupertinoLocalizations.of(context).searchTextFieldPlaceholderLabel;
 
     final TextStyle placeholderStyle = widget.placeholderStyle ??
-        TextStyle(color: CupertinoColors.systemGrey.withOpacity(_animationController.value));
+        TextStyle(color: CupertinoColors.systemGrey.withOpacity(1.0 - _fadeExtent));
 
     // The icon size will be scaled by a factor of the accessibility text scale,
     // to follow the behavior of `UISearchTextField`.
@@ -488,11 +482,11 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     final EdgeInsetsGeometry? padding = EdgeInsetsGeometry.lerp(
       widget.padding,
       widget.padding.resolve(Directionality.of(context)).copyWith(top: currentInsets.top / 2),
-      1.0 - _animationController.value,
+      _fadeExtent,
     );
 
     final Widget prefix = Opacity(
-      opacity: _animationController.value,
+      opacity: 1.0 - _fadeExtent,
       child: Padding(
         padding: widget.prefixInsets,
         child: IconTheme(
@@ -503,7 +497,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     );
 
     final Widget suffix = Opacity(
-      opacity: _animationController.value,
+      opacity: 1.0 - _fadeExtent,
       child: Padding(
         padding: widget.suffixInsets,
         child: CupertinoButton(
