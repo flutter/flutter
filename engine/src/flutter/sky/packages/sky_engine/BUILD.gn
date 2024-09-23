@@ -9,6 +9,7 @@ import("$dart_src/sdk/lib/_http/http_sources.gni")
 import("$dart_src/sdk/lib/_internal/js_runtime/interceptors_sources.gni")
 import("$dart_src/sdk/lib/_internal/js_shared/js_types_sources.gni")
 import("$dart_src/sdk/lib/_internal/vm/lib/vm_internal.gni")
+import("$dart_src/sdk/lib/_internal/vm_shared/lib/vm_shared_sources.gni")
 import("$dart_src/sdk/lib/async/async_sources.gni")
 import("$dart_src/sdk/lib/collection/collection_sources.gni")
 import("$dart_src/sdk/lib/concurrent/concurrent_sources.gni")
@@ -125,6 +126,12 @@ copy("vm_internal") {
   outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/_internal/vm/lib/{{source_file_part}}" ]
 }
 
+copy("vm_shared") {
+  lib_path = rebase_path("_internal/vm_shared/lib/", "", dart_sdk_lib_path)
+  sources = rebase_path(vm_shared_sdk_sources, "", lib_path)
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/_internal/vm_shared/lib/{{source_file_part}}" ]
+}
+
 copy("io") {
   lib_path = rebase_path("io", "", dart_sdk_lib_path)
   sources = rebase_path(io_sdk_sources, "", lib_path)
@@ -236,6 +243,7 @@ group("copy_dart_sdk") {
     ":math",
     ":typed_data",
     ":vm_internal",
+    ":vm_shared",
   ]
 }
 
