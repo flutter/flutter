@@ -195,6 +195,7 @@ void main() {
       expect(outputFlutterFramework.childDirectory('Headers'), isNot(exists));
       expect(outputFlutterFramework.childLink('Modules'), isNot(exists));
       expect(outputFlutterFramework.childDirectory('Modules'), isNot(exists));
+      expect(outputFlutterFramework.childFile('PrivacyInfo.xcprivacy'), exists);
 
       // Build again without cleaning.
       final ProcessResult secondBuild = processManager.runSync(buildCommand, workingDirectory: workingDirectory);
