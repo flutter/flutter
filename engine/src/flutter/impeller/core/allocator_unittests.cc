@@ -79,5 +79,52 @@ TEST(AllocatorTest, TextureDescriptorCompatibility) {
   }
 }
 
+TEST(AllocatorTest, RangeTest) {
+  {
+    Range a = Range{0, 10};
+    Range b = Range{10, 20};
+    auto merged = a.Merge(b);
+
+    EXPECT_EQ(merged.offset, 0u);
+    EXPECT_EQ(merged.length, 30u);
+  }
+
+  {
+    Range a = Range{0, 10};
+    Range b = Range{100, 20};
+    auto merged = a.Merge(b);
+
+    EXPECT_EQ(merged.offset, 0u);
+    EXPECT_EQ(merged.length, 120u);
+  }
+
+  {
+    Range a = Range{0, 10};
+    Range b = Range{100, 20};
+    auto merged = b.Merge(a);
+
+    EXPECT_EQ(merged.offset, 0u);
+    EXPECT_EQ(merged.length, 120u);
+  }
+
+  {
+    Range a = Range{0, 10};
+    Range b = Range{100, 0};
+    auto merged = b.Merge(a);
+
+    EXPECT_EQ(merged.offset, 0u);
+    EXPECT_EQ(merged.length, 10u);
+  }
+
+  {
+    Range a = Range{0, 10};
+    Range b = Range{0, 10};
+    auto merged = b.Merge(a);
+
+    EXPECT_EQ(merged.offset, 0u);
+    EXPECT_EQ(merged.length, 10u);
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller

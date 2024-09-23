@@ -104,6 +104,7 @@ struct GLProc {
   PROC(BlendEquationSeparate);               \
   PROC(BlendFuncSeparate);                   \
   PROC(BufferData);                          \
+  PROC(BufferSubData);                       \
   PROC(CheckFramebufferStatus);              \
   PROC(Clear);                               \
   PROC(ClearColor);                          \
