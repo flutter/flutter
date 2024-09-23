@@ -1,4 +1,4 @@
-## Preqrequisites
+## Prerequisites
 
  * Linux, Mac OS X, or Windows
 
