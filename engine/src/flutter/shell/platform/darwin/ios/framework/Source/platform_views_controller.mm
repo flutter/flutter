@@ -797,13 +797,18 @@ void PlatformViewsController::BringLayersIntoView(const LayersMap& layer_map,
   NSMutableArray* desired_platform_subviews = [NSMutableArray array];
   for (int64_t platform_view_id : composition_order) {
     UIView* platform_view_root = platform_views_[platform_view_id].root_view.get();
-    [desired_platform_subviews addObject:platform_view_root];
+    if (platform_view_root != nil) {
+      [desired_platform_subviews addObject:platform_view_root];
+    }
 
     auto maybe_layer_data = layer_map.find(platform_view_id);
     if (maybe_layer_data != layer_map.end()) {
-      [desired_platform_subviews addObject:maybe_layer_data->second.layer->overlay_view_wrapper];
+      auto view = maybe_layer_data->second.layer->overlay_view_wrapper;
+      if (view != nil) {
+        [desired_platform_subviews addObject:view];
+        previous_composition_order_.push_back(platform_view_id);
+      }
     }
-    previous_composition_order_.push_back(platform_view_id);
   }
 
   NSSet* desired_platform_subviews_set = [NSSet setWithArray:desired_platform_subviews];
