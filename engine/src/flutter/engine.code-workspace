@@ -1,3 +1,5 @@
+// Don't edit directly, see //tools/vscode_workspace for a script
+// that can refresh this from yaml.
 {
   "folders": [
     {
@@ -126,7 +128,7 @@
     "C_Cpp.default.includePath": [
       "${default}",
       "${workspaceFolder}/..",
-      "${workspaceFolder}",
+      "${workspaceFolder}"
     ],
     "dotnet.defaultSolution": "disable",
     "dart.showTodos": false,
@@ -142,6 +144,32 @@
         "gtest": {
           "prependTestRunningArgs": [
             "--enable_playground"
+          ]
+        }
+      },
+      {
+        "name": "display_list_unittests_arm64",
+        "pattern": "../out/host_debug_unopt_arm64/display_list_unittests",
+        "runTask": {
+          "before": [
+            "display_list_unittests_arm64"
+          ]
+        }
+      },
+      {
+        "name": "impeller_golden_tests_arm64",
+        "pattern": "../out/host_debug_unopt_arm64/impeller_golden_tests",
+        "runTask": {
+          "before": [
+            "impeller_golden_tests_arm64"
+          ]
+        },
+        "gtest": {
+          "prependTestRunningArgs": [
+            "--working_dir=~/Desktop"
+          ],
+          "prependTestListingArgs": [
+            "--working_dir=~/Desktop"
           ]
         }
       }
@@ -161,7 +189,7 @@
             "text": "settings set target.source-map \"flutter/\" \"${workspaceFolder}\"",
             "ignoreFailures": false
           }
-        ],
+        ]
       },
       "win32": {
         "type": "cppvsdbg"
@@ -171,7 +199,7 @@
       "cwd": "${cwd}",
       "env": "${envObj}",
       "environment": "${envObjArray}",
-      "sourceFileMap": "${sourceFileMapObj}",
+      "sourceFileMap": "${sourceFileMapObj}"
     }
   },
   "tasks": {
@@ -195,44 +223,88 @@
         ],
         "presentation": {
           "echo": true,
-          "reveal": "always",
+          "reveal": "silent",
           "focus": false,
           "panel": "shared",
           "clear": true
         },
         "group": {
-          "kind": "build",
+          "kind": "build"
         }
+      },
+      {
+        "type": "shell",
+        "command": "./flutter/bin/et",
+        "options": {
+          "cwd": "${workspaceFolder}/.."
+        },
+        "problemMatcher": [
+          "$gcc"
+        ],
+        "presentation": {
+          "echo": true,
+          "reveal": "silent",
+          "focus": false,
+          "panel": "shared",
+          "clear": true
+        },
+        "group": {
+          "kind": "build"
+        },
+        "label": "display_list_unittests_arm64",
+        "args": [
+          "build",
+          "-c",
+          "host_debug_unopt_arm64",
+          "//flutter/display_list:display_list_unittests"
+        ]
+      },
+      {
+        "type": "shell",
+        "command": "./flutter/bin/et",
+        "options": {
+          "cwd": "${workspaceFolder}/.."
+        },
+        "problemMatcher": [
+          "$gcc"
+        ],
+        "presentation": {
+          "echo": true,
+          "reveal": "silent",
+          "focus": false,
+          "panel": "shared",
+          "clear": true
+        },
+        "group": {
+          "kind": "build"
+        },
+        "label": "impeller_golden_tests_arm64",
+        "args": [
+          "build",
+          "-c",
+          "host_debug_unopt_arm64",
+          "//flutter/impeller/golden_tests:impeller_golden_tests"
+        ]
       }
     ]
   },
   "extensions": {
     "recommendations": [
-      // C++ TestMate
       "matepek.vscode-catch2-test-adapter",
-      // Uses github-styled markdown preview, which supports more features than the default markdown preview.
       "bierner.github-markdown-preview",
-      // Flutter and Dart extensions.
       "Dart-Code.dart-code",
-      // Supports C/C++ in the engine.
-      // See https://github.com/flutter/engine/blob/main/docs/contributing/Setting-up-the-Engine-development-environment.md#vscode-with-cc-intellisense-cc
       "llvm-vs-code-extensions.vscode-clangd",
-      // Auto-formats C/C++ code.
-      // https://github.com/flutter/engine/blob/main/CONTRIBUTING.md#cc
-      "xaver.clang-format",
+      "xaver.clang-format"
     ]
   },
   "launch": {
     "version": "0.2.0",
     "configurations": [
       {
-        "name": "impeller_unittests_arm64",
+        "name": "display_list_unittests_arm64",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/../out/host_debug_unopt_arm64/impeller_unittests",
-        "args": [
-          "--enable_playground",
-        ],
+        "program": "${workspaceFolder}/../out/host_debug_unopt_arm64/display_list_unittests",
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}/../out/host_debug_unopt_arm64",
         "environment": [],
@@ -250,7 +322,61 @@
             "ignoreFailures": false
           }
         ],
-        "preLaunchTask": "impeller_unittests_arm64",
+        "preLaunchTask": "display_list_unittests_arm64"
+      },
+      {
+        "type": "cppdbg",
+        "request": "launch",
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/../out/host_debug_unopt_arm64",
+        "environment": [],
+        "externalConsole": false,
+        "MIMode": "lldb",
+        "setupCommands": [
+          {
+            "description": "Enable pretty-printing for lldb",
+            "text": "settings set target.pretty-printing true",
+            "ignoreFailures": true
+          },
+          {
+            "description": "Source map",
+            "text": "settings set target.source-map \"flutter/\" \"${workspaceFolder}\"",
+            "ignoreFailures": false
+          }
+        ],
+        "name": "impeller_unittests_arm64",
+        "program": "${workspaceFolder}/../out/host_debug_unopt_arm64/impeller_unittests",
+        "args": [
+          "--enable_playground"
+        ],
+        "preLaunchTask": "impeller_unittests_arm64"
+      },
+      {
+        "type": "cppdbg",
+        "request": "launch",
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/../out/host_debug_unopt_arm64",
+        "environment": [],
+        "externalConsole": false,
+        "MIMode": "lldb",
+        "setupCommands": [
+          {
+            "description": "Enable pretty-printing for lldb",
+            "text": "settings set target.pretty-printing true",
+            "ignoreFailures": true
+          },
+          {
+            "description": "Source map",
+            "text": "settings set target.source-map \"flutter/\" \"${workspaceFolder}\"",
+            "ignoreFailures": false
+          }
+        ],
+        "name": "impeller_golden_tests_arm64",
+        "program": "${workspaceFolder}/../out/host_debug_unopt_arm64/impeller_golden_tests",
+        "args": [
+          "--working_dir=~/Desktop"
+        ],
+        "preLaunchTask": "impeller_golden_tests_arm64"
       }
     ],
     "compounds": []
