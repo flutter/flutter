@@ -26,6 +26,8 @@ constexpr GLenum ToMode(PrimitiveType primitive_type) {
       return GL_LINE_STRIP;
     case PrimitiveType::kPoint:
       return GL_POINTS;
+    case PrimitiveType::kTriangleFan:
+      return GL_TRIANGLE_FAN;
   }
   FML_UNREACHABLE();
 }

@@ -108,6 +108,9 @@ class CapabilitiesGLES final
   bool SupportsDeviceTransientTextures() const override;
 
   // |Capabilities|
+  bool SupportsTriangleFan() const override;
+
+  // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override;
 
   // |Capabilities|

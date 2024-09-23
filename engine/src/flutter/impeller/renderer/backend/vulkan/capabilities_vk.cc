@@ -708,4 +708,8 @@ CapabilitiesVK::GetSupportedFRCRate(CompressionType compression_type,
   return std::nullopt;
 }
 
+bool CapabilitiesVK::SupportsTriangleFan() const {
+  return true;
+}
+
 }  // namespace impeller

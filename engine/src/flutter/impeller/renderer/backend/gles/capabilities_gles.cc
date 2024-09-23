@@ -181,6 +181,10 @@ bool CapabilitiesGLES::SupportsDeviceTransientTextures() const {
   return false;
 }
 
+bool CapabilitiesGLES::SupportsTriangleFan() const {
+  return true;
+}
+
 PixelFormat CapabilitiesGLES::GetDefaultColorFormat() const {
   return PixelFormat::kR8G8B8A8UNormInt;
 }

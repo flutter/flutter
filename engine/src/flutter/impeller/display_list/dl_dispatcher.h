@@ -14,7 +14,6 @@
 #include "impeller/aiks/experimental_canvas.h"
 #include "impeller/aiks/paint.h"
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/geometry/color.h"
 
 namespace impeller {
 
@@ -236,7 +235,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
 
   virtual Canvas& GetCanvas() = 0;
 
- private:
+ protected:
   Paint paint_;
   Matrix initial_matrix_;
 
@@ -314,7 +313,12 @@ class ExperimentalDlDispatcher : public DlDispatcherBase {
 
   void FinishRecording() { canvas_.EndReplay(); }
 
+  // |flutter::DlOpReceiver|
+  void drawVertices(const std::shared_ptr<flutter::DlVertices>& vertices,
+                    flutter::DlBlendMode dl_mode) override;
+
  private:
+  const ContentContext& renderer_;
   ExperimentalCanvas canvas_;
 
   Canvas& GetCanvas() override;

@@ -350,13 +350,13 @@ enum class IndexType {
 
 /// Decides how backend draws pixels based on input vertices.
 enum class PrimitiveType : uint8_t {
-  /// Draws a triage for each separate set of three vertices.
+  /// Draws a triangle for each separate set of three vertices.
   ///
   /// Vertices [A, B, C, D, E, F] will produce triages
   /// [ABC, DEF].
   kTriangle,
 
-  /// Draws a triage for every adjacent three vertices.
+  /// Draws a triangle for every adjacent three vertices.
   ///
   /// Vertices [A, B, C, D, E, F] will produce triages
   /// [ABC, BCD, CDE, DEF].
@@ -376,8 +376,14 @@ enum class PrimitiveType : uint8_t {
 
   /// Draws a point at each input vertex.
   kPoint,
-  // Triangle fans are implementation dependent and need extra extensions
-  // checks. Hence, they are not supported here.
+
+  /// Draws a triangle for every two vertices, after the first.
+  ///
+  /// The first vertex acts as the hub, all following vertices connect with
+  /// this hub to "fan" out from the first vertex.
+  ///
+  /// Triangle fans are not supported in Metal and need a capability check.
+  kTriangleFan,
 };
 
 enum class PolygonMode {
