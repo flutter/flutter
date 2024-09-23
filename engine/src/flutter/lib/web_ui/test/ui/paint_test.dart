@@ -69,7 +69,7 @@ Future<void> testMain() async {
     expect(
       paint.toString(),
       'Paint('
-      'Color(0xaabbccdd); '
+      '${const ui.Color(0xaabbccdd)}; '
       'BlendMode.darken; '
       'colorFilter: ColorFilter.linearToSrgbGamma(); '
       'maskFilter: MaskFilter.blur(BlurStyle.normal, 1.7); '
