@@ -196,7 +196,6 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
     return SelectedContent(plainText: '$plainText\n');
   }
 
-
   @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
     assert(!widget._disabled);
