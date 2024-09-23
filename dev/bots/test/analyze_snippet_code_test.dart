@@ -19,7 +19,6 @@ const List<String> expectedMainErrors = <String>[
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:112:21: (top-level declaration) (invalid_assignment)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:134:14: (top-level declaration) (undefined_identifier)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:136:21: (top-level declaration) (read_potentially_unassigned_final)',
-  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:147:12: (self-contained program) (unused_import)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:148:11: (self-contained program) (undefined_class)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:148:22: (self-contained program) (undefined_function)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:153:10: (stateful widget) (annotate_overrides)',
