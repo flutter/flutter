@@ -909,7 +909,7 @@ void main() {
               port: 0,
               tlsCertPath: null,
               tlsCertKeyPath: null,
-              packagesFilePath: '.packages',
+              packagesFilePath: '.dart_tool/package_config.json',
               urlTunneller: null, // ignore: avoid_redundant_argument_values
               useSseForDebugProxy: true,
               useSseForDebugBackend: true,
@@ -1049,7 +1049,7 @@ void main() {
               port: 0,
               tlsCertPath: null,
               tlsCertKeyPath: null,
-              packagesFilePath: '.packages',
+              packagesFilePath: '.dart_tool/package_config.json',
               urlTunneller: null, // ignore: avoid_redundant_argument_values
               useSseForDebugProxy: true,
               useSseForDebugBackend: true,
@@ -1189,7 +1189,7 @@ void main() {
                 port: 0,
                 tlsCertPath: null,
                 tlsCertKeyPath: null,
-                packagesFilePath: '.packages',
+                packagesFilePath: '.dart_tool/package_config.json',
                 urlTunneller: null,
                 useSseForDebugProxy: true,
                 useSseForDebugBackend: true,
@@ -1268,7 +1268,7 @@ void main() {
               port: 0,
               tlsCertPath: null,
               tlsCertKeyPath: null,
-              packagesFilePath: '.packages',
+              packagesFilePath: '.dart_tool/package_config.json',
               urlTunneller: null, // ignore: avoid_redundant_argument_values
               useSseForDebugProxy: true,
               useSseForDebugBackend: true,
@@ -1315,7 +1315,7 @@ void main() {
               port: 0,
               tlsCertPath: null,
               tlsCertKeyPath: null,
-              packagesFilePath: '.packages',
+              packagesFilePath: '.dart_tool/package_config.json',
               urlTunneller: null, // ignore: avoid_redundant_argument_values
               useSseForDebugProxy: true,
               useSseForDebugBackend: true,
@@ -1371,7 +1371,7 @@ void main() {
               port: 0,
               tlsCertPath: null,
               tlsCertKeyPath: null,
-              packagesFilePath: '.packages',
+              packagesFilePath: '.dart_tool/package_config.json',
               urlTunneller: null, // ignore: avoid_redundant_argument_values
               useSseForDebugProxy: true,
               useSseForDebugBackend: true,
@@ -1433,7 +1433,7 @@ void main() {
               port: 0,
               tlsCertPath: dummyCertPath,
               tlsCertKeyPath: dummyCertKeyPath,
-              packagesFilePath: '.packages',
+              packagesFilePath: '.dart_tool/package_config.json',
               urlTunneller: null, // ignore: avoid_redundant_argument_values
               useSseForDebugProxy: true,
               useSseForDebugBackend: true,
@@ -1613,7 +1613,7 @@ void main() {
               port: 0,
               tlsCertPath: null,
               tlsCertKeyPath: null,
-              packagesFilePath: '.packages',
+              packagesFilePath: '.dart_tool/package_config.json',
               urlTunneller: null, // ignore: avoid_redundant_argument_values
               useSseForDebugProxy: true,
               useSseForDebugBackend: true,
