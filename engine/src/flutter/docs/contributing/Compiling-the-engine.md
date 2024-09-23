@@ -200,18 +200,28 @@ Also, be sure that Python27 is before any other python in your Path.
 
 ### Build components for Fuchsia
 
-1. Building fuchsia is only supported on linux. You need to run `gclient config --custom-var=download_fuchsia_deps=True` then `gclient sync`.
+1. Building fuchsia is only supported on linux. You need to update `engine/.gclient`, or `../.gclient` if current directory is `engine/src`, with `custom_vars`.
 
-It will set `"download_fuchsia_deps": True` in `"custom_vars"` section in `.gclient` file, and download necessary binaries to build fuchsia components.
+```
+solutions = [
+  {
+    # ...
+    "custom_vars": {
+      "download_fuchsia_deps": True,
+      "run_fuchsia_emu": True,
+    },
+  },
+]
+```
 
-2. If you'd like to run tests locally, also run `gclient config --custom-var=run_fuchsia_emu=True` then `gclient sync`.
+> You may ignore `"run_fuchsia_emu": True` if you won't run tests locally.
 
-It will set `"run_fuchsia_emu": True` in `"custom_vars"` section in `.gclient` file, and download necessary binaries and images to run tests on fuchsia emulators.
-You can set both `custom_vars` and run `gclient sync` only once.
+Run `gclient sync`.
 
-You will also need kvm enabled, or nested virtualization on the gcloud VMs. Fuchsia and the tests will all be executed on the qemu.
+> [!WARNING]
+> When running tests locally, you will also need kvm enabled, or nested virtualization on the gcloud VMs. Fuchsia and the tests will all be executed on the qemu.
 
-3. Prepare and build
+2. Prepare and build
 
 ```
 ./flutter/tools/gn --fuchsia --no-lto
@@ -238,7 +248,7 @@ fuchsia_tests
   * Use `autoninja` if it's available.
   * `-C out/fuchsia_release_x64` for release build; other configurations are similar with a different folder name in `out/`.
 
-4. Run all tests locally
+3. Run all tests locally
 
 ```
 python3 flutter/tools/fuchsia/with_envs.py flutter/testing/fuchsia/run_tests.py
@@ -246,6 +256,10 @@ python3 flutter/tools/fuchsia/with_envs.py flutter/testing/fuchsia/run_tests.py
 
   * It runs the tests in `out/fuchsia_debug_x64` by default. According to the configuration, it may take 5 minutes with regular gtest output to the terminal.
   * Add `fuchsia_release_x64` at the end of the command for release build; other configurations are similar with a different folder name in `out/`.
+
+```
+python3 flutter/tools/fuchsia/with_envs.py flutter/testing/fuchsia/run_tests.py fuchsia_release_x64
+```
 
 ## Compiling for the Web
 
