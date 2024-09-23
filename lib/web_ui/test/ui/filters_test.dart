@@ -121,22 +121,22 @@ Future<void> testMain() async {
 
   test('color filter as image filter', () async {
     const ui.ColorFilter colorFilter = ui.ColorFilter.mode(
-      ui.Color.fromRGBO(0, 0, 255, 128),
+      ui.Color.fromARGB(128, 0, 0, 255),
       ui.BlendMode.srcOver,
     );
     await drawTestImageWithPaint(ui.Paint()..imageFilter = colorFilter);
     await matchGoldenFile('ui_filter_colorfilter_as_imagefilter.png', region: region);
-    expect(colorFilter.toString(), 'ColorFilter.mode(Color(0x800000ff), BlendMode.srcOver)');
+    expect(colorFilter.toString(), 'ColorFilter.mode(${const ui.Color(0x800000ff)}, BlendMode.srcOver)');
   });
 
   test('mode color filter', () async {
     const ui.ColorFilter colorFilter = ui.ColorFilter.mode(
-      ui.Color.fromRGBO(0, 0, 255, 128),
+      ui.Color.fromARGB(128, 0, 0, 255),
       ui.BlendMode.srcOver,
     );
     await drawTestImageWithPaint(ui.Paint()..colorFilter = colorFilter);
     await matchGoldenFile('ui_filter_mode_colorfilter.png', region: region);
-    expect(colorFilter.toString(), 'ColorFilter.mode(Color(0x800000ff), BlendMode.srcOver)');
+    expect(colorFilter.toString(), 'ColorFilter.mode(${const ui.Color(0x800000ff)}, BlendMode.srcOver)');
   });
 
   test('linearToSRGBGamma color filter', () async {
