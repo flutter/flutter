@@ -310,6 +310,8 @@ struct Vector4 {
     return *this + (v - *this) * t;
   }
 
+  constexpr Vector2 xy() const { return Vector2(x, y); }
+
   std::string ToString() const;
 };
 

@@ -11,16 +11,13 @@ uniform f16sampler2D texture_sampler;
 
 layout(constant_id = 0) const float supports_decal = 1.0;
 
-struct KernelSample {
-  vec2 uv_offset;
-  float coefficient;
-};
-
 uniform KernelSamples {
-  int sample_count;
-  KernelSample samples[50];
+  float sample_count;
+
+  // X, Y are uv offset and Z is Coefficient. W is padding.
+  vec4 sample_data[50];
 }
-blur_info;
+kernel_samples;
 
 f16vec4 Sample(f16sampler2D tex, vec2 coords) {
   if (supports_decal == 1.0) {
@@ -36,11 +33,11 @@ out f16vec4 frag_color;
 void main() {
   f16vec4 total_color = f16vec4(0.0hf);
 
-  for (int i = 0; i < blur_info.sample_count; ++i) {
-    float16_t coefficient = float16_t(blur_info.samples[i].coefficient);
-    total_color +=
-        coefficient * Sample(texture_sampler,
-                             v_texture_coords + blur_info.samples[i].uv_offset);
+  for (int i = 0; i < int(kernel_samples.sample_count); i++) {
+    float16_t coefficient = float16_t(kernel_samples.sample_data[i].z);
+    total_color += coefficient *
+                   Sample(texture_sampler,
+                          v_texture_coords + kernel_samples.sample_data[i].xy);
   }
 
   frag_color = total_color;
