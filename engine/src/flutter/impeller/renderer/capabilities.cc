@@ -56,6 +56,9 @@ class StandardCapabilities final : public Capabilities {
   }
 
   // |Capabilities|
+  bool SupportsTriangleFan() const override { return supports_triangle_fan_; }
+
+  // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override {
     return default_color_format_;
   }
@@ -90,6 +93,7 @@ class StandardCapabilities final : public Capabilities {
                        bool supports_read_from_resolve,
                        bool supports_decal_sampler_address_mode,
                        bool supports_device_transient_textures,
+                       bool supports_triangle_fan,
                        PixelFormat default_color_format,
                        PixelFormat default_stencil_format,
                        PixelFormat default_depth_stencil_format,
@@ -104,6 +108,7 @@ class StandardCapabilities final : public Capabilities {
         supports_decal_sampler_address_mode_(
             supports_decal_sampler_address_mode),
         supports_device_transient_textures_(supports_device_transient_textures),
+        supports_triangle_fan_(supports_triangle_fan),
         default_color_format_(default_color_format),
         default_stencil_format_(default_stencil_format),
         default_depth_stencil_format_(default_depth_stencil_format),
@@ -120,6 +125,7 @@ class StandardCapabilities final : public Capabilities {
   bool supports_read_from_resolve_ = false;
   bool supports_decal_sampler_address_mode_ = false;
   bool supports_device_transient_textures_ = false;
+  bool supports_triangle_fan_ = false;
   PixelFormat default_color_format_ = PixelFormat::kUnknown;
   PixelFormat default_stencil_format_ = PixelFormat::kUnknown;
   PixelFormat default_depth_stencil_format_ = PixelFormat::kUnknown;
@@ -209,6 +215,11 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetDefaultGlyphAtlasFormat(
   return *this;
 }
 
+CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsTriangleFan(bool value) {
+  supports_triangle_fan_ = value;
+  return *this;
+}
+
 std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
   return std::unique_ptr<StandardCapabilities>(new StandardCapabilities(  //
       supports_offscreen_msaa_,                                           //
@@ -220,6 +231,7 @@ std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
       supports_read_from_resolve_,                                        //
       supports_decal_sampler_address_mode_,                               //
       supports_device_transient_textures_,                                //
+      supports_triangle_fan_,                                             //
       default_color_format_.value_or(PixelFormat::kUnknown),              //
       default_stencil_format_.value_or(PixelFormat::kUnknown),            //
       default_depth_stencil_format_.value_or(PixelFormat::kUnknown),      //
