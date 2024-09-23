@@ -54,20 +54,21 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
   }
 
   auto size = src_snapshot->texture->GetSize();
-  VertexBufferBuilder<VS::PerVertexData> vtx_builder;
-  vtx_builder.AddVertices({
-      {Point(0, 0), Point(0, 0)},
-      {Point(size.width, 0), Point(1, 0)},
-      {Point(0, size.height), Point(0, 1)},
-      {Point(size.width, size.height), Point(1, 1)},
-  });
+
+  std::array<VS::PerVertexData, 4> vertices = {
+      VS::PerVertexData{Point(0, 0), Point(0, 0)},
+      VS::PerVertexData{Point(size.width, 0), Point(1, 0)},
+      VS::PerVertexData{Point(0, size.height), Point(0, 1)},
+      VS::PerVertexData{Point(size.width, size.height), Point(1, 1)},
+  };
 
   auto options = OptionsFromPass(pass);
   options.blend_mode = BlendMode::kSource;
   options.primitive_type = PrimitiveType::kTriangleStrip;
 
   pass.SetCommandLabel("Framebuffer Advanced Blend Filter");
-  pass.SetVertexBuffer(vtx_builder.CreateVertexBuffer(host_buffer));
+  pass.SetVertexBuffer(
+      CreateVertexBuffer(vertices, renderer.GetTransientsBuffer()));
 
   switch (blend_mode_) {
     case BlendMode::kScreen:

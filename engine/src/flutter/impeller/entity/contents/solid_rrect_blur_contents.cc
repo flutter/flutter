@@ -69,8 +69,6 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
   using VS = RRectBlurPipeline::VertexShader;
   using FS = RRectBlurPipeline::FragmentShader;
 
-  VertexBufferBuilder<VS::PerVertexData> vtx_builder;
-
   // Clamp the max kernel width/height to 1000 to limit the extent
   // of the blur and to kEhCloseEnough to prevent NaN calculations
   // trying to evaluate a Guassian distribution with a sigma of 0.
@@ -79,19 +77,17 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
   // sigma->radius conversion we use for slower blurs.
   auto blur_radius = PadForSigma(blur_sigma);
   auto positive_rect = rect_->GetPositive();
-  {
-    auto left = -blur_radius;
-    auto top = -blur_radius;
-    auto right = positive_rect.GetWidth() + blur_radius;
-    auto bottom = positive_rect.GetHeight() + blur_radius;
+  auto left = -blur_radius;
+  auto top = -blur_radius;
+  auto right = positive_rect.GetWidth() + blur_radius;
+  auto bottom = positive_rect.GetHeight() + blur_radius;
 
-    vtx_builder.AddVertices({
-        {Point(left, top)},
-        {Point(right, top)},
-        {Point(left, bottom)},
-        {Point(right, bottom)},
-    });
-  }
+  std::array<VS::PerVertexData, 4> vertices = {
+      VS::PerVertexData{Point(left, top)},
+      VS::PerVertexData{Point(right, top)},
+      VS::PerVertexData{Point(left, bottom)},
+      VS::PerVertexData{Point(right, bottom)},
+  };
 
   ContentContextOptions opts = OptionsFromPassAndEntity(pass, entity);
   opts.primitive_type = PrimitiveType::kTriangleStrip;
@@ -115,15 +111,13 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
                                        positive_rect.GetWidth() * 0.5f),
                             std::clamp(corner_radii_.height, kEhCloseEnough,
                                        positive_rect.GetHeight() * 0.5f)};
-
+  auto& host_buffer = renderer.GetTransientsBuffer();
   pass.SetCommandLabel("RRect Shadow");
   pass.SetPipeline(renderer.GetRRectBlurPipeline(opts));
-  pass.SetVertexBuffer(
-      vtx_builder.CreateVertexBuffer(renderer.GetTransientsBuffer()));
-  VS::BindFrameInfo(pass,
-                    renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
-  FS::BindFragInfo(pass,
-                   renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
+  pass.SetVertexBuffer(CreateVertexBuffer(vertices, host_buffer));
+
+  VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
+  FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
 
   if (!pass.Draw().ok()) {
     return false;

@@ -34,15 +34,6 @@ SamplerDescriptor MakeSamplerDescriptor(MinMagFilter filter,
   return sampler_desc;
 }
 
-template <typename T>
-void BindVertices(RenderPass& pass,
-                  HostBuffer& host_buffer,
-                  std::initializer_list<typename T::PerVertexData>&& vertices) {
-  VertexBufferBuilder<typename T::PerVertexData> vtx_builder;
-  vtx_builder.AddVertices(vertices);
-  pass.SetVertexBuffer(vtx_builder.CreateVertexBuffer(host_buffer));
-}
-
 void SetTileMode(SamplerDescriptor* descriptor,
                  const ContentContext& renderer,
                  Entity::TileMode tile_mode) {
@@ -329,6 +320,8 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
     const SamplerDescriptor& sampler_descriptor,
     const DownsamplePassArgs& pass_args,
     Entity::TileMode tile_mode) {
+  using VS = TextureFillVertexShader;
+
   // If the texture already had mip levels generated, then we can use the
   // original downsample shader.
   if (pass_args.effective_scalar.x >= 0.5f ||
@@ -351,13 +344,13 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
           frag_info.alpha = 1.0;
 
           const Quad& uvs = pass_args.uvs;
-          BindVertices<TextureFillVertexShader>(pass, host_buffer,
-                                                {
-                                                    {Point(0, 0), uvs[0]},
-                                                    {Point(1, 0), uvs[1]},
-                                                    {Point(0, 1), uvs[2]},
-                                                    {Point(1, 1), uvs[3]},
-                                                });
+          std::array<VS::PerVertexData, 4> vertices = {
+              VS::PerVertexData{Point(0, 0), uvs[0]},
+              VS::PerVertexData{Point(1, 0), uvs[1]},
+              VS::PerVertexData{Point(0, 1), uvs[2]},
+              VS::PerVertexData{Point(1, 1), uvs[3]},
+          };
+          pass.SetVertexBuffer(CreateVertexBuffer(vertices, host_buffer));
 
           SamplerDescriptor linear_sampler_descriptor = sampler_descriptor;
           SetTileMode(&linear_sampler_descriptor, renderer, tile_mode);
@@ -406,13 +399,13 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
           frag_info.pixel_size = Vector2(1.0f / Size(input_texture->GetSize()));
 
           const Quad& uvs = pass_args.uvs;
-          BindVertices<TextureFillVertexShader>(pass, host_buffer,
-                                                {
-                                                    {Point(0, 0), uvs[0]},
-                                                    {Point(1, 0), uvs[1]},
-                                                    {Point(0, 1), uvs[2]},
-                                                    {Point(1, 1), uvs[3]},
-                                                });
+          std::array<VS::PerVertexData, 4> vertices = {
+              VS::PerVertexData{Point(0, 0), uvs[0]},
+              VS::PerVertexData{Point(1, 0), uvs[1]},
+              VS::PerVertexData{Point(0, 1), uvs[2]},
+              VS::PerVertexData{Point(1, 1), uvs[3]},
+          };
+          pass.SetVertexBuffer(CreateVertexBuffer(vertices, host_buffer));
 
           SamplerDescriptor linear_sampler_descriptor = sampler_descriptor;
           SetTileMode(&linear_sampler_descriptor, renderer, tile_mode);
@@ -443,6 +436,8 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
     const BlurParameters& blur_info,
     std::optional<RenderTarget> destination_target,
     const Quad& blur_uvs) {
+  using VS = GaussianBlurVertexShader;
+
   if (blur_info.blur_sigma < kEhCloseEnough) {
     return input_pass;
   }
@@ -464,13 +459,13 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
         options.primitive_type = PrimitiveType::kTriangleStrip;
         pass.SetPipeline(renderer.GetGaussianBlurPipeline(options));
 
-        BindVertices<GaussianBlurVertexShader>(pass, host_buffer,
-                                               {
-                                                   {blur_uvs[0], blur_uvs[0]},
-                                                   {blur_uvs[1], blur_uvs[1]},
-                                                   {blur_uvs[2], blur_uvs[2]},
-                                                   {blur_uvs[3], blur_uvs[3]},
-                                               });
+        std::array<VS::PerVertexData, 4> vertices = {
+            VS::PerVertexData{blur_uvs[0], blur_uvs[0]},
+            VS::PerVertexData{blur_uvs[1], blur_uvs[1]},
+            VS::PerVertexData{blur_uvs[2], blur_uvs[2]},
+            VS::PerVertexData{blur_uvs[3], blur_uvs[3]},
+        };
+        pass.SetVertexBuffer(CreateVertexBuffer(vertices, host_buffer));
 
         SamplerDescriptor linear_sampler_descriptor = sampler_descriptor;
         linear_sampler_descriptor.mag_filter = MinMagFilter::kLinear;

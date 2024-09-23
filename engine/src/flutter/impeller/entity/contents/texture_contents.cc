@@ -124,16 +124,19 @@ bool TextureContents::Render(const ContentContext& renderer,
 
   auto texture_coords =
       Rect::MakeSize(texture_->GetSize()).Project(source_rect_);
-
-  VertexBufferBuilder<VS::PerVertexData> vertex_builder;
-  vertex_builder.AddVertices({
-      {destination_rect_.GetLeftTop(), texture_coords.GetLeftTop()},
-      {destination_rect_.GetRightTop(), texture_coords.GetRightTop()},
-      {destination_rect_.GetLeftBottom(), texture_coords.GetLeftBottom()},
-      {destination_rect_.GetRightBottom(), texture_coords.GetRightBottom()},
-  });
-
   auto& host_buffer = renderer.GetTransientsBuffer();
+
+  std::array<VS::PerVertexData, 4> vertices = {
+      VS::PerVertexData{destination_rect_.GetLeftTop(),
+                        texture_coords.GetLeftTop()},
+      VS::PerVertexData{destination_rect_.GetRightTop(),
+                        texture_coords.GetRightTop()},
+      VS::PerVertexData{destination_rect_.GetLeftBottom(),
+                        texture_coords.GetLeftBottom()},
+      VS::PerVertexData{destination_rect_.GetRightBottom(),
+                        texture_coords.GetRightBottom()},
+  };
+  auto vertex_buffer = CreateVertexBuffer(vertices, host_buffer);
 
   VS::FrameInfo frame_info;
   frame_info.mvp = entity.GetShaderTransform(pass);
@@ -160,7 +163,7 @@ bool TextureContents::Render(const ContentContext& renderer,
                        ? renderer.GetTextureStrictSrcPipeline(pipeline_options)
                        : renderer.GetTexturePipeline(pipeline_options));
 
-  pass.SetVertexBuffer(vertex_builder.CreateVertexBuffer(host_buffer));
+  pass.SetVertexBuffer(vertex_buffer);
   VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
 
   if (strict_source_rect_enabled_) {

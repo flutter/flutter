@@ -6,6 +6,8 @@
 #define FLUTTER_IMPELLER_RENDERER_VERTEX_BUFFER_BUILDER_H_
 
 #include <initializer_list>
+#include <memory>
+#include <type_traits>
 #include <vector>
 
 #include "impeller/base/strings.h"
@@ -16,6 +18,19 @@
 #include "impeller/core/vertex_buffer.h"
 
 namespace impeller {
+
+/// @brief Create an index-less vertex buffer from a fixed size array.
+template <class VertexType, size_t size>
+VertexBuffer CreateVertexBuffer(std::array<VertexType, size> input,
+                                HostBuffer& host_buffer) {
+  return VertexBuffer{
+      .vertex_buffer =
+          host_buffer.Emplace(input.data(), sizeof(VertexType) * size,
+                              alignof(VertexType)),  //
+      .vertex_count = size,                          //
+      .index_type = IndexType::kNone,                //
+  };
+}
 
 template <class VertexType_, class IndexType_ = uint16_t>
 class VertexBufferBuilder {

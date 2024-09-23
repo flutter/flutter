@@ -76,13 +76,12 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
                                                  RenderPass& pass) {
     auto& host_buffer = renderer.GetTransientsBuffer();
 
-    VertexBufferBuilder<VS::PerVertexData> vtx_builder;
-    vtx_builder.AddVertices({
-        {Point(0, 0), input_uvs[0]},
-        {Point(1, 0), input_uvs[1]},
-        {Point(0, 1), input_uvs[2]},
-        {Point(1, 1), input_uvs[3]},
-    });
+    std::array<VS::PerVertexData, 4> vertices = {
+        VS::PerVertexData{Point(0, 0), input_uvs[0]},
+        VS::PerVertexData{Point(1, 0), input_uvs[1]},
+        VS::PerVertexData{Point(0, 1), input_uvs[2]},
+        VS::PerVertexData{Point(1, 1), input_uvs[3]},
+    };
 
     VS::FrameInfo frame_info;
     frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
@@ -116,7 +115,7 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
     options.primitive_type = PrimitiveType::kTriangleStrip;
     options.blend_mode = BlendMode::kSource;
     pass.SetPipeline(renderer.GetMorphologyFilterPipeline(options));
-    pass.SetVertexBuffer(vtx_builder.CreateVertexBuffer(host_buffer));
+    pass.SetVertexBuffer(CreateVertexBuffer(vertices, host_buffer));
 
     auto sampler_descriptor = input_snapshot->sampler_descriptor;
     if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {

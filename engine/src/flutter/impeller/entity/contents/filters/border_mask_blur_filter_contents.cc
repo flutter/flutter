@@ -91,15 +91,15 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
                                const Entity& entity, RenderPass& pass) -> bool {
     auto& host_buffer = renderer.GetTransientsBuffer();
 
-    VertexBufferBuilder<VS::PerVertexData> vtx_builder;
     auto origin = coverage.GetOrigin();
     auto size = coverage.GetSize();
-    vtx_builder.AddVertices({
-        {origin, input_uvs[0]},
-        {{origin.x + size.width, origin.y}, input_uvs[1]},
-        {{origin.x, origin.y + size.height}, input_uvs[2]},
-        {{origin.x + size.width, origin.y + size.height}, input_uvs[3]},
-    });
+    std::array<VS::PerVertexData, 4> vertices = {
+        VS::PerVertexData{origin, input_uvs[0]},
+        VS::PerVertexData{{origin.x + size.width, origin.y}, input_uvs[1]},
+        VS::PerVertexData{{origin.x, origin.y + size.height}, input_uvs[2]},
+        VS::PerVertexData{{origin.x + size.width, origin.y + size.height},
+                          input_uvs[3]},
+    };
 
     auto options = OptionsFromPassAndEntity(pass, entity);
     options.primitive_type = PrimitiveType::kTriangleStrip;
@@ -117,7 +117,7 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
 
     pass.SetCommandLabel("Border Mask Blur Filter");
     pass.SetPipeline(renderer.GetBorderMaskBlurPipeline(options));
-    pass.SetVertexBuffer(vtx_builder.CreateVertexBuffer(host_buffer));
+    pass.SetVertexBuffer(CreateVertexBuffer(vertices, host_buffer));
 
     FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
     VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
