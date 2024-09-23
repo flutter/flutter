@@ -1076,14 +1076,19 @@ void DlDispatcherBase::drawPoints(PointMode mode,
   }
 }
 
-// |flutter::DlOpReceiver|
 void DlDispatcherBase::drawVertices(
+    const std::shared_ptr<flutter::DlVertices>& vertices,
+    flutter::DlBlendMode dl_mode) {}
+
+// |flutter::DlOpReceiver|
+void ExperimentalDlDispatcher::drawVertices(
     const std::shared_ptr<flutter::DlVertices>& vertices,
     flutter::DlBlendMode dl_mode) {
   AUTO_DEPTH_WATCHER(1u);
 
-  GetCanvas().DrawVertices(MakeVertices(vertices), ToBlendMode(dl_mode),
-                           paint_);
+  GetCanvas().DrawVertices(
+      std::make_shared<DlVerticesGeometry>(vertices, renderer_),
+      ToBlendMode(dl_mode), paint_);
 }
 
 // |flutter::DlOpReceiver|
@@ -1349,7 +1354,8 @@ ExperimentalDlDispatcher::ExperimentalDlDispatcher(
     bool has_root_backdrop_filter,
     flutter::DlBlendMode max_root_blend_mode,
     IRect cull_rect)
-    : canvas_(renderer,
+    : renderer_(renderer),
+      canvas_(renderer,
               render_target,
               has_root_backdrop_filter ||
                   RequiresReadbackForBlends(renderer, max_root_blend_mode),

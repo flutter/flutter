@@ -83,6 +83,9 @@ class Capabilities {
   ///         This feature is especially useful for MSAA and stencils.
   virtual bool SupportsDeviceTransientTextures() const = 0;
 
+  /// @brief Whether the primitive type TriangleFan is supported by the backend.
+  virtual bool SupportsTriangleFan() const = 0;
+
   /// @brief  Returns a supported `PixelFormat` for textures that store
   ///         4-channel colors (red/green/blue/alpha).
   virtual PixelFormat GetDefaultColorFormat() const = 0;
@@ -145,6 +148,8 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetDefaultGlyphAtlasFormat(PixelFormat value);
 
+  CapabilitiesBuilder& SetSupportsTriangleFan(bool value);
+
   std::unique_ptr<Capabilities> Build();
 
  private:
@@ -157,6 +162,7 @@ class CapabilitiesBuilder {
   bool supports_read_from_resolve_ = false;
   bool supports_decal_sampler_address_mode_ = false;
   bool supports_device_transient_textures_ = false;
+  bool supports_triangle_fan_ = false;
   std::optional<PixelFormat> default_color_format_ = std::nullopt;
   std::optional<PixelFormat> default_stencil_format_ = std::nullopt;
   std::optional<PixelFormat> default_depth_stencil_format_ = std::nullopt;
