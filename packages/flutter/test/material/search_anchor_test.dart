@@ -3421,38 +3421,38 @@ void main() {
   });
 
   testWidgets('SearchAnchor does not dispose external SeachController', (WidgetTester tester) async {
-      final SearchController controller = SearchController();
-      addTearDown(controller.dispose);
-      await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: SearchAnchor(
-            searchController: controller,
-            builder: (BuildContext context, SearchController controller) {
-              return IconButton(
-                onPressed: () async {
-                  controller.openView();
-                },
-                icon: const Icon(Icons.search),
-              );
-            },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return <Widget>[];
-            },
-          ),
+    final SearchController controller = SearchController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+    MaterialApp(
+      home: Material(
+        child: SearchAnchor(
+          searchController: controller,
+          builder: (BuildContext context, SearchController controller) {
+            return IconButton(
+              onPressed: () async {
+                controller.openView();
+              },
+              icon: const Icon(Icons.search),
+            );
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return <Widget>[];
+          },
         ),
-      ));
+      ),
+    ));
 
-      await tester.tap(find.byIcon(Icons.search));
-      await tester.pumpAndSettle();
-      await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: Text('disposed'),
-        ),
-      ));
-      expect(tester.takeException(), isNull);
-      ChangeNotifier.debugAssertNotDisposed(controller);
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(
+    const MaterialApp(
+      home: Material(
+        child: Text('disposed'),
+      ),
+    ));
+    expect(tester.takeException(), isNull);
+    ChangeNotifier.debugAssertNotDisposed(controller);
   });
 
   testWidgets('SearchAnchor gracefully closes its search view when disposed', (WidgetTester tester) async {
