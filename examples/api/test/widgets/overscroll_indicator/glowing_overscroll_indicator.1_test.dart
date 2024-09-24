@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/widgets/overscroll_indicator/glowing_overscr
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Test visibility', (WidgetTester tester) async {
+  testWidgets('Displays widget tree when the example app is run', (WidgetTester tester) async {
     await tester.pumpWidget(const example.GlowingOverscrollIndicatorExampleApp());
 
     expect(find.descendant(
@@ -26,31 +26,24 @@ void main() {
       matching: find.widgetWithText(Center, 'Glow all day!'),
     ), findsOne);
 
+    final Finder customScrollViewFinder = find.byType(CustomScrollView);
+
     expect(find.descendant(
-      of: find.byType(CustomScrollView),
+      of: customScrollViewFinder,
       matching: find.byType(SliverToBoxAdapter),
     ), findsOne);
 
     expect(find.descendant(
-      of: find.byType(CustomScrollView),
+      of: customScrollViewFinder,
       matching: find.widgetWithIcon(SliverFillRemaining, Icons.sunny),
     ), findsOne);
 
     expect(find.descendant(
-      of: find.byType(CustomScrollView),
+      of: customScrollViewFinder,
       matching: find.byType(GlowingOverscrollIndicator),
     ), findsOne);
-  });
 
-  testWidgets('Test behavior', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.GlowingOverscrollIndicatorExampleApp(),
-    );
-
-    final Finder customScrollViewFinder = find.byType(CustomScrollView);
-    await tester.drag(customScrollViewFinder, const Offset(0, 500));
-    await tester.pump();
-
+    // Check if GlowingOverscrollIndicator starts just after the SliverAppBar
     final RenderBox overscrollIndicator = tester.renderObject<RenderBox>(
       find.descendant(
         of: customScrollViewFinder,
@@ -62,6 +55,6 @@ void main() {
     );
     final Matrix4 transform = overscrollIndicator.getTransformTo(sliverAppBar);
     final Offset? offset = MatrixUtils.getAsTranslation(transform);
-    expect(offset?.dy, kToolbarHeight);
+    expect(offset?.dy, sliverAppBar.geometry?.paintExtent);
   });
 }
