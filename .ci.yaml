@@ -1163,7 +1163,7 @@ targets:
       - bin/internal/engine.version
       - .ci.yaml
 
-  - name: Linux tool_integration_tests_1_4
+  - name: Linux tool_integration_tests_1_5
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1179,7 +1179,7 @@ targets:
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       shard: tool_integration_tests
-      subshard: "1_4"
+      subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
@@ -1189,7 +1189,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Linux tool_integration_tests_2_4
+  - name: Linux tool_integration_tests_2_5
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1205,7 +1205,7 @@ targets:
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       shard: tool_integration_tests
-      subshard: "2_4"
+      subshard: "2_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
@@ -1215,7 +1215,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Linux tool_integration_tests_3_4
+  - name: Linux tool_integration_tests_3_5
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1231,7 +1231,7 @@ targets:
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       shard: tool_integration_tests
-      subshard: "3_4"
+      subshard: "3_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
@@ -1241,7 +1241,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Linux tool_integration_tests_4_4
+  - name: Linux tool_integration_tests_4_5
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1257,7 +1257,33 @@ targets:
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       shard: tool_integration_tests
-      subshard: "4_4"
+      subshard: "4_5"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "2700"
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux tool_integration_tests_5_5
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      shard: tool_integration_tests
+      subshard: "5_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
@@ -5854,7 +5880,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_1_7
+  - name: Windows tool_integration_tests_1_8
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5868,7 +5894,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "1_7"
+      subshard: "1_8"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
@@ -5878,7 +5904,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_2_7
+  - name: Windows tool_integration_tests_2_8
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5892,7 +5918,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "2_6"
+      subshard: "2_8"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
@@ -5902,7 +5928,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_3_7
+  - name: Windows tool_integration_tests_3_8
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5916,7 +5942,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "3_7"
+      subshard: "3_8"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
@@ -5926,7 +5952,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_4_7
+  - name: Windows tool_integration_tests_4_8
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5940,7 +5966,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "4_7"
+      subshard: "4_8"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
@@ -5950,7 +5976,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_5_7
+  - name: Windows tool_integration_tests_5_8
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5964,7 +5990,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "5_7"
+      subshard: "5_8"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
@@ -5974,7 +6000,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_6_7
+  - name: Windows tool_integration_tests_6_8
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5988,7 +6014,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "6_7"
+      subshard: "6_8"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
@@ -5998,7 +6024,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_7_7
+  - name: Windows tool_integration_tests_7_8
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -6012,7 +6038,31 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "7_7"
+      subshard: "7_8"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+      test_timeout_secs: "2700"
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows tool_integration_tests_8_8
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      shard: tool_integration_tests
+      subshard: "8_8"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
