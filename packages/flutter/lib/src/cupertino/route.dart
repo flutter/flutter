@@ -1019,6 +1019,54 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
   }
 }
 
+const double _kStandardStiffness = 522.35;
+
+// Create a spring description in iOS's terms.
+//
+// See
+//  [1]: https://developer.apple.com/documentation/SwiftUI/Animation/spring(duration:bounce:blendDuration:)
+//  [2]: https://developer.apple.com/documentation/quartzcore/caspringanimation/4173018-init
+//  [3]: https://developer.apple.com/documentation/swiftui/spring/init(duration:bounce:)
+//
+// The `bounce` describes how bouncy the spring should be, and has a value
+// between -1 and 1. A value of 0 indicates no bounces (a critically damped
+// spring), positive values indicate increasing amounts of bounciness up to a
+// maximum of 1.0 (corresponding to undamped oscillation), and negative values
+// indicate overdamped springs with a minimum value of -1.0.
+//
+// The stiffness parameter aligns with the stiffness value used in
+// [SpringDescription.stiffness] and is compatible with values from
+// `CASpringAnimation.stiffness`.
+//
+// The mass of the spring is fixed at 1.0.
+//
+// The behavior of the resulting spring will match the effects of the APIs
+// mentioned above if they use the same `bounce` value and if the `duration` or
+// `perceptualDuration` is calculated as `(2 * pi / stiffness)^2`. However, this
+// computed "duration" does not correspond directly to the `duration` displayed
+// in `CASpringAnimation.description` or Apple's defined "perceptual duration"
+// or "settling duration." In Flutter, the settling duration is governed by
+// [Simulation.tolerance].
+SpringDescription _createIosSpring({
+  double stiffness = _kStandardStiffness,
+  double bounce = 0,
+}) {
+  assert(bounce >= -1 && bounce <= 1);
+  final double dampingRatio = switch(bounce) {
+    >= 0 => 1 - bounce,
+    <= 0 => 1 / (1 + bounce),
+    _ => throw UnsupportedError('Unreachable'),
+  };
+
+  const double mass = 1;
+
+  return SpringDescription.withDampingRatio(
+    mass: mass,
+    stiffness: stiffness,
+    ratio: dampingRatio,
+  );
+}
+
 /// A route that shows a modal iOS-style popup that slides up from the
 /// bottom of the screen.
 ///
@@ -1120,12 +1168,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 
   @override
   Simulation createSimulation({required double end}) {
-    const spring = SpringDescription(
-      mass: 1,
-      stiffness: 522.35,
-      damping: 45.71,
-    );
-    return SpringSimulation(spring, controller!.value, end, 0);
+    return SpringSimulation(_createIosSpring(), controller!.value, end, 0);
   }
 
   @override
