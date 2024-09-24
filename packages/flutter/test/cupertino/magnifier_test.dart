@@ -264,26 +264,63 @@ void main() {
       });
     });
 
-    group('magnificationScale',(){
-      testWidgets('Throw assertion error when magnificationScale is zero', (WidgetTester tester) async {
-        expect((){
+    group('magnificationScale', () {
+      testWidgets('Should throw assertion error when magnificationScale is zero',
+          (WidgetTester tester) async {
+        expect(() {
           MaterialApp(
             home: Scaffold(
-              body: CupertinoMagnifier(magnificationScale: 0,)
-            ),
+                body: CupertinoMagnifier(
+              magnificationScale: 0,
+            )),
           );
         }, throwsAssertionError);
       });
-      testWidgets('Throw assertion error when magnificationScale is negative', (WidgetTester tester) async {
-        expect((){
+      testWidgets('Should throw assertion error when magnificationScale is negative',
+          (WidgetTester tester) async {
+        expect(() {
           MaterialApp(
             home: Scaffold(
-              body: CupertinoMagnifier(magnificationScale: -1,)
-            ),
+                body: CupertinoMagnifier(
+              magnificationScale: -1,
+            )),
           );
         }, throwsAssertionError);
+      });
+
+      testWidgets(
+          'Should not alter the size of the child element when the scale factor is 1.0',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(body: CupertinoMagnifier()),
+          ),
+        );
+
+        expect(
+          tester.widget(find.byType(RawMagnifier)),
+          isA<RawMagnifier>().having((RawMagnifier t) => t.magnificationScale,
+              'magnificationScale', 1),
+        );
+      });
+      testWidgets(
+          'Should alter the size of the child element when the scale factor is greater than 1.0',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(
+                body: CupertinoMagnifier(
+              magnificationScale: 2,
+            )),
+          ),
+        );
+
+        expect(
+          tester.widget(find.byType(RawMagnifier)),
+          isA<RawMagnifier>().having((RawMagnifier t) => t.magnificationScale,
+              'magnificationScale', 2),
+        );
       });
     });
-
   });
 }
