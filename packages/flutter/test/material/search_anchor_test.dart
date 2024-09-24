@@ -3527,26 +3527,27 @@ void main() {
     (WidgetTester tester) async {
       final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
-      MaterialApp(
-        navigatorKey: key,
-        home: Material(
-          child: SearchAnchor(
-            builder: (BuildContext context, SearchController controller) {
-              return IconButton(
-                onPressed: () async {
-                  controller.openView();
-                },
-                icon: const Icon(Icons.search),
-              );
-            },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return <Widget>[
-                const Text('suggestion'),
-              ];
-            },
+        MaterialApp(
+          navigatorKey: key,
+          home: Material(
+            child: SearchAnchor(
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  onPressed: () async {
+                    controller.openView();
+                  },
+                  icon: const Icon(Icons.search),
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[
+                  const Text('suggestion'),
+                ];
+              },
+            ),
           ),
         ),
-      ));
+      );
 
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
