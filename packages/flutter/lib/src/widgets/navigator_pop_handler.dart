@@ -12,6 +12,9 @@ import 'pop_scope.dart';
 /// Typically wraps a nested [Navigator] widget and allows it to handle system
 /// back gestures in the [onPop] callback.
 ///
+/// The type parameter `<T>` indicates the type of the [Route]'s return value,
+/// which is passed to [onPopWithResult.
+///
 /// {@tool dartpad}
 /// This sample demonstrates how to use this widget to properly handle system
 /// back gestures when using nested [Navigator]s.
