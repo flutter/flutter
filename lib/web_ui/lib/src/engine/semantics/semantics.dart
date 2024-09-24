@@ -439,6 +439,26 @@ abstract class SemanticRole {
   /// The semantics object managed by this role.
   final SemanticsObject semanticsObject;
 
+  /// Whether this role accepts pointer events.
+  ///
+  /// This boolean decides whether to set the `pointer-events` CSS property to
+  /// `all` or to `none` on the semantics [element].
+  bool get acceptsPointerEvents {
+    final behaviors = _behaviors;
+    if (behaviors != null) {
+      for (final behavior in behaviors) {
+        if (behavior.acceptsPointerEvents) {
+          return true;
+        }
+      }
+    }
+    // Ignore pointer events on all container nodes.
+    if (semanticsObject.hasChildren) {
+      return false;
+    }
+    return true;
+  }
+
   /// Semantic behaviors provided by this role, if any.
   List<SemanticBehavior>? get behaviors => _behaviors;
   List<SemanticBehavior>? _behaviors;
@@ -733,6 +753,12 @@ abstract class SemanticBehavior {
   final SemanticsObject semanticsObject;
 
   final SemanticRole owner;
+
+  /// Whether this role accepts pointer events.
+  ///
+  /// This boolean decides whether to set the `pointer-events` CSS property to
+  /// `all` or to `none` on [SemanticsObject.element].
+  bool get acceptsPointerEvents => false;
 
   /// Called immediately after the [semanticsObject] updates some of its fields.
   ///
@@ -1439,10 +1465,7 @@ class SemanticsObject {
       recomputePositionAndSize();
     }
 
-    // Ignore pointer events on all container nodes and all platform view nodes.
-    // This is so that the platform views are not obscured by semantic elements
-    // and can be reached by inspecting the web page.
-    if (!hasChildren && !isPlatformView) {
+    if (semanticRole!.acceptsPointerEvents) {
       element.style.pointerEvents = 'all';
     } else {
       element.style.pointerEvents = 'none';

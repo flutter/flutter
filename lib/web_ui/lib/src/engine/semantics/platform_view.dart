@@ -28,6 +28,13 @@ class SemanticPlatformView extends SemanticRole {
           preferredLabelRepresentation: LabelRepresentation.ariaLabel,
         );
 
+  /// Ignores pointer events on all platform view nodes.
+  ///
+  /// This is so that the platform views are not obscured by semantic elements
+  /// and can be reached by inspecting the web page.
+  @override
+  bool get acceptsPointerEvents => false;
+
   @override
   void update() {
     super.update();
