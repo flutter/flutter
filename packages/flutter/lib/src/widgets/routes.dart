@@ -1424,7 +1424,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// The [ModalRoute] receiving this transition will set it to their
   /// [receivedTransition] property.
-  DelegatedTransition? get delegatedTransition => null;
+  DelegatedTransitionBuilder? get delegatedTransition => null;
 
   /// The [DelegatedTransition] received from the route above this one in the
   /// navigation stack.
@@ -1435,23 +1435,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// order to show the right route transition when the above route either enters
   /// or leaves the navigation stack. If not null, the `receivedTransition` will
   /// wrap the route content through [buildFlexTransitions].
-  DelegatedTransition? receivedTransition;
-
-  /// A method to trigger setting the [delegatedTransition] for a route.
-  ///
-  /// It is possible for a route to supply a different [delegatedTransition]
-  /// depending on the context of the tree at its location. For example Material's
-  /// [ZoomPageTransitionsBuilder] depends on the [Theme] to conditionally provide
-  /// a non-snapshotted [delegatedTransition].
-  ///
-  /// In some cases, the previous route may ask for the [delegatedTransition] of
-  /// a route before it is built. In these cases, the previous route will call
-  /// [setDelegatedTransition] on the the unbuilt route using its own
-  /// [BuildContext]. Override this method to set the [delegatedTransition] based
-  /// on the provided [BuildContext]. This context will be from the PREVIOUS
-  /// route, so do not use logic that requires the [BuildContext] of the current
-  /// route.
-  void setDelegatedTransition(BuildContext context) {}
+  DelegatedTransitionBuilder? receivedTransition;
 
   /// Wraps the transitions of this route with a [DelegatedTransition], when
   /// [receivedTransition] is not null.
@@ -1481,18 +1465,18 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    final ProxyAnimation proxyAnimation = ProxyAnimation();
+    final Widget originalTransitions = buildTransitions(context, animation, secondaryAnimation, child);
 
-    final Animation<double> flexAnimation = (receivedTransition == null) ?
-      secondaryAnimation : proxyAnimation;
-
-    final Widget originalTransitions = buildTransitions(context, animation, flexAnimation, child);
-
-    if (receivedTransition != null) {
-      return receivedTransition!.builder(context, animation, secondaryAnimation, originalTransitions);
-    } else {
+    if (receivedTransition == null) {
       return originalTransitions;
     }
+
+    // Create a static proxy animation to supress the original secondary transition.
+    final ProxyAnimation proxyAnimation = ProxyAnimation();
+
+    final Widget proxiedOriginalTransitions = buildTransitions(context, animation, proxyAnimation, child);
+
+    return receivedTransition!(context, animation, secondaryAnimation, allowSnapshotting, proxiedOriginalTransitions) ?? originalTransitions;
   }
 
   @override
@@ -2011,18 +1995,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
-    // In some cases, we need to get the delegated transition from a route before
-    // it is built, but some routes need to derive a delegated transition from
-    // the context. So if the next route does not have a `BuildContext` or a
-    // delegatedTransition, call nextRoute.setDelegatedTransition using the
-    // current `BuildContext`.
-    if (nextRoute is ModalRoute<T> && nextRoute.delegatedTransition == null && nextRoute.subtreeContext == null && this.subtreeContext != null) {
-      nextRoute.setDelegatedTransition(this.subtreeContext!);
-    }
-    if (nextRoute is ModalRoute<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition.runtimeType != this.delegatedTransition.runtimeType) {
-      if (receivedTransition.runtimeType != nextRoute.delegatedTransition.runtimeType) {
-        receivedTransition = nextRoute.delegatedTransition;
-      }
+    if (nextRoute is ModalRoute<T> && canTransitionTo(nextRoute)) {
+      receivedTransition = nextRoute.delegatedTransition;
     } else {
       receivedTransition = null;
     }
@@ -2032,10 +2006,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   void didPopNext(Route<dynamic> nextRoute) {
-    if (nextRoute is ModalRoute<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition.runtimeType != this.delegatedTransition.runtimeType) {
-      if (receivedTransition.runtimeType != nextRoute.delegatedTransition.runtimeType) {
-        receivedTransition = nextRoute.delegatedTransition;
-      }
+    if (nextRoute is ModalRoute<T> && canTransitionTo(nextRoute)) {
+      receivedTransition = nextRoute.delegatedTransition;
     } else {
       receivedTransition = null;
     }

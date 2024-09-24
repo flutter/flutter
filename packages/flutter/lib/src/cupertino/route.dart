@@ -298,7 +298,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
   }
 
   @override
-  DelegatedTransition? get delegatedTransition => CupertinoPageTransition.delegatedTransition;
+  DelegatedTransitionBuilder? get delegatedTransition => CupertinoPageTransition.delegatedTransition;
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
@@ -329,7 +329,7 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
   }
 
   @override
-  DelegatedTransition? get delegatedTransition => this.fullscreenDialog ? null : CupertinoPageTransition.delegatedTransition;
+  DelegatedTransitionBuilder? get delegatedTransition => this.fullscreenDialog ? null : CupertinoPageTransition.delegatedTransition;
 
   CupertinoPage<T> get _page => settings as CupertinoPage<T>;
 
@@ -435,7 +435,22 @@ class CupertinoPageTransition extends StatefulWidget {
   /// The Cupertino styled [DelegatedTransition] provided to the previous route.
   ///
   /// {@macro flutter.widgets.delegatedTransition}
-  static const DelegatedTransition delegatedTransition = CupertinoDelegatedTransition();
+  static Widget? delegatedTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child) {
+    final Animation<Offset> delegatedPositionAnimation =
+      CurvedAnimation(
+        parent: secondaryAnimation,
+        curve: Curves.linearToEaseOut,
+        reverseCurve: Curves.easeInToLinear,
+      ).drive(_kMiddleLeftTween);
+    assert(debugCheckHasDirectionality(context));
+    final TextDirection textDirection = Directionality.of(context);
+    return SlideTransition(
+      position: delegatedPositionAnimation,
+      textDirection: textDirection,
+      transformHitTests: false,
+      child: child,
+    );
+  }
 
   @override
   State<CupertinoPageTransition> createState() => _CupertinoPageTransitionState();
@@ -530,33 +545,6 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
           child: widget.child,
         ),
       ),
-    );
-  }
-}
-
-/// Creates a [DelegatedTransition] for [CupertinoPageTransition].
-class CupertinoDelegatedTransition extends DelegatedTransition {
-  /// Creates a [DelegatedTransition] for [CupertinoPageTransition].
-  const CupertinoDelegatedTransition() : super(builder: CupertinoDelegatedTransition.delegatedTransitionBuilder);
-
-  /// The delegated transition from [CupertinoDelegatedTransition].
-  ///
-  /// Slides the content of the screen off the page to sync up with the topmost
-  /// route's [CupertinoPageTransition].
-  static Widget delegatedTransitionBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
-    final Animation<Offset> delegatedPositionAnimation =
-      CurvedAnimation(
-        parent: secondaryAnimation,
-        curve: Curves.linearToEaseOut,
-        reverseCurve: Curves.easeInToLinear,
-      ).drive(_kMiddleLeftTween);
-    assert(debugCheckHasDirectionality(context));
-    final TextDirection textDirection = Directionality.of(context);
-    return SlideTransition(
-      position: delegatedPositionAnimation,
-      textDirection: textDirection,
-      transformHitTests: false,
-      child: child,
     );
   }
 }

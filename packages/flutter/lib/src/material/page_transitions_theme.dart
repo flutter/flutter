@@ -82,38 +82,6 @@ class _OpenUpwardsPageTransition extends StatefulWidget {
   // Used by all of the transition animations.
   static const Curve _transitionCurve = Cubic(0.20, 0.00, 0.00, 1.00);
 
-  static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
-    final Animation<Offset> secondaryTranslationAnimation = _secondaryTranslationTween.animate(
-      CurvedAnimation(
-        parent: secondaryAnimation,
-        curve: _transitionCurve,
-        reverseCurve: _transitionCurve.flipped,
-      ),
-    );
-
-    final CurvedAnimation primaryAnimation = CurvedAnimation(
-      parent: ReverseAnimation(secondaryAnimation),
-      curve: _transitionCurve,
-      reverseCurve: _transitionCurve.flipped,
-    );
-
-    final Animation<Offset> primaryTranslationAnimation = _primaryTranslationTween.animate(primaryAnimation);
-
-    return AnimatedBuilder(
-      animation: secondaryAnimation,
-      child: FractionalTranslation(
-        translation: secondaryTranslationAnimation.value,
-        child: child,
-      ),
-      builder: (BuildContext context, Widget? child) {
-        return FractionalTranslation(
-          translation: secondaryTranslationAnimation.value,
-          child: child,
-        );
-      },
-    );
-  }
-
   final Animation<double> animation;
   final Animation<double> secondaryAnimation;
   final Widget child;
@@ -593,7 +561,7 @@ abstract class PageTransitionsBuilder {
   /// {@macro flutter.widgets.delegatedTransition}
   ///
   /// If left as null, the previous page will not animate.
-  DelegatedTransition? get delegatedTransition => null;
+  DelegatedTransitionBuilder? get delegatedTransition => null;
 
   /// Wraps the child with one or more transition widgets which define how [route]
   /// arrives on and leaves the screen.
@@ -663,11 +631,6 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android P.
   const OpenUpwardsPageTransitionsBuilder();
-
-  /// Delegate animation
-  static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
-    return _OpenUpwardsPageTransition.delegateTransition(context, child, secondaryAnimation);
-  }
 
   @override
   Widget buildTransitions<T>(
@@ -754,10 +717,8 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   static const bool _kProfileForceDisableSnapshotting = bool.fromEnvironment('flutter.benchmarks.force_disable_snapshot');
 
   @override
-  DelegatedTransition? get delegatedTransition => ZoomDelegatedTransition(
-    builder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child)
-      => snapshotAwareDelegatedTransition(context, animation, secondaryAnimation, child, allowSnapshotting, allowEnterRouteSnapshotting, backgroundColor),
-  );
+  DelegatedTransitionBuilder? get delegatedTransition => (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child)
+      => snapshotAwareDelegatedTransition(context, animation, secondaryAnimation, child, allowSnapshotting && this.allowSnapshotting, allowEnterRouteSnapshotting, backgroundColor);
 
   /// A transition builder that takes into account the snapshotting properties of
   /// [ZoomPageTransitionsBuilder].
@@ -846,7 +807,7 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
   const CupertinoPageTransitionsBuilder();
 
   @override
-  DelegatedTransition? get delegatedTransition => CupertinoPageTransition.delegatedTransition;
+  DelegatedTransitionBuilder? get delegatedTransition => CupertinoPageTransition.delegatedTransition;
 
   @override
   Widget buildTransitions<T>(
@@ -933,19 +894,11 @@ class PageTransitionsTheme with Diagnosticable {
   /// Provides the delegate transition for the target platform.
   ///
   /// {@macro flutter.widgets.delegatedTransition}
-  DelegatedTransition? delegatedTransition(TargetPlatform platform, bool allowSnapshotting) {
+  DelegatedTransitionBuilder? delegatedTransition(TargetPlatform platform) {
     final PageTransitionsBuilder matchingBuilder =
       builders[platform] ?? const ZoomPageTransitionsBuilder();
 
-    final PageTransitionsBuilder snapshotAwareBuilder =
-      matchingBuilder is ZoomPageTransitionsBuilder ?
-        ZoomPageTransitionsBuilder(
-          allowSnapshotting: matchingBuilder.allowSnapshotting && allowSnapshotting,
-          allowEnterRouteSnapshotting: matchingBuilder.allowEnterRouteSnapshotting
-        ) :
-        matchingBuilder;
-
-    return snapshotAwareBuilder.delegatedTransition;
+    return matchingBuilder.delegatedTransition;
   }
 
   // Map the builders to a list with one PageTransitionsBuilder per platform for

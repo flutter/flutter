@@ -95,10 +95,13 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   @override
   String? get barrierLabel => null;
 
-  DelegatedTransition? _delegatedTransition;
-
   @override
-  DelegatedTransition? get delegatedTransition => _delegatedTransition;
+  DelegatedTransitionBuilder? get delegatedTransition => (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child) {
+    final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
+    final TargetPlatform platform = Theme.of(context).platform;
+    final DelegatedTransitionBuilder? themeDelegatedTransition = theme.delegatedTransition(platform);
+    return themeDelegatedTransition != null ? themeDelegatedTransition(context, animation, secondaryAnimation, allowSnapshotting, child) : null;
+  };
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
@@ -134,19 +137,8 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
-  void setDelegatedTransition(BuildContext context) {
-    final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
-    final TargetPlatform platform = Theme.of(context).platform;
-    final DelegatedTransition? themeDelegatedTransition = theme.delegatedTransition(platform, allowSnapshotting);
-    if (delegatedTransition != themeDelegatedTransition) {
-      _delegatedTransition = themeDelegatedTransition;
-    }
-  }
-
-  @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
-    setDelegatedTransition(context);
     return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 }
@@ -201,10 +193,6 @@ class MaterialPage<T> extends Page<T> {
   @override
   Route<T> createRoute(BuildContext context) {
     final _PageBasedMaterialPageRoute<T> route = _PageBasedMaterialPageRoute<T>(page: this, allowSnapshotting: allowSnapshotting);
-    // It is necessary to do this now as this is the earliest the MaterialPage can
-    // know what its context is for deciding what delegated transition to send.
-    // buildTransitions happens after canTransitionTo in a lot of cases.
-    route.setDelegatedTransition(context);
     return route;
   }
 }

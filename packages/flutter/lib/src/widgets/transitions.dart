@@ -145,7 +145,7 @@ class _AnimatedState extends State<AnimatedWidget> {
 /// Signature for a page transition's secondary transition builder.
 ///
 /// Typically used as the argument for [DelegatedTransition.builder].
-typedef DelegatedTransitionBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child);
+typedef DelegatedTransitionBuilder = Widget? Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child);
 
 /// An exit animation for a route that can be provided to another route.
 ///
