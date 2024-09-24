@@ -596,7 +596,7 @@ static void add_view_error_cb(GObject* object,
   g_autoptr(GError) error = nullptr;
   FlutterViewId view_id =
       fl_engine_add_view_finish(FL_ENGINE(object), result, &error);
-  EXPECT_EQ(view_id, 0);
+  EXPECT_EQ(view_id, -1);
   EXPECT_NE(error, nullptr);
 
   g_main_loop_quit(static_cast<GMainLoop*>(user_data));
@@ -631,7 +631,7 @@ static void add_view_engine_error_cb(GObject* object,
   g_autoptr(GError) error = nullptr;
   FlutterViewId view_id =
       fl_engine_add_view_finish(FL_ENGINE(object), result, &error);
-  EXPECT_EQ(view_id, 0);
+  EXPECT_EQ(view_id, -1);
   EXPECT_NE(error, nullptr);
 
   g_main_loop_quit(static_cast<GMainLoop*>(user_data));

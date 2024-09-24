@@ -131,7 +131,7 @@ static void view_added_cb(const FlutterAddViewResult* result) {
 
   FlutterViewId view_id = GPOINTER_TO_INT(g_task_get_task_data(task));
   if (result->added) {
-    g_task_return_pointer(task, GINT_TO_POINTER(view_id), nullptr);
+    g_task_return_int(task, view_id);
   } else {
     g_task_return_new_error(task, fl_engine_error_quark(),
                             FL_ENGINE_ERROR_FAILED, "Failed to add view");
@@ -680,7 +680,7 @@ FlutterViewId fl_engine_add_view_finish(FlEngine* self,
                                         GAsyncResult* result,
                                         GError** error) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
-  return GPOINTER_TO_INT(g_task_propagate_pointer(G_TASK(result), error));
+  return g_task_propagate_int(G_TASK(result), error);
 }
 
 void fl_engine_remove_view(FlEngine* self,

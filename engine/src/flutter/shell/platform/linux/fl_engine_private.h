@@ -134,7 +134,7 @@ void fl_engine_add_view(FlEngine* engine,
  *
  * Completes request started with fl_engine_add_view().
  *
- * Returns: the newly added view ID or 0 on error.
+ * Returns: the newly added view ID or -1 on error.
  */
 FlutterViewId fl_engine_add_view_finish(FlEngine* engine,
                                         GAsyncResult* result,
