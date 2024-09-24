@@ -198,7 +198,7 @@ class ScrollController extends ChangeNotifier {
     required Duration duration,
     required Curve curve,
   }) async {
-    assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
+    assert( _positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
     await Future.wait<void>(<Future<void>>[
       for (int i = 0; i < _positions.length; i += 1) _positions[i].animateTo(offset, duration: duration, curve: curve),
     ]);
