@@ -58,6 +58,21 @@ class Path {
     kContour,
   };
 
+  static constexpr size_t VerbToOffset(Path::ComponentType verb) {
+    switch (verb) {
+      case Path::ComponentType::kLinear:
+        return 2u;
+      case Path::ComponentType::kQuadratic:
+        return 3u;
+      case Path::ComponentType::kCubic:
+        return 4u;
+      case Path::ComponentType::kContour:
+        return 2u;
+        break;
+    }
+    FML_UNREACHABLE();
+  }
+
   struct PolylineContour {
     struct Component {
       size_t component_start_index;
@@ -138,14 +153,6 @@ class Path {
 
   bool IsEmpty() const;
 
-  template <class T>
-  using Applier = std::function<void(size_t index, const T& component)>;
-  void EnumerateComponents(
-      const Applier<LinearPathComponent>& linear_applier,
-      const Applier<QuadraticPathComponent>& quad_applier,
-      const Applier<CubicPathComponent>& cubic_applier,
-      const Applier<ContourComponent>& contour_applier) const;
-
   bool GetLinearComponentAtIndex(size_t index,
                                  LinearPathComponent& linear) const;
 
@@ -169,6 +176,12 @@ class Path {
           std::make_unique<std::vector<Point>>(),
       Polyline::ReclaimPointBufferCallback reclaim = nullptr) const;
 
+  void EndContour(
+      size_t storage_offset,
+      Polyline& polyline,
+      size_t component_index,
+      std::vector<PolylineContour::Component>& poly_components) const;
+
   std::optional<Rect> GetBoundingBox() const;
 
   std::optional<Rect> GetTransformedBoundingBox(const Matrix& transform) const;
@@ -182,16 +195,6 @@ class Path {
 
  private:
   friend class PathBuilder;
-
-  struct ComponentIndexPair {
-    ComponentType type = ComponentType::kLinear;
-    size_t index = 0;
-
-    ComponentIndexPair() {}
-
-    ComponentIndexPair(ComponentType a_type, size_t a_index)
-        : type(a_type), index(a_index) {}
-  };
 
   // All of the data for the path is stored in this structure which is
   // held by a shared_ptr. Since they all share the structure, the
@@ -213,11 +216,9 @@ class Path {
 
     FillType fill = FillType::kNonZero;
     Convexity convexity = Convexity::kUnknown;
-    std::vector<ComponentIndexPair> components;
-    std::vector<Point> points;
-    std::vector<ContourComponent> contours;
-
     std::optional<Rect> bounds;
+    std::vector<Point> points;
+    std::vector<ComponentType> components;
   };
 
   explicit Path(Data data);
