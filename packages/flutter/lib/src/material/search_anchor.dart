@@ -405,7 +405,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
     widget.searchController?._detach(this);
     _internalSearchController?._detach(this);
     final bool usingExternalController = widget.searchController != null;
-    if (_viewIsOpen) {
+    if (_route?.navigator != null) {
       _route?._dismiss(
         disposeController: !usingExternalController,
       );
@@ -554,7 +554,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final TextInputType? keyboardType;
   CurvedAnimation? curvedAnimation;
   CurvedAnimation? viewFadeOnIntervalCurve;
-  bool _disposeController = false;
+  bool willDisposeSearchController = false;
 
   @override
   Color? get barrierColor => Colors.transparent;
@@ -599,7 +599,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   }
 
   void _dismiss({required bool disposeController}) {
-    _disposeController = disposeController;
+    willDisposeSearchController = disposeController;
     if (isActive) {
       navigator?.removeRoute(this);
     }
@@ -609,7 +609,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   void dispose() {
     curvedAnimation?.dispose();
     viewFadeOnIntervalCurve?.dispose();
-    if (_disposeController) {
+    if (willDisposeSearchController) {
       searchController.dispose();
     }
     super.dispose();
