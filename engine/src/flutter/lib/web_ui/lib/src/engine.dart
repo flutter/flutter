@@ -33,6 +33,7 @@ export 'engine/canvaskit/image_web_codecs.dart';
 export 'engine/canvaskit/layer.dart';
 export 'engine/canvaskit/layer_scene_builder.dart';
 export 'engine/canvaskit/layer_tree.dart';
+export 'engine/canvaskit/layer_visitor.dart';
 export 'engine/canvaskit/mask_filter.dart';
 export 'engine/canvaskit/multi_surface_rasterizer.dart';
 export 'engine/canvaskit/n_way_canvas.dart';
