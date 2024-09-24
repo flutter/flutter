@@ -1431,7 +1431,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
                 // Copy the native assets created by build.dart and placed here by flutter assemble.
-                String nativeAssetsDir = "${project.layout.buildDirectory.dir("/../native_assets/android/jniLibs/lib/").get()}"
+                String nativeAssetsDir = "${project.layout.buildDirectory.dir("/../native_assets/android/jniLibs/lib").get()}/"
                 project.android.sourceSets.main.jniLibs.srcDir(nativeAssetsDir)
             }
             configurePlugins(project)
