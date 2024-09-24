@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Examples can assume:
+// late BuildContext context;
+
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
@@ -15,10 +21,10 @@ import 'binding.dart';
 import 'image_cache.dart';
 import 'image_stream.dart';
 
-/// Signature for the callback taken by [_createErrorHandlerAndKey].
+/// Signature for the callback taken by [ImageProvider._createErrorHandlerAndKey].
 typedef _KeyAndErrorHandlerCallback<T> = void Function(T key, ImageErrorListener handleError);
 
-/// Signature used for error handling by [_createErrorHandlerAndKey].
+/// Signature used for error handling by [ImageProvider._createErrorHandlerAndKey].
 typedef _AsyncKeyErrorHandler<T> = Future<void> Function(T key, Object exception, StackTrace? stack);
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
@@ -645,7 +651,7 @@ abstract class ImageProvider<T extends Object> {
 }
 
 /// A class that exists to facilitate backwards compatibility in the transition
-/// from [ImageProvider.load] to [ImageProvider.loadBuffer] to [ImageProvider.loadImage]
+/// from [ImageProvider.loadBuffer] to [ImageProvider.loadImage]
 class _AbstractImageStreamCompleter extends ImageStreamCompleter {}
 
 /// Key for the image obtained by an [AssetImage] or [ExactAssetImage].
@@ -1188,11 +1194,31 @@ enum ResizeImagePolicy {
 /// Instructs Flutter to decode the image at the specified dimensions
 /// instead of at its native size.
 ///
+/// The [width] and [height] parameters refer to logical pixels.
+///
+/// Logical pixels have roughly the same visual size across devices, whereas
+/// physical pixels correspond to actual device hardware.
+/// The number of physical pixels per logical pixel is described by the
+/// [ui.FlutterView.devicePixelRatio].
+///
 /// This allows finer control of the size of the image in [ImageCache] and is
 /// generally used to reduce the memory footprint of [ImageCache].
 ///
 /// The decoded image may still be displayed at sizes other than the
 /// cached size provided here.
+///
+/// {@tool snippet}
+/// This example shows how to size the image to half of the screen's width.
+///
+/// ```dart
+///    Image(
+///      image: ResizeImage(
+///        FileImage(File('path/to/image')),
+///        width: MediaQuery.sizeOf(context).width ~/ 2, // Half of the screen's width.
+///      ),
+///    );
+/// ```
+/// {@end-tool}
 class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// Creates an ImageProvider that decodes the image to the specified size.
   ///

@@ -330,12 +330,13 @@ void main() {
   group('Update xcconfig', () {
     testUsingContext('includes Pod config in xcconfig files, if the user manually added Pod dependencies without using Flutter plugins', () async {
       final FlutterProject projectUnderTest = setupProjectUnderTest();
-      fileSystem.file(fileSystem.path.join('project', 'foo', '.packages'))
-        ..createSync(recursive: true)
-        ..writeAsStringSync('\n');
+      final File packageConfigFile = fileSystem.file(
+        fileSystem.path.join('project', '.dart_tool', 'package_config.json'),
+      );
+      packageConfigFile.createSync(recursive: true);
+      packageConfigFile.writeAsStringSync('{"configVersion":2,"packages":[]}');
       projectUnderTest.ios.podfile..createSync()..writeAsStringSync('Custom Podfile');
       projectUnderTest.ios.podfileLock..createSync()..writeAsStringSync('Podfile.lock from user executed `pod install`');
-      projectUnderTest.packagesFile..createSync()..writeAsStringSync('');
       projectUnderTest.ios.xcodeConfigFor('Debug')
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing debug config');
@@ -571,7 +572,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target to at least "
-          '15.0 as described at https://docs.flutter.dev/deployment/ios'
+          '15.0 as described at https://flutter.dev/to/ios-deploy'
         ),
       );
     });
@@ -631,7 +632,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target to at least "
-          '15.0 as described at https://docs.flutter.dev/deployment/ios'
+          '15.0 as described at https://flutter.dev/to/ios-deploy'
         ),
       );
     });
@@ -692,7 +693,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target to at least "
-          '15.0 as described at https://docs.flutter.dev/deployment/ios'
+          '15.0 as described at https://flutter.dev/to/ios-deploy'
         ),
       );
     });
@@ -756,7 +757,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target as "
-          'described at https://docs.flutter.dev/deployment/ios',
+          'described at https://flutter.dev/to/ios-deploy',
         ),
       );
       expect(
@@ -961,7 +962,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target to at least "
-          '12.7 as described at https://docs.flutter.dev/deployment/macos'
+          '12.7 as described at https://flutter.dev/to/macos-deploy'
         ),
       );
     });
@@ -1022,7 +1023,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target to at least "
-          '12.7 as described at https://docs.flutter.dev/deployment/macos'
+          '12.7 as described at https://flutter.dev/to/macos-deploy'
         ),
       );
     });

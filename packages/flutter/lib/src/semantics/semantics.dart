@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/rendering.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag, SemanticsUpdate, SemanticsUpdateBuilder, StringAttribute, TextDirection;
 
@@ -447,6 +453,7 @@ class SemanticsData with Diagnosticable {
     required this.maxValueLength,
     required this.currentValueLength,
     required this.headingLevel,
+    required this.linkUrl,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -456,7 +463,8 @@ class SemanticsData with Diagnosticable {
        assert(attributedDecreasedValue.string == '' || textDirection != null, 'A SemanticsData object with decreasedValue "${attributedDecreasedValue.string}" had a null textDirection.'),
        assert(attributedIncreasedValue.string == '' || textDirection != null, 'A SemanticsData object with increasedValue "${attributedIncreasedValue.string}" had a null textDirection.'),
        assert(attributedHint.string == '' || textDirection != null, 'A SemanticsData object with hint "${attributedHint.string}" had a null textDirection.'),
-       assert(headingLevel >= 0 && headingLevel <= 6, 'Heading level must be between 0 and 6');
+       assert(headingLevel >= 0 && headingLevel <= 6, 'Heading level must be between 0 and 6'),
+       assert(linkUrl == null || (flags & SemanticsFlag.isLink.index) != 0, 'A SemanticsData object with a linkUrl must have the isLink flag set to true');
 
   /// A bit field of [SemanticsFlag]s that apply to this node.
   final int flags;
@@ -637,6 +645,13 @@ class SemanticsData with Diagnosticable {
   /// be set when [maxValueLength] is set.
   final int? currentValueLength;
 
+  /// The URL that this node links to.
+  ///
+  /// See also:
+  ///
+  /// * [SemanticsFlag.isLink], which indicates that this node is a link.
+  final Uri? linkUrl;
+
   /// The bounding box for this node in its coordinate system.
   final Rect rect;
 
@@ -728,6 +743,7 @@ class SemanticsData with Diagnosticable {
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
     properties.add(IntProperty('headingLevel', headingLevel, defaultValue: 0));
+    properties.add(DiagnosticsProperty<Uri>('linkUrl', linkUrl, defaultValue: null));
   }
 
   @override
@@ -758,6 +774,7 @@ class SemanticsData with Diagnosticable {
         && other.elevation == elevation
         && other.thickness == thickness
         && other.headingLevel == headingLevel
+        && other.linkUrl == linkUrl
         && _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds);
   }
 
@@ -789,6 +806,7 @@ class SemanticsData with Diagnosticable {
       elevation,
       thickness,
       headingLevel,
+      linkUrl,
       customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
     ),
   );
@@ -902,6 +920,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.toggled,
     this.button,
     this.link,
+    this.linkUrl,
     this.header,
     this.headingLevel,
     this.textField,
@@ -963,7 +982,8 @@ class SemanticsProperties extends DiagnosticableTree {
        assert(increasedValue == null || attributedIncreasedValue == null, 'Only one of increasedValue or attributedIncreasedValue should be provided'),
        assert(decreasedValue == null || attributedDecreasedValue == null, 'Only one of decreasedValue or attributedDecreasedValue should be provided'),
        assert(hint == null || attributedHint == null, 'Only one of hint or attributedHint should be provided'),
-       assert(headingLevel == null || (headingLevel > 0 && headingLevel <= 6), 'Heading level must be between 1 and 6');
+       assert(headingLevel == null || (headingLevel > 0 && headingLevel <= 6), 'Heading level must be between 1 and 6'),
+       assert(linkUrl == null || (link ?? false), 'If linkUrl is set then link must be true');
 
   /// If non-null, indicates that this subtree represents something that can be
   /// in an enabled or disabled state.
@@ -1199,6 +1219,9 @@ class SemanticsProperties extends DiagnosticableTree {
   /// It'll be appear in accessibility hierarchy as `resource-id`.
   ///
   /// On iOS, this will set `UIAccessibilityElement.accessibilityIdentifier`.
+  ///
+  /// On web, this will set a `flt-semantics-identifier` attribute on the DOM element
+  /// that corresponds to the semantics node.
   /// {@endtemplate}
   final String? identifier;
 
@@ -1426,6 +1449,15 @@ class SemanticsProperties extends DiagnosticableTree {
   ///    here will be passed.
   final SemanticsTag? tagForChildren;
 
+  /// The URL that this node links to.
+  ///
+  /// On the web, this is used to set the `href` attribute of the DOM element.
+  ///
+  /// See also:
+  ///
+  /// * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#href
+  final Uri? linkUrl;
+
   /// The handler for [SemanticsAction.tap].
   ///
   /// This is the semantic equivalent of a user briefly tapping the screen with
@@ -1610,7 +1642,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This handler is invoked when the user wants to replace the current text in
   /// the text field with a new text.
   ///
-  /// Voice access users can trigger this handler by speaking "type <text>" to
+  /// Voice access users can trigger this handler by speaking `type <text>` to
   /// their Android devices.
   final SetTextHandler? onSetText;
 
@@ -2261,7 +2293,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
         || _currentValueLength != config._currentValueLength
         || _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants
         || _areUserActionsBlocked != config.isBlockingUserActions
-        || _headingLevel != config._headingLevel;
+        || _headingLevel != config._headingLevel
+        || _linkUrl != config._linkUrl;
   }
 
   // TAGS, LABELS, ACTIONS
@@ -2571,6 +2604,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
   int get headingLevel => _headingLevel;
   int _headingLevel = _kEmptyConfig._headingLevel;
 
+  /// The URL that this node links to.
+  Uri? get linkUrl => _linkUrl;
+  Uri? _linkUrl = _kEmptyConfig._linkUrl;
+
   bool _canPerformAction(SemanticsAction action) =>
       _actions.containsKey(action);
 
@@ -2631,6 +2668,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _currentValueLength = config._currentValueLength;
     _areUserActionsBlocked = config.isBlockingUserActions;
     _headingLevel = config._headingLevel;
+    _linkUrl = config._linkUrl;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     if (mergeAllDescendantsIntoThisNodeValueChanged) {
@@ -2679,6 +2717,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     int headingLevel = _headingLevel;
     final double elevation = _elevation;
     double thickness = _thickness;
+    Uri? linkUrl = _linkUrl;
     final Set<int> customSemanticsActionIds = <int>{};
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -2716,7 +2755,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
         platformViewId ??= node._platformViewId;
         maxValueLength ??= node._maxValueLength;
         currentValueLength ??= node._currentValueLength;
-        headingLevel = node._headingLevel;
+        linkUrl ??= node._linkUrl;
+        headingLevel = _mergeHeadingLevels(
+          sourceLevel: node._headingLevel,
+          targetLevel: headingLevel,
+        );
 
         if (identifier == '') {
           identifier = node._identifier;
@@ -2802,6 +2845,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       currentValueLength: currentValueLength,
       customSemanticsActionIds: customSemanticsActionIds.toList()..sort(),
       headingLevel: headingLevel,
+      linkUrl: linkUrl,
     );
   }
 
@@ -2878,6 +2922,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
       headingLevel: data.headingLevel,
+      linkUrl: data.linkUrl?.toString() ?? '',
     );
     _dirty = false;
   }
@@ -3027,6 +3072,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(IntProperty('indexInParent', indexInParent, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
+    properties.add(IntProperty('headingLevel', _headingLevel, defaultValue: 0));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -3039,8 +3085,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
     String? prefixOtherLines,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
     DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
+    int wrapWidth = 65,
   }) {
-    return toDiagnosticsNode(childOrder: childOrder).toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
+    return toDiagnosticsNode(childOrder: childOrder).toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel, wrapWidth: wrapWidth);
   }
 
   @override
@@ -3497,10 +3544,10 @@ class SemanticsOwner extends ChangeNotifier {
         assert(node.parent == null || !node.parent!.isPartOfNodeMerging || node.isMergedIntoParent);
         if (node.isPartOfNodeMerging) {
           assert(node.mergeAllDescendantsIntoThisNode || node.parent != null);
-          // if we're merged into our parent, make sure our parent is added to the dirty list
+          // If child node is merged into its parent, make sure the parent is marked as dirty
           if (node.parent != null && node.parent!.isPartOfNodeMerging) {
             node.parent!._markDirty(); // this can add the node to the dirty list
-            node._dirty = false; // We don't want to send update for this node.
+            node._dirty = false; // Do not send update for this node, as it's now part of its parent
           }
         }
       }
@@ -3717,7 +3764,7 @@ class SemanticsConfiguration {
   ///
   /// See also:
   ///
-  ///  * [addAction] to add an action.
+  ///  * [_addAction] to add an action.
   final Map<SemanticsAction, SemanticsActionHandler> _actions = <SemanticsAction, SemanticsActionHandler>{};
 
   int get _effectiveActionsAsBits => isBlockingUserActions ? _actionsAsBits & _kUnblockedUserActions : _actionsAsBits;
@@ -4065,7 +4112,7 @@ class SemanticsConfiguration {
   /// This handler is invoked when the user wants to replace the current text in
   /// the text field with a new text.
   ///
-  /// Voice access users can trigger this handler by speaking "type <text>" to
+  /// Voice access users can trigger this handler by speaking `type <text>` to
   /// their Android devices.
   SetTextHandler? get onSetText => _onSetText;
   SetTextHandler? _onSetText;
@@ -4741,6 +4788,18 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isLink, value);
   }
 
+  /// The URL that the owning [RenderObject] links to.
+  Uri? get linkUrl => _linkUrl;
+  Uri? _linkUrl;
+
+  set linkUrl(Uri? value) {
+    if (value == _linkUrl) {
+      return;
+    }
+    _linkUrl = value;
+    _hasBeenAnnotated = true;
+  }
+
   /// Whether the owning [RenderObject] is a header (true) or not (false).
   bool get isHeader => _hasFlag(SemanticsFlag.isHeader);
   set isHeader(bool value) {
@@ -5025,6 +5084,11 @@ class SemanticsConfiguration {
     _maxValueLength ??= child._maxValueLength;
     _currentValueLength ??= child._currentValueLength;
 
+    _headingLevel = _mergeHeadingLevels(
+      sourceLevel: child._headingLevel,
+      targetLevel: _headingLevel,
+    );
+
     textDirection ??= child.textDirection;
     _sortKey ??= child._sortKey;
     if (_identifier == '') {
@@ -5096,7 +5160,8 @@ class SemanticsConfiguration {
       .._actions.addAll(_actions)
       .._customSemanticsActions.addAll(_customSemanticsActions)
       ..isBlockingUserActions = isBlockingUserActions
-      .._headingLevel = _headingLevel;
+      .._headingLevel = _headingLevel
+      .._linkUrl = _linkUrl;
   }
 }
 
@@ -5260,4 +5325,17 @@ class OrdinalSortKey extends SemanticsSortKey {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('order', order, defaultValue: null));
   }
+}
+
+/// Picks the most accurate heading level when two nodes, with potentially
+/// different heading levels, are merged.
+///
+/// Argument [sourceLevel] is the heading level of the source node that is being
+/// merged into a target node, which has heading level [targetLevel].
+///
+/// If the target node is not a heading, the the source heading level is used.
+/// Otherwise, the target heading level is used irrespective of the source
+/// heading level.
+int _mergeHeadingLevels({required int sourceLevel, required int targetLevel}) {
+  return targetLevel == 0 ? sourceLevel : targetLevel;
 }

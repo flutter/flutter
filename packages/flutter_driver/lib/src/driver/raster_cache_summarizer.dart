@@ -13,7 +13,7 @@ const String _kLayerMemory = 'LayerMBytes';
 const String _kPictureCount = 'PictureCount';
 const String _kPictureMemory = 'PictureMBytes';
 
-/// Summarizes [TimelineEvents]s corresponding to [kRasterCacheEvent] events.
+/// Summarizes [TimelineEvent]s corresponding to [kRasterCacheEvent] events.
 ///
 /// A sample event (some fields have been omitted for brevity):
 /// ```json

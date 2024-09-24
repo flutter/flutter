@@ -26,8 +26,6 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      globals.fs.file('.packages')
-        .writeAsStringSync('\n');
       globals.fs.file(globals.fs.path.join('build', 'app.dill'))
         ..createSync(recursive: true)
         ..writeAsStringSync('ABC');
@@ -69,6 +67,7 @@ void main() {
             '',
             treeShakeIcons: false,
             trackWidgetCreation: true,
+            packageConfigPath: '.dart_tool/package_config.json'
           )),
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,

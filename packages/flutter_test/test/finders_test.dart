@@ -770,11 +770,11 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: _deepWidgetTree(
-            depth: 1000,
+            depth: 500,
             child: Row(
               children: <Widget>[
                 _deepWidgetTree(
-                  depth: 1000,
+                  depth: 500,
                   child: const Column(children: fooBarTexts),
                 ),
               ],

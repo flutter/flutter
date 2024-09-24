@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'divider_theme.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -386,8 +389,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         _isChildExpanded(index),
       );
 
-      Widget expandIconContainer = Container(
-        margin: const EdgeInsetsDirectional.only(end: 8.0),
+      Widget expandIconPadded = Padding(
+        padding: const EdgeInsetsDirectional.only(end: 8.0),
         child: ExpandIcon(
           color: widget.expandIconColor,
           disabledColor: child.canTapOnHeader ? widget.expandIconColor : null,
@@ -403,10 +406,10 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
       if (!child.canTapOnHeader) {
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-        expandIconContainer = Semantics(
+        expandIconPadded = Semantics(
           label: _isChildExpanded(index)? localizations.expandedIconTapHint : localizations.collapsedIconTapHint,
           container: true,
-          child: expandIconContainer,
+          child: expandIconPadded,
         );
       }
       Widget header = Row(
@@ -422,7 +425,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
               ),
             ),
           ),
-          expandIconContainer,
+          expandIconPadded,
         ],
       );
       if (child.canTapOnHeader) {
@@ -443,7 +446,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
             children: <Widget>[
               header,
               AnimatedCrossFade(
-                firstChild: Container(height: 0.0),
+                firstChild: const LimitedBox(maxWidth: 0.0, child: SizedBox(width: double.infinity, height: 0)),
                 secondChild: child.body,
                 firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
                 secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),

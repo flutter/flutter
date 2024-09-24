@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'form_row.dart';
+/// @docImport 'text_form_field_row.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';

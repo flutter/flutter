@@ -1873,6 +1873,51 @@ void main() {
       await tester.pump();
       expect(tester.takeException(), null);
     });
+
+    testWidgets('requestFocus can be updated', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(MaterialApp(
+        navigatorKey: navigatorKey,
+        home: const Text('home'),
+      ));
+      expect(find.text('page2'), findsNothing);
+
+      // Navigate to page 2.
+      navigatorKey.currentState!.push<void>(MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return const Text('page2');
+        },
+      ));
+
+      await tester.pumpAndSettle();
+      expect(find.text('page2'), findsOneWidget);
+
+      // Check that the modal route is requesting focus.
+      ModalRoute<void>? modalRoute = ModalRoute.of<void>(tester.element(find.text('page2')));
+      expect(modalRoute, isNotNull);
+      expect(modalRoute!.requestFocus, isTrue);
+
+      // Navigate back to the home page.
+      navigatorKey.currentState!.pop();
+      await tester.pumpAndSettle();
+      expect(find.text('page2'), findsNothing);
+
+      // Navigate to page 2 again with requestFocus set to false.
+      navigatorKey.currentState!.push<void>(MaterialPageRoute<void>(
+        requestFocus: false,
+        builder: (BuildContext context) {
+          return const Text('page2');
+        },
+      ));
+
+      await tester.pumpAndSettle();
+      expect(find.text('page2'), findsOneWidget);
+
+      // Check that the modal route is not requesting focus.
+      modalRoute = ModalRoute.of<void>(tester.element(find.text('page2')));
+      expect(modalRoute, isNotNull);
+      expect(modalRoute!.requestFocus, isFalse);
+    });
   });
 
   testWidgets('can be dismissed with escape keyboard shortcut', (WidgetTester tester) async {
@@ -1971,6 +2016,78 @@ void main() {
     await tester.restoreFrom(restorationData);
     expect(find.byType(AlertDialog), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+
+  group('NavigationNotifications', () {
+    testWidgets('with no WillPopScope', (WidgetTester tester) async {
+      final List<NavigationNotification> notifications = <NavigationNotification>[];
+      await tester.pumpWidget(
+        NotificationListener<NavigationNotification>(
+          onNotification: (NavigationNotification notification) {
+            notifications.add(notification);
+            return true;
+          },
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Navigator(
+              initialRoute: '/',
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return const SizedBox.shrink();
+                  },
+                  settings: settings,
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Only one notification, from the initial route, where a pop can't be
+      // handled because there's no other route to pop.
+      expect(notifications, hasLength(1));
+      expect(notifications.first.canHandlePop, isFalse);
+    });
+
+    testWidgets('with WillPopScope', (WidgetTester tester) async {
+      final List<NavigationNotification> notifications = <NavigationNotification>[];
+      await tester.pumpWidget(
+        NotificationListener<NavigationNotification>(
+          onNotification: (NavigationNotification notification) {
+            notifications.add(notification);
+            return true;
+          },
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Navigator(
+              initialRoute: '/',
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return WillPopScope(
+                      onWillPop: () {
+                        return Future<bool>.value(false);
+                      },
+                      child: const SizedBox.shrink(),
+                    );
+                  },
+                  settings: settings,
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Two notifications. The first is from the initial route, where a pop
+      // can't be handled because it's the only route. The second is from
+      // registering the WillPopScope, where it will always want to receive
+      // pops.
+      expect(notifications, hasLength(2));
+      expect(notifications.first.canHandlePop, isFalse);
+      expect(notifications.last.canHandlePop, isTrue);
+    });
+  });
 }
 
 double _getOpacity(GlobalKey key, WidgetTester tester) {

@@ -2,6 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'button_style_button.dart';
+/// @docImport 'constants.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'elevated_button_theme.dart';
+/// @docImport 'filled_button.dart';
+/// @docImport 'filled_button_theme.dart';
+/// @docImport 'material.dart';
+/// @docImport 'no_splash.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'outlined_button_theme.dart';
+/// @docImport 'text_button.dart';
+/// @docImport 'text_button_theme.dart';
+/// @docImport 'theme.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -31,9 +46,9 @@ typedef ButtonLayerBuilder = Widget Function(BuildContext context, Set<MaterialS
 ///
 /// All of the ButtonStyle properties are null by default.
 ///
-/// Many of the ButtonStyle properties are [MaterialStateProperty] objects which
+/// Many of the ButtonStyle properties are [WidgetStateProperty] objects which
 /// resolve to different values depending on the button's state. For example
-/// the [Color] properties are defined with `MaterialStateProperty<Color>` and
+/// the [Color] properties are defined with `WidgetStateProperty<Color>` and
 /// can resolve to different colors depending on if the button is pressed,
 /// hovered, focused, disabled, etc.
 ///
@@ -45,9 +60,9 @@ typedef ButtonLayerBuilder = Widget Function(BuildContext context, Set<MaterialS
 /// ```dart
 /// ElevatedButton(
 ///   style: ButtonStyle(
-///     backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-///       (Set<MaterialState> states) {
-///         if (states.contains(MaterialState.pressed)) {
+///     backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+///       (Set<WidgetState> states) {
+///         if (states.contains(WidgetState.pressed)) {
 ///           return Theme.of(context).colorScheme.primary.withOpacity(0.5);
 ///         }
 ///         return null; // Use the component's default.
@@ -68,7 +83,7 @@ typedef ButtonLayerBuilder = Widget Function(BuildContext context, Set<MaterialS
 /// ```dart
 /// ElevatedButton(
 ///   style: const ButtonStyle(
-///     backgroundColor: MaterialStatePropertyAll<Color>(Colors.green),
+///     backgroundColor: WidgetStatePropertyAll<Color>(Colors.green),
 ///   ),
 ///   child: const Text('Let me play among the stars'),
 ///   onPressed: () {
@@ -181,7 +196,7 @@ class ButtonStyle with Diagnosticable {
   /// The button's background fill color.
   final MaterialStateProperty<Color?>? backgroundColor;
 
-  /// The color for the button's [Text] and [Icon] widget descendants.
+  /// The color for the button's [Text] widget descendants.
   ///
   /// This color is typically used instead of the color of the [textStyle]. All
   /// of the components that compute defaults from [ButtonStyle] values
@@ -259,8 +274,6 @@ class ButtonStyle with Diagnosticable {
   final MaterialStateProperty<Size?>? maximumSize;
 
   /// The icon's color inside of the button.
-  ///
-  /// If this is null, the icon color will be [foregroundColor].
   final MaterialStateProperty<Color?>? iconColor;
 
   /// The icon's size inside of the button.

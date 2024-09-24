@@ -4410,7 +4410,7 @@ void main() {
     expect(description, <String>[
       'data: something',
       'semanticsLabel: something else',
-      'style: TextStyle(inherit: true, color: Color(0xff00ff00))',
+      'style: TextStyle(inherit: true, color: ${const Color(0xff00ff00)})',
       'autofocus: true',
       'showCursor: true',
       'minLines: 2',
@@ -4421,7 +4421,7 @@ void main() {
       'cursorWidth: 1.0',
       'cursorHeight: 1.0',
       'cursorRadius: Radius.circular(0.0)',
-      'cursorColor: Color(0xff00ff00)',
+      'cursorColor: ${const Color(0xff00ff00)}',
       'selection disabled',
       'scrollPhysics: ClampingScrollPhysics',
     ]);

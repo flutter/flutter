@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:ui' show Color, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
@@ -87,11 +90,12 @@ class Adaptation<T> {
   /// ThemeData class, like [SwitchThemeData], instead of the defaultValue.
   ///
   /// Factory constructors that support adaptations - currently only
-  /// [Switch.adaptive] - look for a [ThemeData.adaptations] member of the expected
-  /// type when computing their effective default component theme. If a matching
-  /// adaptation is not found, the component may choose to use a default adaptation.
-  /// For example, the [Switch.adaptive] component uses an empty [SwitchThemeData]
-  /// if a matching adaptation is not found, for the sake of backwards compatibility.
+  /// [Switch.adaptive] - look for a type-specific adaptation in
+  /// [ThemeData.adaptationMap] when computing their effective default component
+  /// theme. If a matching adaptation is not found, the component may choose to
+  /// use a default adaptation. For example, the [Switch.adaptive] component
+  /// uses an empty [SwitchThemeData] if a matching adaptation is not found, for
+  /// the sake of backwards compatibility.
   ///
   /// {@tool dartpad}
   /// This sample shows how to create and use subclasses of [Adaptation] that
@@ -2528,7 +2532,7 @@ const ColorScheme _colorSchemeLightM3 = ColorScheme(
   primary: Color(0xFF6750A4),
   onPrimary: Color(0xFFFFFFFF),
   primaryContainer: Color(0xFFEADDFF),
-  onPrimaryContainer: Color(0xFF21005D),
+  onPrimaryContainer: Color(0xFF4F378B),
   primaryFixed: Color(0xFFEADDFF),
   primaryFixedDim: Color(0xFFD0BCFF),
   onPrimaryFixed: Color(0xFF21005D),
@@ -2536,7 +2540,7 @@ const ColorScheme _colorSchemeLightM3 = ColorScheme(
   secondary: Color(0xFF625B71),
   onSecondary: Color(0xFFFFFFFF),
   secondaryContainer: Color(0xFFE8DEF8),
-  onSecondaryContainer: Color(0xFF1D192B),
+  onSecondaryContainer: Color(0xFF4A4458),
   secondaryFixed: Color(0xFFE8DEF8),
   secondaryFixedDim: Color(0xFFCCC2DC),
   onSecondaryFixed: Color(0xFF1D192B),
@@ -2544,7 +2548,7 @@ const ColorScheme _colorSchemeLightM3 = ColorScheme(
   tertiary: Color(0xFF7D5260),
   onTertiary: Color(0xFFFFFFFF),
   tertiaryContainer: Color(0xFFFFD8E4),
-  onTertiaryContainer: Color(0xFF31111D),
+  onTertiaryContainer: Color(0xFF633B48),
   tertiaryFixed: Color(0xFFFFD8E4),
   tertiaryFixedDim: Color(0xFFEFB8C8),
   onTertiaryFixed: Color(0xFF31111D),
@@ -2552,7 +2556,7 @@ const ColorScheme _colorSchemeLightM3 = ColorScheme(
   error: Color(0xFFB3261E),
   onError: Color(0xFFFFFFFF),
   errorContainer: Color(0xFFF9DEDC),
-  onErrorContainer: Color(0xFF410E0B),
+  onErrorContainer: Color(0xFF8C1D18),
   background: Color(0xFFFEF7FF),
   onBackground: Color(0xFF1D1B20),
   surface: Color(0xFFFEF7FF),

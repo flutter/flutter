@@ -87,7 +87,7 @@ class HttpHostValidator extends DoctorValidator {
       if (url == null) {
         availabilityResults.add(
           'Environment variable $kPubDevOverride does not specify a valid URL: "${_platform.environment[kPubDevOverride]}"\n'
-          'Please see https://flutter.dev/community/china for an example of how to use it.'
+          'Please see https://flutter.dev/to/use-mirror-site for an example of how to use it.'
         );
       } else {
         requiredHosts.add(url);
@@ -100,7 +100,7 @@ class HttpHostValidator extends DoctorValidator {
       if (url == null) {
         availabilityResults.add(
           'Environment variable $kFlutterStorageBaseUrl does not specify a valid URL: "${_platform.environment[kFlutterStorageBaseUrl]}"\n'
-          'Please see https://flutter.dev/community/china for an example of how to use it.'
+          'Please see https://flutter.dev/to/use-mirror-site for an example of how to use it.'
         );
       } else {
         requiredHosts.add(url);

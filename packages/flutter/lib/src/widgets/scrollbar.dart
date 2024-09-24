@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
+///
+/// @docImport 'editable_text.dart';
+/// @docImport 'list_wheel_scroll_view.dart';
+/// @docImport 'nested_scroll_view.dart';
+/// @docImport 'page_view.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'widget_state.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -1127,7 +1139,7 @@ class RawScrollbar extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// Subclass [Scrollbar] can hide and show the scrollbar thumb in response to
-  /// [MaterialState]s by using [ScrollbarThemeData.thumbVisibility].
+  /// [WidgetState]s by using [ScrollbarThemeData.thumbVisibility].
   final bool? thumbVisibility;
 
   /// The [OutlinedBorder] of the scrollbar's thumb.
@@ -1203,7 +1215,7 @@ class RawScrollbar extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// Subclass [Scrollbar] can hide and show the scrollbar thumb in response to
-  /// [MaterialState]s by using [ScrollbarThemeData.trackVisibility].
+  /// [WidgetState]s by using [ScrollbarThemeData.trackVisibility].
   final bool? trackVisibility;
 
   /// The [Radius] of the scrollbar track's rounded rectangle corners.
@@ -1324,6 +1336,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   final GlobalKey  _scrollbarPainterKey = GlobalKey();
   bool _hoverIsActive = false;
   Drag? _thumbDrag;
+  bool _maxScrollExtentPermitsScrolling = false;
   ScrollHoldController? _thumbHold;
   Axis? _axis;
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = GlobalKey<RawGestureDetectorState>();
@@ -1618,7 +1631,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // Convert primaryDelta, the amount that the scrollbar moved since the last
     // time when drag started or last updated, into the coordinate space of the scroll
     // position.
-    double scrollOffsetGlobal = scrollbarPainter.getTrackToScroll(primaryDeltaFromDragStart + _startDragThumbOffset!);
+    double scrollOffsetGlobal = scrollbarPainter.getTrackToScroll(_startDragThumbOffset! + primaryDeltaFromDragStart);
+
     if (primaryDeltaFromDragStart > 0 && scrollOffsetGlobal < position.pixels
         || primaryDeltaFromDragStart < 0 && scrollOffsetGlobal > position.pixels) {
       // Adjust the position value if the scrolling direction conflicts with
@@ -1642,7 +1656,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         case TargetPlatform.android:
           // We can only drag the scrollbar into overscroll on mobile
           // platforms, and only then if the physics allow it.
-          break;
       }
       final bool isReversed = axisDirectionIsReversed(position.axisDirection);
       return isReversed ? newPosition - position.pixels : position.pixels - newPosition;
@@ -1760,25 +1773,22 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
 
     // On mobile platforms flinging the scrollbar thumb causes a ballistic
-    // scroll, just like it via a touch drag.
+    // scroll, just like it does via a touch drag. Likewise for desktops when
+    // dragging on the trackpad or with a stylus.
     final TargetPlatform platform = ScrollConfiguration.of(context).getPlatform(context);
-    final (Velocity adjustedVelocity, double primaryVelocity) = switch (platform) {
-      TargetPlatform.iOS || TargetPlatform.android => (
-        -velocity,
-        switch (direction) {
-          Axis.horizontal => -velocity.pixelsPerSecond.dx,
-          Axis.vertical => -velocity.pixelsPerSecond.dy,
-        },
-      ),
-      _ => (Velocity.zero, 0),
+    final Velocity adjustedVelocity = switch (platform) {
+      TargetPlatform.iOS || TargetPlatform.android => -velocity,
+      _ => Velocity.zero,
     };
-
     final RenderBox renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
     final DragEndDetails details = DragEndDetails(
       localPosition: localPosition,
       globalPosition: renderBox.localToGlobal(localPosition),
       velocity: adjustedVelocity,
-      primaryVelocity: primaryVelocity,
+      primaryVelocity: switch (direction) {
+        Axis.horizontal => adjustedVelocity.pixelsPerSecond.dx,
+        Axis.vertical => adjustedVelocity.pixelsPerSecond.dy,
+      },
     );
 
     _thumbDrag?.end(details);
@@ -1790,7 +1800,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _cachedController = null;
   }
 
-  void _handleTrackTapDown(TapDownDetails details) {
+  /// Handler called when the track is tapped in order to page in the tapped
+  /// direction.
+  @protected
+  @mustCallSuper
+  void handleTrackTapDown(TapDownDetails details) {
     // The Scrollbar should page towards the position of the tap on the track.
     assert(_debugCheckHasValidScrollPosition());
     _cachedController = _effectiveScrollController;
@@ -1869,6 +1883,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (metrics.axis != _axis) {
       setState(() { _axis = metrics.axis; });
     }
+    if (_maxScrollExtentPermitsScrolling != notification.metrics.maxScrollExtent > 0.0) {
+      setState(() { _maxScrollExtentPermitsScrolling = !_maxScrollExtentPermitsScrolling; });
+    }
 
     return false;
   }
@@ -1891,8 +1908,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return false;
     }
 
-    if (notification is ScrollUpdateNotification ||
-      notification is OverscrollNotification) {
+    if (notification is ScrollUpdateNotification || notification is OverscrollNotification) {
       // Any movements always makes the scrollbar start showing up.
       if (!_fadeoutAnimationController.isForwardOrCompleted) {
         _fadeoutAnimationController.forward();
@@ -1915,16 +1931,26 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     handleThumbPress();
   }
 
+  // The protected RawScrollbar API methods - handleThumbPressStart,
+  // handleThumbPressUpdate, handleThumbPressEnd - all depend on a
+  // localPosition parameter that defines the event's location relative
+  // to the scrollbar. Ensure that the localPosition is reported consistently,
+  // even if the source of the event is a trackpad or a stylus.
+  Offset _globalToScrollbar(Offset offset) {
+    final RenderBox renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
+    return renderBox.globalToLocal(offset);
+  }
+
   void _handleThumbDragStart(DragStartDetails details) {
-    handleThumbPressStart(details.localPosition);
+    handleThumbPressStart(_globalToScrollbar(details.globalPosition));
   }
 
   void _handleThumbDragUpdate(DragUpdateDetails details) {
-    handleThumbPressUpdate(details.localPosition);
+    handleThumbPressUpdate(_globalToScrollbar(details.globalPosition));
   }
 
   void _handleThumbDragEnd(DragEndDetails details) {
-    handleThumbPressEnd(details.localPosition, details.velocity);
+    handleThumbPressEnd(_globalToScrollbar(details.globalPosition), details.velocity);
   }
 
   void _handleThumbDragCancel() {
@@ -1997,7 +2023,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           customPaintKey: _scrollbarPainterKey,
         ),
         (_TrackTapGestureRecognizer instance) {
-          instance.onTapDown = _handleTrackTapDown;
+          instance.onTapDown = handleTrackTapDown;
         },
       );
 
@@ -2252,6 +2278,11 @@ class _VerticalThumbDragGestureRecognizer extends VerticalDragGestureRecognizer 
   final GlobalKey _customPaintKey;
 
   @override
+  bool isPointerPanZoomAllowed(PointerPanZoomStartEvent event) {
+    return false;
+  }
+
+  @override
   bool isPointerAllowed(PointerEvent event) {
     return _isThumbEvent(_customPaintKey, event) && super.isPointerAllowed(event);
   }
@@ -2264,6 +2295,11 @@ class _HorizontalThumbDragGestureRecognizer extends HorizontalDragGestureRecogni
   }) : _customPaintKey = customPaintKey;
 
   final GlobalKey _customPaintKey;
+
+  @override
+  bool isPointerPanZoomAllowed(PointerPanZoomStartEvent event) {
+    return false;
+  }
 
   @override
   bool isPointerAllowed(PointerEvent event) {

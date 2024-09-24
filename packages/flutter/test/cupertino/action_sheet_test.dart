@@ -12,12 +12,170 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
 void main() {
+  testWidgets('Overall appearance is correct for the light theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestScaffoldApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        actionSheet: CupertinoActionSheet(
+          message: const Text('The title'),
+          actions: <Widget>[
+            CupertinoActionSheetAction(child: const Text('One'), onPressed: () {}),
+            CupertinoActionSheetAction(child: const Text('Two'), onPressed: () {}),
+          ],
+          cancelButton: CupertinoActionSheetAction(child: const Text('Cancel'), onPressed: () {}),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('One')));
+    await tester.pumpAndSettle();
+    // This golden file also verifies the structure of an action sheet that
+    // has a message, no title, and no overscroll for any sections (in contrast
+    // to cupertinoActionSheet.dark-theme.png).
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('cupertinoActionSheet.overall-light-theme.png'),
+    );
+
+    await gesture.up();
+  });
+
+  testWidgets('Overall appearance is correct for the dark theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestScaffoldApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        actionSheet: CupertinoActionSheet(
+          title: const Text('The title'),
+          message: const Text('The message'),
+          actions: List<Widget>.generate(20, (int i) =>
+            CupertinoActionSheetAction(
+              onPressed: () {},
+              child: Text('Button $i'),
+            ),
+          ),
+          cancelButton: CupertinoActionSheetAction(child: const Text('Cancel'), onPressed: () {}),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button 0')));
+    await tester.pumpAndSettle();
+    // This golden file also verifies the structure of an action sheet that
+    // has both a message and a title, and an overscrolled action section (in
+    // contrast to cupertinoActionSheet.light-theme.png).
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('cupertinoActionSheet.overall-dark-theme.png'),
+    );
+
+    await gesture.up();
+  });
+
+  testWidgets('Button appearance is correct with text scaling', (WidgetTester tester) async {
+    // Verifies layout of action button in various text scaling by drawing
+    // buttons in all 12 iOS text scales in one golden image.
+
+    // The following function returns a CupertinoActionSheetAction that:
+    // * Has a fixed width
+    // * Is unconstrained in height
+    // * Is aligned center in a grid of fixed height
+    // * Is surrounded by a black border
+    const double buttonWidth = 400;
+    const double rowHeight = 100;
+    Widget testButton(double contextBodySize) {
+      const double standardHigBody = 17.0;
+      final double contextScaleFactor = contextBodySize / standardHigBody;
+      return OverrideMediaQuery(
+        transformer: (MediaQueryData data) {
+          return data.copyWith(
+            textScaler: TextScaler.linear(contextScaleFactor),
+          );
+        },
+        child: SizedBox(
+          height: rowHeight,
+          child: Center(
+            child: UnconstrainedBox(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints.tightFor(width: buttonWidth),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(border: Border.all()),
+                  child: CupertinoActionSheetAction(
+                    onPressed: () {},
+                    child: const Text('Button'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(CupertinoApp(
+      home: CupertinoPageScaffold(
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                Row(children: <Widget>[
+                  /*xs*/ testButton(14),
+                  /*s*/  testButton(15),
+                ]),
+                Row(children: <Widget>[
+                  /*m*/  testButton(16),
+                  /*l*/  testButton(17),
+                ]),
+                Row(children: <Widget>[
+                  /*xl*/ testButton(19),
+                  /*xxl*/testButton(21),
+                ]),
+                Row(children: <Widget>[
+                  /*xxxl*/testButton(23),
+                  /*ax1*/ testButton(28),
+                ]),
+                Row(children: <Widget>[
+                  /*ax2*/ testButton(33),
+                  /*ax3*/ testButton(40),
+                ]),
+                Row(children: <Widget>[
+                  /*ax4*/ testButton(47),
+                  /*ax5*/ testButton(53),
+                ]),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Iterable<RichText> buttons = tester.widgetList<RichText>(
+      find.text('Button', findRichText: true));
+    final Iterable<double?> sizes = buttons.map((RichText text) {
+      return text.textScaler.scale(text.text.style!.fontSize!);
+    });
+    expect(sizes,
+      <double>[21, 21, 21, 21, 23, 24, 24, 28, 33, 40, 47, 53].map(
+        (double size) => moreOrLessEquals(size, epsilon: 0.001)),
+    );
+
+    await expectLater(
+      find.byType(Column),
+      matchesGoldenFile('cupertinoActionSheet.textScaling.png'),
+    );
+  });
+
   testWidgets('Verify that a tap on modal barrier dismisses an action sheet', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
@@ -227,14 +385,14 @@ void main() {
     // (minus padding).
     expect(
       tester.getBottomLeft(find.byType(ClipRRect)),
-      tester.getBottomLeft(find.byType(CupertinoActionSheet)) - const Offset(-8.0, 10.0),
+      tester.getBottomLeft(find.byType(CupertinoActionSheet)) - const Offset(-8.0, 8.0),
     );
 
     // Check that the dialog size is the same as the content section size
     // (minus padding).
     expect(
       tester.getSize(find.byType(ClipRRect)).height,
-      tester.getSize(find.byType(CupertinoActionSheet)).height  - 20.0,
+      tester.getSize(find.byType(CupertinoActionSheet)).height  - 16.0,
     );
 
     expect(
@@ -279,15 +437,15 @@ void main() {
     // at the top of the action sheet + padding).
     expect(
       tester.getTopLeft(finder),
-      tester.getTopLeft(find.byType(CupertinoActionSheet)) + const Offset(8.0, 10.0),
+      tester.getTopLeft(find.byType(CupertinoActionSheet)) + const Offset(8.0, 8.0),
     );
 
     expect(
-      tester.getTopLeft(find.byType(CupertinoActionSheet)) + const Offset(8.0, 10.0),
+      tester.getTopLeft(find.byType(CupertinoActionSheet)) + const Offset(8.0, 8.0),
       tester.getTopLeft(find.widgetWithText(CupertinoActionSheetAction, 'One')),
     );
     expect(
-      tester.getBottomLeft(find.byType(CupertinoActionSheet)) + const Offset(8.0, -10.0),
+      tester.getBottomLeft(find.byType(CupertinoActionSheet)) + const Offset(8.0, -8.0),
       tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Two')),
     );
   });
@@ -352,11 +510,11 @@ void main() {
     expect(tester.getCenter(find.widgetWithText(CupertinoActionSheetAction, 'Five')).dx, equals(400.0));
 
     // Check that the action buttons are the correct heights.
-    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'One')).height, equals(83.0));
-    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'Two')).height, equals(83.0));
-    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'Three')).height, equals(83.0));
-    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'Four')).height, equals(83.0));
-    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'Five')).height, equals(83.0));
+    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'One')).height, equals(95.4));
+    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'Two')).height, equals(95.4));
+    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'Three')).height, equals(95.4));
+    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'Four')).height, equals(95.4));
+    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'Five')).height, equals(95.4));
   });
 
   testWidgets('Content section is scrollable', (WidgetTester tester) async {
@@ -529,6 +687,36 @@ void main() {
       find.byType(CupertinoActionSheet),
       matchesGoldenFile('cupertinoActionSheet.long-overscroll.0.png'),
     );
+  });
+
+  testWidgets('Takes maximum vertical space with one action and long content', (WidgetTester tester) async {
+    // Ensure that if the actions section is shorter than
+    // _kActionSheetActionsSectionMinHeight, the content section can be assigned
+    // with the remaining vertical space to fill up the maximal height.
+
+    late double screenHeight;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          screenHeight = MediaQuery.sizeOf(context).height;
+          return CupertinoActionSheet(
+            message: Text('content ' * 1000),
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                onPressed: () {},
+                child: const Text('Button 0'),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    // Expect the action sheet to take all available height.
+    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, screenHeight);
   });
 
   testWidgets('Taps on button calls onPressed', (WidgetTester tester) async {
@@ -847,7 +1035,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Find the location right within the upper edge of button 1.
-    final Offset start = tester.getTopLeft(find.text('Button 1')) + const Offset(30, -15);
+    final Offset start = tester.getTopLeft(
+      find.widgetWithText(CupertinoActionSheetAction, 'Button 1'),
+    ) + const Offset(30, 5);
     // Verify that the start location is within button 1.
     await tester.tapAt(start);
     expect(pressed, 1);
@@ -967,6 +1157,52 @@ void main() {
     expect(pressed, null);
   });
 
+  testWidgets('Taps on legacy button calls onPressed and renders correctly', (WidgetTester tester) async {
+    // Legacy buttons are implemented with [GestureDetector.onTap]. Apps that
+    // use customized legacy buttons should continue to work.
+    //
+    // Regression test for https://github.com/flutter/flutter/issues/150980 .
+    bool wasPressed = false;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          return CupertinoActionSheet(
+            actions: <Widget>[
+              LegacyAction(
+                child: const Text('Legacy'),
+                onPressed: () {
+                  expect(wasPressed, false);
+                  wasPressed = true;
+                  Navigator.pop(context);
+                },
+              ),
+              CupertinoActionSheetAction(child: const Text('One'), onPressed: () {}),
+              CupertinoActionSheetAction(child: const Text('Two'), onPressed: () {}),
+            ],
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+    expect(wasPressed, isFalse);
+
+    // Push the legacy button and hold for a while to activate the pressing effect.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Legacy')));
+    await tester.pump(const Duration(seconds: 1));
+    expect(wasPressed, isFalse);
+    await expectLater(
+      find.byType(CupertinoActionSheet),
+      matchesGoldenFile('cupertinoActionSheet.legacyButton.png'),
+    );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(wasPressed, isTrue);
+    expect(find.text('Legacy'), findsNothing);
+  });
+
   testWidgets('Action sheet width is correct when given infinite horizontal space', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
@@ -1020,7 +1256,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, moreOrLessEquals(132.3));
+    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, moreOrLessEquals(130.64));
   });
 
   testWidgets('1 action button with cancel button', (WidgetTester tester) async {
@@ -1047,7 +1283,7 @@ void main() {
     await tester.pump();
 
     // Action section is size of one action button.
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, 56.0);
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, 57.17);
   });
 
   testWidgets('2 action buttons with cancel button', (WidgetTester tester) async {
@@ -1077,7 +1313,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.3));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.0));
   });
 
   testWidgets('3 action buttons with cancel button', (WidgetTester tester) async {
@@ -1111,7 +1347,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.3));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.0));
   });
 
   testWidgets('4+ action buttons with cancel button', (WidgetTester tester) async {
@@ -1149,7 +1385,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.3));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.0));
   });
 
   testWidgets('1 action button without cancel button', (WidgetTester tester) async {
@@ -1171,7 +1407,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, 56.0);
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, 57.17);
   });
 
   testWidgets('2+ action buttons without cancel button', (WidgetTester tester) async {
@@ -1197,7 +1433,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.3));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.0));
   });
 
   testWidgets('Action sheet with just cancel button is correct', (WidgetTester tester) async {
@@ -1215,8 +1451,12 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    // Height should be cancel button height + padding
-    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, 76.0);
+    // The action sheet consists of only a cancel button, so the height should
+    // be cancel button height + padding.
+    const double expectedHeight = 57.17 // button height
+      + 8 // bottom edge padding
+      + 8; // top edge padding, since the screen has no top view padding
+    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, expectedHeight);
     expect(tester.getSize(find.byType(CupertinoActionSheet)).width, 600.0);
   });
 
@@ -1246,13 +1486,19 @@ void main() {
 
     expect(wasPressed, isFalse);
 
-    await tester.tap(find.text('Cancel'));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Cancel')));
+    await tester.pumpAndSettle();
+    // Verify that the cancel button shows the pressed color.
+    await expectLater(
+      find.byType(CupertinoActionSheet),
+      matchesGoldenFile('cupertinoActionSheet.pressedCancel.png'),
+    );
 
+    await gesture.up();
     expect(wasPressed, isTrue);
 
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-
     expect(find.text('Cancel'), findsNothing);
   });
 
@@ -1285,12 +1531,111 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Cancel')).dy, 590.0);
-    expect(
-      tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'One')).dy,
-      moreOrLessEquals(469.7),
+    expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Cancel')).dy, moreOrLessEquals(592.0));
+    expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'One')).dy, moreOrLessEquals(469.36));
+    expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Two')).dy, moreOrLessEquals(526.83));
+  });
+
+  // Verify that on a phone with the given `viewSize` and `viewPadding`, the the
+  // main sheet of a full-height action sheet will have a size of
+  // `expectedSize`.
+  //
+  // The `viewSize` and `viewPadding` can be captured on simulator. Changing
+  // `expectedSize` should be accompanied by screenshot comparison.
+  Future<void> verifyMaximumSize(
+    WidgetTester tester, {
+    required Size viewSize,
+    required EdgeInsets viewPadding,
+    required Size expectedSize,
+  }) async {
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
+    await binding.setSurfaceSize(viewSize);
+    addTearDown(() => binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      OverrideMediaQuery(
+        transformer: (MediaQueryData data) {
+          return data.copyWith(
+            size: viewSize,
+            viewPadding: viewPadding,
+            padding: viewPadding,
+          );
+        },
+        child: createAppWithButtonThatLaunchesActionSheet(
+          CupertinoActionSheet(
+            actions: List<Widget>.generate(20, (int i) =>
+              CupertinoActionSheetAction(
+                onPressed: () {},
+                child: Text('Button $i'),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
-    expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Two')).dy, 526.0);
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final Finder mainSheet = find.byElementPredicate(
+      (Element element) {
+        return element.widget.runtimeType.toString() == '_ActionSheetMainSheet';
+      },
+    );
+    expect(tester.getSize(mainSheet), expectedSize);
+  }
+
+  testWidgets('The maximum size is correct on iPhone SE gen 3', (WidgetTester tester) async {
+    const double expectedHeight = 667 // View height
+      - 20 // Top view padding
+      - 20 // Top widget padding
+      - 8; // Bottom edge padding
+    await verifyMaximumSize(
+      tester,
+      viewSize: const Size(375, 667),
+      viewPadding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+      expectedSize: const Size(359, expectedHeight),
+    );
+  });
+
+  testWidgets('The maximum size is correct on iPhone 13 Pro', (WidgetTester tester) async {
+    const double expectedHeight = 844 // View height
+      - 47 // Top view padding
+      - 47 // Top widget padding
+      - 34; // Bottom view padding
+    await verifyMaximumSize(
+      tester,
+      viewSize: const Size(390, 844),
+      viewPadding: const EdgeInsets.fromLTRB(0, 47, 0, 34),
+      expectedSize: const Size(374, expectedHeight),
+    );
+  });
+
+  testWidgets('The maximum size is correct on iPhone 15 Plus', (WidgetTester tester) async {
+    const double expectedHeight = 932 // View height
+      - 59 // Top view padding
+      - 54 // Top widget padding
+      - 34; // Bottom view padding
+    await verifyMaximumSize(
+      tester,
+      viewSize: const Size(430, 932),
+      viewPadding: const EdgeInsets.fromLTRB(0, 59, 0, 34),
+      expectedSize: const Size(414, expectedHeight),
+    );
+  });
+
+  testWidgets('The maximum size is correct on iPhone 13 Pro landscape', (WidgetTester tester) async {
+    const double expectedWidth = 390 // View height
+      - 8 * 2; // Edge padding
+    const double expectedHeight = 390 // View height
+      - 8 // Top edge padding
+      - 21; // Bottom view padding
+    await verifyMaximumSize(
+      tester,
+      viewSize: const Size(844, 390),
+      viewPadding: const EdgeInsets.fromLTRB(47, 0, 47, 21),
+      expectedSize: const Size(expectedWidth, expectedHeight),
+    );
   });
 
   testWidgets('Action buttons shows pressed color as soon as the pointer is down', (WidgetTester tester) async {
@@ -1328,139 +1673,105 @@ void main() {
   });
 
   testWidgets('Enter/exit animation is correct', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      createAppWithButtonThatLaunchesActionSheet(
-        CupertinoActionSheet(
-          title: const Text('The title'),
-          message: const Text('The message'),
-          actions: <Widget>[
-            CupertinoActionSheetAction(
-              child: const Text('One'),
-              onPressed: () { },
-            ),
-            CupertinoActionSheetAction(
-              child: const Text('Two'),
-              onPressed: () { },
-            ),
-          ],
-          cancelButton: CupertinoActionSheetAction(
-            child: const Text('Cancel'),
+    final AnimationSheetBuilder enterRecorder = AnimationSheetBuilder(
+      frameSize: const Size(600, 600)
+    );
+    addTearDown(enterRecorder.dispose);
+
+    final Widget target = createAppWithButtonThatLaunchesActionSheet(
+      CupertinoActionSheet(
+        title: const Text('The title'),
+        message: const Text('The message'),
+        actions: <Widget>[
+          CupertinoActionSheetAction(
+            child: const Text('One'),
             onPressed: () { },
           ),
+          CupertinoActionSheetAction(
+            child: const Text('Two'),
+            onPressed: () { },
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: const Text('Cancel'),
+          onPressed: () { },
         ),
       ),
     );
+    await tester.pumpWidget(enterRecorder.record(target));
 
     // Enter animation
     await tester.tap(find.text('Go'));
+    await tester.pumpFrames(enterRecorder.record(target), const Duration(milliseconds: 400));
 
-    await tester.pump();
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, 600.0);
+    await expectLater(
+      enterRecorder.collate(5),
+      matchesGoldenFile('cupertinoActionSheet.enter.png'),
+    );
 
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(483.9, epsilon: 0.1));
-
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(398.6, epsilon: 0.1));
-
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(365.3, epsilon: 0.1));
-
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(354.8, epsilon: 0.1));
-
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(350.7, epsilon: 0.1));
-
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(349.4, epsilon: 0.1));
-
-    // Action sheet has reached final height
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(349.4, epsilon: 0.1));
+    final AnimationSheetBuilder exitRecorder = AnimationSheetBuilder(
+      frameSize: const Size(600, 600)
+    );
+    addTearDown(exitRecorder.dispose);
+    await tester.pumpWidget(exitRecorder.record(target));
 
     // Exit animation
     await tester.tapAt(const Offset(20.0, 20.0));
-    await tester.pump();
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(349.4, epsilon: 0.1));
-
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(465.5, epsilon: 0.1));
-
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(550.8, epsilon: 0.1));
-
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(584.1, epsilon: 0.1));
-
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(594.6, epsilon: 0.1));
-
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(598.7, epsilon: 0.1));
+    await tester.pumpFrames(exitRecorder.record(target), const Duration(milliseconds: 400));
 
     // Action sheet has disappeared
-    await tester.pump(const Duration(milliseconds: 60));
     expect(find.byType(CupertinoActionSheet), findsNothing);
-  });
 
-  testWidgets('Modal barrier is pressed during transition', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      createAppWithButtonThatLaunchesActionSheet(
-        CupertinoActionSheet(
-          title: const Text('The title'),
-          message: const Text('The message'),
-          actions: <Widget>[
-            CupertinoActionSheetAction(
-              child: const Text('One'),
-              onPressed: () { },
-            ),
-            CupertinoActionSheetAction(
-              child: const Text('Two'),
-              onPressed: () { },
-            ),
-          ],
-          cancelButton: CupertinoActionSheetAction(
-            child: const Text('Cancel'),
+    await expectLater(
+      exitRecorder.collate(5),
+      matchesGoldenFile('cupertinoActionSheet.exit.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+
+  testWidgets('Animation is correct if entering is canceled halfway', (WidgetTester tester) async {
+    final AnimationSheetBuilder recorder = AnimationSheetBuilder(
+      frameSize: const Size(600, 600)
+    );
+    addTearDown(recorder.dispose);
+
+    final Widget target = createAppWithButtonThatLaunchesActionSheet(
+      CupertinoActionSheet(
+        title: const Text('The title'),
+        message: const Text('The message'),
+        actions: <Widget>[
+          CupertinoActionSheetAction(
+            child: const Text('One'),
             onPressed: () { },
           ),
+          CupertinoActionSheetAction(
+            child: const Text('Two'),
+            onPressed: () { },
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: const Text('Cancel'),
+          onPressed: () { },
         ),
       ),
     );
+    await tester.pumpWidget(recorder.record(target));
 
     // Enter animation
     await tester.tap(find.text('Go'));
-
-    await tester.pump();
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, 600.0);
-
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(483.92863239836686, epsilon: 0.1));
-
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(398.5571539306641, epsilon: 0.1));
-
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(365.3034101784229, epsilon: 0.1));
+    await tester.pumpFrames(recorder.record(target), const Duration(milliseconds: 200));
 
     // Exit animation
     await tester.tapAt(const Offset(20.0, 20.0));
-    await tester.pump(const Duration(milliseconds: 60));
-
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(398.5571539306641, epsilon: 0.1));
-
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(483.92863239836686, epsilon: 0.1));
-
-    await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, 600.0);
+    await tester.pumpFrames(recorder.record(target), const Duration(milliseconds: 400));
 
     // Action sheet has disappeared
-    await tester.pump(const Duration(milliseconds: 60));
     expect(find.byType(CupertinoActionSheet), findsNothing);
-  });
 
+    await expectLater(
+      recorder.collate(5),
+      matchesGoldenFile('cupertinoActionSheet.interrupted-enter.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
   testWidgets('Action sheet semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1644,6 +1955,50 @@ void main() {
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
+
+  testWidgets('Action sheets emits haptic vibration on sliding into a button', (WidgetTester tester) async {
+    int vibrationCount = 0;
+
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      if (methodCall.method == 'HapticFeedback.vibrate') {
+        expect(methodCall.arguments, 'HapticFeedbackType.selectionClick');
+        vibrationCount += 1;
+      }
+      return null;
+    });
+
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        CupertinoActionSheet(
+            title: const Text('The title'),
+            actions: <Widget>[
+              CupertinoActionSheetAction(child: const Text('One'), onPressed: () {}),
+              CupertinoActionSheetAction(child: const Text('Two'), onPressed: () {}),
+              CupertinoActionSheetAction(child: const Text('Three'), onPressed: () {}),
+            ],
+          )
+        ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('One')));
+    await tester.pumpAndSettle();
+    // Tapping down on a button should not emit vibration.
+    expect(vibrationCount, 0);
+
+    await gesture.moveTo(tester.getCenter(find.text('Two')));
+    await tester.pumpAndSettle();
+    expect(vibrationCount, 1);
+
+    await gesture.moveTo(tester.getCenter(find.text('Three')));
+    await tester.pumpAndSettle();
+    expect(vibrationCount, 2);
+
+    await gesture.up();
+    expect(vibrationCount, 2);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 }
 
 RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
@@ -1676,9 +2031,109 @@ Widget createAppWithButtonThatLaunchesActionSheet(Widget actionSheet) {
   );
 }
 
+// Shows an app that has a button with text "Go", and clicking this button
+// displays the `actionSheet` and hides the button.
+//
+// The `theme` will be applied to the app and determines the background.
+class TestScaffoldApp extends StatefulWidget {
+  const TestScaffoldApp({super.key, required this.theme, required this.actionSheet});
+  final CupertinoThemeData theme;
+  final Widget actionSheet;
+
+  @override
+  TestScaffoldAppState createState() => TestScaffoldAppState();
+}
+
+class TestScaffoldAppState extends State<TestScaffoldApp> {
+  bool _pressedButton = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoApp(
+      // Hide the debug banner. Because this CupertinoApp is captured in golden
+      // test as a whole. The debug banner contains tilted text, whose
+      // anti-alias might cause false negative result.
+      // https://github.com/flutter/flutter/pull/150442
+      debugShowCheckedModeBanner: false,
+      theme: widget.theme,
+      home: Builder(builder: (BuildContext context) =>
+        CupertinoPageScaffold(
+          child: Center(
+            child: _pressedButton ? Container() : CupertinoButton(
+              onPressed: () {
+                setState(() {
+                  _pressedButton = true;
+                });
+                showCupertinoModalPopup<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return widget.actionSheet;
+                  },
+                );
+              },
+              child: const Text('Go'),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 Widget boilerplate(Widget child) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: child,
   );
+}
+
+typedef MediaQueryTransformer = MediaQueryData Function(MediaQueryData);
+
+class OverrideMediaQuery extends StatelessWidget {
+  const OverrideMediaQuery({
+    super.key,
+    required this.transformer,
+    required this.child,
+  });
+
+  final MediaQueryTransformer transformer;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final MediaQueryData currentData = MediaQuery.of(context);
+    return MediaQuery(
+      data: transformer(currentData),
+      child: child,
+    );
+  }
+}
+
+// Old-style action sheet buttons, which are implemented with
+// `GestureDetector.onTap`.
+class LegacyAction extends StatelessWidget {
+  const LegacyAction({
+    super.key,
+    required this.onPressed,
+    required this.child,
+  });
+
+  final VoidCallback onPressed;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      behavior: HitTestBehavior.opaque,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 57),
+        child: Container(
+          alignment: AlignmentDirectional.center,
+          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10.0),
+          child: child,
+        ),
+      ),
+    );
+  }
 }

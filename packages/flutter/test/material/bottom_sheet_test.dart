@@ -1281,6 +1281,80 @@ void main() {
     await checkDragHandleAndColors();
   });
 
+  testWidgets('Drag handle interactive area size at minimum possible size', (WidgetTester tester) async {
+    Widget buildScaffold(GlobalKey scaffoldKey, {Size? dragHandleSize}) {
+      return MaterialApp(
+        theme: ThemeData.light().copyWith(
+          bottomSheetTheme:  BottomSheetThemeData(
+            dragHandleSize: dragHandleSize
+          ),
+        ),
+        home: Scaffold(
+          key: scaffoldKey,
+        ),
+      );
+    }
+
+    const Size smallerDragHandleSize = Size(20, 20);
+
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(buildScaffold(scaffoldKey, dragHandleSize: smallerDragHandleSize));
+
+    showModalBottomSheet<void>(
+      context: scaffoldKey.currentContext!,
+      showDragHandle: true,
+      builder: (BuildContext context) {
+        return const Text('BottomSheet');
+      },
+    );
+
+    await tester.pump(); // Bottom sheet show animation starts.
+    await tester.pump(const Duration(seconds: 1)); // Animation done.
+
+    final Finder dragHandle = find.bySemanticsLabel('Dismiss');
+    expect(
+      tester.getSize(dragHandle),
+      const Size(kMinInteractiveDimension, kMinInteractiveDimension),
+    );
+  });
+
+  testWidgets('Drag handle interactive area size at given dragHandleSize', (WidgetTester tester) async {
+    Widget buildScaffold(GlobalKey scaffoldKey, {Size? dragHandleSize}) {
+      return MaterialApp(
+        theme: ThemeData.light().copyWith(
+          bottomSheetTheme: BottomSheetThemeData(
+            dragHandleSize: dragHandleSize
+          ),
+        ),
+        home: Scaffold(
+          key: scaffoldKey,
+        ),
+      );
+    }
+
+    const Size extendedDragHandleSize = Size(100, 50);
+
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(buildScaffold(scaffoldKey, dragHandleSize: extendedDragHandleSize));
+
+    showModalBottomSheet<void>(
+      context: scaffoldKey.currentContext!,
+      showDragHandle: true,
+      builder: (BuildContext context) {
+        return const Text('BottomSheet');
+      },
+    );
+
+    await tester.pump(); // Bottom sheet show animation starts.
+    await tester.pump(const Duration(seconds: 1)); // Animation done.
+
+    final Finder dragHandle = find.bySemanticsLabel('Dismiss');
+    expect(
+      tester.getSize(dragHandle),
+      extendedDragHandleSize,
+    );
+  });
+
   testWidgets('showModalBottomSheet does not use root Navigator by default', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -2534,6 +2608,77 @@ void main() {
 
     // The bottom sheet is dismissed.
     expect(find.byKey(sheetKey), findsNothing);
+  });
+
+  testWidgets('Setting ModalBottomSheetRoute.requestFocus to false does not request focus on the bottom sheet', (WidgetTester tester) async {
+    late BuildContext savedContext;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              savedContext = context;
+              return TextField(focusNode: focusNode);
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    FocusNode? getTextFieldFocusNode() {
+      return tester.widget<Focus>(find.descendant(
+        of: find.byType(TextField),
+        matching: find.byType(Focus),
+      )).focusNode;
+    }
+
+    // Initially, there is no bottom sheet and the text field has no focus.
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(getTextFieldFocusNode()?.hasFocus, false);
+
+    // Request focus on the text field.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(getTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up bottom sheet.
+    final NavigatorState navigator = Navigator.of(savedContext);
+    navigator.push(
+      ModalBottomSheetRoute<void>(
+        isScrollControlled: false,
+        builder: (BuildContext context) => Container(),
+      ),
+    );
+    await tester.pump();
+
+    // The bottom sheet is showing and the text field has lost focus.
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(getTextFieldFocusNode()?.hasFocus, false);
+
+    // Dismiss the bottom sheet.
+    navigator.pop();
+    await tester.pump();
+
+    // The bottom sheet is dismissed and the focus is shifted back to the text field.
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(getTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up bottom sheet again with requestFocus to false.
+    navigator.push(
+      ModalBottomSheetRoute<void>(
+        requestFocus: false,
+        isScrollControlled: false,
+        builder: (BuildContext context) => Container(),
+      ),
+    );
+    await tester.pump();
+
+    // The bottom sheet is showing and the text field still has focus.
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(getTextFieldFocusNode()?.hasFocus, true);
   });
 }
 

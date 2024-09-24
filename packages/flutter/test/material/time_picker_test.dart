@@ -19,8 +19,16 @@ void main() {
   const String okString = 'OK';
   const String amString = 'AM';
   const String pmString = 'PM';
+
   Material getMaterialFromDialog(WidgetTester tester) {
     return tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
+  }
+
+  Finder findBorderPainter() {
+    return find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
+      matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
+    );
   }
 
   testWidgets('Material2 - Dialog size - dial mode', (WidgetTester tester) async {
@@ -1250,7 +1258,10 @@ void main() {
           semantics,
           includesNodeWith(
             label: amString,
-            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+            actions: <SemanticsAction>[
+              SemanticsAction.tap,
+              SemanticsAction.focus,
+            ],
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
               SemanticsFlag.isChecked,
@@ -1264,7 +1275,10 @@ void main() {
           semantics,
           includesNodeWith(
             label: pmString,
-            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+            actions: <SemanticsAction>[
+              SemanticsAction.tap,
+              SemanticsAction.focus,
+            ],
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
               SemanticsFlag.isInMutuallyExclusiveGroup,
@@ -1342,7 +1356,10 @@ void main() {
           includesNodeWith(
             label: 'Hour',
             value: '07',
-            actions: <SemanticsAction>[SemanticsAction.tap],
+            actions: <SemanticsAction>[
+              SemanticsAction.tap,
+              SemanticsAction.focus,
+            ],
             flags: <SemanticsFlag>[
               SemanticsFlag.isTextField,
               SemanticsFlag.hasEnabledState,
@@ -1356,7 +1373,10 @@ void main() {
           includesNodeWith(
             label: 'Minute',
             value: '00',
-            actions: <SemanticsAction>[SemanticsAction.tap],
+            actions: <SemanticsAction>[
+              SemanticsAction.tap,
+              SemanticsAction.focus,
+            ],
             flags: <SemanticsFlag>[
               SemanticsFlag.isTextField,
               SemanticsFlag.hasEnabledState,
@@ -2000,6 +2020,43 @@ void main() {
     final RenderParagraph paragraph = tester.renderObject(find.text(':'));
     expect(paragraph.text.style!.color, theme.colorScheme.onSurface);
     expect(paragraph.text.style!.fontSize, 56.0);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/153549.
+  testWidgets('Time picker hour minute does not resize on error', (WidgetTester tester) async {
+    await startPicker(
+      entryMode: TimePickerEntryMode.input,
+      tester,
+      (TimeOfDay? value) { },
+    );
+
+    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
+
+    // Enter invalid hour.
+    await tester.enterText(find.byType(TextField).first, 'AB');
+    await tester.tap(find.text(okString));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/153549.
+  testWidgets('Material2 - Time picker hour minute does not resize on error', (WidgetTester tester) async {
+    await startPicker(
+      entryMode: TimePickerEntryMode.input,
+      tester,
+      (TimeOfDay? value) { },
+      materialType: MaterialType.material2,
+    );
+
+    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
+
+    // Enter invalid hour.
+    await tester.enterText(find.byType(TextField).first, 'AB');
+    await tester.tap(find.text(okString));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
   });
 }
 

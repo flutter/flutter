@@ -32,7 +32,6 @@ import 'cache.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'doctor.dart';
-import 'fuchsia/fuchsia_sdk.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
 import 'ios/simulators.dart';
@@ -41,6 +40,7 @@ import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/xcdevice.dart';
 import 'macos/xcode.dart';
+import 'native_assets.dart';
 import 'persistent_tool_state.dart';
 import 'pre_run_validator.dart';
 import 'project.dart';
@@ -70,8 +70,6 @@ Signals get signals => context.get<Signals>() ?? LocalSignals.instance;
 AndroidStudio? get androidStudio => context.get<AndroidStudio>();
 AndroidSdk? get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>()!;
-FuchsiaArtifacts? get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
-FuchsiaSdk? get fuchsiaSdk => context.get<FuchsiaSdk>();
 Usage get flutterUsage => context.get<Usage>()!;
 XcodeProjectInterpreter? get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 XCDevice? get xcdevice => context.get<XCDevice>();
@@ -305,3 +303,5 @@ NonNullSafeBuilds get nonNullSafeBuilds => context.get<NonNullSafeBuilds>() ?? N
 /// A value of [null] indicates that no installation of java could be found on
 /// the host machine.
 Java? get java => context.get<Java>();
+
+TestCompilerNativeAssetsBuilder? get nativeAssetsBuilder => context.get<TestCompilerNativeAssetsBuilder>();

@@ -815,6 +815,28 @@ plugins {
         FlutterProjectFactory: () => flutterProjectFactory,
       });
 
+    testUsingContext('kotlin host app language with Gradle Kotlin DSL and typesafe plugin id', () async {
+      final FlutterProject project = await someProject();
+
+        addAndroidGradleFile(project.directory,
+          kotlinDsl: true,
+          gradleFileContent: () {
+            return '''
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    dev.flutter.`flutter-gradle-plugin`
+}
+''';
+        });
+        expect(project.android.isKotlin, isTrue);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        FlutterProjectFactory: () => flutterProjectFactory,
+      });
+
     testUsingContext('Gradle Groovy files are preferred to Gradle Kotlin files', () async {
       final FlutterProject project = await someProject();
 
@@ -898,6 +920,7 @@ plugins {
             <String>[
               'applinks:example.com',
               'applinks:example2.com',
+              'applinks:example3.com?mode=developer',
             ],
           );
           final String outputFilePath = await project.ios.outputsUniversalLinkSettings(
@@ -913,6 +936,7 @@ plugins {
               <String>[
                 'example.com',
                 'example2.com',
+                'example3.com',
               ],
             ),
           );
@@ -1087,7 +1111,7 @@ plugins {
             IosProject.kProductBundleIdKey: 'io.flutter.someProject',
           };
           xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Free'], logger);
-          const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false);
+          const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
 
           expect(await project.ios.productBundleIdentifier(buildInfo), 'io.flutter.someProject');
         });
@@ -1096,7 +1120,7 @@ plugins {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
           xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
-          const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false);
+          const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
 
           await expectToolExitLater(
             project.ios.productBundleIdentifier(buildInfo),
@@ -1166,9 +1190,9 @@ plugins {
         mockXcodeProjectInterpreter = FakeXcodeProjectInterpreter();
       });
 
-      testUsingContext('app product name defaults to Runner.app', () async {
+      testUsingContext('app product name defaults to Runner', () async {
         final FlutterProject project = await someProject();
-        expect(await project.ios.hostAppBundleName(null), 'Runner.app');
+        expect(await project.ios.productName(null), 'Runner');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1180,11 +1204,11 @@ plugins {
         project.ios.xcodeProject.createSync();
         const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
         mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
-          'FULL_PRODUCT_NAME': 'My App.app',
+          'PRODUCT_NAME': 'My App',
         };
         mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
 
-        expect(await project.ios.hostAppBundleName(null), 'My App.app');
+        expect(await project.ios.productName(null), 'My App');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1436,7 +1460,7 @@ plugins {
         const XcodeProjectBuildContext watchBuildContext = XcodeProjectBuildContext(
           scheme: 'WatchScheme',
           deviceId: '123',
-          isWatch: true,
+          sdk: XcodeSdk.WatchOS,
         );
         mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] = <String, String>{
           'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': 'io.flutter.someProject',
@@ -1476,7 +1500,7 @@ plugins {
         const XcodeProjectBuildContext watchBuildContext = XcodeProjectBuildContext(
           scheme: 'WatchScheme',
           deviceId: '123',
-          isWatch: true,
+          sdk: XcodeSdk.WatchOS,
         );
         mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] = <String, String>{
           IosProject.kProductBundleIdKey: 'io.flutter.someProject',

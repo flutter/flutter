@@ -304,7 +304,7 @@ void main() {
       expect(artifact2.didUpdate, false);
       expect(
         logger.errorText,
-        contains('https://flutter.dev/community/china'),
+        contains('https://flutter.dev/to/china-setup'),
       );
     });
 
@@ -909,7 +909,7 @@ void main() {
     handler.addError(webCacheDirectory, FileSystemOp.delete, const FileSystemException('', '', OSError('', 2)));
 
     await expectLater(() => webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils()), throwsToolExit(
-      message: RegExp('The Flutter tool tried to delete the file or directory cache/bin/cache/flutter_web_sdk but was unable to'),
+      message: RegExp('Unable to delete file or directory at "cache/bin/cache/flutter_web_sdk"'),
     ));
   });
 
@@ -992,9 +992,6 @@ void main() {
 
     expect(await pubDependencies.isUpToDate(fileSystem), false); // no package config
 
-    fileSystem.file('packages/flutter_tools/.packages')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('\n');
     fileSystem.file('packages/flutter_tools/.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -1039,7 +1036,7 @@ void main() {
     expect(
       pub.invocations.first,
       predicate<FakePubInvocation>(
-        (FakePubInvocation invocation) => invocation.outputMode == PubOutputMode.none,
+        (FakePubInvocation invocation) => invocation.outputMode == PubOutputMode.failuresOnly,
         'Pub invoked with PubOutputMode.none',
       ),
     );

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +17,7 @@ TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
   );
   return iconRichText.text.style;
 }
+
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
@@ -2563,10 +2565,160 @@ void main() {
       expect(getAppBarBackgroundColor(tester), defaultColor);
       expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
     });
+
+    testWidgets('scrolledUnderElevation should be maintained when drawer is opened', (WidgetTester tester) async {
+      final GlobalKey drawerListKey  = GlobalKey();
+      final GlobalKey bodyListKey = GlobalKey();
+       await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+              return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
+            }),
+            title: const Text('AppBar'),
+          ),
+          drawer: Drawer(
+            child: ListView(
+              key: drawerListKey,
+              children: <Widget>[
+                Container(height: 1200, color: Colors.red),
+              ],
+            ),
+          ),
+          body: ListView(
+            key: bodyListKey,
+            children: <Widget>[
+              Container(height: 1200, color: Colors.teal),
+            ],
+          ),
+        ),
+      ));
+
+      // Initial state: AppBar should have the default color.
+      expect(getAppBarBackgroundColor(tester), defaultColor);
+
+      // Scroll the list view.
+      await tester.drag(find.byKey(bodyListKey), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should now have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Open the drawer.
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll the list inside the drawer.
+      await tester.drag(find.byKey(drawerListKey), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll list inside the drawer back to the top.
+      await tester.drag(find.byKey(drawerListKey), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Close the drawer using the Scaffold's method.
+      tester.state<ScaffoldState>(find.byType(Scaffold)).closeDrawer();
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll the list view back to the top.
+      await tester.drag(find.byKey(bodyListKey), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should be back to the default color.
+      expect(getAppBarBackgroundColor(tester), defaultColor);
+    });
+
+    testWidgets('scrolledUnderElevation should be maintained when endDrawer is opened', (WidgetTester tester) async {
+      final GlobalKey drawerListKey  = GlobalKey();
+      final GlobalKey bodyListKey = GlobalKey();
+       await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+              return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
+            }),
+            title: const Text('AppBar'),
+          ),
+          endDrawer: Drawer(
+            child: ListView(
+              key: drawerListKey,
+              children: <Widget>[
+                Container(height: 1200, color: Colors.red),
+              ],
+            ),
+          ),
+          body: ListView(
+            key: bodyListKey,
+            children: <Widget>[
+              Container(height: 1200, color: Colors.teal),
+            ],
+          ),
+        ),
+      ));
+
+      // Initial state: AppBar should have the default color.
+      expect(getAppBarBackgroundColor(tester), defaultColor);
+
+      // Scroll the list view.
+      await tester.drag(find.byKey(bodyListKey), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should now have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Open the drawer.
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll the list inside the drawer.
+      await tester.drag(find.byKey(drawerListKey), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll list inside the drawer back to the top.
+      await tester.drag(find.byKey(drawerListKey), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Close the drawer using the Scaffold's method.
+      tester.state<ScaffoldState>(find.byType(Scaffold)).closeEndDrawer();
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll the list view back to the top.
+      await tester.drag(find.byKey(bodyListKey), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should be back to the default color.
+      expect(getAppBarBackgroundColor(tester), defaultColor);
+    });
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/80256
-  testWidgets('The second page should have a back button even it has a end drawer', (WidgetTester tester) async {
+  testWidgets('The second page should have a back button even it has an end drawer', (WidgetTester tester) async {
     final Page<void> page1 = MaterialPage<void>(
         key: const ValueKey<String>('1'),
         child: Scaffold(
@@ -2816,6 +2968,203 @@ void main() {
         await tester.pump();
         expect(buttonWasPressed, isFalse);
     });
+  });
+
+  testWidgets('AppBar.leading size with custom IconButton', (WidgetTester tester) async {
+    final Key leadingKey = UniqueKey();
+    final Key titleKey = UniqueKey();
+    const double titleSpacing = 16.0;
+    final ThemeData theme = ThemeData();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            key: leadingKey,
+            onPressed: () {},
+            icon: const Icon(Icons.menu),
+          ),
+          centerTitle: false,
+          title: Text(
+            'Title',
+            key: titleKey,
+          ),
+        ),
+      ),
+    ));
+
+    final Finder buttonFinder = find.byType(IconButton);
+    expect(tester.getSize(buttonFinder), const Size(48.0, 48.0));
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(buttonFinder));
+    await tester.pumpAndSettle();
+    expect(
+      buttonFinder,
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(0.0, 0.0, 40.0, 40.0),
+          color: theme.colorScheme.onSurface.withOpacity(0.08),
+        ),
+    );
+
+    // Get the offset of the Center widget that wraps the IconButton.
+    final Offset backButtonOffset = tester.getTopRight(find.ancestor(
+      of: buttonFinder,
+      matching: find.byType(Center),
+    ));
+    final Offset titleOffset = tester.getTopLeft(find.byKey(titleKey));
+    expect(titleOffset.dx, backButtonOffset.dx + titleSpacing);
+  });
+
+  testWidgets('AppBar.leading size with custom BackButton', (WidgetTester tester) async {
+    final Key leadingKey = UniqueKey();
+    final Key titleKey = UniqueKey();
+    const double titleSpacing = 16.0;
+    final ThemeData theme = ThemeData();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          leading: BackButton(
+            key: leadingKey,
+            onPressed: () {},
+          ),
+          centerTitle: false,
+          title: Text(
+            'Title',
+            key: titleKey,
+          ),
+        ),
+      ),
+    ));
+
+    final Finder buttonFinder = find.byType(BackButton);
+    expect(tester.getSize(buttonFinder), const Size(48.0, 48.0));
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(buttonFinder));
+    await tester.pumpAndSettle();
+    expect(
+      buttonFinder,
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(0.0, 0.0, 40.0, 40.0),
+          color: theme.colorScheme.onSurface.withOpacity(0.08),
+        ),
+    );
+
+    // Get the offset of the Center widget that wraps the IconButton.
+    final Offset backButtonOffset = tester.getTopRight(find.ancestor(
+      of: buttonFinder,
+      matching: find.byType(Center),
+    ));
+    final Offset titleOffset = tester.getTopLeft(find.byKey(titleKey));
+    expect(titleOffset.dx, backButtonOffset.dx + titleSpacing);
+  });
+
+  testWidgets('AppBar.leading size with custom CloseButton', (WidgetTester tester) async {
+    final Key leadingKey = UniqueKey();
+    final Key titleKey = UniqueKey();
+    const double titleSpacing = 16.0;
+    final ThemeData theme = ThemeData();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          leading: CloseButton(
+            key: leadingKey,
+            onPressed: () {},
+          ),
+          centerTitle: false,
+          title: Text(
+            'Title',
+            key: titleKey,
+          ),
+        ),
+      ),
+    ));
+
+    final Finder buttonFinder = find.byType(CloseButton);
+    expect(tester.getSize(buttonFinder), const Size(48.0, 48.0));
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(buttonFinder));
+    await tester.pumpAndSettle();
+    expect(
+      buttonFinder,
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(0.0, 0.0, 40.0, 40.0),
+          color: theme.colorScheme.onSurface.withOpacity(0.08),
+        ),
+    );
+
+    // Get the offset of the Center widget that wraps the IconButton.
+    final Offset backButtonOffset = tester.getTopRight(find.ancestor(
+      of: buttonFinder,
+      matching: find.byType(Center),
+    ));
+    final Offset titleOffset = tester.getTopLeft(find.byKey(titleKey));
+    expect(titleOffset.dx, backButtonOffset.dx + titleSpacing);
+  });
+
+  testWidgets('AppBar.leading size with custom DrawerButton', (WidgetTester tester) async {
+    final Key leadingKey = UniqueKey();
+    final Key titleKey = UniqueKey();
+    const double titleSpacing = 16.0;
+    final ThemeData theme = ThemeData();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          leading: DrawerButton(
+            key: leadingKey,
+            onPressed: () {},
+          ),
+          centerTitle: false,
+          title: Text(
+            'Title',
+            key: titleKey,
+          ),
+        ),
+      ),
+    ));
+
+    final Finder buttonFinder = find.byType(DrawerButton);
+    expect(tester.getSize(buttonFinder), const Size(48.0, 48.0));
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(buttonFinder));
+    await tester.pumpAndSettle();
+    expect(
+      buttonFinder,
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(0.0, 0.0, 40.0, 40.0),
+          color: theme.colorScheme.onSurface.withOpacity(0.08),
+        ),
+    );
+
+    // Get the offset of the Center widget that wraps the IconButton.
+    final Offset backButtonOffset = tester.getTopRight(find.ancestor(
+      of: buttonFinder,
+      matching: find.byType(Center),
+    ));
+    final Offset titleOffset = tester.getTopLeft(find.byKey(titleKey));
+    expect(titleOffset.dx, backButtonOffset.dx + titleSpacing);
   });
 
   group('Material 2', () {

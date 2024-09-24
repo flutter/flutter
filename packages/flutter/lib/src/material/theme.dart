@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app.dart';
+/// @docImport 'color_scheme.dart';
+/// @docImport 'text_theme.dart';
+library;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
@@ -101,6 +106,15 @@ class Theme extends StatelessWidget {
   ///   );
   /// }
   /// ```
+  ///
+  /// See also:
+  ///
+  /// * [ColorScheme.of], a convenience method that returns [ThemeData.colorScheme]
+  ///   from the closest [Theme] ancestor. (equivalent to `Theme.of(context).colorScheme`).
+  /// * [TextTheme.of], a convenience method that returns [ThemeData.textTheme]
+  ///   from the closest [Theme] ancestor. (equivalent to `Theme.of(context).textTheme`).
+  /// * [IconTheme.of], that returns [ThemeData.iconTheme] from the closest [Theme] or
+  ///   [IconThemeData.fallback] if there is no [IconTheme] ancestor.
   static ThemeData of(BuildContext context) {
     final _InheritedTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
     final MaterialLocalizations? localizations = Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);

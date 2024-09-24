@@ -339,7 +339,7 @@ class CreateCommand extends CreateBase {
       linux: includeLinux,
       macos: includeMacos,
       windows: includeWindows,
-      dartSdkVersionBounds: "'>=$dartSdk <4.0.0'",
+      dartSdkVersionBounds: '^$dartSdk',
       implementationTests: boolArg('implementation-tests'),
       agpVersion: gradle.templateAndroidGradlePluginVersion,
       kotlinVersion: gradle.templateKotlinGradlePluginVersion,
@@ -820,7 +820,7 @@ Your example app code is in $relativeExampleMain.
   if (platformsString.isNotEmpty) {
     globals.printStatus('''
 Host platform code is in the $platformsString directories under $pluginPath.
-To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
+To edit platform code in an IDE see https://flutter.dev/to/edit-plugins.
 
     ''');
   }
@@ -841,7 +841,7 @@ You've created a plugin project that doesn't yet support any platforms.
 void _printPluginAddPlatformMessage(String pluginPath, String template) {
   globals.printStatus('''
 To add platforms, run `flutter create -t $template --platforms <platforms> .` under $pluginPath.
-For more information, see https://flutter.dev/go/plugin-platforms.
+For more information, see https://flutter.dev/to/pubspec-plugin-platforms.
 
 ''');
 }
@@ -881,13 +881,13 @@ void _printWarningDisabledPlatform(List<String> platforms) {
 
     globals.printStatus('''
 The desktop $platforms: ${desktop.join(', ')} $verb currently not supported on your local environment.
-For more details, see: https://flutter.dev/desktop
+For more details, see: https://flutter.dev/to/add-desktop-support
 ''');
   }
   if (web.isNotEmpty) {
     globals.printStatus('''
 The web is currently not supported on your local environment.
-For more details, see: https://flutter.dev/docs/get-started/web
+For more details, see: https://flutter.dev/to/add-web-support
 ''');
   }
 }
@@ -959,19 +959,17 @@ used.
   // AGP template version incompatible with Java version.
   final gradle.JavaAgpCompat? minimumCompatibleAgpVersion = gradle.getMinimumAgpVersionForJavaVersion(globals.logger, javaV: javaVersion);
   final String compatibleAgpVersionMessage = minimumCompatibleAgpVersion == null ? '' : ' (minimum compatible AGP version: ${minimumCompatibleAgpVersion.agpMin})';
-  final String gradleBuildFilePaths = '    -  ${_getBuildGradleConfigurationFilePaths(projectType, projectDirPath)!.join('\n    - ')}';
+  final String gradleBuildFilePaths = '    ${_getBuildGradleConfigurationFilePaths(projectType, projectDirPath)!.join('\n    - ')}';
 
   globals.printWarning('''
 $incompatibleVersionsAndRecommendedOptionMessage
 
-Alternatively, to continue using your configured Java version, update the AGP
-version specified in the following files to a compatible AGP
-version$compatibleAgpVersionMessage as necessary:
+Alternatively, to continue using your current Java version, update the AGP
+version in the following file(s) to a compatible version$compatibleAgpVersionMessage:
 $gradleBuildFilePaths
 
-See
-https://developer.android.com/build/releases/gradle-plugin for details on
-compatible Java/AGP versions.
+For details on compatible Java and AGP versions, see
+https://developer.android.com/build/releases/gradle-plugin
 ''',
     emphasis: true
   );
@@ -994,12 +992,11 @@ String getIncompatibleJavaGradleAgpMessageHeader(
   return '''
 The configured version of Java detected may conflict with the $incompatibleDependency version in your new Flutter $projectType.
 
-[RECOMMENDED] If so, to keep the default $incompatibleDependencyVersion, make
-sure to download a compatible Java version
-$validJavaRangeMessage.
-You may configure this compatible Java version by running:
-`flutter config --jdk-dir=<JDK_DIRECTORY>`
-Note that this is a global configuration for Flutter.
+To keep the default AGP version $incompatibleDependencyVersion, download a compatible Java version
+(Java 17 <= $validJavaRangeMessage Java version < Java 21). Configure this Java version
+globally for Flutter by running:
+
+  flutter config --jdk-dir=<JDK_DIRECTORY>
 ''';
 }
 

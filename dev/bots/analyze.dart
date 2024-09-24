@@ -184,8 +184,8 @@ Future<void> run(List<String> arguments) async {
     final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
     printProgress('Analyzing code in the framework with the following rules:$ruleNames');
     await analyzeWithRules(flutterRoot, rules,
-      includePaths: <String>['packages/flutter/lib'],
-      excludePaths: <String>['packages/flutter/lib/fix_data'],
+      includePaths: const <String>['packages/flutter/lib'],
+      excludePaths: const <String>['packages/flutter/lib/fix_data'],
     );
     final List<AnalyzeRule> testRules = <AnalyzeRule>[noStopwatches];
     final String testRuleNames = testRules.map((AnalyzeRule rule) => '\n * $rule').join();
@@ -196,7 +196,14 @@ Future<void> run(List<String> arguments) async {
     final List<AnalyzeRule> toolRules = <AnalyzeRule>[AvoidFutureCatchError()];
     final String toolRuleNames = toolRules.map((AnalyzeRule rule) => '\n * $rule').join();
     printProgress('Analyzing code in the tool with the following rules:$toolRuleNames');
-    await analyzeToolWithRules(flutterRoot, toolRules);
+    await analyzeWithRules(
+      flutterRoot,
+      toolRules,
+      includePaths: const <String>[
+        'packages/flutter_tools/lib',
+        'packages/flutter_tools/test',
+      ],
+    );
   } else {
     printProgress('Skipped performing further analysis in the framework because "flutter analyze" finished with a non-zero exit code.');
   }
@@ -905,9 +912,8 @@ Future<void> verifyNoTestImports(String workingDirectory) async {
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
-    final String s = errors.length == 1 ? '' : 's';
     foundError(<String>[
-      '${bold}The following file$s import a test directly. Test utilities should be in their own file.$reset',
+      '${bold}The following file(s) import a test directly. Test utilities should be in their own file.$reset',
       ...errors,
     ]);
   }
@@ -1884,14 +1890,9 @@ Stream<File> _allFiles(String workingDirectory, String? extension, { required in
       if (_isGeneratedPluginRegistrant(entity)) {
         continue;
       }
-      if (path.basename(entity.path) == 'flutter_export_environment.sh') {
-        continue;
-      }
-      if (path.basename(entity.path) == 'gradlew.bat') {
-        continue;
-      }
-      if (path.basename(entity.path) == '.DS_Store') {
-        continue;
+      switch (path.basename(entity.path)) {
+        case 'flutter_export_environment.sh' || 'gradlew.bat' || '.DS_Store':
+          continue;
       }
       if (extension == null || path.extension(entity.path) == '.$extension') {
         matches += 1;
@@ -1901,23 +1902,9 @@ Stream<File> _allFiles(String workingDirectory, String? extension, { required in
       if (File(path.join(entity.path, '.dartignore')).existsSync()) {
         continue;
       }
-      if (path.basename(entity.path) == '.git') {
-        continue;
-      }
-      if (path.basename(entity.path) == '.idea') {
-        continue;
-      }
-      if (path.basename(entity.path) == '.gradle') {
-        continue;
-      }
-      if (path.basename(entity.path) == '.dart_tool') {
-        continue;
-      }
-      if (path.basename(entity.path) == '.idea') {
-        continue;
-      }
-      if (path.basename(entity.path) == 'build') {
-        continue;
+      switch (path.basename(entity.path)) {
+        case '.git' || '.idea' || '.gradle' || '.dart_tool' || 'build':
+          continue;
       }
       pending.addAll(entity.listSync());
     }
@@ -2229,6 +2216,7 @@ Future<CommandResult> _runFlutterAnalyze(String workingDirectory, {
 const Set<String> kExecutableAllowlist = <String>{
   'bin/dart',
   'bin/flutter',
+  'bin/flutter-dev',
   'bin/internal/update_dart_sdk.sh',
 
   'dev/bots/accept_android_sdk_licenses.sh',

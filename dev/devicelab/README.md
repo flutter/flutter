@@ -60,6 +60,10 @@ Running the devicelab will do things to your environment.
 
 Notably, it will start and stop Gradle, for instance.
 
+### Running tests in `test/...`
+
+`dart test test/{NAME_OF_TEST}`
+
 ### Running specific tests
 
 To run a test, use option `-t` (`--task`):

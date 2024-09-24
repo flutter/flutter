@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -216,12 +219,10 @@ abstract class CachingAssetBundle extends AssetBundle {
     loadString(key, cache: false).then<T>(parser).then<void>((T value) {
       synchronousResult = SynchronousFuture<T>(value);
       _structuredDataCache[key] = synchronousResult!;
-      if (completer != null) {
-        // We already returned from the loadStructuredData function, which means
-        // we are in the asynchronous mode. Pass the value to the completer. The
-        // completer's future is what we returned.
-        completer.complete(value);
-      }
+      // We already returned from the loadStructuredData function, which means
+      // we are in the asynchronous mode. Pass the value to the completer. The
+      // completer's future is what we returned.
+      completer?.complete(value);
     }, onError: (Object error, StackTrace stack) {
       assert(completer != null, 'unexpected synchronous failure');
       // Either loading or parsing failed. We must report the error back to the
@@ -264,12 +265,10 @@ abstract class CachingAssetBundle extends AssetBundle {
     load(key).then<T>(parser).then<void>((T value) {
       synchronousResult = SynchronousFuture<T>(value);
       _structuredBinaryDataCache[key] = synchronousResult!;
-      if (completer != null) {
-        // The load and parse operation ran asynchronously. We already returned
-        // from the loadStructuredBinaryData function and therefore the caller
-        // was given the future of the completer.
-        completer.complete(value);
-      }
+      // The load and parse operation ran asynchronously. We already returned
+      // from the loadStructuredBinaryData function and therefore the caller
+      // was given the future of the completer.
+      completer?.complete(value);
     }, onError: (Object error, StackTrace stack) {
       assert(completer != null, 'unexpected synchronous failure');
       // Either loading or parsing failed. We must report the error back to the

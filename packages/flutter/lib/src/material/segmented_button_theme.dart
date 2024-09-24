@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'segmented_button.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -36,7 +39,7 @@ class SegmentedButtonThemeData with Diagnosticable {
 
   /// Overrides the [SegmentedButton]'s default style.
   ///
-  /// Non-null properties or non-null resolved [MaterialStateProperty]
+  /// Non-null properties or non-null resolved [WidgetStateProperty]
   /// values override the default values used by [SegmentedButton].
   ///
   /// If [style] is null, then this theme doesn't override anything.

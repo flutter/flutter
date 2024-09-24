@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/services.dart';
+/// @docImport 'package:flutter/widgets.dart';
+library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -159,7 +162,7 @@ class TapSemanticEvent extends SemanticsEvent {
 /// An event to move the accessibility focus.
 ///
 /// Using this API is generally not recommended, as it may break a users' expectation of
-/// how a11y focus works and therefore should be just very carefully.
+/// how a11y focus works and therefore should be used very carefully.
 ///
 /// One possible use case:
 /// For example, the currently focused rendering object is replaced by another rendering

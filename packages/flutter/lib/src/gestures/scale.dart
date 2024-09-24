@@ -357,7 +357,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  /// * https://docs.flutter.dev/ui/interactivity/gestures#gesture-disambiguation,
+  /// * https://flutter.dev/to/gesture-disambiguation,
   ///   which provides more information about the gesture arena.
   DragStartBehavior dragStartBehavior;
 
@@ -369,7 +369,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  /// * https://docs.flutter.dev/ui/interactivity/gestures#gesture-disambiguation,
+  /// * https://flutter.dev/to/gesture-disambiguation,
   ///   which provides more information about the gesture arena.
   GestureScaleStartCallback? onStart;
 

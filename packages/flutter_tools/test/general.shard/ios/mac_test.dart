@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -16,7 +18,6 @@ import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcresult.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -191,14 +192,12 @@ void main() {
 
   group('Diagnose Xcode build failure', () {
     late Map<String, String> buildSettings;
-    late TestUsage testUsage;
     late FakeAnalytics fakeAnalytics;
 
     setUp(() {
       buildSettings = <String, String>{
         'PRODUCT_BUNDLE_IDENTIFIER': 'test.app',
       };
-      testUsage = TestUsage();
 
       final MemoryFileSystem fs = MemoryFileSystem.test();
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -222,24 +221,12 @@ void main() {
       final MemoryFileSystem fs = MemoryFileSystem.test();
       await diagnoseXcodeBuildFailure(
         buildResult,
-        flutterUsage: testUsage,
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: SupportedPlatform.ios,
         project: FakeFlutterProject(fileSystem: fs),
       );
-      expect(testUsage.events, contains(
-        TestUsageEvent(
-          'build',
-          'ios',
-          label: 'xcode-bitcode-failure',
-          parameters: CustomDimensions(
-            buildEventCommand: buildCommands.toString(),
-            buildEventSettings: buildSettings.toString(),
-          ),
-        ),
-      ));
       expect(
         fakeAnalytics.sentEvents,
         contains(Event.flutterBuildInfo(
@@ -323,7 +310,6 @@ Error launching application on iPhone.''',
       final MemoryFileSystem fs = MemoryFileSystem.test();
       await diagnoseXcodeBuildFailure(
         buildResult,
-        flutterUsage: testUsage,
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
@@ -369,7 +355,6 @@ Error launching application on iPhone.''',
       final MemoryFileSystem fs = MemoryFileSystem.test();
       await diagnoseXcodeBuildFailure(
         buildResult,
-        flutterUsage: testUsage,
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
@@ -417,7 +402,6 @@ Could not build the precompiled application for the device.''',
       final MemoryFileSystem fs = MemoryFileSystem.test();
       await diagnoseXcodeBuildFailure(
         buildResult,
-        flutterUsage: testUsage,
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
@@ -469,7 +453,6 @@ Could not build the precompiled application for the device.''',
       final MemoryFileSystem fs = MemoryFileSystem.test();
       await diagnoseXcodeBuildFailure(
         buildResult,
-        flutterUsage: testUsage,
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
@@ -504,7 +487,6 @@ Could not build the precompiled application for the device.''',
       project.ios.podfile.createSync(recursive: true);
       await diagnoseXcodeBuildFailure(
         buildResult,
-        flutterUsage: testUsage,
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
@@ -549,7 +531,6 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       project.ios.podfile.createSync(recursive: true);
       await diagnoseXcodeBuildFailure(
         buildResult,
-        flutterUsage: testUsage,
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
@@ -591,7 +572,6 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       project.ios.podfile.createSync(recursive: true);
       await diagnoseXcodeBuildFailure(
         buildResult,
-        flutterUsage: testUsage,
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
@@ -632,7 +612,6 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       project.ios.podfile.createSync(recursive: true);
       await diagnoseXcodeBuildFailure(
         buildResult,
-        flutterUsage: testUsage,
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
@@ -666,7 +645,6 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       final MemoryFileSystem fs = MemoryFileSystem.test();
       final FakeFlutterProject project = FakeFlutterProject(fileSystem: fs);
       project.ios.podfile.createSync(recursive: true);
-      project.directory.childFile('.packages').createSync(recursive: true);
       project.manifest = FakeFlutterManifest();
       createFakePlugins(project, fs, <String>['plugin_1_name', 'plugin_2_name']);
       fs.systemTempDirectory.childFile('cache/plugin_1_name/ios/plugin_1_name/Package.swift')
@@ -675,7 +653,6 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           .createSync(recursive: true);
       await diagnoseXcodeBuildFailure(
         buildResult,
-        flutterUsage: testUsage,
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
@@ -780,6 +757,27 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
   });
 }
 
+  void addToPackageConfig(
+    FlutterProject flutterProject,
+    String name,
+    Directory packageDir,
+  ) {
+    final File packageConfigFile = flutterProject.directory
+      .childDirectory('.dart_tool')
+      .childFile('package_config.json');
+
+    final Map<String, Object?> packageConfig =
+      jsonDecode(packageConfigFile.readAsStringSync()) as Map<String, Object?>;
+
+    (packageConfig['packages']! as List<Object?>).add(<String, Object?>{
+      'name': name,
+      'rootUri': packageDir.uri.toString(),
+      'packageUri': 'lib/',
+    });
+
+    packageConfigFile.writeAsStringSync(jsonEncode(packageConfig));
+  }
+
 void createFakePlugins(
   FlutterProject flutterProject,
   FileSystem fileSystem,
@@ -796,13 +794,17 @@ void createFakePlugins(
   ''';
 
   final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('cache');
-  final File packagesFile = flutterProject.directory.childFile('.packages')
-        ..createSync(recursive: true);
+  flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "packages": [],
+  "configVersion": 2
+}
+''');
   for (final String name in pluginNames) {
     final Directory pluginDirectory = fakePubCache.childDirectory(name);
-    packagesFile.writeAsStringSync(
-        '$name:${pluginDirectory.childFile('lib').uri}\n',
-        mode: FileMode.writeOnlyAppend);
+    addToPackageConfig(flutterProject, name, pluginDirectory);
     pluginDirectory.childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync(pluginYamlTemplate.replaceAll('PLUGIN_CLASS', name));
@@ -821,7 +823,7 @@ class FakeIosProject extends Fake implements IosProject {
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
   @override
-  Future<String> hostAppBundleName(BuildInfo? buildInfo) async => 'UnitTestRunner.app';
+  Future<String> productName(BuildInfo? buildInfo) async => 'UnitTestRunner';
 
   @override
   Directory get xcodeProject => hostAppRoot.childDirectory('Runner.xcodeproj');

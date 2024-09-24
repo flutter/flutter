@@ -59,6 +59,8 @@ void main() {
 
     expect(response.headers, <String, String>{
       'Content-Type': 'image/png',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      'Access-Control-Allow-Origin': '*',
       'content-length': '64',
     });
   });
@@ -79,6 +81,8 @@ void main() {
 
     expect(response.headers, <String, String>{
       'Content-Type': 'text/javascript',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      'Access-Control-Allow-Origin': '*',
       'content-length': '18',
     });
   });
@@ -99,6 +103,8 @@ void main() {
 
     expect(response.headers, <String, String>{
       'Content-Type': 'text/html',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      'Access-Control-Allow-Origin': '*',
       'content-length': '28',
     });
   });
@@ -154,7 +160,7 @@ void main() {
     expect(response.statusCode, HttpStatus.ok);
     final Map<String, String> headers = response.headers;
     expect(headers['Cross-Origin-Opener-Policy'], 'same-origin');
-    expect(headers['Cross-Origin-Embedder-Policy'], 'require-corp');
+    expect(headers['Cross-Origin-Embedder-Policy'], 'credentialless');
   });
 
   testWithoutContext('release asset server serves html content without COOP/COEP headers when specified', () async {

@@ -61,8 +61,8 @@ void main() {
         .toList();
 
     expect(description, <String>[
-      'backgroundColor: Color(0xfffffff0)',
-      'textColor: Color(0xfffffff1)',
+      'backgroundColor: ${const Color(0xfffffff0)}',
+      'textColor: ${const Color(0xfffffff1)}',
       'smallSize: 1.0',
       'largeSize: 2.0',
       'textStyle: TextStyle(inherit: true, size: 4.0)',

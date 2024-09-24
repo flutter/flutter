@@ -64,14 +64,11 @@ void main() {
         return widget is PhysicalShape || widget is PhysicalModel;
       }),
     );
-    final Widget widget = tester.widgetList(finder).single;
-    if (widget is PhysicalShape) {
-      expect(widget.color, bottomAppBarColor);
-    } else if (widget is PhysicalModel) {
-      expect(widget.color, bottomAppBarColor);
-    } else {
-      // Should be unreachable: compare with the finder.
-      assert(false);
+    switch (tester.widgetList(finder).single) {
+      case PhysicalShape(:final Color color) || PhysicalModel(:final Color color):
+        expect(color, bottomAppBarColor);
+      default:
+        assert(false); // Should be unreachable: compare with the finder.
     }
   });
 
@@ -348,7 +345,7 @@ void main() {
     final PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
 
     // For the default dark theme the overlay color for elevation 8 is 0xFF2D2D2D
-    expect(physicalShape.color, const Color(0xFF2D2D2D));
+    expect(physicalShape.color, isSameColorAs(const Color(0xFF2D2D2D)));
   });
 
   testWidgets('Material3 - Dark theme applies an elevation overlay color', (WidgetTester tester) async {

@@ -78,10 +78,10 @@ void main() {
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-    expect(description[0], 'backgroundColor: Color(0xfffffff1)');
+    expect(description[0], 'backgroundColor: ${const Color(0xfffffff1)}');
     expect(description[1], 'elevation: 3.5');
-    expect(description[2], 'surfaceTintColor: Color(0xfffffff3)');
-    expect(description[3], 'side: BorderSide(color: Color(0xfffffff5), width: 2.5)');
+    expect(description[2], 'surfaceTintColor: ${const Color(0xfffffff3)}');
+    expect(description[3], 'side: BorderSide(color: ${const Color(0xfffffff5)}, width: 2.5)');
     expect(description[4], 'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)');
     expect(description[5], 'headerHeight: 35.5');
     expect(description[6], 'headerTextStyle: TextStyle(inherit: true, size: 24.0)');

@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'page_view.dart';
+/// @docImport 'scroll_controller.dart';
+/// @docImport 'scroll_notification_observer.dart';
+/// @docImport 'scroll_position_with_single_context.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'scrollable.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -270,6 +281,15 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   bool get haveDimensions => _haveDimensions;
   bool _haveDimensions = false;
 
+  /// Whether scrollables should absorb pointer events at this position.
+  ///
+  /// This is value relates to the current [ScrollActivity], which determines
+  /// if additional touch input should be received by the scroll view or its children.
+  /// If the position is overscrolled, as is allowed by [BouncingScrollPhysics],
+  /// children of the scroll view will receive pointer events as the scroll view
+  /// settles back from the overscrolled state.
+  bool get shouldIgnorePointer => !outOfRange && (activity?.shouldIgnorePointer ?? true);
+
   /// Take any current applicable state from the given [ScrollPosition].
   ///
   /// This method is called by the constructor if it is given an `oldPosition`.
@@ -363,6 +383,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       final double oldPixels = pixels;
       _pixels = newPixels - overscroll;
       if (_pixels != oldPixels) {
+        if (outOfRange) {
+          context.setIgnorePointer(false);
+        }
         notifyListeners();
         didUpdateScrollPositionBy(pixels - oldPixels);
       }

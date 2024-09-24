@@ -178,7 +178,7 @@ BinaryMessenger _findBinaryMessenger() {
 /// ordering. Applications can assume messages sent via a built-in
 /// [BasicMessageChannel] are delivered in the same order as they're sent.
 ///
-/// See: <https://flutter.dev/platform-channels/>
+/// See: <https://flutter.dev/to/platform-channels/>
 class BasicMessageChannel<T> {
   /// Creates a [BasicMessageChannel] with the specified [name], [codec] and
   /// [binaryMessenger].
@@ -264,7 +264,7 @@ class BasicMessageChannel<T> {
 /// they're sent.
 /// {@endtemplate}
 ///
-/// See: <https://flutter.dev/platform-channels/>
+/// See: <https://flutter.dev/to/platform-channels/>
 @pragma('vm:keep-name')
 class MethodChannel {
   /// Creates a [MethodChannel] with the specified [name].
@@ -361,7 +361,7 @@ class MethodChannel {
   /// {@tool snippet}
   ///
   /// The code might be packaged up as a musical plugin, see
-  /// <https://flutter.dev/developing-packages/>:
+  /// <https://flutter.dev/to/develop-packages>:
   ///
   /// ```dart
   /// abstract final class Music {
@@ -615,7 +615,7 @@ class OptionalMethodChannel extends MethodChannel {
 /// The logical identity of the channel is given by its name. Identically named
 /// channels will interfere with each other's communication.
 ///
-/// See: <https://flutter.dev/platform-channels/>
+/// See: <https://flutter.dev/to/platform-channels/>
 class EventChannel {
   /// Creates an [EventChannel] with the specified [name].
   ///

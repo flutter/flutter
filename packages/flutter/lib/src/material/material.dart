@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'card.dart';
+/// @docImport 'color_scheme.dart';
+/// @docImport 'colors.dart';
+/// @docImport 'ink_decoration.dart';
+/// @docImport 'ink_highlight.dart';
+/// @docImport 'ink_splash.dart';
+/// @docImport 'ink_well.dart';
+/// @docImport 'list_tile.dart';
+/// @docImport 'material_button.dart';
+/// @docImport 'mergeable_material.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';

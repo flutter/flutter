@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:vector_math/vector_math_64.dart';
@@ -181,7 +184,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
   bool hitTestChildren(SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
     if (child != null && child!.geometry!.hitTestExtent > 0.0) {
       final SliverPhysicalParentData childParentData = child!.parentData! as SliverPhysicalParentData;
-      result.addWithAxisOffset(
+      return result.addWithAxisOffset(
         mainAxisPosition: mainAxisPosition,
         crossAxisPosition: crossAxisPosition,
         mainAxisOffset: childMainAxisPosition(child!),

@@ -28,6 +28,29 @@ List<TreeSliverNode<String>> simpleNodeSet = <TreeSliverNode<String>>[
 
 void main() {
   group('TreeSliverNode', () {
+    setUp(() {
+      // Reset node conditions for each test.
+      simpleNodeSet = <TreeSliverNode<String>>[
+        TreeSliverNode<String>('Root 0'),
+        TreeSliverNode<String>(
+          'Root 1',
+          expanded: true,
+          children: <TreeSliverNode<String>>[
+            TreeSliverNode<String>('Child 1:0'),
+            TreeSliverNode<String>('Child 1:1'),
+          ],
+        ),
+        TreeSliverNode<String>(
+          'Root 2',
+          children: <TreeSliverNode<String>>[
+            TreeSliverNode<String>('Child 2:0'),
+            TreeSliverNode<String>('Child 2:1'),
+          ],
+        ),
+        TreeSliverNode<String>('Root 3'),
+      ];
+    });
+
     test('getters, toString', () {
       final List<TreeSliverNode<String>> children = <TreeSliverNode<String>>[
         TreeSliverNode<String>('child'),
@@ -123,6 +146,7 @@ void main() {
         TreeSliverNode<String>('Root 3'),
       ];
     });
+
     testWidgets('Can set controller on TreeSliver', (WidgetTester tester) async {
       final TreeSliverController controller = TreeSliverController();
       TreeSliverController? returnedController;
@@ -427,6 +451,26 @@ void main() {
   });
 
   testWidgets('.toggleNodeWith, onNodeToggle', (WidgetTester tester) async {
+    simpleNodeSet = <TreeSliverNode<String>>[
+      TreeSliverNode<String>('Root 0'),
+      TreeSliverNode<String>(
+        'Root 1',
+        expanded: true,
+        children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>('Child 1:0'),
+          TreeSliverNode<String>('Child 1:1'),
+        ],
+      ),
+      TreeSliverNode<String>(
+        'Root 2',
+        children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>('Child 2:0'),
+          TreeSliverNode<String>('Child 2:1'),
+        ],
+      ),
+      TreeSliverNode<String>('Root 3'),
+    ];
+
     final TreeSliverController controller = TreeSliverController();
     // The default node builder wraps the leading icon with toggleNodeWith.
     bool toggled = false;
@@ -516,6 +560,26 @@ void main() {
   });
 
   testWidgets('AnimationStyle is piped through to node builder', (WidgetTester tester) async {
+    simpleNodeSet = <TreeSliverNode<String>>[
+      TreeSliverNode<String>('Root 0'),
+      TreeSliverNode<String>(
+        'Root 1',
+        expanded: true,
+        children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>('Child 1:0'),
+          TreeSliverNode<String>('Child 1:1'),
+        ],
+      ),
+      TreeSliverNode<String>(
+        'Root 2',
+        children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>('Child 2:0'),
+          TreeSliverNode<String>('Child 2:1'),
+        ],
+      ),
+      TreeSliverNode<String>('Root 3'),
+    ];
+
     AnimationStyle? style;
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
@@ -723,5 +787,100 @@ void main() {
     expect(find.text('Child 2:0'), findsNothing);
     expect(find.text('Child 2:1'), findsNothing);
     expect(find.text('Root 3'), findsOneWidget);
+  });
+
+  testWidgets('TreeSliverNode should close all children when collapsed when animation is disabled', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/153889
+    final TreeSliverController controller = TreeSliverController();
+    final List<TreeSliverNode<String>> tree = <TreeSliverNode<String>>[
+      TreeSliverNode<String>('First'),
+      TreeSliverNode<String>(
+        'Second',
+        children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>(
+            'alpha',
+            children: <TreeSliverNode<String>>[
+              TreeSliverNode<String>('uno'),
+              TreeSliverNode<String>('dos'),
+              TreeSliverNode<String>('tres'),
+            ],
+          ),
+          TreeSliverNode<String>('beta'),
+          TreeSliverNode<String>('kappa'),
+        ],
+      ),
+      TreeSliverNode<String>(
+        'Third',
+        expanded: true,
+        children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>('gamma'),
+          TreeSliverNode<String>('delta'),
+          TreeSliverNode<String>('epsilon'),
+        ],
+      ),
+      TreeSliverNode<String>('Fourth'),
+    ];
+
+    await tester.pumpWidget(MaterialApp(
+      home: CustomScrollView(
+        slivers: <Widget>[
+          TreeSliver<String>(
+            tree: tree,
+            controller: controller,
+            toggleAnimationStyle: AnimationStyle.noAnimation,
+            treeNodeBuilder: (
+              BuildContext context,
+              TreeSliverNode<Object?> node,
+              AnimationStyle animationStyle,
+            ) {
+              final Widget child = GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () => controller.toggleNode(node),
+                child: TreeSliver.defaultTreeNodeBuilder(
+                  context,
+                  node,
+                  animationStyle,
+                ),
+              );
+
+              return child;
+            },
+          ),
+        ],
+      ),
+    ));
+
+    expect(find.text('First'), findsOneWidget);
+    expect(find.text('Second'), findsOneWidget);
+    expect(find.text('Third'), findsOneWidget);
+    expect(find.text('Fourth'), findsOneWidget);
+    expect(find.text('alpha'), findsNothing);
+    expect(find.text('beta'), findsNothing);
+    expect(find.text('kappa'), findsNothing);
+    expect(find.text('gamma'), findsOneWidget);
+    expect(find.text('delta'), findsOneWidget);
+    expect(find.text('epsilon'), findsOneWidget);
+    expect(find.text('uno'), findsNothing);
+    expect(find.text('dos'), findsNothing);
+    expect(find.text('tres'), findsNothing);
+
+    await tester.tap(find.text('Second'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('alpha'), findsOneWidget);
+
+    await tester.tap(find.text('alpha'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('uno'), findsOneWidget);
+    expect(find.text('dos'), findsOneWidget);
+    expect(find.text('tres'), findsOneWidget);
+
+    await tester.tap(find.text('alpha'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('uno'), findsNothing);
+    expect(find.text('dos'), findsNothing);
+    expect(find.text('tres'), findsNothing);
   });
 }

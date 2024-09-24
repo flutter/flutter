@@ -32,7 +32,7 @@ void main() {
     );
 
     await bundle.build(
-      packagesPath: '.packages',
+      packageConfigPath: '.dart_tool/package_config.json',
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       flavor: flavor,
     );
@@ -45,7 +45,7 @@ void main() {
     final BufferLogger logger = BufferLogger.test();
     final FakePlatform platform = FakePlatform();
 
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('assets', 'common', 'image.png')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('assets', 'vanilla', 'ice-cream.png')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('assets', 'strawberry', 'ice-cream.png')).createSync(recursive: true);
@@ -108,7 +108,7 @@ flutter:
     fileSystem.currentDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
     final BufferLogger logger = BufferLogger.test();
     final FakePlatform platform = FakePlatform();
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('assets', 'unflavored.png')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('assets', 'vanillaOrange.png')).createSync(recursive: true);
 
@@ -145,7 +145,7 @@ flutter:
     fileSystem.currentDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
     final BufferLogger logger = BufferLogger.test();
     final FakePlatform platform = FakePlatform();
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('vanilla', 'vanilla.png')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('vanilla', 'flavorless.png')).createSync(recursive: true);
 
@@ -180,7 +180,7 @@ flutter:
     fileSystem.currentDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
     final BufferLogger logger = BufferLogger.test();
     final FakePlatform platform = FakePlatform();
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file('orange.png').createSync(recursive: true);
     fileSystem.file('pubspec.yaml')
       ..createSync()
@@ -215,7 +215,7 @@ flutter:
     fileSystem.currentDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
     final BufferLogger logger = BufferLogger.test();
     final FakePlatform platform = FakePlatform();
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('vanilla', 'actually-strawberry.png')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('vanilla', 'vanilla.png')).createSync(recursive: true);
 
