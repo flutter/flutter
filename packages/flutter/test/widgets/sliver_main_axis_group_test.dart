@@ -795,8 +795,8 @@ void main() {
     );
     Scrollable.ensureVisible(key.currentContext!);
     await tester.pumpAndSettle();
-    // Regression test for https://github.com/flutter/flutter/issues/154615
-    expect(tester.getTopLeft(find.byKey(key)), const Offset(0, 300));
+
+    expect(tester.getTopLeft(find.byKey(key)), Offset.zero);
   });
 
   testWidgets('SliverMainAxisGroup scrolls to the correct position when focusing on a text field within a header', (WidgetTester tester) async {

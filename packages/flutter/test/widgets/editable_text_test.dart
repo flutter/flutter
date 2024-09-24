@@ -17546,8 +17546,8 @@ void main() {
     await tester.pumpWidget(widget);
     await tester.showKeyboard(find.byType(EditableText));
     await tester.pumpAndSettle();
-    // Regression test for https://github.com/flutter/flutter/issues/154615
-    expect(scrollController.offset, 0.0);
+
+    expect(scrollController.offset, 75.0);
   });
 
   testWidgets('getPositionForPoint is correct when EditableText is scaled', (WidgetTester tester) async {
