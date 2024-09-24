@@ -529,9 +529,10 @@ abstract final class SystemChrome {
   /// [SystemChrome.setSystemUIChangeCallback] to respond to these changes in a
   /// fullscreen application.
   ///
-  /// Your Flutter app uses [SystemUiMode.edgeToEdge] by default and setting any
-  /// of the other [SystemUiMode]s will not work unless you perform the
-  /// migration detailed in
+  /// If your app targets Android SDK 15 (API 35) or later (Flutter does this by
+  /// default), then your Flutter app uses [SystemUiMode.edgeToEdge] by default
+  /// on Android and setting any of the other [SystemUiMode]s will NOT work
+  /// unless you perform the migration detailed in
   /// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge.
   static Future<void> setEnabledSystemUIMode(SystemUiMode mode, { List<SystemUiOverlay>? overlays }) async {
     if (mode != SystemUiMode.manual) {
