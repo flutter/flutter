@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'page_storage.dart';
+/// @docImport 'page_view.dart';
+/// @docImport 'scroll_metrics.dart';
+/// @docImport 'scroll_notification.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'single_child_scroll_view.dart';
+/// @docImport 'two_dimensional_scroll_view.dart';
+/// @docImport 'two_dimensional_viewport.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -459,10 +469,10 @@ class Scrollable extends StatefulWidget {
     return false;
   }
 
-  /// Scrolls the scrollables that enclose the given context so as to make the
+  /// Scrolls all scrollables that enclose the given context so as to make the
   /// given context visible.
   ///
-  /// If the [Scrollable] of the provided [BuildContext] is a
+  /// If a [Scrollable] enclosing the provided [BuildContext] is a
   /// [TwoDimensionalScrollable], both vertical and horizontal axes will ensure
   /// the target is made visible.
   static Future<void> ensureVisible(
@@ -916,6 +926,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   void _receivedPointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent && _position != null) {
       if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
+        // The handler won't use the `event`, so allow the platform to trigger
+        // any default native actions.
+        event.respond(allowPlatformDefault: true);
         return;
       }
       final double delta = _pointerSignalEventDelta(event);
@@ -923,7 +936,11 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       // Only express interest in the event if it would actually result in a scroll.
       if (delta != 0.0 && targetScrollOffset != position.pixels) {
         GestureBinding.instance.pointerSignalResolver.register(event, _handlePointerScroll);
+        return;
       }
+      // The `event` won't result in a scroll, so allow the platform to trigger
+      // any default native actions.
+      event.respond(allowPlatformDefault: true);
     } else if (event is PointerScrollInertiaCancelEvent) {
       position.pointerScroll(0);
       // Don't use the pointer signal resolver, all hit-tested scrollables should stop.

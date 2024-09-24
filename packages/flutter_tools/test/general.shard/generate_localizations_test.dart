@@ -794,6 +794,8 @@ HEADER
 
 import 'bar.dart';
 
+// ignore_for_file: type=lint
+
 /// The translations for English (`en`).
 class FooEn extends Foo {
   FooEn([String locale = 'en']) : super(locale);
@@ -894,6 +896,8 @@ flutter:\r
       expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
 import 'app_localizations.dart';
 
+// ignore_for_file: type=lint
+
 /// The translations for English (`en`).
 class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
@@ -924,6 +928,8 @@ class AppLocalizationsEn extends AppLocalizations {
 HEADER
 
 import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
 
 /// The translations for English (`en`).
 class AppLocalizationsEn extends AppLocalizations {
@@ -1643,6 +1649,28 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         "type": "DateTime",
         "format": "asdf o'clock",
         "isCustomDateFormat": "true"
+      }
+    }
+  }
+}'''
+        });
+        final String content = getGeneratedFileContent(locale: 'en');
+        expect(content, contains(r"DateFormat('asdf o\'clock', localeName)"));
+      });
+
+      testWithoutContext('handle arbitrary formatted date with actual boolean', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "@@locale": "en",
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "asdf o'clock",
+        "isCustomDateFormat": true
       }
     }
   }

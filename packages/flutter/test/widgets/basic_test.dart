@@ -47,7 +47,7 @@ void main() {
       expect(renderObject.centerSlice, null);
       expect(renderObject.matchTextDirection, false);
       expect(renderObject.invertColors, false);
-      expect(renderObject.filterQuality, FilterQuality.low);
+      expect(renderObject.filterQuality, FilterQuality.medium);
       expect(renderObject.isAntiAlias, false);
 
       final ui.Image image2 = (await tester.runAsync<ui.Image>(() => createTestImage(width: 2, height: 2)))!;
@@ -715,7 +715,7 @@ void main() {
       renderColoredBox.paint(mockContext, Offset.zero);
 
       expect(mockCanvas.rects.single, const Rect.fromLTWH(0, 0, 800, 600));
-      expect(mockCanvas.paints.single.color, colorToPaint);
+      expect(mockCanvas.paints.single.color, isSameColorAs(colorToPaint));
       expect(mockContext.children, isEmpty);
       expect(mockContext.offsets, isEmpty);
     });
@@ -731,7 +731,7 @@ void main() {
       renderColoredBox.paint(mockContext, Offset.zero);
 
       expect(mockCanvas.rects.single, const Rect.fromLTWH(0, 0, 800, 600));
-      expect(mockCanvas.paints.single.color, colorToPaint);
+      expect(mockCanvas.paints.single.color, isSameColorAs(colorToPaint));
       expect(mockContext.children.single, renderSizedBox);
       expect(mockContext.offsets.single, Offset.zero);
     });
@@ -750,7 +750,7 @@ void main() {
     // golden file can be approved at any time.
     await tester.pumpWidget(RepaintBoundary(
       child: Container(
-        color: const Color(0xFFF40125),
+        color: const Color(0xFF161145),
       ),
     ));
 
@@ -858,6 +858,7 @@ void main() {
         matchesSemantics(
           label: 'button',
           hasTapAction: true,
+          hasFocusAction: true,
           isButton: true,
           isFocusable: true,
           hasEnabledState: true,

@@ -56,7 +56,10 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     required Uri workingDirectory,
     CCompilerConfigImpl? cCompilerConfig,
     int? targetAndroidNdkApi,
+    int? targetIOSVersion,
+    int? targetMacOSVersion,
     IOSSdkImpl? targetIOSSdkImpl,
+    required bool linkingEnabled,
   }) async {
     buildInvocations++;
     lastBuildMode = buildMode;
@@ -73,6 +76,8 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     required native_assets_builder.BuildResult buildResult,
     CCompilerConfigImpl? cCompilerConfig,
     int? targetAndroidNdkApi,
+    int? targetIOSVersion,
+    int? targetMacOSVersion,
     IOSSdkImpl? targetIOSSdkImpl,
   }) async {
     linkInvocations++;
@@ -160,6 +165,7 @@ class FakeHotRunnerNativeAssetsBuilder implements HotRunnerNativeAssetsBuilder {
     required Uri projectUri,
     required FileSystem fileSystem,
     required List<FlutterDevice> flutterDevices,
+    required String packageConfigPath,
     required PackageConfig packageConfig,
     required Logger logger,
   }) {

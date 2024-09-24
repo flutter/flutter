@@ -32,7 +32,7 @@ renderer (`--web-renderer=html`).
 More resources:
 
 * chromedriver: https://chromedriver.chromium.org/getting-started
-* FlutterDriver: https://github.com/flutter/flutter/wiki/Running-Flutter-Driver-tests-with-Web
+* FlutterDriver: https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Running-Flutter-Driver-tests-with-Web.md
 * `package:integration_test`: https://pub.dev/packages/integration_test
 
 [1]: https://chromedriver.chromium.org/downloads

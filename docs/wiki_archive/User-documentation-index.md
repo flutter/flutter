@@ -4,7 +4,7 @@
 Flutter's user-facing documentation should all be on the Flutter web site and the API documentation site:
 
 - https://docs.flutter.dev/
-  - [Release notes](https://flutter.dev/docs/development/tools/sdk/release-notes)
+  - [Release notes](https://docs.flutter.dev/release/release-notes)
 - https://api.flutter.dev/
 
 Historically, experimental documentation was sometimes first written on this wiki and later moved to the web site. This is
@@ -54,4 +54,4 @@ _Contributors: please consider moving this content to the web site or deleting i
 
 ### Release notes
 <!-- don't add things here; user documentation belongs on the web site not the wiki -->
-- [Hotfixes to the Stable Channel](../releases/Hotfixes-to-the-Stable-Channel.md)
+- [Hotfixes to the Stable Channel](../../CHANGELOG.md)

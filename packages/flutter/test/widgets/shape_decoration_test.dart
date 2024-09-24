@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['reduced-test-set'])
+library;
+
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
@@ -18,10 +21,8 @@ Future<void> main() async {
   final ui.Image rawImage = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
   final ImageProvider image = TestImageProvider(0, 0, image: rawImage);
 
-  testWidgets('ShapeDecoration.image',
-  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('ShapeDecoration.image', (WidgetTester tester) async {
+    addTearDown(imageCache.clear);
     await tester.pumpWidget(
       MaterialApp(
         home: DecoratedBox(
@@ -94,10 +95,8 @@ Future<void> main() async {
     );
   });
 
-  testWidgets('TestBorder and Directionality - 2',
-  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('TestBorder and Directionality - 2', (WidgetTester tester) async {
+    addTearDown(imageCache.clear);
     final List<String> log = <String>[];
     await tester.pumpWidget(
       Directionality(
@@ -162,5 +161,66 @@ Future<void> main() async {
 
     expect(a.hashCode, equals(b.hashCode));
     expect(a, equals(b));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/13675
+  testWidgets('OutlinedBorder avoids clipping edges when possible', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    Widget buildWidget(Color color) {
+      final List<Widget> circles = <Widget>[];
+      for (int i = 100; i > 25; i--) {
+        final double radius = i * 2.5;
+        final double angle = i * 0.5;
+        final double x = radius * math.cos(angle);
+        final double y = radius * math.sin(angle);
+        final Widget circle = Positioned(
+          left: 275 - x,
+          top: 275 - y,
+          child: Container(
+            width: 250,
+            height: 250,
+            decoration: ShapeDecoration(
+              color: Colors.black,
+              shape: CircleBorder(
+                side: BorderSide(color: color, width: 50),
+              ),
+            ),
+          ),
+        );
+        circles.add(circle);
+      }
+
+      return Center(
+        key: key,
+        child: Container(
+          width: 800,
+          height: 800,
+          decoration: const ShapeDecoration(
+            color: Colors.redAccent,
+            shape: CircleBorder(
+              side: BorderSide(strokeAlign: BorderSide.strokeAlignOutside),
+            ),
+          ),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: circles,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget(const Color(0xffffffff)));
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('painting.shape_decoration.outlined_border.should_be_white.png'),
+    );
+
+    await tester.pumpWidget(buildWidget(const Color(0xfeffffff)));
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('painting.shape_decoration.outlined_border.show_lines_due_to_opacity.png'),
+    );
   });
 }

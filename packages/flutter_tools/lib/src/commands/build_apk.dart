@@ -50,7 +50,9 @@ class BuildApkCommand extends BuildSubCommand {
       ..addMultiOption('target-platform',
         defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
-        help: 'The target platform for which the app is compiled.',
+        // https://github.com/flutter/flutter/issues/153359 tracks debug build type support.
+        help:
+            'The target platform for which the app is compiled. Supports release but not debug build types.',
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
@@ -137,12 +139,26 @@ class BuildApkCommand extends BuildSubCommand {
     validateBuild(androidBuildInfo);
     displayNullSafetyMode(androidBuildInfo.buildInfo);
     globals.terminal.usesTerminalUi = true;
+    final FlutterProject project = FlutterProject.current();
     await androidBuilder?.buildApk(
-      project: FlutterProject.current(),
+      project: project,
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
       configOnly: configOnly,
     );
+
+    // When an app is successfully built, record to analytics whether Impeller
+    // is enabled or disabled. Note that 'computeImpellerEnabled' will default
+    // to false if not enabled explicitly in the manifest.
+    final bool impellerEnabled = project.android.computeImpellerEnabled();
+    final String buildLabel = impellerEnabled
+          ? 'manifest-impeller-enabled'
+          : 'manifest-impeller-disabled';
+    globals.analytics.send(Event.flutterBuildInfo(
+      label: buildLabel,
+      buildType: 'android',
+    ));
+
     return FlutterCommandResult.success();
   }
 }

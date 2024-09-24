@@ -182,4 +182,17 @@ void main() {
     expect(constraints, const BoxConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4));
   });
 
+  test('BoxConstraints.constrainSizeAndAttemptToPreserveAspectRatio can handle empty size', () {
+    const BoxConstraints constraints = BoxConstraints(
+      minWidth: 10.0,
+      maxWidth: 20.0,
+      minHeight: 10.0,
+      maxHeight: 20.0,
+    );
+    const Size unconstrainedSize = Size(15.0, 0.0);
+    final Size constrainedSize = constraints.constrainSizeAndAttemptToPreserveAspectRatio(
+      unconstrainedSize,
+    );
+    expect(constrainedSize, const Size(15.0, 10.0));
+  });
 }

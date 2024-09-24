@@ -121,7 +121,7 @@ class ModuleTest {
 
       content = content.replaceFirst(
         '${platformLineSep}dependencies:$platformLineSep',
-        '${platformLineSep}dependencies:$platformLineSep  device_info: 2.0.3$platformLineSep  package_info: 2.0.2$platformLineSep',
+        '${platformLineSep}dependencies:$platformLineSep',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -449,7 +449,7 @@ class ModuleTest {
 Future<void> main() async {
   await task(combine(<TaskFunction>[
     // ignore: avoid_redundant_argument_values
-    ModuleTest('module-gradle-7.6', gradleVersion: '7.6.3').call,
-    ModuleTest('module-gradle-7.6', gradleVersion: '7.6-rc-2').call,
+    ModuleTest('module-gradle-7.6', gradleVersion: '8.4').call,
+    ModuleTest('module-gradle-7.6', gradleVersion: '8.4-rc-3').call,
   ]));
 }

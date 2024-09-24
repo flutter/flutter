@@ -11,7 +11,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/feedback_tester.dart';
 
@@ -281,7 +280,7 @@ void main() {
       chipMaterial.shape,
       RoundedRectangleBorder(
         borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-        side: BorderSide(color: theme.colorScheme.outline),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
       ),
     );
 
@@ -957,10 +956,7 @@ void main() {
     expect(getIconData(tester).color, theme.iconTheme.color?.withAlpha(0xde));
   });
 
-  testWidgets('Customize FilterChip delete button',
-  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-  (WidgetTester tester) async {
+  testWidgets('Customize FilterChip delete button', (WidgetTester tester) async {
     Widget buildChip({
       Widget? deleteIcon,
       Color? deleteIconColor,
@@ -1289,5 +1285,43 @@ void main() {
     // Calculate the distance between delete icon and label.
     labelTopRight = tester.getTopRight(find.byType(Container));
     expect(labelTopRight.dx, deleteIconCenter.dx - (iconSize / 2) - labelPadding);
+  });
+
+  testWidgets('FilterChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
+    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+      enableAnimation: AnimationStyle.noAnimation,
+      selectAnimation: AnimationStyle(duration: Durations.extralong4),
+    );
+
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: FilterChip(
+          chipAnimationStyle: chipAnimationStyle,
+          onSelected: (bool value) { },
+          label: const Text('FilterChip'),
+        ),
+      ),
+    ));
+
+    expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
+  });
+
+  testWidgets('Elevated FilterChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
+    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+      enableAnimation: AnimationStyle.noAnimation,
+      selectAnimation: AnimationStyle(duration: Durations.extralong4),
+    );
+
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: FilterChip.elevated(
+          chipAnimationStyle: chipAnimationStyle,
+          onSelected: (bool value) { },
+          label: const Text('FilterChip'),
+        ),
+      ),
+    ));
+
+    expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
   });
 }

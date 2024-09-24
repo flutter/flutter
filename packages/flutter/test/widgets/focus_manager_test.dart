@@ -2190,6 +2190,7 @@ void main() {
       notifyCount++;
     }
     tester.binding.focusManager.addListener(handleFocusChange);
+    addTearDown(() => tester.binding.focusManager.removeListener(handleFocusChange));
 
     nodeA.requestFocus();
     await tester.pump();
@@ -2213,8 +2214,6 @@ void main() {
     expect(nodeB.hasPrimaryFocus, isFalse);
     expect(notifyCount, equals(1));
     notifyCount = 0;
-
-    tester.binding.focusManager.removeListener(handleFocusChange);
   });
 
   testWidgets('debugFocusChanges causes logging of focus changes', (WidgetTester tester) async {
@@ -2317,6 +2316,7 @@ class _LoggingTestFocusNode extends FocusNode {
     String prefixLineOne = '',
     String? prefixOtherLines,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
+    int wrapWidth = 65,
   }) {
     throw StateError("Shouldn't call toStringDeep here");
   }

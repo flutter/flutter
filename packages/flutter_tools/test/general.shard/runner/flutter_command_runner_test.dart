@@ -88,6 +88,21 @@ void main() {
         OutputPreferences: () => OutputPreferences.test(),
       });
 
+      testUsingContext('does not check that Flutter installation is up-to-date with --machine flag present anywhere', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(_FlutterCommandWithItsOwnMachineFlag()) as FlutterCommandRunner;
+        final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+
+        await runner.run(<String>['dummy-with-machine', '--machine']);
+
+        expect(version.didCheckFlutterVersionFreshness, false);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+        FlutterVersion: () => FakeFlutterVersion(),
+        OutputPreferences: () => OutputPreferences.test(),
+      });
+
       testUsingContext('does not check that Flutter installation is up-to-date with CI=true in environment', () async {
         final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
         final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
@@ -176,6 +191,7 @@ void main() {
         Analytics: () => fakeAnalytics,
       });
 
+      // TODO(bkonyi): remove when ready to serve DevTools from DDS.
       group('${FlutterGlobalOptions.kPrintDtd} flag', () {
         testUsingContext('sets DevtoolsLauncher.printDtdUri to false when not present', () async {
           final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
@@ -197,9 +213,9 @@ void main() {
       testUsingContext("Doesn't crash on invalid .packages file", () async {
         final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages')
-          ..createSync()
-          ..writeAsStringSync('Not a valid package');
+        fileSystem.directory('.dart_tool').childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('Not a valid package config');
 
         await runner.run(<String>['dummy']);
 
@@ -338,4 +354,21 @@ class FakeStdio extends Stdio {
   int? get terminalLines => hasFakeTerminal ? 24 : null;
   @override
   bool get supportsAnsiEscapes => hasFakeTerminal;
+}
+
+final class _FlutterCommandWithItsOwnMachineFlag extends FlutterCommand {
+  _FlutterCommandWithItsOwnMachineFlag() {
+    argParser.addFlag('machine', negatable: false);
+  }
+
+  @override
+  String get name => 'dummy-with-machine';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
+
+  @override
+  String get description => 'does nothing, this time with --machine';
 }

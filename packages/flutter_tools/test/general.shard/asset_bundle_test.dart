@@ -27,6 +27,31 @@ import '../src/context.dart';
 void main() {
   const String shaderLibDir = '/./shader_lib';
 
+  File createPackageConfig(
+    FileSystem fileSystem, {
+      Map<String, String> packages = const <String, String>{},
+    }
+  ) {
+    final File file = fileSystem.directory('.dart_tool').childFile('package_config.json');
+    file.createSync(recursive: true);
+    file.writeAsStringSync(
+        json.encode(<String, dynamic>{
+          'packages': <dynamic>[
+            ...packages.entries.map((MapEntry<String, String> entry) {
+              return <String, dynamic>{
+                'name': entry.key,
+                'rootUri': '../${entry.value}',
+                'packageUri': 'lib/',
+                'languageVersion': '3.2',
+              };
+            }),
+          ],
+          'configVersion': 2,
+        },
+      ),
+    );
+    return file;
+  }
   group('AssetBundle.build (using context)', () {
     late FileSystem testFileSystem;
     late Platform platform;
@@ -39,7 +64,7 @@ void main() {
 
     testUsingContext('nonempty', () async {
       final AssetBundle ab = AssetBundleFactory.instance.createBundle();
-      expect(await ab.build(packagesPath: '.packages'), 0);
+      expect(await ab.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
       expect(ab.entries.length, greaterThan(0));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -53,7 +78,7 @@ void main() {
         ..writeAsStringSync('');
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packagesPath: '.packages');
+      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
       expect(bundle.entries.keys,
         unorderedEquals(<String>['AssetManifest.json', 'AssetManifest.bin'])
       );
@@ -75,7 +100,7 @@ void main() {
     });
 
     testUsingContext('wildcard directories do not include subdirectories', () async {
-      globals.fs.file('.packages').createSync();
+      createPackageConfig(globals.fs);
       globals.fs.file('pubspec.yaml').writeAsStringSync(
 '''
 name: test
@@ -104,7 +129,7 @@ flutter:
       }
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packagesPath: '.packages');
+      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
 
       expect(bundle.entries.keys, unorderedEquals(<String>[
         'AssetManifest.json',
@@ -121,7 +146,7 @@ flutter:
     });
 
     testUsingContext('wildcard directories are updated when filesystem changes', () async {
-      final File packageFile = globals.fs.file('.packages')..createSync();
+      final File packageFile = createPackageConfig(globals.fs);
       globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml')
         ..createSync()
@@ -132,7 +157,7 @@ flutter:
     - assets/foo/
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packagesPath: '.packages');
+      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
       expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
         'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
       // Simulate modifying the files by updating the filestat time manually.
@@ -141,7 +166,7 @@ flutter:
         ..setLastModifiedSync(packageFile.lastModifiedSync().add(const Duration(hours: 1)));
 
       expect(bundle.needsBuild(), true);
-      await bundle.build(packagesPath: '.packages');
+      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
       expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
           'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt',
           'assets/foo/fizz.txt']));
@@ -161,9 +186,9 @@ flutter:
   assets:
     - assets/foo/
 ''');
-      globals.fs.file('.packages').createSync();
+      final File packageConfig = createPackageConfig(globals.fs);
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packagesPath: '.packages');
+      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
       expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
         'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
       expect(bundle.needsBuild(), false);
@@ -177,15 +202,14 @@ flutter:
 name: example''')
         ..setLastModifiedSync(modifiedTime);
 
-      // touch .packages to make sure its change time is after pubspec.yaml's
-      globals.fs.file('.packages')
-        .setLastModifiedSync(modifiedTime);
+      // touch the package config to make sure its change time is after pubspec.yaml's
+      packageConfig.setLastModifiedSync(modifiedTime);
 
       // Even though the previous file was removed, it is left in the
       // asset manifest and not updated. This is due to the devfs not
       // supporting file deletion.
       expect(bundle.needsBuild(), true);
-      await bundle.build(packagesPath: '.packages');
+      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
       expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
         'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
     }, overrides: <Type, Generator>{
@@ -208,9 +232,9 @@ flutter:
   assets:
     - assets/foo/
 ''');
-      globals.fs.file('.packages').createSync();
+      createPackageConfig(globals.fs);
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packagesPath: '.packages');
+      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
       expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
         'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
       expect(bundle.needsBuild(), false);
@@ -221,7 +245,7 @@ flutter:
     });
 
     testUsingContext('deferred assets are parsed', () async {
-      globals.fs.file('.packages').createSync();
+      createPackageConfig(globals.fs);
       globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
       globals.fs.file(globals.fs.path.join('assets', 'bar', 'barbie.txt')).createSync(recursive: true);
       globals.fs.file(globals.fs.path.join('assets', 'wild', 'dash.txt')).createSync(recursive: true);
@@ -244,7 +268,7 @@ flutter:
         platform: globals.platform,
         splitDeferredAssets: true,
       ).createBundle();
-      await bundle.build(packagesPath: '.packages', deferredComponentsEnabled: true);
+      await bundle.build(packageConfigPath: '.dart_tool/package_config.json', deferredComponentsEnabled: true);
       expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
         'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
       expect(bundle.deferredComponentsEntries.length, 1);
@@ -257,7 +281,7 @@ flutter:
     });
 
     testUsingContext('deferred assets are parsed regularly when splitDeferredAssets Disabled', () async {
-      globals.fs.file('.packages').createSync();
+      createPackageConfig(globals.fs);
       globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
       globals.fs.file(globals.fs.path.join('assets', 'bar', 'barbie.txt')).createSync(recursive: true);
       globals.fs.file(globals.fs.path.join('assets', 'wild', 'dash.txt')).createSync(recursive: true);
@@ -275,7 +299,7 @@ flutter:
         - assets/wild/
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packagesPath: '.packages');
+      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
       expect(bundle.entries.keys, unorderedEquals(<String>['assets/foo/bar.txt',
         'assets/bar/barbie.txt', 'assets/wild/dash.txt', 'AssetManifest.json',
         'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']));
@@ -288,7 +312,7 @@ flutter:
     });
 
     testUsingContext('deferred assets wildcard parsed', () async {
-      final File packageFile = globals.fs.file('.packages')..createSync();
+      final File packageFile = createPackageConfig(globals.fs);
       globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
       globals.fs.file(globals.fs.path.join('assets', 'bar', 'barbie.txt')).createSync(recursive: true);
       globals.fs.file(globals.fs.path.join('assets', 'wild', 'dash.txt')).createSync(recursive: true);
@@ -311,7 +335,7 @@ flutter:
         platform: globals.platform,
         splitDeferredAssets: true,
       ).createBundle();
-      await bundle.build(packagesPath: '.packages', deferredComponentsEnabled: true);
+      await bundle.build(packageConfigPath: '.dart_tool/package_config.json', deferredComponentsEnabled: true);
       expect(bundle.entries.keys, unorderedEquals(<String>['assets/foo/bar.txt',
         'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']));
       expect(bundle.deferredComponentsEntries.length, 1);
@@ -324,7 +348,7 @@ flutter:
         ..setLastModifiedSync(packageFile.lastModifiedSync().add(const Duration(hours: 1)));
 
       expect(bundle.needsBuild(), true);
-      await bundle.build(packagesPath: '.packages', deferredComponentsEnabled: true);
+      await bundle.build(packageConfigPath: '.dart_tool/package_config.json', deferredComponentsEnabled: true);
 
       expect(bundle.entries.keys, unorderedEquals(<String>['assets/foo/bar.txt',
         'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']));
@@ -348,7 +372,7 @@ flutter:
         userMessages: UserMessages(),
       );
 
-      fileSystem.file('.packages').createSync();
+      createPackageConfig(fileSystem);
       fileSystem.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
@@ -366,7 +390,7 @@ flutter:
 
       expect(
         () => bundle.build(
-          packagesPath: '.packages',
+          packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(
             fileSystem.currentDirectory,
           ),
@@ -400,7 +424,7 @@ flutter:
         fileSystem: fileSystem,
         userMessages: UserMessages(),
       );
-      fileSystem.file('.packages').createSync();
+      createPackageConfig(fileSystem);
       fileSystem.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
@@ -418,7 +442,7 @@ flutter:
 
       expect(
         () => bundle.build(
-          packagesPath: '.packages',
+          packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(
             fileSystem.currentDirectory,
           ),
@@ -436,7 +460,7 @@ flutter:
 
       final BufferLogger logger = BufferLogger.test();
       final FakePlatform platform = FakePlatform();
-      fileSystem.file('.packages').createSync();
+      createPackageConfig(fileSystem);
       fileSystem.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
@@ -459,7 +483,7 @@ flutter:
       );
 
       await bundle.build(
-        packagesPath: '.packages',
+        packageConfigPath: '.dart_tool/package_config.json',
         flutterProject: FlutterProject.fromDirectoryTest(
           fileSystem.currentDirectory,
         ),
@@ -468,7 +492,7 @@ flutter:
       expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
 
       await bundle.build(
-        packagesPath: '.packages',
+        packageConfigPath: '.dart_tool/package_config.json',
         flutterProject: FlutterProject.fromDirectoryTest(
           fileSystem.currentDirectory,
         ),
@@ -487,7 +511,7 @@ flutter:
 ''');
 
       await bundle.build(
-        packagesPath: '.packages',
+        packageConfigPath: '.dart_tool/package_config.json',
         flutterProject: FlutterProject.fromDirectoryTest(
           fileSystem.currentDirectory,
         ),
@@ -513,7 +537,7 @@ flutter:
         ..writeAsStringSync('');
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packagesPath: '.packages', targetPlatform: TargetPlatform.web_javascript);
+      await bundle.build(packageConfigPath: '.dart_tool/package_config.json', targetPlatform: TargetPlatform.web_javascript);
 
       expect(bundle.entries.keys,
         unorderedEquals(<String>[
@@ -537,7 +561,7 @@ flutter:
     });
 
     testUsingContext('pubspec contains an asset', () async {
-      globals.fs.file('.packages').createSync();
+      createPackageConfig(globals.fs);
       globals.fs.file('pubspec.yaml').writeAsStringSync(r'''
 name: test
 dependencies:
@@ -552,7 +576,7 @@ flutter:
       ).createSync(recursive: true);
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packagesPath: '.packages', targetPlatform: TargetPlatform.web_javascript);
+      await bundle.build(packageConfigPath: '.dart_tool/package_config.json', targetPlatform: TargetPlatform.web_javascript);
 
       expect(bundle.entries.keys,
         unorderedEquals(<String>[
@@ -618,7 +642,7 @@ flutter:
   });
 
   testUsingContext('does not unnecessarily recreate asset manifest, font manifest, license', () async {
-    globals.fs.file('.packages').createSync();
+    createPackageConfig(globals.fs);
     globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
@@ -629,13 +653,13 @@ assets:
   - assets/foo/bar.txt
 ''');
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-    await bundle.build(packagesPath: '.packages');
+    await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
 
     final AssetBundleEntry? assetManifest = bundle.entries['AssetManifest.json'];
     final AssetBundleEntry? fontManifest = bundle.entries['FontManifest.json'];
     final AssetBundleEntry? license = bundle.entries['NOTICES'];
 
-    await bundle.build(packagesPath: '.packages');
+    await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
 
     expect(assetManifest, bundle.entries['AssetManifest.json']);
     expect(fontManifest, bundle.entries['FontManifest.json']);
@@ -648,7 +672,7 @@ assets:
 
   testUsingContext('inserts dummy file into additionalDependencies when '
     'wildcards are used', () async {
-    globals.fs.file('.packages').createSync();
+    createPackageConfig(globals.fs);
     globals.fs.file(globals.fs.path.join('assets', 'bar.txt')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
@@ -660,7 +684,7 @@ flutter:
 ''');
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-    expect(await bundle.build(packagesPath: '.packages'), 0);
+    expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
     expect(bundle.additionalDependencies.single.path, contains('DOES_NOT_EXIST_RERUN_FOR_WILDCARD'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
@@ -670,7 +694,7 @@ flutter:
 
   testUsingContext('Does not insert dummy file into additionalDependencies '
     'when wildcards are not used', () async {
-    globals.fs.file('.packages').createSync();
+    createPackageConfig(globals.fs);
     globals.fs.file(globals.fs.path.join('assets', 'bar.txt')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
@@ -682,7 +706,7 @@ flutter:
 ''');
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-    expect(await bundle.build(packagesPath: '.packages'), 0);
+    expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
     expect(bundle.additionalDependencies, isEmpty);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
@@ -715,7 +739,7 @@ flutter:
     });
 
     testUsingContext('Including a shader triggers the shader compiler', () async {
-      fileSystem.file('.packages').createSync();
+      createPackageConfig(fileSystem);
       fileSystem.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
@@ -726,7 +750,7 @@ flutter:
   ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packagesPath: '.packages'), 0);
+      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
 
       await writeBundle(
         output,
@@ -768,7 +792,7 @@ flutter:
     });
 
     testUsingContext('Included shaders are compiled for the web', () async {
-      fileSystem.file('.packages').createSync();
+      createPackageConfig(fileSystem);
       fileSystem.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
@@ -779,7 +803,7 @@ flutter:
   ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packagesPath: '.packages', targetPlatform: TargetPlatform.web_javascript), 0);
+      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json', targetPlatform: TargetPlatform.web_javascript), 0);
 
       await writeBundle(
         output,
@@ -820,7 +844,7 @@ flutter:
     });
 
     testUsingContext('Material shaders are compiled for the web', () async {
-      fileSystem.file('.packages').createSync();
+      createPackageConfig(fileSystem);
 
       final String materialIconsPath = fileSystem.path.join(
         getFlutterRoot(),
@@ -867,7 +891,7 @@ flutter:
   ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packagesPath: '.packages', targetPlatform: TargetPlatform.web_javascript), 0);
+      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json', targetPlatform: TargetPlatform.web_javascript), 0);
 
       await writeBundle(
         output,
@@ -891,10 +915,13 @@ flutter:
 
   testUsingContext('Does not insert dummy file into additionalDependencies '
     'when wildcards are used by dependencies', () async {
-    globals.fs.file('.packages').writeAsStringSync(r'''
-example:lib/
-foo:foo/lib/
-''');
+    createPackageConfig(
+      globals.fs,
+      packages: <String, String> {
+        'example': '',
+        'foo': 'foo',
+      },
+    );
     globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
       .createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
@@ -916,7 +943,7 @@ flutter:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     globals.fs.file('foo/bar/fizz.txt').createSync(recursive: true);
 
-    expect(await bundle.build(packagesPath: '.packages'), 0);
+    expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
     expect(bundle.additionalDependencies, isEmpty);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
@@ -925,10 +952,13 @@ flutter:
   });
 
   testUsingContext('does not track wildcard directories from dependencies', () async {
-    globals.fs.file('.packages').writeAsStringSync(r'''
-example:lib/
-foo:foo/lib/
-''');
+    createPackageConfig(
+      globals.fs,
+      packages: <String, String> {
+        'example': '',
+        'foo': 'foo',
+      },
+    );
     globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
       .createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
@@ -950,7 +980,7 @@ flutter:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     globals.fs.file('foo/bar/fizz.txt').createSync(recursive: true);
 
-    await bundle.build(packagesPath: '.packages');
+    await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
 
       expect(bundle.entries.keys, unorderedEquals(<String>['packages/foo/bar/fizz.txt',
         'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']));
@@ -969,10 +999,13 @@ flutter:
 
   testUsingContext('reports package that causes asset bundle error when it is '
     'a dependency', () async {
-    globals.fs.file('.packages').writeAsStringSync(r'''
-example:lib/
-foo:foo/lib/
-''');
+    createPackageConfig(
+      globals.fs,
+      packages: <String, String> {
+        'example': '',
+        'foo': 'foo',
+      },
+    );
     globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
       .createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
@@ -993,7 +1026,7 @@ flutter:
 ''');
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-    expect(await bundle.build(packagesPath: '.packages'), 1);
+    expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 1);
     expect(testLogger.errorText, contains('This asset was included from package foo'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
@@ -1003,9 +1036,13 @@ flutter:
 
   testUsingContext('does not report package that causes asset bundle error '
     'when it is from own pubspec', () async {
-    globals.fs.file('.packages').writeAsStringSync(r'''
-example:lib/
-''');
+    createPackageConfig(
+      globals.fs,
+      packages: <String, String> {
+        'example': '',
+        'foo': 'foo',
+      },
+    );
     globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
@@ -1016,7 +1053,7 @@ flutter:
 ''');
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-    expect(await bundle.build(packagesPath: '.packages'), 1);
+    expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 1);
     expect(testLogger.errorText, isNot(contains('This asset was included from')));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
@@ -1026,10 +1063,13 @@ flutter:
 
   testUsingContext('does not include Material Design assets if uses-material-design: true is '
     'specified only by a dependency', () async {
-    globals.fs.file('.packages').writeAsStringSync(r'''
-example:lib/
-foo:foo/lib/
-''');
+    createPackageConfig(
+      globals.fs,
+      packages: <String, String> {
+        'example': '',
+        'foo': 'foo',
+      },
+    );
     globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
@@ -1050,7 +1090,7 @@ flutter:
 ''');
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-    expect(await bundle.build(packagesPath: '.packages'), 0);
+    expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
     expect((bundle.entries['FontManifest.json']!.content as DevFSStringContent).string, '[]');
     expect((bundle.entries['AssetManifest.json']!.content as DevFSStringContent).string, '{}');
     expect(testLogger.errorText, contains(
@@ -1063,9 +1103,12 @@ flutter:
   });
 
   testUsingContext('does not include assets in project directories as asset variants', () async {
-    globals.fs.file('.packages').writeAsStringSync(r'''
-example:lib/
-''');
+    createPackageConfig(
+      globals.fs,
+      packages: <String, String> {
+        'example': '',
+      },
+    );
     globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
@@ -1087,7 +1130,7 @@ flutter:
 
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-    expect(await bundle.build(packagesPath: '.packages'), 0);
+    expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
     expect(bundle.entries.keys, unorderedEquals(<String>['assets/foo.txt',
       'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']));
   }, overrides: <Type, Generator>{
@@ -1097,9 +1140,12 @@ flutter:
   });
 
   testUsingContext('deferred and regular assets are included in manifest alphabetically', () async {
-    globals.fs.file('.packages').writeAsStringSync(r'''
-example:lib/
-''');
+    createPackageConfig(
+      globals.fs,
+      packages: <String, String> {
+        'example': '',
+      },
+    );
     globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
@@ -1122,7 +1168,7 @@ flutter:
     globals.fs.file('assets/zebra.jpg').createSync();
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-    expect(await bundle.build(packagesPath: '.packages'), 0);
+    expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
     expect((bundle.entries['FontManifest.json']!.content as DevFSStringContent).string, '[]');
     // The assets from deferred components and regular assets
     // are both included in alphabetical order

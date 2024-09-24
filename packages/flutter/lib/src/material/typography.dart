@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'material_localizations.dart';
+/// @docImport 'theme.dart';
+/// @docImport 'theme_data.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -71,7 +76,7 @@ enum ScriptCategory {
 ///
 /// By default, [ThemeData.typography] is `Typography.material2014(platform:
 /// platform)` which uses [englishLike2014], [dense2014] and [tall2014]. To use
-/// the 2018 text theme geometries, specify a value using the [material2018]
+/// the 2018 text theme geometries, specify a value using the [Typography.material2018]
 /// constructor:
 ///
 /// ```dart

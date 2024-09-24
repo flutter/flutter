@@ -2,8 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/services.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'button.dart';
+/// @docImport 'dialog.dart';
+/// @docImport 'nav_bar.dart';
+/// @docImport 'page_scaffold.dart';
+/// @docImport 'tab_scaffold.dart';
+library;
+
 import 'dart:math';
-import 'dart:ui' show ImageFilter, lerpDouble;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -17,13 +30,8 @@ import 'localizations.dart';
 const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
 
-// An eyeballed value for the maximum time it takes for a page to animate forward
-// if the user releases a page mid swipe.
-const int _kMaxDroppedSwipePageForwardAnimationTime = 800; // Milliseconds.
-
-// The maximum time for a page to get reset to it's original position if the
-// user releases a page mid swipe.
-const int _kMaxPageBackAnimationTime = 300; // Milliseconds.
+// The duration for a page to animate when the user releases it mid-swipe.
+const Duration _kDroppedSwipePageAnimationDuration = Duration(milliseconds: 350);
 
 /// Barrier color used for a barrier visible during transitions for Cupertino
 /// page routes.
@@ -269,6 +277,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
     required this.builder,
     this.title,
     super.settings,
+    super.requestFocus,
     this.maintainState = true,
     super.fullscreenDialog,
     super.allowSnapshotting = true,
@@ -769,20 +778,20 @@ class _CupertinoBackGestureController<T> {
   final ValueGetter<bool> getIsActive;
   final ValueGetter<bool> getIsCurrent;
 
-  /// The drag gesture has changed by [fractionalDelta]. The total range of the
-  /// drag should be 0.0 to 1.0.
+  /// The drag gesture has changed by [delta]. The total range of the drag
+  /// should be 0.0 to 1.0.
   void dragUpdate(double delta) {
     controller.value -= delta;
   }
 
-  /// The drag gesture has ended with a horizontal motion of
-  /// [fractionalVelocity] as a fraction of screen width per second.
+  /// The drag gesture has ended with a horizontal motion of [velocity] as a
+  /// fraction of screen width per second.
   void dragEnd(double velocity) {
     // Fling in the appropriate direction.
     //
     // This curve has been determined through rigorously eyeballing native iOS
     // animations.
-    const Curve animationCurve = Curves.fastLinearToSlowEaseIn;
+    const Curve animationCurve = Curves.fastEaseInToSlowEaseOut;
     final bool isCurrent = getIsCurrent();
     final bool animateForward;
 
@@ -804,14 +813,7 @@ class _CupertinoBackGestureController<T> {
     }
 
     if (animateForward) {
-      // The closer the panel is to dismissing, the shorter the animation is.
-      // We want to cap the animation time, but we want to use a linear curve
-      // to determine it.
-      final int droppedPageForwardAnimationTime = min(
-        lerpDouble(_kMaxDroppedSwipePageForwardAnimationTime, 0, controller.value)!.floor(),
-        _kMaxPageBackAnimationTime,
-      );
-      controller.animateTo(1.0, duration: Duration(milliseconds: droppedPageForwardAnimationTime), curve: animationCurve);
+      controller.animateTo(1.0, duration: _kDroppedSwipePageAnimationDuration, curve: animationCurve);
     } else {
       if (isCurrent) {
         // This route is destined to pop at this point. Reuse navigator's pop.
@@ -820,9 +822,7 @@ class _CupertinoBackGestureController<T> {
 
       // The popping may have finished inline if already at the target destination.
       if (controller.isAnimating) {
-        // Otherwise, use a custom popping animation duration and curve.
-        final int droppedPageBackAnimationTime = lerpDouble(0, _kMaxDroppedSwipePageForwardAnimationTime, controller.value)!.floor();
-        controller.animateBack(0.0, duration: Duration(milliseconds: droppedPageBackAnimationTime), curve: animationCurve);
+        controller.animateBack(0.0, duration: _kDroppedSwipePageAnimationDuration, curve: animationCurve);
       }
     }
 
@@ -854,7 +854,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
       // Eyeballed gradient used to mimic a drop shadow on the start side only.
       <Color>[
         Color(0x04000000),
-        Color(0x00000000),
+        CupertinoColors.transparent,
       ],
     ),
   );
@@ -1063,6 +1063,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     bool semanticsDismissible = false,
     super.filter,
     super.settings,
+    super.requestFocus,
     this.anchorPoint,
   }) : _barrierDismissible = barrierDismissible,
        _semanticsDismissible = semanticsDismissible;
@@ -1374,6 +1375,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
     super.transitionDuration = const Duration(milliseconds: 250),
     this.transitionBuilder,
     super.settings,
+    super.requestFocus,
     super.anchorPoint,
   }) : super(
         pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {

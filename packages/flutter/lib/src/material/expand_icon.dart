@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'expansion_panel.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -39,6 +42,8 @@ class ExpandIcon extends StatefulWidget {
     this.color,
     this.disabledColor,
     this.expandedColor,
+    this.splashColor,
+    this.highlightColor,
   });
 
   /// Whether the icon is in an expanded state.
@@ -94,6 +99,20 @@ class ExpandIcon extends StatefulWidget {
   /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
   final Color? expandedColor;
 
+  /// Defines the splash color of the IconButton.
+  ///
+  /// If [ThemeData.useMaterial3] is true, this field will be ignored,
+  /// as [IconButton.splashColor] will be ignored, and you should use
+  /// [highlightColor] instead.
+  ///
+  /// Defaults to [ThemeData.splashColor].
+  final Color? splashColor;
+
+  /// Defines the highlight color of the IconButton.
+  ///
+  /// Defaults to [ThemeData.highlightColor].
+  final Color? highlightColor;
+
   @override
   State<ExpandIcon> createState() => _ExpandIconState();
 }
@@ -138,7 +157,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
     widget.onPressed?.call(widget.isExpanded);
   }
 
-  /// Default icon colors and opacities for when [Theme.brightness] is set to
+  /// Default icon colors and opacities for when [ThemeData.brightness] is set to
   /// [Brightness.light] are based on the
   /// [Material Design system icon specifications](https://material.io/design/iconography/system-icons.html#color).
   /// Icon colors and opacities for [Brightness.dark] are based on the
@@ -170,6 +189,8 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       child: IconButton(
         padding: widget.padding,
         iconSize: widget.size,
+        highlightColor: widget.highlightColor,
+        splashColor: widget.splashColor,
         color: _iconColor,
         disabledColor: widget.disabledColor,
         onPressed: widget.onPressed == null ? null : _handlePressed,

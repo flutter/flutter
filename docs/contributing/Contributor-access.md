@@ -30,8 +30,6 @@ If they react negatively, or if they continue to make the environment unpleasant
 
 Part of being a contributor is making sure our documentation is up to date, including our internal (team-facing) documentation such as this wiki. If you spot something wrong, please fix it! As a contributor, you have access to the wiki.
 
-For the wiki specifically, since there's no code review, it's good to mention on Discord that you've made a change when you make one.
-
 ### Privileges
 
 Being in the GitHub "flutter-hackers" group gives you the following:

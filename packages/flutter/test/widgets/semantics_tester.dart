@@ -38,6 +38,7 @@ class TestSemantics {
     this.label = '',
     this.value = '',
     this.tooltip = '',
+    this.headingLevel,
     this.increasedValue = '',
     this.decreasedValue = '',
     this.hint = '',
@@ -66,6 +67,7 @@ class TestSemantics {
     this.decreasedValue = '',
     this.hint = '',
     this.tooltip = '',
+    this.headingLevel,
     this.textDirection,
     this.transform,
     this.textSelection,
@@ -99,6 +101,7 @@ class TestSemantics {
     this.hint = '',
     this.value = '',
     this.tooltip = '',
+    this.headingLevel,
     this.increasedValue = '',
     this.decreasedValue = '',
     this.textDirection,
@@ -237,6 +240,8 @@ class TestSemantics {
   /// The tags of this node.
   final Set<SemanticsTag> tags;
 
+  final int? headingLevel;
+
   bool _matches(
     SemanticsNode? node,
     Map<dynamic, dynamic> matchState, {
@@ -321,6 +326,9 @@ class TestSemantics {
     final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
     if (children.length != childrenCount) {
       return fail('expected node id $id to have ${children.length} child${ children.length == 1 ? "" : "ren" } but found $childrenCount.');
+    }
+    if (headingLevel != null && headingLevel != node.headingLevel) {
+      return fail('expected node id $id to have headingLevel $headingLevel but found headingLevel ${node.headingLevel}');
     }
 
     if (children.isEmpty) {
@@ -523,6 +531,7 @@ class SemanticsTester {
       if (textDirection != null && node.textDirection != textDirection) {
         return false;
       }
+
       if (actions != null) {
         final int expectedActions = actions.fold<int>(0, (int value, SemanticsAction action) => value | action.index);
         final int actualActions = node.getSemanticsData().actions;
@@ -569,11 +578,8 @@ class SemanticsTester {
       node.visitChildren(visit);
       return true;
     }
-    if (ancestor != null) {
-      visit(ancestor);
-    } else {
-      visit(tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!);
-    }
+    visit(ancestor ?? tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!);
+
     return result;
   }
 

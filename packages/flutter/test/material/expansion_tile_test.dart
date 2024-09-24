@@ -11,7 +11,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestIcon extends StatefulWidget {
   const TestIcon({super.key});
@@ -141,8 +140,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     final ShapeDecoration collapsingContainerDecoration = getDecoratedBox(collapsedKey).decoration as ShapeDecoration;
     expect(collapsingContainerDecoration.color, Colors.transparent);
-    expect((collapsingContainerDecoration.shape as Border).top.color, const Color(0x15222222));
-    expect((collapsingContainerDecoration.shape as Border).bottom.color, const Color(0x15222222));
+    expect((collapsingContainerDecoration.shape as Border).top.color, isSameColorAs(const Color(0x15222222)));
+    expect((collapsingContainerDecoration.shape as Border).bottom.color, isSameColorAs(const Color(0x15222222)));
 
     // Pump all the way to the end now.
     await tester.pump(const Duration(seconds: 1));
@@ -223,10 +222,7 @@ void main() {
     expect(iconColor(collapsedIconKey), foregroundColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('ExpansionTile subtitle',
-  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-  (WidgetTester tester) async {
+  testWidgets('ExpansionTile subtitle', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -711,10 +707,12 @@ void main() {
           children: <Widget>[
             ExpansionTile(
               title: Text('First Expansion Tile'),
+              internalAddSemanticForOnTap: true,
             ),
             ExpansionTile(
               initiallyExpanded: true,
               title: Text('Second Expansion Tile'),
+              internalAddSemanticForOnTap: true,
             ),
           ],
         ),
@@ -731,7 +729,9 @@ void main() {
     expect(
       tester.getSemantics(find.byType(ListTile).first),
       matchesSemantics(
+        isButton: true,
         hasTapAction: true,
+        hasFocusAction: true,
         hasEnabledState: true,
         isEnabled: true,
         isFocused: true,
@@ -745,7 +745,9 @@ void main() {
     expect(
       tester.getSemantics(find.byType(ListTile).last),
       matchesSemantics(
+        isButton: true,
         hasTapAction: true,
+        hasFocusAction: true,
         hasEnabledState: true,
         isEnabled: true,
         isFocusable: true,
@@ -1586,5 +1588,37 @@ void main() {
     final Size titleSize = tester.getSize(find.byType(ColoredBox));
 
     expect(titleSize.width, materialAppSize.width - 32.0);
+  });
+
+  testWidgets('ExpansionTile uses ListTileTheme controlAffinity', (WidgetTester tester) async {
+    Widget buildView(ListTileControlAffinity controlAffinity) {
+      return MaterialApp(
+        home: ListTileTheme(
+          data: ListTileThemeData(
+            controlAffinity: controlAffinity,
+          ),
+          child: const Material(
+            child: ExpansionTile(
+              title: Text('ExpansionTile'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildView(ListTileControlAffinity.leading));
+    final Finder leading = find.text('ExpansionTile');
+    final Offset offsetLeading = tester.getTopLeft(leading);
+    expect(offsetLeading, const Offset(56.0, 17.0));
+
+    await tester.pumpWidget(buildView(ListTileControlAffinity.trailing));
+    final Finder trailing = find.text('ExpansionTile');
+    final Offset offsetTrailing = tester.getTopLeft(trailing);
+    expect(offsetTrailing, const Offset(16.0, 17.0));
+
+    await tester.pumpWidget(buildView(ListTileControlAffinity.platform));
+    final Finder platform = find.text('ExpansionTile');
+    final Offset offsetPlatform = tester.getTopLeft(platform);
+    expect(offsetPlatform, const Offset(16.0, 17.0));
   });
 }

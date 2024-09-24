@@ -50,6 +50,7 @@ void main() {
     ),
     cancelButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xffffff6f))),
     confirmButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xffffff7f))),
+    locale: Locale('en'),
   );
 
   Material findDialogMaterial(WidgetTester tester) {
@@ -145,6 +146,7 @@ void main() {
     expect(theme.inputDecorationTheme, null);
     expect(theme.cancelButtonStyle, null);
     expect(theme.confirmButtonStyle, null);
+    expect(theme.locale, null);
   });
 
   testWidgets('DatePickerTheme.defaults M3 defaults', (WidgetTester tester) async {
@@ -223,6 +225,7 @@ void main() {
     expect(m3.inputDecorationTheme, null);
     expect(m3.cancelButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
     expect(m3.confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
+    expect(m3.locale, null);
   });
 
   testWidgets('DatePickerTheme.defaults M2 defaults', (WidgetTester tester) async {
@@ -293,6 +296,7 @@ void main() {
     expect(m2.inputDecorationTheme, null);
     expect(m2.cancelButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
     expect(m2.confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
+    expect(m2.locale, null);
   });
 
   testWidgets('Default DatePickerThemeData debugFillProperties', (WidgetTester tester) async {
@@ -318,43 +322,44 @@ void main() {
         .toList();
 
     expect(description, equalsIgnoringHashCodes(<String>[
-      'backgroundColor: Color(0xfffffff0)',
+      'backgroundColor: ${const Color(0xfffffff0)}',
       'elevation: 6.0',
-      'shadowColor: Color(0xfffffff1)',
-      'surfaceTintColor: Color(0xfffffff2)',
+      'shadowColor: ${const Color(0xfffffff1)}',
+      'surfaceTintColor: ${const Color(0xfffffff2)}',
       'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
-      'headerBackgroundColor: Color(0xfffffff3)',
-      'headerForegroundColor: Color(0xfffffff4)',
+      'headerBackgroundColor: ${const Color(0xfffffff3)}',
+      'headerForegroundColor: ${const Color(0xfffffff4)}',
       'headerHeadlineStyle: TextStyle(inherit: true, size: 10.0)',
       'headerHelpStyle: TextStyle(inherit: true, size: 11.0)',
       'weekDayStyle: TextStyle(inherit: true, size: 12.0)',
       'dayStyle: TextStyle(inherit: true, size: 13.0)',
-      'dayForegroundColor: WidgetStatePropertyAll(Color(0xfffffff5))',
-      'dayBackgroundColor: WidgetStatePropertyAll(Color(0xfffffff6))',
-      'dayOverlayColor: WidgetStatePropertyAll(Color(0xfffffff7))',
+      'dayForegroundColor: WidgetStatePropertyAll(${const Color(0xfffffff5)})',
+      'dayBackgroundColor: WidgetStatePropertyAll(${const Color(0xfffffff6)})',
+      'dayOverlayColor: WidgetStatePropertyAll(${const Color(0xfffffff7)})',
       'dayShape: WidgetStatePropertyAll(RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero))',
-      'todayForegroundColor: WidgetStatePropertyAll(Color(0xfffffff8))',
-      'todayBackgroundColor: WidgetStatePropertyAll(Color(0xfffffff9))',
+      'todayForegroundColor: WidgetStatePropertyAll(${const Color(0xfffffff8)})',
+      'todayBackgroundColor: WidgetStatePropertyAll(${const Color(0xfffffff9)})',
       'todayBorder: BorderSide(width: 3.0)',
       'yearStyle: TextStyle(inherit: true, size: 13.0)',
-      'yearForegroundColor: WidgetStatePropertyAll(Color(0xfffffffa))',
-      'yearBackgroundColor: WidgetStatePropertyAll(Color(0xfffffffb))',
-      'yearOverlayColor: WidgetStatePropertyAll(Color(0xfffffffc))',
-      'rangePickerBackgroundColor: Color(0xfffffffd)',
+      'yearForegroundColor: WidgetStatePropertyAll(${const Color(0xfffffffa)})',
+      'yearBackgroundColor: WidgetStatePropertyAll(${const Color(0xfffffffb)})',
+      'yearOverlayColor: WidgetStatePropertyAll(${const Color(0xfffffffc)})',
+      'rangePickerBackgroundColor: ${const Color(0xfffffffd)}',
       'rangePickerElevation: 7.0',
-      'rangePickerShadowColor: Color(0xfffffffe)',
-      'rangePickerSurfaceTintColor: Color(0xffffffff)',
+      'rangePickerShadowColor: ${const Color(0xfffffffe)}',
+      'rangePickerSurfaceTintColor: ${const Color(0xffffffff)}',
       'rangePickerShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
-      'rangePickerHeaderBackgroundColor: Color(0xffffff0f)',
-      'rangePickerHeaderForegroundColor: Color(0xffffff1f)',
+      'rangePickerHeaderBackgroundColor: ${const Color(0xffffff0f)}',
+      'rangePickerHeaderForegroundColor: ${const Color(0xffffff1f)}',
       'rangePickerHeaderHeadlineStyle: TextStyle(inherit: true, size: 14.0)',
       'rangePickerHeaderHelpStyle: TextStyle(inherit: true, size: 15.0)',
-      'rangeSelectionBackgroundColor: Color(0xffffff2f)',
-      'rangeSelectionOverlayColor: WidgetStatePropertyAll(Color(0xffffff3f))',
-      'dividerColor: Color(0xffffff4f)',
-      'inputDecorationTheme: InputDecorationTheme#00000(fillColor: Color(0xffffff5f), border: UnderlineInputBorder())',
-      'cancelButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xffffff6f)))',
-      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xffffff7f)))'
+      'rangeSelectionBackgroundColor: ${const Color(0xffffff2f)}',
+      'rangeSelectionOverlayColor: WidgetStatePropertyAll(${const Color(0xffffff3f)})',
+      'dividerColor: ${const Color(0xffffff4f)}',
+      'inputDecorationTheme: InputDecorationTheme#00000(fillColor: ${const Color(0xffffff5f)}, border: UnderlineInputBorder())',
+      'cancelButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xffffff6f)}))',
+      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xffffff7f)}))',
+      'locale: en',
     ]));
   });
 

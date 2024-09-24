@@ -8,6 +8,8 @@ import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 
+import 'adaptive_text_selection_toolbar.dart';
+import 'back_button.dart';
 import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -136,6 +138,7 @@ class SearchAnchor extends StatefulWidget {
     required this.suggestionsBuilder,
     this.textInputAction,
     this.keyboardType,
+    this.enabled = true,
   });
 
   /// Create a [SearchAnchor] that has a [SearchBar] which opens a search view.
@@ -183,6 +186,8 @@ class SearchAnchor extends StatefulWidget {
     required SuggestionsBuilder suggestionsBuilder,
     TextInputAction? textInputAction,
     TextInputType? keyboardType,
+    EdgeInsets scrollPadding,
+    EditableTextContextMenuBuilder contextMenuBuilder,
   }) = _SearchAnchorWithSearchBar;
 
   /// Whether the search view grows to fill the entire screen when the
@@ -348,6 +353,13 @@ class SearchAnchor extends StatefulWidget {
   /// Defaults to the default value specified in [TextField].
   final TextInputType? keyboardType;
 
+  /// Whether or not this widget is currently interactive.
+  ///
+  /// When false, the widget will ignore taps and appear dimmed.
+  ///
+  /// Defaults to true.
+  final bool enabled;
+
   @override
   State<SearchAnchor> createState() => _SearchAnchorState();
 }
@@ -448,15 +460,25 @@ class _SearchAnchorState extends State<SearchAnchor> {
     };
   }
 
+  double _getOpacity() {
+    if (widget.enabled) {
+      return _anchorIsVisible ? 1.0 : 0.0;
+    }
+    return _kDisableSearchBarOpacity;
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedOpacity(
       key: _anchorKey,
-      opacity: _anchorIsVisible ? 1.0 : 0.0,
+      opacity: _getOpacity(),
       duration: _kAnchorFadeDuration,
-      child: GestureDetector(
-        onTap: _openView,
-        child: widget.builder(context, _searchController),
+      child: IgnorePointer(
+        ignoring: !widget.enabled,
+        child: GestureDetector(
+          onTap: _openView,
+          child: widget.builder(context, _searchController),
+        ),
       ),
     );
   }
@@ -792,9 +814,15 @@ class _ViewContentState extends State<_ViewContent> {
       _timer?.cancel();
       _timer = Timer(Duration.zero, () async {
         searchValue = _controller.text;
-        result = await widget.suggestionsBuilder(context, _controller);
+        final Iterable<Widget> suggestions =
+            await widget.suggestionsBuilder(context, _controller);
         _timer?.cancel();
         _timer = null;
+        if (mounted) {
+          setState(() {
+            result = suggestions;
+          });
+        }
       });
     }
   }
@@ -859,11 +887,9 @@ class _ViewContentState extends State<_ViewContent> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget defaultLeading = IconButton(
-      icon: const Icon(Icons.arrow_back),
-      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-      onPressed: () { Navigator.of(context).pop(); },
+    final Widget defaultLeading = BackButton(
       style: const ButtonStyle(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+      onPressed: () { Navigator.of(context).pop(); },
     );
 
     final List<Widget> defaultTrailing = <Widget>[
@@ -1028,6 +1054,8 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     required super.suggestionsBuilder,
     super.textInputAction,
     super.keyboardType,
+    EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
+    EditableTextContextMenuBuilder contextMenuBuilder = SearchBar._defaultContextMenuBuilder,
   }) : super(
     viewHintText: viewHintText ?? barHintText,
     headerHeight: viewHeaderHeight,
@@ -1061,6 +1089,8 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
         textCapitalization: textCapitalization,
         textInputAction: textInputAction,
         keyboardType: keyboardType,
+        scrollPadding: scrollPadding,
+        contextMenuBuilder: contextMenuBuilder,
       );
     }
   );
@@ -1181,6 +1211,8 @@ class SearchBar extends StatefulWidget {
     this.autoFocus = false,
     this.textInputAction,
     this.keyboardType,
+    this.scrollPadding = const EdgeInsets.all(20.0),
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1308,7 +1340,11 @@ class SearchBar extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
 
-  /// If false the text field is "disabled" so the SearchBar will ignore taps.
+  /// Whether or not this widget is currently interactive.
+  ///
+  /// When false, the widget will ignore taps and appear dimmed.
+  ///
+  /// Defaults to true.
   final bool enabled;
 
   /// {@macro flutter.widgets.editableText.autofocus}
@@ -1321,6 +1357,26 @@ class SearchBar extends StatefulWidget {
   ///
   /// Defaults to the default value specified in [TextField].
   final TextInputType? keyboardType;
+
+  /// {@macro flutter.widgets.editableText.scrollPadding}
+  final EdgeInsets scrollPadding;
+
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
+  ///
+  /// If not provided, will build a default menu based on the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [AdaptiveTextSelectionToolbar], which is built by default.
+  ///  * [BrowserContextMenu], which allows the browser's context menu on web to
+  ///    be disabled and Flutter-rendered context menus to appear.
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
+    );
+  }
 
   @override
   State<SearchBar> createState() => _SearchBarState();
@@ -1462,6 +1518,8 @@ class _SearchBarState extends State<SearchBar> {
                           textCapitalization: effectiveTextCapitalization,
                           textInputAction: widget.textInputAction,
                           keyboardType: widget.keyboardType,
+                          scrollPadding: widget.scrollPadding,
+                          contextMenuBuilder: widget.contextMenuBuilder,
                         ),
                       ),
                     ),

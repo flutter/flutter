@@ -875,7 +875,7 @@ void main() {
 
       final Icon icon = tester.widget(find.byType(Icon));
       expect(icon.icon, expectedIcon, reason: "didn't find close icon for $type");
-      expect(find.byType(CloseButton), findsOneWidget, reason: "didn't find close button for $type");
+      expect(find.byKey(StandardComponentType.closeButton.key), findsOneWidget, reason: "didn't find close button for $type");
     }
 
     PageRoute<void> materialRouteBuilder() {
@@ -3395,6 +3395,29 @@ void main() {
     // FAB is not visible.
     expect(find.byType(FloatingActionButton), findsNothing);
   });
+
+  testWidgets('Scaffold background color defaults to ColorScheme.surface', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      colorScheme: ThemeData().colorScheme.copyWith(
+        surface: Colors.orange,
+        background: Colors.green,
+      )
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Scaffold(
+          body: SizedBox.expand(),
+        ),
+      ),
+    );
+
+    final Material scaffoldMaterial = tester.widget<Material>(find.descendant(
+      of: find.byType(Scaffold),
+      matching: find.byType(Material).first,
+    ));
+    expect(scaffoldMaterial.color, theme.colorScheme.surface);
+  });
 }
 
 class _GeometryListener extends StatefulWidget {
@@ -3424,12 +3447,8 @@ class _GeometryListenerState extends State<_GeometryListener> {
       return;
     }
 
-    if (geometryListenable != null) {
-      geometryListenable!.removeListener(onGeometryChanged);
-    }
-
-    geometryListenable = newListenable;
-    geometryListenable!.addListener(onGeometryChanged);
+    geometryListenable?.removeListener(onGeometryChanged);
+    geometryListenable = newListenable..addListener(onGeometryChanged);
     cache = _GeometryCachePainter(geometryListenable!);
   }
 

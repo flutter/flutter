@@ -40,7 +40,6 @@ abstract class FlutterTestRunner {
     String? tags,
     String? excludeTags,
     bool enableVmService = false,
-    bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
     Map<String, String>? precompiledDillFiles,
@@ -56,6 +55,7 @@ abstract class FlutterTestRunner {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
     int? totalShards,
@@ -63,6 +63,7 @@ abstract class FlutterTestRunner {
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    BuildInfo? buildInfo,
   });
 
   /// Runs tests using the experimental strategy of spawning each test in a
@@ -84,6 +85,7 @@ abstract class FlutterTestRunner {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
     int? totalShards,
@@ -105,7 +107,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String? tags,
     String? excludeTags,
     bool enableVmService = false,
-    bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
     Map<String, String>? precompiledDillFiles,
@@ -121,6 +122,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
     int? totalShards,
@@ -128,6 +130,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    BuildInfo? buildInfo,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts!.getArtifactPath(Artifact.flutterTester);
@@ -158,6 +161,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         ...<String>['--tags', tags],
       if (excludeTags != null)
         ...<String>['--exclude-tags', excludeTags],
+      if (failFast)
+        '--fail-fast',
       if (runSkipped)
         '--run-skipped',
       if (totalShards != null)
@@ -232,7 +237,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       ..addAll(testFiles.map((Uri uri) => uri.toString()));
 
     final InternetAddressType serverType =
-        ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
+        debuggingOptions.ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
     final loader.FlutterPlatform platform = loader.installHook(
       testWrapper: testWrapper,
@@ -253,6 +258,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       integrationTestUserIdentifier: integrationTestUserIdentifier,
       testTimeRecorder: testTimeRecorder,
       nativeAssetsBuilder: nativeAssetsBuilder,
+      buildInfo: buildInfo,
     );
 
     try {
@@ -665,6 +671,7 @@ class SpawnPlugin extends PlatformPlugin {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
     int? totalShards,
@@ -734,6 +741,8 @@ class SpawnPlugin extends PlatformPlugin {
         ...<String>['--tags', tags],
       if (excludeTags != null)
         ...<String>['--exclude-tags', excludeTags],
+      if (failFast)
+        '--fail-fast',
       if (runSkipped)
         '--run-skipped',
       if (totalShards != null)
@@ -793,7 +802,7 @@ class SpawnPlugin extends PlatformPlugin {
       '--non-interactive',
       '--use-test-fonts',
       '--disable-asset-fonts',
-      '--packages=${debuggingOptions.buildInfo.packagesPath}',
+      '--packages=${debuggingOptions.buildInfo.packageConfigPath}',
       if (testAssetDirectory != null)
         '--flutter-assets-dir=$testAssetDirectory',
       if (debuggingOptions.nullAssertions)
@@ -816,6 +825,8 @@ class SpawnPlugin extends PlatformPlugin {
       'APP_NAME': flutterProject.manifest.appName,
       if (testAssetDirectory != null)
         'UNIT_TEST_ASSETS': testAssetDirectory,
+      if (nativeAssetsBuilder != null && globals.platform.isWindows)
+        'PATH': '${nativeAssetsBuilder.windowsBuildDirectory(flutterProject)};${globals.platform.environment['PATH']}',
     };
 
     globals.logger.printTrace('Starting flutter_tester process with command=$command, environment=$environment');

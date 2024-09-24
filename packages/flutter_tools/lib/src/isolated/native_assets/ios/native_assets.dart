@@ -9,7 +9,6 @@ import 'package:native_assets_cli/native_assets_cli_internal.dart';
 import '../../../base/file_system.dart';
 import '../../../build_info.dart';
 import '../../../globals.dart' as globals;
-
 import '../macos/native_assets_host.dart';
 import '../native_assets.dart';
 
@@ -55,19 +54,8 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsIOSInternal(
     includeParentEnvironment: true,
   );
   ensureNativeAssetsBuildDryRunSucceed(buildDryRunResult);
-  final LinkDryRunResult linkDryRunResult = await buildRunner.linkDryRun(
-    linkModePreference: LinkModePreferenceImpl.dynamic,
-    targetOS: targetOS,
-    workingDirectory: projectUri,
-    includeParentEnvironment: true,
-    buildDryRunResult: buildDryRunResult,
-  );
-  ensureNativeAssetsLinkDryRunSucceed(linkDryRunResult);
-  final List<AssetImpl> nativeAssets = <AssetImpl>[
-    ...buildDryRunResult.assets,
-    ...linkDryRunResult.assets,
-  ];
-  ensureNoLinkModeStatic(nativeAssets);
+  // No link hooks in JIT.
+  final List<AssetImpl> nativeAssets = buildDryRunResult.assets;
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   return _assetTargetLocations(nativeAssets).values;
 }
@@ -90,6 +78,7 @@ Future<List<Uri>> buildNativeAssetsIOS({
 
   final List<Target> targets = darwinArchs.map(_getNativeTarget).toList();
   final BuildModeImpl buildModeCli = nativeAssetsBuildMode(buildMode);
+  final bool linkingEnabled = buildModeCli == BuildModeImpl.release;
 
   const OSImpl targetOS = OSImpl.iOS;
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
@@ -107,25 +96,31 @@ Future<List<Uri>> buildNativeAssetsIOS({
       workingDirectory: projectUri,
       includeParentEnvironment: true,
       cCompilerConfig: await buildRunner.cCompilerConfig,
+      // TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
+      targetIOSVersion: 12,
+      linkingEnabled: linkingEnabled,
     );
     ensureNativeAssetsBuildSucceed(buildResult);
     nativeAssets.addAll(buildResult.assets);
     dependencies.addAll(buildResult.dependencies);
-    final LinkResult linkResult = await buildRunner.link(
-      linkModePreference: LinkModePreferenceImpl.dynamic,
-      target: target,
-      targetIOSSdkImpl: iosSdk,
-      buildMode: buildModeCli,
-      workingDirectory: projectUri,
-      includeParentEnvironment: true,
-      cCompilerConfig: await buildRunner.cCompilerConfig,
-      buildResult: buildResult,
-    );
-    ensureNativeAssetsLinkSucceed(linkResult);
-    nativeAssets.addAll(linkResult.assets);
-    dependencies.addAll(linkResult.dependencies);
+    if (linkingEnabled) {
+      final LinkResult linkResult = await buildRunner.link(
+        linkModePreference: LinkModePreferenceImpl.dynamic,
+        target: target,
+        targetIOSSdkImpl: iosSdk,
+        buildMode: buildModeCli,
+        workingDirectory: projectUri,
+        includeParentEnvironment: true,
+        cCompilerConfig: await buildRunner.cCompilerConfig,
+        buildResult: buildResult,
+        // TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
+        targetIOSVersion: 12,
+      );
+      ensureNativeAssetsLinkSucceed(linkResult);
+      nativeAssets.addAll(linkResult.assets);
+      dependencies.addAll(linkResult.dependencies);
+    }
   }
-  ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
   final Map<KernelAssetPath, List<AssetImpl>> fatAssetTargetLocations =
       _fatAssetTargetLocations(nativeAssets);
@@ -234,8 +229,10 @@ final KernelAssetPath kernelAssetPath;
 /// For `flutter run -release` a multi-architecture solution is needed. So,
 /// `lipo` is used to combine all target architectures into a single file.
 ///
-/// The install name is set so that it matches what the place it will
-/// be bundled in the final app.
+/// The install name is set so that it matches with the place it will
+/// be bundled in the final app. Install names that are referenced in dependent
+/// libraries are updated to match the new install name, so that the referenced
+/// library can be found by the dynamic linker.
 ///
 /// Code signing is also done here, so that it doesn't have to be done in
 /// in xcode_backend.dart.
@@ -249,11 +246,15 @@ Future<void> _copyNativeAssetsIOS(
   if (assetTargetLocations.isNotEmpty) {
     globals.logger
         .printTrace('Copying native assets to ${buildUri.toFilePath()}.');
+
+    final Map<String, String> oldToNewInstallNames = <String, String>{};
+    final List<(File, String, Directory)> dylibs = <(File, String, Directory)>[];
+
     for (final MapEntry<KernelAssetPath, List<AssetImpl>> assetMapping
         in assetTargetLocations.entries) {
       final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
-      final List<Uri> sources = <Uri>[
-        for (final AssetImpl source in assetMapping.value) source.file!
+      final List<File> sources = <File>[
+        for (final AssetImpl source in assetMapping.value) fileSystem.file(source.file)
       ];
       final Uri targetUri = buildUri.resolveUri(target);
       final File dylibFile = fileSystem.file(targetUri);
@@ -262,12 +263,25 @@ Future<void> _copyNativeAssetsIOS(
         await frameworkDir.create(recursive: true);
       }
       await lipoDylibs(dylibFile, sources);
-      await setInstallNameDylib(dylibFile);
+
+      final String dylibFileName = dylibFile.basename;
+      final String newInstallName = '@rpath/$dylibFileName.framework/$dylibFileName';
+      final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
+      for (final String oldInstallName in oldInstallNames) {
+        oldToNewInstallNames[oldInstallName] = newInstallName;
+      }
+      dylibs.add((dylibFile, newInstallName, frameworkDir));
+
       // TODO(knopp): Wire the value once there is a way to configure that in the hook.
       // https://github.com/dart-lang/native/issues/1133
       await createInfoPlist(targetUri.pathSegments.last, frameworkDir, minimumIOSVersion: '12.0');
+    }
+
+    for (final (File dylibFile, String newInstallName, Directory frameworkDir) in dylibs) {
+      await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
       await codesignDylib(codesignIdentity, buildMode, frameworkDir);
     }
+
     globals.logger.printTrace('Copying native assets done.');
   }
 }

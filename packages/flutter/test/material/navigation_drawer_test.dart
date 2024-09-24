@@ -112,9 +112,11 @@ void main() {
 
     scaffoldKey.currentState!.openDrawer();
     await tester.pump(const Duration(seconds: 1)); // animation done
-    final Container destinationColor = tester.firstWidget<Container>(
+    final ColoredBox destinationColor = tester.firstWidget<ColoredBox>(
       find.descendant(
-          of: find.byType(NavigationDrawerDestination), matching: find.byType(Container)),
+        of: find.byType(NavigationDrawerDestination),
+        matching: find.byType(ColoredBox),
+      ),
     );
 
     expect(destinationColor.color, equals(color));
@@ -324,6 +326,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -333,6 +336,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
 
@@ -345,6 +349,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -355,6 +360,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });

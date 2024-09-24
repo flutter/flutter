@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1077,5 +1079,88 @@ void main() {
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
     expect(textField.focusNode!.hasFocus, isTrue);
+  });
+
+  testWidgets('keyboardDismissBehavior.OnDrag with drawer tests', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: Container(),
+          body: Column(
+            children: <Widget>[
+              const TextField(),
+              Expanded(
+                child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: Container(
+                    height: 1000,
+                  )
+                ),
+              ),
+            ]
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    final Finder finder = find.byType(TextField).first;
+    await tester.tap(finder);
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+  });
+
+  testWidgets('keyboardDismissBehavior on scroll without a drag test', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SizedBox(
+          height: 1000,
+          child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: Column(
+              children: <Widget>[
+                Autocomplete<String>(
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    return<String>['aardvark', 'bobcat', 'chameleon']
+                        .where((String option) {
+                      return option.contains(textEditingValue.text.toLowerCase());
+                    });
+                  },
+                ),
+                const SizedBox(height: 2000),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(Autocomplete<String>));
+    await tester.pump();
+
+    await tester.enterText(find.byType(RawAutocomplete<String>),'aard');
+    await tester.pump();
+
+    expect(find.text('aardvark'), findsOneWidget);
+
+    final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
+    final Offset scrollStart = tester.getCenter(find.byType(SingleChildScrollView));
+
+    testPointer.hover(scrollStart);
+    await tester.sendEventToBinding(testPointer.scroll(Offset(scrollStart.dx, scrollStart.dy - 100)));
+    await tester.pumpAndSettle();
+
+    expect(find.text('aardvark'), findsNothing);
   });
 }

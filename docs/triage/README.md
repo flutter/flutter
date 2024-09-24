@@ -1,8 +1,8 @@
 # Primary issue triage process
 
-The process of triaging new incoming bugs consiists of processing the list of [issues without team-* labels, with no assignees, and not labeled `will need additional triage`](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+no%3Aassignee+-label%3A%22will+need+additional+triage%22+-label%3Ateam-release%2Cteam-codelabs%2Cteam-ecosystem%2Cteam-infra%2Cteam-engine%2Cteam-framework%2Cteam-news%2Cteam-ios%2Cteam-tool%2Cteam-web%2Cteam-desktop%2Cteam-design%2Cteam-android%2Cteam-go_router%2Cteam-games%2Cteam-text-input+) as described in this section, so as to make that list empty.
+The process of triaging new incoming bugs consists of processing the list of [issues without team-* labels, with no assignees, and not labeled `will need additional triage`](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+no%3Aassignee+-label%3A%22will+need+additional+triage%22+-label%3Ateam-release%2Cteam-codelabs%2Cteam-ecosystem%2Cteam-infra%2Cteam-engine%2Cteam-framework%2Cteam-news%2Cteam-ios%2Cteam-tool%2Cteam-web%2Cteam-linux%2Cteam-macos%2Cteam-windows%2Cteam-design%2Cteam-android%2Cteam-go_router%2Cteam-games%2Cteam-text-input+) as described in this section, so as to make that list empty.
 
-_See also: [Issue triage reports](../wiki_archive/Nevercode%20[TBD]/Issue-triage-reports.md)_
+_See also: [Issue triage reports](https://github.com/flutter/flutter/wiki/Issue-triage-reports)_
 
 ### General
 
@@ -42,7 +42,7 @@ In the specific case of a bug with unclear steps to reproduce but very specific 
 
 If you recognize that this bug is a duplicate of an existing bug, add a reference to that bug in a comment, then close the bug. Skip the remaining steps. As you triage more and more bugs you will become more and more familiar with the existing bugs and so you will get better and better at marking duplicates in this way.
 
-When closing the duplicate bug, the github issue tracker does not copy the list of people being notified on the closed bug into the original bug. This can matter, especially when asking on the original bug for things like reproduction steps. Consider cc'ing the author of the duplicate issue into the original issue, especially if we're still trying to determine reproduction steps for the issue.
+When closing the duplicate bug, the GitHub issue tracker does not copy the list of people being notified on the closed bug into the original bug. This can matter, especially when asking on the original bug for things like reproduction steps. Consider cc'ing the author of the duplicate issue into the original issue, especially if we're still trying to determine reproduction steps for the issue.
 
 ### Requests for help (documentation issues)
 
@@ -72,10 +72,12 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 - If it's about the release process or tooling (e.g., `conductor`), add `team-release`.
 - If it's about the Flutter team's CI or infrastructure, add `team-infra`.
 - If it's about Impeller, add `team-engine`.
+- If it's about accessibility (e.g. `Semantics`, `talkBack`, `voiceOver`), add `team-accessibility`.
+  - If it's specific to a single platform, also add that platform's fyi label.
 - If it's about Cupertino or Material Design, add `team-design`.
 - If it's about text fields or other user-facing text input issues, add `team-text-input`.
   - If it's specific to a single platform, also add that platform's fyi label.
-- If it's specific to a single platform, add that platform's team (`team-android`, `team-desktop`, `team-ios`, or `team-web`).
+- If it's specific to a single platform, add that platform's team (`team-android`, `team-ios`, `team-linux`, `team-macos`, `team-web`, or `team-windows`).
   - If the issue is about a first-party package, also add `fyi-ecosystem`.
 - If it's about one of our games templates, add `team-games`.
 - If it's about the Flutter engine, add `team-engine`.
@@ -194,12 +196,18 @@ For more guidance on reviewing PRs, see [Tree Hygiene](../contributing/Tree-hygi
 
 ## Links for teams
 
+### Accessibility team (`team-accessibility`)
+
+- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-accessibility%2Cfyi-accessibility+-label%3Atriaged-accessibility+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+)
+- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-accessibility+label%3AP0+sort%3Aupdated-asc+)
+- [Package PRs](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+accessibility%22+sort%3Aupdated-asc+-is%3Adraft+)
+
 ### Android platform team (`team-android`)
 
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android%2Cfyi-android+-label%3Atriaged-android+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android+label%3AP0+sort%3Aupdated-asc)
 - [P1, No Assignee list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android+label%3Ap1+no%3Aassignee+sort%3Aupdated-asc)
-- PRs: [Engine](https://github.com/flutter/engine/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+-label%3A%22Work+in+progress+%28WIP%29%22+sort%3Aupdated-asc), [Framework/Tool](https://github.com/flutter/flutter/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+-label%3A%22work+in+progress%3B+do+not+review%22+sort%3Aupdated-asc+), [Plugins \(non-dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+sort%3Aupdated-asc+-author%3Aapp%2Fdependabot+), [Plugins \(dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+sort%3Aupdated-asc+author%3Aapp%2Fdependabot+)
+- PRs: [Engine](https://github.com/flutter/engine/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+-label%3A%22Work+in+progress+%28WIP%29%22+sort%3Aupdated-asc), [Framework/Tool](https://github.com/flutter/flutter/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+-label%3A%22work+in+progress%3B+do+not+review%22+sort%3Aupdated-asc+), [Plugins \(non-dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Atriage-android+sort%3Aupdated-asc+-author%3Aapp%2Fdependabot+), [Plugins \(dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+sort%3Aupdated-asc+author%3Aapp%2Fdependabot+)
 
 ### Codelabs team (`team-codelabs`)
 
@@ -210,14 +218,7 @@ For more guidance on reviewing PRs, see [Tree Hygiene](../contributing/Tree-hygi
 
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-design%2Cfyi-design+-label%3Atriaged-design+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+-label%3A%22waiting+for+customer+response%22+)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-design+label%3AP0+sort%3Aupdated-asc)
-- [Design Languages PRs](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22f%3A+material+design%22%2C%22f%3A+cupertino%22+sort%3Aupdated-asc)
-
-### Desktop platforms team (`team-desktop`)
-
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-desktop%2Cfyi-desktop+-label%3Atriaged-desktop+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
-- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-desktop+label%3AP0+sort%3Aupdated-asc)
-- [Desktop PRs on the engine](https://github.com/flutter/engine/pulls?q=is%3Aopen+is%3Apr+label%3A%22affects%3A+desktop%22+sort%3Aupdated-asc)
-- [Desktop PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+sort%3Aupdated-asc)
+- [Design Languages PRs](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22f%3A+material+design%22%2C%22f%3A+cupertino%22+sort%3Aupdated-asc+draft%3Afalse)
 
 ### Ecosystem team (`team-ecosystem`)
 
@@ -266,18 +267,28 @@ In addition, consider these issues that fall under another team's triage, but ar
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-infra%2Cfyi-infra+-label%3Atriaged-infra+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
 - [Latest updated issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-infra%2Cfyi-infra+sort%3Aupdated-desc)
 
-### iOS platform team (`team-ios`)
+### iOS and macOS platform team (`team-ios` and `team-macos`)
 
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ios%2Cfyi-ios+-label%3Atriaged-ios+no%3Aassignee+-label%3A%22will+need+additional+triage%22+-label%3A%22waiting+for+customer+response%22+sort%3Aupdated-asc)
-- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ios+label%3AP0+sort%3Aupdated-asc)
-
-Apple's https://developer.apple.com/news should be periodically checked for updates that might affect us.
+- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ios%2Cteam-macos+label%3AP0+sort%3Aupdated-asc+)
+- [iOS incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ios%2Cfyi-ios+-label%3Atriaged-ios+-label%3A%22will+need+additional+triage%22+-label%3A%22waiting+for+customer+response%22+sort%3Aupdated-asc+)
+- [macOS incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-macos%2Cfyi-macos+-label%3Atriaged-macos+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+)
+- [Apple news](https://developer.apple.com/news) - check for updates that might affect us.
 
 PRs are reviewed weekly across the framework, packages, and engine repositories:
 
-* [iOS Framework PRs](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios+sort%3Acreated-asc+-is%3Adraft)
-* [iOS Plugins PRs](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios+draft%3Afalse+sort%3Aupdated-asc)
-* [iOS Engine PRs](https://github.com/flutter/engine/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios+sort%3Acreated-asc+-is%3Adraft)
+- [iOS PRs on the engine](https://github.com/flutter/engine/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios+sort%3Acreated-asc+-is%3Adraft)
+- [macOS PRs on the engine](https://github.com/flutter/engine/pulls?q=is%3Aopen+is%3Apr+label%3A%22affects%3A+desktop%22+label%3Aplatform-macos+sort%3Aupdated-asc)
+- [iOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios+sort%3Acreated-asc+-is%3Adraft)
+- [macOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+platform-macos++sort%3Aupdated-asc)
+- [iOS and macOS PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-macos%2Ctriage-ios+sort%3Aupdated-asc+)
+
+### Linux platforms team (`team-linux`)
+
+- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-linux%2Cfyi-linux+-label%3Atriaged-linux+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
+- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-linux+label%3AP0+sort%3Aupdated-asc)
+- [Linux PRs on the engine](https://github.com/flutter/engine/pulls?q=is%3Aopen+is%3Apr+label%3A%22affects%3A+desktop%22+label%3Aplatform-linux+sort%3Aupdated-asc)
+- [Linux PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-linux+sort%3Aupdated-asc)
+- [Linux PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-linux+sort%3Aupdated-asc)
 
 ### News Toolkit team (`team-news`)
 
@@ -293,7 +304,7 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+sort%3Aupdated-asc+label%3AP0+)
 - [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+sort%3Acreated-desc+draft%3Afalse+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+)
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+no%3Aassignee+-label%3A%22triaged-design%22+-label%3A%22triaged-framework%22+-label%3A%22triaged-desktop%22+-label%3A%22triaged-android%22+-label%3A%22triaged-ios%22+-label%3A%22triaged-web%22+-label%3A%22triaged-ecosystem%22+-label%3A%22triaged-engine%22+-label%3A%22triaged-tool%22+-label%3A%22triaged-text-input%22+-project%3Aflutter%2F111+)
+- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+no%3Aassignee+-label%3A%22triaged-design%22+-label%3A%22triaged-framework%22+-label%3A%22triaged-linux%22+-label%3A%22triaged-macos%22+-label%3A%22triaged-windows%22+-label%3A%22triaged-android%22+-label%3A%22triaged-ios%22+-label%3A%22triaged-web%22+-label%3A%22triaged-ecosystem%22+-label%3A%22triaged-engine%22+-label%3A%22triaged-tool%22+-label%3A%22triaged-text-input%22+-project%3Aflutter%2F111+)
 
 ### Flutter Tool team (`team-tool`)
 
@@ -304,6 +315,14 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 ### Web platform team (`team-web`)
 
 - See the [Flutter Web Triage](Flutter-Web-Triage.md) page.
+
+### Windows platforms team (`team-windows`)
+
+- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-windows%2Cfyi-windows+-label%3Atriaged-windows+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
+- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-windows+label%3AP0+sort%3Aupdated-asc)
+- [Windows PRs on the engine](https://github.com/flutter/engine/pulls?q=is%3Aopen+is%3Apr+label%3A%22affects%3A+desktop%22+label%3Aplatform-windows+sort%3Aupdated-asc)
+- [Windows PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-windows+sort%3Aupdated-asc)
+- [Windows PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-windows+sort%3Aupdated-asc)
 
 ## Adding a new team
 

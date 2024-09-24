@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'text_button.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'banner_theme.dart';
@@ -115,6 +120,7 @@ class MaterialBanner extends StatefulWidget {
     this.overflowAlignment = OverflowBarAlignment.end,
     this.animation,
     this.onVisible,
+    this.minActionBarHeight = 52.0,
   }) : assert(elevation == null || elevation >= 0.0);
 
   /// The content of the [MaterialBanner].
@@ -150,6 +156,11 @@ class MaterialBanner extends StatefulWidget {
   ///
   /// Typically an [Icon] widget.
   final Widget? leading;
+
+  /// The optional minimum action bar height.
+  ///
+  /// Default to 52.0.
+  final double minActionBarHeight;
 
   /// The color of the surface of this [MaterialBanner].
   ///
@@ -247,6 +258,7 @@ class MaterialBanner extends StatefulWidget {
       actions: actions,
       elevation: elevation,
       leading: leading,
+      minActionBarHeight: minActionBarHeight,
       backgroundColor: backgroundColor,
       surfaceTintColor: surfaceTintColor,
       shadowColor: shadowColor,
@@ -341,7 +353,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
         ?? const EdgeInsetsDirectional.only(end: 16.0);
 
     final Widget actionsBar = ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 52.0),
+      constraints: BoxConstraints(minHeight: widget.minActionBarHeight),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Align(

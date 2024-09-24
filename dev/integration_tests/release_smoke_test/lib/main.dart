@@ -17,6 +17,14 @@ Future<void> main() async {
   // regression test for https://github.com/flutter/flutter/issues/49601
   final List<int> computed = await compute(_utf8Encode, 'test');
   print(computed);
+
+  // regression test for https://github.com/flutter/flutter/issues/148983
+  const String value = 'testValueKey';
+  const ValueKey<String> valueKey = ValueKey<String>(value);
+  if (!valueKey.toString().contains(value)) {
+    throw Exception('ValueKey string does not contain the value');
+  }
+
   runApp(
     const Center(
       child: text,

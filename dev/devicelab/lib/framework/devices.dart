@@ -128,6 +128,9 @@ abstract class Device {
   /// A unique device identifier.
   String get deviceId;
 
+  /// Switch the device into fixed/regular performance mode.
+  Future<void> toggleFixedPerformanceMode(bool enable) async {}
+
   /// Whether the device is awake.
   Future<bool> isAwake();
 
@@ -589,6 +592,11 @@ class AndroidDevice extends Device {
   String deviceInfo = '';
   int apiLevel = 0;
 
+  @override
+  Future<void> toggleFixedPerformanceMode(bool enable) async {
+    await shellExec('cmd', <String>['power', 'set-fixed-performance-mode-enabled', if (enable) 'true' else 'false']);
+  }
+
   /// Whether the device is awake.
   @override
   Future<bool> isAwake() async {
@@ -706,6 +714,7 @@ class AndroidDevice extends Device {
       List<String> arguments, {
       Map<String, String>? environment,
       bool silent = false,
+      bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
     }) {
     return eval(
       adbPath,
@@ -713,6 +722,7 @@ class AndroidDevice extends Device {
       environment: environment,
       printStdout: !silent,
       printStderr: !silent,
+      canFail: canFail,
     );
   }
 
@@ -735,7 +745,7 @@ class AndroidDevice extends Device {
   @override
   Future<void> startLoggingToSink(IOSink sink, {bool clear = true}) async {
     if (clear) {
-      await adb(<String>['logcat', '--clear'], silent: true);
+      await adb(<String>['logcat', '--clear'], silent: true, canFail: true);
     }
     _loggingProcess = await startProcess(
       adbPath,
@@ -770,7 +780,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<void> clearLogs() {
-    return adb(<String>['logcat', '-c']);
+    return adb(<String>['logcat', '-c'], canFail: true);
   }
 
   @override

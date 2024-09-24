@@ -137,6 +137,9 @@ class _${blockName}DefaultsM3 extends SwitchThemeData {
 
   @override
   double get splashRadius => ${getToken('md.comp.switch.state-layer.size')} / 2;
+
+  @override
+  EdgeInsetsGeometry? get padding => const EdgeInsets.symmetric(horizontal: 4);
 }
 
 class _SwitchConfigM3 with _SwitchConfig {
@@ -192,13 +195,13 @@ class _SwitchConfigM3 with _SwitchConfig {
   double get pressedThumbRadius => ${getToken('md.comp.switch.pressed.handle.width')} / 2;
 
   @override
-  double get switchHeight => _kSwitchMinSize + 8.0;
+  double get switchHeight => switchMinSize.height + 8.0;
 
   @override
-  double get switchHeightCollapsed => _kSwitchMinSize;
+  double get switchHeightCollapsed => switchMinSize.height;
 
   @override
-  double get switchWidth => trackWidth - 2 * (trackHeight / 2.0) + _kSwitchMinSize;
+  double get switchWidth => 52.0;
 
   @override
   double get thumbRadiusWithIcon => ${getToken('md.comp.switch.with-icon.handle.width')} / 2;
@@ -223,6 +226,9 @@ class _SwitchConfigM3 with _SwitchConfig {
   // Hand coded default based on the animation specs.
   @override
   double? get thumbOffset => null;
+
+  @override
+  Size get switchMinSize => const Size(kMinInteractiveDimension, kMinInteractiveDimension - 8.0);
 }
 ''';
 

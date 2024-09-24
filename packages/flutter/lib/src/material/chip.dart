@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'action_chip.dart';
+/// @docImport 'app.dart';
+/// @docImport 'choice_chip.dart';
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'filter_chip.dart';
+/// @docImport 'input_chip.dart';
+/// @docImport 'scaffold.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show clampDouble;
@@ -82,14 +91,14 @@ abstract interface class ChipAttributes {
   /// This only has an effect on widgets that respect the [DefaultTextStyle],
   /// such as [Text].
   ///
-  /// If [TextStyle.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
-  /// is used for the following [MaterialState]s:
+  /// If [TextStyle.color] is a [WidgetStateProperty<Color>], [WidgetStateProperty.resolve]
+  /// is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.disabled].
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.pressed].
+  ///  * [WidgetState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.pressed].
   TextStyle? get labelStyle;
 
   /// The color and weight of the chip's outline.
@@ -104,14 +113,14 @@ abstract interface class ChipAttributes {
   /// This value is combined with [shape] to create a shape decorated with an
   /// outline. To omit the outline entirely, pass [BorderSide.none] to [side].
   ///
-  /// If it is a [MaterialStateBorderSide], [MaterialStateProperty.resolve] is
-  /// used for the following [MaterialState]s:
+  /// If it is a [WidgetStateBorderSide], [WidgetStateProperty.resolve] is
+  /// used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.disabled].
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.pressed].
+  ///  * [WidgetState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.pressed].
   BorderSide? get side;
 
   /// The [OutlinedBorder] to draw around the chip.
@@ -126,14 +135,14 @@ abstract interface class ChipAttributes {
   /// side of [shape] is ignored. To omit the outline entirely,
   /// pass [BorderSide.none] to [side].
   ///
-  /// If it is a [MaterialStateOutlinedBorder], [MaterialStateProperty.resolve]
-  /// is used for the following [MaterialState]s:
+  /// If it is a [WidgetStateOutlinedBorder], [WidgetStateProperty.resolve]
+  /// is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.disabled].
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.pressed].
+  ///  * [WidgetState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.pressed].
   OutlinedBorder? get shape;
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -147,13 +156,13 @@ abstract interface class ChipAttributes {
   /// {@macro flutter.widgets.Focus.autofocus}
   bool get autofocus;
 
-  /// The color that fills the chip, in all [MaterialState]s.
+  /// The color that fills the chip, in all [WidgetState]s.
   ///
   /// Defaults to null.
   ///
   /// Resolves in the following states:
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.disabled].
   MaterialStateProperty<Color?>? get color;
 
   /// Color to be used for the unselected, enabled chip's background.
@@ -243,6 +252,32 @@ abstract interface class ChipAttributes {
   /// ** See code in examples/api/lib/material/chip/chip_attributes.avatar_box_constraints.0.dart **
   /// {@end-tool}
   BoxConstraints? get avatarBoxConstraints;
+
+  /// Used to override the default chip animations durations.
+  ///
+  /// If [ChipAnimationStyle.enableAnimation] with duration or reverse duration is
+  /// provided, it will be used to override the chip enable and disable animation durations.
+  /// If it is null, then default duration will be 75ms.
+  ///
+  /// If [ChipAnimationStyle.selectAnimation] with duration or reverse duration is provided,
+  /// it will be used to override the chip select and unselect animation durations.
+  /// If it is null, then default duration will be 195ms.
+  ///
+  /// If [ChipAnimationStyle.avatarDrawerAnimation] with duration or reverse duration
+  /// is provided, it will be used to override the chip checkmark animation duration.
+  /// If it is null, then default duration will be 150ms.
+  ///
+  /// If [ChipAnimationStyle.deleteDrawerAnimation] with duration or reverse duration
+  /// is provided, it will be used to override the chip delete icon animation duration.
+  /// If it is null, then default duration will be 150ms.
+  ///
+  /// {@tool dartpad}
+  /// This sample showcases how to override the chip animations durations using
+  /// [ChipAnimationStyle].
+  ///
+  /// ** See code in examples/api/lib/material/chip/chip_attributes.chip_animation_style.0.dart **
+  /// {@end-tool}
+  ChipAnimationStyle? get chipAnimationStyle;
 }
 
 /// An interface for Material Design chips that can be deleted.
@@ -568,6 +603,37 @@ abstract interface class TappableChipAttributes {
   String? get tooltip;
 }
 
+/// A helper class that overrides the default chip animation parameters.
+class ChipAnimationStyle {
+  /// Creates an instance of Chip Animation Style class.
+  ChipAnimationStyle({
+    this.enableAnimation,
+    this.selectAnimation,
+    this.avatarDrawerAnimation,
+    this.deleteDrawerAnimation,
+  });
+
+  /// If [enableAnimation] with duration or reverse duration is provided,
+  /// it will be used to override the chip enable and disable animation durations.
+  /// If it is null, then default duration will be 75ms.
+  final AnimationStyle? enableAnimation;
+
+  /// If [selectAnimation] with duration or reverse duration is provided,
+  /// it will be used to override the chip select and unselect animation durations.
+  /// If it is null, then default duration will be 195ms.
+  final AnimationStyle? selectAnimation;
+
+  /// If [avatarDrawerAnimation] with duration or reverse duration is provided,
+  /// it will be used to override the chip checkmark animation duration. If it
+  /// is null, then default duration will be 150ms.
+  final AnimationStyle? avatarDrawerAnimation;
+
+  /// If [deleteDrawerAnimation] with duration or reverse duration is provided,
+  /// it will be used to override the chip delete icon animation duration. If it
+  /// is null, then default duration will be 150ms.
+  final AnimationStyle? deleteDrawerAnimation;
+}
+
 /// A Material Design chip.
 ///
 /// Chips are compact elements that represent an attribute, text, entity, or
@@ -637,6 +703,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.iconTheme,
     this.avatarBoxConstraints,
     this.deleteIconBoxConstraints,
+    this.chipAnimationStyle,
   }) : assert(elevation == null || elevation >= 0.0);
 
   @override
@@ -687,6 +754,8 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final BoxConstraints? avatarBoxConstraints;
   @override
   final BoxConstraints? deleteIconBoxConstraints;
+  @override
+  final ChipAnimationStyle? chipAnimationStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -717,6 +786,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       iconTheme: iconTheme,
       avatarBoxConstraints: avatarBoxConstraints,
       deleteIconBoxConstraints: deleteIconBoxConstraints,
+      chipAnimationStyle: chipAnimationStyle,
     );
   }
 }
@@ -806,6 +876,7 @@ class RawChip extends StatefulWidget
     this.avatarBorder = const CircleBorder(),
     this.avatarBoxConstraints,
     this.deleteIconBoxConstraints,
+    this.chipAnimationStyle,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        deleteIcon = deleteIcon ?? _kDefaultDeleteIcon;
@@ -889,6 +960,8 @@ class RawChip extends StatefulWidget
   final BoxConstraints? avatarBoxConstraints;
   @override
   final BoxConstraints? deleteIconBoxConstraints;
+  @override
+  final ChipAnimationStyle? chipAnimationStyle;
 
   /// If set, this indicates that the chip should be disabled if all of the
   /// tap callbacks ([onSelected], [onPressed]) are null.
@@ -936,7 +1009,8 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     setMaterialState(MaterialState.disabled, !widget.isEnabled);
     setMaterialState(MaterialState.selected, widget.selected);
     selectController = AnimationController(
-      duration: _kSelectDuration,
+      duration: widget.chipAnimationStyle?.selectAnimation?.duration ?? _kSelectDuration,
+      reverseDuration: widget.chipAnimationStyle?.selectAnimation?.reverseDuration,
       value: widget.selected ? 1.0 : 0.0,
       vsync: this,
     );
@@ -945,17 +1019,20 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
       curve: Curves.fastOutSlowIn,
     );
     avatarDrawerController = AnimationController(
-      duration: _kDrawerDuration,
+      duration: widget.chipAnimationStyle?.avatarDrawerAnimation?.duration ?? _kDrawerDuration,
+      reverseDuration: widget.chipAnimationStyle?.avatarDrawerAnimation?.reverseDuration,
       value: hasAvatar || widget.selected ? 1.0 : 0.0,
       vsync: this,
     );
     deleteDrawerController = AnimationController(
-      duration: _kDrawerDuration,
+      duration: widget.chipAnimationStyle?.deleteDrawerAnimation?.duration ?? _kDrawerDuration,
+      reverseDuration: widget.chipAnimationStyle?.deleteDrawerAnimation?.reverseDuration,
       value: hasDeleteButton ? 1.0 : 0.0,
       vsync: this,
     );
     enableController = AnimationController(
-      duration: _kDisableDuration,
+      duration: widget.chipAnimationStyle?.enableAnimation?.duration ?? _kDisableDuration,
+      reverseDuration: widget.chipAnimationStyle?.enableAnimation?.reverseDuration,
       value: widget.isEnabled ? 1.0 : 0.0,
       vsync: this,
     );
@@ -1292,7 +1369,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
     final Widget? avatar = iconTheme != null && hasAvatar
       ? IconTheme.merge(
-          data: theme.useMaterial3 ? chipDefaults.iconTheme!.merge(iconTheme) : iconTheme,
+          data: chipDefaults.iconTheme!.merge(iconTheme),
           child: widget.avatar!,
         )
       : widget.avatar;
@@ -1449,7 +1526,7 @@ class _IndividualOverrides extends MaterialStateProperty<Color?> {
   }
 }
 
-/// Redirects the [buttonRect.dy] passed to [RenderBox.hitTest] to the vertical
+/// Redirects the `buttonRect.dy` passed to [RenderBox.hitTest] to the vertical
 /// center of the widget.
 ///
 /// The primary purpose of this widget is to allow padding around the [RawChip]
@@ -2364,7 +2441,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
 
   @override
   BorderSide? get side => isEnabled
-    ? BorderSide(color: _colors.outline)
+    ? BorderSide(color: _colors.outlineVariant)
     : BorderSide(color: _colors.onSurface.withOpacity(0.12));
 
   @override

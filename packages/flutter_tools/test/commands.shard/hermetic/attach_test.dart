@@ -73,7 +73,7 @@ void main() {
       artifacts = Artifacts.test(fileSystem: testFileSystem);
       stdio = FakeStdio();
       terminal = FakeTerminal();
-      signals = Signals.test();
+      signals = FakeSignals();
       processInfo = FakeProcessInfo();
       testDeviceManager = TestDeviceManager(logger: logger);
     });
@@ -802,6 +802,13 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
         DeviceManager: () => testDeviceManager,
+        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+          preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+          logger: logger,
+          flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
+        ),
       });
 
       testUsingContext('exits when vm-service-port is specified and debug-port is not', () async {
@@ -1118,6 +1125,45 @@ void main() {
       DeviceManager: () => testDeviceManager,
     });
 
+    testUsingContext('Catches "Service connection disposed" error', () async {
+      final FakeAndroidDevice device = FakeAndroidDevice(id: '1')
+        ..portForwarder = const NoOpDevicePortForwarder()
+        ..onGetLogReader = () => NoOpDeviceLogReader('test');
+      final FakeHotRunner hotRunner = FakeHotRunner();
+      final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+        ..hotRunner = hotRunner;
+      hotRunner.onAttach = (
+        Completer<DebugConnectionInfo>? connectionInfoCompleter,
+        Completer<void>? appStartedCompleter,
+        bool allowExistingDdsInstance,
+        bool enableDevTools,
+      ) async {
+        await null;
+        throw vm_service.RPCError('flutter._listViews', RPCErrorCodes.kServerError, 'Service connection disposed');
+      };
+
+      testDeviceManager.devices = <Device>[device];
+      testFileSystem.file('lib/main.dart').createSync();
+
+      final AttachCommand command = AttachCommand(
+        hotRunnerFactory: hotRunnerFactory,
+        stdio: stdio,
+        logger: logger,
+        terminal: terminal,
+        signals: signals,
+        platform: platform,
+        processInfo: processInfo,
+        fileSystem: testFileSystem,
+      );
+      await expectLater(createTestCommandRunner(command).run(<String>[
+        'attach',
+      ]), throwsToolExit(message: 'Lost connection to device.'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => testDeviceManager,
+    });
+
     testUsingContext('Does not catch generic RPC error', () async {
       final FakeAndroidDevice device = FakeAndroidDevice(id: '1')
         ..portForwarder = const NoOpDevicePortForwarder()
@@ -1394,11 +1440,14 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
-    required Logger logger,
-    int? hostPort,
+    int? ddsPort,
+    FlutterDevice? device,
     bool? ipv6,
     bool? disableServiceAuthCodes,
+    bool enableDevTools = false,
     bool cacheStartupProfile = false,
+    String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
   }) async {}
 
   @override

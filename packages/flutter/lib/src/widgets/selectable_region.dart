@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
+///
+/// @docImport 'editable_text.dart';
+/// @docImport 'text.dart';
+library;
+
 import 'dart:async';
 import 'dart:math';
 
@@ -354,9 +361,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   Orientation? _lastOrientation;
   SelectedContent? _lastSelectedContent;
 
-  /// {@macro flutter.rendering.RenderEditable.lastSecondaryTapDownPosition}
-  Offset? lastSecondaryTapDownPosition;
-
   /// The [SelectionOverlay] that is currently visible on the screen.
   ///
   /// Can be null if there is no visible [SelectionOverlay].
@@ -375,25 +379,10 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     widget.focusNode.addListener(_handleFocusChanged);
     _initMouseGestureRecognizer();
     _initTouchGestureRecognizer();
-    // Taps and right clicks.
+    // Right clicks.
     _gestureRecognizers[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
           () => TapGestureRecognizer(debugOwner: this),
           (TapGestureRecognizer instance) {
-        instance.onTapUp = (TapUpDetails details) {
-          if (defaultTargetPlatform == TargetPlatform.iOS && _positionIsOnActiveSelection(globalPosition: details.globalPosition)) {
-            // On iOS when the tap occurs on the previous selection, instead of
-            // moving the selection, the context menu will be toggled.
-            final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
-            if (toolbarIsVisible) {
-              hideToolbar(false);
-            } else {
-              _showToolbar(location: details.globalPosition);
-            }
-          } else {
-            hideToolbar();
-            _collapseSelectionAt(offset: details.globalPosition);
-          }
-        };
         instance.onSecondaryTapDown = _handleRightClickDown;
       },
     );
@@ -462,7 +451,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         // the new window causing the Flutter application to go inactive. In this
         // case we want to retain the selection so it remains when we return to
         // the Flutter application.
-        _clearSelection();
+        clearSelection();
       }
     }
     if (kIsWeb) {
@@ -487,6 +476,31 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   // gestures.
 
+  /// Whether the Shift key was pressed when the most recent [PointerDownEvent]
+  /// was tracked by the [BaseTapAndDragGestureRecognizer].
+  bool _isShiftPressed = false;
+
+  // The position of the most recent secondary tap down event on this
+  // SelectableRegion.
+  Offset? _lastSecondaryTapDownPosition;
+
+  // The device kind for the pointer of the most recent tap down event on this
+  // SelectableRegion.
+  PointerDeviceKind? _lastPointerDeviceKind;
+
+  static bool _isPrecisePointerDevice(PointerDeviceKind pointerDeviceKind) {
+    switch (pointerDeviceKind) {
+      case PointerDeviceKind.mouse:
+        return true;
+      case PointerDeviceKind.trackpad:
+      case PointerDeviceKind.stylus:
+      case PointerDeviceKind.invertedStylus:
+      case PointerDeviceKind.touch:
+      case PointerDeviceKind.unknown:
+        return false;
+    }
+  }
+
   // Converts the details.consecutiveTapCount from a TapAndDrag*Details object,
   // which can grow to be infinitely large, to a value between 1 and the supported
   // max consecutive tap count. The value that the raw count is converted to is
@@ -494,11 +508,24 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   //
   // This method should be used in all instances when details.consecutiveTapCount
   // would be used.
-  static int _getEffectiveConsecutiveTapCount(int rawCount) {
-    const int maxConsecutiveTap = 3;
+  int _getEffectiveConsecutiveTapCount(int rawCount) {
+    int maxConsecutiveTap = 3;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+        if (_lastPointerDeviceKind != null && _lastPointerDeviceKind != PointerDeviceKind.mouse) {
+          // When the pointer device kind is not precise like a mouse, native
+          // Android resets the tap count at 2. For example, this is so the
+          // selection can collapse on the third tap.
+          maxConsecutiveTap = 2;
+        }
+        // From observation, these platforms reset their tap count to 0 when
+        // the number of consecutive taps exceeds the max consecutive tap supported.
+        // For example on native Android, when going past a triple click,
+        // on the fourth click the selection is moved to the precise click
+        // position, on the fifth click the word at the position is selected, and
+        // on the sixth click the paragraph at the position is selected.
+        return rawCount <= maxConsecutiveTap ? rawCount : (rawCount % maxConsecutiveTap == 0 ? maxConsecutiveTap : rawCount % maxConsecutiveTap);
       case TargetPlatform.linux:
         // From observation, these platforms reset their tap count to 0 when
         // the number of consecutive taps exceeds the max consecutive tap supported.
@@ -510,7 +537,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        // From observation, these platforms either hold their tap count at the max
+        // From observation, these platforms hold their tap count at the max
         // consecutive tap supported. For example on macOS, when going past a triple
         // click, the selection should be retained at the paragraph that was first
         // selected on triple click.
@@ -520,21 +547,71 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   void _initMouseGestureRecognizer() {
     _gestureRecognizers[TapAndPanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
-          () => TapAndPanGestureRecognizer(debugOwner:this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
+          () => TapAndPanGestureRecognizer(
+            debugOwner:this,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse },
+          ),
           (TapAndPanGestureRecognizer instance) {
         instance
+          ..onTapTrackStart = _onTapTrackStart
+          ..onTapTrackReset = _onTapTrackReset
           ..onTapDown = _startNewMouseSelectionGesture
           ..onTapUp = _handleMouseTapUp
           ..onDragStart = _handleMouseDragStart
           ..onDragUpdate = _handleMouseDragUpdate
           ..onDragEnd = _handleMouseDragEnd
-          ..onCancel = _clearSelection
+          ..onCancel = clearSelection
           ..dragStartBehavior = DragStartBehavior.down;
       },
     );
   }
 
+  void _onTapTrackStart() {
+    _isShiftPressed = HardwareKeyboard.instance.logicalKeysPressed
+        .intersection(<LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight})
+        .isNotEmpty;
+  }
+
+  void _onTapTrackReset() {
+    _isShiftPressed = false;
+  }
+
   void _initTouchGestureRecognizer() {
+    // A [TapAndHorizontalDragGestureRecognizer] is used on non-precise pointer devices
+    // like PointerDeviceKind.touch so [SelectableRegion] gestures do not conflict with
+    // ancestor Scrollable gestures in common scenarios like a vertically scrolling list view.
+    _gestureRecognizers[TapAndHorizontalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndHorizontalDragGestureRecognizer>(
+          () => TapAndHorizontalDragGestureRecognizer(
+            debugOwner:this,
+            supportedDevices: PointerDeviceKind.values.where((PointerDeviceKind device) {
+              return device != PointerDeviceKind.mouse;
+            }).toSet(),
+          ),
+          (TapAndHorizontalDragGestureRecognizer instance) {
+        instance
+          // iOS does not provide a device specific touch slop
+          // unlike Android (~8.0), so the touch slop for a [Scrollable]
+          // always default to kTouchSlop which is 18.0. When
+          // [SelectableRegion] is the child of a horizontal
+          // scrollable that means the [SelectableRegion] will
+          // always win the gesture arena when competing with
+          // the ancestor scrollable because they both have
+          // the same touch slop threshold and the child receives
+          // the [PointerEvent] first. To avoid this conflict
+          // and ensure a smooth scrolling experience, on
+          // iOS the [TapAndHorizontalDragGestureRecognizer]
+          // will wait for all other gestures to lose before
+          // declaring victory.
+          ..eagerVictoryOnDrag = defaultTargetPlatform != TargetPlatform.iOS
+          ..onTapDown = _startNewMouseSelectionGesture
+          ..onTapUp = _handleMouseTapUp
+          ..onDragStart = _handleMouseDragStart
+          ..onDragUpdate = _handleMouseDragUpdate
+          ..onDragEnd = _handleMouseDragEnd
+          ..onCancel = clearSelection
+          ..dragStartBehavior = DragStartBehavior.down;
+      },
+    );
     _gestureRecognizers[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
           () => LongPressGestureRecognizer(debugOwner: this, supportedDevices: _kLongPressSelectionDevices),
           (LongPressGestureRecognizer instance) {
@@ -546,26 +623,68 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     );
   }
 
+  Offset? _doubleTapOffset;
   void _startNewMouseSelectionGesture(TapDragDownDetails details) {
+    _lastPointerDeviceKind = details.kind;
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
         widget.focusNode.requestFocus();
-        hideToolbar();
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
-            // On mobile platforms the selection is set on tap up.
+            // On mobile platforms the selection is set on tap up for the first
+            // tap.
             break;
           case TargetPlatform.macOS:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
+            hideToolbar();
+            // It is impossible to extend the selection when the shift key is
+            // pressed and the start of the selection has not been initialized.
+            // In this case we fallback on collapsing the selection to first
+            // initialize the selection.
+            final bool isShiftPressedValid = _isShiftPressed && _selectionDelegate.value.startSelectionPoint != null;
+            if (isShiftPressedValid) {
+              _selectEndTo(offset: details.globalPosition);
+              return;
+            }
             _collapseSelectionAt(offset: details.globalPosition);
         }
       case 2:
-        _selectWordAt(offset: details.globalPosition);
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.iOS:
+            if (kIsWeb && details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+              // Double tap on iOS web triggers when a drag begins after the double tap.
+              _doubleTapOffset = details.globalPosition;
+              break;
+            }
+            _selectWordAt(offset: details.globalPosition);
+            if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+              _showHandles();
+            }
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.macOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            _selectWordAt(offset: details.globalPosition);
+        }
       case 3:
-        _selectParagraphAt(offset: details.globalPosition);
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
+            if (details.kind != null && _isPrecisePointerDevice(details.kind!)) {
+              // Triple tap on static text is only supported on mobile
+              // platforms using a precise pointer device.
+              _selectParagraphAt(offset: details.globalPosition);
+            }
+          case TargetPlatform.macOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            _selectParagraphAt(offset: details.globalPosition);
+        }
     }
     _updateSelectedContentIfNeeded();
   }
@@ -573,6 +692,10 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _handleMouseDragStart(TapDragStartDetails details) {
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
+        if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+          // Drag to select is only enabled with a precise pointer device.
+          return;
+        }
         _selectStartTo(offset: details.globalPosition);
     }
     _updateSelectedContentIfNeeded();
@@ -581,33 +704,131 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _handleMouseDragUpdate(TapDragUpdateDetails details) {
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
+        if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+          // Drag to select is only enabled with a precise pointer device.
+          return;
+        }
         _selectEndTo(offset: details.globalPosition, continuous: true);
       case 2:
-        _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            // Double tap + drag is only supported on Android when using a precise
+            // pointer device or when not on the web.
+            if (!kIsWeb || details.kind != null && _isPrecisePointerDevice(details.kind!)) {
+              _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
+            }
+          case TargetPlatform.iOS:
+            if (kIsWeb && details.kind != null && !_isPrecisePointerDevice(details.kind!) && _doubleTapOffset != null) {
+              // On iOS web a double tap does not select the word at the position,
+              // until the drag has begun.
+              _selectWordAt(offset: _doubleTapOffset!);
+              _doubleTapOffset = null;
+            }
+            _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
+            if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+              _showHandles();
+            }
+          case TargetPlatform.macOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
+        }
       case 3:
-        _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.paragraph);
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
+            // Triple tap + drag is only supported on mobile devices when using
+            // a precise pointer device.
+            if (details.kind != null && _isPrecisePointerDevice(details.kind!)) {
+              _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.paragraph);
+            }
+          case TargetPlatform.macOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.paragraph);
+        }
     }
     _updateSelectedContentIfNeeded();
   }
 
   void _handleMouseDragEnd(TapDragEndDetails details) {
+    final bool isPointerPrecise = _lastPointerDeviceKind != null && _lastPointerDeviceKind == PointerDeviceKind.mouse;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        if (!isPointerPrecise) {
+          // On Android, a drag gesture will only show the selection overlay when
+          // the drag has finished and the pointer device kind is not precise.
+          _showHandles();
+          _showToolbar();
+        }
+      case TargetPlatform.iOS:
+        if (!isPointerPrecise) {
+          // On iOS, a drag gesture will only show the selection toolbar when
+          // the drag has finished and the pointer device kind is not precise.
+          _showToolbar();
+        }
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+          // The selection overlay is not shown on desktop platforms after a drag.
+          break;
+    }
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
   }
 
   void _handleMouseTapUp(TapDragUpDetails details) {
+    if (defaultTargetPlatform == TargetPlatform.iOS && _positionIsOnActiveSelection(globalPosition: details.globalPosition)) {
+      // On iOS when the tap occurs on the previous selection, instead of
+      // moving the selection, the context menu will be toggled.
+      final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
+      if (toolbarIsVisible) {
+        hideToolbar(false);
+      } else {
+        _showToolbar();
+      }
+      return;
+    }
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
+            hideToolbar();
             _collapseSelectionAt(offset: details.globalPosition);
           case TargetPlatform.macOS:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
             // On desktop platforms the selection is set on tap down.
             break;
+        }
+      case 2:
+        final bool isPointerPrecise = _isPrecisePointerDevice(details.kind);
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            if (!isPointerPrecise) {
+              // On Android, a double tap will only show the selection overlay after
+              // the following tap up when the pointer device kind is not precise.
+              _showHandles();
+              _showToolbar();
+            }
+          case TargetPlatform.iOS:
+            if (!isPointerPrecise) {
+              // On iOS, a double tap will only show the selection toolbar after
+              // the following tap up when the pointer device kind is not precise.
+              _showToolbar();
+            }
+          case TargetPlatform.macOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+              // The selection overlay is not shown on desktop platforms
+              // on a double click.
+              break;
         }
     }
     _updateSelectedContentIfNeeded();
@@ -659,47 +880,47 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleRightClickDown(TapDownDetails details) {
-    final Offset? previousSecondaryTapDownPosition = lastSecondaryTapDownPosition;
+    final Offset? previousSecondaryTapDownPosition = _lastSecondaryTapDownPosition;
     final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
-    lastSecondaryTapDownPosition = details.globalPosition;
+    _lastSecondaryTapDownPosition = details.globalPosition;
     widget.focusNode.requestFocus();
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.windows:
-        // If lastSecondaryTapDownPosition is within the current selection then
+        // If _lastSecondaryTapDownPosition is within the current selection then
         // keep the current selection, if not then collapse it.
         final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
         if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-          _collapseSelectionAt(offset: lastSecondaryTapDownPosition!);
+          _collapseSelectionAt(offset: _lastSecondaryTapDownPosition!);
         }
         _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
+        _showToolbar(location: _lastSecondaryTapDownPosition);
       case TargetPlatform.iOS:
-        _selectWordAt(offset: lastSecondaryTapDownPosition!);
+        _selectWordAt(offset: _lastSecondaryTapDownPosition!);
         _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
+        _showToolbar(location: _lastSecondaryTapDownPosition);
       case TargetPlatform.macOS:
-        if (previousSecondaryTapDownPosition == lastSecondaryTapDownPosition && toolbarIsVisible) {
+        if (previousSecondaryTapDownPosition == _lastSecondaryTapDownPosition && toolbarIsVisible) {
           hideToolbar();
           return;
         }
-        _selectWordAt(offset: lastSecondaryTapDownPosition!);
+        _selectWordAt(offset: _lastSecondaryTapDownPosition!);
         _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
+        _showToolbar(location: _lastSecondaryTapDownPosition);
       case TargetPlatform.linux:
         if (toolbarIsVisible) {
           hideToolbar();
           return;
         }
-        // If lastSecondaryTapDownPosition is within the current selection then
+        // If _lastSecondaryTapDownPosition is within the current selection then
         // keep the current selection, if not then collapse it.
         final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
         if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-          _collapseSelectionAt(offset: lastSecondaryTapDownPosition!);
+          _collapseSelectionAt(offset: _lastSecondaryTapDownPosition!);
         }
         _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
+        _showToolbar(location: _lastSecondaryTapDownPosition);
     }
     _updateSelectedContentIfNeeded();
   }
@@ -1008,7 +1229,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// See also:
   ///  * [_selectStartTo], which sets or updates selection start edge.
   ///  * [_finalizeSelection], which stops the `continuous` updates.
-  ///  * [_clearSelection], which clears the ongoing selection.
+  ///  * [clearSelection], which clears the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [_selectParagraphAt], which selects an entire paragraph at the location.
   ///  * [_collapseSelectionAt], which collapses the selection at the location.
@@ -1049,7 +1270,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// See also:
   ///  * [_selectEndTo], which sets or updates selection end edge.
   ///  * [_finalizeSelection], which stops the `continuous` updates.
-  ///  * [_clearSelection], which clears the ongoing selection.
+  ///  * [clearSelection], which clears the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [_selectParagraphAt], which selects an entire paragraph at the location.
   ///  * [_collapseSelectionAt], which collapses the selection at the location.
@@ -1073,7 +1294,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_selectStartTo], which sets or updates selection start edge.
   ///  * [_selectEndTo], which sets or updates selection end edge.
   ///  * [_finalizeSelection], which stops the `continuous` updates.
-  ///  * [_clearSelection], which clears the ongoing selection.
+  ///  * [clearSelection], which clears the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [_selectParagraphAt], which selects an entire paragraph at the location.
   ///  * [selectAll], which selects the entire content.
@@ -1087,7 +1308,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// The `offset` is in global coordinates.
   ///
   /// If the whole word is already in the current selection, selection won't
-  /// change. One call [_clearSelection] first if the selection needs to be
+  /// change. One call [clearSelection] first if the selection needs to be
   /// updated even if the word is already covered by the current selection.
   ///
   /// One can also use [_selectEndTo] or [_selectStartTo] to adjust the selection
@@ -1097,7 +1318,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_selectStartTo], which sets or updates selection start edge.
   ///  * [_selectEndTo], which sets or updates selection end edge.
   ///  * [_finalizeSelection], which stops the `continuous` updates.
-  ///  * [_clearSelection], which clears the ongoing selection.
+  ///  * [clearSelection], which clears the ongoing selection.
   ///  * [_collapseSelectionAt], which collapses the selection at the location.
   ///  * [_selectParagraphAt], which selects an entire paragraph at the location.
   ///  * [selectAll], which selects the entire content.
@@ -1112,7 +1333,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// The `offset` is in global coordinates.
   ///
   /// If the paragraph is already in the current selection, selection won't
-  /// change. One call [_clearSelection] first if the selection needs to be
+  /// change. One call [clearSelection] first if the selection needs to be
   /// updated even if the paragraph is already covered by the current selection.
   ///
   /// One can also use [_selectEndTo] or [_selectStartTo] to adjust the selection
@@ -1122,7 +1343,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_selectStartTo], which sets or updates selection start edge.
   ///  * [_selectEndTo], which sets or updates selection end edge.
   ///  * [_finalizeSelection], which stops the `continuous` updates.
-  ///  * [_clearSelection], which clear the ongoing selection.
+  ///  * [clearSelection], which clear the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [selectAll], which selects the entire content.
   void _selectParagraphAt({required Offset offset}) {
@@ -1133,7 +1354,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   /// Stops any ongoing selection updates.
   ///
-  /// This method is different from [_clearSelection] that it does not remove
+  /// This method is different from [clearSelection] that it does not remove
   /// the current selection. It only stops the continuous updates.
   ///
   /// A continuous update can happen as result of calling [_selectStartTo] or
@@ -1145,8 +1366,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _stopSelectionStartEdgeUpdate();
   }
 
-  /// Removes the ongoing selection.
-  void _clearSelection() {
+  /// Removes the ongoing selection for this [SelectableRegion].
+  void clearSelection() {
     _finalizeSelection();
     _directionalHorizontalBaseline = null;
     _adjustingSelectionEnd = null;
@@ -1177,9 +1398,9 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [contextMenuButtonItems], which provides the [ContextMenuButtonItem]s
   ///    for the default context menu buttons.
   TextSelectionToolbarAnchors get contextMenuAnchors {
-    if (lastSecondaryTapDownPosition != null) {
+    if (_lastSecondaryTapDownPosition != null) {
       return TextSelectionToolbarAnchors(
-        primaryAnchor: lastSecondaryTapDownPosition!,
+        primaryAnchor: _lastSecondaryTapDownPosition!,
       );
     }
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
@@ -1276,7 +1497,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
-            _clearSelection();
+            clearSelection();
           case TargetPlatform.iOS:
             hideToolbar(false);
           case TargetPlatform.linux:
@@ -1305,7 +1526,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
-            _clearSelection();
+            clearSelection();
           case TargetPlatform.iOS:
             hideToolbar(false);
           case TargetPlatform.linux:
@@ -1399,7 +1620,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   @override
   void selectAll([SelectionChangedCause? cause]) {
-    _clearSelection();
+    clearSelection();
     _selectable?.dispatchSelectionEvent(const SelectAllSelectionEvent());
     if (cause == SelectionChangedCause.toolbar) {
       _showToolbar();
@@ -1415,7 +1636,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   @override
   void copySelection(SelectionChangedCause cause) {
     _copy();
-    _clearSelection();
+    clearSelection();
   }
 
   @Deprecated(

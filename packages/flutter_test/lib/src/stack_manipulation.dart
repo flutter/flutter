@@ -4,6 +4,9 @@
 
 // See also test_async_utils.dart which has some stack manipulation code.
 
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 /// Report call site for `expect()` call. Returns the number of frames that

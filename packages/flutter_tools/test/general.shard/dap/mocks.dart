@@ -18,6 +18,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     required FileSystem fileSystem,
     required Platform platform,
     bool simulateAppStarted = true,
+    bool simulateAppStopError = false,
     bool supportsRestart = true,
     FutureOr<void> Function(MockFlutterDebugAdapter adapter)? preAppStart,
   }) {
@@ -32,6 +33,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
       fileSystem: fileSystem,
       platform: platform,
       simulateAppStarted: simulateAppStarted,
+      simulateAppStopError: simulateAppStopError,
       supportsRestart: supportsRestart,
       preAppStart: preAppStart,
     );
@@ -43,6 +45,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     required super.fileSystem,
     required super.platform,
     this.simulateAppStarted = true,
+    this.simulateAppStopError = false,
     this.supportsRestart = true,
     this.preAppStart,
   }) {
@@ -54,6 +57,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   int _seq = 1;
   final ByteStreamServerChannel clientChannel;
   final bool simulateAppStarted;
+  final bool simulateAppStopError;
   final bool supportsRestart;
   final FutureOr<void> Function(MockFlutterDebugAdapter adapter)? preAppStart;
 
@@ -135,6 +139,15 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
         'event': 'app.started',
       });
     }
+    if (simulateAppStopError) {
+      simulateStdoutMessage(<String, Object?>{
+        'event': 'app.stop',
+        'params': <String, Object?>{
+          'appId': 'TEST',
+          'error': 'App stopped due to an error',
+        }
+      });
+    }
   }
 
   /// Handles messages sent from the debug adapter back to the client.
@@ -191,7 +204,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   }
 
   @override
-  void sendFlutterMessage(Map<String, Object?> message) {
+  Future<void> sendFlutterMessage(Map<String, Object?> message) async {
     dapToFlutterMessages.add(message);
     // Don't call super because it will try to write to the process that we
     // didn't actually spawn.

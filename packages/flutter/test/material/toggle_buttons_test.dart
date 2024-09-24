@@ -1923,10 +1923,10 @@ void main() {
 
     expect(description, <String>[
       'Buttons are enabled',
-      'color: MaterialColor(primary value: Color(0xff4caf50))',
-      'disabledColor: MaterialColor(primary value: Color(0xff2196f3))',
-      'selectedBorderColor: MaterialColor(primary value: Color(0xffe91e63))',
-      'disabledBorderColor: MaterialColor(primary value: Color(0xffffeb3b))',
+      'color: MaterialColor(primary value: ${const Color(0xff4caf50)})',
+      'disabledColor: MaterialColor(primary value: ${const Color(0xff2196f3)})',
+      'selectedBorderColor: MaterialColor(primary value: ${const Color(0xffe91e63)})',
+      'disabledBorderColor: MaterialColor(primary value: ${const Color(0xffffeb3b)})',
       'borderRadius: BorderRadius.circular(7.0)',
       'borderWidth: 3.0',
       'direction: Axis.vertical',
@@ -2117,6 +2117,7 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
               rect: const Rect.fromLTRB(0.0, 0.0, 87.0, 48.0),
             ),
@@ -2130,6 +2131,7 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
               rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0)
             ),
@@ -2143,6 +2145,7 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
               rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
             ),
@@ -2188,6 +2191,7 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
             ),
             TestSemantics(
@@ -2201,6 +2205,7 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
             ),
           ],

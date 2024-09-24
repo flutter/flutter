@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'action_chip.dart';
+/// @docImport 'chip.dart';
+/// @docImport 'choice_chip.dart';
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'filter_chip.dart';
+/// @docImport 'input_chip.dart';
+/// @docImport 'material.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -267,6 +276,7 @@ class ChipThemeData with Diagnosticable {
       brightness: brightness,
       elevation: 0.0,
       pressElevation: 8.0,
+      iconTheme: const IconThemeData(size: 18.0),
     );
   }
 
@@ -363,15 +373,15 @@ class ChipThemeData with Diagnosticable {
   /// the color and weight of the chip's outline.
   ///
   /// This value is combined with [shape] to create a shape decorated with an
-  /// outline. If it is a [MaterialStateBorderSide],
-  /// [MaterialStateProperty.resolve] is used for the following
-  /// [MaterialState]s:
+  /// outline. If it is a [WidgetStateBorderSide],
+  /// [WidgetStateProperty.resolve] is used for the following
+  /// [WidgetState]s:
   ///
-  ///  * [MaterialState.disabled].
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.pressed].
+  ///  * [WidgetState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.pressed].
   ///
   /// This property applies to [ActionChip], [Chip], [ChoiceChip],
   /// [FilterChip], [InputChip], [RawChip].
@@ -381,15 +391,15 @@ class ChipThemeData with Diagnosticable {
   /// the shape of border to draw around the chip.
   ///
   /// This shape is combined with [side] to create a shape decorated with an
-  /// outline. If it is a [MaterialStateOutlinedBorder],
-  /// [MaterialStateProperty.resolve] is used for the following
-  /// [MaterialState]s:
+  /// outline. If it is a [WidgetStateOutlinedBorder],
+  /// [WidgetStateProperty.resolve] is used for the following
+  /// [WidgetState]s:
   ///
-  ///  * [MaterialState.disabled].
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.pressed].
+  ///  * [WidgetState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.pressed].
   ///
   /// This property applies to [ActionChip], [Chip], [ChoiceChip],
   /// [FilterChip], [InputChip], [RawChip].

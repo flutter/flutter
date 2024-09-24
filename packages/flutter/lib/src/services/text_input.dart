@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/rendering.dart';
+///
+/// @docImport 'live_text.dart';
+/// @docImport 'text_formatter.dart';
+library;
+
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:ui' show

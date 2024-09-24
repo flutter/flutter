@@ -9,7 +9,6 @@ import '../cache.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../macos/build_macos.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
@@ -51,7 +50,6 @@ class BuildMacosCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = await getBuildInfo();
-    final FlutterProject flutterProject = FlutterProject.current();
     if (!featureFlags.isMacOSEnabled) {
       throwToolExit('"build macos" is not currently supported. To enable, run "flutter config --enable-macos-desktop".');
     }
@@ -60,7 +58,7 @@ class BuildMacosCommand extends BuildSubCommand {
     }
     displayNullSafetyMode(buildInfo);
     await buildMacOS(
-      flutterProject: flutterProject,
+      flutterProject: project,
       buildInfo: buildInfo,
       targetOverride: targetFile,
       verboseLogging: globals.logger.isVerbose,
@@ -69,9 +67,9 @@ class BuildMacosCommand extends BuildSubCommand {
         fileSystem: globals.fs,
         logger: globals.logger,
         appFilenamePattern: 'App',
-        flutterUsage: globals.flutterUsage,
         analytics: analytics,
       ),
+      usingCISystem: usingCISystem,
     );
     return FlutterCommandResult.success();
   }

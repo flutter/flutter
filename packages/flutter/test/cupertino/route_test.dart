@@ -12,7 +12,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -352,10 +351,10 @@ void main() {
       const Offset(400, 0),
     );
     // Let the dismissing snapping animation go 60%.
-    await tester.pump(const Duration(milliseconds: 240));
+    await tester.pump(const Duration(milliseconds: 210));
     expect(
       tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(CupertinoPageScaffold))).dx,
-      moreOrLessEquals(798, epsilon: 1),
+      moreOrLessEquals(789, epsilon: 1),
     );
 
     // Use the navigator to push a route instead of tapping the 'push' button.
@@ -644,10 +643,7 @@ void main() {
     );
   });
 
-  testWidgets('Fullscreen route animates correct transform values over time',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+  testWidgets('Fullscreen route animates correct transform values over time', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(
@@ -865,17 +861,11 @@ void main() {
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-0.0, epsilon: 1.0));
   }
 
-  testWidgets('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+  testWidgets('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testParallax(tester, fromFullscreenDialog: false);
   });
 
-  testWidgets('FullscreenDialog CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+  testWidgets('FullscreenDialog CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testParallax(tester, fromFullscreenDialog: true);
   });
 
@@ -989,17 +979,11 @@ void main() {
       expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(0.0, epsilon: 1.0));
     }
 
-    testWidgets('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top and gets popped before the end of the animation',
-      // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-      experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-      (WidgetTester tester) async {
+    testWidgets('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top and gets popped before the end of the animation', (WidgetTester tester) async {
       await testParallax(tester, fromFullscreenDialog: false);
     });
 
-    testWidgets('FullscreenDialog CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top and gets popped before the end of the animation',
-      // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-      experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-      (WidgetTester tester) async {
+    testWidgets('FullscreenDialog CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top and gets popped before the end of the animation', (WidgetTester tester) async {
       await testParallax(tester, fromFullscreenDialog: true);
     });
   });
@@ -1085,24 +1069,15 @@ void main() {
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, 0.0);
   }
 
-  testWidgets('CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+  testWidgets('CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testNoParallax(tester, fromFullscreenDialog: false);
   });
 
-  testWidgets('FullscreenDialog CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+  testWidgets('FullscreenDialog CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testNoParallax(tester, fromFullscreenDialog: true);
   });
 
-  testWidgets('Animated push/pop is not linear',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+  testWidgets('Animated push/pop is not linear', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Text('1'),
@@ -1277,13 +1252,13 @@ void main() {
     );
 
     await tester.pump(const Duration(milliseconds: 50));
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-19, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(744, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-61, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(614, epsilon: 1));
 
     await tester.pump(const Duration(milliseconds: 50));
     // Rate of change is slowing down.
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-4, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(787, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-26, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(721, epsilon: 1));
 
     await tester.pumpAndSettle();
     expect(
@@ -1322,7 +1297,7 @@ void main() {
 
     // Didn't drag far enough to snap into dismissing this route.
     // Each 100px distance takes 100ms to snap back.
-    await tester.pump(const Duration(milliseconds: 101));
+    await tester.pump(const Duration(milliseconds: 351));
     // Back to the page covering the whole screen.
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(0));
     expect(navigatorKey.currentState!.userGestureInProgress, false);
@@ -1337,7 +1312,7 @@ void main() {
     expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didPop);
 
     // Did go far enough to snap out of this route.
-    await tester.pump(const Duration(milliseconds: 301));
+    await tester.pump(const Duration(milliseconds: 351));
     // Back to the page covering the whole screen.
     expect(find.text('2'), findsNothing);
     // First route covers the whole screen.
@@ -1514,11 +1489,11 @@ void main() {
       final RenderBox box = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
 
       // Animation starts with effectively no shadow
-      expect(box, paintsShadowRect(dx: 795, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 785, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 775, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 765, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 755, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 795, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 785, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 775, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 765, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 755, color: CupertinoColors.transparent));
 
       await tester.pump(const Duration(milliseconds: 100));
 
@@ -1526,8 +1501,8 @@ void main() {
       expect(box, paintsShadowRect(dx: 296, color: const Color(0x03000000)));
       expect(box, paintsShadowRect(dx: 286, color: const Color(0x02000000)));
       expect(box, paintsShadowRect(dx: 276, color: const Color(0x01000000)));
-      expect(box, paintsShadowRect(dx: 266, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 266, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 266, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 266, color: CupertinoColors.transparent));
 
       await tester.pumpAndSettle();
 
@@ -1537,7 +1512,7 @@ void main() {
       expect(box, paintsShadowRect(dx: -10, color: const Color(0x03000000)));
       expect(box, paintsShadowRect(dx: -20, color: const Color(0x02000000)));
       expect(box, paintsShadowRect(dx: -30, color: const Color(0x01000000)));
-      expect(box, paintsShadowRect(dx: -40, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: -40, color: CupertinoColors.transparent));
 
       // Start animation in reverse
       tester.state<NavigatorState>(find.byType(Navigator)).pop();
@@ -1548,16 +1523,16 @@ void main() {
       expect(box, paintsShadowRect(dx: 488, color: const Color(0x03000000)));
       expect(box, paintsShadowRect(dx: 478, color: const Color(0x02000000)));
       expect(box, paintsShadowRect(dx: 468, color: const Color(0x01000000)));
-      expect(box, paintsShadowRect(dx: 458, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 458, color: CupertinoColors.transparent));
 
       await tester.pump(const Duration(milliseconds: 150));
 
       // At the end of the animation, the shadow approaches full transparency
       expect(box, paintsShadowRect(dx: 794, color: const Color(0x01000000)));
-      expect(box, paintsShadowRect(dx: 784, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 774, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 764, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 754, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 784, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 774, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 764, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 754, color: CupertinoColors.transparent));
     });
 
     testWidgets('when route is fullscreenDialog, it has no visible _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
@@ -1970,7 +1945,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(semantics, isNot(includesNodeWith(
-      actions: <SemanticsAction>[SemanticsAction.tap],
+      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
       label: 'Dismiss',
     )));
     debugDefaultTargetPlatformOverride = null;
@@ -2045,8 +2020,6 @@ void main() {
   });
 
   testWidgets('showCupertinoModalPopup transparent barrier color is transparent', (WidgetTester tester) async {
-    const Color kTransparentColor = Color(0x00000000);
-
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
         child: Builder(builder: (BuildContext context) {
@@ -2055,7 +2028,7 @@ void main() {
               await showCupertinoModalPopup<void>(
                 context: context,
                 builder: (BuildContext context) => const SizedBox(),
-                barrierColor: kTransparentColor,
+                barrierColor: CupertinoColors.transparent,
               );
             },
             child: const Text('tap'),
@@ -2620,10 +2593,7 @@ void main() {
     });
   });
 
-  testWidgets(
-  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: <String>['CurvedAnimation']),
-  'Fullscreen route does not leak CurveAnimation', (WidgetTester tester) async {
+  testWidgets( 'Fullscreen route does not leak CurveAnimation', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
@@ -2667,10 +2637,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
   });
 
-  testWidgets('CupertinoModalPopupRoute does not leak CurveAnimation',
-  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: <String>['CurvedAnimation']),
-  (WidgetTester tester) async {
+  testWidgets('CupertinoModalPopupRoute does not leak CurveAnimation', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Navigator(
         onGenerateRoute: (RouteSettings settings) {
@@ -2697,10 +2664,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('CupertinoDialogRoute does not leak CurveAnimation',
-  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: <String>['CurvedAnimation']),
-  (WidgetTester tester) async {
+  testWidgets('CupertinoDialogRoute does not leak CurveAnimation', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Navigator(
         onGenerateRoute: (RouteSettings settings) {
@@ -2725,6 +2689,202 @@ void main() {
     // Open the dialog.
     await tester.tap(find.text('tap'));
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('Setting CupertinoDialogRoute.requestFocus to false does not request focus on the dialog', (WidgetTester tester) async {
+    late BuildContext savedContext;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    const String dialogText = 'Dialog Text';
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return CupertinoTextField(focusNode: focusNode);
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    FocusNode? getCupertinoTextFieldFocusNode() {
+      return tester.widget<Focus>(find.descendant(
+        of: find.byType(CupertinoTextField),
+        matching: find.byType(Focus),
+      )).focusNode;
+    }
+
+    // Initially, there is no dialog and the text field has no focus.
+    expect(find.text(dialogText), findsNothing);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, false);
+
+    // Request focus on the text field.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up dialog.
+    final NavigatorState navigator = Navigator.of(savedContext);
+    navigator.push(
+      CupertinoDialogRoute<void>(
+        context: savedContext,
+        builder: (BuildContext context) => const Text(dialogText),
+      ),
+    );
+    await tester.pump();
+
+    // The dialog is showing and the text field has lost focus.
+    expect(find.text(dialogText), findsOneWidget);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, false);
+
+    // Dismiss the dialog.
+    navigator.pop();
+    await tester.pump();
+
+    // The dialog is dismissed and the focus is shifted back to the text field.
+    expect(find.text(dialogText), findsNothing);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up dialog again with requestFocus to false.
+    navigator.push(
+      CupertinoDialogRoute<void>(
+        context: savedContext,
+        requestFocus: false,
+        builder: (BuildContext context) => const Text(dialogText),
+      ),
+    );
+    await tester.pump();
+
+    // The dialog is showing and the text field still has focus.
+    expect(find.text(dialogText), findsOneWidget);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+  });
+
+  testWidgets('Setting CupertinoModalPopupRoute.requestFocus to false does not request focus on the popup', (WidgetTester tester) async {
+    late BuildContext savedContext;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    const String dialogText = 'Popup Text';
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return CupertinoTextField(focusNode: focusNode);
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    FocusNode? getCupertinoTextFieldFocusNode() {
+      return tester.widget<Focus>(find.descendant(
+        of: find.byType(CupertinoTextField),
+        matching: find.byType(Focus),
+      )).focusNode;
+    }
+
+    // Initially, there is no popup and the text field has no focus.
+    expect(find.text(dialogText), findsNothing);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, false);
+
+    // Request focus on the text field.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up popup.
+    final NavigatorState navigator = Navigator.of(savedContext);
+    navigator.push(
+      CupertinoModalPopupRoute<void>(
+        builder: (BuildContext context) => const Text(dialogText),
+      ),
+    );
+    await tester.pump();
+
+    // The popup is showing and the text field has lost focus.
+    expect(find.text(dialogText), findsOneWidget);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, false);
+
+    // Dismiss the popup.
+    navigator.pop();
+    await tester.pump();
+
+    // The popup is dismissed and the focus is shifted back to the text field.
+    expect(find.text(dialogText), findsNothing);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up popup again with requestFocus to false.
+    navigator.push(
+      CupertinoModalPopupRoute<void>(
+        requestFocus: false,
+        builder: (BuildContext context) => const Text(dialogText),
+      ),
+    );
+    await tester.pump();
+
+    // The popup is showing and the text field still has focus.
+    expect(find.text(dialogText), findsOneWidget);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+  });
+
+  testWidgets('Setting CupertinoPageRoute.requestFocus to false does not request focus on the page', (WidgetTester tester) async {
+    late BuildContext savedContext;
+    const String pageTwoText = 'Page Two';
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return Container();
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // Check page two is not on the screen.
+    expect(find.text(pageTwoText), findsNothing);
+
+    // Navigate to page two with text.
+    final NavigatorState navigator = Navigator.of(savedContext);
+    navigator.push(
+      CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return const Text(pageTwoText);
+        }
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100)); // Advance route transition animation.
+
+    // The page two is showing and the text widget has focus.
+    Element textOnPageTwo = tester.element(find.text(pageTwoText));
+    FocusScopeNode focusScopeNode = FocusScope.of(textOnPageTwo);
+    expect(focusScopeNode.hasFocus, isTrue);
+
+    // Navigate back to page one.
+    navigator.pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100)); // Advance route transition animation.
+
+    // Navigate to page two again with requestFocus set to false.
+    navigator.push(
+      CupertinoPageRoute<void>(
+        requestFocus: false,
+        builder: (BuildContext context) {
+          return const Text(pageTwoText);
+        }
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100)); // Advance route transition animation.
+
+    // The page two is showing and the text widget is not focused.
+    textOnPageTwo = tester.element(find.text(pageTwoText));
+    focusScopeNode = FocusScope.of(textOnPageTwo);
+    expect(focusScopeNode.hasFocus, isFalse);
   });
 }
 

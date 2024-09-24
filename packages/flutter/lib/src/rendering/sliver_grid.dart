@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'sliver_fixed_extent_list.dart';
+/// @docImport 'sliver_list.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -348,7 +354,8 @@ class SliverGridDelegateWithFixedCrossAxisCount extends SliverGridDelegate {
   }) : assert(crossAxisCount > 0),
        assert(mainAxisSpacing >= 0),
        assert(crossAxisSpacing >= 0),
-       assert(childAspectRatio > 0);
+       assert(childAspectRatio > 0),
+       assert(mainAxisExtent == null || mainAxisExtent >= 0);
 
   /// The number of children in the cross axis.
   final int crossAxisCount;
@@ -446,8 +453,8 @@ class SliverGridDelegateWithMaxCrossAxisExtent extends SliverGridDelegate {
   }) : assert(maxCrossAxisExtent > 0),
        assert(mainAxisSpacing >= 0),
        assert(crossAxisSpacing >= 0),
-       assert(childAspectRatio > 0);
-
+       assert(childAspectRatio > 0),
+       assert(mainAxisExtent == null || mainAxisExtent >= 0);
   /// The maximum extent of tiles in the cross axis.
   ///
   /// This delegate will select a cross-axis extent for the tiles that is as

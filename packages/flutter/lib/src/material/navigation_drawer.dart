@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'scaffold.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -152,11 +155,7 @@ class NavigationDrawer extends StatelessWidget {
             indicatorColor: indicatorColor,
             indicatorShape: indicatorShape,
             tilePadding: tilePadding,
-            onTap: () {
-              if (onDestinationSelected != null) {
-                onDestinationSelected!(index);
-              }
-            },
+            onTap: () => onDestinationSelected?.call(index),
             child: child,
           );
         });
@@ -218,7 +217,7 @@ class NavigationDrawerDestination extends StatelessWidget {
   /// selected.
   ///
   /// The icon will use [NavigationDrawerThemeData.iconTheme] with
-  /// [MaterialState.selected]. If this is null, the default [IconThemeData]
+  /// [WidgetState.selected]. If this is null, the default [IconThemeData]
   /// would use a size of 24.0 and [ColorScheme.onSecondaryContainer].
   final Widget? selectedIcon;
 
@@ -342,7 +341,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
 
   /// Sets the color of navigation destination.
   ///
-  /// If this is null, then [NavigationDrawerTheme.backgroundColor] is used.
+  /// If this is null, then [NavigationDrawerThemeData.backgroundColor] is used.
   final Color? backgroundColor;
 
   @override
@@ -351,42 +350,47 @@ class _NavigationDestinationBuilder extends StatelessWidget {
     final NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerTheme.of(context);
     final NavigationDrawerThemeData defaults = _NavigationDrawerDefaultsM3(context);
 
-    final Row destinationBody = Row(
-      children: <Widget>[
-        const SizedBox(width: 16),
-        buildIcon(context),
-        const SizedBox(width: 12),
-        buildLabel(context),
-      ],
+    final InkWell inkWell = InkWell(
+      highlightColor: Colors.transparent,
+      onTap: enabled ? info.onTap : null,
+      customBorder: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
+      child: Stack(
+        alignment: Alignment.center,
+        children: <Widget>[
+          NavigationIndicator(
+            animation: info.selectedAnimation,
+            color: info.indicatorColor ?? navigationDrawerTheme.indicatorColor ?? defaults.indicatorColor!,
+            shape: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
+            width: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).width,
+            height: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).height,
+          ),
+          Row(
+            children: <Widget>[
+              const SizedBox(width: 16),
+              buildIcon(context),
+              const SizedBox(width: 12),
+              buildLabel(context),
+            ],
+          ),
+        ],
+      ),
     );
 
-    return Container(
+    final Widget destination = Padding(
       padding: info.tilePadding,
-      color: backgroundColor ?? navigationDrawerTheme.backgroundColor,
       child: _NavigationDestinationSemantics(
         child: SizedBox(
           height: navigationDrawerTheme.tileHeight ?? defaults.tileHeight,
-          child: InkWell(
-            highlightColor: Colors.transparent,
-            onTap: enabled ? info.onTap : null,
-            customBorder: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
-            child: Stack(
-              alignment: Alignment.center,
-              children: <Widget>[
-                NavigationIndicator(
-                  animation: info.selectedAnimation,
-                  color: info.indicatorColor ?? navigationDrawerTheme.indicatorColor ?? defaults.indicatorColor!,
-                  shape: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
-                  width: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).width,
-                  height: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).height,
-                ),
-                destinationBody
-              ],
-            ),
-          ),
+          child: inkWell,
         ),
       ),
     );
+
+    final Color? color = backgroundColor ?? navigationDrawerTheme.backgroundColor;
+    if (color != null) {
+      return ColoredBox(color: color, child: destination);
+    }
+    return destination;
   }
 }
 
@@ -474,7 +478,7 @@ class _StatusTransitionWidgetBuilder extends StatusTransitionWidget {
 }
 
 /// Inherited widget for passing data from the [NavigationDrawer] to the
-/// [NavigationDrawer.destinations] children widgets.
+/// [NavigationDrawerDestination] child widgets.
 ///
 /// Useful for building navigation destinations using:
 /// `_NavigationDrawerDestinationInfo.of(context)`.

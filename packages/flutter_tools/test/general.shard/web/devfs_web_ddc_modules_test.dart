@@ -130,6 +130,7 @@ void main() {
             NullSafetyMode.unsound,
             usesDdcModuleSystem,
             webRenderer: WebRendererMode.canvaskit,
+            useLocalCanvasKit: false,
           );
           releaseAssetServer = ReleaseAssetServer(
             globals.fs.file('main.dart').uri,
@@ -414,6 +415,7 @@ void main() {
               NullSafetyMode.unsound,
               usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
+              useLocalCanvasKit: false,
             );
 
             expect(webAssetServer.basePath, 'foo/bar');
@@ -437,6 +439,7 @@ void main() {
               NullSafetyMode.unsound,
               usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
+              useLocalCanvasKit: false,
             );
 
             // Defaults to "/" when there's no base element.
@@ -462,6 +465,7 @@ void main() {
                 NullSafetyMode.unsound,
                 usesDdcModuleSystem,
                 webRenderer: WebRendererMode.canvaskit,
+                useLocalCanvasKit: false,
               ),
               throwsToolExit(),
             );
@@ -486,6 +490,7 @@ void main() {
                 NullSafetyMode.unsound,
                 usesDdcModuleSystem,
                 webRenderer: WebRendererMode.canvaskit,
+                useLocalCanvasKit: false,
               ),
               throwsToolExit(),
             );
@@ -904,7 +909,7 @@ void main() {
               port: 0,
               tlsCertPath: null,
               tlsCertKeyPath: null,
-              packagesFilePath: '.packages',
+              packagesFilePath: '.dart_tool/package_config.json',
               urlTunneller: null, // ignore: avoid_redundant_argument_values
               useSseForDebugProxy: true,
               useSseForDebugBackend: true,
@@ -916,6 +921,7 @@ void main() {
                 '',
                 treeShakeIcons: false,
                 nullSafetyMode: NullSafetyMode.unsound,
+                packageConfigPath: '.dart_tool/package_config.json',
               ),
               enableDwds: false,
               enableDds: false,
@@ -929,6 +935,7 @@ void main() {
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.html,
               isWasm: false,
+              useLocalCanvasKit: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1042,7 +1049,7 @@ void main() {
               port: 0,
               tlsCertPath: null,
               tlsCertKeyPath: null,
-              packagesFilePath: '.packages',
+              packagesFilePath: '.dart_tool/package_config.json',
               urlTunneller: null, // ignore: avoid_redundant_argument_values
               useSseForDebugProxy: true,
               useSseForDebugBackend: true,
@@ -1053,6 +1060,7 @@ void main() {
                 BuildMode.debug,
                 '',
                 treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
               ),
               enableDwds: false,
               enableDds: false,
@@ -1066,6 +1074,7 @@ void main() {
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.html,
               isWasm: false,
+              useLocalCanvasKit: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1180,7 +1189,7 @@ void main() {
                 port: 0,
                 tlsCertPath: null,
                 tlsCertKeyPath: null,
-                packagesFilePath: '.packages',
+                packagesFilePath: '.dart_tool/package_config.json',
                 urlTunneller: null,
                 useSseForDebugProxy: true,
                 useSseForDebugBackend: true,
@@ -1191,6 +1200,7 @@ void main() {
                   BuildMode.debug,
                   '',
                   treeShakeIcons: false,
+                  packageConfigPath: '.dart_tool/package_config.json',
                 ),
                 enableDwds: true,
                 enableDds: false,
@@ -1203,6 +1213,7 @@ void main() {
                 ddcModuleSystem: usesDdcModuleSystem,
                 webRenderer: WebRendererMode.canvaskit,
                 isWasm: false,
+                useLocalCanvasKit: false,
                 rootDirectory: globals.fs.currentDirectory,
               );
               webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1257,7 +1268,7 @@ void main() {
               port: 0,
               tlsCertPath: null,
               tlsCertKeyPath: null,
-              packagesFilePath: '.packages',
+              packagesFilePath: '.dart_tool/package_config.json',
               urlTunneller: null, // ignore: avoid_redundant_argument_values
               useSseForDebugProxy: true,
               useSseForDebugBackend: true,
@@ -1277,6 +1288,7 @@ void main() {
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
               isWasm: false,
+              useLocalCanvasKit: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1303,18 +1315,21 @@ void main() {
               port: 0,
               tlsCertPath: null,
               tlsCertKeyPath: null,
-              packagesFilePath: '.packages',
+              packagesFilePath: '.dart_tool/package_config.json',
               urlTunneller: null, // ignore: avoid_redundant_argument_values
               useSseForDebugProxy: true,
               useSseForDebugBackend: true,
               useSseForInjectedClient: true,
               nullAssertions: true,
               nativeNullAssertions: true,
-              buildInfo: const BuildInfo(BuildMode.debug, '',
-                  treeShakeIcons: false,
-                  dartDefines: <String>[
-                    'FLUTTER_WEB_USE_SKIA=true',
-                  ]),
+              buildInfo: const BuildInfo(
+                BuildMode.debug, '',
+                treeShakeIcons: false,
+                dartDefines: <String>[
+                  'FLUTTER_WEB_USE_SKIA=true',
+                ],
+                packageConfigPath: '.dart_tool/package_config.json',
+              ),
               enableDwds: false,
               enableDds: false,
               entrypoint: Uri.base,
@@ -1327,6 +1342,7 @@ void main() {
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
               isWasm: false,
+              useLocalCanvasKit: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1355,18 +1371,21 @@ void main() {
               port: 0,
               tlsCertPath: null,
               tlsCertKeyPath: null,
-              packagesFilePath: '.packages',
+              packagesFilePath: '.dart_tool/package_config.json',
               urlTunneller: null, // ignore: avoid_redundant_argument_values
               useSseForDebugProxy: true,
               useSseForDebugBackend: true,
               useSseForInjectedClient: true,
               nullAssertions: true,
               nativeNullAssertions: true,
-              buildInfo: const BuildInfo(BuildMode.debug, '',
-                  treeShakeIcons: false,
-                  dartDefines: <String>[
-                    'FLUTTER_WEB_AUTO_DETECT=true',
-                  ]),
+              buildInfo: const BuildInfo(
+                BuildMode.debug, '',
+                treeShakeIcons: false,
+                dartDefines: <String>[
+                  'FLUTTER_WEB_AUTO_DETECT=true',
+                ],
+                packageConfigPath: '.dart_tool/package_config.json',
+              ),
               enableDwds: false,
               enableDds: false,
               entrypoint: Uri.base,
@@ -1379,6 +1398,7 @@ void main() {
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.auto,
               isWasm: false,
+              useLocalCanvasKit: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1413,7 +1433,7 @@ void main() {
               port: 0,
               tlsCertPath: dummyCertPath,
               tlsCertKeyPath: dummyCertKeyPath,
-              packagesFilePath: '.packages',
+              packagesFilePath: '.dart_tool/package_config.json',
               urlTunneller: null, // ignore: avoid_redundant_argument_values
               useSseForDebugProxy: true,
               useSseForDebugBackend: true,
@@ -1433,6 +1453,7 @@ void main() {
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
               isWasm: false,
+              useLocalCanvasKit: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1463,6 +1484,7 @@ void main() {
           BuildMode.debug,
           '',
           treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
         ),
         false,
         false,
@@ -1472,6 +1494,7 @@ void main() {
         NullSafetyMode.unsound,
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
+        useLocalCanvasKit: false,
         testMode: true);
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
@@ -1495,6 +1518,7 @@ void main() {
           BuildMode.debug,
           '',
           treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
         ),
         false,
         false,
@@ -1506,6 +1530,7 @@ void main() {
         NullSafetyMode.unsound,
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
+        useLocalCanvasKit: false,
         testMode: true);
 
     expect(webAssetServer.defaultResponseHeaders[extraHeaderKey],
@@ -1551,6 +1576,7 @@ void main() {
               NullSafetyMode.sound,
               usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
+              useLocalCanvasKit: false,
             );
 
             expect(
@@ -1587,7 +1613,7 @@ void main() {
               port: 0,
               tlsCertPath: null,
               tlsCertKeyPath: null,
-              packagesFilePath: '.packages',
+              packagesFilePath: '.dart_tool/package_config.json',
               urlTunneller: null, // ignore: avoid_redundant_argument_values
               useSseForDebugProxy: true,
               useSseForDebugBackend: true,
@@ -1607,6 +1633,7 @@ void main() {
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
               isWasm: false,
+              useLocalCanvasKit: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);

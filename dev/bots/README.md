@@ -10,7 +10,7 @@ Flutter build results are available at:
 
 Flutter infra requires special permissions to retrigger builds on the
 [build dashboard](https://flutter-dashboard.appspot.com/#/build). File an
-[infra ticket](https://github.com/flutter/flutter/wiki/Infra-Ticket-Queue) to
+[infra ticket](../../docs/infra/Infra-Ticket-Queue.md) to
 request permission.
 
 The [Cirrus](https://cirrus-ci.org)-based bots run the [`test.dart`](test.dart)
@@ -28,7 +28,7 @@ The build dashboard includes post-commit testing run on physical devices. See
 A [set of infra scripts](https://flutter.googlesource.com/recipes/)
 run on Windows, Linux, and Mac machines. The configuration for how many
 machines and what kind are managed internally by Google. File an
-[infra ticket](https://github.com/flutter/flutter/wiki/Infra-Ticket-Queue)
+[infra ticket](../../docs/infra/Infra-Ticket-Queue.md)
 to request new machine types to be added. Both of these technologies are highly
 specific to the [LUCI](https://github.com/luci) project, which is the successor
 to Chromium's infra and the foundation to Flutter's infrastructure.

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'arena.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -481,19 +486,10 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   Timer? _consecutiveTapTimer;
   Offset? _lastTapOffset;
 
-  /// {@template flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.onTapTrackStart}
-  /// Callback used to indicate that a tap tracking has started upon
-  /// a [PointerDownEvent].
-  /// {@endtemplate}
+  /// {@macro flutter.gestures.selectionrecognizers.TextSelectionGestureDetector.onTapTrackStart}
   VoidCallback? onTapTrackStart;
 
-  /// {@template flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.onTapTrackReset}
-  /// Callback used to indicate that a tap tracking has been reset which
-  /// happens on the next [PointerDownEvent] after the timer between two taps
-  /// elapses, the recognizer loses the arena, the gesture is cancelled or
-  /// the recognizer is disposed of.
-  /// {@endtemplate}
-
+  /// {@macro flutter.gestures.selectionrecognizers.TextSelectionGestureDetector.onTapTrackReset}
   VoidCallback? onTapTrackReset;
 
   // When tracking a tap, the [consecutiveTapCount] is incremented if the given tap
@@ -765,7 +761,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   /// no difference in behavior between the two settings.
   ///
   /// For more information about the gesture arena:
-  /// https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation
+  /// https://flutter.dev/to/gesture-disambiguation
   ///
   /// By default, the drag start behavior is [DragStartBehavior.start].
   ///
@@ -1060,6 +1056,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     }
 
     _stopDeadlineTimer();
+    _start = null;
     _dragState = _DragState.ready;
     _pastSlopTolerance = false;
   }

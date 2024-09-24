@@ -177,12 +177,25 @@ void main() {
       nativeAssetsYaml,
       projectUri.resolve('build/native_assets/macos/native_assets.yaml'),
     );
+    final String nativeAssetsYamlContents =
+        await fileSystem.file(nativeAssetsYaml).readAsString();
     expect(
-      await fileSystem.file(nativeAssetsYaml).readAsString(),
+      nativeAssetsYamlContents,
       contains('package:bar/bar.dart'),
     );
     expect(buildRunner.buildDryRunInvocations, 1);
-    expect(buildRunner.linkDryRunInvocations, 1);
+    expect(buildRunner.linkDryRunInvocations, 0);
+    // Check that the framework uri is identical for both archs.
+    final String pathSeparator = const LocalPlatform().pathSeparator;
+    expect(
+      nativeAssetsYamlContents,
+      stringContainsInOrder(
+        <String>[
+          'bar.framework${pathSeparator}bar',
+          'bar.framework${pathSeparator}bar',
+        ],
+      ),
+    );
   });
 
   testUsingContext('build with assets but not enabled', overrides: <Type, Generator>{
@@ -243,118 +256,297 @@ void main() {
     if (flutterTester) {
       testName += ' flutter tester';
     }
-    final String dylibPath;
-    final String signPath;
+    final String dylibPathBar;
+    final String signPathBar;
+    final String dylibPathBuz;
+    final String signPathBuz;
+
     if (flutterTester) {
       // Just the dylib.
-      dylibPath = '/build/native_assets/macos/libbar.dylib';
-      signPath = '/build/native_assets/macos/libbar.dylib';
+      dylibPathBar = '/build/native_assets/macos/libbar.dylib';
+      signPathBar = '/build/native_assets/macos/libbar.dylib';
+      dylibPathBuz = '/build/native_assets/macos/libbuz.dylib';
+      signPathBuz = '/build/native_assets/macos/libbuz.dylib';
     } else {
       // Packaged in framework.
-      dylibPath = '/build/native_assets/macos/bar.framework/Versions/A/bar';
-      signPath = '/build/native_assets/macos/bar.framework';
+      dylibPathBar = '/build/native_assets/macos/bar.framework/Versions/A/bar';
+      signPathBar = '/build/native_assets/macos/bar.framework';
+      dylibPathBuz = '/build/native_assets/macos/buz.framework/Versions/A/buz';
+      signPathBuz = '/build/native_assets/macos/buz.framework';
     }
-    testUsingContext('build with assets$testName', overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.list(
-        <FakeCommand>[
-          FakeCommand(
-            command: <Pattern>[
-              'lipo',
-              '-create',
-              '-output',
-              dylibPath,
-              'arm64/libbar.dylib',
-              'x64/libbar.dylib',
+    for (final BuildMode buildMode in <BuildMode>[
+      BuildMode.debug,
+      BuildMode.release,
+    ]) {
+      testUsingContext('build with assets $buildMode$testName', overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+        ProcessManager: () => FakeProcessManager.list(
+          <FakeCommand>[
+            if (flutterTester) ...<FakeCommand>[
+              FakeCommand(
+                command: <Pattern>[
+                  'lipo',
+                  '-create',
+                  '-output',
+                  dylibPathBar,
+                  'arm64/libbar.dylib',
+                  'x64/libbar.dylib',
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'otool',
+                  '-D',
+                  dylibPathBar,
+                ],
+                stdout: <String>[
+                  '$dylibPathBar (architecture x86_64):',
+                  '@rpath/libbar.dylib',
+                  '$dylibPathBar (architecture arm64):',
+                  '@rpath/libbar.dylib',
+                ].join('\n'),
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'lipo',
+                  '-create',
+                  '-output',
+                  dylibPathBuz,
+                  'arm64/libbuz.dylib',
+                  'x64/libbuz.dylib',
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'otool',
+                  '-D',
+                  dylibPathBuz,
+                ],
+                stdout: <String>[
+                  '$dylibPathBuz (architecture x86_64):',
+                  '@rpath/libbuz.dylib',
+                  '$dylibPathBuz (architecture arm64):',
+                  '@rpath/libbuz.dylib',
+                ].join('\n'),
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'install_name_tool',
+                  '-id',
+                  dylibPathBar,
+                  '-change',
+                  '@rpath/libbar.dylib',
+                  dylibPathBar,
+                  '-change',
+                  '@rpath/libbuz.dylib',
+                  dylibPathBuz,
+                  dylibPathBar,
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'codesign',
+                  '--force',
+                  '--sign',
+                  '-',
+                  if (buildMode == BuildMode.debug)
+                    '--timestamp=none',
+                  signPathBar,
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'install_name_tool',
+                  '-id',
+                  dylibPathBuz,
+                  '-change',
+                  '@rpath/libbar.dylib',
+                 dylibPathBar,
+                  '-change',
+                  '@rpath/libbuz.dylib',
+                  signPathBuz,
+                  signPathBuz,
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'codesign',
+                  '--force',
+                  '--sign',
+                  '-',
+                  if (buildMode == BuildMode.debug)
+                    '--timestamp=none',
+                  signPathBuz,
+                ],
+              ),
+            ] else ...<FakeCommand>[
+              FakeCommand(
+                command: <Pattern>[
+                  'lipo',
+                  '-create',
+                  '-output',
+                  dylibPathBar,
+                  'arm64/libbar.dylib',
+                  'x64/libbar.dylib',
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'otool',
+                  '-D',
+                  dylibPathBar,
+                ],
+                stdout: <String>[
+                  '$dylibPathBar (architecture x86_64):',
+                  '@rpath/libbar.dylib',
+                  '$dylibPathBar (architecture arm64):',
+                  '@rpath/libbar.dylib',
+                ].join('\n'),
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'lipo',
+                  '-create',
+                  '-output',
+                  dylibPathBuz,
+                  'arm64/libbuz.dylib',
+                  'x64/libbuz.dylib',
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'otool',
+                  '-D',
+                  dylibPathBuz,
+                ],
+                stdout: <String>[
+                  '$dylibPathBuz (architecture x86_64):',
+                  '@rpath/libbuz.dylib',
+                  '$dylibPathBuz (architecture arm64):',
+                  '@rpath/libbuz.dylib',
+                ].join('\n'),
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'install_name_tool',
+                  '-id',
+                  '@rpath/bar.framework/bar',
+                  '-change',
+                  '@rpath/libbar.dylib',
+                  '@rpath/bar.framework/bar',
+                  '-change',
+                  '@rpath/libbuz.dylib',
+                  '@rpath/buz.framework/buz',
+                  dylibPathBar,
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'install_name_tool',
+                  '-id',
+                  '@rpath/buz.framework/buz',
+                  '-change',
+                  '@rpath/libbar.dylib',
+                  '@rpath/bar.framework/bar',
+                  '-change',
+                  '@rpath/libbuz.dylib',
+                  '@rpath/buz.framework/buz',
+                  dylibPathBuz,
+                ],
+              ),
             ],
-          ),
-          if  (!flutterTester)
-            FakeCommand(
-              command: <Pattern>[
-                'install_name_tool',
-                '-id',
-                '@rpath/bar.framework/bar',
-                dylibPath,
-              ],
-            ),
-          FakeCommand(
-            command: <Pattern>[
-              'codesign',
-              '--force',
-              '--sign',
-              '-',
-              '--timestamp=none',
-              signPath,
-            ],
-          ),
-        ],
-      ),
-    }, () async {
-      if (const LocalPlatform().isWindows) {
-        return; // Backslashes in commands, but we will never run these commands on Windows.
-      }
-      final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
-      await packageConfig.parent.create();
-      await packageConfig.create();
-      final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
-        packagesWithNativeAssetsResult: <Package>[
-          Package('bar', projectUri),
-        ],
-        onBuild: (native_assets_cli.Target target) =>
-            FakeNativeAssetsBuilderResult(
-          assets: <AssetImpl>[
-            NativeCodeAssetImpl(
-              id: 'package:bar/bar.dart',
-              linkMode: DynamicLoadingBundledImpl(),
-              os: target.os,
-              architecture: target.architecture,
-              file: Uri.file('${target.architecture}/libbar.dylib'),
-            ),
           ],
         ),
-      );
-      final (Uri? nativeAssetsYaml, _) = await buildNativeAssetsMacOS(
-        darwinArchs: <DarwinArch>[DarwinArch.arm64, DarwinArch.x86_64],
-        projectUri: projectUri,
-        buildMode: BuildMode.debug,
-        fileSystem: fileSystem,
-        flutterTester: flutterTester,
-        buildRunner: buildRunner,
-      );
-      expect(
-        (globals.logger as BufferLogger).traceText,
-        stringContainsInOrder(<String>[
-          'Building native assets for [macos_arm64, macos_x64] debug.',
-          'Building native assets for [macos_arm64, macos_x64] done.',
-        ]),
-      );
-      expect(
-        nativeAssetsYaml,
-        projectUri.resolve('build/native_assets/macos/native_assets.yaml'),
-      );
-      expect(
-        await fileSystem.file(nativeAssetsYaml).readAsString(),
-        stringContainsInOrder(<String>[
-          'package:bar/bar.dart',
-          if (flutterTester)
-            // Tests run on host system, so the have the full path on the system.
-            '- ${projectUri.resolve('build/native_assets/macos/libbar.dylib').toFilePath()}'
-          else
-            // Apps are a bundle with the dylibs on their dlopen path.
-            '- bar.framework/bar',
-        ]),
-      );
-      // Multi arch.
-      expect(buildRunner.buildInvocations, 2);
-      expect(buildRunner.linkInvocations, 2);
-    });
+      }, () async {
+        if (const LocalPlatform().isWindows) {
+          return; // Backslashes in commands, but we will never run these commands on Windows.
+        }
+        final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+        await packageConfig.parent.create();
+        await packageConfig.create();
+        final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+          onBuild: (native_assets_cli.Target target) =>
+              FakeNativeAssetsBuilderResult(
+                assets: <AssetImpl>[
+                  NativeCodeAssetImpl(
+                    id: 'package:bar/bar.dart',
+                    linkMode: DynamicLoadingBundledImpl(),
+                    os: target.os,
+                    architecture: target.architecture,
+                    file: Uri.file('${target.architecture}/libbar.dylib'),
+                  ),
+                  NativeCodeAssetImpl(
+                    id: 'package:buz/buz.dart',
+                    linkMode: DynamicLoadingBundledImpl(),
+                    os: target.os,
+                    architecture: target.architecture,
+                    file: Uri.file('${target.architecture}/libbuz.dylib'),
+                  ),
+                ],
+              ),
+        );
+        final (Uri? nativeAssetsYaml, _) = await buildNativeAssetsMacOS(
+          darwinArchs: <DarwinArch>[DarwinArch.arm64, DarwinArch.x86_64],
+          projectUri: projectUri,
+          buildMode: buildMode,
+          fileSystem: fileSystem,
+          flutterTester: flutterTester,
+          buildRunner: buildRunner,
+        );
+        expect(
+          (globals.logger as BufferLogger).traceText,
+          stringContainsInOrder(<String>[
+            'Building native assets for [macos_arm64, macos_x64] $buildMode.',
+            'Building native assets for [macos_arm64, macos_x64] done.',
+          ]),
+        );
+        expect(
+          nativeAssetsYaml,
+          projectUri.resolve('build/native_assets/macos/native_assets.yaml'),
+        );
+        expect(
+          await fileSystem.file(nativeAssetsYaml).readAsString(),
+          stringContainsInOrder(<String>[
+            'package:bar/bar.dart',
+            if (flutterTester)
+              // Tests run on host system, so the have the full path on the system.
+              '- ${projectUri.resolve('build/native_assets/macos/libbar.dylib').toFilePath()}'
+            else
+              // Apps are a bundle with the dylibs on their dlopen path.
+              '- bar.framework/bar',
+          ]),
+        );
+        expect(
+          await fileSystem.file(nativeAssetsYaml).readAsString(),
+          stringContainsInOrder(<String>[
+            'package:buz/buz.dart',
+            if (flutterTester)
+              // Tests run on host system, so the have the full path on the system.
+              '- ${projectUri.resolve('build/native_assets/macos/libbuz.dylib').toFilePath()}'
+            else
+              // Apps are a bundle with the dylibs on their dlopen path.
+              '- buz.framework/buz',
+          ]),
+        );
+        // Multi arch.
+        expect(buildRunner.buildInvocations, 2);
+        expect(
+          buildRunner.linkInvocations,
+          buildMode == BuildMode.release ? 2 : 0,
+        );
+      });
+    }
   }
 
-  testUsingContext('static libs not supported', overrides: <Type, Generator>{
+  testUsingContext('Native assets dry run error', overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
-    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
     expect(
@@ -365,67 +557,16 @@ void main() {
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
-          buildDryRunResult: FakeNativeAssetsBuilderResult(
-            assets: <AssetImpl>[
-              NativeCodeAssetImpl(
-                id: 'package:bar/bar.dart',
-                linkMode: StaticLinkingImpl(),
-                os: OSImpl.macOS,
-                architecture: ArchitectureImpl.arm64,
-                file: Uri.file('bar.a'),
-              ),
-              NativeCodeAssetImpl(
-                id: 'package:bar/bar.dart',
-                linkMode: StaticLinkingImpl(),
-                os: OSImpl.macOS,
-                architecture: ArchitectureImpl.x64,
-                file: Uri.file('bar.a'),
-              ),
-            ],
+          buildDryRunResult: const FakeNativeAssetsBuilderResult(
+            success: false,
           ),
         ),
       ),
       throwsToolExit(
-        message: 'Native asset(s) package:bar/bar.dart have their link mode set to '
-            'static, but this is not yet supported. '
-            'For more info see https://github.com/dart-lang/sdk/issues/49418.',
+        message:
+            'Building (dry run) native assets failed. See the logs for more details.',
       ),
     );
-  });
-
-
-
-  testUsingContext('Native assets dry run error', overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-    ProcessManager: () => FakeProcessManager.empty(),
-  }, () async {
-    final File packageConfig =
-        environment.projectDir.childFile('.dart_tool/package_config.json');
-    await packageConfig.parent.create();
-    await packageConfig.create();
-    for (final String hook in <String>['Building', 'Linking']) {
-      expect(
-        () => dryRunNativeAssetsMacOS(
-          projectUri: projectUri,
-          fileSystem: fileSystem,
-          buildRunner: FakeNativeAssetsBuildRunner(
-            packagesWithNativeAssetsResult: <Package>[
-              Package('bar', projectUri),
-            ],
-            buildDryRunResult: FakeNativeAssetsBuilderResult(
-              success: hook != 'Building',
-            ),
-            linkDryRunResult: FakeNativeAssetsBuilderResult(
-              success: hook != 'Linking',
-            ),
-          ),
-        ),
-        throwsToolExit(
-          message:
-              '$hook (dry run) native assets failed. See the logs for more details.',
-        ),
-      );
-    }
   });
 
   testUsingContext('Native assets build error', overrides: <Type, Generator>{
@@ -436,32 +577,27 @@ void main() {
         environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
-    for (final String hook in <String>['Building', 'Linking']) {
-      expect(
-        () => buildNativeAssetsMacOS(
-          darwinArchs: <DarwinArch>[DarwinArch.arm64],
-          projectUri: projectUri,
-          buildMode: BuildMode.debug,
-          fileSystem: fileSystem,
-          yamlParentDirectory: environment.buildDir.uri,
-          buildRunner: FakeNativeAssetsBuildRunner(
-            packagesWithNativeAssetsResult: <Package>[
-              Package('bar', projectUri),
-            ],
-            buildResult: FakeNativeAssetsBuilderResult(
-              success: hook != 'Building',
-            ),
-            linkResult: FakeNativeAssetsBuilderResult(
-              success: hook != 'Linking',
-            ),
+    expect(
+      () => buildNativeAssetsMacOS(
+        darwinArchs: <DarwinArch>[DarwinArch.arm64],
+        projectUri: projectUri,
+        buildMode: BuildMode.debug,
+        fileSystem: fileSystem,
+        yamlParentDirectory: environment.buildDir.uri,
+        buildRunner: FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+          buildResult: const FakeNativeAssetsBuilderResult(
+            success: false,
           ),
         ),
-        throwsToolExit(
-          message:
-              '$hook native assets failed. See the logs for more details.',
-        ),
-      );
-    }
+      ),
+      throwsToolExit(
+        message:
+            'Building native assets failed. See the logs for more details.',
+      ),
+    );
   });
 
   // This logic is mocked in the other tests to avoid having test order
@@ -486,18 +622,19 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
       return;
     }
 
-    final File packagesFile = fileSystem
+    final File packageConfigFile = fileSystem
         .directory(projectUri)
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
-    await packagesFile.parent.create();
-    await packagesFile.create();
+    await packageConfigFile.parent.create();
+    await packageConfigFile.create();
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      packagesFile,
+      packageConfigFile,
       logger: environment.logger,
     );
     final NativeAssetsBuildRunner runner = NativeAssetsBuildRunnerImpl(
       projectUri,
+      packageConfigFile.path,
       packageConfig,
       fileSystem,
       logger,

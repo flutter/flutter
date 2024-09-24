@@ -38,7 +38,6 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <Pattern>[
         'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
-        '--disable-dart-dev',
         'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
         '--sdk-root',
         'HostArtifact.flutterWebSdk/',
@@ -83,6 +82,7 @@ void main() {
       BuildMode.debug,
       '',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
 
     await compiler.initialize(

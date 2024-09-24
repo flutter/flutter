@@ -166,7 +166,7 @@ void main() {
       chipMaterial.shape,
       RoundedRectangleBorder(
         borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-        side: BorderSide(color: theme.colorScheme.outline),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
       ),
     );
 
@@ -492,5 +492,41 @@ void main() {
     // Calculate the distance between avatar and label.
     labelTopLeft = tester.getTopLeft(find.byType(Container));
     expect(labelTopLeft.dx, avatarCenter.dx + (iconSize / 2) + labelPadding);
+  });
+
+  testWidgets('ActionChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
+    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+      enableAnimation: AnimationStyle(duration: Durations.extralong4),
+      selectAnimation: AnimationStyle.noAnimation,
+    );
+
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: ActionChip(
+          chipAnimationStyle: chipAnimationStyle,
+          label: const Text('ActionChip'),
+        ),
+      ),
+    ));
+
+    expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
+  });
+
+  testWidgets('Elevated ActionChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
+    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+      enableAnimation: AnimationStyle(duration: Durations.extralong4),
+      selectAnimation: AnimationStyle.noAnimation,
+    );
+
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: ActionChip.elevated(
+          chipAnimationStyle: chipAnimationStyle,
+          label: const Text('ActionChip'),
+        ),
+      ),
+    ));
+
+    expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
   });
 }

@@ -214,15 +214,6 @@ class FlutterProject {
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
 
-  /// The `.packages` file of this project.
-  File get packagesFile => directory.childFile('.packages');
-
-  /// The `package_config.json` file of the project.
-  ///
-  /// This is the replacement for .packages which contains language
-  /// version information.
-  File get packageConfigFile => directory.childDirectory('.dart_tool').childFile('package_config.json');
-
   /// The `.metadata` file of this project.
   File get metadataFile => directory.childFile('.metadata');
 
@@ -232,6 +223,9 @@ class FlutterProject {
   /// The `.flutter-plugins-dependencies` file of this project,
   /// which contains the dependencies each plugin depends on.
   File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
+
+  /// The `.gitignore` file of this project.
+  File get gitignoreFile => directory.childFile('.gitignore');
 
   /// The `.dart-tool` directory of this project.
   Directory get dartTool => directory.childDirectory('.dart_tool');
@@ -459,6 +453,11 @@ class AndroidProject extends FlutterProjectPlatform {
   static const String javaGradleCompatUrl =
     'https://docs.gradle.org/current/userguide/compatibility.html#java';
 
+  // User facing link that describes instructions for downloading
+  // the latest version of Android Studio.
+  static const String installAndroidStudioUrl =
+    'https://developer.android.com/studio/install';
+
   /// The parent of this project.
   final FlutterProject parent;
 
@@ -544,7 +543,9 @@ class AndroidProject extends FlutterProjectPlatform {
         // pluginManagement block of the settings.gradle file.
         // See https://docs.gradle.org/current/userguide/composite_builds.html#included_plugin_builds,
         // as well as the settings.gradle and build.gradle templates.
-        final bool declarativeApply = line.contains('dev.flutter.flutter-gradle-plugin');
+        final bool declarativeApply = line.contains(
+          RegExp(r'dev\.flutter\.(?:(?:flutter-gradle-plugin)|(?:`flutter-gradle-plugin`))'),
+        );
 
         // This case allows for flutter run/build to work for modules. It does
         // not guarantee the Flutter Gradle Plugin is applied.
@@ -572,22 +573,33 @@ class AndroidProject extends FlutterProjectPlatform {
   /// The file must exist and it must be written in either Groovy (build.gradle)
   /// or Kotlin (build.gradle.kts).
   File get hostAppGradleFile {
-    final File buildGroovy = hostAppGradleRoot.childFile('build.gradle');
-    final File buildKotlin = hostAppGradleRoot.childFile('build.gradle.kts');
+    return getGroovyOrKotlin(hostAppGradleRoot, 'build.gradle');
+  }
 
-    if (buildGroovy.existsSync() && buildKotlin.existsSync()) {
+  /// Gets the project root level Gradle settings file.
+  ///
+  /// The file must exist and it must be written in either Groovy (build.gradle)
+  /// or Kotlin (build.gradle.kts).
+  File get settingsGradleFile {
+    return getGroovyOrKotlin(hostAppGradleRoot, 'settings.gradle');
+  }
+
+  File getGroovyOrKotlin(Directory directory, String baseFilename) {
+    final File groovyFile = directory.childFile(baseFilename);
+    final File kotlinFile = directory.childFile('$baseFilename.kts');
+
+    if (groovyFile.existsSync()) {
       // We mimic Gradle's behavior of preferring Groovy over Kotlin when both files exist.
-      return buildGroovy;
+      return groovyFile;
     }
-
-    if (buildKotlin.existsSync()) {
-      return buildKotlin;
+    if (kotlinFile.existsSync()) {
+      return kotlinFile;
     }
 
     // TODO(bartekpacia): An exception should be thrown when neither
-    // build.gradle nor build.gradle.kts exist, instead of falling back to the
+    // the Groovy or Kotlin file exists, instead of falling back to the
     // Groovy file. See #141180.
-    return buildGroovy;
+    return groovyFile;
   }
 
   /// Gets the module-level build.gradle file.
@@ -597,22 +609,7 @@ class AndroidProject extends FlutterProjectPlatform {
   /// or Kotlin (build.gradle.kts).
   File get appGradleFile {
     final Directory appDir = hostAppGradleRoot.childDirectory('app');
-    final File buildGroovy = appDir.childFile('build.gradle');
-    final File buildKotlin = appDir.childFile('build.gradle.kts');
-
-    if (buildGroovy.existsSync() && buildKotlin.existsSync()) {
-      // We mimic Gradle's behavior of preferring Groovy over Kotlin when both files exist.
-      return buildGroovy;
-    }
-
-    if (buildKotlin.existsSync()) {
-      return buildKotlin;
-    }
-
-    // TODO(bartekpacia): An exception should be thrown when neither
-    // build.gradle nor build.gradle.kts exist, instead of falling back to the
-    // Groovy file. See #141180.
-    return buildGroovy;
+    return getGroovyOrKotlin(appDir, 'build.gradle');
   }
 
   File get appManifestFile {
@@ -869,6 +866,8 @@ $javaGradleCompatUrl
     }
     for (final XmlElement metaData in document.findAllElements('meta-data')) {
       final String? name = metaData.getAttribute('android:name');
+      // External code checks for this string to indentify flutter android apps.
+      // See cl/667760684 as an example.
       if (name == 'flutterEmbedding') {
         final String? embeddingVersionString = metaData.getAttribute('android:value');
         if (embeddingVersionString == '1') {
@@ -880,6 +879,41 @@ $javaGradleCompatUrl
       }
     }
     return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in ${appManifestFile.absolute.path}');
+  }
+
+  // TODO(matanlurey): Flip to true when on by default, https://github.com/flutter/flutter/issues/132712.
+  static const bool _impellerEnabledByDefault = false;
+
+  /// Returns the `io.flutter.embedding.android.EnableImpeller` manifest value.
+  ///
+  /// If there is no manifest file, or the key is not present, returns `false`.
+  bool computeImpellerEnabled() {
+    if (!appManifestFile.existsSync()) {
+      return _impellerEnabledByDefault;
+    }
+    final XmlDocument document;
+    try {
+      document = XmlDocument.parse(appManifestFile.readAsStringSync());
+    } on XmlException {
+      throwToolExit('Error parsing $appManifestFile '
+                    'Please ensure that the android manifest is a valid XML document and try again.');
+    } on FileSystemException {
+      throwToolExit('Error reading $appManifestFile even though it exists. '
+                    'Please ensure that you have read permission to this file and try again.');
+    }
+    for (final XmlElement metaData in document.findAllElements('meta-data')) {
+      final String? name = metaData.getAttribute('android:name');
+      if (name == 'io.flutter.embedding.android.EnableImpeller') {
+        final String? value = metaData.getAttribute('android:value');
+        if (value == 'true') {
+          return true;
+        }
+        if (value == 'false') {
+          return false;
+        }
+      }
+    }
+    return _impellerEnabledByDefault;
   }
 }
 

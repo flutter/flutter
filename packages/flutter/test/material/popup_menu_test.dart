@@ -9,7 +9,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
@@ -1220,7 +1219,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '1',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1231,7 +1230,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '2',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1242,7 +1241,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '3',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1253,7 +1252,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '4',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1264,7 +1263,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '5',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1352,7 +1351,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: 'test1\ntest2',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1433,7 +1432,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '1',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1453,7 +1452,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '3',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1464,7 +1463,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '4',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1475,7 +1474,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '5',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1668,8 +1667,55 @@ void main() {
     await tester.tap(find.byKey(popupMenuButtonKey));
     await tester.pumpAndSettle();
 
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 0')).padding, const EdgeInsets.symmetric(horizontal: 12.0));
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 1')).padding, const EdgeInsets.symmetric(horizontal: 12.0));
+    EdgeInsetsGeometry paddingFor(String text) {
+      return tester.widget<Padding>(
+        find.ancestor(
+          of: find.widgetWithText(Align, 'Item 0'),
+          matching: find.byKey(const Key('menu item padding')),
+        ),
+      ).padding;
+    }
+
+    expect(paddingFor('Item 0'), const EdgeInsets.symmetric(horizontal: 12.0));
+    expect(paddingFor('Item 1'), const EdgeInsets.symmetric(horizontal: 12.0));
+  });
+
+  testWidgets('PopupMenu default padding', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              child: const Text('button'),
+              onSelected: (String result) { },
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<String>>[
+                   const PopupMenuItem<String>(
+                    value: '0',
+                    enabled: false,
+                    child: Text('Item 0'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: '1',
+                    child: Text('Item 1'),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu.
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Check popup menu padding.
+    final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>(find.byType(SingleChildScrollView));
+    expect(popupMenu.padding, const EdgeInsets.symmetric(vertical: 8.0));
   });
 
   testWidgets('Material2 - PopupMenuItem default padding', (WidgetTester tester) async {
@@ -1706,8 +1752,56 @@ void main() {
     await tester.tap(find.byKey(popupMenuButtonKey));
     await tester.pumpAndSettle();
 
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 0')).padding, const EdgeInsets.symmetric(horizontal: 16.0));
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 1')).padding, const EdgeInsets.symmetric(horizontal: 16.0));
+    EdgeInsetsGeometry paddingFor(String text) {
+      return tester.widget<Padding>(
+        find.ancestor(
+          of: find.widgetWithText(Align, 'Item 0'),
+          matching: find.byKey(const Key('menu item padding')),
+        ),
+      ).padding;
+    }
+
+    expect(paddingFor('Item 0'), const EdgeInsets.symmetric(horizontal: 16.0));
+    expect(paddingFor('Item 1'), const EdgeInsets.symmetric(horizontal: 16.0));
+  });
+
+  testWidgets('Material2 - PopupMenuItem default padding', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              child: const Text('button'),
+              onSelected: (String result) { },
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<String>>[
+                   const PopupMenuItem<String>(
+                    value: '0',
+                    enabled: false,
+                    child: Text('Item 0'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: '1',
+                    child: Text('Item 1'),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu.
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Check popup menu padding.
+    final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>(find.byType(SingleChildScrollView));
+    expect(popupMenu.padding, const EdgeInsets.symmetric(vertical: 8.0));
   });
 
   testWidgets('PopupMenuItem custom padding', (WidgetTester tester) async {
@@ -1766,10 +1860,19 @@ void main() {
     expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 2')).height, 56); // Padding (20.0 + 20.0) + Height of text (16) = 56
     expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 3')).height, 100); // Height value of 100, since child (16) + padding (40) < 100
 
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 0')).padding, EdgeInsets.zero);
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 1')).padding, EdgeInsets.zero);
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 2')).padding, const EdgeInsets.all(20));
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 3')).padding, const EdgeInsets.all(20));
+    EdgeInsetsGeometry paddingFor(String text) {
+      final ConstrainedBox widget = tester.widget<ConstrainedBox>(
+        find.ancestor(of: find.text(text), matching: find.byWidgetPredicate(
+            (Widget widget) => widget is ConstrainedBox && widget.child is Padding,
+        )),
+      );
+      return (widget.child! as Padding).padding;
+    }
+
+    expect(paddingFor('Item 0'), EdgeInsets.zero);
+    expect(paddingFor('Item 1'), EdgeInsets.zero);
+    expect(paddingFor('Item 2'), const EdgeInsets.all(20));
+    expect(paddingFor('Item 3'), const EdgeInsets.all(20));
   });
 
   testWidgets('CheckedPopupMenuItem child height is a minimum, child is vertically centered', (WidgetTester tester) async {
@@ -1916,10 +2019,19 @@ void main() {
     expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 2')).height, 96); // Padding (20.0 + 20.0) + Height of ListTile (56) = 96
     expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 3')).height, 100); // Height value of 100, since child (56) + padding (40) < 100
 
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 0')).padding, EdgeInsets.zero);
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 1')).padding, EdgeInsets.zero);
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 2')).padding, const EdgeInsets.all(20));
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 3')).padding, const EdgeInsets.all(20));
+    EdgeInsetsGeometry paddingFor(String text) {
+      final ConstrainedBox widget = tester.widget<ConstrainedBox>(
+        find.ancestor(of: find.text(text), matching: find.byWidgetPredicate(
+            (Widget widget) => widget is ConstrainedBox && widget.child is Padding,
+        )),
+      );
+      return (widget.child! as Padding).padding;
+    }
+
+    expect(paddingFor('Item 0'), EdgeInsets.zero);
+    expect(paddingFor('Item 1'), EdgeInsets.zero);
+    expect(paddingFor('Item 2'), const EdgeInsets.all(20));
+    expect(paddingFor('Item 3'), const EdgeInsets.all(20));
   });
 
   testWidgets('Update PopupMenuItem layout while the menu is visible', (WidgetTester tester) async {
@@ -2142,10 +2254,7 @@ void main() {
     expect(find.text('PopupMenuButton icon'), findsOneWidget);
   });
 
-  testWidgets('showMenu uses nested navigator by default',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+  testWidgets('showMenu uses nested navigator by default', (WidgetTester tester) async {
     final MenuObserver rootObserver = MenuObserver();
     final MenuObserver nestedObserver = MenuObserver();
 
@@ -4168,6 +4277,84 @@ void main() {
       matching: find.byType(RichText),
     ));
     expect(iconText.text.style?.color, Colors.red);
+  });
+
+  testWidgets("Popup menu child's InkWell borderRadius", (WidgetTester tester) async {
+    final BorderRadius borderRadius = BorderRadius.circular(20);
+
+    Widget buildPopupMenu({required BorderRadius? borderRadius}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              borderRadius: borderRadius,
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('Item 0'),
+                ),
+              ],
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text('Pop up menu'),
+                  Icon(Icons.arrow_drop_down),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Popup menu with default null borderRadius.
+    await tester.pumpWidget(buildPopupMenu(borderRadius: null));
+    await tester.pumpAndSettle();
+
+    InkWell inkWell = tester.widget<InkWell>(find.byType(InkWell));
+    expect(inkWell.borderRadius, isNull);
+
+    // Popup menu with fixed borderRadius.
+    await tester.pumpWidget(buildPopupMenu(borderRadius: borderRadius));
+    await tester.pumpAndSettle();
+
+    inkWell = tester.widget<InkWell>(find.byType(InkWell));
+    expect(inkWell.borderRadius, borderRadius);
+  });
+
+  testWidgets('If requestFocus is false, the original focus should be preserved upon menu appearance.', (WidgetTester tester) async {
+    final FocusNode fieldFocusNode = FocusNode();
+    addTearDown(fieldFocusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              TextField(focusNode: fieldFocusNode, autofocus: true),
+              PopupMenuButton<int>(
+                style: const ButtonStyle(
+                  iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+                ),
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuItem<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('One'),
+                    ),
+                  ];
+                },
+                requestFocus: false,
+                child: const Text('click here'),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(fieldFocusNode.hasFocus, isTrue);
+    await tester.tap(find.text('click here'));
+    await tester.pump();
+    expect(fieldFocusNode.hasFocus, isTrue);
   });
 }
 

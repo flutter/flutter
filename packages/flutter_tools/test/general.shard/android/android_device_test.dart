@@ -189,7 +189,6 @@ name: example
 flutter:
   module: {}
 ''');
-    fileSystem.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProjectFactory(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -202,7 +201,6 @@ flutter:
   testWithoutContext('isSupportedForProject is true with editable host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
     fileSystem.directory('android').createSync();
     final FlutterProject flutterProject = FlutterProjectFactory(
       fileSystem: fileSystem,
@@ -217,7 +215,6 @@ flutter:
   testWithoutContext('isSupportedForProject is false with no host app and no module', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProjectFactory(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -329,6 +326,18 @@ flutter:
     );
 
     expect(await device.emulatorId, isNull);
+  });
+
+  testWithoutContext('AndroidDevice clearLogs does not crash', () async {
+    final AndroidDevice device = setUpAndroidDevice(
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'logcat', '-c'],
+          exitCode: 1,
+        ),
+      ])
+    );
+    device.clearLogs();
   });
 
   testWithoutContext('AndroidDevice lastLogcatTimestamp returns null if shell command failed', () async {

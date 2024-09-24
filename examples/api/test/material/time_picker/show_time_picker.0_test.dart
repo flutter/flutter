@@ -30,11 +30,7 @@ void main() {
     ];
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: example.ShowTimePickerApp(),
-        ),
-      ),
+      const example.ShowTimePickerApp(),
     );
 
     for (final String option in options) {

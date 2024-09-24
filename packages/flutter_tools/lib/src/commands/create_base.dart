@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
+import 'package:yaml/yaml.dart';
 
 import '../android/android.dart' as android_common;
 import '../android/android_workflow.dart';
@@ -319,13 +320,45 @@ abstract class CreateBase extends FlutterCommand {
     }
   }
 
-  /// Gets the project name based.
+  /// Gets the project name.
   ///
-  /// Use the current directory path name if the `--project-name` is not specified explicitly.
+  /// If the `--project-name` is not specified explicitly,
+  /// the `name` field from the pubspec.yaml file is used.
+  ///
+  /// If the pubspec.yaml file does not exist,
+  /// the current directory path name is used.
   @protected
   String get projectName {
-    final String projectName =
-        stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
+    String? projectName = stringArg('project-name');
+
+    if (projectName == null) {
+      final File pubspec = globals.fs
+        .directory(projectDirPath)
+        .childFile('pubspec.yaml');
+
+      if (pubspec.existsSync()) {
+        final String pubspecContents = pubspec.readAsStringSync();
+
+        try {
+          final Object? pubspecYaml = loadYaml(pubspecContents);
+
+          if (pubspecYaml is YamlMap) {
+            final Object? pubspecName = pubspecYaml['name'];
+
+            if (pubspecName is String) {
+              projectName = pubspecName;
+            }
+          }
+        } on YamlException {
+          // If the pubspec is malformed, fallback to using the directory name.
+        }
+      }
+
+      final String projectDirName = globals.fs.path.basename(projectDirPath);
+
+      projectName ??= projectDirName;
+    }
+
     if (!boolArg('skip-name-checks')) {
       final String? error = _validateProjectName(projectName);
       if (error != null) {
@@ -538,6 +571,7 @@ abstract class CreateBase extends FlutterCommand {
         usage: globals.flutterUsage,
         analytics: globals.analytics,
         projectDir: project.directory,
+        packageConfigPath: packageConfigPath(),
         generateDartPluginRegistry: true,
       );
 
@@ -708,11 +742,11 @@ abstract class CreateBase extends FlutterCommand {
 
 // A valid Dart identifier that can be used for a package, i.e. no
 // capital letters.
-// https://dart.dev/guides/language/language-tour#important-concepts
+// https://dart.dev/language#important-concepts
 final RegExp _identifierRegExp = RegExp('[a-z_][a-z0-9_]*');
 
 // non-contextual dart keywords.
-//' https://dart.dev/guides/language/language-tour#keywords
+// https://dart.dev/language/keywords
 const Set<String> _keywords = <String>{
   'abstract',
   'as',

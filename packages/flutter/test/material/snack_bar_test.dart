@@ -437,7 +437,7 @@ void main() {
     // There is a somewhat complicated background color calculation based
     // off of the surface color. For the default light theme it
     // should be this value.
-    expect(renderModel.color, equals(const Color(0xFF333333)));
+    expect(renderModel.color, isSameColorAs(const Color(0xFF333333)));
   });
 
   testWidgets('Material3 - Light theme SnackBar has dark background', (WidgetTester tester) async {
@@ -596,90 +596,13 @@ void main() {
     expect(buttonTextStyle.color, equals(darkTheme.colorScheme.inversePrimary));
   });
 
-  testWidgets('SnackBar should inherit theme data from its ancestor.', (WidgetTester tester) async {
-    final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
-      primaryColor: Colors.black,
-      primaryColorDark: Colors.black,
-      primaryColorLight: Colors.black,
-      valueIndicatorTextStyle: const TextStyle(color: Colors.black),
+  testWidgets('SnackBar should inherit theme data from its ancestor', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.green,
+        brightness: Brightness.dark,
+      ),
     );
-
-    final ChipThemeData chipTheme = ChipThemeData.fromDefaults(
-      primaryColor: Colors.black,
-      secondaryColor: Colors.white,
-      labelStyle: const TextStyle(color: Colors.black),
-    );
-
-    const PageTransitionsTheme pageTransitionTheme = PageTransitionsTheme(
-      builders: <TargetPlatform, PageTransitionsBuilder>{
-        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-        TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
-      },
-    );
-
-    final ThemeData theme = ThemeData.light().copyWith(
-      visualDensity: VisualDensity.standard,
-      primaryColor: Colors.black,
-      primaryColorLight: Colors.black,
-      primaryColorDark: Colors.black,
-      canvasColor: Colors.black,
-      shadowColor: Colors.black,
-      scaffoldBackgroundColor: Colors.black,
-      cardColor: Colors.black,
-      dividerColor: Colors.black,
-      focusColor: Colors.black,
-      hoverColor: Colors.black,
-      highlightColor: Colors.black,
-      splashColor: Colors.black,
-      splashFactory: InkRipple.splashFactory,
-      unselectedWidgetColor: Colors.black,
-      disabledColor: Colors.black,
-      buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.dark()),
-      toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
-      secondaryHeaderColor: Colors.black,
-      dialogBackgroundColor: Colors.black,
-      indicatorColor: Colors.black,
-      hintColor: Colors.black,
-      textTheme: ThemeData.dark().textTheme,
-      primaryTextTheme: ThemeData.dark().textTheme,
-      inputDecorationTheme: ThemeData.dark().inputDecorationTheme.copyWith(border: const OutlineInputBorder()),
-      iconTheme: ThemeData.dark().iconTheme,
-      primaryIconTheme: ThemeData.dark().iconTheme,
-      sliderTheme: sliderTheme,
-      tabBarTheme: const TabBarTheme(labelColor: Colors.black),
-      tooltipTheme: const TooltipThemeData(height: 100),
-      cardTheme: const CardTheme(color: Colors.black),
-      chipTheme: chipTheme,
-      platform: TargetPlatform.iOS,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      applyElevationOverlayColor: false,
-      pageTransitionsTheme: pageTransitionTheme,
-      appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
-      scrollbarTheme: const ScrollbarThemeData(radius: Radius.circular(10.0)),
-      bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
-      colorScheme: const ColorScheme.light(),
-      dialogTheme: const DialogTheme(backgroundColor: Colors.black),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
-      navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.black),
-      typography: Typography.material2018(),
-      snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
-      bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.black),
-      popupMenuTheme: const PopupMenuThemeData(color: Colors.black),
-      bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.black),
-      dividerTheme: const DividerThemeData(color: Colors.black),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(type: BottomNavigationBarType.fixed),
-      timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
-      textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: Colors.red)),
-      elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: Colors.green)),
-      outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(foregroundColor: Colors.blue)),
-      textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),
-      dataTableTheme: const DataTableThemeData(),
-      checkboxTheme: const CheckboxThemeData(),
-      radioTheme: const RadioThemeData(),
-      switchTheme: const SwitchThemeData(),
-      progressIndicatorTheme: const ProgressIndicatorThemeData(),
-    );
-
     ThemeData? themeBeforeSnackBar;
     ThemeData? themeAfterSnackBar;
     await tester.pumpWidget(
@@ -722,7 +645,6 @@ void main() {
     final ThemeData comparedTheme = themeBeforeSnackBar!.copyWith(
       colorScheme: themeAfterSnackBar!.colorScheme,
     ); // Fields replaced by SnackBar.
-
     expect(comparedTheme, themeAfterSnackBar);
   });
 
@@ -1015,14 +937,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 750));
 
     final Element actionTextBox = tester.element(find.text('ACTION'));
-    final Widget textWidget = actionTextBox.widget;
-    final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(actionTextBox);
-    if (textWidget is Text) {
-      final TextStyle effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
-      expect(effectiveStyle.color, Colors.lightBlue);
-    } else {
-      expect(false, true);
-    }
+    expect(actionTextBox.widget, isA<Text>());
+    final Text(:TextStyle? style) = actionTextBox.widget as Text;
+
+    final TextStyle defaultStyle = DefaultTextStyle.of(actionTextBox).style;
+    expect(defaultStyle.merge(style).color, Colors.lightBlue);
   });
 
   testWidgets('Material3 - Snackbar labels can be colored as MaterialColor', (WidgetTester tester) async {
@@ -4077,6 +3996,66 @@ testWidgets('SnackBarAction backgroundColor works as a Color', (WidgetTester tes
       actionButtonStyle?.overlayColor?.resolve(<MaterialState>{MaterialState.hovered}),
       theme.colorScheme.inversePrimary.withOpacity(0.08),
     );
+  });
+
+  testWidgets('Can interact with widgets behind SnackBar when insetPadding is set in SnackBarThemeData', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/148566.
+    tester.view.physicalSize = const Size.square(200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const String buttonText = 'Show snackbar';
+    const String snackbarContent = 'Snackbar';
+    const String buttonText2 = 'Try press me';
+
+    final Completer<void> completer = Completer<void>();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        snackBarTheme: const SnackBarThemeData(
+          insetPadding: EdgeInsets.only(left: 100),
+        ),
+      ),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        content: Text(snackbarContent),
+                      ),
+                    );
+                  },
+                  child: const Text(buttonText),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    completer.complete();
+                  },
+                  child: const Text(buttonText2),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text(buttonText));
+    await tester.pumpAndSettle();
+
+    expect(find.text(snackbarContent), findsOneWidget);
+    await tester.tapAt(tester.getTopLeft(find.text(buttonText2)));
+    expect(find.text(snackbarContent), findsOneWidget);
+
+    expect(completer.isCompleted, true);
   });
 }
 

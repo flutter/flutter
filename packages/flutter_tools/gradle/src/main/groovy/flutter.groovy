@@ -42,7 +42,7 @@ import org.gradle.internal.os.OperatingSystem
 class FlutterExtension {
 
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    public final int compileSdkVersion = 34
+    public final int compileSdkVersion = 35
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
     public  final int minSdkVersion = 21
@@ -53,14 +53,14 @@ class FlutterExtension {
      *
      * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
      */
-    public final int targetSdkVersion = 34
+    public final int targetSdkVersion = 35
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
      * Chosen as default version of the AGP version below as found in
      * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
-    public final String ndkVersion = "23.1.7779620"
+    public final String ndkVersion = "26.1.10909125"
 
     /**
      * Specifies the relative directory to the Flutter project directory.
@@ -98,7 +98,6 @@ class FlutterExtension {
 
         return flutterVersionName
     }
-
 }
 
 // This buildscript block supplies dependencies for this file's own import
@@ -207,7 +206,7 @@ class FlutterPlugin implements Plugin<Project> {
     /**
      * Flutter Docs Website URLs for help messages.
      */
-    private final String kWebsiteDeploymentAndroidBuildConfig = "https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration"
+    private final String kWebsiteDeploymentAndroidBuildConfig = "https://flutter.dev/to/review-gradle-config"
 
     @Override
     void apply(Project project) {
@@ -333,17 +332,25 @@ class FlutterPlugin implements Plugin<Project> {
         // -> Kotlin migration, we should remove this complexity and perform the checks inside
         // of the main Flutter Gradle Plugin.
         // See https://github.com/flutter/flutter/issues/121541#issuecomment-1920363687.
-        final Boolean shouldSkipDependencyChecks = project.hasProperty("skipDependencyChecks") && project.getProperty("skipDependencyChecks");
+        final Boolean shouldSkipDependencyChecks = project.hasProperty("skipDependencyChecks") && project.getProperty("skipDependencyChecks")
         if (!shouldSkipDependencyChecks) {
             try {
                 final String dependencyCheckerPluginPath = Paths.get(flutterRoot.absolutePath,
                         "packages", "flutter_tools", "gradle", "src", "main", "kotlin",
                         "dependency_version_checker.gradle.kts")
                 project.apply from: dependencyCheckerPluginPath
-            } catch (Exception ignored) {
-                project.logger.error("Warning: Flutter was unable to detect project Gradle, Java, " +
-                        "AGP, and KGP versions. Skipping dependency version checking. Error was: "
-                        + ignored)
+            } catch (Exception e) {
+                if (!project.hasProperty("usesUnsupportedDependencyVersions") || !project.usesUnsupportedDependencyVersions) {
+                    // Possible bug in dependency checking code - warn and do not block build.
+                    project.logger.error("Warning: Flutter was unable to detect project Gradle, Java, " +
+                            "AGP, and KGP versions. Skipping dependency version checking. Error was: "
+                            + e)
+                }
+                else {
+                    // If usesUnsupportedDependencyVersions is set, the exception was thrown by us
+                    // in the dependency version checker plugin so re-throw it here.
+                    throw e
+                }
             }
         }
 
@@ -374,7 +381,7 @@ class FlutterPlugin implements Plugin<Project> {
                     shrinkResources(isBuiltAsApp(project))
                     // Fallback to `android/app/proguard-rules.pro`.
                     // This way, custom Proguard rules can be configured as needed.
-                    proguardFiles(project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro")
+                    proguardFiles(project.android.getDefaultProguardFile("proguard-android-optimize.txt"), flutterProguardRules, "proguard-rules.pro")
                 }
             }
         }
@@ -758,6 +765,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (pluginProject == null) {
             return
         }
+        // Apply the "flutter" Gradle extension to plugins so that they can use it's vended
+        // compile/target/min sdk values.
+        pluginProject.extensions.create("flutter", FlutterExtension)
         // Add plugin dependency to the app project.
         project.dependencies {
             api(pluginProject)
@@ -1225,7 +1235,7 @@ class FlutterPlugin implements Plugin<Project> {
                     // for only the output APK, not for the variant itself. Skipping this step simply
                     // causes Gradle to use the value of variant.versionCode for the APK.
                     // For more, see https://developer.android.com/studio/build/configure-apk-splits
-                    int abiVersionCode = ABI_VERSION.get(output.getFilter(OutputFile.ABI))
+                    Integer abiVersionCode = ABI_VERSION.get(output.getFilter(OutputFile.ABI))
                     if (abiVersionCode != null) {
                         output.versionCodeOverride =
                             abiVersionCode * 1000 + variant.versionCode
@@ -1265,7 +1275,7 @@ class FlutterPlugin implements Plugin<Project> {
                 trackWidgetCreation(trackWidgetCreationValue)
                 targetPlatformValues = targetPlatforms
                 sourceDir(getFlutterSourceDirectory())
-                intermediateDir(project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/"))
+                intermediateDir(project.file(project.layout.buildDirectory.dir("$INTERMEDIATES_DIR/flutter/${variant.name}/")))
                 frontendServerStarterPath(frontendServerStarterPathValue)
                 extraFrontEndOptions(extraFrontEndOptionsValue)
                 extraGenSnapshotOptions(extraGenSnapshotOptionsValue)
@@ -1280,7 +1290,7 @@ class FlutterPlugin implements Plugin<Project> {
                 validateDeferredComponents(validateDeferredComponentsValue)
                 flavor(flavorValue)
             }
-            File libJar = project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar")
+            File libJar = project.file(project.layout.buildDirectory.dir("$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar"))
             Task packJniLibsTask = project.tasks.create(name: "packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDirectory = libJar.parentFile
                 archiveFileName = libJar.name
@@ -1362,6 +1372,11 @@ class FlutterPlugin implements Plugin<Project> {
             def bundleAarTask = project.tasks.findByName("bundle${variant.name.capitalize()}Aar")
             if (bundleAarTask) {
                 bundleAarTask.dependsOn(copyFlutterAssetsTask)
+            }
+
+            def bundleAarTaskWithLint = project.tasks.findByName("bundle${variant.name.capitalize()}LocalLintAar")
+            if (bundleAarTaskWithLint) {
+                bundleAarTaskWithLint.dependsOn(copyFlutterAssetsTask)
             }
 
             return copyFlutterAssetsTask

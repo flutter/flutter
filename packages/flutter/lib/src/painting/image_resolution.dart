@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:async';
 import 'dart:collection';
 
@@ -249,7 +252,7 @@ class AssetImage extends AssetBundleImageProvider {
 
   /// The name used to generate the key to obtain the asset. For local assets
   /// this is [assetName], and for assets from packages the [assetName] is
-  /// prefixed 'packages/<package_name>/'.
+  /// prefixed `packages/<package_name>/`.
   String get keyName => package == null ? assetName : 'packages/$package/$assetName';
 
   /// The bundle from which the image will be obtained.

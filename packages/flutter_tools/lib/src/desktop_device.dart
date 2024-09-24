@@ -16,6 +16,8 @@ import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';
+import 'globals.dart' as globals;
+import 'macos/macos_device.dart';
 import 'protocol_discovery.dart';
 
 /// A partial implementation of Device for desktop-class devices to inherit
@@ -24,7 +26,7 @@ abstract class DesktopDevice extends Device {
   DesktopDevice(super.id, {
       required PlatformType super.platformType,
       required super.ephemeral,
-      required Logger logger,
+      required super.logger,
       required ProcessManager processManager,
       required FileSystem fileSystem,
       required OperatingSystemUtils operatingSystemUtils,
@@ -112,13 +114,13 @@ abstract class DesktopDevice extends Device {
     required DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs = const <String, dynamic>{},
     bool prebuiltApplication = false,
-    bool ipv6 = false,
     String? userIdentifier,
   }) async {
     if (!prebuiltApplication) {
       await buildForDevice(
         buildInfo: debuggingOptions.buildInfo,
         mainPath: mainPath,
+        usingCISystem: debuggingOptions.usingCISystem,
       );
     }
 
@@ -155,12 +157,43 @@ abstract class DesktopDevice extends Device {
     final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(_deviceLogReader,
       devicePort: debuggingOptions.deviceVmServicePort,
       hostPort: debuggingOptions.hostVmServicePort,
-      ipv6: ipv6,
+      ipv6: debuggingOptions.ipv6,
       logger: _logger,
     );
     try {
+      Timer? timer;
+      if (this is MacOSDevice) {
+        if (await globals.isRunningOnBot) {
+          const int defaultTimeout = 5;
+          timer = Timer(const Duration(minutes: defaultTimeout), () {
+            // As of macOS 14, if sandboxing is enabled and the app is not codesigned,
+            // a dialog will prompt the user to allow the app to run. This will
+            // cause tests in CI to hang. In CI, we workaround this by setting
+            // the CODE_SIGN_ENTITLEMENTS build setting to a version with
+            // sandboxing disabled.
+            final String sandboxingMessage;
+            if (debuggingOptions.usingCISystem) {
+              sandboxingMessage = 'Ensure sandboxing is disabled by checking '
+                  'the set CODE_SIGN_ENTITLEMENTS.';
+            } else {
+              sandboxingMessage = 'Consider codesigning your app or disabling '
+                  'sandboxing. Flutter will attempt to disable sandboxing if '
+                  'the `--ci` flag is provided.';
+            }
+            _logger.printError(
+                'The Dart VM Service was not discovered after $defaultTimeout '
+                'minutes. If the app has sandboxing enabled and is not '
+                'codesigned or codesigning changed, this may be caused by a '
+                'system prompt asking for access. $sandboxingMessage\n'
+                'See https://developer.apple.com/documentation/security/app_sandbox/accessing_files_from_the_macos_app_sandbox '
+                'for more information.');
+          });
+        }
+      }
+
       final Uri? vmServiceUri = await vmServiceDiscovery.uri;
       if (vmServiceUri != null) {
+        timer?.cancel();
         onAttached(package, buildInfo, process);
         return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
       }
@@ -199,6 +232,7 @@ abstract class DesktopDevice extends Device {
   Future<void> buildForDevice({
     required BuildInfo buildInfo,
     String? mainPath,
+    bool usingCISystem = false,
   });
 
   /// Returns the path to the executable to run for [package] on this device for

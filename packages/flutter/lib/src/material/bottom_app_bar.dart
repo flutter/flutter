@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app_bar.dart';
+/// @docImport 'floating_action_button.dart';
+/// @docImport 'floating_action_button_location.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'icons.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 

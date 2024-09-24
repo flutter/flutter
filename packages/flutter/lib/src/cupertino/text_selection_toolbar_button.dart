@@ -132,9 +132,8 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
     final Widget child = CupertinoButton(
       color: isPressed
         ? _kToolbarPressedColor.resolveFrom(context)
-        : const Color(0x00000000),
-      borderRadius: null,
-      disabledColor: const Color(0x00000000),
+        : CupertinoColors.transparent,
+      disabledColor: CupertinoColors.transparent,
       // This CupertinoButton does not actually handle the onPressed callback,
       // this is only here to correctly enable/disable the button (see
       // GestureDetector comment below).

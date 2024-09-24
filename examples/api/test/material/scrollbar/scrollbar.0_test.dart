@@ -18,4 +18,22 @@ void main() {
 
     expect(tester.takeException(), isNull);
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('The scrollbar should be painted when the user scrolls', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.ScrollbarExampleApp(),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10)); // Wait for the thumb to start appearing.
+
+    expect(find.text('item 0'), findsOne);
+    expect(find.text('item 9'), findsNothing);
+    expect(find.byType(Scrollbar), isNot(paints..rect()));
+
+    await tester.fling(find.byType(Scrollbar).last, const Offset(0, -300), 10.0);
+
+    expect(find.text('item 0'), findsNothing);
+    expect(find.text('item 9'), findsOne);
+    expect(find.byType(Scrollbar).last, paints..rect());
+  });
 }

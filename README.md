@@ -12,7 +12,6 @@
 [![Twitter handle][]][Twitter badge]
 [![codecov](https://codecov.io/gh/flutter/flutter/branch/master/graph/badge.svg?token=11yDrJU2M2)](https://codecov.io/gh/flutter/flutter)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5631/badge)](https://bestpractices.coreinfrastructure.org/projects/5631)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/flutter/flutter/badge)](https://deps.dev/project/github/flutter%2Fflutter)
 [![SLSA 1](https://slsa.dev/images/gh-badge-level1.svg)](https://slsa.dev)
 
 Flutter is Google's SDK for crafting beautiful, fast user experiences for
@@ -24,7 +23,7 @@ open source.
 
 * [Install Flutter](https://flutter.dev/get-started/)
 * [Flutter documentation](https://docs.flutter.dev/)
-* [Development wiki](https://github.com/flutter/flutter/wiki)
+* [Development wiki](./docs/README.md)
 * [Contributing to Flutter](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md)
 
 For announcements about new releases, follow the
@@ -67,7 +66,7 @@ support for customizing or creating entirely new visual components.
 ### Fast results
 
 Flutter is fast. It's powered by hardware-accelerated 2D graphics
-libraries like [Skia] (that underpins Chrome and Android) and
+libraries like [Skia] (which underpins Chrome and Android) and
 [Impeller]. We architected Flutter to
 support glitch-free, jank-free graphics at the native speed of your device.
 
@@ -100,7 +99,7 @@ Information on how to get started can be found in our
 [contributor guide](CONTRIBUTING.md).
 
 [flutter.dev]: https://flutter.dev
-[Discord instructions]: https://github.com/flutter/flutter/wiki/Chat
+[Discord instructions]: ./docs/contributing/Chat.md
 [Discord badge]: https://img.shields.io/discord/608014603317936148?logo=discord
 [Twitter handle]: https://img.shields.io/twitter/follow/flutterdev.svg?style=social&label=Follow
 [Twitter badge]: https://twitter.com/intent/follow?screen_name=flutterdev

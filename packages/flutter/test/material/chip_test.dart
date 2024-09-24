@@ -231,83 +231,6 @@ Finder findTooltipContainer(String tooltipText) {
 }
 
 void main() {
-  testWidgets('M2 Chip defaults', (WidgetTester tester) async {
-    late TextTheme textTheme;
-
-    Widget buildFrame(Brightness brightness) {
-      return MaterialApp(
-        theme: ThemeData(brightness: brightness, useMaterial3: false),
-        home: Scaffold(
-          body: Center(
-            child: Builder(
-              builder: (BuildContext context) {
-                textTheme = Theme.of(context).textTheme;
-                return Chip(
-                  avatar: const CircleAvatar(child: Text('A')),
-                  label: const Text('Chip A'),
-                  onDeleted: () { },
-                );
-              },
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildFrame(Brightness.light));
-    expect(getMaterialBox(tester), paints..rrect()..circle(color: const Color(0xff1976d2)));
-    expect(tester.getSize(find.byType(Chip)), const Size(156.0, 48.0));
-    expect(getMaterial(tester).color, null);
-    expect(getMaterial(tester).elevation, 0);
-    expect(getMaterial(tester).shape, const StadiumBorder());
-    expect(getIconData(tester).color?.value, 0xffffffff);
-    expect(getIconData(tester).opacity, null);
-    expect(getIconData(tester).size, null);
-
-    TextStyle labelStyle = getLabelStyle(tester, 'Chip A').style;
-    expect(labelStyle.color?.value, 0xde000000);
-    expect(labelStyle.fontFamily, textTheme.bodyLarge?.fontFamily);
-    expect(labelStyle.fontFamilyFallback, textTheme.bodyLarge?.fontFamilyFallback);
-    expect(labelStyle.fontFeatures, textTheme.bodyLarge?.fontFeatures);
-    expect(labelStyle.fontSize, textTheme.bodyLarge?.fontSize);
-    expect(labelStyle.fontStyle, textTheme.bodyLarge?.fontStyle);
-    expect(labelStyle.fontWeight, textTheme.bodyLarge?.fontWeight);
-    expect(labelStyle.height, textTheme.bodyLarge?.height);
-    expect(labelStyle.inherit, textTheme.bodyLarge?.inherit);
-    expect(labelStyle.leadingDistribution, textTheme.bodyLarge?.leadingDistribution);
-    expect(labelStyle.letterSpacing, textTheme.bodyLarge?.letterSpacing);
-    expect(labelStyle.overflow, textTheme.bodyLarge?.overflow);
-    expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
-    expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
-
-    await tester.pumpWidget(buildFrame(Brightness.dark));
-    await tester.pumpAndSettle(); // Theme transition animation
-    expect(getMaterialBox(tester), paints..rrect(color: const Color(0x1fffffff)));
-    expect(tester.getSize(find.byType(Chip)), const Size(156.0, 48.0));
-    expect(getMaterial(tester).color, null);
-    expect(getMaterial(tester).elevation, 0);
-    expect(getMaterial(tester).shape, const StadiumBorder());
-    expect(getIconData(tester).color?.value, 0xffffffff);
-    expect(getIconData(tester).opacity, null);
-    expect(getIconData(tester).size, null);
-
-    labelStyle = getLabelStyle(tester, 'Chip A').style;
-    expect(labelStyle.color?.value, 0xdeffffff);
-    expect(labelStyle.fontFamily, textTheme.bodyLarge?.fontFamily);
-    expect(labelStyle.fontFamilyFallback, textTheme.bodyLarge?.fontFamilyFallback);
-    expect(labelStyle.fontFeatures, textTheme.bodyLarge?.fontFeatures);
-    expect(labelStyle.fontSize, textTheme.bodyLarge?.fontSize);
-    expect(labelStyle.fontStyle, textTheme.bodyLarge?.fontStyle);
-    expect(labelStyle.fontWeight, textTheme.bodyLarge?.fontWeight);
-    expect(labelStyle.height, textTheme.bodyLarge?.height);
-    expect(labelStyle.inherit, textTheme.bodyLarge?.inherit);
-    expect(labelStyle.leadingDistribution, textTheme.bodyLarge?.leadingDistribution);
-    expect(labelStyle.letterSpacing, textTheme.bodyLarge?.letterSpacing);
-    expect(labelStyle.overflow, textTheme.bodyLarge?.overflow);
-    expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
-    expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
-  });
-
   testWidgets('M3 Chip defaults', (WidgetTester tester) async {
     late TextTheme textTheme;
     final ThemeData lightTheme = ThemeData.light();
@@ -337,7 +260,7 @@ void main() {
     expect(getMaterial(tester).color, null);
     expect(getMaterial(tester).elevation, 0);
     expect(getMaterial(tester).shape, RoundedRectangleBorder(
-      side: BorderSide(color: lightTheme.colorScheme.outline),
+      side: BorderSide(color: lightTheme.colorScheme.outlineVariant),
       borderRadius: BorderRadius.circular(8.0),
     ));
     expect(getIconData(tester).color, lightTheme.colorScheme.primary);
@@ -365,7 +288,7 @@ void main() {
     expect(getMaterial(tester).color, null);
     expect(getMaterial(tester).elevation, 0);
     expect(getMaterial(tester).shape, RoundedRectangleBorder(
-      side: BorderSide(color: darkTheme.colorScheme.outline),
+      side: BorderSide(color: darkTheme.colorScheme.outlineVariant),
       borderRadius: BorderRadius.circular(8.0),
     ));
     expect(getIconData(tester).color, darkTheme.colorScheme.primary);
@@ -2971,7 +2894,7 @@ void main() {
                             children: <TestSemantics>[
                               TestSemantics(
                                 tooltip: 'Delete',
-                                actions: <SemanticsAction>[SemanticsAction.tap],
+                                actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                                 textDirection: TextDirection.ltr,
                                 flags: <SemanticsFlag>[
                                   SemanticsFlag.isButton,
@@ -3030,7 +2953,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                           ),
                         ],
                       ),
@@ -3088,7 +3011,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                           ),
                         ],
                       ),
@@ -3141,7 +3064,7 @@ void main() {
                               SemanticsFlag.isFocusable,
                               SemanticsFlag.isSelected,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                           ),
                         ],
                       ),
@@ -3295,7 +3218,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                           ),
                         ],
                       ),
@@ -4484,7 +4407,7 @@ void main() {
     expect(box.size, equals(const Size(128, 32.0 + 16.0)));
     expect(textBox.size, equals(const Size(56, 14)));
     expect(iconBox.size, equals(const Size(18, 18)));
-    expect(avatarBox.size, equals(const Size(24, 24)));
+    expect(avatarBox.size, equals(const Size(18, 18)));
     expect(textBox.top, equals(17));
     expect(box.bottom - textBox.bottom, equals(17));
     expect(textBox.left, equals(372));
@@ -4499,7 +4422,7 @@ void main() {
     expect(box.size, equals(const Size(128, 60)));
     expect(textBox.size, equals(const Size(56, 14)));
     expect(iconBox.size, equals(const Size(18, 18)));
-    expect(avatarBox.size, equals(const Size(24, 24)));
+    expect(avatarBox.size, equals(const Size(18, 18)));
     expect(textBox.top, equals(23));
     expect(box.bottom - textBox.bottom, equals(23));
     expect(textBox.left, equals(372));
@@ -4514,7 +4437,7 @@ void main() {
     expect(box.size, equals(const Size(128, 36)));
     expect(textBox.size, equals(const Size(56, 14)));
     expect(iconBox.size, equals(const Size(18, 18)));
-    expect(avatarBox.size, equals(const Size(24, 24)));
+    expect(avatarBox.size, equals(const Size(18, 18)));
     expect(textBox.top, equals(11));
     expect(box.bottom - textBox.bottom, equals(11));
     expect(textBox.left, equals(372));
@@ -4531,7 +4454,7 @@ void main() {
     expect(box.size, equals(const Size(128, 36)));
     expect(textBox.size, equals(const Size(56, 14)));
     expect(iconBox.size, equals(const Size(18, 18)));
-    expect(avatarBox.size, equals(const Size(24, 24)));
+    expect(avatarBox.size, equals(const Size(18, 18)));
     expect(textBox.top, equals(11));
     expect(box.bottom - textBox.bottom, equals(11));
     expect(textBox.left, equals(372));
@@ -4799,7 +4722,7 @@ void main() {
     ));
     final ShapeDecoration decoration = ink.decoration! as ShapeDecoration;
     expect(decoration.color, backgroundColor);
-    expect(decoration.shape, shape.copyWith(side: BorderSide(color: theme.colorScheme.outline)));
+    expect(decoration.shape, shape.copyWith(side: BorderSide(color: theme.colorScheme.outlineVariant)));
   });
 
   testWidgets('Chip highlight color is drawn on top of the backgroundColor', (WidgetTester tester) async {
@@ -4987,7 +4910,7 @@ void main() {
     // Chip should have the default side.
     expect(
       getMaterial(tester).shape,
-      StadiumBorder(side: BorderSide(color: theme.colorScheme.outline)),
+      StadiumBorder(side: BorderSide(color: theme.colorScheme.outlineVariant)),
     );
   });
 
@@ -5489,9 +5412,9 @@ void main() {
       expect(getMaterial(tester).color, null);
       expect(getMaterial(tester).elevation, 0);
       expect(getMaterial(tester).shape, const StadiumBorder());
-      expect(getIconData(tester).color?.value, 0xffffffff);
+      expect(getIconData(tester).color, const Color(0xdd000000));
       expect(getIconData(tester).opacity, null);
-      expect(getIconData(tester).size, null);
+      expect(getIconData(tester).size, 18.0);
 
       TextStyle labelStyle = getLabelStyle(tester, 'Chip A').style;
       expect(labelStyle.color?.value, 0xde000000);
@@ -5518,7 +5441,7 @@ void main() {
       expect(getMaterial(tester).shape, const StadiumBorder());
       expect(getIconData(tester).color?.value, 0xffffffff);
       expect(getIconData(tester).opacity, null);
-      expect(getIconData(tester).size, null);
+      expect(getIconData(tester).size, 18.0);
 
       labelStyle = getLabelStyle(tester, 'Chip A').style;
       expect(labelStyle.color?.value, 0xdeffffff);
@@ -5792,6 +5715,318 @@ void main() {
     await tester.pumpWidget(wrapForChip(child: RawChip(label: layoutCounter)));
 
     expect(renderLayoutCount.layoutCount, 1);
+  });
+
+  testWidgets('ChipAnimationStyle.enableAnimation overrides chip enable animation duration', (WidgetTester tester) async {
+    const Color disabledColor = Color(0xffff0000);
+    const Color backgroundColor = Color(0xff00ff00);
+    bool enabled = true;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  RawChip(
+                    chipAnimationStyle: ChipAnimationStyle(
+                      enableAnimation: AnimationStyle(
+                        duration: const Duration(milliseconds: 300),
+                        reverseDuration: const Duration(milliseconds: 150),
+                      ),
+                    ),
+                    isEnabled: enabled,
+                    disabledColor: disabledColor,
+                    backgroundColor: backgroundColor,
+                    label: const Text('RawChip'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        enabled = !enabled;
+                      });
+                    },
+                    child: Text('${enabled ? 'Disable' : 'Enable'} Chip'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    final RenderBox materialBox = tester.firstRenderObject<RenderBox>(
+      find.descendant(
+        of: find.byType(RawChip),
+        matching: find.byType(CustomPaint),
+      ),
+    );
+
+    // Test background color when the chip is enabled.
+    expect(materialBox, paints..rrect(color: backgroundColor));
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Disable Chip'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 75));
+
+    expect(materialBox, paints..rrect(color: const Color(0x80ff0000)));
+
+    await tester.pump(const Duration(milliseconds: 75));
+
+    // Test background color when the chip is disabled.
+    expect(materialBox, paints..rrect(color: disabledColor));
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Enable Chip'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+
+    expect(materialBox, paints..rrect(color: const Color(0x8000ff00)));
+
+    await tester.pump(const Duration(milliseconds: 150));
+
+    // Test background color when the chip is enabled.
+    expect(materialBox, paints..rrect(color: backgroundColor));
+  });
+
+  testWidgets('ChipAnimationStyle.selectAnimation overrides chip selection animation duration', (WidgetTester tester) async {
+    const Color backgroundColor = Color(0xff00ff00);
+    const Color selectedColor = Color(0xff0000ff);
+    bool selected = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  RawChip(
+                    chipAnimationStyle: ChipAnimationStyle(
+                      selectAnimation: AnimationStyle(
+                        duration: const Duration(milliseconds: 600),
+                        reverseDuration: const Duration(milliseconds: 300),
+                      ),
+                    ),
+                    backgroundColor: backgroundColor,
+                    selectedColor: selectedColor,
+                    selected: selected,
+                    onSelected: (bool value) {},
+                    label: const Text('RawChip'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        selected = !selected;
+                      });
+                    },
+                    child: Text('${selected ? 'Unselect' : 'Select'} Chip'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    final RenderBox materialBox = tester.firstRenderObject<RenderBox>(
+      find.descendant(
+        of: find.byType(RawChip),
+        matching: find.byType(CustomPaint),
+      ),
+    );
+
+    // Test background color when the chip is unselected.
+    expect(materialBox, paints..rrect(color: backgroundColor));
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Select Chip'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(materialBox, paints..rrect(color: const Color(0xc60000ff)));
+
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Test background color when the chip is selected.
+    expect(materialBox, paints..rrect(color: selectedColor));
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Unselect Chip'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+
+    expect(materialBox, paints..rrect(color: const Color(0x3900ff00)));
+
+    await tester.pump(const Duration(milliseconds: 150));
+
+    // Test background color when the chip is unselected.
+    expect(materialBox, paints..rrect(color: backgroundColor));
+  });
+
+  testWidgets('ChipAnimationStyle.avatarDrawerAnimation overrides chip avatar animation duration', (WidgetTester tester) async {
+    const Color checkmarkColor = Color(0xffff0000);
+    bool selected = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  RawChip(
+                    chipAnimationStyle: ChipAnimationStyle(
+                      avatarDrawerAnimation: AnimationStyle(
+                        duration: const Duration(milliseconds: 800),
+                        reverseDuration: const Duration(milliseconds: 400),
+                      ),
+                    ),
+                    checkmarkColor: checkmarkColor,
+                    selected: selected,
+                    onSelected: (bool value) {},
+                    label: const Text('RawChip'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        selected = !selected;
+                      });
+                    },
+                    child: Text('${selected ? 'Unselect' : 'Select'} Chip'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    final RenderBox materialBox = tester.firstRenderObject<RenderBox>(
+      find.descendant(
+        of: find.byType(RawChip),
+        matching: find.byType(CustomPaint),
+      ),
+    );
+
+    // Test the chechmark is not visible yet.
+    expect(materialBox, isNot(paints..path(color:checkmarkColor)));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(132.6, 0.1));
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Select Chip'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(materialBox, paints..path(color: checkmarkColor));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(148.2, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // Test the checkmark is fully visible.
+    expect(materialBox, paints..path(color: checkmarkColor));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(152.6, 0.1));
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Unselect Chip'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(materialBox, isNot(paints..path(color:checkmarkColor)));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(148.2, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // Test if checkmark is removed.
+    expect(materialBox, isNot(paints..path(color:checkmarkColor)));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(132.6, 0.1));
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+
+  testWidgets('ChipAnimationStyle.deleteDrawerAnimation overrides chip delete icon animation duration', (WidgetTester tester) async {
+    bool showDeleteIcon = false;
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  RawChip(
+                    chipAnimationStyle: ChipAnimationStyle(
+                      deleteDrawerAnimation: AnimationStyle(
+                        duration: const Duration(milliseconds: 500),
+                        reverseDuration: const Duration(milliseconds: 250),
+                      ),
+                    ),
+                    onDeleted: showDeleteIcon ? () {} : null,
+                    label: const Text('RawChip'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        showDeleteIcon = !showDeleteIcon;
+                      });
+                    },
+                    child: Text('${showDeleteIcon ? 'Hide' : 'Show'} delete icon'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    // Test the delete icon is not visible yet.
+    expect(find.byIcon(Icons.cancel), findsNothing);
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(132.6, 0.1));
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Show delete icon'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(find.byIcon(Icons.cancel), findsOneWidget);
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(148.2, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 250));
+
+    // Test the delete icon is fully visible.
+    expect(find.byIcon(Icons.cancel), findsOneWidget);
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(152.6, 0.1));
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Hide delete icon'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 125));
+
+    expect(find.byIcon(Icons.cancel), findsOneWidget);
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(148.2, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 125));
+
+    // Test if delete icon is removed.
+    expect(find.byIcon(Icons.cancel), findsNothing);
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(132.6, 0.1));
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+
+  testWidgets('Chip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
+    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+      enableAnimation: AnimationStyle.noAnimation,
+      selectAnimation: AnimationStyle(duration: Durations.long3),
+    );
+
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: Chip(
+          chipAnimationStyle: chipAnimationStyle,
+          label: const Text('Chip'),
+        ),
+      ),
+    ));
+
+    expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
   });
 }
 

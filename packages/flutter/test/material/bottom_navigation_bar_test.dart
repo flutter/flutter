@@ -14,7 +14,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import '../widgets/feedback_tester.dart';
@@ -2109,9 +2108,11 @@ void main() {
       matchesSemantics(
         label: 'AC\nTab 1 of 3',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2119,8 +2120,10 @@ void main() {
       matchesSemantics(
         label: 'Alarm\nTab 2 of 3',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2128,8 +2131,10 @@ void main() {
       matchesSemantics(
         label: 'Hot Tub\nTab 3 of 3',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -2163,9 +2168,11 @@ void main() {
       matchesSemantics(
         label: 'AC\nTab 1 of 3',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2173,8 +2180,10 @@ void main() {
       matchesSemantics(
         label: 'Alarm\nTab 2 of 3',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2182,16 +2191,15 @@ void main() {
       matchesSemantics(
         label: 'Hot Tub\nTab 3 of 3',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
 
-  testWidgets('BottomNavigationBar handles items.length changes',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar handles items.length changes', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/10322
 
     Widget buildFrame(int itemCount) {
@@ -2326,10 +2334,7 @@ void main() {
       );
     }
     for (int pump = 1; pump < 9; pump++) {
-      testWidgets('pump $pump',
-        // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-        experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']).withCreationStackTrace(),
-        (WidgetTester tester) async {
+      testWidgets('pump $pump', (WidgetTester tester) async {
         await tester.pumpWidget(runTest());
         await tester.tap(find.text('Green'));
 
@@ -2519,9 +2524,11 @@ void main() {
       matchesSemantics(
         label: 'Red\nTab 1 of 2',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2529,8 +2536,10 @@ void main() {
       matchesSemantics(
         label: 'Green\nTab 2 of 2',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -2562,9 +2571,11 @@ void main() {
       matchesSemantics(
         label: 'Red\nTab 1 of 2',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2572,8 +2583,10 @@ void main() {
       matchesSemantics(
         label: 'Green\nTab 2 of 2',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -2751,16 +2764,20 @@ void main() {
                           children: <TestSemantics>[
                             TestSemantics(
                               flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
                                 SemanticsFlag.isSelected,
                                 SemanticsFlag.isFocusable,
                               ],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                               label: 'A\nTab 1 of 2',
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
-                              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                                SemanticsFlag.isFocusable,
+                              ],
+                              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                               label: 'B\nTab 2 of 2',
                               textDirection: TextDirection.ltr,
                             ),

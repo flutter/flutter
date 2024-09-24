@@ -1,14 +1,16 @@
 ## Testing on Emulators in the Devicelab
+
 While the Devicelab is typically for testing on Devices we have added support so that developers can now test Android changes via the LUCI recipes on an Android Emulator.
 
-You can specify a new test via the .ci.yaml file in the repository. This allows the infra framework to run the test automatically with minimal work from the developer.
+You can specify a new test via the `.ci.yaml` file in the repository. This allows the infra framework to run the test automatically with minimal work from the developer.
 
 ### Adding a Brand New Target
+
 Adding a new Devicelab Android Emulator test for Android feature changes requires the following steps:
 
 Starting with the finished target yaml definition:
 
-```
+```yaml
 - name: Linux_android android_defines_test
   recipe: devicelab/devicelab_drone
   presubmit: true
@@ -51,6 +53,7 @@ Starting with the finished target yaml definition:
     f. `timeout` the timeout here is for the time to give the test to run before killing it.
 
 ### Updating an Existing Target
+
 If you want to update an existing target you will only need to add the following changes:
 1. add a `dimensions` field as described above.
 2. Set the `device_type: "none"`.

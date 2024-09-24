@@ -37,7 +37,11 @@ void main() {
     );
 
     flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-    fileSystem.file('.packages').createSync();
+
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
   });
 
   testUsingContext('WebBuilder sets environment on success', () async {
@@ -76,7 +80,6 @@ void main() {
         const WasmCompilerConfig(
           optimizationLevel: 0,
           stripWasm: false,
-          renderer: WebRendererMode.skwasm,
         ),
         const JsCompilerConfig.run(
           nativeNullAssertions: true,
@@ -165,7 +168,7 @@ void main() {
               BuildInfo.debug,
               ServiceWorkerStrategy.offlineFirst,
               compilerConfigs: <WebCompilerConfig>[
-                const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.auto),
+                const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.canvaskit),
               ]
             ),
         throwsToolExit(message: 'Failed to compile application for the Web.'));

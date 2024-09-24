@@ -1,4 +1,4 @@
-### Style guide for Flutter repo
+# Style guide for Flutter repo
 
 ## Summary
 
@@ -17,7 +17,7 @@ project (the framework itself and all our sample code). Flutter application deve
 are welcome to follow this style as well, but this is by no means required. Flutter
 will work regardless of what style is used to author applications that use it.
 
-The engine repository uses https://github.com/flutter/engine/blob/main/CONTRIBUTING.md#style[other style guides for non-Dart code]. The language-neutral sections in this document still apply to engine code, however.
+The engine repository uses [other style guides for non-Dart code](https://github.com/flutter/engine/blob/main/CONTRIBUTING.md#style). The language-neutral sections in this document still apply to engine code, however.
 
 
 ## Overview
@@ -30,12 +30,12 @@ understanding with new team members.
 The primary goal of these style guidelines is to improve code readability so
 that everyone, whether reading the code for the first time or
 maintaining it for years, can quickly determine what the code does.
-Secondary goals are to design systems that are simple, to increase the
-likelihood of catching bugs quickly, and avoiding arguments when there are
+Secondary goals are to design systems that are simple; to increase the
+likelihood of catching bugs quickly; and to avoid arguments when there are
 disagreements over subjective matters.
 
 For anything not covered by this document, check the
-https://www.dartlang.org/guides/language/effective-dart/[Dart style guide]
+[Dart style guide](https://www.dartlang.org/guides/language/effective-dart/)
 for more advice. That document is focused primarily on Dart-specific
 conventions, while this document is more about Flutter conventions.
 
@@ -84,9 +84,8 @@ that now use it), _and_ implement the feature. It's much better to
 take longer to fix a problem properly, than to be the one who fixes
 everything quickly but in a way that will require cleaning up later.
 
-You may hear team members say "embrace the http://www.catb.org/jargon/html/Y/yak-shaving.html[yak
-shave]!". This is
-an encouragement to https://www.youtube.com/watch?v=AbSehcT19u0[take on the larger effort necessary] to perform a
+You may hear team members say "embrace the [yak shave](http://www.catb.org/jargon/html/Y/yak-shaving.html)!". This is
+an encouragement to [take on the larger effort necessary](https://www.youtube.com/watch?v=AbSehcT19u0) to perform a
 proper fix for a problem rather than just applying a band-aid.
 
 
@@ -217,7 +216,7 @@ features that are unique to one platform or another are unavailable.
 For Flutter, we want to avoid this by explicitly aiming to be the best way
 to develop for each platform individually. Our ability to be used cross-
 platform is secondary to our ability to be used on each platform. For example,
-https://master-api.flutter.dev/flutter/services/TextInputAction-class.html[TextInputAction]
+[TextInputAction](https://master-api.flutter.dev/flutter/services/TextInputAction-class.html)
 has values that only make sense on some platforms. Similarly, our platform
 channel mechanism is designed to allow separate extensions to be created on
 each platform.
@@ -364,13 +363,13 @@ widget for that rather than updating the existing buttons to have the new style.
 
 ### Code that is not copyrighted "The Flutter Authors"
 
-All code in all Flutter repositories must be contributed by developers who have signed https://cla.developers.google.com/[the Google CLA], and must be licensed using our normal BSD license with a copyright referencing "The Flutter Authors", except if it is "third party code".
+All code in all Flutter repositories must be contributed by developers who have signed [the Google CLA](https://cla.developers.google.com/), and must be licensed using our normal BSD license with a copyright referencing "The Flutter Authors", except if it is "third party code".
 
 "Third party code" that is not part of a Dart package must be in a subdirectory of a `third_party` directory at the root of the relevant repository, and the subdirectory in question must contain a `LICENSE` file that details the license covering that code and a `README` describing the provenance of that code.
 
-"Third party code" that is part of a Dart package and is not Dart code must be in a subdirectory of a `third_party` directory at the root of the package, and the subdirectory in question must contain a `LICENSE` file that details the license covering that code and a `README` describing the provenance of that code. The license must then also be duplicated into the package's `LICENSE` file using the syntax described in the https://master-api.flutter.dev/flutter/foundation/LicenseRegistry-class.html[LicenseRegistry] API docs.
+"Third party code" that is part of a Dart package and is not Dart code must be in a subdirectory of a `third_party` directory at the root of the package, and the subdirectory in question must contain a `LICENSE` file that details the license covering that code and a `README` describing the provenance of that code. The license must then also be duplicated into the package's `LICENSE` file using the syntax described in the [LicenseRegistry](https://master-api.flutter.dev/flutter/foundation/LicenseRegistry-class.html) API docs.
 
-"Third party code" that is part of a Dart package and is Dart code must be in a subdirectory of the package's `lib/src/third_party` directory, and the subdirectory in question must contain a `LICENSE` file that details the license covering that code and a `README` describing the provenance of that code. The license must then also be duplicated into the package's `LICENSE` file using the syntax described in the https://master-api.flutter.dev/flutter/foundation/LicenseRegistry-class.html[LicenseRegistry] API docs.
+"Third party code" that is part of a Dart package and is Dart code must be in a subdirectory of the package's `lib/src/third_party` directory, and the subdirectory in question must contain a `LICENSE` file that details the license covering that code and a `README` describing the provenance of that code. The license must then also be duplicated into the package's `LICENSE` file using the syntax described in the [LicenseRegistry](https://master-api.flutter.dev/flutter/foundation/LicenseRegistry-class.html) API docs.
 
 All licenses included in this manner must have been reviewed and determined to be legally acceptable licenses.
 
@@ -386,7 +385,7 @@ of our APIs in other languages, such as ObjectiveC and Java. All public members 
 libraries should have a documentation.
 
 In general, follow the
-https://www.dartlang.org/effective-dart/documentation/#doc-comments[Dart documentation guide]
+[Dart documentation guide](https://www.dartlang.org/effective-dart/documentation/#doc-comments)
 except where that would contradict this page.
 
 ### Answer your own questions straight away
@@ -422,7 +421,7 @@ Avoid checking in such documentation, because it is no better than no
 documentation but will prevent us from noticing that the identifier is
 not actually documented.
 
-Example (from http://docs.flutter.io/flutter/material/CircleAvatar-class.html[`CircleAvatar`]):
+Example (from [`CircleAvatar`](http://docs.flutter.io/flutter/material/CircleAvatar-class.html)):
 
 ```dart
 // BAD:
@@ -478,7 +477,7 @@ Unfortunately, the reality is that everyone starts knowing nothing, and we do no
 
 For this reason, avoid using terms without first defining them, unless you are linking to more fundamental documentation that defines that term without reference to the API you are documenting.
 
-For example, a fancy widget in the Material library can refer to the `StatefulWidget` documentation and assume that the reader either knows about the `StatefulWidget` class, or can learn about it by following the link and then later returning to the documentation for the fancy widget. However, the documentation for the `StatefulWidget` class should avoid assuming that the reader knows what a `State` class is, and should avoid defering to it for its definition, because `State` could is likely to defer back to `StatefulWidget` and the reader would be stuck in a loop unable to grasp the basic principles. This is the documentation equivalent of a bootstrapping problem.
+For example, a fancy widget in the Material library can refer to the `StatefulWidget` documentation and assume that the reader either knows about the `StatefulWidget` class, or can learn about it by following the link and then later returning to the documentation for the fancy widget. However, the documentation for the `StatefulWidget` class should avoid assuming that the reader knows what a `State` class is, and should avoid deferring to it for its definition, because `State` could is likely to defer back to `StatefulWidget` and the reader would be stuck in a loop unable to grasp the basic principles. This is the documentation equivalent of a bootstrapping problem.
 
 Another way to express this is that API documentation should follow a similar layering philosophy as code. The goal of documentation is not just to act as a refresher for experts, but to act as a tutorial for new developers.
 
@@ -538,7 +537,7 @@ Example:
 abstract class Picture ...
 ```
 
-You can also use "See also" links, is in:
+You can also use "See also" links, as in:
 
 ```dart
 /// See also:
@@ -606,15 +605,15 @@ By definition, if they are looking at the documentation, they are not finding it
 
 Sample code helps developers learn your API quickly. Writing sample code also helps you think through how your API is going to be used by app developers.
 
-Sample code should go in a documentation comment that typically begins with `/// {@tool dartpad}`, and ends with `/// {@end-tool}`, with the example source and corresponding tests placed in a file under https://github.com/flutter/flutter/blob/main/examples/api[the API examples directory]. This will then be checked by automated tools, and formatted for display on the API documentation web site https://api.flutter.dev[api.flutter.dev]. For details on how to write sample code, see https://github.com/flutter/flutter/blob/main/examples/api/README.md#authoring[the API example documentation].
+Sample code should go in a documentation comment that typically begins with `/// {@tool dartpad}`, and ends with `/// {@end-tool}`, with the example source and corresponding tests placed in a file under [the API examples directory](https://github.com/flutter/flutter/blob/main/examples/api). This will then be checked by automated tools, and formatted for display on the API documentation web site [api.flutter.dev](https://api.flutter.dev). For details on how to write sample code, see [the API example documentation](https://github.com/flutter/flutter/blob/main/examples/api/README.md#authoring).
 
 #### Provide full application samples.
 
 Our UX research has shown that developers prefer to see examples that are in the context of an entire app. So, whenever it makes sense, provide an example that can be presented as part of an entire application instead of just a snippet that uses the `{@tool snippet}` or &#96;&#96;&#96;dart ... &#96;&#96;&#96; indicators.
 
-An application sample can be created using the `{@tool dartpad}` ... `{@end-tool}` or `{@tool sample}` ... `{@end-tool}` dartdoc indicators. See https://github.com/flutter/flutter/blob/main/examples/api/README.md#authoring[here] for more details about writing these kinds of examples.
+An application sample can be created using the `{@tool dartpad}` ... `{@end-tool}` or `{@tool sample}` ... `{@end-tool}` dartdoc indicators. See [here](https://github.com/flutter/flutter/blob/main/examples/api/README.md#authoring) for more details about writing these kinds of examples.
 
-Dartpad examples (those using the dartdoc `{@tool dartpad}` indicator) will be presented on the https://api.flutter.dev[API documentation website] as an in-page executable and editable example. This allows developers to interact with the example right there on the page, and is the preferred form of example. Here is https://api.flutter.dev/flutter/widgets/AnimatedSwitcher-class.html#widgets.AnimatedSwitcher.1[one such example].
+Dartpad examples (those using the dartdoc `{@tool dartpad}` indicator) will be presented on the [API documentation website](https://api.flutter.dev) as an in-page executable and editable example. This allows developers to interact with the example right there on the page, and is the preferred form of example. Here is [one such example](https://api.flutter.dev/flutter/widgets/AnimatedSwitcher-class.html#widgets.AnimatedSwitcher.1).
 
 For examples that don't make sense in a web page (for example, code that interacts with a particular platform feature), application examples (using the dartdoc `{@tool sample}` indicator) are preferred, and will be presented on the API documentation website along with information about how to instantiate the example as an application that can be run.
 
@@ -628,14 +627,14 @@ Examples:
 
 * A diagram for the AppBar widget
 
-image::https://flutter.github.io/assets-for-api-docs/assets/material/app_bar.png[]
+![AppBar diagram](https://flutter.github.io/assets-for-api-docs/assets/material/app_bar.png)
 
 
 * A screenshot for the Card widget
 
-image::https://user-images.githubusercontent.com/348942/28338544-2c3681b8-6bbe-11e7-967d-fcd7c830bf53.png[]
+![Card screenshot](https://user-images.githubusercontent.com/348942/28338544-2c3681b8-6bbe-11e7-967d-fcd7c830bf53.png)
 
-When creating diagrams, make sure to provide alternative text https://html.spec.whatwg.org/multipage/images.html#alt[as described in the HTML specification].
+When creating diagrams, make sure to provide alternative text [as described in the HTML specification](https://html.spec.whatwg.org/multipage/images.html#alt).
 
 
 ### Link to Widget of the Week videos
@@ -711,7 +710,7 @@ The first paragraph of any dartdoc section must be a short self-contained senten
 and meaning of the item being documented. Subsequent paragraphs then must elaborate. Avoid having the first paragraph have multiple sentences. (This is because the first paragraph gets extracted and used in tables of
 contents, etc, and so has to be able to stand alone and not take up a lot of room.)
 
-When referencing a parameter, use backticks. However, when referencing a parameter that also corresponds to a property, use square brackets instead. (This contradicts the Dart style guide, which says to use square brackets for both. We do this because of https://github.com/dart-lang/dartdoc/issues/1486[dartdoc issue 1486]. Currently, there's no way to unambiguously reference a parameter. We want to avoid cases where a parameter that happens to be named the same as a property despite having no relationship to that property gets linked to the property.)
+When referencing a parameter, use backticks. However, when referencing a parameter that also corresponds to a property, use square brackets instead. (This contradicts the Dart style guide, which says to use square brackets for both. We do this because of [dartdoc issue 1486](https://github.com/dart-lang/dartdoc/issues/1486). Currently, there's no way to unambiguously reference a parameter. We want to avoid cases where a parameter that happens to be named the same as a property despite having no relationship to that property gets linked to the property.)
 
 ```dart
 // GOOD
@@ -753,13 +752,13 @@ abstract class RenderBox extends RenderObject {
     // more complicated asserts:
     assert(() {
       final RenderObject parent = this.parent;
-      if (owner.debugDoingLayout)
-        return (RenderObject.debugActiveLayout == parent) &&
-            parent.debugDoingThisLayout;
-      if (owner.debugDoingPaint)
-        return ((RenderObject.debugActivePaint == parent) &&
-                parent.debugDoingThisPaint) ||
-            ((RenderObject.debugActivePaint == this) && debugDoingThisPaint);
+      if (owner.debugDoingLayout) {
+        return (RenderObject.debugActiveLayout == parent) && parent.debugDoingThisLayout;
+      }
+      if (owner.debugDoingPaint) {
+        return ((RenderObject.debugActivePaint == parent) && parent.debugDoingThisPaint)
+            || ((RenderObject.debugActivePaint == this)   && debugDoingThisPaint);
+      }
       assert(parent == this.parent);
       return false;
     });
@@ -794,7 +793,7 @@ global constant.
 
 As a general rule, when you have a lot of constants, wrap them in a
 class. For examples of this, see
-https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/material/colors.dart[lib/src/material/colors.dart].
+[lib/src/material/colors.dart](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/material/colors.dart).
 
 
 ### Avoid using `if` chains or `?:` or `==` with enum values
@@ -835,7 +834,7 @@ than "lasagna" code (where each section of the code is cleanly layered and separ
 ### Avoid using `extension`.
 
 Extension methods are confusing to document and discover. To an end developer,
-they appear no different than the built in API of the class, and discovering
+they appear no different than the built-in API of the class, and discovering
 the documentation and implementation of an extension is more challenging than
 for class members.
 
@@ -867,7 +866,7 @@ Expando objects tend to invite code that is hard to understand because one canno
 
 ### Avoid using `@visibleForTesting`
 
-The https://api.flutter.dev/flutter/meta/visibleForTesting-constant.html[`@visibleForTesting`] annotation marks a public API so that developers that have not disabled the `invalid_use_of_visible_for_testing_member` analyzer error get a warning when they use this API outside of a `test` directory.
+The [`@visibleForTesting`](https://api.flutter.dev/flutter/meta/visibleForTesting-constant.html) annotation marks a public API so that developers that have not disabled the `invalid_use_of_visible_for_testing_member` analyzer error get a warning when they use this API outside of a `test` directory.
 
 This means that the API has to be treated as being public (nothing prevents a developer from using the API even in non-test code), meaning it must be designed to be a public API, it must be documented, it must be tested, etc. At which point, there's really no reason not to just make it a public API. If anything, the use of `@visibleForTesting` becomes merely a crutch to convince ourselves that it's ok that we're making something public that we should really not have made public.
 
@@ -929,8 +928,9 @@ TheType get theProperty => _theProperty;
 TheType _theProperty;
 void set theProperty(TheType value) {
   assert(value != null);
-  if (_theProperty == value)
+  if (_theProperty == value) {
     return;
+  }
   _theProperty = value;
   markNeedsWhatever(); // the method to mark the object dirty
 }
@@ -986,7 +986,7 @@ you should use `@immutable` on the class hierarchy in question.
 
 ### Override `toString`
 
-Use `https://api.flutter.dev/flutter/foundation/Diagnosticable-mixin.html[Diagnosticable]` (rather than directly overriding `toString`) on all but the most trivial classes. That allows us to inspect the object from https://pub.dartlang.org/packages/devtools[devtools] and IDEs.
+Use [`Diagnosticable`](https://api.flutter.dev/flutter/foundation/Diagnosticable-mixin.html) (rather than directly overriding `toString`) on all but the most trivial classes. That allows us to inspect the object from [devtools](https://pub.dartlang.org/packages/devtools) and IDEs.
 
 For trivial classes, override `toString` as follows, to aid in debugging:
 
@@ -1058,7 +1058,7 @@ suite. (It also makes developing the tests faster because you can run the test f
 
 ### Avoid using `pumpAndSettle`
 
-As per the API docs for https://main-api.flutter.dev/flutter/flutter_test/WidgetController/pumpAndSettle.html[pumpAndSettle], prefer using explicit https://main-api.flutter.dev/flutter/flutter_test/WidgetController/pump.html[`pump`] calls rather than `pumpAndSettle`.
+As per the API docs for [pumpAndSettle](https://main-api.flutter.dev/flutter/flutter_test/WidgetController/pumpAndSettle.html), prefer using explicit [`pump`](https://main-api.flutter.dev/flutter/flutter_test/WidgetController/pump.html) calls rather than `pumpAndSettle`.
 
 Using `pumpAndSettle`, especially without checking its return value, makes it very easy for bugs to sneak in where we trigger animations across multiple frames instead of immediately. It is almost always the case that a call to `pumpAndSettle` is more strictly correctly written as two `pump` calls, one to trigger the animations and one (with a duration) to jump to the point after the animations.
 
@@ -1074,7 +1074,7 @@ const double kParagraphSpacing = 1.5;
 const String kSaveButtonTitle = 'Save';
 ```
 
-However, where possible avoid global constants. Rather than `kDefaultButtonColor`, consider `Button.defaultColor`. If necessary, consider creating a class with a private constructor to hold relevant constants.
+However, where possible avoid global constants. Rather than `kDefaultButtonColor`, consider `Button.defaultColor`. If necessary, consider creating an `abstract final class` to hold relevant constants.
 
 
 ### Avoid abbreviations
@@ -1117,7 +1117,7 @@ common callsites for the signature.
 ### Spell words in identifiers and comments correctly
 
 Our primary source of truth for spelling is the
-https://material.google.com/[Material Design Specification].
+[Material Design Specification](https://material.google.com/).
 Our secondary source of truth is dictionaries.
 
 Avoid "cute" spellings. For example, 'colors', not 'colorz'.
@@ -1129,7 +1129,7 @@ Prefer compound words over "cute" spellings to avoid conflicts with reserved wor
 
 ### Capitalize identifiers consistent with their spelling
 
-In general, we use https://dart.dev/guides/language/effective-dart/style#identifiers[Dart's recommendations]'s for naming identifiers. Please consider the following additional guidelines:
+In general, we use [Dart's recommendations](https://dart.dev/guides/language/effective-dart/style#identifiers) for naming identifiers. Please consider the following additional guidelines:
 
 If a word is correctly spelled (according to our sources of truth as described in the previous section) as a single word, then it should not have any inner capitalization or spaces.
 
@@ -1137,7 +1137,7 @@ For examples, prefer `toolbar`, `scrollbar`, but `appBar` ('app bar' in document
 
 Similarly, prefer `offstage` rather than `offStage`.
 
-Avoid using class names with `iOS` when possible. The capitalization of `iOS` is supposed to be exactly that, but that doesn't work well with camelCase and even less with UpperCamelCase; use alternatives like "Cupertino" or "UIKit" instead when possible. If you really really must use "iOS" in an identifier, capitalize it to `IOS`. Whether or not https://dart.dev/guides/language/effective-dart/style#do-capitalize-acronyms-and-abbreviations-longer-than-two-letters-like-words[the two-letter exception] applies to "iOS" is debatable, but `IOS` is consistent with Dart APIs, and the alternatives (`IOs`, `Ios`) are even more jarring. (Previous versions of this guide incorrectly indicated that `Ios` was the correct capitalization when necessary; this form should not be used in new code.)
+Avoid using class names with `iOS` when possible. The capitalization of `iOS` is supposed to be exactly that, but that doesn't work well with camelCase and even less with UpperCamelCase; use alternatives like "Cupertino" or "UIKit" instead when possible. If you really really must use "iOS" in an identifier, capitalize it to `IOS`. Whether or not [the two-letter exception](https://dart.dev/guides/language/effective-dart/style#do-capitalize-acronyms-and-abbreviations-longer-than-two-letters-like-words) applies to "iOS" is debatable, but `IOS` is consistent with Dart APIs, and the alternatives (`IOs`, `Ios`) are even more jarring. (Previous versions of this guide incorrectly indicated that `Ios` was the correct capitalization when necessary; this form should not be used in new code.)
 
 
 ### Avoid double negatives in APIs
@@ -1169,7 +1169,7 @@ documented top-level library intended to be imported by users.
 
 The definition of "New" changes as code grows and time passes. If the code
 needed a replacement version the odds of needing another replacement in the
-future is higher. Instead find a name that represents the idea being being used
+future is higher. Instead find a name that represents the idea being used
 or replaced.
 
 
@@ -1205,13 +1205,13 @@ Example:
 
 TODOs should include the string TODO in all caps, followed by the GitHub username of
 the person with the best _context_ about the problem referenced by the TODO in
-parenthesis. A TODO is not a commitment that the person referenced will fix the
+parentheses. A TODO is not a commitment that the person referenced will fix the
 problem, it is intended to be the person with enough context to explain the problem.
 Thus, when you create a TODO, it is almost always your username that is given.
 
 Including an issue link in a TODO description is required.
 
-_(See also https://github.com/flutter/flutter/issues/37519[#37519],
+_(See also [#37519](https://github.com/flutter/flutter/issues/37519),
 which tracks a proposal to change the syntax of TODOs to not include usernames.)_
 
 ### Comment all `// ignores`
@@ -1250,7 +1250,9 @@ include a link to that issue in the code.
 Generally the closure passed to `setState` should include all the code that changes the state. Sometimes this is not possible because the state changed elsewhere and the `setState` is called in response. In those cases, include a comment in the `setState` closure that explains what the state is that changed.
 
 ```dart
-  setState(() { /* The animation ticked. We use the animation's value in the build method. */ });
+  setState(() {
+    // The animation ticked. We use the animation's value in the build method.
+  });
 ```
 
 
@@ -1262,7 +1264,7 @@ for consistency and readability reasons.
 We do not yet use `dartfmt` (except in flutter/packages).
 Flutter code tends to use patterns that
 the standard Dart formatter does not handle well. We are
-https://github.com/flutter/flutter/issues/2025[working with Dart team] to make `dartfmt` aware of these patterns.
+[working with Dart team](https://github.com/flutter/flutter/issues/2025) to make `dartfmt` aware of these patterns.
 
 
 ### In defense of the extra work that hand-formatting entails
@@ -1329,25 +1331,21 @@ to the superclass.
 
 ```dart
 // one-line constructor example
-abstract class Foo extends StatelessWidget {
-  Foo(this.bar, { Key key, this.child }) : super(key: key);
-  final int bar;
-  final Widget child;
+class ConstantTween<T> extends Tween<T> {
+  ConstantTween(T value) : super(begin: value, end: value);
+
   // ...
 }
 
 // fully expanded constructor example
-abstract class Foo extends StatelessWidget {
-  Foo(
-    this.bar, {
-    Key key,
-    Widget childWidget,
-  }) : child = childWidget,
-       super(
-         key: key,
-       );
-  final int bar;
-  final Widget child;
+class ConstantTween<T> extends Tween<T> {
+  ConstantTween(
+    T value,
+  ) : super(
+        begin: value,
+        end: value,
+      );
+
   // ...
 }
 ```
@@ -1433,8 +1431,6 @@ Example:
     bar,
     baz,
   );
-  foo(bar,
-    baz);
 ```
 
 ### Use a trailing comma for arguments, parameters, and list items, but only if they each have their own line.
@@ -1452,6 +1448,42 @@ foo1(
   baz,
 );
 foo2(bar, baz);
+```
+
+If one of the items is a multi-line callback, collection literal,
+or switch expression, it can be added without a trailing comma.
+
+```dart
+// GOOD:
+foo(
+  bar,
+  baz,
+  switch (value) {
+    true  => ScrollDirection.forward,
+    false => ScrollDirection.reverse,
+    null  => ScrollDirection.idle,
+  },
+);
+
+// also GOOD:
+foo(bar, baz, switch (value) {
+  true  => ScrollDirection.forward,
+  false => ScrollDirection.reverse,
+  null  => ScrollDirection.idle,
+});
+
+// The same applies to collection literals and callbacks:
+foo(<String>[
+  'list item 1',
+  'list item 2',
+  'list item 3',
+]);
+
+Future.delayed(Durations.short1, () {
+  if (mounted && _shouldOpenDrawer) {
+    _drawerController.forward();
+  }
+});
 ```
 
 Whether to put things all on one line or whether to have one line per item is an aesthetic choice. We prefer whatever ends up being most readable. Typically this means that when everything would fit on one line, put it all on one line, otherwise, split it one item to a line.
@@ -1489,17 +1521,6 @@ However, there are exceptions. For example, if there are six back-to-back lists 
   ];
 ```
 
-### Prefer single quotes for strings
-
-Use double quotes for nested strings or (optionally) for strings that contain single quotes.
-For all other strings, use single quotes.
-
-Example:
-
-```dart
-print('Hello ${name.split(" ")[0]}');
-```
-
 
 ### Consider using `=>` for short functions and methods
 
@@ -1521,14 +1542,49 @@ String capitalize(String s) {
 }
 ```
 
-### Use `=>` for inline callbacks that just return literals or switch expressions
+### Use `=>` for getters and callbacks that just return literals or switch expressions
 
-If your code is passing an inline closure that merely returns a list or
-map literal, or a switch expression, or is merely calling another function,
-then if the argument is on its own line, then rather than using braces and a
-return` statement, you can instead use the `=>` form. When doing this, the
-closing `]`, `}`, or `)` bracket will line up with the argument name, for
-named arguments, or the `(` of the argument list, for positional arguments.
+```dart
+// GOOD:
+List<Color> get favorites => <Color>[
+  const Color(0xFF80FFFF),
+  const Color(0xFF00FFF0),
+  const Color(0xFF4000FF),
+  _mysteryColor(),
+];
+
+// GOOD:
+bool get isForwardOrCompleted => switch (status) {
+  AnimationStatus.forward || AnimationStatus.completed => true,
+  AnimationStatus.reverse || AnimationStatus.dismissed => false,
+};
+```
+
+It's important to use discretion, since there are cases where a function body
+is easier to visually parse:
+
+```dart
+// OKAY, but the code is more dense than it could be:
+String? get validated => switch(input[_inputIndex]?.trim()) {
+  final String value when value.isNotEmpty => value,
+  _ => null,
+}
+
+// BETTER (more verbose, but also more readable):
+String? get validated {
+  final String? value = input[_inputIndex]?.trim();
+
+  if (value != null && value.isNotEmpty) {
+    return value;
+  }
+  return null;
+}
+```
+
+If your code is passing an inline closure containing only a `return` statement,
+you can instead use the `=>` form.\
+When doing this, the closing `]`, `}`, or `)` bracket will have the same
+indentation as the line where the callback starts.
 
 For example:
 
@@ -1542,11 +1598,11 @@ For example:
           return <PopupMenuItem<String>>[
             PopupMenuItem<String>(
               value: 'Friends',
-              child: MenuItemWithIcon(Icons.people, 'Friends', '5 new')
+              child: MenuItemWithIcon(Icons.people, 'Friends', '5 new'),
             ),
             PopupMenuItem<String>(
               value: 'Events',
-              child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming')
+              child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming'),
             ),
           ];
         }
@@ -1561,11 +1617,11 @@ For example:
         itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
           PopupMenuItem<String>(
             value: 'Friends',
-            child: MenuItemWithIcon(Icons.people, 'Friends', '5 new')
+            child: MenuItemWithIcon(Icons.people, 'Friends', '5 new'),
           ),
           PopupMenuItem<String>(
             value: 'Events',
-            child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming')
+            child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming'),
           ),
         ]
       );
@@ -1666,60 +1722,6 @@ final List<String> args = <String>[
 
 Use a block (with braces) when a body would wrap onto more than one line (as opposed to using `=>`; the cases where you can use `=>` are discussed in the previous two guidelines).
 
-
-### Separate the 'if' expression from its statement
-
-(This is enforced by the `always_put_control_body_on_new_line` and `curly_braces_in_flow_control_structures` lints.)
-
-Don't put the statement part of an 'if' statement on the same line as
-the expression, even if it is short. (Doing so makes it unobvious that
-there is relevant code there. This is especially important for early
-returns.)
-
-Example:
-
-```dart
-// BAD:
-if (notReady) return;
-
-// GOOD:
-// Use this style for code that is expected to be publicly read by developers
-if (notReady) {
-  return;
-}
-```
-
-If the body is more than one line, or if there is an `else` clause, wrap the body in braces:
-
-```dart
-// BAD:
-if (foo)
-  bar(
-    'baz',
-  );
-
-// BAD:
-if (foo)
-  bar();
-else
-  baz();
-
-// GOOD:
-if (foo) {
-  bar(
-    'baz',
-  );
-}
-
-// GOOD:
-if (foo) {
-  bar();
-} else {
-  baz();
-}
-```
-
-We require bodies to make it very clear where the bodies belong.
 
 ### Align expressions
 
@@ -1835,20 +1837,20 @@ As per normal Dart conventions, a package should have a single import
 that reexports all of its API.
 
 > For example,
-> https://github.com/flutter/flutter/blob/main/packages/flutter/lib/rendering.dart[rendering.dart]
+> [rendering.dart](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/rendering.dart)
 > exports all of lib/src/rendering/*.dart
 
 If a package uses, as part of its exposed API, types that it imports
 from a lower layer, it should reexport those types.
 
 > For example,
-> https://github.com/flutter/flutter/blob/main/packages/flutter/lib/material.dart[material.dart]
+> [material.dart](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/material.dart)
 > reexports everything from
-> https://github.com/flutter/flutter/blob/main/packages/flutter/lib/widgets.dart[widgets.dart].
+> [widgets.dart](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/widgets.dart).
 > Similarly, the latter
-> https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/widgets/basic.dart[reexports]
+> [reexports](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/widgets/basic.dart)
 > many types from
-> https://github.com/flutter/flutter/blob/main/packages/flutter/lib/rendering.dart[rendering.dart],
+> [rendering.dart](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/rendering.dart),
 > such as `BoxConstraints`, that it uses in its API. On the other
 > hand, it does not reexport, say, `RenderProxyBox`, since that is not
 > part of the widgets API.
@@ -1871,7 +1873,7 @@ the features.
 
 ### Import conventions
 
-Under lib/src, for in-folder import use relative import. For cross-folder import,
+Under `lib/src`, for in-folder import, use relative import. For cross-folder import,
 import the entire package with absolute import.
 
 When importing the `rendering.dart` library into higher level libraries,
@@ -1889,7 +1891,7 @@ By convention, `dart:ui` is imported using `import 'dart:ui' show
 level will have done it for you), and as `import 'dart:ui' as ui show
 ...;` for low-level APIs, in both cases listing all the identifiers
 being imported. See
-https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/painting/basic_types.dart[basic_types.dart]
+[basic_types.dart](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/painting/basic_types.dart)
 in the `painting` package for details of which identifiers we import
 which way. Other packages are usually imported undecorated unless they
 have a convention of their own (e.g. `path` is imported `as path`).
@@ -1900,16 +1902,16 @@ The `dart:math` library is always imported `as math`.
 
 As a general rule, if a feature is entirely self-contained (not requiring low-level integration into the Flutter framework) and is not something with universal appeal, we would encourage that that feature be provided as a package.
 
-We try to be very conservative with what we put in the core framework, because there's a high cost to having anything there. We have to commit to supporting it for years to come, we have to document it, test it, create samples, we have to consider everyone's varied desires which they may have as they use the feature, we have to fix bugs. If there's design problems, we may not find out for a long time but then once we do we then have to figure out how to fix them without breaking people, or we have to migrate all our existing widgets to the new architecture, etc.
+We try to be very conservative with what we put in the core framework, because there's a high cost to having anything there. We have to commit to supporting it for years to come, we have to document it, test it, create samples, we have to consider everyone's varied desires which they may have as they use the feature, we have to fix bugs. If there are design problems, we may not find out for a long time but then once we do we then have to figure out how to fix them without breaking downstream code, or we have to migrate all our existing widgets to the new architecture, etc.
 
 Basically, code is expensive. So before we take it, if possible, we like to see if we can prove the code's value. By creating a package, we can see if people use the feature, how they like it, whether it would be useful for the framework, etc, without having to take on the costs.
 
-We have two main kinds of packages that are maintained by the Flutter team, both of which live in https://github.com/flutter/packages[flutter/packages]:
+We have two main kinds of packages that are maintained by the Flutter team, both of which live in [flutter/packages](https://github.com/flutter/packages):
 
 1. Regular packages, which are pure Dart. Packages can also be written and maintained by people outside the Flutter team.
 
 2. Plugin packages, which provide access to platform features and therefore include native code (such as Java or Objective-C) as well as Dart.
 
-You can also consider making an independent package. Packages are published to https://pub.dartlang.org/[pub].
+You can also consider making an independent package. Packages are published to [pub](https://pub.dartlang.org/).
 
 Often once we have made a package we find that that is actually sufficient to solve the problem that the code sets out to solve, and there ends up being no need to bring it into the framework at all.
