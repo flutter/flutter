@@ -120,8 +120,9 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
 
 #if EXPERIMENTAL_CANVAS
     auto skia_cull_rect = SkIRect::MakeWH(cull_rect.width, cull_rect.height);
-    impeller::TextFrameDispatcher collector(aiks_context->GetContentContext(),
-                                            impeller::Matrix());
+    impeller::TextFrameDispatcher collector(
+        aiks_context->GetContentContext(), impeller::Matrix(),
+        impeller::Rect::MakeSize(cull_rect));
     display_list->Dispatch(collector, skia_cull_rect);
 
     impeller::ExperimentalDlDispatcher impeller_dispatcher(

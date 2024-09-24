@@ -171,8 +171,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
         surface->SetFrameBoundary(surface_frame.submit_info().frame_boundary);
 
 #if EXPERIMENTAL_CANVAS
-        impeller::TextFrameDispatcher collector(aiks_context->GetContentContext(),
-                                                impeller::Matrix());
+        impeller::TextFrameDispatcher collector(aiks_context->GetContentContext(),             //
+                                                impeller::Matrix(),                            //
+                                                impeller::Rect::MakeSize(cull_rect.GetSize())  //
+        );
         display_list->Dispatch(collector, sk_cull_rect);
 
         impeller::ExperimentalDlDispatcher impeller_dispatcher(
@@ -299,8 +301,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
         impeller::IRect cull_rect = surface->coverage();
         SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.GetWidth(), cull_rect.GetHeight());
 #if EXPERIMENTAL_CANVAS
-        impeller::TextFrameDispatcher collector(aiks_context->GetContentContext(),
-                                                impeller::Matrix());
+        impeller::TextFrameDispatcher collector(aiks_context->GetContentContext(),             //
+                                                impeller::Matrix(),                            //
+                                                impeller::Rect::MakeSize(cull_rect.GetSize())  //
+        );
         display_list->Dispatch(collector, sk_cull_rect);
         impeller::RenderTarget render_target = surface->GetTargetRenderPassDescriptor();
         impeller::ExperimentalDlDispatcher impeller_dispatcher(

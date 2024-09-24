@@ -90,7 +90,10 @@ bool AiksPlayground::OpenPlaygroundHere(
       [&renderer, &callback](RenderTarget& render_target) -> bool {
 #if EXPERIMENTAL_CANVAS
         auto display_list = callback();
-        TextFrameDispatcher collector(renderer.GetContentContext(), Matrix());
+        TextFrameDispatcher collector(renderer.GetContentContext(),  //
+                                      Matrix(),                      //
+                                      Rect::MakeMaximum()            //
+        );
         display_list->Dispatch(collector);
 
         ExperimentalDlDispatcher impeller_dispatcher(
