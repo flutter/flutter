@@ -783,12 +783,6 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
-/// The [DelegatedTransition] for a Zoom page transition.
-class ZoomDelegatedTransition extends DelegatedTransition {
-  /// Creates a Zoom delegated transtion.
-  const ZoomDelegatedTransition({required super.builder});
-}
-
 /// Used by [PageTransitionsTheme] to define a horizontal [MaterialPageRoute]
 /// page transition animation that matches native iOS page transitions.
 ///

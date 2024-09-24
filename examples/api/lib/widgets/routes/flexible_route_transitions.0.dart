@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 /// This sample demonstrates creating a custom page transition that is able to
 /// override the outgoing transition of the route behind it in the navigation
-/// stack using [DelegatedTransition].
+/// stack using [DelegatedTransitionBuilder].
 
 void main() {
   runApp(const FlexibleRouteTransitionsApp());
@@ -102,7 +102,7 @@ class _VerticalTransitionPageRoute<T> extends PageRoute<T> {
   final WidgetBuilder builder;
 
   @override
-  DelegatedTransition? get delegatedTransition => _VerticalPageTransition._delegatedTransition;
+  DelegatedTransitionBuilder? get delegatedTransition => _VerticalPageTransition._delegatedTransitionBuilder;
 
   @override
   Color? get barrierColor => const Color(0x00000000);
@@ -191,11 +191,13 @@ class _VerticalPageTransition extends StatelessWidget {
   // When the _VerticalTransitionPageRoute animates onto or off of the navigation
   // stack, this transition is given to the route below it so that they animate in
   // sync.
-  static const VerticalDelegatedTransition _delegatedTransition = VerticalDelegatedTransition(
-    builder: _delegatedTransitionBuilder,
-  );
-
-  static Widget _delegatedTransitionBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
+  static Widget _delegatedTransitionBuilder(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    bool allowSnapshotting,
+    Widget? child
+  ) {
     final Animatable<Offset> tween = Tween<Offset>(
       begin: Offset.zero,
       end: const Offset(0.0, -1.0),
@@ -225,8 +227,4 @@ class _VerticalPageTransition extends StatelessWidget {
       ),
     );
   }
-}
-
-class VerticalDelegatedTransition extends DelegatedTransition {
-  const VerticalDelegatedTransition({required super.builder});
 }

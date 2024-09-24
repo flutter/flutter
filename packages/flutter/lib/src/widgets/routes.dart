@@ -1417,17 +1417,39 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     return child;
   }
 
-  /// The [DelegatedTransition] provided to the route below this one in the
+  /// The [DelegatedTransitionBuilder] provided to the route below this one in the
   /// navigation stack.
   ///
-  /// {@macro flutter.widgets.delegatedTransition}
+  /// {@template flutter.widgets.delegatedTransition}
+  /// Used for the purposes of coordinating transitions between two routes with
+  /// different route transitions. When a route is added to the stack, the original
+  /// topmost route will look for this transition, and if available, it will use
+  /// the `delegatedTransition` from the incoming transition to animate off the
+  /// screen.
+  /// {@endtemplate}
   ///
   /// The [ModalRoute] receiving this transition will set it to their
   /// [receivedTransition] property.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows an app that uses three different page transitions, a
+  /// Material Zoom transition, the standard Cupertino sliding transition, and a
+  /// custom vertical transition. All of the page routes are able to inform the
+  /// previous page how to transition off the screen to sync with the new page.
+  ///
+  /// ** See code in examples/api/lib/widgets/routes/flexible_route_transitions.0.dart **
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
+  /// This sample shows an app that uses the same transitions as the previous
+  /// sample, this time in a [MaterialApp.router].
+  ///
+  /// ** See code in examples/api/lib/widgets/routes/flexible_route_transitions.1.dart **
+  /// {@end-tool}
   DelegatedTransitionBuilder? get delegatedTransition => null;
 
-  /// The [DelegatedTransition] received from the route above this one in the
-  /// navigation stack.
+  /// The [DelegatedTransitionBuilder] received from the route above this one in
+  /// the navigation stack.
   ///
   /// {@macro flutter.widgets.delegatedTransition}
   ///
@@ -1437,7 +1459,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// wrap the route content through [buildFlexTransitions].
   DelegatedTransitionBuilder? receivedTransition;
 
-  /// Wraps the transitions of this route with a [DelegatedTransition], when
+  /// Wraps the transitions of this route with a [DelegatedTransitionBuilder], when
   /// [receivedTransition] is not null.
   ///
   /// This allows the current route to sync its exit transition with the

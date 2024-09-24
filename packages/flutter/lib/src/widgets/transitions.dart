@@ -144,59 +144,8 @@ class _AnimatedState extends State<AnimatedWidget> {
 
 /// Signature for a page transition's secondary transition builder.
 ///
-/// Typically used as the argument for [DelegatedTransition.builder].
+/// Typically used as the argument for [ModalRoute.delegatedTransition].
 typedef DelegatedTransitionBuilder = Widget? Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child);
-
-/// An exit animation for a route that can be provided to another route.
-///
-/// {@template flutter.widgets.delegatedTransition}
-/// Used for the purposes of coordinating transitions between two routes with
-/// different route transitions. When a route is added to the stack, the original
-/// topmost route will look for this transition, and if diferent from its own
-/// `DelegatedTransition`, it will use the `builder` from the incoming transition
-/// to animate off the screen.
-/// {@endtemplate}
-///
-/// Typically subclasses of the abstract `DelegatedTransition` would be made for
-/// a page transition, then passed to [ModalRoute.delegatedTransition].
-///
-/// This check is based on the run time type of the `DelegatedTransition`. So if
-/// the topmost route has a `DelegatedTransition` of the same type as the route
-/// below it, then the transition will not be used in the lower route, even if
-/// the builder is different.
-///
-/// {@tool dartpad}
-/// This sample shows an app that uses three different page transitions, a
-/// Material Zoom transition, the standard Cupertino sliding transition, and a
-/// custom vertical transition. All of the page routes are able to inform the
-/// previous page how to transition off the screen to sync with the new page.
-///
-/// ** See code in examples/api/lib/widgets/routes/flexible_route_transitions.0.dart **
-/// {@end-tool}
-///
-/// {@tool dartpad}
-/// This sample shows an app that uses the same transitions as the previous
-/// sample, this time in a [MaterialApp.router].
-///
-/// ** See code in examples/api/lib/widgets/routes/flexible_route_transitions.1.dart **
-/// {@end-tool}
-@immutable
-abstract class DelegatedTransition {
-  /// Creates a transition that will be passed to the previous page.
-  ///
-  /// The [builder] argument must not be null.
-  const DelegatedTransition({
-    required this.builder,
-  });
-
-  /// The builder method that will wrap the page with the exit transition.
-  ///
-  /// When a route is added to the stack, this transition will play on the
-  /// previous route as the new route is animating on to the screen. If the new
-  /// route pops off of the stack, than this transition will play in reverse as
-  /// the previous page returns to the view.
-  final DelegatedTransitionBuilder builder;
-}
 
 /// Animates the position of a widget relative to its normal position.
 ///

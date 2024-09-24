@@ -432,7 +432,8 @@ class CupertinoPageTransition extends StatefulWidget {
   ///    Used to precisely track back gesture drags.
   final bool linearTransition;
 
-  /// The Cupertino styled [DelegatedTransition] provided to the previous route.
+  /// The Cupertino styled [DelegatedTransitionBuilder] provided to the previous
+  /// route.
   ///
   /// {@macro flutter.widgets.delegatedTransition}
   static Widget? delegatedTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child) {

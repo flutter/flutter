@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 
 /// This sample demonstrates creating a custom page transition that is able to
 /// override the outgoing transition of the route behind it in the navigation
-/// stack using [DelegatedTransition], using a [MaterialApp.router] pattern of
-/// navigation.
+/// stack using [DelegatedTransitionBuilder], using a [MaterialApp.router]
+/// pattern of navigation.
 
 void main() {
   runApp(FlexibleRouteTransitionsApp());
@@ -286,7 +286,7 @@ class _PageBasedVerticalPageRoute<T> extends PageRoute<T> {
   String get debugLabel => '${super.debugLabel}(${_page.name})';
 
   @override
-  DelegatedTransition? get delegatedTransition => _VerticalPageTransition._delegatedTransition;
+  DelegatedTransitionBuilder? get delegatedTransition => _VerticalPageTransition._delegatedTransitionBuilder;
 
   @override
   Color? get barrierColor => const Color(0x00000000);
@@ -372,11 +372,13 @@ class _VerticalPageTransition extends StatelessWidget {
   // When the _VerticalTransitionPageRoute animates onto or off of the navigation
   // stack, this transition is given to the route below it so that they animate in
   // sync.
-  static const _VerticalDelegatedTransition _delegatedTransition = _VerticalDelegatedTransition(
-    builder: _delegatedTransitionBuilder,
-  );
-
-  static Widget _delegatedTransitionBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
+  static Widget _delegatedTransitionBuilder(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    bool allowSnapshotting,
+    Widget? child
+  ) {
     final Animatable<Offset> tween = Tween<Offset>(
       begin: Offset.zero,
       end: const Offset(0.0, -1.0),
@@ -426,8 +428,4 @@ enum MyPageConfiguration {
   }
 
   Uri get uri => Uri.parse(uriString);
-}
-
-class _VerticalDelegatedTransition extends DelegatedTransition {
-  const _VerticalDelegatedTransition({required super.builder});
 }
