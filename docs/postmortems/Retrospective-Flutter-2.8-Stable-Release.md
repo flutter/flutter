@@ -1,8 +1,11 @@
 # Flutter 2.8 Stable Retrospective
+
 Date: 16 December 2021
 
 Facilitator: Kevin Chisholm
+
 ## Attendees
+
 1. Nuritzi Sanchez
 1. Alexander Thomas
 1. Godofredo Contreras
@@ -17,23 +20,33 @@ Facilitator: Kevin Chisholm
 1. Andrew Brogdon
 1. Kevin Chisholm
 
-
 ## Retrospective Guidelines
+
 ### Blameless
+
 Focus on the actions and behaviors, not the people.  Our retrospectives should be a safe place to reflect on what we can do to improve as a team.
+
 ### Inclusive
+
 All input is valuable, we should never make someone feel as if their thoughts and contributions are not valued.
+
 ### Actionable
+
 Work toward defining the issues that can be actioned on to be more successful in the future.
+
 ## Retrospective Items
+
 ### What went well
+
 * We released a quality SDK on the expected date.
   * No P0 issues to hotfix.
 * Our infrastructure and test owners responded rapidly to the chat allowing us to address issues.
 * The social team was proactive in keeping customers informed.
 * Were able to delay blog post and docs.
   * Got them out in time after the release was available.
+
 ### Challenges
+
 * We did not properly take into account how long the release would take.
 * We had no process to separate the build from the release.
 * Documentation is lacking / not prescriptive enough to accurately describe the entire process.
@@ -55,6 +68,7 @@ Xcode/Mac/iOS were force updated in between the beta to stable time window
   * Branch configurations were updated after landing the PR causing multiple purples and several manual retries.
 
 ### How can we improve [30 Minutes]
+
 * Build Flutter in advance.
   * Should have been done the day before and pushed the morning of.
   * Do most of the build and release process in advance; on the day-of, do the tagging / packaging work (<1 hr, and a predictable process).
@@ -74,6 +88,7 @@ Xcode/Mac/iOS were force updated in between the beta to stable time window
 * Improve communication.
 * Cherry pick owners were not notified of the release times.
   * Were not able to resolve issues.
+
 ### Action Items
 
 | Status | Action Item | Owner |

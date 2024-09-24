@@ -1,6 +1,7 @@
 ## If flutter.dev is down
 
-If one of our web sites is down, please ping `@emergency` on our [Discord server](./contributing/Chat.md).
+If one of our websites is down,
+please ping `@emergency` on our [Discord server](./contributing/Chat.md).
 
 ## If you find a security vulnerability
 

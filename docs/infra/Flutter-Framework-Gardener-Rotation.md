@@ -21,6 +21,7 @@ As such, the gardener should use their badge and hat to:
 * Proactively communicate issues/status to others upstream/downstream.
 
 ## Rotation
+
 Rotations are managed in the [Rotations tool]. The [Framework Gardener calendar] can be added to your calendar. Both of these links are currently Google internal.
 
 Team members are not expected to participate in multiple Flutter rotations. For example, those on the engine rotation are exempt and vice versa. New team members should be added to a single rotation, depending on the team to which they belong.
@@ -28,6 +29,7 @@ Team members are not expected to participate in multiple Flutter rotations. For 
 Before heading out on holiday, or if you get to your shift and find you can't do it, check the upcoming rotations and find a volunteer to swap shifts with while you're out. During some holiday periods when many team members are out and activity is particularly low on the tree, it may not be essential to have a dedicated gardener.
 
 ## Periodic scan
+
 Open the [Framework build dashboard].
 1. If the tree is closed, identify which test shards are failing. If there are yellow boxes with an exclamation point, that means that the failed tests are automatically re-running themselves. The tree is not fully closed until there are solid red boxes or red boxes with exclamation points. You can begin investigation as soon as you notice the tree going red, but it is suggested not to begin escalation until re-runs have completed.
 1. Identify which test within the shard failed, and try to locate obvious errors or failures in the logs. This procedure will be different if the failure is in [devicelab](#handling-a-devicelab-failure) or [LUCI](#handling-a-luci-failure).
@@ -44,6 +46,7 @@ Open the [Framework build dashboard].
 Unmute the [tree-status channel] and [hackers-infra channel] on [Discord]. Contributors are encouraged to escalate tree closures to you. Respond there as quickly as possible.
 
 ### Escalation
+
 Escalate to the [test owner][TESTOWNERS]. File GitHub issues if none are already open.
 1. The title should include the name of the failing test.
 1. Assign the issue to the test owner with a `P1` priority.
@@ -53,12 +56,14 @@ Escalate to the [test owner][TESTOWNERS]. File GitHub issues if none are already
 1. Investigation updates and questions should not be posted in the [tree-status channel]. This channel should remain free of noise to discourage notification muting.
 
 ### Handling a devicelab failure
+
 See [Why Flutter Devicelab Tests Break].
 1. If devicelab square (Android, Apple, or Windows icon) is red or yellow, click the square and click the _Download All Logs_ button. Note these logs may include the output from several test runs, since they will automatically rerun on failure to detect flakes.
 1. If many different tests are failing on the same agent, this may be an indication of infra failure. File an [infrastructure ticket] if needed.
 1. Note that phones occasionally require manual reboot. If this occurs, escalate on the [hackers-infra channel] on [Discord] file an [infrastructure ticket].
 
 ### Handling a Firebase Test Lab failure
+
 The devices in the Firebase test lab are not managed by the Flutter infra team.
 
 1. The LUCI logs will typically list the device that the test failed for. Check the logs for a Firebase link that will contain logs from the failing device. [Example log](https://logs.chromium.org/logs/flutter/buildbucket/cr-buildbucket/8772117221814493585/+/u/test_execution/gcloud_firebase__2_/stdout).
@@ -66,10 +71,12 @@ The devices in the Firebase test lab are not managed by the Flutter infra team.
 1. Alternatively, check the LUCI log for instructions on how to notify Firebase via Slack.
 
 ### Handling a LUCI failure
+
 1. If Chrome icon (LUCI) square is red, click the red square and _Open Log for Build #1234_ to see the failing test in LUCI.
 1. File an [infrastructure ticket] if needed.
 
 ### Reverting commits
+
 If the test failure is not a known flake or infrastructure issue, revert the commit immediately.
 
 If the commit landed within the last 24 hours:
@@ -99,6 +106,7 @@ If the failure is happening on an engine roll, contact the [Engine Sheriff chat]
 Coordinate with the engine sheriff on pausing and unpausing the [Engine to Framework autoroller] during this process.
 
 ### Handling a benchmark regression
+
 Check [framework benchmarks] for regressions. File issues and escalate.
 
 Review [engine benchmarks] for any regressions. Choose the _Triage_ item on the left, and walk through new issues. For each commit that caused a regression you'll see marks in columns corresponding to the regression --- those marks indicate whether the results at that commit are low or high.
@@ -108,7 +116,7 @@ Click a mark, and you'll be taken to a popup with the plot of recent data around
 1. Click the commit to get a sub-popup with a link that can take you to the commit in question.
 
 If there is a new regression not deemed to be noise in a benchmark:
-1. [Add a new issue to Github][new issue]
+1. [Add a new issue to GitHub][new issue]
 1. Label the issue with `team: benchmark`, and `severe:regression` labels. Label it with the `severe:performance` label if the benchmark is a performance one.
 1. Paste a link to the performance plot from skia-perf into the bug. This is a "permalink", and will help others see what you're seeing.
 1. Determine the CL at which the regression started and label with which part of the codebase might be causing the problem and whoever submitted the CL if possible.
@@ -122,9 +130,11 @@ If there is a new regression not deemed to be noise in a benchmark:
 If it's noise, accept the benchmark by clicking the checkbox in the triage details popup.
 
 ### Handling a Skia gold failure
+
 See the [golden test build breakage] guide.
 
 ## Filing an infra ticket
+
 1. Open a [new infra issue].
 1. Add a descriptive title. A message like "Add a LUCI builder for linux web engine" or "Debug gallery startup" is much more helpful than "quick request" or "test doesn't work?".
 1. Clearly describe the issue or request in the description field. For example, if a ticket is requesting running several commands on the bots, the ticket should explain why, what commands are needed, on which bots and how to verify the results.
@@ -143,12 +153,14 @@ See the [golden test build breakage] guide.
 1. Click the create button. No need to set an assignee; infra oncall will handle all new tickets.
 
 ## Communication channels (public)
+
 The bulk of communication happens on [Discord].
 * Tree closure escalation and announcements: [tree-status channel].
 * Infra issues: [hackers-infra channel]
 * Infrastructure tickets: File an [infrastructure ticket].
 
 ## Communication channels (Google-internal)
+
 * Engine issues: [🐣 Flutter Engine Sheriff ($USERNAME) ⛑️][Engine Sheriff chat]
 * LUCI help chat: [LUCI Users][LUCI Users chat]
 

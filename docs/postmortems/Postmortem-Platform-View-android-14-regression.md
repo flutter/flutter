@@ -1,21 +1,26 @@
-Flutter postmortem: Platform-View-android-14-regression
+# Flutter postmortem: Platform-View-android-14-regression
+
 Status:Published
 Owners: johnmccutchen, reidbaker, jrect
 
-##Summary
+## Summary
+
 Flutter “Platform Views” on Android 14 stopped displaying when apps were backgrounded and onMemoryTrim was called. Confounding investigation, the OEM had a different but related issue that impacted viewing Platform Views. Platform Views are particularly important because they are the mechanism used to display ads.
 
 Component: Android, Platform Views
 Date/time: 2024-05-28
 Duration: 6 months
 
-###Purpose of this doc
+### Purpose of this doc
+
 This is a postmortem for the regression in Flutter Platform Views on Android 14. The purpose is to understand what went wrong, why it took so long to diagnose and/or fix, and how to avoid such breakages and long resolution periods in the future.
 
-###User Impact
+### User Impact
+
 All Flutter customers using Platform Views on Android 14, including apps that use ads for revenue.
 
 ### Root Cause(s)
+
 An AOSP public Android API was subtly broken in the commit here.
 An OEM specific broken public API that was caused by similar roots but had different observable outcomes.
 Flutter integration tests did not catch this class of error.
@@ -73,7 +78,7 @@ Timeline (all times in PST/PDT)
 13:10 - Flutter team shares the model information so that we can get a build with the fix while awaiting an explanation of what is wrong.
 
 2024-01-31
-00:00 - On an external bug with active comentary from multiple flutter contributors. Flutter still believes the issue to be the OEM only. https://github.com/pichillilorenzo/flutter_inappwebview/issues/1981#issuecomment-1919482839
+00:00 - On an external bug with active commentary from multiple flutter contributors. Flutter still believes the issue to be the OEM only. https://github.com/pichillilorenzo/flutter_inappwebview/issues/1981#issuecomment-1919482839
 
 
 2024-02-16
@@ -181,20 +186,23 @@ medium (?) news: workaround isn't that bad at least, you'll need to switch to Ha
 16:47 - Android rejected AOSP patch for partners.  https://buganizer.corp.google.com/issues/339659092#comment12
 
 2024-06-06
-Discussion among Flutter leads about whether the the OEM-specific workaround(s) that were CP’d into Flutter 3.22 should be reverted. The workarounds imply additional Flutter public APIs that are not believed to be sustainable.
+Discussion among Flutter leads about whether the OEM-specific workaround(s) that were CP’d into Flutter 3.22 should be reverted. The workarounds imply additional Flutter public APIs that are not believed to be sustainable.
 https://github.com/flutter/flutter/issues/148417
 
 3.22.2 released to the public with the second mitigation. Flutter apps need to recompile and republish. https://groups.google.com/g/flutter-announce/c/0PEE5AvDZqc
 End of outage.
 
-###What went well:
+### What went well
+
 Once the Flutter team found the build range, the Android team fixed the problem for AOSP quickly.
 
-###Where we got lucky:
+### Where we got lucky
+
 The issue did not affect all Platform Views on launch.
 Drawing on prior experience, the Flutter team was able to quickly bisect on Android builds. Presumably, most Android customers wouldn’t be able to do this.
 
-###What could have gone better?
+### What could have gone better?
+
 The Flutter team struggled for several months to identify the difference between an Android issue from one manufacturer and an Android issue in AOSP.
 The root-causing effort could have been more collaborative.
 Platform Views are high risk and high value.
@@ -210,11 +218,12 @@ Action items
 * P1 Screenshot Integration test for an arbitrary version of android that displays a platform view.
 * P2 Screenshot Integration test for an arbitrary version of android that displays a platform view after backgrounding the activity and triggering memory trim
 
-###Process
+### Process
+
 go/critical-partner-patches this document describes the work to escalate android patches to other android manufacturers.
 go/pr-bug form required to get a patch shipped to pixel devices.
 
 
-###Fixes
+### Fixes
 https://googleplex-android-review.git.corp.google.com/c/platform/frameworks/base/+/27015418
 https://github.com/flutter/engine/pull/52370

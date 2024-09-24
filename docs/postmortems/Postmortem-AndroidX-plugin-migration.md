@@ -150,7 +150,7 @@ It looks like the only issue filed for this directly has been
 
 An explanation and migration path exists in the CHANGELOG.md of each plugin, but
 this information is hard to find and the actual Gradle error is not helpful.
-Several bugs on Github have been filed from affected users.
+Several bugs on GitHub have been filed from affected users.
 
 * [flutter/flutter#27106](https://github.com/flutter/flutter/issues/27106)
 * [flutter/flutter#27226](https://github.com/flutter/flutter/issues/27226)
@@ -198,7 +198,7 @@ did not provide any obvious ways to debug the incompatibility.
   scale of the breakage. We didn't realize that it applied to all untouched
   `build.gradle` files produced by released versions of `flutter create`. Also
   failed to verify that the Gradle errors mentioned AndroidX or were otherwise
-  easily understable.
+  easily understandable.
 * The `flutter/plugins` CI failed to verify that the new plugins could be used
   with the template from `flutter create` on stable.
 * No manual sanity checks were recommended and insufficient ones were performed

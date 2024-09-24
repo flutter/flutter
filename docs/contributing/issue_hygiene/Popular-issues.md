@@ -2,7 +2,7 @@ When deciding what to work on, we usually focus on issues that have a lot of thu
 
 Some popular issues are topics on which we cannot find a good way to make progress. Since those issues where we _do_ make progress get closed, the result is that [the list of most-popular issues](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc) is now full of issues where we have conspicuously not made progress!
 
-In the interests of transparency, this wiki page discusses the status of the ten most popular issues. It is only updated occasionally and so may not be entirely up to date; for the most up to date information, please see the latest comments on the relevant issue. (Please avoid asking for an update on issues, otherwise they become full of people asking for updates and nobody can find the actual updates.)
+In the interests of transparency, this wiki page discusses the status of the ten most popular issues. It is only updated occasionally and so may not be entirely up to date; for the most up-to-date information, please see the latest comments on the relevant issue. (Please avoid asking for an update on issues, otherwise they become full of people asking for updates and nobody can find the actual updates.)
 
 _See also: [the list of popular issues including closed issues](https://github.com/flutter/flutter/issues?q=is%3Aissue+sort%3Areactions-%2B1-desc), which shows that popular issues do get closed. 😅_
 

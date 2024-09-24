@@ -477,7 +477,7 @@ Unfortunately, the reality is that everyone starts knowing nothing, and we do no
 
 For this reason, avoid using terms without first defining them, unless you are linking to more fundamental documentation that defines that term without reference to the API you are documenting.
 
-For example, a fancy widget in the Material library can refer to the `StatefulWidget` documentation and assume that the reader either knows about the `StatefulWidget` class, or can learn about it by following the link and then later returning to the documentation for the fancy widget. However, the documentation for the `StatefulWidget` class should avoid assuming that the reader knows what a `State` class is, and should avoid defering to it for its definition, because `State` could is likely to defer back to `StatefulWidget` and the reader would be stuck in a loop unable to grasp the basic principles. This is the documentation equivalent of a bootstrapping problem.
+For example, a fancy widget in the Material library can refer to the `StatefulWidget` documentation and assume that the reader either knows about the `StatefulWidget` class, or can learn about it by following the link and then later returning to the documentation for the fancy widget. However, the documentation for the `StatefulWidget` class should avoid assuming that the reader knows what a `State` class is, and should avoid deferring to it for its definition, because `State` could is likely to defer back to `StatefulWidget` and the reader would be stuck in a loop unable to grasp the basic principles. This is the documentation equivalent of a bootstrapping problem.
 
 Another way to express this is that API documentation should follow a similar layering philosophy as code. The goal of documentation is not just to act as a refresher for experts, but to act as a tutorial for new developers.
 
@@ -834,7 +834,7 @@ than "lasagna" code (where each section of the code is cleanly layered and separ
 ### Avoid using `extension`.
 
 Extension methods are confusing to document and discover. To an end developer,
-they appear no different than the built in API of the class, and discovering
+they appear no different than the built-in API of the class, and discovering
 the documentation and implementation of an extension is more challenging than
 for class members.
 
@@ -1169,7 +1169,7 @@ documented top-level library intended to be imported by users.
 
 The definition of "New" changes as code grows and time passes. If the code
 needed a replacement version the odds of needing another replacement in the
-future is higher. Instead find a name that represents the idea being being used
+future is higher. Instead find a name that represents the idea being used
 or replaced.
 
 
@@ -1205,7 +1205,7 @@ Example:
 
 TODOs should include the string TODO in all caps, followed by the GitHub username of
 the person with the best _context_ about the problem referenced by the TODO in
-parenthesis. A TODO is not a commitment that the person referenced will fix the
+parentheses. A TODO is not a commitment that the person referenced will fix the
 problem, it is intended to be the person with enough context to explain the problem.
 Thus, when you create a TODO, it is almost always your username that is given.
 

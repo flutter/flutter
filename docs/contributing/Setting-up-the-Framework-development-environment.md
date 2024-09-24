@@ -1,6 +1,6 @@
-## Preqrequisites
+## Prerequisites
 
- * Linux, Mac OS X, or Windows
+ * Linux, macOS, or Windows
 
  * `git` (used for source version control)
 
