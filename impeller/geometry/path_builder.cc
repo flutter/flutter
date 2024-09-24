@@ -6,6 +6,8 @@
 
 #include <cmath>
 
+#include "impeller/geometry/path_component.h"
+
 namespace impeller {
 
 PathBuilder::PathBuilder() {
@@ -22,6 +24,7 @@ Path PathBuilder::CopyPath(FillType fill) {
 Path PathBuilder::TakePath(FillType fill) {
   prototype_.fill = fill;
   UpdateBounds();
+  current_contour_location_ = 0u;
   return Path(std::move(prototype_));
 }
 
@@ -264,24 +267,27 @@ PathBuilder& PathBuilder::AddRoundedRectBottomLeft(Rect rect,
 void PathBuilder::AddContourComponent(const Point& destination,
                                       bool is_closed) {
   auto& components = prototype_.components;
-  auto& contours = prototype_.contours;
+  auto& points = prototype_.points;
+  auto closed = is_closed ? Point{0, 0} : Point{1, 1};
   if (components.size() > 0 &&
-      components.back().type == Path::ComponentType::kContour) {
+      components.back() == Path::ComponentType::kContour) {
     // Never insert contiguous contours.
-    contours.back() = ContourComponent(destination, is_closed);
+    points[current_contour_location_] = destination;
+    points[current_contour_location_ + 1] = closed;
   } else {
-    contours.emplace_back(ContourComponent(destination, is_closed));
-    components.emplace_back(Path::ComponentType::kContour, contours.size() - 1);
+    current_contour_location_ = points.size();
+    points.push_back(destination);
+    points.push_back(closed);
+    components.push_back(Path::ComponentType::kContour);
   }
   prototype_.bounds.reset();
 }
 
 void PathBuilder::AddLinearComponent(const Point& p1, const Point& p2) {
   auto& points = prototype_.points;
-  auto index = points.size();
-  points.emplace_back(p1);
-  points.emplace_back(p2);
-  prototype_.components.emplace_back(Path::ComponentType::kLinear, index);
+  points.push_back(p1);
+  points.push_back(p2);
+  prototype_.components.push_back(Path::ComponentType::kLinear);
   prototype_.bounds.reset();
 }
 
@@ -289,11 +295,10 @@ void PathBuilder::AddQuadraticComponent(const Point& p1,
                                         const Point& cp,
                                         const Point& p2) {
   auto& points = prototype_.points;
-  auto index = points.size();
-  points.emplace_back(p1);
-  points.emplace_back(cp);
-  points.emplace_back(p2);
-  prototype_.components.emplace_back(Path::ComponentType::kQuadratic, index);
+  points.push_back(p1);
+  points.push_back(cp);
+  points.push_back(p2);
+  prototype_.components.push_back(Path::ComponentType::kQuadratic);
   prototype_.bounds.reset();
 }
 
@@ -302,17 +307,17 @@ void PathBuilder::AddCubicComponent(const Point& p1,
                                     const Point& cp2,
                                     const Point& p2) {
   auto& points = prototype_.points;
-  auto index = points.size();
-  points.emplace_back(p1);
-  points.emplace_back(cp1);
-  points.emplace_back(cp2);
-  points.emplace_back(p2);
-  prototype_.components.emplace_back(Path::ComponentType::kCubic, index);
+  points.push_back(p1);
+  points.push_back(cp1);
+  points.push_back(cp2);
+  points.push_back(p2);
+  prototype_.components.push_back(Path::ComponentType::kCubic);
   prototype_.bounds.reset();
 }
 
 void PathBuilder::SetContourClosed(bool is_closed) {
-  prototype_.contours.back().is_closed = is_closed;
+  prototype_.points[current_contour_location_ + 1] =
+      is_closed ? Point{0, 0} : Point{1, 1};
 }
 
 PathBuilder& PathBuilder::AddArc(const Rect& oval_bounds,
@@ -428,29 +433,60 @@ PathBuilder& PathBuilder::AddLine(const Point& p1, const Point& p2) {
 }
 
 PathBuilder& PathBuilder::AddPath(const Path& path) {
-  auto linear = [&](size_t index, const LinearPathComponent& l) {
-    AddLinearComponent(l.p1, l.p2);
-  };
-  auto quadratic = [&](size_t index, const QuadraticPathComponent& q) {
-    AddQuadraticComponent(q.p1, q.cp, q.p2);
-  };
-  auto cubic = [&](size_t index, const CubicPathComponent& c) {
-    AddCubicComponent(c.p1, c.cp1, c.cp2, c.p2);
-  };
-  auto move = [&](size_t index, const ContourComponent& m) {
-    AddContourComponent(m.destination);
-  };
-  path.EnumerateComponents(linear, quadratic, cubic, move);
+  auto& points = prototype_.points;
+  auto& components = prototype_.components;
+
+  points.insert(points.end(), path.data_->points.begin(),
+                path.data_->points.end());
+  components.insert(components.end(), path.data_->components.begin(),
+                    path.data_->components.end());
+
+  size_t source_offset = points.size();
+  for (auto component : path.data_->components) {
+    if (component == Path::ComponentType::kContour) {
+      current_contour_location_ = source_offset;
+    }
+    source_offset += Path::VerbToOffset(component);
+  }
   return *this;
 }
 
 PathBuilder& PathBuilder::Shift(Point offset) {
-  for (auto& point : prototype_.points) {
-    point += offset;
+  auto& points = prototype_.points;
+  size_t storage_offset = 0u;
+  for (const auto& component : prototype_.components) {
+    switch (component) {
+      case Path::ComponentType::kLinear: {
+        auto* linear =
+            reinterpret_cast<LinearPathComponent*>(&points[storage_offset]);
+        linear->p1 += offset;
+        linear->p2 += offset;
+        break;
+      }
+      case Path::ComponentType::kQuadratic: {
+        auto* quad =
+            reinterpret_cast<QuadraticPathComponent*>(&points[storage_offset]);
+        quad->p1 += offset;
+        quad->p2 += offset;
+        quad->cp += offset;
+      } break;
+      case Path::ComponentType::kCubic: {
+        auto* cubic =
+            reinterpret_cast<CubicPathComponent*>(&points[storage_offset]);
+        cubic->p1 += offset;
+        cubic->p2 += offset;
+        cubic->cp1 += offset;
+        cubic->cp2 += offset;
+      } break;
+      case Path::ComponentType::kContour:
+        auto* contour =
+            reinterpret_cast<ContourComponent*>(&points[storage_offset]);
+        contour->destination += offset;
+        break;
+    }
+    storage_offset += Path::VerbToOffset(component);
   }
-  for (auto& contour : prototype_.contours) {
-    contour.destination += offset;
-  }
+
   prototype_.bounds.reset();
   return *this;
 }
@@ -499,11 +535,12 @@ std::optional<std::pair<Point, Point>> PathBuilder::GetMinMaxCoveragePoints()
     }
   };
 
+  size_t storage_offset = 0u;
   for (const auto& component : prototype_.components) {
-    switch (component.type) {
+    switch (component) {
       case Path::ComponentType::kLinear: {
         auto* linear = reinterpret_cast<const LinearPathComponent*>(
-            &points[component.index]);
+            &points[storage_offset]);
         clamp(linear->p1);
         clamp(linear->p2);
         break;
@@ -511,14 +548,14 @@ std::optional<std::pair<Point, Point>> PathBuilder::GetMinMaxCoveragePoints()
       case Path::ComponentType::kQuadratic:
         for (const auto& extrema :
              reinterpret_cast<const QuadraticPathComponent*>(
-                 &points[component.index])
+                 &points[storage_offset])
                  ->Extrema()) {
           clamp(extrema);
         }
         break;
       case Path::ComponentType::kCubic:
         for (const auto& extrema : reinterpret_cast<const CubicPathComponent*>(
-                                       &points[component.index])
+                                       &points[storage_offset])
                                        ->Extrema()) {
           clamp(extrema);
         }
@@ -526,6 +563,7 @@ std::optional<std::pair<Point, Point>> PathBuilder::GetMinMaxCoveragePoints()
       case Path::ComponentType::kContour:
         break;
     }
+    storage_offset += Path::VerbToOffset(component);
   }
 
   if (!min.has_value() || !max.has_value()) {

@@ -6,6 +6,7 @@
 
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/impeller/geometry/path_builder.h"
+#include "impeller/geometry/path.h"
 
 namespace flutter {
 
@@ -81,6 +82,9 @@ using FillType = impeller::FillType;
 using Convexity = impeller::Convexity;
 
 Path DlPath::ConvertToImpellerPath(const SkPath& path, const DlPoint& shift) {
+  if (path.isEmpty()) {
+    return impeller::Path{};
+  }
   auto iterator = SkPath::Iter(path, false);
 
   struct PathData {

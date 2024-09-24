@@ -8,7 +8,6 @@
 #include <functional>
 #include <optional>
 #include <type_traits>
-#include <variant>
 #include <vector>
 
 #include "impeller/geometry/point.h"
@@ -150,38 +149,19 @@ struct CubicPathComponent {
 
 struct ContourComponent {
   Point destination;
-  bool is_closed = false;
+
+  // 0, 0 for closed, anything else for open.
+  Point closed = Point(1, 1);
 
   ContourComponent() {}
 
-  explicit ContourComponent(Point p, bool is_closed = false)
-      : destination(p), is_closed(is_closed) {}
+  constexpr bool IsClosed() const { return closed == Point{0, 0}; }
+
+  explicit ContourComponent(Point p, Point closed)
+      : destination(p), closed(closed) {}
 
   bool operator==(const ContourComponent& other) const {
-    return destination == other.destination && is_closed == other.is_closed;
-  }
-};
-
-using PathComponentVariant = std::variant<std::monostate,
-                                          const LinearPathComponent*,
-                                          const QuadraticPathComponent*,
-                                          const CubicPathComponent*>;
-
-struct PathComponentStartDirectionVisitor {
-  std::optional<Vector2> operator()(const LinearPathComponent* component);
-  std::optional<Vector2> operator()(const QuadraticPathComponent* component);
-  std::optional<Vector2> operator()(const CubicPathComponent* component);
-  std::optional<Vector2> operator()(std::monostate monostate) {
-    return std::nullopt;
-  }
-};
-
-struct PathComponentEndDirectionVisitor {
-  std::optional<Vector2> operator()(const LinearPathComponent* component);
-  std::optional<Vector2> operator()(const QuadraticPathComponent* component);
-  std::optional<Vector2> operator()(const CubicPathComponent* component);
-  std::optional<Vector2> operator()(std::monostate monostate) {
-    return std::nullopt;
+    return destination == other.destination && IsClosed() == other.IsClosed();
   }
 };
 
