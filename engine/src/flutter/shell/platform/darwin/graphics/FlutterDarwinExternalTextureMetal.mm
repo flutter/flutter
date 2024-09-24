@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h"
 #include "flutter/display_list/image/dl_image.h"
+#include "impeller/aiks/aiks_context.h"
 #include "impeller/base/validation.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
@@ -196,29 +197,14 @@ FLUTTER_ASSERT_ARC
   CVBufferRelease(uvMetalTexture);
 
   if (_enableImpeller) {
-    impeller::TextureDescriptor yDesc;
-    yDesc.storage_mode = impeller::StorageMode::kHostVisible;
-    yDesc.format = impeller::PixelFormat::kR8UNormInt;
-    yDesc.size = {textureSize.width(), textureSize.height()};
-    yDesc.mip_count = 1;
-    auto yTexture = impeller::TextureMTL::Wrapper(yDesc, yTex);
-    yTexture->SetCoordinateSystem(impeller::TextureCoordinateSystem::kUploadFromHost);
-
-    impeller::TextureDescriptor uvDesc;
-    uvDesc.storage_mode = impeller::StorageMode::kHostVisible;
-    uvDesc.format = impeller::PixelFormat::kR8G8UNormInt;
-    uvDesc.size = {textureSize.width() / 2, textureSize.height() / 2};
-    uvDesc.mip_count = 1;
-    auto uvTexture = impeller::TextureMTL::Wrapper(uvDesc, uvTex);
-    uvTexture->SetCoordinateSystem(impeller::TextureCoordinateSystem::kUploadFromHost);
-
     impeller::YUVColorSpace yuvColorSpace =
         _pixelFormat == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
             ? impeller::YUVColorSpace::kBT601LimitedRange
             : impeller::YUVColorSpace::kBT601FullRange;
-
-    return impeller::DlImageImpeller::MakeFromYUVTextures(context.aiks_context, yTexture, uvTexture,
-                                                          yuvColorSpace);
+    return [FlutterDarwinExternalTextureImpellerImageWrapper wrapYUVATexture:yTex
+                                                                       UVTex:uvTex
+                                                               YUVColorSpace:yuvColorSpace
+                                                                 aiksContext:context.aiks_context];
   }
 
   SkYUVColorSpace colorSpace = _pixelFormat == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
@@ -263,14 +249,8 @@ FLUTTER_ASSERT_ARC
   CVBufferRelease(metalTexture);
 
   if (_enableImpeller) {
-    impeller::TextureDescriptor desc;
-    desc.storage_mode = impeller::StorageMode::kHostVisible;
-    desc.format = impeller::PixelFormat::kB8G8R8A8UNormInt;
-    desc.size = {textureSize.width(), textureSize.height()};
-    desc.mip_count = 1;
-    auto texture = impeller::TextureMTL::Wrapper(desc, rgbaTex);
-    texture->SetCoordinateSystem(impeller::TextureCoordinateSystem::kUploadFromHost);
-    return impeller::DlImageImpeller::Make(texture);
+    return [FlutterDarwinExternalTextureImpellerImageWrapper wrapRGBATexture:rgbaTex
+                                                                 aiksContext:context.aiks_context];
   }
 
   auto skImage = [FlutterDarwinExternalTextureSkImageWrapper wrapRGBATexture:rgbaTex
@@ -340,5 +320,45 @@ FLUTTER_ASSERT_ARC
                                      /*colorSpace=*/nullptr, /*releaseProc*/ nullptr,
                                      /*releaseContext*/ nullptr);
 #endif  //  SLIMPELLER
+}
+@end
+
+@implementation FlutterDarwinExternalTextureImpellerImageWrapper
+
++ (sk_sp<flutter::DlImage>)wrapYUVATexture:(id<MTLTexture>)yTex
+                                     UVTex:(id<MTLTexture>)uvTex
+                             YUVColorSpace:(impeller::YUVColorSpace)colorSpace
+                               aiksContext:(nonnull impeller::AiksContext*)aiks_context {
+  impeller::TextureDescriptor yDesc;
+  yDesc.storage_mode = impeller::StorageMode::kDevicePrivate;
+  yDesc.format = impeller::PixelFormat::kR8UNormInt;
+  yDesc.size = impeller::ISize(yTex.width, yTex.height);
+  yDesc.mip_count = 1;
+  auto yTexture = impeller::TextureMTL::Wrapper(yDesc, yTex);
+  yTexture->SetCoordinateSystem(impeller::TextureCoordinateSystem::kUploadFromHost);
+
+  impeller::TextureDescriptor uvDesc;
+  uvDesc.storage_mode = impeller::StorageMode::kDevicePrivate;
+  uvDesc.format = impeller::PixelFormat::kR8G8UNormInt;
+  uvDesc.size = impeller::ISize(uvTex.width, uvTex.height);
+  uvDesc.mip_count = 1;
+  auto uvTexture = impeller::TextureMTL::Wrapper(uvDesc, uvTex);
+  uvTexture->SetCoordinateSystem(impeller::TextureCoordinateSystem::kUploadFromHost);
+  ;
+
+  return impeller::DlImageImpeller::MakeFromYUVTextures(aiks_context, yTexture, uvTexture,
+                                                        colorSpace);
+}
+
++ (sk_sp<flutter::DlImage>)wrapRGBATexture:(id<MTLTexture>)rgbaTex
+                               aiksContext:(nonnull impeller::AiksContext*)aiks_context {
+  impeller::TextureDescriptor desc;
+  desc.storage_mode = impeller::StorageMode::kDevicePrivate;
+  desc.format = impeller::PixelFormat::kB8G8R8A8UNormInt;
+  desc.size = impeller::ISize(rgbaTex.width, rgbaTex.height);
+  desc.mip_count = 1;
+  auto texture = impeller::TextureMTL::Wrapper(desc, rgbaTex);
+  texture->SetCoordinateSystem(impeller::TextureCoordinateSystem::kUploadFromHost);
+  return impeller::DlImageImpeller::Make(texture);
 }
 @end

@@ -37,8 +37,8 @@ void EmbedderExternalTextureMetal::Paint(PaintContext& context,
                                          bool freeze,
                                          const DlImageSampling sampling) {
   if (last_image_ == nullptr) {
-    last_image_ =
-        ResolveTexture(Id(), context.gr_context, SkISize::Make(bounds.width(), bounds.height()));
+    last_image_ = ResolveTexture(Id(), context.gr_context, context.aiks_context,
+                                 SkISize::Make(bounds.width(), bounds.height()));
   }
 
   DlCanvas* canvas = context.canvas;
@@ -56,11 +56,41 @@ void EmbedderExternalTextureMetal::Paint(PaintContext& context,
 
 sk_sp<DlImage> EmbedderExternalTextureMetal::ResolveTexture(int64_t texture_id,
                                                             GrDirectContext* context,
+                                                            impeller::AiksContext* aiks_context,
                                                             const SkISize& size) {
   std::unique_ptr<FlutterMetalExternalTexture> texture =
       external_texture_callback_(texture_id, size.width(), size.height());
 
   if (!texture) {
+    return nullptr;
+  }
+  if (aiks_context) {
+    switch (texture->pixel_format) {
+      case FlutterMetalExternalTexturePixelFormat::kRGBA: {
+        if (ValidNumTextures(1, texture->num_textures)) {
+          id<MTLTexture> rgbaTex = (__bridge id<MTLTexture>)texture->textures[0];
+          return [FlutterDarwinExternalTextureImpellerImageWrapper wrapRGBATexture:rgbaTex
+                                                                       aiksContext:aiks_context];
+        }
+        break;
+      }
+      case FlutterMetalExternalTexturePixelFormat::kYUVA: {
+        if (ValidNumTextures(2, texture->num_textures)) {
+          id<MTLTexture> yTex = (__bridge id<MTLTexture>)texture->textures[0];
+          id<MTLTexture> uvTex = (__bridge id<MTLTexture>)texture->textures[1];
+          impeller::YUVColorSpace colorSpace =
+              texture->yuv_color_space ==
+                      FlutterMetalExternalTextureYUVColorSpace::kBT601LimitedRange
+                  ? impeller::YUVColorSpace::kBT601LimitedRange
+                  : impeller::YUVColorSpace::kBT601FullRange;
+          return [FlutterDarwinExternalTextureImpellerImageWrapper wrapYUVATexture:yTex
+                                                                             UVTex:uvTex
+                                                                     YUVColorSpace:colorSpace
+                                                                       aiksContext:aiks_context];
+        }
+        break;
+      }
+    }
     return nullptr;
   }
 
@@ -72,8 +102,8 @@ sk_sp<DlImage> EmbedderExternalTextureMetal::ResolveTexture(int64_t texture_id,
         id<MTLTexture> rgbaTex = (__bridge id<MTLTexture>)texture->textures[0];
         image = [FlutterDarwinExternalTextureSkImageWrapper wrapRGBATexture:rgbaTex
                                                                   grContext:context
-                                                                      width:size.width()
-                                                                     height:size.height()];
+                                                                      width:rgbaTex.width
+                                                                     height:rgbaTex.height];
       }
       break;
     }
