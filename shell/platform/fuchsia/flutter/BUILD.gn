@@ -320,8 +320,6 @@ template("jit_runner") {
 
     binary = "flutter_jit${product_suffix}_runner"
 
-    cml_file = rebase_path("meta/flutter_jit${product_suffix}_runner.cml")
-
     resources = [
       {
         path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
@@ -388,8 +386,6 @@ template("aot_runner") {
         observatory_target,
       ]
     }
-
-    cml_file = rebase_path("meta/flutter_aot${product_suffix}_runner.cml")
 
     binary = "flutter_aot${product_suffix}_runner"
 
@@ -590,9 +586,7 @@ if (enable_unittests) {
 
   fuchsia_test_archive("flutter_runner_tests") {
     deps = [ ":flutter_runner_unittests" ]
-
-    binary = "$target_name"
-
+    gen_cml_file = true
     resources = [
       {
         path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
@@ -603,9 +597,7 @@ if (enable_unittests) {
 
   fuchsia_test_archive("flutter_runner_tzdata_tests") {
     deps = [ ":flutter_runner_tzdata_unittests" ]
-
-    binary = "$target_name"
-
+    gen_cml_file = true
     resources = [
       {
         path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
@@ -631,9 +623,7 @@ if (enable_unittests) {
 
   fuchsia_test_archive("flutter_runner_tzdata_missing_tests") {
     deps = [ ":flutter_runner_tzdata_missing_unittests" ]
-
-    binary = "$target_name"
-
+    gen_cml_file = true
     resources = [
       {
         path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
@@ -644,15 +634,14 @@ if (enable_unittests) {
 
   fuchsia_test_archive("fml_tests") {
     deps = [ "//flutter/fml:fml_unittests" ]
-
+    gen_cml_file = true
     binary = "fml_unittests"
   }
 
   fuchsia_test_archive("display_list_tests") {
     deps = [ "//flutter/display_list:display_list_unittests" ]
-
+    gen_cml_file = true
     binary = "display_list_unittests"
-
     resources = [
       {
         path = rebase_path(
@@ -664,9 +653,8 @@ if (enable_unittests) {
 
   fuchsia_test_archive("display_list_render_tests") {
     deps = [ "//flutter/display_list:display_list_rendertests" ]
-
+    gen_cml_file = true
     binary = "display_list_rendertests"
-
     resources = [
       {
         path = rebase_path(
@@ -678,9 +666,8 @@ if (enable_unittests) {
 
   fuchsia_test_archive("flow_tests") {
     deps = [ "//flutter/flow:flow_unittests" ]
-
+    gen_cml_file = true
     binary = "flow_unittests"
-
     resources = [
       {
         path = rebase_path(
@@ -710,7 +697,7 @@ if (enable_unittests) {
       "//flutter/runtime:runtime_fixtures",
       "//flutter/runtime:runtime_unittests",
     ]
-
+    gen_cml_file = true
     binary = "runtime_unittests"
 
     # TODO(gw280): https://github.com/flutter/flutter/issues/50294
@@ -729,7 +716,7 @@ if (enable_unittests) {
       "//flutter/shell/common:shell_unittests",
       "//flutter/shell/common:shell_unittests_fixtures",
     ]
-
+    gen_cml_file = true
     binary = "shell_unittests"
 
     # TODO(gw280): https://github.com/flutter/flutter/issues/50294
@@ -758,13 +745,13 @@ if (enable_unittests) {
 
   fuchsia_test_archive("testing_tests") {
     deps = [ "//flutter/testing:testing_unittests" ]
-
+    gen_cml_file = true
     binary = "testing_unittests"
   }
 
   fuchsia_test_archive("txt_tests") {
     deps = [ "//flutter/third_party/txt:txt_unittests" ]
-
+    gen_cml_file = true
     binary = "txt_unittests"
 
     resources = [
@@ -784,7 +771,7 @@ if (enable_unittests) {
       "//flutter/lib/ui:ui_unittests",
       "//flutter/lib/ui:ui_unittests_fixtures",
     ]
-
+    gen_cml_file = true
     binary = "ui_unittests"
 
     # TODO(gw280): https://github.com/flutter/flutter/issues/50294
@@ -826,7 +813,7 @@ if (enable_unittests) {
       "//flutter/shell/platform/embedder:embedder_unittests",
       "//flutter/shell/platform/embedder:fixtures",
     ]
-
+    gen_cml_file = true
     binary = "embedder_unittests"
 
     # TODO(gw280): https://github.com/flutter/flutter/issues/50294
@@ -904,7 +891,7 @@ if (enable_unittests) {
 
   fuchsia_test_archive("dart_utils_tests") {
     deps = [ "//flutter/shell/platform/fuchsia/runtime/dart/utils:dart_utils_unittests" ]
-
+    gen_cml_file = true
     binary = "dart_utils_unittests"
   }
 

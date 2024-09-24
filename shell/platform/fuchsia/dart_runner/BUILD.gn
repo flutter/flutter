@@ -178,8 +178,6 @@ template("aot_runner_package") {
 
     binary = "dart_aot${product_suffix}_runner"
 
-    cml_file = rebase_path("meta/dart_aot${product_suffix}_runner.cml")
-
     libraries = common_libs
 
     resources = []
@@ -237,8 +235,6 @@ template("jit_runner_package") {
     }
 
     binary = "dart_jit${product_suffix}_runner"
-
-    cml_file = rebase_path("meta/dart_jit${product_suffix}_runner.cml")
 
     libraries = common_libs
 
@@ -330,8 +326,7 @@ if (enable_unittests) {
 
   fuchsia_test_archive("dart_runner_tests") {
     deps = [ ":dart_test_runner_unittests" ]
-
-    binary = "$target_name"
+    gen_cml_file = true
   }
 
   # When adding a new dep here, please also ensure the dep is added to

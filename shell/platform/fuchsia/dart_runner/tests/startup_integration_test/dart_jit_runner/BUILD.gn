@@ -40,7 +40,4 @@ executable("dart-jit-runner-integration-test-bin") {
 
 fuchsia_test_archive("dart-jit-runner-integration-test") {
   deps = [ ":dart-jit-runner-integration-test-bin" ]
-
-  binary = "$target_name"
-  cml_file = rebase_path("meta/$target_name.cml")
 }
