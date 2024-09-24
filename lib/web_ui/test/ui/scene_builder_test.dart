@@ -308,6 +308,24 @@ Future<void> testMain() async {
       await renderScene(sceneBuilder.build());
       await matchGoldenFile('scene_builder_color_filter.png', region: region);
     });
+
+    test('overlapping pictures in opacity layer', () async {
+      final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
+      sceneBuilder.pushOpacity(128);
+      sceneBuilder.addPicture(ui.Offset.zero, drawPicture((ui.Canvas canvas) {
+        canvas.drawCircle(const ui.Offset(100, 150), 100,
+            ui.Paint()..color = const ui.Color(0xFFFF0000));
+      }));
+      sceneBuilder.addPicture(ui.Offset.zero, drawPicture((ui.Canvas canvas) {
+        canvas.drawCircle(const ui.Offset(200, 150), 100,
+            ui.Paint()..color = const ui.Color(0xFFFF0000));
+      }));
+      sceneBuilder.pop();
+
+      await renderScene(sceneBuilder.build());
+      await matchGoldenFile('scene_builder_overlapping_pictures_in_opacity.png',
+          region: region);
+    });
   });
 }
 
