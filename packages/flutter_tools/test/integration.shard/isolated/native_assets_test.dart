@@ -271,7 +271,7 @@ void main() {
             'build',
             buildSubcommand,
             if (buildSubcommand == 'ios') '--no-codesign',
-            '-v' // Requires verbose mode for error.
+            '-v', // Requires verbose mode for error.
           ],
           workingDirectory: exampleDirectory.path,
         );
