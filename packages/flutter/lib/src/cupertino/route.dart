@@ -1112,7 +1112,6 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   @override
   AnimationController createAnimationController() {
     return AnimationController(
-      duration: const Duration(milliseconds: 800), // TODO
       debugLabel: debugLabel,
       vsync: navigator!,
       animationBehavior: AnimationBehavior.normal,
