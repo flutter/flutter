@@ -18,6 +18,7 @@
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/shell/common/display.h"
+#include "fml/macros.h"
 #include "third_party/tonic/dart_persistent_value.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 
@@ -27,6 +28,11 @@ class PlatformMessage;
 class PlatformMessageHandler;
 class PlatformIsolateManager;
 class Scene;
+
+// Forward declaration of friendly tests.
+namespace testing {
+FML_TEST_CLASS(PlatformConfigurationTest, BeginFrameMonotonic);
+}
 
 //--------------------------------------------------------------------------
 /// @brief An enum for defining the different kinds of accessibility features
@@ -517,6 +523,8 @@ class PlatformConfiguration final {
   Dart_Handle on_error() { return on_error_.Get(); }
 
  private:
+  FML_FRIEND_TEST(testing::PlatformConfigurationTest, BeginFrameMonotonic);
+
   PlatformConfigurationClient* client_;
   tonic::DartPersistentValue on_error_;
   tonic::DartPersistentValue add_view_;
@@ -534,6 +542,9 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue begin_frame_;
   tonic::DartPersistentValue draw_frame_;
   tonic::DartPersistentValue report_timings_;
+
+  uint64_t last_frame_number_ = 0;
+  int64_t last_microseconds_ = 0;
 
   // All current views' view metrics mapped from view IDs.
   std::unordered_map<int64_t, ViewportMetrics> metrics_;
