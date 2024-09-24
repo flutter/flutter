@@ -1121,7 +1121,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-testWidgets('keyboardDismissBehavior on scroll without a drag test', (WidgetTester tester) async {
+  testWidgets('keyboardDismissBehavior on scroll without a drag test', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SizedBox(
@@ -1138,7 +1138,7 @@ testWidgets('keyboardDismissBehavior on scroll without a drag test', (WidgetTest
                     });
                   },
                 ),
-                const SizedBox(height: 2000)
+                const SizedBox(height: 2000),
               ],
             ),
           ),
@@ -1158,7 +1158,7 @@ testWidgets('keyboardDismissBehavior on scroll without a drag test', (WidgetTest
     final Offset scrollStart = tester.getCenter(find.byType(SingleChildScrollView));
 
     testPointer.hover(scrollStart);
-    await tester.sendEventToBinding(testPointer.scroll(Offset(scrollStart.dx, scrollStart.dy-100)));
+    await tester.sendEventToBinding(testPointer.scroll(Offset(scrollStart.dx, scrollStart.dy - 100)));
     await tester.pumpAndSettle();
 
     expect(find.text('aardvark'), findsNothing);
