@@ -1166,6 +1166,7 @@ targets:
   - name: Linux tool_integration_tests_1_5
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -1192,6 +1193,7 @@ targets:
   - name: Linux tool_integration_tests_2_5
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -1218,6 +1220,7 @@ targets:
   - name: Linux tool_integration_tests_3_5
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -1244,6 +1247,7 @@ targets:
   - name: Linux tool_integration_tests_4_5
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -1270,6 +1274,7 @@ targets:
   - name: Linux tool_integration_tests_5_5
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -5883,6 +5888,7 @@ targets:
   - name: Windows tool_integration_tests_1_8
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -5907,6 +5913,7 @@ targets:
   - name: Windows tool_integration_tests_2_8
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -5931,6 +5938,7 @@ targets:
   - name: Windows tool_integration_tests_3_8
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -5955,6 +5963,7 @@ targets:
   - name: Windows tool_integration_tests_4_8
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -5979,6 +5988,7 @@ targets:
   - name: Windows tool_integration_tests_5_8
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6003,6 +6013,7 @@ targets:
   - name: Windows tool_integration_tests_6_8
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6027,6 +6038,7 @@ targets:
   - name: Windows tool_integration_tests_7_8
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6051,6 +6063,7 @@ targets:
   - name: Windows tool_integration_tests_8_8
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
