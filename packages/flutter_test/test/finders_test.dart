@@ -302,7 +302,10 @@ void main() {
 
     testWidgets('Throws StateError if semantics are not enabled (bySemanticsIdentifier)',
         (WidgetTester tester) async {
-      expect(() => find.bySemanticsIdentifier('Add'), throwsStateError);
+      expect(
+        () => find.bySemanticsIdentifier('Add'),
+        throwsA(isA<StateError>().having((StateError e) => e.message, 'message', contains('Semantics are not enabled')))
+      );
     }, semanticsEnabled: false);
 
     testWidgets('finds Semantically labeled widgets by identifier',
@@ -342,7 +345,6 @@ void main() {
       expect(find.bySemanticsIdentifier(RegExp(r'^item-')), findsNWidgets(2));
       semanticsHandle.dispose();
     });
-
   });
 
   group('byTooltip', () {

@@ -580,7 +580,6 @@ class CommonFinders {
     );
   }
 
-
   /// Finds [Semantics] widgets matching the given `identifier`, either by
   /// [RegExp.hasMatch] or string equality.
   ///
