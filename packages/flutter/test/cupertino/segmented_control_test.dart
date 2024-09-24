@@ -1674,32 +1674,6 @@ void main() {
     );
   });
 
-  testWidgets('The disabled children length should not exceed children length', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{
-      0: const Text('Child 1'),
-      1: const Text('Child 2'),
-      2: const Text('Child 3'),
-    };
-    final Set<int> disabledChildren = <int>{0, 1, 2, 3};
-
-    await expectLater(
-      () => tester.pumpWidget(
-        boilerplate(
-          child: CupertinoSegmentedControl<int>(
-            children: children,
-            disabledChildren: disabledChildren,
-            onValueChanged: (int newValue) {},
-          ),
-        ),
-      ),
-      throwsA(isAssertionError.having(
-        (AssertionError error) => error.toString(),
-        '.toString()',
-        contains('disabledChildren.length'),
-      )),
-    );
-  });
-
   testWidgets('Tap on disabled segment should not change its state', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
       0: const Text('Child 1'),
@@ -1746,17 +1720,17 @@ void main() {
       // Disabled segment should have a white background with 50% opacity by default.
       expect(
         getBackgroundColor(tester, 0),
-        isSameColorAs(CupertinoColors.white.withOpacity(0.5)),
+        isSameColorAs(CupertinoColors.systemBackground.withOpacity(0.5)),
       );
-      expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
+      expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.systemBackground));
 
-      // Tap on disabled segment should not change its state
+      // Tap on disabled segment should not change its color
       await tester.tap(find.text('Child 1'));
       await tester.pumpAndSettle();
 
       expect(
         getBackgroundColor(tester, 0),
-        isSameColorAs(CupertinoColors.white.withOpacity(0.5)),
+        isSameColorAs(CupertinoColors.systemBackground.withOpacity(0.5)),
       );
   });
 
