@@ -343,8 +343,8 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   TextEditingController get _effectiveController =>
       widget.controller ?? _controller!.value;
 
-  double _fadeExtent = 0.0;
   ScrollPosition? _ancestorScrollPosition;
+  double _fadeExtent = 0.0;
   double _maxHeight = 0.0;
 
   @override
@@ -354,7 +354,10 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       _createLocalController();
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _calculateMaxHeight();
+      final RenderBox? searchFieldRenderBox = context.findRenderObject() as RenderBox?;
+      setState(() {
+        _maxHeight = searchFieldRenderBox?.size.height ?? 0.0;
+      });
     });
   }
 
@@ -420,13 +423,6 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     }
   }
 
-  void _calculateMaxHeight() {
-    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
-    setState(() {
-      _maxHeight = renderBox?.size.height ?? 0.0;
-    });
-  }
-
   void _onScroll() {
     if (_ancestorScrollPosition == null || !_ancestorScrollPosition!.hasPixels) {
       return;
@@ -444,7 +440,6 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     } else if (currentHeight <= thresholdHeight) {
       return 1.0;
     } else {
-      // Calculate a value between 0 and 1 based on the current height.
       final double range = _maxHeight - thresholdHeight;
       final double progress = (currentHeight - thresholdHeight) / range;
       return 1.0 - progress;
