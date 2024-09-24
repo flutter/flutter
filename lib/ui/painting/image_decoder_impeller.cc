@@ -382,6 +382,8 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
     return std::make_pair(nullptr, decode_error);
   }
 
+  context->DisposeThreadLocalCachedResources();
+
   return std::make_pair(
       impeller::DlImageImpeller::Make(std::move(result_texture)),
       std::string());
