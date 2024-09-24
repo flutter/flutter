@@ -27,7 +27,9 @@ VsyncWaiterAndroid::~VsyncWaiterAndroid() = default;
 
 // |VsyncWaiter|
 void VsyncWaiterAndroid::AwaitVSync() {
-  if (impeller::android::Choreographer::IsAvailableOnPlatform()) {
+  const static bool use_choreographer =
+      impeller::android::Choreographer::IsAvailableOnPlatform();
+  if (use_choreographer) {
     auto* weak_this = new std::weak_ptr<VsyncWaiter>(shared_from_this());
     fml::TaskRunner::RunNowOrPostTask(
         task_runners_.GetUITaskRunner(), [weak_this]() {
