@@ -1159,16 +1159,8 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   final Offset? anchorPoint;
 
   @override
-  AnimationController createAnimationController() {
-    return AnimationController(
-      debugLabel: debugLabel,
-      vsync: navigator!,
-      animationBehavior: AnimationBehavior.normal,
-    );
-  }
-
-  @override
   Simulation createSimulation({required double end}) {
+    assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
     return SpringSimulation(_createIosSpring(), controller!.value, end, 0);
   }
 

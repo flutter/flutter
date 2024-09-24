@@ -136,16 +136,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   /// non-essential work while this handle is active.
   PerformanceModeRequestHandle? _performanceModeRequestHandle;
 
-  bool get useSimulation => false;
-
-  Simulation? get simulation => _simulation;
-  Simulation? _simulation;
-
-  Simulation createSimulation({required double end}) {
-    assert(!useSimulation, 'This method must not be called if useSimulation is false.');
-    throw UnimplementedError;
-  }
-
   /// {@template flutter.widgets.TransitionRoute.transitionDuration}
   /// The duration the transition going forwards.
   ///
@@ -223,6 +213,22 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   /// It defaults to `true`.
   bool willDisposeAnimationController = true;
 
+  /// Returns true if [dispose] has been called.
+  ///
+  /// After [dispose] is called, this object can no longer be used.
+  ///
+  /// This method only works if assert is enabled. Otherwise it always returns
+  /// true.
+  @protected
+  bool debugIsDisposed() {
+    bool disposed = false;
+    assert(() {
+      disposed = _transitionCompleter.isCompleted;
+      return true;
+    }());
+    return disposed;
+  }
+
   /// Called to create the animation controller that will drive the transitions to
   /// this route from the previous one, and back to the previous route from this
   /// one.
@@ -230,10 +236,11 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   /// The returned controller will be disposed by [AnimationController.dispose]
   /// if the [willDisposeAnimationController] is `true`.
   AnimationController createAnimationController() {
-    assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
+    assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
     final Duration duration = transitionDuration;
     final Duration reverseDuration = reverseTransitionDuration;
-    assert(duration >= Duration.zero);
+    assert(useSimulation || duration >= Duration.zero,
+        'The `duration` must be positive for a non-simulation animation. Received $duration.');
     return AnimationController(
       duration: duration,
       reverseDuration: reverseDuration,
@@ -246,9 +253,20 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   /// the transition controlled by the animation controller created by
   /// [createAnimationController()].
   Animation<double> createAnimation() {
-    assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
+    assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
     assert(_controller != null);
     return _controller!.view;
+  }
+
+  bool get useSimulation => false;
+
+  Simulation? get simulation => _simulation;
+  Simulation? _simulation;
+
+  Simulation createSimulation({required double end}) {
+    assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
+    assert(!useSimulation, 'This method must not be called if useSimulation is false.');
+    throw UnimplementedError;
   }
 
   T? _result;
@@ -285,7 +303,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
 
   @override
   void install() {
-    assert(!_transitionCompleter.isCompleted, 'Cannot install a $runtimeType after disposing it.');
+    assert(!debugIsDisposed(), 'Cannot install a $runtimeType after disposing it.');
     _controller = createAnimationController();
     assert(_controller != null, '$runtimeType.createAnimationController() returned null.');
     _animation = createAnimation()
@@ -300,7 +318,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   @override
   TickerFuture didPush() {
     assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
-    assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
+    assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
     super.didPush();
     if (!useSimulation) {
       return _controller!.forward();
@@ -313,7 +331,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   @override
   void didAdd() {
     assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
-    assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
+    assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
     super.didAdd();
     _controller!.value = _controller!.upperBound;
   }
@@ -321,7 +339,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   @override
   void didReplace(Route<dynamic>? oldRoute) {
     assert(_controller != null, '$runtimeType.didReplace called before calling install() or after calling dispose().');
-    assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
+    assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
     if (oldRoute is TransitionRoute) {
       _controller!.value = oldRoute._controller!.value;
     }
@@ -345,7 +363,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   @override
   void didPopNext(Route<dynamic> nextRoute) {
     assert(_controller != null, '$runtimeType.didPopNext called before calling install() or after calling dispose().');
-    assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
+    assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
     _updateSecondaryAnimation(nextRoute);
     super.didPopNext(nextRoute);
   }
@@ -353,7 +371,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
     assert(_controller != null, '$runtimeType.didChangeNext called before calling install() or after calling dispose().');
-    assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
+    assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
     _updateSecondaryAnimation(nextRoute);
     super.didChangeNext(nextRoute);
   }
@@ -582,6 +600,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   @override
   void dispose() {
     assert(!_transitionCompleter.isCompleted, 'Cannot dispose a $runtimeType twice.');
+    assert(!debugIsDisposed(), 'Cannot dispose a $runtimeType twice.');
     _animation?.removeStatusListener(_handleStatusChanged);
     _performanceModeRequestHandle?.dispose();
     _performanceModeRequestHandle = null;
