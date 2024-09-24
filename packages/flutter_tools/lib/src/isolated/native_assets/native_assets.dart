@@ -382,27 +382,6 @@ Future<void> ensureNoNativeAssetsOrOsIsSupported(
   );
 }
 
-/// Ensure all native assets have a linkmode declared to be dynamic loading.
-///
-/// In JIT, the link mode must always be dynamic linking.
-/// In AOT, the static linking has not yet been implemented in Dart:
-/// https://github.com/dart-lang/sdk/issues/49418.
-///
-/// Therefore, ensure all `build.dart` scripts return only dynamic libraries.
-void ensureNoLinkModeStatic(List<AssetImpl> nativeAssets) {
-  final Iterable<AssetImpl> staticAssets = nativeAssets.where((AssetImpl e) =>
-      e is NativeCodeAssetImpl && e.linkMode == StaticLinkingImpl());
-  if (staticAssets.isNotEmpty) {
-    final String assetIds =
-        staticAssets.map((AssetImpl a) => a.id).toSet().join(', ');
-    throwToolExit(
-      'Native asset(s) $assetIds have their link mode set to static, '
-      'but this is not yet supported. '
-      'For more info see https://github.com/dart-lang/sdk/issues/49418.',
-    );
-  }
-}
-
 /// This should be the same for different archs, debug/release, etc.
 /// It should work for all macOS.
 Uri nativeAssetsBuildUri(Uri projectUri, OS os) {
@@ -665,7 +644,6 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsSingleArchitectureInternal(
   ensureNativeAssetsBuildDryRunSucceed(buildDryRunResult);
   // No link hooks in JIT mode.
   final List<AssetImpl> nativeAssets = buildDryRunResult.assets;
-  ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   final Uri? absolutePath = flutterTester ? buildUri : null;
   final Map<AssetImpl, KernelAsset> assetTargetLocations =
@@ -744,7 +722,6 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsSingleA
     ...buildResult.dependencies,
     if (linkingEnabled) ...linkResult.dependencies,
   };
-  ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $target done.');
   final Uri? absolutePath = flutterTester ? buildUri : null;
   final Map<AssetImpl, KernelAsset> assetTargetLocations =
