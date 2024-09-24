@@ -30,7 +30,7 @@ namespace egl {
 // destroy surfaces
 class Manager {
  public:
-  static std::unique_ptr<Manager> Create(bool enable_impeller);
+  static std::unique_ptr<Manager> Create();
 
   virtual ~Manager();
 
@@ -74,7 +74,7 @@ class Manager {
  protected:
   // Creates a new surface manager retaining reference to the passed-in target
   // for the lifetime of the manager.
-  explicit Manager(bool enable_impeller);
+  explicit Manager();
 
  private:
   // Number of active instances of Manager
@@ -84,7 +84,7 @@ class Manager {
   bool InitializeDisplay();
 
   // Initialize the EGL configs.
-  bool InitializeConfig(bool enable_impeller);
+  bool InitializeConfig();
 
   // Initialize the EGL render and resource contexts.
   bool InitializeContexts();
