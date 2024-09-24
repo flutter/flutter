@@ -73,8 +73,11 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
     );
   }
 
-  impeller::TextFrameDispatcher collector(context->GetContentContext(),
-                                          impeller::Matrix());
+  impeller::TextFrameDispatcher collector(
+      context->GetContentContext(),                 //
+      impeller::Matrix(),                           //
+      impeller::Rect::MakeSize(render_target_size)  //
+  );
   display_list->Dispatch(collector, SkIRect::MakeSize(size));
   impeller::ExperimentalDlDispatcher impeller_dispatcher(
       context->GetContentContext(), target,

@@ -14,6 +14,8 @@
 #include "impeller/aiks/experimental_canvas.h"
 #include "impeller/aiks/paint.h"
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/geometry/color.h"
+#include "impeller/geometry/rect.h"
 
 namespace impeller {
 
@@ -330,7 +332,11 @@ class TextFrameDispatcher : public flutter::IgnoreAttributeDispatchHelper,
                             public flutter::IgnoreDrawDispatchHelper {
  public:
   TextFrameDispatcher(const ContentContext& renderer,
-                      const Matrix& initial_matrix);
+                      const Matrix& initial_matrix,
+                      const Rect cull_rect);
+
+  ~TextFrameDispatcher();
+
   void save() override;
 
   void saveLayer(const DlRect& bounds,
@@ -386,10 +392,18 @@ class TextFrameDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   // |flutter::DlOpReceiver|
   void setStrokeJoin(flutter::DlStrokeJoin join) override;
 
+  // |flutter::DlOpReceiver|
+  void setImageFilter(const flutter::DlImageFilter* filter) override;
+
  private:
+  const Rect GetCurrentLocalCullingBounds() const;
+
   const ContentContext& renderer_;
   Matrix matrix_;
   std::vector<Matrix> stack_;
+  // note: cull rects are always in the global coordinate space.
+  std::vector<Rect> cull_rect_state_;
+  bool has_image_filter_ = false;
   Paint paint_;
 };
 

@@ -61,7 +61,8 @@ bool Surface::DrawDisplayList(const DisplayList& dl) const {
   const auto cull_rect = IRect::MakeSize(surface_->GetSize());
   auto skia_cull_rect =
       SkIRect::MakeWH(cull_rect.GetWidth(), cull_rect.GetHeight());
-  impeller::TextFrameDispatcher collector(content_context, impeller::Matrix{});
+  impeller::TextFrameDispatcher collector(content_context, impeller::Matrix{},
+                                          Rect::MakeSize(surface_->GetSize()));
   display_list->Dispatch(collector, skia_cull_rect);
 
   impeller::ExperimentalDlDispatcher impeller_dispatcher(

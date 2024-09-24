@@ -81,8 +81,9 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
     }
 
 #if EXPERIMENTAL_CANVAS
-    impeller::TextFrameDispatcher collector(aiks_context->GetContentContext(),
-                                            impeller::Matrix());
+    impeller::TextFrameDispatcher collector(
+        aiks_context->GetContentContext(), impeller::Matrix(),
+        impeller::Rect::MakeSize(cull_rect));
     display_list->Dispatch(collector,
                            SkIRect::MakeWH(cull_rect.width, cull_rect.height));
     impeller::ExperimentalDlDispatcher impeller_dispatcher(
