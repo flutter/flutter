@@ -94,6 +94,27 @@ targets:
       - testing/scenario_app/**
       - testing/skia_gold_client/**
 
+  - name: Linux linux_android_emulator_opengles_tests_34
+    bringup: true
+    enabled_branches:
+      - main
+    recipe: engine_v2/engine_v2
+    properties:
+      config_name: linux_android_emulator_opengles_34
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+    timeout: 90
+    runIf:
+      - .ci.yaml
+      - ci/builders/linux_android_emulator_opengles_34.json
+      - DEPS
+      - lib/ui/**
+      - shell/platform/android/**
+      - testing/scenario_app/**
+      - testing/skia_gold_client/**
+
   - name: Linux linux_android_emulator_skia_tests
     bringup: true
     enabled_branches:
