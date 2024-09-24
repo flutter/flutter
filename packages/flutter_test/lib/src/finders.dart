@@ -597,31 +597,31 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder bySemanticsIdentifier(Pattern identifier, {bool skipOffstage = true}) {
-      if (!SemanticsBinding.instance.semanticsEnabled) {
-        throw StateError(
-          'Semantics are not enabled. '
-          'Make sure to call tester.ensureSemantics() before using '
-          'this finder, and call dispose on its return value after.',
-        );
-      }
-      return byElementPredicate(
-        (Element element) {
-          // Multiple elements can have the same renderObject - we want the "owner"
-          // of the renderObject, i.e. the RenderObjectElement.
-          if (element is! RenderObjectElement) {
-            return false;
-          }
-          final String? semanticsIdentifier = element.renderObject.debugSemantics?.identifier;
-          if (semanticsIdentifier == null) {
-            return false;
-          }
-          return identifier is RegExp
-              ? identifier.hasMatch(semanticsIdentifier)
-              : identifier == semanticsIdentifier;
-        },
-        skipOffstage: skipOffstage,
+    if (!SemanticsBinding.instance.semanticsEnabled) {
+      throw StateError(
+        'Semantics are not enabled. '
+        'Make sure to call tester.ensureSemantics() before using '
+        'this finder, and call dispose on its return value after.',
       );
     }
+    return byElementPredicate(
+      (Element element) {
+        // Multiple elements can have the same renderObject - we want the "owner"
+        // of the renderObject, i.e. the RenderObjectElement.
+        if (element is! RenderObjectElement) {
+          return false;
+        }
+        final String? semanticsIdentifier = element.renderObject.debugSemantics?.identifier;
+        if (semanticsIdentifier == null) {
+          return false;
+        }
+        return identifier is RegExp
+            ? identifier.hasMatch(semanticsIdentifier)
+            : identifier == semanticsIdentifier;
+      },
+      skipOffstage: skipOffstage,
+    );
+  }
 }
 
 /// Provides lightweight syntax for getting frequently used semantics finders.
