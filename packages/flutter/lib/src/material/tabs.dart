@@ -1861,7 +1861,7 @@ class _TabBarState extends State<TabBar> {
           tabBar = CustomPaint(
             painter: _DividerPainter(
               dividerColor: dividerColor,
-              dividerHeight: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight!,
+              dividerHeight: dividerHeight,
             ),
             child: tabBar,
           );
