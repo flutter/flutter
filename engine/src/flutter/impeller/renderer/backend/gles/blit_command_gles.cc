@@ -283,8 +283,6 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
   }
 
   {
-    TRACE_EVENT1("impeller", "TexImage2DUpload", "Bytes",
-                 std::to_string(data.buffer_view.range.length).c_str());
     gl.PixelStorei(GL_UNPACK_ALIGNMENT, 1);
     gl.TexSubImage2D(texture_target,                  // target
                      0u,                              // LOD level
