@@ -30,28 +30,29 @@ class WidgetStateBorderSideExample extends StatefulWidget {
   const WidgetStateBorderSideExample({super.key});
 
   @override
-  State<WidgetStateBorderSideExample> createState() =>
-      _WidgetStateBorderSideExampleState();
+  State<WidgetStateBorderSideExample> createState() => _WidgetStateBorderSideExampleState();
 }
 
-class _WidgetStateBorderSideExampleState
-    extends State<WidgetStateBorderSideExample> {
-  bool isSelected = true;
+class _WidgetStateBorderSideExampleState extends State<WidgetStateBorderSideExample> {
+  bool _isSelected = true;
 
   @override
   Widget build(BuildContext context) {
     return FilterChip(
       label: const Text('Select chip'),
-      selected: isSelected,
+      selected: _isSelected,
       onSelected: (bool value) {
         setState(() {
-          isSelected = value;
+          _isSelected = value;
         });
       },
       side: const WidgetStateBorderSide.fromMap(
         <WidgetStatesConstraint, BorderSide?>{
+          WidgetState.pressed:  BorderSide(color: Colors.green),
+          WidgetState.hovered:  BorderSide(color: Colors.blue),
           WidgetState.selected: BorderSide(color: Colors.red),
-          WidgetState.any: null, // Defer to default value of the theme or widget.
+          // Resolves to null if no keys match, deferring to the default value
+          // of the theme or widget.
         },
       ),
     );

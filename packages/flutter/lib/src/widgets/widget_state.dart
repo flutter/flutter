@@ -481,8 +481,8 @@ class _EnabledAndDisabledMouseCursor extends WidgetStateMouseCursor {
 /// their support, like [ActionChip.side].
 ///
 /// {@tool dartpad}
-/// This example defines a [WidgetStateBorderSide] which resolves to red colored
-/// border side when its widget is selected.
+/// This example defines a [WidgetStateBorderSide] which resolves to different
+/// border colors depending on how the user is interacting with it.
 ///
 /// ** See code in examples/api/lib/widgets/widget_state/widget_state_border_side.0.dart **
 /// {@end-tool}

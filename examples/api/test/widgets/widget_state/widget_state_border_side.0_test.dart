@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_api_samples/widgets/widget_state/widget_state_border_side.0.dart'
     as example;
@@ -15,39 +17,60 @@ void main() {
       }
 
       final ShapeBorder? shape = widget.shape;
-
-      if (shape is! OutlinedBorder) {
-        return false;
-      }
-
-      return shape.side.color == color;
+      return shape is OutlinedBorder && shape.side.color == color;
     });
   }
 
-  testWidgets('FilterChip displays the correct border color when selected', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const example.WidgetStateBorderSideExampleApp(),
-      );
+  testWidgets('FilterChip displays the blue colored border when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.WidgetStateBorderSideExampleApp(),
+    );
 
-      expect(findByBorderColor(Colors.red), findsOneWidget);
-    },
-  );
+    // Hover over the FilterChip.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(tester.getCenter(find.byType(FilterChip)));
+
+    await tester.pumpAndSettle();
+
+    expect(findByBorderColor(Colors.blue), findsOneWidget);
+  });
+
+  testWidgets('FilterChip displays the green colored border when pressed', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.WidgetStateBorderSideExampleApp(),
+    );
+
+    // Press on the FilterChip.
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.down(tester.getCenter(find.byType(FilterChip)));
+
+    await tester.pumpAndSettle();
+
+    expect(findByBorderColor(Colors.green), findsOneWidget);
+  });
+
+  testWidgets('FilterChip displays the red colored border when selected', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.WidgetStateBorderSideExampleApp(),
+    );
+
+    expect(findByBorderColor(Colors.red), findsOneWidget);
+  });
 
   testWidgets('FilterChip displays the correct border color when not selected', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const example.WidgetStateBorderSideExampleApp(),
-      );
+    await tester.pumpWidget(
+      const example.WidgetStateBorderSideExampleApp(),
+    );
 
-      await tester.tap(find.byType(FilterChip));
-      await tester.pumpAndSettle();
+    await tester.tap(find.byType(FilterChip));
+    await tester.pumpAndSettle();
 
-      final ThemeData theme = Theme.of(tester.element(find.byType(FilterChip)));
+    final ThemeData theme = Theme.of(tester.element(find.byType(FilterChip)));
 
-      // By default FilterChip uses ColorScheme.outlineVariant color for side.
-      expect(
-        findByBorderColor(theme.colorScheme.outlineVariant),
-        findsOneWidget,
-      );
-    },
-  );
+    // By default FilterChip uses ColorScheme.outlineVariant color for side.
+    expect(
+      findByBorderColor(theme.colorScheme.outlineVariant),
+      findsOneWidget,
+    );
+  });
 }
