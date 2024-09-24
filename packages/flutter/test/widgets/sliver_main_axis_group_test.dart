@@ -795,7 +795,6 @@ void main() {
     );
     Scrollable.ensureVisible(key.currentContext!);
     await tester.pumpAndSettle();
-
     expect(tester.getTopLeft(find.byKey(key)), Offset.zero);
   });
 
