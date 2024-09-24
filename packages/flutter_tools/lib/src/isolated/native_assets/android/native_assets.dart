@@ -59,8 +59,7 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsAndroidInternal(
   ensureNativeAssetsBuildDryRunSucceed(buildDryRunResult);
   // No link hooks in JIT mode.
   final List<AssetImpl> nativeAssets = buildDryRunResult.assets;
-  ensureNoLinkModeStatic(nativeAssets);
-  globals.logger.printTrace('Dry running native assets for $targetOS done.');
+    globals.logger.printTrace('Dry running native assets for $targetOS done.');
   final Map<AssetImpl, KernelAsset> assetTargetLocations =
       _assetTargetLocations(nativeAssets);
   return assetTargetLocations.values;
@@ -128,7 +127,6 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
       dependencies.addAll(linkResult.dependencies);
     }
   }
-  ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
   final Map<AssetImpl, KernelAsset> assetTargetLocations =
       _assetTargetLocations(nativeAssets);

@@ -56,7 +56,6 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsIOSInternal(
   ensureNativeAssetsBuildDryRunSucceed(buildDryRunResult);
   // No link hooks in JIT.
   final List<AssetImpl> nativeAssets = buildDryRunResult.assets;
-  ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   return _assetTargetLocations(nativeAssets).values;
 }
@@ -122,7 +121,6 @@ Future<List<Uri>> buildNativeAssetsIOS({
       dependencies.addAll(linkResult.dependencies);
     }
   }
-  ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
   final Map<KernelAssetPath, List<AssetImpl>> fatAssetTargetLocations =
       _fatAssetTargetLocations(nativeAssets);

@@ -56,8 +56,8 @@ dependencies:
 
   cli_config: 0.2.0
   graphs: 2.3.2
-  native_assets_builder: 0.8.2
-  native_assets_cli: 0.7.3
+  native_assets_builder: 0.8.3
+  native_assets_cli: 0.8.0
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
@@ -122,4 +122,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 40f5
+# PUBSPEC CHECKSUM: 01f4
