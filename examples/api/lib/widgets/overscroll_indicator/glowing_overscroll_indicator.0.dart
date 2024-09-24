@@ -52,35 +52,8 @@ class GlowingOverscrollIndicatorExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const ScrollView scrollView = CustomScrollView(slivers: <Widget>[
-      SliverAppBar(title: Text('Custom PaintOffset')),
-      SliverToBoxAdapter(
-        child: DefaultTextStyle(
-          style: TextStyle(
-            color: Colors.amberAccent,
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-          ),
-          child: ColoredBox(
-            color: Colors.grey,
-            child: SizedBox(
-              width: double.infinity,
-              height: 80,
-              child: Center(child: Text('Glow all day!')),
-            ),
-          ),
-        ),
-      ),
-      SliverFillRemaining(
-        child: Icon(
-          Icons.sunny,
-          color: Colors.amberAccent,
-          size: 128,
-        ),
-      ),
-    ]);
-
     final double leadingPaintOffset = MediaQuery.paddingOf(context).top + kToolbarHeight;
+
     return NotificationListener<OverscrollIndicatorNotification>(
       onNotification: (OverscrollIndicatorNotification notification) {
         if (notification.leading) {
@@ -88,7 +61,35 @@ class GlowingOverscrollIndicatorExample extends StatelessWidget {
         }
         return false;
       },
-      child: scrollView,
+      child: const CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(title: Text('Custom PaintOffset')),
+          SliverToBoxAdapter(
+            child: DefaultTextStyle(
+              style: TextStyle(
+                color: Colors.amberAccent,
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+              ),
+              child: ColoredBox(
+                color: Colors.grey,
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 80,
+                  child: Center(child: Text('Glow all day!')),
+                ),
+              ),
+            ),
+          ),
+          SliverFillRemaining(
+            child: Icon(
+              Icons.sunny,
+              color: Colors.amberAccent,
+              size: 128,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

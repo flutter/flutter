@@ -53,40 +53,40 @@ class GlowingOverscrollIndicatorExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const ScrollView scrollView = CustomScrollView(slivers: <Widget>[
-      SliverToBoxAdapter(
-        child: DefaultTextStyle(
-          style: TextStyle(
-            color: Colors.amberAccent,
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-          ),
-          child: ColoredBox(
-            color: Colors.grey,
-            child: SizedBox(
-              width: double.infinity,
-              height: 80,
-              child: Center(child: Text('Glow all day!')),
-            ),
-          ),
-        ),
-      ),
-      SliverFillRemaining(
-        child: Icon(
-          Icons.sunny,
-          color: Colors.amberAccent,
-          size: 128,
-        ),
-      ),
-    ]);
-
     return NestedScrollView(
       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
         return const <Widget>[
           SliverAppBar(title: Text('Custom NestedScrollViews')),
         ];
       },
-      body: scrollView,
+      body: const CustomScrollView(
+        slivers: <Widget>[
+          SliverToBoxAdapter(
+            child: DefaultTextStyle(
+              style: TextStyle(
+                color: Colors.amberAccent,
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+              ),
+              child: ColoredBox(
+                color: Colors.grey,
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 80,
+                  child: Center(child: Text('Glow all day!')),
+                ),
+              ),
+            ),
+          ),
+          SliverFillRemaining(
+            child: Icon(
+              Icons.sunny,
+              color: Colors.amberAccent,
+              size: 128,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
