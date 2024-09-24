@@ -38,6 +38,7 @@ void EmbedderExternalTextureGL::Paint(PaintContext& context,
     last_image_ =
         ResolveTexture(Id(),                                           //
                        context.gr_context,                             //
+                       context.aiks_context,                           //
                        SkISize::Make(bounds.width(), bounds.height())  //
         );
   }
@@ -58,6 +59,7 @@ void EmbedderExternalTextureGL::Paint(PaintContext& context,
 sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTexture(
     int64_t texture_id,
     GrDirectContext* context,
+    impeller::AiksContext* aiks_context,
     const SkISize& size) {
   context->flushAndSubmit();
   context->resetContext(kAll_GrBackendState);
