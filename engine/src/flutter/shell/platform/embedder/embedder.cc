@@ -1038,6 +1038,23 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
 #endif
 }
 
+#if defined(SHELL_ENABLE_GL) && defined(IMPELLER_SUPPORTS_RENDERING)
+static std::optional<impeller::PixelFormat> FlutterFormatToImpellerPixelFormat(
+    uint32_t format) {
+  switch (format) {
+    case GL_BGRA8_EXT:
+      return impeller::PixelFormat::kB8G8R8A8UNormInt;
+    case GL_RGBA8:
+      return impeller::PixelFormat::kR8G8B8A8UNormInt;
+    default:
+      FML_LOG(ERROR) << "Cannot convert format " << format
+                     << " to impeller::PixelFormat.";
+      return std::nullopt;
+  }
+}
+
+#endif  // defined(SHELL_ENABLE_GL) && defined(IMPELLER_SUPPORTS_RENDERING)
+
 static std::unique_ptr<flutter::EmbedderRenderTarget>
 MakeRenderTargetFromBackingStoreImpeller(
     FlutterBackingStore backing_store,
@@ -1046,18 +1063,30 @@ MakeRenderTargetFromBackingStoreImpeller(
     const FlutterBackingStoreConfig& config,
     const FlutterOpenGLFramebuffer* framebuffer) {
 #if defined(SHELL_ENABLE_GL) && defined(IMPELLER_SUPPORTS_RENDERING)
+  auto format = FlutterFormatToImpellerPixelFormat(framebuffer->target);
+  if (!format.has_value()) {
+    return nullptr;
+  }
 
   const auto& gl_context =
       impeller::ContextGLES::Cast(*aiks_context->GetContext());
+  const bool implicit_msaa = aiks_context->GetContext()
+                                 ->GetCapabilities()
+                                 ->SupportsImplicitResolvingMSAA();
   const auto size = impeller::ISize(config.size.width, config.size.height);
 
   impeller::TextureDescriptor color0_tex;
-  color0_tex.type = impeller::TextureType::kTexture2D;
-  color0_tex.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  if (implicit_msaa) {
+    color0_tex.type = impeller::TextureType::kTexture2DMultisample;
+    color0_tex.sample_count = impeller::SampleCount::kCount4;
+  } else {
+    color0_tex.type = impeller::TextureType::kTexture2D;
+    color0_tex.sample_count = impeller::SampleCount::kCount1;
+  }
+  color0_tex.format = format.value();
   color0_tex.size = size;
   color0_tex.usage = static_cast<impeller::TextureUsageMask>(
       impeller::TextureUsage::kRenderTarget);
-  color0_tex.sample_count = impeller::SampleCount::kCount1;
   color0_tex.storage_mode = impeller::StorageMode::kDevicePrivate;
 
   impeller::ColorAttachment color0;
@@ -1065,15 +1094,25 @@ MakeRenderTargetFromBackingStoreImpeller(
       gl_context.GetReactor(), color0_tex, framebuffer->name);
   color0.clear_color = impeller::Color::DarkSlateGray();
   color0.load_action = impeller::LoadAction::kClear;
-  color0.store_action = impeller::StoreAction::kStore;
+  if (implicit_msaa) {
+    color0.store_action = impeller::StoreAction::kMultisampleResolve;
+    color0.resolve_texture = color0.texture;
+  } else {
+    color0.store_action = impeller::StoreAction::kStore;
+  }
 
   impeller::TextureDescriptor depth_stencil_texture_desc;
-  depth_stencil_texture_desc.type = impeller::TextureType::kTexture2D;
-  depth_stencil_texture_desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  depth_stencil_texture_desc.type =
+      impeller::TextureType::kTexture2DMultisample;
+  depth_stencil_texture_desc.format = impeller::PixelFormat::kD24UnormS8Uint;
   depth_stencil_texture_desc.size = size;
   depth_stencil_texture_desc.usage = static_cast<impeller::TextureUsageMask>(
       impeller::TextureUsage::kRenderTarget);
-  depth_stencil_texture_desc.sample_count = impeller::SampleCount::kCount1;
+  if (implicit_msaa) {
+    depth_stencil_texture_desc.sample_count = impeller::SampleCount::kCount4;
+  } else {
+    depth_stencil_texture_desc.sample_count = impeller::SampleCount::kCount1;
+  }
 
   auto depth_stencil_tex = std::make_shared<impeller::TextureGLES>(
       gl_context.GetReactor(), depth_stencil_texture_desc,

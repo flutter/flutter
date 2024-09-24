@@ -14,23 +14,23 @@ namespace egl {
 
 int Manager::instance_count_ = 0;
 
-std::unique_ptr<Manager> Manager::Create(bool enable_impeller) {
+std::unique_ptr<Manager> Manager::Create() {
   std::unique_ptr<Manager> manager;
-  manager.reset(new Manager(enable_impeller));
+  manager.reset(new Manager());
   if (!manager->IsValid()) {
     return nullptr;
   }
   return std::move(manager);
 }
 
-Manager::Manager(bool enable_impeller) {
+Manager::Manager() {
   ++instance_count_;
 
   if (!InitializeDisplay()) {
     return;
   }
 
-  if (!InitializeConfig(enable_impeller)) {
+  if (!InitializeConfig()) {
     return;
   }
 
@@ -140,46 +140,19 @@ bool Manager::InitializeDisplay() {
   FML_UNREACHABLE();
 }
 
-bool Manager::InitializeConfig(bool enable_impeller) {
+bool Manager::InitializeConfig() {
   const EGLint config_attributes[] = {EGL_RED_SIZE,   8, EGL_GREEN_SIZE,   8,
                                       EGL_BLUE_SIZE,  8, EGL_ALPHA_SIZE,   8,
                                       EGL_DEPTH_SIZE, 8, EGL_STENCIL_SIZE, 8,
                                       EGL_NONE};
 
-  const EGLint impeller_config_attributes[] = {
-      EGL_RED_SIZE,       8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE,    8,
-      EGL_ALPHA_SIZE,     8, EGL_DEPTH_SIZE, 0, EGL_STENCIL_SIZE, 8,
-      EGL_SAMPLE_BUFFERS, 1, EGL_SAMPLES,    4, EGL_NONE};
-  const EGLint impeller_config_attributes_no_msaa[] = {
-      EGL_RED_SIZE,   8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE,    8,
-      EGL_ALPHA_SIZE, 8, EGL_DEPTH_SIZE, 0, EGL_STENCIL_SIZE, 8,
-      EGL_NONE};
-
-  EGLBoolean result;
   EGLint num_config = 0;
 
-  if (enable_impeller) {
-    // First try the MSAA configuration.
-    result = ::eglChooseConfig(display_, impeller_config_attributes, &config_,
-                               1, &num_config);
+  EGLBoolean result =
+      ::eglChooseConfig(display_, config_attributes, &config_, 1, &num_config);
 
-    if (result == EGL_TRUE && num_config > 0) {
-      return true;
-    }
-
-    // Next fall back to disabled MSAA.
-    result = ::eglChooseConfig(display_, impeller_config_attributes_no_msaa,
-                               &config_, 1, &num_config);
-    if (result == EGL_TRUE && num_config == 0) {
-      return true;
-    }
-  } else {
-    result = ::eglChooseConfig(display_, config_attributes, &config_, 1,
-                               &num_config);
-
-    if (result == EGL_TRUE && num_config > 0) {
-      return true;
-    }
+  if (result == EGL_TRUE && num_config > 0) {
+    return true;
   }
 
   LogEGLError("Failed to choose EGL config");

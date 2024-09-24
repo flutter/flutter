@@ -23,8 +23,9 @@ struct FramebufferBackingStore {
 }  // namespace
 
 CompositorOpenGL::CompositorOpenGL(FlutterWindowsEngine* engine,
-                                   impeller::ProcTableGLES::Resolver resolver)
-    : engine_(engine), resolver_(resolver) {}
+                                   impeller::ProcTableGLES::Resolver resolver,
+                                   bool enable_impeller)
+    : engine_(engine), resolver_(resolver), enable_impeller_(enable_impeller) {}
 
 bool CompositorOpenGL::CreateBackingStore(
     const FlutterBackingStoreConfig& config,
@@ -50,8 +51,33 @@ bool CompositorOpenGL::CreateBackingStore(
                   GL_UNSIGNED_BYTE, nullptr);
   gl_->BindTexture(GL_TEXTURE_2D, 0);
 
-  gl_->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                            store->texture_id, 0);
+  if (enable_impeller_) {
+    // Impeller requries that its onscreen surface is Multisampled and already
+    // has depth/stencil attached in order for anti-aliasing to work.
+    gl_->FramebufferTexture2DMultisampleEXT(GL_FRAMEBUFFER,
+                                            GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                                            store->texture_id, 0, 4);
+
+    // Set up depth/stencil attachment for impeller renderer.
+    GLuint depth_stencil;
+    gl_->GenRenderbuffers(1, &depth_stencil);
+    gl_->BindRenderbuffer(GL_RENDERBUFFER, depth_stencil);
+    gl_->RenderbufferStorageMultisampleEXT(
+        GL_RENDERBUFFER,      // target
+        4,                    // samples
+        GL_DEPTH24_STENCIL8,  // internal format
+        config.size.width,    // width
+        config.size.height    // height
+    );
+    gl_->FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                 GL_RENDERBUFFER, depth_stencil);
+    gl_->FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                                 GL_RENDERBUFFER, depth_stencil);
+
+  } else {
+    gl_->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                              GL_TEXTURE_2D, store->texture_id, 0);
+  }
 
   result->type = kFlutterBackingStoreTypeOpenGL;
   result->open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
@@ -131,7 +157,6 @@ bool CompositorOpenGL::Present(FlutterWindowsView* view,
   // Prevents regressions like: https://github.com/flutter/flutter/issues/140828
   // See OpenGL specification version 4.6, section 18.3.1.
   gl_->Disable(GL_SCISSOR_TEST);
-
   gl_->BindFramebuffer(GL_READ_FRAMEBUFFER, source_id);
   gl_->BindFramebuffer(GL_DRAW_FRAMEBUFFER, kWindowFrameBufferId);
 
