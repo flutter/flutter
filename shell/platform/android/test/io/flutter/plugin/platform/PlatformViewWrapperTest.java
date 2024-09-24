@@ -15,6 +15,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.view.Surface;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
@@ -23,6 +24,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -61,6 +63,37 @@ public class PlatformViewWrapperTest {
 
     // Verify.
     verify(canvas, times(1)).drawColor(Color.RED);
+  }
+
+  @Test
+  public void draw_withoutValidSurface() {
+    FlutterRenderer.debugDisableSurfaceClear = true;
+    final Surface surface = mock(Surface.class);
+    when(surface.isValid()).thenReturn(false);
+    final PlatformViewRenderTarget renderTarget = mock(PlatformViewRenderTarget.class);
+    when(renderTarget.getSurface()).thenReturn(surface);
+
+    final PlatformViewWrapper wrapper = new PlatformViewWrapper(ctx, renderTarget);
+    final Canvas canvas = mock(Canvas.class);
+    wrapper.draw(canvas);
+
+    verify(canvas, times(0)).drawColor(Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR);
+  }
+
+  @Test
+  public void draw_withValidSurface() {
+    FlutterRenderer.debugDisableSurfaceClear = true;
+    final Canvas canvas = mock(Canvas.class);
+    final Surface surface = mock(Surface.class);
+    when(surface.isValid()).thenReturn(true);
+    final PlatformViewRenderTarget renderTarget = mock(PlatformViewRenderTarget.class);
+    when(renderTarget.getSurface()).thenReturn(surface);
+    when(surface.lockHardwareCanvas()).thenReturn(canvas);
+    final PlatformViewWrapper wrapper = new PlatformViewWrapper(ctx, renderTarget);
+
+    wrapper.draw(canvas);
+
+    verify(canvas, times(1)).drawColor(Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR);
   }
 
   @Test

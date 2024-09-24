@@ -165,7 +165,13 @@ public class PlatformViewWrapper extends FrameLayout {
       Log.e(TAG, "Platform view cannot be composed without a RenderTarget.");
       return;
     }
+
     final Surface targetSurface = renderTarget.getSurface();
+    if (!targetSurface.isValid()) {
+      Log.e(TAG, "Platform view cannot be composed without a valid RenderTarget surface.");
+      return;
+    }
+
     final Canvas targetCanvas = targetSurface.lockHardwareCanvas();
     if (targetCanvas == null) {
       // Cannot render right now.
