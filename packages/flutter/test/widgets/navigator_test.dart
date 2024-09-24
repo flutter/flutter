@@ -5808,12 +5808,12 @@ class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
   @override
   Widget build(BuildContext context) {
     final BuildContext rootContext = context;
-    return NavigatorPopHandler(
-      onPop: () {
+    return NavigatorPopHandler<String>(
+      onPopWithResult: (String? result) {
         if (widget.popScopePageEnabled == false) {
           return;
         }
-        _navigatorKey.currentState!.pop();
+        _navigatorKey.currentState!.pop(result);
       },
       child: Navigator(
         key: _navigatorKey,
