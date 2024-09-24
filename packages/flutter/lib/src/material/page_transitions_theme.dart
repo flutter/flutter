@@ -343,7 +343,8 @@ class _ZoomPageTransition extends StatelessWidget {
         secondaryAnimation,
         child,
         allowSnapshotting,
-        allowEnterRouteSnapshotting
+        allowEnterRouteSnapshotting,
+        enterTransitionBackgroundColor
       ),
     );
   }
@@ -755,7 +756,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   @override
   DelegatedTransition? get delegatedTransition => ZoomDelegatedTransition(
     builder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child)
-      => snapshotAwareDelegatedTransition(context, animation, secondaryAnimation, child, allowSnapshotting, allowEnterRouteSnapshotting),
+      => snapshotAwareDelegatedTransition(context, animation, secondaryAnimation, child, allowSnapshotting, allowEnterRouteSnapshotting, backgroundColor),
   );
 
   /// A transition builder that takes into account the snapshotting properties of
@@ -763,7 +764,8 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   ///
   /// This is provided to [ZoomDelegatedTransition.builder], to be passed to the
   /// previous page route, when the current page is added to the stack.
-  static Widget snapshotAwareDelegatedTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child, bool allowSnapshotting, bool allowEnterRouteSnapshotting) {
+  static Widget snapshotAwareDelegatedTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child, bool allowSnapshotting, bool allowEnterRouteSnapshotting, Color? backgroundColor) {
+    final Color enterTransitionBackgroundColor = backgroundColor ?? Theme.of(context).colorScheme.surface;
     return DualTransitionBuilder(
       animation: ReverseAnimation(secondaryAnimation),
       forwardBuilder: (
@@ -775,6 +777,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
           animation: animation,
           allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting,
           reverse: true,
+          backgroundColor: enterTransitionBackgroundColor,
           child: child,
         );
       },
