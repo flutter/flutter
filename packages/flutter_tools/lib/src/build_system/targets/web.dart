@@ -363,13 +363,15 @@ class Dart2WasmTarget extends Dart2WebTarget {
       .whereType<File>()
       .where((File file) => switch (file.basename) {
         'main.dart.wasm' || 'main.dart.mjs' => true,
+        'main.dart.wasm.map' => compilerConfig.sourceMaps,
         _ => false,
       });
 
   @override
-  Iterable<String> get buildPatternStems => const <String>[
+  Iterable<String> get buildPatternStems => <String>[
     'main.dart.wasm',
     'main.dart.mjs',
+    if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
   ];
 }
 
