@@ -377,7 +377,25 @@ void PlatformConfiguration::BeginFrame(fml::TimePoint frameTime,
   }
   tonic::DartState::Scope scope(dart_state);
 
-  int64_t microseconds = (frameTime - fml::TimePoint()).ToMicroseconds();
+  if (last_frame_number_ > frame_number) {
+    FML_LOG(ERROR) << "Frame number is out of order: " << frame_number << " < "
+                   << last_frame_number_;
+  }
+  last_frame_number_ = frame_number;
+
+  // frameTime is not a delta; its the timestamp of the presentation.
+  // This is just a type conversion.
+  int64_t microseconds = frameTime.ToEpochDelta().ToMicroseconds();
+  if (last_microseconds_ > microseconds) {
+    // Do not allow time traveling frametimes
+    // github.com/flutter/flutter/issues/106277
+    FML_LOG(ERROR)
+        << "Reported frame time is older than the last one; clamping. "
+        << microseconds << " < " << last_microseconds_
+        << " ~= " << last_microseconds_ - microseconds;
+    microseconds = last_microseconds_;
+  }
+  last_microseconds_ = microseconds;
 
   tonic::CheckAndHandleError(
       tonic::DartInvoke(begin_frame_.Get(), {

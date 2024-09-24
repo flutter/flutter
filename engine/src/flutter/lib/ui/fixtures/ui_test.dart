@@ -492,6 +492,16 @@ void convertPaintToDlPaint() {
 @pragma('vm:external-name',  'ConvertPaintToDlPaint')
 external void _convertPaintToDlPaint(Paint paint);
 
+/// Hooks for platform_configuration_unittests.cc
+@pragma('vm:entry-point')
+void _beginFrameHijack(int microseconds, int frameNumber) {
+  nativeBeginFrame(microseconds, frameNumber);
+}
+
+@pragma('vm:entry-point')
+@pragma('vm:external-name', 'BeginFrame')
+external nativeBeginFrame(int microseconds, int frameNumber);
+
 @pragma('vm:entry-point')
 void hooksTests() async {
   Future<void> test(String name, FutureOr<void> Function() testFunction) async {
