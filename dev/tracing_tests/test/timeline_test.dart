@@ -108,7 +108,7 @@ void main() {
       <String>['BUILD', 'Placeholder', 'CustomPaint', 'LAYOUT', 'UPDATING COMPOSITING BITS', 'PAINT', 'COMPOSITING', 'FINALIZE TREE'],
     );
     args = (events.where((TimelineEvent event) => event.json!['name'] == '$Placeholder').single.json!['args'] as Map<String, Object?>).cast<String, String>();
-    expect(args['color'], 'Color(0xffffffff)');
+    expect(args['color'], '${const Color(0xffffffff)}');
     debugProfileBuildsEnabled = false;
     debugEnhanceBuildTimelineArguments = false;
 
@@ -121,7 +121,7 @@ void main() {
       <String>['BUILD', 'Placeholder', 'LAYOUT', 'UPDATING COMPOSITING BITS', 'PAINT', 'COMPOSITING', 'FINALIZE TREE'],
     );
     args = (events.where((TimelineEvent event) => event.json!['name'] == '$Placeholder').single.json!['args'] as Map<String, Object?>).cast<String, String>();
-    expect(args['color'], 'Color(0xffffffff)');
+    expect(args['color'], '${const Color(0xffffffff)}');
     debugProfileBuildsEnabledUserWidgets = false;
     debugEnhanceBuildTimelineArguments = false;
 

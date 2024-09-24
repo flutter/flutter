@@ -55,7 +55,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     // The Scaffold background color is updated.
-    expect(getScaffoldMaterial().color, const Color(0xff333731));
+    expect(getScaffoldMaterial().color, isSameColorAs(const Color(0xff333731)));
 
     await tester.pumpAndSettle();
 
