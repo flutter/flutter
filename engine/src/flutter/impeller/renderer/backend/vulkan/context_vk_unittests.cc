@@ -72,6 +72,25 @@ TEST(ContextVKTest, DeletesCommandPoolsOnAllThreads) {
   ASSERT_FALSE(weak_pool_thread.lock());
 }
 
+TEST(ContextVKTest, ThreadLocalCleanupDeletesCommandPool) {
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+
+  fml::AutoResetWaitableEvent latch1, latch2;
+  std::weak_ptr<CommandPoolVK> weak_pool;
+  std::thread thread([&]() {
+    weak_pool = context->GetCommandPoolRecycler()->Get();
+    context->DisposeThreadLocalCachedResources();
+    latch1.Signal();
+    latch2.Wait();
+  });
+
+  latch1.Wait();
+  ASSERT_FALSE(weak_pool.lock());
+
+  latch2.Signal();
+  thread.join();
+}
+
 TEST(ContextVKTest, DeletePipelineAfterContext) {
   std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline;
   std::shared_ptr<std::vector<std::string>> functions;

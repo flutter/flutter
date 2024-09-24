@@ -103,6 +103,10 @@ void SurfaceContextVK::InitializeCommonlyUsedShadersIfNeeded() const {
   parent_->InitializeCommonlyUsedShadersIfNeeded();
 }
 
+void SurfaceContextVK::DisposeThreadLocalCachedResources() {
+  parent_->DisposeThreadLocalCachedResources();
+}
+
 const std::shared_ptr<ContextVK>& SurfaceContextVK::GetParent() const {
   return parent_;
 }

@@ -167,7 +167,11 @@ class ContextVK final : public Context,
 
   void RecordFrameEndTime() const;
 
+  // |Context|
   void InitializeCommonlyUsedShadersIfNeeded() const override;
+
+  // |Context|
+  void DisposeThreadLocalCachedResources() override;
 
   /// @brief Whether the Android Surface control based swapchain should be
   /// disabled, even if the device is capable of supporting it.

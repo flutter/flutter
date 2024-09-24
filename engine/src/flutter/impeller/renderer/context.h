@@ -196,6 +196,13 @@ class Context {
   /// shader variants, as well as forcing driver initialization.
   virtual void InitializeCommonlyUsedShadersIfNeeded() const {}
 
+  /// Dispose resources that are cached on behalf of the current thread.
+  ///
+  /// Some backends such as Vulkan may cache resources that can be reused while
+  /// executing a rendering operation.  This API can be called after the
+  /// operation completes in order to clear the cache.
+  virtual void DisposeThreadLocalCachedResources() {}
+
  protected:
   Context();
 
