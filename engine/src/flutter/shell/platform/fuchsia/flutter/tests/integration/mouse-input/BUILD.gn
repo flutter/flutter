@@ -54,7 +54,6 @@ executable("mouse-input-test-bin") {
 }
 
 fuchsia_test_archive("mouse-input-test") {
-  testonly = true
   deps = [
     ":mouse-input-test-bin",
 
@@ -63,7 +62,4 @@ fuchsia_test_archive("mouse-input-test") {
     # TODO(fxbug.dev/106575): Fix this with subpackages.
     "//flutter/shell/platform/fuchsia/flutter:oot_flutter_jit_runner",
   ]
-
-  binary = "$target_name"
-  cml_file = rebase_path("meta/$target_name.cml")
 }
