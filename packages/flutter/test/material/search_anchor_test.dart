@@ -3551,9 +3551,9 @@ void main() {
       await tester.pumpAndSettle();
       key.currentState!.pop();
       await tester.pump();
-      await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
+      await tester.pumpWidget(MaterialApp(
+        navigatorKey: key,
+        home: const Material(
           child: Text('disposed'),
         ),
       ));
