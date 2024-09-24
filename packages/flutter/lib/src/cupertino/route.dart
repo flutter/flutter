@@ -1019,6 +1019,9 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
   }
 }
 
+// The stiffness used by dialogs and action sheets.
+//
+// Derived by dumping description of [CASpringAnimation] from XCode.
 const double _kStandardStiffness = 522.35;
 
 // Create a spring description in iOS's terms.
@@ -1028,25 +1031,23 @@ const double _kStandardStiffness = 522.35;
 //  [2]: https://developer.apple.com/documentation/quartzcore/caspringanimation/4173018-init
 //  [3]: https://developer.apple.com/documentation/swiftui/spring/init(duration:bounce:)
 //
-// The `bounce` describes how bouncy the spring should be, and has a value
-// between -1 and 1. A value of 0 indicates no bounces (a critically damped
-// spring), positive values indicate increasing amounts of bounciness up to a
-// maximum of 1.0 (corresponding to undamped oscillation), and negative values
-// indicate overdamped springs with a minimum value of -1.0.
+// The `bounce` parameter determines the spring's bounciness and ranges from -1
+// to 1. A value of 0 indicates no bounces (a critically damped spring),
+// positive values (up to 1.0) represent increasing bounciness (up to undamped
+// oscillation), and negative values (down to -1.0) indicate overdamped springs.
+// This parameter directly corresponds to the `bounce` value used in the iOS
+// APIs listed above.
 //
-// The stiffness parameter aligns with the stiffness value used in
-// [SpringDescription.stiffness] and is compatible with values from
-// `CASpringAnimation.stiffness`.
+// The `stiffness` parameter matches the `stiffness` value in
+// [SpringDescription.stiffness] and can also be aligned with
+// `CASpringAnimation.stiffness` values from iOS. For iOS APIs, the `duration` or
+// `perceptualDuration` corresponds to (2 * pi / stiffness)^2. However, note
+// that this calculated duration may not match the `duration` displayed in
+// `CASpringAnimation.description` or Apple's official definitions of
+// "perceptual duration" or "settling duration." In Flutter, the settling
+// duration is instead controlled by [Simulation.tolerance].
 //
 // The mass of the spring is fixed at 1.0.
-//
-// The behavior of the resulting spring will match the effects of the APIs
-// mentioned above if they use the same `bounce` value and if the `duration` or
-// `perceptualDuration` is calculated as `(2 * pi / stiffness)^2`. However, this
-// computed "duration" does not correspond directly to the `duration` displayed
-// in `CASpringAnimation.description` or Apple's defined "perceptual duration"
-// or "settling duration." In Flutter, the settling duration is governed by
-// [Simulation.tolerance].
 SpringDescription _createIosSpring({
   double stiffness = _kStandardStiffness,
   double bounce = 0,
