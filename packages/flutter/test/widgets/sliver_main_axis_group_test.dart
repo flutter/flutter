@@ -804,6 +804,9 @@ void main() {
     addTearDown(controller.dispose);
     final FocusNode textFieldFocus = FocusNode();
     addTearDown(textFieldFocus.dispose);
+    final FocusNode textFieldFocus2 = FocusNode();
+    addTearDown(textFieldFocus2.dispose);
+    const ValueKey<int> firstTextFieldKey = ValueKey<int>(1);
 
     await tester.pumpWidget(
       _buildSliverMainAxisGroup(
@@ -822,6 +825,7 @@ void main() {
           SliverToBoxAdapter(
               child: Material(
             child: TextField(
+              key: firstTextFieldKey,
               focusNode: textFieldFocus,
             ),
           )),
@@ -831,22 +835,26 @@ void main() {
               height: 500,
             ),
           ),
+          SliverToBoxAdapter(
+              child: Material(
+            child: TextField(
+              focusNode: textFieldFocus2,
+            ),
+          )),
         ],
       ),
     );
 
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
-    expect(controller.offset, 0.0);
 
-    controller.jumpTo(100.0);
+    textFieldFocus2.requestFocus();
     await tester.pumpAndSettle();
 
     textFieldFocus.requestFocus();
     await tester.pumpAndSettle();
 
-    expect(controller.offset, 8.0); // 8.0 is contentPadding of TextField; (0.0, 8.0, 0.0, 8.0).
+    expect(tester.getTopLeft(find.byKey(firstTextFieldKey)), const Offset(0, 60));
   });
 }
 
