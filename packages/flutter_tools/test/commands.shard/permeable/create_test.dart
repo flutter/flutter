@@ -820,7 +820,7 @@ void main() {
       throwsToolExit(message:
         '"xyz-xyz" is not a valid Dart package name. Try "xyz_xyz" instead.\n'
         '\n'
-        'The name should be all lowercase, with underscores to separate words, '
+        'The name should consist of lowercase words separated by underscores, '
         '"like_this". Use only basic Latin letters and Arabic digits: [a-z0-9_], '
         'and ensure the name is a valid Dart identifier (i.e. it does not start '
         'with a digit and is not a reserved word).\n'
