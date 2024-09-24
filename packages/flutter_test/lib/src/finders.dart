@@ -598,9 +598,11 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder bySemanticsIdentifier(Pattern identifier, {bool skipOffstage = true}) {
       if (!SemanticsBinding.instance.semanticsEnabled) {
-        throw StateError('Semantics are not enabled. '
-            'Make sure to call tester.ensureSemantics() before using '
-            'this finder, and call dispose on its return value after.');
+        throw StateError(
+          'Semantics are not enabled. '
+          'Make sure to call tester.ensureSemantics() before using '
+          'this finder, and call dispose on its return value after.',
+        );
       }
       return byElementPredicate(
         (Element element) {
@@ -609,8 +611,7 @@ class CommonFinders {
           if (element is! RenderObjectElement) {
             return false;
           }
-          final String? semanticsIdentifier =
-              element.renderObject.debugSemantics?.identifier;
+          final String? semanticsIdentifier = element.renderObject.debugSemantics?.identifier;
           if (semanticsIdentifier == null) {
             return false;
           }

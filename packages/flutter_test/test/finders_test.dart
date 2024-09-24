@@ -300,16 +300,20 @@ void main() {
       semanticsHandle.dispose();
     });
 
-    testWidgets('Throws StateError if semantics are not enabled (bySemanticsIdentifier)',
-        (WidgetTester tester) async {
+    testWidgets('Throws StateError if semantics are not enabled (bySemanticsIdentifier)', (WidgetTester tester) async {
       expect(
         () => find.bySemanticsIdentifier('Add'),
-        throwsA(isA<StateError>().having((StateError e) => e.message, 'message', contains('Semantics are not enabled')))
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('Semantics are not enabled'),
+          ),
+        ),
       );
     }, semanticsEnabled: false);
 
-    testWidgets('finds Semantically labeled widgets by identifier',
-        (WidgetTester tester) async {
+    testWidgets('finds Semantically labeled widgets by identifier', (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
         Semantics(
@@ -325,8 +329,7 @@ void main() {
       semanticsHandle.dispose();
     });
 
-    testWidgets('finds Semantically labeled widgets by identifier RegExp',
-        (WidgetTester tester) async {
+    testWidgets('finds Semantically labeled widgets by identifier RegExp', (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
       // list of elements with a prefixed identifier
       await tester.pumpWidget(_boilerplate(
