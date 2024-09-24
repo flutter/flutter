@@ -608,6 +608,10 @@ void ContextVK::InitializeCommonlyUsedShadersIfNeeded() const {
   auto pass = builder.Build(GetDevice());
 }
 
+void ContextVK::DisposeThreadLocalCachedResources() {
+  command_pool_recycler_->Dispose();
+}
+
 const std::shared_ptr<YUVConversionLibraryVK>&
 ContextVK::GetYUVConversionLibrary() const {
   return yuv_conversion_library_;

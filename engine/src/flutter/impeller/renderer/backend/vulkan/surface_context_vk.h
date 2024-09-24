@@ -80,7 +80,11 @@ class SurfaceContextVK : public Context,
   ///        recreated on the next frame.
   void UpdateSurfaceSize(const ISize& size) const;
 
+  // |Context|
   void InitializeCommonlyUsedShadersIfNeeded() const override;
+
+  // |Context|
+  void DisposeThreadLocalCachedResources() override;
 
   const vk::Device& GetDevice() const;
 
