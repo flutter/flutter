@@ -332,7 +332,7 @@ class CupertinoSearchTextField extends StatefulWidget {
 }
 
 class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
-    with RestorationMixin, SingleTickerProviderStateMixin {
+    with RestorationMixin {
   /// Default value for the border radius. Radius value was determined using the
   /// comparison tool in https://github.com/flutter/platform_tests/.
   final BorderRadius _kDefaultBorderRadius =
