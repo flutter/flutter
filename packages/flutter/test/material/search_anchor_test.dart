@@ -3558,7 +3558,8 @@ void main() {
           home: const Material(
             child: Text('disposed'),
           ),
-      ));
+        ),
+      );
       await tester.pump();
       expect(tester.takeException(), isNull);
   });
