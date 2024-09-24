@@ -218,6 +218,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.systemOverlayStyle,
     this.forceMaterialTransparency = false,
     this.clipBehavior,
+    this.actionsPadding,
   }) : assert(elevation == null || elevation >= 0.0),
        preferredSize = _PreferredAppBarSize(toolbarHeight, bottom?.preferredSize.height);
 
@@ -744,6 +745,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@macro flutter.material.Material.clipBehavior}
   final Clip? clipBehavior;
 
+  /// {@template flutter.material.appbar.marginPadding}
+  /// The padding between the [actions] and the right edge of the AppBar.
+  ///
+  /// By default, the value of [AppBar.actionsPadding] is 0.0.
+  /// {@endtemplate}
+  final double? actionsPadding;
+
   bool _getEffectiveCenterTitle(ThemeData theme) {
     bool platformCenter() {
       switch (theme.platform) {
@@ -906,6 +914,11 @@ class _AppBarState extends State<AppBar> {
       ?? defaults.actionsIconTheme?.copyWith(color: actionForegroundColor)
       ?? overallIconTheme;
 
+    // TODO(Craftplacer): consider using 8.0 instead of 0.0 for Material 3 in the future
+    final double actionsPadding = widget.actionsPadding
+      ?? appBarTheme.actionsPadding
+      ?? 0.0;
+
     TextStyle? toolbarTextStyle = widget.toolbarTextStyle
       ?? appBarTheme.toolbarTextStyle
       ?? defaults.toolbarTextStyle?.copyWith(color: foregroundColor);
@@ -1019,10 +1032,13 @@ class _AppBarState extends State<AppBar> {
 
     Widget? actions;
     if (widget.actions != null && widget.actions!.isNotEmpty) {
-      actions = Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: theme.useMaterial3 ? CrossAxisAlignment.center : CrossAxisAlignment.stretch,
-        children: widget.actions!,
+      actions = Padding(
+        padding: EdgeInsetsDirectional.only(end: actionsPadding),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: theme.useMaterial3 ? CrossAxisAlignment.center : CrossAxisAlignment.stretch,
+          children: widget.actions!,
+        ),
       );
     } else if (hasEndDrawer) {
       actions = EndDrawerButton(
@@ -1219,6 +1235,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.clipBehavior,
     required this.variant,
     required this.accessibleNavigation,
+    required this.actionsPadding,
   }) : assert(primary || topPadding == 0.0),
        _bottomHeight = bottom?.preferredSize.height ?? 0.0;
 
@@ -1257,6 +1274,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final Clip? clipBehavior;
   final _SliverAppVariant variant;
   final bool accessibleNavigation;
+  final double? actionsPadding;
 
   @override
   double get minExtent => collapsedHeight;
@@ -1338,6 +1356,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         titleTextStyle: titleTextStyle,
         systemOverlayStyle: systemOverlayStyle,
         forceMaterialTransparency: forceMaterialTransparency,
+        actionsPadding: actionsPadding,
       ),
     );
     return appBar;
@@ -1376,7 +1395,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || titleTextStyle != oldDelegate.titleTextStyle
         || systemOverlayStyle != oldDelegate.systemOverlayStyle
         || forceMaterialTransparency != oldDelegate.forceMaterialTransparency
-        || accessibleNavigation != oldDelegate.accessibleNavigation;
+        || accessibleNavigation != oldDelegate.accessibleNavigation
+        || actionsPadding != oldDelegate.actionsPadding;
   }
 
   @override
@@ -1516,6 +1536,7 @@ class SliverAppBar extends StatefulWidget {
     this.systemOverlayStyle,
     this.forceMaterialTransparency = false,
     this.clipBehavior,
+    this.actionsPadding,
   }) : assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
        assert(stretchTriggerOffset > 0.0),
        assert(
@@ -1584,6 +1605,7 @@ class SliverAppBar extends StatefulWidget {
     this.systemOverlayStyle,
     this.forceMaterialTransparency = false,
     this.clipBehavior,
+    this.actionsPadding,
  }) : assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
        assert(stretchTriggerOffset > 0.0),
        assert(
@@ -1652,6 +1674,7 @@ class SliverAppBar extends StatefulWidget {
     this.systemOverlayStyle,
     this.forceMaterialTransparency = false,
     this.clipBehavior,
+    this.actionsPadding,
   }) : assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
        assert(stretchTriggerOffset > 0.0),
        assert(
@@ -1915,6 +1938,11 @@ class SliverAppBar extends StatefulWidget {
   /// {@macro flutter.material.Material.clipBehavior}
   final Clip? clipBehavior;
 
+  /// {@macro flutter.material.appbar.actionsPadding}
+  ///
+  /// This property is used to configure an [AppBar].
+  final double? actionsPadding;
+
   final _SliverAppVariant _variant;
 
   @override
@@ -2059,6 +2087,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           clipBehavior: widget.clipBehavior,
           variant: widget._variant,
           accessibleNavigation: MediaQuery.of(context).accessibleNavigation,
+          actionsPadding: widget.actionsPadding,
         ),
       ),
     );
