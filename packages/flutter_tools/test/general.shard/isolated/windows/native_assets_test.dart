@@ -306,44 +306,6 @@ void main() {
     }
   }
 
-  testUsingContext('static libs not supported', overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-    ProcessManager: () => FakeProcessManager.empty(),
-  }, () async {
-    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
-    await packageConfig.parent.create();
-    await packageConfig.create();
-    expect(
-      () => dryRunNativeAssetsWindows(
-        projectUri: projectUri,
-        fileSystem: fileSystem,
-        buildRunner: FakeNativeAssetsBuildRunner(
-          packagesWithNativeAssetsResult: <Package>[
-            Package('bar', projectUri),
-          ],
-          buildDryRunResult: FakeNativeAssetsBuilderResult(
-            assets: <AssetImpl>[
-              NativeCodeAssetImpl(
-                id: 'package:bar/bar.dart',
-                linkMode: StaticLinkingImpl(),
-                os: OSImpl.windows,
-                architecture: ArchitectureImpl.x64,
-                file: Uri.file(OSImpl.windows.staticlibFileName('bar')),
-              ),
-            ],
-          ),
-        ),
-      ),
-      throwsToolExit(
-        message: 'Native asset(s) package:bar/bar.dart have their link mode set to '
-            'static, but this is not yet supported. '
-            'For more info see https://github.com/dart-lang/sdk/issues/49418.',
-      ),
-    );
-  });
-
-
-
   testUsingContext('Native assets dry run error', overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     ProcessManager: () => FakeProcessManager.empty(),

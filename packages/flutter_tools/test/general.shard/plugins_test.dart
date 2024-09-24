@@ -1684,7 +1684,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           name: 'test',
           path: '/path/to/test/',
           defaultPackagePlatforms: const <String, String>{},
-          pluginDartClassPlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
           platforms: const <String, PluginPlatform>{
             IOSPlugin.kConfigKey: IOSPlugin(name: 'test', classPrefix: ''),
             MacOSPlugin.kConfigKey: MacOSPlugin(name: 'test'),
@@ -1709,7 +1709,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           name: 'test',
           path: '/path/to/test/',
           defaultPackagePlatforms: const <String, String>{},
-          pluginDartClassPlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
           platforms: const <String, PluginPlatform>{
             IOSPlugin.kConfigKey: IOSPlugin(name: 'test', classPrefix: '', sharedDarwinSource: true),
             MacOSPlugin.kConfigKey: MacOSPlugin(name: 'test', sharedDarwinSource: true),
@@ -1734,7 +1734,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           name: 'test',
           path: '/path/to/test/',
           defaultPackagePlatforms: const <String, String>{},
-          pluginDartClassPlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
           platforms: const <String, PluginPlatform>{
             WindowsPlugin.kConfigKey: WindowsPlugin(name: 'test', pluginClass: ''),
           },
@@ -1762,7 +1762,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           name: 'test',
           path: '/path/to/test/',
           defaultPackagePlatforms: const <String, String>{},
-          pluginDartClassPlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
           platforms: const <String, PluginPlatform>{
             IOSPlugin.kConfigKey: IOSPlugin(name: 'test', classPrefix: ''),
             MacOSPlugin.kConfigKey: MacOSPlugin(name: 'test'),
@@ -1787,7 +1787,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           name: 'test',
           path: '/path/to/test/',
           defaultPackagePlatforms: const <String, String>{},
-          pluginDartClassPlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
           platforms: const <String, PluginPlatform>{
             IOSPlugin.kConfigKey: IOSPlugin(name: 'test', classPrefix: '', sharedDarwinSource: true),
             MacOSPlugin.kConfigKey: MacOSPlugin(name: 'test', sharedDarwinSource: true),
@@ -1812,7 +1812,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           name: 'test',
           path: '/path/to/test/',
           defaultPackagePlatforms: const <String, String>{},
-          pluginDartClassPlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
           platforms: const <String, PluginPlatform>{
             WindowsPlugin.kConfigKey: WindowsPlugin(name: 'test', pluginClass: ''),
           },
@@ -1863,7 +1863,7 @@ The Flutter Preview device does not support the following plugins from your pubs
         ..flutterPluginsDependenciesFile = dependenciesFile
         ..windows = windowsProject;
 
-      flutterProject.directory.childFile('.packages').createSync(recursive: true);
+      flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
 
       const String dependenciesFileContents = r'''
 {
@@ -1993,7 +1993,7 @@ The Flutter Preview device does not support the following plugins from your pubs
           flutterProject.directory.childFile('.flutter-plugins-dependencies')
       ..windows = windowsProject;
 
-    flutterProject.directory.childFile('.packages').createSync(recursive: true);
+    flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
 
     createPluginSymlinks(
       flutterProject,
