@@ -212,6 +212,14 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     _setDepthCompareOperation(compareFunction.index);
   }
 
+  void setStencilReference(int referenceValue) {
+    if (referenceValue < 0 || referenceValue > 0xFFFFFFFF) {
+      throw Exception(
+          "The stencil reference value must be in the range [0, 2^32 - 1]");
+    }
+    _setStencilReference(referenceValue);
+  }
+
   void draw() {
     if (!_draw()) {
       throw Exception("Failed to append draw");
@@ -334,6 +342,10 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   @Native<Void Function(Pointer<Void>, Int)>(
       symbol: 'InternalFlutterGpu_RenderPass_SetDepthCompareOperation')
   external void _setDepthCompareOperation(int compareOperation);
+
+  @Native<Void Function(Pointer<Void>, Int)>(
+      symbol: 'InternalFlutterGpu_RenderPass_SetStencilReference')
+  external void _setStencilReference(int referenceValue);
 
   @Native<Bool Function(Pointer<Void>)>(
       symbol: 'InternalFlutterGpu_RenderPass_Draw')
