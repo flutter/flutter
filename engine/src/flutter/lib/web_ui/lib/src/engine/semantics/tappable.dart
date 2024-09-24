@@ -53,6 +53,9 @@ class Tappable extends SemanticBehavior {
     owner.element.addEventListener('click', _clickListener);
   }
 
+  @override
+  bool get acceptsPointerEvents => true;
+
   DomEventListener? _clickListener;
   bool _isListening = false;
 

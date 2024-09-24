@@ -213,6 +213,9 @@ class SemanticTextField extends SemanticRole {
     _initializeEditableElement();
   }
 
+  @override
+  bool get acceptsPointerEvents => true;
+
   /// The element used for editing, e.g. `<input>`, `<textarea>`, which is
   /// different from the host [element].
   late final DomHTMLElement editableElement;
