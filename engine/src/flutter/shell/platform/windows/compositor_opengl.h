@@ -19,7 +19,8 @@ namespace flutter {
 class CompositorOpenGL : public Compositor {
  public:
   CompositorOpenGL(FlutterWindowsEngine* engine,
-                   impeller::ProcTableGLES::Resolver resolver);
+                   impeller::ProcTableGLES::Resolver resolver,
+                   bool enable_impeller);
 
   /// |Compositor|
   bool CreateBackingStore(const FlutterBackingStoreConfig& config,
@@ -58,6 +59,9 @@ class CompositorOpenGL : public Compositor {
   // The OpenGL texture format for backing stores. Invalid value until
   // the compositor is initialized.
   TextureFormat format_;
+
+  // Whether the Impeller rendering backend is enabled.
+  bool enable_impeller_ = false;
 
   // Initialize the compositor. This must run on the raster thread.
   bool Initialize();

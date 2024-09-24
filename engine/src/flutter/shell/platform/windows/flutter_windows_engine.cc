@@ -194,7 +194,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(
   enable_impeller_ = std::find(switches.begin(), switches.end(),
                                "--enable-impeller=true") != switches.end();
 
-  egl_manager_ = egl::Manager::Create(enable_impeller_);
+  egl_manager_ = egl::Manager::Create();
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
   window_proc_delegate_manager_->RegisterTopLevelWindowProcDelegate(
       [](HWND hwnd, UINT msg, WPARAM wpar, LPARAM lpar, void* user_data,
@@ -393,7 +393,8 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
 
     // TODO(schectman) Pass the platform view manager to the compositor
     // constructors: https://github.com/flutter/flutter/issues/143375
-    compositor_ = std::make_unique<CompositorOpenGL>(this, resolver);
+    compositor_ =
+        std::make_unique<CompositorOpenGL>(this, resolver, enable_impeller_);
   } else {
     compositor_ = std::make_unique<CompositorSoftware>();
   }

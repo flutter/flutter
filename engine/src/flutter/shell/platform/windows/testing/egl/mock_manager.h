@@ -16,7 +16,7 @@ namespace egl {
 /// Mock for the |Manager| base class.
 class MockManager : public flutter::egl::Manager {
  public:
-  MockManager() : Manager(false) {}
+  MockManager() : Manager() {}
 
   MOCK_METHOD(std::unique_ptr<flutter::egl::WindowSurface>,
               CreateWindowSurface,
