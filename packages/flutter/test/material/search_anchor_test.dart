@@ -3459,33 +3459,34 @@ void main() {
     bool disposed = false;
     late StateSetter setState;
     await tester.pumpWidget(
-     MaterialApp(
-      home: Material(
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter stateSetter) {
-            setState = stateSetter;
-            if (disposed) {
-              return const Text('disposed');
+      MaterialApp(
+        home: Material(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter stateSetter) {
+              setState = stateSetter;
+              if (disposed) {
+                return const Text('disposed');
+              }
+              return SearchAnchor(
+                builder: (BuildContext context, SearchController controller) {
+                  return IconButton(
+                    onPressed: () async {
+                      controller.openView();
+                    },
+                    icon: const Icon(Icons.search),
+                  );
+                },
+                suggestionsBuilder: (BuildContext context, SearchController controller) {
+                  return <Widget>[
+                    const Text('suggestion'),
+                  ];
+                },
+              );
             }
-            return SearchAnchor(
-              builder: (BuildContext context, SearchController controller) {
-                return IconButton(
-                  onPressed: () async {
-                    controller.openView();
-                  },
-                  icon: const Icon(Icons.search),
-                );
-              },
-              suggestionsBuilder: (BuildContext context, SearchController controller) {
-                return <Widget>[
-                  const Text('suggestion'),
-                ];
-              },
-            );
-          }
+          ),
         ),
       ),
-    ));
+    );
 
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
@@ -3551,11 +3552,12 @@ void main() {
       await tester.pumpAndSettle();
       key.currentState!.pop();
       await tester.pump();
-      await tester.pumpWidget(MaterialApp(
-        navigatorKey: key,
-        home: const Material(
-          child: Text('disposed'),
-        ),
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: key,
+          home: const Material(
+            child: Text('disposed'),
+          ),
       ));
       await tester.pump();
       expect(tester.takeException(), isNull);
