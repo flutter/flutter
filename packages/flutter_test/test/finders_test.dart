@@ -300,6 +300,11 @@ void main() {
       semanticsHandle.dispose();
     });
 
+    testWidgets('Throws StateError if semantics are not enabled (bySemanticsIdentifier)',
+        (WidgetTester tester) async {
+      expect(() => find.bySemanticsIdentifier('Add'), throwsStateError);
+    }, semanticsEnabled: false);
+
     testWidgets('finds Semantically labeled widgets by identifier',
         (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();

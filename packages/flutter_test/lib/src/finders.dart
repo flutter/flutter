@@ -624,7 +624,6 @@ class CommonFinders {
     }
 }
 
-
 /// Provides lightweight syntax for getting frequently used semantics finders.
 ///
 /// This class is instantiated once, as [CommonFinders.semantics], under [find].
