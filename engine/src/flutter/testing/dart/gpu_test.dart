@@ -32,6 +32,37 @@ gpu.RenderPipeline createUnlitRenderPipeline() {
   return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
 }
 
+class RenderPassState {
+  RenderPassState(this.renderTexture, this.commandBuffer, this.renderPass);
+
+  final gpu.Texture renderTexture;
+  final gpu.CommandBuffer commandBuffer;
+  final gpu.RenderPass renderPass;
+}
+
+/// Create a simple RenderPass with simple color and depth-stencil attachments.
+RenderPassState createSimpleRenderPass() {
+  final gpu.Texture? renderTexture =
+      gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 100, 100);
+  assert(renderTexture != null);
+
+  final gpu.Texture? depthStencilTexture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.deviceTransient, 100, 100,
+      format: gpu.gpuContext.defaultDepthStencilFormat);
+
+  final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+
+  final gpu.RenderTarget renderTarget = gpu.RenderTarget.singleColor(
+      gpu.ColorAttachment(texture: renderTexture!),
+      depthStencilAttachment:
+          gpu.DepthStencilAttachment(texture: depthStencilTexture!));
+
+  final gpu.RenderPass renderPass =
+      commandBuffer.createRenderPass(renderTarget);
+
+  return RenderPassState(renderTexture, commandBuffer, renderPass);
+}
+
 void main() async {
   final ImageComparer comparer = await ImageComparer.create();
 
@@ -203,25 +234,44 @@ void main() async {
     }
   }, skip: !impellerEnabled);
 
+  test('RenderPass.setStencilReference doesnt throw for valid values',
+      () async {
+    final state = createSimpleRenderPass();
+
+    state.renderPass.setStencilReference(0);
+    state.renderPass.setStencilReference(2 << 30);
+  }, skip: !impellerEnabled);
+
+  test('RenderPass.setStencilReference throws for invalid values', () async {
+    final state = createSimpleRenderPass();
+
+    try {
+      state.renderPass.setStencilReference(-1);
+      fail('Exception not thrown for out of bounds stencil reference.');
+    } catch (e) {
+      expect(e.toString(),
+          contains('The stencil reference value must be in the range'));
+    }
+
+    try {
+      state.renderPass.setStencilReference(2 << 31);
+      fail('Exception not thrown for out of bounds stencil reference.');
+    } catch (e) {
+      expect(e.toString(),
+          contains('The stencil reference value must be in the range'));
+    }
+  }, skip: !impellerEnabled);
+
+  // Renders a green triangle pointing downwards.
   test('Can render triangle', () async {
-    final gpu.Texture? renderTexture =
-        gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 100, 100);
-    assert(renderTexture != null);
-
-    final gpu.CommandBuffer commandBuffer =
-        gpu.gpuContext.createCommandBuffer();
-
-    final gpu.RenderTarget renderTarget = gpu.RenderTarget.singleColor(
-      gpu.ColorAttachment(texture: renderTexture!),
-    );
-    final gpu.RenderPass encoder = commandBuffer.createRenderPass(renderTarget);
+    final state = createSimpleRenderPass();
 
     final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
-    encoder.bindPipeline(pipeline);
+    state.renderPass.bindPipeline(pipeline);
 
     // Configure blending with defaults (just to test the bindings).
-    encoder.setColorBlendEnable(true);
-    encoder.setColorBlendEquation(gpu.ColorBlendEquation());
+    state.renderPass.setColorBlendEnable(true);
+    state.renderPass.setColorBlendEquation(gpu.ColorBlendEquation());
 
     final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
     final gpu.BufferView vertices = transients.emplace(float32(<double>[
@@ -236,16 +286,16 @@ void main() async {
       0, 0, 0, 1, // mvp
       0, 1, 0, 1, // color
     ]));
-    encoder.bindVertexBuffer(vertices, 3);
+    state.renderPass.bindVertexBuffer(vertices, 3);
 
     final gpu.UniformSlot vertInfo =
         pipeline.vertexShader.getUniformSlot('VertInfo');
-    encoder.bindUniform(vertInfo, vertInfoData);
-    encoder.draw();
+    state.renderPass.bindUniform(vertInfo, vertInfoData);
+    state.renderPass.draw();
 
-    commandBuffer.submit();
+    state.commandBuffer.submit();
 
-    final ui.Image image = renderTexture.asImage();
+    final ui.Image image = state.renderTexture.asImage();
     await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
   }, skip: !impellerEnabled);
 }

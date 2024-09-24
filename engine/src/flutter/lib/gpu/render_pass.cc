@@ -511,6 +511,13 @@ void InternalFlutterGpu_RenderPass_SetDepthCompareOperation(
       flutter::gpu::ToImpellerCompareFunction(compare_operation);
 }
 
+void InternalFlutterGpu_RenderPass_SetStencilReference(
+    flutter::gpu::RenderPass* wrapper,
+    int stencil_reference) {
+  auto& command = wrapper->GetCommand();
+  command.stencil_reference = static_cast<uint32_t>(stencil_reference);
+}
+
 bool InternalFlutterGpu_RenderPass_Draw(flutter::gpu::RenderPass* wrapper) {
   return wrapper->Draw();
 }

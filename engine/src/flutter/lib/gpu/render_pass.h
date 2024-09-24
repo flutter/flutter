@@ -222,6 +222,11 @@ extern void InternalFlutterGpu_RenderPass_SetDepthCompareOperation(
     int compare_operation);
 
 FLUTTER_GPU_EXPORT
+extern void InternalFlutterGpu_RenderPass_SetStencilReference(
+    flutter::gpu::RenderPass* wrapper,
+    int stencil_reference);
+
+FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_RenderPass_Draw(
     flutter::gpu::RenderPass* wrapper);
 
