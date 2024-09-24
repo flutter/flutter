@@ -1298,6 +1298,67 @@ void _testContainer() {
     semantics().semanticsEnabled = false;
   });
 
+  test('containers can be opaque if tappable', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      actions: 0 | ui.SemanticsAction.tap.index,
+      childrenInTraversalOrder: Int32List.fromList(<int>[1, 2]),
+      childrenInHitTestOrder: Int32List.fromList(<int>[1, 2]),
+    );
+    updateNode(builder, id: 1);
+    updateNode(builder, id: 2);
+
+    owner().updateSemantics(builder.build());
+    expectSemanticsTree(owner(), '''
+<sem>
+  <sem-c>
+    <sem style="z-index: 2"></sem>
+    <sem style="z-index: 1"></sem>
+  </sem-c>
+</sem>''');
+
+    final DomElement root = owner().semanticsHost.querySelector('#flt-semantic-node-0')!;
+    expect(root.style.pointerEvents, 'all');
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('container can be opaque if it is a text field', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      flags: 0 | ui.SemanticsFlag.isTextField.index,
+      childrenInTraversalOrder: Int32List.fromList(<int>[1, 2]),
+      childrenInHitTestOrder: Int32List.fromList(<int>[1, 2]),
+    );
+    updateNode(builder, id: 1);
+    updateNode(builder, id: 2);
+
+    owner().updateSemantics(builder.build());
+    expectSemanticsTree(owner(), '''
+<sem>
+  <input>
+  <sem-c>
+    <sem style="z-index: 2"></sem>
+    <sem style="z-index: 1"></sem>
+  </sem-c>
+</sem>''');
+
+    final DomElement root = owner().semanticsHost.querySelector('#flt-semantic-node-0')!;
+    expect(root.style.pointerEvents, 'all');
+
+    semantics().semanticsEnabled = false;
+  });
+
   test('descendant nodes are removed from the node map, unless reparented', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
