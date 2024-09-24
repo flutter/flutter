@@ -18,12 +18,7 @@ class WidgetStateMouseCursorExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('WidgetStateMouseCursor Sample')),
-        body: const Center(
-          child: WidgetStateMouseCursorExample(
-            // TRY THIS: Switch to get a different mouse cursor while hovering ListTile.
-            enabled: false,
-          ),
-        ),
+        body: const WidgetStateMouseCursorExample(),
       ),
     );
   }
@@ -45,21 +40,46 @@ class ListTileCursor extends WidgetStateMouseCursor {
   String get debugDescription => 'ListTileCursor()';
 }
 
-class WidgetStateMouseCursorExample extends StatelessWidget {
-  const WidgetStateMouseCursorExample({
-    required this.enabled,
-    super.key,
-  });
+class WidgetStateMouseCursorExample extends StatefulWidget {
+  const WidgetStateMouseCursorExample({super.key});
 
-  final bool enabled;
+  @override
+  State<WidgetStateMouseCursorExample> createState() => _WidgetStateMouseCursorExampleState();
+}
+
+class _WidgetStateMouseCursorExampleState extends State<WidgetStateMouseCursorExample> {
+  bool _enabled = false;
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text('ListTile'),
-      enabled: enabled,
-      onTap: () {},
-      mouseCursor: const ListTileCursor(),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        ListTile(
+          title: const Text('ListTile'),
+          enabled: _enabled,
+          onTap: () {},
+          mouseCursor: const ListTileCursor(),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              'Enabled: ',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            Switch(
+              value: _enabled,
+              onChanged: (_) {
+                setState(() {
+                  _enabled = !_enabled;
+                });
+              },
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
