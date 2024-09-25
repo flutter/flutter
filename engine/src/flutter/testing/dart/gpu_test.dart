@@ -52,7 +52,7 @@ class RenderPassState {
 }
 
 /// Create a simple RenderPass with simple color and depth-stencil attachments.
-RenderPassState createSimpleRenderPass() {
+RenderPassState createSimpleRenderPass({Vector4? clearColor}) {
   final gpu.Texture? renderTexture =
       gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 100, 100);
   assert(renderTexture != null);
@@ -64,7 +64,7 @@ RenderPassState createSimpleRenderPass() {
   final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
 
   final gpu.RenderTarget renderTarget = gpu.RenderTarget.singleColor(
-      gpu.ColorAttachment(texture: renderTexture!),
+      gpu.ColorAttachment(texture: renderTexture!, clearValue: clearColor),
       depthStencilAttachment:
           gpu.DepthStencilAttachment(texture: depthStencilTexture!));
 
@@ -322,6 +322,16 @@ void main() async {
       expect(e.toString(),
           contains('The stencil write mask must be in the range'));
     }
+  }, skip: !impellerEnabled);
+
+  // Performs no draw calls. Just clears the render target to a solid green color.
+  test('Can render clear color', () async {
+    final state = createSimpleRenderPass(clearColor: Colors.lime);
+
+    state.commandBuffer.submit();
+
+    final ui.Image image = state.renderTexture.asImage();
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_clear_color.png');
   }, skip: !impellerEnabled);
 
   // Renders a green triangle pointing downwards.
