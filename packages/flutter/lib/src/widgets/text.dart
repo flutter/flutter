@@ -882,7 +882,7 @@ class _RichText extends StatelessWidget {
 // position to make the compareScreenOrder function more robust.
 const double _kSelectableVerticalComparingThreshold = 3.0;
 
-class _SelectableTextContainerDelegate extends MultiStaticSelectableSelectionContainerDelegate {
+class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate {
   _SelectableTextContainerDelegate(
     GlobalKey textKey,
   ) : _textKey = textKey;

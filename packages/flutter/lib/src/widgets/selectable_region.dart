@@ -351,7 +351,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   final LayerLink _startHandleLayerLink = LayerLink();
   final LayerLink _endHandleLayerLink = LayerLink();
   final LayerLink _toolbarLayerLink = LayerLink();
-  final MultiStaticSelectableSelectionContainerDelegate _selectionDelegate = MultiStaticSelectableSelectionContainerDelegate();
+  final StaticSelectionContainerDelegate _selectionDelegate = StaticSelectionContainerDelegate();
   // there should only ever be one selectable, which is the SelectionContainer.
   Selectable? _selectable;
 
@@ -1845,7 +1845,7 @@ class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovemen
 ///
 ///  * [MultiSelectableSelectionContainerDelegate], for the class that provides
 ///  the main implementation details of this [SelectionContainerDelegate].
-class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
+class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   /// The set of [Selectable]s that have received start events.
   final Set<Selectable> _hasReceivedStartEvent = <Selectable>{};
 

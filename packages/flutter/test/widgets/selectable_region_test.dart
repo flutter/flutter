@@ -654,7 +654,7 @@ void main() {
     });
   });
 
-  testWidgets('Can extend MultiStaticSelectableSelectionContainerDelegate', (WidgetTester tester) async {
+  testWidgets('Can extend StaticSelectionContainerDelegate', (WidgetTester tester) async {
     SelectedContent? content;
     final FocusNode focusNode = FocusNode();
 
@@ -5350,7 +5350,7 @@ void main() {
   });
 }
 
-class ColumnSelectionContainerDelegate extends MultiStaticSelectableSelectionContainerDelegate {
+class ColumnSelectionContainerDelegate extends StaticSelectionContainerDelegate {
   /// Copies the selected contents of all [Selectable]s, separating their
   /// contents with a new line.
   @override
