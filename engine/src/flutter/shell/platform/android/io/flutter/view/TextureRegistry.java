@@ -171,6 +171,28 @@ public interface TextureRegistry {
 
     /** This method is not officially part of the public API surface and will be deprecated. */
     void scheduleFrame();
+
+    /**
+     * Returns whether the current rendering path handles crop and rotation metadata.
+     *
+     * <p>On most newer Android devices (API 29+), a {@link android.media.ImageReader} backend is
+     * used, which has more features, works in new graphic backends directly (such as Impeller's
+     * Vulkan backend), and is the Android recommended solution. However, crop and rotation metadata
+     * are <strong>not</strong> handled automatically, and require plugin authors to make
+     * appropriate changes ({@see https://github.com/flutter/flutter/issues/144407}).
+     *
+     * <pre>{@code
+     * void example(SurfaceProducer producer) {
+     *   bool supported = producer.handlesCropAndRotation();
+     *   if (!supported) {
+     *       // Manually rotate/crop, either in the Android plugin or in the Dart framework layer.
+     *   }
+     * }
+     * }</pre>
+     *
+     * @return {@code true} if crop and rotation is handled automatically, {@code false} otherwise.
+     */
+    boolean handlesCropAndRotation();
   }
 
   /** A registry entry for a managed SurfaceTexture. */

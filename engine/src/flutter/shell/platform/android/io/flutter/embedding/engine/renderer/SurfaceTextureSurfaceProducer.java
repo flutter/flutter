@@ -61,6 +61,11 @@ final class SurfaceTextureSurfaceProducer
   }
 
   @Override
+  public boolean handlesCropAndRotation() {
+    return true;
+  }
+
+  @Override
   @NonNull
   public SurfaceTexture getSurfaceTexture() {
     return texture.surfaceTexture();
