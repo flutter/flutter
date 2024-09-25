@@ -56,7 +56,7 @@ void main() {
         globals.fs
             .file(globals.fs.path.join('lib', 'main.dart'))
             .createSync(recursive: true);
-        final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner();
+        final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner();
         final HotRunner residentRunner = HotRunner(
           <FlutterDevice>[
             flutterDevice,
