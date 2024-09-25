@@ -61,7 +61,6 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsMacOSInternal(
   ensureNativeAssetsBuildDryRunSucceed(buildDryRunResult);
   // No link hooks in JIT mode.
   final List<AssetImpl> nativeAssets = buildDryRunResult.assets;
-  ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   final Uri? absolutePath = flutterTester ? buildUri : null;
   final Map<AssetImpl, KernelAsset> assetTargetLocations =
@@ -143,7 +142,6 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
       dependencies.addAll(linkResult.dependencies);
     }
   }
-  ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
   final Uri? absolutePath = flutterTester ? buildUri : null;
   final Map<AssetImpl, KernelAsset> assetTargetLocations =
