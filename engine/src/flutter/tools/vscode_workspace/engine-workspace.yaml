@@ -193,6 +193,12 @@ tasks:
       group:
         kind: build
     - <<: *et-task
+      label: host_debug_unopt_arm64
+      args:
+        - build
+        - -c
+        - host_debug_unopt_arm64
+    - <<: *et-task
       label: display_list_unittests_arm64
       args:
         - build
@@ -217,6 +223,17 @@ tasks:
         - build
         - -c
         - ios_debug_unopt
+    - <<: *et-task
+      label: android_debug_unopt_arm64
+      args:
+        - build
+        - -c
+        - host_debug_unopt_arm64
+        - "&&"
+        - *et-cmd
+        - build
+        - -c
+        - android_debug_unopt_arm64
 extensions:
   recommendations:
     # C++ TestMate
