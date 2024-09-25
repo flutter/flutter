@@ -327,6 +327,7 @@ class DatePickerDialog extends StatefulWidget {
     this.onDatePickerModeChange,
     this.switchToInputEntryModeIcon,
     this.switchToCalendarEntryModeIcon,
+    this.onDateChanged,
   }) : initialDate = initialDate == null ? null : DateUtils.dateOnly(initialDate),
        firstDate = DateUtils.dateOnly(firstDate),
        lastDate = DateUtils.dateOnly(lastDate),
@@ -444,6 +445,9 @@ class DatePickerDialog extends StatefulWidget {
   /// {@macro flutter.material.date_picker.switchToCalendarEntryModeIcon}
   final Icon? switchToCalendarEntryModeIcon;
 
+  /// Called when the user selects a date in the picker.
+  final ValueChanged<DateTime>? onDateChanged;
+
   @override
   State<DatePickerDialog> createState() => _DatePickerDialogState();
 }
@@ -516,6 +520,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     setState(() {
       _selectedDate.value = date;
     });
+    widget.onDateChanged?.call(date);
   }
 
   Size _dialogSize(BuildContext context) {
