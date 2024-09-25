@@ -7,7 +7,6 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -2185,7 +2184,6 @@ void main() {
   testWidgets('DatePickerDialog onDateChanged callback', (WidgetTester tester) async {
     DateTime? selectedDate;
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: true),
       home: Material(
         child: DatePickerDialog(
           initialDate: initialDate,
@@ -2198,6 +2196,22 @@ void main() {
 
     await tester.tap(find.text('12'));
     expect(selectedDate, equals(DateTime(2016, DateTime.january, 12)));
+  });
+
+  testWidgets('DatePickerDialog with updated insetPadding', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: DatePickerDialog(
+          initialDate: initialDate,
+          firstDate: firstDate,
+          lastDate: lastDate,
+          insetPadding: const EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0),
+        ),
+      ),
+    ));
+
+    final Dialog dialog = tester.widget<Dialog>(find.byType(Dialog));
+    expect(dialog.insetPadding, const EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0));
   });
 
   group('Landscape input-only date picker headers use headlineSmall', () {
