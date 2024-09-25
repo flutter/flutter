@@ -10,14 +10,14 @@ base class ColorAttachment {
   ColorAttachment({
     this.loadAction = LoadAction.clear,
     this.storeAction = StoreAction.store,
-    this.clearValue = const ui.Color(0x00000000),
+    vm.Vector4? clearValue = null,
     required this.texture,
     this.resolveTexture = null,
-  });
+  }) : clearValue = clearValue ?? vm.Vector4.zero();
 
   LoadAction loadAction;
   StoreAction storeAction;
-  ui.Color clearValue;
+  vm.Vector4 clearValue;
 
   Texture texture;
   Texture? resolveTexture;
@@ -121,15 +121,6 @@ base class RenderTarget {
   final DepthStencilAttachment? depthStencilAttachment;
 }
 
-// TODO(gaaclarke): Refactor this to support wide gamut colors.
-int _colorToInt(ui.Color color) {
-  assert(color.colorSpace == ui.ColorSpace.sRGB);
-  return ((color.a * 255.0).round() << 24) |
-      ((color.r * 255.0).round() << 16) |
-      ((color.g * 255.0).round() << 8) |
-      ((color.b * 255.0).round() << 0);
-}
-
 base class RenderPass extends NativeFieldWrapperClass1 {
   /// Creates a new RenderPass.
   RenderPass._(CommandBuffer commandBuffer, RenderTarget renderTarget) {
@@ -140,7 +131,10 @@ base class RenderPass extends NativeFieldWrapperClass1 {
           index,
           color.loadAction.index,
           color.storeAction.index,
-          _colorToInt(color.clearValue),
+          color.clearValue.r,
+          color.clearValue.g,
+          color.clearValue.b,
+          color.clearValue.a,
           color.texture,
           color.resolveTexture);
       if (error != null) {
@@ -280,13 +274,25 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   external void _initialize();
 
   @Native<
-      Handle Function(Pointer<Void>, Int, Int, Int, Int, Pointer<Void>,
+      Handle Function(
+          Pointer<Void>,
+          Int,
+          Int,
+          Int,
+          Float,
+          Float,
+          Float,
+          Float,
+          Pointer<Void>,
           Handle)>(symbol: 'InternalFlutterGpu_RenderPass_SetColorAttachment')
   external String? _setColorAttachment(
       int colorAttachmentIndex,
       int loadAction,
       int storeAction,
-      int clearColor,
+      double clearColorR,
+      double clearColorG,
+      double clearColorB,
+      double clearColorA,
       Texture texture,
       Texture? resolveTexture);
 

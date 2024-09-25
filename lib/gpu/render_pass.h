@@ -107,7 +107,10 @@ extern Dart_Handle InternalFlutterGpu_RenderPass_SetColorAttachment(
     int color_attachment_index,
     int load_action,
     int store_action,
-    int clear_color,
+    float clear_color_r,
+    float clear_color_g,
+    float clear_color_b,
+    float clear_color_a,
     flutter::gpu::Texture* texture,
     Dart_Handle resolve_texture_wrapper);
 
