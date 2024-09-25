@@ -4506,7 +4506,7 @@ void main() {
       expect(hintTextWidget.style!.overflow, decoration.hintStyle!.overflow);
     });
 
-    testWidgets('Not Maintain hint height on non-empty text', (WidgetTester tester) async {
+    testWidgets('Widget height collapses from hint height when maintainHintHeight is false', (WidgetTester tester) async {
       final String hintText = 'hint' * 20;
       final InputDecoration decoration = InputDecoration(
         hintText: hintText,
@@ -4522,7 +4522,7 @@ void main() {
       expect(tester.getSize(find.byType(InputDecorator)).height, 48.0);
     });
 
-    testWidgets('Maintain hint height on non-empty text', (WidgetTester tester) async {
+    testWidgets('Widget height stays at hint height by default', (WidgetTester tester) async {
       final String hintText = 'hint' * 20;
       final InputDecoration decoration = InputDecoration(
         hintMaxLines: 3,
@@ -4539,7 +4539,7 @@ void main() {
       expect(inputHeight, hintHeight + 16.0);
     });
 
-    testWidgets('Not Maintain hint height from non-empty to empty text accepts hintFadeDuration', (WidgetTester tester) async {
+    testWidgets('hintFadeDuration applies to hint fade-in when maintainHintHeight is false', (WidgetTester tester) async {
       const InputDecoration decoration = InputDecoration(
         hintText: hintText,
         hintMaxLines: 3,
@@ -4578,7 +4578,7 @@ void main() {
       expect(hintOpacity120ms, 1.0);
     });
 
-    testWidgets('Not Maintain hint height from empty to non-empty text accepts hintFadeDuration', (WidgetTester tester) async {
+    testWidgets('hintFadeDuration applies to hint fade-out when maintainHintHeight is false', (WidgetTester tester) async {
       const InputDecoration decoration = InputDecoration(
         hintText: hintText,
         hintMaxLines: 3,
