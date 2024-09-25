@@ -427,10 +427,9 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     if (_ancestorScrollPosition == null || !_ancestorScrollPosition!.hasPixels) {
       return;
     }
-    final double currentHeight = _maxHeight - _ancestorScrollPosition!.pixels;
-    setState(() {
-      _fadeExtent = _calculateScrollOpacity(currentHeight);
-    });
+    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    final double currentHeight = renderBox?.size.height ?? 0.0;
+    _fadeExtent = _calculateScrollOpacity(currentHeight);
   }
 
   double _calculateScrollOpacity(double currentHeight) {
