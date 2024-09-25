@@ -241,7 +241,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
       });
-  
+
   testWidgets('ScrollDirection test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/107101
     final List<ScrollDirection> receivedResult = <ScrollDirection>[];
