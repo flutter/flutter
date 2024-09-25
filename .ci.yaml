@@ -3011,6 +3011,7 @@ targets:
 
   # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__transition_perf_with_semantics
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/155664
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
