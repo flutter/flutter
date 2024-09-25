@@ -617,7 +617,7 @@ Map<NativeCodeAssetImpl, KernelAsset> _assetTargetLocationsForOS(OS targetOS,
     case OS.android:
       return assetTargetLocationsAndroid(codeAssets);
     default:
-      throw StateError('This should be unreachable.');
+      throw UnimplementedError('This should be unreachable.');
   }
 }
 
