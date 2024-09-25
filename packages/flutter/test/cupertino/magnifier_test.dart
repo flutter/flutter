@@ -285,9 +285,7 @@ void main() {
         ), throwsAssertionError);
       });
 
-      testWidgets(
-          'Should not alter the size of the child element when the scale factor is 1.0',
-          (WidgetTester tester) async {
+      testWidgets('CupertinoMagnifier magnification scale defaults to 1', (WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
             home: Scaffold(body: CupertinoMagnifier()),
@@ -296,8 +294,11 @@ void main() {
 
         expect(
           tester.widget(find.byType(RawMagnifier)),
-          isA<RawMagnifier>().having((RawMagnifier t) => t.magnificationScale,
-              'magnificationScale', 1),
+          isA<RawMagnifier>().having(
+            (RawMagnifier t) => t.magnificationScale,
+            'magnificationScale',
+            1,
+          ),
         );
       });
       testWidgets(
