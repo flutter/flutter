@@ -633,10 +633,16 @@ bool DartIsolate::UpdateThreadPoolNames() const {
   }
 
   if (auto task_runner = task_runners.GetPlatformTaskRunner()) {
+    bool is_merged_platform_ui_thread =
+        task_runner == task_runners.GetUITaskRunner();
+    std::string label;
+    if (is_merged_platform_ui_thread) {
+      label = task_runners.GetLabel() + std::string{".ui"};
+    } else {
+      label = task_runners.GetLabel() + std::string{".platform"};
+    }
     task_runner->PostTask(
-        [label = task_runners.GetLabel() + std::string{".platform"}]() {
-          Dart_SetThreadName(label.c_str());
-        });
+        [label = std::move(label)]() { Dart_SetThreadName(label.c_str()); });
   }
 
   return true;
