@@ -7,6 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -2179,6 +2180,24 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(TextField), findsNothing);
     });
+  });
+
+  testWidgets('DatePickerDialog onDateChanged callback', (WidgetTester tester) async {
+    DateTime? selectedDate;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: Material(
+        child: DatePickerDialog(
+          initialDate: initialDate,
+          firstDate: firstDate,
+          lastDate: lastDate,
+          onDateChanged: (DateTime date) => selectedDate = date,
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('12'));
+    expect(selectedDate, equals(DateTime(2016, DateTime.january, 12)));
   });
 
   group('Landscape input-only date picker headers use headlineSmall', () {
