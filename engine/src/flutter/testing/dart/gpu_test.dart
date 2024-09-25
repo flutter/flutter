@@ -11,6 +11,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:test/test.dart';
+import 'package:vector_math/vector_math.dart';
 
 import '../../lib/gpu/lib/gpu.dart' as gpu;
 
@@ -19,6 +20,16 @@ import 'impeller_enabled.dart';
 
 ByteData float32(List<double> values) {
   return Float32List.fromList(values).buffer.asByteData();
+}
+
+ByteData unlitUBO(Matrix4 mvp, Vector4 color) {
+  return float32(<double>[
+    mvp[0], mvp[1], mvp[2], mvp[3], //
+    mvp[4], mvp[5], mvp[6], mvp[7], //
+    mvp[8], mvp[9], mvp[10], mvp[11], //
+    mvp[12], mvp[13], mvp[14], mvp[15], //
+    color.r, color.g, color.b, color.a,
+  ]);
 }
 
 gpu.RenderPipeline createUnlitRenderPipeline() {
@@ -424,5 +435,48 @@ void main() async {
     final ui.Image image = state.renderTexture.asImage();
     await comparer.addGoldenImage(
         image, 'flutter_gpu_test_triangle_stencil.png');
+  }, skip: !impellerEnabled);
+
+  test('Drawing respects cull mode', () async {
+    final state = createSimpleRenderPass();
+
+    final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    state.renderPass.setColorBlendEnable(true);
+    state.renderPass.setColorBlendEquation(gpu.ColorBlendEquation());
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    // Counter-clockwise triangle.
+    final List<double> triangle = [
+      -0.5, 0.5, //
+      0.0, -0.5, //
+      0.5, 0.5, //
+    ];
+    final gpu.BufferView vertices = transients.emplace(float32(triangle));
+
+    void drawTriangle(Vector4 color) {
+      final gpu.BufferView vertInfoUboFront =
+          transients.emplace(unlitUBO(Matrix4.identity(), color));
+
+      final gpu.UniformSlot vertInfo =
+          pipeline.vertexShader.getUniformSlot('VertInfo');
+      // TODO(bdero): Overwrite bindings with the same slot so we don't need to clear.
+      //              https://github.com/flutter/flutter/issues/155335
+      state.renderPass.clearBindings();
+      state.renderPass.bindVertexBuffer(vertices, 3);
+      state.renderPass.bindUniform(vertInfo, vertInfoUboFront);
+      state.renderPass.draw();
+    }
+
+    state.renderPass.setCullMode(gpu.CullMode.frontFace);
+    drawTriangle(Colors.lime);
+    state.renderPass.setCullMode(gpu.CullMode.backFace);
+    drawTriangle(Colors.red);
+
+    state.commandBuffer.submit();
+
+    final ui.Image image = state.renderTexture.asImage();
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_cull_mode.png');
   }, skip: !impellerEnabled);
 }
