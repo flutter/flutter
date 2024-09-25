@@ -216,7 +216,7 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
         while (current != null) {
           // If the sliver is not clipped, then we add the scroll extent of the
           // sliver to the childScrollOffset.
-          if (current.geometry?.hasVisualOverflow == false) {
+          if (!current.geometry!.hasVisualOverflow || lastChild == child ) {
             childScrollOffset += current.geometry!.scrollExtent;
           }
           current = childBefore(current);
