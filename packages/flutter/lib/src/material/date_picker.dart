@@ -1318,6 +1318,8 @@ class DateRangePickerDialog extends StatefulWidget {
     this.switchToInputEntryModeIcon,
     this.switchToCalendarEntryModeIcon,
     this.selectableDayPredicate,
+    this.onStartDateChanged,
+    this.onEndDateChanged,
   });
 
   /// The date range that the date range picker starts with when it opens.
@@ -1449,6 +1451,12 @@ class DateRangePickerDialog extends StatefulWidget {
   /// Function to provide full control over which [DateTime] can be selected.
   final SelectableDayForRangePredicate? selectableDayPredicate;
 
+  /// Called when the user selects a start date in the picker.
+  final ValueChanged<DateTime?>? onStartDateChanged;
+
+  /// Called when the user selects a end date in the picker.
+  final ValueChanged<DateTime?>? onEndDateChanged;
+
   @override
   State<DateRangePickerDialog> createState() => _DateRangePickerDialogState();
 }
@@ -1542,10 +1550,12 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
 
   void _handleStartDateChanged(DateTime? date) {
     setState(() => _selectedStart.value = date);
+    widget.onStartDateChanged?.call(date);
   }
 
   void _handleEndDateChanged(DateTime? date) {
     setState(() => _selectedEnd.value = date);
+    widget.onEndDateChanged?.call(date);
   }
 
   bool get _hasSelectedDateRange => _selectedStart.value != null && _selectedEnd.value != null;
