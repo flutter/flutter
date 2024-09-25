@@ -525,9 +525,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   }
 
   void _handleDateChanged(DateTime date) {
-    setState(() {
-      _selectedDate.value = date;
-    });
+    setState(() => _selectedDate.value = date);
     widget.onDateChanged?.call(date);
   }
 
