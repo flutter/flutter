@@ -1312,7 +1312,8 @@ void main() {
 
       await gesture.up();
       await tester.pumpAndSettle();
-    }, variant: TargetPlatformVariant.all());
+    }, variant: TargetPlatformVariant.all(),
+       skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can select single text on desktop platforms', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
