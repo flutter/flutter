@@ -43,7 +43,7 @@ class NavigatorPopHandler<T> extends StatefulWidget {
     super.key,
     @Deprecated(
       'Use onPopWithResult instead. '
-      'This feature was deprecated after v3.24.3.',
+      'This feature was deprecated after v3.26.0-0.1.pre.',
     )
     this.onPop,
     this.onPopWithResult,
@@ -79,7 +79,7 @@ class NavigatorPopHandler<T> extends StatefulWidget {
   /// code on [NavigatorPopHandler] for a full example of this.
   @Deprecated(
     'Use onPopWithResult instead. '
-    'This feature was deprecated after v3.24.3.',
+    'This feature was deprecated after v3.26.0-0.1.pre.',
   )
   final VoidCallback? onPop;
 
