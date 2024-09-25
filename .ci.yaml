@@ -425,7 +425,6 @@ targets:
     timeout: 60
 
   - name: Linux build_aar_module_test
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
