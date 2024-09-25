@@ -2756,6 +2756,7 @@ targets:
 
   # linux mokey benchmark
   - name: Linux_mokey fullscreen_textfield_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/155677
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
