@@ -67,7 +67,7 @@ void main() {
 
     final ThemeData theme = Theme.of(tester.element(find.byType(FilterChip)));
 
-    // By default FilterChip uses ColorScheme.outlineVariant color for side.
+    // FilterChip's border color defaults to ColorScheme.outlineVariant.
     expect(
       findByBorderColor(theme.colorScheme.outlineVariant),
       findsOneWidget,

@@ -482,7 +482,7 @@ class _EnabledAndDisabledMouseCursor extends WidgetStateMouseCursor {
 ///
 /// {@tool dartpad}
 /// This example defines a [WidgetStateBorderSide] which resolves to different
-/// border colors depending on how the user is interacting with it.
+/// border colors depending on how the user interacts with it.
 ///
 /// ** See code in examples/api/lib/widgets/widget_state/widget_state_border_side.0.dart **
 /// {@end-tool}
