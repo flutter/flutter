@@ -480,6 +480,13 @@ class _EnabledAndDisabledMouseCursor extends WidgetStateMouseCursor {
 /// property values. [WidgetStateBorderSide] should only be used with widgets that document
 /// their support, like [ActionChip.side].
 ///
+/// {@tool dartpad}
+/// This example defines a [WidgetStateBorderSide] which resolves to different
+/// border colors depending on how the user interacts with it.
+///
+/// ** See code in examples/api/lib/widgets/widget_state/widget_state_border_side.0.dart **
+/// {@end-tool}
+///
 /// This class should only be used for parameters which are documented to take
 /// [WidgetStateBorderSide], otherwise only the default state will be used.
 ///
@@ -764,6 +771,16 @@ class _WidgetTextStyleMapper extends WidgetStateTextStyle {
 /// has many material state properties. The button widgets keep track
 /// of their current material state and [resolve] the button style's
 /// material state properties when their value is needed.
+///
+/// {@tool dartpad}
+/// This example shows how the default text and icon color
+/// (the "foreground color") of a [TextButton] can be overridden with a
+/// [WidgetStateProperty]. In this example, the button's text color will be
+/// `Colors.blue` when the button is being pressed, hovered, or focused.
+/// Otherwise, the text color will be `Colors.red`.
+///
+/// ** See code in examples/api/lib/widgets/widget_state/widget_state_property.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
