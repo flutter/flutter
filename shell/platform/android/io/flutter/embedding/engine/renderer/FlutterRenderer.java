@@ -766,6 +766,11 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
+    public boolean handlesCropAndRotation() {
+      return false;
+    }
+
+    @Override
     public long id() {
       return id;
     }
