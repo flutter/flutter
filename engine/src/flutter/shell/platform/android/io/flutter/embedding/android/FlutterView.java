@@ -14,6 +14,7 @@ import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -21,6 +22,7 @@ import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -31,7 +33,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewStructure;
 import android.view.WindowInsets;
-import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.autofill.AutofillValue;
@@ -597,26 +598,35 @@ public class FlutterView extends FrameLayout
   // android may decide to place the software navigation bars on the side. When the nav
   // bar is hidden, the reported insets should be removed to prevent extra useless space
   // on the sides.
-  private enum ZeroSides {
+  @VisibleForTesting
+  public enum ZeroSides {
     NONE,
     LEFT,
     RIGHT,
     BOTH
   }
 
-  private ZeroSides calculateShouldZeroSides() {
+  /**
+   * This method can be run on APIs 30 and above but its intended use is for 30 and below.
+   *
+   * @return some ZeroSides enum
+   */
+  @androidx.annotation.DeprecatedSinceApi(api = API_LEVELS.API_30)
+  @VisibleForTesting
+  public ZeroSides calculateShouldZeroSides() {
     // We get both orientation and rotation because rotation is all 4
     // rotations relative to default rotation while orientation is portrait
     // or landscape. By combining both, we can obtain a more precise measure
     // of the rotation.
     Context context = getContext();
     int orientation = context.getResources().getConfiguration().orientation;
-    int rotation =
-        ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE))
-            .getDefaultDisplay()
-            .getRotation();
 
     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+      int rotation =
+          ((DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE))
+              .getDisplay(Display.DEFAULT_DISPLAY)
+              .getRotation();
+
       if (rotation == Surface.ROTATION_90) {
         return ZeroSides.RIGHT;
       } else if (rotation == Surface.ROTATION_270) {
