@@ -3420,7 +3420,7 @@ void main() {
     });
   });
 
-  testWidgets('SearchAnchor does not dispose external SeachController', (WidgetTester tester) async {
+  testWidgets('SearchAnchor does not dispose external SearchController', (WidgetTester tester) async {
     final SearchController controller = SearchController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
