@@ -29,6 +29,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.HardwareBuffer;
+import android.hardware.display.DisplayManager;
 import android.media.Image;
 import android.media.Image.Plane;
 import android.media.ImageReader;
@@ -39,13 +40,13 @@ import android.view.DisplayCutout;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowInsets;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 import androidx.core.util.Consumer;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.window.layout.FoldingFeature;
 import androidx.window.layout.WindowLayoutInfo;
+import io.flutter.Build.API_LEVELS;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.loader.FlutterLoader;
@@ -438,6 +439,48 @@ public class FlutterViewTest {
     validateViewportMetricPadding(viewportMetricsCaptor, 100, 0, 0, 0);
   }
 
+  @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_29, qualifiers = "port")
+  public void calculateShouldZeroSidesInPortrait() {
+    FlutterView flutterView = spy(new FlutterView(ctx));
+    assertEquals(FlutterView.ZeroSides.NONE, flutterView.calculateShouldZeroSides());
+  }
+
+  @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_29, qualifiers = "land")
+  public void calculateShouldZeroSidesInLandscapeNeutralRotation() {
+    FlutterView flutterView = spy(new FlutterView(ctx));
+    setExpectedDisplayRotation(Surface.ROTATION_0);
+    assertEquals(FlutterView.ZeroSides.BOTH, flutterView.calculateShouldZeroSides());
+
+    setExpectedDisplayRotation(Surface.ROTATION_180);
+    assertEquals(FlutterView.ZeroSides.BOTH, flutterView.calculateShouldZeroSides());
+  }
+
+  @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_29, qualifiers = "land")
+  public void calculateShouldZeroSidesInLandscapeRotation90() {
+    FlutterView flutterView = spy(new FlutterView(ctx));
+    setExpectedDisplayRotation(Surface.ROTATION_90);
+    assertEquals(FlutterView.ZeroSides.RIGHT, flutterView.calculateShouldZeroSides());
+  }
+
+  @Test
+  @Config(minSdk = API_LEVELS.API_21, maxSdk = API_LEVELS.API_22, qualifiers = "land")
+  public void calculateShouldZeroSidesInLandscapeRotation270API22() {
+    FlutterView flutterView = spy(new FlutterView(ctx));
+    setExpectedDisplayRotation(Surface.ROTATION_270);
+    assertEquals(FlutterView.ZeroSides.RIGHT, flutterView.calculateShouldZeroSides());
+  }
+
+  @Test
+  @Config(minSdk = API_LEVELS.API_23, maxSdk = API_LEVELS.API_29, qualifiers = "land")
+  public void calculateShouldZeroSidesInLandscapeRotation270API23Plus() {
+    FlutterView flutterView = spy(new FlutterView(ctx));
+    setExpectedDisplayRotation(Surface.ROTATION_270);
+    assertEquals(FlutterView.ZeroSides.LEFT, flutterView.calculateShouldZeroSides());
+  }
+
   @SuppressWarnings("deprecation")
   // getSystemUiVisibility, getWindowSystemUiVisibility required to test pre api 30 behavior.
   @Test
@@ -615,9 +658,6 @@ public class FlutterViewTest {
   public void itRegistersAndUnregistersToWindowManager() {
     Context context = Robolectric.setupActivity(Activity.class);
     FlutterView flutterView = spy(new FlutterView(context));
-    ShadowDisplay display =
-        Shadows.shadowOf(
-            ((WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay());
     WindowInfoRepositoryCallbackAdapterWrapper windowInfoRepo =
         mock(WindowInfoRepositoryCallbackAdapterWrapper.class);
     // For reasoning behing using doReturn instead of when, read "Important gotcha" at
@@ -646,9 +686,6 @@ public class FlutterViewTest {
   public void itSendsHingeDisplayFeatureToFlutter() {
     Context context = Robolectric.setupActivity(Activity.class);
     FlutterView flutterView = spy(new FlutterView(context));
-    ShadowDisplay display =
-        Shadows.shadowOf(
-            ((WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay());
     when(flutterView.getContext()).thenReturn(context);
     WindowInfoRepositoryCallbackAdapterWrapper windowInfoRepo =
         mock(WindowInfoRepositoryCallbackAdapterWrapper.class);
@@ -1102,10 +1139,10 @@ public class FlutterViewTest {
 
   @SuppressWarnings("deprecation")
   private void setExpectedDisplayRotation(int rotation) {
-    ShadowDisplay display =
+    ShadowDisplay myDisplay =
         Shadows.shadowOf(
-            ((WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay());
-    display.setRotation(rotation);
+            ((DisplayManager) ctx.getSystemService(Context.DISPLAY_SERVICE)).getDisplay(0));
+    myDisplay.setRotation(rotation);
   }
 
   private void validateViewportMetricPadding(

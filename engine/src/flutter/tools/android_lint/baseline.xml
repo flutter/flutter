@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="6" by="lint 8.1.0 [10406996] " type="baseline" client="" dependencies="true" name="" variant="all" version="8.1.0 [10406996] ">
+<issues format="6" by="lint 8.3.0 [11479570] " type="baseline" client="" dependencies="true" name="" variant="all" version="8.3.0 [11479570] ">
+
+    <issue
+        id="DeprecatedSinceApi"
+        message="This method is deprecated as of API level 30"
+        errorLine1="        zeroSides = calculateShouldZeroSides();"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterView.java"
+            line="759"
+            column="21"/>
+    </issue>
 
     <issue
         id="HardcodedDebugMode"
@@ -19,7 +30,7 @@
         errorLine2="                 ~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
-            line="445"
+            line="474"
             column="18"/>
     </issue>
 
@@ -30,7 +41,7 @@
         errorLine2="                 ~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterView.java"
-            line="928"
+            line="896"
             column="18"/>
     </issue>
 

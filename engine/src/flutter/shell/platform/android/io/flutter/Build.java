@@ -4,10 +4,13 @@
 
 package io.flutter;
 
+import androidx.annotation.VisibleForTesting;
+
 /** A replacement of utilities from android.os.Build. */
 public class Build {
   /** For use in place of the Android Build.VERSION_CODES class. */
   public static class API_LEVELS {
+    @VisibleForTesting public static final int FLUTTER_MIN = 21;
     public static final int API_21 = 21;
     public static final int API_22 = 22;
     public static final int API_23 = 23;
