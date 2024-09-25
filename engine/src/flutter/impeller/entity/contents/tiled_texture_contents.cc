@@ -116,15 +116,11 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
 
   using VS = TextureUvFillVertexShader;
   using FS = TiledTextureFillFragmentShader;
-  using FSExternal = TiledTextureFillExternalFragmentShader;
 
   const auto texture_size = texture_->GetSize();
   if (texture_size.IsEmpty()) {
     return true;
   }
-
-  bool is_external_texture =
-      texture_->GetTextureDescriptor().type == TextureType::kTextureExternalOES;
 
   VS::FrameInfo frame_info;
   frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
@@ -132,80 +128,40 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
       Rect::MakeSize(texture_size).GetNormalizingTransform() *
       GetInverseEffectTransform();
 
-  PipelineBuilderMethod pipeline_method;
-
-#ifdef IMPELLER_ENABLE_OPENGLES
-  if (is_external_texture) {
-    pipeline_method = &ContentContext::GetTiledTextureExternalPipeline;
-  } else {
-    pipeline_method = &ContentContext::GetTiledTexturePipeline;
-  }
-#else
-  pipeline_method = &ContentContext::GetTiledTexturePipeline;
-#endif  // IMPELLER_ENABLE_OPENGLES
-
   PipelineBuilderCallback pipeline_callback =
-      [&renderer, &pipeline_method](ContentContextOptions options) {
-        return (renderer.*pipeline_method)(options);
+      [&renderer](ContentContextOptions options) {
+        return renderer.GetTiledTexturePipeline(options);
       };
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,
-      [this, &renderer, &is_external_texture, &entity](RenderPass& pass) {
+      [this, &renderer, &entity](RenderPass& pass) {
         auto& host_buffer = renderer.GetTransientsBuffer();
-
+#ifdef IMPELLER_DEBUG
         pass.SetCommandLabel("TextureFill");
+#endif  // IMPELLER_DEBUG
 
-        if (is_external_texture) {
-          FSExternal::FragInfo frag_info;
-          frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
-          frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
-          frag_info.alpha =
-              GetOpacityFactor() *
-              GetGeometry()->ComputeAlphaCoverage(entity.GetTransform());
-          FSExternal::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+        FS::FragInfo frag_info;
+        frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
+        frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
+        frag_info.alpha =
+            GetOpacityFactor() *
+            GetGeometry()->ComputeAlphaCoverage(entity.GetTransform());
+        FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+
+        if (color_filter_) {
+          auto filtered_texture = CreateFilterTexture(renderer);
+          if (!filtered_texture) {
+            return false;
+          }
+          FS::BindTextureSampler(
+              pass, filtered_texture,
+              renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+                  CreateSamplerDescriptor(renderer.GetDeviceCapabilities())));
         } else {
-          FS::FragInfo frag_info;
-          frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
-          frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
-          frag_info.alpha =
-              GetOpacityFactor() *
-              GetGeometry()->ComputeAlphaCoverage(entity.GetTransform());
-          FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
-        }
-
-        if (is_external_texture) {
-          SamplerDescriptor sampler_desc;
-          // OES_EGL_image_external states that only CLAMP_TO_EDGE is valid, so
-          // we emulate all other tile modes here by remapping the texture
-          // coordinates.
-          sampler_desc.width_address_mode = SamplerAddressMode::kClampToEdge;
-          sampler_desc.height_address_mode = SamplerAddressMode::kClampToEdge;
-
-          // Also, external textures cannot be bound to color filters, so ignore
-          // this case for now.
-          FML_DCHECK(!color_filter_) << "Color filters are not currently "
-                                        "supported for external textures.";
-
-          FSExternal::BindSAMPLEREXTERNALOESTextureSampler(
+          FS::BindTextureSampler(
               pass, texture_,
               renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-                  sampler_desc));
-        } else {
-          if (color_filter_) {
-            auto filtered_texture = CreateFilterTexture(renderer);
-            if (!filtered_texture) {
-              return false;
-            }
-            FS::BindTextureSampler(
-                pass, filtered_texture,
-                renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-                    CreateSamplerDescriptor(renderer.GetDeviceCapabilities())));
-          } else {
-            FS::BindTextureSampler(
-                pass, texture_,
-                renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-                    CreateSamplerDescriptor(renderer.GetDeviceCapabilities())));
-          }
+                  CreateSamplerDescriptor(renderer.GetDeviceCapabilities())));
         }
 
         return true;

@@ -237,7 +237,7 @@ using VerticesUberShader = RenderPipelineHandle<PorterDuffBlendVertexShader,
 
 #ifdef IMPELLER_ENABLE_OPENGLES
 using TiledTextureExternalPipeline =
-    RenderPipelineHandle<TextureUvFillVertexShader,
+    RenderPipelineHandle<TextureFillVertexShader,
                          TiledTextureFillExternalFragmentShader>;
 #endif  // IMPELLER_ENABLE_OPENGLES
 

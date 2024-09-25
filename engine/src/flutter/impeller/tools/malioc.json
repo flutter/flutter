@@ -5547,7 +5547,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 70,
+          "fp16_arithmetic": 35,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
@@ -5560,7 +5560,7 @@
               0.421875,
               0.0,
               0.0,
-              0.125,
+              0.25,
               0.25
             ],
             "pipelines": [
@@ -5581,7 +5581,7 @@
               0.09375,
               0.0,
               0.0,
-              0.125,
+              0.25,
               0.0
             ],
             "total_bound_pipelines": [
@@ -5589,12 +5589,12 @@
               "arith_cvt"
             ],
             "total_cycles": [
-              0.515625,
+              0.546875,
               0.359375,
-              0.515625,
+              0.546875,
               0.0,
               0.0,
-              0.125,
+              0.25,
               0.25
             ]
           },
@@ -5618,7 +5618,7 @@
               "arithmetic"
             ],
             "longest_path_cycles": [
-              7.920000076293945,
+              8.25,
               1.0,
               1.0
             ],
@@ -5639,7 +5639,7 @@
               "arithmetic"
             ],
             "total_cycles": [
-              9.0,
+              9.666666984558105,
               1.0,
               1.0
             ]
@@ -7971,7 +7971,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 100,
+          "fp16_arithmetic": 72,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
@@ -7979,12 +7979,12 @@
               "arith_cvt"
             ],
             "longest_path_cycles": [
-              0.328125,
+              0.375,
               0.1875,
-              0.328125,
+              0.375,
+              0.0625,
               0.0,
-              0.0,
-              0.125,
+              0.25,
               0.25
             ],
             "pipelines": [
@@ -8000,12 +8000,12 @@
               "varying"
             ],
             "shortest_path_cycles": [
-              0.109375,
+              0.140625,
               0.03125,
-              0.109375,
+              0.140625,
+              0.0625,
               0.0,
-              0.0,
-              0.125,
+              0.25,
               0.0
             ],
             "total_bound_pipelines": [
@@ -8013,19 +8013,19 @@
               "arith_cvt"
             ],
             "total_cycles": [
-              0.390625,
+              0.4375,
               0.21875,
-              0.390625,
+              0.4375,
+              0.0625,
               0.0,
-              0.0,
-              0.125,
+              0.25,
               0.25
             ]
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 6,
-          "work_registers_used": 6
+          "work_registers_used": 7
         }
       }
     }

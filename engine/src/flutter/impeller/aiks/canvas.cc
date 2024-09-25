@@ -744,24 +744,6 @@ void Canvas::DrawImageRect(const std::shared_ptr<Texture>& image,
     return;
   }
 
-  if (image->GetTextureDescriptor().type == TextureType::kTextureExternalOES) {
-    auto texture_contents = std::make_shared<TiledTextureContents>();
-    texture_contents->SetTexture(image);
-    texture_contents->SetGeometry(Geometry::MakeRect(dest));
-    texture_contents->SetSamplerDescriptor(std::move(sampler));
-    texture_contents->SetInheritedOpacity(paint.color.alpha);
-
-    std::shared_ptr<Contents> contents = texture_contents;
-
-    Entity entity;
-    entity.SetBlendMode(paint.blend_mode);
-    entity.SetContents(paint.WithFilters(contents));
-    entity.SetTransform(GetCurrentTransform());
-
-    AddRenderEntityToCurrentPass(std::move(entity));
-    return;
-  }
-
   auto texture_contents = TextureContents::MakeRect(dest);
   texture_contents->SetTexture(image);
   texture_contents->SetSourceRect(source);
