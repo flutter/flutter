@@ -1,11 +1,13 @@
 # Flutter Cherry-pick Process
 
 ## Goal
+
 With branching and branch testability being supported for Flutter & Dart releases, cherry-picking fixes is the preferred method to address issues for released software (beta and stable channels.)  Stability of the release will be the overarching goal, so only highly impactful and critical cherrypicks will be allowed across Dart and Flutter.  This document outlines the process for requesting and approval of cherrypicks.
 
 **Note: This process applies to regressions from the previous release or serious bugs otherwise introduced by the current release.  Feature work is not considered for cherry-picking and will need to wait for the next release.**
 
 ## Automatically Creates a Cherry Pick Request
+
 Eligibility:
 1. If your cherry pick is expecting to have a merge conflict, please skip this section and follow instructions in the FAQ section below to manually open a cherry pick request instead. (e.g. PRs that contain changes to .ci.yaml files are very likely to hit a merge conflict)
 2. The framework PR to be cherry picked needs to have a base commit later than [01/24/2024](https://www.google.com/url?q=https://github.com/flutter/flutter/pull/142058&sa=D&source=docs&ust=1706904517596608&usg=AOvVaw3cFfw8vyiBtY3EzM_N-PEi), and the engine PR to be cherry picked has a base commit later than [02/06/2024](https://github.com/flutter/engine/pull/50265)
@@ -23,6 +25,7 @@ refer to the FAQ section below
 ## Frequently asked questions
 
 ### How do I request a cherry-pick?
+
 To request a cherry-pick, utilize the [issue template](https://github.com/flutter/flutter/issues/new?template=7_cherry_pick.yml).
 
 ### Who can request a cherry-pick?
