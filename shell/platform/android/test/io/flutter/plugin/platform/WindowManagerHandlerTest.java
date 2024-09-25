@@ -109,6 +109,11 @@ public class WindowManagerHandlerTest {
     @SuppressWarnings("Unchecked cast")
     Consumer<Boolean> mockListener = (Consumer<Boolean>) mock(Consumer.class);
 
+    // Windowmanager's getDefaultDisplay() function is deprecated in API 30 level 30.
+    // See Android docs here:
+    // https://developer.android.com/reference/android/view/WindowManager#getDefaultDisplay()
+    // We expect this behavior because this unit test expects a blind forward that includes
+    // deprecated function calls. See comment above for more details.
     windowManagerHandler.getDefaultDisplay();
     verify(mockWindowManager).getDefaultDisplay();
 
