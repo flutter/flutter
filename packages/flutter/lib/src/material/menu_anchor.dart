@@ -312,6 +312,10 @@ class MenuAnchor extends StatefulWidget {
 }
 
 class _MenuAnchorState extends State<MenuAnchor> {
+  static final Map<LogicalKeySet, DirectionalFocusIntent> _anchorShortcuts = <LogicalKeySet, DirectionalFocusIntent>{
+    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+  };
   // This is the global key that is used later to determine the bounding rect
   // for the anchor's region that the CustomSingleChildLayout's delegate
   // uses to determine where to place the menu on the screen and to avoid the
@@ -329,6 +333,17 @@ class _MenuAnchorState extends State<MenuAnchor> {
   bool get _isOpen => _overlayController.isShowing;
   bool get _isRoot => _parent == null;
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
+
+  // Allows for traversal to the the first or last menu item in this anchor's
+  // overlay.
+  //
+  // To prevent interference with the Submenu and MenuBar focus logic, this
+  // feature is only enabled if the menu is a top-level overlay anchor that has
+  // a childFocusNode.
+  bool get _isVerticalDirectionalFocusEnabled {
+    return widget.childFocusNode != null &&
+        (_isRoot || _parent!._orientation == Axis.horizontal);
+  }
 
   @override
   void initState() {
@@ -444,13 +459,21 @@ class _MenuAnchorState extends State<MenuAnchor> {
     return Actions(
       actions: <Type, Action<Intent>>{
         DismissIntent: DismissMenuAction(controller: _menuController),
+        if (_isVerticalDirectionalFocusEnabled)
+          DirectionalFocusIntent: _RootAnchorDirectionalFocusAction(),
       },
-      child:  Builder(
-        key: _anchorKey,
-        builder: (BuildContext context) {
-          return widget.builder?.call(context, _menuController, widget.child)
-              ?? widget.child ?? const SizedBox();
-        },
+      child: Shortcuts(
+        includeSemantics: false, // https://github.com/flutter/flutter/pull/152077
+        shortcuts: _isVerticalDirectionalFocusEnabled
+            ? _anchorShortcuts
+            : <LogicalKeySet, Intent>{},
+        child: Builder(
+          key: _anchorKey,
+          builder: (BuildContext context) {
+            return widget.builder?.call(context, _menuController, widget.child)
+                ?? widget.child ?? const SizedBox();
+          },
+        ),
       ),
     );
   }
@@ -458,7 +481,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   // Returns the first focusable item in the submenu, where "first" is
   // determined by the focus traversal policy.
   FocusNode? get _firstItemFocusNode {
-    if (_menuScopeNode.context == null) {
+    if (_menuScopeNode.context?.mounted != true) {
       return null;
     }
     final FocusTraversalPolicy policy =
@@ -466,8 +489,10 @@ class _MenuAnchorState extends State<MenuAnchor> {
     return policy.findFirstFocus(_menuScopeNode, ignoreCurrentFocus: true);
   }
 
+  // Returns the last focusable item in the submenu, where "last" is
+  // determined by the focus traversal policy.
   FocusNode? get _lastItemFocusNode {
-    if (_menuScopeNode.context == null) {
+    if (_menuScopeNode.context?.mounted != true) {
       return null;
     }
     final FocusTraversalPolicy policy =
@@ -615,6 +640,57 @@ class _MenuAnchorState extends State<MenuAnchor> {
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
     return describeIdentity(this);
+  }
+}
+
+class _RootAnchorDirectionalFocusAction extends ContextAction<DirectionalFocusIntent> {
+  _RootAnchorDirectionalFocusAction();
+
+  @override
+  void invoke(DirectionalFocusIntent intent, [BuildContext? context]) {
+    final _MenuAnchorState? state = _MenuAnchorState._maybeOf(context!);
+    if (state == null) {
+      return;
+    }
+
+    // While we could remove this action if the menu is open, this occasionally
+    // leads to the menu losing focus when rapidly shifting focus between
+    // different anchors. Instead, allow the action to bubble up to the
+    // next action handler.
+    if (!state._isOpen) {
+      Actions.maybeInvoke(state.context, intent);
+      return;
+    }
+
+    switch (intent.direction) {
+      case TraversalDirection.left:
+      case TraversalDirection.right:
+        break;
+      case TraversalDirection.up:
+        final FocusNode? lastFocus = state._lastItemFocusNode;
+
+        // If the last focus is the menu scope node, then there are no
+        // focusable items in the menu.
+        if (lastFocus == null || lastFocus == state._menuScopeNode) {
+          return;
+        }
+
+        return FocusTraversalGroup.of(context).requestFocusCallback(lastFocus);
+      case TraversalDirection.down:
+        final FocusNode? firstFocus = state._firstItemFocusNode;
+
+        // If the first focus is the menu scope node, then there are no
+        // focusable items in the menu.
+        if (firstFocus == null || firstFocus == state._menuScopeNode) {
+          return;
+        }
+
+        return FocusTraversalGroup.of(context).requestFocusCallback(firstFocus);
+    }
+
+    // Fallback so that we don't swallow previously-specified directional focus
+    // intents that rely on default app actions.
+    Actions.maybeInvoke(state.context, intent);
   }
 }
 
@@ -1851,7 +1927,6 @@ class SubmenuButton extends StatefulWidget {
       surfaceTintColor: surfaceTintColor,
       iconColor: iconColor,
       disabledIconColor: disabledIconColor,
-      iconSize: iconSize,
       textStyle: textStyle,
       overlayColor: overlayColor,
       elevation: elevation,
@@ -1896,7 +1971,6 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     DirectionalFocusIntent: _SubmenuDirectionalFocusAction(submenu: this)
   };
   bool _waitingToFocusMenu = false;
-  bool _isOpenOnFocusEnabled = true;
   MenuController? _internalMenuController;
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
   _MenuAnchorState? get _parent => _MenuAnchorState._maybeOf(context);
@@ -1975,7 +2049,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         childFocusNode: _buttonFocusNode,
         alignmentOffset: menuPaddingOffset,
         clipBehavior: widget.clipBehavior,
-        onClose: _onClose,
+        onClose: widget.onClose,
         onOpen: _onOpen,
         style: widget.menuStyle,
         builder: (BuildContext context, MenuController controller, Widget? child) {
@@ -2072,22 +2146,6 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     );
   }
 
-  void _onClose() {
-    // After closing the children of this submenu, this submenu button will
-    // regain focus. Because submenu buttons open on focus, this submenu will
-    // immediately reopen. To prevent this from happening, we prevent focus on
-    // SubmenuButtons that do not already have focus using the _openOnFocus
-    // flag. This flag is reset after one frame.
-    if (!_buttonFocusNode.hasFocus) {
-      _isOpenOnFocusEnabled = false;
-      SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
-        FocusManager.instance.applyFocusChangesIfNeeded();
-        _isOpenOnFocusEnabled = true;
-      }, debugLabel: 'MenuAnchor.preventOpenOnFocus');
-    }
-    widget.onClose?.call();
-  }
-
   void _onOpen() {
     if (!_waitingToFocusMenu) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -2112,7 +2170,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
 
   void _handleFocusChange() {
     if (_buttonFocusNode.hasPrimaryFocus) {
-      if (!_menuController.isOpen && _isOpenOnFocusEnabled) {
+      if (!_menuController.isOpen) {
         _menuController.open();
       }
     } else {
@@ -2124,9 +2182,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
 }
 
 class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
-  _SubmenuDirectionalFocusAction({
-    required this.submenu,
-  });
+  _SubmenuDirectionalFocusAction({required this.submenu});
 
   final _SubmenuButtonState submenu;
 
@@ -2164,27 +2220,6 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
           ..requestFocus()
           ..nextFocus();
         return;
-      case (Axis.horizontal, _, TraversalDirection.down):
-        if (isSubmenu) {
-          // If this is a top-level (horizontal) button in a menubar, focus the
-          // first item in this button's submenu.
-          final FocusNode? firstItem = _anchor._firstItemFocusNode;
-          if (firstItem?.canRequestFocus ?? false) {
-            firstItem!.requestFocus();
-          }
-          return;
-        }
-      case (Axis.horizontal, _, TraversalDirection.up):
-        if (isSubmenu) {
-          // If this is a top-level (horizontal) button in a menubar, focus the
-          // last item in this button's submenu. This makes navigating into
-          // upward-oriented submenus more intuitive.
-          final FocusNode? lastItem = _anchor._lastItemFocusNode;
-          if (lastItem?.canRequestFocus ?? false) {
-            lastItem!.requestFocus();
-          }
-          return;
-        }
       case (Axis.vertical, TextDirection.ltr, TraversalDirection.left):
       case (Axis.vertical, TextDirection.rtl, TraversalDirection.right):
         if (_parent?._parent?._orientation == Axis.horizontal) {
@@ -2196,7 +2231,7 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
             assert(_debugMenuInfo('Exiting submenu'));
             // MenuBar SubmenuButton => SubmenuButton => child
             // Focus the parent SubmenuButton anchor attached to this child.
-            _buttonFocusNode.requestFocus();
+            _anchor._focusButton();
           }
         } else {
           if (isSubmenu) {
@@ -2211,8 +2246,8 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
               .._close();
           } else {
             // If focus is not on a submenu button, closing the anchor this item
-            // presides in will close the menu and focus the anchor button.
-            _anchor._close();
+            // resides in will close the menu and focus the anchor button.
+            _anchor._focusButton();
           }
           assert(_debugMenuInfo('Exiting submenu'));
         }
@@ -2261,7 +2296,7 @@ class DismissMenuAction extends DismissAction {
 
   @override
   bool isEnabled(DismissIntent intent) {
-    return controller.isOpen;
+    return controller._anchor!._root._isOpen;
   }
 }
 
