@@ -1423,7 +1423,7 @@ class FlutterPlugin implements Plugin<Project> {
                         filename += "-${buildModeFor(variant.buildType)}"
                         project.copy {
                             from new File("$outputDirectoryStr/${output.outputFileName}")
-                            into new File("${project.layout.buildDirectory.dir("/outputs/flutter-apk").get()}")
+                            into new File("${project.layout.buildDirectory.dir("outputs/flutter-apk").get()}")
                             rename {
                                 return "${filename}.apk"
                             }
