@@ -264,6 +264,10 @@ base class RenderPass extends NativeFieldWrapperClass1 {
         targetFace.index);
   }
 
+  void setCullMode(CullMode cullMode) {
+    _setCullMode(cullMode.index);
+  }
+
   void draw() {
     if (!_draw()) {
       throw Exception("Failed to append draw");
@@ -401,6 +405,10 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       int readMask,
       int writeMask,
       int target_face);
+
+  @Native<Void Function(Pointer<Void>, Int)>(
+      symbol: 'InternalFlutterGpu_RenderPass_SetCullMode')
+  external void _setCullMode(int cullMode);
 
   @Native<Bool Function(Pointer<Void>)>(
       symbol: 'InternalFlutterGpu_RenderPass_Draw')

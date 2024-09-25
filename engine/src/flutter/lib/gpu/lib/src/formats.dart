@@ -135,6 +135,12 @@ enum PrimitiveType {
   point,
 }
 
+enum CullMode {
+  none,
+  frontFace,
+  backFace,
+}
+
 enum CompareFunction {
   /// Comparison test never passes.
   never,

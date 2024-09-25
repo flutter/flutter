@@ -76,6 +76,10 @@ impeller::VertexBuffer& RenderPass::GetVertexBuffer() {
   return vertex_buffer_;
 }
 
+impeller::PipelineDescriptor& RenderPass::GetPipelineDescriptor() {
+  return pipeline_descriptor_;
+}
+
 bool RenderPass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
   render_pass_ =
       command_buffer.GetCommandBuffer()->CreateRenderPass(render_target_);
@@ -556,6 +560,14 @@ void InternalFlutterGpu_RenderPass_SetStencilConfig(
   if (target_face != 1 /* both or back */) {
     wrapper->GetStencilBackAttachmentDescriptor() = desc;
   }
+}
+
+void InternalFlutterGpu_RenderPass_SetCullMode(
+    flutter::gpu::RenderPass* wrapper,
+    int cull_mode) {
+  impeller::PipelineDescriptor& pipeline_descriptor =
+      wrapper->GetPipelineDescriptor();
+  pipeline_descriptor.SetCullMode(flutter::gpu::ToImpellerCullMode(cull_mode));
 }
 
 bool InternalFlutterGpu_RenderPass_Draw(flutter::gpu::RenderPass* wrapper) {
