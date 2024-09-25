@@ -265,16 +265,14 @@ void main() {
     });
 
     group('magnificationScale', () {
-      testWidgets('Should throw assertion error when magnificationScale is zero',
-          (WidgetTester tester) async {
-        expect(() {
-          MaterialApp(
-            home: Scaffold(
-                body: CupertinoMagnifier(
+      testWidgets('Throws assertion error when magnificationScale is zero', (WidgetTester tester) async {
+        expect(() => MaterialApp(
+          home: Scaffold(
+            body: CupertinoMagnifier(
               magnificationScale: 0,
-            )),
-          );
-        }, throwsAssertionError);
+            ),
+          ),
+        ), throwsAssertionError);
       });
       testWidgets('Should throw assertion error when magnificationScale is negative',
           (WidgetTester tester) async {
