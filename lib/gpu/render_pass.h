@@ -52,6 +52,8 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   impeller::VertexBuffer& GetVertexBuffer();
 
+  impeller::PipelineDescriptor& GetPipelineDescriptor();
+
   bool Begin(flutter::gpu::CommandBuffer& command_buffer);
 
   void SetPipeline(fml::RefPtr<RenderPipeline> pipeline);
@@ -240,6 +242,11 @@ extern void InternalFlutterGpu_RenderPass_SetStencilConfig(
     int read_mask,
     int write_mask,
     int target);
+
+FLUTTER_GPU_EXPORT
+extern void InternalFlutterGpu_RenderPass_SetCullMode(
+    flutter::gpu::RenderPass* wrapper,
+    int cull_mode);
 
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_RenderPass_Draw(
