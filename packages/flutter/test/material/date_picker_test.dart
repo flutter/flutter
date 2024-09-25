@@ -2214,7 +2214,7 @@ void main() {
     expect(dialog.insetPadding, const EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0));
   });
 
-testWidgets('DateRangePickerDialog onStartDateChanged and onEndDateChanged callbacks', (WidgetTester tester) async {
+  testWidgets('DateRangePickerDialog onStartDateChanged and onEndDateChanged callbacks', (WidgetTester tester) async {
     DateTime? selectedStartDate;
     DateTime? selectedEndDate;
     await tester.pumpWidget(MaterialApp(
