@@ -712,7 +712,7 @@ void main() {
   testUsingContext('kotlin/swift plugin project without Swift Package Manager', () async {
     return _createProject(
       projectDir,
-      <String>['--no-pub', '--template=plugin', '-a', 'kotlin', '--ios-language', 'swift', '--platforms', 'ios,android'],
+      <String>['--no-pub', '--template=plugin', '-a', 'kotlin', '--ios-language', 'swift', '--platforms', 'android,ios,macos'],
       <String>[
         'analysis_options.yaml',
         'android/src/main/kotlin/com/example/flutter_project/FlutterProjectPlugin.kt',
@@ -722,6 +722,8 @@ void main() {
         'example/lib/main.dart',
         'ios/Classes/FlutterProjectPlugin.swift',
         'ios/Resources/PrivacyInfo.xcprivacy',
+        'macos/Classes/FlutterProjectPlugin.swift',
+        'macos/Resources/PrivacyInfo.xcprivacy',
         'lib/flutter_project.dart',
       ],
       unexpectedPaths: <String>[
@@ -736,7 +738,7 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     // Test flags disable Swift Package Manager.
-    FeatureFlags: () => TestFeatureFlags(),
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('swift plugin project with Swift Package Manager', () async {
@@ -749,7 +751,7 @@ void main() {
         'ios/flutter_project/Sources/flutter_project/PrivacyInfo.xcprivacy',
         'macos/flutter_project/Package.swift',
         'macos/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
-        'macos/flutter_project/Sources/flutter_project/Resources/.gitkeep',
+        'macos/flutter_project/Sources/flutter_project/PrivacyInfo.xcprivacy',
       ],
       unexpectedPaths: <String>[
         'ios/Classes/FlutterProjectPlugin.swift',
