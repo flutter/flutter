@@ -3263,7 +3263,7 @@ void main() {
       return MaterialApp(
         home: Scaffold(
           appBar: AppBar(
-            actions: [
+            actions: <Widget>[
               SizedBox.square(key: actionKey, dimension: 40.0),
             ],
             actionsPadding: actionsPadding,
