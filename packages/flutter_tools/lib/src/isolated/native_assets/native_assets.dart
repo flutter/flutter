@@ -34,7 +34,7 @@ import 'windows/native_assets.dart';
 /// If any of the dependencies change, then the Dart build should be performed
 /// again.
 final class DartBuildResult {
-  const DartBuildResult(this.codeAssets, this.dependencies);
+  const DartBuildResult({required this.codeAssets, required this.dependencies});
   const DartBuildResult.empty()
       : codeAssets = const <NativeCodeAssetImpl>[],
         dependencies = const <Uri>[];
@@ -43,8 +43,8 @@ final class DartBuildResult {
   final List<Uri> dependencies;
 }
 
-/// Invokes the build of all transitive Dart packages & prepares code assets to
-/// be included in the native build.
+/// Invokes the build of all transitive Dart packages and prepares code assets
+/// to be included in the native build.
 Future<(DartBuildResult, Uri)> runFlutterSpecificDartBuild({
   required Map<String, String> environmentDefines,
   required FlutterNativeAssetsBuildRunner buildRunner,
@@ -181,7 +181,7 @@ Future<Uri?> runFlutterSpecificDartDryRunOnPlatforms({
 ///
 /// It enables mocking `package:native_assets_builder` package.
 /// It also enables mocking native toolchain discovery via [cCompilerConfig].
-abstract class FlutterNativeAssetsBuildRunner {
+abstract interface class FlutterNativeAssetsBuildRunner {
   /// Whether the project has a `.dart_tools/package_config.json`.
   ///
   /// If there is no package config, [packagesWithNativeAssets], [build], and
@@ -765,7 +765,7 @@ Future<DartBuildResult> _runDartBuild({
       assets.whereType<NativeCodeAssetImpl>().toList();
   globals.logger
       .printTrace('Building native assets for $targetString $buildMode done.');
-  return DartBuildResult(codeAssets, dependencies.toList());
+  return DartBuildResult(codeAssets: codeAssets, dependencies: dependencies.toList());
 }
 
 Future<DartBuildResult> _runDartDryRunBuild({
@@ -792,7 +792,7 @@ Future<DartBuildResult> _runDartDryRunBuild({
   final List<NativeCodeAssetImpl> codeAssets =
       assets.whereType<NativeCodeAssetImpl>().toList();
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
-  return DartBuildResult(codeAssets, dependencies.toList());
+  return DartBuildResult(codeAssets: codeAssets, dependencies: dependencies.toList());
 }
 
 List<Target> _targetsForOS(build_info.TargetPlatform targetPlatform,

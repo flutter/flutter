@@ -5,6 +5,7 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -85,7 +86,7 @@ void main() {
       await runFlutterSpecificDartBuild(
         environmentDefines: <String, String>{
           kBuildMode: buildMode.cliName,
-          kMinSdkVersion: 21.toString(),
+          kMinSdkVersion: minSdkVersion,
         },
         targetPlatform: TargetPlatform.android_arm64,
         projectUri: projectUri,
@@ -128,7 +129,7 @@ void main() {
     await runFlutterSpecificDartBuild(
       environmentDefines: <String, String>{
         kBuildMode: BuildMode.debug.cliName,
-        kMinSdkVersion: 21.toString(),
+        kMinSdkVersion: minSdkVersion,
       },
       targetPlatform: TargetPlatform.android_x64,
       nativeAssetsYamlUri: nonFlutterTesterAssetUri,
@@ -155,7 +156,7 @@ void main() {
       () => runFlutterSpecificDartBuild(
         environmentDefines: <String, String>{
           kBuildMode: BuildMode.debug.cliName,
-          kMinSdkVersion: 21.toString(),
+          kMinSdkVersion: minSdkVersion,
         },
         targetPlatform: TargetPlatform.android_arm64,
         projectUri: projectUri,
