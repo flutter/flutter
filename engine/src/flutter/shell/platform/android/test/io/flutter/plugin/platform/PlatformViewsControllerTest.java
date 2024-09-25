@@ -1651,6 +1651,11 @@ public class PlatformViewsControllerTest {
                 return null;
               }
 
+              @Override
+              public boolean handlesCropAndRotation() {
+                return false;
+              }
+
               public void scheduleFrame() {}
             };
           }
