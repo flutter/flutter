@@ -301,24 +301,26 @@ void main() {
           ),
         );
       });
-      testWidgets(
-          'Should alter the size of the child element when the scale factor is greater than 1.0',
-          (WidgetTester tester) async {
+
+      testWidgets('Magnification scale argument is passed to the RawMagnifier', (WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
             home: Scaffold(
-                body: CupertinoMagnifier(
-              magnificationScale: 2,
-            )),
+              body: CupertinoMagnifier(
+                magnificationScale: 2,
+              ),
+            ),
           ),
         );
 
         expect(
           tester.widget(find.byType(RawMagnifier)),
-          isA<RawMagnifier>().having((RawMagnifier t) => t.magnificationScale,
-              'magnificationScale', 2),
+          isA<RawMagnifier>().having(
+            (RawMagnifier t) => t.magnificationScale,
+            'magnificationScale',
+            2,
+          ),
         );
       });
-    });
   });
 }
