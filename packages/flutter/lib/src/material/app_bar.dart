@@ -746,7 +746,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final Clip? clipBehavior;
 
   /// {@template flutter.material.appbar.marginPadding}
-  /// The padding between the [actions] and the right edge of the AppBar.
+  /// The padding between the [actions] and the end of the AppBar.
   ///
   /// By default, the value of [AppBar.actionsPadding] is 0.0.
   /// {@endtemplate}
