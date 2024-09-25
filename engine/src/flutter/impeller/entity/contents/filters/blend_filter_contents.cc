@@ -454,7 +454,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
                                  BlendModeToString(blend_mode)));
 #endif  // IMPELLER_DEBUG
     pass.SetVertexBuffer(std::move(vtx_buffer));
-    auto options = OptionsFromPass(pass);
+    auto options = OptionsFromPassAndEntity(pass, entity);
     options.primitive_type = PrimitiveType::kTriangleStrip;
     pass.SetPipeline(renderer.GetPorterDuffBlendPipeline(options));
 
@@ -505,6 +505,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
 
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));
+  sub_entity.SetBlendMode(entity.GetBlendMode());
 
   return sub_entity;
 }
