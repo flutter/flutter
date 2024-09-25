@@ -672,8 +672,8 @@ void main() {
           selectionControls: materialTextSelectionControls,
           child: SelectionContainer(
             delegate: selectionDelegate,
-            child: Center(
-              child: const Column(
+            child: const Center(
+              child: Column(
                 children: <Widget>[
                   Text('Hello World!'),
                   Text('How are you!'),
