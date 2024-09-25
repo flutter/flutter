@@ -259,6 +259,46 @@ void main() {
     });
   });
 
+  testWidgets('picker honours showDayOfWeek supported only in date mode', (WidgetTester tester) async {
+    // This should work: showDayOfWeek is used in date mode
+    expect(
+      () => example.CupertinoDatePicker(
+        mode: example.CupertinoDatePickerMode.date,
+        onDateTimeChanged: (_) {},
+        showDayOfWeek: true,
+      ),
+      returnsNormally,
+    );
+
+    // These should throw AssertionError: showDayOfWeek is not supported in other modes
+    expect(
+      () => example.CupertinoDatePicker(
+        mode: example.CupertinoDatePickerMode.time,
+        onDateTimeChanged: (_) {},
+        showDayOfWeek: true,
+      ),
+      throwsAssertionError,
+    );
+
+    expect(
+      () => example.CupertinoDatePicker(
+        mode: example.CupertinoDatePickerMode.monthYear,
+        onDateTimeChanged: (_) {},
+        showDayOfWeek: true,
+      ),
+      throwsAssertionError,
+    );
+
+    expect(
+      () => example.CupertinoDatePicker(
+        mode: example.CupertinoDatePickerMode.dateAndTime,
+        onDateTimeChanged: (_) {},
+        showDayOfWeek: true,
+      ),
+      throwsAssertionError,
+    );
+  });
+
   testWidgets('picker honors minuteInterval and secondInterval', (WidgetTester tester) async {
     late Duration duration;
     await tester.pumpWidget(
