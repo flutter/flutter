@@ -762,7 +762,7 @@ public class FlutterRendererTest {
     TextureRegistry.SurfaceProducer.Callback callback =
         new TextureRegistry.SurfaceProducer.Callback() {
           @Override
-          public void onSurfaceCreated() {
+          public void onSurfaceAvailable() {
             latch.countDown();
           }
 
@@ -770,6 +770,9 @@ public class FlutterRendererTest {
           public void onSurfaceDestroyed() {}
         };
     producer.setCallback(callback);
+
+    // Trim memory.
+    ((FlutterRenderer.ImageReaderSurfaceProducer) producer).onTrimMemory(40);
 
     // Trigger a resume.
     ((LifecycleRegistry) ProcessLifecycleOwner.get().getLifecycle())
