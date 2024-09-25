@@ -1866,6 +1866,9 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
   ///
   /// When `forEnd` is null, the [Selectable] will be registered as having received both
   /// start and end events.
+  ///
+  /// Call this method when a [SelectionEvent] is dispatched to a child selectable managed
+  /// by this delegate.
   @protected
   void didReceiveSelectionEventFor({required Selectable selectable, bool? forEnd}) {
     if (forEnd == null) {
@@ -2035,11 +2038,11 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
   /// This method is called when:
   ///   1. A new [Selectable] is added to the delegate, and its screen location
   ///   falls into the previous selection.
-  ///   2. A [Selectable] is dispatched a [SelectionEvent] of type
+  ///   2. Before a [SelectionEvent] of type
   ///   [SelectionEventType.startEdgeUpdate], [SelectionEventType.endEdgeUpdate],
   ///   [SelectionEventType.granularlyExtendSelection], or
-  ///   [SelectionEventType.directionallyExtendSelection] through
-  ///   [dispatchSelectionEventToChild].
+  ///   [SelectionEventType.directionallyExtendSelection] is dispatched
+  ///   to a [Selectable] child.
   @override
   void ensureChildUpdated(Selectable selectable) {
     if (_lastEndEdgeUpdateGlobalPosition != null && _hasReceivedEndEvent.add(selectable)) {

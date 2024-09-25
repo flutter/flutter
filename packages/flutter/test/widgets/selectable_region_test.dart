@@ -670,9 +670,9 @@ void main() {
           onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
           focusNode: focusNode,
           selectionControls: materialTextSelectionControls,
-          child: Center(
-            child: SelectionContainer(
-              delegate: selectionDelegate,
+          child: SelectionContainer(
+            delegate: selectionDelegate,
+            child: Center(
               child: const Column(
                 children: <Widget>[
                   Text('Hello World!'),
