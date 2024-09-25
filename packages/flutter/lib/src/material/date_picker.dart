@@ -1452,7 +1452,7 @@ class DateRangePickerDialog extends StatefulWidget {
   /// Called when the user selects a start date in the picker.
   final ValueChanged<DateTime?>? onStartDateChanged;
 
-  /// Called when the user selects a end date in the picker.
+  /// Called when the user selects an end date in the picker.
   final ValueChanged<DateTime?>? onEndDateChanged;
 
   @override
