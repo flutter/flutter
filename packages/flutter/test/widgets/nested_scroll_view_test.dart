@@ -109,7 +109,139 @@ Widget buildTest({
   );
 }
 
+
+class _TabBarViewInNestedScrollView extends StatefulWidget {
+  const _TabBarViewInNestedScrollView();
+
+  @override
+  State<_TabBarViewInNestedScrollView> createState() =>
+      _TabBarViewInNestedScrollViewState();
+}
+
+class _TabBarViewInNestedScrollViewState
+    extends State<_TabBarViewInNestedScrollView> with TickerProviderStateMixin {
+  final List<int> _tabs = <int>[0, 1];
+
+  late TabController _tabController;
+  int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(
+      initialIndex: _selectedIndex,
+      vsync: this,
+      length: _tabs.length,
+    );
+    _tabController.addListener(() {
+      setState(() {
+        _selectedIndex = _tabController.index;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: NestedScrollView(
+        floatHeaderSlivers: true,
+        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          return <Widget>[
+            SliverAppBar(
+              title: const Text('title'),
+              pinned: true,
+              expandedHeight: 150.0,
+              bottom: TabBar(
+                controller: _tabController,
+                tabs:
+                _tabs.map((int index) => Tab(text: 'tab $index')).toList(),
+              ),
+            ),
+          ];
+        },
+        body: TabBarView(
+          controller: _tabController,
+          children: _tabs
+              .map((int e) => _TabPage(
+            tab: e,
+            isSelected: _selectedIndex == e,
+          ))
+              .toList(),
+        ),
+      ),
+    );
+  }
+}
+
+class _TabPage extends StatefulWidget {
+  const _TabPage({required this.tab, required this.isSelected});
+
+  final int tab;
+  final bool isSelected;
+
+  @override
+  _TabPageState createState() => _TabPageState();
+}
+
+class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  late ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    return SafeArea(
+      top: false,
+      bottom: false,
+      child: Builder(
+        builder: (BuildContext context) {
+          final ScrollController scrollController =
+            PrimaryScrollController.of(context);
+          return CustomScrollView(
+            controller:
+            widget.isSelected ? scrollController : _scrollController,
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) =>
+                      ListTile(title: Text('Item $index')),
+                  childCount: 30,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
 void main() {
+  testWidgets('Change tab and scroll test', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: _TabBarViewInNestedScrollView(),
+          ),
+        );
+
+        await tester.tap(find.text('tab 1'));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+
+        await tester.drag(find.byType(CustomScrollView), const Offset(0, -300));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      });
+  
   testWidgets('ScrollDirection test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/107101
     final List<ScrollDirection> receivedResult = <ScrollDirection>[];
