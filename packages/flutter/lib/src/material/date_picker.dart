@@ -327,6 +327,7 @@ class DatePickerDialog extends StatefulWidget {
     this.onDatePickerModeChange,
     this.switchToInputEntryModeIcon,
     this.switchToCalendarEntryModeIcon,
+    this.insetPadding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
     this.onDateChanged,
   }) : initialDate = initialDate == null ? null : DateUtils.dateOnly(initialDate),
        firstDate = DateUtils.dateOnly(firstDate),
@@ -444,6 +445,13 @@ class DatePickerDialog extends StatefulWidget {
 
   /// {@macro flutter.material.date_picker.switchToCalendarEntryModeIcon}
   final Icon? switchToCalendarEntryModeIcon;
+
+  /// The amount of padding added to [MediaQueryData.viewInsets] on the outside
+  /// of the dialog. This defines the minimum space between the screen's edges
+  /// and the dialog.
+  ///
+  /// Defaults to `EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0)`.
+  final EdgeInsets insetPadding;
 
   /// Called when the user selects a date in the picker.
   final ValueChanged<DateTime>? onDateChanged;
@@ -723,7 +731,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
       shape: useMaterial3
         ? datePickerTheme.shape ?? defaults.shape
         : datePickerTheme.shape ?? dialogTheme.shape ?? defaults.shape,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+      insetPadding: widget.insetPadding,
       clipBehavior: Clip.antiAlias,
       child: AnimatedContainer(
         width: dialogSize.width,
