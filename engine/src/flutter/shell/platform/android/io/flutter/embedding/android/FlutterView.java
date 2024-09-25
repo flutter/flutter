@@ -683,7 +683,7 @@ public class FlutterView extends FrameLayout
   // The annotations to suppress "InlinedApi" and "NewApi" lints prevent lint warnings
   // caused by usage of Android Q APIs. These calls are safe because they are
   // guarded.
-  @SuppressLint({"InlinedApi", "NewApi"})
+  @SuppressLint({"InlinedApi", "NewApi", "DeprecatedSinceApi"})
   @NonNull
   public final WindowInsets onApplyWindowInsets(@NonNull WindowInsets insets) {
     WindowInsets newInsets = super.onApplyWindowInsets(insets);

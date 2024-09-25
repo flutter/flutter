@@ -2,17 +2,6 @@
 <issues format="6" by="lint 8.3.0 [11479570] " type="baseline" client="" dependencies="true" name="" variant="all" version="8.3.0 [11479570] ">
 
     <issue
-        id="DeprecatedSinceApi"
-        message="This method is deprecated as of API level 30"
-        errorLine1="        zeroSides = calculateShouldZeroSides();"
-        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterView.java"
-            line="759"
-            column="21"/>
-    </issue>
-
-    <issue
         id="HardcodedDebugMode"
         message="Avoid hardcoding the debug mode; leaving it out allows debug and release builds to automatically assign one"
         errorLine1="    &lt;application android:label=&quot;Flutter Shell&quot; android:name=&quot;FlutterApplication&quot; android:debuggable=&quot;true&quot;>"
