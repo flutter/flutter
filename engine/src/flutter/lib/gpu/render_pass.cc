@@ -194,13 +194,6 @@ bool RenderPass::Draw() {
 }  // namespace gpu
 }  // namespace flutter
 
-static impeller::Color ToImpellerColor(uint32_t argb) {
-  return impeller::Color::MakeRGBA8((argb >> 16) & 0xFF,  // R
-                                    (argb >> 8) & 0xFF,   // G
-                                    argb & 0xFF,          // B
-                                    argb >> 24);          // A
-}
-
 //----------------------------------------------------------------------------
 /// Exports
 ///
@@ -215,13 +208,17 @@ Dart_Handle InternalFlutterGpu_RenderPass_SetColorAttachment(
     int color_attachment_index,
     int load_action,
     int store_action,
-    int clear_color,
+    float clear_color_r,
+    float clear_color_g,
+    float clear_color_b,
+    float clear_color_a,
     flutter::gpu::Texture* texture,
     Dart_Handle resolve_texture_wrapper) {
   impeller::ColorAttachment desc;
   desc.load_action = flutter::gpu::ToImpellerLoadAction(load_action);
   desc.store_action = flutter::gpu::ToImpellerStoreAction(store_action);
-  desc.clear_color = ToImpellerColor(static_cast<uint32_t>(clear_color));
+  desc.clear_color = impeller::Color(clear_color_r, clear_color_g,
+                                     clear_color_b, clear_color_a);
   desc.texture = texture->GetTexture();
   if (!Dart_IsNull(resolve_texture_wrapper)) {
     flutter::gpu::Texture* resolve_texture =
