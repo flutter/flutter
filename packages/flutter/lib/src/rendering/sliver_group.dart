@@ -225,7 +225,7 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
         RenderSliver? current = childAfter(child as RenderSliver);
         while (current != null) {
           if (!current.geometry!.hasVisualOverflow || firstChild == child ) {
-            childScrollOffset += current.geometry!.scrollExtent;
+            childScrollOffset -= current.geometry!.scrollExtent;
           }
           current = childAfter(current);
         }
