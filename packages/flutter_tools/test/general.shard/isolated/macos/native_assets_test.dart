@@ -13,8 +13,10 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/native_assets_cli_internal.dart' hide Target;
+import 'package:native_assets_cli/native_assets_cli_internal.dart'
+    hide Target;
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
     as native_assets_cli;
 import 'package:package_config/package_config_types.dart';
@@ -49,9 +51,207 @@ void main() {
     projectUri = environment.projectDir.uri;
   });
 
-  for (final bool flutterTester in <bool>[false, true]) {
-    final bool isArm64 = native_assets_cli.ArchitectureImpl.current == ArchitectureImpl.arm64;
+  testUsingContext('dry run with no package config', overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    expect(
+      await dryRunNativeAssetsMacOS(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: FakeNativeAssetsBuildRunner(
+          hasPackageConfigResult: false,
+        ),
+      ),
+      null,
+    );
+    expect(
+      (globals.logger as BufferLogger).traceText,
+      contains('No package config found. Skipping native assets compilation.'),
+    );
+  });
 
+  testUsingContext('build with no package config', overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    await buildNativeAssetsMacOS(
+      darwinArchs: <DarwinArch>[DarwinArch.arm64],
+      projectUri: projectUri,
+      buildMode: BuildMode.debug,
+      fileSystem: fileSystem,
+      buildRunner: FakeNativeAssetsBuildRunner(
+        hasPackageConfigResult: false,
+      ),
+    );
+    expect(
+      (globals.logger as BufferLogger).traceText,
+      contains('No package config found. Skipping native assets compilation.'),
+    );
+  });
+
+  testUsingContext('dry run for multiple OSes with no package config', overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    await dryRunNativeAssetsMultipleOSes(
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      targetPlatforms: <TargetPlatform>[
+        TargetPlatform.darwin,
+        TargetPlatform.ios,
+      ],
+      buildRunner: FakeNativeAssetsBuildRunner(
+        hasPackageConfigResult: false,
+      ),
+    );
+    expect(
+      (globals.logger as BufferLogger).traceText,
+      contains('No package config found. Skipping native assets compilation.'),
+    );
+  });
+
+  testUsingContext('dry run with assets but not enabled', overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    expect(
+      () => dryRunNativeAssetsMacOS(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+        ),
+      ),
+      throwsToolExit(
+        message: 'Package(s) bar require the native assets feature to be enabled. '
+            'Enable using `flutter config --enable-native-assets`.',
+      ),
+    );
+  });
+
+  testUsingContext('dry run with assets', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
+      packagesWithNativeAssetsResult: <Package>[
+        Package('bar', projectUri),
+      ],
+      buildDryRunResult: FakeNativeAssetsBuilderResult(
+        assets: <AssetImpl>[
+          NativeCodeAssetImpl(
+            id: 'package:bar/bar.dart',
+            linkMode: DynamicLoadingBundledImpl(),
+            os: OSImpl.macOS,
+            architecture: ArchitectureImpl.arm64,
+            file: Uri.file('libbar.dylib'),
+          ),
+          NativeCodeAssetImpl(
+            id: 'package:bar/bar.dart',
+            linkMode: DynamicLoadingBundledImpl(),
+            os: OSImpl.macOS,
+            architecture: ArchitectureImpl.x64,
+            file: Uri.file('libbar.dylib'),
+          ),
+        ],
+      ),
+    );
+    final Uri? nativeAssetsYaml = await dryRunNativeAssetsMacOS(
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      buildRunner: buildRunner,
+    );
+    expect(
+      (globals.logger as BufferLogger).traceText,
+      stringContainsInOrder(<String>[
+        'Dry running native assets for macos.',
+        'Dry running native assets for macos done.',
+      ]),
+    );
+    expect(
+      nativeAssetsYaml,
+      projectUri.resolve('build/native_assets/macos/native_assets.yaml'),
+    );
+    final String nativeAssetsYamlContents =
+        await fileSystem.file(nativeAssetsYaml).readAsString();
+    expect(
+      nativeAssetsYamlContents,
+      contains('package:bar/bar.dart'),
+    );
+    expect(buildRunner.buildDryRunInvocations, 1);
+    expect(buildRunner.linkDryRunInvocations, 0);
+    // Check that the framework uri is identical for both archs.
+    final String pathSeparator = const LocalPlatform().pathSeparator;
+    expect(
+      nativeAssetsYamlContents,
+      stringContainsInOrder(
+        <String>[
+          'bar.framework${pathSeparator}bar',
+          'bar.framework${pathSeparator}bar',
+        ],
+      ),
+    );
+  });
+
+  testUsingContext('build with assets but not enabled', overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    expect(
+      () => buildNativeAssetsMacOS(
+        darwinArchs: <DarwinArch>[DarwinArch.arm64],
+        projectUri: projectUri,
+        buildMode: BuildMode.debug,
+        fileSystem: fileSystem,
+        buildRunner: FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+        ),
+      ),
+      throwsToolExit(
+        message: 'Package(s) bar require the native assets feature to be enabled. '
+            'Enable using `flutter config --enable-native-assets`.',
+      ),
+    );
+  });
+
+  testUsingContext('build no assets', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    final (Uri? nativeAssetsYaml, _) = await buildNativeAssetsMacOS(
+      darwinArchs: <DarwinArch>[DarwinArch.arm64],
+      projectUri: projectUri,
+      buildMode: BuildMode.debug,
+      fileSystem: fileSystem,
+      buildRunner: FakeNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', projectUri),
+        ],
+      ),
+    );
+    expect(
+      nativeAssetsYaml,
+      projectUri.resolve('build/native_assets/macos/native_assets.yaml'),
+    );
+    expect(
+      await fileSystem.file(nativeAssetsYaml).readAsString(),
+      isNot(contains('package:bar/bar.dart')),
+    );
+  });
+
+  for (final bool flutterTester in <bool>[false, true]) {
     String testName = '';
     if (flutterTester) {
       testName += ' flutter tester';
@@ -76,7 +276,7 @@ void main() {
     }
     for (final BuildMode buildMode in <BuildMode>[
       BuildMode.debug,
-      if (!flutterTester) BuildMode.release,
+      BuildMode.release,
     ]) {
       testUsingContext('build with assets $buildMode$testName', overrides: <Type, Generator>{
         FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
@@ -89,7 +289,8 @@ void main() {
                   '-create',
                   '-output',
                   dylibPathBar,
-                  '${isArm64 ? 'arm64' : 'x64'}/libbar.dylib',
+                  'arm64/libbar.dylib',
+                  'x64/libbar.dylib',
                 ],
               ),
               FakeCommand(
@@ -111,7 +312,8 @@ void main() {
                   '-create',
                   '-output',
                   dylibPathBuz,
-                  '${isArm64 ? 'arm64' : 'x64'}/libbuz.dylib',
+                  'arm64/libbuz.dylib',
+                  'x64/libbuz.dylib',
                 ],
               ),
               FakeCommand(
@@ -121,7 +323,9 @@ void main() {
                   dylibPathBuz,
                 ],
                 stdout: <String>[
-                  '$dylibPathBuz (architecture ${isArm64 ? 'arm64' : 'x86_64'}):',
+                  '$dylibPathBuz (architecture x86_64):',
+                  '@rpath/libbuz.dylib',
+                  '$dylibPathBuz (architecture arm64):',
                   '@rpath/libbuz.dylib',
                 ].join('\n'),
               ),
@@ -145,7 +349,8 @@ void main() {
                   '--force',
                   '--sign',
                   '-',
-                  if (buildMode == BuildMode.debug) '--timestamp=none',
+                  if (buildMode == BuildMode.debug)
+                    '--timestamp=none',
                   signPathBar,
                 ],
               ),
@@ -156,7 +361,7 @@ void main() {
                   dylibPathBuz,
                   '-change',
                   '@rpath/libbar.dylib',
-                  dylibPathBar,
+                 dylibPathBar,
                   '-change',
                   '@rpath/libbuz.dylib',
                   signPathBuz,
@@ -169,7 +374,8 @@ void main() {
                   '--force',
                   '--sign',
                   '-',
-                  if (buildMode == BuildMode.debug) '--timestamp=none',
+                  if (buildMode == BuildMode.debug)
+                    '--timestamp=none',
                   signPathBuz,
                 ],
               ),
@@ -255,27 +461,15 @@ void main() {
         if (const LocalPlatform().isWindows) {
           return; // Backslashes in commands, but we will never run these commands on Windows.
         }
-        if (flutterTester && !const LocalPlatform().isMacOS) {
-          // The [runFlutterSpecificDartBuild] will - when given
-          // `TargetPlatform.tester` - enable `flutter test` mode. That means if
-          // this test is run on linux, it's going to do a linux build.
-          // Though this test is mac-specific, so we skip that.
-          //
-          // Running the test in `!flutterTester` mode still works on linux as
-          // we explicitly tell it to do a mac build (instead of letting it
-          // choose the local build).
-          return;
-        }
         final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
-        final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
         await packageConfig.parent.create();
         await packageConfig.create();
-        final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
+        final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
           onBuild: (native_assets_cli.Target target) =>
-              FakeFlutterNativeAssetsBuilderResult(
+              FakeNativeAssetsBuilderResult(
                 assets: <AssetImpl>[
                   NativeCodeAssetImpl(
                     id: 'package:bar/bar.dart',
@@ -292,34 +486,26 @@ void main() {
                     file: Uri.file('${target.architecture}/libbuz.dylib'),
                   ),
                 ],
-          ),
+              ),
         );
-        final (_, Uri nativeAssetsYaml) = await runFlutterSpecificDartBuild(
-          environmentDefines: <String, String>{
-            kBuildMode: buildMode.cliName,
-            kDarwinArchs: 'arm64 x86_64',
-          },
-          targetPlatform: flutterTester ? TargetPlatform.tester : TargetPlatform.darwin,
+        final (Uri? nativeAssetsYaml, _) = await buildNativeAssetsMacOS(
+          darwinArchs: <DarwinArch>[DarwinArch.arm64, DarwinArch.x86_64],
           projectUri: projectUri,
-          nativeAssetsYamlUri: flutterTester ? null : nonFlutterTesterAssetUri,
+          buildMode: buildMode,
           fileSystem: fileSystem,
+          flutterTester: flutterTester,
           buildRunner: buildRunner,
         );
-        final String expectedArchsBeingBuilt = flutterTester
-            ? (isArm64 ? 'macos_arm64' : 'macos_x64')
-            : '[macos_arm64, macos_x64]';
         expect(
           (globals.logger as BufferLogger).traceText,
           stringContainsInOrder(<String>[
-            'Building native assets for $expectedArchsBeingBuilt $buildMode.',
-            'Building native assets for $expectedArchsBeingBuilt $buildMode done.',
+            'Building native assets for [macos_arm64, macos_x64] $buildMode.',
+            'Building native assets for [macos_arm64, macos_x64] done.',
           ]),
         );
         expect(
           nativeAssetsYaml,
-          flutterTester
-              ? projectUri.resolve('build/native_assets/macos/native_assets.yaml')
-              : nonFlutterTesterAssetUri
+          projectUri.resolve('build/native_assets/macos/native_assets.yaml'),
         );
         expect(
           await fileSystem.file(nativeAssetsYaml).readAsString(),
@@ -327,10 +513,10 @@ void main() {
             'package:bar/bar.dart',
             if (flutterTester)
               // Tests run on host system, so the have the full path on the system.
-              projectUri.resolve('build/native_assets/macos/libbar.dylib').toFilePath()
+              '- ${projectUri.resolve('build/native_assets/macos/libbar.dylib').toFilePath()}'
             else
               // Apps are a bundle with the dylibs on their dlopen path.
-              'bar.framework/bar',
+              '- bar.framework/bar',
           ]),
         );
         expect(
@@ -339,14 +525,14 @@ void main() {
             'package:buz/buz.dart',
             if (flutterTester)
               // Tests run on host system, so the have the full path on the system.
-              projectUri.resolve('build/native_assets/macos/libbuz.dylib').toFilePath()
+              '- ${projectUri.resolve('build/native_assets/macos/libbuz.dylib').toFilePath()}'
             else
               // Apps are a bundle with the dylibs on their dlopen path.
-              'buz.framework/buz',
+              '- buz.framework/buz',
           ]),
         );
         // Multi arch.
-        expect(buildRunner.buildInvocations, flutterTester ? 1 : 2);
+        expect(buildRunner.buildInvocations, 2);
         expect(
           buildRunner.linkInvocations,
           buildMode == BuildMode.release ? 2 : 0,
@@ -355,24 +541,82 @@ void main() {
     }
   }
 
+  testUsingContext('Native assets dry run error', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    expect(
+      () => dryRunNativeAssetsMacOS(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+          buildDryRunResult: const FakeNativeAssetsBuilderResult(
+            success: false,
+          ),
+        ),
+      ),
+      throwsToolExit(
+        message:
+            'Building (dry run) native assets failed. See the logs for more details.',
+      ),
+    );
+  });
+
+  testUsingContext('Native assets build error', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    expect(
+      () => buildNativeAssetsMacOS(
+        darwinArchs: <DarwinArch>[DarwinArch.arm64],
+        projectUri: projectUri,
+        buildMode: BuildMode.debug,
+        fileSystem: fileSystem,
+        yamlParentDirectory: environment.buildDir.uri,
+        buildRunner: FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+          buildResult: const FakeNativeAssetsBuilderResult(
+            success: false,
+          ),
+        ),
+      ),
+      throwsToolExit(
+        message:
+            'Building native assets failed. See the logs for more details.',
+      ),
+    );
+  });
+
   // This logic is mocked in the other tests to avoid having test order
   // randomization causing issues with what processes are invoked.
   // Exercise the parsing of the process output in this separate test.
-  testUsingContext('NativeAssetsBuildRunnerImpl.cCompilerConfig',
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.list(
-            <FakeCommand>[
-              const FakeCommand(
-                command: <Pattern>['xcrun', 'clang', '--version'],
-                stdout: '''
+  testUsingContext('NativeAssetsBuildRunnerImpl.cCompilerConfig', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.list(
+      <FakeCommand>[
+        const FakeCommand(
+          command: <Pattern>['xcrun', 'clang', '--version'],
+          stdout: '''
 Apple clang version 14.0.0 (clang-1400.0.29.202)
 Target: arm64-apple-darwin22.6.0
 Thread model: posix
 InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin''',
-            )
-          ],
-        ),
+        )
+      ],
+    ),
   }, () async {
     if (!const LocalPlatform().isMacOS) {
       return;
@@ -388,7 +632,7 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
       packageConfigFile,
       logger: environment.logger,
     );
-    final FlutterNativeAssetsBuildRunner runner = FlutterNativeAssetsBuildRunnerImpl(
+    final NativeAssetsBuildRunner runner = NativeAssetsBuildRunnerImpl(
       projectUri,
       packageConfigFile.path,
       packageConfig,
