@@ -14,6 +14,7 @@
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/entity/texture_fill_strict_src.frag.h"
+#include "impeller/entity/tiled_texture_fill_external.frag.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
@@ -118,9 +119,11 @@ bool TextureContents::Render(const ContentContext& renderer,
     return true;  // Nothing to render.
   }
 
-  [[maybe_unused]] bool is_external_texture =
+#ifdef IMPELLER_ENABLE_OPENGLES
+  using FSExternal = TiledTextureFillExternalFragmentShader;
+  bool is_external_texture =
       texture_->GetTextureDescriptor().type == TextureType::kTextureExternalOES;
-  FML_DCHECK(!is_external_texture);
+#endif  // IMPELLER_ENABLE_OPENGLES
 
   auto texture_coords =
       Rect::MakeSize(texture_->GetSize()).Project(source_rect_);
@@ -159,9 +162,21 @@ bool TextureContents::Render(const ContentContext& renderer,
   pipeline_options.depth_write_enabled =
       stencil_enabled_ && pipeline_options.blend_mode == BlendMode::kSource;
 
+#ifdef IMPELLER_ENABLE_OPENGLES
+  if (is_external_texture) {
+    pass.SetPipeline(
+        renderer.GetTiledTextureExternalPipeline(pipeline_options));
+  } else {
+    pass.SetPipeline(
+        strict_source_rect_enabled_
+            ? renderer.GetTextureStrictSrcPipeline(pipeline_options)
+            : renderer.GetTexturePipeline(pipeline_options));
+  }
+#else
   pass.SetPipeline(strict_source_rect_enabled_
                        ? renderer.GetTextureStrictSrcPipeline(pipeline_options)
                        : renderer.GetTexturePipeline(pipeline_options));
+#endif  // IMPELLER_ENABLE_OPENGLES
 
   pass.SetVertexBuffer(vertex_buffer);
   VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
@@ -181,6 +196,26 @@ bool TextureContents::Render(const ContentContext& renderer,
         pass, texture_,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
             sampler_descriptor_));
+#ifdef IMPELLER_ENABLE_OPENGLES
+  } else if (is_external_texture) {
+    FSExternal::FragInfo frag_info;
+    frag_info.x_tile_mode =
+        static_cast<Scalar>(sampler_descriptor_.width_address_mode);
+    frag_info.y_tile_mode =
+        static_cast<Scalar>(sampler_descriptor_.height_address_mode);
+    frag_info.alpha = GetOpacity();
+    FSExternal::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+
+    SamplerDescriptor sampler_desc;
+    // OES_EGL_image_external states that only CLAMP_TO_EDGE is valid, so
+    // we emulate all other tile modes here by remapping the texture
+    // coordinates.
+    sampler_desc.width_address_mode = SamplerAddressMode::kClampToEdge;
+    sampler_desc.height_address_mode = SamplerAddressMode::kClampToEdge;
+    FSExternal::BindSAMPLEREXTERNALOESTextureSampler(
+        pass, texture_,
+        renderer.GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc));
+#endif  //  IMPELLER_ENABLE_OPENGLES
   } else {
     FS::FragInfo frag_info;
     frag_info.alpha = GetOpacity();
