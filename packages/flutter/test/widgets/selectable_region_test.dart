@@ -1261,6 +1261,59 @@ void main() {
       skip: !kIsWeb, // [intended] This test verifies web behavior.
     );
 
+    testWidgets('RenderParagraph should invalidate cachedRect on window size change', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/155143.
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      addTearDown(tester.view.reset);
+      const String testString = 'How are you doing today? Good, and you?';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: const Center(
+              child: Text(testString),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('How are you'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, testString.length));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 2, extentOffset: testString.length));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Change the size of the window.
+      tester.view.physicalSize = const Size(800.0, 400.0);
+      await tester.pumpAndSettle();
+
+      // Start a new drag.
+      await gesture.down(textOffsetToPosition(paragraph, 0));
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle(kDoubleTapTimeout);
+      expect(paragraph.selections.isEmpty, isFalse);
+      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 0));
+
+      await gesture.down(textOffsetToPosition(paragraph, 2));
+      await tester.pumpAndSettle();
+
+      // Select to the end.
+      await gesture.moveTo(textOffsetToPosition(paragraph, testString.length));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 2, extentOffset: testString.length));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }, variant: TargetPlatformVariant.all());
+
     testWidgets('mouse can select single text on desktop platforms', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
