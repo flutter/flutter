@@ -15,7 +15,6 @@
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
-#include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/conical_gradient_contents.h"
 #include "impeller/entity/contents/content_context.h"
@@ -29,18 +28,15 @@
 #include "impeller/entity/contents/runtime_effect_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
+#include "impeller/entity/contents/sweep_gradient_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/contents/tiled_texture_contents.h"
 #include "impeller/entity/entity.h"
-#include "impeller/entity/entity_pass.h"
-#include "impeller/entity/entity_pass_delegate.h"
 #include "impeller/entity/entity_playground.h"
 #include "impeller/entity/geometry/geometry.h"
-#include "impeller/entity/geometry/point_field_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/entity/geometry/superellipse_geometry.h"
-#include "impeller/entity/render_target_cache.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/geometry/path_builder.h"
@@ -72,77 +68,6 @@ INSTANTIATE_PLAYGROUND_SUITE(EntityTest);
 TEST_P(EntityTest, CanCreateEntity) {
   Entity entity;
   ASSERT_TRUE(entity.GetTransform().IsIdentity());
-}
-
-class TestPassDelegate final : public EntityPassDelegate {
- public:
-  explicit TestPassDelegate(bool collapse = false) : collapse_(collapse) {}
-
-  // |EntityPassDelegate|
-  ~TestPassDelegate() override = default;
-
-  // |EntityPassDelgate|
-  bool CanElide() override { return false; }
-
-  // |EntityPassDelgate|
-  bool CanCollapseIntoParentPass(EntityPass* entity_pass) override {
-    return collapse_;
-  }
-
-  // |EntityPassDelgate|
-  std::shared_ptr<Contents> CreateContentsForSubpassTarget(
-      std::shared_ptr<Texture> target,
-      const Matrix& transform) override {
-    return nullptr;
-  }
-
-  // |EntityPassDelegate|
-  std::shared_ptr<FilterContents> WithImageFilter(
-      const FilterInput::Variant& input,
-      const Matrix& effect_transform) const override {
-    return nullptr;
-  }
-
- private:
-  const std::optional<Rect> coverage_;
-  const bool collapse_;
-};
-
-auto CreatePassWithRectPath(
-    Rect rect,
-    std::optional<Rect> bounds_hint,
-    ContentBoundsPromise bounds_promise = ContentBoundsPromise::kUnknown,
-    bool collapse = false) {
-  auto subpass = std::make_unique<EntityPass>();
-  Entity entity;
-  entity.SetContents(SolidColorContents::Make(
-      PathBuilder{}.AddRect(rect).TakePath(), Color::Red()));
-  subpass->AddEntity(std::move(entity));
-  subpass->SetDelegate(std::make_unique<TestPassDelegate>(collapse));
-  subpass->SetBoundsLimit(bounds_hint);
-  return subpass;
-}
-
-TEST_P(EntityTest, EntityPassCanMergeSubpassIntoParent) {
-  // Both a red and a blue box should appear if the pass merging has worked
-  // correctly.
-
-  EntityPass pass;
-  auto subpass = CreatePassWithRectPath(Rect::MakeLTRB(0, 0, 100, 100),
-                                        Rect::MakeLTRB(50, 50, 150, 150),
-                                        ContentBoundsPromise::kUnknown, true);
-  pass.AddSubpass(std::move(subpass));
-
-  Entity entity;
-  entity.SetTransform(Matrix::MakeScale(GetContentScale()));
-  auto contents = std::make_unique<SolidColorContents>();
-  contents->SetGeometry(Geometry::MakeRect(Rect::MakeLTRB(100, 100, 200, 200)));
-  contents->SetColor(Color::Blue());
-  entity.SetContents(std::move(contents));
-
-  pass.AddEntity(std::move(entity));
-
-  ASSERT_TRUE(OpenPlaygroundHere(pass));
 }
 
 TEST_P(EntityTest, FilterCoverageRespectsCropRect) {
@@ -1369,76 +1294,6 @@ TEST_P(EntityTest, SolidFillCoverageIsCorrect) {
   }
 }
 
-TEST_P(EntityTest, SolidFillShouldRenderIsCorrect) {
-  // No path.
-  {
-    auto fill = std::make_shared<SolidColorContents>();
-    fill->SetColor(Color::CornflowerBlue());
-    ASSERT_FALSE(fill->ShouldRender(Entity{}, Rect::MakeSize(Size{100, 100})));
-    ASSERT_FALSE(
-        fill->ShouldRender(Entity{}, Rect::MakeLTRB(-100, -100, -50, -50)));
-  }
-
-  // With path.
-  {
-    auto fill = std::make_shared<SolidColorContents>();
-    fill->SetColor(Color::CornflowerBlue());
-    fill->SetGeometry(Geometry::MakeFillPath(
-        PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 100, 100)).TakePath()));
-    ASSERT_TRUE(fill->ShouldRender(Entity{}, Rect::MakeSize(Size{100, 100})));
-    ASSERT_FALSE(
-        fill->ShouldRender(Entity{}, Rect::MakeLTRB(-100, -100, -50, -50)));
-  }
-
-  // With paint cover.
-  {
-    auto fill = std::make_shared<SolidColorContents>();
-    fill->SetColor(Color::CornflowerBlue());
-    fill->SetGeometry(Geometry::MakeCover());
-    ASSERT_TRUE(fill->ShouldRender(Entity{}, Rect::MakeSize(Size{100, 100})));
-    ASSERT_TRUE(
-        fill->ShouldRender(Entity{}, Rect::MakeLTRB(-100, -100, -50, -50)));
-  }
-}
-
-TEST_P(EntityTest, DoesNotCullEntitiesByDefault) {
-  auto fill = std::make_shared<SolidColorContents>();
-  fill->SetColor(Color::CornflowerBlue());
-  fill->SetGeometry(
-      Geometry::MakeRect(Rect::MakeLTRB(-1000, -1000, -900, -900)));
-
-  Entity entity;
-  entity.SetContents(fill);
-
-  // Even though the entity is offscreen, this should still render because we do
-  // not compute the coverage intersection by default.
-  EXPECT_TRUE(entity.ShouldRender(Rect::MakeLTRB(0, 0, 100, 100)));
-}
-
-TEST_P(EntityTest, ClipContentsShouldRenderIsCorrect) {
-  // For clip ops, `ShouldRender` should always return true.
-
-  // Clip.
-  {
-    auto clip = std::make_shared<ClipContents>();
-    ASSERT_TRUE(clip->ShouldRender(Entity{}, Rect::MakeSize(Size{100, 100})));
-    clip->SetGeometry(Geometry::MakeFillPath(
-        PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 100, 100)).TakePath()));
-    ASSERT_TRUE(clip->ShouldRender(Entity{}, Rect::MakeSize(Size{100, 100})));
-    ASSERT_TRUE(
-        clip->ShouldRender(Entity{}, Rect::MakeLTRB(-100, -100, -50, -50)));
-  }
-
-  // Clip restore.
-  {
-    auto restore = std::make_shared<ClipRestoreContents>();
-    ASSERT_TRUE(
-        restore->ShouldRender(Entity{}, Rect::MakeSize(Size{100, 100})));
-    ASSERT_TRUE(
-        restore->ShouldRender(Entity{}, Rect::MakeLTRB(-100, -100, -50, -50)));
-  }
-}
-
 TEST_P(EntityTest, ClipContentsGetClipCoverageIsCorrect) {
   // Intersection: No stencil coverage, no geometry.
   {
@@ -2037,7 +1892,6 @@ TEST_P(EntityTest, InheritOpacityTest) {
   // Texture contents can always accept opacity.
   auto texture_contents = std::make_shared<TextureContents>();
   texture_contents->SetOpacity(0.5);
-  ASSERT_TRUE(texture_contents->CanInheritOpacity(entity));
 
   texture_contents->SetInheritedOpacity(0.5);
   ASSERT_EQ(texture_contents->GetOpacity(), 0.25);
@@ -2051,8 +1905,6 @@ TEST_P(EntityTest, InheritOpacityTest) {
       Geometry::MakeRect(Rect::MakeLTRB(100, 100, 200, 200)));
   solid_color->SetColor(Color::Blue().WithAlpha(0.5));
 
-  ASSERT_TRUE(solid_color->CanInheritOpacity(entity));
-
   solid_color->SetInheritedOpacity(0.5);
   ASSERT_EQ(solid_color->GetColor().alpha, 0.25);
   solid_color->SetInheritedOpacity(0.5);
@@ -2065,20 +1917,10 @@ TEST_P(EntityTest, InheritOpacityTest) {
       Geometry::MakeRect(Rect::MakeLTRB(100, 100, 200, 200)));
   tiled_texture->SetOpacityFactor(0.5);
 
-  ASSERT_TRUE(tiled_texture->CanInheritOpacity(entity));
-
   tiled_texture->SetInheritedOpacity(0.5);
   ASSERT_EQ(tiled_texture->GetOpacityFactor(), 0.25);
   tiled_texture->SetInheritedOpacity(0.5);
   ASSERT_EQ(tiled_texture->GetOpacityFactor(), 0.25);
-
-  // Clips and restores trivially accept opacity.
-  ASSERT_TRUE(ClipContents().CanInheritOpacity(entity));
-  ASSERT_TRUE(ClipRestoreContents().CanInheritOpacity(entity));
-
-  // Runtime effect contents can't accept opacity.
-  auto runtime_effect = std::make_shared<RuntimeEffectContents>();
-  ASSERT_FALSE(runtime_effect->CanInheritOpacity(entity));
 }
 
 TEST_P(EntityTest, ColorFilterWithForegroundColorAdvancedBlend) {
@@ -2332,56 +2174,6 @@ TEST_P(EntityTest, TextContentsCeilsGlyphScaleToDecimal) {
   ASSERT_EQ(TextFrame::RoundScaledFontSize(100000000.0f, 12), 48.0f);
 }
 
-TEST_P(EntityTest, AdvancedBlendCoverageHintIsNotResetByEntityPass) {
-  if (GetContext()->GetCapabilities()->SupportsFramebufferFetch()) {
-    GTEST_SKIP() << "Backends that support framebuffer fetch dont use coverage "
-                    "for advanced blends.";
-  }
-
-  auto contents = std::make_shared<SolidColorContents>();
-  contents->SetGeometry(Geometry::MakeRect(Rect::MakeXYWH(100, 100, 100, 100)));
-  contents->SetColor(Color::Red());
-
-  Entity entity;
-  entity.SetTransform(Matrix::MakeScale(Vector3(2, 2, 1)));
-  entity.SetBlendMode(BlendMode::kColorBurn);
-  entity.SetContents(contents);
-
-  auto coverage = entity.GetCoverage();
-  EXPECT_TRUE(coverage.has_value());
-
-  auto pass = std::make_unique<EntityPass>();
-  std::shared_ptr<RenderTargetCache> render_target_allocator =
-      std::make_shared<RenderTargetCache>(GetContext()->GetResourceAllocator());
-  auto stencil_config = RenderTarget::AttachmentConfig{
-      .storage_mode = StorageMode::kDevicePrivate,
-      .load_action = LoadAction::kClear,
-      .store_action = StoreAction::kDontCare,
-      .clear_color = Color::BlackTransparent()};
-  auto rt = render_target_allocator->CreateOffscreen(
-      *GetContext(), ISize::MakeWH(1000, 1000),
-      /*mip_count=*/1, "Offscreen", RenderTarget::kDefaultColorAttachmentConfig,
-      stencil_config);
-  auto content_context = ContentContext(
-      GetContext(), TypographerContextSkia::Make(), render_target_allocator);
-  pass->AddEntity(std::move(entity));
-
-  EXPECT_TRUE(pass->Render(content_context, rt));
-
-  auto contains_size = [&render_target_allocator](ISize size) -> bool {
-    return std::find_if(render_target_allocator->GetRenderTargetDataBegin(),
-                        render_target_allocator->GetRenderTargetDataEnd(),
-                        [&size](const auto& data) {
-                          return data.config.size == size;
-                        }) != render_target_allocator->GetRenderTargetDataEnd();
-  };
-
-  EXPECT_TRUE(contains_size(ISize(1000, 1000)))
-      << "The root texture wasn't allocated";
-  EXPECT_TRUE(contains_size(ISize(200, 200)))
-      << "The ColorBurned texture wasn't allocated (100x100 scales up 2x)";
-}
-
 TEST_P(EntityTest, SpecializationConstantsAreAppliedToVariants) {
   auto content_context = GetContentContext();
 
@@ -2581,6 +2373,36 @@ TEST_P(EntityTest, DrawSuperEllipse) {
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
+
+TEST_P(EntityTest, SolidColorApplyColorFilter) {
+  auto contents = SolidColorContents();
+  contents.SetColor(Color::CornflowerBlue().WithAlpha(0.75));
+  auto result = contents.ApplyColorFilter([](const Color& color) {
+    return color.Blend(Color::LimeGreen().WithAlpha(0.75), BlendMode::kScreen);
+  });
+  ASSERT_TRUE(result);
+  ASSERT_COLOR_NEAR(contents.GetColor(),
+                    Color(0.424452, 0.828743, 0.79105, 0.9375));
+}
+
+#define APPLY_COLOR_FILTER_GRADIENT_TEST(name)                                 \
+  TEST_P(EntityTest, name##GradientApplyColorFilter) {                         \
+    auto contents = name##GradientContents();                                  \
+    contents.SetColors({Color::CornflowerBlue().WithAlpha(0.75)});             \
+    auto result = contents.ApplyColorFilter([](const Color& color) {           \
+      return color.Blend(Color::LimeGreen().WithAlpha(0.75),                   \
+                         BlendMode::kScreen);                                  \
+    });                                                                        \
+    ASSERT_TRUE(result);                                                       \
+                                                                               \
+    std::vector<Color> expected = {Color(0.433247, 0.879523, 0.825324, 0.75)}; \
+    ASSERT_COLORS_NEAR(contents.GetColors(), expected);                        \
+  }
+
+APPLY_COLOR_FILTER_GRADIENT_TEST(Linear);
+APPLY_COLOR_FILTER_GRADIENT_TEST(Radial);
+APPLY_COLOR_FILTER_GRADIENT_TEST(Conical);
+APPLY_COLOR_FILTER_GRADIENT_TEST(Sweep);
 
 }  // namespace testing
 }  // namespace impeller

@@ -166,43 +166,23 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
 
         impeller::IRect cull_rect = surface->coverage();
         SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.GetWidth(), cull_rect.GetHeight());
-
-        impeller::RenderTarget render_target = surface->GetTargetRenderPassDescriptor();
         surface->SetFrameBoundary(surface_frame.submit_info().frame_boundary);
-
-#if EXPERIMENTAL_CANVAS
-        impeller::TextFrameDispatcher collector(aiks_context->GetContentContext(),             //
-                                                impeller::Matrix(),                            //
-                                                impeller::Rect::MakeSize(cull_rect.GetSize())  //
-        );
-        display_list->Dispatch(collector, sk_cull_rect);
-
-        impeller::ExperimentalDlDispatcher impeller_dispatcher(
-            aiks_context->GetContentContext(), render_target,
-            display_list->root_has_backdrop_filter(), display_list->max_root_blend_mode(),
-            cull_rect);
-        display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
-        impeller_dispatcher.FinishRecording();
-        aiks_context->GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
-        aiks_context->GetContentContext().GetTransientsBuffer().Reset();
+        auto render_result =
+            impeller::RenderToOnscreen(aiks_context->GetContentContext(),         //
+                                       surface->GetTargetRenderPassDescriptor(),  //
+                                       display_list,                              //
+                                       sk_cull_rect,                              //
+                                       /*reset_host_buffer=*/true                 //
+            );
+        if (!render_result) {
+          return false;
+        }
 
         if (!surface->PreparePresent()) {
           return false;
         }
         surface_frame.set_user_data(std::move(surface));
         return true;
-#else
-        impeller::DlDispatcher impeller_dispatcher(cull_rect);
-        display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
-        auto picture = impeller_dispatcher.EndRecordingAsPicture();
-        auto result = aiks_context->Render(picture, render_target, /*reset_host_buffer=*/true);
-
-        if (!surface->PreparePresent()) {
-          return false;
-        }
-        surface_frame.set_user_data(std::move(surface));
-        return result;
-#endif
       });
 
   SurfaceFrame::FramebufferInfo framebuffer_info;
@@ -300,36 +280,18 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
 
         impeller::IRect cull_rect = surface->coverage();
         SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.GetWidth(), cull_rect.GetHeight());
-#if EXPERIMENTAL_CANVAS
-        impeller::TextFrameDispatcher collector(aiks_context->GetContentContext(),             //
-                                                impeller::Matrix(),                            //
-                                                impeller::Rect::MakeSize(cull_rect.GetSize())  //
-        );
-        display_list->Dispatch(collector, sk_cull_rect);
-        impeller::RenderTarget render_target = surface->GetTargetRenderPassDescriptor();
-        impeller::ExperimentalDlDispatcher impeller_dispatcher(
-            aiks_context->GetContentContext(), render_target,
-            display_list->root_has_backdrop_filter(), display_list->max_root_blend_mode(),
-            cull_rect);
-        display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
-        impeller_dispatcher.FinishRecording();
-        aiks_context->GetContentContext().GetTransientsBuffer().Reset();
-        aiks_context->GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
-        if (!surface->PreparePresent()) {
-          return false;
-        }
-        bool render_result = true;
-#else
-        impeller::DlDispatcher impeller_dispatcher(cull_rect);
-        display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
-        auto picture = impeller_dispatcher.EndRecordingAsPicture();
-
-        const impeller::RenderTarget& render_target = surface->GetTargetRenderPassDescriptor();
-        bool render_result =
-            aiks_context->Render(picture, render_target, /*reset_host_buffer=*/true);
-#endif
+        auto render_result =
+            impeller::RenderToOnscreen(aiks_context->GetContentContext(),         //
+                                       surface->GetTargetRenderPassDescriptor(),  //
+                                       display_list,                              //
+                                       sk_cull_rect,                              //
+                                       /*reset_host_buffer=*/true                 //
+            );
         if (!render_result) {
           FML_LOG(ERROR) << "Failed to render Impeller frame";
+          return false;
+        }
+        if (!surface->PreparePresent()) {
           return false;
         }
         return surface->PreparePresent();

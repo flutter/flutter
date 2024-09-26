@@ -46,10 +46,6 @@ std::optional<Rect> ColorSourceContents::GetCoverage(
   return geometry_->GetCoverage(entity.GetTransform());
 };
 
-bool ColorSourceContents::CanInheritOpacity(const Entity& entity) const {
-  return true;
-}
-
 void ColorSourceContents::SetInheritedOpacity(Scalar opacity) {
   inherited_opacity_ = opacity;
 }

@@ -55,10 +55,6 @@ void TextureContents::SetStencilEnabled(bool enabled) {
   stencil_enabled_ = enabled;
 }
 
-bool TextureContents::CanInheritOpacity(const Entity& entity) const {
-  return true;
-}
-
 void TextureContents::SetInheritedOpacity(Scalar opacity) {
   inherited_opacity_ = opacity;
 }

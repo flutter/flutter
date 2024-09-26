@@ -89,18 +89,12 @@ class ColorSourceContents : public Contents {
   ///
   /// @note   If set, the output of this method factors factors in the inherited
   ///         opacity of this `Contents`.
-  ///
-  /// @see    `Contents::CanInheritOpacity`
-  ///
   Scalar GetOpacityFactor() const;
 
   virtual bool IsSolidColor() const;
 
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
-
-  // |Contents|
-  bool CanInheritOpacity(const Entity& entity) const override;
 
   // |Contents|
   void SetInheritedOpacity(Scalar opacity) override;
