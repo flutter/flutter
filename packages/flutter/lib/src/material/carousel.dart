@@ -197,8 +197,7 @@ class CarouselView extends StatefulWidget {
     required List<int> this.flexWeights,
     required this.children,
   })  : itemExtent = null,
-        assert(disabledChildrenInteraction == true ||
-            (disabledChildrenInteraction == false && onTap == null));
+        assert(disabledChildrenInteraction || onTap == null));
 
   /// The amount of space to surround each carousel item with.
   ///
