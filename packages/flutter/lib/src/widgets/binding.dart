@@ -1229,6 +1229,12 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// The `rootWidget` widget provided to this method must not already be
   /// wrapped in a [View].
   Widget wrapWithDefaultView(Widget rootWidget) {
+    assert(
+      platformDispatcher.implicitView != null,
+      'The implicitView is null. Cannot create a default View from `runApp`. '
+      'Try with `runWidget` instead.'
+      '${kIsWeb ? " See: https://docs.flutter.dev/platform-integration/web/embedding-flutter-web#embedded-mode":""}',
+    );
     return View(
       view: platformDispatcher.implicitView!,
       deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: pipelineOwner,
