@@ -427,17 +427,17 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     }
     final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
     final double currentHeight = renderBox?.size.height ?? 0.0;
-    setState(() { _fadeExtent = _calculateScrollOpacity(currentHeight); });
+    setState(() { _fadeExtent = _calculateScrollOpacity(currentHeight, _maxHeight); });
   }
 
-  double _calculateScrollOpacity(double currentHeight) {
-    final double thresholdHeight = _maxHeight * _kMinHeightBeforeTotalTransparency;
-    if (currentHeight >= _maxHeight) {
+  static double _calculateScrollOpacity(double currentHeight, double maxHeight) {
+    final double thresholdHeight = maxHeight * _kMinHeightBeforeTotalTransparency;
+    if (currentHeight >= maxHeight) {
       return 0.0;
     } else if (currentHeight <= thresholdHeight) {
       return 1.0;
     } else {
-      final double range = _maxHeight - thresholdHeight;
+      final double range = maxHeight - thresholdHeight;
       final double progress = (currentHeight - thresholdHeight) / range;
       return 1.0 - progress;
     }
