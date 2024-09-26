@@ -130,12 +130,12 @@ class CarouselView extends StatefulWidget {
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     this.onTap,
-    this.disabledChildrenInteraction = true,
+    this.enableSplash = true,
     required double this.itemExtent,
     required this.children,
   })  : consumeMaxWeight = true,
         flexWeights = null,
-        assert(disabledChildrenInteraction || onTap == null);
+        assert(enableSplash || onTap == null);
 
   /// Creates a scrollable list where the size of each child widget is dynamically
   /// determined by the provided [flexWeights].
@@ -192,11 +192,11 @@ class CarouselView extends StatefulWidget {
     this.reverse = false,
     this.consumeMaxWeight = true,
     this.onTap,
-    this.disabledChildrenInteraction = true,
+    this.enableSplash = true,
     required List<int> this.flexWeights,
     required this.children,
   })  : itemExtent = null,
-        assert(disabledChildrenInteraction || onTap == null);
+        assert(enableSplash || onTap == null);
 
   /// The amount of space to surround each carousel item with.
   ///
@@ -306,7 +306,7 @@ class CarouselView extends StatefulWidget {
   ///
   /// Note: Setting this to false while also providing an [onTap] callback will
   /// throw an assertion error, as these options are mutually exclusive.
-  final bool disabledChildrenInteraction;
+  final bool enableSplash;
 
   /// The extent the children are forced to have in the main axis.
   ///
@@ -430,7 +430,7 @@ class _CarouselViewState extends State<CarouselView> {
           fit: StackFit.expand,
           children: <Widget>[
             widget.children[index],
-            if (widget.disabledChildrenInteraction)
+            if (widget.enableSplash)
               Material(
                 color: Colors.transparent,
                 child: InkWell(

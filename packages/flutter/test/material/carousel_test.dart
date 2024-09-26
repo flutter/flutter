@@ -1275,7 +1275,7 @@ void main() {
     expect(tappedIndex, 2);
   });
 
-  testWidgets('CarouselView with disabledChildrenInteraction true - children are not directly interactive', (WidgetTester tester) async {
+  testWidgets('CarouselView with enableSplash true - children are not directly interactive', (WidgetTester tester) async {
     bool buttonPressed = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -1301,14 +1301,14 @@ void main() {
     expect(buttonPressed, isFalse);
   });
 
-  testWidgets('CarouselView with disabledChildrenInteraction false - children are directly interactive', (WidgetTester tester) async {
+  testWidgets('CarouselView with enableSplash false - children are directly interactive', (WidgetTester tester) async {
     bool buttonPressed = false;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: CarouselView(
             itemExtent: 350,
-            disabledChildrenInteraction: false,
+            enableSplash: false,
             children: List<Widget>.generate(3, (int index) {
               return Center(
                 child: ElevatedButton(
@@ -1328,13 +1328,13 @@ void main() {
     expect(buttonPressed, isTrue);
   });
 
-  testWidgets('CarouselView throws assertion error when disabledChildrenInteraction is false and onTap is set', (WidgetTester tester) async {
+  testWidgets('CarouselView throws assertion error when enableSplash is false and onTap is set', (WidgetTester tester) async {
     expect(() => tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: CarouselView(
             itemExtent: 350,
-            disabledChildrenInteraction: false,
+            enableSplash: false,
             onTap: (index) {},
             children: List<Widget>.generate(3, (int index) {
               return Center(
