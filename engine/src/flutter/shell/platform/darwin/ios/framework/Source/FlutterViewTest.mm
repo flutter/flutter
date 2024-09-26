@@ -51,10 +51,10 @@ FLUTTER_ASSERT_ARC
   XCTAssertTrue(delegate.callbackCalled);
 }
 
-- (void)testFlutterViewBackgroundColorIsNotNil {
+- (void)testFlutterViewBackgroundColorIsNil {
   FakeDelegate* delegate = [[FakeDelegate alloc] init];
   FlutterView* view = [[FlutterView alloc] initWithDelegate:delegate opaque:NO enableWideGamut:NO];
-  XCTAssertNotNil(view.backgroundColor);
+  XCTAssertNil(view.backgroundColor);
 }
 
 - (void)testIgnoreWideColorWithoutImpeller {
