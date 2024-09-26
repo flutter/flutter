@@ -1263,7 +1263,7 @@ void main() {
     await tester.tap(carouselItem, warnIfMissed: false);
     await tester.pumpAndSettle();
 
-    // Verify that the onTap callback was called with the correct index
+    // Verify that the onTap callback was called with the correct index.
     expect(tappedIndex, 1);
 
     // Test tapping another item
