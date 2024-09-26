@@ -1266,7 +1266,7 @@ void main() {
     // Verify that the onTap callback was called with the correct index.
     expect(tappedIndex, 1);
 
-    // Test tapping another item
+    // Tap another item.
     final Finder anotherCarouselItem = find.text('Item 2');
     await tester.tap(anotherCarouselItem, warnIfMissed: false);
     await tester.pumpAndSettle();
