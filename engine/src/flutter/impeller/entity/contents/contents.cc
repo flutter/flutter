@@ -128,10 +128,6 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
   return snapshot;
 }
 
-bool Contents::CanInheritOpacity(const Entity& entity) const {
-  return false;
-}
-
 void Contents::SetInheritedOpacity(Scalar opacity) {
   VALIDATION_LOG << "Contents::SetInheritedOpacity should never be called when "
                     "Contents::CanAcceptOpacity returns false.";
@@ -149,21 +145,6 @@ const FilterContents* Contents::AsFilter() const {
 bool Contents::ApplyColorFilter(
     const Contents::ColorFilterProc& color_filter_proc) {
   return false;
-}
-
-bool Contents::ShouldRender(const Entity& entity,
-                            const std::optional<Rect> clip_coverage) const {
-  if (!clip_coverage.has_value()) {
-    return false;
-  }
-  auto coverage = GetCoverage(entity);
-  if (!coverage.has_value()) {
-    return false;
-  }
-  if (coverage == Rect::MakeMaximum()) {
-    return true;
-  }
-  return clip_coverage->IntersectsWithRect(coverage.value());
 }
 
 void Contents::SetCoverageHint(std::optional<Rect> coverage_hint) {

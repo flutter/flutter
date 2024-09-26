@@ -13,12 +13,12 @@
 
 #include "impeller/aiks/image_filter.h"
 #include "impeller/aiks/paint.h"
-#include "impeller/aiks/picture.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/entity/entity.h"
-#include "impeller/entity/entity_pass.h"
+#include "impeller/entity/entity_pass_clip_stack.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/geometry/vertices_geometry.h"
+#include "impeller/entity/inline_pass_context.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
@@ -29,8 +29,6 @@ namespace impeller {
 
 struct CanvasStackEntry {
   Matrix transform;
-  // |cull_rect| is conservative screen-space bounds of the clipped output area
-  std::optional<Rect> cull_rect;
   uint32_t clip_depth = 0u;
   size_t clip_height = 0u;
   // The number of clips tracked for this canvas stack entry.
@@ -61,21 +59,76 @@ enum class SourceRectConstraint {
   kStrict,
 };
 
+/// Specifies how much to trust the bounds rectangle provided for a list
+/// of contents. Used by both |EntityPass| and |Canvas::SaveLayer|.
+enum class ContentBoundsPromise {
+  /// @brief The caller makes no claims related to the size of the bounds.
+  kUnknown,
+
+  /// @brief The caller claims the bounds are a reasonably tight estimate
+  ///        of the coverage of the contents and should contain all of the
+  ///        contents.
+  kContainsContents,
+
+  /// @brief The caller claims the bounds are a subset of an estimate of
+  ///        the reasonably tight bounds but likely clips off some of the
+  ///        contents.
+  kMayClipContents,
+};
+
+struct LazyRenderingConfig {
+  std::unique_ptr<EntityPassTarget> entity_pass_target;
+  std::unique_ptr<InlinePassContext> inline_pass_context;
+
+  /// Whether or not the clear color texture can still be updated.
+  bool IsApplyingClearColor() const { return !inline_pass_context->IsActive(); }
+
+  LazyRenderingConfig(ContentContext& renderer,
+                      std::unique_ptr<EntityPassTarget> p_entity_pass_target)
+      : entity_pass_target(std::move(p_entity_pass_target)) {
+    inline_pass_context =
+        std::make_unique<InlinePassContext>(renderer, *entity_pass_target, 0);
+  }
+
+  LazyRenderingConfig(ContentContext& renderer,
+                      std::unique_ptr<EntityPassTarget> entity_pass_target,
+                      std::unique_ptr<InlinePassContext> inline_pass_context)
+      : entity_pass_target(std::move(entity_pass_target)),
+        inline_pass_context(std::move(inline_pass_context)) {}
+};
+
 class Canvas {
  public:
   static constexpr uint32_t kMaxDepth = 1 << 24;
 
-  Canvas();
+  using BackdropFilterProc = std::function<std::shared_ptr<FilterContents>(
+      FilterInput::Ref,
+      const Matrix& effect_transform,
+      Entity::RenderingMode rendering_mode)>;
 
-  explicit Canvas(Rect cull_rect);
+  Canvas(ContentContext& renderer,
+         RenderTarget& render_target,
+         bool requires_readback);
 
-  explicit Canvas(IRect cull_rect);
+  explicit Canvas(ContentContext& renderer,
+                  RenderTarget& render_target,
+                  bool requires_readback,
+                  Rect cull_rect);
 
-  virtual ~Canvas();
+  explicit Canvas(ContentContext& renderer,
+                  RenderTarget& render_target,
+                  bool requires_readback,
+                  IRect cull_rect);
 
-  virtual void Save(uint32_t total_content_depth = kMaxDepth);
+  ~Canvas() = default;
 
-  virtual void SaveLayer(
+  /// @brief Return the culling bounds of the current render target, or nullopt
+  ///        if there is no coverage.
+  std::optional<Rect> GetLocalCoverageLimit() const;
+
+  void Save(uint32_t total_content_depth = kMaxDepth);
+
+  void SaveLayer(
       const Paint& paint,
       std::optional<Rect> bounds = std::nullopt,
       const std::shared_ptr<ImageFilter>& backdrop_filter = nullptr,
@@ -83,15 +136,13 @@ class Canvas {
       uint32_t total_content_depth = kMaxDepth,
       bool can_distribute_opacity = false);
 
-  virtual bool Restore();
+  bool Restore();
 
   size_t GetSaveCount() const;
 
   void RestoreToCount(size_t count);
 
   const Matrix& GetCurrentTransform() const;
-
-  const std::optional<Rect> GetCurrentLocalCullingBounds() const;
 
   void ResetTransform();
 
@@ -162,9 +213,9 @@ class Canvas {
       const Size& corner_radii,
       Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect);
 
-  virtual void DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
-                             Point position,
-                             const Paint& paint);
+  void DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
+                     Point position,
+                     const Paint& paint);
 
   void DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
                     BlendMode blend_mode,
@@ -179,15 +230,45 @@ class Canvas {
                  std::optional<Rect> cull_rect,
                  const Paint& paint);
 
-  Picture EndRecordingAsPicture();
+  void EndReplay();
 
   uint64_t GetOpDepth() const { return current_depth_; }
+
   uint64_t GetMaxOpDepth() const { return transform_stack_.back().clip_depth; }
 
- protected:
+  struct SaveLayerState {
+    Paint paint;
+    Rect coverage;
+  };
+
+ private:
+  ContentContext& renderer_;
+  RenderTarget& render_target_;
+  const bool requires_readback_;
+  EntityPassClipStack clip_coverage_stack_;
+
   std::deque<CanvasStackEntry> transform_stack_;
   std::optional<Rect> initial_cull_rect_;
+  std::vector<LazyRenderingConfig> render_passes_;
+  std::vector<SaveLayerState> save_layer_state_;
+
   uint64_t current_depth_ = 0u;
+
+  Point GetGlobalPassPosition() const;
+
+  // clip depth of the previous save or 0.
+  size_t GetClipHeightFloor() const;
+
+  /// @brief Whether all entites should be skipped until a corresponding
+  ///        restore.
+  bool IsSkipping() const;
+
+  /// @brief Skip all rendering/clipping entities until next restore.
+  void SkipUntilMatchingRestore(size_t total_content_depth);
+
+  void SetupRenderPass();
+
+  bool BlitToOnscreen();
 
   size_t GetClipHeight() const;
 
@@ -195,27 +276,12 @@ class Canvas {
 
   void Reset();
 
- private:
-  std::unique_ptr<EntityPass> base_pass_;
-  EntityPass* current_pass_ = nullptr;
+  void AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth = false);
 
-  EntityPass& GetCurrentPass();
-
-  virtual void AddRenderEntityToCurrentPass(Entity entity,
-                                            bool reuse_depth = false);
-  virtual void AddClipEntityToCurrentPass(Entity entity);
+  void AddClipEntityToCurrentPass(Entity& entity);
 
   void ClipGeometry(const std::shared_ptr<Geometry>& geometry,
                     Entity::ClipOperation clip_op);
-
-  void IntersectCulling(Rect clip_bounds);
-  void SubtractCulling(Rect clip_bounds);
-
-  virtual void Save(
-      bool create_subpass,
-      uint32_t total_content_depth,
-      BlendMode = BlendMode::kSourceOver,
-      const std::shared_ptr<ImageFilter>& backdrop_filter = nullptr);
 
   void RestoreClip();
 

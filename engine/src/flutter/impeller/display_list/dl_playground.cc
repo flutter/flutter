@@ -47,15 +47,11 @@ bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
         }
 
         auto list = callback();
-
-#if EXPERIMENTAL_CANVAS
-        TextFrameDispatcher collector(context.GetContentContext(),  //
-                                      Matrix(),                     //
-                                      Rect::MakeMaximum()           //
-        );
+        TextFrameDispatcher collector(context.GetContentContext(), Matrix(),
+                                      Rect::MakeMaximum());
         list->Dispatch(collector);
 
-        ExperimentalDlDispatcher impeller_dispatcher(
+        CanvasDlDispatcher impeller_dispatcher(
             context.GetContentContext(), render_target,
             list->root_has_backdrop_filter(), list->max_root_blend_mode(),
             IRect::MakeMaximum());
@@ -64,13 +60,6 @@ bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
         context.GetContentContext().GetTransientsBuffer().Reset();
         context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
         return true;
-#else
-        DlDispatcher dispatcher;
-        list->Dispatch(dispatcher);
-        auto picture = dispatcher.EndRecordingAsPicture();
-
-        return context.Render(picture, render_target, true);
-#endif
       });
 }
 

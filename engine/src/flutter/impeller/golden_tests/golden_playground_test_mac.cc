@@ -9,7 +9,6 @@
 #include "display_list/display_list.h"
 #include "flutter/impeller/golden_tests/golden_playground_test.h"
 
-#include "flutter/impeller/aiks/picture.h"
 #include "flutter/impeller/golden_tests/golden_digest.h"
 #include "flutter/impeller/golden_tests/metal_screenshotter.h"
 #include "flutter/impeller/golden_tests/vulkan_screenshotter.h"
@@ -206,57 +205,17 @@ PlaygroundBackend GoldenPlaygroundTest::GetBackend() const {
   return GetParam();
 }
 
-bool GoldenPlaygroundTest::OpenPlaygroundHere(Picture picture) {
-  AiksContext renderer(GetContext(), typographer_context_);
-
-  auto screenshot = pimpl_->screenshotter->MakeScreenshot(renderer, picture,
-                                                          pimpl_->window_size);
-  return SaveScreenshot(std::move(screenshot));
-}
-
 bool GoldenPlaygroundTest::OpenPlaygroundHere(
     const AiksDlPlaygroundCallback& callback) {
   AiksContext renderer(GetContext(), typographer_context_);
 
   std::unique_ptr<testing::Screenshot> screenshot;
-#if EXPERIMENTAL_CANVAS
   for (int i = 0; i < 2; ++i) {
     auto display_list = callback();
     auto texture =
         DisplayListToTexture(display_list, pimpl_->window_size, renderer);
     screenshot = pimpl_->screenshotter->MakeScreenshot(renderer, texture);
   }
-#else
-  std::optional<Picture> picture;
-  for (int i = 0; i < 2; ++i) {
-    auto display_list = callback();
-    DlDispatcher dispatcher;
-    display_list->Dispatch(dispatcher);
-    Picture picture = dispatcher.EndRecordingAsPicture();
-
-    screenshot = pimpl_->screenshotter->MakeScreenshot(renderer, picture,
-                                                       pimpl_->window_size);
-  }
-#endif  // EXPERIMENTAL_CANVAS
-  return SaveScreenshot(std::move(screenshot));
-}
-
-bool GoldenPlaygroundTest::OpenPlaygroundHere(
-    AiksPlaygroundCallback
-        callback) {  // NOLINT(performance-unnecessary-value-param)
-  AiksContext renderer(GetContext(), typographer_context_);
-
-  std::optional<Picture> picture;
-  std::unique_ptr<testing::Screenshot> screenshot;
-  for (int i = 0; i < 2; ++i) {
-    picture = callback(renderer);
-    if (!picture.has_value()) {
-      return false;
-    }
-    screenshot = pimpl_->screenshotter->MakeScreenshot(
-        renderer, picture.value(), pimpl_->window_size);
-  }
-
   return SaveScreenshot(std::move(screenshot));
 }
 
@@ -350,20 +309,8 @@ std::unique_ptr<testing::Screenshot> GoldenPlaygroundTest::MakeScreenshot(
     const sk_sp<flutter::DisplayList>& list) {
   AiksContext renderer(GetContext(), typographer_context_);
 
-#if EXPERIMENTAL_CANVAS
   return pimpl_->screenshotter->MakeScreenshot(
       renderer, DisplayListToTexture(list, pimpl_->window_size, renderer));
-#else
-  DlDispatcher dispatcher;
-  list->Dispatch(dispatcher);
-  Picture picture = dispatcher.EndRecordingAsPicture();
-
-  std::unique_ptr<testing::Screenshot> screenshot =
-      pimpl_->screenshotter->MakeScreenshot(renderer, picture,
-                                            pimpl_->window_size);
-
-  return screenshot;
-#endif  // EXPERIMENTAL_CANVAS
 }
 
 }  // namespace impeller

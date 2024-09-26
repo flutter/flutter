@@ -13,7 +13,6 @@
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
-#include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkColorType.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkPoint.h"

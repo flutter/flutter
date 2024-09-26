@@ -34,8 +34,4 @@ std::optional<Rect> PlaceholderFilterInput::GetCoverage(
   return coverage_rect_;
 }
 
-void PlaceholderFilterInput::PopulateGlyphAtlas(
-    const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas,
-    Scalar scale) {}
-
 }  // namespace impeller

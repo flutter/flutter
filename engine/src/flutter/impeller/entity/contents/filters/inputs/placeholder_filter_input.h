@@ -28,11 +28,6 @@ class PlaceholderFilterInput final : public FilterInput {
   // |FilterInput|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
-  // |FilterInput|
-  void PopulateGlyphAtlas(
-      const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas,
-      Scalar scale) override;
-
  private:
   Rect coverage_rect_;
 

@@ -14,16 +14,10 @@ impeller_component("aiks") {
     "color_filter.h",
     "color_source.cc",
     "color_source.h",
-    "experimental_canvas.cc",
-    "experimental_canvas.h",
     "image_filter.cc",
     "image_filter.h",
     "paint.cc",
     "paint.h",
-    "paint_pass_delegate.cc",
-    "paint_pass_delegate.h",
-    "picture.cc",
-    "picture.h",
   ]
 
   public_deps = [
@@ -53,25 +47,9 @@ impeller_component("aiks_playground") {
   ]
 }
 
-impeller_component("context_spy") {
-  testonly = true
-
-  sources = [
-    "testing/context_mock.h",
-    "testing/context_spy.cc",
-    "testing/context_spy.h",
-  ]
-  deps = [
-    "//flutter/impeller/entity:entity_test_helpers",
-    "//flutter/impeller/renderer",
-    "//flutter/testing:testing_lib",
-  ]
-}
-
 template("aiks_unittests_component") {
   target_name = invoker.target_name
   predefined_sources = [
-    "aiks_gradient_unittests.cc",
     "aiks_unittests.cc",
     "aiks_unittests.h",
   ]
@@ -92,7 +70,6 @@ template("aiks_unittests_component") {
     deps = [
       ":aiks",
       ":aiks_playground",
-      ":context_spy",
       "//flutter/impeller/geometry:geometry_asserts",
       "//flutter/impeller/golden_tests:golden_playground_test",
       "//flutter/impeller/playground:playground_test",
@@ -114,14 +91,5 @@ aiks_unittests_component("aiks_unittests_golden") {
   defines = [
     "IMPELLER_GOLDEN_TESTS",
     "IMPELLER_ENABLE_VALIDATION=1",
-  ]
-}
-
-executable("canvas_benchmarks") {
-  testonly = true
-  sources = [ "canvas_benchmarks.cc" ]
-  deps = [
-    ":aiks",
-    "//flutter/benchmarking",
   ]
 }

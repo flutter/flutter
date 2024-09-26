@@ -37,16 +37,6 @@ Color TextContents::GetColor() const {
   return color_.WithAlpha(color_.alpha * inherited_opacity_);
 }
 
-bool TextContents::CanInheritOpacity(const Entity& entity) const {
-  // Computing whether or not opacity can be inherited requires determining if
-  // any glyphs can overlap exactly. While this was previously implemented
-  // via TextFrame::MaybeHasOverlapping, this code relied on scaling up text
-  // bounds for a size specified at 1.0 DPR, which was not accurate at
-  // higher or lower DPRs. Rather than re-implement the checks to compute exact
-  // glyph bounds, for now this optimization has been disabled for Text.
-  return false;
-}
-
 void TextContents::SetInheritedOpacity(Scalar opacity) {
   inherited_opacity_ = opacity;
 }
@@ -61,13 +51,6 @@ void TextContents::SetForceTextColor(bool value) {
 
 std::optional<Rect> TextContents::GetCoverage(const Entity& entity) const {
   return frame_->GetBounds().TransformBounds(entity.GetTransform());
-}
-
-void TextContents::PopulateGlyphAtlas(
-    const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas,
-    Scalar scale) {
-  lazy_glyph_atlas->AddTextFrame(*frame_, scale, offset_, properties_);
-  scale_ = scale;
 }
 
 void TextContents::SetTextProperties(Color color,

@@ -4,8 +4,6 @@
 
 #include "flutter/impeller/golden_tests/golden_playground_test.h"
 
-#include "impeller/aiks/picture.h"
-
 namespace impeller {
 
 GoldenPlaygroundTest::GoldenPlaygroundTest() = default;
@@ -25,16 +23,6 @@ void GoldenPlaygroundTest::SetUp() {
 
 PlaygroundBackend GoldenPlaygroundTest::GetBackend() const {
   return GetParam();
-}
-
-bool GoldenPlaygroundTest::OpenPlaygroundHere(Picture picture) {
-  return false;
-}
-
-bool GoldenPlaygroundTest::OpenPlaygroundHere(
-    AiksPlaygroundCallback
-        callback) {  // NOLINT(performance-unnecessary-value-param)
-  return false;
 }
 
 bool GoldenPlaygroundTest::OpenPlaygroundHere(

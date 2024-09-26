@@ -76,10 +76,6 @@ Matrix FilterInput::GetTransform(const Entity& entity) const {
   return entity.GetTransform() * GetLocalTransform(entity);
 }
 
-void FilterInput::PopulateGlyphAtlas(
-    const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas,
-    Scalar scale) {}
-
 FilterInput::~FilterInput() = default;
 
 bool FilterInput::IsTranslationOnly() const {

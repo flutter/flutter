@@ -95,8 +95,6 @@ class Entity {
   Contents::ClipCoverage GetClipCoverage(
       const std::optional<Rect>& current_clip_coverage) const;
 
-  bool ShouldRender(const std::optional<Rect>& clip_coverage) const;
-
   void SetContents(std::shared_ptr<Contents> contents);
 
   const std::shared_ptr<Contents>& GetContents() const;
@@ -117,13 +115,9 @@ class Entity {
 
   static bool IsBlendModeDestructive(BlendMode blend_mode);
 
-  bool CanInheritOpacity() const;
-
   bool SetInheritedOpacity(Scalar alpha);
 
   std::optional<Color> AsBackgroundColor(ISize target_size) const;
-
-  Scalar DeriveTextScale() const;
 
   Entity Clone() const;
 

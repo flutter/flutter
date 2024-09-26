@@ -13,6 +13,7 @@ impeller_component("golden_playground_test") {
   deps = [
     ":digest",
     ":screenshot",
+    "//flutter/display_list",
     "//flutter/fml",
     "//flutter/impeller/aiks",
     "//flutter/impeller/display_list:display_list",
@@ -66,6 +67,7 @@ if (is_mac) {
 
     deps = [
       ":screenshot",
+      "//flutter/display_list",
       "//flutter/impeller/aiks",
       "//flutter/impeller/display_list",
       "//flutter/impeller/playground",
@@ -87,6 +89,7 @@ if (is_mac) {
     deps = [
       ":digest",
       ":metal_screenshot",
+      "//flutter/display_list",
       "//flutter/impeller/aiks",
       "//flutter/impeller/aiks:aiks_unittests_golden",
       "//flutter/impeller/display_list:display_list_unittests_golden",

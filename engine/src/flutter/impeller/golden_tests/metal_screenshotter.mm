@@ -22,19 +22,6 @@ MetalScreenshotter::MetalScreenshotter(bool enable_wide_gamut) {
 
 std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
     AiksContext& aiks_context,
-    const Picture& picture,
-    const ISize& size,
-    bool scale_content) {
-  Vector2 content_scale =
-      scale_content ? playground_->GetContentScale() : Vector2{1, 1};
-  std::shared_ptr<Texture> image = picture.ToImage(
-      aiks_context,
-      ISize(size.width * content_scale.x, size.height * content_scale.y));
-  return MakeScreenshot(aiks_context, image);
-}
-
-std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
-    AiksContext& aiks_context,
     const std::shared_ptr<Texture> texture) {
   @autoreleasepool {
     id<MTLTexture> metal_texture =
