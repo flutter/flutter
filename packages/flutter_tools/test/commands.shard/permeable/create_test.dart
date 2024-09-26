@@ -838,9 +838,15 @@ void main() {
         <String>['--no-pub', '--template=plugin', '--project-name', 'xyz-xyz', '--platforms', 'android,ios',],
         <String>[],
       ),
-      allOf(
-        throwsToolExit(message: '"xyz-xyz" is not a valid Dart package name.'),
-        throwsToolExit(message: 'Try "xyz_xyz" instead.'),
+      throwsToolExit(message:
+        '"xyz-xyz" is not a valid Dart package name. Try "xyz_xyz" instead.\n'
+        '\n'
+        'The name should consist of lowercase words separated by underscores, '
+        '"like_this". Use only basic Latin letters and Arabic digits: [a-z0-9_], '
+        'and ensure the name is a valid Dart identifier (i.e. it does not start '
+        'with a digit and is not a reserved word).\n'
+        '\n'
+        'See https://dart.dev/tools/pub/pubspec#name for more information.'
       ),
     );
   });
