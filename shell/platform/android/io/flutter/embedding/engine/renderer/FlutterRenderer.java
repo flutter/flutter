@@ -108,8 +108,9 @@ public class FlutterRenderer implements TextureRegistry {
               public void onResume(@NonNull LifecycleOwner owner) {
                 Log.v(TAG, "onResume called; notifying SurfaceProducers");
                 for (ImageReaderSurfaceProducer producer : imageReaderProducers) {
-                  if (producer.callback != null) {
-                    producer.callback.onSurfaceCreated();
+                  if (producer.callback != null && producer.notifiedDestroy) {
+                    producer.notifiedDestroy = false;
+                    producer.callback.onSurfaceAvailable();
                   }
                 }
               }
@@ -462,6 +463,13 @@ public class FlutterRenderer implements TextureRegistry {
     // will be produced at that size.
     private boolean createNewReader = true;
 
+    /**
+     * Stores whether {@link Callback#onSurfaceDestroyed()} was previously invoked.
+     *
+     * <p>Used to avoid signaling {@link Callback#onSurfaceAvailable()} unnecessarily.
+     */
+    private boolean notifiedDestroy = false;
+
     // State held to track latency of various stages.
     private long lastDequeueTime = 0;
     private long lastQueueTime = 0;
@@ -689,6 +697,7 @@ public class FlutterRenderer implements TextureRegistry {
       cleanup();
       createNewReader = true;
       if (this.callback != null) {
+        notifiedDestroy = true;
         this.callback.onSurfaceDestroyed();
       }
     }
