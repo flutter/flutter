@@ -145,7 +145,9 @@ Future<Uri?> runFlutterSpecificDartDryRunOnPlatforms({
     final OSImpl targetOS = _getNativeOSFromTargetPlatfrorm(targetPlatform);
     if (targetOS != OS.macOS &&
         targetOS != OS.windows &&
-        targetOS != OS.linux) {
+        targetOS != OS.linux &&
+        targetOS != OS.android &&
+        targetOS != OS.iOS) {
       await ensureNoNativeAssetsOrOsIsSupported(
         projectUri,
         targetPlatform.toString(),
