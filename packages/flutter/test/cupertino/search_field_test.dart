@@ -708,7 +708,6 @@ void main() {
 
     final double searchTextFieldHeight = tester.getSize(searchTextFieldFinder).height;
 
-    // Scroll until the search text field starts resizing.
     final TestGesture scrollGesture1 = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
     // Start a scroll gesture to win the gesture arena.
     await scrollGesture1.moveBy(const Offset(0, -4.0));
@@ -743,7 +742,6 @@ void main() {
       lessThan(1.0),
     );
 
-    // Scroll far enough that the placeholder and icons are completely transparent.
     final TestGesture scrollGesture2 = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
     // Start a scroll gesture to win the gesture arena.
     await scrollGesture2.moveBy(const Offset(0, -4.0));
