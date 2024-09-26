@@ -11,6 +11,7 @@ import 'dart:async';
 import 'package:browser_launcher/browser_launcher.dart';
 import 'package:meta/meta.dart';
 
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'resident_runner.dart';
@@ -175,10 +176,11 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
         queryParameters: <String, dynamic>{'uri': '${device!.vmService!.httpAddress}'},
       ).toString();
       _logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUrl');
-      Chrome.start(<String>[devToolsUrl]).catchError((e) {
-      _logger.printError('Failed to open web browser: $e');
-      return;
-        }).ignore();
+      Chrome.start(<String>[devToolsUrl]).catchError((Object e) {
+        _logger.printError('Failed to launch web browser: $e');
+        throw ProcessException(
+            'Chrome', <String>[devToolsUrl], 'Failed to launch browser');
+      }).ignore();
     }
     launchedInBrowser = true;
   }
