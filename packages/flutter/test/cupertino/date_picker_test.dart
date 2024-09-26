@@ -262,8 +262,8 @@ void main() {
   testWidgets('picker honours showDayOfWeek supported only in date mode', (WidgetTester tester) async {
     // This should work: showDayOfWeek is used in date mode
     expect(
-      () => example.CupertinoDatePicker(
-        mode: example.CupertinoDatePickerMode.date,
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.date,
         onDateTimeChanged: (_) {},
         showDayOfWeek: true,
       ),
@@ -272,8 +272,8 @@ void main() {
 
     // These should throw AssertionError: showDayOfWeek is not supported in other modes
     expect(
-      () => example.CupertinoDatePicker(
-        mode: example.CupertinoDatePickerMode.time,
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.time,
         onDateTimeChanged: (_) {},
         showDayOfWeek: true,
       ),
@@ -281,8 +281,8 @@ void main() {
     );
 
     expect(
-      () => example.CupertinoDatePicker(
-        mode: example.CupertinoDatePickerMode.monthYear,
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.monthYear,
         onDateTimeChanged: (_) {},
         showDayOfWeek: true,
       ),
@@ -290,8 +290,8 @@ void main() {
     );
 
     expect(
-      () => example.CupertinoDatePicker(
-        mode: example.CupertinoDatePickerMode.dateAndTime,
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.dateAndTime,
         onDateTimeChanged: (_) {},
         showDayOfWeek: true,
       ),
