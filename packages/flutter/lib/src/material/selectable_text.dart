@@ -136,18 +136,19 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 
   @override
   void onSingleTapUp(TapDragUpDetails details) {
+    if (!delegate.selectionEnabled) {
+      return;
+    }
     editableText.hideToolbar();
-    if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
-        case TargetPlatform.iOS:
-          renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-        case TargetPlatform.macOS:
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-      }
+    switch (Theme.of(_state.context).platform) {
+      case TargetPlatform.iOS:
+        renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+      case TargetPlatform.macOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        renderEditable.selectPosition(cause: SelectionChangedCause.tap);
     }
     _state.widget.onTap?.call();
   }
