@@ -96,8 +96,8 @@ public interface TextureRegistry {
 
     /**
      * Sets a callback that is notified when a previously created {@link Surface} returned by {@link
-     * SurfaceProducer#getSurface()} is no longer valid due to being destroyed, or a new surface is
-     * now available (after the previous one was destroyed) for rendering.
+     * SurfaceProducer#getSurface()} is no longer valid, either due to being destroyed or being
+     * changed.
      *
      * @param callback The callback to notify, or null to remove the callback.
      */
@@ -106,65 +106,18 @@ public interface TextureRegistry {
     /** Callback invoked by {@link #setCallback(Callback)}. */
     interface Callback {
       /**
-       * An alias for {@link Callback#onSurfaceAvailable()} with a less accurate name.
+       * Invoked when a previous surface is now invalid and a new surface is now available.
        *
-       * @deprecated Override and use {@link Callback#onSurfaceAvailable()} instead.
+       * <p>Typically plugins will use this callback as a signal to redraw, such as due to the
+       * texture being resized, the format being changed, or the application being resumed after
+       * being suspended in the background.
        */
-      @Deprecated(since = "Flutter 3.27", forRemoval = true)
-      default void onSurfaceCreated() {}
+      void onSurfaceCreated();
 
       /**
-       * Invoked when an Android application is resumed after {@link Callback#onSurfaceDestroyed()}.
+       * Invoked when a previous surface is now invalid.
        *
-       * <p>Applications should now call {@link SurfaceProducer#getSurface()} to get a new
-       * {@link Surface}, as the previous one was destroyed and released as a result of a low memory
-       * event from the Android OS.
-       *
-       * <pre>
-       * {@code
-       * void example(SurfaceProducer producer) {
-       *   producer.setCallback(new SurfaceProducer.Callback() {
-       *     @override
-       *     public void onSurfaceAvailable() {
-       *       Surface surface = producer.getSurface();
-       *       redrawOrUse(surface);
-       *     }
-       *
-       *     // ...
-       *   });
-       * }
-       * }
-       * </pre>
-       */
-      default void onSurfaceAvailable() {
-        this.onSurfaceCreated();
-      }
-
-      /**
-       * Invoked when a {@link Surface} returned by {@link SurfaceProducer#getSurface()} is invalid.
-       *
-       * <p>In a low memory environment, the Android OS will signal to Flutter to release resources,
-       * such as surfaces, that are not currently in use, such as when the application is in the
-       * background, and this method is subsequently called to notify a plugin author to stop
-       * using or rendering to the last surface.
-       *
-       * <p>Use {@link Callback#onSurfaceAvailable()} to be notified to resume rendering.
-       *
-       * <pre>
-       * {@code
-       * void example(SurfaceProducer producer) {
-       *   producer.setCallback(new SurfaceProducer.Callback() {
-       *     @override
-       *     public void onSurfaceDestroyed() {
-       *       // Store information about the last frame, if necessary.
-       *       // Potentially release other dependent resources.
-       *     }
-       *
-       *     // ...
-       *   });
-       * }
-       * }
-       * </pre>
+       * <p>Typically plugins will use this callback as a signal to release resources.
        */
       void onSurfaceDestroyed();
     }
