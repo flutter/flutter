@@ -1996,6 +1996,90 @@ void main() {
     expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12));
   });
 
+  testWidgets(
+    'When the initial selection matches a menu entry the text field should display the corresponding value',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: DropdownMenu<TestMenu>(
+                initialSelection: TestMenu.mainMenu3,
+                dropdownMenuEntries: menuChildren,
+                controller: controller,
+              ),
+            );
+          }
+        ),
+      ));
+
+      expect(controller.text, TestMenu.mainMenu3.label);
+    },
+  );
+
+  testWidgets(
+    'When the initial selection does not match any menu entries the text field should be empty',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: DropdownMenu<TestMenu>(
+                initialSelection: TestMenu.mainMenu3,
+                // Use a menu entries which does not contain TestMenu.mainMenu3.
+                dropdownMenuEntries: menuChildren.getRange(0, 1).toList(),
+                controller: controller,
+              ),
+            );
+          }
+        ),
+      ));
+
+      expect(controller.text, isEmpty);
+    },
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/155660.
+  testWidgets('Updating the menu entries refreshes the initial selection', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    Widget boilerplate(List<DropdownMenuEntry<TestMenu>> entries) {
+      return MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: DropdownMenu<TestMenu>(
+                initialSelection: TestMenu.mainMenu3,
+                dropdownMenuEntries: entries,
+                controller: controller,
+              ),
+            );
+          }
+        ),
+      );
+    }
+
+    // The text field should be empty when the initial selection does not match
+    // any menu items.
+    await tester.pumpWidget(boilerplate(menuChildren.getRange(0, 1).toList()));
+    expect(controller.text, '');
+
+    // When the menu entries is updated the initial selection should be rematched.
+    await tester.pumpWidget(boilerplate(menuChildren));
+    expect(controller.text, TestMenu.mainMenu3.label);
+
+    // Update the entries with none matching the initial selection.
+    await tester.pumpWidget(boilerplate(menuChildren.getRange(0, 1).toList()));
+    expect(controller.text, '');
+  });
+
   testWidgets('The default text input field should not be focused on mobile platforms '
       'when it is tapped', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();

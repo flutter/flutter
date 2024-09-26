@@ -510,13 +510,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
     _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
 
-    final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
-    if (index != -1) {
-      _localTextEditingController?.value = TextEditingValue(
-        text: filteredEntries[index].label,
-        selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
-      );
-    }
+    matchInitialSelection();
     refreshLeadingPadding();
   }
 
@@ -554,18 +548,13 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       filteredEntries = widget.dropdownMenuEntries;
       buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
       _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
+      matchInitialSelection();
     }
     if (oldWidget.leadingIcon != widget.leadingIcon) {
       refreshLeadingPadding();
     }
     if (oldWidget.initialSelection != widget.initialSelection) {
-      final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
-      if (index != -1) {
-        _localTextEditingController?.value = TextEditingValue(
-          text: filteredEntries[index].label,
-          selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
-        );
-      }
+      matchInitialSelection();
     }
   }
 
@@ -575,6 +564,21 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia => false,
         TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
       };
+  }
+
+  // Initialize the text field with the label associated to the entry
+  // whose value matches the initial selection.
+  // Empty the text field when no entry matches the initial selection.
+  void matchInitialSelection() {
+    final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
+    if (index != -1) {
+      _localTextEditingController?.value = TextEditingValue(
+        text: filteredEntries[index].label,
+        selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
+      );
+    } else {
+      _localTextEditingController?.value = TextEditingValue.empty;
+    }
   }
 
   void refreshLeadingPadding() {
