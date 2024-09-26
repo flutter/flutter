@@ -133,8 +133,8 @@ class CarouselView extends StatefulWidget {
     this.enableSplash = true,
     required double this.itemExtent,
     required this.children,
-  })  : consumeMaxWeight = true,
-        flexWeights = null;
+  }) : consumeMaxWeight = true,
+       flexWeights = null;
 
   /// Creates a scrollable list where the size of each child widget is dynamically
   /// determined by the provided [flexWeights].
@@ -194,7 +194,7 @@ class CarouselView extends StatefulWidget {
     this.enableSplash = true,
     required List<int> this.flexWeights,
     required this.children,
-  })  : itemExtent = null;
+  }) : itemExtent = null;
 
   /// The amount of space to surround each carousel item with.
   ///
