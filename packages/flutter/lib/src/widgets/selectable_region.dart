@@ -1871,15 +1871,14 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
   /// by this delegate.
   @protected
   void didReceiveSelectionEventFor({required Selectable selectable, bool? forEnd}) {
-    if (forEnd == null) {
-      _hasReceivedStartEvent.add(selectable);
-      _hasReceivedEndEvent.add(selectable);
-      return;
-    }
-    if (forEnd) {
-      _hasReceivedEndEvent.add(selectable);
-    } else {
-      _hasReceivedStartEvent.add(selectable);
+    switch (forEnd) {
+      case true:
+        _hasReceivedEndEvent.add(selectable);
+      case false:
+        _hasReceivedStartEvent.add(selectable);
+      case null:
+        _hasReceivedStartEvent.add(selectable);
+        _hasReceivedEndEvent.add(selectable);
     }
   }
 
