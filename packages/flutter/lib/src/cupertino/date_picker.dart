@@ -330,7 +330,7 @@ class CupertinoDatePicker extends StatefulWidget {
       assert(
         (mode == CupertinoDatePickerMode.date) || !showDayOfWeek,
         'showDayOfWeek is only supported in date mode',
-      )
+      ),
       assert((initialDateTime ?? DateTime.now()).minute % minuteInterval == 0, 'initial minute is not divisible by minute interval');
 
 
