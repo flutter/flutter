@@ -260,7 +260,6 @@ void main() {
   });
 
   testWidgets('showDayOfWeek is supported only in date mode', (WidgetTester tester) async {
-    // This should work: showDayOfWeek is used in date mode
     expect(
       () => CupertinoDatePicker(
         mode: CupertinoDatePickerMode.date,
@@ -270,7 +269,6 @@ void main() {
       returnsNormally,
     );
 
-    // These should throw AssertionError: showDayOfWeek is not supported in other modes
     expect(
       () => CupertinoDatePicker(
         mode: CupertinoDatePickerMode.time,
