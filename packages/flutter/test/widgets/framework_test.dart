@@ -1574,32 +1574,6 @@ void main() {
     expect(RawKeyboard.instance.keyEventHandler, same(rawKeyEventHandler));
   });
 
-  testWidgets('Incorrect use of ParentDataWidget shows a useful error message', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const SizedBox(
-        key: Key('container'),
-        // Flexible should only be used inside Flex widgets, such as a Column or Row.
-        child: Flexible(
-          child: SizedBox(),
-        )
-      ),
-    );
-
-    await tester.pumpAndSettle();
-
-    expect(
-      tester.takeException(),
-      isFlutterError.having(
-        (FlutterError e) => e.message,
-        'message',
-        startsWith(
-          'Incorrect use of ParentDataWidget.\n'
-          'The widget `Flexible` must be a direct child of a `Row`, `Column`, or `Flex` widget.\n'
-        )
-      )
-    );
-  });
-
   testWidgets('Can access debugFillProperties without _LateInitializationError', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     TestRenderObjectElement().debugFillProperties(builder);

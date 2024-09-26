@@ -6698,17 +6698,8 @@ abstract class RenderObjectElement extends Element {
       // original error in debug mode.
       assert(() {
         try {
-          final String parentDataWidgetType = parentDataWidget.toStringShort();
-          String errorMessage = 'Incorrect use of ParentDataWidget.\n';
-
-          if (parentDataWidgetType == 'Positioned') {
-            errorMessage += 'The widget `Positioned` must be a descendant of a `Stack` widget.\n';
-          } else if (parentDataWidgetType == 'Flexible' || parentDataWidgetType == 'Expanded') {
-            errorMessage += 'The widget `$parentDataWidgetType` must be a direct child of a `Row`, `Column`, or `Flex` widget.\n';
-          }
-
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary(errorMessage),
+            ErrorSummary('Incorrect use of ParentDataWidget.'),
             ...parentDataWidget._debugDescribeIncorrectParentDataType(
               parentData: renderObject.parentData,
               parentDataCreator: _ancestorRenderObjectElement?.widget as RenderObjectWidget?,
