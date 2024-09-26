@@ -1341,7 +1341,7 @@ void main() {
             },
             children: List<Widget>.generate(3, (int index) {
               return Column(
-                children: [
+                children: <Widget>[
                   Text('Item $index'),
                   ElevatedButton(
                     onPressed: () => buttonPressed = true,
