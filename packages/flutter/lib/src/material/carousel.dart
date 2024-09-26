@@ -418,25 +418,21 @@ class _CarouselViewState extends State<CarouselView> {
         color: effectiveBackgroundColor,
         elevation: effectiveElevation,
         shape: effectiveShape,
-        child: Stack(
-          fit: StackFit.expand,
-          children: <Widget>[
-            if (widget.enableSplash) ...<Widget>[
-              widget.children[index],
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () => widget.onTap?.call(index),
-                  overlayColor: effectiveOverlayColor,
+        child: widget.enableSplash
+            ? Stack(fit: StackFit.expand, children: <Widget>[
+                widget.children[index],
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => widget.onTap?.call(index),
+                    overlayColor: effectiveOverlayColor,
+                  ),
                 ),
-              ),
-            ] else
-              GestureDetector(
+              ])
+            : GestureDetector(
                 onTap: () => widget.onTap?.call(index),
                 child: widget.children[index],
               ),
-          ],
-        ),
       ),
     );
   }
