@@ -1225,16 +1225,27 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// The [View] determines into what [FlutterView] the app is rendered into.
   /// This is currently [PlatformDispatcher.implicitView] from [platformDispatcher].
+  /// This method will throw a [StateError] if the [PlatformDispatcher.implicitView]
+  /// is null.
   ///
   /// The `rootWidget` widget provided to this method must not already be
   /// wrapped in a [View].
   Widget wrapWithDefaultView(Widget rootWidget) {
-    assert(
-      platformDispatcher.implicitView != null,
-      'The implicitView is null. Cannot create a default View from `runApp`. '
-      'Try with `runWidget` instead.'
-      '${kIsWeb ? " See: https://docs.flutter.dev/platform-integration/web/embedding-flutter-web#embedded-mode":""}',
-    );
+    if (platformDispatcher.implicitView == null) {
+      throw StateError(
+        "The app is attempting to render into a default View that isn't available "
+        '(`platformDispatcher.implicitView == null`).\n'
+
+        'This is likely because the platform has multi-view mode enabled, '
+        'but the app is calling `runApp` to render its root Widget.\n'
+
+        'Try using `runWidget` instead of `runApp` to start your app. '
+        '`runWidget` allows you to provide a `View` widget, without requiring '
+        'a default on the platform.'
+        '${kIsWeb?"\nSee: https://flutter.dev/to/web-multiview-runwidget" : ""}'
+      );
+    }
+
     return View(
       view: platformDispatcher.implicitView!,
       deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: pipelineOwner,

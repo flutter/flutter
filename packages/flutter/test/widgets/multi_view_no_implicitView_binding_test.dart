@@ -31,12 +31,11 @@ void main() {
     expect(() {
       runApp(Container());
     }, throwsA(
-        isA<AssertionError>().having(
-          (AssertionError error) => error.message,
+        isA<StateError>().having(
+          (StateError error) => error.message,
           'description',
-          contains('Try with `runWidget` instead'),
+          contains('Try using `runWidget` instead of `runApp`'),        ),
         ),
-      ),
     );
 
     // Ensure the test harness finds the implicitView.
