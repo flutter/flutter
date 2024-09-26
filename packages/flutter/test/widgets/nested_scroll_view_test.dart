@@ -110,16 +110,16 @@ Widget buildTest({
 }
 
 
-class _TabBarViewInNestedScrollView extends StatefulWidget {
-  const _TabBarViewInNestedScrollView();
+class TabBarViewInNestedScrollView extends StatefulWidget {
+  const TabBarViewInNestedScrollView({super.key});
 
   @override
-  State<_TabBarViewInNestedScrollView> createState() =>
-      _TabBarViewInNestedScrollViewState();
+  State<TabBarViewInNestedScrollView> createState() =>
+      TabBarViewInNestedScrollViewState();
 }
 
-class _TabBarViewInNestedScrollViewState
-    extends State<_TabBarViewInNestedScrollView> with TickerProviderStateMixin {
+class TabBarViewInNestedScrollViewState
+    extends State<TabBarViewInNestedScrollView> with TickerProviderStateMixin {
   final List<int> _tabs = <int>[0, 1];
 
   late TabController _tabController;
@@ -154,45 +154,42 @@ class _TabBarViewInNestedScrollViewState
               bottom: TabBar(
                 controller: _tabController,
                 tabs:
-                _tabs.map((int index) => Tab(text: 'tab $index')).toList(),
+                    _tabs.map((int index) => Tab(text: 'tab $index')).toList(),
               ),
             ),
           ];
         },
         body: TabBarView(
           controller: _tabController,
-          children: _tabs
-              .map((int e) => _TabPage(
-            tab: e,
-            isSelected: _selectedIndex == e,
-          ))
-              .toList(),
+          children: <Widget>[
+            for (final int index in _tabs)
+              TabPage(isSelected: _selectedIndex == index),
+          ],
         ),
       ),
     );
   }
 }
 
-class _TabPage extends StatefulWidget {
-  const _TabPage({required this.tab, required this.isSelected});
+class TabPage extends StatefulWidget {
+  const TabPage({super.key, required this.isSelected});
 
-  final int tab;
   final bool isSelected;
 
   @override
-  _TabPageState createState() => _TabPageState();
+  TabPageState createState() => TabPageState();
 }
 
-class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
+class TabPageState extends State<TabPage> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
-  late ScrollController _scrollController;
+  final ScrollController _scrollController = ScrollController();
 
   @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -204,15 +201,14 @@ class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
       bottom: false,
       child: Builder(
         builder: (BuildContext context) {
-          final ScrollController scrollController =
-            PrimaryScrollController.of(context);
+          final ScrollController scrollController = PrimaryScrollController.of(context);
           return CustomScrollView(
             controller:
-            widget.isSelected ? scrollController : _scrollController,
+                widget.isSelected ? scrollController : _scrollController,
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) =>
+                  (BuildContext context, int index) =>
                       ListTile(title: Text('Item $index')),
                   childCount: 30,
                 ),
@@ -229,7 +225,7 @@ void main() {
   testWidgets('Change tab and scroll test', (WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
-            home: _TabBarViewInNestedScrollView(),
+            home: TabBarViewInNestedScrollView(),
           ),
         );
 
