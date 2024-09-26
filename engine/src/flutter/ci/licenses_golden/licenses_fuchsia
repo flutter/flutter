@@ -1,4 +1,4 @@
-Signature: 486f71591a65d7e3743fe07deb790371
+Signature: 94dbdc8475b7b635c77763cfbc7e74fd
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -4531,7 +4531,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/svc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.ifs
-FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.json
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/libc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/zircon.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/trace-engine.ifs
@@ -11772,7 +11772,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/svc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.ifs
-FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.json
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/libc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/zircon.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/trace-engine.ifs
@@ -11981,6 +11981,8 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.bluetooth/hci.fidl + ..
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.bluetooth/virtual.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.clock/clock.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.light/light.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network.driver/network-device.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network.driver/network-mac.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/admin.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/power.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.serial/serial.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -12406,6 +12408,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.bluetooth/hci.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.bluetooth/virtual.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.clock/clock.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.light/light.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network.driver/network-device.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network.driver/network-mac.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/admin.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/power.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.serial/serial.fidl
@@ -14108,9 +14112,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_absolute.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_base.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/convert.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/offer.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/use.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace/client.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace/offer.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace/use.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
@@ -14458,9 +14459,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/va
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_absolute.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_base.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/convert.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
-FILE: ../../../fuchsia/sdk/linux/pkg/syslog/offer.shard.cml
-FILE: ../../../fuchsia/sdk/linux/pkg/syslog/use.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/trace/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/trace/offer.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/trace/use.shard.cml
@@ -14556,6 +14554,8 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/feature.fidl + ../
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv4.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv6.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.stackmigrationdeprecated/stackmigrationdeprecated.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.broker/broker.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.system/system.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.scheduler/role.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.session/lifecycle.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.session/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -14662,6 +14662,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/feature.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv4.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv6.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.stackmigrationdeprecated/stackmigrationdeprecated.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.broker/broker.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.system/system.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.scheduler/role.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.session/lifecycle.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.session/overview.fidl
@@ -14755,6 +14757,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/availabilit
 ORIGIN: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/zircon/availability_levels.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/availability_levels.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.regulator/fuchsia.regulator.bind + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.spmi/fuchsia.spmi.bind + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.bredr/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/codec_delay.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/iso.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -14810,6 +14813,15 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_metadata_cpp/include/lib/driver/me
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_metadata_cpp/include/lib/driver/metadata/cpp/metadata_server.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_node_cpp/add_child.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_node_cpp/include/lib/driver/node/cpp/add_child.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/element-description-builder.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/include/lib/driver/power/cpp/element-description-builder.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/include/lib/driver/power/cpp/power-support.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/include/lib/driver/power/cpp/types.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/power-support.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/types.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/offer.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/use.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/include/lib/syslog/cpp/log_message_impl.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/log_message_impl.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/vulkan/offer.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
@@ -14818,6 +14830,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/availability_
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/zircon/availability_levels.inc
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/availability_levels.inc
 FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.regulator/fuchsia.regulator.bind
+FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.spmi/fuchsia.spmi.bind
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.bredr/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/codec_delay.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/iso.fidl
@@ -14873,6 +14886,15 @@ FILE: ../../../fuchsia/sdk/linux/pkg/driver_metadata_cpp/include/lib/driver/meta
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_metadata_cpp/include/lib/driver/metadata/cpp/metadata_server.h
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_node_cpp/add_child.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_node_cpp/include/lib/driver/node/cpp/add_child.h
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/element-description-builder.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/include/lib/driver/power/cpp/element-description-builder.h
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/include/lib/driver/power/cpp/power-support.h
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/include/lib/driver/power/cpp/types.h
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/power-support.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/types.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/offer.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/use.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/include/lib/syslog/cpp/log_message_impl.h
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog_cpp/log_message_impl.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/offer.shard.cml
@@ -19434,7 +19456,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/svc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.ifs
-FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.json
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/libc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/zircon.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/trace-engine.ifs
