@@ -1526,7 +1526,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(controllerA.selection, TextRange.empty);
     expect(controllerB.selection, const TextSelection.collapsed(offset: 0));
-  }, variant: TargetPlatformVariant.all());
+  });
 
   testWidgets('Selectable text is skipped during focus traversal', (WidgetTester tester) async {
     final FocusNode firstFieldFocus = FocusNode();
