@@ -274,7 +274,7 @@ static void my_application_dispose(GObject* object) {
 
   g_clear_pointer(&self->dart_entrypoint_arguments, g_strfreev);
   g_clear_object(&self->up_client);
-  g_clear_object(&self->battery_devices);
+  g_clear_pointer(&self->battery_devices, g_ptr_array_unref);
   g_clear_object(&self->battery_channel);
   g_clear_object(&self->charging_channel);
   g_clear_pointer(&self->last_charge_event, g_free);
