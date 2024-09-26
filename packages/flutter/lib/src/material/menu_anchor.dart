@@ -432,11 +432,15 @@ class _MenuAnchorState extends State<MenuAnchor> {
       );
     }
 
-    return _MenuAnchorScope(
-      anchorKey: _anchorKey,
-      anchor: this,
-      isOpen: _isOpen,
-      child: child,
+    return Shortcuts(
+      // The list of shortcuts when the focus is on the MenuAnchor.
+      shortcuts: _kMenuTraversalShortcuts,
+      child: _MenuAnchorScope(
+        anchorKey: _anchorKey,
+        anchor: this,
+        isOpen: _isOpen,
+        child: child,
+      ),
     );
   }
 
@@ -3638,6 +3642,7 @@ class _Submenu extends StatelessWidget {
                   actions: <Type, Action<Intent>>{
                     DismissIntent: DismissMenuAction(controller: anchor._menuController),
                   },
+                  // The list of shortcuts when the focus is in the submenu.
                   child: Shortcuts(
                     shortcuts: _kMenuTraversalShortcuts,
                     child: _MenuPanel(
