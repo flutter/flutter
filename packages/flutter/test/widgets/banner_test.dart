@@ -296,19 +296,19 @@ void main() {
     );
   });
 
-  testWidgets('Banner widget respects shadow', (WidgetTester tester) async {
+  testWidgets('Can configure shadow for Banner widget', (WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(
       const Directionality(
-           textDirection: TextDirection.ltr,
+        textDirection: TextDirection.ltr,
         child: Banner(
-            message: 'Shadow banner',
-            location: BannerLocation.topEnd,
-            shadow: BoxShadow(
-              color: Color(0xFF008000),
-              blurRadius: 8.0,
-            ),
-          )
+          message: 'Shadow banner',
+          location: BannerLocation.topEnd,
+          shadow: BoxShadow(
+            color: Color(0xFF008000),
+            blurRadius: 8.0,
+          ),
+        ),
       ),
     );
     final Finder customPaint = find.byType(CustomPaint);
@@ -320,7 +320,6 @@ void main() {
 
     expect(painter.shadow.color, const Color(0xFF008000));
     expect(painter.shadow.blurRadius, 8.0);
-    
     debugDisableShadows = true;
   });
 }

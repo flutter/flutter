@@ -17,7 +17,7 @@ import 'framework.dart';
 
 const double _kOffset = 40.0; // distance to bottom of banner, at a 45 degree angle inwards
 const double _kHeight = 12.0; // height of banner
-const double _kBottomOffset = _kOffset + 0.707 * _kHeight; // offset plus sqrt(2)/2 * banner height
+const double _kBottomOffset = _kOffset + math.sqrt1_2 * _kHeight;
 const Rect _kRect = Rect.fromLTWH(-_kOffset, _kOffset - _kHeight, _kOffset * 2.0, _kHeight);
 const BoxShadow _kShadow = BoxShadow(
     color: Color(0x7F000000),
