@@ -140,8 +140,8 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
           renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+        case TargetPlatform.macOS:
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
