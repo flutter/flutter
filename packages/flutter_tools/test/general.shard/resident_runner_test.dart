@@ -682,10 +682,6 @@ void main() {
   testUsingContext('ResidentRunner reports hot reload time details', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
-      FakeVmServiceRequest(
-        method: 'getVM',
-        jsonResponse: fakeVM.toJson(),
-      ),
       listViews,
       listViews,
       FakeVmServiceRequest(
