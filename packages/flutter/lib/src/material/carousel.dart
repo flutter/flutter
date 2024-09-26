@@ -134,8 +134,7 @@ class CarouselView extends StatefulWidget {
     required double this.itemExtent,
     required this.children,
   })  : consumeMaxWeight = true,
-        flexWeights = null,
-        assert(enableSplash || onTap == null);
+        flexWeights = null;
 
   /// Creates a scrollable list where the size of each child widget is dynamically
   /// determined by the provided [flexWeights].
@@ -195,8 +194,7 @@ class CarouselView extends StatefulWidget {
     this.enableSplash = true,
     required List<int> this.flexWeights,
     required this.children,
-  })  : itemExtent = null,
-        assert(enableSplash || onTap == null);
+  })  : itemExtent = null;
 
   /// The amount of space to surround each carousel item with.
   ///
@@ -300,9 +298,6 @@ class CarouselView extends StatefulWidget {
   /// as defined by the [ThemeData.splashFactory].
   ///
   /// Setting this to false allows the [children] to respond to user gestures.
-  ///
-  /// Note: Setting this to false while also providing an [onTap] callback will
-  /// throw an assertion error, as these options are mutually exclusive.
   final bool enableSplash;
 
   /// The extent the children are forced to have in the main axis.
@@ -426,14 +421,19 @@ class _CarouselViewState extends State<CarouselView> {
         child: Stack(
           fit: StackFit.expand,
           children: <Widget>[
-            widget.children[index],
-            if (widget.enableSplash)
+            if (widget.enableSplash) ...<Widget>[
+              widget.children[index],
               Material(
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: () => widget.onTap?.call(index),
                   overlayColor: effectiveOverlayColor,
                 ),
+              ),
+            ] else
+              GestureDetector(
+                onTap: () => widget.onTap?.call(index),
+                child: widget.children[index],
               ),
           ],
         ),

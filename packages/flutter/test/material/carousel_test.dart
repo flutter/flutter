@@ -1244,7 +1244,7 @@ void main() {
         home: Scaffold(
           body: CarouselView(
             itemExtent: 350,
-            onTap: (index) {
+            onTap: (int index) {
               tappedIndex = index;
             },
             children: List<Widget>.generate(3, (int index) {
@@ -1296,7 +1296,6 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Attempt to tap the button (should not work)
     await tester.tap(find.text('Button 1'), warnIfMissed: false);
     expect(buttonPressed, isFalse);
   });
@@ -1323,28 +1322,56 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Verify button can be pressed
     await tester.tap(find.text('Button 1'));
     expect(buttonPressed, isTrue);
   });
 
-  testWidgets('CarouselView throws assertion error when enableSplash is false and onTap is set', (WidgetTester tester) async {
-    expect(() => tester.pumpWidget(
+
+  testWidgets('CarouselView with enableSplash false - container is clickable without triggering children onTap', (WidgetTester tester) async {
+    int tappedIndex = -1;
+    bool buttonPressed = false;
+    await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: CarouselView(
             itemExtent: 350,
             enableSplash: false,
-            onTap: (index) {},
+            onTap: (int index) {
+              tappedIndex = index;
+            },
             children: List<Widget>.generate(3, (int index) {
-              return Center(
-                child: Text('Item $index'),
+              return Column(
+                children: [
+                  Text('Item $index'),
+                  ElevatedButton(
+                    onPressed: () => buttonPressed = true,
+                    child: Text('Button $index'),
+                  ),
+                ],
               );
             }),
           ),
         ),
       )
-    ), throwsAssertionError);
+    );
+    await tester.pumpAndSettle();
+
+    final Finder carouselItem = find.text('Item 1');
+    await tester.tap(carouselItem, warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    expect(tappedIndex, 1);
+    expect(buttonPressed,false);
+
+    final Finder anotherCarouselItem = find.text('Item 2');
+    await tester.tap(anotherCarouselItem, warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    expect(tappedIndex, 2);
+    expect(buttonPressed,false);
+
+    await tester.tap(find.text('Button 1'), warnIfMissed: false);
+    expect(buttonPressed, isTrue);
   });
 }
 
