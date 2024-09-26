@@ -223,7 +223,7 @@ static void my_application_activate(GApplication* application) {
   g_autoptr(GPtrArray) devices = up_client_get_devices(self->up_client);
 #endif
   for (guint i = 0; i < devices->len; i++) {
-    g_autoptr(UpDevice) device = UP_DEVICE(g_ptr_array_index(devices, i));
+    UpDevice* device = UP_DEVICE(g_ptr_array_index(devices, i));
     up_device_added_cb(self, device);
   }
 
