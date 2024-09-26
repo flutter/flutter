@@ -410,8 +410,8 @@ class _CarouselViewState extends State<CarouselView> {
         }
         return null;
       });
-    Widget contents = widget.children[index];
 
+    Widget contents = widget.children[index];
     if (widget.enableSplash) {
       contents = Stack(
         fit: StackFit.expand,
