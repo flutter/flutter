@@ -2285,6 +2285,63 @@ void main() {
       expect(opened, isEmpty);
       expect(closed, isNotEmpty);
     });
+
+    // Regression test for
+    // https://github.com/flutter/flutter/issues/119532#issuecomment-2274705565.
+    testWidgets('Shortcuts of MenuAnchor do not rely on WidgetsApp.shortcuts', (WidgetTester tester) async {
+      // MenuAnchor used to rely on WidgetsApp.shortcuts for menu navigation,
+      // which is a problem for Web because the Web uses a special set of
+      // default shortcuts that make arrow keys scroll instead of traversing,
+      // and therefore arrow keys won't enter submenus when the focus is on
+      // MenuAnchor.
+      //
+      // This test verifies that `MenuAnchor`'s shortcuts continues to work even
+      // when `WidgetsApp.shortcuts` contains almost nothing.
+
+      int? pressedItem;
+      await tester.pumpWidget(
+        MaterialApp(
+          // A minimal set of shortcuts that only contains 'enter' that is
+          // needed to verify which button is focused.
+          shortcuts: <ShortcutActivator, Intent>{
+            SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+          },
+          home: Scaffold(
+            body: _CustomDropdownButton(
+              menuItems: List<Widget>.generate(3, (int i) =>
+                MenuItemButton(
+                  child: Text('Submenu item $i'),
+                  onPressed: () {
+                    pressedItem = i;
+                  },
+                )
+              ),
+              child: Text("Main button"),
+            ),
+          ),
+        ),
+      );
+
+      // Open the drop down menu and focus on the MenuAnchor.
+      await tester.tap(find.text('Main button'));
+      await tester.pumpAndSettle();
+      expect(find.text('Submenu item 0'), findsOneWidget);
+
+      // Press arrowDown, and the first submenu button should be focused.
+      // This is the critical part. It used to not work on Web.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+
+      // Press arrowDown, and the second submenu button should be focused.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+
+      // Press enter, and the second submenu button should be pressed.
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+
+      expect(pressedItem, 1);
+    });
   });
 
   group('Accelerators', () {
@@ -4710,4 +4767,50 @@ enum TestMenu {
   final String acceleratorLabel;
   // Strip the accelerator markers.
   String get label => MenuAcceleratorLabel.stripAcceleratorMarkers(acceleratorLabel);
+}
+
+// A button that pops up a drop down menu when tapped.
+//
+// Used in a regression test for
+// https://github.com/flutter/flutter/issues/119532#issuecomment-2274705565.
+class _CustomDropdownButton extends StatefulWidget {
+  const _CustomDropdownButton({
+    required this.menuItems,
+    required this.child,
+  });
+
+  final List<Widget> menuItems;
+  final Widget child;
+
+  @override
+  State<_CustomDropdownButton> createState() => _CustomDropdownButtonState();
+}
+
+class _CustomDropdownButtonState extends State<_CustomDropdownButton> {
+  final _controller = WidgetStatesController();
+  final childNode = FocusNode(debugLabel: "Dropdown Inkwell");
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    childNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      childFocusNode: childNode,
+      builder: (context, controller, child) {
+        return InkWell(
+          focusNode: childNode,
+          statesController: _controller,
+          onTap: controller.open,
+          child: child,
+        );
+      },
+      menuChildren: widget.menuItems,
+      child: widget.child,
+    );
+  }
 }

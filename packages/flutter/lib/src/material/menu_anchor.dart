@@ -432,9 +432,14 @@ class _MenuAnchorState extends State<MenuAnchor> {
       );
     }
 
+    // This `Shortcuts` is needed so that shortcuts work when the focus is on
+    // MenuAnchor (specifically, the root menu, since submenus have their own
+    // `Shortcuts`.)
     return Shortcuts(
-      // The list of shortcuts when the focus is on the MenuAnchor.
       shortcuts: _kMenuTraversalShortcuts,
+      // Ignore semantics here and since the same information is typically
+      // also provided by the children.
+      includeSemantics: false,
       child: _MenuAnchorScope(
         anchorKey: _anchorKey,
         anchor: this,
