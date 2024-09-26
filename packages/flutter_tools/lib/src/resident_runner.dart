@@ -343,10 +343,15 @@ class FlutterDevice {
       if (completer.isCompleted) {
         return;
       }
+
       globals.printTrace('Successfully connected to service protocol: $vmServiceUri');
 
+      // TODO for review: Does anything actually gurantee a working connection here?
+      // Could `service!` result in a NPE?
+      await (await device!.getLogReader(app: package))
+          .provideVmService(service!);
+
       vmService = service;
-      (await device!.getLogReader(app: package)).connectedVMService = vmService;
       completer.complete();
       await subscription.cancel();
     }, onError: (dynamic error) {
@@ -415,24 +420,6 @@ class FlutterDevice {
     }
     await _loggingSubscription!.cancel();
     _loggingSubscription = null;
-  }
-
-  /// Attempts to set up reading logs from the Flutter app on the device.
-  ///
-  /// This can fail if the device if no longer connected.
-  Future<void> tryInitLogReader() async {
-    final vm_service.VM? vm = await vmService!.getVmGuarded();
-    final DeviceLogReader logReader = await device!.getLogReader(app: package);
-    if (vm == null && logReader is AdbLogReader) {
-      // TODO(andrewkolos): This is a temporary, hacky fix for
-      //  https://github.com/flutter/flutter/issues/155795 that emphasizes
-      //  simplicity for the sake of being suitable for cherry-picking.
-      globals.printError(
-        'Unable to initiate adb log filtering for device'
-        '${device?.name}. Logs from the device may be more verbose than usual.',
-      );
-    }
-    logReader.appPid = vm?.pid;
   }
 
   Future<int> runHot({

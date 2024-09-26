@@ -1300,16 +1300,15 @@ class IOSDeviceLogReader extends DeviceLogReader {
   @override
   Stream<String> get logLines => linesController.stream;
 
-  @override
-  FlutterVmService? get connectedVMService => _connectedVMService;
-  FlutterVmService? _connectedVMService;
+  FlutterVmService? _connectedVmService;
 
   @override
-  set connectedVMService(FlutterVmService? connectedVmService) {
+  Future<void> provideVmService(FlutterVmService? connectedVmService) async {
     if (connectedVmService != null) {
-      _listenToUnifiedLoggingEvents(connectedVmService);
+      // TODO for reviewer: I wonder if not awaiting this beforehand was a bug?
+      await _listenToUnifiedLoggingEvents(connectedVmService);
+      _connectedVmService = connectedVmService;
     }
-    _connectedVMService = connectedVmService;
   }
 
   static const int minimumUniversalLoggingSdkVersion = 13;
@@ -1360,7 +1359,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     // CoreDevice and has iOS 13 or greater.
     // When using `ios-deploy` and the Dart VM, prefer the more complete logs
     // from the attached debugger, if available.
-    if (connectedVMService != null && (_iosDeployDebugger == null || !_iosDeployDebugger!.debuggerAttached)) {
+    if (_connectedVmService != null && (_iosDeployDebugger == null || !_iosDeployDebugger!.debuggerAttached)) {
       return _IOSDeviceLogSources(
         primarySource: IOSDeviceLogSource.unifiedLogging,
         fallbackSource: IOSDeviceLogSource.iosDeploy,

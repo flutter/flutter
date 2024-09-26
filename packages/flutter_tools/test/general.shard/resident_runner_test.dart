@@ -1929,43 +1929,6 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('FlutterDevice does not throw when unable to initiate log reader due to VM service disconnection', () async {
-    fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          method: 'getVM',
-          error: FakeRPCError(
-            code: RPCErrorCodes.kServerError,
-            error: 'Service connection disposed',
-          ),
-        ),
-      ],
-    );
-    final TestFlutterDevice flutterDevice = TestFlutterDevice(device);
-    flutterDevice.vmService = fakeVmServiceHost!.vmService;
-    await flutterDevice.tryInitLogReader();
-
-    final BufferLogger logger = globals.logger as BufferLogger;
-    expect(
-      logger.traceText,
-      contains(
-        'VmService.getVm call failed: getVM: (-32000) '
-        'Service connection disposed\n',
-      ),
-    );
-    // We should not print a warning since the device does not have a connected
-    // adb log reader.
-    // TODO(andrewkolos): This test is a bit fragile, and is something that
-    //  should be corrected in a follow-up PR (see
-    //  https://github.com/flutter/flutter/issues/155795).
-    expect(logger.errorText, isEmpty);
-  }, overrides: <Type, Generator>{
-    Logger: () => BufferLogger.test(),
-    Artifacts: () => Artifacts.test(),
-    FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
-
   testUsingContext('Uses existing DDS URI from exception field', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice()
