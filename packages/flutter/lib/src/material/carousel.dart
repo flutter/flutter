@@ -390,28 +390,26 @@ class _CarouselViewState extends State<CarouselView> {
   }
 
   Widget _buildCarouselItem(ThemeData theme, int index) {
-    final EdgeInsets effectivePadding =
-        widget.padding ?? const EdgeInsets.all(4.0);
-    final Color effectiveBackgroundColor =
-        widget.backgroundColor ?? Theme.of(context).colorScheme.surface;
+    final EdgeInsets effectivePadding = widget.padding ?? const EdgeInsets.all(4.0);
+    final Color effectiveBackgroundColor = widget.backgroundColor ?? Theme.of(context).colorScheme.surface;
     final double effectiveElevation = widget.elevation ?? 0.0;
-    final ShapeBorder effectiveShape = widget.shape ??
-        const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(28.0)));
-    final WidgetStateProperty<Color?> effectiveOverlayColor =
-        widget.overlayColor ??
-            WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-              if (states.contains(WidgetState.pressed)) {
-                return theme.colorScheme.onSurface.withOpacity(0.1);
-              }
-              if (states.contains(WidgetState.hovered)) {
-                return theme.colorScheme.onSurface.withOpacity(0.08);
-              }
-              if (states.contains(WidgetState.focused)) {
-                return theme.colorScheme.onSurface.withOpacity(0.1);
-              }
-              return null;
-            });
+    final ShapeBorder effectiveShape = widget.shape
+      ?? const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(28.0))
+      );
+    final WidgetStateProperty<Color?> effectiveOverlayColor = widget.overlayColor
+      ?? WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.pressed)) {
+          return theme.colorScheme.onSurface.withOpacity(0.1);
+        }
+        if (states.contains(WidgetState.hovered)) {
+          return theme.colorScheme.onSurface.withOpacity(0.08);
+        }
+        if (states.contains(WidgetState.focused)) {
+          return theme.colorScheme.onSurface.withOpacity(0.1);
+        }
+        return null;
+      });
     Widget contents = widget.children[index];
 
     if (widget.enableSplash) {
