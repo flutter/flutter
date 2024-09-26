@@ -21,6 +21,15 @@ import 'page_scaffold.dart';
 import 'route.dart';
 import 'theme.dart';
 
+/// test
+enum NavigationDrawerMode {
+  /// always mode.
+  always,
+
+  /// automatic mode
+  automatic,
+}
+
 /// Standard iOS navigation bar height without the status bar.
 ///
 /// This height is constant and independent of accessibility as it is in iOS.
@@ -697,6 +706,8 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
     this.stretch = false,
+    this.drawer,
+    this.drawerMode,
   }) : assert(
          automaticallyImplyTitle || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
@@ -793,6 +804,12 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
 
   /// {@macro flutter.cupertino.CupertinoNavigationBar.heroTag}
   final Object heroTag;
+
+  /// test
+  final Widget? drawer;
+
+  /// test
+  final NavigationDrawerMode? drawerMode;
 
   /// True if the navigation bar's background color has no transparency.
   bool get opaque => backgroundColor?.alpha == 0xFF;
