@@ -3647,7 +3647,6 @@ class _Submenu extends StatelessWidget {
                   actions: <Type, Action<Intent>>{
                     DismissIntent: DismissMenuAction(controller: anchor._menuController),
                   },
-                  // The list of shortcuts when the focus is in the submenu.
                   child: Shortcuts(
                     shortcuts: _kMenuTraversalShortcuts,
                     child: _MenuPanel(
