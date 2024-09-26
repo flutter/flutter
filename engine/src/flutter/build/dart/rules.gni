@@ -4,14 +4,6 @@
 
 # This file has rules for making Dart packages and snapshots.
 
-import("//build/compiled_action.gni")
-import("//build/module_args/dart.gni")
-import("//flutter/build/dart/dart.gni")
-import("//flutter/common/config.gni")
-
-import("$dart_src/build/dart/dart_action.gni")
-import("$dart_src/sdk_args.gni")
-
 import("//flutter/build/dart/internal/application_snapshot.gni")
 import("//flutter/build/dart/internal/flutter_frontend_server.gni")
 import("//flutter/build/dart/internal/flutter_snapshot.gni")

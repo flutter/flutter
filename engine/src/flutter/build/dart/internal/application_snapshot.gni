@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 import("//build/compiled_action.gni")
-import("//build/module_args/dart.gni")
 import("//flutter/build/dart/dart.gni")
 import("//flutter/common/config.gni")
 

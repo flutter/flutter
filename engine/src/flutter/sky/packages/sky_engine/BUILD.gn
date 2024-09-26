@@ -41,6 +41,9 @@ if (is_fuchsia) {
 
 dart_sdk_lib_path = rebase_path("$dart_src/sdk/lib")
 
+# This variable should point to the Dart SDK.
+dart_sdk_root = "//third_party/dart-sdk/dart-sdk"
+
 copy("async") {
   lib_path = rebase_path("async", "", dart_sdk_lib_path)
   sources = rebase_path(async_sdk_sources, "", lib_path)
