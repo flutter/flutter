@@ -1297,7 +1297,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Attempt to tap the button (should not work)
-    await tester.tap(find.byType(ElevatedButton).at(1), warnIfMissed: false);
+    await tester.tap(find.text('Button 1'), warnIfMissed: false);
     expect(buttonPressed, isFalse);
   });
 
