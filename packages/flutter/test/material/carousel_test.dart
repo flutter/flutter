@@ -1271,7 +1271,7 @@ void main() {
     await tester.tap(anotherCarouselItem, warnIfMissed: false);
     await tester.pumpAndSettle();
 
-    // Verify that the onTap callback was called with the new index
+    // Verify that the onTap callback was called with the new index.
     expect(tappedIndex, 2);
   });
 
