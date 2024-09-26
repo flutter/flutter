@@ -22,6 +22,7 @@ import 'constants.dart';
 import 'context_menu_controller.dart';
 import 'debug.dart';
 import 'editable_text.dart';
+import 'feedback.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'inherited_theme.dart';
@@ -2319,12 +2320,14 @@ class TextSelectionGestureDetectorBuilder {
   void onForcePressStart(ForcePressDetails details) {
     assert(delegate.forcePressEnabled);
     _shouldShowSelectionToolbar = true;
-    if (delegate.selectionEnabled) {
-      renderEditable.selectWordsInRange(
-        from: details.globalPosition,
-        cause: SelectionChangedCause.forcePress,
-      );
+    if (!delegate.selectionEnabled) {
+      return;
     }
+    renderEditable.selectWordsInRange(
+      from: details.globalPosition,
+      cause: SelectionChangedCause.forcePress,
+    );
+    editableText.showToolbar();
   }
 
   /// Handler for [TextSelectionGestureDetector.onForcePressEnd].
@@ -2497,44 +2500,48 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback.
   @protected
   void onSingleLongTapStart(LongPressStartDetails details) {
-    if (delegate.selectionEnabled) {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          if (!renderEditable.hasFocus) {
-            _longPressStartedWithoutFocus = true;
-            renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-          } else {
-            renderEditable.selectPositionAt(
-              from: details.globalPosition,
-              cause: SelectionChangedCause.longPress,
-            );
-            // Show the floating cursor.
-            final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
-              state: FloatingCursorDragState.Start,
-              startLocation: (
-                renderEditable.globalToLocal(details.globalPosition),
-                TextPosition(
-                  offset: editableText.textEditingValue.selection.baseOffset,
-                  affinity: editableText.textEditingValue.selection.affinity,
-                ),
-              ),
-              offset: Offset.zero,
-            );
-            editableText.updateFloatingCursor(cursorPoint);
-          }
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-      }
-
-      _showMagnifierIfSupportedByPlatform(details.globalPosition);
-
-      _dragStartViewportOffset = renderEditable.offset.pixels;
-      _dragStartScrollOffset = _scrollPosition;
+    if (!delegate.selectionEnabled) {
+      return;
     }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        if (!renderEditable.hasFocus) {
+          _longPressStartedWithoutFocus = true;
+          renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+        } else {
+          renderEditable.selectPositionAt(
+            from: details.globalPosition,
+            cause: SelectionChangedCause.longPress,
+          );
+          // Show the floating cursor.
+          final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+            state: FloatingCursorDragState.Start,
+            startLocation: (
+              renderEditable.globalToLocal(details.globalPosition),
+              TextPosition(
+                offset: editableText.textEditingValue.selection.baseOffset,
+                affinity: editableText.textEditingValue.selection.affinity,
+              ),
+            ),
+            offset: Offset.zero,
+          );
+          editableText.updateFloatingCursor(cursorPoint);
+        }
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+        if (editableText.context.mounted) {
+          Feedback.forLongPress(editableText.context);
+        }
+    }
+
+    _showMagnifierIfSupportedByPlatform(details.globalPosition);
+
+    _dragStartViewportOffset = renderEditable.offset.pixels;
+    _dragStartScrollOffset = _scrollPosition;
   }
 
   /// Handler for [TextSelectionGestureDetector.onSingleLongTapMoveUpdate].
@@ -2548,49 +2555,50 @@ class TextSelectionGestureDetectorBuilder {
   ///    triggers this callback.
   @protected
   void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (delegate.selectionEnabled) {
-      // Adjust the drag start offset for possible viewport offset changes.
-      final Offset editableOffset = renderEditable.maxLines == 1
-          ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
-          : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
-      final Offset scrollableOffset = switch (axisDirectionToAxis(_scrollDirection ?? AxisDirection.left)) {
-        Axis.horizontal => Offset(_scrollPosition - _dragStartScrollOffset, 0.0),
-        Axis.vertical   => Offset(0.0, _scrollPosition - _dragStartScrollOffset),
-      };
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          if (_longPressStartedWithoutFocus) {
-            renderEditable.selectWordsInRange(
-              from: details.globalPosition - details.offsetFromOrigin - editableOffset - scrollableOffset,
-              to: details.globalPosition,
-              cause: SelectionChangedCause.longPress,
-            );
-          } else {
-            renderEditable.selectPositionAt(
-              from: details.globalPosition,
-              cause: SelectionChangedCause.longPress,
-            );
-            // Update the floating cursor.
-            final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
-              state: FloatingCursorDragState.Update,
-              offset: details.offsetFromOrigin,
-            );
-            editableText.updateFloatingCursor(cursorPoint);
-          }
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
+    if (!delegate.selectionEnabled) {
+      return;
+    }
+    // Adjust the drag start offset for possible viewport offset changes.
+    final Offset editableOffset = renderEditable.maxLines == 1
+        ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
+        : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
+    final Offset scrollableOffset = switch (axisDirectionToAxis(_scrollDirection ?? AxisDirection.left)) {
+      Axis.horizontal => Offset(_scrollPosition - _dragStartScrollOffset, 0.0),
+      Axis.vertical   => Offset(0.0, _scrollPosition - _dragStartScrollOffset),
+    };
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        if (_longPressStartedWithoutFocus) {
           renderEditable.selectWordsInRange(
             from: details.globalPosition - details.offsetFromOrigin - editableOffset - scrollableOffset,
             to: details.globalPosition,
             cause: SelectionChangedCause.longPress,
           );
-      }
-
-      _showMagnifierIfSupportedByPlatform(details.globalPosition);
+        } else {
+          renderEditable.selectPositionAt(
+            from: details.globalPosition,
+            cause: SelectionChangedCause.longPress,
+          );
+          // Update the floating cursor.
+          final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+            state: FloatingCursorDragState.Update,
+            offset: details.offsetFromOrigin,
+          );
+          editableText.updateFloatingCursor(cursorPoint);
+        }
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        renderEditable.selectWordsInRange(
+          from: details.globalPosition - details.offsetFromOrigin - editableOffset - scrollableOffset,
+          to: details.globalPosition,
+          cause: SelectionChangedCause.longPress,
+        );
     }
+
+    _showMagnifierIfSupportedByPlatform(details.globalPosition);
   }
 
   /// Handler for [TextSelectionGestureDetector.onSingleLongTapEnd].

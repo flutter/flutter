@@ -91,19 +91,6 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   }
 
   @override
-  void onForcePressStart(ForcePressDetails details) {
-    super.onForcePressStart(details);
-    if (delegate.selectionEnabled && shouldShowSelectionToolbar) {
-      editableText.showToolbar();
-    }
-  }
-
-  @override
-  void onForcePressEnd(ForcePressDetails details) {
-    // Not required.
-  }
-
-  @override
   void onSingleLongTapStart(LongPressStartDetails details) {
     if (!delegate.selectionEnabled) {
       return;
@@ -139,16 +126,15 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
     if (!delegate.selectionEnabled) {
       return;
     }
-    editableText.hideToolbar();
     switch (Theme.of(_state.context).platform) {
       case TargetPlatform.iOS:
-        renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+        super.onSingleTapUp(details);
       case TargetPlatform.macOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+        super.onSingleTapUp(details);
     }
     _state.widget.onTap?.call();
   }
