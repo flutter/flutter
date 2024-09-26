@@ -5,7 +5,6 @@
 #include "impeller/aiks/aiks_playground.h"
 
 #include <memory>
-#include <optional>
 
 #include "impeller/aiks/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
@@ -26,44 +25,6 @@ void AiksPlayground::SetTypographerContext(
 
 void AiksPlayground::TearDown() {
   PlaygroundTest::TearDown();
-}
-
-bool AiksPlayground::OpenPlaygroundHere(Picture picture) {
-  if (!switches_.enable_playground) {
-    return true;
-  }
-
-  AiksContext renderer(GetContext(), typographer_context_);
-
-  if (!renderer.IsValid()) {
-    return false;
-  }
-
-  return Playground::OpenPlaygroundHere(
-      [&renderer, &picture](RenderTarget& render_target) -> bool {
-        return renderer.Render(picture, render_target, true);
-      });
-}
-
-bool AiksPlayground::OpenPlaygroundHere(AiksPlaygroundCallback callback) {
-  if (!switches_.enable_playground) {
-    return true;
-  }
-
-  AiksContext renderer(GetContext(), typographer_context_);
-
-  if (!renderer.IsValid()) {
-    return false;
-  }
-
-  return Playground::OpenPlaygroundHere(
-      [&renderer, &callback](RenderTarget& render_target) -> bool {
-        std::optional<Picture> picture = callback(renderer);
-        if (!picture.has_value()) {
-          return false;
-        }
-        return renderer.Render(*picture, render_target, true);
-      });
 }
 
 bool AiksPlayground::ImGuiBegin(const char* name,
@@ -88,7 +49,6 @@ bool AiksPlayground::OpenPlaygroundHere(
 
   return Playground::OpenPlaygroundHere(
       [&renderer, &callback](RenderTarget& render_target) -> bool {
-#if EXPERIMENTAL_CANVAS
         auto display_list = callback();
         TextFrameDispatcher collector(renderer.GetContentContext(),  //
                                       Matrix(),                      //
@@ -96,7 +56,7 @@ bool AiksPlayground::OpenPlaygroundHere(
         );
         display_list->Dispatch(collector);
 
-        ExperimentalDlDispatcher impeller_dispatcher(
+        CanvasDlDispatcher impeller_dispatcher(
             renderer.GetContentContext(), render_target,
             display_list->root_has_backdrop_filter(),
             display_list->max_root_blend_mode(), IRect::MakeMaximum());
@@ -105,14 +65,6 @@ bool AiksPlayground::OpenPlaygroundHere(
         renderer.GetContentContext().GetTransientsBuffer().Reset();
         renderer.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
         return true;
-#else
-        auto display_list = callback();
-        DlDispatcher dispatcher;
-        display_list->Dispatch(dispatcher);
-        Picture picture = dispatcher.EndRecordingAsPicture();
-
-        return renderer.Render(picture, render_target, true);
-#endif  // EXPERIMENTAL_CANVAS
       });
 }
 

@@ -39,10 +39,6 @@ void RuntimeEffectContents::SetTextureInputs(
   texture_inputs_ = std::move(texture_inputs);
 }
 
-bool RuntimeEffectContents::CanInheritOpacity(const Entity& entity) const {
-  return false;
-}
-
 static ShaderType GetShaderType(RuntimeUniformType type) {
   switch (type) {
     case kSampledImage:

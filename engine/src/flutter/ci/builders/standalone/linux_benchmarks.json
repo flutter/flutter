@@ -30,7 +30,6 @@
             "flutter/display_list:display_list_transform_benchmarks",
             "flutter/fml:fml_benchmarks",
             "flutter/impeller/geometry:geometry_benchmarks",
-            "flutter/impeller/aiks:canvas_benchmarks",
             "flutter/lib/ui:ui_benchmarks",
             "flutter/shell/common:shell_benchmarks",
             "flutter/shell/testing",

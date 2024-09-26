@@ -5,9 +5,9 @@
 #ifndef FLUTTER_IMPELLER_GOLDEN_TESTS_SCREENSHOTTER_H_
 #define FLUTTER_IMPELLER_GOLDEN_TESTS_SCREENSHOTTER_H_
 
-#include "flutter/impeller/aiks/picture.h"
 #include "flutter/impeller/golden_tests/screenshot.h"
 #include "flutter/impeller/playground/playground_impl.h"
+#include "impeller/aiks/aiks_context.h"
 
 namespace impeller {
 namespace testing {
@@ -17,12 +17,6 @@ namespace testing {
 class Screenshotter {
  public:
   virtual ~Screenshotter() = default;
-
-  virtual std::unique_ptr<Screenshot> MakeScreenshot(
-      AiksContext& aiks_context,
-      const Picture& picture,
-      const ISize& size = {300, 300},
-      bool scale_content = true) = 0;
 
   virtual std::unique_ptr<Screenshot> MakeScreenshot(
       AiksContext& aiks_context,

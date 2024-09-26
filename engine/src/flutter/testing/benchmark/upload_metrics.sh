@@ -63,5 +63,3 @@ cd "$SCRIPT_DIR"
   --json $ENGINE_PATH/src/out/${VARIANT}/display_list_transform_benchmarks.json "$@"
 "$DART" bin/parse_and_send.dart \
   --json $ENGINE_PATH/src/out/${VARIANT}/geometry_benchmarks.json "$@"
-"$DART" bin/parse_and_send.dart \
-  --json $ENGINE_PATH/src/out/${VARIANT}/canvas_benchmarks.json "$@"

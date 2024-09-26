@@ -48,10 +48,4 @@ std::optional<Rect> ContentsFilterInput::GetCoverage(
   return contents_->GetCoverage(entity);
 }
 
-void ContentsFilterInput::PopulateGlyphAtlas(
-    const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas,
-    Scalar scale) {
-  contents_->PopulateGlyphAtlas(lazy_glyph_atlas, scale);
-}
-
 }  // namespace impeller

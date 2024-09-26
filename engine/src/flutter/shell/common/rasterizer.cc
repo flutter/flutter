@@ -925,20 +925,14 @@ ScreenshotLayerTreeAsImageImpeller(
   RenderFrameForScreenshot(compositor_context, &builder, tree, nullptr,
                            aiks_context);
 
-  std::shared_ptr<impeller::Texture> texture;
-#if EXPERIMENTAL_CANVAS
-  texture = impeller::DisplayListToTexture(
+  std::shared_ptr<impeller::Texture> texture = impeller::DisplayListToTexture(
       builder.Build(),
       impeller::ISize(tree->frame_size().fWidth, tree->frame_size().fHeight),
       *aiks_context);
-#else
-  impeller::DlDispatcher dispatcher;
-  builder.Build()->Dispatch(dispatcher);
-  const auto& picture = dispatcher.EndRecordingAsPicture();
-  texture = picture.ToImage(
-      *aiks_context,
-      impeller::ISize(tree->frame_size().fWidth, tree->frame_size().fHeight));
-#endif  // EXPERIMENTAL_CANVAS
+  if (!texture) {
+    FML_LOG(ERROR) << "Failed to render to texture";
+    return {nullptr, Rasterizer::ScreenshotFormat::kUnknown};
+  }
 
   impeller::DeviceBufferDescriptor buffer_desc;
   buffer_desc.storage_mode = impeller::StorageMode::kHostVisible;

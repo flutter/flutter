@@ -10,11 +10,10 @@
 #include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/display_list/utils/dl_receiver_utils.h"
 #include "fml/logging.h"
+#include "impeller/aiks/aiks_context.h"
 #include "impeller/aiks/canvas.h"
-#include "impeller/aiks/experimental_canvas.h"
 #include "impeller/aiks/paint.h"
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/geometry/color.h"
 #include "impeller/geometry/rect.h"
 
 namespace impeller {
@@ -27,8 +26,6 @@ using DlPath = flutter::DlPath;
 
 class DlDispatcherBase : public flutter::DlOpReceiver {
  public:
-  Picture EndRecordingAsPicture();
-
   // |flutter::DlOpReceiver|
   void setAntiAlias(bool aa) override;
 
@@ -246,54 +243,15 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                                  const Paint& paint);
 };
 
-#if !EXPERIMENTAL_CANVAS
-class DlDispatcher : public DlDispatcherBase {
+class CanvasDlDispatcher : public DlDispatcherBase {
  public:
-  DlDispatcher();
+  CanvasDlDispatcher(ContentContext& renderer,
+                     RenderTarget& render_target,
+                     bool has_root_backdrop_filter,
+                     flutter::DlBlendMode max_root_blend_mode,
+                     IRect cull_rect);
 
-  explicit DlDispatcher(IRect cull_rect);
-
-  explicit DlDispatcher(Rect cull_rect);
-
-  ~DlDispatcher() = default;
-
-  // |flutter::DlOpReceiver|
-  void save() override {
-    // This dispatcher is used from test cases that might not supply
-    // a content_depth parameter. Since this dispatcher doesn't use
-    // the value, we just pass through a 0.
-    DlDispatcherBase::save(0u);
-  }
-  using DlDispatcherBase::save;
-
-  // |flutter::DlOpReceiver|
-  void saveLayer(const DlRect& bounds,
-                 const flutter::SaveLayerOptions options,
-                 const flutter::DlImageFilter* backdrop) override {
-    // This dispatcher is used from test cases that might not supply
-    // a content_depth parameter. Since this dispatcher doesn't use
-    // the value, we just pass through a 0.
-    DlDispatcherBase::saveLayer(bounds, options, 0u,
-                                flutter::DlBlendMode::kLastMode, backdrop);
-  }
-  using DlDispatcherBase::saveLayer;
-
- private:
-  Canvas canvas_;
-
-  Canvas& GetCanvas() override;
-};
-#endif  // !EXPERIMENTAL_CANVAS
-
-class ExperimentalDlDispatcher : public DlDispatcherBase {
- public:
-  ExperimentalDlDispatcher(ContentContext& renderer,
-                           RenderTarget& render_target,
-                           bool has_root_backdrop_filter,
-                           flutter::DlBlendMode max_root_blend_mode,
-                           IRect cull_rect);
-
-  ~ExperimentalDlDispatcher() = default;
+  ~CanvasDlDispatcher() = default;
 
   // |flutter::DlOpReceiver|
   void save() override {
@@ -320,8 +278,8 @@ class ExperimentalDlDispatcher : public DlDispatcherBase {
                     flutter::DlBlendMode dl_mode) override;
 
  private:
+  Canvas canvas_;
   const ContentContext& renderer_;
-  ExperimentalCanvas canvas_;
 
   Canvas& GetCanvas() override;
 };
@@ -411,7 +369,14 @@ class TextFrameDispatcher : public flutter::IgnoreAttributeDispatchHelper,
 std::shared_ptr<Texture> DisplayListToTexture(
     const sk_sp<flutter::DisplayList>& display_list,
     ISize size,
-    AiksContext& context);
+    AiksContext& context,
+    bool reset_host_buffer = true);
+
+/// Render the provided display list to the render target.
+bool RenderToOnscreen(ContentContext& context, RenderTarget render_target,
+                         const sk_sp<flutter::DisplayList>& display_list,
+                         SkIRect cull_rect,
+                         bool reset_host_buffer);
 
 }  // namespace impeller
 
