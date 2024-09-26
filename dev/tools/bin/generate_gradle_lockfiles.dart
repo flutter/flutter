@@ -179,7 +179,11 @@ void main(List<String> arguments) {
     final String appDirectory = androidDirectory.parent.absolute.path;
 
     // Fetch pub dependencies.
-    exec('flutter', <String>['pub', 'get'], workingDirectory: appDirectory);
+    final String flutterPath = repoRoot
+        .childDirectory('bin')
+        .childFile('flutter')
+        .path;
+    exec(flutterPath, <String>['pub', 'get'], workingDirectory: appDirectory);
 
     // Verify that the Gradlew wrapper exists.
     final File gradleWrapper = androidDirectory.childFile('gradlew');
