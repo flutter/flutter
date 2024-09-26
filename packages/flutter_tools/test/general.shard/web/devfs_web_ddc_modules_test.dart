@@ -31,7 +31,7 @@ import '../../src/common.dart';
 import '../../src/testbed.dart';
 
 const List<int> kTransparentImage = <int>[
-  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, //
   0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
   0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
   0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
@@ -61,7 +61,10 @@ void main() {
   setUp(() {
     httpServer = FakeHttpServer();
     linux = FakePlatform(environment: <String, String>{});
-    windows = FakePlatform(operatingSystem: 'windows', environment: <String, String>{});
+    windows = FakePlatform(
+      operatingSystem: 'windows',
+      environment: <String, String>{},
+    );
     logger = BufferLogger.test();
     testbed = Testbed(
       setup: () {
