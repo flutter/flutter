@@ -93,7 +93,7 @@ void main() {
   });
 
   @isTest
-  void runTestbed(
+  void runInTestbed(
     String description,
     FutureOr<void> Function() body, {
     Map<Type, Generator>? overrides,
@@ -101,7 +101,7 @@ void main() {
     test(description, () => testbed.run(body, overrides: overrides));
   }
 
-  runTestbed('.log() reports warnings', () {
+  runInTestbed('.log() reports warnings', () {
     const String unresolvedUriMessage = 'Unresolved uri:';
     const String otherMessage = 'Something bad happened';
 
@@ -115,7 +115,7 @@ void main() {
     expect(logger.warningText, contains(otherMessage));
   });
 
-  runTestbed('Handles against malformed manifest', () async {
+  runInTestbed('Handles against malformed manifest', () async {
     final File source = globals.fs.file('source')
       ..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')
@@ -151,7 +151,7 @@ void main() {
     );
   });
 
-  runTestbed('serves JavaScript files from memory cache', () async {
+  runInTestbed('serves JavaScript files from memory cache', () async {
     final File source = globals.fs.file('source')
       ..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')
@@ -180,7 +180,7 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{Platform: () => linux});
 
-  runTestbed('serves metadata files from memory cache', () async {
+  runInTestbed('serves metadata files from memory cache', () async {
     const String metadataContents = '{"name":"foo"}';
     final File source = globals.fs.file('source')
       ..writeAsStringSync('main() {}');
@@ -206,7 +206,7 @@ void main() {
   }, overrides: <Type, Generator>{Platform: () => linux});
 
   // Ensures that no requests are made outside of served directory.
-  runTestbed('Removes leading slashes for valid requests', () async {
+  runInTestbed('Removes leading slashes for valid requests', () async {
     globals.fs.file('foo.png').createSync();
     globals.fs.currentDirectory = globals.fs.directory('project_directory')
       ..createSync();
@@ -227,7 +227,7 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   });
 
-  runTestbed('takes base path into account when serving', () async {
+  runInTestbed('takes base path into account when serving', () async {
     webAssetServer.basePath = 'base/path';
 
     globals.fs.file('foo.png').createSync();
@@ -250,7 +250,7 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   });
 
-  runTestbed('serves index.html at the base path', () async {
+  runInTestbed('serves index.html at the base path', () async {
     webAssetServer.basePath = 'base/path';
 
     const String htmlContent = '<html><head></head><body id="test"></body></html>';
@@ -274,7 +274,7 @@ void main() {
     expect(await response.readAsString(), htmlContent);
   });
 
-  runTestbed('serves index.html at / if href attribute is $kBaseHrefPlaceholder', () async {
+  runInTestbed('serves index.html at / if href attribute is $kBaseHrefPlaceholder', () async {
     const String htmlContent = '<html><head><base href ="$kBaseHrefPlaceholder"></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
@@ -295,7 +295,7 @@ void main() {
     expect(await response.readAsString(), htmlContent.replaceAll(kBaseHrefPlaceholder, '/'));
   });
 
-  runTestbed('does not serve outside the base path', () async {
+  runInTestbed('does not serve outside the base path', () async {
     webAssetServer.basePath = 'base/path';
 
     const String htmlContent = '<html><head></head><body id="test"></body></html>';
@@ -309,7 +309,7 @@ void main() {
     expect(response.statusCode, HttpStatus.notFound);
   });
 
-  runTestbed('parses base path from index.html', () async {
+  runInTestbed('parses base path from index.html', () async {
     const String htmlContent = '<html><head><base href="/foo/bar/"></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
@@ -329,7 +329,7 @@ void main() {
     expect(webAssetServer.basePath, 'foo/bar');
   });
 
-  runTestbed('handles lack of base path in index.html', () async {
+  runInTestbed('handles lack of base path in index.html', () async {
     const String htmlContent = '<html><head></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
@@ -350,7 +350,7 @@ void main() {
     expect(webAssetServer.basePath, '');
   });
 
-  runTestbed('throws if base path is relative', () async {
+  runInTestbed('throws if base path is relative', () async {
     const String htmlContent = '<html><head><base href="foo/bar/"></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
@@ -371,7 +371,7 @@ void main() {
     );
   });
 
-  runTestbed('throws if base path does not end with slash', () async {
+  runInTestbed('throws if base path does not end with slash', () async {
     const String htmlContent = '<html><head><base href="/foo/bar"></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
@@ -392,7 +392,7 @@ void main() {
     );
   });
 
-  runTestbed('serves JavaScript files from memory cache not from manifest', () async {
+  runInTestbed('serves JavaScript files from memory cache not from manifest', () async {
     webAssetServer.writeFile('foo.js', 'main() {}');
 
     final Response response = await webAssetServer.handleRequest(
@@ -408,7 +408,7 @@ void main() {
     expect((await response.read().toList()).first, utf8.encode('main() {}'));
   });
 
-  runTestbed('Returns notModified when the ifNoneMatch header matches the etag', () async {
+  runInTestbed('Returns notModified when the ifNoneMatch header matches the etag', () async {
     webAssetServer.writeFile('foo.js', 'main() {}');
 
     final Response response = await webAssetServer.handleRequest(
@@ -425,7 +425,7 @@ void main() {
     expect(await cachedResponse.read().toList(), isEmpty);
   });
 
-  runTestbed('serves index.html when path is unknown', () async {
+  runInTestbed('serves index.html when path is unknown', () async {
     const String htmlContent = '<html><head></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
@@ -445,7 +445,7 @@ void main() {
     expect(await response.readAsString(), htmlContent);
   });
 
-  runTestbed('does not serve outside the base path', () async {
+  runInTestbed('does not serve outside the base path', () async {
     webAssetServer.basePath = 'base/path';
 
     const String htmlContent ='<html><head></head><body id="test"></body></html>';
@@ -459,7 +459,7 @@ void main() {
     expect(response.statusCode, HttpStatus.notFound);
   });
 
-  runTestbed('does not serve index.html when path is inside assets or packages', () async {
+  runInTestbed('does not serve index.html when path is inside assets or packages', () async {
     const String htmlContent = '<html><head></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
@@ -487,7 +487,7 @@ void main() {
     expect(response.statusCode, HttpStatus.notFound);
   });
 
-  runTestbed('serves default index.html', () async {
+  runInTestbed('serves default index.html', () async {
     final String flutterJsPath = globals.fs.path.join(
       globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
       'flutter.js',
@@ -507,7 +507,7 @@ void main() {
     );
   });
 
-  runTestbed('handles web server paths without .lib extension', () async {
+  runInTestbed('handles web server paths without .lib extension', () async {
     final File source = globals.fs.file('source')
       ..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')
@@ -531,7 +531,7 @@ void main() {
     expect(response.statusCode, HttpStatus.ok);
   });
 
-  runTestbed('serves JavaScript files from memory cache on Windows', () async {
+  runInTestbed('serves JavaScript files from memory cache on Windows', () async {
     final File source = globals.fs.file('source')
       ..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')
@@ -560,7 +560,7 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{Platform: () => windows});
 
-  runTestbed('serves asset files from filesystem with url-encoded paths', () async {
+  runInTestbed('serves asset files from filesystem with url-encoded paths', () async {
     final String path = globals.fs.path.join(
       'build',
       'flutter_assets',
@@ -582,7 +582,7 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   });
 
-  runTestbed('serves files from web directory', () async {
+  runInTestbed('serves files from web directory', () async {
     final File source = globals.fs.file(globals.fs.path.join('web', 'foo.png'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(kTransparentImage);
@@ -599,7 +599,7 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   });
 
-  runTestbed('serves asset files from filesystem with known mime type on Windows', () async {
+  runInTestbed('serves asset files from filesystem with known mime type on Windows', () async {
     final String path = globals.fs.path.join('build', 'flutter_assets', 'foo.png');
     final File source = globals.fs.file(path)
       ..createSync(recursive: true)
@@ -617,7 +617,7 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{Platform: () => windows});
 
-  runTestbed('serves Dart files from filesystem on Linux/macOS', () async {
+  runInTestbed('serves Dart files from filesystem on Linux/macOS', () async {
     final File source = globals.fs.file('foo.dart').absolute
       ..createSync(recursive: true)
       ..writeAsStringSync('void main() {}');
@@ -633,7 +633,7 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{Platform: () => linux});
 
-  runTestbed('serves asset files from filesystem with known mime type', () async {
+  runInTestbed('serves asset files from filesystem with known mime type', () async {
     final String path = globals.fs.path.join('build', 'flutter_assets', 'foo.png');
     final File source = globals.fs.file(path)
       ..createSync(recursive: true)
@@ -650,7 +650,7 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   });
 
-  runTestbed('serves asset files from filesystem with known mime type and empty content', () async {
+  runInTestbed('serves asset files from filesystem with known mime type and empty content', () async {
     final String path = globals.fs.path.join('web', 'foo.js');
     final File source = globals.fs.file(path)
       ..createSync(recursive: true);
@@ -666,7 +666,7 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   });
 
-  runTestbed('serves asset files from filesystem with unknown mime type', () async {
+  runInTestbed('serves asset files from filesystem with unknown mime type', () async {
     final String path = globals.fs.path.join('build', 'flutter_assets', 'foo');
     final File source = globals.fs.file(path)
       ..createSync(recursive: true)
@@ -683,7 +683,7 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   });
 
-  runTestbed('serves valid etag header for asset files with non-ascii characters', () async {
+  runInTestbed('serves valid etag header for asset files with non-ascii characters', () async {
     final String path = globals.fs.path.join('build', 'flutter_assets', 'fooπ');
     globals.fs.file(path)
       ..createSync(recursive: true)
@@ -697,7 +697,7 @@ void main() {
     expect(etag.runes, everyElement(predicate((int char) => char < 255)));
   });
 
-  runTestbed('serves /packages/<package>/<path> files as if they were package:<package>/<path> uris', () async {
+  runInTestbed('serves /packages/<package>/<path> files as if they were package:<package>/<path> uris', () async {
     final String path = globals.fs.path.fromUri(
       packages.resolve(Uri.parse('package:flutter_tools/foo.dart')),
     );
@@ -716,12 +716,12 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   });
 
-  runTestbed('calling dispose closes the HTTP server', () async {
+  runInTestbed('calling dispose closes the HTTP server', () async {
     await webAssetServer.dispose();
     expect(httpServer.closed, true);
   });
 
-  runTestbed('Can start web server with specified DDC module system assets', () async {
+  runInTestbed('Can start web server with specified DDC module system assets', () async {
     final String path = globals.fs.path.join('lib', 'main.dart');
     final File outputFile = globals.fs.file(path)
       ..createSync(recursive: true);
@@ -845,7 +845,7 @@ void main() {
     await webDevFS.destroy();
   }, overrides: <Type, Generator>{Artifacts: Artifacts.test});
 
-  runTestbed('Can start web server with specified assets in sound null safety mode', () async {
+  runInTestbed('Can start web server with specified assets in sound null safety mode', () async {
     final String path = globals.fs.path.join('lib', 'main.dart');
     final File outputFile = globals.fs.file(path)
       ..createSync(recursive: true);
@@ -967,7 +967,7 @@ void main() {
     await webDevFS.destroy();
   }, overrides: <Type, Generator>{Artifacts: Artifacts.test});
 
-  runTestbed('.connect() will never call vmServiceFactory twice', () async {
+  runInTestbed('.connect() will never call vmServiceFactory twice', () async {
     await FakeAsync().run<Future<void>>((FakeAsync time) {
       final String path = globals.fs.path.join('lib', 'main.dart');
       final File outputFile = globals.fs.file(path)
@@ -1047,7 +1047,7 @@ void main() {
     });
   }, overrides: <Type, Generator>{Artifacts: Artifacts.test});
 
-  runTestbed('Can start web server with hostname any', () async {
+  runInTestbed('Can start web server with hostname any', () async {
     final String path = globals.fs.path.join('lib', 'main.dart');
     final File outputFile = globals.fs.file(path)
       ..createSync(recursive: true);
@@ -1091,7 +1091,7 @@ void main() {
     await webDevFS.destroy();
   });
 
-  runTestbed('Can start web server with canvaskit enabled', () async {
+  runInTestbed('Can start web server with canvaskit enabled', () async {
     final String path = globals.fs.path.join('lib', 'main.dart');
     final File outputFile = globals.fs.file(path)
       ..createSync(recursive: true);
@@ -1141,7 +1141,7 @@ void main() {
     await webDevFS.destroy();
   });
 
-  runTestbed('Can start web server with auto detect enabled', () async {
+  runInTestbed('Can start web server with auto detect enabled', () async {
     final String path = globals.fs.path.join('lib', 'main.dart');
     final File outputFile = globals.fs.file(path)
       ..createSync(recursive: true);
@@ -1191,7 +1191,7 @@ void main() {
     await webDevFS.destroy();
   });
 
-  runTestbed('Can start web server with tls connection', () async {
+  runInTestbed('Can start web server with tls connection', () async {
     final String dataPath = globals.fs.path.join(
       getFlutterRoot(),
       'packages',
@@ -1316,21 +1316,21 @@ void main() {
     await webAssetServer.dispose();
   });
 
-  runTestbed('WebAssetServer responds to POST requests with 404 not found', () async {
+  runInTestbed('WebAssetServer responds to POST requests with 404 not found', () async {
     final Response response = await webAssetServer.handleRequest(
       Request('POST', Uri.parse('http://foobar/something')),
     );
     expect(response.statusCode, 404);
   });
 
-  runTestbed('ReleaseAssetServer responds to POST requests with 404 not found', () async {
+  runInTestbed('ReleaseAssetServer responds to POST requests with 404 not found', () async {
     final Response response = await releaseAssetServer.handle(
       Request('POST', Uri.parse('http://foobar/something')),
     );
     expect(response.statusCode, 404);
   });
 
-  runTestbed('WebAssetServer strips leading base href off of asset requests', () async {
+  runInTestbed('WebAssetServer strips leading base href off of asset requests', () async {
     const String htmlContent = '<html><head><base href="/foo/"></head><body id="test"></body></html>';
     globals.fs.currentDirectory.childDirectory('web').childFile('index.html')
       ..createSync(recursive: true)
@@ -1358,7 +1358,7 @@ void main() {
     );
   });
 
-  runTestbed('DevFS URI includes any specified base path.', () async {
+  runInTestbed('DevFS URI includes any specified base path.', () async {
     final String path = globals.fs.path.join('lib', 'main.dart');
     final File outputFile = globals.fs.file(path)
       ..createSync(recursive: true);
