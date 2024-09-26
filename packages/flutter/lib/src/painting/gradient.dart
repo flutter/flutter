@@ -570,6 +570,7 @@ class LinearGradient extends Gradient {
       ],
       stops: stops,
       tileMode: tileMode,
+      transform: transform,
     );
   }
 }
@@ -872,6 +873,7 @@ class RadialGradient extends Gradient {
       tileMode: tileMode,
       focal: focal,
       focalRadius: focalRadius,
+      transform: transform,
     );
   }
 }
@@ -1149,6 +1151,7 @@ class SweepGradient extends Gradient {
       ],
       stops: stops,
       tileMode: tileMode,
+      transform: transform,
     );
   }
 }
