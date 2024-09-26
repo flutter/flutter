@@ -2291,9 +2291,9 @@ void main() {
     testWidgets('Shortcuts of MenuAnchor do not rely on WidgetsApp.shortcuts', (WidgetTester tester) async {
       // MenuAnchor used to rely on WidgetsApp.shortcuts for menu navigation,
       // which is a problem for Web because the Web uses a special set of
-      // default shortcuts that make arrow keys scroll instead of traversing,
-      // and therefore arrow keys won't enter submenus when the focus is on
-      // MenuAnchor.
+      // default shortcuts that define arrow keys as scrolling instead of
+      // traversing, and therefore arrow keys won't enter submenus when the
+      // focus is on MenuAnchor.
       //
       // This test verifies that `MenuAnchor`'s shortcuts continues to work even
       // when `WidgetsApp.shortcuts` contains almost nothing.
