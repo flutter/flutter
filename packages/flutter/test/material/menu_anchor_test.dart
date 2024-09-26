@@ -2303,7 +2303,7 @@ void main() {
         MaterialApp(
           // A minimal set of shortcuts that only contains 'enter' that is
           // needed to verify which button is focused.
-          shortcuts: <ShortcutActivator, Intent>{
+          shortcuts: const <ShortcutActivator, Intent>{
             SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
           },
           home: Scaffold(
@@ -2316,7 +2316,7 @@ void main() {
                   },
                 )
               ),
-              child: Text("Main button"),
+              child: const Text('Main button'),
             ),
           ),
         ),
@@ -4787,8 +4787,8 @@ class _CustomDropdownButton extends StatefulWidget {
 }
 
 class _CustomDropdownButtonState extends State<_CustomDropdownButton> {
-  final _controller = WidgetStatesController();
-  final childNode = FocusNode(debugLabel: "Dropdown Inkwell");
+  final WidgetStatesController _controller = WidgetStatesController();
+  final FocusNode childNode = FocusNode(debugLabel: 'Dropdown Inkwell');
 
   @override
   void dispose() {
@@ -4801,7 +4801,7 @@ class _CustomDropdownButtonState extends State<_CustomDropdownButton> {
   Widget build(BuildContext context) {
     return MenuAnchor(
       childFocusNode: childNode,
-      builder: (context, controller, child) {
+      builder: (BuildContext context, MenuController controller, Widget? child) {
         return InkWell(
           focusNode: childNode,
           statesController: _controller,
