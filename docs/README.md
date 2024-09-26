@@ -1,6 +1,6 @@
 This wiki is primarily aimed at engineers building or making contributions to Flutter.
 
-If you are new to Flutter, then you will find more general information on the Flutter project, including tutorials and samples, on our Web site at [flutter.dev](https://flutter.dev). For specific information about Flutter's APIs, consider our API reference which can be found at the [api.flutter.dev](https://api.flutter.dev/).
+If you are new to Flutter, then you will find more general information on the Flutter project, including tutorials and samples, on our website at [flutter.dev](https://flutter.dev). For specific information about Flutter's APIs, consider our API reference which can be found at the [api.flutter.dev](https://api.flutter.dev/).
 
 If you want to know what we're likely to do in the future, our [roadmap](./roadmap/Roadmap.md) may be of interest.
 
