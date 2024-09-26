@@ -195,7 +195,7 @@ TEST_P(AiksTest, PaintBlendModeIsRespected) {
 }
 
 // Compare results with https://api.flutter.dev/flutter/dart-ui/BlendMode.html
-TEST_P(AiksTest, ImageFilterBlend) {
+TEST_P(AiksTest, ColorFilterBlend) {
   bool has_color_filter = true;
   auto callback = [&]() -> sk_sp<DisplayList> {
     if (AiksTest::ImGuiBegin("Controls", nullptr,
@@ -217,6 +217,63 @@ TEST_P(AiksTest, ImageFilterBlend) {
         DlBlendMode::kSrcIn,   DlBlendMode::kSrcOut,  DlBlendMode::kDst,
         DlBlendMode::kDstATop, DlBlendMode::kDstOver, DlBlendMode::kDstIn,
         DlBlendMode::kDstOut,  DlBlendMode::kClear,   DlBlendMode::kXor};
+
+    for (uint32_t i = 0; i < blend_modes.size(); ++i) {
+      builder.Save();
+      builder.Translate((i % 5) * 200, (i / 5) * 200);
+      builder.Scale(0.4, 0.4);
+      {
+        DlPaint dstPaint;
+        builder.DrawImage(dst_image, {0, 0}, DlImageSampling::kMipmapLinear,
+                          &dstPaint);
+      }
+      {
+        DlPaint srcPaint;
+        srcPaint.setBlendMode(blend_modes[i]);
+        if (has_color_filter) {
+          std::shared_ptr<const DlColorFilter> color_filter =
+              DlBlendColorFilter::Make(DlColor::RGBA(0.9, 0.5, 0.0, 1.0),
+                                       DlBlendMode::kSrcIn);
+          srcPaint.setColorFilter(color_filter);
+        }
+        builder.DrawImage(src_image, {0, 0}, DlImageSampling::kMipmapLinear,
+                          &srcPaint);
+      }
+      builder.Restore();
+    }
+    return builder.Build();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+// Verification for: https://github.com/flutter/flutter/issues/155691
+TEST_P(AiksTest, ColorFilterAdvancedBlend) {
+  bool has_color_filter = true;
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::Checkbox("has color filter", &has_color_filter);
+      ImGui::End();
+    }
+
+    DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
+
+    auto src_image =
+        DlImageImpeller::Make(CreateTextureForFixture("blend_mode_src.png"));
+    auto dst_image =
+        DlImageImpeller::Make(CreateTextureForFixture("blend_mode_dst.png"));
+
+    std::vector<DlBlendMode> blend_modes = {
+        DlBlendMode::kScreen,     DlBlendMode::kOverlay,
+        DlBlendMode::kDarken,     DlBlendMode::kLighten,
+        DlBlendMode::kColorDodge, DlBlendMode::kColorBurn,
+        DlBlendMode::kHardLight,  DlBlendMode::kSoftLight,
+        DlBlendMode::kDifference, DlBlendMode::kExclusion,
+        DlBlendMode::kMultiply,   DlBlendMode::kHue,
+        DlBlendMode::kSaturation, DlBlendMode::kColor,
+        DlBlendMode::kLuminosity,
+    };
 
     for (uint32_t i = 0; i < blend_modes.size(); ++i) {
       builder.Save();
