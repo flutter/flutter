@@ -371,6 +371,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
   bool get _viewIsOpen => !_anchorIsVisible;
   SearchController? _internalSearchController;
   SearchController get _searchController => widget.searchController ?? (_internalSearchController ??= SearchController());
+  _SearchViewRoute? _route;
 
   @override
   void initState() {
@@ -401,15 +402,25 @@ class _SearchAnchorState extends State<SearchAnchor> {
 
   @override
   void dispose() {
-    super.dispose();
     widget.searchController?._detach(this);
     _internalSearchController?._detach(this);
-    _internalSearchController?.dispose();
+    final bool usingExternalController = widget.searchController != null;
+    if (_route?.navigator != null) {
+      _route?._dismiss(
+        disposeController: !usingExternalController,
+      );
+      if (usingExternalController) {
+        _internalSearchController?.dispose();
+      }
+    } else {
+      _internalSearchController?.dispose();
+    }
+    super.dispose();
   }
 
   void _openView() {
     final NavigatorState navigator = Navigator.of(context);
-    navigator.push(_SearchViewRoute(
+    _route = _SearchViewRoute(
       viewOnChanged: widget.viewOnChanged,
       viewOnSubmitted: widget.viewOnSubmitted,
       viewLeading: widget.viewLeading,
@@ -436,7 +447,8 @@ class _SearchAnchorState extends State<SearchAnchor> {
       capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
       textInputAction: widget.textInputAction,
       keyboardType: widget.keyboardType,
-    ));
+    );
+    navigator.push(_route!);
   }
 
   void _closeView(String? selectedText) {
@@ -542,6 +554,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final TextInputType? keyboardType;
   CurvedAnimation? curvedAnimation;
   CurvedAnimation? viewFadeOnIntervalCurve;
+  bool willDisposeSearchController = false;
 
   @override
   Color? get barrierColor => Colors.transparent;
@@ -585,10 +598,20 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     return super.didPop(result);
   }
 
+  void _dismiss({required bool disposeController}) {
+    willDisposeSearchController = disposeController;
+    if (isActive) {
+      navigator?.removeRoute(this);
+    }
+  }
+
   @override
   void dispose() {
     curvedAnimation?.dispose();
     viewFadeOnIntervalCurve?.dispose();
+    if (willDisposeSearchController) {
+      searchController.dispose();
+    }
     super.dispose();
   }
 
