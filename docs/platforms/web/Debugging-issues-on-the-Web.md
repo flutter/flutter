@@ -1,6 +1,6 @@
 # Debugging issues on the Web
 
-The tips below can help you debug Web issues quicker and file more readable Github issues.
+The tips below can help you debug Web issues quicker and file more readable GitHub issues.
 
 ## Chrome DevTools
 
