@@ -1152,8 +1152,7 @@ void testMain() {
 
       // Scene 5: A combination of scene 1 and scene 4, where a subtitle is
       // painted over each platform view and a placeholder is painted under each
-      // one. Unfortunately, we need an overlay for each platform view in this
-      // case.
+      // one.
       final LayerSceneBuilder sb5 = LayerSceneBuilder();
       sb5.pushOffset(0, 0);
       sb5.addPicture(
@@ -1181,9 +1180,7 @@ void testMain() {
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
-        _overlay,
         _platformView,
-        _overlay,
         _platformView,
         _overlay,
       ]);
@@ -1314,7 +1311,6 @@ void testMain() {
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
-        _overlay,
         _platformView,
         _overlay,
       ]);
