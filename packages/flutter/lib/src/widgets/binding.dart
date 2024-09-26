@@ -1233,15 +1233,15 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   Widget wrapWithDefaultView(Widget rootWidget) {
     if (platformDispatcher.implicitView == null) {
       throw StateError(
-        "The app is attempting to render into a default View that isn't available "
-        '(`platformDispatcher.implicitView == null`).\n'
-
-        'This is likely because the platform has multi-view mode enabled, '
-        'but the app is calling `runApp` to render its root Widget.\n'
-
-        'Try using `runWidget` instead of `runApp` to start your app. '
+        'The app requested a view, but the platform did not provide one.\n'
+        'This is likely because the app called `runApp` to render its root '
+        'widget, which expects the platform to provide a default view to '
+        'render into (the "implicit" view).\n'
+        'However, the platform likely has multi-view mode enabled, which does '
+        'not create this default "implicit" view.\n'
+        'Try using `runWidget` instead of `runApp` to start your app.\n'
         '`runWidget` allows you to provide a `View` widget, without requiring '
-        'a default on the platform.'
+        'a default view.'
         '${kIsWeb?"\nSee: https://flutter.dev/to/web-multiview-runwidget" : ""}'
       );
     }
