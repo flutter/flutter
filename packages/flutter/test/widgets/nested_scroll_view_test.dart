@@ -208,8 +208,9 @@ class TabPageState extends State<TabPage> with AutomaticKeepAliveClientMixin {
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) =>
-                      ListTile(title: Text('Item $index')),
+                  (BuildContext context, int index) {
+                    return ListTile(title: Text('Item $index'));
+                  },
                   childCount: 30,
                 ),
               ),
