@@ -96,12 +96,14 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   String? get barrierLabel => null;
 
   @override
-  DelegatedTransitionBuilder? get delegatedTransition => (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child) {
+  DelegatedTransitionBuilder? get delegatedTransition => _delegatedTransition;
+
+  static Widget? _delegatedTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
     final TargetPlatform platform = Theme.of(context).platform;
     final DelegatedTransitionBuilder? themeDelegatedTransition = theme.delegatedTransition(platform);
     return themeDelegatedTransition != null ? themeDelegatedTransition(context, animation, secondaryAnimation, allowSnapshotting, child) : null;
-  };
+  }
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {

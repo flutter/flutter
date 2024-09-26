@@ -723,8 +723,9 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   /// A transition builder that takes into account the snapshotting properties of
   /// [ZoomPageTransitionsBuilder].
   ///
-  /// This is provided to [ZoomDelegatedTransition.builder], to be passed to the
-  /// previous page route, when the current page is added to the stack.
+  /// This is provided to the `delegatedTransition` of a [ModalRoute], to be
+  /// passed to the previous page route, when the current page is added to the
+  /// stack.
   static Widget snapshotAwareDelegatedTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child, bool allowSnapshotting, bool allowEnterRouteSnapshotting, Color? backgroundColor) {
     final Color enterTransitionBackgroundColor = backgroundColor ?? Theme.of(context).colorScheme.surface;
     return DualTransitionBuilder(
