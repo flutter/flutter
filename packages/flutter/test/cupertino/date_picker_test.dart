@@ -291,7 +291,6 @@ void main() {
 
     expect(
       () => CupertinoDatePicker(
-        mode: CupertinoDatePickerMode.dateAndTime,
         onDateTimeChanged: (_) {},
         showDayOfWeek: true,
       ),
