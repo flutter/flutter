@@ -389,32 +389,6 @@ class _CarouselViewState extends State<CarouselView> {
     }
   }
 
-  Widget _buildCarouselContent(
-      int index, WidgetStateProperty<Color?>? overlayColor) {
-    if (widget.enableSplash) {
-      return Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          widget.children[index],
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => widget.onTap?.call(index),
-              overlayColor: overlayColor,
-            ),
-          ),
-        ],
-      );
-    }
-    if (widget.onTap != null) {
-      return GestureDetector(
-        onTap: () => widget.onTap!(index),
-        child: widget.children[index],
-      );
-    }
-    return widget.children[index];
-  }
-
   Widget _buildCarouselItem(ThemeData theme, int index) {
     final EdgeInsets effectivePadding =
         widget.padding ?? const EdgeInsets.all(4.0);
@@ -438,6 +412,28 @@ class _CarouselViewState extends State<CarouselView> {
               }
               return null;
             });
+    Widget contents = widget.children[index];
+
+    if (widget.enableSplash) {
+      contents = Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          contents,
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => widget.onTap?.call(index),
+              overlayColor: effectiveOverlayColor,
+            ),
+          ),
+        ],
+      );
+    } else if (widget.onTap != null) {
+      contents = GestureDetector(
+        onTap: () => widget.onTap!(index),
+        child: contents,
+      );
+    }
 
     return Padding(
       padding: effectivePadding,
@@ -446,7 +442,7 @@ class _CarouselViewState extends State<CarouselView> {
         color: effectiveBackgroundColor,
         elevation: effectiveElevation,
         shape: effectiveShape,
-        child: _buildCarouselContent(index, effectiveOverlayColor),
+        child: contents,
       ),
     );
   }
