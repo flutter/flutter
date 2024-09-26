@@ -53,7 +53,7 @@ abstract class ViewRasterizer {
     // The [frameSize] may be slightly imprecise if the `devicePixelRatio` isn't
     // an integer. For example, is you zoom to 110% in Chrome on a Macbook, the
     // `devicePixelRatio` is `2.200000047683716`, so when the physical size is
-    // computed by multiplying the logical size by the device pixel ratio, the
+    // computed by multiplying the logical size by the devie pixel ratio, the
     // result is slightly imprecise as well. Nevertheless, the number should
     // be close to an integer, so round the frame size to be more precice.
     final BitmapSize bitmapSize = BitmapSize.fromSize(frameSize);
@@ -61,11 +61,14 @@ abstract class ViewRasterizer {
     currentFrameSize = bitmapSize;
     prepareToDraw();
     viewEmbedder.frameSize = currentFrameSize;
-    final Frame compositorFrame = context.acquireFrame(viewEmbedder);
+    final CkPictureRecorder pictureRecorder = CkPictureRecorder();
+    pictureRecorder.beginRecording(ui.Offset.zero & currentFrameSize.toSize());
+    final Frame compositorFrame =
+        context.acquireFrame(pictureRecorder.recordingCanvas!, viewEmbedder);
 
     compositorFrame.raster(layerTree, ignoreRasterCache: true);
 
-    await viewEmbedder.submitFrame();
+    await viewEmbedder.submitFrame(pictureRecorder.endRecording());
   }
 
   /// Do some initialization to prepare to draw a frame.
