@@ -1703,9 +1703,10 @@ class _TabBarState extends State<TabBar> {
       EdgeInsetsGeometry padding = widget.labelPadding ?? tabBarTheme.labelPadding ?? kTabLabelPadding;
       const double verticalAdjustment = (_kTextAndIconTabHeight - _kTabHeight) / 2.0;
 
+      final Widget tab = widget.tabs[index];
       if (
-        widget.tabs[index] case PreferredSizeWidget(preferredSize: Size(height: _kTabHeight))
-        when widget.tabHasTextAndIcon
+        tab is PreferredSizeWidget && tab.preferredSize.height == _kTabHeight
+        && widget.tabHasTextAndIcon
       ) {
         padding = padding.add(const EdgeInsets.symmetric(vertical: verticalAdjustment));
       }
