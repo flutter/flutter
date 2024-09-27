@@ -2467,14 +2467,14 @@ class TextSelectionGestureDetectorBuilder {
                 editableText.toggleToolbar(false);
               }
             } else if (((_positionWasOnSelectionExclusive(textPosition) && !previousSelection.isCollapsed)
-                       || (_positionWasOnSelectionInclusive(textPosition) && previousSelection.isCollapsed && isAffinityTheSame && !editableText.widget.readOnly))
+                       || (_positionWasOnSelectionInclusive(textPosition) && previousSelection.isCollapsed && isAffinityTheSame && !renderEditable.readOnly))
                        && renderEditable.hasFocus) {
               editableText.toggleToolbar(false);
             } else {
               renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
               if (previousSelection == editableText.textEditingValue.selection
                   && renderEditable.hasFocus
-                  && !editableText.widget.readOnly) {
+                  && !renderEditable.readOnly) {
                 editableText.toggleToolbar(false);
               } else {
                 editableText.hideToolbar(false);
@@ -2516,7 +2516,7 @@ class TextSelectionGestureDetectorBuilder {
         if (!renderEditable.hasFocus) {
           _longPressStartedWithoutFocus = true;
           renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-        } else if (editableText.widget.readOnly) {
+        } else if (renderEditable.readOnly) {
           renderEditable.selectWord(cause: SelectionChangedCause.longPress);
           if (editableText.context.mounted) {
             Feedback.forLongPress(editableText.context);
@@ -2581,7 +2581,7 @@ class TextSelectionGestureDetectorBuilder {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        if (_longPressStartedWithoutFocus || editableText.widget.readOnly) {
+        if (_longPressStartedWithoutFocus || renderEditable.readOnly) {
           renderEditable.selectWordsInRange(
             from: details.globalPosition - details.offsetFromOrigin - editableOffset - scrollableOffset,
             to: details.globalPosition,
