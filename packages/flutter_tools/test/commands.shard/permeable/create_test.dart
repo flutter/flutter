@@ -3141,6 +3141,33 @@ void main() {
     expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
   });
 
+  testUsingContext('Android FFI plugin contains 16kb page support', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '-t',
+      'plugin_ffi',
+      '--org',
+      'com.bar.foo',
+      '--platforms=android',
+      projectDir.path
+    ]);
+
+    final File cmakeLists =
+        globals.fs.file('${projectDir.path}/src/CMakeLists.txt');
+
+    expect(cmakeLists.existsSync(), true);
+
+    final String cmakeListsContent = await cmakeLists.readAsString();
+    const String expected16KbFlags = 'PRIVATE "-Wl,-z,max-page-size=16384")';
+    expect(cmakeListsContent.contains(expected16KbFlags), true);
+  });
+
   testUsingContext('Android Kotlin plugin contains namespace', () async {
     Cache.flutterRoot = '../..';
 
