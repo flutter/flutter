@@ -11,6 +11,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
 
+FLUTTER_ASSERT_ARC
+
 static NSString* const kUIBackgroundMode = @"UIBackgroundModes";
 static NSString* const kRemoteNotificationCapabitiliy = @"remote-notification";
 static NSString* const kBackgroundFetchCapatibility = @"fetch";
@@ -18,11 +20,10 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
 @interface FlutterAppDelegate ()
 @property(nonatomic, copy) FlutterViewController* (^rootFlutterViewControllerGetter)(void);
+@property(nonatomic, strong) FlutterPluginAppLifeCycleDelegate* lifeCycleDelegate;
 @end
 
-@implementation FlutterAppDelegate {
-  FlutterPluginAppLifeCycleDelegate* _lifeCycleDelegate;
-}
+@implementation FlutterAppDelegate
 
 - (instancetype)init {
   if (self = [super init]) {
@@ -31,21 +32,16 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   return self;
 }
 
-- (void)dealloc {
-  [_lifeCycleDelegate release];
-  [_rootFlutterViewControllerGetter release];
-  [_window release];
-  [super dealloc];
-}
-
 - (BOOL)application:(UIApplication*)application
     willFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-  return [_lifeCycleDelegate application:application willFinishLaunchingWithOptions:launchOptions];
+  return [self.lifeCycleDelegate application:application
+              willFinishLaunchingWithOptions:launchOptions];
 }
 
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-  return [_lifeCycleDelegate application:application didFinishLaunchingWithOptions:launchOptions];
+  return [self.lifeCycleDelegate application:application
+               didFinishLaunchingWithOptions:launchOptions];
 }
 
 // Returns the key window's rootViewController, if it's a FlutterViewController.
@@ -85,20 +81,20 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 - (void)application:(UIApplication*)application
     didRegisterUserNotificationSettings:(UIUserNotificationSettings*)notificationSettings {
-  [_lifeCycleDelegate application:application
+  [self.lifeCycleDelegate application:application
       didRegisterUserNotificationSettings:notificationSettings];
 }
 #pragma GCC diagnostic pop
 
 - (void)application:(UIApplication*)application
     didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken {
-  [_lifeCycleDelegate application:application
+  [self.lifeCycleDelegate application:application
       didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
 }
 
 - (void)application:(UIApplication*)application
     didFailToRegisterForRemoteNotificationsWithError:(NSError*)error {
-  [_lifeCycleDelegate application:application
+  [self.lifeCycleDelegate application:application
       didFailToRegisterForRemoteNotificationsWithError:error];
 }
 
@@ -106,7 +102,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 - (void)application:(UIApplication*)application
     didReceiveLocalNotification:(UILocalNotification*)notification {
-  [_lifeCycleDelegate application:application didReceiveLocalNotification:notification];
+  [self.lifeCycleDelegate application:application didReceiveLocalNotification:notification];
 }
 #pragma GCC diagnostic pop
 
@@ -114,10 +110,10 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
        willPresentNotification:(UNNotification*)notification
          withCompletionHandler:
              (void (^)(UNNotificationPresentationOptions options))completionHandler {
-  if ([_lifeCycleDelegate respondsToSelector:_cmd]) {
-    [_lifeCycleDelegate userNotificationCenter:center
-                       willPresentNotification:notification
-                         withCompletionHandler:completionHandler];
+  if ([self.lifeCycleDelegate respondsToSelector:_cmd]) {
+    [self.lifeCycleDelegate userNotificationCenter:center
+                           willPresentNotification:notification
+                             withCompletionHandler:completionHandler];
   }
 }
 
@@ -127,10 +123,10 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 - (void)userNotificationCenter:(UNUserNotificationCenter*)center
     didReceiveNotificationResponse:(UNNotificationResponse*)response
              withCompletionHandler:(void (^)(void))completionHandler {
-  if ([_lifeCycleDelegate respondsToSelector:_cmd]) {
-    [_lifeCycleDelegate userNotificationCenter:center
-                didReceiveNotificationResponse:response
-                         withCompletionHandler:completionHandler];
+  if ([self.lifeCycleDelegate respondsToSelector:_cmd]) {
+    [self.lifeCycleDelegate userNotificationCenter:center
+                    didReceiveNotificationResponse:response
+                             withCompletionHandler:completionHandler];
   }
 }
 
@@ -145,7 +141,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options {
-  if ([_lifeCycleDelegate application:application openURL:url options:options]) {
+  if ([self.lifeCycleDelegate application:application openURL:url options:options]) {
     return YES;
   }
 
@@ -178,31 +174,31 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 }
 
 - (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url {
-  return [_lifeCycleDelegate application:application handleOpenURL:url];
+  return [self.lifeCycleDelegate application:application handleOpenURL:url];
 }
 
 - (BOOL)application:(UIApplication*)application
               openURL:(NSURL*)url
     sourceApplication:(NSString*)sourceApplication
            annotation:(id)annotation {
-  return [_lifeCycleDelegate application:application
-                                 openURL:url
-                       sourceApplication:sourceApplication
-                              annotation:annotation];
+  return [self.lifeCycleDelegate application:application
+                                     openURL:url
+                           sourceApplication:sourceApplication
+                                  annotation:annotation];
 }
 
 - (void)application:(UIApplication*)application
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler {
-  [_lifeCycleDelegate application:application
-      performActionForShortcutItem:shortcutItem
-                 completionHandler:completionHandler];
+  [self.lifeCycleDelegate application:application
+         performActionForShortcutItem:shortcutItem
+                    completionHandler:completionHandler];
 }
 
 - (void)application:(UIApplication*)application
     handleEventsForBackgroundURLSession:(nonnull NSString*)identifier
                       completionHandler:(nonnull void (^)())completionHandler {
-  [_lifeCycleDelegate application:application
+  [self.lifeCycleDelegate application:application
       handleEventsForBackgroundURLSession:identifier
                         completionHandler:completionHandler];
 }
@@ -213,9 +209,9 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
       restorationHandler:
           (void (^)(NSArray<id<UIUserActivityRestoring>>* __nullable restorableObjects))
               restorationHandler {
-  if ([_lifeCycleDelegate application:application
-                 continueUserActivity:userActivity
-                   restorationHandler:restorationHandler]) {
+  if ([self.lifeCycleDelegate application:application
+                     continueUserActivity:userActivity
+                       restorationHandler:restorationHandler]) {
     return YES;
   }
 
@@ -251,30 +247,30 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 #pragma mark - Selectors handling
 
 - (void)addApplicationLifeCycleDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate {
-  [_lifeCycleDelegate addDelegate:delegate];
+  [self.lifeCycleDelegate addDelegate:delegate];
 }
 
 #pragma mark - UIApplicationDelegate method dynamic implementation
 
 - (BOOL)respondsToSelector:(SEL)selector {
-  if ([_lifeCycleDelegate isSelectorAddedDynamically:selector]) {
+  if ([self.lifeCycleDelegate isSelectorAddedDynamically:selector]) {
     return [self delegateRespondsSelectorToPlugins:selector];
   }
   return [super respondsToSelector:selector];
 }
 
 - (BOOL)delegateRespondsSelectorToPlugins:(SEL)selector {
-  if ([_lifeCycleDelegate hasPluginThatRespondsToSelector:selector]) {
-    return [_lifeCycleDelegate respondsToSelector:selector];
+  if ([self.lifeCycleDelegate hasPluginThatRespondsToSelector:selector]) {
+    return [self.lifeCycleDelegate respondsToSelector:selector];
   } else {
     return NO;
   }
 }
 
 - (id)forwardingTargetForSelector:(SEL)aSelector {
-  if ([_lifeCycleDelegate isSelectorAddedDynamically:aSelector]) {
+  if ([self.lifeCycleDelegate isSelectorAddedDynamically:aSelector]) {
     [self logCapabilityConfigurationWarningIfNeeded:aSelector];
-    return _lifeCycleDelegate;
+    return self.lifeCycleDelegate;
   }
   return [super forwardingTargetForSelector:aSelector];
 }
@@ -286,7 +282,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 - (void)logCapabilityConfigurationWarningIfNeeded:(SEL)selector {
   NSArray* backgroundModesArray =
       [[NSBundle mainBundle] objectForInfoDictionaryKey:kUIBackgroundMode];
-  NSSet* backgroundModesSet = [[[NSSet alloc] initWithArray:backgroundModesArray] autorelease];
+  NSSet* backgroundModesSet = [[NSSet alloc] initWithArray:backgroundModesArray];
   if (selector == @selector(application:didReceiveRemoteNotification:fetchCompletionHandler:)) {
     if (![backgroundModesSet containsObject:kRemoteNotificationCapabitiliy]) {
       NSLog(

@@ -59,6 +59,7 @@ source_set("flutter_framework_source_arc") {
   public_configs = [ "//flutter:config" ]
 
   sources = [
+    "framework/Source/FlutterAppDelegate.mm",
     "framework/Source/FlutterCallbackCache.mm",
     "framework/Source/FlutterCallbackCache_Internal.h",
     "framework/Source/FlutterChannelKeyResponder.h",
@@ -179,7 +180,6 @@ source_set("flutter_framework_source") {
     # iOS embedder is migrating to ARC.
     # New files are highly encouraged to be in ARC.
     # To add new files in ARC, add them to the `flutter_framework_source_arc` target.
-    "framework/Source/FlutterAppDelegate.mm",
     "framework/Source/FlutterEngine.mm",
     "framework/Source/FlutterEngineGroup.mm",
     "framework/Source/FlutterEngine_Internal.h",
