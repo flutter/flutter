@@ -190,7 +190,7 @@ void main(List<String> arguments) {
     // Generate Gradle wrapper if it doesn't exist.
     if (!gradleWrapper.existsSync()) {
       exec(
-        'flutter',
+        flutterPath,
         <String>['build', 'apk', '--config-only'],
         workingDirectory: appDirectory,
       );
