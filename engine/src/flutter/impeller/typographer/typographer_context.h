@@ -9,7 +9,6 @@
 
 #include "impeller/renderer/context.h"
 #include "impeller/typographer/glyph_atlas.h"
-#include "impeller/typographer/text_frame.h"
 
 namespace impeller {
 
@@ -34,7 +33,7 @@ class TypographerContext {
       GlyphAtlas::Type type,
       HostBuffer& host_buffer,
       const std::shared_ptr<GlyphAtlasContext>& atlas_context,
-      const std::vector<std::shared_ptr<TextFrame>>& text_frames) const = 0;
+      const FontGlyphMap& font_glyph_map) const = 0;
 
  protected:
   //----------------------------------------------------------------------------

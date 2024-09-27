@@ -16,8 +16,6 @@ namespace impeller {
 ///             This object is typically the entrypoint in the Impeller type
 ///             rendering subsystem.
 ///
-/// A text frame should not be reused in multiple places within a single frame,
-/// as internally it is used as a cache for various glyph properties.
 class TextFrame {
  public:
   TextFrame();
@@ -25,6 +23,11 @@ class TextFrame {
   TextFrame(std::vector<TextRun>& runs, Rect bounds, bool has_color);
 
   ~TextFrame();
+
+  void CollectUniqueFontGlyphPairs(FontGlyphMap& glyph_map,
+                                   Scalar scale,
+                                   Point offset,
+                                   const GlyphProperties& properties) const;
 
   static Point ComputeSubpixelPosition(
       const TextRun::GlyphPosition& glyph_position,
@@ -66,53 +69,17 @@ class TextFrame {
   bool HasColor() const;
 
   //----------------------------------------------------------------------------
-  /// @brief      The type of atlas this run should be place in.
+  /// @brief      The type of atlas this run should be emplaced in.
   GlyphAtlas::Type GetAtlasType() const;
-
-  /// @brief Verifies that all glyphs in this text frame have computed bounds
-  ///        information.
-  bool IsFrameComplete() const;
-
-  /// @brief Retrieve the frame bounds for the glyph at [index].
-  ///
-  /// This method is only valid if [IsFrameComplete] returns true.
-  const FrameBounds& GetFrameBounds(size_t index) const;
-
-  /// @brief Store text frame scale, offset, and properties for hashing in th
-  /// glyph atlas.
-  void SetPerFrameData(Scalar scale,
-                       Point offset,
-                       std::optional<GlyphProperties> properties);
 
   TextFrame& operator=(TextFrame&& other) = default;
 
   TextFrame(const TextFrame& other) = default;
 
  private:
-  friend class TypographerContextSkia;
-  friend class TypographerContextSTB;
-  friend class LazyGlyphAtlas;
-
-  Scalar GetScale() const;
-
-  Point GetOffset() const;
-
-  std::optional<GlyphProperties> GetProperties() const;
-
-  void AppendFrameBounds(const FrameBounds& frame_bounds);
-
-  void ClearFrameBounds();
-
   std::vector<TextRun> runs_;
   Rect bounds_;
   bool has_color_;
-
-  // Data that is cached when rendering the text frame and is only
-  // valid for a single frame.
-  std::vector<FrameBounds> bound_values_;
-  Scalar scale_ = 0;
-  Point offset_;
-  std::optional<GlyphProperties> properties_;
 };
 
 }  // namespace impeller

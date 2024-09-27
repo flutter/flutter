@@ -62,8 +62,6 @@ class TextContents final : public Contents {
               RenderPass& pass) const override;
 
  private:
-  std::optional<GlyphProperties> GetGlyphProperties() const;
-
   std::shared_ptr<TextFrame> frame_;
   Scalar scale_ = 1.0;
   Scalar inherited_opacity_ = 1.0;
