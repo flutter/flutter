@@ -7,7 +7,6 @@
 #include "fml/logging.h"
 #include "impeller/base/validation.h"
 #include "impeller/typographer/glyph_atlas.h"
-#include "impeller/typographer/text_frame.h"
 #include "impeller/typographer/typographer_context.h"
 
 #include <memory>
@@ -31,22 +30,23 @@ LazyGlyphAtlas::LazyGlyphAtlas(
 
 LazyGlyphAtlas::~LazyGlyphAtlas() = default;
 
-void LazyGlyphAtlas::AddTextFrame(const std::shared_ptr<TextFrame>& frame,
+void LazyGlyphAtlas::AddTextFrame(const TextFrame& frame,
                                   Scalar scale,
                                   Point offset,
-                                  std::optional<GlyphProperties> properties) {
-  frame->SetPerFrameData(scale, offset, properties);
+                                  const GlyphProperties& properties) {
   FML_DCHECK(alpha_atlas_ == nullptr && color_atlas_ == nullptr);
-  if (frame->GetAtlasType() == GlyphAtlas::Type::kAlphaBitmap) {
-    alpha_text_frames_.push_back(frame);
+  if (frame.GetAtlasType() == GlyphAtlas::Type::kAlphaBitmap) {
+    frame.CollectUniqueFontGlyphPairs(alpha_glyph_map_, scale, offset,
+                                      properties);
   } else {
-    color_text_frames_.push_back(frame);
+    frame.CollectUniqueFontGlyphPairs(color_glyph_map_, scale, offset,
+                                      properties);
   }
 }
 
 void LazyGlyphAtlas::ResetTextFrames() {
-  alpha_text_frames_.clear();
-  color_text_frames_.clear();
+  alpha_glyph_map_.clear();
+  color_glyph_map_.clear();
   alpha_atlas_.reset();
   color_atlas_.reset();
 }
@@ -75,8 +75,8 @@ const std::shared_ptr<GlyphAtlas>& LazyGlyphAtlas::CreateOrGetGlyphAtlas(
     return kNullGlyphAtlas;
   }
 
-  auto& glyph_map = type == GlyphAtlas::Type::kAlphaBitmap ? alpha_text_frames_
-                                                           : color_text_frames_;
+  auto& glyph_map = type == GlyphAtlas::Type::kAlphaBitmap ? alpha_glyph_map_
+                                                           : color_glyph_map_;
   const std::shared_ptr<GlyphAtlasContext>& atlas_context =
       type == GlyphAtlas::Type::kAlphaBitmap ? alpha_context_ : color_context_;
   std::shared_ptr<GlyphAtlas> atlas = typographer_context_->CreateGlyphAtlas(
