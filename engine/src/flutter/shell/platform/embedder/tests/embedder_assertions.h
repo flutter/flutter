@@ -70,7 +70,7 @@ inline bool operator==(const FlutterOpenGLFramebuffer& a,
 inline bool operator==(const FlutterOpenGLSurface& a,
                        const FlutterOpenGLSurface& b) {
   return a.make_current_callback == b.make_current_callback &&
-         a.user_data == b.user_data &&
+         a.user_data == b.user_data && a.format == b.format &&
          a.destruction_callback == b.destruction_callback;
 }
 
@@ -309,7 +309,8 @@ inline std::ostream& operator<<(std::ostream& out,
                                 const FlutterOpenGLSurface& item) {
   return out << "(FlutterOpenGLSurface) Make Current Callback: "
              << reinterpret_cast<void*>(item.make_current_callback)
-             << " User Data: " << item.user_data << " Destruction Callback: "
+             << " User Data: " << item.user_data << "Format: " << item.format
+             << " Destruction Callback: "
              << reinterpret_cast<void*>(item.destruction_callback);
 }
 

@@ -4527,6 +4527,65 @@ TEST_F(EmbedderTest, CreateInvalidBackingstoreOpenGLFramebuffer) {
   latch.Wait();
 }
 
+TEST_F(EmbedderTest, CreateInvalidBackingstoreOpenGLSurface) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLSurface);
+  builder.SetDartEntrypoint("invalid_backingstore");
+
+  fml::AutoResetWaitableEvent latch;
+
+  builder.GetCompositor().create_backing_store_callback =
+      [](const FlutterBackingStoreConfig* config,  //
+         FlutterBackingStore* backing_store_out,   //
+         void* user_data                           //
+      ) {
+        backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
+        backing_store_out->user_data = user_data;
+        backing_store_out->open_gl.type = kFlutterOpenGLTargetTypeSurface;
+        backing_store_out->open_gl.surface.user_data = user_data;
+        // Deliberately set this to an invalid format
+        backing_store_out->open_gl.surface.format = 0;
+        backing_store_out->open_gl.surface.make_current_callback = [](void*,
+                                                                      bool*) {
+          ADD_FAILURE() << "make_current_callback method should not be called";
+          return true;
+        };
+        backing_store_out->open_gl.surface.clear_current_callback = [](void*,
+                                                                       bool*) {
+          ADD_FAILURE() << "clear_current_callback method should not be called";
+          return true;
+        };
+        backing_store_out->open_gl.surface.destruction_callback =
+            [](void* user_data) {
+              FAIL() << "destruction_callback method should not be called";
+            };
+
+        return true;
+      };
+
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&latch](Dart_NativeArguments args) { latch.Signal(); }));
+
+  auto engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+}
+
 TEST_F(EmbedderTest, ExternalTextureGLRefreshedTooOften) {
   TestGLSurface surface(SkISize::Make(100, 100));
   auto context = surface.GetGrContext();

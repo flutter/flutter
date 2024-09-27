@@ -458,6 +458,13 @@ typedef struct {
   ///
   /// @attention required. (non-null)
   VoidCallback destruction_callback;
+
+  /// The surface format.
+  ///
+  /// Allowed values:
+  ///   - GL_RGBA8
+  ///   - GL_BGRA8_EXT
+  uint32_t format;
 } FlutterOpenGLSurface;
 
 typedef bool (*BoolCallback)(void* /* user data */);
