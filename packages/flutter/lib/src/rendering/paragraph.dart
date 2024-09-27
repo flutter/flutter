@@ -809,6 +809,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
   @override
   void performLayout() {
+    _lastSelectableFragments?.forEach((_SelectableFragment element) => element.didChangeParagraphLayout());
     final BoxConstraints constraints = this.constraints;
     _placeholderDimensions = layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.layoutChild, ChildLayoutHelper.getBaseline);
     _layoutTextWithConstraints(constraints);
