@@ -1050,9 +1050,10 @@ class _LargeTitleNavigationBarSliverDelegate
                       left: 0.0,
                       right: 0.0,
                       top: persistentHeight + _kNavBarLargeTitleHeightExtension,
+                      bottom: 0.0,
                       child: SizedBox(
                         height: drawerHeight * (1.0 - drawerShrinkFactor),
-                        child: drawer,
+                        child: ClipRect(child: drawer),
                       ),
                     ),
                 ],
