@@ -184,16 +184,17 @@
         "--simulator-cpu=arm64",
         "--runtime-mode",
         "debug",
+        "--unoptimized",
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
         "--rbe",
         "--no-goma"
       ],
-      "name": "macos/ios_debug_sim_arm64",
+      "name": "macos/ios_debug_sim_unopt_arm64",
       "description": "Builds a debug mode engine that targets the arm64 iOS simulator from a macOS host.",
       "ninja": {
-        "config": "ios_debug_sim_arm64",
+        "config": "ios_debug_sim_unopt_arm64",
         "targets": []
       },
       "properties": {
