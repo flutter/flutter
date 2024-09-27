@@ -2458,7 +2458,7 @@ void main() {
 
     expect(testWidth, equals(largestWidth));
     expect(widths.indexOf(largestWidth), equals(1));
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }
 
 Widget _buildPicker({
