@@ -78,10 +78,17 @@ Color _scaleAlpha(Color x, double factor) {
 /// Color c2 = const Color(0xFFFFFFFF); // fully opaque white (visible)
 /// ```
 ///
+/// [Color]'s color components are stored as floating-point values. Care should
+/// be taken if one does not want the literal equality provided by `operator==`.
+/// To test equality inside of Flutter tests consider using `package:test`'s
+/// `isSameColorAs`.
+///
 /// See also:
 ///
-///  * [Colors](https://api.flutter.dev/flutter/material/Colors-class.html), which
-///    defines the colors found in the Material Design specification.
+///  * [Colors](https://api.flutter.dev/flutter/material/Colors-class.html),
+///    which defines the colors found in the Material Design specification.
+///  * [`isSameColorAs`](https://api.flutter.dev/flutter/flutter_test/isSameColorAs.html),
+///    a Matcher to handle floating-point deltas when checking [Color] equality.
 class Color {
   /// Construct an sRGB color from the lower 32 bits of an [int].
   ///
