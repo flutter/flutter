@@ -250,7 +250,7 @@ class ThemeData with Diagnosticable {
   ///
   ///  * [ThemeData.from], which creates a ThemeData from a [ColorScheme].
   ///  * [ThemeData.light], which creates the default light theme.
-  ///  * [ThemeData.dark], which creates the deafult dark theme.
+  ///  * [ThemeData.dark], which creates the default dark theme.
   ///  * [ColorScheme.fromSeed], which is used to create a [ColorScheme] from a seed color.
   factory ThemeData({
     // For the sanity of the reader, make sure these properties are in the same
