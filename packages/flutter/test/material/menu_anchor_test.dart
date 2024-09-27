@@ -172,6 +172,13 @@ void main() {
     return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
   }
 
+  TextStyle iconStyle(WidgetTester tester, IconData icon) {
+    final RichText iconRichText = tester.widget<RichText>(
+      find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+    );
+    return iconRichText.text.style!;
+  }
+
   testWidgets('Menu responds to density changes', (WidgetTester tester) async {
     Widget buildMenu({VisualDensity? visualDensity = VisualDensity.standard}) {
       return MaterialApp(
@@ -1298,7 +1305,7 @@ void main() {
       expect(
         description.join('\n'),
         equalsIgnoringHashCodes(
-            'style: MenuStyle#00000(backgroundColor: WidgetStatePropertyAll(MaterialColor(primary value: Color(0xfff44336))), elevation: WidgetStatePropertyAll(10.0))\n'
+            'style: MenuStyle#00000(backgroundColor: WidgetStatePropertyAll(MaterialColor(primary value: ${const Color(0xfff44336)})), elevation: WidgetStatePropertyAll(10.0))\n'
             'clipBehavior: Clip.none'),
       );
     });
@@ -2972,7 +2979,7 @@ void main() {
         equalsIgnoringHashCodes(
           <String>[
             'focusNode: null',
-            'menuStyle: MenuStyle#00000(backgroundColor: WidgetStatePropertyAll(MaterialColor(primary value: Color(0xff4caf50))), elevation: WidgetStatePropertyAll(20.0), shape: WidgetStatePropertyAll(RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)))',
+            'menuStyle: MenuStyle#00000(backgroundColor: WidgetStatePropertyAll(MaterialColor(primary value: ${const Color(0xff4caf50)})), elevation: WidgetStatePropertyAll(20.0), shape: WidgetStatePropertyAll(RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)))',
             'alignmentOffset: null',
             'clipBehavior: hardEdge',
           ],
@@ -4508,6 +4515,148 @@ void main() {
       expect(state.target, isNull);
     }, skip: kIsWeb // [intended] ForceGC does not work in web and in release mode. See https://api.flutter.dev/flutter/package-leak_tracker_leak_tracker/forceGC.html
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/154798.
+  testWidgets('MenuItemButton.styleFrom can customize the button icon', (WidgetTester tester) async {
+    const Color iconColor = Color(0xFFF000FF);
+    const double iconSize = 32.0;
+    const Color disabledIconColor = Color(0xFFFFF000);
+    Widget buildButton({ bool enabled = true }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: MenuItemButton(
+              style: MenuItemButton.styleFrom(
+                iconColor: iconColor,
+                iconSize: iconSize,
+                disabledIconColor: disabledIconColor,
+              ),
+              onPressed: enabled ? () {} : null,
+              trailingIcon: const Icon(Icons.add),
+              child: const Text('Button'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test enabled button.
+    await tester.pumpWidget(buildButton());
+    expect(tester.getSize(find.byIcon(Icons.add)), const Size(iconSize, iconSize));
+    expect(iconStyle(tester, Icons.add).color, iconColor);
+
+    // Test disabled button.
+    await tester.pumpWidget(buildButton(enabled: false));
+    expect(iconStyle(tester, Icons.add).color, disabledIconColor);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/154798.
+  testWidgets('SubmenuButton.styleFrom can customize the button icon', (WidgetTester tester) async {
+    const Color iconColor = Color(0xFFF000FF);
+    const double iconSize = 32.0;
+    const Color disabledIconColor = Color(0xFFFFF000);
+    Widget buildButton({ bool enabled = true }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: SubmenuButton(
+              style: SubmenuButton.styleFrom(
+                iconColor: iconColor,
+                iconSize: iconSize,
+                disabledIconColor: disabledIconColor,
+              ),
+              trailingIcon: const Icon(Icons.add),
+              menuChildren: <Widget>[
+                if (enabled)
+                  const Text('Item'),
+              ],
+              child: const Text('SubmenuButton'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test enabled button.
+    await tester.pumpWidget(buildButton());
+    expect(tester.getSize(find.byIcon(Icons.add)), const Size(iconSize, iconSize));
+    expect(iconStyle(tester, Icons.add).color, iconColor);
+
+    // Test disabled button.
+    await tester.pumpWidget(buildButton(enabled: false));
+    expect(iconStyle(tester, Icons.add).color, disabledIconColor);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/155034.
+  testWidgets('Content is shown in the root overlay', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    final UniqueKey overlayKey = UniqueKey();
+    final UniqueKey menuItemKey = UniqueKey();
+
+    List<RenderObject> ancestorRenderTheaters(RenderObject child) {
+      final List<RenderObject> results = <RenderObject>[];
+      RenderObject? node = child;
+      while (node != null) {
+        if (node.runtimeType.toString() == '_RenderTheater') {
+          results.add(node);
+        }
+        final RenderObject? parent = node.parent;
+        node = parent is RenderObject? parent : null;
+      }
+      return results;
+    }
+
+    Widget boilerplate() {
+      return MaterialApp(
+        home: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                return Scaffold(
+                  body: Center(
+                    child: MenuAnchor(
+                      controller: controller,
+                      menuChildren: <Widget>[
+                        MenuItemButton(
+                          key: menuItemKey,
+                          onPressed: () {},
+                          child: const Text('Item 1'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+            ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(boilerplate());
+    expect(find.byKey(menuItemKey), findsNothing);
+
+    // Open the menu.
+    controller.open();
+    await tester.pump();
+    expect(find.byKey(menuItemKey), findsOne);
+
+    // Expect two overlays: the root overlay created by MaterialApp and the
+    // overlay created by the boilerplate code.
+    expect(find.byType(Overlay), findsNWidgets(2));
+
+    final Iterable<Overlay> overlays = tester.widgetList<Overlay>(find.byType(Overlay));
+    final Overlay nonRootOverlay = tester.widget(find.byKey(overlayKey));
+    final Overlay rootOverlay = overlays.firstWhere((Overlay overlay) => overlay != nonRootOverlay);
+
+    // Check that the ancestor _RenderTheater for the menu item is the one
+    // from the root overlay.
+    expect(
+      ancestorRenderTheaters(tester.renderObject(find.byKey(menuItemKey))).single,
+      tester.renderObject(find.byWidget(rootOverlay)),
+    );
+  });
 }
 
 List<Widget> createTestMenus({
