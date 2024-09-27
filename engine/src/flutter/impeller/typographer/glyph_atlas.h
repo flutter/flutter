@@ -19,6 +19,16 @@ namespace impeller {
 
 class FontGlyphAtlas;
 
+struct FrameBounds {
+  /// The bounds of the glyph within the glyph atlas.
+  Rect atlas_bounds;
+  /// The local glyph bounds.
+  Rect glyph_bounds;
+  /// Whether [atlas_bounds] are still a placeholder and have
+  /// not yet been computed.
+  bool is_placeholder = true;
+};
+
 //------------------------------------------------------------------------------
 /// @brief      A texture containing the bitmap representation of glyphs in
 ///             different fonts along with the ability to query the location of
@@ -115,7 +125,7 @@ class GlyphAtlas {
   /// @return     The location of the font-glyph pair in the atlas.
   ///             `std::nullopt` if the pair is not in the atlas.
   ///
-  std::optional<std::pair<Rect, Rect>> FindFontGlyphBounds(
+  std::optional<FrameBounds> FindFontGlyphBounds(
       const FontGlyphPair& pair) const;
 
   //----------------------------------------------------------------------------
@@ -130,7 +140,7 @@ class GlyphAtlas {
   ///             scale are not available in the atlas.  The pointer is only
   ///             valid for the lifetime of the GlyphAtlas.
   ///
-  const FontGlyphAtlas* GetFontGlyphAtlas(const Font& font, Scalar scale) const;
+  FontGlyphAtlas* GetOrCreateFontGlyphAtlas(const ScaledFont& scaled_font);
 
  private:
   const Type type_;
@@ -213,20 +223,25 @@ class FontGlyphAtlas {
   /// @return     The location of the glyph in the atlas.
   ///             `std::nullopt` if the glyph is not in the atlas.
   ///
-  std::optional<std::pair<Rect, Rect>> FindGlyphBounds(
-      const SubpixelGlyph& glyph) const;
+  std::optional<FrameBounds> FindGlyphBounds(const SubpixelGlyph& glyph) const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Append the frame bounds of a glyph to this atlas.
+  ///
+  ///             This may indicate a placeholder glyph location to be replaced
+  ///             at a later time, as indicated by FrameBounds.placeholder.
+  void AppendGlyph(const SubpixelGlyph& glyph, const FrameBounds& frame_bounds);
 
  private:
   friend class GlyphAtlas;
+
   std::unordered_map<SubpixelGlyph,
-                     std::pair<Rect, Rect>,
+                     FrameBounds,
                      SubpixelGlyph::Hash,
                      SubpixelGlyph::Equal>
       positions_;
 
   FontGlyphAtlas(const FontGlyphAtlas&) = delete;
-
-  FontGlyphAtlas& operator=(const FontGlyphAtlas&) = delete;
 };
 
 }  // namespace impeller
