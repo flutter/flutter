@@ -1041,10 +1041,6 @@ TEST_P(AiksTest, BlurredRectangleWithShader) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-#define FLT_FORWARD(mock, real, method) \
-  EXPECT_CALL(*mock, method())          \
-      .WillRepeatedly(::testing::Return(real->method()));
-
 TEST_P(AiksTest, GaussianBlurWithoutDecalSupport) {
   if (GetParam() != PlaygroundBackend::kMetal) {
     GTEST_SKIP()
