@@ -1,6 +1,6 @@
 This is an index of team-facing documentation for the [flutter/engine repository](https://github.com/flutter/engine/).
 
-- [Accessibility on Windows](../platforms/desktop/windows/Accessibility-on-Windows.md)
+- [Accessibility on Windows](https://github.com/flutter/flutter/blob/master/docs/platforms/desktop/windows/Accessibility-on-Windows.md)
 - [Code signing metadata](./release/Code-signing-metadata.md) for engine binaries
 - [Compiling the engine](./contributing/Compiling-the-engine.md)
 - [Comparing AOT Snapshot Sizes](./benchmarks/Comparing-AOT-Snapshot-Sizes.md)
@@ -9,7 +9,7 @@ This is an index of team-facing documentation for the [flutter/engine repository
 - [Custom Flutter Engine Embedding in AOT Mode](./Custom-Flutter-Engine-Embedding-in-AOT-Mode.md)
 - [Debugging the engine](./Debugging-the-engine.md)
 - [Flutter engine operation in AOT Mode](./Flutter-engine-operation-in-AOT-Mode.md)
-- [Flutter Test Fonts](../contributing/testing/Flutter-Test-Fonts.md)
+- [Flutter Test Fonts](https://github.com/flutter/flutter/blob/master/docs/contributing/testing/Flutter-Test-Fonts.md)
 - [Flutter's modes](./Flutter's-modes.md)
 - [Engine Clang Tidy Linter](./ci/Engine-Clang-Tidy-Linter.md)
 - [Engine disk footprint](./Engine-disk-footprint.md)
@@ -19,14 +19,14 @@ This is an index of team-facing documentation for the [flutter/engine repository
 - [Impeller](./impeller/README.md) documentation index
 - [Life of a Flutter Frame](Life-of-a-Flutter-Frame.md)
 - [Reduce Flutter engine size with MLGO](Reduce-Flutter-engine-size-with-MLGO.md)
-- [Resolving common build failures](../platforms/android/Resolving-common-build-failures.md)
+- [Resolving common build failures](https://github.com/flutter/flutter/blob/master/docs/platforms/android/Resolving-common-build-failures.md)
 - [Setting up the Engine development environment](./contributing/Setting-up-the-Engine-development-environment.md)
 - [Supporting legacy platforms](Supporting-legacy-platforms.md)
-- [Testing Android Changes in the Devicelab on an Emulator](../platforms/android/Testing-Android-Changes-in-the-Devicelab-on-an-Emulator.md)
+- [Testing Android Changes in the Devicelab on an Emulator](https://github.com/flutter/flutter/blob/master/docs/platforms/android/Testing-Android-Changes-in-the-Devicelab-on-an-Emulator.md)
 - [Testing the engine](./testing/Testing-the-engine.md)
 - [Testing presubmit Engine PRs with the Flutter framework](Testing-presubmit-Engine-PRs-with-the-Flutter-framework.md)
-- [The Engine architecture](../about/The-Engine-architecture.md)
-- [Upgrading Engine's Android API version](../platforms/android/Upgrading-Engine's-Android-API-version.md)
+- [The Engine architecture](https://github.com/flutter/flutter/blob/master/docs/about/The-Engine-architecture.md)
+- [Upgrading Engine's Android API version](https://github.com/flutter/flutter/blob/master/docs/platforms/android/Upgrading-Engine's-Android-API-version.md)
 - [Using the Dart Development Service (DDS) and Flutter DevTools with a custom Flutter Engine Embedding](./Using-the-Dart-Development-Service-(DDS)-and-Flutter-DevTools-with-a-custom-Flutter-Engine-Embedding.md)
 - [Using Sanitizers with the Flutter Engine](./Using-Sanitizers-with-the-Flutter-Engine.md)
-- [Why we have a separate engine repo](../about/Why-we-have-a-separate-engine-repo.md)
+- [Why we have a separate engine repo](https://github.com/flutter/flutter/blob/master/docs/about/Why-we-have-a-separate-engine-repo.md)
