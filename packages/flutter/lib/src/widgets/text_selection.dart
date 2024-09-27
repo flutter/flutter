@@ -2385,6 +2385,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onSingleTapUp(TapDragUpDetails details) {
     if (!delegate.selectionEnabled) {
+      editableText.requestKeyboard();
       return;
     }
     // It is impossible to extend the selection when the shift key is pressed, if the
