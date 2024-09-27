@@ -303,7 +303,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
                                  BlendModeToString(blend_mode)));
 #endif  // IMPELLER_DEBUG
     pass.SetVertexBuffer(std::move(vtx_buffer));
-    auto options = OptionsFromPass(pass);
+    auto options = OptionsFromPassAndEntity(pass, entity);
     options.primitive_type = PrimitiveType::kTriangleStrip;
 
     switch (blend_mode) {
@@ -370,8 +370,9 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
     frame_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
 
-    frame_info.mvp = Entity::GetShaderTransform(entity.GetShaderClipDepth(),
-                                                pass, dst_snapshot->transform);
+    frame_info.mvp = Entity::GetShaderTransform(
+        entity.GetShaderClipDepth(), pass,
+        entity.GetTransform() * dst_snapshot->transform);
 
     blend_info.dst_input_alpha =
         absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
@@ -402,6 +403,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
 
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));
+  sub_entity.SetBlendMode(entity.GetBlendMode());
 
   return sub_entity;
 }
