@@ -126,16 +126,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
     if (!delegate.selectionEnabled) {
       return;
     }
-    switch (Theme.of(_state.context).platform) {
-      case TargetPlatform.iOS:
-        super.onSingleTapUp(details);
-      case TargetPlatform.macOS:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        super.onSingleTapUp(details);
-    }
+    super.onSingleTapUp(details);
     _state.widget.onTap?.call();
   }
 }

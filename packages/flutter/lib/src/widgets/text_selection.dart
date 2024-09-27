@@ -2464,11 +2464,15 @@ class TextSelectionGestureDetectorBuilder {
               } else {
                 editableText.toggleToolbar(false);
               }
-            } else if (((_positionWasOnSelectionExclusive(textPosition) && !previousSelection.isCollapsed) || (_positionWasOnSelectionInclusive(textPosition) && previousSelection.isCollapsed && isAffinityTheSame)) && renderEditable.hasFocus) {
+            } else if (((_positionWasOnSelectionExclusive(textPosition) && !previousSelection.isCollapsed)
+                       || (_positionWasOnSelectionInclusive(textPosition) && previousSelection.isCollapsed && isAffinityTheSame && !editableText.widget.readOnly))
+                       && renderEditable.hasFocus) {
               editableText.toggleToolbar(false);
             } else {
               renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-              if (previousSelection == editableText.textEditingValue.selection && renderEditable.hasFocus && !editableText.widget.readOnly) {
+              if (previousSelection == editableText.textEditingValue.selection
+                  && renderEditable.hasFocus
+                  && !editableText.widget.readOnly) {
                 editableText.toggleToolbar(false);
               } else {
                 editableText.hideToolbar(false);

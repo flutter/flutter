@@ -3593,7 +3593,7 @@ void main() {
   );
 
   testWidgets(
-    'long press tap cannot initiate a double tap',
+    'long press tap cannot initiate a double tap on macOS',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -3622,18 +3622,56 @@ void main() {
       final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
       final TextEditingController controller = editableTextWidget.controller;
 
-      // On iOS, we ended up moving the cursor to the edge of the same word and dismissed
-      // the toolbar.
-      //
-      // On macOS, we move the cursor to the tapped position.
+      // Move the cursor to the tapped position.
       expect(
         controller.selection,
-        TextSelection.collapsed(offset: defaultTargetPlatform == TargetPlatform.iOS ? 7 : 4, affinity: TextAffinity.upstream),
+        const TextSelection.collapsed(offset: 4, affinity: TextAffinity.upstream),
       );
 
       expect(find.byType(CupertinoButton), findsNothing);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
+  testWidgets(
+    'long press tap cannot initiate a double tap on iOS',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Material(
+            child: Center(
+              child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
+            ),
+          ),
+        ),
+      );
+
+      final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+      await tester.longPressAt(selectableTextStart + const Offset(50.0, 5.0));
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // Hide the toolbar so it doesn't interfere with taps on the text.
+      final EditableTextState editableTextState =
+          tester.state<EditableTextState>(find.byType(EditableText));
+      editableTextState.hideToolbar();
+      await tester.pumpAndSettle();
+
+      await tester.tapAt(selectableTextStart + const Offset(50.0, 5.0));
+      await tester.pump();
+
+      final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+      final TextEditingController controller = editableTextWidget.controller;
+
+      // Move the cursor to the edge of the same word and toggle the toolbar.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+
+      expect(find.byType(CupertinoButton), findsNWidgets(4));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
   testWidgets(
@@ -4342,13 +4380,16 @@ void main() {
       await tester.pumpAndSettle(kDoubleTapTimeout);
       await tester.tapAt(selectableTextStart + const Offset(10.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
-      // First tap moved the cursor.
+
+      // First tap moved the cursor and toggled the toolbar.
+      expect(find.byType(CupertinoButton), findsNothing);
       expect(
         controller.selection,
-        TextSelection.collapsed(offset: defaultTargetPlatform == TargetPlatform.iOS ? 7 : 1, affinity: TextAffinity.upstream),
+        defaultTargetPlatform == TargetPlatform.iOS ? const TextSelection(baseOffset: 0, extentOffset: 7) : const TextSelection.collapsed(offset: 1, affinity: TextAffinity.upstream),
       );
       await tester.tapAt(selectableTextStart + const Offset(10.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
+      // Second tap toggled the toolbar, and selected the word at the tapped position on macOS.
       expect(
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
