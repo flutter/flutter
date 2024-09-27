@@ -3167,6 +3167,93 @@ void main() {
     expect(titleOffset.dx, backButtonOffset.dx + titleSpacing);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/152315
+  testWidgets('AppBar back button navigates to previous page on tap with TooltipTriggerMode.tap', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(tooltipTheme: const TooltipThemeData(triggerMode: TooltipTriggerMode.tap)),
+      home: Scaffold(
+        body: Center(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => Scaffold(
+                        appBar: AppBar(
+                          title: const Text('Second Screen'),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('Go to second screen'),
+              );
+            }
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('Second Screen'), findsNothing);
+
+    await tester.tap(find.text('Go to second screen'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Second Screen'), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Second Screen'), findsNothing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/152315
+  testWidgets('Material2 - AppBar back button navigates to previous page on tap with TooltipTriggerMode.tap', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        useMaterial3: false,
+        tooltipTheme: const TooltipThemeData(triggerMode: TooltipTriggerMode.tap),
+      ),
+      home: Scaffold(
+        body: Center(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => Scaffold(
+                        appBar: AppBar(
+                          title: const Text('Second Screen'),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('Go to second screen'),
+              );
+            }
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('Second Screen'), findsNothing);
+
+    await tester.tap(find.text('Go to second screen'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Second Screen'), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Second Screen'), findsNothing);
+  });
+
   group('Material 2', () {
     testWidgets('Material2 - AppBar draws a light system bar for a dark background', (WidgetTester tester) async {
       final ThemeData darkTheme = ThemeData.dark(useMaterial3: false);
