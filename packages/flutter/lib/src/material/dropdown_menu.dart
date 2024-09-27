@@ -548,7 +548,13 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       filteredEntries = widget.dropdownMenuEntries;
       buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
       _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
-      matchInitialSelection();
+      // If the text field content matches one of the new entries do not rematch the initialSelection.
+      final bool isCurrentSelectionValid = filteredEntries.any(
+        (DropdownMenuEntry<T> entry) => entry.label == _localTextEditingController?.text
+      );
+      if (!isCurrentSelectionValid) {
+        matchInitialSelection();
+      }
     }
     if (oldWidget.leadingIcon != widget.leadingIcon) {
       refreshLeadingPadding();

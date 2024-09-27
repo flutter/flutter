@@ -2080,6 +2080,51 @@ void main() {
     expect(controller.text, '');
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/155660.
+  testWidgets(
+    'Updating the menu entries refreshes the initial selection only if the current selection is no more valid',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      Widget boilerplate(List<DropdownMenuEntry<TestMenu>> entries) {
+        return MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Scaffold(
+                body: DropdownMenu<TestMenu>(
+                  initialSelection: TestMenu.mainMenu3,
+                  dropdownMenuEntries: entries,
+                  controller: controller,
+                ),
+              );
+            }
+          ),
+        );
+      }
+
+      await tester.pumpWidget(boilerplate(menuChildren));
+      expect(controller.text, TestMenu.mainMenu3.label);
+
+      // Open the menu
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      // Select another item.
+      final Finder item2 = find.widgetWithText(MenuItemButton, 'Item 2').last;
+      await tester.tap(item2);
+      await tester.pumpAndSettle();
+      expect(controller.text, TestMenu.mainMenu2.label);
+
+      // Update the menu entries with another instance of list containing the
+      // same entries.
+      await tester.pumpWidget(boilerplate(
+        List<DropdownMenuEntry<TestMenu>>.from(menuChildren)
+      ));
+      expect(controller.text, TestMenu.mainMenu2.label);
+    },
+  );
+
   testWidgets('The default text input field should not be focused on mobile platforms '
       'when it is tapped', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
