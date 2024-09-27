@@ -114,21 +114,15 @@ Color ToColor(const flutter::DlColor& color) {
   };
 }
 
-std::vector<Matrix> ToRSXForms(const SkRSXform xform[], int count) {
-  auto result = std::vector<Matrix>();
-  for (int i = 0; i < count; i++) {
-    auto form = xform[i];
-    // clang-format off
-    auto matrix = Matrix{
+Matrix ToRSXForm(const SkRSXform& form) {
+  // clang-format off
+    return Matrix{
       form.fSCos, form.fSSin, 0, 0,
      -form.fSSin, form.fSCos, 0, 0,
       0,          0,          1, 0,
       form.fTx,   form.fTy,   0, 1
     };
-    // clang-format on
-    result.push_back(matrix);
-  }
-  return result;
+  // clang-format on
 }
 
 std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type) {

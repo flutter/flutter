@@ -15,9 +15,11 @@
 #include "impeller/aiks/aiks_context.h"
 #include "impeller/aiks/color_filter.h"
 #include "impeller/core/formats.h"
+#include "impeller/display_list/dl_atlas_geometry.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/display_list/nine_patch_converter.h"
 #include "impeller/display_list/skia_conversions.h"
+#include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
@@ -322,17 +324,6 @@ void DlDispatcherBase::setStrokeJoin(flutter::DlStrokeJoin join) {
       paint_.stroke_join = Join::kBevel;
       break;
   }
-}
-
-static std::vector<Color> ToColors(const flutter::DlColor colors[], int count) {
-  auto result = std::vector<Color>();
-  if (colors == nullptr) {
-    return result;
-  }
-  for (int i = 0; i < count; i++) {
-    result.push_back(skia_conversions::ToColor(colors[i]));
-  }
-  return result;
 }
 
 static std::optional<ColorSource::Type> ToColorSourceType(
@@ -1154,11 +1145,20 @@ void DlDispatcherBase::drawAtlas(const sk_sp<flutter::DlImage> atlas,
                                  const DlRect* cull_rect,
                                  bool render_with_attributes) {
   AUTO_DEPTH_WATCHER(1u);
-  GetCanvas().DrawAtlas(
-      atlas->impeller_texture(), skia_conversions::ToRSXForms(xform, count),
-      skia_conversions::ToRects(tex, count), ToColors(colors, count),
-      ToBlendMode(mode), ToSamplerDescriptor(sampling),
-      skia_conversions::ToRect(cull_rect), paint_);
+
+  auto geometry = DlAtlasGeometry(atlas->impeller_texture(),           //
+                                  xform,                               //
+                                  tex,                                 //
+                                  colors,                              //
+                                  static_cast<size_t>(count),          //
+                                  ToBlendMode(mode),                   //
+                                  ToSamplerDescriptor(sampling),       //
+                                  skia_conversions::ToRect(cull_rect)  //
+  );
+  auto atlas_contents = std::make_shared<AtlasContents>();
+  atlas_contents->SetGeometry(&geometry);
+
+  GetCanvas().DrawAtlas(atlas_contents, paint_);
 }
 
 // |flutter::DlOpReceiver|

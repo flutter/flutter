@@ -10,7 +10,11 @@
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/testing/testing.h"
+#include "impeller/core/formats.h"
+#include "impeller/display_list/dl_atlas_geometry.h"
 #include "impeller/display_list/dl_image_impeller.h"
+#include "impeller/entity/contents/content_context.h"
+#include "impeller/geometry/color.h"
 #include "impeller/geometry/scalar.h"
 #include "include/core/SkRSXform.h"
 #include "include/core/SkRefCnt.h"
@@ -39,6 +43,28 @@ CreateTestData(const AiksTest* test) {
       SkRect::MakeLTRB(half_width, 0, size.width, half_height),
       SkRect::MakeLTRB(0, half_height, half_width, size.height),
       SkRect::MakeLTRB(half_width, half_height, size.width, size.height)};
+  // Position quadrants adjacent to eachother.
+  std::vector<SkRSXform> transforms = {
+      MakeTranslation(0, 0), MakeTranslation(half_width, 0),
+      MakeTranslation(0, half_height),
+      MakeTranslation(half_width, half_height)};
+  return std::make_tuple(texture_coordinates, transforms, atlas);
+}
+
+std::tuple<std::vector<DlRect>, std::vector<SkRSXform>, sk_sp<DlImageImpeller>>
+CreateDlTestData(const AiksTest* test) {
+  // Draws the image as four squares stiched together.
+  auto atlas =
+      DlImageImpeller::Make(test->CreateTextureForFixture("bay_bridge.jpg"));
+  auto size = atlas->impeller_texture()->GetSize();
+  // Divide image into four quadrants.
+  Scalar half_width = size.width / 2;
+  Scalar half_height = size.height / 2;
+  std::vector<DlRect> texture_coordinates = {
+      DlRect::MakeLTRB(0, 0, half_width, half_height),
+      DlRect::MakeLTRB(half_width, 0, size.width, half_height),
+      DlRect::MakeLTRB(0, half_height, half_width, size.height),
+      DlRect::MakeLTRB(half_width, half_height, size.width, size.height)};
   // Position quadrants adjacent to eachother.
   std::vector<SkRSXform> transforms = {
       MakeTranslation(0, 0), MakeTranslation(half_width, 0),
@@ -170,6 +196,79 @@ TEST_P(AiksTest, DrawAtlasPlusWideGamut) {
                     DlImageSampling::kNearestNeighbor, /*cullRect=*/nullptr);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, DlAtlasGeometryNoBlend) {
+  auto [texture_coordinates, transforms, atlas] = CreateDlTestData(this);
+
+  DlAtlasGeometry geom(atlas->impeller_texture(), transforms.data(),
+                       texture_coordinates.data(), nullptr, transforms.size(),
+                       BlendMode::kSourceOver, {}, std::nullopt);
+
+  EXPECT_FALSE(geom.ShouldUseBlend());
+  EXPECT_FALSE(geom.ShouldSkip());
+
+  ContentContext context(GetContext(), nullptr);
+  auto vertex_buffer =
+      geom.CreateSimpleVertexBuffer(context.GetTransientsBuffer());
+
+  EXPECT_EQ(vertex_buffer.index_type, IndexType::kNone);
+  EXPECT_EQ(vertex_buffer.vertex_count, texture_coordinates.size() * 6);
+}
+
+TEST_P(AiksTest, DlAtlasGeometryBlend) {
+  auto [texture_coordinates, transforms, atlas] = CreateDlTestData(this);
+
+  std::vector<DlColor> colors;
+  colors.reserve(texture_coordinates.size());
+  for (auto i = 0u; i < texture_coordinates.size(); i++) {
+    colors.push_back(DlColor::ARGB(0.5, 1, 1, 1));
+  }
+  DlAtlasGeometry geom(atlas->impeller_texture(), transforms.data(),
+                       texture_coordinates.data(), colors.data(),
+                       transforms.size(), BlendMode::kSourceOver, {},
+                       std::nullopt);
+
+  EXPECT_TRUE(geom.ShouldUseBlend());
+  EXPECT_FALSE(geom.ShouldSkip());
+
+  ContentContext context(GetContext(), nullptr);
+  auto vertex_buffer =
+      geom.CreateBlendVertexBuffer(context.GetTransientsBuffer());
+
+  EXPECT_EQ(vertex_buffer.index_type, IndexType::kNone);
+  EXPECT_EQ(vertex_buffer.vertex_count, texture_coordinates.size() * 6);
+}
+
+TEST_P(AiksTest, DlAtlasGeometryColorButNoBlend) {
+  auto [texture_coordinates, transforms, atlas] = CreateDlTestData(this);
+
+  std::vector<DlColor> colors;
+  colors.reserve(texture_coordinates.size());
+  for (auto i = 0u; i < texture_coordinates.size(); i++) {
+    colors.push_back(DlColor::ARGB(0.5, 1, 1, 1));
+  }
+  DlAtlasGeometry geom(atlas->impeller_texture(), transforms.data(),
+                       texture_coordinates.data(), colors.data(),
+                       transforms.size(), BlendMode::kSource, {}, std::nullopt);
+
+  // Src blend mode means that colors would be ignored, even if provided.
+  EXPECT_FALSE(geom.ShouldUseBlend());
+  EXPECT_FALSE(geom.ShouldSkip());
+}
+
+TEST_P(AiksTest, DlAtlasGeometrySkip) {
+  auto [texture_coordinates, transforms, atlas] = CreateDlTestData(this);
+
+  std::vector<DlColor> colors;
+  colors.reserve(texture_coordinates.size());
+  for (auto i = 0u; i < texture_coordinates.size(); i++) {
+    colors.push_back(DlColor::ARGB(0.5, 1, 1, 1));
+  }
+  DlAtlasGeometry geom(atlas->impeller_texture(), transforms.data(),
+                       texture_coordinates.data(), colors.data(),
+                       transforms.size(), BlendMode::kClear, {}, std::nullopt);
+  EXPECT_TRUE(geom.ShouldSkip());
 }
 
 }  // namespace testing
