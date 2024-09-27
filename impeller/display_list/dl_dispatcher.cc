@@ -1458,10 +1458,13 @@ void TextFrameDispatcher::drawTextFrame(
   }
   auto scale =
       (matrix_ * Matrix::MakeTranslation(Point(x, y))).GetMaxBasisLengthXY();
-  renderer_.GetLazyGlyphAtlas()->AddTextFrame(*text_frame,  //
-                                              scale,        //
-                                              Point(x, y),  //
-                                              properties    //
+  renderer_.GetLazyGlyphAtlas()->AddTextFrame(
+      text_frame,                                       //
+      scale,                                            //
+      Point(x, y),                                      //
+      (properties.stroke || text_frame->HasColor())     //
+          ? std::optional<GlyphProperties>(properties)  //
+          : std::nullopt                                //
   );
 }
 
