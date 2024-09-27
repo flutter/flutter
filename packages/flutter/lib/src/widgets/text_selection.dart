@@ -2514,6 +2514,11 @@ class TextSelectionGestureDetectorBuilder {
         if (!renderEditable.hasFocus) {
           _longPressStartedWithoutFocus = true;
           renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+        } else if (editableText.widget.readOnly) {
+          renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+          if (editableText.context.mounted) {
+            Feedback.forLongPress(editableText.context);
+          }
         } else {
           renderEditable.selectPositionAt(
             from: details.globalPosition,
@@ -2574,7 +2579,7 @@ class TextSelectionGestureDetectorBuilder {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        if (_longPressStartedWithoutFocus) {
+        if (_longPressStartedWithoutFocus || editableText.widget.readOnly) {
           renderEditable.selectWordsInRange(
             from: details.globalPosition - details.offsetFromOrigin - editableOffset - scrollableOffset,
             to: details.globalPosition,
