@@ -3398,12 +3398,8 @@ void main() {
       );
       final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
 
-      // Adjust `textOffsetToPosition` result because it returns the wrong vertical position (wrong line).
-      // TODO(bleroux): Remove when https://github.com/flutter/flutter/issues/133637 is fixed.
-      final Offset gestureOffset = textOffsetToPosition(paragraph, 125).translate(0, 10);
-
       // Right click to select word at position.
-      final TestGesture gesture = await tester.startGesture(gestureOffset, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 125), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
       addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.up();
