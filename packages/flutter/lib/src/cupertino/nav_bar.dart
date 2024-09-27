@@ -21,13 +21,16 @@ import 'page_scaffold.dart';
 import 'route.dart';
 import 'theme.dart';
 
-/// test
+/// Modes that determine when to display the navigation bar's drawer.
 enum NavigationDrawerMode {
-  /// always mode.
+  /// Enable hiding the drawer in response to scrolling.
+  automatic,
+
+  /// Always display the drawer regardless of the scroll activity.
   always,
 
-  /// automatic mode
-  automatic,
+  /// Never display the drawer.
+  none,
 }
 
 /// Standard iOS navigation bar height without the status bar.
@@ -54,6 +57,10 @@ const double _kNavBarEdgePadding = 16.0;
 const double _kNavBarBottomPadding = 8.0;
 
 const double _kNavBarBackButtonTapWidth = 50.0;
+
+/// The height of a CupertinoSearchTextField with padding, used as the default
+/// height of a navigation bar's drawer.
+const double _kNavBarDrawerHeight = 50.0;
 
 /// Title text transfer fade.
 const Duration _kNavBarTitleFadeDuration = Duration(milliseconds: 150);
@@ -707,13 +714,15 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.heroTag = _defaultHeroTag,
     this.stretch = false,
     this.drawer,
-    this.drawerMode,
+    this.drawerMode = NavigationDrawerMode.none,
+    this.drawerHeight = _kNavBarDrawerHeight,
   }) : assert(
          automaticallyImplyTitle || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
          'false. Either provide a largeTitle or set automaticallyImplyTitle to '
          'true.',
-       );
+       ),
+       assert (drawer != null || drawerMode == NavigationDrawerMode.none);
 
   /// The navigation bar's title.
   ///
@@ -805,11 +814,22 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// {@macro flutter.cupertino.CupertinoNavigationBar.heroTag}
   final Object heroTag;
 
-  /// test
+  /// A widget to place under the large title or static navigation bar if there
+  /// is no large title.
+  ///
+  /// Typically, this is a CupertinoSearchTextField.
   final Widget? drawer;
 
-  /// test
-  final NavigationDrawerMode? drawerMode;
+  /// Modes that determine when to display the navigation bar's drawer.
+  ///
+  /// Defaults to [NavigationDrawerMode.none].
+  final NavigationDrawerMode drawerMode;
+
+  /// The height of the [drawer].
+  ///
+  /// Defaults to 50.0, which is the height of a CupertinoSearchTextField with
+  /// padding.
+  final double drawerHeight;
 
   /// True if the navigation bar's background color has no transparency.
   bool get opaque => backgroundColor?.alpha == 0xFF;
@@ -877,6 +897,9 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           alwaysShowMiddle: widget.alwaysShowMiddle && widget.middle != null,
           stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
           enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
+          drawer: widget.drawer ?? const SizedBox.shrink(),
+          drawerMode: widget.drawerMode,
+          drawerHeight: widget.drawerMode != NavigationDrawerMode.none ? widget.drawerHeight : 0.0,
         ),
       ),
     );
@@ -901,6 +924,9 @@ class _LargeTitleNavigationBarSliverDelegate
     required this.alwaysShowMiddle,
     required this.stretchConfiguration,
     required this.enableBackgroundFilterBlur,
+    required this.drawer,
+    required this.drawerMode,
+    required this.drawerHeight,
   });
 
   final _NavigationBarStaticComponentsKeys keys;
@@ -917,12 +943,15 @@ class _LargeTitleNavigationBarSliverDelegate
   final double persistentHeight;
   final bool alwaysShowMiddle;
   final bool enableBackgroundFilterBlur;
+  final Widget drawer;
+  final NavigationDrawerMode drawerMode;
+  final double drawerHeight;
 
   @override
-  double get minExtent => persistentHeight;
+  double get minExtent => persistentHeight + (drawerMode == NavigationDrawerMode.always ? drawerHeight: 0.0);
 
   @override
-  double get maxExtent => persistentHeight + _kNavBarLargeTitleHeightExtension;
+  double get maxExtent => persistentHeight + _kNavBarLargeTitleHeightExtension + drawerHeight;
 
   @override
   OverScrollHeaderStretchConfiguration? stretchConfiguration;
@@ -931,6 +960,10 @@ class _LargeTitleNavigationBarSliverDelegate
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final double largeTitleThreshold = maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
     final bool showLargeTitle = shrinkOffset < largeTitleThreshold;
+
+    // Calculate how much the drawer should shrink.
+    final double drawerShrinkFactor = clampDouble(shrinkOffset / drawerHeight, 0, 1);
+
     final double shrinkAnimationValue = clampDouble(
       (shrinkOffset - largeTitleThreshold - _kNavBarScrollUnderAnimationExtent) / _kNavBarScrollUnderAnimationExtent,
       0,
@@ -964,50 +997,68 @@ class _LargeTitleNavigationBarSliverDelegate
       enableBackgroundFilterBlur: enableBackgroundFilterBlur,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
-        child: Stack(
-          fit: StackFit.expand,
+        child: Column(
           children: <Widget>[
-            Positioned(
-              top: persistentHeight,
-              left: 0.0,
-              right: 0.0,
-              bottom: 0.0,
-              child: ClipRect(
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.only(
-                    start: _kNavBarEdgePadding,
-                    bottom: _kNavBarBottomPadding
-                  ),
-                  child: SafeArea(
-                    top: false,
-                    bottom: false,
-                    child: AnimatedOpacity(
-                      opacity: showLargeTitle ? 1.0 : 0.0,
-                      duration: _kNavBarTitleFadeDuration,
-                      child: Semantics(
-                        header: true,
-                        child: DefaultTextStyle(
-                          style: CupertinoTheme.of(context)
-                              .textTheme
-                              .navLargeTitleTextStyle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          child: _LargeTitle(
-                            child: components.largeTitle,
+            Expanded(
+              child: Stack(
+                children: <Widget>[
+                  Positioned(
+                    top: persistentHeight,
+                    left: 0.0,
+                    right: 0.0,
+                    bottom: drawerMode == NavigationDrawerMode.automatic
+                      ? drawerHeight * (1.0 - drawerShrinkFactor)
+                      : 0.0,
+                    child: ClipRect(
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          start: _kNavBarEdgePadding,
+                          bottom: _kNavBarBottomPadding
+                        ),
+                        child: SafeArea(
+                          top: false,
+                          bottom: false,
+                          child: AnimatedOpacity(
+                            opacity: showLargeTitle ? 1.0 : 0.0,
+                            duration: _kNavBarTitleFadeDuration,
+                            child: Semantics(
+                              header: true,
+                              child: DefaultTextStyle(
+                                style: CupertinoTheme.of(context)
+                                    .textTheme
+                                    .navLargeTitleTextStyle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                child: _LargeTitle(
+                                  child: components.largeTitle,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
+                  Positioned(
+                    left: 0.0,
+                    right: 0.0,
+                    top: 0.0,
+                    child: persistentNavigationBar,
+                  ),
+                  if (drawerMode == NavigationDrawerMode.automatic)
+                    Positioned(
+                      left: 0.0,
+                      right: 0.0,
+                      top: persistentHeight + _kNavBarLargeTitleHeightExtension,
+                      child: SizedBox(
+                        height: drawerHeight * (1.0 - drawerShrinkFactor),
+                        child: drawer,
+                      ),
+                    ),
+                ],
               ),
             ),
-            Positioned(
-              left: 0.0,
-              right: 0.0,
-              top: 0.0,
-              child: persistentNavigationBar,
-            ),
+            if (drawerMode == NavigationDrawerMode.always) drawer,
           ],
         ),
       ),
@@ -1055,7 +1106,10 @@ class _LargeTitleNavigationBarSliverDelegate
         || persistentHeight != oldDelegate.persistentHeight
         || alwaysShowMiddle != oldDelegate.alwaysShowMiddle
         || heroTag != oldDelegate.heroTag
-        || enableBackgroundFilterBlur != oldDelegate.enableBackgroundFilterBlur;
+        || enableBackgroundFilterBlur != oldDelegate.enableBackgroundFilterBlur
+        || drawer != oldDelegate.drawer
+        || drawerMode != oldDelegate.drawerMode
+        || drawerHeight != oldDelegate.drawerHeight;
   }
 }
 
