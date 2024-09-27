@@ -22,6 +22,8 @@ impeller_component("skia_conversions") {
 
 impeller_component("display_list") {
   sources = [
+    "dl_atlas_geometry.cc",
+    "dl_atlas_geometry.h",
     "dl_dispatcher.cc",
     "dl_dispatcher.h",
     "dl_image_impeller.cc",

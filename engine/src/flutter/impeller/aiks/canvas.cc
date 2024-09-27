@@ -947,32 +947,14 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   AddRenderEntityToCurrentPass(entity);
 }
 
-void Canvas::DrawAtlas(const std::shared_ptr<Texture>& atlas,
-                       std::vector<Matrix> transforms,
-                       std::vector<Rect> texture_coordinates,
-                       std::vector<Color> colors,
-                       BlendMode blend_mode,
-                       SamplerDescriptor sampler,
-                       std::optional<Rect> cull_rect,
+void Canvas::DrawAtlas(const std::shared_ptr<AtlasContents>& atlas_contents,
                        const Paint& paint) {
-  if (!atlas) {
-    return;
-  }
-
-  std::shared_ptr<AtlasContents> contents = std::make_shared<AtlasContents>();
-  contents->SetColors(std::move(colors));
-  contents->SetTransforms(std::move(transforms));
-  contents->SetTextureCoordinates(std::move(texture_coordinates));
-  contents->SetTexture(atlas);
-  contents->SetSamplerDescriptor(std::move(sampler));
-  contents->SetBlendMode(blend_mode);
-  contents->SetCullRect(cull_rect);
-  contents->SetAlpha(paint.color.alpha);
+  atlas_contents->SetAlpha(paint.color.alpha);
 
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
-  entity.SetContents(paint.WithFilters(contents));
+  entity.SetContents(paint.WithFilters(atlas_contents));
 
   AddRenderEntityToCurrentPass(entity);
 }

@@ -14,6 +14,7 @@
 #include "impeller/aiks/image_filter.h"
 #include "impeller/aiks/paint.h"
 #include "impeller/core/sampler_descriptor.h"
+#include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_clip_stack.h"
 #include "impeller/entity/geometry/geometry.h"
@@ -221,13 +222,7 @@ class Canvas {
                     BlendMode blend_mode,
                     const Paint& paint);
 
-  void DrawAtlas(const std::shared_ptr<Texture>& atlas,
-                 std::vector<Matrix> transforms,
-                 std::vector<Rect> texture_coordinates,
-                 std::vector<Color> colors,
-                 BlendMode blend_mode,
-                 SamplerDescriptor sampler,
-                 std::optional<Rect> cull_rect,
+  void DrawAtlas(const std::shared_ptr<AtlasContents>& atlas_contents,
                  const Paint& paint);
 
   void EndReplay();
