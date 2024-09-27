@@ -2441,17 +2441,18 @@ class TextSelectionGestureDetectorBuilder {
             // toolbar once. If additional taps are made on a misspelled word, toggle the toolbar. If the word
             // is not misspelled, default to the following behavior:
             //
-            // Toggle the toolbar if the `previousSelection` is collapsed, the tap is on the selection, the
-            // TextAffinity remains the same, and the editable is focused. The TextAffinity is important when the
-            // cursor is on the boundary of a line wrap, if the affinity is different (i.e. it is downstream), the
-            // selection should move to the following line and not toggle the toolbar.
-            //
             // Toggle the toolbar when the tap is exclusively within the bounds of a non-collapsed `previousSelection`,
             // and the editable is focused.
             //
+            // Toggle the toolbar if the `previousSelection` is collapsed, the tap is on the selection, the
+            // TextAffinity remains the same, the editable field is not read only, and the editable is focused.
+            // The TextAffinity is important when the cursor is on the boundary of a line wrap, if the affinity
+            // is different (i.e. it is downstream), the selection should move to the following line and not toggle
+            // the toolbar.
+            //
             // Selects the word edge closest to the tap when the editable is not focused, or if the tap was neither exclusively
             // or inclusively on `previousSelection`. If the selection remains the same after selecting the word edge, then we
-            // toggle the toolbar. If the selection changes then we hide the toolbar.
+            // toggle the toolbar, if the editable field is not read only. If the selection changes then we hide the toolbar.
             final TextSelection previousSelection = renderEditable.selection ?? editableText.textEditingValue.selection;
             final TextPosition textPosition = renderEditable.getPositionForPoint(details.globalPosition);
             final bool isAffinityTheSame = textPosition.affinity == previousSelection.affinity;

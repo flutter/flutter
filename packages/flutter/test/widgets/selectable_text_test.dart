@@ -4389,7 +4389,8 @@ void main() {
       );
       await tester.tapAt(selectableTextStart + const Offset(10.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
-      // Second tap toggled the toolbar, and selected the word at the tapped position on macOS.
+      // Second tap toggled the toolbar, and on macOS also selects the word at the tapped position.
+      // On iOS the selection remains the same.
       expect(
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
