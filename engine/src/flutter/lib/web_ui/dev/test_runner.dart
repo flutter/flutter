@@ -339,7 +339,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
         'builders',
         'linux_web_engine.json',
       ));
-      configFile.writeAsStringSync(configString);
+      configFile.writeAsStringSync('$configString\n');
       return true;
     }
     if (isList || isVerbose) {

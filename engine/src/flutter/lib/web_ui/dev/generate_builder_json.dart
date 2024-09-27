@@ -30,6 +30,7 @@ Map<String, dynamic> _getArtifactBuildStep() {
     ],
     'gclient_variables': <String, dynamic>{
       'download_android_deps': false,
+      'download_jdk': false,
       'download_emsdk': true,
     },
     'gn': <String>[
@@ -141,6 +142,7 @@ Iterable<dynamic> _getTestStepsForPlatform(
         ],
         'gclient_variables': <String, dynamic>{
           'download_android_deps': false,
+          'download_jdk': false,
         },
         'dependencies': <String>[
           'web_tests/artifacts',
