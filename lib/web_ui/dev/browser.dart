@@ -75,6 +75,12 @@ abstract class Browser {
   /// with an error.
   Future<void> get onExit;
 
+  /// A future that completes if the browser is notified about an uncaught
+  /// exception.
+  ///
+  /// Returns `null` if the browser does not support this.
+  Future<String>? get onUncaughtException => null;
+
   /// Closes the browser
   ///
   /// Returns the same [Future] as [onExit], except that it won't emit
