@@ -6,7 +6,6 @@
 
 #include <numeric>
 #include <utility>
-#include "impeller/typographer/font_glyph_pair.h"
 
 namespace impeller {
 
@@ -68,10 +67,10 @@ void GlyphAtlas::AddTypefaceGlyphPositionAndBounds(const FontGlyphPair& pair,
                                                    Rect position,
                                                    Rect bounds) {
   font_atlas_map_[pair.scaled_font].positions_[pair.glyph] =
-      FrameBounds{position, bounds, /*is_placeholder=*/false};
+      std::make_pair(position, bounds);
 }
 
-std::optional<FrameBounds> GlyphAtlas::FindFontGlyphBounds(
+std::optional<std::pair<Rect, Rect>> GlyphAtlas::FindFontGlyphBounds(
     const FontGlyphPair& pair) const {
   const auto& found = font_atlas_map_.find(pair.scaled_font);
   if (found == font_atlas_map_.end()) {
@@ -80,14 +79,13 @@ std::optional<FrameBounds> GlyphAtlas::FindFontGlyphBounds(
   return found->second.FindGlyphBounds(pair.glyph);
 }
 
-FontGlyphAtlas* GlyphAtlas::GetOrCreateFontGlyphAtlas(
-    const ScaledFont& scaled_font) {
-  const auto& found = font_atlas_map_.find(scaled_font);
-  if (found != font_atlas_map_.end()) {
-    return &found->second;
+const FontGlyphAtlas* GlyphAtlas::GetFontGlyphAtlas(const Font& font,
+                                                    Scalar scale) const {
+  const auto& found = font_atlas_map_.find(ScaledFont{font, scale});
+  if (found == font_atlas_map_.end()) {
+    return nullptr;
   }
-  font_atlas_map_[scaled_font] = FontGlyphAtlas();
-  return &font_atlas_map_[scaled_font];
+  return &found->second;
 }
 
 size_t GlyphAtlas::GetGlyphCount() const {
@@ -110,7 +108,7 @@ size_t GlyphAtlas::IterateGlyphs(
     for (const auto& glyph_value : font_value.second.positions_) {
       count++;
       if (!iterator(font_value.first, glyph_value.first,
-                    glyph_value.second.atlas_bounds)) {
+                    glyph_value.second.first)) {
         return count;
       }
     }
@@ -118,18 +116,13 @@ size_t GlyphAtlas::IterateGlyphs(
   return count;
 }
 
-std::optional<FrameBounds> FontGlyphAtlas::FindGlyphBounds(
+std::optional<std::pair<Rect, Rect>> FontGlyphAtlas::FindGlyphBounds(
     const SubpixelGlyph& glyph) const {
   const auto& found = positions_.find(glyph);
   if (found == positions_.end()) {
     return std::nullopt;
   }
   return found->second;
-}
-
-void FontGlyphAtlas::AppendGlyph(const SubpixelGlyph& glyph,
-                                 const FrameBounds& frame_bounds) {
-  positions_[glyph] = frame_bounds;
 }
 
 }  // namespace impeller

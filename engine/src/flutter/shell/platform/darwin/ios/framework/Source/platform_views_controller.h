@@ -6,8 +6,6 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_PLATFORM_VIEWS_CONTROLLER_H_
 
 #include <Metal/Metal.h>
-#include <unordered_map>
-#include <unordered_set>
 
 #include "flutter/flow/surface.h"
 #include "flutter/fml/memory/weak_ptr.h"
