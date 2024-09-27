@@ -22,6 +22,7 @@
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/playground_test.h"
+#include "impeller/renderer/testing/mocks.h"
 #include "include/core/SkMatrix.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -291,6 +292,97 @@ TEST_P(AiksTest, ColorFilterAdvancedBlend) {
           std::shared_ptr<const DlColorFilter> color_filter =
               DlBlendColorFilter::Make(DlColor::RGBA(0.9, 0.5, 0.0, 1.0),
                                        DlBlendMode::kSrcIn);
+          srcPaint.setColorFilter(color_filter);
+        }
+        builder.DrawImage(src_image, {0, 0}, DlImageSampling::kMipmapLinear,
+                          &srcPaint);
+      }
+      builder.Restore();
+    }
+    return builder.Build();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+// Variant of the https://github.com/flutter/flutter/issues/155691 test that
+// uses an advanced blend in the color filter and disables framebuffer fetch
+// to force usage of BlendFilterContents::CreateForegroundAdvancedBlend.
+TEST_P(AiksTest, ColorFilterAdvancedBlendNoFbFetch) {
+  if (GetParam() != PlaygroundBackend::kMetal) {
+    GTEST_SKIP()
+        << "This backend doesn't yet support setting device capabilities.";
+  }
+  if (!WillRenderSomething()) {
+    GTEST_SKIP() << "This test requires playgrounds.";
+  }
+
+  std::shared_ptr<const Capabilities> old_capabilities =
+      GetContext()->GetCapabilities();
+  auto mock_capabilities = std::make_shared<MockCapabilities>();
+  EXPECT_CALL(*mock_capabilities, SupportsFramebufferFetch())
+      .Times(::testing::AtLeast(1))
+      .WillRepeatedly(::testing::Return(false));
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultColorFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultStencilFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              GetDefaultDepthStencilFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsOffscreenMSAA);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsImplicitResolvingMSAA);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsReadFromResolve);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsSSBO);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsCompute);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsTextureToTextureBlits);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultGlyphAtlasFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsTriangleFan);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsDecalSamplerAddressMode);
+  ASSERT_TRUE(SetCapabilities(mock_capabilities).ok());
+
+  bool has_color_filter = true;
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::Checkbox("has color filter", &has_color_filter);
+      ImGui::End();
+    }
+
+    DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
+
+    auto src_image =
+        DlImageImpeller::Make(CreateTextureForFixture("blend_mode_src.png"));
+    auto dst_image =
+        DlImageImpeller::Make(CreateTextureForFixture("blend_mode_dst.png"));
+
+    std::vector<DlBlendMode> blend_modes = {
+        DlBlendMode::kScreen,     DlBlendMode::kOverlay,
+        DlBlendMode::kDarken,     DlBlendMode::kLighten,
+        DlBlendMode::kColorDodge, DlBlendMode::kColorBurn,
+        DlBlendMode::kHardLight,  DlBlendMode::kSoftLight,
+        DlBlendMode::kDifference, DlBlendMode::kExclusion,
+        DlBlendMode::kMultiply,   DlBlendMode::kHue,
+        DlBlendMode::kSaturation, DlBlendMode::kColor,
+        DlBlendMode::kLuminosity,
+    };
+
+    for (uint32_t i = 0; i < blend_modes.size(); ++i) {
+      builder.Save();
+      builder.Translate((i % 5) * 200, (i / 5) * 200);
+      builder.Scale(0.4, 0.4);
+      {
+        DlPaint dstPaint;
+        builder.DrawImage(dst_image, {0, 0}, DlImageSampling::kMipmapLinear,
+                          &dstPaint);
+      }
+      {
+        DlPaint srcPaint;
+        srcPaint.setBlendMode(blend_modes[i]);
+        if (has_color_filter) {
+          std::shared_ptr<const DlColorFilter> color_filter =
+              DlBlendColorFilter::Make(DlColor::RGBA(0.9, 0.5, 0.0, 1.0),
+                                       DlBlendMode::kMultiply);
           srcPaint.setColorFilter(color_filter);
         }
         builder.DrawImage(src_image, {0, 0}, DlImageSampling::kMipmapLinear,

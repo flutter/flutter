@@ -16,6 +16,10 @@
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/sampler_library.h"
 
+#define FLT_FORWARD(mock, real, method) \
+  EXPECT_CALL(*mock, method())          \
+      .WillRepeatedly(::testing::Return(real->method()));
+
 namespace impeller {
 namespace testing {
 
