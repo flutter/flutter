@@ -14,6 +14,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'adaptive_text_selection_toolbar.dart';
 import 'desktop_text_selection.dart';
@@ -135,18 +136,19 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 
   @override
   void onSingleTapUp(TapDragUpDetails details) {
+    if (!delegate.selectionEnabled) {
+      return;
+    }
     editableText.hideToolbar();
-    if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-      }
+    switch (Theme.of(_state.context).platform) {
+      case TargetPlatform.iOS:
+        renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+      case TargetPlatform.macOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        renderEditable.selectPosition(cause: SelectionChangedCause.tap);
     }
     _state.widget.onTap?.call();
   }
@@ -582,6 +584,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         textSpan: widget.textSpan ?? TextSpan(text: widget.data),
     );
     _controller.addListener(_onControllerChanged);
+    _effectiveFocusNode.addListener(_handleFocusChanged);
   }
 
   @override
@@ -595,6 +598,10 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
       );
       _controller.addListener(_onControllerChanged);
     }
+    if (widget.focusNode != oldWidget.focusNode) {
+      (oldWidget.focusNode ?? _focusNode)?.removeListener(_handleFocusChanged);
+      (widget.focusNode ?? _focusNode)?.addListener(_handleFocusChanged);
+    }
     if (_effectiveFocusNode.hasFocus && _controller.selection.isCollapsed) {
       _showSelectionHandles = false;
     } else {
@@ -604,6 +611,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
 
   @override
   void dispose() {
+    _effectiveFocusNode.removeListener(_handleFocusChanged);
     _focusNode?.dispose();
     _controller.dispose();
     super.dispose();
@@ -618,6 +626,20 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     setState(() {
       _showSelectionHandles = showSelectionHandles;
     });
+  }
+
+  void _handleFocusChanged() {
+    if (!_effectiveFocusNode.hasFocus
+        && SchedulerBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+      // We should only clear the selection when this SelectableText loses
+      // focus while the application is currently running. It is possible
+      // that the application is not currently running, for example on desktop
+      // platforms, clicking on a different window switches the focus to
+      // the new window causing the Flutter application to go inactive. In this
+      // case we want to retain the selection so it remains when we return to
+      // the Flutter application.
+      _controller.value = TextEditingValue(text: _controller.value.text);
+    }
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {

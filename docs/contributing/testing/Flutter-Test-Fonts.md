@@ -18,6 +18,7 @@ Thanks to that, the `FlutterTest` font generally provides more precise and font-
 **Example**
 
 You can expect this test to pass on all platforms (currently with the exception of the web HTML renderer):
+
 ```dart
 final painter = TextPainter(
   text: const TextSpan(
@@ -35,6 +36,7 @@ expect(lineMetrics.descent, 3.5); // 0.25em * 14.0pt
 // 'text' is 4 glyphs. Most glyphs are as wide as they are tall.
 expect(lineMetrics.width, 14.0 * 4);
 ```
+
 While with the `Ahem` font you would get [slightly different metrics on different platforms](https://github.com/flutter/flutter/issues/62819), since they use different font engines to scale the font.
 
 ### Glyphs
