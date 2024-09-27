@@ -55,6 +55,29 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
   ColorLabel? selectedColor;
   IconLabel? selectedIcon;
 
+  final List<DropdownMenuEntry<ColorLabel>> colorEntries = ColorLabel.values.map<DropdownMenuEntry<ColorLabel>>(
+    (ColorLabel color) {
+      return DropdownMenuEntry<ColorLabel>(
+        value: color,
+        label: color.label,
+        enabled: color.label != 'Grey',
+        style: MenuItemButton.styleFrom(
+          foregroundColor: color.color,
+        ),
+      );
+    }
+  ).toList();
+
+  final List<DropdownMenuEntry<IconLabel>> iconEntries = IconLabel.values.map<DropdownMenuEntry<IconLabel>>(
+    (IconLabel icon) {
+      return DropdownMenuEntry<IconLabel>(
+        value: icon,
+        label: icon.label,
+        leadingIcon: Icon(icon.icon),
+      );
+    },
+  ).toList();
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -85,18 +108,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                           selectedColor = color;
                         });
                       },
-                      dropdownMenuEntries: ColorLabel.values.map<DropdownMenuEntry<ColorLabel>>(
-                        (ColorLabel color) {
-                          return DropdownMenuEntry<ColorLabel>(
-                            value: color,
-                            label: color.label,
-                            enabled: color.label != 'Grey',
-                            style: MenuItemButton.styleFrom(
-                              foregroundColor: color.color,
-                            ),
-                          );
-                        }
-                      ).toList(),
+                      dropdownMenuEntries: colorEntries,
                     ),
                     const SizedBox(width: 24),
                     DropdownMenu<IconLabel>(
@@ -114,15 +126,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                           selectedIcon = icon;
                         });
                       },
-                      dropdownMenuEntries: IconLabel.values.map<DropdownMenuEntry<IconLabel>>(
-                        (IconLabel icon) {
-                          return DropdownMenuEntry<IconLabel>(
-                            value: icon,
-                            label: icon.label,
-                            leadingIcon: Icon(icon.icon),
-                          );
-                        },
-                      ).toList(),
+                      dropdownMenuEntries: iconEntries,
                     ),
                   ],
                 ),

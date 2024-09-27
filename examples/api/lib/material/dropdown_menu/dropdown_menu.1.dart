@@ -36,6 +36,12 @@ class DropdownMenuExample extends StatefulWidget {
 
 class _DropdownMenuExampleState extends State<DropdownMenuExample> {
   String dropdownValue = list.first;
+  final List<DropdownMenuEntry<String>> menuEntries = list.map<DropdownMenuEntry<String>>((String value) {
+    return DropdownMenuEntry<String>(
+      value: value,
+      label: value
+    );
+  }).toList();
 
   @override
   Widget build(BuildContext context) {
@@ -47,12 +53,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
           dropdownValue = value!;
         });
       },
-      dropdownMenuEntries: list.map<DropdownMenuEntry<String>>((String value) {
-        return DropdownMenuEntry<String>(
-          value: value,
-          label: value
-        );
-      }).toList(),
+      dropdownMenuEntries: menuEntries,
     );
   }
 }

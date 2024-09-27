@@ -39,6 +39,9 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final List<DropdownMenuEntry<String>> menuEntries = list.map<DropdownMenuEntry<String>>((String value) {
+      return DropdownMenuEntry<String>(value: value, label: value);
+    }).toList();
 
     return ListView(
       children: <Widget>[
@@ -62,10 +65,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                     dropdownValue = value!;
                   });
                 },
-                dropdownMenuEntries:
-                    list.map<DropdownMenuEntry<String>>((String value) {
-                  return DropdownMenuEntry<String>(value: value, label: value);
-                }).toList(),
+                dropdownMenuEntries: menuEntries,
               ),
               const Text('Text cursor is shown when hovering over the DropdownMenu.'),
             ],
@@ -92,10 +92,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                     dropdownValue = value!;
                   });
                 },
-                dropdownMenuEntries:
-                    list.map<DropdownMenuEntry<String>>((String value) {
-                  return DropdownMenuEntry<String>(value: value, label: value);
-                }).toList(),
+                dropdownMenuEntries: menuEntries,
               ),
               const Text('Clickable cursor is shown when hovering over the DropdownMenu.'),
             ],
@@ -123,10 +120,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                     dropdownValue = value!;
                   });
                 },
-                dropdownMenuEntries:
-                    list.map<DropdownMenuEntry<String>>((String value) {
-                  return DropdownMenuEntry<String>(value: value, label: value);
-                }).toList(),
+                dropdownMenuEntries: menuEntries,
               ),
               const Text('Default cursor is shown when hovering over the DropdownMenu.'),
             ],
@@ -154,10 +148,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                     dropdownValue = value!;
                   });
                 },
-                dropdownMenuEntries:
-                    list.map<DropdownMenuEntry<String>>((String value) {
-                  return DropdownMenuEntry<String>(value: value, label: value);
-                }).toList(),
+                dropdownMenuEntries: menuEntries,
               ),
               const Text('Default cursor is shown when hovering over the DropdownMenu.'),
             ],
