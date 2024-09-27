@@ -258,6 +258,7 @@ bool EmbedderTestBackingStoreProducer::CreateSurface(
   backing_store_out->open_gl.surface.clear_current_callback = clear_current;
   backing_store_out->open_gl.surface.destruction_callback =
       destruction_callback;
+  backing_store_out->open_gl.surface.format = 0x93A1 /* GL_BGRA8_EXT */;
 
   return true;
 #else

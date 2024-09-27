@@ -868,7 +868,7 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
     const FlutterOpenGLSurface* surface) {
 #ifdef SHELL_ENABLE_GL
   GrGLFramebufferInfo framebuffer_info = {};
-  framebuffer_info.fFormat = GL_BGRA8_EXT;
+  framebuffer_info.fFormat = SAFE_ACCESS(surface, format, GL_BGRA8_EXT);
   framebuffer_info.fFBOID = 0;
 
   auto backend_render_target =
@@ -881,11 +881,17 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
 
   SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
 
+  std::optional<SkColorType> color_type =
+      FlutterFormatToSkColorType(surface->format);
+  if (!color_type) {
+    return nullptr;
+  }
+
   auto sk_surface = SkSurfaces::WrapBackendRenderTarget(
       context,                      //  context
       backend_render_target,        // backend render target
       kBottomLeft_GrSurfaceOrigin,  // surface origin
-      kN32_SkColorType,             // color type
+      color_type.value(),           // color type
       SkColorSpace::MakeSRGB(),     // color space
       &surface_properties,          // surface properties
       static_cast<SkSurfaces::RenderTargetReleaseProc>(
