@@ -849,7 +849,7 @@ void main() {
     listeners[1].onImage(imageInfo.clone(), false);
 
     // Make sure the second listener can be called re-entrantly.
-    final image1 = imageInfo.clone();
+    final ImageInfo image1 = imageInfo.clone();
     listeners[0].onImage(image1, false);
     listeners[0].onImage(imageInfo.clone(), false);
 
