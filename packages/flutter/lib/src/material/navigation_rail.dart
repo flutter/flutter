@@ -746,39 +746,38 @@ class _RailDestinationState extends State<_RailDestination> {
             indicatorVerticalPadding + indicatorVerticalOffset,
           );
         }
-        content = Container(
-          constraints: BoxConstraints(
-            minWidth: widget.minWidth,
-            minHeight: minHeight,
-          ),
-          padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
-          child: ClipRect(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                topSpacing,
-                _AddIndicator(
-                  addIndicator: widget.useIndicator,
-                  indicatorColor: widget.indicatorColor,
-                  indicatorShape: widget.indicatorShape,
-                  isCircular: false,
-                  indicatorAnimation: widget.destinationAnimation,
-                  child: themedIcon,
-                ),
-                labelSpacing,
-                Align(
-                  alignment: Alignment.topCenter,
-                  heightFactor: appearingAnimationValue,
-                  widthFactor: 1.0,
-                  child: FadeTransition(
-                    alwaysIncludeSemantics: true,
-                    opacity: labelFadeAnimation,
-                    child: styledLabel,
+        content = ConstrainedBox(
+          constraints: BoxConstraints(minWidth: widget.minWidth, minHeight: minHeight),
+          child: Padding(
+            padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
+            child: ClipRect(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  topSpacing,
+                  _AddIndicator(
+                    addIndicator: widget.useIndicator,
+                    indicatorColor: widget.indicatorColor,
+                    indicatorShape: widget.indicatorShape,
+                    isCircular: false,
+                    indicatorAnimation: widget.destinationAnimation,
+                    child: themedIcon,
                   ),
-                ),
-                bottomSpacing,
-              ],
+                  labelSpacing,
+                  Align(
+                    alignment: Alignment.topCenter,
+                    heightFactor: appearingAnimationValue,
+                    widthFactor: 1.0,
+                    child: FadeTransition(
+                      alwaysIncludeSemantics: true,
+                      opacity: labelFadeAnimation,
+                      child: styledLabel,
+                    ),
+                  ),
+                  bottomSpacing,
+                ],
+              ),
             ),
           ),
         );
@@ -799,27 +798,26 @@ class _RailDestinationState extends State<_RailDestination> {
             indicatorVerticalPadding + indicatorVerticalOffset,
           );
         }
-        content = Container(
-          constraints: BoxConstraints(
-            minWidth: widget.minWidth,
-            minHeight: minHeight,
-          ),
-          padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
-          child: Column(
-            children: <Widget>[
-              topSpacing,
-              _AddIndicator(
-                addIndicator: widget.useIndicator,
-                indicatorColor: widget.indicatorColor,
-                indicatorShape: widget.indicatorShape,
-                isCircular: false,
-                indicatorAnimation: widget.destinationAnimation,
-                child: themedIcon,
-              ),
-              labelSpacing,
-              styledLabel,
-              bottomSpacing,
-            ],
+        content = ConstrainedBox(
+          constraints: BoxConstraints(minWidth: widget.minWidth, minHeight: minHeight),
+          child: Padding(
+            padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
+            child: Column(
+              children: <Widget>[
+                topSpacing,
+                _AddIndicator(
+                  addIndicator: widget.useIndicator,
+                  indicatorColor: widget.indicatorColor,
+                  indicatorShape: widget.indicatorShape,
+                  isCircular: false,
+                  indicatorAnimation: widget.destinationAnimation,
+                  child: themedIcon,
+                ),
+                labelSpacing,
+                styledLabel,
+                bottomSpacing,
+              ],
+            ),
           ),
         );
     }

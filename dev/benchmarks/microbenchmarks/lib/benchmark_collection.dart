@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:io';
+import 'dart:math';
 
+import 'package:args/args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -85,17 +87,52 @@ Future<void> main() async {
       'foundation/all_elements_bench.dart',
       () async {
         binding.framePolicy =
-            LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
+            LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
         runApp(const SizedBox.shrink()); // ensure dispose
         await SchedulerBinding.instance.endOfFrame;
-        all_elements_bench.execute();
+        await all_elements_bench.execute();
       }
     ),
   ];
 
-  print('╡ ••• Running microbenchmarks ••• ╞');
+  // Parses the optional compile-time dart variables; we can't have
+  // arguments passed in to main.
+  final ArgParser parser = ArgParser();
+  final List<String> allowed = benchmarks.map((Benchmark e) => e.$1).toList();
+  parser.addMultiOption(
+    'tests',
+    abbr: 't',
+    defaultsTo: allowed,
+    allowed: allowed,
+    help: 'selected tests to run',
+  );
+  parser.addOption(
+    'seed',
+    defaultsTo: '12345',
+    help: 'selects seed to sort tests by',
+  );
+  final List<String> mainArgs = <String>[];
+  const String testArgs = String.fromEnvironment('tests');
+  if (testArgs.isNotEmpty) {
+    mainArgs.addAll(<String>['--tests', testArgs]);
+    print('╡ ••• environment test override: $testArgs ••• ╞');
+  }
+  const String seedArgs = String.fromEnvironment('seed');
+  if (seedArgs.isNotEmpty) {
+    mainArgs.addAll(<String>['--seed', seedArgs]);
+    print('╡ ••• environment seed override: $seedArgs ••• ╞');
+  }
+  final ArgResults results = parser.parse(mainArgs);
+  final List<String> selectedTests = results.multiOption('tests');
 
-  for (final Benchmark mark in benchmarks) {
+  // Shuffle the tests becauase we don't want order dependent tests.
+  // It is the responsibily of the infra to tell us what the seed value is,
+  // in case we want to have the seed stable for some time period.
+  final List<Benchmark> tests = benchmarks.where((Benchmark e) => selectedTests.contains(e.$1)).toList();
+  tests.shuffle(Random(int.parse(results.option('seed')!)));
+
+  print('╡ ••• Running microbenchmarks ••• ╞');
+  for (final Benchmark mark in tests) {
     // Reset the frame policy to default - each test can set it on their own.
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fadePointers;
     print('╡ ••• Running ${mark.$1} ••• ╞');
