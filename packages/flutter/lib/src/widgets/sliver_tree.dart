@@ -862,6 +862,7 @@ class _TreeSliverState<T> extends State<TreeSliver<T>> with TickerProviderStateM
       // No state to change.
       return;
     }
+
     setState(() {
       node._expanded = !node._expanded;
       if (widget.onNodeToggle != null) {
