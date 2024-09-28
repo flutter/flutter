@@ -192,7 +192,7 @@
         "--no-goma"
       ],
       "name": "macos/ios_debug_sim_unopt_arm64",
-      "description": "Builds a debug mode engine that targets the arm64 iOS simulator from a macOS host.",
+      "description": "Builds an unoptimized debug mode engine that targets the arm64 iOS simulator from a macOS host.",
       "ninja": {
         "config": "ios_debug_sim_unopt_arm64",
         "targets": []
