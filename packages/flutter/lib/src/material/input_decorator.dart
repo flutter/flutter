@@ -1919,6 +1919,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     _floatingLabelAnimation.dispose();
     _shakingLabelController.dispose();
     _borderGap.dispose();
+    _curvedAnimation?.dispose();
     super.dispose();
   }
 
@@ -2150,6 +2151,21 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     }
   }
 
+  CurvedAnimation? _curvedAnimation;
+
+  FadeTransition _buildTransition(Widget child, Animation<double> animation) {
+    _curvedAnimation?.dispose();
+    _curvedAnimation  = CurvedAnimation(
+              parent: animation,
+              curve: _kTransitionCurve,
+            );
+
+    return FadeTransition(
+      opacity: _curvedAnimation!,
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
@@ -2182,15 +2198,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         child: hintTextWidget,
       ) : AnimatedSwitcher(
         duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
-        transitionBuilder: (Widget child, Animation<double> animation) {
-          return FadeTransition(
-            opacity: CurvedAnimation(
-              parent: animation,
-              curve: _kTransitionCurve,
-            ),
-            child: child,
-          );
-        },
+        transitionBuilder: _buildTransition,
         child: showHint ? hintTextWidget : const SizedBox.shrink(),
       );
     }
