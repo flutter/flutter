@@ -825,7 +825,7 @@ void main() {
 
   testWidgets('Precache removes original listener immediately after future completes, does not crash on successive calls #25143',
   // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  // experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final _TestImageStreamCompleter imageStreamCompleter = _TestImageStreamCompleter();
     final _TestImageProvider provider = _TestImageProvider(streamCompleter: imageStreamCompleter);
