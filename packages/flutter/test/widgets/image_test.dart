@@ -849,10 +849,12 @@ void main() {
     listeners[1].onImage(imageInfo.clone(), false);
 
     // Make sure the second listener can be called re-entrantly.
-    listeners[0].onImage(imageInfo.clone(), false);
+    final image1 = imageInfo.clone();
+    listeners[0].onImage(image1, false);
     listeners[0].onImage(imageInfo.clone(), false);
 
     imageInfo.dispose();
+    // image1.dispose();
     imageStreamCompleter.dispose();
     imageCache.clear();
   });
@@ -2201,21 +2203,24 @@ class _TestImageProvider extends ImageProvider<Object> {
 }
 
 class _TestImageStreamCompleter extends ImageStreamCompleter {
-  _TestImageStreamCompleter([this._currentImage]);
+  _TestImageStreamCompleter([this._currentImage]) {
+    if (_currentImage != null) {
+      setImage(_currentImage!);
+    }
+  }
 
   ImageInfo? _currentImage;
   final Set<ImageStreamListener> listeners = <ImageStreamListener>{};
 
   @override
   void addListener(ImageStreamListener listener) {
+    super.addListener(listener);
     listeners.add(listener);
-    if (_currentImage != null) {
-      listener.onImage(_currentImage!.clone(), true);
-    }
   }
 
   @override
   void removeListener(ImageStreamListener listener) {
+    super.removeListener(listener);
     listeners.remove(listener);
   }
 
@@ -2224,14 +2229,14 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
     ImageChunkEvent? chunkEvent,
   }) {
     if (imageInfo != null) {
+      super.setImage(imageInfo);
       _currentImage?.dispose();
       _currentImage = imageInfo;
     }
     final List<ImageStreamListener> localListeners = listeners.toList();
     for (final ImageStreamListener listener in localListeners) {
-      if (imageInfo != null) {
-        listener.onImage(imageInfo.clone(), false);
-      }
+      removeListener(listener);
+      addListener(listener);
       if (chunkEvent != null && listener.onChunk != null) {
         listener.onChunk!(chunkEvent);
       }
@@ -2251,6 +2256,7 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
   void dispose() {
     final List<ImageStreamListener> listenersCopy = listeners.toList();
     listenersCopy.forEach(removeListener);
+    _currentImage?.dispose();
   }
 }
 
