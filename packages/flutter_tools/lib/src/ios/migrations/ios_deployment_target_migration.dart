@@ -20,7 +20,7 @@ class IOSDeploymentTargetMigration extends ProjectMigrator {
   final File _appFrameworkInfoPlist;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     if (_xcodeProjectInfoFile.existsSync()) {
       processFileLines(_xcodeProjectInfoFile);
     } else {

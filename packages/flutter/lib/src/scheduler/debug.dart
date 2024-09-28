@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/rendering.dart';
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'binding.dart';
+/// @docImport 'ticker.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 // Any changes to this file should be reflected in the debugAssertAllSchedulerVarsUnset()

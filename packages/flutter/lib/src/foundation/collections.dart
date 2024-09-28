@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:collection/collection.dart';
+library;
+
 // TODO(ianh): These should be on the Set and List classes themselves.
 
 /// Compares two sets for element-by-element equality.

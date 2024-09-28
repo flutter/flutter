@@ -16,6 +16,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../doctor_validator.dart';
@@ -23,7 +24,7 @@ import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
-import '../reporting/reporting.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
@@ -51,7 +52,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   final String name = 'ios';
 
   @override
-  final String description = 'Build an iOS application bundle (macOS host only).';
+  final String description = 'Build an iOS application bundle.';
 
   @override
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.build;
@@ -128,7 +129,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   final List<String> aliases = <String>['xcarchive'];
 
   @override
-  final String description = 'Build an iOS archive bundle and IPA for distribution (macOS host only).';
+  final String description = 'Build an iOS archive bundle and IPA for distribution.';
 
   @override
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.archive;
@@ -444,7 +445,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         );
       }
     }
-    globals.printStatus('\nTo update the settings, please refer to https://docs.flutter.dev/deployment/ios\n');
+    globals.printStatus('\nTo update the settings, please refer to https://flutter.dev/to/ios-deploy\n');
 
     // xcarchive failed or not at expected location.
     if (xcarchiveResult.exitStatus != ExitStatus.success) {
@@ -467,14 +468,14 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     String? exportOptions = exportOptionsPlist;
     String? exportMethod = exportOptions != null ?
         globals.plistParser.getValueFromFile<String?>(exportOptions, 'method') : null;
-    exportMethod ??= stringArg('export-method')!;
-    final bool isAppStoreUpload = exportMethod == 'app-store';
+    exportMethod ??= _getVersionAppropriateExportMethod(stringArg('export-method')!);
+    final bool isAppStoreUpload = exportMethod == 'app-store' || exportMethod == 'app-store-connect';
     File? generatedExportPlist;
     try {
       final String exportMethodDisplayName = isAppStoreUpload ? 'App Store' : exportMethod;
       status = globals.logger.startProgress('Building $exportMethodDisplayName IPA...');
       if (exportOptions == null) {
-        generatedExportPlist = _createExportPlist();
+        generatedExportPlist = _createExportPlist(exportMethod);
         exportOptions = generatedExportPlist.path;
       }
 
@@ -555,7 +556,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     return FlutterCommandResult.success();
   }
 
-  File _createExportPlist() {
+  File _createExportPlist(String exportMethod) {
     // Create the plist to be passed into xcodebuild -exportOptionsPlist.
     final StringBuffer plistContents = StringBuffer('''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -563,7 +564,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 <plist version="1.0">
     <dict>
         <key>method</key>
-        <string>${stringArg('export-method')}</string>
+        <string>$exportMethod</string>
         <key>uploadBitcode</key>
         <false/>
     </dict>
@@ -575,6 +576,29 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     tempPlist.writeAsStringSync(plistContents.toString());
 
     return tempPlist;
+  }
+
+  // As of Xcode 15.4, the old export methods 'app-store', 'ad-hoc', and 'development'
+  // are now deprecated. The new equivalents are 'app-store-connect', 'release-testing',
+  // and 'debugging'.
+  String _getVersionAppropriateExportMethod(String method) {
+    final Version? currVersion = globals.xcode!.currentVersion;
+    if (currVersion != null) {
+      if (currVersion >= Version(15, 4, 0)) {
+        switch (method) {
+          case 'app-store':
+            return 'app-store-connect';
+          case 'ad-hoc':
+            return 'release-testing';
+          case 'development':
+            return 'debugging';
+          default:
+            throwToolExit('Encountered invalid export-method input.');
+        }
+      }
+      return method;
+    }
+    throwToolExit('Xcode version could not be found.');
   }
 }
 
@@ -665,11 +689,10 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
     final String logTarget = environmentType == EnvironmentType.simulator ? 'simulator' : 'device';
     final String typeName = globals.artifacts!.getEngineType(TargetPlatform.ios, buildInfo.mode);
-    if (xcodeBuildAction == XcodeBuildAction.build) {
-      globals.printStatus('Building $app for $logTarget ($typeName)...');
-    } else {
-      globals.printStatus('Archiving $app...');
-    }
+    globals.printStatus(switch (xcodeBuildAction) {
+      XcodeBuildAction.build   => 'Building $app for $logTarget ($typeName)...',
+      XcodeBuildAction.archive => 'Archiving $app...',
+    });
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,
@@ -686,7 +709,15 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     xcodeBuildResult = result;
 
     if (!result.success) {
-      await diagnoseXcodeBuildFailure(result, globals.flutterUsage, globals.logger, globals.analytics);
+      await diagnoseXcodeBuildFailure(
+        result,
+        analytics: globals.analytics,
+        fileSystem: globals.fs,
+        flutterUsage: globals.flutterUsage,
+        logger: globals.logger,
+        platform: SupportedPlatform.ios,
+        project: app.project.parent,
+      );
       final String presentParticiple = xcodeBuildAction == XcodeBuildAction.build ? 'building' : 'archiving';
       throwToolExit('Encountered error while $presentParticiple for $logTarget.');
     }
@@ -761,7 +792,8 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       );
 
       // When an app is successfully built, record to analytics whether Impeller
-      // is enabled or disabled.
+      // is enabled or disabled. Note that we report the _lack_ of an explicit
+      // flag set as "enabled" because the default is to enable Impeller on iOS.
       final BuildableIOSApp app = await buildableIOSApp;
       final String plistPath = app.project.infoPlist.path;
       final bool? impellerEnabled = globals.plistParser.getValueFromFile<bool>(
@@ -771,11 +803,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       final String buildLabel = impellerEnabled == false
           ? 'plist-impeller-disabled'
           : 'plist-impeller-enabled';
-      BuildEvent(
-        buildLabel,
-        type: 'ios',
-        flutterUsage: globals.flutterUsage,
-      ).send();
       globals.analytics.send(Event.flutterBuildInfo(
         label: buildLabel,
         buildType: 'ios',

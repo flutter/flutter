@@ -182,7 +182,7 @@ class FuchsiaRemoteConnection {
   /// is expected to contain the interface as well (in the event that it is
   /// link-local), like the following:
   ///
-  /// ```
+  /// ```none
   /// fe80::1%eth0
   /// ```
   ///

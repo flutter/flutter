@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:io';
+///
+/// @docImport 'controller.dart';
+/// @docImport 'test_pointer.dart';
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -254,6 +261,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _testTextInput.register();
     }
     CustomSemanticsAction.resetForTests(); // ignore: invalid_use_of_visible_for_testing_member
+    _enableFocusManagerLifecycleAwarenessIfSupported();
+  }
+
+  void _enableFocusManagerLifecycleAwarenessIfSupported() {
+    if (buildOwner == null) {
+      return;
+    }
+    buildOwner!.focusManager.listenToApplicationLifecycleChangesIfSupported(); // ignore: invalid_use_of_visible_for_testing_member
   }
 
   @override
@@ -2098,7 +2113,11 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 ///
 /// The resulting ViewConfiguration maps the given size onto the actual display
 /// using the [BoxFit.contain] algorithm.
-class TestViewConfiguration extends ViewConfiguration {
+///
+/// If the underlying [FlutterView] changes, a new [TestViewConfiguration] should
+/// be created. See [RendererBinding.handleMetricsChanged] and
+/// [RendererBinding.createViewConfigurationFor].
+class TestViewConfiguration implements ViewConfiguration {
   /// Deprecated. Will be removed in a future version of Flutter.
   ///
   /// This property has been deprecated to prepare for Flutter's upcoming
@@ -2120,14 +2139,29 @@ class TestViewConfiguration extends ViewConfiguration {
   /// Creates a [TestViewConfiguration] with the given size and view.
   ///
   /// The [size] defaults to 800x600.
-  TestViewConfiguration.fromView({required ui.FlutterView view, Size size = _kDefaultTestViewportSize})
-      : _paintMatrix = _getMatrix(size, view.devicePixelRatio, view),
-        _physicalSize = view.physicalSize,
-        super(
-          devicePixelRatio: view.devicePixelRatio,
-          logicalConstraints: BoxConstraints.tight(size),
-          physicalConstraints: BoxConstraints.tight(size) * view.devicePixelRatio,
-      );
+  ///
+  /// The settings of the given [FlutterView] are captured when the constructor
+  /// is called, and subsequent changes are ignored. A new
+  /// [TestViewConfiguration] should be created if the underlying [FlutterView]
+  /// changes. See [RendererBinding.handleMetricsChanged] and
+  /// [RendererBinding.createViewConfigurationFor].
+  TestViewConfiguration.fromView({
+    required ui.FlutterView view,
+    Size size = _kDefaultTestViewportSize,
+  }) : devicePixelRatio = view.devicePixelRatio,
+       logicalConstraints = BoxConstraints.tight(size),
+       physicalConstraints =  BoxConstraints.tight(size) * view.devicePixelRatio,
+       _paintMatrix = _getMatrix(size, view.devicePixelRatio, view),
+       _physicalSize = view.physicalSize;
+
+  @override
+  final double devicePixelRatio;
+
+  @override
+  final BoxConstraints logicalConstraints;
+
+  @override
+  final BoxConstraints physicalConstraints;
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;
@@ -2157,6 +2191,18 @@ class TestViewConfiguration extends ViewConfiguration {
 
   @override
   Matrix4 toMatrix() => _paintMatrix.clone();
+
+  @override
+  bool shouldUpdateMatrix(ViewConfiguration oldConfiguration) {
+    if (oldConfiguration.runtimeType != runtimeType) {
+      // New configuration could have different logic, so we don't know
+      // whether it will need a new transform. Return a conservative result.
+      return true;
+    }
+    oldConfiguration as TestViewConfiguration;
+    // Compare the matrices directly since they are cached.
+    return oldConfiguration._paintMatrix != _paintMatrix;
+  }
 
   final Size _physicalSize;
 

@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport '_goldens_web.dart';
+/// @docImport 'binding.dart';
+/// @docImport 'matchers.dart';
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -84,7 +92,7 @@ abstract class GoldenFileComparator {
   /// historical golden files.
   ///
   /// Version numbers are used in golden file tests for package:flutter. You can
-  /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
+  /// learn more about these tests [here](https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md).
   Uri getTestUri(Uri key, int? version) {
     if (version == null) {
       return key;
@@ -127,11 +135,7 @@ abstract class GoldenFileComparator {
 ///
 ///  * [flutter_test] for more information about how to configure tests at the
 ///    directory-level.
-GoldenFileComparator get goldenFileComparator => _goldenFileComparator;
-GoldenFileComparator _goldenFileComparator = const TrivialComparator._();
-set goldenFileComparator(GoldenFileComparator value) {
-  _goldenFileComparator = value;
-}
+GoldenFileComparator goldenFileComparator = const TrivialComparator._();
 
 /// Compares image pixels against a golden image file.
 ///
@@ -145,7 +149,7 @@ set goldenFileComparator(GoldenFileComparator value) {
 /// fake async constraints that are normally imposed on widget tests (i.e. the
 /// need or the ability to call [WidgetTester.pump] to advance the microtask
 /// queue). Prior to the invocation, the test framework will render only the
-/// [widgets.Element] to be compared on the screen.
+/// [Element] to be compared on the screen.
 ///
 /// See also:
 ///
@@ -220,7 +224,7 @@ abstract class WebGoldenComparator {
   /// historical golden files.
   ///
   /// Version numbers are used in golden file tests for package:flutter. You can
-  /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
+  /// learn more about these tests [here](https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md).
   Uri getTestUri(Uri key, int? version) {
     if (version == null) {
       return key;

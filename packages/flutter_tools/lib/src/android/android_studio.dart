@@ -384,17 +384,12 @@ class AndroidStudio {
     final String? homeDirPath = globals.fsUtils.homeDirPath;
 
     if (homeDirPath != null && globals.fs.directory(homeDirPath).existsSync()) {
-      final Directory homeDir = globals.fs.directory(homeDirPath);
-
-      final List<Directory> directoriesToSearch = <Directory>[homeDir];
-
       // >=4.1 has new install location at $HOME/.cache/Google
-      final String cacheDirPath =
-          globals.fs.path.join(homeDirPath, '.cache', 'Google');
-
-      if (globals.fs.isDirectorySync(cacheDirPath)) {
-        directoriesToSearch.add(globals.fs.directory(cacheDirPath));
-      }
+      final String cacheDirPath = globals.fs.path.join(homeDirPath, '.cache', 'Google');
+      final List<Directory> directoriesToSearch = <Directory>[
+        globals.fs.directory(homeDirPath),
+        if (globals.fs.isDirectorySync(cacheDirPath)) globals.fs.directory(cacheDirPath),
+      ];
 
       final List<Directory> entities = <Directory>[];
 

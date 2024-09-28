@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
 
 Widget wrap({ required Widget child }) {
   return MediaQuery(
@@ -78,7 +78,7 @@ void main() {
             SemanticsFlag.isFocusable,
             SemanticsFlag.isToggled,
           ],
-          actions: SemanticsAction.tap.index,
+          actions: SemanticsAction.tap.index | SemanticsAction.focus.index,
           label: 'aaa\nAAA',
         ),
         TestSemantics.rootChild(
@@ -92,7 +92,7 @@ void main() {
             SemanticsFlag.isEnabled,
             SemanticsFlag.isFocusable,
           ],
-          actions: SemanticsAction.tap.index,
+          actions: SemanticsAction.tap.index | SemanticsAction.focus.index,
           label: 'bbb\nBBB',
         ),
         TestSemantics.rootChild(
@@ -106,7 +106,7 @@ void main() {
             SemanticsFlag.isFocusable,
             SemanticsFlag.isInMutuallyExclusiveGroup,
           ],
-          actions: SemanticsAction.tap.index,
+          actions: SemanticsAction.tap.index | SemanticsAction.focus.index,
           label: 'CCC\nccc',
         ),
       ],

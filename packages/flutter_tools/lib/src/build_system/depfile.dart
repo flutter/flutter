@@ -58,20 +58,12 @@ class DepfileService {
   /// The [file] contains a list of newline separated file URIs. The output
   /// file must be manually specified.
   Depfile parseDart2js(File file, File output) {
-    final List<File> inputs = <File>[];
-    for (final String rawUri in file.readAsLinesSync()) {
-      if (rawUri.trim().isEmpty) {
-        continue;
-      }
-      final Uri? fileUri = Uri.tryParse(rawUri);
-      if (fileUri == null) {
-        continue;
-      }
-      if (fileUri.scheme != 'file') {
-        continue;
-      }
-      inputs.add(_fileSystem.file(fileUri));
-    }
+    final List<File> inputs = <File>[
+      for (final String rawUri in file.readAsLinesSync())
+        if (rawUri.trim().isNotEmpty)
+          if (Uri.tryParse(rawUri) case final Uri fileUri when fileUri.scheme == 'file')
+            _fileSystem.file(fileUri),
+    ];
     return Depfile(inputs, <File>[output]);
   }
 

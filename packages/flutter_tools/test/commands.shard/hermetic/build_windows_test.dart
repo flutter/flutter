@@ -45,7 +45,7 @@ final Platform notWindowsPlatform = FakePlatform(
 );
 
 void main() {
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late ProcessManager processManager;
   late TestUsage usage;
   late FakeAnalytics fakeAnalytics;
@@ -152,7 +152,7 @@ void main() {
     expect(createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub']
     ), throwsToolExit(message: 'No Windows desktop project configured. See '
-      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://flutter.dev/to/add-desktop-support '
       'to learn about adding Windows support to a project.'));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,

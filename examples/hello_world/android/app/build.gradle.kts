@@ -20,8 +20,8 @@ android {
         applicationId = "io.flutter.examples.hello_world"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode()
-        versionName = flutter.versionName()
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
     }
 
     buildTypes {

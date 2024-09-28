@@ -4,7 +4,7 @@
 
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines because it contains golden tests; see:
-// https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter#reduced-test-set-tag
+// https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md
 @Tags(<String>['reduced-test-set'])
 library;
 

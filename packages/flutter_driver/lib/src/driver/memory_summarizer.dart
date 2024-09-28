@@ -21,7 +21,7 @@ class GPUMemorySumarizer {
   }
 
   /// Whether or not this event is a GPU allocation event.
-  static const Set<String> kMemoryEvents = <String>{'AllocatorVK'};
+  static const Set<String> kMemoryEvents = <String>{'AllocatorVK', 'AllocatorMTL'};
 
   final List<double> _memoryMB = <double>[];
 

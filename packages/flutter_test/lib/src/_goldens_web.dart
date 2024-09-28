@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'matchers.dart';
+library;
+
 import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:typed_data';
@@ -42,12 +45,12 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
 ///   * [matchesGoldenFile], the function from [flutter_test] that invokes the
 ///    comparator.
 class DefaultWebGoldenComparator extends WebGoldenComparator {
-  /// Creates a new [DefaultWebGoldenComparator] for the specified [testFile].
+  /// Creates a new [DefaultWebGoldenComparator] for the specified [testUri].
   ///
   /// Golden file keys will be interpreted as file paths relative to the
-  /// directory in which [testFile] resides.
+  /// directory in which [testUri] resides.
   ///
-  /// The [testFile] URL must represent a file.
+  /// The [testUri] must represent a file.
   DefaultWebGoldenComparator(this.testUri);
 
   /// The test file currently being executed.

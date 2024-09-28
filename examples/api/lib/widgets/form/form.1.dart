@@ -111,7 +111,7 @@ class _SaveableFormState extends State<_SaveableForm> {
           const SizedBox(height: 20.0),
           Form(
             canPop: !_isDirty,
-            onPopInvoked: (bool didPop) async {
+            onPopInvokedWithResult: (bool didPop, Object? result) async {
               if (didPop) {
                 return;
               }

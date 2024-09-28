@@ -111,5 +111,5 @@ void main() {
 
     paragraph.strutStyle = const StrutStyle(fontSize: 100, forceStrutHeight: true);
     expect(paragraph.getMaxIntrinsicHeight(double.infinity), 100);
-  }, skip: kIsWeb && !isCanvasKit); // [intended] strut spport for HTML renderer https://github.com/flutter/flutter/issues/32243.
+  }, skip: kIsWeb && !isSkiaWeb); // [intended] strut support for HTML renderer https://github.com/flutter/flutter/issues/32243.
 }

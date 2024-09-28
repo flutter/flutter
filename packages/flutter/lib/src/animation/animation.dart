@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
 
 import 'package:flutter/foundation.dart';
 
@@ -27,7 +29,31 @@ enum AnimationStatus {
   reverse,
 
   /// The animation is stopped at the end.
-  completed,
+  completed;
+
+  /// Whether the animation is stopped at the beginning.
+  bool get isDismissed => this == dismissed;
+
+  /// Whether the animation is stopped at the end.
+  bool get isCompleted => this == completed;
+
+  /// Whether the animation is running in either direction.
+  bool get isAnimating => switch (this) {
+    forward   || reverse   => true,
+    completed || dismissed => false,
+  };
+
+  /// {@template flutter.animation.AnimationStatus.isForwardOrCompleted}
+  /// Whether the current aim of the animation is toward completion.
+  ///
+  /// Specifically, returns `true` for [AnimationStatus.forward] or
+  /// [AnimationStatus.completed], and `false` for
+  /// [AnimationStatus.reverse] or [AnimationStatus.dismissed].
+  /// {@endtemplate}
+  bool get isForwardOrCompleted => switch (this) {
+    forward || completed => true,
+    reverse || dismissed => false,
+  };
 }
 
 /// Signature for listeners attached using [Animation.addStatusListener].
@@ -150,10 +176,20 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   T get value;
 
   /// Whether this animation is stopped at the beginning.
-  bool get isDismissed => status == AnimationStatus.dismissed;
+  bool get isDismissed => status.isDismissed;
 
   /// Whether this animation is stopped at the end.
-  bool get isCompleted => status == AnimationStatus.completed;
+  bool get isCompleted => status.isCompleted;
+
+  /// Whether this animation is running in either direction.
+  ///
+  /// By default, this value is equal to `status.isAnimating`, but
+  /// [AnimationController] overrides this method so that its output
+  /// depends on whether the controller is actively ticking.
+  bool get isAnimating => status.isAnimating;
+
+  /// {@macro flutter.animation.AnimationStatus.isForwardOrCompleted}
+  bool get isForwardOrCompleted => status.isForwardOrCompleted;
 
   /// Chains a [Tween] (or [CurveTween]) to this [Animation].
   ///
@@ -183,7 +219,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// {@end-tool}
   /// {@tool snippet}
   ///
-  /// The `_alignment.value` could then be used in a widget's build method, for
+  /// The `alignment1.value` could then be used in a widget's build method, for
   /// instance, to position a child using an [Align] widget such that the
   /// position of the child shifts over time from the top left to the top right.
   ///

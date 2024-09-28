@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'hardware_keyboard.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_maps.g.dart';
@@ -230,7 +233,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
   // These are not the values defined by the Windows header for each modifier. Since they
   // can't be packaged into a single int, we are re-defining them here to reduce the size
   // of the message from the embedder. Embedders should map these values to the native key codes.
-  // Keep this in sync with https://github.com/flutter/engine/blob/master/shell/platform/windows/key_event_handler.cc
+  // Keep this in sync with https://github.com/flutter/engine/blob/main/shell/platform/windows/key_event_handler.cc
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// SHIFT modifier keys is pressed.

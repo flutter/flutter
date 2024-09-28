@@ -23,7 +23,7 @@ class ColumnOfTextState extends State<ColumnOfText> with SingleTickerProviderSta
       duration: const Duration(milliseconds: 300),
     )
       ..addStatusListener((AnimationStatus status) {
-        if (status == AnimationStatus.completed) {
+        if (status.isCompleted) {
           setState(() {
             _showText = !_showText;
           });

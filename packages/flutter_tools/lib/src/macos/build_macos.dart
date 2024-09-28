@@ -16,6 +16,7 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/xcode_build_settings.dart';
 import '../ios/xcodeproj.dart';
+import '../migrations/swift_package_manager_integration_migration.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
@@ -24,13 +25,14 @@ import 'application_package.dart';
 import 'cocoapod_utils.dart';
 import 'migrations/flutter_application_migration.dart';
 import 'migrations/macos_deployment_target_migration.dart';
+import 'migrations/nsapplicationmain_deprecation_migration.dart';
 import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
 
 /// When run in -quiet mode, Xcode should only print from the underlying tasks to stdout.
 /// Passing this regexp to trace moves the stdout output to stderr.
 ///
 /// Filter out xcodebuild logging unrelated to macOS builds:
-/// ```
+/// ```none
 /// xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionPointIdentifierToBundleIdentifier for extension Xcode.DebuggerFoundation.AppExtensionToBundleIdentifierMap.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
 ///
 /// note: Using new build system
@@ -63,11 +65,12 @@ Future<void> buildMacOS({
   required bool verboseLogging,
   bool configOnly = false,
   SizeAnalyzer? sizeAnalyzer,
+  bool usingCISystem = false,
 }) async {
   final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
   if (xcodeWorkspace == null) {
     throwToolExit('No macOS desktop project configured. '
-      'See https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'See https://flutter.dev/to/add-desktop-support '
       'to learn about adding macOS support to a project.');
   }
 
@@ -83,10 +86,21 @@ Future<void> buildMacOS({
     XcodeScriptBuildPhaseMigration(flutterProject.macos, globals.logger),
     XcodeThinBinaryBuildPhaseInputPathsMigration(flutterProject.macos, globals.logger),
     FlutterApplicationMigration(flutterProject.macos, globals.logger),
+    NSApplicationMainDeprecationMigration(flutterProject.macos, globals.logger),
+    if (flutterProject.usesSwiftPackageManager && flutterProject.macos.flutterPluginSwiftPackageManifest.existsSync())
+      SwiftPackageManagerIntegrationMigration(
+        flutterProject.macos,
+        SupportedPlatform.macos,
+        buildInfo,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        plistParser: globals.plistParser,
+      ),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
-  migration.run();
+  await migration.run();
 
   final Directory flutterBuildDir = globals.fs.directory(getMacOSBuildDirectory());
   if (!flutterBuildDir.existsSync()) {
@@ -99,6 +113,11 @@ Future<void> buildMacOS({
     targetOverride: targetOverride,
     useMacOSConfig: true,
   );
+
+  // TODO(vashworth): Call `SwiftPackageManager.updateMinimumDeployment`
+  // using MACOSX_DEPLOYMENT_TARGET once https://github.com/flutter/flutter/issues/146204
+  // is fixed.
+
   await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
   // If the xcfilelists do not exist, create empty version.
   if (!flutterProject.macos.inputFileList.existsSync()) {
@@ -135,6 +154,19 @@ Future<void> buildMacOS({
     'Building macOS application...',
   );
   int result;
+
+  File? disabledSandboxEntitlementFile;
+  if (usingCISystem) {
+    disabledSandboxEntitlementFile = _createDisabledSandboxEntitlementFile(
+      flutterProject.macos,
+      configuration,
+    );
+    if (disabledSandboxEntitlementFile != null) {
+      globals.logger.printStatus(
+        'Detected macOS app running in CI, turning off sandboxing.');
+    }
+  }
+
   try {
     result = await globals.processUtils.stream(<String>[
       '/usr/bin/env',
@@ -152,6 +184,8 @@ Future<void> buildMacOS({
       else
         '-quiet',
       'COMPILER_INDEX_STORE_ENABLE=NO',
+      if (disabledSandboxEntitlementFile != null)
+        'CODE_SIGN_ENTITLEMENTS=${disabledSandboxEntitlementFile.path}',
       ...environmentVariablesAsXcodeBuildSettings(globals.platform),
     ],
     trace: true,
@@ -252,4 +286,53 @@ Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnaly
     '\nTo analyze your app size in Dart DevTools, run the following command:\n'
     'dart devtools --appSizeBase=$relativeAppSizePath'
   );
+}
+
+/// Finds and copies macOS entitlements file. In the copy, disables sandboxing.
+/// If entitlements file is not found, returns null.
+///
+/// As of macOS 14, running a macOS sandbox app may prompt the user to grant
+/// access to the app. To workaround this in CI, we create and use a entitlements
+/// file with sandboxing disabled. See
+/// https://developer.apple.com/documentation/security/app_sandbox/accessing_files_from_the_macos_app_sandbox.
+File? _createDisabledSandboxEntitlementFile(
+  MacOSProject macos,
+  String configuration,
+) {
+  String entitlementDefaultFileName;
+  if (configuration == 'Release') {
+    entitlementDefaultFileName = 'Release';
+  } else {
+    entitlementDefaultFileName = 'DebugProfile';
+  }
+
+  // TODO(vashworth): Once https://github.com/flutter/flutter/issues/146204 is
+  // fixed, it would be better to get the path to the entitlement file from the
+  // project's build settings (CODE_SIGN_ENTITLEMENTS).
+  final File entitlementFile = macos.hostAppRoot
+      .childDirectory('Runner')
+      .childFile('$entitlementDefaultFileName.entitlements');
+
+  if (!entitlementFile.existsSync()) {
+    globals.logger.printTrace(
+        'Unable to find entitlements file at ${entitlementFile.path}');
+    return null;
+  }
+
+  final String entitlementFileContents = entitlementFile.readAsStringSync();
+  final File disabledSandboxEntitlementFile = globals.fs.systemTempDirectory
+      .createTempSync('flutter_disable_sandbox_entitlement.')
+      .childFile(
+        '${entitlementDefaultFileName}WithDisabledSandboxing.entitlements',
+      );
+  disabledSandboxEntitlementFile.createSync(recursive: true);
+  disabledSandboxEntitlementFile.writeAsStringSync(
+    entitlementFileContents.replaceAll(
+      RegExp(r'<key>com\.apple\.security\.app-sandbox<\/key>[\S\s]*?<true\/>'),
+      '''
+<key>com.apple.security.app-sandbox</key>
+	<false/>''',
+    ),
+  );
+  return disabledSandboxEntitlementFile;
 }

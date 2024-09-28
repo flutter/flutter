@@ -316,6 +316,11 @@ class FakePlistParser implements PlistParser {
   String? plistXmlContent(String plistFilePath) => throw UnimplementedError();
 
   @override
+  String? plistJsonContent(String filePath, {bool sorted = false}) {
+    throw UnimplementedError();
+  }
+
+  @override
   Map<String, Object> parseFile(String plistFilePath) {
     return _underlyingValues;
   }
@@ -472,6 +477,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isCliAnimationEnabled = true,
     this.isNativeAssetsEnabled = false,
     this.isPreviewDeviceEnabled = false,
+    this.isSwiftPackageManagerEnabled = false,
   });
 
   @override
@@ -506,6 +512,9 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isPreviewDeviceEnabled;
+
+  @override
+  final bool isSwiftPackageManagerEnabled;
 
   @override
   bool isEnabled(Feature feature) {
@@ -726,5 +735,15 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   @override
   Future<void> close() async {
     closed = true;
+  }
+}
+
+class ClosedStdinController extends Fake implements StreamSink<List<int>> {
+  @override
+  Future<Object?> addStream(Stream<List<int>> stream) async => throw const SocketException('Bad pipe');
+
+  @override
+  Future<Object?> close() async {
+    return null;
   }
 }

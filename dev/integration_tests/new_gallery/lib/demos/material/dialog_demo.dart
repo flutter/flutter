@@ -81,16 +81,12 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
 
   String _title(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    switch (widget.type) {
-      case DialogDemoType.alert:
-        return localizations.demoAlertDialogTitle;
-      case DialogDemoType.alertTitle:
-        return localizations.demoAlertTitleDialogTitle;
-      case DialogDemoType.simple:
-        return localizations.demoSimpleDialogTitle;
-      case DialogDemoType.fullscreen:
-        return localizations.demoFullscreenDialogTitle;
-    }
+    return switch (widget.type) {
+      DialogDemoType.alert      => localizations.demoAlertDialogTitle,
+      DialogDemoType.alertTitle => localizations.demoAlertTitleDialogTitle,
+      DialogDemoType.simple     => localizations.demoSimpleDialogTitle,
+      DialogDemoType.fullscreen => localizations.demoFullscreenDialogTitle,
+    };
   }
 
   static Route<String> _alertDialogDemoRoute(

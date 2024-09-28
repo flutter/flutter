@@ -31,14 +31,14 @@ String? currentLocale;
 ///
 /// The following outputs the generated Dart code to the console as a dry run:
 ///
-/// ```
+/// ```bash
 /// dart dev/tools/localization/bin/gen_date_localizations.dart
 /// ```
 ///
 /// If the data looks good, use the `--overwrite` option to overwrite the
 /// lib/src/l10n/date_localizations.dart file:
 ///
-/// ```
+/// ```bash
 /// dart dev/tools/localization/bin/gen_date_localizations.dart --overwrite
 /// ```
 Future<void> main(List<String> rawArgs) async {
@@ -164,61 +164,51 @@ String _jsonToMapEntry(String key, dynamic value) {
 }
 
 String _jsonToObject(dynamic json) {
-  if (json == null || json is num || json is bool) {
-    return '$json';
-  }
-
-  if (json is String) {
-    return generateEncodedString(currentLocale, json);
-  }
-
-  if (json is Iterable<Object?>) {
-    final String type = json.first.runtimeType.toString();
-    final StringBuffer buffer = StringBuffer('const <$type>[');
-    for (final dynamic value in json) {
-      buffer.writeln('${_jsonToMap(value)},');
-    }
-    buffer.write(']');
-    return buffer.toString();
-  }
-
-  if (json is Map<String, dynamic>) {
-    final StringBuffer buffer = StringBuffer('<String, Object>{');
-    json.forEach((String key, dynamic value) {
-      buffer.writeln(_jsonToMapEntry(key, value));
-    });
-    buffer.write('}');
-    return buffer.toString();
+  switch (json) {
+    case null || num() || bool():
+      return '$json';
+    case String():
+      return generateEncodedString(currentLocale, json);
+    case Iterable<Object?>():
+      final Type type = json.first.runtimeType;
+      final StringBuffer buffer = StringBuffer('const <$type>[');
+      for (final dynamic value in json) {
+        buffer.writeln('${_jsonToMap(value)},');
+      }
+      buffer.write(']');
+      return buffer.toString();
+    case Map<String, dynamic>():
+      final StringBuffer buffer = StringBuffer('<String, Object>{');
+      json.forEach((String key, dynamic value) {
+        buffer.writeln(_jsonToMapEntry(key, value));
+      });
+      buffer.write('}');
+      return buffer.toString();
   }
 
   throw 'Unsupported JSON type ${json.runtimeType} of value $json.';
 }
 
 String _jsonToMap(dynamic json) {
-  if (json == null || json is num || json is bool) {
-    return '$json';
-  }
-
-  if (json is String) {
-    return generateEncodedString(currentLocale, json);
-  }
-
-  if (json is Iterable) {
-    final StringBuffer buffer = StringBuffer('<String>[');
-    for (final dynamic value in json) {
-      buffer.writeln('${_jsonToMap(value)},');
-    }
-    buffer.write(']');
-    return buffer.toString();
-  }
-
-  if (json is Map<String, dynamic>) {
-    final StringBuffer buffer = StringBuffer('<String, Object>{');
-    json.forEach((String key, dynamic value) {
-      buffer.writeln(_jsonToMapEntry(key, value));
-    });
-    buffer.write('}');
-    return buffer.toString();
+  switch (json) {
+    case null || num() || bool():
+      return '$json';
+    case String():
+      return generateEncodedString(currentLocale, json);
+    case Iterable<dynamic>():
+      final StringBuffer buffer = StringBuffer('<String>[');
+      for (final dynamic value in json) {
+        buffer.writeln('${_jsonToMap(value)},');
+      }
+      buffer.write(']');
+      return buffer.toString();
+    case Map<String, dynamic>():
+      final StringBuffer buffer = StringBuffer('<String, Object>{');
+      json.forEach((String key, dynamic value) {
+        buffer.writeln(_jsonToMapEntry(key, value));
+      });
+      buffer.write('}');
+      return buffer.toString();
   }
 
   throw 'Unsupported JSON type ${json.runtimeType} of value $json.';

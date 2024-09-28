@@ -316,7 +316,7 @@ class MenuStyle with Diagnosticable {
       minimumSize: MaterialStateProperty.lerp<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
       fixedSize: MaterialStateProperty.lerp<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
       maximumSize: MaterialStateProperty.lerp<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
-      side: _LerpSides(a?.side, b?.side, t),
+      side: MaterialStateBorderSide.lerp(a?.side, b?.side, t),
       shape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
@@ -340,31 +340,5 @@ class MenuStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
-  }
-}
-
-/// A required helper class because [BorderSide.lerp] doesn't support passing or
-/// returning null values.
-class _LerpSides implements MaterialStateProperty<BorderSide?> {
-  const _LerpSides(this.a, this.b, this.t);
-
-  final MaterialStateProperty<BorderSide?>? a;
-  final MaterialStateProperty<BorderSide?>? b;
-  final double t;
-
-  @override
-  BorderSide? resolve(Set<MaterialState> states) {
-    final BorderSide? resolvedA = a?.resolve(states);
-    final BorderSide? resolvedB = b?.resolve(states);
-    if (resolvedA == null && resolvedB == null) {
-      return null;
-    }
-    if (resolvedA == null) {
-      return BorderSide.lerp(BorderSide(width: 0, color: resolvedB!.color.withAlpha(0)), resolvedB, t);
-    }
-    if (resolvedB == null) {
-      return BorderSide.lerp(resolvedA, BorderSide(width: 0, color: resolvedA.color.withAlpha(0)), t);
-    }
-    return BorderSide.lerp(resolvedA, resolvedB, t);
   }
 }

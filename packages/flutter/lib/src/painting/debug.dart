@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:developer';
+/// @docImport 'dart:ui';
+///
+/// @docImport 'borders.dart';
+/// @docImport 'box_decoration.dart';
+/// @docImport 'box_shadow.dart';
+/// @docImport 'image_provider.dart';
+/// @docImport 'shader_warm_up.dart';
+/// @docImport 'shape_decoration.dart';
+library;
+
 import 'dart:io';
 import 'dart:ui' show Image, Picture, Size;
 
@@ -13,11 +24,17 @@ import 'package:flutter/foundation.dart';
 /// the rendering of shadows is not guaranteed to be pixel-for-pixel identical from
 /// version to version (or even from run to run).
 ///
-/// In those tests, this is usually set to false at the beginning of a test and back
-/// to true before the end of the test case.
+/// This is set to true in [AutomatedTestWidgetsFlutterBinding]. Tests will fail
+/// if they change this value and do not reset it before the end of the test.
 ///
-/// If it remains true when the test ends, an exception is thrown to avoid state
-/// leaking from one test case to another.
+/// When this is set, [BoxShadow.toPaint] acts as if the [BoxShadow.blurStyle]
+/// was [BlurStyle.normal] regardless of the actual specified blur style. This
+/// is compensated for in [BoxDecoration] and [ShapeDecoration] but may need to
+/// be explicitly considered in other situations.
+///
+/// This property should not be changed during a frame (e.g. during a call to
+/// [ShapeBorder.paintInterior] or [ShapeBorder.getOuterPath]); doing so may
+/// cause undefined effects.
 bool debugDisableShadows = false;
 
 /// Signature for a method that returns an [HttpClient].

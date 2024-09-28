@@ -430,6 +430,37 @@ extension DapTestClientExtension on DapTestClient {
   Future<Response> continue_(int threadId) =>
       sendRequest(ContinueArguments(threadId: threadId));
 
+  /// Sends a stepIn request for the given thread.
+  ///
+  /// Returns a Future that completes when the server returns a corresponding
+  /// response.
+  Future<Response> stepIn(int threadId) =>
+      sendRequest(StepInArguments(threadId: threadId));
+
+  /// Fetches a stack trace and asserts it was a valid response.
+  Future<StackTraceResponseBody> getValidStack(int threadId,
+      {required int startFrame, required int numFrames}) async {
+    final Response response = await stackTrace(threadId,
+        startFrame: startFrame, numFrames: numFrames);
+    assert(response.success);
+    assert(response.command == 'stackTrace');
+    return StackTraceResponseBody.fromJson(
+        response.body! as Map<String, Object?>);
+  }
+
+  /// Sends a stackTrace request to the server to request the call stack for a
+  /// given thread.
+  ///
+  /// If [startFrame] and/or [numFrames] are supplied, only a slice of the
+  /// frames will be returned.
+  ///
+  /// Returns a Future that completes when the server returns a corresponding
+  /// response.
+  Future<Response> stackTrace(int threadId,
+          {int? startFrame, int? numFrames}) =>
+      sendRequest(StackTraceArguments(
+          threadId: threadId, startFrame: startFrame, levels: numFrames));
+
   /// Clears breakpoints in [file].
   Future<void> clearBreakpoints(String filePath) async {
     await sendRequest(

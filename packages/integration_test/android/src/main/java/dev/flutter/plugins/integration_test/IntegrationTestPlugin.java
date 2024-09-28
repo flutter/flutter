@@ -30,11 +30,6 @@ public class IntegrationTestPlugin implements MethodCallHandler, FlutterPlugin, 
   public static final Future<Map<String, String>> testResults = testResultsSettable;
 
   /** Plugin registration. */
-  @SuppressWarnings("deprecation")
-  public static void registerWith(io.flutter.plugin.common.PluginRegistry.Registrar registrar) {
-    final IntegrationTestPlugin instance = new IntegrationTestPlugin();
-    instance.onAttachedToEngine(registrar.context(), registrar.messenger());
-  }
 
   @Override
   public void onAttachedToEngine(FlutterPluginBinding binding) {

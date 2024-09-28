@@ -147,28 +147,25 @@ void main() {
 
     expect(semantics, isNot(includesNodeWith(
       label: const DefaultMaterialLocalizations().modalBarrierDismissLabel,
-      actions: <SemanticsAction>[SemanticsAction.tap],
+      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
     )));
 
     semantics.dispose();
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('Scaffold drawerScrimColor', (WidgetTester tester) async {
-    // The scrim is a Container within a Semantics node labeled "Dismiss",
+    // The scrim is a ColoredBox within a Semantics node labeled "Dismiss",
     // within a DrawerController. Sorry.
-    Container getScrim() {
-      return tester.widget<Container>(
+    Widget getScrim() {
+      return tester.widget<Semantics>(
         find.descendant(
-          of: find.descendant(
-            of: find.byType(DrawerController),
-            matching: find.byWidgetPredicate((Widget widget) {
-              return widget is Semantics
-                  && widget.properties.label == 'Dismiss';
-            }),
-          ),
-          matching: find.byType(Container),
+          of: find.byType(DrawerController),
+          matching: find.byWidgetPredicate((Widget widget) {
+            return widget is Semantics
+                && widget.properties.label == 'Dismiss';
+          }),
         ),
-      );
+      ).child!;
     }
 
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -196,7 +193,8 @@ void main() {
     scaffoldKey.currentState!.openDrawer();
     await tester.pumpAndSettle();
 
-    expect(getScrim().color, Colors.black54);
+    ColoredBox scrim = getScrim() as ColoredBox;
+    expect(scrim.color, Colors.black54);
 
     await tester.tap(find.byType(Drawer));
     await tester.pumpAndSettle();
@@ -208,7 +206,8 @@ void main() {
     scaffoldKey.currentState!.openDrawer();
     await tester.pumpAndSettle();
 
-    expect(getScrim().color, const Color(0xFF323232));
+    scrim = getScrim() as ColoredBox;
+    expect(scrim.color, const Color(0xFF323232));
 
     await tester.tap(find.byType(Drawer));
     await tester.pumpAndSettle();
@@ -258,6 +257,61 @@ void main() {
     await tester.pumpAndSettle();
     expect(state.isDrawerOpen, equals(false));
     expect(state.isEndDrawerOpen, equals(false));
+  });
+
+  testWidgets('Open/close drawer by dragging', (WidgetTester tester) async {
+    final ThemeData draggable = ThemeData(platform: TargetPlatform.android);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: draggable,
+        home: const Scaffold(drawer: Drawer()),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture();
+    final Finder finder = find.byType(Drawer);
+
+    double drawerPosition() {
+      expect(finder, findsOneWidget);
+      final RenderBox renderBox = tester.renderObject(finder);
+      return renderBox.localToGlobal(Offset.zero).dx;
+    }
+
+    // Pointer down (drawer is closed).
+    await gesture.addPointer();
+    await gesture.down(const Offset(2,2));
+    await tester.pump();
+    expect(finder, findsNothing);
+
+    // Open drawer slightly.
+    await gesture.moveBy(const Offset(20, 0));
+    await tester.pump();
+    expect(drawerPosition(), isNegative);
+
+    // Open drawer more than halfway.
+    await gesture.moveBy(const Offset(200, 0));
+    await tester.pump();
+    expect(drawerPosition(), isNegative);
+
+    // Drawer is fully open.
+    await gesture.moveBy(const Offset(200, 0));
+    await tester.pump();
+    expect(drawerPosition(), 0.0);
+
+    // Drawer is less than halfway closed.
+    await gesture.moveBy(const Offset(-100.0, 0));
+    await tester.pump();
+    expect(drawerPosition(), moreOrLessEquals(-100.0));
+
+    // Drawer is more than halfway closed.
+    await gesture.moveBy(const Offset(-100.0, 0));
+    await tester.pump();
+    expect(drawerPosition(), moreOrLessEquals(-200.0));
+
+    // Drawer is completely closed.
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    expect(finder, findsNothing);
   });
 
   testWidgets('Scaffold.drawer - null restorationId ', (WidgetTester tester) async {

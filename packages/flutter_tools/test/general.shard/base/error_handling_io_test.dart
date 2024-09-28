@@ -98,6 +98,24 @@ void main() {
     }, throwsFileSystemException());
   });
 
+  testWithoutContext('deleteIfExists throws tool exit if the path is not found on Windows', () {
+    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
+    final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+      delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+      platform: windowsPlatform,
+    );
+    final File file = fileSystem.file(fileSystem.path.join('directory', 'file'))
+      ..createSync(recursive: true);
+
+    exceptionHandler.addError(
+      file,
+      FileSystemOp.delete,
+      FileSystemException('', file.path, const OSError('', 2)),
+    );
+
+    expect(() => ErrorHandlingFileSystem.deleteIfExists(file), throwsToolExit());
+  });
+
   group('throws ToolExit on Windows', () {
     const int kDeviceFull = 112;
     const int kUserMappedSectionOpened = 1224;
@@ -571,14 +589,14 @@ void main() {
 
     testWithoutContext('When the current working directory disappears', () async {
      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: ThrowsOnCurrentDirectoryFileSystem(kSystemCannotFindFile),
+        delegate: ThrowsOnCurrentDirectoryFileSystem(kSystemCodeCannotFindFile),
         platform: linuxPlatform,
       );
 
       expect(() => fileSystem.currentDirectory, throwsToolExit(message: 'Unable to read current working directory'));
     });
 
-    testWithoutContext('Rethrows os error $kSystemCannotFindFile', () {
+    testWithoutContext('Rethrows os error $kSystemCodeCannotFindFile', () {
        final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: linuxPlatform,
@@ -588,11 +606,11 @@ void main() {
       exceptionHandler.addError(
         file,
         FileSystemOp.read,
-        FileSystemException('', file.path, const OSError('', kSystemCannotFindFile)),
+        FileSystemException('', file.path, const OSError('', kSystemCodeCannotFindFile)),
       );
 
       // Error is not caught by other operations.
-      expect(() => fileSystem.file('foo').readAsStringSync(), throwsFileSystemException(kSystemCannotFindFile));
+      expect(() => fileSystem.file('foo').readAsStringSync(), throwsFileSystemException(kSystemCodeCannotFindFile));
     });
   });
 
@@ -864,6 +882,43 @@ void main() {
       expect(fs.currentDirectory.toString(), delegate.currentDirectory.toString());
       expect(fs.currentDirectory, isA<ErrorHandlingDirectory>());
     });
+  });
+
+  testWithoutContext("ErrorHandlingFileSystem.systemTempDirectory wraps delegates filesystem's systemTempDirectory", () {
+    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
+
+    final MemoryFileSystem delegate = MemoryFileSystem.test(
+      style: FileSystemStyle.windows,
+      opHandle: exceptionHandler.opHandle,
+    );
+
+    final FileSystem fs = ErrorHandlingFileSystem(
+      delegate: delegate,
+      platform: FakePlatform(operatingSystem: 'windows'),
+    );
+
+    expect(fs.systemTempDirectory, isA<ErrorHandlingDirectory>());
+    expect(fs.systemTempDirectory.path, delegate.systemTempDirectory.path);
+
+    final File tempFile = delegate.systemTempDirectory.childFile('hello')
+      ..createSync(recursive: true);
+
+    exceptionHandler.addError(
+      tempFile,
+      FileSystemOp.write,
+      FileSystemException(
+        'Oh no!',
+        tempFile.path,
+        const OSError('Access denied ):', 5),
+      ),
+    );
+
+    expect(
+      () => fs.file(tempFile.path).writeAsStringSync('world'),
+      throwsToolExit(message: r'''
+Flutter failed to write to a file at "C:\.tmp_rand0\hello". The flutter tool cannot access the file or directory.
+Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.'''),
+    );
   });
 
   group('ProcessManager on windows throws tool exit', () {

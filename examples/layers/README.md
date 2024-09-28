@@ -21,7 +21,7 @@ Flutter's layered architecture.
 To run each example, specify the demo file on the `flutter run`
 command line, for example:
 
-```
+```sh
 flutter run raw/spinning_square.dart
 flutter run rendering/spinning_square.dart
 flutter run widgets/spinning_square.dart

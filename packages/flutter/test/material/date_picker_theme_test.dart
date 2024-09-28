@@ -50,6 +50,7 @@ void main() {
     ),
     cancelButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xffffff6f))),
     confirmButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xffffff7f))),
+    locale: Locale('en'),
   );
 
   Material findDialogMaterial(WidgetTester tester) {
@@ -145,6 +146,7 @@ void main() {
     expect(theme.inputDecorationTheme, null);
     expect(theme.cancelButtonStyle, null);
     expect(theme.confirmButtonStyle, null);
+    expect(theme.locale, null);
   });
 
   testWidgets('DatePickerTheme.defaults M3 defaults', (WidgetTester tester) async {
@@ -223,6 +225,7 @@ void main() {
     expect(m3.inputDecorationTheme, null);
     expect(m3.cancelButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
     expect(m3.confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
+    expect(m3.locale, null);
   });
 
   testWidgets('DatePickerTheme.defaults M2 defaults', (WidgetTester tester) async {
@@ -293,6 +296,7 @@ void main() {
     expect(m2.inputDecorationTheme, null);
     expect(m2.cancelButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
     expect(m2.confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
+    expect(m2.locale, null);
   });
 
   testWidgets('Default DatePickerThemeData debugFillProperties', (WidgetTester tester) async {
@@ -354,7 +358,8 @@ void main() {
       'dividerColor: Color(0xffffff4f)',
       'inputDecorationTheme: InputDecorationTheme#00000(fillColor: Color(0xffffff5f), border: UnderlineInputBorder())',
       'cancelButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xffffff6f)))',
-      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xffffff7f)))'
+      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xffffff7f)))',
+      'locale: en',
     ]));
   });
 
@@ -539,7 +544,7 @@ void main() {
     );
 
     final Material material = findDialogMaterial(tester);
-    expect(material.color, datePickerTheme.backgroundColor); //!!
+    expect(material.color, datePickerTheme.backgroundColor);
     expect(tester.widget<Scaffold>(find.byType(Scaffold)).backgroundColor, datePickerTheme.rangePickerBackgroundColor);
     expect(material.elevation, datePickerTheme.rangePickerElevation);
     expect(material.shadowColor, datePickerTheme.rangePickerShadowColor);
@@ -550,6 +555,67 @@ void main() {
     expect(appBar.backgroundColor, datePickerTheme.rangePickerHeaderBackgroundColor);
 
     final Text selectRange = tester.widget<Text>(find.text('Select range'));
+    expect(selectRange.style?.color, datePickerTheme.rangePickerHeaderForegroundColor);
+    expect(selectRange.style?.fontSize, datePickerTheme.rangePickerHeaderHelpStyle?.fontSize);
+
+    final Text selectedDate = tester.widget<Text>(find.text('Jan 17'));
+    expect(selectedDate.style?.color, datePickerTheme.rangePickerHeaderForegroundColor);
+    expect(selectedDate.style?.fontSize, datePickerTheme.rangePickerHeaderHeadlineStyle?.fontSize);
+
+    // Test the day overlay color.
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.text('16')));
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paints..circle(color: datePickerTheme.dayOverlayColor?.resolve(<MaterialState>{})));
+
+    // Test the range selection overlay color.
+    await gesture.moveTo(tester.getCenter(find.text('18')));
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paints..circle(color: datePickerTheme.rangeSelectionOverlayColor?.resolve(<MaterialState>{})));
+  });
+
+  testWidgets('Material2 - DateRangePickerDialog uses ThemeData datePicker theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          datePickerTheme: datePickerTheme,
+          useMaterial3: false,
+        ),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: DateRangePickerDialog(
+                firstDate: DateTime(2023),
+                lastDate: DateTime(2023, DateTime.january, 31),
+                initialDateRange: DateTimeRange(
+                  start: DateTime(2023, DateTime.january, 17),
+                  end: DateTime(2023, DateTime.january, 20),
+                ),
+                currentDate: DateTime(2023, DateTime.january, 23),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Material material = findDialogMaterial(tester);
+    expect(material.color, datePickerTheme.backgroundColor);
+    expect(tester.widget<Scaffold>(find.byType(Scaffold)).backgroundColor, datePickerTheme.rangePickerBackgroundColor);
+    expect(material.elevation, datePickerTheme.rangePickerElevation);
+    expect(material.shadowColor, datePickerTheme.rangePickerShadowColor);
+    expect(material.surfaceTintColor, datePickerTheme.rangePickerSurfaceTintColor);
+    expect(material.shape, datePickerTheme.rangePickerShape);
+
+    final AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
+    expect(appBar.backgroundColor, datePickerTheme.rangePickerHeaderBackgroundColor);
+
+    final Text selectRange = tester.widget<Text>(find.text('SELECT RANGE'));
     expect(selectRange.style?.color, datePickerTheme.rangePickerHeaderForegroundColor);
     expect(selectRange.style?.fontSize, datePickerTheme.rangePickerHeaderHelpStyle?.fontSize);
 

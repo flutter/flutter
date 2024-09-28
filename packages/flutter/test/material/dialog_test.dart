@@ -111,6 +111,28 @@ void main() {
     expect(materialWidget.color, customColor);
   });
 
+  testWidgets('Dialog background defaults to ColorScheme.surface', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      colorScheme: ThemeData().colorScheme.copyWith(
+        surface: Colors.orange,
+        background: Colors.green,
+      )
+    );
+    const Dialog dialog = Dialog(
+      child: SizedBox(
+        width: 200,
+        height: 200
+      ),
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: theme));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.color, theme.colorScheme.surface);
+  });
+
   testWidgets('Material2 - Dialog Defaults', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),

@@ -5,7 +5,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'gesture_tester.dart';
 
@@ -766,8 +765,6 @@ void main() {
   });
 
   testGesture('Horizontal drag with multiple pointers - averageBoundaryPointers',
-  // TODO(polina-c): dispose gesture recognizers https://github.com/flutter/flutter/issues/145605 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag =
     HorizontalDragGestureRecognizer()
@@ -903,6 +900,8 @@ void main() {
     // Tear down 'currentSystemFrameTimeStamp'
     SchedulerBinding.instance.handleBeginFrame(Duration.zero);
     SchedulerBinding.instance.handleDrawFrame();
+    // Dispose gesture
+    drag.dispose();
 
     expect(log, <String>[
       '-a',
@@ -929,8 +928,6 @@ void main() {
   });
 
   testGesture('Vertical drag with multiple pointers - averageBoundaryPointers',
-  // TODO(polina-c): dispose gesture recognizers https://github.com/flutter/flutter/issues/145605 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (GestureTester tester) {
     final VerticalDragGestureRecognizer drag =
     VerticalDragGestureRecognizer()
@@ -1066,6 +1063,8 @@ void main() {
     // Tear down 'currentSystemFrameTimeStamp'
     SchedulerBinding.instance.handleBeginFrame(Duration.zero);
     SchedulerBinding.instance.handleDrawFrame();
+     // Dispose gesture
+    drag.dispose();
 
     expect(log, <String>[
       '-a',
@@ -1092,8 +1091,6 @@ void main() {
   });
 
   testGesture('Pan drag with multiple pointers - averageBoundaryPointers',
-  // TODO(polina-c): dispose gesture recognizers https://github.com/flutter/flutter/issues/145605 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (GestureTester tester) {
     final PanGestureRecognizer drag =
     PanGestureRecognizer()
@@ -1250,6 +1247,9 @@ void main() {
     // Tear down 'currentSystemFrameTimeStamp'
     SchedulerBinding.instance.handleBeginFrame(Duration.zero);
     SchedulerBinding.instance.handleDrawFrame();
+
+    // Dispose gesture
+    drag.dispose();
 
     expect(log, <String>[
       '-a',

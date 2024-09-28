@@ -48,7 +48,7 @@ class CupertinoNavigationDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
+    return PopScope<Object?>(
       // Prevent swipe popping of this page. Use explicit exit buttons only.
       canPop: false,
       child: DefaultTextStyle(

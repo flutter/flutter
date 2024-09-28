@@ -130,7 +130,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
     final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
-    if (kIsWeb && isCanvasKit) {
+    if (kIsWeb && isSkiaWeb) {
       expect(
         box,
         paints
@@ -164,7 +164,7 @@ void main() {
     );
 
     await gesture.up();
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('The InkWell widget renders an ink ripple', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);

@@ -45,6 +45,7 @@ void main() {
     expect(themeData.checkboxHorizontalMargin, null);
     expect(themeData.headingCellCursor, null);
     expect(themeData.dataRowCursor, null);
+    expect(themeData.headingRowAlignment, null);
 
     const DataTableTheme theme = DataTableTheme(data: DataTableThemeData(), child: SizedBox());
     expect(theme.data.decoration, null);
@@ -62,6 +63,7 @@ void main() {
     expect(theme.data.checkboxHorizontalMargin, null);
     expect(theme.data.headingCellCursor, null);
     expect(theme.data.dataRowCursor, null);
+    expect(theme.data.headingRowAlignment, null);
   });
 
   testWidgets('Default DataTableThemeData debugFillProperties', (WidgetTester tester) async {
@@ -97,6 +99,7 @@ void main() {
       checkboxHorizontalMargin: 6.0,
       headingCellCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.grab),
       dataRowCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden),
+      headingRowAlignment: MainAxisAlignment.center,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -118,6 +121,7 @@ void main() {
     expect(description[11], 'checkboxHorizontalMargin: 6.0');
     expect(description[12], 'headingCellCursor: WidgetStatePropertyAll(SystemMouseCursor(grab))');
     expect(description[13], 'dataRowCursor: WidgetStatePropertyAll(SystemMouseCursor(forbidden))');
+    expect(description[14], 'headingRowAlignment: center');
   });
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {
@@ -545,6 +549,67 @@ void main() {
     );
 
     expect(tester.getSize(_findFirstContainerFor('Data')).height, localThemeDataRowHeight);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/143340.
+  testWidgets('DataColumn label can be centered with DataTableTheme.headingRowAlignment', (WidgetTester tester) async {
+    const double horizontalMargin = 24.0;
+
+    Widget buildTable({ MainAxisAlignment? headingRowAlignment, bool sortEnabled = false }) {
+      return MaterialApp(
+        theme: ThemeData(
+          dataTableTheme: DataTableThemeData(
+            headingRowAlignment: headingRowAlignment,
+          ),
+        ),
+        home: Material(
+          child: DataTable(
+            columns: <DataColumn>[
+              DataColumn(
+                onSort: sortEnabled
+                  ? (int columnIndex, bool ascending) { }
+                  : null,
+                label: const Text('Header'),
+              ),
+            ],
+            rows: const <DataRow>[
+              DataRow(
+                cells: <DataCell>[
+                  DataCell(Text('Data')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Test mainAxisAlignment without sort arrow.
+    await tester.pumpWidget(buildTable());
+
+    Offset headerTopLeft = tester.getTopLeft(find.text('Header'));
+    expect(headerTopLeft.dx, equals(horizontalMargin));
+
+    // Test mainAxisAlignment.center without sort arrow.
+    await tester.pumpWidget(buildTable(headingRowAlignment: MainAxisAlignment.center));
+    await tester.pumpAndSettle();
+
+    Offset headerCenter = tester.getCenter(find.text('Header'));
+    expect(headerCenter.dx, equals(400));
+
+    // Test mainAxisAlignment with sort arrow.
+    await tester.pumpWidget(buildTable(sortEnabled: true));
+    await tester.pumpAndSettle();
+
+    headerTopLeft = tester.getTopLeft(find.text('Header'));
+    expect(headerTopLeft.dx, equals(horizontalMargin));
+
+    // Test mainAxisAlignment.center with sort arrow.
+    await tester.pumpWidget(buildTable(headingRowAlignment: MainAxisAlignment.center, sortEnabled: true));
+    await tester.pumpAndSettle();
+
+    headerCenter = tester.getCenter(find.text('Header'));
+    expect(headerCenter.dx, equals(400));
   });
 }
 

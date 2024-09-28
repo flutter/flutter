@@ -300,6 +300,7 @@ abstract class UnpackIOS extends Target {
   }
 
   Future<void> _copyFramework(Environment environment, String sdkRoot) async {
+    // Copy Flutter framework.
     final EnvironmentType? environmentType = environmentTypeFromSdkroot(sdkRoot, environment.fileSystem);
     final String basePath = environment.artifacts.getArtifactPath(
       Artifact.flutterFramework,
@@ -323,6 +324,34 @@ abstract class UnpackIOS extends Target {
         'Failed to copy framework (exit ${result.exitCode}:\n'
         '${result.stdout}\n---\n${result.stderr}',
       );
+    }
+
+    // Copy Flutter framework dSYM (debug symbol) bundle, if present.
+    final Directory frameworkDsym = environment.fileSystem.directory(
+      environment.artifacts.getArtifactPath(
+        Artifact.flutterFrameworkDsym,
+        platform: TargetPlatform.ios,
+        mode: buildMode,
+        environmentType: environmentType,
+      )
+    );
+    if (frameworkDsym.existsSync()) {
+      final ProcessResult result = await environment.processManager.run(<String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        frameworkDsym.path,
+        environment.outputDir.path,
+      ]);
+      if (result.exitCode != 0) {
+        throw Exception(
+          'Failed to copy framework dSYM (exit ${result.exitCode}:\n'
+          '${result.stdout}\n---\n${result.stderr}',
+        );
+      }
     }
   }
 
@@ -504,6 +533,7 @@ abstract class IosAssetBundle extends Target {
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.ios,
+      buildMode: buildMode,
       additionalInputs: <File>[
         flutterProject.ios.infoPlist,
         flutterProject.ios.appFrameworkInfoPlist,

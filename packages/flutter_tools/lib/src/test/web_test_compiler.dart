@@ -174,7 +174,7 @@ class WebTestCompiler {
       platformDill: _fileSystem.file(platformDillPath).absolute.uri.toString(),
       dartDefines: dartDefines,
       librariesSpec: _artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).uri.toString(),
-      packagesPath: buildInfo.packagesPath,
+      packagesPath: buildInfo.packageConfigPath,
       artifacts: _artifacts,
       processManager: _processManager,
       logger: _logger,
@@ -222,7 +222,6 @@ class WebTestCompiler {
       languageVersion: currentLanguageVersion(_fileSystem, Cache.flutterRoot!),
     );
 
-    final String dartSdkPath = _artifacts.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript);
     final String platformBinariesPath = _artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
     final String platformFilePath = _fileSystem.path.join(platformBinariesPath, 'dart2wasm_platform.dill');
     final List<String> dartDefines = webRenderer.updateDartDefines(buildInfo.dartDefines);
@@ -233,20 +232,21 @@ class WebTestCompiler {
       'compile',
       'wasm',
       '--packages=.dart_tool/package_config.json',
-      '--extra-compiler-option=--dart-sdk=$dartSdkPath',
       '--extra-compiler-option=--platform=$platformFilePath',
       '--extra-compiler-option=--multi-root-scheme=org-dartlang-app',
       '--extra-compiler-option=--multi-root=${projectDirectory.childDirectory('test').path}',
       '--extra-compiler-option=--multi-root=${outputDirectory.path}',
+      '--extra-compiler-option=--enable-asserts',
+      '--extra-compiler-option=--no-inlining',
       if (webRenderer == WebRendererMode.skwasm) ...<String>[
         '--extra-compiler-option=--import-shared-memory',
         '--extra-compiler-option=--shared-memory-max-pages=32768',
-        ],
+      ],
       ...buildInfo.extraFrontEndOptions,
       for (final String dartDefine in dartDefines)
         '-D$dartDefine',
 
-      '-O1',
+      '-O0',
       '-o',
       outputWasmFile.path,
       testFile.path, // dartfile
@@ -257,8 +257,7 @@ class WebTestCompiler {
       processManager: _processManager,
     );
 
-    await processUtils.run(
-      throwOnError: true,
+    await processUtils.stream(
       compilationArgs,
     );
 

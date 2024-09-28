@@ -267,7 +267,7 @@ class Drawer extends StatelessWidget {
           shadowColor: shadowColor ?? drawerTheme.shadowColor ?? defaults.shadowColor,
           surfaceTintColor: surfaceTintColor ?? drawerTheme.surfaceTintColor ?? defaults.surfaceTintColor,
           shape: effectiveShape,
-          clipBehavior: effectiveShape != null ? (clipBehavior ?? Clip.hardEdge) : Clip.none,
+          clipBehavior: effectiveShape != null ? (clipBehavior ?? drawerTheme.clipBehavior ?? defaults.clipBehavior!) : Clip.none,
           child: child,
         ),
       ),
@@ -489,15 +489,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (widget.scrimColor != oldWidget.scrimColor) {
       _scrimColorTween = _buildScrimColorTween();
     }
+
+    if (_controller.status.isAnimating) {
+      return; // Don't snap the drawer open or shut while the user is dragging.
+    }
     if (widget.isDrawerOpen != oldWidget.isDrawerOpen) {
-      switch (_controller.status) {
-        case AnimationStatus.completed:
-        case AnimationStatus.dismissed:
-          _controller.value = widget.isDrawerOpen ? 1.0 : 0.0;
-        case AnimationStatus.forward:
-        case AnimationStatus.reverse:
-          break;
-      }
+      _controller.value = widget.isDrawerOpen ? 1.0 : 0.0;
     }
   }
 
@@ -529,7 +526,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         _historyEntry?.remove();
         _historyEntry = null;
       case AnimationStatus.dismissed:
-        break;
       case AnimationStatus.completed:
         break;
     }
@@ -568,20 +564,17 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   bool _previouslyOpened = false;
 
+  int get _directionFactor {
+    return switch ((Directionality.of(context), widget.alignment)) {
+      (TextDirection.rtl, DrawerAlignment.start) => -1,
+      (TextDirection.rtl, DrawerAlignment.end)   =>  1,
+      (TextDirection.ltr, DrawerAlignment.start) =>  1,
+      (TextDirection.ltr, DrawerAlignment.end)   => -1,
+    };
+  }
+
   void _move(DragUpdateDetails details) {
-    double delta = details.primaryDelta! / _width;
-    switch (widget.alignment) {
-      case DrawerAlignment.start:
-        break;
-      case DrawerAlignment.end:
-        delta = -delta;
-    }
-    switch (Directionality.of(context)) {
-      case TextDirection.rtl:
-        _controller.value -= delta;
-      case TextDirection.ltr:
-        _controller.value += delta;
-    }
+    _controller.value += details.primaryDelta! / _width * _directionFactor;
 
     final bool opened = _controller.value > 0.5;
     if (opened != _previouslyOpened && widget.drawerCallback != null) {
@@ -594,22 +587,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (_controller.isDismissed) {
       return;
     }
-    if (details.velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
-      double visualVelocity = details.velocity.pixelsPerSecond.dx / _width;
-      switch (widget.alignment) {
-        case DrawerAlignment.start:
-          break;
-        case DrawerAlignment.end:
-          visualVelocity = -visualVelocity;
-      }
-      switch (Directionality.of(context)) {
-        case TextDirection.rtl:
-          _controller.fling(velocity: -visualVelocity);
-          widget.drawerCallback?.call(visualVelocity < 0.0);
-        case TextDirection.ltr:
-          _controller.fling(velocity: visualVelocity);
-          widget.drawerCallback?.call(visualVelocity > 0.0);
-      }
+    final double xVelocity = details.velocity.pixelsPerSecond.dx;
+    if (xVelocity.abs() >= _kMinFlingVelocity) {
+      final double visualVelocity = xVelocity / _width * _directionFactor;
+
+      _controller.fling(velocity: visualVelocity);
+      widget.drawerCallback?.call(visualVelocity > 0.0);
     } else if (_controller.value < 0.5) {
       close();
     } else {
@@ -671,7 +654,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         (DrawerAlignment.end,   TextDirection.ltr) => MediaQuery.paddingOf(context).right,
       };
 
-    if (_controller.status == AnimationStatus.dismissed) {
+    if (_controller.isDismissed) {
       if (widget.enableOpenDragGesture && !isDesktop) {
         return Align(
           alignment: _drawerOuterAlignment,
@@ -682,7 +665,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
             behavior: HitTestBehavior.translucent,
             excludeFromSemantics: true,
             dragStartBehavior: widget.dragStartBehavior,
-            child: Container(width: dragAreaWidth),
+            child: LimitedBox(maxHeight: 0.0, child: SizedBox(width: dragAreaWidth, height: double.infinity)),
           ),
         );
       } else {
@@ -701,6 +684,11 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           platformHasBackButton = false;
       }
 
+      Widget drawerScrim = const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand());
+      if (_scrimColorTween.evaluate(_controller) case final Color color) {
+        drawerScrim = ColoredBox(color: color, child: drawerScrim);
+      }
+
       final Widget child = _DrawerControllerScope(
         controller: widget,
         child: RepaintBoundary(
@@ -714,9 +702,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                     onTap: close,
                     child: Semantics(
                       label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-                      child: Container( // The drawer's "scrim"
-                        color: _scrimColorTween.evaluate(_controller),
-                      ),
+                      child: drawerScrim,
                     ),
                   ),
                 ),
@@ -769,7 +755,10 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
 class _DrawerDefaultsM2 extends DrawerThemeData {
   const _DrawerDefaultsM2(this.context)
-      : super(elevation: 16.0);
+      : super(
+        elevation: 16.0,
+        clipBehavior: Clip.hardEdge,
+      );
 
   final BuildContext context;
 
@@ -787,7 +776,10 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
 
 class _DrawerDefaultsM3 extends DrawerThemeData {
   _DrawerDefaultsM3(this.context)
-      : super(elevation: 1.0);
+      : super(
+          elevation: 1.0,
+          clipBehavior: Clip.hardEdge,
+        );
 
   final BuildContext context;
   late final TextDirection direction = Directionality.of(context);

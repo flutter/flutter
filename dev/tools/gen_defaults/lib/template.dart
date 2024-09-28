@@ -69,7 +69,7 @@ abstract class TokenTemplate {
   /// If the file already contains a generated text block matching the
   /// [blockName], it will be replaced by the [generate] output. Otherwise
   /// the content will just be appended to the end of the file.
-  Future<void> updateFile() async {
+  void updateFile() {
     final String contents = File(fileName).readAsStringSync();
     final String beginComment = '$beginGeneratedComment - $blockName\n';
     final String endComment = '$endGeneratedComment - $blockName\n';
@@ -169,16 +169,13 @@ abstract class TokenTemplate {
   }
 
   String? _numToString(Object? value, [int? digits]) {
-    if (value == null) {
-      return null;
-    }
-    if (value is num) {
-      if (value == double.infinity) {
-        return 'double.infinity';
-      }
-      return digits == null ? value.toString() : value.toStringAsFixed(digits);
-    }
-    return getToken(value as String).toString();
+    return switch (value) {
+      null => null,
+      double.infinity => 'double.infinity',
+      num() when digits == null => value.toString(),
+      num() => value.toStringAsFixed(digits!),
+      _ => getToken(value as String).toString(),
+    };
   }
 
   /// Generate an elevation value for the given component token.

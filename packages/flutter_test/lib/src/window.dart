@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'binding.dart';
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'dart:ui' hide window;
 
 import 'package:flutter/foundation.dart';
@@ -154,6 +160,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }) : _platformDispatcher = platformDispatcher {
     _updateViewsAndDisplays();
     _platformDispatcher.onMetricsChanged = _handleMetricsChanged;
+    _platformDispatcher.onViewFocusChange = _handleViewFocusChanged;
   }
 
   /// The [PlatformDispatcher] that is wrapped by this [TestPlatformDispatcher].
@@ -176,10 +183,21 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   set onMetricsChanged(VoidCallback? callback) {
     _onMetricsChanged = callback;
   }
-
   void _handleMetricsChanged() {
     _updateViewsAndDisplays();
     _onMetricsChanged?.call();
+  }
+
+  @override
+  ViewFocusChangeCallback? get onViewFocusChange => _platformDispatcher.onViewFocusChange;
+  ViewFocusChangeCallback? _onViewFocusChange;
+  @override
+  set onViewFocusChange(ViewFocusChangeCallback? callback) {
+    _onViewFocusChange = callback;
+  }
+  void _handleViewFocusChanged(ViewFocusEvent event) {
+    _updateViewsAndDisplays();
+    _onViewFocusChange?.call(event);
   }
 
   @override
@@ -305,6 +323,18 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// service is defined and returns to the real value.
   void clearNativeSpellCheckServiceDefined() {
     _nativeSpellCheckServiceDefinedTestValue = null;
+  }
+
+  @override
+  bool get supportsShowingSystemContextMenu => _supportsShowingSystemContextMenu ?? _platformDispatcher.supportsShowingSystemContextMenu;
+  bool? _supportsShowingSystemContextMenu;
+  set supportsShowingSystemContextMenu(bool value) { // ignore: avoid_setters_without_getters
+    _supportsShowingSystemContextMenu = value;
+  }
+
+  /// Resets [supportsShowingSystemContextMenu] to the default value.
+  void resetSupportsShowingSystemContextMenu() {
+    _supportsShowingSystemContextMenu = null;
   }
 
   @override
@@ -458,6 +488,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     clearTextScaleFactorTestValue();
     clearNativeSpellCheckServiceDefined();
     resetBrieflyShowPassword();
+    resetSupportsShowingSystemContextMenu();
     resetInitialLifecycleState();
     resetSystemFontFamily();
   }

@@ -590,7 +590,6 @@ void main() {
         await tester.pumpWidget(FadeInImage(
           placeholder: placeholderProvider,
           image: imageProvider,
-          filterQuality: FilterQuality.medium,
         ));
 
         expect(findFadeInImage(tester).placeholder!.filterQuality, equals(findFadeInImage(tester).target.filterQuality));
@@ -604,7 +603,6 @@ void main() {
         await tester.pumpWidget(FadeInImage(
           placeholder: placeholderProvider,
           image: imageProvider,
-          filterQuality: FilterQuality.medium,
           placeholderFilterQuality: FilterQuality.high,
         ));
 

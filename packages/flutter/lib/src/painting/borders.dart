@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'box_border.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
 

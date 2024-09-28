@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
@@ -346,8 +347,7 @@ void main() {
   });
 
   testWidgets('correctly switches between view configurations',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // Leaking by design as contains deprecated items.
   (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapWithView: false,
@@ -514,6 +514,52 @@ void main() {
     final RenderBox child = renderView.child!;
     expect(child.debugCanParentUseSize, isTrue);
     expect(child.size, const Size(100, 200));
+  });
+
+  testWidgets('ViewFocusEvents cause unfocusing and refocusing', (WidgetTester tester) async {
+    late FlutterView view;
+    late FocusNode focusNode;
+    await tester.pumpWidget(
+      Focus(
+        child: Builder(
+          builder: (BuildContext context) {
+            view = View.of(context);
+            focusNode = Focus.of(context);
+            return Container();
+          },
+        ),
+      ),
+    );
+
+    final ViewFocusEvent unfocusEvent = ViewFocusEvent(
+      viewId: view.viewId,
+      state: ViewFocusState.unfocused,
+      direction: ViewFocusDirection.forward,
+    );
+
+    final ViewFocusEvent focusEvent = ViewFocusEvent(
+      viewId: view.viewId,
+      state: ViewFocusState.focused,
+      direction: ViewFocusDirection.backward,
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(FocusManager.instance.rootScope.hasPrimaryFocus, isFalse);
+
+    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(unfocusEvent);
+    await tester.pump();
+
+    expect(focusNode.hasPrimaryFocus, isFalse);
+    expect(FocusManager.instance.rootScope.hasPrimaryFocus, isTrue);
+
+    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(focusEvent);
+    await tester.pump();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(FocusManager.instance.rootScope.hasPrimaryFocus, isFalse);
   });
 }
 

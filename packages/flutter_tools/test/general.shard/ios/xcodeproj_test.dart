@@ -634,15 +634,15 @@ Information about project "Runner":
   });
 
   testWithoutContext('expected scheme for flavored build is the title-cased flavor', () {
-    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.debug, 'hello', treeShakeIcons: false)), 'Hello');
-    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.profile, 'HELLO', treeShakeIcons: false)), 'HELLO');
-    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.release, 'Hello', treeShakeIcons: false)), 'Hello');
+    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.debug, 'hello', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json')), 'Hello');
+    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.profile, 'HELLO', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json')), 'HELLO');
+    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.release, 'Hello', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json')), 'Hello');
   });
 
   testWithoutContext('expected build configuration for flavored build is Mode-Flavor', () {
-    expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.debug, 'hello', treeShakeIcons: false), 'Hello'), 'Debug-Hello');
-    expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.profile, 'HELLO', treeShakeIcons: false), 'Hello'), 'Profile-Hello');
-    expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.release, 'Hello', treeShakeIcons: false), 'Hello'), 'Release-Hello');
+    expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.debug, 'hello', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json'), 'Hello'), 'Debug-Hello');
+    expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.profile, 'HELLO', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json'), 'Hello'), 'Profile-Hello');
+    expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.release, 'Hello', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json'), 'Hello'), 'Release-Hello');
   });
 
   testWithoutContext('scheme for default project is Runner', () {
@@ -651,7 +651,7 @@ Information about project "Runner":
     expect(info.schemeFor(BuildInfo.debug), 'Runner');
     expect(info.schemeFor(BuildInfo.profile), 'Runner');
     expect(info.schemeFor(BuildInfo.release), 'Runner');
-    expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown', treeShakeIcons: false)), isNull);
+    expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json')), isNull);
   });
 
   testWithoutContext('build configuration for default project is matched against BuildMode', () {
@@ -670,11 +670,11 @@ Information about project "Runner":
       logger,
     );
 
-    expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false)), 'Free');
-    expect(info.schemeFor(const BuildInfo(BuildMode.profile, 'Free', treeShakeIcons: false)), 'Free');
-    expect(info.schemeFor(const BuildInfo(BuildMode.release, 'paid', treeShakeIcons: false)), 'Paid');
+    expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json')), 'Free');
+    expect(info.schemeFor(const BuildInfo(BuildMode.profile, 'Free', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json')), 'Free');
+    expect(info.schemeFor(const BuildInfo(BuildMode.release, 'paid', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json')), 'Paid');
     expect(info.schemeFor(BuildInfo.debug), isNull);
-    expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown', treeShakeIcons: false)), isNull);
+    expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json')), isNull);
   });
 
   testWithoutContext('reports default scheme error and exit', () {
@@ -717,10 +717,10 @@ Information about project "Runner":
       logger,
     );
 
-    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false), 'Free'), 'debug (free)');
-    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'Paid', treeShakeIcons: false), 'Paid'), 'Debug paid');
-    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'FREE', treeShakeIcons: false), 'Free'), 'profile - Free');
-    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'paid', treeShakeIcons: false), 'Paid'), 'Release-Paid');
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json'), 'Free'), 'debug (free)');
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'Paid', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json'), 'Paid'), 'Debug paid');
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'FREE', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json'), 'Free'), 'profile - Free');
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'paid', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json'), 'Paid'), 'Release-Paid');
   });
 
   testWithoutContext('build configuration for project with inconsistent naming is null', () {
@@ -730,9 +730,9 @@ Information about project "Runner":
       <String>['Free', 'Paid'],
       logger,
     );
-    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'Free', treeShakeIcons: false), 'Free'), null);
-    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'Free', treeShakeIcons: false), 'Free'), null);
-    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'Paid', treeShakeIcons: false), 'Paid'), null);
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'Free', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json'), 'Free'), null);
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'Free', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json'), 'Free'), null);
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'Paid', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json'), 'Paid'), null);
   });
  group('environmentVariablesAsXcodeBuildSettings', () {
     late FakePlatform platform;
@@ -1048,7 +1048,7 @@ Build settings for action build and target plugin2:
     });
 
     testUsingOsxContext('does not set TRACK_WIDGET_CREATION when trackWidgetCreation is false', () async {
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
       await updateGeneratedXcodeProperties(
         project: project,
@@ -1162,7 +1162,7 @@ dependencies:
 flutter:
 ''';
 
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -1180,7 +1180,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -1198,7 +1198,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -1216,7 +1216,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -1234,7 +1234,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildNumber: '3', treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildNumber: '3', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -1252,7 +1252,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -1270,7 +1270,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -1287,7 +1287,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -1304,7 +1304,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,

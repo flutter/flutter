@@ -18,20 +18,23 @@ import '../../../globals.dart' as globals;
 /// The framework must be named [name].framework and the dylib [name].
 Future<void> createInfoPlist(
   String name,
-  Directory target,
-) async {
+  Directory target, {
+  String? minimumIOSVersion,
+}) async {
   final File infoPlistFile = target.childFile('Info.plist');
-  await infoPlistFile.writeAsString('''
+  final String bundleIdentifier = 'io.flutter.flutter.native_assets.$name'.replaceAll('_', '-');
+  await infoPlistFile.writeAsString(<String>[
+    '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	 <string>en</string>
+	<string>en</string>
 	<key>CFBundleExecutable</key>
 	<string>$name</string>
 	<key>CFBundleIdentifier</key>
-	<string>io.flutter.flutter.native_assets.$name</string>
+	<string>$bundleIdentifier</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -44,9 +47,16 @@ Future<void> createInfoPlist(
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
+''',
+    if (minimumIOSVersion != null)
+      '''
+	<key>MinimumOSVersion</key>
+	<string>$minimumIOSVersion</string>
+''',
+    '''
 </dict>
-</plist>
-  ''');
+</plist>'''
+  ].join());
 }
 
 /// Combines dylibs from [sources] into a fat binary at [targetFullPath].

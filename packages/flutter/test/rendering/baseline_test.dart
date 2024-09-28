@@ -53,6 +53,33 @@ void main() {
     expect(parent.size, equals(const Size(100.0, 110.0)));
   });
 
+  test('RenderBaseline different baseline types', () {
+    final _RenderBaselineTester child = _RenderBaselineTester()
+     ..boxSize = const Size.square(100)
+     ..alphabeticBaselineOffset = 50
+     ..ideographicBaselineOffset = 60;
+    final RenderBaseline renderBaseline = RenderBaseline(
+      baseline: 1.0,
+      baselineType: TextBaseline.alphabetic,
+      child: child,
+    );
+
+    layout(renderBaseline, phase: EnginePhase.paint);
+    expect(renderBaseline.getDryBaseline(const BoxConstraints(), TextBaseline.alphabetic), 1.0);
+    expect(renderBaseline.getDryBaseline(const BoxConstraints(), TextBaseline.ideographic), 11.0);
+
+    child
+     ..alphabeticBaselineOffset = null
+     ..ideographicBaselineOffset = null
+     ..markNeedsLayout(); // Clears baseline cache.
+
+    renderBaseline.markNeedsLayout();
+
+    pumpFrame(phase: EnginePhase.paint);
+    expect(renderBaseline.getDryBaseline(const BoxConstraints(), TextBaseline.alphabetic), isNull);
+    expect(renderBaseline.getDryBaseline(const BoxConstraints(), TextBaseline.ideographic), isNull);
+  });
+
   test('RenderFlex and RenderIgnoreBaseline (control test -- with baseline)', () {
     final RenderBox a, b;
     final RenderBox root = RenderFlex(
@@ -104,4 +131,34 @@ void main() {
     expect(aPos.dy, 0.0);
     expect(bPos.dy, 0.0);
   });
+}
+
+class _RenderBaselineTester extends RenderBox {
+  Size boxSize = Size.zero;
+  double? alphabeticBaselineOffset;
+  double? ideographicBaselineOffset;
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    return switch (baseline) {
+      TextBaseline.alphabetic => alphabeticBaselineOffset,
+      TextBaseline.ideographic => ideographicBaselineOffset,
+    };
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    return switch (baseline) {
+      TextBaseline.alphabetic => alphabeticBaselineOffset,
+      TextBaseline.ideographic => ideographicBaselineOffset,
+    };
+  }
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) => constraints.constrain(boxSize);
+
+  @override
+  void performLayout() {
+    size = computeDryLayout(constraints);
+  }
 }

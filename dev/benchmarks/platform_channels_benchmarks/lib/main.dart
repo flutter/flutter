@@ -11,30 +11,20 @@ import 'package:flutter/services.dart';
 import 'package:microbenchmarks/common.dart';
 
 List<Object?> _makeTestBuffer(int size) {
-  final List<Object?> answer = <Object?>[];
-  for (int i = 0; i < size; ++i) {
-    switch (i % 9) {
-      case 0:
-        answer.add(1);
-      case 1:
-        answer.add(math.pow(2, 65));
-      case 2:
-        answer.add(1234.0);
-      case 3:
-        answer.add(null);
-      case 4:
-        answer.add(<int>[1234]);
-      case 5:
-        answer.add(<String, int>{'hello': 1234});
-      case 6:
-        answer.add('this is a test');
-      case 7:
-        answer.add(true);
-      case 8:
-        answer.add(Uint8List(64));
-    }
-  }
-  return answer;
+  return <Object?>[
+    for (int i = 0; i < size; i++)
+      switch (i % 9) {
+        0 => 1,
+        1 => math.pow(2, 65),
+        2 => 1234.0,
+        3 => null,
+        4 => <int>[1234],
+        5 => <String, int>{'hello': 1234},
+        6 => 'this is a test',
+        7 => true,
+        _ => Uint8List(64),
+      },
+  ];
 }
 
 Future<double> _runBasicStandardSmall(

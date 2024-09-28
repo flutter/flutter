@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -180,20 +183,13 @@ class DefaultSpellCheckService implements SpellCheckService {
       return null;
     }
 
-    List<SuggestionSpan> suggestionSpans = <SuggestionSpan>[];
-
-    for (final dynamic result in rawResults) {
-      final Map<String, dynamic> resultMap =
-        Map<String,dynamic>.from(result as Map<dynamic, dynamic>);
-      suggestionSpans.add(
+    List<SuggestionSpan> suggestionSpans = <SuggestionSpan>[
+      for (final Map<dynamic, dynamic> resultMap in rawResults.cast<Map<dynamic, dynamic>>())
         SuggestionSpan(
-          TextRange(
-            start: resultMap['startIndex'] as int,
-            end: resultMap['endIndex'] as int),
-          (resultMap['suggestions'] as List<dynamic>).cast<String>(),
-        )
-      );
-    }
+          TextRange(start: resultMap['startIndex'] as int, end: resultMap['endIndex'] as int),
+          (resultMap['suggestions'] as List<Object?>).cast<String>(),
+        ),
+    ];
 
     if (lastSavedResults != null) {
       // Merge current and previous spell check results if between requests,

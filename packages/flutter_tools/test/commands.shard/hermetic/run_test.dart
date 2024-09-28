@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -29,6 +30,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:flutter_tools/src/web/compile.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:vm_service/vm_service.dart';
@@ -986,6 +988,36 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
+      testUsingContext('throws a ToolExit when using --wasm on a non-web platform', () async {
+        final RunCommand command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--wasm',
+          ]), throwsToolExit(message: '--wasm is only supported on the web platform'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      });
+
+      testUsingContext('throws a ToolExit when using the skwasm renderer without --wasm', () async {
+        final RunCommand command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--web-renderer=skwasm',
+          ]), throwsToolExit(message: 'Skwasm renderer requires --wasm'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      });
+
       testUsingContext('accepts headers with commas in them', () async {
         final RunCommand command = RunCommand();
         await expectLater(
@@ -1164,6 +1196,44 @@ void main() {
     expect(options.skiaDeterministicRendering, true);
     expect(options.usingCISystem, true);
     expect(options.debugLogsDirectoryPath, 'path/to/logs');
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('usingCISystem can also be set by environment LUCI_CI', () async {
+    final RunCommand command = RunCommand();
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'run',
+    ]), throwsToolExit());
+
+    final DebuggingOptions options = await command.createDebuggingOptions(false);
+
+    expect(options.usingCISystem, true);
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => FakePlatform(
+      environment: <String, String>{
+        'LUCI_CI': 'True'
+      }
+    ),
+  });
+
+  testUsingContext('wasm mode selects skwasm renderer by default', () async {
+    final RunCommand command = RunCommand();
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'run',
+      '-d chrome',
+      '--wasm',
+    ]), throwsToolExit());
+
+    final DebuggingOptions options = await command.createDebuggingOptions(false);
+
+    expect(options.webUseWasm, true);
+    expect(options.webRenderer, WebRendererMode.skwasm);
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
@@ -1405,8 +1475,8 @@ class TestRunCommandForUsageValues extends RunCommand {
   }
 
   @override
-  Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
-    return const BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+  Future<BuildInfo> getBuildInfo({FlutterProject? project, BuildMode? forcedBuildMode, File? forcedTargetFile}) async {
+    return const BuildInfo(BuildMode.debug, null, treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
   }
 }
 

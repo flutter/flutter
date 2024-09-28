@@ -6,7 +6,7 @@
 // by Flutter Web users.
 // This should be somewhat kept in sync with the different index.html files present
 // in `flutter/dev/integration_tests/web/web`.
-// @see https://github.com/flutter/flutter/tree/master/dev/integration_tests/web/web
+// @see https://github.com/flutter/flutter/tree/main/dev/integration_tests/web/web
 
 /// index_with_flutterjs_entrypoint_loaded.html
 String indexHtmlFlutterJsCallback = _generateFlutterJsIndexHtml('''

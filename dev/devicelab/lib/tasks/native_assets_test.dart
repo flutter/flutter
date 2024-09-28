@@ -54,11 +54,14 @@ TaskFunction createNativeAssetsTest({
         ];
         int transitionCount = 0;
         bool done = false;
+        bool error = false;
 
         await inDirectory<void>(exampleDirectory, () async {
           final int runFlutterResult = await runFlutter(
             options: options,
             onLine: (String line, Process process) {
+              error |= line.contains('EXCEPTION CAUGHT BY WIDGETS LIBRARY');
+              error |= line.contains("Invalid argument(s): Couldn't resolve native function 'sum'");
               if (done) {
                 return;
               }
@@ -107,6 +110,9 @@ TaskFunction createNativeAssetsTest({
             'Did not get expected number of transitions: $transitionCount '
             '(expected $expectedNumberOfTransitions)',
           );
+        }
+        if (error) {
+          return TaskResult.failure('Error during hot reload or hot restart.');
         }
         return TaskResult.success(null);
       });

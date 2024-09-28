@@ -15,7 +15,7 @@ void main() {
     expect(find.widgetWithText(AppBar, 'SnackBar Sample'), findsOneWidget);
     expect(find.widgetWithText(ElevatedButton, 'Show Snackbar'), findsOneWidget);
     await tester.tap(find.widgetWithText(ElevatedButton, 'Show Snackbar'));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('Awesome Snackbar!'), findsOneWidget);
     expect(find.text('Action'), findsOneWidget);
   });

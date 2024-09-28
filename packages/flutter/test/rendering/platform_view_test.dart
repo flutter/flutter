@@ -47,11 +47,10 @@ void main() {
         child: platformViewRenderBox,
       );
       int semanticsUpdateCount = 0;
-      final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.rootPipelineOwner.ensureSemantics(
-        listener: () {
-          ++semanticsUpdateCount;
-        },
-      );
+      final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.ensureSemantics();
+      TestRenderingFlutterBinding.instance.pipelineOwner.semanticsOwner!.addListener(() {
+        ++semanticsUpdateCount;
+      });
       layout(tree, phase: EnginePhase.flushSemantics);
       // Initial semantics update
       expect(semanticsUpdateCount, 1);

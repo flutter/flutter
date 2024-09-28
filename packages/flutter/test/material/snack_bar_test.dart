@@ -1015,14 +1015,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 750));
 
     final Element actionTextBox = tester.element(find.text('ACTION'));
-    final Widget textWidget = actionTextBox.widget;
-    final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(actionTextBox);
-    if (textWidget is Text) {
-      final TextStyle effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
-      expect(effectiveStyle.color, Colors.lightBlue);
-    } else {
-      expect(false, true);
-    }
+    expect(actionTextBox.widget, isA<Text>());
+    final Text(:TextStyle? style) = actionTextBox.widget as Text;
+
+    final TextStyle defaultStyle = DefaultTextStyle.of(actionTextBox).style;
+    expect(defaultStyle.merge(style).color, Colors.lightBlue);
   });
 
   testWidgets('Material3 - Snackbar labels can be colored as MaterialColor', (WidgetTester tester) async {
@@ -2601,7 +2598,7 @@ void main() {
       },
     );
 
-    testWidgets('Floating snackbar with custom width is centered when text direction is rtl', (WidgetTester tester) async {
+    testWidgets('Material3 - Floating snackbar with custom width is centered when text direction is rtl', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/140125.
       const double customWidth = 400.0;
       await tester.pumpWidget(
@@ -2631,7 +2628,51 @@ void main() {
       );
 
       await tester.tap(find.text('X'));
-      await tester.pump(); // start animation
+      await tester.pump(); // Start animation.
+      await tester.pump(const Duration(milliseconds: 750));
+
+      final Finder materialFinder = find.descendant(
+        of: find.byType(SnackBar),
+        matching: find.byType(Material),
+      );
+      final Offset snackBarBottomLeft = tester.getBottomLeft(materialFinder);
+      final Offset snackBarBottomRight = tester.getBottomRight(materialFinder);
+      expect(snackBarBottomLeft.dx, (800 - customWidth) / 2); // Device width is 800.
+      expect(snackBarBottomRight.dx, (800 + customWidth) / 2); // Device width is 800.
+    });
+
+    testWidgets('Material2 - Floating snackbar with custom width is centered when text direction is rtl', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/147838.
+      const double customWidth = 400.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) {
+                  return GestureDetector(
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          behavior: SnackBarBehavior.floating,
+                          width: customWidth,
+                          content: Text('Feeling super snackish'),
+                        ),
+                      );
+                    },
+                    child: const Text('X'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('X'));
+      await tester.pump(); // Start animation.
       await tester.pump(const Duration(milliseconds: 750));
 
       final Finder materialFinder = find.descendant(
@@ -2965,7 +3006,7 @@ void main() {
     await expectLater(find.byType(MaterialApp), matchesGoldenFile('m3_snack_bar.scaffold.nested.png'));
     final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
 
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(snackBarTopRight.dy, 465.0);
     }
   });
@@ -4000,6 +4041,99 @@ testWidgets('SnackBarAction backgroundColor works as a Color', (WidgetTester tes
     expect(find.text(snackbarContent), findsOneWidget);
 
     expect(completer.isCompleted, false);
+  });
+
+  testWidgets('Action text button uses correct overlay color', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: const Text('I am a snack bar.'),
+                  action: SnackBarAction(label: 'ACTION', onPressed: () { }),
+                ));
+              },
+              child: const Text('X'),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final ButtonStyle? actionButtonStyle = tester.widget<TextButton>(
+      find.widgetWithText(TextButton, 'ACTION'),
+    ).style;
+    expect(
+      actionButtonStyle?.overlayColor?.resolve(<MaterialState>{MaterialState.hovered}),
+      theme.colorScheme.inversePrimary.withOpacity(0.08),
+    );
+  });
+
+  testWidgets('Can interact with widgets behind SnackBar when insetPadding is set in SnackBarThemeData', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/148566.
+    tester.view.physicalSize = const Size.square(200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const String buttonText = 'Show snackbar';
+    const String snackbarContent = 'Snackbar';
+    const String buttonText2 = 'Try press me';
+
+    final Completer<void> completer = Completer<void>();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        snackBarTheme: const SnackBarThemeData(
+          insetPadding: EdgeInsets.only(left: 100),
+        ),
+      ),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        content: Text(snackbarContent),
+                      ),
+                    );
+                  },
+                  child: const Text(buttonText),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    completer.complete();
+                  },
+                  child: const Text(buttonText2),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text(buttonText));
+    await tester.pumpAndSettle();
+
+    expect(find.text(snackbarContent), findsOneWidget);
+    await tester.tapAt(tester.getTopLeft(find.text(buttonText2)));
+    expect(find.text(snackbarContent), findsOneWidget);
+
+    expect(completer.isCompleted, true);
   });
 }
 

@@ -376,7 +376,7 @@ class TextButton extends ButtonStyleButton {
   /// * `splashFactory` - Theme.splashFactory
   ///
   /// For the [TextButton.icon] factory, the end (generally the right) value of
-  /// [padding] is increased from 12 to 16.
+  /// `padding` is increased from 12 to 16.
   /// {@endtemplate}
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {

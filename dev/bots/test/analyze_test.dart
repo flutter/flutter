@@ -45,6 +45,7 @@ void main() {
   final String testRootPath = path.join('test', 'analyze-test-input', 'root');
   final String dartName = Platform.isWindows ? 'dart.exe' : 'dart';
   final String dartPath = path.canonicalize(path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', dartName));
+  final String testGenDefaultsPath = path.join('test', 'analyze-gen-defaults');
 
   test('analyze.dart - verifyDeprecations', () async {
     final String result = await capture(() => verifyDeprecations(testRootPath, minimumMatches: 2), shouldHaveErrors: true);
@@ -65,14 +66,14 @@ void main() {
       .map((String line) {
         return line
           .replaceAll('/', Platform.isWindows ? r'\' : '/')
-          .replaceAll('STYLE_GUIDE_URL', 'https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo')
+          .replaceAll('STYLE_GUIDE_URL', 'https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md')
           .replaceAll('RELEASES_URL', 'https://flutter.dev/docs/development/tools/sdk/releases');
       })
       .join('\n');
     expect(result,
       '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
       '$lines\n'
-      '║ See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes\n'
+      '║ See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
   });
@@ -91,7 +92,7 @@ void main() {
     expect(result.length, 4 + lines.length, reason: 'output had unexpected number of lines:\n${result.join('\n')}');
     expect(result[0], '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════');
     expect(result.getRange(1, result.length - 3).toSet(), lines.toSet());
-    expect(result[result.length - 3], '║ See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter');
+    expect(result[result.length - 3], '║ See: https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md');
     expect(result[result.length - 2], '╚═══════════════════════════════════════════════════════════════════════════════');
     expect(result[result.length - 1], ''); // trailing newline
   });
@@ -146,6 +147,31 @@ void main() {
     );
   });
 
+  test('analyze.dart - verifyRepositoryLinks', () async {
+    final String result = await capture(() => verifyRepositoryLinks(testRootPath), shouldHaveErrors: true);
+    const String bannedBranch = 'master';
+    final String file = Platform.isWindows ?
+      r'test\analyze-test-input\root\packages\foo\bad_repository_links.dart' :
+      'test/analyze-test-input/root/packages/foo/bad_repository_links.dart';
+    final String lines = <String>[
+        '║ $file contains https://android.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://chromium.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://cs.opensource.google.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://dart.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://flutter.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://source.chromium.org/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://github.com/flutter/flutter/tree/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://raw.githubusercontent.com/flutter/flutter/blob/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ Change the URLs above to the expected pattern by using the "main" branch if it exists, otherwise adding the repository to the list of exceptions in analyze.dart.',
+      ]
+      .join('\n');
+    expect(result,
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
+      '$lines\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n'
+    );
+  });
+
   test('analyze.dart - verifyNoBinaries - positive', () async {
     final String result = await capture(() => verifyNoBinaries(
       testRootPath,
@@ -161,7 +187,7 @@ void main() {
         '║ to which you need access, you should consider how to fetch it from another repository;\n'
         '║ for example, the "assets-for-api-docs" repository is used for images in API docs.\n'
         '║ To add assets to flutter_tools templates, see the instructions in the wiki:\n'
-        '║ https://github.com/flutter/flutter/wiki/Managing-template-image-assets\n'
+        '║ https://github.com/flutter/flutter/blob/main/docs/tool/Managing-template-image-assets.md\n'
         '╚═══════════════════════════════════════════════════════════════════════════════\n'
       );
     }
@@ -290,6 +316,26 @@ void main() {
       '$lines\n'
       '║ \n'
       '║ Typically the get* methods should be used to obtain the intrinsics of a RenderBox.\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n'
+    );
+  });
+
+  test('analyze.dart - verifyMaterialFilesAreUpToDateWithTemplateFiles', () async {
+    String result = await capture(() => verifyMaterialFilesAreUpToDateWithTemplateFiles(
+      testGenDefaultsPath,
+      dartPath,
+    ), shouldHaveErrors: true);
+    final String lines = <String>[
+        '║ chip.dart is not up-to-date with the token template file.',
+      ]
+      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+      .join('\n');
+    const String errorStart = '╔═';
+    result = result.substring(result.indexOf(errorStart));
+    expect(result,
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
+      '$lines\n'
+      '║ See: https://github.com/flutter/flutter/blob/main/dev/tools/gen_defaults to update the token template files.\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
   });

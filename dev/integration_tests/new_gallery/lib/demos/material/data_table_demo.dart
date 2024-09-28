@@ -26,14 +26,10 @@ class _RestorableDessertSelections extends RestorableProperty<Set<int>> {
   /// Takes a list of [_Dessert]s and saves the row indices of selected rows
   /// into a [Set].
   void setDessertSelections(List<_Dessert> desserts) {
-    final Set<int> updatedSet = <int>{};
-    for (int i = 0; i < desserts.length; i += 1) {
-      final _Dessert dessert = desserts[i];
-      if (dessert.selected) {
-        updatedSet.add(i);
-      }
-    }
-    _dessertSelections = updatedSet;
+    _dessertSelections = <int>{
+      for (final (int i, _Dessert dessert) in desserts.indexed)
+        if (dessert.selected) i,
+    };
     notifyListeners();
   }
 

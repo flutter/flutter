@@ -75,7 +75,7 @@ If you're running the tests with Android instrumentation or XCTest, this means
 that you are not capturing test results properly! See the following link for
 how to set up the integration_test plugin:
 
-https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
+https://docs.flutter.dev/testing/integration-tests
 ''');
       }
     });

@@ -231,10 +231,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
   }
 
   // Returns true if the cart is open or opening and false otherwise.
-  bool get _isOpen {
-    final AnimationStatus status = _controller.status;
-    return status == AnimationStatus.completed || status == AnimationStatus.forward;
-  }
+  bool get _isOpen => _controller.isForwardOrCompleted;
 
   // Opens the ExpandingBottomSheet if it's closed, otherwise does nothing.
   void open() {
@@ -355,7 +352,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
 
   // Closes the cart if the cart is open, otherwise exits the app (this should
   // only be relevant for Android).
-  void _handlePopInvoked(bool didPop) {
+  void _handlePopInvoked(bool didPop, Object? result) {
     if (didPop) {
       return;
     }
@@ -370,9 +367,9 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
       duration: const Duration(milliseconds: 225),
       curve: Curves.easeInOut,
       alignment: FractionalOffset.topLeft,
-      child: PopScope(
+      child: PopScope<Object?>(
         canPop: !_isOpen,
-        onPopInvoked: _handlePopInvoked,
+        onPopInvokedWithResult: _handlePopInvoked,
         child: AnimatedBuilder(
           animation: widget.hideController,
           builder: _buildSlideAnimation,

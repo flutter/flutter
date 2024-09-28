@@ -166,11 +166,11 @@ void main() {
   tearDownAll(() async {
     // See widget_inspector_test.dart for tests of the ext.flutter.inspector
     // service extensions included in this count.
-    int widgetInspectorExtensionCount = 28;
+    int widgetInspectorExtensionCount = 29;
     if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
       // Some inspector extensions are only exposed if widget creation locations
       // are tracked.
-      widgetInspectorExtensionCount += 2;
+      widgetInspectorExtensionCount += 3;
     }
     expect(binding.extensions.keys.where((String name) => name.startsWith('inspector.')), hasLength(widgetInspectorExtensionCount));
 
@@ -278,7 +278,7 @@ void main() {
         r'TransformLayer#[0-9a-f]{5}\n'
         r'   owner: RenderView#[0-9a-f]{5}\n'
         r'   creator: RenderView\n'
-        r'   engine layer: (TransformEngineLayer|PersistedTransform)#[0-9a-f]{5}\n'
+        r'   engine layer: (TransformLayer|TransformEngineLayer|PersistedTransform)#[0-9a-f]{5}\n'
         r'   handles: 1\n'
         r'   offset: Offset\(0\.0, 0\.0\)\n'
         r'   transform:\n'

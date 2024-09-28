@@ -21,6 +21,7 @@ import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
+import 'macos/xcode.dart';
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
 import 'template.dart';
@@ -31,14 +32,20 @@ export 'xcode_project.dart';
 
 /// Enum for each officially supported platform.
 enum SupportedPlatform {
-  android,
-  ios,
-  linux,
-  macos,
-  web,
-  windows,
-  fuchsia,
-  root, // Special platform to represent the root project directory
+  android(name: 'android'),
+  ios(name: 'ios'),
+  linux(name: 'linux'),
+  macos(name: 'macos'),
+  web(name: 'web'),
+  windows(name: 'windows'),
+  fuchsia(name: 'fuchsia'),
+  root(name: 'root'); // Special platform to represent the root project directory
+
+  const SupportedPlatform({
+    required this.name,
+  });
+
+  final String name;
 }
 
 class FlutterProjectFactory {
@@ -261,31 +268,36 @@ class FlutterProject {
   /// True if this project has an example application.
   bool get hasExampleApp => _exampleDirectory(directory).existsSync();
 
+  /// True if this project doesn't have Swift Package Manager disabled in the
+  /// pubspec, has either an iOS or macOS platform implementation, is not a
+  /// module project, Xcode is 15 or greater, and the Swift Package Manager
+  /// feature is enabled.
+  bool get usesSwiftPackageManager {
+    if (!manifest.disabledSwiftPackageManager &&
+        (ios.existsSync() || macos.existsSync()) &&
+        !isModule) {
+      final Xcode? xcode = globals.xcode;
+      final Version? xcodeVersion = xcode?.currentVersion;
+      if (xcodeVersion == null || xcodeVersion.major < 15) {
+        return false;
+      }
+      return featureFlags.isSwiftPackageManagerEnabled;
+    }
+    return false;
+  }
+
   /// Returns a list of platform names that are supported by the project.
   List<SupportedPlatform> getSupportedPlatforms({bool includeRoot = false}) {
-    final List<SupportedPlatform> platforms = includeRoot ? <SupportedPlatform>[SupportedPlatform.root] : <SupportedPlatform>[];
-    if (android.existsSync()) {
-      platforms.add(SupportedPlatform.android);
-    }
-    if (ios.exists) {
-      platforms.add(SupportedPlatform.ios);
-    }
-    if (web.existsSync()) {
-      platforms.add(SupportedPlatform.web);
-    }
-    if (macos.existsSync()) {
-      platforms.add(SupportedPlatform.macos);
-    }
-    if (linux.existsSync()) {
-      platforms.add(SupportedPlatform.linux);
-    }
-    if (windows.existsSync()) {
-      platforms.add(SupportedPlatform.windows);
-    }
-    if (fuchsia.existsSync()) {
-      platforms.add(SupportedPlatform.fuchsia);
-    }
-    return platforms;
+    return <SupportedPlatform>[
+      if (includeRoot)          SupportedPlatform.root,
+      if (android.existsSync()) SupportedPlatform.android,
+      if (ios.exists)           SupportedPlatform.ios,
+      if (web.existsSync())     SupportedPlatform.web,
+      if (macos.existsSync())   SupportedPlatform.macos,
+      if (linux.existsSync())   SupportedPlatform.linux,
+      if (windows.existsSync()) SupportedPlatform.windows,
+      if (fuchsia.existsSync()) SupportedPlatform.fuchsia,
+    ];
   }
 
   /// The directory that will contain the example if an example exists.
@@ -532,7 +544,9 @@ class AndroidProject extends FlutterProjectPlatform {
         // pluginManagement block of the settings.gradle file.
         // See https://docs.gradle.org/current/userguide/composite_builds.html#included_plugin_builds,
         // as well as the settings.gradle and build.gradle templates.
-        final bool declarativeApply = line.contains('dev.flutter.flutter-gradle-plugin');
+        final bool declarativeApply = line.contains(
+          RegExp(r'dev\.flutter\.(?:(?:flutter-gradle-plugin)|(?:`flutter-gradle-plugin`))'),
+        );
 
         // This case allows for flutter run/build to work for modules. It does
         // not guarantee the Flutter Gradle Plugin is applied.
@@ -868,6 +882,41 @@ $javaGradleCompatUrl
       }
     }
     return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in ${appManifestFile.absolute.path}');
+  }
+
+  // TODO(matanlurey): Flip to true when on by default, https://github.com/flutter/flutter/issues/132712.
+  static const bool _impellerEnabledByDefault = false;
+
+  /// Returns the `io.flutter.embedding.android.EnableImpeller` manifest value.
+  ///
+  /// If there is no manifest file, or the key is not present, returns `false`.
+  bool computeImpellerEnabled() {
+    if (!appManifestFile.existsSync()) {
+      return _impellerEnabledByDefault;
+    }
+    final XmlDocument document;
+    try {
+      document = XmlDocument.parse(appManifestFile.readAsStringSync());
+    } on XmlException {
+      throwToolExit('Error parsing $appManifestFile '
+                    'Please ensure that the android manifest is a valid XML document and try again.');
+    } on FileSystemException {
+      throwToolExit('Error reading $appManifestFile even though it exists. '
+                    'Please ensure that you have read permission to this file and try again.');
+    }
+    for (final XmlElement metaData in document.findAllElements('meta-data')) {
+      final String? name = metaData.getAttribute('android:name');
+      if (name == 'io.flutter.embedding.android.EnableImpeller') {
+        final String? value = metaData.getAttribute('android:value');
+        if (value == 'true') {
+          return true;
+        }
+        if (value == 'false') {
+          return false;
+        }
+      }
+    }
+    return _impellerEnabledByDefault;
   }
 }
 

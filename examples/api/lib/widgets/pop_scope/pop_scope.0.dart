@@ -109,9 +109,9 @@ class _PageTwoState extends State<_PageTwo> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('Page Two'),
-            PopScope(
+            PopScope<Object?>(
               canPop: false,
-              onPopInvoked: (bool didPop) async {
+              onPopInvokedWithResult: (bool didPop, Object? result) async {
                 if (didPop) {
                   return;
                 }

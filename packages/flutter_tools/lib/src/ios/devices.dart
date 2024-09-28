@@ -22,6 +22,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
+import '../device_vm_service_discovery_for_attach.dart';
 import '../globals.dart' as globals;
 import '../macos/xcdevice.dart';
 import '../mdns_discovery.dart';
@@ -495,7 +496,15 @@ class IOSDevice extends Device {
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');
-        await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, _logger, globals.analytics);
+        await diagnoseXcodeBuildFailure(
+          buildResult,
+          analytics: globals.analytics,
+          fileSystem: globals.fs,
+          flutterUsage: globals.flutterUsage,
+          logger: globals.logger,
+          platform: SupportedPlatform.ios,
+          project: package.project.parent,
+        );
         _logger.printError('');
         return LaunchResult.failed();
       }
@@ -773,14 +782,11 @@ class IOSDevice extends Device {
 
     final List<Future<Uri?>> discoveryOptions = <Future<Uri?>>[
       vmUrlFromMDns,
+      // vmServiceDiscovery uses device logs (`idevicesyslog`), which doesn't work
+      // on wireless devices.
+      if (vmServiceDiscovery != null && !isWirelesslyConnected)
+        vmServiceDiscovery.uri,
     ];
-
-    // vmServiceDiscovery uses device logs (`idevicesyslog`), which doesn't work
-    // on wireless devices.
-    if (vmServiceDiscovery != null && !isWirelesslyConnected) {
-      final Future<Uri?> vmUrlFromLogs = vmServiceDiscovery.uri;
-      discoveryOptions.add(vmUrlFromLogs);
-    }
 
     Uri? localUri = await Future.any(
       <Future<Uri?>>[...discoveryOptions, cancelCompleter.future],
@@ -1025,6 +1031,43 @@ class IOSDevice extends Device {
 
   @override
   void clearLogs() { }
+
+  @override
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) {
+    final bool compatibleWithProtocolDiscovery = majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
+          !isWirelesslyConnected;
+    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: isWirelesslyConnected,
+    );
+
+    if (compatibleWithProtocolDiscovery) {
+      return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
+        mdnsVMServiceDiscoveryForAttach,
+        super.getVMServiceDiscoveryForAttach(
+          appId: appId,
+          fuchsiaModule: fuchsiaModule,
+          filterDevicePort: filterDevicePort,
+          expectedHostPort: expectedHostPort,
+          ipv6: ipv6,
+          logger: logger,
+        ),
+      ]);
+    } else {
+      return mdnsVMServiceDiscoveryForAttach;
+    }
+  }
 
   @override
   bool get supportsScreenshot {

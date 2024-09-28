@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'drag_details.dart';
+/// @docImport 'monodrag.dart';
+/// @docImport 'multitap.dart';
+/// @docImport 'tap.dart';
+library;
 
 import 'dart:async';
 import 'dart:collection';
@@ -101,7 +108,8 @@ enum MultitouchDragStrategy {
   sumAllPointers,
 }
 
-/// Signature for `allowedButtonsFilter` in [GestureRecognizer].
+/// Signature for [GestureRecognizer.allowedButtonsFilter].
+///
 /// Used to filter the input buttons of incoming pointer events.
 /// The parameter `buttons` comes from [PointerEvent.buttons].
 typedef AllowedButtonsFilter = bool Function(int buttons);
@@ -132,8 +140,8 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   GestureRecognizer({
     this.debugOwner,
     this.supportedDevices,
-    AllowedButtonsFilter? allowedButtonsFilter,
-  }) : _allowedButtonsFilter = allowedButtonsFilter ?? _defaultButtonAcceptBehavior {
+    this.allowedButtonsFilter = _defaultButtonAcceptBehavior,
+  }) {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
@@ -178,7 +186,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   ///
   /// Defaults to all buttons.
   /// {@endtemplate}
-  final AllowedButtonsFilter _allowedButtonsFilter;
+  final AllowedButtonsFilter allowedButtonsFilter;
 
   // The default value for [allowedButtonsFilter].
   // Accept any input.
@@ -271,9 +279,8 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// Checks whether or not a pointer is allowed to be tracked by this recognizer.
   @protected
   bool isPointerAllowed(PointerDownEvent event) {
-    return (supportedDevices == null ||
-            supportedDevices!.contains(event.kind)) &&
-        _allowedButtonsFilter(event.buttons);
+    return (supportedDevices == null || supportedDevices!.contains(event.kind))
+        && allowedButtonsFilter(event.buttons);
   }
 
   /// Handles a pointer pan/zoom being added that's not allowed by this recognizer.

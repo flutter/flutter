@@ -90,12 +90,13 @@ abstract class FlutterTestDriver {
     List<String> arguments, {
     String? script,
     bool withDebugger = false,
+    bool verbose = false,
   }) async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     if (withDebugger) {
       arguments.add('--start-paused');
     }
-    if (_printDebugOutputToStdOut) {
+    if (verbose || _printDebugOutputToStdOut) {
       arguments.add('--verbose');
     }
     if (script != null) {
@@ -509,6 +510,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool expressionEvaluation = true,
     bool structuredErrors = false,
     bool serveObservatory = false,
+    bool verbose = false,
     String? script,
     List<String>? additionalCommandArgs,
   }) async {
@@ -538,6 +540,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       startPaused: startPaused,
       pauseOnExceptions: pauseOnExceptions,
       script: script,
+      verbose: verbose,
     );
   }
 
@@ -578,6 +581,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
+    bool verbose = false,
     int? attachPort,
   }) async {
     assert(!startPaused || withDebugger);
@@ -585,6 +589,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       args,
       script: script,
       withDebugger: withDebugger,
+      verbose: verbose,
     );
 
     final Completer<void> prematureExitGuard = Completer<void>();
@@ -796,12 +801,14 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     String? script,
     bool withDebugger = false,
     bool pauseOnExceptions = false,
+    bool verbose = false,
     Future<void> Function()? beforeStart,
   }) async {
     await super._setupProcess(
       args,
       script: script,
       withDebugger: withDebugger,
+      verbose: verbose,
     );
 
     // Stash the PID so that we can terminate the VM more reliably than using

@@ -11,7 +11,6 @@ updates:
       - "christopherfujino"
       - "jmagman"
       - "keyonghan"
-      - "yusuf-goog"
     labels:
       - "team"
       - "team-infra"
@@ -21,9 +20,9 @@ updates:
     schedule:
       interval: "weekly"
     reviewers:
-      - "keyonghan"
-      - "yusuf-goog"
       - "christopherfujino"
+      - "jmagman"
+      - "keyonghan"
     labels:
       - "team"
       - "team-infra"
@@ -33,7 +32,9 @@ updates:
     schedule:
       interval: "daily"
     reviewers:
-      - "godofredoc"
+      - "christopherfujino"
+      - "jmagman"
+      - "keyonghan"
     labels:
       - "team"
       - "team-infra"

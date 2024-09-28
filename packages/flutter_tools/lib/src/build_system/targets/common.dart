@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:package_config/package_config.dart';
+import 'package:yaml/yaml.dart';
 
 import '../../artifacts.dart';
 import '../../base/build.dart';
@@ -121,15 +122,17 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
 /// even though it is not listed as an input. Pub inserts a timestamp into
 /// the file which causes unnecessary rebuilds, so instead a subset of the contents
 /// are used an input instead.
-class KernelSnapshot extends Target {
-  const KernelSnapshot();
+///
+/// This kernel snapshot is concatenated with the [KernelSnapshotNativeAssets]
+/// inside [KernelSnapshot] byte-wise to create the combined kernel snapshot.
+class KernelSnapshotProgram extends Target {
+  const KernelSnapshotProgram();
 
   @override
-  String get name => 'kernel_snapshot';
+  String get name => 'kernel_snapshot_program';
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/native_assets.yaml'),
     Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
     Source.artifact(Artifact.platformKernelDill),
@@ -139,19 +142,25 @@ class KernelSnapshot extends Target {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[];
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/${KernelSnapshotProgram.dillName}'),
+    // TODO(mosuem): Should output resources.json. https://github.com/flutter/flutter/issues/146263
+  ];
+
+  static const String depfile = 'kernel_snapshot_program.d';
 
   @override
-  List<String> get depfiles => <String>[
-    'kernel_snapshot.d',
+  List<String> get depfiles => const <String>[
+    depfile,
   ];
 
   @override
   List<Target> get dependencies => const <Target>[
-    NativeAssets(),
     GenerateLocalizationsTarget(),
     DartPluginRegistrantTarget(),
   ];
+
+  static const String dillName = 'program.dill';
 
   @override
   Future<void> build(Environment environment) async {
@@ -185,13 +194,6 @@ class KernelSnapshot extends Target {
     final List<String> extraFrontEndOptions = decodeCommaSeparated(environment.defines, kExtraFrontEndOptions);
     final List<String>? fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String? fileSystemScheme = environment.defines[kFileSystemScheme];
-
-    final File nativeAssetsFile = environment.buildDir.childFile('native_assets.yaml');
-    final String nativeAssets = nativeAssetsFile.path;
-    if (!await nativeAssetsFile.exists()) {
-      throwToolExit("$nativeAssets doesn't exist.");
-    }
-    environment.logger.printTrace('Embedding native assets mapping $nativeAssets in kernel.');
 
     TargetModel targetModel = TargetModel.flutter;
     if (targetPlatform == TargetPlatform.fuchsia_x64 ||
@@ -242,6 +244,8 @@ class KernelSnapshot extends Target {
       logger: environment.logger,
     );
 
+    final String dillPath = environment.buildDir.childFile(dillName).path;
+
     final CompilerOutput? output = await compiler.compile(
       sdkRoot: environment.artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
@@ -252,13 +256,12 @@ class KernelSnapshot extends Target {
       buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation && buildMode != BuildMode.release,
       targetModel: targetModel,
-      outputFilePath: environment.buildDir.childFile('app.dill').path,
-      initializeFromDill: buildMode.isPrecompiled ? null :
-          environment.buildDir.childFile('app.dill').path,
+      outputFilePath: dillPath,
+      initializeFromDill: buildMode.isPrecompiled ? null : dillPath,
       packagesPath: packagesFile.path,
       linkPlatformKernelIn: forceLinkPlatform || buildMode.isPrecompiled,
       mainPath: targetFileAbsolute,
-      depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
+      depFilePath: environment.buildDir.childFile(depfile).path,
       frontendServerStarterPath: frontendServerStarterPath,
       extraFrontEndOptions: extraFrontEndOptions,
       fileSystemRoots: fileSystemRoots,
@@ -268,11 +271,156 @@ class KernelSnapshot extends Target {
       buildDir: environment.buildDir,
       targetOS: targetOS,
       checkDartPluginRegistry: environment.generateDartPluginRegistry,
+    );
+    if (output == null || output.errorCount != 0) {
+      throw Exception();
+    }
+  }
+}
+
+/// Generate a kernel snapshot of the native assets mapping for resolving
+/// `@Native` assets at runtime.
+///
+/// This kernel snapshot is concatenated to the [KernelSnapshotProgram]
+/// inside [KernelSnapshot] to create the combined kernel snapshot.
+class KernelSnapshotNativeAssets extends Target {
+  const KernelSnapshotNativeAssets();
+
+  @override
+  String get name =>  'kernel_snapshot_native_assets';
+
+  @override
+  List<Source> get inputs => <Source>[
+    const Source.pattern('{BUILD_DIR}/native_assets.yaml'),
+    ...const KernelSnapshotProgram().inputs,
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/${KernelSnapshotNativeAssets.dillName}'),
+  ];
+
+  @override
+  List<String> get depfiles => const <String>[];
+
+  @override
+  List<Target> get dependencies => <Target>[
+    const NativeAssets(),
+  ];
+
+  static const String dillName = 'native_assets.dill';
+
+  @override
+  Future<void> build(Environment environment) async {
+    final File nativeAssetsFile = environment.buildDir.childFile('native_assets.yaml');
+    final File dillFile = environment.buildDir.childFile(dillName);
+
+    final YamlNode nativeAssetContents = loadYamlNode(await nativeAssetsFile.readAsString());
+    final Object? nativeAssetsInYaml = (nativeAssetContents as Map<Object?, Object?>)['native-assets'];
+    if (nativeAssetsInYaml is! Map || nativeAssetsInYaml.isEmpty) {
+      // Write an empty file to make concatenation a no-op.
+      // Write the file out to disk for caching.
+      await dillFile.writeAsBytes(<int>[]);
+      return;
+    }
+
+    final KernelCompiler compiler = KernelCompiler(
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
+      processManager: environment.processManager,
+      artifacts: environment.artifacts,
+      fileSystemRoots: <String>[],
+    );
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
+      throw MissingDefineException(kBuildMode, 'kernel_snapshot');
+    }
+    final String? targetPlatformEnvironment = environment.defines[kTargetPlatform];
+    if (targetPlatformEnvironment == null) {
+      throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
+    }
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final File packagesFile = environment.projectDir
+      .childDirectory('.dart_tool')
+      .childFile('package_config.json');
+
+    final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
+
+    final String? frontendServerStarterPath = environment.defines[kFrontendServerStarterPath];
+
+    final String nativeAssets = nativeAssetsFile.path;
+    if (!await nativeAssetsFile.exists()) {
+      throwToolExit("$nativeAssets doesn't exist.");
+    }
+    environment.logger.printTrace('Embedding native assets mapping $nativeAssets in kernel.');
+
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      packagesFile,
+      logger: environment.logger,
+    );
+
+    final String dillPath = dillFile.path;
+
+    final CompilerOutput? output = await compiler.compile(
+      sdkRoot: environment.artifacts.getArtifactPath(
+        Artifact.flutterPatchedSdkPath,
+        platform: targetPlatform,
+        mode: buildMode,
+      ),
+      aot: buildMode.isPrecompiled,
+      buildMode: buildMode,
+      trackWidgetCreation: false,
+      outputFilePath: dillPath,
+      packagesPath: packagesFile.path,
+      frontendServerStarterPath: frontendServerStarterPath,
+      packageConfig: packageConfig,
+      buildDir: environment.buildDir,
+      dartDefines: <String>[],
       nativeAssets: nativeAssets,
     );
     if (output == null || output.errorCount != 0) {
       throw Exception();
     }
+  }
+}
+
+class KernelSnapshot extends Target {
+  const KernelSnapshot();
+
+  @override
+  String get name => 'kernel_snapshot';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    KernelSnapshotProgram(),
+    KernelSnapshotNativeAssets(),
+  ];
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/${KernelSnapshotProgram.dillName}'),
+    Source.pattern('{BUILD_DIR}/${KernelSnapshotNativeAssets.dillName}'),
+  ];
+
+  @override
+  List<Source> get outputs => <Source>[];
+
+  static const String dillName = 'app.dill';
+
+  @override
+  Future<void> build(Environment environment) async {
+    final File programDill = environment.buildDir.childFile(
+      KernelSnapshotProgram.dillName,
+    );
+    final File nativeAssetsDill = environment.buildDir.childFile(
+      KernelSnapshotNativeAssets.dillName,
+    );
+    final File dill = environment.buildDir.childFile(dillName);
+    await programDill.copy(dill.path);
+    await dill.writeAsBytes(
+      await nativeAssetsDill.readAsBytes(),
+      mode: FileMode.append,
+    );
   }
 }
 

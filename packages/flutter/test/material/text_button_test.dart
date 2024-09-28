@@ -607,6 +607,7 @@ void main() {
           TestSemantics.rootChild(
             actions: <SemanticsAction>[
               SemanticsAction.tap,
+              SemanticsAction.focus,
             ],
             label: 'ABC',
             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
@@ -695,7 +696,7 @@ void main() {
 
     expect(tester.getSize(find.byType(TextButton)), const Size(134.0, 48.0));
     expect(tester.getSize(find.byType(Text)), const Size(126.0, 42.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/61016
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/61016
 
   testWidgets('TextButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
@@ -2299,6 +2300,53 @@ void main() {
 
     // The icon is aligned to the left of the button.
     expect(buttonTopLeft.dx, iconTopLeft.dx - 16.0); // 16.0 - padding between icon and button edge.
+  });
+
+  testWidgets('treats a hovering stylus like a mouse', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    bool hasBeenHovered = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return TextButton(
+                  onPressed: () {},
+                  onHover: (bool entered) {
+                    hasBeenHovered = true;
+                  },
+                  focusNode: focusNode,
+                  child: const Text('TextButton'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    RenderObject overlayColor() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    }
+
+    final Offset center = tester.getCenter(find.byType(TextButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.stylus,
+    );
+    await gesture.addPointer();
+    await tester.pumpAndSettle();
+
+    expect(hasBeenHovered, isFalse);
+
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withOpacity(0.08)));
+    expect(hasBeenHovered, isTrue);
   });
 }
 

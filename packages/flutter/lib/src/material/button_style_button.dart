@@ -605,6 +605,20 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final double? result = child.getDryBaseline(constraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(constraints);
+    return result + Alignment.center.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
+  }
+
+  @override
   void performLayout() {
     size = _computeSize(
       constraints: constraints,

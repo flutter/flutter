@@ -141,7 +141,6 @@ class NavigationDrawer extends StatelessWidget {
         children.whereType<NavigationDrawerDestination>().toList().length;
 
     int destinationIndex = 0;
-    final List<Widget> wrappedChildren = <Widget>[];
     Widget wrapChild(Widget child, int index) => _SelectableAnimatedBuilder(
         duration: const Duration(milliseconds: 500),
         isSelected: index == selectedIndex,
@@ -162,14 +161,11 @@ class NavigationDrawer extends StatelessWidget {
           );
         });
 
-    for (int i = 0; i < children.length; i++) {
-      if (children[i] is! NavigationDrawerDestination) {
-        wrappedChildren.add(children[i]);
-      } else {
-        wrappedChildren.add(wrapChild(children[i], destinationIndex));
-        destinationIndex += 1;
-      }
-    }
+    final List<Widget> wrappedChildren = <Widget>[
+      for (final Widget child in children)
+        if (child is! NavigationDrawerDestination) child
+        else wrapChild(child, destinationIndex++),
+    ];
     final NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerTheme.of(context);
 
     return Drawer(
@@ -269,7 +265,7 @@ class NavigationDrawerDestination extends StatelessWidget {
           child: icon,
         );
 
-        return _isForwardOrCompleted(animation)
+        return animation.isForwardOrCompleted
             ? selectedIconWidget
             : unselectedIconWidget;
       },
@@ -282,7 +278,7 @@ class NavigationDrawerDestination extends StatelessWidget {
             defaults.labelTextStyle!.resolve(enabled ? unselectedState : disabledState);
 
         return DefaultTextStyle(
-          style: _isForwardOrCompleted(animation)
+          style: animation.isForwardOrCompleted
             ? effectiveSelectedLabelTextStyle!
             : effectiveUnselectedLabelTextStyle!,
           child: label,
@@ -423,7 +419,7 @@ class _NavigationDestinationSemantics extends StatelessWidget {
       animation: destinationInfo.selectedAnimation,
       builder: (BuildContext context, Widget? child) {
         return Semantics(
-          selected: _isForwardOrCompleted(destinationInfo.selectedAnimation),
+          selected: destinationInfo.selectedAnimation.isForwardOrCompleted,
           container: true,
           child: child,
         );
@@ -687,12 +683,6 @@ class _SelectableAnimatedBuilderState extends State<_SelectableAnimatedBuilder>
       _controller,
     );
   }
-}
-
-/// Returns `true` if this animation is ticking forward, or has completed,
-/// based on [status].
-bool _isForwardOrCompleted(Animation<double> animation) {
-  return animation.status == AnimationStatus.forward || animation.status == AnimationStatus.completed;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - NavigationDrawer

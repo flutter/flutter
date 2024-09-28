@@ -26,6 +26,7 @@ if (flutterVersionName == null) {
 }
 
 android {
+    namespace = "io.flutter.integration.platformviews"
     compileSdk flutter.compileSdkVersion
 
     compileOptions {

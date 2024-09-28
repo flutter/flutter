@@ -41,6 +41,9 @@ List<Target> _kDefaultTargets = <Target>[
   const DebugMacOSBundleFlutterAssets(),
   const ProfileMacOSBundleFlutterAssets(),
   const ReleaseMacOSBundleFlutterAssets(),
+  const DebugUnpackMacOS(),
+  const ProfileUnpackMacOS(),
+  const ReleaseUnpackMacOS(),
   // Linux targets
   const DebugBundleLinuxAssets(TargetPlatform.linux_x64),
   const DebugBundleLinuxAssets(TargetPlatform.linux_arm64),
@@ -72,6 +75,9 @@ List<Target> _kDefaultTargets = <Target>[
   const DebugIosApplicationBundle(),
   const ProfileIosApplicationBundle(),
   const ReleaseIosApplicationBundle(),
+  const DebugUnpackIOS(),
+  const ProfileUnpackIOS(),
+  const ReleaseUnpackIOS(),
   // Windows targets
   const UnpackWindows(TargetPlatform.windows_x64),
   const UnpackWindows(TargetPlatform.windows_arm64),

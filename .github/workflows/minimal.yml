@@ -18,7 +18,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout Flutter Repo
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
         with:
           repository: flutter/flutter
           token: ${{ github.token }}
@@ -30,7 +30,7 @@ jobs:
           cd flutter
           touch empty.json
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@70a41aba780001da0a30141984ae2a0c95d8704e
+        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c
         with:
           path: flutter
           commit-message: blah

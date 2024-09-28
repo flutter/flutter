@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'hardware_keyboard.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_maps.g.dart';
@@ -53,7 +56,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 
   /// The modifiers that were present when the key event occurred.
   ///
-  /// See <https://fuchsia.googlesource.com/garnet/+/master/public/fidl/fuchsia.ui.input/input_event_constants.fidl>
+  /// See <https://android.googlesource.com/platform/prebuilts/fuchsia_sdk/+/main/fidl/fuchsia.ui.input/input_event_constants.fidl>
   /// for the numerical values of the modifiers. Many of these are also
   /// replicated as static constants in this class.
   ///

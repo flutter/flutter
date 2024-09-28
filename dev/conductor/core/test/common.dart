@@ -4,6 +4,7 @@
 
 import 'package:args/args.dart';
 import 'package:conductor_core/src/stdio.dart';
+import 'package:test/fake.dart';
 import 'package:test/test.dart';
 
 export 'package:test/fake.dart';
@@ -54,7 +55,7 @@ class TestStdio extends Stdio {
   }
 }
 
-class FakeArgResults implements ArgResults {
+class FakeArgResults extends Fake implements ArgResults {
   FakeArgResults({
     required String? level,
     required String candidateBranch,
@@ -84,28 +85,10 @@ class FakeArgResults implements ArgResults {
   @override
   final List<String> rest = <String>[];
 
-  @override
-  List<String> get arguments {
-    assert(false, 'not yet implemented');
-    return <String>[];
-  }
-
   final Map<String, dynamic> _parsedArgs;
-
-  @override
-  Iterable<String> get options {
-    assert(false, 'not yet implemented');
-    return <String>[];
-  }
 
   @override
   dynamic operator [](String name) {
     return _parsedArgs[name];
-  }
-
-  @override
-  bool wasParsed(String name) {
-    assert(false, 'not yet implemented');
-    return false;
   }
 }

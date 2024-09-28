@@ -16,7 +16,7 @@ import 'process.dart';
 class SnapshotType {
   SnapshotType(this.platform, this.mode);
 
-  final TargetPlatform? platform;
+  final TargetPlatform platform;
   final BuildMode mode;
 
   @override

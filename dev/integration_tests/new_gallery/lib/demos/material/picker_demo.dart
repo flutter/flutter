@@ -164,25 +164,20 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
 
   String get _title {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    switch (widget.type) {
-      case PickerDemoType.date:
-        return localizations.demoDatePickerTitle;
-      case PickerDemoType.time:
-        return localizations.demoTimePickerTitle;
-      case PickerDemoType.range:
-        return localizations.demoDateRangePickerTitle;
-    }
+    return switch (widget.type) {
+      PickerDemoType.date  => localizations.demoDatePickerTitle,
+      PickerDemoType.time  => localizations.demoTimePickerTitle,
+      PickerDemoType.range => localizations.demoDateRangePickerTitle,
+    };
   }
 
   String get _labelText {
-    switch (widget.type) {
-      case PickerDemoType.date:
-        return DateFormat.yMMMd().format(_fromDate.value);
-      case PickerDemoType.time:
-        return _fromTime.value.format(context);
-      case PickerDemoType.range:
-        return '${DateFormat.yMMMd().format(_startDate.value)} - ${DateFormat.yMMMd().format(_endDate.value)}';
-    }
+    final DateFormat yMMMd = DateFormat.yMMMd();
+    return switch (widget.type) {
+      PickerDemoType.date  => yMMMd.format(_fromDate.value),
+      PickerDemoType.time  => _fromTime.value.format(context),
+      PickerDemoType.range => '${yMMMd.format(_startDate.value)} - ${yMMMd.format(_endDate.value)}',
+    };
   }
 
   @override
@@ -202,16 +197,11 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
                   Text(_labelText),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () {
-                      switch (widget.type) {
-                        case PickerDemoType.date:
-                          _restorableDatePickerRouteFuture.present();
-                        case PickerDemoType.time:
-                          _restorableTimePickerRouteFuture.present();
-                        case PickerDemoType.range:
-                          _restorableDateRangePickerRouteFuture.present();
-                      }
-                    },
+                    onPressed: () => switch (widget.type) {
+                      PickerDemoType.date  => _restorableDatePickerRouteFuture,
+                      PickerDemoType.time  => _restorableTimePickerRouteFuture,
+                      PickerDemoType.range => _restorableDateRangePickerRouteFuture,
+                    }.present(),
                     child: Text(
                       GalleryLocalizations.of(context)!.demoPickersShowPicker,
                     ),

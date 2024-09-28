@@ -11,10 +11,9 @@ void main() {
     await tester.pumpWidget(
       const example.ColorSchemeExample(),
     );
-    expect(find.text('Light ColorScheme'), findsOneWidget);
-    expect(find.text('Dark ColorScheme'), findsOneWidget);
+    expect(find.text('tonalSpot (Default)'), findsOneWidget);
 
-    expect(find.byType(example.ColorChip), findsNWidgets(86));
+    expect(find.byType(example.ColorChip), findsNWidgets(43 * 9));
   });
 
   testWidgets('Change color seed', (WidgetTester tester) async {
@@ -30,10 +29,11 @@ void main() {
         )
       );
     }
-    expect(coloredBox().color, const Color(0xFF6750A4));
-    await tester.tap(find.byType(MenuAnchor));
+    expect(coloredBox().color, const Color(0xff65558f));
+    await tester.tap(find.byType(example.SettingsButton));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(MenuItemButton, 'Yellow'));
+    expect(find.text('Settings'), findsOneWidget);
+    await tester.tap(find.byType(IconButton).at(6));
     await tester.pumpAndSettle();
 
     expect(coloredBox().color, const Color(0xFF685F12));

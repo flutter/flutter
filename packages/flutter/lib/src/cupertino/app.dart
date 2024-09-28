@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/services.dart';
+///
+/// @docImport 'page_scaffold.dart';
+/// @docImport 'tab_view.dart';
+library;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
@@ -250,7 +257,7 @@ class CupertinoApp extends StatefulWidget {
   ///
   /// When a named route is pushed with [Navigator.pushNamed], the route name is
   /// looked up in this map. If the name is present, the associated
-  /// [widgets.WidgetBuilder] is used to construct a [CupertinoPageRoute] that
+  /// [WidgetBuilder] is used to construct a [CupertinoPageRoute] that
   /// performs an appropriate transition, including [Hero] animations, to the
   /// new route.
   ///
@@ -331,7 +338,7 @@ class CupertinoApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://flutter.dev/debugging/#performance-overlay>
+  ///  * <https://flutter.dev/to/performance-overlay>
   final bool showPerformanceOverlay;
 
   /// Turns on checkerboarding of raster cache images.
@@ -563,8 +570,6 @@ class _CupertinoAppState extends State<CupertinoApp> {
         localeListResolutionCallback: widget.localeListResolutionCallback,
         supportedLocales: widget.supportedLocales,
         showPerformanceOverlay: widget.showPerformanceOverlay,
-        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
         showSemanticsDebugger: widget.showSemanticsDebugger,
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
         inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
@@ -599,8 +604,6 @@ class _CupertinoAppState extends State<CupertinoApp> {
       localeListResolutionCallback: widget.localeListResolutionCallback,
       supportedLocales: widget.supportedLocales,
       showPerformanceOverlay: widget.showPerformanceOverlay,
-      checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-      checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
       showSemanticsDebugger: widget.showSemanticsDebugger,
       debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
       inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
