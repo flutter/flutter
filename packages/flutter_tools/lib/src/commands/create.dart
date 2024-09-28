@@ -258,6 +258,14 @@ class CreateCommand extends CreateBase {
         'template: the language will always be C or C++.',
         exitCode: 2,
       );
+    } else if (!generateModule && argResults!.wasParsed('ios-language')) {
+      // Swift is not yet supported for add-to-app https://github.com/flutter/flutter/issues/23955.
+      globals.printWarning(
+          'The "ios-language" option is deprecated and will be removed in a future Flutter release.');
+      if (stringArg('ios-language') == 'objc') {
+        globals.printWarning(
+            'Please comment in https://github.com/flutter/flutter/issues/148586 describing your use-case for using Objective-C instead of Swift.');
+      }
     }
 
     final String organization = await getOrganization();
