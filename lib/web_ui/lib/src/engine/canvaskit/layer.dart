@@ -4,10 +4,18 @@
 
 import 'package:ui/ui.dart' as ui;
 
+import '../color_filter.dart';
 import '../vector_math.dart';
-import 'layer_visitor.dart';
+import 'canvas.dart';
+import 'canvaskit_api.dart';
+import 'color_filter.dart';
+import 'embedded_views.dart';
+import 'image_filter.dart';
+import 'n_way_canvas.dart';
+import 'painting.dart';
 import 'path.dart';
 import 'picture.dart';
+import 'raster_cache.dart';
 
 /// A layer to be composed into a scene.
 ///
@@ -23,8 +31,15 @@ abstract class Layer implements ui.EngineLayer {
   /// Whether or not this layer actually needs to be painted in the scene.
   bool get needsPainting => !paintBounds.isEmpty;
 
-  /// Implement layer visitor.
-  void accept(LayerVisitor visitor);
+  /// Pre-process this layer before painting.
+  ///
+  /// In this step, we compute the estimated [paintBounds] as well as
+  /// apply heuristics to prepare the render cache for pictures that
+  /// should be cached.
+  void preroll(PrerollContext prerollContext, Matrix4 matrix);
+
+  /// Paint this layer into the scene.
+  void paint(PaintContext paintContext);
 
   // TODO(dnfield): Implement ui.EngineLayer.dispose for CanvasKit.
   // https://github.com/flutter/flutter/issues/82878
@@ -32,19 +47,109 @@ abstract class Layer implements ui.EngineLayer {
   void dispose() {}
 }
 
+/// A context shared by all layers during the preroll pass.
+class PrerollContext {
+  PrerollContext(this.rasterCache, this.viewEmbedder);
+
+  /// A raster cache. Used to register candidates for caching.
+  final RasterCache? rasterCache;
+
+  /// A compositor for embedded HTML views.
+  final HtmlViewEmbedder? viewEmbedder;
+
+  final MutatorsStack mutatorsStack = MutatorsStack();
+
+  ui.Rect get cullRect {
+    ui.Rect cullRect = ui.Rect.largest;
+    for (final Mutator m in mutatorsStack) {
+      ui.Rect clipRect;
+      switch (m.type) {
+        case MutatorType.clipRect:
+          clipRect = m.rect!;
+        case MutatorType.clipRRect:
+          clipRect = m.rrect!.outerRect;
+        case MutatorType.clipPath:
+          clipRect = m.path!.getBounds();
+        default:
+          continue;
+      }
+      cullRect = cullRect.intersect(clipRect);
+    }
+    return cullRect;
+  }
+}
+
+/// A context shared by all layers during the paint pass.
+class PaintContext {
+  PaintContext(
+    this.internalNodesCanvas,
+    this.leafNodesCanvas,
+    this.rasterCache,
+    this.viewEmbedder,
+  );
+
+  /// A multi-canvas that applies clips, transforms, and opacity
+  /// operations to all canvases (root canvas and overlay canvases for the
+  /// platform views).
+  CkNWayCanvas internalNodesCanvas;
+
+  /// The canvas for leaf nodes to paint to.
+  CkCanvas? leafNodesCanvas;
+
+  /// A raster cache potentially containing pre-rendered pictures.
+  final RasterCache? rasterCache;
+
+  /// A compositor for embedded HTML views.
+  final HtmlViewEmbedder? viewEmbedder;
+}
+
 /// A layer that contains child layers.
 abstract class ContainerLayer extends Layer {
-  final List<Layer> children = <Layer>[];
+  final List<Layer> _layers = <Layer>[];
 
   /// The list of child layers.
   ///
   /// Useful in tests.
-  List<Layer> get debugLayers => children;
+  List<Layer> get debugLayers => _layers;
 
   /// Register [child] as a child of this layer.
   void add(Layer child) {
     child.parent = this;
-    children.add(child);
+    _layers.add(child);
+  }
+
+  @override
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    paintBounds = prerollChildren(prerollContext, matrix);
+  }
+
+  /// Run [preroll] on all of the child layers.
+  ///
+  /// Returns a [Rect] that covers the paint bounds of all of the child layers.
+  /// If all of the child layers have empty paint bounds, then the returned
+  /// [Rect] is empty.
+  ui.Rect prerollChildren(PrerollContext context, Matrix4 childMatrix) {
+    ui.Rect childPaintBounds = ui.Rect.zero;
+    for (final Layer layer in _layers) {
+      layer.preroll(context, childMatrix);
+      if (childPaintBounds.isEmpty) {
+        childPaintBounds = layer.paintBounds;
+      } else if (!layer.paintBounds.isEmpty) {
+        childPaintBounds = childPaintBounds.expandToInclude(layer.paintBounds);
+      }
+    }
+    return childPaintBounds;
+  }
+
+  /// Calls [paint] on all child layers that need painting.
+  void paintChildren(PaintContext context) {
+    assert(needsPainting);
+
+    for (final Layer layer in _layers) {
+      if (layer.needsPainting) {
+        layer.paint(context);
+      }
+    }
   }
 }
 
@@ -54,21 +159,36 @@ abstract class ContainerLayer extends Layer {
 /// to [LayerSceneBuilder] without requiring a [ContainerLayer].
 class RootLayer extends ContainerLayer {
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitRoot(this);
+  void paint(PaintContext paintContext) {
+    paintChildren(paintContext);
   }
 }
 
 class BackdropFilterEngineLayer extends ContainerLayer
     implements ui.BackdropFilterEngineLayer {
-  BackdropFilterEngineLayer(this.filter, this.blendMode);
+  BackdropFilterEngineLayer(this._filter, this._blendMode);
 
-  final ui.ImageFilter filter;
-  final ui.BlendMode blendMode;
+  final ui.ImageFilter _filter;
+  final ui.BlendMode _blendMode;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitBackdropFilter(this);
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    final ui.Rect childBounds = prerollChildren(prerollContext, matrix);
+    paintBounds = childBounds.expandToInclude(prerollContext.cullRect);
+  }
+
+  @override
+  void paint(PaintContext paintContext) {
+    final CkPaint paint = CkPaint()..blendMode = _blendMode;
+
+    // Only apply the backdrop filter to the current canvas. If we apply the
+    // backdrop filter to every canvas (i.e. by applying it to the
+    // [internalNodesCanvas]), then later when we compose the canvases into a
+    // single canvas, the backdrop filter will be applied multiple times.
+    final CkCanvas currentCanvas = paintContext.leafNodesCanvas!;
+    currentCanvas.saveLayerWithFilter(paintBounds, _filter, paint);
+    paintChildren(paintContext);
+    currentCanvas.restore();
   }
 
   // TODO(dnfield): dispose of the _filter
@@ -78,76 +198,189 @@ class BackdropFilterEngineLayer extends ContainerLayer
 /// A layer that clips its child layers by a given [Path].
 class ClipPathEngineLayer extends ContainerLayer
     implements ui.ClipPathEngineLayer {
-  ClipPathEngineLayer(this.clipPath, this.clipBehavior)
-      : assert(clipBehavior != ui.Clip.none);
+  ClipPathEngineLayer(this._clipPath, this._clipBehavior)
+      : assert(_clipBehavior != ui.Clip.none);
 
   /// The path used to clip child layers.
-  final CkPath clipPath;
-  final ui.Clip clipBehavior;
+  final CkPath _clipPath;
+  final ui.Clip _clipBehavior;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitClipPath(this);
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    prerollContext.mutatorsStack.pushClipPath(_clipPath);
+    final ui.Rect childPaintBounds = prerollChildren(prerollContext, matrix);
+    final ui.Rect clipBounds = _clipPath.getBounds();
+    if (childPaintBounds.overlaps(clipBounds)) {
+      paintBounds = childPaintBounds.intersect(clipBounds);
+    }
+    prerollContext.mutatorsStack.pop();
+  }
+
+  @override
+  void paint(PaintContext paintContext) {
+    assert(needsPainting);
+
+    paintContext.internalNodesCanvas.save();
+    paintContext.internalNodesCanvas
+        .clipPath(_clipPath, _clipBehavior != ui.Clip.hardEdge);
+
+    if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
+      paintContext.internalNodesCanvas.saveLayer(paintBounds, null);
+    }
+    paintChildren(paintContext);
+    if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
+      paintContext.internalNodesCanvas.restore();
+    }
+    paintContext.internalNodesCanvas.restore();
   }
 }
 
 /// A layer that clips its child layers by a given [Rect].
 class ClipRectEngineLayer extends ContainerLayer
     implements ui.ClipRectEngineLayer {
-  ClipRectEngineLayer(this.clipRect, this.clipBehavior)
-      : assert(clipBehavior != ui.Clip.none);
+  ClipRectEngineLayer(this._clipRect, this._clipBehavior)
+      : assert(_clipBehavior != ui.Clip.none);
 
   /// The rectangle used to clip child layers.
-  final ui.Rect clipRect;
-  final ui.Clip clipBehavior;
+  final ui.Rect _clipRect;
+  final ui.Clip _clipBehavior;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitClipRect(this);
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    prerollContext.mutatorsStack.pushClipRect(_clipRect);
+    final ui.Rect childPaintBounds = prerollChildren(prerollContext, matrix);
+    if (childPaintBounds.overlaps(_clipRect)) {
+      paintBounds = childPaintBounds.intersect(_clipRect);
+    }
+    prerollContext.mutatorsStack.pop();
+  }
+
+  @override
+  void paint(PaintContext paintContext) {
+    assert(needsPainting);
+
+    paintContext.internalNodesCanvas.save();
+    paintContext.internalNodesCanvas.clipRect(
+      _clipRect,
+      ui.ClipOp.intersect,
+      _clipBehavior != ui.Clip.hardEdge,
+    );
+    if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
+      paintContext.internalNodesCanvas.saveLayer(_clipRect, null);
+    }
+    paintChildren(paintContext);
+    if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
+      paintContext.internalNodesCanvas.restore();
+    }
+    paintContext.internalNodesCanvas.restore();
   }
 }
 
 /// A layer that clips its child layers by a given [RRect].
 class ClipRRectEngineLayer extends ContainerLayer
     implements ui.ClipRRectEngineLayer {
-  ClipRRectEngineLayer(this.clipRRect, this.clipBehavior)
-      : assert(clipBehavior != ui.Clip.none);
+  ClipRRectEngineLayer(this._clipRRect, this._clipBehavior)
+      : assert(_clipBehavior != ui.Clip.none);
 
   /// The rounded rectangle used to clip child layers.
-  final ui.RRect clipRRect;
-  final ui.Clip? clipBehavior;
+  final ui.RRect _clipRRect;
+  final ui.Clip? _clipBehavior;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitClipRRect(this);
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    prerollContext.mutatorsStack.pushClipRRect(_clipRRect);
+    final ui.Rect childPaintBounds = prerollChildren(prerollContext, matrix);
+    if (childPaintBounds.overlaps(_clipRRect.outerRect)) {
+      paintBounds = childPaintBounds.intersect(_clipRRect.outerRect);
+    }
+    prerollContext.mutatorsStack.pop();
+  }
+
+  @override
+  void paint(PaintContext paintContext) {
+    assert(needsPainting);
+
+    paintContext.internalNodesCanvas.save();
+    paintContext.internalNodesCanvas
+        .clipRRect(_clipRRect, _clipBehavior != ui.Clip.hardEdge);
+    if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
+      paintContext.internalNodesCanvas.saveLayer(paintBounds, null);
+    }
+    paintChildren(paintContext);
+    if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
+      paintContext.internalNodesCanvas.restore();
+    }
+    paintContext.internalNodesCanvas.restore();
   }
 }
 
 /// A layer that paints its children with the given opacity.
 class OpacityEngineLayer extends ContainerLayer
     implements ui.OpacityEngineLayer {
-  OpacityEngineLayer(this.alpha, this.offset);
+  OpacityEngineLayer(this._alpha, this._offset);
 
-  final int alpha;
-  final ui.Offset offset;
+  final int _alpha;
+  final ui.Offset _offset;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitOpacity(this);
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    final Matrix4 childMatrix = Matrix4.copy(matrix);
+    childMatrix.translate(_offset.dx, _offset.dy);
+    prerollContext.mutatorsStack
+        .pushTransform(Matrix4.translationValues(_offset.dx, _offset.dy, 0.0));
+    prerollContext.mutatorsStack.pushOpacity(_alpha);
+    super.preroll(prerollContext, childMatrix);
+    prerollContext.mutatorsStack.pop();
+    prerollContext.mutatorsStack.pop();
+    paintBounds = paintBounds.translate(_offset.dx, _offset.dy);
+  }
+
+  @override
+  void paint(PaintContext paintContext) {
+    assert(needsPainting);
+
+    final CkPaint paint = CkPaint();
+    paint.color = ui.Color.fromARGB(_alpha, 0, 0, 0);
+
+    paintContext.internalNodesCanvas.save();
+    paintContext.internalNodesCanvas.translate(_offset.dx, _offset.dy);
+
+    final ui.Rect saveLayerBounds = paintBounds.shift(-_offset);
+
+    paintContext.internalNodesCanvas.saveLayer(saveLayerBounds, paint);
+    paintChildren(paintContext);
+    // Restore twice: once for the translate and once for the saveLayer.
+    paintContext.internalNodesCanvas.restore();
+    paintContext.internalNodesCanvas.restore();
   }
 }
 
 /// A layer that transforms its child layers by the given transform matrix.
 class TransformEngineLayer extends ContainerLayer
     implements ui.TransformEngineLayer {
-  TransformEngineLayer(this.transform);
+  TransformEngineLayer(this._transform);
 
   /// The matrix with which to transform the child layers.
-  final Matrix4 transform;
+  final Matrix4 _transform;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitTransform(this);
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    final Matrix4 childMatrix = matrix.multiplied(_transform);
+    prerollContext.mutatorsStack.pushTransform(_transform);
+    final ui.Rect childPaintBounds =
+        prerollChildren(prerollContext, childMatrix);
+    paintBounds = _transform.transformRect(childPaintBounds);
+    prerollContext.mutatorsStack.pop();
+  }
+
+  @override
+  void paint(PaintContext paintContext) {
+    assert(needsPainting);
+
+    paintContext.internalNodesCanvas.save();
+    paintContext.internalNodesCanvas.transform(_transform.storage);
+    paintChildren(paintContext);
+    paintContext.internalNodesCanvas.restore();
   }
 }
 
@@ -160,24 +393,59 @@ class OffsetEngineLayer extends TransformEngineLayer
     implements ui.OffsetEngineLayer {
   OffsetEngineLayer(double dx, double dy)
       : super(Matrix4.translationValues(dx, dy, 0.0));
-
-  @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitOffset(this);
-  }
 }
 
 /// A layer that applies an [ui.ImageFilter] to its children.
 class ImageFilterEngineLayer extends ContainerLayer
     implements ui.ImageFilterEngineLayer {
-  ImageFilterEngineLayer(this.filter, this.offset);
+  ImageFilterEngineLayer(this._filter, this._offset);
 
-  final ui.Offset offset;
-  final ui.ImageFilter filter;
+  final ui.Offset _offset;
+  final ui.ImageFilter _filter;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitImageFilter(this);
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    final Matrix4 childMatrix = Matrix4.copy(matrix);
+    childMatrix.translate(_offset.dx, _offset.dy);
+    prerollContext.mutatorsStack
+        .pushTransform(Matrix4.translationValues(_offset.dx, _offset.dy, 0.0));
+    final CkManagedSkImageFilterConvertible convertible;
+    if (_filter is ui.ColorFilter) {
+      convertible = createCkColorFilter(_filter as EngineColorFilter)!;
+    } else {
+      convertible = _filter as CkManagedSkImageFilterConvertible;
+    }
+    ui.Rect childPaintBounds =
+        prerollChildren(prerollContext, childMatrix);
+    childPaintBounds = childPaintBounds.translate(_offset.dx, _offset.dy);
+    if (_filter is ui.ColorFilter) {
+      // If the filter is a ColorFilter, the extended paint bounds will be the
+      // entire screen, which is not what we want.
+      paintBounds = childPaintBounds;
+    } else {
+      convertible.withSkImageFilter((skFilter) {
+        paintBounds = rectFromSkIRect(
+          skFilter.getOutputBounds(toSkRect(childPaintBounds)),
+        );
+      });
+    }
+    prerollContext.mutatorsStack.pop();
+  }
+
+  @override
+  void paint(PaintContext paintContext) {
+    assert(needsPainting);
+    final ui.Rect offsetPaintBounds = paintBounds.shift(-_offset);
+    paintContext.internalNodesCanvas.save();
+    paintContext.internalNodesCanvas.translate(_offset.dx, _offset.dy);
+    paintContext.internalNodesCanvas
+        .clipRect(offsetPaintBounds, ui.ClipOp.intersect, false);
+    final CkPaint paint = CkPaint();
+    paint.imageFilter = _filter;
+    paintContext.internalNodesCanvas.saveLayer(offsetPaintBounds, paint);
+    paintChildren(paintContext);
+    paintContext.internalNodesCanvas.restore();
+    paintContext.internalNodesCanvas.restore();
   }
 
   // TODO(dnfield): dispose of the _filter
@@ -195,8 +463,25 @@ class ShaderMaskEngineLayer extends ContainerLayer
   final ui.FilterQuality filterQuality;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitShaderMask(this);
+  void paint(PaintContext paintContext) {
+    assert(needsPainting);
+
+    paintContext.internalNodesCanvas.saveLayer(paintBounds, null);
+    paintChildren(paintContext);
+
+    final CkPaint paint = CkPaint();
+    paint.shader = shader;
+    paint.blendMode = blendMode;
+    paint.filterQuality = filterQuality;
+
+    paintContext.leafNodesCanvas!.save();
+    paintContext.leafNodesCanvas!.translate(maskRect.left, maskRect.top);
+
+    paintContext.leafNodesCanvas!.drawRect(
+        ui.Rect.fromLTWH(0, 0, maskRect.width, maskRect.height), paint);
+    paintContext.leafNodesCanvas!.restore();
+
+    paintContext.internalNodesCanvas.restore();
   }
 }
 
@@ -216,17 +501,21 @@ class PictureLayer extends Layer {
   /// A hint to the compositor that this picture is likely to change.
   final bool willChange;
 
-  /// Whether or not this picture is culled in the final scene. We compute this
-  /// when we optimize the scene.
-  bool isCulled = false;
-
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitPicture(this);
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    paintBounds = picture.cullRect.shift(offset);
   }
 
   @override
-  bool get needsPainting => super.needsPainting && !isCulled;
+  void paint(PaintContext paintContext) {
+    assert(needsPainting);
+
+    paintContext.leafNodesCanvas!.save();
+    paintContext.leafNodesCanvas!.translate(offset.dx, offset.dy);
+
+    paintContext.leafNodesCanvas!.drawPicture(picture);
+    paintContext.leafNodesCanvas!.restore();
+  }
 }
 
 /// A layer which contains a [ui.ColorFilter].
@@ -237,8 +526,26 @@ class ColorFilterEngineLayer extends ContainerLayer
   final ui.ColorFilter filter;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitColorFilter(this);
+  void paint(PaintContext paintContext) {
+    assert(needsPainting);
+
+    final CkPaint paint = CkPaint();
+    paint.colorFilter = filter;
+
+    // We need to clip because if the ColorFilter affects transparent black,
+    // then it will fill the entire `cullRect` of the picture, ignoring the
+    // `paintBounds` passed to `saveLayer`. See:
+    // https://github.com/flutter/flutter/issues/88866
+    paintContext.internalNodesCanvas.save();
+
+    // TODO(hterkelsen): Only clip if the ColorFilter affects transparent black.
+    paintContext.internalNodesCanvas
+        .clipRect(paintBounds, ui.ClipOp.intersect, false);
+
+    paintContext.internalNodesCanvas.saveLayer(paintBounds, paint);
+    paintChildren(paintContext);
+    paintContext.internalNodesCanvas.restore();
+    paintContext.internalNodesCanvas.restore();
   }
 }
 
@@ -252,7 +559,27 @@ class PlatformViewLayer extends Layer {
   final double height;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitPlatformView(this);
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    paintBounds = ui.Rect.fromLTWH(offset.dx, offset.dy, width, height);
+
+    /// ViewEmbedder is set to null when screenshotting. Therefore, skip
+    /// rendering
+    prerollContext.viewEmbedder?.prerollCompositeEmbeddedView(
+      viewId,
+      EmbeddedViewParams(
+        offset,
+        ui.Size(width, height),
+        prerollContext.mutatorsStack,
+      ),
+    );
+  }
+
+  @override
+  void paint(PaintContext paintContext) {
+    final CkCanvas? canvas =
+        paintContext.viewEmbedder?.compositeEmbeddedView(viewId);
+    if (canvas != null) {
+      paintContext.leafNodesCanvas = canvas;
+    }
   }
 }
