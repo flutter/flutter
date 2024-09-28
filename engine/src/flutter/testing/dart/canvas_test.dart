@@ -1364,6 +1364,36 @@ void main() async {
     final int rgba = data.buffer.asUint32List()[0];
     expect(rgba, 0xFF0000FF);
   });
+
+  test('DrawAtlas with no colors does not crash',
+      () async {
+    final Image testImage = await createTestImage();
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    // Make a drawAtlas call that should be solid red.
+    canvas.drawAtlas(
+      testImage,
+      [
+        RSTransform.fromComponents(
+          rotation: 0,
+          scale: 10,
+          anchorX: 0,
+          anchorY: 0,
+          translateX: 0,
+          translateY: 0,
+        ),
+      ],
+      [const Rect.fromLTWH(0, 0, 1, 1)],
+      [],
+      BlendMode.dst,
+      null,
+      Paint(),
+    );
+
+    final Image resultImage = await recorder.endRecording().toImage(1, 1);
+    final ByteData? data = await resultImage.toByteData();
+    expect(data, isNotNull);
+  });
 }
 
 Future<Image> createTestImage() async {
