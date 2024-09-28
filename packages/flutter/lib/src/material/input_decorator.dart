@@ -2154,11 +2154,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   CurvedAnimation? _curvedAnimation;
 
   FadeTransition _buildTransition(Widget child, Animation<double> animation) {
-    _curvedAnimation?.dispose();
-    _curvedAnimation  = CurvedAnimation(
+    if (_curvedAnimation?.parent != animation) {
+      _curvedAnimation?.dispose();
+      _curvedAnimation  = CurvedAnimation(
               parent: animation,
               curve: _kTransitionCurve,
             );
+    }
 
     return FadeTransition(
       opacity: _curvedAnimation!,
