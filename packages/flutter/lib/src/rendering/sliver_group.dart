@@ -214,7 +214,13 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
         double childScrollOffset = 0.0;
         RenderSliver? current = childBefore(child as RenderSliver);
         while (current != null) {
-          if (!current.geometry!.hasVisualOverflow || lastChild == child ) {
+          // If the current sliver is not the first child, add twice the scrollExtent to the scrollOffset
+          // to account for both the current and the previous slivers.
+          // If the current sliver is the first child, add its scrollExtent once to the scrollOffset
+          // to account for only the current sliver.
+          if (childBefore(current) != null) {
+            childScrollOffset += 2 * current.geometry!.scrollExtent;
+          } else if (!(childAfter(child) != null && current.geometry!.hasVisualOverflow)) {
             childScrollOffset += current.geometry!.scrollExtent;
           }
           current = childBefore(current);
@@ -224,7 +230,13 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
         double childScrollOffset = 0.0;
         RenderSliver? current = childAfter(child as RenderSliver);
         while (current != null) {
-          if (!current.geometry!.hasVisualOverflow || firstChild == child ) {
+          // If the current sliver is not the last child, subtract twice the scrollExtent to the scrollOffset
+          // to account for both the current and the next slivers.
+          // If the current sliver is the last child, subtract its scrollExtent once to the scrollOffset
+          // to account for only the current sliver.
+          if (childAfter(current) != null) {
+            childScrollOffset -= 2 * current.geometry!.scrollExtent;
+          } else if (!(childBefore(child) != null && current.geometry!.hasVisualOverflow)) {
             childScrollOffset -= current.geometry!.scrollExtent;
           }
           current = childAfter(current);
