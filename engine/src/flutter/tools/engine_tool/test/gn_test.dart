@@ -4,14 +4,15 @@
 
 import 'package:engine_tool/src/gn.dart';
 import 'package:engine_tool/src/label.dart';
+import 'package:engine_tool/src/logger.dart';
 import 'package:test/test.dart';
 
 import 'utils.dart';
 
 void main() {
   test('gn.desc handles a non-zero exit code', () async {
-    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
-      cannedProcesses: <CannedProcess>[
+    final testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: [
         CannedProcess(
           (List<String> command) => command.contains('desc'),
           exitCode: 1,
@@ -20,46 +21,56 @@ void main() {
         ),
       ],
     );
-    try {
-      final Gn gn = Gn.fromEnvironment(testEnv.environment);
-      await gn.desc('out/Release', TargetPattern('//foo', 'bar'));
-      fail('Expected an exception');
-    } catch (e) {
-      final String message = '$e';
-      expect(message, contains('Failed to run'));
-      expect(message, contains('exit code 1'));
-      expect(message, contains('STDOUT:\nstdout'));
-      expect(message, contains('STDERR:\nstderr'));
-    } finally {
-      testEnv.cleanup();
-    }
+    addTearDown(testEnv.cleanup);
+
+    final gn = Gn.fromEnvironment(testEnv.environment);
+    expect(
+      () => gn.desc('out/Release', TargetPattern('//foo', 'bar')),
+      throwsA(
+        isA<FatalError>().having(
+          (a) => a.toString(),
+          'toString()',
+          allOf([
+            contains('Failed to run'),
+            contains('exit code 1'),
+            contains('STDOUT:\nstdout'),
+            contains('STDERR:\nstderr'),
+          ]),
+        ),
+      ),
+    );
   });
 
   test('gn.desc handles unparseable stdout', () async {
-    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
-      cannedProcesses: <CannedProcess>[
+    final testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: [
         CannedProcess(
           (List<String> command) => command.contains('desc'),
           stdout: 'not json',
         ),
       ],
     );
-    try {
-      final Gn gn = Gn.fromEnvironment(testEnv.environment);
-      await gn.desc('out/Release', TargetPattern('//foo', 'bar'));
-      fail('Expected an exception');
-    } catch (e) {
-      final String message = '$e';
-      expect(message, contains('Failed to parse JSON'));
-      expect(message, contains('not json'));
-    } finally {
-      testEnv.cleanup();
-    }
+    addTearDown(testEnv.cleanup);
+
+    final gn = Gn.fromEnvironment(testEnv.environment);
+    expect(
+      () => gn.desc('out/Release', TargetPattern('//foo', 'bar')),
+      throwsA(
+        isA<FatalError>().having(
+          (a) => a.toString(),
+          'toString()',
+          allOf([
+            contains('Failed to parse JSON'),
+            contains('not json'),
+          ]),
+        ),
+      ),
+    );
   });
 
   test('gn.desc parses build targets', () async {
-    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
-      cannedProcesses: <CannedProcess>[
+    final testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: [
         CannedProcess(
           (List<String> command) => command.contains('desc'),
           stdout: '''
@@ -82,31 +93,37 @@ void main() {
         ),
       ],
     );
-    try {
-      final Gn gn = Gn.fromEnvironment(testEnv.environment);
-      final List<BuildTarget> targets = await gn.desc('out/Release', TargetPattern('//foo', 'bar'));
-      expect(targets, hasLength(3));
+    addTearDown(testEnv.cleanup);
 
-      // There should be exactly one binary test target and two library targets.
-      final ExecutableBuildTarget testTarget = targets.whereType<ExecutableBuildTarget>().single;
-      expect(testTarget, ExecutableBuildTarget(
-        label: Label('//foo/bar', 'baz_test'),
-        testOnly: true,
-        executable: 'out/host_debug/foo/bar/baz_test',
-      ));
+    final gn = Gn.fromEnvironment(testEnv.environment);
+    final targets = await gn.desc('out/Release', TargetPattern('//foo', 'bar'));
+    expect(targets, hasLength(3));
 
-      final List<LibraryBuildTarget> libraryTargets = targets.whereType<LibraryBuildTarget>().toList();
-      expect(libraryTargets, hasLength(2));
-      expect(libraryTargets.contains(LibraryBuildTarget(
+    // There should be exactly one binary test target and two library targets.
+    final testTarget = targets.whereType<ExecutableBuildTarget>().single;
+    expect(
+        testTarget,
+        ExecutableBuildTarget(
+          label: Label('//foo/bar', 'baz_test'),
+          testOnly: true,
+          executable: 'out/host_debug/foo/bar/baz_test',
+        ));
+
+    final libraryTargets = targets.whereType<LibraryBuildTarget>().toList();
+    expect(libraryTargets, hasLength(2));
+    expect(
+      libraryTargets.contains(LibraryBuildTarget(
         label: Label('//foo/bar', 'baz_shared_library'),
         testOnly: false,
-      )), isTrue);
-      expect(libraryTargets.contains(LibraryBuildTarget(
+      )),
+      isTrue,
+    );
+    expect(
+      libraryTargets.contains(LibraryBuildTarget(
         label: Label('//foo/bar', 'baz_static_library'),
         testOnly: false,
-      )), isTrue);
-    } finally {
-      testEnv.cleanup();
-    }
+      )),
+      isTrue,
+    );
   });
 }
