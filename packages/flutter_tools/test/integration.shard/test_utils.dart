@@ -48,9 +48,18 @@ void writeBytesFile(String path, List<int> content) {
     ..writeAsBytesSync(content, flush: true);
 }
 
-void writePackages(String folder) {
-  writeFile(fileSystem.path.join(folder, '.packages'), '''
-test:${fileSystem.path.join(fileSystem.currentDirectory.path, 'lib')}/
+void writePackageConfig(String folder) {
+  writeFile(fileSystem.path.join(folder, '.dart_tool', 'package_config.json'), '''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "test",
+      "rootUri": "fileSystem.currentDirectory.path"
+      "packageUri": "lib/",
+    }
+  ]
+}
 ''');
 }
 

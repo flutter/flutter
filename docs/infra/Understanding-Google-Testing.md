@@ -1,4 +1,4 @@
-"Google testing" is the test suite that Google runs to test a flutter pull request against their internal code base. This check shows up as one of the many check runs at the bottom of a open pull request.
+"Google testing" is the test suite that Google runs to test a flutter pull request against their internal code base. This check shows up as one of the many check runs at the bottom of an open pull request.
 
 ![Screenshot 2023-02-24 at 3 45 33 PM](https://user-images.githubusercontent.com/38773539/221321907-edaca6c3-2165-4bfe-b436-00fcd64e820e.png)
 
@@ -6,13 +6,13 @@
 
 1. Triggering google testing (<1 minute)
 
-   Google testing starts once an approval from a Flutter hacker is given. For Googlers, the check is run immediately. Google testing is triggered on GitHub webhooks, and uses a 30 minute cron job to backfill when webhooks are dropped.
+   Google testing starts once an approval from a Flutter hacker is given. For Googlers, the check is run immediately. Google testing is triggered on GitHub webhooks, and uses a 30-minute cron job to backfill when webhooks are dropped.
 
 2. Running google testing (30 minutes)
 
    A subset of tests have been selected to run on presubmit as our smoke test suite. This gives quick, high coverage for PRs without running everything.
 
-3. Propagating results back to Github (30 minutes)
+3. Propagating results back to GitHub (30 minutes)
 
    Once Google Testing finishes, it takes up to 1 hour for the results to be propagated back to Github. Once the result is available on Github, it will show "Google Testing" as either "success" or "failure".
 

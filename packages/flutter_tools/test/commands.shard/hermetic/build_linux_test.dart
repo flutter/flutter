@@ -74,7 +74,7 @@ void main() {
   // Creates the mock files necessary to look like a Flutter project.
   void setUpMockCoreProjectFiles() {
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
@@ -664,7 +664,7 @@ project(runner LANGUAGES CXX)
 set(BINARY_NAME "fizz_bar")
 ''');
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
     expect(getCmakeExecutableName(flutterProject.linux), 'fizz_bar');
