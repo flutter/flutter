@@ -147,8 +147,7 @@
 
         "templates/app_integration_test/integration_test/plugin_integration_test.dart.tmpl",
 
-        "templates/cocoapods/Podfile-ios-objc",
-        "templates/cocoapods/Podfile-ios-swift",
+        "templates/cocoapods/Podfile-ios",
         "templates/cocoapods/Podfile-macos",
 
         "templates/module/android/deferred_component/build.gradle.tmpl",
