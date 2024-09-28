@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -864,7 +866,7 @@ void main() {
 
         // Prev/Next month buttons.
         expect(tester.getSemantics(previousMonthIcon), matchesSemantics(
-          label: 'Previous month',
+          label: Platform.isAndroid ? 'Previous month' : '',
           tooltip: 'Previous month',
           isButton: true,
           hasTapAction: true,
@@ -874,7 +876,7 @@ void main() {
           isFocusable: true,
         ));
         expect(tester.getSemantics(nextMonthIcon), matchesSemantics(
-          label: 'Next month',
+          label: Platform.isAndroid ? 'Next month' : '',
           tooltip: 'Next month',
           isButton: true,
           hasTapAction: true,

@@ -6,6 +6,7 @@
 /// @docImport 'time_picker.dart';
 library;
 
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
@@ -801,7 +802,7 @@ class _MonthPickerState extends State<_MonthPicker> {
                   IconButton(
                     icon: Icon(
                       Icons.chevron_left,
-                      semanticLabel: _localizations.previousMonthTooltip,
+                      semanticLabel: Platform.isAndroid ? _localizations.previousMonthTooltip : '',
                     ),
                     color: controlColor,
                     tooltip: _isDisplayingFirstMonth ? null : _localizations.previousMonthTooltip,
@@ -810,7 +811,7 @@ class _MonthPickerState extends State<_MonthPicker> {
                   IconButton(
                     icon: Icon(
                       Icons.chevron_right,
-                      semanticLabel: _localizations.nextMonthTooltip,
+                      semanticLabel: Platform.isAndroid ? _localizations.nextMonthTooltip : '',
                     ),
                     color: controlColor,
                     tooltip: _isDisplayingLastMonth ? null : _localizations.nextMonthTooltip,

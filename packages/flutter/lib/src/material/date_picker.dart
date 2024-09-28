@@ -8,6 +8,7 @@
 /// @docImport 'time_picker.dart';
 library;
 
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -1580,7 +1581,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
                 icon: widget.switchToInputEntryModeIcon ??
                       Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit,
                           semanticLabel:
-                              localizations.inputDateModeButtonLabel),
+                              Platform.isAndroid ? localizations.inputDateModeButtonLabel : ''),
                 padding: EdgeInsets.zero,
                 tooltip: localizations.inputDateModeButtonLabel,
                 onPressed: _handleEntryModeToggle,
@@ -1651,7 +1652,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
             ? IconButton(
                 icon: widget.switchToCalendarEntryModeIcon ??
                       Icon(Icons.calendar_today,
-                          semanticLabel: localizations.calendarModeButtonLabel),
+                          semanticLabel: Platform.isAndroid ? localizations.calendarModeButtonLabel : ''),
                 padding: EdgeInsets.zero,
                 tooltip: localizations.calendarModeButtonLabel,
                 onPressed: _handleEntryModeToggle,
