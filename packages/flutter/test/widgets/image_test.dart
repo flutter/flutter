@@ -824,9 +824,10 @@ void main() {
   });
 
   testWidgets('Precache removes original listener immediately after future completes, does not crash on successive calls #25143',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
+ // experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design, because of hacky way dealing with images.
   (WidgetTester tester) async {
     final _TestImageStreamCompleter imageStreamCompleter = _TestImageStreamCompleter();
+
     final _TestImageProvider provider = _TestImageProvider(streamCompleter: imageStreamCompleter);
 
     await tester.pumpWidget(
@@ -853,6 +854,7 @@ void main() {
     listeners[0].onImage(imageInfo.clone(), false);
 
     imageInfo.dispose();
+    provider.dispose();
     imageStreamCompleter.dispose();
     imageCache.clear();
   });
@@ -2161,6 +2163,8 @@ class _TestImageProvider extends ImageProvider<Object> {
   int get loadCallCount => _loadCallCount;
   int _loadCallCount = 0;
 
+  final List<ImageInfo> _images = <ImageInfo>[];
+
   @override
   Future<Object> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<_TestImageProvider>(this);
@@ -2179,7 +2183,9 @@ class _TestImageProvider extends ImageProvider<Object> {
   }
 
   void complete(ui.Image image) {
-    _completer.complete(ImageInfo(image: image));
+    final ImageInfo imageInfo = ImageInfo(image: image);
+    _completer.complete(imageInfo);
+    _images.add(imageInfo);
   }
 
   void fail(Object exception, StackTrace? stackTrace) {
@@ -2188,6 +2194,12 @@ class _TestImageProvider extends ImageProvider<Object> {
 
   @override
   String toString() => '${describeIdentity(this)}()';
+
+  void dispose() {
+    for (final ImageInfo image in _images) {
+      image.image.dispose();
+    }
+  }
 }
 
 class _TestImageStreamCompleter extends ImageStreamCompleter {
@@ -2196,11 +2208,15 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
   ImageInfo? _currentImage;
   final Set<ImageStreamListener> listeners = <ImageStreamListener>{};
 
+  final List<ImageInfo> _images = <ImageInfo>[];
+
   @override
   void addListener(ImageStreamListener listener) {
     listeners.add(listener);
     if (_currentImage != null) {
-      listener.onImage(_currentImage!.clone(), true);
+      final newImage = _currentImage!.clone();
+      _images.add(newImage);
+      listener.onImage(newImage, true);
     }
   }
 
@@ -2239,8 +2255,11 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
   }
 
   void dispose() {
-    final listenersCopy = this.listeners.toList();
+    final List<ImageStreamListener> listenersCopy = listeners.toList();
     listenersCopy.forEach(removeListener);
+    for (final ImageInfo image in _images) {
+      image.dispose();
+    }
   }
 }
 
