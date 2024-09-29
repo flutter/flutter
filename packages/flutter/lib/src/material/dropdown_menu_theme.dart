@@ -141,7 +141,8 @@ class DropdownMenuTheme extends InheritedTheme {
   ///  * [maybeOf], which returns null if it doesn't find a
   ///    [DropdownMenuTheme] ancestor.
   static DropdownMenuThemeData of(BuildContext context) {
-    return maybeOf(context) ?? Theme.of(context).dropdownMenuTheme;
+    return maybeOf(context)
+      ?? Theme.select(context, (ThemeData theme) => theme.dropdownMenuTheme);
   }
 
   /// The data from the closest instance of this class that encloses the given

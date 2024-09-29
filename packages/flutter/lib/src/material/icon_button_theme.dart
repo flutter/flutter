@@ -112,8 +112,8 @@ class IconButtonTheme extends InheritedTheme {
   /// IconButtonThemeData theme = IconButtonTheme.of(context);
   /// ```
   static IconButtonThemeData of(BuildContext context) {
-    final IconButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<IconButtonTheme>();
-    return buttonTheme?.data ?? Theme.of(context).iconButtonTheme;
+    return context.dependOnInheritedWidgetOfExactType<IconButtonTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.iconButtonTheme);
   }
 
   @override

@@ -99,8 +99,8 @@ class SliderTheme extends InheritedTheme {
   ///  * [SliderThemeData], which describes the actual configuration of a slider
   ///    theme.
   static SliderThemeData of(BuildContext context) {
-    final SliderTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<SliderTheme>();
-    return inheritedTheme != null ? inheritedTheme.data : Theme.of(context).sliderTheme;
+    return context.dependOnInheritedWidgetOfExactType<SliderTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.sliderTheme);
   }
 
   @override

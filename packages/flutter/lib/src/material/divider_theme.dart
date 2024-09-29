@@ -167,8 +167,8 @@ class DividerTheme extends InheritedTheme {
   /// DividerThemeData theme = DividerTheme.of(context);
   /// ```
   static DividerThemeData of(BuildContext context) {
-    final DividerTheme? dividerTheme = context.dependOnInheritedWidgetOfExactType<DividerTheme>();
-    return dividerTheme?.data ?? Theme.of(context).dividerTheme;
+    return context.dependOnInheritedWidgetOfExactType<DividerTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.dividerTheme);
   }
 
   @override

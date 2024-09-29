@@ -91,7 +91,7 @@ class BottomAppBarTheme with Diagnosticable {
 
   /// The [ThemeData.bottomAppBarTheme] property of the ambient [Theme].
   static BottomAppBarTheme of(BuildContext context) {
-    return Theme.of(context).bottomAppBarTheme;
+    return Theme.select(context, (ThemeData theme) => theme.bottomAppBarTheme);
   }
 
   /// Linearly interpolate between two BAB themes.

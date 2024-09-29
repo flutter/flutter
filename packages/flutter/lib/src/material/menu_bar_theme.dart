@@ -104,8 +104,8 @@ class MenuBarTheme extends InheritedTheme {
   /// }
   /// ```
   static MenuBarThemeData of(BuildContext context) {
-    final MenuBarTheme? menuBarTheme = context.dependOnInheritedWidgetOfExactType<MenuBarTheme>();
-    return menuBarTheme?.data ?? Theme.of(context).menuBarTheme;
+    return context.dependOnInheritedWidgetOfExactType<MenuBarTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.menuBarTheme);
   }
 
   @override

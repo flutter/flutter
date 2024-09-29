@@ -203,8 +203,8 @@ class DrawerTheme extends InheritedTheme {
   /// DrawerThemeData theme = DrawerTheme.of(context);
   /// ```
   static DrawerThemeData of(BuildContext context) {
-    final DrawerTheme? drawerTheme = context.dependOnInheritedWidgetOfExactType<DrawerTheme>();
-    return drawerTheme?.data ?? Theme.of(context).drawerTheme;
+    return context.dependOnInheritedWidgetOfExactType<DrawerTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.drawerTheme);
   }
 
   @override

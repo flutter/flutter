@@ -506,8 +506,8 @@ class ListTileTheme extends InheritedTheme {
   /// ListTileThemeData theme = ListTileTheme.of(context);
   /// ```
   static ListTileThemeData of(BuildContext context) {
-    final ListTileTheme? result = context.dependOnInheritedWidgetOfExactType<ListTileTheme>();
-    return result?.data ?? Theme.of(context).listTileTheme;
+    return context.dependOnInheritedWidgetOfExactType<ListTileTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.listTileTheme);
   }
 
   /// Creates a list tile theme that controls the color and style parameters for

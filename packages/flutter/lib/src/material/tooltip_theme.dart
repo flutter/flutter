@@ -309,8 +309,8 @@ class TooltipTheme extends InheritedTheme {
   /// TooltipThemeData theme = TooltipTheme.of(context);
   /// ```
   static TooltipThemeData of(BuildContext context) {
-    final TooltipTheme? tooltipTheme = context.dependOnInheritedWidgetOfExactType<TooltipTheme>();
-    return tooltipTheme?.data ?? Theme.of(context).tooltipTheme;
+    return context.dependOnInheritedWidgetOfExactType<TooltipTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.tooltipTheme);
   }
 
   @override

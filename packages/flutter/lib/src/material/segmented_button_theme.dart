@@ -135,7 +135,8 @@ class SegmentedButtonTheme extends InheritedTheme {
   ///  * [maybeOf], which returns null if it doesn't find a
   ///    [SegmentedButtonTheme] ancestor.
   static SegmentedButtonThemeData of(BuildContext context) {
-    return maybeOf(context) ?? Theme.of(context).segmentedButtonTheme;
+    return maybeOf(context)
+      ?? Theme.select(context, (ThemeData theme) => theme.segmentedButtonTheme);
   }
 
   /// The data from the closest instance of this class that encloses the given

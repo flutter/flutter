@@ -191,8 +191,8 @@ class DialogTheme extends InheritedTheme with Diagnosticable {
 
   /// The [ThemeData.dialogTheme] property of the ambient [Theme].
   static DialogThemeData of(BuildContext context) {
-    final DialogTheme? dialogTheme = context.dependOnInheritedWidgetOfExactType<DialogTheme>();
-    return dialogTheme?.data ?? Theme.of(context).dialogTheme;
+    return context.dependOnInheritedWidgetOfExactType<DialogTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.dialogTheme);
   }
 
   @override

@@ -604,7 +604,9 @@ class TextTheme with Diagnosticable {
   /// See also:
   /// * [TextTheme.primaryOf], which returns the [ThemeData.primaryTextTheme] property of
   ///   the ambient [Theme] instead.
-  static TextTheme of(BuildContext context) => Theme.of(context).textTheme;
+  static TextTheme of(BuildContext context) {
+    return Theme.select(context, (ThemeData theme) => theme.textTheme);
+  }
 
   /// The [ThemeData.primaryTextTheme] property of the ambient [Theme].
   ///

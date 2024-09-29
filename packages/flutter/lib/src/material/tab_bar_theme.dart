@@ -246,8 +246,8 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
 
   /// Returns the closest [TabBarTheme] instance given the build context.
   static TabBarThemeData of(BuildContext context) {
-    final TabBarTheme? tabBarTheme = context.dependOnInheritedWidgetOfExactType<TabBarTheme>();
-    return tabBarTheme?.data ?? Theme.of(context).tabBarTheme;
+    return context.dependOnInheritedWidgetOfExactType<TabBarTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.tabBarTheme);
   }
 
   /// Linearly interpolate between two tab bar themes.

@@ -234,8 +234,8 @@ class SwitchTheme extends InheritedWidget {
   /// SwitchThemeData theme = SwitchTheme.of(context);
   /// ```
   static SwitchThemeData of(BuildContext context) {
-    final SwitchTheme? switchTheme = context.dependOnInheritedWidgetOfExactType<SwitchTheme>();
-    return switchTheme?.data ?? Theme.of(context).switchTheme;
+    return context.dependOnInheritedWidgetOfExactType<SwitchTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.switchTheme);
   }
 
   @override

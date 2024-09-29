@@ -1923,6 +1923,12 @@ class ColorScheme with Diagnosticable {
 
   /// The [ThemeData.colorScheme] of the ambient [Theme].
   ///
-  /// Equivalent to `Theme.of(context).colorScheme`.
-  static ColorScheme of(BuildContext context) => Theme.of(context).colorScheme;
+  /// Returns the same result as `Theme.of(context).colorScheme`,
+  /// but only triggers dependency-based rebuilds when the
+  /// [ThemeData.colorScheme] changes.
+  static ColorScheme of(BuildContext context) {
+    const ThemeSelector<ColorScheme> selector = ThemeSelector<ColorScheme>.from(_select);
+    return selector.resolve(context);
+  }
+  static ColorScheme _select(ThemeData theme) => theme.colorScheme;
 }

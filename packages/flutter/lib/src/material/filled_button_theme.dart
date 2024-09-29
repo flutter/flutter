@@ -114,8 +114,8 @@ class FilledButtonTheme extends InheritedTheme {
   /// FilledButtonThemeData theme = FilledButtonTheme.of(context);
   /// ```
   static FilledButtonThemeData of(BuildContext context) {
-    final FilledButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<FilledButtonTheme>();
-    return buttonTheme?.data ?? Theme.of(context).filledButtonTheme;
+    return context.dependOnInheritedWidgetOfExactType<FilledButtonTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.filledButtonTheme);
   }
 
   @override

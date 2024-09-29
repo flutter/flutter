@@ -261,8 +261,8 @@ class NavigationRailTheme extends InheritedTheme {
   /// NavigationRailThemeData theme = NavigationRailTheme.of(context);
   /// ```
   static NavigationRailThemeData of(BuildContext context) {
-    final NavigationRailTheme? navigationRailTheme = context.dependOnInheritedWidgetOfExactType<NavigationRailTheme>();
-    return navigationRailTheme?.data ?? Theme.of(context).navigationRailTheme;
+    return context.dependOnInheritedWidgetOfExactType<NavigationRailTheme>()?.data
+      ?? Theme.select(context, (ThemeData theme) => theme.navigationRailTheme);
   }
 
   @override
