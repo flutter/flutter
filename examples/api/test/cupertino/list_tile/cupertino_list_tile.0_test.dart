@@ -16,7 +16,7 @@ void main() {
 
     // Verify if the CupertinoListTile contains the expected widgets.
     expect(find.byType(FlutterLogo), findsNWidgets(4));
-    expect(find.text('One-line with leading widget'), findOne);
+    expect(find.text('One-line with leading widget'), findsOne);
     expect(find.text('One-line with trailing widget'), findsOne);
     expect(find.text('One-line CupertinoListTile'), findsOne);
     expect(find.text('One-line with both widgets'), findsOne);
@@ -27,6 +27,6 @@ void main() {
     expect(find.byIcon(Icons.info), findsOne);
 
     final Finder tileWithBackgroundFinder = find.byKey(const Key('CupertinoListTile with background color'));
-    expect((tester.firstWidget<CupertinoListTile>(cupertinoListTileFinder)).backgroundColor, Colors.lightBlue);
+    expect(tester.firstWidget<CupertinoListTile>(tileWithBackgroundFinder).backgroundColor, Colors.lightBlue);
   });
 }
