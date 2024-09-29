@@ -701,6 +701,10 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       .maxIntrinsicWidth;
   }
 
+  /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
+  /// This does not require the layout to be updated.
+  double get preferredLineHeight => _textPainter.preferredLineHeight;
+
   double _computeIntrinsicHeight(double width) {
     return (_textIntrinsics
       ..setPlaceholderDimensions(layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getDryBaseline))
@@ -903,8 +907,10 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     }
 
     if (_lastSelectableFragments != null) {
+      int count = 0;
       for (final _SelectableFragment fragment in _lastSelectableFragments!) {
-        fragment.paint(context, offset);
+        fragment.paint(context, offset, count == 0? Color.fromRGBO(255, 0, 0, 100) : Color.fromRGBO(0, 0, 255, 100));
+        count++;
       }
     }
 
@@ -3043,7 +3049,18 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return _rect.size;
   }
 
-  void paint(PaintingContext context, Offset offset) {
+  void paint(PaintingContext context, Offset offset, Color color) {
+    final Paint selectionPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..color = color
+      ..strokeWidth = 1.0;
+    for (final TextBox textBox in paragraph.getBoxesForSelection(TextSelection(baseOffset: range.start, extentOffset: range.end), boxHeightStyle: ui.BoxHeightStyle.max)) {
+      context.canvas.drawRect(
+          textBox.toRect().shift(offset), selectionPaint);
+    }
+    //Offset(219.6, 311.5)diff
+    //Offset(199.6, 310.0) original
+    context.canvas.drawCircle(Offset(199.6, 310.0), 2.0, Paint()..color = Color.fromRGBO(255, 0, 0, 100) ..style = PaintingStyle.fill);
     if (_textSelectionStart == null || _textSelectionEnd == null) {
       return;
     }

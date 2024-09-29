@@ -1302,7 +1302,8 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   /// [SelectWordSelectionEvent.globalPosition].
   @override
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
-    final SelectionResult result = super.handleSelectWord(event);
+    debugPrint('$selectables');
+    final SelectionResult result = _handleSelectBoundary(event);
     if (currentSelectionStartIndex != -1) {
       _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
     }
@@ -1311,6 +1312,61 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     }
     _updateLastEdgeEventsFromGeometries();
     return result;
+  }
+
+  SelectionResult _handleSelectBoundary(SelectionEvent event) {
+    assert(event is SelectWordSelectionEvent || event is SelectParagraphSelectionEvent, 'This method should only be given selection events that select text boundaries.');
+    late final Offset effectiveGlobalPosition;
+    if (event.type == SelectionEventType.selectWord) {
+      effectiveGlobalPosition = (event as SelectWordSelectionEvent).globalPosition;
+    } else if (event.type == SelectionEventType.selectParagraph) {
+      effectiveGlobalPosition = (event as SelectParagraphSelectionEvent).globalPosition;
+    }
+    SelectionResult? lastSelectionResult;
+    for (int index = 0; index < selectables.length; index += 1) {
+      debugPrint('at index $index');
+      bool globalRectsContainPosition = false;
+      if (selectables[index].boundingBoxes.isNotEmpty) {
+        for (final Rect rect in selectables[index].boundingBoxes) {
+          final Rect globalRect = MatrixUtils.transformRect(selectables[index].getTransformTo(null), rect);
+          debugPrint('rect being checked: $globalRect, position: $effectiveGlobalPosition');
+          if (globalRect.contains(effectiveGlobalPosition)) {
+            globalRectsContainPosition = true;
+            break;
+          }
+        }
+      }
+      if (globalRectsContainPosition) {
+        debugPrint('containsss $index ${selectables[index]}');
+        final SelectionGeometry existingGeometry = selectables[index].value;
+        lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
+        if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
+          return SelectionResult.next;
+        }
+        if (lastSelectionResult == SelectionResult.next) {
+          continue;
+        }
+        if (index == 0 && lastSelectionResult == SelectionResult.previous) {
+          return SelectionResult.previous;
+        }
+        if (selectables[index].value != existingGeometry) {
+          // Geometry has changed as a result of select word, need to clear the
+          // selection of other selectables to keep selection in sync.
+          selectables
+            .where((Selectable target) => target != selectables[index])
+            .forEach((Selectable target) => dispatchSelectionEventToChild(target, const ClearSelectionEvent()));
+          currentSelectionStartIndex = currentSelectionEndIndex = index;
+        }
+        return SelectionResult.end;
+      } else {
+        if (lastSelectionResult == SelectionResult.next) {
+          currentSelectionStartIndex = currentSelectionEndIndex = index - 1;
+          return SelectionResult.end;
+        }
+      }
+    }
+    assert(lastSelectionResult == null);
+    return SelectionResult.end;
   }
 
   @override
