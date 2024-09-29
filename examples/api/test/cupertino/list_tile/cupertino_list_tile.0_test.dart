@@ -11,25 +11,22 @@ void main() {
   testWidgets('Test CupertinoListTile respects properties', (WidgetTester tester) async {
     await tester.pumpWidget(const example.CupertinoListTileApp());
 
-    final Finder cupertinoListTileFinder = find.byKey(const Key('CupertinoListTile with background color'));
-
-    // Verify if the 'CupertinoListTile Sample' text is present.
-    expect(find.text('CupertinoListTile Sample'), findsOneWidget);
-
-    // Verify if the first CupertinoListTile with background color is present.
+    expect(find.text('CupertinoListTile Sample'), findsOne);
     expect(find.byType(CupertinoListTile), findsNWidgets(6));
 
     // Verify if the CupertinoListTile contains the expected widgets.
     expect(find.byType(FlutterLogo), findsNWidgets(4));
-    expect(find.text('One-line with leading widget'), findsOneWidget);
-    expect(find.text('One-line with trailing widget'), findsOneWidget);
-    expect(find.text('One-line CupertinoListTile'), findsOneWidget);
-    expect(find.text('One-line with both widgets'), findsOneWidget);
-    expect(find.text('Two-line CupertinoListTile'), findsOneWidget);
-    expect(find.text('Here is a subtitle'), findsOneWidget);
-    expect(find.text('CupertinoListTile with background color'), findsOneWidget);
+    expect(find.text('One-line with leading widget'), findOne);
+    expect(find.text('One-line with trailing widget'), findsOne);
+    expect(find.text('One-line CupertinoListTile'), findsOne);
+    expect(find.text('One-line with both widgets'), findsOne);
+    expect(find.text('Two-line CupertinoListTile'), findsOne);
+    expect(find.text('Here is a subtitle'), findsOne);
+    expect(find.text('CupertinoListTile with background color'), findsOne);
     expect(find.byIcon(Icons.more_vert), findsNWidgets(3));
-    expect(find.byIcon(Icons.info), findsOneWidget);
-    expect((tester.firstWidget(cupertinoListTileFinder) as CupertinoListTile).backgroundColor, Colors.lightBlue);
+    expect(find.byIcon(Icons.info), findsOne);
+
+    final Finder tileWithBackgroundFinder = find.byKey(const Key('CupertinoListTile with background color'));
+    expect((tester.firstWidget<CupertinoListTile>(cupertinoListTileFinder)).backgroundColor, Colors.lightBlue);
   });
 }
