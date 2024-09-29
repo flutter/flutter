@@ -701,6 +701,10 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       .maxIntrinsicWidth;
   }
 
+  /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
+  /// This does not require the layout to be updated.
+  double get preferredLineHeight => _textPainter.preferredLineHeight;
+
   double _computeIntrinsicHeight(double width) {
     return (_textIntrinsics
       ..setPlaceholderDimensions(layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getDryBaseline))
