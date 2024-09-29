@@ -19,6 +19,7 @@ import 'package:flutter/rendering.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
+import 'inherited_filter.dart';
 import 'inherited_model.dart';
 import 'notification_listener.dart';
 import 'widget_inspector.dart';
@@ -2660,6 +2661,10 @@ final class BuildScope {
       _dirtyElements.add(element);
       element._inDirtyList = true;
     }
+    if (element._usingFilter) {
+      InheritedFilterElement._clear(element);
+      element._usingFilter = false;
+    }
     if (!_buildScheduled && !_building) {
       _buildScheduled = true;
       scheduleRebuild?.call();
@@ -5151,6 +5156,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   // Whether we've already built or not. Set in [rebuild].
   bool _debugBuiltOnce = false;
 
+  /// Whether at least one of the [_dependencies] is an [InheritedFilterElement].
+  ///
+  /// Resets to false once [InheritedFilterElement._clear] is called.
+  bool _usingFilter = false;
+
   /// Marks the element as dirty and adds it to the global list of widgets to
   /// rebuild in the next frame.
   ///
@@ -6239,6 +6249,195 @@ class InheritedElement extends ProxyElement {
       assert(dependent._dependencies!.contains(this));
       notifyDependent(oldWidget, dependent);
     }
+  }
+}
+
+/// An [Element] that uses an [InheritedFilter] widget as its configuration.
+///
+/// {@macro flutter.widgets.InheritedFilter}
+///
+/// {@macro flutter.widgets.InheritedFilterElement.notifyDependent}
+class InheritedFilterElement<Selector> extends ProxyElement implements InheritedElement {
+  /// Creates an element that uses the given widget as its configuration.
+  InheritedFilterElement(InheritedFilter<Selector> super.widget);
+
+  static void _clear(Element dependent) {
+    final Set<InheritedElement>? dependencies = dependent._dependencies;
+    if (dependencies == null) {
+      return;
+    }
+    for (final InheritedElement inheritedElement in dependencies) {
+      if (inheritedElement is InheritedFilterElement) {
+        inheritedElement.clearSelectors(dependent);
+      }
+    }
+  }
+
+  @override
+  void _updateInheritance() {
+    assert(_lifecycleState == _ElementLifecycle.active);
+    const PersistentHashMap<Type, InheritedElement> emptyMap = PersistentHashMap<Type, InheritedElement>.empty();
+    _inheritedElements = (_parent?._inheritedElements ?? emptyMap).put(widget.runtimeType, this);
+  }
+
+  @override
+  void debugDeactivated() {
+    assert(_dependents.isEmpty);
+    super.debugDeactivated();
+  }
+
+  /// Tracks which selectors each dependent is using.
+  @override
+  final Map<Element, HashSet<Selector>> _dependents = <Element, HashSet<Selector>>{};
+
+  @override
+  Set<Selector> getDependencies([Element? dependent]) {
+    if (dependent == null) {
+      // Return a set containing all selectors in use.
+      return <Selector>{
+        for (final Set<Selector> selectors in _dependents.values) ...selectors,
+      };
+    }
+    return _dependents[dependent]!;
+  }
+
+  @override
+  void updateDependencies(Element dependent, Object? aspect) {
+    assert(() {
+      if (aspect is Selector) {
+        return true;
+      }
+
+      final String widgetType = widget.runtimeType.toString();
+      final String invalidType = aspect.runtimeType.toString();
+      String firstLetter = invalidType[0];
+      if (firstLetter == '_') {
+        firstLetter = invalidType[1];
+      }
+      final String an = switch (firstLetter.toLowerCase()) {
+        'a' || 'e' || 'i' || 'o' || 'u' => 'an',
+        _ => 'a',
+      };
+
+      throw FlutterError.fromParts(
+        <DiagnosticsNode>[
+          ErrorSummary('$widgetType was sent an invalid aspect.'),
+          ErrorDescription(
+            '$widgetType() is an instance of InheritedFilter<$Selector>(). '
+            'The aspect $aspect is not a valid selector for this widget.',
+          ),
+          ErrorHint(
+            'Instead of $an $invalidType, consider using an instance of $Selector.',
+          ),
+        ],
+      );
+    }());
+    setDependencies(dependent, aspect as Selector);
+    dependent._usingFilter = true;
+  }
+
+  @override
+  void setDependencies(Element dependent, covariant Selector value) {
+    (_dependents[dependent] ??= HashSet<Selector>()).add(value);
+  }
+
+  @override
+  void removeDependent(Element dependent) {
+    _dependents.remove(dependent);
+  }
+
+  /// Resets the dependent's aspect (to an empty set)
+  /// in preparation for another build.
+  void clearSelectors(Element dependent) {
+    final HashSet<Object?>? selectors = _dependents[dependent];
+    assert(selectors != null);
+    selectors!.clear();
+  }
+
+  /// {@macro flutter.widgets.InheritedFilter}
+  ///
+  /// {@macro flutter.widgets.InheritedFilterElement.notifyDependent}
+  @override
+  void notifyClients(InheritedFilter<Selector> oldWidget) {
+    final InheritedFilter<Selector> widget = this.widget as InheritedFilter<Selector>;
+
+    for (final Element dependent in _dependents.keys) {
+      final HashSet<Selector> selectors = _dependents[dependent]!;
+
+      for (final Selector selector in selectors) {
+        Equality<Object?>? equality;
+        if (selector is EqualityFilter) {
+          equality = selector.equality;
+        }
+        equality ??= widget.equality;
+
+        assert((Equality<Object?> equality) {
+          final Object? selectorResult = widget.select(selector);
+          if (equality.isValidKey(selectorResult)) {
+            return true;
+          }
+          final Equality<Object?>? selectorEquality = selector is EqualityFilter
+              ? selector.equality
+              : null;
+          throw FlutterError.fromParts(
+            <DiagnosticsNode>[
+              ErrorSummary(
+                'The return value of ${widget.runtimeType}.select() is not valid.',
+              ),
+              if (selectorEquality != null)
+                ErrorDescription(
+                  'The selector $selector is using "$selectorEquality" for equality. '
+                  'Its output, "$selectorResult", was determined to be an invalid key '
+                  'for the equality relationship. ',
+                )
+              else
+                ErrorDescription(
+                  '${widget.runtimeType} is an InheritedSelector<$Selector> instance '
+                  'and uses ',
+                ),
+            ],
+          );
+        }(equality));
+
+        if (equality.equals(widget.select(selector), oldWidget.select(selector))) {
+          continue;
+        }
+
+        assert(() {
+          // Check that it really is our descendant.
+          Element? ancestor = dependent._parent;
+          while (ancestor != this && ancestor != null) {
+            ancestor = ancestor._parent;
+          }
+          return ancestor == this;
+        }());
+        // Check that it really depends on us.
+        assert(dependent._dependencies!.contains(this));
+
+        notifyDependent(oldWidget, dependent);
+        break;
+      }
+    }
+  }
+
+  /// Clears the dependent's selectors and notifies it to rebuild.
+  ///
+  /// {@template flutter.widgets.InheritedFilterElement.notifyDependent}
+  /// A primary aim of [InheritedFilter] is to reduce the frequency of
+  /// [InheritedElement.notifyDependent] calls to the minimum amount necessary.
+  ///
+  /// For example, after [State.setState] is called, the [InheritedFilterElement]
+  /// will not evaulate any of that dependent's selectors, since the [State] is
+  /// about to rebuild anyway.
+  ///
+  /// When switching to an [InheritedFilter] paradigm, consider double-checking
+  /// any logic contained in [State.didChangeDependencies], since calls to that
+  /// method will be made less frequently.
+  /// {@endtemplate}
+  @override
+  void notifyDependent(InheritedFilter<Selector> oldWidget, Element dependent) {
+    clearSelectors(dependent);
+    dependent.didChangeDependencies();
   }
 }
 

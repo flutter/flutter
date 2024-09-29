@@ -69,6 +69,7 @@ export 'src/widgets/image.dart';
 export 'src/widgets/image_filter.dart';
 export 'src/widgets/image_icon.dart';
 export 'src/widgets/implicit_animations.dart';
+export 'src/widgets/inherited_filter.dart';
 export 'src/widgets/inherited_model.dart';
 export 'src/widgets/inherited_notifier.dart';
 export 'src/widgets/inherited_theme.dart';
