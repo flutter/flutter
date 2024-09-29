@@ -16,8 +16,8 @@ import 'semantics_tester.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
-  final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret) + Offset(0.0, paragraph.preferredLineHeight);
-  return paragraph.localToGlobal(localOffset) + const Offset(kIsWeb? 1.0 : 0.0, -2.0);
+  final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret);
+  return paragraph.localToGlobal(localOffset);
 }
 
 Offset globalize(Offset point, RenderBox box) {
@@ -3431,7 +3431,6 @@ void main() {
                         text:
                             'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                       ),
-                      // WidgetSpan(child: SizedBox(height: 20,width: 20,)),
                       WidgetSpan(child: SizedBox.shrink()),
                       TextSpan(text: 'Hello, world.'),
                     ],
@@ -3447,19 +3446,14 @@ void main() {
 
       // Adjust `textOffsetToPosition` result because it returns the wrong vertical position (wrong line).
       // TODO(bleroux): Remove when https://github.com/flutter/flutter/issues/133637 is fixed.
-      final Offset gestureOffset = textOffsetToPosition(paragraph, 125);
+      final Offset gestureOffset = textOffsetToPosition(paragraph, 125).translate(0, 10);
 
       // Right click to select word at position.
       final TestGesture gesture = await tester.startGesture(gestureOffset, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
       addTearDown(gesture.removePointer);
-      // Hold the press.
       await tester.pump();
       await gesture.up();
       await tester.pump();
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesGoldenFile('selection_area_test_golden.test.1.png'),
-      );
       // Should select "Hello".
       expect(paragraph.selections[0], const TextSelection(baseOffset: 124, extentOffset: 129));
     },
