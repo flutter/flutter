@@ -48,13 +48,10 @@ class _MyHomePageState extends State<MyHomePage> {
   // to a _LocalSpanRange, being the range the bullet covers relative to the SelectionListener
   // it is under.
   Map<_LocalSpanRange, TextSpan> bulletSourceMap = <_LocalSpanRange, TextSpan>{};
-  // The data of the emphasized text contained within a WidgetSpan.
-  Map<_LocalSpanRange, TextSpan> emphasizedTextMap = <_LocalSpanRange, TextSpan>{};
   Map<int, Map<_LocalSpanRange, TextSpan>> widgetSpanMaps = <int, Map<_LocalSpanRange, TextSpan>>{};
   // The origin data used to restore the demo to its initial state.
   late final Map<_LocalSpanRange, TextSpan> originSourceData;
   late final Map<_LocalSpanRange, TextSpan> originBulletSourceData;
-  late final Map<_LocalSpanRange, TextSpan> originEmphasizedSourceData;
 
   @override
   void initState() {
@@ -68,12 +65,9 @@ class _MyHomePageState extends State<MyHomePage> {
       for (int i = 1; i <= 7; i += 1)
         '• Bullet $i'
     ];
-    const String textAfterBulletList = '\nSome text after the bulleted list.';
-    const String emphasizedText = ' This text is emphasized.';
-    const String endOfBulletTree = ' This is the end of the text widget.';
 
     int currentOffset = 0;
-    dataSourceMap[(startOffset: 0, endOffset: bulletListTitle.length + bullets.join().length + textAfterBulletList.length + emphasizedText.length + endOfBulletTree.length)] = TextSpan(
+    dataSourceMap[(startOffset: 0, endOffset: bulletListTitle.length + bullets.join().length)] = TextSpan(
       text: bulletListTitle,
       children: <InlineSpan>[
         WidgetSpan(
@@ -87,18 +81,6 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         ),
-        const TextSpan(
-          text: textAfterBulletList,
-          children: <InlineSpan>[
-            WidgetSpan(
-              child: Text(
-                emphasizedText,
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            TextSpan(text: endOfBulletTree),
-          ],
-        ),
       ],
     );
     currentOffset += bulletListTitle.length;
@@ -107,12 +89,6 @@ class _MyHomePageState extends State<MyHomePage> {
       bulletSourceMap[(startOffset: currentOffset, endOffset: currentOffset + bullet.length)] = TextSpan(text: bullet);
       currentOffset += bullet.length;
     }
-
-    currentOffset += textAfterBulletList.length;
-    emphasizedTextMap[(startOffset: currentOffset, endOffset: currentOffset + emphasizedText.length)] = const TextSpan(text: emphasizedText, style: TextStyle(fontWeight: FontWeight.bold));
-    widgetSpanMaps[currentOffset] = emphasizedTextMap;
-    currentOffset += emphasizedText.length;
-    currentOffset += endOfBulletTree.length;
 
     const TextSpan secondTextParagraph = TextSpan(
       text: 'This is some text in a text widget.',
@@ -131,10 +107,6 @@ class _MyHomePageState extends State<MyHomePage> {
     originBulletSourceData = <_LocalSpanRange, TextSpan>{};
     for (final MapEntry<_LocalSpanRange, TextSpan> entry in bulletSourceMap.entries) {
       originBulletSourceData[entry.key] = entry.value;
-    }
-    originEmphasizedSourceData = <_LocalSpanRange, TextSpan>{};
-    for (final MapEntry<_LocalSpanRange, TextSpan> entry in emphasizedTextMap.entries) {
-      originEmphasizedSourceData[entry.key] = entry.value;
     }
   }
 
@@ -242,7 +214,7 @@ class _MyHomePageState extends State<MyHomePage> {
             coloringChildSpan: true,
           );
           // Re-create widgetspan.
-          if (count == 28) {
+          if (count == 28) { // The index where the bulleted list begins.
             insideSelection.add(
               WidgetSpan(
                 child: Column(
@@ -255,15 +227,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       )
                   ],
-                ),
-              ),
-            );
-          }
-          if (count == 133) {
-            insideSelection.add(
-              WidgetSpan(
-                child: Text.rich(
-                  widgetSpanSourceMap.entries.first.value,
                 ),
               ),
             );
@@ -364,9 +327,6 @@ class _MyHomePageState extends State<MyHomePage> {
             }
             for (final MapEntry<_LocalSpanRange, TextSpan> entry in originBulletSourceData.entries) {
               bulletSourceMap[entry.key] = entry.value;
-            }
-            for (final MapEntry<_LocalSpanRange, TextSpan> entry in originEmphasizedSourceData.entries) {
-              emphasizedTextMap[entry.key] = entry.value;
             }
           });
         },
