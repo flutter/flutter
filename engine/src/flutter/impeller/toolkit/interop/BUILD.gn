@@ -4,12 +4,6 @@
 
 import("//flutter/impeller/tools/impeller.gni")
 
-impeller_component("interop_public") {
-  public = [ "impeller.h" ]
-
-  sources = [ "impeller_c.c" ]
-}
-
 impeller_component("interop") {
   sources = [
     "color_filter.cc",
@@ -27,6 +21,8 @@ impeller_component("interop") {
     "image_filter.cc",
     "image_filter.h",
     "impeller.cc",
+    "impeller.h",
+    "impeller_c.c",
     "mask_filter.cc",
     "mask_filter.h",
     "object.cc",
@@ -43,8 +39,6 @@ impeller_component("interop") {
     "texture.h",
   ]
 
-  public_deps = [ ":interop_public" ]
-
   deps = [
     "../../base",
     "../../display_list",
@@ -53,6 +47,14 @@ impeller_component("interop") {
     "//flutter/display_list",
     "//flutter/fml",
   ]
+}
+
+impeller_component("library") {
+  target_type = "shared_library"
+
+  output_name = "impeller"
+
+  deps = [ ":interop" ]
 }
 
 impeller_component("example") {
