@@ -19,9 +19,17 @@
 #define IMPELLER_EXTERN_C_END
 #endif  // defined(__cplusplus)
 
-#ifndef IMPELLER_EXPORT
+#ifdef _WIN32
+#define IMPELLER_EXPORT_DECORATION __declspec(dllexport)
+#else
+#define IMPELLER_EXPORT_DECORATION __attribute__((visibility("default")))
+#endif
+
+#ifndef IMPELLER_NO_EXPORT
+#define IMPELLER_EXPORT IMPELLER_EXPORT_DECORATION
+#else  // IMPELLER_NO_EXPORT
 #define IMPELLER_EXPORT
-#endif  // IMPELLER_EXPORT
+#endif  // IMPELLER_NO_EXPORT
 
 #ifdef __clang__
 #define IMPELLER_NULLABLE _Nullable
