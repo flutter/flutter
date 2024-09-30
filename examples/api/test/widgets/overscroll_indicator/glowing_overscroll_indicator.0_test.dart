@@ -44,7 +44,7 @@ void main() {
       matching: find.byType(GlowingOverscrollIndicator),
     ), findsOne);
 
-    // Check if GlowingOverscrollIndicator overlays the SliverAppBar
+    // Check if GlowingOverscrollIndicator overlays the SliverAppBar.
     final RenderBox overscrollIndicator = tester.renderObject<RenderBox>(
       find.descendant(
         of: customScrollViewFinder,

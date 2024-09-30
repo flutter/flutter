@@ -43,7 +43,7 @@ void main() {
       matching: find.byType(GlowingOverscrollIndicator),
     ), findsOne);
 
-    // Check if GlowingOverscrollIndicator starts just after the SliverAppBar
+    // Check if GlowingOverscrollIndicator starts just after the SliverAppBar.
     final RenderBox overscrollIndicator = tester.renderObject<RenderBox>(
       find.descendant(
         of: customScrollViewFinder,
