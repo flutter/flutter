@@ -704,6 +704,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
   ///
   /// This does not require the layout to be updated.
+  @visibleForTesting
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _computeIntrinsicHeight(double width) {
