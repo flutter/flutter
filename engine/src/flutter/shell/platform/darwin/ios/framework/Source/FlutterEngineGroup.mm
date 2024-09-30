@@ -5,43 +5,28 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngineGroup.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 
+FLUTTER_ASSERT_ARC
+
 @implementation FlutterEngineGroupOptions
-
-- (void)dealloc {
-  [_entrypoint release];
-  [_libraryURI release];
-  [_initialRoute release];
-  [_entrypointArgs release];
-  [super dealloc];
-}
-
 @end
 
 @interface FlutterEngineGroup ()
 @property(nonatomic, copy) NSString* name;
-@property(nonatomic, retain) NSMutableArray<NSValue*>* engines;
-@property(nonatomic, retain) FlutterDartProject* project;
+@property(nonatomic, strong) NSMutableArray<NSValue*>* engines;
+@property(nonatomic, copy) FlutterDartProject* project;
+@property(nonatomic, assign) NSUInteger enginesCreatedCount;
 @end
 
-@implementation FlutterEngineGroup {
-  int _enginesCreatedCount;
-}
+@implementation FlutterEngineGroup
 
 - (instancetype)initWithName:(NSString*)name project:(nullable FlutterDartProject*)project {
   self = [super init];
   if (self) {
     _name = [name copy];
     _engines = [[NSMutableArray<NSValue*> alloc] init];
-    _project = [project retain];
+    _project = project;
   }
   return self;
-}
-
-- (void)dealloc {
-  [_name release];
-  [_engines release];
-  [_project release];
-  [super dealloc];
 }
 
 - (FlutterEngine*)makeEngineWithEntrypoint:(nullable NSString*)entrypoint
@@ -52,7 +37,7 @@
 - (FlutterEngine*)makeEngineWithEntrypoint:(nullable NSString*)entrypoint
                                 libraryURI:(nullable NSString*)libraryURI
                               initialRoute:(nullable NSString*)initialRoute {
-  FlutterEngineGroupOptions* options = [[[FlutterEngineGroupOptions alloc] init] autorelease];
+  FlutterEngineGroupOptions* options = [[FlutterEngineGroupOptions alloc] init];
   options.entrypoint = entrypoint;
   options.libraryURI = libraryURI;
   options.initialRoute = initialRoute;
@@ -79,7 +64,8 @@
                              initialRoute:initialRoute
                            entrypointArgs:entrypointArgs];
   }
-  [_engines addObject:[NSValue valueWithPointer:engine]];
+  // TODO(cbracken): https://github.com/flutter/flutter/issues/155943
+  [self.engines addObject:[NSValue valueWithPointer:(__bridge void*)engine]];
 
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
   [center addObserver:self
@@ -91,13 +77,14 @@
 }
 
 - (FlutterEngine*)makeEngine {
-  NSString* engineName = [NSString stringWithFormat:@"%@.%d", self.name, ++_enginesCreatedCount];
-  FlutterEngine* result = [[FlutterEngine alloc] initWithName:engineName project:self.project];
-  return [result autorelease];
+  NSString* engineName =
+      [NSString stringWithFormat:@"%@.%lu", self.name, ++self.enginesCreatedCount];
+  return [[FlutterEngine alloc] initWithName:engineName project:self.project];
 }
 
 - (void)onEngineWillBeDealloced:(NSNotification*)notification {
-  [_engines removeObject:[NSValue valueWithPointer:notification.object]];
+  // TODO(cbracken): https://github.com/flutter/flutter/issues/155943
+  [self.engines removeObject:[NSValue valueWithPointer:(__bridge void*)notification.object]];
 }
 
 @end
