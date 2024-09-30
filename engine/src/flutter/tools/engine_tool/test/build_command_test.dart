@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert' as convert;
 
 import 'package:engine_build_configs/engine_build_configs.dart';
@@ -449,65 +448,55 @@ void main() {
   });
 
   test('et help build line length is not too big', () async {
-    final prints = <String>[];
-    await runZoned(
-      () async {
-        final testEnv = TestEnvironment.withTestEngine(
-          cannedProcesses: cannedProcesses,
-          verbose: true,
-        );
-        addTearDown(testEnv.cleanup);
-
-        final runner = ToolCommandRunner(
-          environment: testEnv.environment,
-          configs: configs,
-          help: true,
-        );
-        final result = await runner.run([
-          'help',
-          'build',
-        ]);
-        expect(result, equals(0));
-      },
-      zoneSpecification: ZoneSpecification(
-        print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
-          prints.addAll(line.split('\n'));
-        },
-      ),
+    final testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+      verbose: true,
     );
-    for (final line in prints) {
-      expect(line.length, lessThanOrEqualTo(100));
-    }
+    addTearDown(testEnv.cleanup);
+
+    final runner = ToolCommandRunner(
+      environment: testEnv.environment,
+      configs: configs,
+      help: true,
+    );
+    final result = await runner.run([
+      'help',
+      'build',
+    ]);
+    expect(result, equals(0));
+
+    // Avoid a degenerate case where nothing is logged.
+    expect(testEnv.testLogs, isNotEmpty, reason: 'No logs were emitted');
+
+    expect(
+      testEnv.testLogs.map((LogRecord r) => r.message.split('\n')),
+      everyElement(hasLength(lessThanOrEqualTo(100))),
+    );
   });
 
   test('non-verbose "et help build" does not contain ci builds', () async {
-    final prints = <String>[];
-    await runZoned(
-      () async {
-        final testEnv = TestEnvironment.withTestEngine(
-          cannedProcesses: cannedProcesses,
-        );
-        addTearDown(testEnv.cleanup);
-
-        final runner = ToolCommandRunner(
-          environment: testEnv.environment,
-          configs: configs,
-          help: true,
-        );
-        final result = await runner.run([
-          'help',
-          'build',
-        ]);
-        expect(result, equals(0));
-      },
-      zoneSpecification: ZoneSpecification(
-        print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
-          prints.addAll(line.split('\n'));
-        },
-      ),
+    final testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
     );
-    for (final line in prints) {
-      expect(line.contains('[ci/'), isFalse);
-    }
+    addTearDown(testEnv.cleanup);
+
+    final runner = ToolCommandRunner(
+      environment: testEnv.environment,
+      configs: configs,
+      help: true,
+    );
+    final result = await runner.run([
+      'help',
+      'build',
+    ]);
+    expect(result, equals(0));
+
+    // Avoid a degenerate case where nothing is logged.
+    expect(testEnv.testLogs, isNotEmpty, reason: 'No logs were emitted');
+
+    expect(
+      testEnv.testLogs.map((LogRecord r) => r.message),
+      isNot(contains('[ci/')),
+    );
   });
 }

@@ -103,4 +103,9 @@ final class ToolCommandRunner extends CommandRunner<int> {
       return 1;
     }
   }
+
+  @override
+  void printUsage() {
+    environment.logger.status(usage);
+  }
 }

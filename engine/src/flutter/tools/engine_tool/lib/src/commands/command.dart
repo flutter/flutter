@@ -28,6 +28,11 @@ abstract base class CommandBase extends Command<int> {
 
   @override
   final ArgParser argParser;
+
+  @override
+  void printUsage() {
+    environment.logger.status(usage);
+  }
 }
 
 /// Adds the -c (--config) option to the parser.
