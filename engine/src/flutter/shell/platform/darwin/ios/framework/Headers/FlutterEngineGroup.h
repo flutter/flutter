@@ -38,7 +38,7 @@ FLUTTER_DARWIN_EXPORT
 /**
  * Arguments passed as a list of string to Dart's entrypoint function.
  */
-@property(nonatomic, retain, nullable) NSArray<NSString*>* entrypointArgs;
+@property(nonatomic, copy, nullable) NSArray<NSString*>* entrypointArgs;
 @end
 
 /**
