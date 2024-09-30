@@ -227,12 +227,12 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   };
 
   MaterialStateProperty<Color> get _thumbColor {
+    _colorScheme = ColorScheme.of(context);
     final Color onSurface = _colorScheme.onSurface;
-    final Brightness brightness = _colorScheme.brightness;
     late Color dragColor;
     late Color hoverColor;
     late Color idleColor;
-    switch (brightness) {
+    switch (_colorScheme.brightness) {
       case Brightness.light:
         dragColor = onSurface.withOpacity(0.6);
         hoverColor = onSurface.withOpacity(0.5);
