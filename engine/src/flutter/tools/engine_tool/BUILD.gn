@@ -1,0 +1,15 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/build/dart/internal/gen_dartcli_call.gni")
+
+# TODO(matanl): WIP in https://github.com/flutter/flutter/issues/155769.
+#
+# Example usage:
+#   ninja -C ../out/host_debug flutter/tools/engine_tool:tests
+#   ../out/host_debug/gen/flutter/tools/engine_tool/tests
+gen_dartcli_call("tests") {
+  args = [ "test" ]
+  cwd = "//flutter/tools/engine_tool"
+}
