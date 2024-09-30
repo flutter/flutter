@@ -350,7 +350,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
 
   /// The text to display.
-  InlineSpan get text => _textPainter.text!;
+  InlineSpan get text => _textPainter.text ?? const TextSpan();
   set text(InlineSpan value) {
     switch (_textPainter.text!.compareTo(value)) {
       case RenderComparison.identical:
