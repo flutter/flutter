@@ -9,22 +9,18 @@ import 'package:flutter/foundation.dart';
 import 'message_codec.dart';
 import 'system_channels.dart';
 
-/// An interface into system-level handwriting text input.
+/// An interface into Android stylus handwriting text input.
 ///
 /// This is typically used by implemeting the methods in [ScribeClient] in a
 /// class, usually a [State], and setting an instance of it to [client]. The
 /// relevant methods on [ScribeClient] will be called in response to method
 /// channel calls on [SystemChannels.scribe].
 ///
-/// Currently, handwriting input is supported in the iOS embedder with the Apple
-/// Pencil.
-///
-/// [EditableText] uses this class via [ScribeClient] to automatically support
-/// handwriting input when [EditableText.stylusHandwritingEnabled] is set to
-/// true.
-///
 /// See also:
 ///
+///  * [EditableText.stylusHandwritingEnabled], which controls whether Flutter's
+///    built-in text fields support handwriting input. On Android it uses this
+///    class via [ScribeClient].
 ///  * [SystemChannels.scribe], which is the [MethodChannel] used by this
 ///    class, and which has a list of the methods that this class handles.
 class Scribe {
