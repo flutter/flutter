@@ -29,8 +29,6 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
 
-import com.flutter.gradle.SayHello;
-
 /**
  * For apps only. Provides the flutter extension used in the app-level Gradle
  * build file (app/build.gradle or app/build.gradle.kts).
@@ -213,7 +211,6 @@ class FlutterPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        SayHello.a()
         this.project = project
 
         Project rootProject = project.rootProject
