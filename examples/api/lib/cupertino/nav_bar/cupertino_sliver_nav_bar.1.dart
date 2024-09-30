@@ -79,9 +79,9 @@ class SliverNavBarExample extends StatelessWidget {
 }
 
 class NextPage extends StatelessWidget {
-  final NavigationDrawerMode drawerMode;
-
   const NextPage({super.key, this.drawerMode = NavigationDrawerMode.automatic});
+
+  final NavigationDrawerMode drawerMode;
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +105,7 @@ class NextPage extends StatelessWidget {
               child: CupertinoSearchTextField(),
             ),
             drawerMode: drawerMode,
-            drawerHeight: 50.0,
+            drawerHeight: 51.0,
           ),
           const SliverFillRemaining(
             child: Column(
