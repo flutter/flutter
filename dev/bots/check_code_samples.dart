@@ -320,7 +320,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/platform_menu_bar/platform_menu_bar.0_test.dart',
   'examples/api/test/material/flexible_space_bar/flexible_space_bar.0_test.dart',
   'examples/api/test/material/navigation_rail/navigation_rail.extended_animation.0_test.dart',
-  'examples/api/test/painting/star_border/star_border.0_test.dart',
   'examples/api/test/widgets/navigator/navigator.restorable_push_and_remove_until.0_test.dart',
   'examples/api/test/widgets/navigator/navigator.restorable_push.0_test.dart',
   'examples/api/test/widgets/navigator/navigator_state.restorable_push_replacement.0_test.dart',
