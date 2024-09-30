@@ -3173,7 +3173,7 @@ void main() {
 
     final String cmakeListsContent = await cmakeLists.readAsString();
     const String expected16KbFlags = 'PRIVATE "-Wl,-z,max-page-size=16384")';
-    expect(cmakeListsContent.contains(expected16KbFlags), true);
+    expect(cmakeListsContent, contains(expected16KbFlags));
   });
 
   testUsingContext('Android Kotlin plugin contains namespace', () async {
