@@ -1,4 +1,4 @@
-package com.flutter.graadle
+package com.flutter.gradle
 
 public class SayHello {
     companion object {
