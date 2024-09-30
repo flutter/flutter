@@ -1,4 +1,4 @@
-Signature: 3dbacf0dd5c29d8af543a56e4ac0f50a
+Signature: 43c786d4831cb7c3ce34dc3b19d73901
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9540,6 +9540,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/BackendSemaphorePriv.
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/BackendTexturePriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/ComputePathAtlas.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/ComputePathAtlas.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/InternalDrawTypeFlags.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/RasterPathUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/RasterPathUtils.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/RenderPassDesc.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9656,6 +9657,7 @@ FILE: ../../../flutter/third_party/skia/src/gpu/graphite/BackendSemaphorePriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/BackendTexturePriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/ComputePathAtlas.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/ComputePathAtlas.h
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/InternalDrawTypeFlags.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/RasterPathUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/RasterPathUtils.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/RenderPassDesc.cpp
