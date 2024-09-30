@@ -129,8 +129,11 @@ group("flutter") {
 
   if (build_engine_artifacts) {
     public_deps += [
+      "//flutter/build/dart/test:gen_dartcli_call",
+      "//flutter/build/dart/test:gen_executable_call",
       "//flutter/shell/testing",
       "//flutter/tools/const_finder",
+      "//flutter/tools/engine_tool:tests",
       "//flutter/tools/font_subset",
     ]
   }
