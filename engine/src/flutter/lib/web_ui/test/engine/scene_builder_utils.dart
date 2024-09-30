@@ -36,8 +36,12 @@ class StubPicture implements ScenePicture {
 class StubCompositePicture extends StubPicture {
   StubCompositePicture(this.children) : super(
     children.fold(null, (ui.Rect? previousValue, StubPicture child) {
+      final ui.Rect childRect = child.cullRect;
+      if (childRect.isEmpty) {
+        return previousValue;
+      }
       return previousValue?.expandToInclude(child.cullRect) ?? child.cullRect;
-    })!
+    }) ?? ui.Rect.zero
   );
 
   final List<StubPicture> children;
