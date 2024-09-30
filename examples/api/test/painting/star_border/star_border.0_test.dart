@@ -86,6 +86,30 @@ void main() {
     expect(exampleBorder.border.squash, isNot(equals(0.0)));
     expect(exampleBorder.border.rotation, isNot(equals(0.0)));
 
+    expect(find.descendant(
+      of: find.byType(ListView),
+      matching: find.byWidgetPredicate((Widget pre)=>
+        pre is SelectableText &&
+        pre.data!.startsWith('Container(') &&
+        pre.data!.contains('points: ${exampleBorder.border.points}') &&
+        pre.data!.contains('rotation: ${exampleBorder.border.rotation}') &&
+        pre.data!.contains('innerRadiusRatio: ${exampleBorder.border.innerRadiusRatio}') &&
+        pre.data!.contains('pointRounding: ${exampleBorder.border.pointRounding}') &&
+        pre.data!.contains('valleyRounding: ${exampleBorder.border.valleyRounding}') &&
+        pre.data!.contains('squash: ${exampleBorder.border.squash}'))
+    ), findsOne);
+
+    expect(find.descendant(
+      of: find.byType(ListView),
+      matching: find.byWidgetPredicate((Widget pre)=>
+        pre is SelectableText &&
+        pre.data!.startsWith('Container(') &&
+        pre.data!.contains('sides: ${exampleBorder.border.points}') &&
+        pre.data!.contains('rotation: ${exampleBorder.border.rotation}') &&
+        pre.data!.contains('cornerRounding: ${exampleBorder.border.pointRounding}') &&
+        pre.data!.contains('squash: ${exampleBorder.border.squash}'))
+    ), findsOne);
+
     expect(exampleBorder.border.points, isNot(exampleBorder.border.points.roundToDouble()));
     final Finder nearestFinder = find.widgetWithText(OutlinedButton, 'Nearest');
     expect(nearestFinder, findsOne);
