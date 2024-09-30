@@ -79,8 +79,9 @@ class Scribe {
 
   static void registerScribeClient(ScribeClient scribeClient) {
     _instance._scribeClients.add(scribeClient);
-    // TODO(justinmc): Idea for cursor: One frame after this happens, make a
-    // call that sends a Rect for each ScribeClient on screen to the engine.
+    // TODO(justinmc): Support Scribe hover icon by sending the Rect of each
+    // ScribeClient currently on screen to the engine.
+    // https://github.com/flutter/flutter/issues/155948
   }
 
   static void unregisterScribeClient(ScribeClient scribeClient) {
