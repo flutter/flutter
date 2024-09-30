@@ -96,13 +96,12 @@ abstract class CreateBase extends FlutterCommand {
           'The project name for this new Flutter project. This must be a valid dart package name.',
     );
     argParser.addOption(
-      hide: true,
       'ios-language',
       abbr: 'i',
       defaultsTo: 'swift',
       allowed: <String>['objc', 'swift'],
-      help: 'This option is deprecated and will be removed in a future Flutter release.\n'
-          'The language to use for iOS-specific code, either Objective-C (legacy) or Swift (recommended).'
+      help: '(deprecated) The language to use for iOS-specific code, either Objective-C (legacy) or Swift (recommended).',
+      hide: !verboseHelp,
     );
     argParser.addOption(
       'android-language',
