@@ -81,7 +81,7 @@ responsibility of the embedder to create and manage threads (and their message
 loops) for the Flutter engine. The embedder gives the Flutter engine task
 runners for the threads it manages. In addition to the threads managed by the
 embedder for the engine, the Dart VM also has its own thread pool. Neither the
-Flutter engine or the embedder have any access to the threads in this pool.
+Flutter engine nor the embedder have any access to the threads in this pool.
 
 ### Task Runner Configuration
 
@@ -122,7 +122,7 @@ Interacting with the Flutter engine in any way must happen on the platform
 thread. Interacting with the engine on any other thread will trip assertions in
 unoptimized builds and is not thread safe in release builds. There are numerous
 components in the Flutter engine that are not thread safe. Once the Flutter
-engine is setup and running, the embedder does not have to post tasks to any of
+engine is set up and running, the embedder does not have to post tasks to any of
 the task runners used to configure the engine as long as all accesses to the
 embedder API are made on the platform thread.
 

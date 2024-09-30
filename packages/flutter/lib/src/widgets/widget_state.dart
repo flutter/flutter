@@ -6,6 +6,7 @@
 /// @docImport 'package:flutter/scheduler.dart';
 library;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -45,14 +46,77 @@ abstract interface class WidgetStatesConstraint {
   bool isSatisfiedBy(Set<WidgetState> states);
 }
 
-// A private class, used in [WidgetStateOperators].
-class _WidgetStateOperation implements WidgetStatesConstraint {
-  const _WidgetStateOperation(this._isSatisfiedBy);
+@immutable
+sealed class _WidgetStateCombo implements WidgetStatesConstraint {
+  const _WidgetStateCombo(this.first, this.second);
 
-  final bool Function(Set<WidgetState> states) _isSatisfiedBy;
+  final WidgetStatesConstraint first;
+  final WidgetStatesConstraint second;
 
   @override
-  bool isSatisfiedBy(Set<WidgetState> states) => _isSatisfiedBy(states);
+  // ignore: hash_and_equals, since == is defined in subclasses
+  int get hashCode => Object.hash(first, second);
+}
+
+class _WidgetStateAnd extends _WidgetStateCombo {
+  const _WidgetStateAnd(super.first, super.second);
+
+  @override
+  bool isSatisfiedBy(Set<WidgetState> states) {
+    return first.isSatisfiedBy(states) && second.isSatisfiedBy(states);
+  }
+
+  @override
+  // ignore: hash_and_equals, hashCode is defined in the sealed super-class
+  bool operator ==(Object other) {
+    return other is _WidgetStateAnd
+        && other.first == first
+        && other.second == second;
+  }
+
+  @override
+  String toString() => '($first & $second)';
+}
+
+class _WidgetStateOr extends _WidgetStateCombo {
+  const _WidgetStateOr(super.first, super.second);
+
+  @override
+  bool isSatisfiedBy(Set<WidgetState> states) {
+    return first.isSatisfiedBy(states) || second.isSatisfiedBy(states);
+  }
+
+  @override
+  // ignore: hash_and_equals, hashCode is defined in the sealed super-class
+  bool operator ==(Object other) {
+    return other is _WidgetStateOr
+        && other.first == first
+        && other.second == second;
+  }
+
+  @override
+  String toString() => '($first | $second)';
+}
+
+@immutable
+class _WidgetStateNot implements WidgetStatesConstraint {
+  const _WidgetStateNot(this.value);
+
+  final WidgetStatesConstraint value;
+
+  @override
+  bool isSatisfiedBy(Set<WidgetState> states) => !value.isSatisfiedBy(states);
+
+  @override
+  bool operator ==(Object other) {
+    return other is _WidgetStateNot && other.value == value;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  String toString() => '~$value';
 }
 
 /// These operators can be used inside a [WidgetStateMap] to combine states
@@ -67,33 +131,24 @@ class _WidgetStateOperation implements WidgetStatesConstraint {
 /// the operators can be used without being directly inherited.
 extension WidgetStateOperators on WidgetStatesConstraint {
   /// Combines two [WidgetStatesConstraint] values using logical "and".
-  WidgetStatesConstraint operator &(WidgetStatesConstraint other) {
-    return _WidgetStateOperation(
-      (Set<WidgetState> states) => isSatisfiedBy(states) && other.isSatisfiedBy(states),
-    );
-  }
+  WidgetStatesConstraint operator &(WidgetStatesConstraint other) => _WidgetStateAnd(this, other);
 
   /// Combines two [WidgetStatesConstraint] values using logical "or".
-  WidgetStatesConstraint operator |(WidgetStatesConstraint other) {
-    return _WidgetStateOperation(
-      (Set<WidgetState> states) => isSatisfiedBy(states) || other.isSatisfiedBy(states),
-    );
-  }
+  WidgetStatesConstraint operator |(WidgetStatesConstraint other) => _WidgetStateOr(this, other);
 
   /// Takes a [WidgetStatesConstraint] and applies the logical "not".
-  WidgetStatesConstraint operator ~() {
-    return _WidgetStateOperation(
-      (Set<WidgetState> states) => !isSatisfiedBy(states),
-    );
-  }
+  WidgetStatesConstraint operator ~() => _WidgetStateNot(this);
 }
 
 // A private class, used to create [WidgetState.any].
-class _AlwaysMatch implements WidgetStatesConstraint {
-  const _AlwaysMatch();
+class _AnyWidgetStates implements WidgetStatesConstraint {
+  const _AnyWidgetStates();
 
   @override
   bool isSatisfiedBy(Set<WidgetState> states) => true;
+
+  @override
+  String toString() => 'WidgetState.any';
 }
 
 /// Interactive states that some of the widgets can take on when receiving input
@@ -183,7 +238,7 @@ enum WidgetState implements WidgetStatesConstraint {
   /// isn't satisfied by the given set of states, consier adding
   /// [WidgetState.any] as the final [WidgetStateMap] key.
   /// {@endtemplate}
-  static const WidgetStatesConstraint any = _AlwaysMatch();
+  static const WidgetStatesConstraint any = _AnyWidgetStates();
 
   @override
   bool isSatisfiedBy(Set<WidgetState> states) => states.contains(this);
@@ -268,7 +323,7 @@ abstract class WidgetStateColor extends Color implements WidgetStateProperty<Col
   /// [Set] of [WidgetState]s will be selected.
   ///
   /// {@macro flutter.widgets.WidgetState.any}
-  factory WidgetStateColor.fromMap(WidgetStateMap<Color> map) = _WidgetStateColorMapper;
+  const factory WidgetStateColor.fromMap(WidgetStateMap<Color> map) = _WidgetStateColorMapper;
 
   /// Returns a [Color] that's to be used when a component is in the specified
   /// state.
@@ -290,23 +345,31 @@ class _WidgetStateColor extends WidgetStateColor {
   Color resolve(Set<WidgetState> states) => _resolve(states);
 }
 
-class _WidgetStateColorMapper extends WidgetStateColor {
-  _WidgetStateColorMapper(this.map)
-      : super(_WidgetStateMapper<Color>(map).resolve(_defaultStates).value);
-
-  final WidgetStateMap<Color> map;
-
-  static const Set<WidgetState> _defaultStates = <WidgetState>{};
-
-  @override
-  Color resolve(Set<WidgetState> states) => _WidgetStateMapper<Color>(map).resolve(states);
-}
-
 class _WidgetStateColorTransparent extends WidgetStateColor {
   const _WidgetStateColorTransparent() : super(0x00000000);
 
   @override
   Color resolve(Set<WidgetState> states) => const Color(0x00000000);
+}
+
+@immutable
+class _WidgetStateColorMapper extends _WidgetStateColorTransparent {
+  const _WidgetStateColorMapper(this.map);
+
+  final WidgetStateMap<Color> map;
+
+  _WidgetStateMapper<Color> get _mapper => _WidgetStateMapper<Color>(map);
+
+  @override
+  Color resolve(Set<WidgetState> states) => _mapper.resolve(states);
+
+  @override
+  bool operator ==(Object other) {
+    return other is _WidgetStateColorMapper && other.map == map;
+  }
+
+  @override
+  int get hashCode => map.hashCode;
 }
 
 /// Defines a [MouseCursor] whose value depends on a set of [WidgetState]s which
@@ -416,6 +479,13 @@ class _EnabledAndDisabledMouseCursor extends WidgetStateMouseCursor {
 /// properties to be extended to also effectively support `WidgetStateProperty<BorderSide>`
 /// property values. [WidgetStateBorderSide] should only be used with widgets that document
 /// their support, like [ActionChip.side].
+///
+/// {@tool dartpad}
+/// This example defines a [WidgetStateBorderSide] which resolves to different
+/// border colors depending on how the user interacts with it.
+///
+/// ** See code in examples/api/lib/widgets/widget_state/widget_state_border_side.0.dart **
+/// {@end-tool}
 ///
 /// This class should only be used for parameters which are documented to take
 /// [WidgetStateBorderSide], otherwise only the default state will be used.
@@ -548,8 +618,18 @@ class _WidgetBorderSideMapper extends WidgetStateBorderSide {
 
   final WidgetStateMap<BorderSide?> map;
 
+  _WidgetStateMapper<BorderSide?> get _mapper => _WidgetStateMapper<BorderSide?>(map);
+
   @override
-  BorderSide? resolve(Set<WidgetState> states) => _WidgetStateMapper<BorderSide?>(map).resolve(states);
+  BorderSide? resolve(Set<WidgetState> states) => _mapper.resolve(states);
+
+  @override
+  bool operator ==(Object other) {
+    return other is _WidgetBorderSideMapper && other.map == map;
+  }
+
+  @override
+  int get hashCode => map.hashCode;
 }
 
 /// Defines an [OutlinedBorder] whose value depends on a set of [WidgetState]s
@@ -660,8 +740,18 @@ class _WidgetTextStyleMapper extends WidgetStateTextStyle {
 
   final WidgetStateMap<TextStyle> map;
 
+  _WidgetStateMapper<TextStyle> get _mapper => _WidgetStateMapper<TextStyle>(map);
+
   @override
-  TextStyle resolve(Set<WidgetState> states) => _WidgetStateMapper<TextStyle>(map).resolve(states);
+  TextStyle resolve(Set<WidgetState> states) => _mapper.resolve(states);
+
+  @override
+  bool operator ==(Object other) {
+    return other is _WidgetTextStyleMapper && other.map == map;
+  }
+
+  @override
+  int get hashCode => map.hashCode;
 }
 
 /// Interface for classes that [resolve] to a value of type `T` based
@@ -681,6 +771,16 @@ class _WidgetTextStyleMapper extends WidgetStateTextStyle {
 /// has many material state properties. The button widgets keep track
 /// of their current material state and [resolve] the button style's
 /// material state properties when their value is needed.
+///
+/// {@tool dartpad}
+/// This example shows how the default text and icon color
+/// (the "foreground color") of a [TextButton] can be overridden with a
+/// [WidgetStateProperty]. In this example, the button's text color will be
+/// `Colors.blue` when the button is being pressed, hovered, or focused.
+/// Otherwise, the text color will be `Colors.red`.
+///
+/// ** See code in examples/api/lib/widgets/widget_state/widget_state_property.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -847,6 +947,7 @@ class _WidgetStatePropertyWith<T> implements WidgetStateProperty<T> {
 typedef WidgetStateMap<T> = Map<WidgetStatesConstraint, T>;
 
 // A private class, used to create the [WidgetStateProperty.fromMap] constructor.
+@immutable
 class _WidgetStateMapper<T> implements WidgetStateProperty<T> {
   const _WidgetStateMapper(this.map);
 
@@ -872,6 +973,17 @@ class _WidgetStateMapper<T> implements WidgetStateProperty<T> {
       );
     }
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is _WidgetStateMapper && mapEquals(map, other.map);
+  }
+
+  @override
+  int get hashCode => MapEquality<WidgetStatesConstraint, T>().hash(map);
+
+  @override
+  String toString() => '$map';
 }
 
 /// Convenience class for creating a [WidgetStateProperty] that
@@ -881,6 +993,7 @@ class _WidgetStateMapper<T> implements WidgetStateProperty<T> {
 ///
 ///  * [MaterialStatePropertyAll], the Material specific version of
 ///    `WidgetStatePropertyAll`.
+@immutable
 class WidgetStatePropertyAll<T> implements WidgetStateProperty<T> {
 
   /// Constructs a [WidgetStateProperty] that always resolves to the given
@@ -901,6 +1014,16 @@ class WidgetStatePropertyAll<T> implements WidgetStateProperty<T> {
       return 'WidgetStatePropertyAll($value)';
     }
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WidgetStatePropertyAll<T>
+        && other.runtimeType == runtimeType
+        && other.value == value;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
 }
 
 /// Manages a set of [WidgetState]s and notifies listeners of changes.
