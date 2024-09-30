@@ -6,7 +6,6 @@ import org.gradle.api.Project
 class BaseApplicationNameHandler {
     companion object {
         @JvmStatic fun setBaseName(project: Project) {
-            println("HI GRAY, in base application name handler")
             val androidComponentsExtension: ApplicationExtension = project.extensions.getByType(ApplicationExtension::class.java)
             androidComponentsExtension.defaultConfig.applicationId
 
