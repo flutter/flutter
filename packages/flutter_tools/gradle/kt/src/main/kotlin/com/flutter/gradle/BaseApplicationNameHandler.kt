@@ -3,6 +3,7 @@ package com.flutter.gradle
 import com.android.build.api.dsl.ApplicationExtension
 import org.gradle.api.Project
 
+// TODO(gmackall): maybe migrate this to a package-level function when FGP conversion is done.
 class BaseApplicationNameHandler {
     companion object {
         @JvmStatic fun setBaseName(project: Project) {
