@@ -1429,6 +1429,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// topmost route will look for this transition, and if available, it will use
   /// the `delegatedTransition` from the incoming transition to animate off the
   /// screen.
+  ///
+  /// If the return of the [DelegatedTransitionBuilder] is null, then by default
+  /// the original transition of the routes will be used. This is useful if a
+  /// route can conditionally provide a transition based on the [BuildContext].
   /// {@endtemplate}
   ///
   /// The [ModalRoute] receiving this transition will set it to their
@@ -1486,7 +1490,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// {@end-tool}
   ///
   /// Override this method if more granular control of how the [receivedTransition]
-  /// is used for the transitions of a route.
+  /// is used for the transitions of a route is needed.
   Widget buildFlexibleTransitions(
     BuildContext context,
     Animation<double> animation,
@@ -1502,8 +1506,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
     final Widget proxiedOriginalTransitions = buildTransitions(context, animation, proxyAnimation, child);
 
+    // If recievedTransitions return null, then we want to return the original transitions,
+    // but with the secondary animation still proxied. This keeps a desynched
+    // animation from playing.
     return receivedTransition!(context, animation, secondaryAnimation, allowSnapshotting, proxiedOriginalTransitions) ??
-      buildTransitions(context, animation, secondaryAnimation, child);
+      proxiedOriginalTransitions;
   }
 
   @override

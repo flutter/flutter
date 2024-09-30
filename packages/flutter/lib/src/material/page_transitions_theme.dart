@@ -559,8 +559,6 @@ abstract class PageTransitionsBuilder {
   /// Provideds a secondary transition to the previous route.
   ///
   /// {@macro flutter.widgets.delegatedTransition}
-  ///
-  /// If left as null, the previous page will not animate.
   DelegatedTransitionBuilder? get delegatedTransition => null;
 
   /// Wraps the child with one or more transition widgets which define how [route]

@@ -24,10 +24,13 @@ class FlexibleRouteTransitionsApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         pageTransitionsTheme: const PageTransitionsTheme(
           builders: <TargetPlatform, PageTransitionsBuilder>{
+            // By default the zoom builder is used on all platforms but iOS. Normally
+            // on iOS the default is the Cupertino sliding transition. Setting
+            // it to use zoom on all platforms allows the example to show multiple
+            // transitions in one app for all platforms.
             TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
           },
         ),
-        useMaterial3: true,
       ),
       home: const _MyHomePage(title: 'Zoom Page'),
     );
@@ -55,7 +58,7 @@ class _MyHomePage extends StatelessWidget {
                 Navigator.of(context).push(
                   _VerticalTransitionPageRoute<void>(
                     builder: (BuildContext context) {
-                      return  const _MyHomePage(title: 'Crazy Vertical Page');
+                      return const _MyHomePage(title: 'Crazy Vertical Page');
                     },
                   ),
                 );
@@ -67,7 +70,7 @@ class _MyHomePage extends StatelessWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (BuildContext context) {
-                      return  const _MyHomePage(title: 'Zoom Page');
+                      return const _MyHomePage(title: 'Zoom Page');
                     },
                   ),
                 );
@@ -78,7 +81,7 @@ class _MyHomePage extends StatelessWidget {
               onPressed: () {
                 final CupertinoPageRoute<void> route = CupertinoPageRoute<void>(
                   builder: (BuildContext context) {
-                    return  const _MyHomePage(title: 'Cupertino Page');
+                    return const _MyHomePage(title: 'Cupertino Page');
                   }
                 );
                 Navigator.of(context).push(route);
@@ -127,23 +130,13 @@ class _VerticalTransitionPageRoute<T> extends PageRoute<T> {
     return builder(context);
   }
 
-  static Widget buildPageTransitions<T>(
-    ModalRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     return _VerticalPageTransition(
       primaryRouteAnimation: animation,
       secondaryRouteAnimation: secondaryAnimation,
       child: child,
     );
-  }
-
-  @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 }
 
@@ -157,14 +150,14 @@ class _VerticalPageTransition extends StatelessWidget {
   }) : _primaryPositionAnimation =
            CurvedAnimation(
                  parent: primaryRouteAnimation,
-                 curve: curve,
-                 reverseCurve: curve,
+                 curve: _curve,
+                 reverseCurve: _curve,
                ).drive(_kBottomUpTween),
       _secondaryPositionAnimation =
            CurvedAnimation(
                  parent: secondaryRouteAnimation,
-                 curve: curve,
-                 reverseCurve: curve,
+                 curve: _curve,
+                 reverseCurve: _curve,
                )
            .drive(_kTopDownTween);
 
@@ -176,7 +169,7 @@ class _VerticalPageTransition extends StatelessWidget {
 
   final Widget child;
 
-  static const Curve curve = Curves.decelerate;
+  static const Curve _curve = Curves.decelerate;
 
   static final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
     begin: const Offset(0.0, 1.0),
@@ -201,7 +194,7 @@ class _VerticalPageTransition extends StatelessWidget {
     final Animatable<Offset> tween = Tween<Offset>(
       begin: Offset.zero,
       end: const Offset(0.0, -1.0),
-    ).chain(CurveTween(curve: curve));
+    ).chain(CurveTween(curve: _curve));
 
     return SlideTransition(
       position: secondaryAnimation.drive(tween),
