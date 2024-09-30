@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_api_samples/painting/star_border/star_border.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
@@ -49,27 +53,27 @@ void main() {
 
     const Offset offset = Offset(10, 0);
     await tester.drag(find.descendant(
-      of: find.byWidgetPredicate((w)=> w is example.ControlSlider && w.label=='Points'),
+      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label=='Points'),
       matching: find.byType(Slider),
     ), offset);
     await tester.drag(find.descendant(
-      of: find.byWidgetPredicate((w)=> w is example.ControlSlider && w.label=='Inner Radius'),
+      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label=='Inner Radius'),
       matching: find.byType(Slider),
     ), offset);
     await tester.drag(find.descendant(
-      of: find.byWidgetPredicate((w)=> w is example.ControlSlider && w.label=='Point Rounding'),
+      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label=='Point Rounding'),
       matching: find.byType(Slider)
     ), offset);
     await tester.drag(find.descendant(
-      of: find.byWidgetPredicate((w)=> w is example.ControlSlider && w.label=='Valley Rounding'),
+      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label=='Valley Rounding'),
       matching: find.byType(Slider)
     ), offset);
     await tester.drag(find.descendant(
-      of: find.byWidgetPredicate((w)=> w is example.ControlSlider && w.label=='Squash'),
+      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label=='Squash'),
       matching: find.byType(Slider)
     ), offset);
     await tester.drag(find.descendant(
-      of: find.byWidgetPredicate((w)=> w is example.ControlSlider && w.label=='Rotation'),
+      of: find.byWidgetPredicate((Widget w)=> w is example.ControlSlider && w.label=='Rotation'),
       matching: find.byType(Slider)
     ), offset);
     await tester.pump();
