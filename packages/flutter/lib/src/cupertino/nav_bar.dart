@@ -272,6 +272,8 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.padding,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
+    this.drawer,
+    this.drawerHeight = 0.0,
   }) : assert(
          !transitionBetweenRoutes || identical(heroTag, _defaultHeroTag),
          'Cannot specify a heroTag override if this navigation bar does not '
@@ -448,6 +450,12 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Object heroTag;
 
+  ///
+  final Widget? drawer;
+
+  ///
+  final double drawerHeight;
+
   /// True if the navigation bar's background color has no transparency.
   @override
   bool shouldFullyObstruct(BuildContext context) {
@@ -458,7 +466,8 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
 
   @override
   Size get preferredSize {
-    return const Size.fromHeight(_kNavBarPersistentHeight);
+    final double heightForDrawer = drawer != null ? drawerHeight : 0.0;
+    return Size.fromHeight(_kNavBarPersistentHeight + heightForDrawer);
   }
 
   @override
@@ -569,9 +578,14 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
-        child: _PersistentNavigationBar(
-          components: components,
-          padding: widget.padding,
+        child: Column(
+          children: <Widget>[
+            _PersistentNavigationBar(
+              components: components,
+              padding: widget.padding,
+            ),
+            if (widget.drawer != null) widget.drawer!,
+          ],
         ),
       ),
     );
