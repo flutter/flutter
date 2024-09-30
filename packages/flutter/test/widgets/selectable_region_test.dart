@@ -1316,6 +1316,68 @@ void main() {
        skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
     );
 
+    testWidgets('RenderParagraph should invalidate cached bounding boxes', (WidgetTester tester) async {
+      final UniqueKey outerText = UniqueKey();
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: Scaffold(
+              body: Center(
+                child: Text(
+                  'How are you doing today? Good, and you?',
+                  key: outerText,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
+      final SelectableRegionState state =
+          tester.state<SelectableRegionState>(find.byType(SelectableRegion));
+
+      // Double click to select word at position.
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 27), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      await gesture.down(textOffsetToPosition(paragraph, 27));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Should select "Good".
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 25, extentOffset: 29));
+
+      // Change the size of the window.
+      tester.view.physicalSize = const Size(800.0, 400.0);
+      await tester.pumpAndSettle();
+      state.clearSelection();
+      await tester.pumpAndSettle(kDoubleTapTimeout);
+      expect(paragraph.selections.isEmpty, isTrue);
+
+      // Double click at the same position.
+      await gesture.down(textOffsetToPosition(paragraph, 27));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      await gesture.down(textOffsetToPosition(paragraph, 27));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Should select "Good" again.
+      expect(paragraph.selections.isEmpty, isFalse);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 25, extentOffset: 29));
+    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+
     testWidgets('mouse can select single text on desktop platforms', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
