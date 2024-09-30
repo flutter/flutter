@@ -27,6 +27,8 @@ class GlowingOverscrollIndicatorExampleApp extends StatelessWidget {
 
 const Set<PointerDeviceKind> allPointers = <PointerDeviceKind>{...PointerDeviceKind.values};
 
+/// Passing this class into [MaterialApp.scrollBehavior] ensures that a
+/// [GlowingOverscrollIndicator] is created, regardless of the target platform.
 class AlwaysGlow extends MaterialScrollBehavior {
   const AlwaysGlow();
 
