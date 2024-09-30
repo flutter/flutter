@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/cupertino/list_tile/cupertino_list_tile.0.da
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Test CupertinoListTile respects properties', (WidgetTester tester) async {
+  testWidgets('CupertinoListTile respects properties', (WidgetTester tester) async {
     await tester.pumpWidget(const example.CupertinoListTileApp());
 
     expect(find.text('CupertinoListTile Sample'), findsOne);

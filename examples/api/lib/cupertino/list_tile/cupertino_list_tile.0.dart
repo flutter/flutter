@@ -5,7 +5,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [ListTile].
+/// Flutter code sample for [CupertinoListTile].
 
 void main() => runApp(const CupertinoListTileApp());
 
