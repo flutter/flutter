@@ -145,6 +145,12 @@
           "prependTestRunningArgs": [
             "--enable_playground"
           ]
+        },
+        "env": {
+          "MTL_DEBUG_LAYER": "1",
+          "MTL_DEBUG_LAYER_ERROR_MODE": "assert",
+          "MTL_DEBUG_LAYER_WARNING_MODE": "nslog",
+          "MTL_SHADER_VALIDATION": "1"
         }
       },
       {
