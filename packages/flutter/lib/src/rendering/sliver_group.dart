@@ -230,14 +230,7 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
         double childScrollOffset = 0.0;
         RenderSliver? current = childAfter(child as RenderSliver);
         while (current != null) {
-          // If the current sliver is not the last child, subtract twice the scrollExtent to the scrollOffset
-          // to account for both the current and the next slivers.
-          // If the current sliver is the last child, subtract its scrollExtent once to the scrollOffset
-          // to account for only the current sliver.
-          if (childAfter(current) != null) {
-            childScrollOffset -= 2 * current.geometry!.scrollExtent;
-          } else if (!(childBefore(child) != null && current.geometry!.hasVisualOverflow)) {
-            childScrollOffset -= current.geometry!.scrollExtent;
+           childScrollOffset -= current.geometry!.scrollExtent;
           }
           current = childAfter(current);
         }
