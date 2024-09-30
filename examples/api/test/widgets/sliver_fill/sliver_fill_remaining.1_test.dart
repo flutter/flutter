@@ -33,7 +33,7 @@ void main() {
     for (final Widget widget in tester.widgetList(find.byWidgetPredicate(
       (Widget widget) =>
         (widget is Container)
-        && <Color>[Colors.orange[300]!, Colors.blue[200]!, Colors.amber[200]!]
+        && <Color>[Colors.orange[300], Colors.blue[200], Colors.amber[200]]
           .contains(widget.color)))
     ) {
       contentHeight += tester.getSize(find.byWidget(widget)).height;

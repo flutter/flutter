@@ -37,7 +37,7 @@ class _WidgetBindingsObserverSampleState extends State<WidgetBindingsObserverSam
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     if (WidgetsBinding.instance.lifecycleState != null) {
-      _stateHistoryList.add(WidgetsBinding.instance.lifecycleState!);
+      _stateHistoryList.add(WidgetsBinding.instance.lifecycleState);
     }
   }
 

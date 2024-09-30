@@ -49,7 +49,7 @@ class _ValueListenableBuilderExampleState extends State<ValueListenableBuilderEx
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     CountDisplay(count: value),
-                    child!,
+                    child,
                   ],
                 );
               },
