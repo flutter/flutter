@@ -12,6 +12,8 @@ class BaseApplicationNameHandler {
 
             // Setting to android.app.Application is the same as omitting the attribute.
             var baseApplicationName: String = "android.app.Application"
+
+            // Respect this property if it set by the Flutter tool.
             if (project.hasProperty("base-application-name")) {
                 baseApplicationName = project.property("base-application-name").toString()
             }
