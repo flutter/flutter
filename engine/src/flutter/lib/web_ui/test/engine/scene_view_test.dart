@@ -172,7 +172,7 @@ void testMain() {
       120,
     ));
     final EngineRootLayer rootLayer = EngineRootLayer();
-    rootLayer.slices.add(PictureSlice(picture));
+    rootLayer.slices.add(LayerSlice(picture, <PlatformView>[]));
     final EngineScene scene = EngineScene(rootLayer);
     await sceneView.renderScene(scene, null);
 
@@ -205,7 +205,7 @@ void testMain() {
         const ui.Rect.fromLTWH(50, 80, 100, 120),
         const PlatformViewStyling());
     final EngineRootLayer rootLayer = EngineRootLayer();
-    rootLayer.slices.add(PlatformViewSlice(<PlatformView>[platformView], null));
+    rootLayer.slices.add(LayerSlice(StubPicture(ui.Rect.zero), <PlatformView>[platformView]));
     final EngineScene scene = EngineScene(rootLayer);
     await sceneView.renderScene(scene, null);
 
@@ -246,7 +246,7 @@ void testMain() {
       ));
       pictures.add(picture);
       final EngineRootLayer rootLayer = EngineRootLayer();
-      rootLayer.slices.add(PictureSlice(picture));
+      rootLayer.slices.add(LayerSlice(picture, <PlatformView>[]));
       final EngineScene scene = EngineScene(rootLayer);
       renderFutures.add(sceneView.renderScene(scene, null));
     }
@@ -267,7 +267,7 @@ void testMain() {
       ));
 
       final EngineRootLayer rootLayer = EngineRootLayer();
-      rootLayer.slices.add(PictureSlice(picture));
+      rootLayer.slices.add(LayerSlice(picture, <PlatformView>[]));
       final EngineScene scene = EngineScene(rootLayer);
       await sceneView.renderScene(scene, null);
 

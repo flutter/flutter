@@ -88,6 +88,9 @@ class SkwasmBlurFilter extends SkwasmImageFilter {
 
   @override
   String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, ${tileModeString(tileMode)})';
+
+  @override
+  Matrix4? get transform => null;
 }
 
 class SkwasmDilateFilter extends SkwasmImageFilter {
@@ -105,6 +108,9 @@ class SkwasmDilateFilter extends SkwasmImageFilter {
 
   @override
   String toString() => 'ImageFilter.dilate($radiusX, $radiusY)';
+
+  @override
+  Matrix4? get transform => null;
 }
 
 class SkwasmErodeFilter extends SkwasmImageFilter {
@@ -122,6 +128,9 @@ class SkwasmErodeFilter extends SkwasmImageFilter {
 
   @override
   String toString() => 'ImageFilter.erode($radiusX, $radiusY)';
+
+  @override
+  Matrix4? get transform => null;
 }
 
 class SkwasmMatrixFilter extends SkwasmImageFilter {
@@ -144,6 +153,9 @@ class SkwasmMatrixFilter extends SkwasmImageFilter {
 
   @override
   String toString() => 'ImageFilter.matrix($matrix4, $filterQuality)';
+
+  @override
+  Matrix4? get transform => Matrix4.fromFloat32List(toMatrix32(matrix4));
 }
 
 class SkwasmColorImageFilter extends SkwasmImageFilter {
@@ -162,6 +174,9 @@ class SkwasmColorImageFilter extends SkwasmImageFilter {
 
   @override
   String toString() => filter.toString();
+
+  @override
+  Matrix4? get transform => null;
 }
 
 class SkwasmComposedImageFilter extends SkwasmImageFilter {
@@ -183,6 +198,16 @@ class SkwasmComposedImageFilter extends SkwasmImageFilter {
 
   @override
   String toString() => 'ImageFilter.compose($outer, $inner)';
+
+  @override
+  Matrix4? get transform {
+    final outerTransform = outer.transform;
+    final innerTransform = inner.transform;
+    if (outerTransform != null && innerTransform != null) {
+      return outerTransform.multiplied(innerTransform);
+    }
+    return outerTransform ?? innerTransform;
+  }
 }
 
 typedef ColorFilterHandleBorrow = void Function(ColorFilterHandle handle);
