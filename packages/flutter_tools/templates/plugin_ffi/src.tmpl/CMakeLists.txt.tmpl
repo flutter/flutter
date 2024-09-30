@@ -16,5 +16,7 @@ set_target_properties({{projectName}} PROPERTIES
 
 target_compile_definitions({{projectName}} PUBLIC DART_SHARED_LIB)
 
-# Support android 15 16k page size
-target_link_options({{projectName}} PRIVATE "-Wl,-z,max-page-size=16384")
+if(ANDROID)
+  # Support android 15 16k page size
+  target_link_options({{projectName}} PRIVATE "-Wl,-z,max-page-size=16384")
+endif()
