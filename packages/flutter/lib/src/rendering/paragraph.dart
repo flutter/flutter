@@ -701,6 +701,12 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       .maxIntrinsicWidth;
   }
 
+  /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
+  ///
+  /// This does not require the layout to be updated.
+  @visibleForTesting
+  double get preferredLineHeight => _textPainter.preferredLineHeight;
+
   double _computeIntrinsicHeight(double width) {
     return (_textIntrinsics
       ..setPlaceholderDimensions(layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getDryBaseline))
@@ -2997,6 +3003,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     if (_cachedBoundingBoxes == null) {
       final List<TextBox> boxes = paragraph.getBoxesForSelection(
         TextSelection(baseOffset: range.start, extentOffset: range.end),
+        boxHeightStyle: ui.BoxHeightStyle.max,
       );
       if (boxes.isNotEmpty) {
         _cachedBoundingBoxes = <Rect>[];
@@ -3034,6 +3041,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
 
   void didChangeParagraphLayout() {
     _cachedRect = null;
+    _cachedBoundingBoxes = null;
   }
 
   @override
