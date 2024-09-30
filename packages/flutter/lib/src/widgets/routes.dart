@@ -1078,7 +1078,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                         child: ListenableBuilder(
                           listenable: _listenable, // immutable
                           builder: (BuildContext context, Widget? child) {
-                            return widget.route.buildFlexTransitions(
+                            return widget.route.buildFlexibleTransitions(
                               context,
                               widget.route.animation!,
                               widget.route.secondaryAnimation!,
@@ -1408,6 +1408,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   ///  * [buildPage], which is used to describe the actual contents of the page,
   ///    and whose result is passed to the `child` argument of this method.
+  ///  * [buildFlexibleTransitions], which is used to wrap these transitions with
+  ///    one passed to the route from the route above this one in the navigation
+  ///    stack.
   Widget buildTransitions(
     BuildContext context,
     Animation<double> animation,
@@ -1453,10 +1456,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// {@macro flutter.widgets.delegatedTransition}
   ///
-  /// `receivedTransition` will use the above route's [delegatedTransition] in
+  /// The `receivedTransition` will use the above route's [delegatedTransition] in
   /// order to show the right route transition when the above route either enters
   /// or leaves the navigation stack. If not null, the `receivedTransition` will
-  /// wrap the route content through [buildFlexTransitions].
+  /// wrap the route content through [buildFlexibleTransitions].
   DelegatedTransitionBuilder? receivedTransition;
 
   /// Wraps the transitions of this route with a [DelegatedTransitionBuilder], when
@@ -1481,16 +1484,17 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// ** See code in examples/api/lib/widgets/routes/flexible_route_transitions.1.dart **
   /// {@end-tool}
-  Widget buildFlexTransitions(
+  ///
+  /// Override this method if more granular control of how the [receivedTransition]
+  /// is used for the transitions of a route.
+  Widget buildFlexibleTransitions(
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    final Widget originalTransitions = buildTransitions(context, animation, secondaryAnimation, child);
-
     if (receivedTransition == null) {
-      return originalTransitions;
+      return buildTransitions(context, animation, secondaryAnimation, child);
     }
 
     // Create a static proxy animation to supress the original secondary transition.
@@ -1498,7 +1502,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
     final Widget proxiedOriginalTransitions = buildTransitions(context, animation, proxyAnimation, child);
 
-    return receivedTransition!(context, animation, secondaryAnimation, allowSnapshotting, proxiedOriginalTransitions) ?? originalTransitions;
+    return receivedTransition!(context, animation, secondaryAnimation, allowSnapshotting, proxiedOriginalTransitions) ??
+      buildTransitions(context, animation, secondaryAnimation, child);
   }
 
   @override
