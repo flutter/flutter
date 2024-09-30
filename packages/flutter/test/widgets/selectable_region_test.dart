@@ -16,8 +16,8 @@ import 'semantics_tester.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
-  final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret) + Offset(0.0, paragraph.preferredLineHeight) + const Offset(kIsWeb ? 1.0 : 0.0, -2.0);
-  return paragraph.localToGlobal(localOffset);
+  final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret) + Offset(0.0, paragraph.preferredLineHeight);
+  return paragraph.localToGlobal(localOffset) + const Offset(kIsWeb ? 1.0 : 0.0, -2.0);
 }
 
 Offset globalize(Offset point, RenderBox box) {
