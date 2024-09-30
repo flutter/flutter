@@ -23,8 +23,9 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
-@implementation FlutterHeadlessDartRunner {
-}
+FLUTTER_ASSERT_ARC
+
+@implementation FlutterHeadlessDartRunner
 
 - (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)projectOrNil {
   return [self initWithName:labelPrefix project:projectOrNil allowHeadlessExecution:YES];
@@ -56,4 +57,5 @@
 - (instancetype)init {
   return [self initWithName:@"io.flutter.headless" project:nil];
 }
+
 @end
