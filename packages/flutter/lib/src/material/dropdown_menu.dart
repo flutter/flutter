@@ -576,11 +576,14 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   // whose value matches the initial selection.
   // Empty the text field when no entry matches the initial selection.
   void matchInitialSelection() {
-    final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
+    final int index = filteredEntries.indexWhere(
+      (DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection
+    );
     if (index != -1) {
+      final String label = filteredEntries[index].label;
       _localTextEditingController?.value = TextEditingValue(
-        text: filteredEntries[index].label,
-        selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
+        text: label,
+        selection: TextSelection.collapsed(offset: label.length),
       );
     } else {
       _localTextEditingController?.value = TextEditingValue.empty;

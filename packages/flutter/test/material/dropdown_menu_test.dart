@@ -1997,7 +1997,7 @@ void main() {
   });
 
   testWidgets(
-    'When the initial selection matches a menu entry the text field should display the corresponding value',
+    'When the initial selection matches a menu entry, the text field displays the corresponding value',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       addTearDown(controller.dispose);
@@ -2021,7 +2021,7 @@ void main() {
   );
 
   testWidgets(
-    'When the initial selection does not match any menu entries the text field should be empty',
+    'Text field is empty when the initial selection does not match any menu entries',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       addTearDown(controller.dispose);
