@@ -4,6 +4,7 @@
 // found in the LICENSE file.
 
 import com.android.build.OutputFile
+import com.flutter.gradle.BaseApplicationNameHandler
 import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
@@ -28,7 +29,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
 
-import com.flutter.graadle.SayHello;
+import com.flutter.gradle.SayHello;
 
 /**
  * For apps only. Provides the flutter extension used in the app-level Gradle
@@ -357,8 +358,8 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        // Use Kotlin DSL to handle baseApplicationName logic due to Groovy dynamic dispatch bug.
-        project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "kotlin", "flutter.gradle.kts")
+        // Use Kotlin source to handle baseApplicationName logic due to Groovy dynamic dispatch bug.
+        BaseApplicationNameHandler.setBaseName(project)
 
         String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
                 "gradle", "flutter_proguard_rules.pro")
