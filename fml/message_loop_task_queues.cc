@@ -132,9 +132,8 @@ fml::closure MessageLoopTaskQueues::GetNextTaskToRun(TaskQueueId queue_id,
     return nullptr;
   }
   fml::closure invocation = top.task.GetTask();
-  queue_entries_.at(top.task_queue_id)
-      ->task_source->PopTask(top.task.GetTaskSourceGrade());
   const auto task_source_grade = top.task.GetTaskSourceGrade();
+  queue_entries_.at(top.task_queue_id)->task_source->PopTask(task_source_grade);
   tls_task_source_grade.reset(new TaskSourceGradeHolder{task_source_grade});
   return invocation;
 }
