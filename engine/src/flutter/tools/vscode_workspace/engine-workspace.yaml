@@ -133,6 +133,11 @@ settings:
       gtest:
         prependTestRunningArgs:
           - --enable_playground
+      env:
+        MTL_DEBUG_LAYER: "1"
+        MTL_DEBUG_LAYER_ERROR_MODE: assert
+        MTL_DEBUG_LAYER_WARNING_MODE: nslog
+        MTL_SHADER_VALIDATION: "1"
     - name: display_list_unittests_arm64
       pattern: ../out/host_debug_unopt_arm64/display_list_unittests
       runTask:
