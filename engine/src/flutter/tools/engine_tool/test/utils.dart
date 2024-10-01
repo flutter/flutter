@@ -69,10 +69,10 @@ class TestEnvironment {
       abi: abi,
       engine: engine,
       platform: FakePlatform(
-          operatingSystem: _operatingSystemForAbi(abi),
-          resolvedExecutable: io.Platform.resolvedExecutable,
-          pathSeparator: _pathSeparatorForAbi(abi),
-          numberOfProcessors: 32,
+        operatingSystem: _operatingSystemForAbi(abi),
+        resolvedExecutable: io.Platform.resolvedExecutable,
+        pathSeparator: _pathSeparatorForAbi(abi),
+        numberOfProcessors: 32,
       ),
       processRunner: ProcessRunner(
           processManager: FakeProcessManager(onStart: (List<String> command) {
@@ -84,7 +84,8 @@ class TestEnvironment {
         return processResult;
       }, onRun: (List<String> command) {
         final io.ProcessResult result = _getCannedProcessResult(
-          command, cannedProcesses,
+          command,
+          cannedProcesses,
         );
         processHistory.add(ExecutedProcess(
           command,
