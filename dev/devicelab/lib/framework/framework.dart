@@ -66,6 +66,12 @@ Future<TaskResult> task(TaskFunction task, { ProcessManager? processManager }) a
 
 class _TaskRunner {
   _TaskRunner(this.task, this.processManager) {
+    final String successResponse = json.encode(
+      const <String, String>{
+        'result': 'success',
+      },
+    );
+
     registerExtension('ext.cocoonRunTask',
         (String method, Map<String, String> parameters) async {
       final Duration? taskTimeout = parameters.containsKey('timeoutInMinutes')
@@ -95,12 +101,12 @@ class _TaskRunner {
     });
     registerExtension('ext.cocoonRunnerReady',
         (String method, Map<String, String> parameters) async {
-      return ServiceExtensionResponse.result(json.encode('ready'));
+      return ServiceExtensionResponse.result(successResponse);
     });
     registerExtension('ext.cocoonTaskResultReceived',
         (String method, Map<String, String> parameters) async {
       _closeKeepAlivePort();
-      return ServiceExtensionResponse.result(json.encode('acknowledged'));
+      return ServiceExtensionResponse.result(successResponse);
     });
   }
 

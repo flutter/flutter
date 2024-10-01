@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service_io.dart';
 
 import 'cocoon.dart';
 import 'devices.dart';
@@ -291,7 +292,7 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
       final IsolateRef isolate = vm.isolates!.first;
       // Sanity check to ensure we're talking with the main isolate.
       final Response response = await client.callServiceExtension('ext.cocoonRunnerReady', isolateId: isolate.id);
-      if (response.json!['response'] != 'ready') {
+      if (response.json!['result'] != 'success') {
         throw 'not ready yet';
       }
       return ConnectionResult(client, isolate);
@@ -329,32 +330,4 @@ class ConnectionResult {
 
   final VmService vmService;
   final IsolateRef isolate;
-}
-
-/// The cocoon client sends an invalid VM service response, we need to intercept it.
-Future<VmService> vmServiceConnectUri(String wsUri, {Log? log}) async {
-  final WebSocket socket = await WebSocket.connect(wsUri);
-  final StreamController<dynamic> controller = StreamController<dynamic>();
-  final Completer<dynamic> streamClosedCompleter = Completer<dynamic>();
-  socket.listen(
-    (dynamic data) {
-      final Map<String, dynamic> rawData = json.decode(data as String) as Map<String, dynamic> ;
-      if (rawData['result'] == 'ready') {
-        rawData['result'] = <String, dynamic>{'response': 'ready'};
-        controller.add(json.encode(rawData));
-      } else {
-        controller.add(data);
-      }
-    },
-    onError: (Object err, StackTrace stackTrace) => controller.addError(err, stackTrace),
-    onDone: () => streamClosedCompleter.complete(),
-  );
-
-  return VmService(
-    controller.stream,
-    (String message) => socket.add(message),
-    log: log,
-    disposeHandler: () => socket.close(),
-    streamClosed: streamClosedCompleter.future,
-  );
 }
