@@ -5137,7 +5137,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     DoNothingAndStopPropagationTextIntent: DoNothingAction(consumesKey: false),
     ReplaceTextIntent: _replaceTextAction,
     UpdateSelectionIntent: _updateSelectionAction,
-    DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
+    DirectionalFocusIntent: _makeOverridable(DirectionalFocusAction.forTextField()),
     DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideToolbarIfVisible),
 
     // Delete

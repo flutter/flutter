@@ -741,6 +741,18 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     return result;
   }
 
+  void handleDirectionalFocus(DirectionalFocusIntent intent) {
+    switch (intent.direction) {
+      case TraversalDirection.left:
+      case TraversalDirection.right:
+        return;
+      case TraversalDirection.up:
+        handleUpKeyInvoke(intent);
+      case TraversalDirection.down:
+        handleDownKeyInvoke(intent);
+    }
+  }
+
   void handleUpKeyInvoke(_) {
     setState(() {
       if (!widget.enabled || !_menuHasEnabledItem || !_controller.isOpen) {
@@ -936,14 +948,20 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           return textField;
         }
 
-        return _DropdownMenuBody(
-          width: widget.width,
-          children: <Widget>[
-            textField,
-            ..._initialMenu!.map((Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item)),
-            trailingButton,
-            leadingButton,
-          ],
+        return Shortcuts(
+          shortcuts: const <ShortcutActivator, Intent>{
+            SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
+            SingleActivator(LogicalKeyboardKey.arrowRight): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+          },
+          child: _DropdownMenuBody(
+            width: widget.width,
+            children: <Widget>[
+              textField,
+              ..._initialMenu!.map((Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item)),
+              trailingButton,
+              leadingButton,
+            ],
+          ),
         );
       },
     );
@@ -973,11 +991,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       shortcuts: _kMenuTraversalShortcuts,
       child: Actions(
         actions: <Type, Action<Intent>>{
-          _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(
-            onInvoke: handleUpKeyInvoke,
-          ),
-          _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(
-            onInvoke: handleDownKeyInvoke,
+          DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(
+            onInvoke: handleDirectionalFocus,
           ),
         },
         child: menuAnchor,
