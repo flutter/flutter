@@ -298,6 +298,8 @@ class CarouselView extends StatefulWidget {
   /// as defined by the [ThemeData.splashFactory].
   ///
   /// Setting this to false allows the [children] to respond to user gestures.
+  ///
+  /// Defaults to true.
   final bool enableSplash;
 
   /// The extent the children are forced to have in the main axis.
