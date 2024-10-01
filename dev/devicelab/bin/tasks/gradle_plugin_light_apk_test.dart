@@ -34,9 +34,6 @@ Future<void> main() async {
           ...debugAssets,
           ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
-          // Debug mode intentionally includes `x86` and `x86_64`.
-          'lib/x86/libflutter.so',
-          'lib/x86_64/libflutter.so',
         ], apkFiles);
 
         checkCollectionDoesNotContain<String>(<String>[
@@ -65,9 +62,7 @@ Future<void> main() async {
           ...flutterAssets,
           ...debugAssets,
           ...baseApkFiles,
-          // Debug mode intentionally includes `x86` and `x86_64`.
           'lib/x86/libflutter.so',
-          'lib/x86_64/libflutter.so',
         ], apkFiles);
 
         checkCollectionDoesNotContain<String>(<String>[
@@ -96,8 +91,6 @@ Future<void> main() async {
           ...flutterAssets,
           ...debugAssets,
           ...baseApkFiles,
-          // Debug mode intentionally includes `x86` and `x86_64`.
-          'lib/x86/libflutter.so',
           'lib/x86_64/libflutter.so',
         ], apkFiles);
 
