@@ -490,20 +490,12 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   final MenuController _controller = MenuController();
   bool _enableFilter = false;
   late bool _enableSearch;
-  late List<DropdownMenuEntry<T>> _filteredEntries;
+  late List<DropdownMenuEntry<T>> filteredEntries;
   List<Widget>? _initialMenu;
   int? currentHighlight;
   double? leadingPadding;
   bool _menuHasEnabledItem = false;
   TextEditingController? _localTextEditingController;
-
-  List<DropdownMenuEntry<T>> get filteredEntries => _filteredEntries;
-
-  set filteredEntries(List<DropdownMenuEntry<T>> value) {
-    _filteredEntries = value;
-    buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
-    _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
-  }
 
   @override
   void initState() {
@@ -515,6 +507,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     }
     _enableSearch = widget.enableSearch;
     filteredEntries = widget.dropdownMenuEntries;
+    buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
+    _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
 
     final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
     if (index != -1) {
@@ -558,6 +552,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     if (oldWidget.dropdownMenuEntries != widget.dropdownMenuEntries) {
       currentHighlight = null;
       filteredEntries = widget.dropdownMenuEntries;
+      buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
+      _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
     }
     if (oldWidget.leadingIcon != widget.leadingIcon) {
       refreshLeadingPadding();
@@ -811,6 +807,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     } else {
       filteredEntries = widget.dropdownMenuEntries;
     }
+    _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
 
     if (_enableSearch) {
       if (widget.searchCallback != null) {
