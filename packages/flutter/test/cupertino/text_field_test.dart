@@ -8067,6 +8067,73 @@ void main() {
     );
   });
 
+  testWidgets(
+    'CrossAxisAlignment start positions the prefix and suffix at the top of the field',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              padding: EdgeInsets.zero, // Preventing delta position.dy
+              prefix: Icon(CupertinoIcons.add),
+              suffix: Icon(CupertinoIcons.clear),
+              crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+          ),
+        ),
+      );
+
+      final CupertinoTextField cupertinoTextField = tester.widget<CupertinoTextField>(
+        find.byType(CupertinoTextField),
+      );
+
+      expect(find.widgetWithIcon(CupertinoTextField, CupertinoIcons.clear), findsOneWidget);
+      expect(find.widgetWithIcon(CupertinoTextField, CupertinoIcons.add), findsOneWidget);
+      expect(cupertinoTextField.crossAxisAlignment, CrossAxisAlignment.start);
+
+      final double editableDy = tester.getTopLeft(find.byType(EditableText)).dy;
+      final double prefixDy = tester.getTopLeft(find.byIcon(CupertinoIcons.add)).dy;
+      final double suffixDy = tester.getTopLeft(find.byIcon(CupertinoIcons.clear)).dy;
+
+      expect(prefixDy, editableDy);
+      expect(suffixDy, editableDy);
+    },
+  );
+
+  testWidgets(
+    'CrossAxisAlignment end positions the prefix and suffix at the bottom of the field',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              padding: EdgeInsets.zero, // Preventing delta position.dy
+              prefix: SizedBox.square(dimension: 48, child: Icon(CupertinoIcons.add)),
+              suffix: SizedBox.square(dimension: 48, child: Icon(CupertinoIcons.clear)),
+              crossAxisAlignment: CrossAxisAlignment.end,
+            ),
+          ),
+        ),
+      );
+
+      final CupertinoTextField cupertinoTextField = tester.widget<CupertinoTextField>(
+        find.byType(CupertinoTextField),
+      );
+
+      expect(find.widgetWithIcon(CupertinoTextField, CupertinoIcons.clear), findsOneWidget);
+      expect(find.widgetWithIcon(CupertinoTextField, CupertinoIcons.add), findsOneWidget);
+      expect(cupertinoTextField.crossAxisAlignment, CrossAxisAlignment.end);
+
+
+      final double editableDy = tester.getTopLeft(find.byType(EditableText)).dy;
+      final double prefixDy = tester.getTopLeft(find.byIcon(CupertinoIcons.add)).dy;
+      final double suffixDy = tester.getTopLeft(find.byIcon(CupertinoIcons.clear)).dy;
+
+      expect(prefixDy, lessThan(editableDy));
+      expect(suffixDy, lessThan(editableDy));
+    },
+  );
+
   testWidgets('text selection style 1', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure\nhi\nwassssup!',
