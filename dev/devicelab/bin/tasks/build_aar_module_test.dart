@@ -228,7 +228,6 @@ Future<void> main() async {
 
       checkFileContains(<String>[
         'flutter_embedding_debug',
-        'x86_debug',
         'x86_64_debug',
         'armeabi_v7a_debug',
         'arm64_v8a_debug',
