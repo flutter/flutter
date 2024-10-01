@@ -690,6 +690,13 @@ static void fl_view_dispose(GObject* object) {
   if (self->engine != nullptr) {
     fl_engine_set_update_semantics_handler(self->engine, nullptr, nullptr,
                                            nullptr);
+
+    // Stop rendering.
+    fl_renderer_remove_view(FL_RENDERER(self->renderer), self->view_id);
+
+    // Release the view ID from the engine.
+    fl_engine_remove_view(self->engine, self->view_id, nullptr, nullptr,
+                          nullptr);
   }
 
   if (self->on_pre_engine_restart_handler != 0) {
