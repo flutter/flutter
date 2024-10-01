@@ -518,7 +518,7 @@ void main() {
           child: CupertinoCheckbox(
             value: value,
             onChanged: enabled ? (bool? value) => true : null,
-            mouseCursor: const CheckboxMouseCursor(),
+            mouseCursor: const _CheckboxMouseCursor(),
             focusNode: focusNode
           ),
         ),
@@ -959,8 +959,8 @@ void main() {
   });
 }
 
-class CheckboxMouseCursor extends WidgetStateMouseCursor {
-  const CheckboxMouseCursor();
+class _CheckboxMouseCursor extends WidgetStateMouseCursor {
+  const _CheckboxMouseCursor();
 
   @override
   MouseCursor resolve(Set<WidgetState> states) {
@@ -976,5 +976,5 @@ class CheckboxMouseCursor extends WidgetStateMouseCursor {
     return SystemMouseCursors.basic;
   }
   @override
-  String get debugDescription => 'CheckboxMouseCursor()';
+  String get debugDescription => '_CheckboxMouseCursor()';
 }
