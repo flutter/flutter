@@ -1177,7 +1177,7 @@ void main() {
     );
     item0material = tester.widget<Material>(button0Material);
     expect(item0material.color, Colors.transparent); // the previous item should not be highlighted.
-  }, variant: TargetPlatformVariant.all());
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('Up key can highlight the menu item on desktop platforms', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
@@ -1219,7 +1219,7 @@ void main() {
 
     item5material = tester.widget<Material>(button5Material);
     expect(item5material.color, Colors.transparent); // the previous item should not be highlighted.
-  }, variant: TargetPlatformVariant.all());
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('Left and right keys can move text field selection', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -1259,7 +1259,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
     expect(controller.selection, const TextSelection.collapsed(offset: 7));
-  }, variant: TargetPlatformVariant.all());
+  }, variant: TargetPlatformVariant.desktop());
 
   // Regression test for https://github.com/flutter/flutter/issues/147253.
   testWidgets('Down key and up key can navigate on desktop platforms '
