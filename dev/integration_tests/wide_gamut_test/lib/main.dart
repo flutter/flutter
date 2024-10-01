@@ -137,7 +137,7 @@ const String _displayP3Logo =
     'gr3yrjmlwqXLjmWw1O2I5Wmp9Xxjyh+AVIZ6ADIAqcwClakzeMgApDILVKbO4CED'
     'kMosUJk6g4dUBuRfvf1am9VRqzYAAAAASUVORK5CYII=';
 
-void main() => run(Setup.drawnImage);
+void main() => run(Setup.container);
 
 enum Setup {
   none,
@@ -145,6 +145,7 @@ enum Setup {
   canvasSaveLayer,
   blur,
   drawnImage,
+  container,
 }
 
 void run(Setup setup) {
@@ -264,7 +265,7 @@ class _MyHomePageState extends State<MyHomePage> {
         _loadImage().then((ui.Image? value) => setState(() { _image = value; }));
       case Setup.drawnImage:
         _drawImage().then((ui.Image? value) => setState(() { _image = value; }));
-      case Setup.image || Setup.blur || Setup.none:
+      case Setup.image || Setup.blur || Setup.none || Setup.container:
         break;
     }
     super.initState();
@@ -297,6 +298,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Image.memory(base64Decode(_displayP3Logo))),
           ],
         );
+      case Setup.container:
+        imageWidget = Container(
+          width: 100,
+          height: 100,
+            color: const Color.from(
+                alpha: 1,
+                red: 1,
+                green: 0,
+                blue: 0,
+                colorSpace: ui.ColorSpace.displayP3));
     }
 
     return Scaffold(

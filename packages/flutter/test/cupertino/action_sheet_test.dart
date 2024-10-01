@@ -1035,7 +1035,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Find the location right within the upper edge of button 1.
-    final Offset start = tester.getTopLeft(find.text('Button 1')) + const Offset(30, -15);
+    final Offset start = tester.getTopLeft(
+      find.widgetWithText(CupertinoActionSheetAction, 'Button 1'),
+    ) + const Offset(30, 5);
     // Verify that the start location is within button 1.
     await tester.tapAt(start);
     expect(pressed, 1);
@@ -1484,13 +1486,19 @@ void main() {
 
     expect(wasPressed, isFalse);
 
-    await tester.tap(find.text('Cancel'));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Cancel')));
+    await tester.pumpAndSettle();
+    // Verify that the cancel button shows the pressed color.
+    await expectLater(
+      find.byType(CupertinoActionSheet),
+      matchesGoldenFile('cupertinoActionSheet.pressedCancel.png'),
+    );
 
+    await gesture.up();
     expect(wasPressed, isTrue);
 
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-
     expect(find.text('Cancel'), findsNothing);
   });
 

@@ -920,6 +920,7 @@ plugins {
             <String>[
               'applinks:example.com',
               'applinks:example2.com',
+              'applinks:example3.com?mode=developer',
             ],
           );
           final String outputFilePath = await project.ios.outputsUniversalLinkSettings(
@@ -935,6 +936,7 @@ plugins {
               <String>[
                 'example.com',
                 'example2.com',
+                'example3.com',
               ],
             ),
           );
@@ -1458,7 +1460,7 @@ plugins {
         const XcodeProjectBuildContext watchBuildContext = XcodeProjectBuildContext(
           scheme: 'WatchScheme',
           deviceId: '123',
-          isWatch: true,
+          sdk: XcodeSdk.WatchOS,
         );
         mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] = <String, String>{
           'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': 'io.flutter.someProject',
@@ -1498,7 +1500,7 @@ plugins {
         const XcodeProjectBuildContext watchBuildContext = XcodeProjectBuildContext(
           scheme: 'WatchScheme',
           deviceId: '123',
-          isWatch: true,
+          sdk: XcodeSdk.WatchOS,
         );
         mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] = <String, String>{
           IosProject.kProductBundleIdKey: 'io.flutter.someProject',

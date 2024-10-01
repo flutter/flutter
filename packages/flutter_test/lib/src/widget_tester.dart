@@ -683,7 +683,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     }());
 
     dynamic caughtException;
-    void handleError(dynamic error, StackTrace stackTrace) => caughtException ??= error;
+    StackTrace? stackTrace;
+    void handleError(dynamic error, StackTrace trace)  {
+      caughtException ??= error;
+      stackTrace ??= trace;
+    }
 
     await Future<void>.microtask(() { binding.handleBeginFrame(duration); }).catchError(handleError);
     await idle();
@@ -691,7 +695,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     await idle();
 
     if (caughtException != null) {
-      throw caughtException as Object; // ignore: only_throw_errors, rethrowing caught exception.
+      Error.throwWithStackTrace(caughtException as Object, stackTrace!);
     }
   }
 

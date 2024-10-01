@@ -144,7 +144,7 @@
   "menuDismissLabel": "I-dismiss ang menu",
   "lookUpButtonLabel": "Tumingin sa Itaas",
   "searchWebButtonLabel": "Maghanap sa Web",
-  "shareButtonLabel": "Ibahagi...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "I-share",
+  "clearButtonTooltip": "I-clear ang text",
+  "selectedDateLabel": "Napili"
 }

@@ -150,6 +150,57 @@ void main() {
     expect(directionSeenByOverlayChild, textDirection);
   });
 
+  testWidgets('The overlay portal update semantics does not dirty overlay', (WidgetTester tester) async {
+    late StateSetter setState;
+    late final OverlayEntry overlayEntry;
+    final UniqueKey overlayKey = UniqueKey();
+    String msg = 'msg';
+    addTearDown(() => overlayEntry..remove()..dispose());
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          container: true,
+          child: Overlay(
+            key: overlayKey,
+            initialEntries: <OverlayEntry>[
+              overlayEntry = OverlayEntry(
+                builder: (BuildContext context) {
+                  return Semantics(
+                    container: true,
+                    explicitChildNodes: true,
+                    child: StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setter) {
+                          setState = setter;
+                          return OverlayPortal(
+                            controller: controller1,
+                            overlayChildBuilder: (BuildContext context) {
+                              return Semantics(label: msg, child: const SizedBox(width: 100, height: 100));
+                            },
+                            child: const Text('overlay child'),
+                          );
+                        }
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    final RenderObject renderObject = tester.renderObject(find.byKey(overlayKey));
+    expect(renderObject.debugNeedsSemanticsUpdate, isFalse);
+    expect(find.bySemanticsLabel(msg), findsOneWidget);
+    setState(() {
+      msg = 'msg2';
+    });
+    // stop before updating semantics.
+    await tester.pump(null, EnginePhase.composite);
+    expect(renderObject.debugNeedsSemanticsUpdate, isFalse);
+  });
+
   testWidgets('Safe to deactivate and re-activate OverlayPortal', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(() => overlayEntry..remove()..dispose());
@@ -352,6 +403,39 @@ void main() {
       tester.takeException().toString(),
       stringContainsInOrder(<String>['Failed to attach' ,'It is already attached to']),
     );
+  });
+
+  testWidgets('Properly size itself when the theater is given unbounded constraints', (WidgetTester tester) async {
+    // Regression test https://github.com/flutter/flutter/issues/153903.
+    late final OverlayEntry overlayEntry;
+    addTearDown(() => overlayEntry..remove()..dispose());
+    const Size size = Size.square(40);
+
+    final Widget widget = Directionality(
+      key: GlobalKey(debugLabel: 'key'),
+      textDirection: TextDirection.ltr,
+      child: UnconstrainedBox(
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            overlayEntry = OverlayEntry(
+              canSizeOverlay: true,
+              builder: (BuildContext context) {
+                return OverlayPortal(
+                  controller: controller1,
+                  overlayChildBuilder: (BuildContext context) => const SizedBox(),
+                  child: SizedBox.fromSize(size: size),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    controller1.show();
+    await tester.pumpWidget(widget);
+    expect(tester.getSize(find.byType(Overlay)), size);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('show/hide works', (WidgetTester tester) async {

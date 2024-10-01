@@ -2,6 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'drag_target.dart';
+/// @docImport 'implicit_animations.dart';
+/// @docImport 'media_query.dart';
+/// @docImport 'navigator.dart';
+/// @docImport 'routes.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'sliver.dart';
+/// @docImport 'text.dart';
+library;
+
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
@@ -1293,6 +1307,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
   @override
   bool get sizedByParent => false;
 
+  bool _layingOutSizeDeterminingChild = false;
   @override
   void performLayout() {
     RenderBox? sizeDeterminingChild;
@@ -1300,7 +1315,9 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
       size = constraints.biggest;
     } else {
       sizeDeterminingChild = _findSizeDeterminingChild();
+      _layingOutSizeDeterminingChild = true;
       layoutChild(sizeDeterminingChild, constraints);
+      _layingOutSizeDeterminingChild = false;
       size = sizeDeterminingChild.size;
     }
 
@@ -2117,31 +2134,25 @@ class _OverlayPortalElement extends RenderObjectElement {
   @override
   void activate() {
     super.activate();
-    final Element? overlayChild = _overlayChild;
-    if (overlayChild != null) {
-      final _RenderDeferredLayoutBox? box = overlayChild.renderObject as _RenderDeferredLayoutBox?;
-      if (box != null) {
-        assert(!box.attached);
-        assert(renderObject._deferredLayoutChild == box);
-        // updateChild has not been called at this point so the RenderTheater in
-        // the overlay location could be detached. Adding children to a detached
-        // RenderObject is still allowed however this isn't the most efficient.
-        (overlayChild.slot! as _OverlayEntryLocation)._activate(box);
-      }
+    final _RenderDeferredLayoutBox? box = _overlayChild?.renderObject as _RenderDeferredLayoutBox?;
+    if (box != null) {
+      assert(!box.attached);
+      assert(renderObject._deferredLayoutChild == box);
+      // updateChild has not been called at this point so the RenderTheater in
+      // the overlay location could be detached. Adding children to a detached
+      // RenderObject is still allowed however this isn't the most efficient.
+      (_overlayChild!.slot! as _OverlayEntryLocation)._activate(box);
     }
   }
 
   @override
   void deactivate() {
-    final Element? overlayChild = _overlayChild;
     // Instead of just detaching the render objects, removing them from the
     // render subtree entirely. This is a workaround for the
     // !renderObject.attached assert in the `super.deactivate()` method.
-    if (overlayChild != null) {
-      final _RenderDeferredLayoutBox? box = overlayChild.renderObject as _RenderDeferredLayoutBox?;
-      if (box != null) {
-        (overlayChild.slot! as _OverlayEntryLocation)._deactivate(box);
-      }
+    final _RenderDeferredLayoutBox? box = _overlayChild?.renderObject as _RenderDeferredLayoutBox?;
+    if (box != null) {
+      (_overlayChild!.slot! as _OverlayEntryLocation)._deactivate(box);
     }
     super.deactivate();
   }
@@ -2152,6 +2163,7 @@ class _OverlayPortalElement extends RenderObjectElement {
     if (slot != null) {
       renderObject._deferredLayoutChild = child as _RenderDeferredLayoutBox;
       slot._addChild(child);
+      renderObject.markNeedsSemanticsUpdate();
     } else {
       renderObject.child = child;
     }
@@ -2163,6 +2175,7 @@ class _OverlayPortalElement extends RenderObjectElement {
   void moveRenderObjectChild(_RenderDeferredLayoutBox child, _OverlayEntryLocation oldSlot, _OverlayEntryLocation newSlot) {
     assert(newSlot._debugIsLocationValid());
     newSlot._moveChild(child, oldSlot);
+    renderObject.markNeedsSemanticsUpdate();
   }
 
   @override
@@ -2271,6 +2284,9 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
   }
 
   @override
+  RenderObject? get semanticsParent => _layoutSurrogate;
+
+  @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
     final RenderBox? child = this.child;
     if (child == null) {
@@ -2289,7 +2305,17 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
       assert(false, '$this is not attached to parent');
       return;
     }
-    super.layout(BoxConstraints.tight(theater.constraints.biggest));
+    if (theater._layingOutSizeDeterminingChild) {
+      theater.invokeLayoutCallback((BoxConstraints constraints) { markNeedsLayout(); });
+    } else {
+      final BoxConstraints theaterConstraints = theater.constraints;
+      final Size boxSize = theaterConstraints.biggest.isFinite
+        ? theaterConstraints.biggest
+        // Accessing the theater's size is only unsafe if it is laying out the
+        // size-determining child.
+        : theater.size;
+      super.layout(BoxConstraints.tight(boxSize));
+    }
   }
 
   bool _theaterDoingThisLayout = false;

@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app.dart';
+/// @docImport 'drawer.dart';
+/// @docImport 'popup_menu.dart';
+/// @docImport 'snack_bar.dart';
+/// @docImport 'text_button.dart';
+/// @docImport 'text_field.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -767,6 +775,11 @@ class _AppBarState extends State<AppBar> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _scrollNotificationObserver?.removeListener(_handleScrollNotification);
+    final ScaffoldState? scaffoldState = Scaffold.maybeOf(context);
+
+    if (scaffoldState != null && (scaffoldState.isDrawerOpen || scaffoldState.isEndDrawerOpen)) {
+      return;
+    }
     _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
     _scrollNotificationObserver?.addListener(_handleScrollNotification);
   }

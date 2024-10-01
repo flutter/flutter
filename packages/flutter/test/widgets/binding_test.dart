@@ -292,7 +292,7 @@ void main() {
       direction: ViewFocusDirection.forward,
     );
 
-    PlatformDispatcher.instance.onViewFocusChange!.call(expectedEvent);
+    PlatformDispatcher.instance.onViewFocusChange!(expectedEvent);
     expect(observer.accumulatedEvents, <ViewFocusEvent>[expectedEvent]);
 
     WidgetsBinding.instance.removeObserver(observer);

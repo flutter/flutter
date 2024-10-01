@@ -108,7 +108,11 @@ void main() {
       await tester.pumpAndSettle();
 
       final Finder collapsedTitle = find.text(title).last;
-      final Offset backButtonOffset = tester.getTopRight(find.byType(BackButton));
+      // Get the offset of the Center widget that wraps the IconButton.
+      final Offset backButtonOffset = tester.getTopRight(find.ancestor(
+        of: find.byType(IconButton),
+        matching: find.byType(Center),
+      ));
       final Offset titleOffset = tester.getTopLeft(collapsedTitle);
       expect(titleOffset.dx, backButtonOffset.dx + titleSpacing);
   });

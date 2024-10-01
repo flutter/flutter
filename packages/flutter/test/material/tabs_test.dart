@@ -5947,6 +5947,55 @@ void main() {
     gesture.removePointer();
   });
 
+  testWidgets('No crash if TabBar build called before didUpdateWidget with SliverAppBar', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/154484.
+    final List<String> tabs = <String>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return DefaultTabController(
+              length: tabs.length,
+              child: Scaffold(
+                body: CustomScrollView(
+                  slivers: <Widget>[
+                    SliverAppBar(
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('Add Tab'),
+                          onPressed: () {
+                            setState(() {
+                              tabs.add('Tab ${tabs.length + 1}');
+                            });
+                          },
+                        ),
+                      ],
+                      bottom: TabBar(
+                        tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Initializes with zero tabs.
+    expect(find.text('Tab 1'), findsNothing);
+    expect(find.text('Tab 2'), findsNothing);
+
+    // No crash after tabs added.
+    await tester.tap(find.text('Add Tab'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text('Tab 2'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Do not crash if the controller and TabBarView are updated at different phases(build and layout) of the same frame', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/104994.
     List<String> tabTextContent = <String>[];
@@ -7293,5 +7342,111 @@ void main() {
       tabAlignment: TabAlignment.center,
     ));
     expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+  });
+
+  testWidgets('TabBar.indicatorAnimation can customize tab indicator animation', (WidgetTester tester) async {
+    const double indicatorWidth = 50.0;
+    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      return Tab(
+        key: ValueKey<int>(index),
+        child: const SizedBox(width: indicatorWidth),
+      );
+    });
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTab({ TabIndicatorAnimation? indicatorAnimation }) {
+      return MaterialApp(
+        home: boilerplate(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              indicatorAnimation: indicatorAnimation,
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test tab indicator animation with TabIndicatorAnimation.linear.
+    await tester.pumpWidget(buildTab(indicatorAnimation: TabIndicatorAnimation.linear));
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+
+    // Idle at tab 0.
+    expect(
+      tabBarBox,
+      paints..rrect(rrect: RRect.fromLTRBAndCorners(
+        75.0, 45.0, 125.0, 48.0,
+        topLeft: const Radius.circular(3.0),
+        topRight: const Radius.circular(3.0),
+      ),
+    ));
+
+    // Start moving tab indicator.
+    controller.offset = 0.2;
+    await tester.pump();
+
+    expect(
+      tabBarBox,
+      paints..rrect(rrect: RRect.fromLTRBAndCorners(
+        115.0, 45.0, 165.0, 48.0,
+        topLeft: const Radius.circular(3.0),
+        topRight: const Radius.circular(3.0),
+      ),
+    ));
+
+    // Reset tab controller offset.
+    controller.offset = 0.0;
+
+    // Test tab indicator animation with TabIndicatorAnimation.elastic.
+    await tester.pumpWidget(buildTab(indicatorAnimation: TabIndicatorAnimation.elastic));
+    await tester.pumpAndSettle();
+
+    // Ease in sine (accelerating).
+    double accelerateIntepolation(double fraction) {
+      return 1.0 - math.cos((fraction * math.pi) / 2.0);
+    }
+
+    void expectIndicatorAttrs(
+      RenderBox tabBarBox, {
+      required Rect rect,
+      required Rect targetRect,
+    }) {
+      const double indicatorWeight = 3.0;
+      final double tabChangeProgress =  (controller.index - controller.animation!.value).abs();
+      final double leftFraction = accelerateIntepolation(tabChangeProgress);
+      final double rightFraction = accelerateIntepolation(tabChangeProgress);
+
+      final RRect rrect = RRect.fromLTRBAndCorners(
+        lerpDouble(rect.left, targetRect.left, leftFraction)!,
+        tabBarBox.size.height - indicatorWeight,
+        lerpDouble(rect.right, targetRect.right, rightFraction)!,
+        tabBarBox.size.height,
+        topLeft: const Radius.circular(3.0),
+        topRight: const Radius.circular(3.0),
+      );
+
+      expect(tabBarBox, paints..rrect(rrect: rrect));
+    }
+
+    Rect rect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    Rect targetRect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+
+    // Idle at tab 0.
+    expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
+
+    // Start moving tab indicator.
+    controller.offset = 0.2;
+    await tester.pump();
+
+    rect = const Rect.fromLTRB(115.0, 0.0, 165.0, 48.0);
+    targetRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
+    expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
   });
 }

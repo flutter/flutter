@@ -565,7 +565,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         }
       default:
         errors.add('Unexpected child "$yamlKey" found under "flutter".');
-        break;
     }
   }
 }
@@ -704,7 +703,6 @@ void _validateFonts(YamlList fonts, List<String> errors) {
             }
           default:
             errors.add('Unexpected key $fontKey ((${kvp.value.runtimeType})) under font.');
-            break;
         }
       }
     }

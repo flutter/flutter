@@ -459,16 +459,16 @@ class LinearGradient extends Gradient {
 
   @override
   Gradient? lerpFrom(Gradient? a, double t) {
-    if (a == null || (a is LinearGradient)) {
-      return LinearGradient.lerp(a as LinearGradient?, this, t);
+    if (a is LinearGradient?) {
+      return LinearGradient.lerp(a, this, t);
     }
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient? lerpTo(Gradient? b, double t) {
-    if (b == null || (b is LinearGradient)) {
-      return LinearGradient.lerp(this, b as LinearGradient?, t);
+    if (b is LinearGradient?) {
+      return LinearGradient.lerp(this, b, t);
     }
     return super.lerpTo(b, t);
   }
@@ -570,6 +570,7 @@ class LinearGradient extends Gradient {
       ],
       stops: stops,
       tileMode: tileMode,
+      transform: transform,
     );
   }
 }
@@ -751,16 +752,16 @@ class RadialGradient extends Gradient {
 
   @override
   Gradient? lerpFrom(Gradient? a, double t) {
-    if (a == null || (a is RadialGradient)) {
-      return RadialGradient.lerp(a as RadialGradient?, this, t);
+    if (a is RadialGradient?) {
+      return RadialGradient.lerp(a, this, t);
     }
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient? lerpTo(Gradient? b, double t) {
-    if (b == null || (b is RadialGradient)) {
-      return RadialGradient.lerp(this, b as RadialGradient?, t);
+    if (b is RadialGradient?) {
+      return RadialGradient.lerp(this, b, t);
     }
     return super.lerpTo(b, t);
   }
@@ -872,6 +873,7 @@ class RadialGradient extends Gradient {
       tileMode: tileMode,
       focal: focal,
       focalRadius: focalRadius,
+      transform: transform,
     );
   }
 }
@@ -1034,16 +1036,16 @@ class SweepGradient extends Gradient {
 
   @override
   Gradient? lerpFrom(Gradient? a, double t) {
-    if (a == null || (a is SweepGradient)) {
-      return SweepGradient.lerp(a as SweepGradient?, this, t);
+    if (a is SweepGradient?) {
+      return SweepGradient.lerp(a, this, t);
     }
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient? lerpTo(Gradient? b, double t) {
-    if (b == null || (b is SweepGradient)) {
-      return SweepGradient.lerp(this, b as SweepGradient?, t);
+    if (b is SweepGradient?) {
+      return SweepGradient.lerp(this, b, t);
     }
     return super.lerpTo(b, t);
   }
@@ -1149,6 +1151,7 @@ class SweepGradient extends Gradient {
       ],
       stops: stops,
       tileMode: tileMode,
+      transform: transform,
     );
   }
 }

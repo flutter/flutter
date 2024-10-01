@@ -5,6 +5,7 @@
 apply plugin: 'com.android.application'
 
 android {
+    namespace = "io.flutter.add2app"
     compileSdk 34
 
     compileOptions {

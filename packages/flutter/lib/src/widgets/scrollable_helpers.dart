@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'overscroll_indicator.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -150,7 +156,7 @@ class ScrollableDetails {
 ///
 /// The scroll velocity is controlled by the [velocityScalar]:
 ///
-/// velocity = <distance of overscroll> * [velocityScalar].
+/// velocity = (distance of overscroll) * [velocityScalar].
 class EdgeDraggingAutoScroller {
   /// Creates a auto scroller that scrolls the [scrollable].
   EdgeDraggingAutoScroller(
@@ -173,7 +179,7 @@ class EdgeDraggingAutoScroller {
   /// The velocity scalar per pixel over scroll.
   ///
   /// It represents how the velocity scale with the over scroll distance. The
-  /// auto-scroll velocity = <distance of overscroll> * velocityScalar.
+  /// auto-scroll velocity = (distance of overscroll) * velocityScalar.
   /// {@endtemplate}
   final double velocityScalar;
 
@@ -277,9 +283,7 @@ class EdgeDraggingAutoScroller {
       duration: duration,
       curve: Curves.linear,
     );
-    if (onScrollViewScrolled != null) {
-      onScrollViewScrolled!();
-    }
+    onScrollViewScrolled?.call();
     if (_scrolling) {
       await _scroll();
     }

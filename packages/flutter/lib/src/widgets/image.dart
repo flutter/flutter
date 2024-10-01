@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'fade_in_image.dart';
+/// @docImport 'icon.dart';
+/// @docImport 'transitions.dart';
+library;
+
 import 'dart:async';
 import 'dart:io' show File;
 
@@ -331,6 +339,10 @@ class Image extends StatefulWidget {
   /// To show an image from the network or from an asset bundle, consider using
   /// [Image.network] and [Image.asset] respectively.
   ///
+  /// The `scale` argument specifies the linear scale factor for drawing this
+  /// image at its intended size and applies to both the width and the height.
+  /// {@macro flutter.painting.imageInfo.scale}
+  ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
   /// Otherwise, the image dimensions will change as the image is loaded, which
@@ -370,6 +382,10 @@ class Image extends StatefulWidget {
   /// widget should be placed in a context that sets tight layout constraints.
   /// Otherwise, the image dimensions will change as the image is loaded, which
   /// will result in ugly layout changes.
+  ///
+  /// The `scale` argument specifies the linear scale factor for drawing this
+  /// image at its intended size and applies to both the width and the height.
+  /// {@macro flutter.painting.imageInfo.scale}
   ///
   /// All network images are cached regardless of HTTP headers.
   ///
@@ -419,6 +435,10 @@ class Image extends StatefulWidget {
        assert(cacheHeight == null || cacheHeight > 0);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
+  ///
+  /// The `scale` argument specifies the linear scale factor for drawing this
+  /// image at its intended size and applies to both the width and the height.
+  /// {@macro flutter.painting.imageInfo.scale}
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
@@ -499,6 +519,10 @@ class Image extends StatefulWidget {
   ///
   /// If the `bundle` argument is omitted or null, then the
   /// [DefaultAssetBundle] will be used.
+  ///
+  /// The `scale` argument specifies the linear scale factor for drawing this
+  /// image at its intended size and applies to both the width and the height.
+  /// {@macro flutter.painting.imageInfo.scale}
   ///
   /// By default, the pixel-density-aware asset resolution will be attempted. In
   /// addition:

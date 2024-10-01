@@ -30,14 +30,14 @@ class MaterialStateExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       initialValue: 'abc',
-      decoration: InputDecoration(
-        prefixIcon: const Icon(Icons.person),
-        prefixIconColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
-          if (states.contains(WidgetState.focused)) {
-            return Colors.green;
-          }
-          return Colors.grey;
-        }),
+      decoration: const InputDecoration(
+        prefixIcon: Icon(Icons.person),
+        prefixIconColor: WidgetStateColor.fromMap(
+          <WidgetStatesConstraint, Color>{
+            WidgetState.focused: Colors.green,
+            WidgetState.any:     Colors.grey,
+          },
+        ),
       ),
     );
   }

@@ -244,6 +244,11 @@ https://docs.flutter.dev/testing/integration-tests
     results[description] ??= _success;
   }
 
+  // Do not paint a description label because it could show up in screenshots
+  // of the integration test.
+  @override
+  void setLabel(String value) {}
+
   vm.VmService? _vmService;
 
   /// Initialize the [vm.VmService] settings for the timeline.

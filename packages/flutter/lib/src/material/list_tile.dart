@@ -2,6 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'card.dart';
+/// @docImport 'checkbox.dart';
+/// @docImport 'checkbox_list_tile.dart';
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'drawer.dart';
+/// @docImport 'expansion_tile.dart';
+/// @docImport 'material.dart';
+/// @docImport 'radio.dart';
+/// @docImport 'radio_list_tile.dart';
+/// @docImport 'scaffold.dart';
+/// @docImport 'switch.dart';
+/// @docImport 'switch_list_tile.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -396,6 +410,7 @@ class ListTile extends StatelessWidget {
     this.minLeadingWidth,
     this.minTileHeight,
     this.titleAlignment,
+    this.internalAddSemanticForOnTap = true,
   }) : assert(!isThreeLine || subtitle != null);
 
   /// A widget to display before the title.
@@ -724,6 +739,13 @@ class ListTile extends StatelessWidget {
   ///   [ListTileThemeData].
   final ListTileTitleAlignment? titleAlignment;
 
+  /// Whether to add button:true to the semantics if onTap is provided.
+  /// This is a temporary flag to help changing the behavior of ListTile onTap semantics.
+  ///
+  // TODO(hangyujin): Remove this flag after fixing related g3 tests and flipping
+  // the default value to true.
+  final bool internalAddSemanticForOnTap;
+
   /// Add a one pixel border in between each tile. If color isn't specified the
   /// [ThemeData.dividerColor] of the context's [Theme] is used.
   ///
@@ -896,6 +918,7 @@ class ListTile extends StatelessWidget {
       autofocus: autofocus,
       enableFeedback: enableFeedback ?? tileTheme.enableFeedback ?? true,
       child: Semantics(
+        button: internalAddSemanticForOnTap && (onTap != null || onLongPress != null),
         selected: selected,
         enabled: enabled,
         child: Ink(

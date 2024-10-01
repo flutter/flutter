@@ -102,17 +102,18 @@ class JsCompilerConfig extends WebCompilerConfig {
   CompileTarget get compileTarget => CompileTarget.js;
 
   /// Arguments to use in both phases: full JS compile and CFE-only.
-  List<String> toSharedCommandOptions() => <String>[
+  List<String> toSharedCommandOptions(BuildMode buildMode) => <String>[
         if (nativeNullAssertions) '--native-null-assertions',
         if (!sourceMaps) '--no-source-maps',
+        if (buildMode == BuildMode.debug) '--enable-asserts',
       ];
 
   /// Arguments to use in the full JS compile, but not CFE-only.
   ///
   /// Includes the contents of [toSharedCommandOptions].
   List<String> toCommandOptions(BuildMode buildMode) => <String>[
-        if (buildMode == BuildMode.profile) '--no-minify',
-        ...toSharedCommandOptions(),
+        if (buildMode != BuildMode.release) '--no-minify',
+        ...toSharedCommandOptions(buildMode),
         '-O$optimizationLevel',
         if (dumpInfo) '--dump-info',
         if (noFrequencyBasedMinification) '--no-frequency-based-minification',
@@ -156,7 +157,8 @@ class WasmCompilerConfig extends WebCompilerConfig {
     return <String>[
       '-O$optimizationLevel',
       '--${stripSymbols ? '' : 'no-'}strip-wasm',
-      if (!sourceMaps) '--extra-compiler-option=--no-source-maps',
+      if (!sourceMaps) '--no-source-maps',
+      if (buildMode == BuildMode.debug) '--extra-compiler-option=--enable-asserts',
     ];
   }
 

@@ -16,6 +16,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'localizations.dart';
+import 'scrollbar.dart';
 
 // The scale of the child at the time that the CupertinoContextMenu opens.
 // This value was eyeballed from a physical device running iOS 13.1.2.
@@ -56,6 +57,11 @@ const List<BoxShadow> _endBoxShadow = <BoxShadow>[
 const Color _borderColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFA9A9AF),
   darkColor: Color(0xFF57585A),
+);
+
+const Color _kBackgroundColor = CupertinoDynamicColor.withBrightness(
+   color: Color(0xFFF1F1F1),
+   darkColor: Color(0xFF212122),
 );
 
 typedef _DismissCallback = void Function(
@@ -232,6 +238,10 @@ class CupertinoContextMenu extends StatefulWidget {
   /// fully opening. For an example, see the documentation for [builder].
   static final double animationOpensAt =
       _previewLongPressTimeout.inMilliseconds / _animationDuration;
+
+  /// The background color of a [CupertinoContextMenuAction] and a
+  /// [CupertinoContextMenu] sheet.
+  static const Color kBackgroundColor = _kBackgroundColor;
 
   /// A function that returns a widget to be used alternatively from [child].
   ///
@@ -1369,21 +1379,36 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
 
 // The menu that displays when CupertinoContextMenu is open. It consists of a
 // list of actions that are typically CupertinoContextMenuActions.
-class _ContextMenuSheet extends StatelessWidget {
+class _ContextMenuSheet extends StatefulWidget {
   _ContextMenuSheet({
     super.key,
     required this.actions,
-    required _ContextMenuLocation contextMenuLocation,
-    required Orientation orientation,
-  }) : assert(actions.isNotEmpty),
-       _contextMenuLocation = contextMenuLocation,
-       _orientation = orientation;
+    required this.contextMenuLocation,
+    required this.orientation,
+  }) : assert(actions.isNotEmpty);
 
   final List<Widget> actions;
-  final _ContextMenuLocation _contextMenuLocation;
-  final Orientation _orientation;
+  final _ContextMenuLocation contextMenuLocation;
+  final Orientation orientation;
 
+  @override
+  State<_ContextMenuSheet> createState() => _ContextMenuSheetState();
+}
+
+class _ContextMenuSheetState extends State<_ContextMenuSheet> {
+  late final ScrollController _controller;
   static const double _kMenuWidth = 250.0;
+  // Eyeballed on a context menu on an iOS 15 simulator running iOS 17.5.
+  static const double _kScrollbarMainAxisMargin = 13.0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Link the scrollbar to the scroll view by providing both the same scroll
+    // controller. Using SingleChildScrollview.primary might conflict with users
+    // already using the PrimaryScrollController.
+    _controller = ScrollController();
+  }
 
   // Get the children, whose order depends on orientation and
   // contextMenuLocation.
@@ -1393,38 +1418,57 @@ class _ContextMenuSheet extends StatelessWidget {
       child: IntrinsicHeight(
         child: ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(13.0)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              actions.first,
-              for (final Widget action in actions.skip(1))
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(
-                        color: CupertinoDynamicColor.resolve(
-                          _borderColor,
-                          context,
+          child: ColoredBox(
+            color: CupertinoDynamicColor.resolve(CupertinoContextMenu.kBackgroundColor, context),
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+              child: CupertinoScrollbar(
+                mainAxisMargin: _kScrollbarMainAxisMargin,
+                controller: _controller,
+                child: SingleChildScrollView(
+                  controller: _controller,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      widget.actions.first,
+                      for (final Widget action in widget.actions.skip(1))
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(
+                                color: CupertinoDynamicColor.resolve(
+                                  _borderColor,
+                                  context,
+                                ),
+                                width: 0.4,
+                              ),
+                            ),
+                          ),
+                          position: DecorationPosition.foreground,
+                          child: action,
                         ),
-                        width: 0.4,
-                      ),
-                    ),
+                    ],
                   ),
-                  position: DecorationPosition.foreground,
-                  child: action,
                 ),
-            ],
+              ),
+            ),
           ),
         ),
       ),
     );
 
-    return switch (_contextMenuLocation) {
-      _ContextMenuLocation.center when _orientation == Orientation.portrait => <Widget>[const Spacer(), menu, const Spacer()],
+    return switch (widget.contextMenuLocation) {
+      _ContextMenuLocation.center when widget.orientation == Orientation.portrait => <Widget>[const Spacer(), menu, const Spacer()],
       _ContextMenuLocation.center => <Widget>[menu, const Spacer()],
       _ContextMenuLocation.right  => <Widget>[const Spacer(), menu],
       _ContextMenuLocation.left   => <Widget>[menu, const Spacer()],
     };
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override

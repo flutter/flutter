@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/foundation.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'animated_size.dart';
+/// @docImport 'transitions.dart';
+library;
+
 import 'package:flutter/animation.dart';
 
 import 'framework.dart';

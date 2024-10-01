@@ -205,6 +205,7 @@ class CheckboxListTile extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.checkboxSemanticLabel,
+    this.internalAddSemanticForOnTap = false,
   }) : _checkboxType = _CheckboxType.material,
        assert(tristate || value != null),
        assert(!isThreeLine || subtitle != null);
@@ -249,6 +250,7 @@ class CheckboxListTile extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.checkboxSemanticLabel,
+    this.internalAddSemanticForOnTap = false,
   }) : _checkboxType = _CheckboxType.adaptive,
        assert(tristate || value != null),
        assert(!isThreeLine || subtitle != null);
@@ -464,6 +466,13 @@ class CheckboxListTile extends StatelessWidget {
   /// inoperative.
   final bool? enabled;
 
+  /// Whether to add button:true to the semantics if onTap is provided.
+  /// This is a temporary flag to help changing the behavior of ListTile onTap semantics.
+  ///
+  // TODO(hangyujin): Remove this flag after fixing related g3 tests and flipping
+  // the default value to true.
+  final bool internalAddSemanticForOnTap;
+
   /// {@macro flutter.material.checkbox.semanticLabel}
   final String? checkboxSemanticLabel;
 
@@ -567,6 +576,7 @@ class CheckboxListTile extends StatelessWidget {
         focusNode: focusNode,
         onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
+        internalAddSemanticForOnTap: internalAddSemanticForOnTap,
       ),
     );
   }

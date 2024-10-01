@@ -86,6 +86,19 @@ typedef _ContextPainterFunction = void Function(PaintingContext context, Offset 
 /// The signature of functions that paint directly on a canvas.
 typedef _CanvasPainterFunction = void Function(Canvas canvas);
 
+bool _colorsMatch(Color x, Color? y) {
+  if (y == null) {
+    return false;
+  } else {
+    const double limit = 1/255;
+    return x.colorSpace == y.colorSpace &&
+      (x.a - y.a).abs() < limit &&
+      (x.r - y.r).abs() < limit &&
+      (x.g - y.g).abs() < limit &&
+      (x.b - y.b).abs() < limit;
+  }
+}
+
 /// Builder interface for patterns used to match display lists (canvas calls).
 ///
 /// The [paints] matcher returns a [PaintPattern] so that you can build the
@@ -944,7 +957,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   @mustCallSuper
   void verifyArguments(List<dynamic> arguments) {
     final Paint paintArgument = arguments[paintArgumentIndex] as Paint;
-    if (color != null && paintArgument.color != color) {
+    if (color != null && !_colorsMatch(paintArgument.color, color)) {
       throw FlutterError(
         'It called $methodName with a paint whose color, '
         '${paintArgument.color}, was not exactly the expected color ($color).'
@@ -1421,7 +1434,7 @@ class _ShadowPredicate extends _PaintPredicate {
       }
     }
     final Color actualColor = arguments[1] as Color;
-    if (color != null && actualColor != color) {
+    if (color != null && !_colorsMatch(actualColor, color)) {
       throw FlutterError(
         'It called $methodName with a color, $actualColor, which was not '
         'exactly the expected color ($color).'

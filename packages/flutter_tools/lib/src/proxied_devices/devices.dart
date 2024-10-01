@@ -19,6 +19,7 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../project.dart';
+import '../resident_runner.dart';
 import 'debounce_data_stream.dart';
 import 'file_transfer.dart';
 
@@ -175,7 +176,7 @@ class ProxiedDevice extends Device {
     required this.supportsScreenshot,
     required this.supportsFastStart,
     required bool supportsHardwareRendering,
-    required Logger logger,
+    required super.logger,
     FileTransfer fileTransfer = const FileTransfer(),
   }): _deltaFileTransfer = deltaFileTransfer,
       _enableDdsProxy = enableDdsProxy,
@@ -334,7 +335,6 @@ class ProxiedDevice extends Device {
     required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs = const <String, Object?>{},
     bool prebuiltApplication = false,
-    bool ipv6 = false,
     String? userIdentifier,
   }) async {
     final Map<String, Object?> result = _cast<Map<String, Object?>>(await connection.sendRequest('device.startApp', <String, Object?>{
@@ -345,7 +345,7 @@ class ProxiedDevice extends Device {
       'debuggingOptions': debuggingOptions.toJson(),
       'platformArgs': platformArgs,
       'prebuiltApplication': prebuiltApplication,
-      'ipv6': ipv6,
+      'ipv6': debuggingOptions.ipv6,
       'userIdentifier': userIdentifier,
     }));
     final bool started = _cast<bool>(result['started']);
@@ -748,7 +748,7 @@ Future<ServerSocket> _defaultCreateServerSocket(Logger logger, int? hostPort, bo
 /// There are a lot of communications between DDS and the VM service on the
 /// device. When using proxied device, starting DDS remotely helps reduces the
 /// amount of data transferred with the remote daemon, hence improving latency.
-class ProxiedDartDevelopmentService implements DartDevelopmentService {
+class ProxiedDartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin implements DartDevelopmentService {
   ProxiedDartDevelopmentService(
     this.connection,
     this.deviceId, {
@@ -756,10 +756,11 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
     required ProxiedPortForwarder proxiedPortForwarder,
     required ProxiedPortForwarder devicePortForwarder,
     @visibleForTesting DartDevelopmentService? localDds,
-  })  : _logger = logger,
+  })  :
+        _logger = logger,
         _proxiedPortForwarder = proxiedPortForwarder,
         _devicePortForwarder = devicePortForwarder,
-        _localDds = localDds ?? DartDevelopmentService();
+        _localDds = localDds ?? DartDevelopmentService(logger: logger);
 
   final String deviceId;
 
@@ -776,10 +777,9 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
   /// It forwards a port on the remotely connected device, to the remote host, then to the local host.
   final ProxiedPortForwarder _devicePortForwarder;
 
-  Uri? _localUri;
-
   @override
   Uri? get uri => _ddsStartedLocally ? _localDds.uri : _localUri;
+  Uri? _localUri;
 
   @override
   Future<void> get done => _completer.future;
@@ -792,11 +792,14 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
-    required Logger logger,
-    int? hostPort,
+    FlutterDevice? device,
+    int? ddsPort,
     bool? ipv6,
     bool? disableServiceAuthCodes,
+    bool enableDevTools = false,
     bool cacheStartupProfile = false,
+    String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
   }) async {
     // Locate the original VM service port on the remote daemon.
     // A proxied device has two PortForwarder. Check both to determine which
@@ -805,18 +808,24 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
         _proxiedPortForwarder.originalRemotePort(vmServiceUri.port) ??
         _devicePortForwarder.originalRemotePort(vmServiceUri.port);
 
-    if (remoteVMServicePort == null) {
-      _logger.printTrace('VM service port is not a forwarded port. Start DDS locally.');
+    Future<void> startLocalDds() async {
       _ddsStartedLocally = true;
       await _localDds.startDartDevelopmentService(
         vmServiceUri,
-        logger: logger,
-        hostPort: hostPort,
+        ddsPort: ddsPort,
         ipv6: ipv6,
         disableServiceAuthCodes: disableServiceAuthCodes,
         cacheStartupProfile: cacheStartupProfile,
+        enableDevTools: enableDevTools,
+        google3WorkspaceRoot: google3WorkspaceRoot,
+        devToolsServerAddress: devToolsServerAddress,
       );
       unawaited(_localDds.done.then(_completer.complete));
+    }
+
+    if (remoteVMServicePort == null) {
+      _logger.printTrace('VM service port is not a forwarded port. Start DDS locally.');
+      await startLocalDds();
       return;
     }
 
@@ -835,11 +844,19 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
               // Ignore if we did not receive any event from the server.
             },
           ));
-      remoteUriStr = _cast<String?>(await connection.sendRequest(method, <String, Object?>{
-        'deviceId': deviceId,
-        'vmServiceUri': remoteVMServiceUri.toString(),
-        'disableServiceAuthCodes': disableServiceAuthCodes,
-      }));
+      final Object? response = await connection.sendRequest(method, <String, Object?>{
+          'deviceId': deviceId,
+          'vmServiceUri': remoteVMServiceUri.toString(),
+          'disableServiceAuthCodes': disableServiceAuthCodes,
+      });
+
+      if (response is Map<String, Object?>) {
+        remoteUriStr = response['ddsUri'] as String?;
+      } else {
+        // For backwards compatibility in google3.
+        // TODO(bkonyi): remove once a newer version of the flutter_tool is rolled out.
+        remoteUriStr = _cast<String?>(response);
+      }
     } on String catch (e) {
       if (!e.contains(method)) {
         rethrow;
@@ -850,16 +867,7 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
 
     if (remoteUriStr == null) {
       _logger.printTrace('Remote daemon cannot start DDS. Start a local DDS instead.');
-      _ddsStartedLocally = true;
-      await _localDds.startDartDevelopmentService(
-        vmServiceUri,
-        logger: logger,
-        hostPort: hostPort,
-        ipv6: ipv6,
-        disableServiceAuthCodes: disableServiceAuthCodes,
-        cacheStartupProfile: cacheStartupProfile,
-      );
-      unawaited(_localDds.done.then(_completer.complete));
+      await startLocalDds();
       return;
     }
 
@@ -869,7 +877,7 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
     final Uri remoteUri = Uri.parse(remoteUriStr);
     final int localPort = await _proxiedPortForwarder.forward(
       remoteUri.port,
-      hostPort: hostPort,
+      hostPort: ddsPort,
       ipv6: ipv6,
     );
 
@@ -885,21 +893,13 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
   @override
   Future<void> shutdown() async {
     if (_ddsStartedLocally) {
-      await _localDds.shutdown();
+      _localDds.shutdown();
       _ddsStartedLocally = false;
     } else {
       await connection.sendRequest('device.shutdownDartDevelopmentService', <String, Object?>{
         'deviceId': deviceId,
       });
     }
-  }
-
-  @override
-  void setExternalDevToolsUri(Uri uri) {
-    connection.sendRequest('device.setExternalDevToolsUriForDartDevelopmentService', <String, Object?>{
-      'deviceId': deviceId,
-      'uri': uri.toString(),
-    });
   }
 }
 

@@ -48,6 +48,10 @@ import 'theme.dart';
 /// route created by this method is pushed to the nearest navigator to the
 /// given `context`. It can not be `null`.
 ///
+/// The `maintainState` argument is used to determine if the route should remain
+/// in memory when it is inactive (see [ModalRoute.maintainState] for more details].
+/// By default, `maintainState` is `false`.
+///
 /// The transition to the search page triggered by this method looks best if the
 /// screen triggering the transition contains an [AppBar] at the top and the
 /// transition is called from an [IconButton] that's part of [AppBar.actions].
@@ -68,11 +72,13 @@ Future<T?> showSearch<T>({
   required SearchDelegate<T> delegate,
   String? query = '',
   bool useRootNavigator = false,
+  bool maintainState = false,
 }) {
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
   return Navigator.of(context, rootNavigator: useRootNavigator).push(_SearchPageRoute<T>(
     delegate: delegate,
+    maintainState: maintainState
   ));
 }
 
@@ -417,6 +423,7 @@ enum _SearchBody {
 class _SearchPageRoute<T> extends PageRoute<T> {
   _SearchPageRoute({
     required this.delegate,
+    required this.maintainState,
   }) {
     assert(
       delegate._route == null,
@@ -430,6 +437,9 @@ class _SearchPageRoute<T> extends PageRoute<T> {
   final SearchDelegate<T> delegate;
 
   @override
+  final bool maintainState;
+
+  @override
   Color? get barrierColor => null;
 
   @override
@@ -437,9 +447,6 @@ class _SearchPageRoute<T> extends PageRoute<T> {
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 300);
-
-  @override
-  bool get maintainState => false;
 
   @override
   Widget buildTransitions(
