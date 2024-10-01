@@ -3,43 +3,20 @@
 // found in the LICENSE file.
 
 import 'dart:convert' as convert;
+import 'dart:ffi';
 
 import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:engine_tool/src/build_utils.dart';
 import 'package:engine_tool/src/commands/command_runner.dart';
 import 'package:engine_tool/src/logger.dart';
 import 'package:path/path.dart' as path;
-import 'package:platform/platform.dart';
 import 'package:test/test.dart';
 
 import 'fixtures.dart' as fixtures;
+import 'src/test_build_configs.dart';
 import 'utils.dart';
 
 void main() {
-  final linuxTestConfig = BuilderConfig.fromJson(
-    path: 'ci/builders/linux_test_config.json',
-    map: convert.jsonDecode(fixtures.testConfig('Linux', Platform.linux))
-        as Map<String, Object?>,
-  );
-
-  final macTestConfig = BuilderConfig.fromJson(
-    path: 'ci/builders/mac_test_config.json',
-    map: convert.jsonDecode(fixtures.testConfig('Mac-12', Platform.macOS))
-        as Map<String, Object?>,
-  );
-
-  final winTestConfig = BuilderConfig.fromJson(
-    path: 'ci/builders/win_test_config.json',
-    map: convert.jsonDecode(fixtures.testConfig('Windows-11', Platform.windows))
-        as Map<String, Object?>,
-  );
-
-  final configs = <String, BuilderConfig>{
-    'linux_test_config': linuxTestConfig,
-    'mac_test_config': macTestConfig,
-    'win_test_config': winTestConfig,
-  };
-
   final cannedProcesses = [
     CannedProcess(
       (command) => command.contains('desc'),
@@ -49,20 +26,56 @@ void main() {
 
   test('can find host runnable build', () async {
     final testEnv = TestEnvironment.withTestEngine(
+      abi: Abi.macosArm64,
       cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
+    final builder = TestBuilderConfig();
+    builder.addBuild(
+      name: 'macos/host_debug',
+      dimension: TestDroneDimension.mac,
+    );
+    builder.addBuild(
+      name: 'mac/host_profile',
+      dimension: TestDroneDimension.mac,
+    );
+    builder.addBuild(
+      name: 'linux/host_debug',
+      dimension: TestDroneDimension.linux,
+    );
+
+    final configs = {
+      'mac_test_config': builder.buildConfig(
+        path: 'ci/builders/mac_test_config.json',
+      ),
+    };
+
     final result = runnableBuilds(testEnv.environment, configs, true);
-    expect(result.length, equals(4));
-    expect(result[0].name, equals('ci/build_name'));
+    expect(
+      result.map((r) => r.name),
+      unorderedEquals(['macos/host_debug', 'mac/host_profile']),
+    );
   });
 
   test('build command invokes gn', () async {
     final testEnv = TestEnvironment.withTestEngine(
+      abi: Abi.macosArm64,
       cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
+
+    final builder = TestBuilderConfig();
+    builder.addBuild(
+      name: 'macos/host_debug',
+      dimension: TestDroneDimension.mac,
+    );
+
+    final configs = {
+      'mac_test_config': builder.buildConfig(
+        path: 'ci/builders/mac_test_config.json',
+      ),
+    };
 
     final runner = ToolCommandRunner(
       environment: testEnv.environment,
@@ -71,8 +84,10 @@ void main() {
     final result = await runner.run([
       'build',
       '--config',
-      'ci/build_name',
+      'host_debug',
     ]);
+
+    printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
     expect(testEnv.processHistory.length, greaterThanOrEqualTo(1));
     expect(testEnv.processHistory[0].command[0], contains('gn'));
@@ -80,10 +95,22 @@ void main() {
 
   test('build command invokes ninja', () async {
     final testEnv = TestEnvironment.withTestEngine(
+      abi: Abi.macosArm64,
       cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
+    final builder = TestBuilderConfig();
+    builder.addBuild(
+      name: 'macos/host_debug',
+      dimension: TestDroneDimension.mac,
+    );
+
+    final configs = {
+      'mac_test_config': builder.buildConfig(
+        path: 'ci/builders/mac_test_config.json',
+      ),
+    };
     final runner = ToolCommandRunner(
       environment: testEnv.environment,
       configs: configs,
@@ -91,8 +118,10 @@ void main() {
     final result = await runner.run([
       'build',
       '--config',
-      'ci/build_name',
+      'host_debug',
     ]);
+
+    printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
     expect(testEnv.processHistory.length, greaterThanOrEqualTo(2));
     expect(testEnv.processHistory[1].command[0], contains('ninja'));
@@ -100,10 +129,23 @@ void main() {
 
   test('build command invokes generator', () async {
     final testEnv = TestEnvironment.withTestEngine(
+      abi: Abi.macosArm64,
       cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
+    final builder = TestBuilderConfig();
+    builder.addBuild(
+      name: 'macos/host_debug',
+      dimension: TestDroneDimension.mac,
+      generatorTask: ('gen/script.py', ['--test-param']),
+    );
+
+    final configs = {
+      'mac_test_config': builder.buildConfig(
+        path: 'ci/builders/mac_test_config.json',
+      ),
+    };
     final runner = ToolCommandRunner(
       environment: testEnv.environment,
       configs: configs,
@@ -111,22 +153,36 @@ void main() {
     final result = await runner.run([
       'build',
       '--config',
-      'ci/build_name',
+      'host_debug',
     ]);
+
+    printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
-    expect(testEnv.processHistory.length, greaterThanOrEqualTo(3));
     expect(
-      testEnv.processHistory[2].command,
-      containsAllInOrder(['python3', 'gen/script.py']),
+      testEnv.processHistory.map((p) => p.command),
+      containsOnce(containsAllInOrder(['python3', 'gen/script.py'])),
     );
   });
 
   test('build command does not invoke tests', () async {
     final testEnv = TestEnvironment.withTestEngine(
+      abi: Abi.macosArm64,
       cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
+    final builder = TestBuilderConfig();
+    builder.addBuild(
+      name: 'macos/host_debug',
+      dimension: TestDroneDimension.mac,
+      testTask: ('test/script.py', ['--test-param']),
+    );
+
+    final configs = {
+      'mac_test_config': builder.buildConfig(
+        path: 'ci/builders/mac_test_config.json',
+      ),
+    };
     final runner = ToolCommandRunner(
       environment: testEnv.environment,
       configs: configs,
@@ -134,18 +190,36 @@ void main() {
     final result = await runner.run([
       'build',
       '--config',
-      'ci/build_name',
+      'host_debug',
     ]);
+
+    printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
-    expect(testEnv.processHistory.length, lessThanOrEqualTo(4));
+    expect(
+      testEnv.processHistory.map((p) => p.command),
+      isNot(contains(containsAllInOrder(['python3', 'gen/script.py']))),
+    );
   });
 
   test('build command runs rbe on an rbe build', () async {
     final testEnv = TestEnvironment.withTestEngine(
+      abi: Abi.macosArm64,
       withRbe: true,
       cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
+
+    final builder = TestBuilderConfig();
+    builder.addBuild(
+      name: 'ci/android_debug_rbe_arm64',
+      dimension: TestDroneDimension.mac,
+      enableRbe: true,
+    );
+    final configs = {
+      'mac_test_config': builder.buildConfig(
+        path: 'ci/builders/mac_test_config.json',
+      ),
+    };
 
     final runner = ToolCommandRunner(
       environment: testEnv.environment,
@@ -156,50 +230,93 @@ void main() {
       '--config',
       'ci/android_debug_rbe_arm64',
     ]);
+
+    printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
-    expect(testEnv.processHistory[0].command[0],
-        contains(path.join('tools', 'gn')));
-    expect(testEnv.processHistory[0].command[2], equals('--rbe'));
-    expect(testEnv.processHistory[1].command[0],
-        contains(path.join('reclient', 'bootstrap')));
+
+    final [gnCall, reclientCall, ..._] = testEnv.processHistory;
+    expect(
+      gnCall.command,
+      containsAllInOrder([
+        endsWith('tools/gn'),
+        contains('--rbe'),
+      ]),
+    );
+    expect(
+      reclientCall.command,
+      containsAllInOrder([
+        endsWith('reclient/bootstrap'),
+      ]),
+    );
   });
 
   test('build command plumbs -j to ninja', () async {
     final testEnv = TestEnvironment.withTestEngine(
+      abi: Abi.macosArm64,
       withRbe: true,
       cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
+    final builder = TestBuilderConfig();
+    builder.addBuild(
+      name: 'ci/android_debug_arm64',
+      dimension: TestDroneDimension.mac,
+    );
+
     final runner = ToolCommandRunner(
       environment: testEnv.environment,
-      configs: configs,
+      configs: {
+        'mac_test_config': builder.buildConfig(
+          path: 'ci/builders/mac_test_config.json',
+        ),
+      },
     );
     final result = await runner.run([
       'build',
       '--config',
-      'ci/android_debug_rbe_arm64',
+      'ci/android_debug_arm64',
       '-j',
       '500',
     ]);
+
+    printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
-    expect(testEnv.processHistory[0].command[0],
-        contains(path.join('tools', 'gn')));
-    expect(testEnv.processHistory[0].command[2], equals('--rbe'));
-    expect(testEnv.processHistory[2].command.contains('500'), isTrue);
+
+    print(testEnv.processHistory);
+    final [_, ninja, ..._] = testEnv.processHistory;
+    expect(
+      ninja.command,
+      containsAllInOrder([
+        endsWith('ninja/ninja'),
+        '-j',
+        '500',
+      ]),
+    );
   });
 
   test('build command fails when rbe is enabled but not supported', () async {
     final testEnv = TestEnvironment.withTestEngine(
+      abi: Abi.macosArm64,
       cannedProcesses: cannedProcesses,
       // Intentionally omit withRbe: true.
       // That means the //flutter/build/rbe directory will not be created.
     );
     addTearDown(testEnv.cleanup);
 
+    final builder = TestBuilderConfig();
+    builder.addBuild(
+      name: 'ci/android_debug_rbe_arm64',
+      dimension: TestDroneDimension.mac,
+      enableRbe: true,
+    );
     final runner = ToolCommandRunner(
       environment: testEnv.environment,
-      configs: configs,
+      configs: {
+        'mac_test_config': builder.buildConfig(
+          path: 'ci/builders/mac_test_config.json',
+        ),
+      },
     );
     final result = await runner.run([
       'build',
@@ -216,14 +333,28 @@ void main() {
 
   test('build command does not run rbe when disabled', () async {
     final testEnv = TestEnvironment.withTestEngine(
+      abi: Abi.macosArm64,
       withRbe: true,
       cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
+    final builder = TestBuilderConfig();
+    builder.addBuild(
+      name: 'ci/android_debug_rbe_arm64',
+      dimension: TestDroneDimension.mac,
+
+      // Intentionally show that RBE is disabled.
+      // ignore: avoid_redundant_argument_values
+      enableRbe: false,
+    );
     final runner = ToolCommandRunner(
       environment: testEnv.environment,
-      configs: configs,
+      configs: {
+        'mac_test_config': builder.buildConfig(
+          path: 'ci/builders/mac_test_config.json',
+        ),
+      },
     );
     final result = await runner.run([
       'build',
@@ -231,36 +362,64 @@ void main() {
       'ci/android_debug_rbe_arm64',
       '--no-rbe',
     ]);
+
+    printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
-    expect(testEnv.processHistory[0].command[0],
-        contains(path.join('tools', 'gn')));
-    expect(testEnv.processHistory[0].command, isNot(contains(['--rbe'])));
-    expect(testEnv.processHistory[1].command[0],
-        contains(path.join('ninja', 'ninja')));
+
+    final [gn, ninja, ..._] = testEnv.processHistory;
+    expect(gn.command, isNot(contains('--rbe')));
+
+    expect(
+      ninja.command,
+      containsAllInOrder(
+        [
+          endsWith('ninja/ninja'),
+        ],
+      ),
+    );
   });
 
   test('build command does not run rbe when rbe configs do not exist',
       () async {
     final testEnv = TestEnvironment.withTestEngine(
+      abi: Abi.macosArm64,
       cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
+    final builder = TestBuilderConfig();
+    builder.addBuild(
+      name: 'ci/android_debug_rbe_arm64',
+      dimension: TestDroneDimension.mac,
+      enableRbe: true,
+    );
     final runner = ToolCommandRunner(
       environment: testEnv.environment,
-      configs: configs,
+      configs: {
+        'mac_test_config': builder.buildConfig(
+          path: 'ci/builders/mac_test_config.json',
+        ),
+      },
     );
     final result = await runner.run([
       'build',
       '--config',
       'ci/android_debug_rbe_arm64',
     ]);
+
+    printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
-    expect(testEnv.processHistory[0].command[0],
-        contains(path.join('tools', 'gn')));
-    expect(testEnv.processHistory[0].command, isNot(contains(['--rbe'])));
-    expect(testEnv.processHistory[1].command[0],
-        contains(path.join('ninja', 'ninja')));
+
+    final [gn, ninja, ..._] = testEnv.processHistory;
+    expect(gn.command, isNot(contains('--rbe')));
+    expect(
+      ninja.command,
+      containsAllInOrder(
+        [
+          endsWith('ninja/ninja'),
+        ],
+      ),
+    );
   });
 
   test('mangleConfigName removes the OS and adds ci/ as needed', () {
@@ -359,60 +518,108 @@ void main() {
 
   test('build command invokes ninja with the specified target', () async {
     final testEnv = TestEnvironment.withTestEngine(
+      abi: Abi.macosArm64,
       cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
+    final builder = TestBuilderConfig();
+    builder.addBuild(
+      name: 'ci/host_debug',
+      targetDir: 'host_debug',
+      dimension: TestDroneDimension.mac,
+    );
     final runner = ToolCommandRunner(
       environment: testEnv.environment,
-      configs: configs,
+      configs: {
+        'mac_test_config': builder.buildConfig(
+          path: 'ci/builders/mac_test_config.json',
+        ),
+      },
     );
     final result = await runner.run([
       'build',
       '--config',
-      'host_debug',
+      'ci/host_debug',
       '//flutter/fml:fml_arc_unittests',
     ]);
+
+    printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
-    expect(testEnv.processHistory, containsCommand((command) {
-      return command.length > 3 &&
-          command[0].contains('ninja') &&
-          command[1].contains('-C') &&
-          command[2].endsWith('/host_debug') &&
-          // TODO(matanlurey): Tighten this up to be more specific.
-          // The reason we need a broad check is because the test fixture
-          // always returns multiple targets for gn desc, even though that is
-          // not the actual behavior.
-          command.sublist(3).contains('flutter/fml:fml_arc_unittests');
-    }));
+
+    final ninjaCmd = testEnv.processHistory.firstWhere(
+      (p) => p.command.first.endsWith('ninja'),
+    );
+    expect(
+      ninjaCmd.command,
+      containsAllInOrder(
+        [
+          endsWith('ninja'),
+          '-C',
+          endsWith('host_debug'),
+        ],
+      ),
+    );
+    expect(
+      ninjaCmd.command,
+      contains(
+        contains('flutter/fml:fml_arc_unittests'),
+      ),
+    );
   });
 
   test('build command invokes ninja with all matched targets', () async {
     final testEnv = TestEnvironment.withTestEngine(
+      abi: Abi.macosArm64,
       cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
+    final builder = TestBuilderConfig();
+    builder.addBuild(
+      name: 'ci/host_debug',
+      targetDir: 'host_debug',
+      dimension: TestDroneDimension.mac,
+    );
     final runner = ToolCommandRunner(
       environment: testEnv.environment,
-      configs: configs,
+      configs: {
+        'mac_test_config': builder.buildConfig(
+          path: 'ci/builders/mac_test_config.json',
+        ),
+      },
     );
     final result = await runner.run([
       'build',
       '--config',
-      'host_debug',
+      'ci/host_debug',
       '//flutter/...',
     ]);
+    printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
-    expect(testEnv.processHistory, containsCommand((command) {
-      return command.length > 5 &&
-          command[0].contains('ninja') &&
-          command[1].contains('-C') &&
-          command[2].endsWith('/host_debug') &&
-          command[3] == 'flutter/display_list:display_list_unittests' &&
-          command[4] == 'flutter/flow:flow_unittests' &&
-          command[5] == 'flutter/fml:fml_arc_unittests';
-    }));
+
+    final ninjaCmd = testEnv.processHistory.firstWhere(
+      (p) => p.command.first.endsWith('ninja'),
+    );
+    expect(
+      ninjaCmd.command,
+      containsAllInOrder(
+        [
+          endsWith('ninja'),
+          '-C',
+          endsWith('host_debug'),
+        ],
+      ),
+    );
+
+    expect(
+      ninjaCmd.command,
+      containsAll([
+        'flutter/display_list:display_list_unittests',
+        'flutter/flow:flow_unittests',
+        'flutter/fml:fml_arc_unittests',
+      ]),
+    );
   });
 
   test('build command gracefully handles no matched targets', () async {
@@ -420,27 +627,42 @@ void main() {
       CannedProcess(
         (command) => command.contains('desc'),
         stdout: fixtures.gnDescOutputEmpty(
-            gnPattern: 'testing/scenario_app:sceario_app'),
+          gnPattern: 'testing/scenario_app:sceario_app',
+        ),
         exitCode: 1,
       ),
     ];
     final testEnv = TestEnvironment.withTestEngine(
+      abi: Abi.macosArm64,
       cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
+    final builder = TestBuilderConfig();
+    builder.addBuild(
+      name: 'ci/host_debug',
+      targetDir: 'host_debug',
+      dimension: TestDroneDimension.mac,
+    );
     final runner = ToolCommandRunner(
       environment: testEnv.environment,
-      configs: configs,
+      configs: {
+        'mac_test_config': builder.buildConfig(
+          path: 'ci/builders/mac_test_config.json',
+        ),
+      },
     );
     final result = await runner.run([
       'build',
       '--config',
-      'host_debug',
+      'ci/host_debug',
       // Intentionally omit the prefix '//flutter/' to trigger the warning.
       '//testing/scenario_app',
     ]);
+
+    printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
+
     expect(
       testEnv.testLogs.map((LogRecord r) => r.message).join(),
       contains('No targets matched the pattern `testing/scenario_app'),
@@ -456,7 +678,7 @@ void main() {
 
     final runner = ToolCommandRunner(
       environment: testEnv.environment,
-      configs: configs,
+      configs: {},
       help: true,
     );
     final result = await runner.run([
@@ -474,21 +696,74 @@ void main() {
     );
   });
 
+  test('verbose "et help build" contains CI builds', () async {
+    final testEnv = TestEnvironment.withTestEngine(
+      abi: Abi.macosArm64,
+      cannedProcesses: cannedProcesses,
+      verbose: true,
+    );
+    addTearDown(testEnv.cleanup);
+
+    final builder = TestBuilderConfig();
+    builder.addBuild(
+      name: 'ci/linux_android_debug',
+      dimension: TestDroneDimension.mac,
+    );
+    final runner = ToolCommandRunner(
+      environment: testEnv.environment,
+      configs: {
+        'linux_test_config': builder.buildConfig(
+          path: 'ci/builders/linux_test_config.json',
+        )
+      },
+      help: true,
+    );
+    final result = await runner.run([
+      '--verbose',
+      'help',
+      'build',
+    ]);
+
+    printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
+    expect(result, equals(0));
+
+    // Avoid a degenerate case where nothing is logged.
+    expect(testEnv.testLogs, isNotEmpty, reason: 'No logs were emitted');
+    print(testEnv.testLogs);
+
+    expect(
+      testEnv.testLogs.map((LogRecord r) => r.message),
+      contains(contains('[ci/')),
+    );
+  });
+
   test('non-verbose "et help build" does not contain ci builds', () async {
     final testEnv = TestEnvironment.withTestEngine(
+      abi: Abi.macosArm64,
       cannedProcesses: cannedProcesses,
     );
     addTearDown(testEnv.cleanup);
 
+    final builder = TestBuilderConfig();
+    builder.addBuild(
+      name: 'ci/linux_android_debug',
+      dimension: TestDroneDimension.mac,
+    );
     final runner = ToolCommandRunner(
       environment: testEnv.environment,
-      configs: configs,
+      configs: {
+        'linux_test_config': builder.buildConfig(
+          path: 'ci/builders/linux_test_config.json',
+        )
+      },
       help: true,
     );
     final result = await runner.run([
       'help',
       'build',
     ]);
+
+    printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
 
     // Avoid a degenerate case where nothing is logged.
@@ -496,7 +771,8 @@ void main() {
 
     expect(
       testEnv.testLogs.map((LogRecord r) => r.message),
-      isNot(contains('[ci/')),
+      isNot(contains(contains('[ci/'))),
+      reason: 'The log should not contain CI-prefixed builds',
     );
   });
 }
