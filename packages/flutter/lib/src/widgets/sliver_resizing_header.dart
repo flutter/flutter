@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'pinned_header_sliver.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'sliver_floating_header.dart';
+/// @docImport 'sliver_persistent_header.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';

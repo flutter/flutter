@@ -22,7 +22,7 @@ export 'package:flutter/foundation.dart' show Brightness;
 const _CupertinoThemeDefaults _kDefaultTheme = _CupertinoThemeDefaults(
   null,
   CupertinoColors.systemBlue,
-  CupertinoColors.systemBackground,
+  CupertinoColors.white,
   CupertinoDynamicColor.withBrightness(
     color: Color(0xF0F9F9F9),
     darkColor: Color(0xF01D1D1D),

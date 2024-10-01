@@ -21,7 +21,7 @@ void main() {
       );
       bufferLogger.printStatus('0123456789' * 8);
 
-      expect(bufferLogger.statusText, equals(('${'0123456789' * 4}\n') * 2));
+      expect(bufferLogger.statusText, equals('${'0123456789' * 4}\n' * 2));
     });
 
     testWithoutContext('can turn off wrapping', () async {

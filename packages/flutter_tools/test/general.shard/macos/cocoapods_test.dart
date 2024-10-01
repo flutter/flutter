@@ -330,12 +330,13 @@ void main() {
   group('Update xcconfig', () {
     testUsingContext('includes Pod config in xcconfig files, if the user manually added Pod dependencies without using Flutter plugins', () async {
       final FlutterProject projectUnderTest = setupProjectUnderTest();
-      fileSystem.file(fileSystem.path.join('project', 'foo', '.packages'))
-        ..createSync(recursive: true)
-        ..writeAsStringSync('\n');
+      final File packageConfigFile = fileSystem.file(
+        fileSystem.path.join('project', '.dart_tool', 'package_config.json'),
+      );
+      packageConfigFile.createSync(recursive: true);
+      packageConfigFile.writeAsStringSync('{"configVersion":2,"packages":[]}');
       projectUnderTest.ios.podfile..createSync()..writeAsStringSync('Custom Podfile');
       projectUnderTest.ios.podfileLock..createSync()..writeAsStringSync('Podfile.lock from user executed `pod install`');
-      projectUnderTest.packagesFile..createSync()..writeAsStringSync('');
       projectUnderTest.ios.xcodeConfigFor('Debug')
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing debug config');

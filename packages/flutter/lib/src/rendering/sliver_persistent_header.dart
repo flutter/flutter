@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
@@ -365,20 +368,9 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
     return stretchOffset > 0 ? 0.0 : math.min(0.0, paintExtent - childExtent);
   }
 
-
   @override
   void performLayout() {
-    final SliverConstraints constraints = this.constraints;
-    final double maxExtent = this.maxExtent;
     layoutChild(constraints.scrollOffset, maxExtent);
-    final double paintExtent = maxExtent - constraints.scrollOffset;
-    geometry = SliverGeometry(
-      scrollExtent: maxExtent,
-      paintOrigin: math.min(constraints.overlap, 0.0),
-      paintExtent: clampDouble(paintExtent, 0.0, constraints.remainingPaintExtent),
-      maxPaintExtent: maxExtent,
-      hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
-    );
     _childPosition = updateGeometry();
   }
 

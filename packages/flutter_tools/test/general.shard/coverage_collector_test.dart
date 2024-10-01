@@ -33,14 +33,15 @@ void main() {
             ]
           ).toJson(),
         ),
-        FakeVmServiceRequest(
-          method: 'getVersion',
-          jsonResponse: Version(major: 3, minor: 51).toJson(),
-        ),
         const FakeVmServiceRequest(
-          method: 'getScripts',
+          method: 'getSourceReport',
           args: <String, Object>{
             'isolateId': '1',
+            'reports': <Object>['Coverage'],
+            'forceCompile': true,
+            'reportLines': true,
+            'libraryFilters': <Object>['package:foo/'],
+            'librariesAlreadyCompiled': <Object>[],
           },
           jsonResponse: <String, Object>{
             'type': 'Sentinel',
@@ -74,27 +75,14 @@ void main() {
           ).toJson(),
         ),
         FakeVmServiceRequest(
-          method: 'getVersion',
-          jsonResponse: Version(major: 3, minor: 51).toJson(),
-        ),
-        FakeVmServiceRequest(
-          method: 'getScripts',
-          args: <String, Object>{
-            'isolateId': '1',
-          },
-          jsonResponse: ScriptList(scripts: <ScriptRef>[
-            ScriptRef(uri: 'package:foo/foo.dart', id: '1'),
-            ScriptRef(uri: 'package:bar/bar.dart', id: '2'),
-          ]).toJson(),
-        ),
-        FakeVmServiceRequest(
           method: 'getSourceReport',
           args: <String, Object>{
             'isolateId': '1',
             'reports': <Object>['Coverage'],
-            'scriptId': '1',
             'forceCompile': true,
             'reportLines': true,
+            'libraryFilters': <Object>['package:foo/'],
+            'librariesAlreadyCompiled': <Object>[],
           },
           jsonResponse: SourceReport(
             ranges: <SourceReportRange>[
@@ -200,10 +188,6 @@ void main() {
           ).toJson(),
         ),
         FakeVmServiceRequest(
-          method: 'getVersion',
-          jsonResponse: Version(major: 3, minor: 57).toJson(),
-        ),
-        FakeVmServiceRequest(
           method: 'getSourceReport',
           args: <String, Object>{
             'isolateId': '1',
@@ -211,6 +195,7 @@ void main() {
             'forceCompile': true,
             'reportLines': true,
             'libraryFilters': <Object>['package:foo/'],
+            'librariesAlreadyCompiled': <Object>[],
           },
           jsonResponse: SourceReport(
             ranges: <SourceReportRange>[
@@ -276,16 +261,13 @@ void main() {
           ).toJson(),
         ),
         FakeVmServiceRequest(
-          method: 'getVersion',
-          jsonResponse: Version(major: 3, minor: 57).toJson(),
-        ),
-        FakeVmServiceRequest(
           method: 'getSourceReport',
           args: <String, Object>{
             'isolateId': '1',
             'reports': <Object>['Coverage'],
             'forceCompile': true,
             'reportLines': true,
+            'librariesAlreadyCompiled': <Object>[],
           },
           jsonResponse: SourceReport(
             ranges: <SourceReportRange>[
@@ -351,27 +333,14 @@ void main() {
           ).toJson(),
         ),
         FakeVmServiceRequest(
-          method: 'getVersion',
-          jsonResponse: Version(major: 3, minor: 56).toJson(),
-        ),
-        FakeVmServiceRequest(
-          method: 'getScripts',
-          args: <String, Object>{
-            'isolateId': '1',
-          },
-          jsonResponse: ScriptList(scripts: <ScriptRef>[
-            ScriptRef(uri: 'package:foo/foo.dart', id: '1'),
-            ScriptRef(uri: 'package:bar/bar.dart', id: '2'),
-          ]).toJson(),
-        ),
-        FakeVmServiceRequest(
           method: 'getSourceReport',
           args: <String, Object>{
             'isolateId': '1',
             'reports': <Object>['Coverage', 'BranchCoverage'],
-            'scriptId': '1',
             'forceCompile': true,
             'reportLines': true,
+            'libraryFilters': <Object>['package:foo/'],
+            'librariesAlreadyCompiled': <Object>[],
           },
           jsonResponse: SourceReport(
             ranges: <SourceReportRange>[
@@ -482,7 +451,10 @@ void main() {
       fooFile.deleteSync();
       await collector.collectCoverage(
           TestTestDevice(),
-          serviceOverride: createFakeVmServiceHostWithFooAndBar(libraryFilters: <String>['package:foo/', 'package:bar/']).vmService,
+          serviceOverride: createFakeVmServiceHostWithFooAndBar(
+              libraryFilters: <String>['package:foo/', 'package:bar/'],
+              librariesAlreadyCompiled: <String>['package:foo/foo.dart', 'package:bar/bar.dart'],
+          ).vmService,
         );
       await getHitMapAndVerify();
     } finally {
@@ -622,10 +594,6 @@ void main() {
           ).toJson(),
         ),
         FakeVmServiceRequest(
-          method: 'getVersion',
-          jsonResponse: Version(major: 4, minor: 13).toJson(),
-        ),
-        FakeVmServiceRequest(
           method: 'getSourceReport',
           args: <String, Object>{
             'isolateId': '1',
@@ -704,10 +672,6 @@ void main() {
               })!,
             ]
           ).toJson(),
-        ),
-        FakeVmServiceRequest(
-          method: 'getVersion',
-          jsonResponse: Version(major: 4, minor: 13).toJson(),
         ),
 
         // This collection sets librariesAlreadyCompiled. The response doesn't
@@ -802,6 +766,7 @@ File writeFooBarPackagesJson(Directory tempDir) {
 
 FakeVmServiceHost createFakeVmServiceHostWithFooAndBar({
     List<String>? libraryFilters,
+    List<String> librariesAlreadyCompiled = const <String>[],
   }) {
   return FakeVmServiceHost(
     requests: <VmServiceExpectation>[
@@ -816,16 +781,13 @@ FakeVmServiceHost createFakeVmServiceHostWithFooAndBar({
         ).toJson(),
       ),
       FakeVmServiceRequest(
-        method: 'getVersion',
-        jsonResponse: Version(major: 3, minor: 61).toJson(),
-      ),
-      FakeVmServiceRequest(
         method: 'getSourceReport',
         args: <String, Object>{
           'isolateId': '1',
           'reports': <Object>['Coverage'],
           'forceCompile': true,
           'reportLines': true,
+          'librariesAlreadyCompiled': librariesAlreadyCompiled,
           if (libraryFilters != null) 'libraryFilters': libraryFilters,
         },
         jsonResponse: SourceReport(

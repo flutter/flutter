@@ -450,6 +450,57 @@ void main() {
       expect(context.stderr, isEmpty);
     });
 
+    test('does not assumes ARCHS if ARCHS and NATIVE_ARCH are different', () {
+      final Directory buildDir = fileSystem.directory('/path/to/builds')
+        ..createSync(recursive: true);
+      final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
+        ..createSync(recursive: true);
+      final File pipe = fileSystem.file('/tmp/pipe')
+        ..createSync(recursive: true);
+      const String buildMode = 'Debug';
+      final TestContext context = TestContext(
+        <String>['prepare'],
+        <String, String>{
+          'BUILT_PRODUCTS_DIR': buildDir.path,
+          'CONFIGURATION': buildMode,
+          'FLUTTER_ROOT': flutterRoot.path,
+          'INFOPLIST_PATH': 'Info.plist',
+          'ARCHS': 'arm64',
+          'ONLY_ACTIVE_ARCH': 'YES',
+          'NATIVE_ARCH': 'x86_64',
+        },
+        commands: <FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              '${flutterRoot.path}/bin/flutter',
+              'assemble',
+              '--no-version-check',
+              '--output=${buildDir.path}/',
+              '-dTargetPlatform=ios',
+              '-dTargetFile=lib/main.dart',
+              '-dBuildMode=${buildMode.toLowerCase()}',
+              '-dIosArchs=arm64',
+              '-dSdkRoot=',
+              '-dSplitDebugInfo=',
+              '-dTreeShakeIcons=',
+              '-dTrackWidgetCreation=',
+              '-dDartObfuscation=',
+              '-dAction=',
+              '-dFrontendServerStarterPath=',
+              '--ExtraGenSnapshotOptions=',
+              '--DartDefines=',
+              '--ExtraFrontEndOptions=',
+              '-dPreBuildAction=PrepareFramework',
+              'debug_unpack_ios',
+            ],
+          ),
+        ],
+        fileSystem: fileSystem,
+        scriptOutputStreamFile: pipe,
+      )..run();
+      expect(context.stderr, isEmpty);
+    });
+
     test('does not assumes ARCHS if ONLY_ACTIVE_ARCH is not YES', () {
       final Directory buildDir = fileSystem.directory('/path/to/builds')
         ..createSync(recursive: true);

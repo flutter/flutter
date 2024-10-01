@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'page_storage.dart';
+/// @docImport 'scroll_configuration.dart';
+/// @docImport 'scroll_notification.dart';
+/// @docImport 'scroll_position.dart';
+/// @docImport 'scrollable.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 

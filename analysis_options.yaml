@@ -101,6 +101,7 @@ linter:
     - directives_ordering
     # - discarded_futures # too many false positives, similar to unawaited_futures
     # - do_not_use_environment # there are appropriate times to use the environment, especially in our tests and build logic
+    # - document_ignores # not yet tested
     - empty_catches
     - empty_constructor_bodies
     - empty_statements
@@ -113,6 +114,7 @@ linter:
     - implicit_call_tearoffs
     - implicit_reopen
     - invalid_case_patterns
+    - invalid_runtime_check_with_js_interop_types
     # - join_return_with_assignment # not required by flutter style
     - leading_newlines_in_multiline_strings
     - library_annotations
@@ -139,6 +141,7 @@ linter:
     - null_check_on_nullable_type_parameter
     - null_closures
     # - omit_local_variable_types # opposite of always_specify_types
+    # - omit_obvious_local_variable_types # not yet tested
     # - one_member_abstracts # too many false positives
     - only_throw_errors # this does get disabled in a few places where we have legacy code that uses strings et al
     - overridden_fields
@@ -197,6 +200,7 @@ linter:
     - sort_constructors_first
     # - sort_pub_dependencies # prevents separating pinned transitive dependencies
     - sort_unnamed_constructors_first
+    # - specify_nonobvious_local_variable_types # not yet tested
     - test_types_in_equals
     - throw_in_finally
     - tighten_type_of_initializing_formals
@@ -204,6 +208,7 @@ linter:
     - type_init_formals
     - type_literal_in_constant_pattern
     # - unawaited_futures # too many false positives, especially with the way AnimationController works
+    # - unintended_html_in_doc_comment # blocked on https://github.com/dart-lang/linter/issues/5065
     - unnecessary_await_in_return
     - unnecessary_brace_in_string_interps
     - unnecessary_breaks
@@ -251,5 +256,6 @@ linter:
     - use_super_parameters
     - use_test_throws_matchers
     # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
+    - use_truncating_division
     - valid_regexps
     - void_checks

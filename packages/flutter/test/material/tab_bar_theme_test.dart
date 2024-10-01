@@ -7,11 +7,15 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:math' as math;
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'tabs_utils.dart';
 
 const String _tab1Text = 'tab 1';
 const String _tab2Text = 'tab 2';
@@ -31,6 +35,7 @@ final List<SizedBox> _sizedTabs = <SizedBox>[
 ];
 
 Widget buildTabBar({
+  TabBarThemeData? localTabBarTheme,
   TabBarTheme? tabBarTheme,
   bool secondaryTabBar = false,
   List<Widget> tabs = _tabs,
@@ -43,31 +48,30 @@ Widget buildTabBar({
   );
   addTearDown(controller.dispose);
 
-  if (secondaryTabBar) {
-    return MaterialApp(
-      theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: useMaterial3),
-      home: Scaffold(
-        body: RepaintBoundary(
-          key: _painterKey,
-          child: TabBar.secondary(
-            tabs: tabs,
-            isScrollable: isScrollable,
-            controller: controller,
-          ),
-        ),
-      ),
+  Widget tabBar = secondaryTabBar
+    ? TabBar.secondary(
+      tabs: tabs,
+      isScrollable: isScrollable,
+      controller: controller,
+    ) : TabBar(
+      tabs: tabs,
+      isScrollable: isScrollable,
+      controller: controller,
+    );
+
+  if (localTabBarTheme != null) {
+    tabBar = TabBarTheme(
+      data: localTabBarTheme,
+      child: tabBar,
     );
   }
+
   return MaterialApp(
     theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: useMaterial3),
     home: Scaffold(
       body: RepaintBoundary(
         key: _painterKey,
-        child: TabBar(
-          tabs: tabs,
-          isScrollable: isScrollable,
-          controller: controller,
-        ),
+        child: tabBar,
       ),
     ),
   );
@@ -85,29 +89,122 @@ RenderParagraph _getText(WidgetTester tester, String text) {
 }
 
 void main() {
-  test('TabBarTheme copyWith, ==, hashCode, defaults', () {
-    expect(const TabBarTheme(), const TabBarTheme().copyWith());
-    expect(const TabBarTheme().hashCode, const TabBarTheme().copyWith().hashCode);
+  test('TabBarThemeData copyWith, ==, hashCode, defaults', () {
+    expect(const TabBarThemeData(), const TabBarThemeData().copyWith());
+    expect(const TabBarThemeData().hashCode, const TabBarThemeData().copyWith().hashCode);
 
-    expect(const TabBarTheme().indicator, null);
-    expect(const TabBarTheme().indicatorColor, null);
-    expect(const TabBarTheme().indicatorSize, null);
-    expect(const TabBarTheme().dividerColor, null);
-    expect(const TabBarTheme().dividerHeight, null);
-    expect(const TabBarTheme().labelColor, null);
-    expect(const TabBarTheme().labelPadding, null);
-    expect(const TabBarTheme().labelStyle, null);
-    expect(const TabBarTheme().unselectedLabelColor, null);
-    expect(const TabBarTheme().unselectedLabelStyle, null);
-    expect(const TabBarTheme().overlayColor, null);
-    expect(const TabBarTheme().splashFactory, null);
-    expect(const TabBarTheme().mouseCursor, null);
-    expect(const TabBarTheme().tabAlignment, null);
+    expect(const TabBarThemeData().indicator, null);
+    expect(const TabBarThemeData().indicatorColor, null);
+    expect(const TabBarThemeData().indicatorSize, null);
+    expect(const TabBarThemeData().dividerColor, null);
+    expect(const TabBarThemeData().dividerHeight, null);
+    expect(const TabBarThemeData().labelColor, null);
+    expect(const TabBarThemeData().labelPadding, null);
+    expect(const TabBarThemeData().labelStyle, null);
+    expect(const TabBarThemeData().unselectedLabelColor, null);
+    expect(const TabBarThemeData().unselectedLabelStyle, null);
+    expect(const TabBarThemeData().overlayColor, null);
+    expect(const TabBarThemeData().splashFactory, null);
+    expect(const TabBarThemeData().mouseCursor, null);
+    expect(const TabBarThemeData().tabAlignment, null);
+    expect(const TabBarThemeData().textScaler, null);
+    expect(const TabBarThemeData().indicatorAnimation, null);
   });
 
-  test('TabBarTheme lerp special cases', () {
-    const TabBarTheme theme = TabBarTheme();
-    expect(identical(TabBarTheme.lerp(theme, theme, 0.5), theme), true);
+  test('TabBarThemeData lerp special cases', () {
+    const TabBarThemeData theme = TabBarThemeData();
+    expect(identical(TabBarThemeData.lerp(theme, theme, 0.5), theme), true);
+  });
+
+  testWidgets('Default TabBarThemeData debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const TabBarThemeData().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[]);
+  });
+
+  testWidgets('TabBarThemeData implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const TabBarThemeData(
+      indicator: BoxDecoration(color: Color(0xFF00FF00)),
+      indicatorColor: Colors.red,
+      indicatorSize: TabBarIndicatorSize.label,
+      dividerColor: Color(0xff000001),
+      dividerHeight: 20.5,
+      labelColor: Color(0xff000002),
+      labelPadding: EdgeInsets.all(20.0),
+      labelStyle: TextStyle(color: Colors.amber),
+      unselectedLabelColor: Color(0xff654321),
+      unselectedLabelStyle: TextStyle(color: Colors.blue),
+      overlayColor: WidgetStatePropertyAll<Color>(Colors.yellow),
+      mouseCursor: WidgetStatePropertyAll<MouseCursor>(SystemMouseCursors.contextMenu),
+      tabAlignment: TabAlignment.center,
+      textScaler: TextScaler.noScaling,
+      indicatorAnimation: TabIndicatorAnimation.elastic,
+    ).debugFillProperties(builder);
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode n) => n.toString()).toList();
+    expect(description, <String>[
+      'indicator: BoxDecoration(color: ${const Color(0xff00ff00)})',
+      'indicatorColor: MaterialColor(primary value: ${const Color(0xfff44336)})',
+      'indicatorSize: TabBarIndicatorSize.label',
+      'dividerColor: ${const Color(0xff000001)}',
+      'dividerHeight: 20.5',
+      'labelColor: ${const Color(0xff000002)}',
+      'labelPadding: EdgeInsets.all(20.0)',
+      'labelStyle: TextStyle(inherit: true, color: MaterialColor(primary value: ${const Color(0xffffc107)}))',
+      'unselectedLabelColor: ${const Color(0xff654321)}',
+      'unselectedLabelStyle: TextStyle(inherit: true, color: MaterialColor(primary value: ${const Color(0xff2196f3)}))',
+      'overlayColor: WidgetStatePropertyAll(MaterialColor(primary value: ${const Color(0xffffeb3b)}))',
+      'mouseCursor: WidgetStatePropertyAll(SystemMouseCursor(contextMenu))',
+      'tabAlignment: TabAlignment.center',
+      'textScaler: no scaling',
+      'indicatorAnimation: TabIndicatorAnimation.elastic',
+    ]);
+  });
+
+  testWidgets('Local TabBarTheme overrides defaults', (WidgetTester tester) async {
+    const Color indicatorColor = Colors.green;
+    const Color dividerColor = Color(0xff000001);
+    const double dividerHeight = 20.5;
+    const Color labelColor = Color(0xff000002);
+    const TextStyle labelStyle = TextStyle(fontSize: 32.0);
+    const Color unselectedLabelColor = Color(0xff654321);
+    const TextStyle unselectedLabelStyle = TextStyle(fontWeight: FontWeight.bold);
+
+    const TabBarThemeData tabBarTheme = TabBarThemeData(
+      indicatorColor: indicatorColor,
+      dividerColor: dividerColor,
+      dividerHeight: dividerHeight,
+      labelColor: labelColor,
+      labelStyle: labelStyle,
+      unselectedLabelColor: unselectedLabelColor,
+      unselectedLabelStyle: unselectedLabelStyle,
+    );
+
+    // Test default label color and label styles.
+    await tester.pumpWidget(buildTabBar(useMaterial3: true, localTabBarTheme: tabBarTheme));
+
+    final RenderParagraph selectedLabel = _getText(tester, _tab1Text);
+    expect(selectedLabel.text.style!.color, labelColor);
+    expect(selectedLabel.text.style!.fontSize, 32.0);
+    final RenderParagraph unselectedLabel = _getText(tester, _tab2Text);
+    expect(unselectedLabel.text.style!.color, unselectedLabelColor);
+    expect(unselectedLabel.text.style!.fontWeight, FontWeight.bold);
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(
+      tabBarBox,
+      paints
+        ..line(color: dividerColor, strokeWidth: dividerHeight)
+        ..rrect(color: indicatorColor)
+    );
   });
 
   testWidgets('Tab bar defaults (primary)', (WidgetTester tester) async {
@@ -1584,4 +1681,114 @@ void main() {
     labelSize = tester.getSize(find.text('Tab 1'));
     expect(labelSize, equals(const Size(140.5, 40.0)));
   }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/87543
+
+  testWidgets('TabBarTheme indicatorAnimation can customize tab indicator animation', (WidgetTester tester) async {
+    const double indicatorWidth = 50.0;
+    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      return Tab(
+        key: ValueKey<int>(index),
+        child: const SizedBox(width: indicatorWidth),
+      );
+    });
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTab({ TabIndicatorAnimation? indicatorAnimation }) {
+      return MaterialApp(
+        theme: ThemeData(
+          tabBarTheme: TabBarTheme(
+            indicatorAnimation: indicatorAnimation,
+          ),
+        ),
+        home: Material(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test tab indicator animation with TabIndicatorAnimation.linear.
+    await tester.pumpWidget(buildTab(indicatorAnimation: TabIndicatorAnimation.linear));
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+
+    // Idle at tab 0.
+    expect(
+      tabBarBox,
+      paints..rrect(rrect: RRect.fromLTRBAndCorners(
+        75.0, 45.0, 125.0, 48.0,
+        topLeft: const Radius.circular(3.0),
+        topRight: const Radius.circular(3.0),
+      ),
+    ));
+
+    // Start moving tab indicator.
+    controller.offset = 0.2;
+    await tester.pump();
+
+    expect(
+      tabBarBox,
+      paints..rrect(rrect: RRect.fromLTRBAndCorners(
+        115.0, 45.0, 165.0, 48.0,
+        topLeft: const Radius.circular(3.0),
+        topRight: const Radius.circular(3.0),
+      ),
+    ));
+
+    // Reset tab controller offset.
+    controller.offset = 0.0;
+
+    // Test tab indicator animation with TabIndicatorAnimation.elastic.
+    await tester.pumpWidget(buildTab(indicatorAnimation: TabIndicatorAnimation.elastic));
+    await tester.pumpAndSettle();
+
+    // Ease in sine (accelerating).
+    double accelerateIntepolation(double fraction) {
+      return 1.0 - math.cos((fraction * math.pi) / 2.0);
+    }
+
+    void expectIndicatorAttrs(
+      RenderBox tabBarBox, {
+      required Rect rect,
+      required Rect targetRect,
+    }) {
+      const double indicatorWeight = 3.0;
+      final double tabChangeProgress =  (controller.index - controller.animation!.value).abs();
+      final double leftFraction = accelerateIntepolation(tabChangeProgress);
+      final double rightFraction = accelerateIntepolation(tabChangeProgress);
+
+      final RRect rrect = RRect.fromLTRBAndCorners(
+        lerpDouble(rect.left, targetRect.left, leftFraction)!,
+        tabBarBox.size.height - indicatorWeight,
+        lerpDouble(rect.right, targetRect.right, rightFraction)!,
+        tabBarBox.size.height,
+        topLeft: const Radius.circular(3.0),
+        topRight: const Radius.circular(3.0),
+      );
+
+      expect(tabBarBox, paints..rrect(rrect: rrect));
+    }
+
+    Rect rect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    Rect targetRect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+
+    // Idle at tab 0.
+    expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
+
+    // Start moving tab indicator.
+    controller.offset = 0.2;
+    await tester.pump();
+
+    rect = const Rect.fromLTRB(115.0, 0.0, 165.0, 48.0);
+    targetRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
+    expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
+  });
 }

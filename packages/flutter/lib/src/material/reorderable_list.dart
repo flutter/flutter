@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter_test/flutter_test.dart';
+///
+/// @docImport 'card.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/gestures.dart';
@@ -214,7 +219,7 @@ class ReorderableListView extends StatefulWidget {
   ///
   ///
   /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.build_default_drag_handles.0.dart **
-  ///{@end-tool}
+  /// {@end-tool}
   final bool buildDefaultDragHandles;
 
   /// {@macro flutter.widgets.reorderable_list.padding}

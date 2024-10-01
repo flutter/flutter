@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -757,7 +759,7 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
 
   _HandlePointerEvent? _handlePointerEvent;
 
-  /// {@macro flutter.rendering.RenderAndroidView.updateGestureRecognizers}
+  /// {@macro flutter.rendering.PlatformViewRenderBox.updateGestureRecognizers}
   ///
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
   /// set of gesture recognizers is changed.

@@ -273,7 +273,7 @@ void _analyze() {}
     await runCommand(
       arguments: <String>['analyze', '--no-pub'],
       statusTextContains: <String>[
-        'info',
+        'warning',
         'unused_element',
       ],
       exitMessageContains: '1 issue found.',

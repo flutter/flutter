@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'switch.dart';
 /// @docImport 'slider.dart';
+/// @docImport 'switch.dart';
 library;
 
 import 'package:flutter/painting.dart';
@@ -45,7 +45,7 @@ const List<BoxShadow> _kSliderBoxShadows = <BoxShadow> [
 
 /// Paints an iOS-style slider thumb or switch thumb.
 ///
-/// Used by [CupertinoSwitch] and [CupertinoSlider].
+/// Used by [CupertinoSlider].
 class CupertinoThumbPainter {
   /// Creates an object that paints an iOS-style slider thumb.
   const CupertinoThumbPainter({

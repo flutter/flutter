@@ -231,19 +231,17 @@ class VelocityTracker {
     } while (sampleCount < _historySize);
 
     if (sampleCount >= _minSampleSize) {
-      final LeastSquaresSolver xSolver = LeastSquaresSolver(time, x, w);
-      final PolynomialFit? xFit = xSolver.solve(2);
-      if (xFit != null) {
-        final LeastSquaresSolver ySolver = LeastSquaresSolver(time, y, w);
-        final PolynomialFit? yFit = ySolver.solve(2);
-        if (yFit != null) {
-          return VelocityEstimate( // convert from pixels/ms to pixels/s
-            pixelsPerSecond: Offset(xFit.coefficients[1] * 1000, yFit.coefficients[1] * 1000),
-            confidence: xFit.confidence * yFit.confidence,
-            duration: newestSample.time - oldestSample.time,
-            offset: newestSample.point - oldestSample.point,
-          );
-        }
+      // Marking as "late" ensures that yFit isn't evaluated unless it's needed.
+      late final PolynomialFit? xFit = LeastSquaresSolver(time, x, w).solve(2);
+      late final PolynomialFit? yFit = LeastSquaresSolver(time, y, w).solve(2);
+
+      if (xFit != null && yFit != null) {
+        return VelocityEstimate( // convert from pixels/ms to pixels/s
+          pixelsPerSecond: Offset(xFit.coefficients[1] * 1000, yFit.coefficients[1] * 1000),
+          confidence: xFit.confidence * yFit.confidence,
+          duration: newestSample.time - oldestSample.time,
+          offset: newestSample.point - oldestSample.point,
+        );
       }
     }
 

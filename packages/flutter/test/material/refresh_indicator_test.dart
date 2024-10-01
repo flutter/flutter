@@ -1140,6 +1140,64 @@ void main() {
     expect(stretchAccepted, false);
   });
 
+  group('RefreshIndicator.noSpinner', () {
+    testWidgets('onStatusChange and onRefresh Trigger', (WidgetTester tester) async {
+      refreshCalled = false;
+      bool modeSnap = false;
+      bool modeDrag = false;
+      bool modeArmed = false;
+      bool modeDone = false;
+
+      await tester.pumpWidget(MaterialApp(
+        home: RefreshIndicator.noSpinner(
+          onStatusChange: (RefreshIndicatorStatus? mode) {
+            if (mode == RefreshIndicatorStatus.armed) {
+              modeArmed = true;
+            }
+            if (mode == RefreshIndicatorStatus.drag) {
+              modeDrag = true;
+            }
+            if (mode == RefreshIndicatorStatus.snap) {
+              modeSnap = true;
+            }
+            if (mode == RefreshIndicatorStatus.done) {
+              modeDone = true;
+            }
+          },
+          onRefresh: refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children:
+            <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(
+                height: 200.0,
+                child: Text(item),
+              );
+            }).toList(),
+          ),
+        ),
+      ));
+
+      await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+      await tester.pump();
+
+      // Finish the scroll animation.
+      await tester.pump(const Duration(seconds: 1));
+
+      // Finish the indicator settle animation.
+      await tester.pump(const Duration(seconds: 1));
+
+      // Finish the indicator hide animation.
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(refreshCalled, true);
+      expect(modeSnap, true);
+      expect(modeDrag, true);
+      expect(modeArmed, true);
+      expect(modeDone, true);
+    });
+  });
+
   testWidgets('RefreshIndicator manipulates value color opacity correctly', (WidgetTester tester) async {
     final List<Color> colors = <Color>[
       Colors.black,
@@ -1201,6 +1259,58 @@ void main() {
 
     for (final Color color in colors) {
       await testColor(color);
+    }
+  });
+
+  testWidgets('RefreshIndicator passes the default elevation through correctly', (WidgetTester tester) async {
+    final AnimationController positionController = AnimationController(vsync: const TestVSync());
+    addTearDown(positionController.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[Text('X')],
+          ),
+        ),
+      ),
+    );
+
+    final double maxPosition = tester.view.physicalSize.height / tester.view.devicePixelRatio * 0.25;
+    const double position = 50.0;
+    await tester.fling(find.text('X'), const Offset(0.0, position), 1.0);
+    await tester.pump();
+    positionController.value = position / maxPosition;
+    expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).elevation, 2.0);
+  });
+
+  testWidgets('RefreshIndicator passes custom elevation values through correctly', (WidgetTester tester) async {
+    for (final double elevation in <double>[0.0, 2.0]) {
+      final AnimationController positionController = AnimationController(vsync: const TestVSync());
+      addTearDown(positionController.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RefreshIndicator(
+            elevation: elevation,
+            onRefresh: refresh,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const <Widget>[Text('X')],
+            ),
+          ),
+        ),
+      );
+
+      final double maxPosition = tester.view.physicalSize.height / tester.view.devicePixelRatio * 0.25;
+      const double position = 50.0;
+      await tester.fling(find.text('X'), const Offset(0.0, position), 1.0);
+      await tester.pump();
+      positionController.value = position / maxPosition;
+      expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).elevation, elevation);
+      await tester.pumpAndSettle();
     }
   });
 }

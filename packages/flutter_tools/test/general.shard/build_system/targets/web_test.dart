@@ -23,7 +23,6 @@ import '../../../src/testbed.dart';
 
 const List<String> _kDart2jsLinuxArgs = <String>[
   'Artifact.engineDartBinary.TargetPlatform.web_javascript',
-  '--disable-dart-dev',
   'Artifact.dart2jsSnapshot.TargetPlatform.web_javascript',
   '--platform-binaries=HostArtifact.webPlatformKernelFolder',
   '--invoker=flutter_tool',
@@ -33,10 +32,8 @@ const List<String> _kDart2WasmLinuxArgs = <String> [
   'Artifact.engineDartBinary.TargetPlatform.web_javascript',
   'compile',
   'wasm',
-  '--packages=.dart_tool/package_config.json',
+  '--packages=/.dart_tool/package_config.json',
   '--extra-compiler-option=--platform=HostArtifact.webPlatformKernelFolder/dart2wasm_platform.dill',
-  '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
-  '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
 ];
 
 void main() {
@@ -53,9 +50,21 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      globals.fs.file('.packages')
+     globals.fs.directory('.dart_tool').childFile('package_config.json')
         ..createSync(recursive: true)
-        ..writeAsStringSync('foo:foo/lib/\n');
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "foo",
+      "rootUri": "../foo/",
+      "packageUri": "lib/",
+      "languageVersion": "2.7"
+    }
+  ]
+}
+''');
       globals.fs.currentDirectory.childDirectory('bar').createSync();
       processManager = FakeProcessManager.empty();
       globals.fs.file('bin/cache/flutter_web_sdk/flutter_js/flutter.js')
@@ -395,7 +404,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.dart_tool/package_config.json',
+        '--packages=/.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -440,7 +449,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.dart_tool/package_config.json',
+        '--packages=/.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -484,7 +493,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.dart_tool/package_config.json',
+        '--packages=/.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -527,7 +536,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.dart_tool/package_config.json',
+        '--packages=/.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -569,7 +578,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.dart_tool/package_config.json',
+        '--packages=/.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -612,7 +621,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.dart_tool/package_config.json',
+        '--packages=/.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -655,7 +664,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.dart_tool/package_config.json',
+        '--packages=/.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -697,7 +706,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.dart_tool/package_config.json',
+        '--packages=/.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ], onRun: (_) {
@@ -751,7 +760,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.dart_tool/package_config.json',
+        '--packages=/.dart_tool/package_config.json',
        '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -784,7 +793,7 @@ void main() {
 
   test('Dart2JSTarget can enable source maps', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    environment.defines[JsCompilerConfig.kSourceMapsEnabled] = 'true';
+    environment.defines[WebCompilerConfig.kSourceMapsEnabled] = 'true';
     processManager.addCommand(FakeCommand(
       command: <String>[
         ..._kDart2jsLinuxArgs,
@@ -794,7 +803,7 @@ void main() {
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.dart_tool/package_config.json',
+        '--packages=/.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -836,7 +845,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.dart_tool/package_config.json',
+        '--packages=/.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -868,6 +877,54 @@ void main() {
     ProcessManager: () => processManager,
   }));
 
+  test('Dart2JSTarget calls dart2js with Dart defines in debug mode', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'debug';
+    environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ..._kDart2jsLinuxArgs,
+        '-DFOO=bar',
+        '-DBAZ=qux',
+        '-DFLUTTER_WEB_AUTO_DETECT=false',
+        '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+        '--no-source-maps',
+        '--enable-asserts',
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+        '--packages=/.dart_tool/package_config.json',
+        '--cfe-only',
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ]
+    ));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ..._kDart2jsLinuxArgs,
+        '-DFOO=bar',
+        '-DBAZ=qux',
+        '-DFLUTTER_WEB_AUTO_DETECT=false',
+        '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+        '--no-minify',
+        '--no-source-maps',
+        '--enable-asserts',
+        '-O4',
+        '-o',
+        environment.buildDir.childFile('main.dart.js').absolute.path,
+        environment.buildDir.childFile('app.dill').absolute.path,
+      ]
+    ));
+
+    await Dart2JSTarget(
+      const JsCompilerConfig(
+        sourceMaps: false,
+      )
+    ).build(environment);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
+  }));
+
+
   test('Dart2JSTarget calls dart2js with expected args with dump-info', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
     environment.defines[JsCompilerConfig.kDart2jsDumpInfo] = 'true';
@@ -881,7 +938,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.dart_tool/package_config.json',
+        '--packages=/.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -926,7 +983,7 @@ void main() {
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.dart_tool/package_config.json',
+        '--packages=/.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -962,56 +1019,66 @@ void main() {
     for (int level = 1; level <= 4; level++) {
       for (final bool strip in <bool>[true, false]) {
         for (final List<String> defines in const <List<String>>[<String>[], <String>['FOO=bar', 'BAZ=qux']]) {
-          for (final String buildMode in const <String>['profile', 'release']) {
-            test('Dart2WasmTarget invokes dart2wasm with renderer=$renderer, -O$level, stripping=$strip, defines=$defines, modeMode=$buildMode', () => testbed.run(() async {
-              environment.defines[kBuildMode] = buildMode;
-              environment.defines[kDartDefines] = encodeDartDefines(defines);
+          for (final String buildMode in const <String>['profile', 'release', 'debug']) {
+            for (final bool sourceMaps in const <bool>[true, false]) {
+              test('Dart2WasmTarget invokes dart2wasm with renderer=$renderer, -O$level, stripping=$strip, defines=$defines, modeMode=$buildMode sourceMaps=$sourceMaps', () => testbed.run(() async {
+                environment.defines[kBuildMode] = buildMode;
+                environment.defines[kDartDefines] = encodeDartDefines(defines);
 
-              final File depFile = environment.buildDir.childFile('dart2wasm.d');
+                final File depFile = environment.buildDir.childFile('dart2wasm.d');
 
-              final File outputJsFile = environment.buildDir.childFile('main.dart.mjs');
-              processManager.addCommand(FakeCommand(
-                command: <String>[
-                  ..._kDart2WasmLinuxArgs,
-                  if (renderer == WebRendererMode.skwasm) ...<String>[
-                    '--extra-compiler-option=--import-shared-memory',
-                    '--extra-compiler-option=--shared-memory-max-pages=32768',
+                final File outputJsFile = environment.buildDir.childFile('main.dart.mjs');
+                processManager.addCommand(FakeCommand(
+                  command: <String>[
+                    ..._kDart2WasmLinuxArgs,
+                    '-Ddart.vm.profile=${buildMode == 'profile'}',
+                    '-Ddart.vm.product=${buildMode == 'release'}',
+                    if (buildMode != 'debug') ...<String>[
+                      '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
+                      '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
+                    ],
+                    if (renderer == WebRendererMode.skwasm) ...<String>[
+                      '--extra-compiler-option=--import-shared-memory',
+                      '--extra-compiler-option=--shared-memory-max-pages=32768',
+                    ],
+                    ...defines.map((String define) => '-D$define'),
+                    if (renderer == WebRendererMode.skwasm) ...<String>[
+                      '-DFLUTTER_WEB_AUTO_DETECT=false',
+                      '-DFLUTTER_WEB_USE_SKIA=false',
+                      '-DFLUTTER_WEB_USE_SKWASM=true',
+                    ],
+                    if (renderer == WebRendererMode.canvaskit) ...<String>[
+                      '-DFLUTTER_WEB_AUTO_DETECT=false',
+                      '-DFLUTTER_WEB_USE_SKIA=true',
+                    ],
+                    '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+                    '--extra-compiler-option=--depfile=${depFile.absolute.path}',
+                    '-O$level',
+                    if (strip && buildMode == 'release') '--strip-wasm' else '--no-strip-wasm',
+                    if (!sourceMaps) '--no-source-maps',
+                    if (buildMode == 'debug') '--extra-compiler-option=--enable-asserts',
+                    '-o',
+                    environment.buildDir.childFile('main.dart.wasm').absolute.path,
+                    environment.buildDir.childFile('main.dart').absolute.path,
                   ],
-                  '-Ddart.vm.${buildMode == 'release' ? 'product' : 'profile' }=true',
-                  ...defines.map((String define) => '-D$define'),
-                  if (renderer == WebRendererMode.skwasm) ...<String>[
-                    '-DFLUTTER_WEB_AUTO_DETECT=false',
-                    '-DFLUTTER_WEB_USE_SKIA=false',
-                    '-DFLUTTER_WEB_USE_SKWASM=true',
-                  ],
-                  if (renderer == WebRendererMode.canvaskit) ...<String>[
-                    '-DFLUTTER_WEB_AUTO_DETECT=false',
-                    '-DFLUTTER_WEB_USE_SKIA=true',
-                  ],
-                  '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-                  '--extra-compiler-option=--depfile=${depFile.absolute.path}',
-                  '-O$level',
-                  if (strip && buildMode == 'release') '--strip-wasm' else '--no-strip-wasm',
-                  '-o',
-                  environment.buildDir.childFile('main.dart.wasm').absolute.path,
-                  environment.buildDir.childFile('main.dart').absolute.path,
-                ],
-                onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo'))
-              );
+                  onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo'))
+                );
 
-              await Dart2WasmTarget(
-                WasmCompilerConfig(
-                  optimizationLevel: level,
-                  stripWasm: strip,
-                  renderer: renderer,
-                )
-              ).build(environment);
+                await Dart2WasmTarget(
+                  WasmCompilerConfig(
+                    optimizationLevel: level,
+                    stripWasm: strip,
+                    renderer: renderer,
+                    sourceMaps: sourceMaps,
+                  )
+                ).build(environment);
 
-              expect(outputJsFile.existsSync(), isTrue);
-            }, overrides: <Type, Generator>{
-            ProcessManager: () => processManager,
-          }));
-        }
+                expect(outputJsFile.existsSync(), isTrue);
+              }, overrides: <Type, Generator>{
+                ProcessManager: () => processManager,
+              }));
+            }
+          }
         }
       }
     }

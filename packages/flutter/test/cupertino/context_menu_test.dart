@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   const double kOpenScale = 1.15;
+  const double kMinScaleFactor = 1.02;
 
   Widget getChild() {
     return Container(
@@ -494,7 +495,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(findStatic(), findsOneWidget);
 
-      expect(findStaticChildColor(tester), findsNWidgets(1));
+      // Both the background color and the action colors are found.
+      expect(findStaticChildColor(tester), findsNWidgets(2));
 
       // Close the CupertinoContextMenu.
       await tester.tapAt(const Offset(1.0, 1.0));
@@ -526,7 +528,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(findStatic(), findsOneWidget);
 
-      expect(findStaticChildColor(tester), findsNWidgets(2));
+      expect(findStaticChildColor(tester), findsNWidgets(3));
     });
 
     testWidgets('Can close CupertinoContextMenu by background tap', (WidgetTester tester) async {
@@ -688,6 +690,86 @@ void main() {
         // The value of the height is 80 because of the font and icon size.
         expect(tester.getSize(find.byWidget(action)).width, 250);
       }
+    });
+
+    testWidgets('CupertinoContextMenu minimizes scaling offscreen', (WidgetTester tester) async {
+      final Widget child = getChild();
+
+      // Pump a CupertinoContextMenu on the top-left of the screen and open it.
+      await tester.pumpWidget(getContextMenu(
+        alignment: Alignment.topLeft,
+        child: child,
+      ));
+      await tester.pump();
+      Rect childRect = tester.getRect(find.byWidget(child));
+      // Start a press on the child.
+      final TestGesture gesture1 = await tester.startGesture(childRect.center);
+      await tester.pump();
+
+      // The _DecoyChild is showing directly on top of the child.
+      expect(findDecoyChild(child), findsOneWidget);
+      Rect decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, equals(decoyChildRect));
+
+      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
+
+      // After a small delay, the _DecoyChild has begun to animate.
+      await tester.pump(const Duration(milliseconds: 400));
+      decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, isNot(equals(decoyChildRect)));
+
+      // Eventually the decoy fully scales. Since the context menu is fully
+      // top-left aligned, the minimum scale factor is used so that the menu
+      // animates minimally off the screen.
+      await tester.pump(const Duration(milliseconds: 900));
+      decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, isNot(equals(decoyChildRect)));
+      expect(decoyChildRect.width, childRect.width * kMinScaleFactor);
+
+      // Open and then close the CupertinoContextMenu.
+      await tester.pumpAndSettle();
+      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsNothing);
+
+      // Pump a CupertinoContextMenu on the bottom-right of the screen and open it.
+      await tester.pumpWidget(getContextMenu(
+        alignment: Alignment.bottomRight,
+        child: child,
+      ));
+      await tester.pump();
+      childRect = tester.getRect(find.byWidget(child));
+      // Start a press on the child.
+      final TestGesture gesture2 = await tester.startGesture(childRect.center);
+      await tester.pump();
+
+      // The _DecoyChild is showing directly on top of the child.
+      expect(findDecoyChild(child), findsOneWidget);
+      decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, equals(decoyChildRect));
+
+      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
+
+      // After a small delay, the _DecoyChild has begun to animate.
+      await tester.pump(const Duration(milliseconds: 400));
+      decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, isNot(equals(decoyChildRect)));
+
+      // Eventually the decoy fully scales. Since the context menu is fully
+      // bottom-right aligned, the minimum scale factor is used so that the menu
+      // animates minimally off the screen.
+      await tester.pump(const Duration(milliseconds: 900));
+      decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, isNot(equals(decoyChildRect)));
+      expect(decoyChildRect.width, childRect.width * kMinScaleFactor);
+
+      // Open and then close the CupertinoContextMenu.
+      await tester.pumpAndSettle();
+      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsNothing);
+      await gesture1.up();
+      await gesture2.up();
     });
 
     testWidgets("ContextMenu route animation doesn't throw exception on dismiss", (WidgetTester tester) async {
@@ -942,5 +1024,62 @@ void main() {
       // The route should be pushed when the insideTap is not triggered.
       expect(routeStatic, findsOneWidget);
     }
+  });
+
+  testWidgets('CupertinoContextMenu scrolls correctly', (WidgetTester tester) async {
+    const int numMenuItems = 100;
+    final Widget child = getChild();
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: MediaQuery(
+            data: const MediaQueryData(size: Size(100, 100)),
+            child: CupertinoContextMenu(
+              actions: List<CupertinoContextMenuAction>.generate(numMenuItems, (int index) {
+                return CupertinoContextMenuAction(
+                  child: Text('Item $index'),
+                  onPressed: () {},
+                );
+              }),
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the CupertinoContextMenu.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byWidget(child)));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoContextMenu), findsOneWidget);
+
+    // Verify the first items are visible.
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+
+    // Find the scrollable part of the context menu.
+    final Finder scrollableFinder = find.byType(Scrollable);
+    expect(scrollableFinder, findsOneWidget);
+
+    // Verify a scrollbar is displayed.
+    expect(find.byType(CupertinoScrollbar), findsOneWidget);
+
+    // Scroll to the bottom.
+    await tester.drag(scrollableFinder, const Offset(0, -500));
+    await tester.pumpAndSettle();
+
+    // Verify the last item is visible.
+    expect(find.text('Item ${numMenuItems - 1}'), findsOneWidget);
+
+    // Scroll back to the top.
+    await tester.drag(scrollableFinder, const Offset(0, 500));
+    await tester.pumpAndSettle();
+
+    // Verify the first items are still visible.
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
   });
 }

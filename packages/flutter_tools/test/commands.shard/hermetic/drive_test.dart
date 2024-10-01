@@ -640,7 +640,7 @@ class NeverEndingDriverService extends Fake implements DriverService {
 
   final void Function() callback;
   @override
-  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions, bool ipv6) async { }
+  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions) async { }
 
   @override
   Future<int> startTest(
@@ -670,7 +670,7 @@ class FailingFakeFlutterDriverFactory extends Fake implements FlutterDriverFacto
 
 class FailingFakeDriverService extends Fake implements DriverService {
   @override
-  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions, bool ipv6) async { }
+  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions) async { }
 
   @override
   Future<int> startTest(

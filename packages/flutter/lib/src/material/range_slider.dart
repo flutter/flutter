@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app.dart';
+/// @docImport 'checkbox.dart';
+/// @docImport 'color_scheme.dart';
+/// @docImport 'material.dart';
+/// @docImport 'radio.dart';
+/// @docImport 'scaffold.dart';
+/// @docImport 'slider.dart';
+/// @docImport 'switch.dart';
+/// @docImport 'text_theme.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;

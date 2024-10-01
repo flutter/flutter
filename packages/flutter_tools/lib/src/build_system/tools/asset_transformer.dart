@@ -55,16 +55,21 @@ final class AssetTransformer {
     required Logger logger,
   }) async {
 
-    String getTempFilePath(int transformStep) {
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync();
+
+    int transformStep = 0;
+    File nextTempFile() {
       final String basename = _fileSystem.path.basename(asset.path);
       final String ext = _fileSystem.path.extension(asset.path);
-      return '$basename-transformOutput$transformStep$ext';
+
+      final File result = tempDirectory.childFile('$basename-transformOutput$transformStep$ext');
+      transformStep++;
+      return result;
     }
 
-    File tempInputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(0));
+    File tempInputFile = nextTempFile();
     await asset.copy(tempInputFile.path);
-    File tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(1));
-    ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
+    File tempOutputFile = nextTempFile();
 
     final Stopwatch stopwatch = Stopwatch()..start();
     try {
@@ -78,10 +83,7 @@ final class AssetTransformer {
         );
 
         if (transformerFailure != null) {
-          return AssetTransformationFailure(
-            'User-defined transformation of asset "${asset.path}" failed.\n'
-            '${transformerFailure.message}',
-          );
+          return AssetTransformationFailure(transformerFailure.message);
         }
 
         ErrorHandlingFileSystem.deleteIfExists(tempInputFile);
@@ -90,15 +92,13 @@ final class AssetTransformer {
           await tempOutputFile.copy(outputPath);
         } else {
           tempInputFile = tempOutputFile;
-          tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(i+2));
-          ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
+          tempOutputFile = nextTempFile();
         }
       }
 
       logger.printTrace("Finished transforming asset at path '${asset.path}' (${stopwatch.elapsedMilliseconds}ms)");
     } finally {
-      ErrorHandlingFileSystem.deleteIfExists(tempInputFile);
-      ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
 
     return null;
@@ -123,6 +123,11 @@ final class AssetTransformer {
       transformer.package,
       ...transformerArguments,
     ];
+
+    // Delete the output file if it already exists for whatever reason.
+    // With this, we can check for the existence of the file after transformation
+    // to make sure the transformer produced an output file.
+    ErrorHandlingFileSystem.deleteIfExists(output);
 
     logger.printTrace("Transforming asset using command '${command.join(' ')}'");
     final ProcessResult result = await _processManager.run(

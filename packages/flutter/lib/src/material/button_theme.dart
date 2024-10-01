@@ -2,6 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'button.dart';
+/// @docImport 'button_bar.dart';
+/// @docImport 'dropdown.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'elevated_button_theme.dart';
+/// @docImport 'filled_button.dart';
+/// @docImport 'filled_button_theme.dart';
+/// @docImport 'material.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'outlined_button_theme.dart';
+/// @docImport 'text_button.dart';
+/// @docImport 'text_button_theme.dart';
+/// @docImport 'text_theme.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -288,8 +303,8 @@ class ButtonThemeData with Diagnosticable {
   /// This property is null by default.
   ///
   /// If the button is in the focused, hovering, or highlighted state, then the
-  /// [focusColor], [hoverColor], or [highlightColor] will take precedence over
-  /// the [buttonColor].
+  /// `focusColor`, `hoverColor`, or `highlightColor` will take precedence over
+  /// the `buttonColor`.
   ///
   /// See also:
   ///
@@ -310,8 +325,8 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// This property is null by default.
   ///
-  /// If the button is in the hovering or highlighted state, then the [hoverColor]
-  /// or [highlightColor] will take precedence over the [focusColor].
+  /// If the button is in the hovering or highlighted state, then the `hoverColor`
+  /// or `highlightColor` will take precedence over the `focusColor`.
   ///
   /// See also:
   ///
@@ -323,8 +338,8 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// This property is null by default.
   ///
-  /// If the button is in the highlighted state, then the [highlightColor] will
-  /// take precedence over the [hoverColor].
+  /// If the button is in the highlighted state, then the `highlightColor` will
+  /// take precedence over the `hoverColor`.
   ///
   /// See also:
   ///
@@ -339,7 +354,7 @@ class ButtonThemeData with Diagnosticable {
   /// See also:
   ///
   ///  * [getHighlightColor], which is used to compute the color of the overlay
-  ///    that appears when the [button] is pressed.
+  ///    that appears when the `button` is pressed.
   final Color? _highlightColor;
 
   /// The color of the ink "splash" overlay that appears when a button is tapped.
@@ -349,7 +364,7 @@ class ButtonThemeData with Diagnosticable {
   /// See also:
   ///
   ///  * [getSplashColor], which is used to compute the color of the ink
-  ///    "splash" overlay that appears when the (enabled) [button] is tapped.
+  ///    "splash" overlay that appears when the (enabled) `button` is tapped.
   final Color? _splashColor;
 
   /// A set of thirteen colors that can be used to derive the button theme's

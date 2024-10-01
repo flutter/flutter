@@ -48,10 +48,6 @@ void main() {
     final File barExample = examplesLib.childFile('bar_example.0.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('// Example for bar');
-    final File curvesExample =
-        examples.childDirectory('lib').childDirectory('animation').childDirectory('curves').childFile('curve2_d.0.dart')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('// Missing a test, but OK');
     if (missingLinks) {
       examplesLib.childFile('missing_example.0.dart')
         ..createSync(recursive: true)
@@ -77,11 +73,9 @@ void main() {
     if (malformedLinks) {
       writeLink(source: flutterPackage.childDirectory('layer').childFile('foo.dart'), example: fooExample, alternateLink: '*See Code *');
       writeLink(source: flutterPackage.childDirectory('layer').childFile('bar.dart'), example: barExample, alternateLink: ' ** See code examples/api/lib/layer/bar_example.0.dart **');
-      writeLink(source: flutterPackage.childDirectory('animation').childFile('curves.dart'), example: curvesExample, alternateLink: '* see code in examples/api/lib/animation/curves/curve2_d.0.dart *');
     } else {
       writeLink(source: flutterPackage.childDirectory('layer').childFile('foo.dart'), example: fooExample);
       writeLink(source: flutterPackage.childDirectory('layer').childFile('bar.dart'), example: barExample);
-      writeLink(source: flutterPackage.childDirectory('animation').childFile('curves.dart'), example: curvesExample);
     }
   }
 
@@ -144,20 +138,16 @@ void main() {
     final String lines = <String>[
       '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
       '║ The following examples are not linked from any source file API doc comments:',
-      if (!isWindows) '║   examples/api/lib/animation/curves/curve2_d.0.dart',
       if (!isWindows) '║   examples/api/lib/layer/foo_example.0.dart',
       if (!isWindows) '║   examples/api/lib/layer/bar_example.0.dart',
-      if (isWindows) r'║   examples\api\lib\animation\curves\curve2_d.0.dart',
       if (isWindows) r'║   examples\api\lib\layer\foo_example.0.dart',
       if (isWindows) r'║   examples\api\lib\layer\bar_example.0.dart',
       '║ Either link them to a source file API doc comment, or remove them.',
       '╚═══════════════════════════════════════════════════════════════════════════════',
       '╔═╡ERROR #2╞════════════════════════════════════════════════════════════════════',
       '║ The following malformed links were found in API doc comments:',
-      if (!isWindows) '║   /flutter sdk/packages/flutter/lib/src/animation/curves.dart:6: ///* see code in examples/api/lib/animation/curves/curve2_d.0.dart *',
       if (!isWindows) '║   /flutter sdk/packages/flutter/lib/src/layer/foo.dart:6: ///*See Code *',
       if (!isWindows) '║   /flutter sdk/packages/flutter/lib/src/layer/bar.dart:6: /// ** See code examples/api/lib/layer/bar_example.0.dart **',
-      if (isWindows) r'║   C:\flutter sdk\packages\flutter\lib\src\animation\curves.dart:6: ///* see code in examples/api/lib/animation/curves/curve2_d.0.dart *',
       if (isWindows) r'║   C:\flutter sdk\packages\flutter\lib\src\layer\foo.dart:6: ///*See Code *',
       if (isWindows) r'║   C:\flutter sdk\packages\flutter\lib\src\layer\bar.dart:6: /// ** See code examples/api/lib/layer/bar_example.0.dart **',
       '║ Correct the formatting of these links so that they match the exact pattern:',

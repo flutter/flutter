@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'value_listenable_builder.dart';
+library;
+
 import 'dart:async' show StreamSubscription;
 
 import 'package:flutter/foundation.dart';

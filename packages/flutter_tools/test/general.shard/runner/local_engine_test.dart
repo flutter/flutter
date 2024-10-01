@@ -14,7 +14,7 @@ import '../../src/common.dart';
 
 const String kEngineRoot = '/flutter/engine';
 const String kArbitraryEngineRoot = '/arbitrary/engine';
-const String kDotPackages = '.packages';
+const String kPackageConfig = '.dart_tool/package_config.json';
 
 void main() {
   testWithoutContext('works if --local-engine is specified and --local-engine-src-path '
@@ -27,8 +27,20 @@ void main() {
       .directory('$kArbitraryEngineRoot/src/out/host_debug')
       .createSync(recursive: true);
     fileSystem
-      .file(kDotPackages)
-      .writeAsStringSync('sky_engine:file://$kArbitraryEngineRoot/src/out/ios_debug/gen/dart-pkg/sky_engine/lib/');
+      .file(kPackageConfig)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "sky_engine",
+      "rootUri": "file://$kArbitraryEngineRoot/src/out/ios_debug/gen/dart-pkg/sky_engine",
+      "packageUri": "lib/"
+    }
+  ]
+}
+''');
     fileSystem
       .file('bin/cache/pkg/sky_engine/lib')
       .createSync(recursive: true);
@@ -54,8 +66,20 @@ void main() {
     // Verify that this also works if the sky_engine path is a symlink to the engine root.
     fileSystem.link('/symlink').createSync(kArbitraryEngineRoot);
     fileSystem
-      .file(kDotPackages)
-      .writeAsStringSync('sky_engine:file:///symlink/src/out/ios_debug/gen/dart-pkg/sky_engine/lib/');
+      .file(kPackageConfig)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "sky_engine",
+      "rootUri": "file:///symlink/src/out/ios_debug/gen/dart-pkg/sky_engine/",
+      "packageUri": "lib/"
+    }
+  ]
+}
+''');
 
     expect(
       await localEngineLocator.findEnginePath(localEngine: 'ios_debug', localHostEngine: 'host_debug'),
@@ -296,7 +320,9 @@ void main() {
   testWithoutContext('works if --local-engine is specified and --local-engine-src-path '
     'is determined by flutter root', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    fileSystem.file(kDotPackages).writeAsStringSync('\n');
+    fileSystem
+      .file(kPackageConfig)
+      .createSync(recursive: true);
     fileSystem
       .directory('$kEngineRoot/src/out/ios_debug')
       .createSync(recursive: true);

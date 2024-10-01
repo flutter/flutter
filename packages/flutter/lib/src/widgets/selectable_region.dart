@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
+///
+/// @docImport 'editable_text.dart';
+/// @docImport 'text.dart';
+library;
+
 import 'dart:async';
 import 'dart:math';
 
@@ -444,7 +451,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         // the new window causing the Flutter application to go inactive. In this
         // case we want to retain the selection so it remains when we return to
         // the Flutter application.
-        _clearSelection();
+        clearSelection();
       }
     }
     if (kIsWeb) {
@@ -468,6 +475,10 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   // gestures.
+
+  /// Whether the Shift key was pressed when the most recent [PointerDownEvent]
+  /// was tracked by the [BaseTapAndDragGestureRecognizer].
+  bool _isShiftPressed = false;
 
   // The position of the most recent secondary tap down event on this
   // SelectableRegion.
@@ -535,30 +546,72 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _initMouseGestureRecognizer() {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        _gestureRecognizers[TapAndPanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
-              () => TapAndPanGestureRecognizer(debugOwner:this),
-              (TapAndPanGestureRecognizer instance) {
-            instance
-              ..onTapDown = _startNewMouseSelectionGesture
-              ..onTapUp = _handleMouseTapUp
-              ..onDragStart = _handleMouseDragStart
-              ..onDragUpdate = _handleMouseDragUpdate
-              ..onDragEnd = _handleMouseDragEnd
-              ..onCancel = _clearSelection
-              ..dragStartBehavior = DragStartBehavior.down;
-          },
-        );
-    }
+    _gestureRecognizers[TapAndPanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
+          () => TapAndPanGestureRecognizer(
+            debugOwner:this,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse },
+          ),
+          (TapAndPanGestureRecognizer instance) {
+        instance
+          ..onTapTrackStart = _onTapTrackStart
+          ..onTapTrackReset = _onTapTrackReset
+          ..onTapDown = _startNewMouseSelectionGesture
+          ..onTapUp = _handleMouseTapUp
+          ..onDragStart = _handleMouseDragStart
+          ..onDragUpdate = _handleMouseDragUpdate
+          ..onDragEnd = _handleMouseDragEnd
+          ..onCancel = clearSelection
+          ..dragStartBehavior = DragStartBehavior.down;
+      },
+    );
+  }
+
+  void _onTapTrackStart() {
+    _isShiftPressed = HardwareKeyboard.instance.logicalKeysPressed
+        .intersection(<LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight})
+        .isNotEmpty;
+  }
+
+  void _onTapTrackReset() {
+    _isShiftPressed = false;
   }
 
   void _initTouchGestureRecognizer() {
+    // A [TapAndHorizontalDragGestureRecognizer] is used on non-precise pointer devices
+    // like PointerDeviceKind.touch so [SelectableRegion] gestures do not conflict with
+    // ancestor Scrollable gestures in common scenarios like a vertically scrolling list view.
+    _gestureRecognizers[TapAndHorizontalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndHorizontalDragGestureRecognizer>(
+          () => TapAndHorizontalDragGestureRecognizer(
+            debugOwner:this,
+            supportedDevices: PointerDeviceKind.values.where((PointerDeviceKind device) {
+              return device != PointerDeviceKind.mouse;
+            }).toSet(),
+          ),
+          (TapAndHorizontalDragGestureRecognizer instance) {
+        instance
+          // iOS does not provide a device specific touch slop
+          // unlike Android (~8.0), so the touch slop for a [Scrollable]
+          // always default to kTouchSlop which is 18.0. When
+          // [SelectableRegion] is the child of a horizontal
+          // scrollable that means the [SelectableRegion] will
+          // always win the gesture arena when competing with
+          // the ancestor scrollable because they both have
+          // the same touch slop threshold and the child receives
+          // the [PointerEvent] first. To avoid this conflict
+          // and ensure a smooth scrolling experience, on
+          // iOS the [TapAndHorizontalDragGestureRecognizer]
+          // will wait for all other gestures to lose before
+          // declaring victory.
+          ..eagerVictoryOnDrag = defaultTargetPlatform != TargetPlatform.iOS
+          ..onTapDown = _startNewMouseSelectionGesture
+          ..onTapUp = _handleMouseTapUp
+          ..onDragStart = _handleMouseDragStart
+          ..onDragUpdate = _handleMouseDragUpdate
+          ..onDragEnd = _handleMouseDragEnd
+          ..onCancel = clearSelection
+          ..dragStartBehavior = DragStartBehavior.down;
+      },
+    );
     _gestureRecognizers[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
           () => LongPressGestureRecognizer(debugOwner: this, supportedDevices: _kLongPressSelectionDevices),
           (LongPressGestureRecognizer instance) {
@@ -587,6 +640,15 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.linux:
           case TargetPlatform.windows:
             hideToolbar();
+            // It is impossible to extend the selection when the shift key is
+            // pressed and the start of the selection has not been initialized.
+            // In this case we fallback on collapsing the selection to first
+            // initialize the selection.
+            final bool isShiftPressedValid = _isShiftPressed && _selectionDelegate.value.startSelectionPoint != null;
+            if (isShiftPressedValid) {
+              _selectEndTo(offset: details.globalPosition);
+              return;
+            }
             _collapseSelectionAt(offset: details.globalPosition);
         }
       case 2:
@@ -1167,7 +1229,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// See also:
   ///  * [_selectStartTo], which sets or updates selection start edge.
   ///  * [_finalizeSelection], which stops the `continuous` updates.
-  ///  * [_clearSelection], which clears the ongoing selection.
+  ///  * [clearSelection], which clears the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [_selectParagraphAt], which selects an entire paragraph at the location.
   ///  * [_collapseSelectionAt], which collapses the selection at the location.
@@ -1208,7 +1270,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// See also:
   ///  * [_selectEndTo], which sets or updates selection end edge.
   ///  * [_finalizeSelection], which stops the `continuous` updates.
-  ///  * [_clearSelection], which clears the ongoing selection.
+  ///  * [clearSelection], which clears the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [_selectParagraphAt], which selects an entire paragraph at the location.
   ///  * [_collapseSelectionAt], which collapses the selection at the location.
@@ -1232,7 +1294,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_selectStartTo], which sets or updates selection start edge.
   ///  * [_selectEndTo], which sets or updates selection end edge.
   ///  * [_finalizeSelection], which stops the `continuous` updates.
-  ///  * [_clearSelection], which clears the ongoing selection.
+  ///  * [clearSelection], which clears the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [_selectParagraphAt], which selects an entire paragraph at the location.
   ///  * [selectAll], which selects the entire content.
@@ -1246,7 +1308,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// The `offset` is in global coordinates.
   ///
   /// If the whole word is already in the current selection, selection won't
-  /// change. One call [_clearSelection] first if the selection needs to be
+  /// change. One call [clearSelection] first if the selection needs to be
   /// updated even if the word is already covered by the current selection.
   ///
   /// One can also use [_selectEndTo] or [_selectStartTo] to adjust the selection
@@ -1256,7 +1318,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_selectStartTo], which sets or updates selection start edge.
   ///  * [_selectEndTo], which sets or updates selection end edge.
   ///  * [_finalizeSelection], which stops the `continuous` updates.
-  ///  * [_clearSelection], which clears the ongoing selection.
+  ///  * [clearSelection], which clears the ongoing selection.
   ///  * [_collapseSelectionAt], which collapses the selection at the location.
   ///  * [_selectParagraphAt], which selects an entire paragraph at the location.
   ///  * [selectAll], which selects the entire content.
@@ -1271,7 +1333,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// The `offset` is in global coordinates.
   ///
   /// If the paragraph is already in the current selection, selection won't
-  /// change. One call [_clearSelection] first if the selection needs to be
+  /// change. One call [clearSelection] first if the selection needs to be
   /// updated even if the paragraph is already covered by the current selection.
   ///
   /// One can also use [_selectEndTo] or [_selectStartTo] to adjust the selection
@@ -1281,7 +1343,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_selectStartTo], which sets or updates selection start edge.
   ///  * [_selectEndTo], which sets or updates selection end edge.
   ///  * [_finalizeSelection], which stops the `continuous` updates.
-  ///  * [_clearSelection], which clear the ongoing selection.
+  ///  * [clearSelection], which clear the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [selectAll], which selects the entire content.
   void _selectParagraphAt({required Offset offset}) {
@@ -1292,7 +1354,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   /// Stops any ongoing selection updates.
   ///
-  /// This method is different from [_clearSelection] that it does not remove
+  /// This method is different from [clearSelection] that it does not remove
   /// the current selection. It only stops the continuous updates.
   ///
   /// A continuous update can happen as result of calling [_selectStartTo] or
@@ -1304,8 +1366,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _stopSelectionStartEdgeUpdate();
   }
 
-  /// Removes the ongoing selection.
-  void _clearSelection() {
+  /// Removes the ongoing selection for this [SelectableRegion].
+  void clearSelection() {
     _finalizeSelection();
     _directionalHorizontalBaseline = null;
     _adjustingSelectionEnd = null;
@@ -1435,7 +1497,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
-            _clearSelection();
+            clearSelection();
           case TargetPlatform.iOS:
             hideToolbar(false);
           case TargetPlatform.linux:
@@ -1464,7 +1526,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
-            _clearSelection();
+            clearSelection();
           case TargetPlatform.iOS:
             hideToolbar(false);
           case TargetPlatform.linux:
@@ -1558,7 +1620,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   @override
   void selectAll([SelectionChangedCause? cause]) {
-    _clearSelection();
+    clearSelection();
     _selectable?.dispatchSelectionEvent(const SelectAllSelectionEvent());
     if (cause == SelectionChangedCause.toolbar) {
       _showToolbar();
@@ -1574,7 +1636,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   @override
   void copySelection(SelectionChangedCause cause) {
     _copy();
-    _clearSelection();
+    clearSelection();
   }
 
   @Deprecated(

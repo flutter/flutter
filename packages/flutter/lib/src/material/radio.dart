@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'checkbox.dart';
+/// @docImport 'list_tile.dart';
+/// @docImport 'material.dart';
+/// @docImport 'radio_list_tile.dart';
+/// @docImport 'slider.dart';
+/// @docImport 'switch.dart';
+library;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 

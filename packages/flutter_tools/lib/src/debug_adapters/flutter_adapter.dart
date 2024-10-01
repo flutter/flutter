@@ -9,6 +9,7 @@ import 'package:dds/dap.dart' hide PidTracker;
 import 'package:vm_service/vm_service.dart' as vm;
 
 import '../base/io.dart';
+import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals show fs;
@@ -328,7 +329,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     final int id = _flutterRequestId++;
     _flutterRequestCompleters[id] = completer;
 
-    sendFlutterMessage(<String, Object?>{
+    await sendFlutterMessage(<String, Object?>{
       'id': id,
       'method': method,
       'params': params,
@@ -340,7 +341,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   /// Sends a message to the Flutter run daemon.
   ///
   /// Throws `DebugAdapterException` if a Flutter process is not yet running.
-  void sendFlutterMessage(Map<String, Object?> message) {
+  Future<void> sendFlutterMessage(Map<String, Object?> message) async {
     final Process? process = this.process;
     if (process == null) {
       throw DebugAdapterException('Flutter process has not yet started');
@@ -350,7 +351,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     // Flutter requests are always wrapped in brackets as an array.
     final String payload = '[$messageString]\n';
     _logTraffic('==> [Flutter] $payload');
-    process.stdin.writeln(payload);
+    await ProcessUtils.writelnToStdinUnsafe(stdin: process.stdin, line: payload);
   }
 
   /// Called by [terminateRequest] to request that we gracefully shut down the app being run (or in the case of an attach, disconnect).
@@ -534,8 +535,8 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     Map<String, Object?>? params,
   ) {
     /// A helper to send a client response to Flutter.
-    void sendResponseToFlutter(Object? id, Object? value, { bool error = false }) {
-      sendFlutterMessage(<String, Object?>{
+    Future<void> sendResponseToFlutter(Object? id, Object? value, { bool error = false }) async {
+      await sendFlutterMessage(<String, Object?>{
         'id': id,
         if (error)
           'error': value
@@ -602,9 +603,9 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   }
 
   @override
-  void handleStderr(List<int> data) {
+  void handleStderr(String data) {
     _logTraffic('<== [Flutter] [stderr] $data');
-    sendOutput('stderr', utf8.decode(data));
+    sendOutput('stderr', data);
   }
 
   /// Handles stdout from the `flutter run --machine` process, decoding the JSON and calling the appropriate handlers.

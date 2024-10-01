@@ -72,22 +72,22 @@ void main() {
 
     expect(description, <String>[
       'trackHeight: 7.0',
-      'activeTrackColor: Color(0xff000001)',
-      'inactiveTrackColor: Color(0xff000002)',
-      'secondaryActiveTrackColor: Color(0xff000003)',
-      'disabledActiveTrackColor: Color(0xff000004)',
-      'disabledInactiveTrackColor: Color(0xff000005)',
-      'disabledSecondaryActiveTrackColor: Color(0xff000006)',
-      'activeTickMarkColor: Color(0xff000007)',
-      'inactiveTickMarkColor: Color(0xff000008)',
-      'disabledActiveTickMarkColor: Color(0xff000009)',
-      'disabledInactiveTickMarkColor: Color(0xff000010)',
-      'thumbColor: Color(0xff000011)',
-      'overlappingShapeStrokeColor: Color(0xff000012)',
-      'disabledThumbColor: Color(0xff000013)',
-      'overlayColor: Color(0xff000014)',
-      'valueIndicatorColor: Color(0xff000015)',
-      'valueIndicatorStrokeColor: Color(0xff000015)',
+      'activeTrackColor: ${const Color(0xff000001)}',
+      'inactiveTrackColor: ${const Color(0xff000002)}',
+      'secondaryActiveTrackColor: ${const Color(0xff000003)}',
+      'disabledActiveTrackColor: ${const Color(0xff000004)}',
+      'disabledInactiveTrackColor: ${const Color(0xff000005)}',
+      'disabledSecondaryActiveTrackColor: ${const Color(0xff000006)}',
+      'activeTickMarkColor: ${const Color(0xff000007)}',
+      'inactiveTickMarkColor: ${const Color(0xff000008)}',
+      'disabledActiveTickMarkColor: ${const Color(0xff000009)}',
+      'disabledInactiveTickMarkColor: ${const Color(0xff000010)}',
+      'thumbColor: ${const Color(0xff000011)}',
+      'overlappingShapeStrokeColor: ${const Color(0xff000012)}',
+      'disabledThumbColor: ${const Color(0xff000013)}',
+      'overlayColor: ${const Color(0xff000014)}',
+      'valueIndicatorColor: ${const Color(0xff000015)}',
+      'valueIndicatorStrokeColor: ${const Color(0xff000015)}',
       "overlayShape: Instance of 'RoundSliderOverlayShape'",
       "tickMarkShape: Instance of 'RoundSliderTickMarkShape'",
       "thumbShape: Instance of 'RoundSliderThumbShape'",
@@ -98,7 +98,7 @@ void main() {
       "rangeTrackShape: Instance of 'RoundedRectRangeSliderTrackShape'",
       "rangeValueIndicatorShape: Instance of 'PaddleRangeSliderValueIndicatorShape'",
       'showValueIndicator: always',
-      'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
+      'valueIndicatorTextStyle: TextStyle(inherit: true, color: ${const Color(0xff000000)})',
       'mouseCursor: WidgetStateMouseCursor(clickable)',
       'allowedInteraction: tapOnly'
     ]);
@@ -165,12 +165,20 @@ void main() {
       expect(
         material,
         paints
-          ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 297.0, 362.4, 303.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: activeTrackColor)
-          ..rrect(rrect: RRect.fromLTRBAndCorners(362.4, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius), color: inactiveTrackColor),
+          // Inactive track.
+          ..rrect(
+            rrect: RRect.fromLTRBR(360.4, 298.0, 776.0, 302.0, radius),
+            color: inactiveTrackColor,
+          )
+          // Active track.
+          ..rrect(
+            rrect: RRect.fromLTRBR(24.0, 297.0, 364.4, 303.0, activatedRadius),
+            color: activeTrackColor,
+          ),
       );
 
       // Test default colors for enabled slider.
-      expect(material, paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor)..rrect(color: secondaryActiveTrackColor));
+      expect(material, paints..rrect(color: inactiveTrackColor)..rrect(color: activeTrackColor)..rrect(color: secondaryActiveTrackColor));
       expect(material, paints..shadow(color: shadowColor));
       expect(material, paints..circle(color: thumbColor));
       expect(material, isNot(paints..circle(color: disabledThumbColor)));
@@ -182,7 +190,7 @@ void main() {
 
       // Test defaults colors for discrete slider.
       await tester.pumpWidget(buildApp(divisions: 3));
-      expect(material, paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor)..rrect(color: secondaryActiveTrackColor));
+      expect(material, paints..rrect(color: inactiveTrackColor)..rrect(color: activeTrackColor)..rrect(color: secondaryActiveTrackColor));
       expect(
         material,
         paints
@@ -204,8 +212,8 @@ void main() {
       expect(
         material,
         paints
-          ..rrect(color: disabledActiveTrackColor)
           ..rrect(color: disabledInactiveTrackColor)
+          ..rrect(color: disabledActiveTrackColor)
           ..rrect(color: disabledSecondaryActiveTrackColor),
       );
       expect(material, paints..shadow(color: shadowColor)..circle(color: disabledThumbColor));
@@ -307,7 +315,7 @@ void main() {
       final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
       // Check default theme for enabled widget.
-      expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.inactiveTrackColor)..rrect(color: sliderTheme.secondaryActiveTrackColor));
+      expect(material, paints..rrect(color: sliderTheme.inactiveTrackColor)..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.secondaryActiveTrackColor));
       expect(material, paints..shadow(color: const Color(0xff000000)));
       expect(material, paints..circle(color: sliderTheme.thumbColor));
       expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
@@ -319,7 +327,7 @@ void main() {
 
       // Test setting only the activeColor.
       await tester.pumpWidget(buildApp(activeColor: customColor1));
-      expect(material, paints..rrect(color: customColor1)..rrect(color: sliderTheme.inactiveTrackColor)..rrect(color: sliderTheme.secondaryActiveTrackColor));
+      expect(material, paints..rrect(color: sliderTheme.inactiveTrackColor)..rrect(color: customColor1)..rrect(color: sliderTheme.secondaryActiveTrackColor));
       expect(material, paints..shadow(color: Colors.black));
       expect(material, paints..circle(color: customColor1));
       expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
@@ -330,7 +338,7 @@ void main() {
 
       // Test setting only the inactiveColor.
       await tester.pumpWidget(buildApp(inactiveColor: customColor1));
-      expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: customColor1)..rrect(color: sliderTheme.secondaryActiveTrackColor));
+      expect(material, paints..rrect(color: customColor1)..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.secondaryActiveTrackColor));
       expect(material, paints..shadow(color: Colors.black));
       expect(material, paints..circle(color: sliderTheme.thumbColor));
       expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
@@ -340,7 +348,7 @@ void main() {
 
       // Test setting only the secondaryActiveColor.
       await tester.pumpWidget(buildApp(secondaryActiveColor: customColor1));
-      expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.inactiveTrackColor)..rrect(color: customColor1));
+      expect(material, paints..rrect(color: sliderTheme.inactiveTrackColor)..rrect(color: sliderTheme.activeTrackColor)..rrect(color: customColor1));
       expect(material, paints..shadow(color: Colors.black));
       expect(material, paints..circle(color: sliderTheme.thumbColor));
       expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
@@ -350,7 +358,7 @@ void main() {
 
       // Test setting both activeColor, inactiveColor, and secondaryActiveColor.
       await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2, secondaryActiveColor: customColor3));
-      expect(material, paints..rrect(color: customColor1)..rrect(color: customColor2)..rrect(color: customColor3));
+      expect(material, paints..rrect(color: customColor2)..rrect(color: customColor1)..rrect(color: customColor3));
       expect(material, paints..shadow(color: Colors.black));
       expect(material, paints..circle(color: customColor1));
       expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
@@ -361,7 +369,7 @@ void main() {
 
       // Test colors for discrete slider.
       await tester.pumpWidget(buildApp(divisions: 3));
-      expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.inactiveTrackColor)..rrect(color: sliderTheme.secondaryActiveTrackColor));
+      expect(material, paints..rrect(color: sliderTheme.inactiveTrackColor)..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.secondaryActiveTrackColor));
       expect(
         material,
         paints
@@ -384,7 +392,7 @@ void main() {
         secondaryActiveColor: customColor3,
         divisions: 3,
       ));
-      expect(material, paints..rrect(color: customColor1)..rrect(color: customColor2)..rrect(color: customColor3));
+      expect(material, paints..rrect(color: customColor2)..rrect(color: customColor1)..rrect(color: customColor3));
       expect(
         material,
         paints
@@ -409,13 +417,14 @@ void main() {
       expect(
         material,
         paints
-          ..rrect(color: sliderTheme.disabledActiveTrackColor)
           ..rrect(color: sliderTheme.disabledInactiveTrackColor)
+          ..rrect(color: sliderTheme.disabledActiveTrackColor)
           ..rrect(color: sliderTheme.disabledSecondaryActiveTrackColor),
       );
       expect(material, paints..shadow(color: Colors.black)..circle(color: sliderTheme.disabledThumbColor));
       expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
-      expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
+      // These 2 colors are too close to distinguish.
+      // expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.inactiveTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.secondaryActiveTrackColor)));
 
@@ -432,7 +441,8 @@ void main() {
           ..circle(color: sliderTheme.disabledThumbColor),
       );
       expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
-      expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
+      // These 2 colors are too close to distinguish.
+      // expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.inactiveTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.secondaryActiveTrackColor)));
       expect(material, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
@@ -443,13 +453,14 @@ void main() {
       expect(
         material,
         paints
-          ..rrect(color: sliderTheme.disabledActiveTrackColor)
           ..rrect(color: sliderTheme.disabledInactiveTrackColor)
+          ..rrect(color: sliderTheme.disabledActiveTrackColor)
           ..rrect(color: sliderTheme.disabledSecondaryActiveTrackColor),
       );
       expect(material, paints..circle(color: sliderTheme.disabledThumbColor));
       expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
-      expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
+      // These colors are too close to distinguish.
+      // expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.inactiveTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.secondaryActiveTrackColor)));
 
@@ -485,8 +496,8 @@ void main() {
         valueIndicatorBox,
         paints
           ..rrect(color: const Color(0xfffafafa))
-          ..rrect(color: customColor1) // active track
-          ..rrect(color: customColor2) // inactive track
+          ..rrect(color: customColor2) // Inactive track
+          ..rrect(color: customColor1) // Active track
           ..circle(color: customColor1.withOpacity(0.12)) // overlay
           ..circle(color: customColor2) // 1st tick mark
           ..circle(color: customColor2) // 2nd tick mark
@@ -549,7 +560,7 @@ void main() {
       final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
       // Test Slider parameters.
-      expect(material, paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor)..rrect(color: secondaryActiveTrackColor));
+      expect(material, paints..rrect(color: inactiveTrackColor)..rrect(color: activeTrackColor)..rrect(color: secondaryActiveTrackColor));
       expect(material, paints..circle(color: thumbColor));
     } finally {
       debugDisableShadows = true;
@@ -676,22 +687,22 @@ void main() {
     const Color middleGrey = Color(0xff7f7f7f);
 
     expect(lerp.trackHeight, equals(4.0));
-    expect(lerp.activeTrackColor, equals(middleGrey.withAlpha(0xff)));
-    expect(lerp.inactiveTrackColor, equals(middleGrey.withAlpha(0x3d)));
-    expect(lerp.secondaryActiveTrackColor, equals(middleGrey.withAlpha(0x8a)));
-    expect(lerp.disabledActiveTrackColor, equals(middleGrey.withAlpha(0x52)));
-    expect(lerp.disabledInactiveTrackColor, equals(middleGrey.withAlpha(0x1f)));
-    expect(lerp.disabledSecondaryActiveTrackColor, equals(middleGrey.withAlpha(0x1f)));
-    expect(lerp.activeTickMarkColor, equals(middleGrey.withAlpha(0x8a)));
-    expect(lerp.inactiveTickMarkColor, equals(middleGrey.withAlpha(0x8a)));
-    expect(lerp.disabledActiveTickMarkColor, equals(middleGrey.withAlpha(0x1f)));
-    expect(lerp.disabledInactiveTickMarkColor, equals(middleGrey.withAlpha(0x1f)));
-    expect(lerp.thumbColor, equals(middleGrey.withAlpha(0xff)));
-    expect(lerp.disabledThumbColor, equals(middleGrey.withAlpha(0x52)));
-    expect(lerp.overlayColor, equals(middleGrey.withAlpha(0x1f)));
-    expect(lerp.valueIndicatorColor, equals(middleGrey.withAlpha(0xff)));
-    expect(lerp.valueIndicatorStrokeColor, equals(middleGrey.withAlpha(0xff)));
-    expect(lerp.valueIndicatorTextStyle!.color, equals(middleGrey.withAlpha(0xff)));
+    expect(lerp.activeTrackColor, isSameColorAs(middleGrey.withAlpha(0xff)));
+    expect(lerp.inactiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x3d)));
+    expect(lerp.secondaryActiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x8a)));
+    expect(lerp.disabledActiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x52)));
+    expect(lerp.disabledInactiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.disabledSecondaryActiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.activeTickMarkColor, isSameColorAs(middleGrey.withAlpha(0x8a)));
+    expect(lerp.inactiveTickMarkColor, isSameColorAs(middleGrey.withAlpha(0x8a)));
+    expect(lerp.disabledActiveTickMarkColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.disabledInactiveTickMarkColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.thumbColor, isSameColorAs(middleGrey.withAlpha(0xff)));
+    expect(lerp.disabledThumbColor, isSameColorAs(middleGrey.withAlpha(0x52)));
+    expect(lerp.overlayColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.valueIndicatorColor, isSameColorAs(middleGrey.withAlpha(0xff)));
+    expect(lerp.valueIndicatorStrokeColor, isSameColorAs(middleGrey.withAlpha(0xff)));
+    expect(lerp.valueIndicatorTextStyle!.color, isSameColorAs(middleGrey.withAlpha(0xff)));
   });
 
   testWidgets('Default slider track draws correctly', (WidgetTester tester) async {
@@ -712,9 +723,23 @@ void main() {
     expect(
       material,
       paints
-        ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 297.0, 212.0, 303.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.activeTrackColor)
-        ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.inactiveTrackColor)
-        ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 400.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.secondaryActiveTrackColor),
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(210.0, 298.0, 776.0, 302.0, radius),
+          color: sliderTheme.inactiveTrackColor,
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(24.0, 297.0, 214.0, 303.0, activatedRadius),
+          color: sliderTheme.activeTrackColor,
+        )
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 400.0, 302.0,
+            topRight: radius,
+            bottomRight: radius,
+          ),
+          color: sliderTheme.secondaryActiveTrackColor,
+        ),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, secondaryTrackValue: 0.5, enabled: false));
@@ -724,9 +749,23 @@ void main() {
     expect(
       material,
       paints
-        ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 297.0, 212.0, 303.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.disabledActiveTrackColor)
-        ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.disabledInactiveTrackColor)
-        ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 400.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.disabledSecondaryActiveTrackColor),
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(210.0, 298.0, 776.0, 302.0, radius),
+          color: sliderTheme.disabledInactiveTrackColor,
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(24.0, 297.0, 214.0, 303.0, activatedRadius),
+          color: sliderTheme.disabledActiveTrackColor,
+        )
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 400.0, 302.0,
+            topRight: radius,
+            bottomRight: radius,
+          ),
+          color: sliderTheme.disabledSecondaryActiveTrackColor,
+        ),
     );
   });
 
@@ -1276,8 +1315,16 @@ void main() {
     expect(
       material,
       paints
-        ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 291.0, 212.0, 309.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.activeTrackColor)
-        ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 292.0, 776.0, 308.0, topRight: radius, bottomRight: radius), color: sliderTheme.inactiveTrackColor),
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(204.0, 292.0, 776.0, 308.0, radius),
+          color: sliderTheme.inactiveTrackColor,
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(24.0, 291.0, 220.0, 309.0, activatedRadius),
+          color: sliderTheme.activeTrackColor,
+        ),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
@@ -1288,8 +1335,16 @@ void main() {
     expect(
       material,
       paints
-        ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 291.0, 212.0, 309.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.disabledActiveTrackColor)
-        ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 292.0, 776.0, 308.0, topRight: radius, bottomRight: radius), color: sliderTheme.disabledInactiveTrackColor),
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(204.0, 292.0, 776.0, 308.0, radius),
+          color: sliderTheme.disabledInactiveTrackColor,
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(24.0, 291.0, 220.0, 309.0, activatedRadius),
+          color: sliderTheme.disabledActiveTrackColor,
+        ),
     );
   });
 
@@ -1422,23 +1477,21 @@ void main() {
     expect(
       material,
       paints
-        // active track RRect. Starts 10 pixels from left of screen.
-        ..rrect(rrect: RRect.fromLTRBAndCorners(
-            10.0,
-            297.0,
-            400.0,
-            303.0,
-            topLeft: const Radius.circular(3.0),
-            bottomLeft: const Radius.circular(3.0),
-        ))
-        // inactive track RRect. Ends 10 pixels from right of screen.
-        ..rrect(rrect: RRect.fromLTRBAndCorners(
-            400.0,
+        // Inactive track RRect. Ends 10 pixels from right of screen.
+        ..rrect(rrect: RRect.fromLTRBR(
+            398.0,
             298.0,
             790.0,
             302.0,
-            topRight: const Radius.circular(2.0),
-            bottomRight: const Radius.circular(2.0),
+            const Radius.circular(2.0),
+        ))
+        // Active track RRect. Starts 10 pixels from left of screen.
+        ..rrect(rrect: RRect.fromLTRBR(
+            10.0,
+            297.0,
+            402.0,
+            303.0,
+            const Radius.circular(3.0),
         ))
         // The thumb.
         ..circle(x: 400.0, y: 300.0, radius: 10.0),
@@ -1882,11 +1935,12 @@ void main() {
 
   testWidgets('activeTrackRadius is taken into account when painting the border of the active track', (WidgetTester tester) async {
     await tester.pumpWidget(_buildApp(
+      value: 0.5,
       ThemeData().sliderTheme.copyWith(
         trackShape: const RoundedRectSliderTrackShapeWithCustomAdditionalActiveTrackHeight(
-          additionalActiveTrackHeight: 10.0
-        )
-      )
+          additionalActiveTrackHeight: 10.0,
+        ),
+      ),
     ));
     await tester.pumpAndSettle();
     final Offset center = tester.getCenter(find.byType(Slider));
@@ -1894,16 +1948,10 @@ void main() {
     expect(
       find.byType(Slider),
       paints
-        ..rrect(rrect: RRect.fromLTRBAndCorners(
-          24.0, 293.0, 24.0, 307.0,
-          topLeft: const Radius.circular(7.0),
-          bottomLeft: const Radius.circular(7.0),
-        ))
-        ..rrect(rrect: RRect.fromLTRBAndCorners(
-          24.0, 298.0, 776.0, 302.0,
-          topRight: const Radius.circular(2.0),
-          bottomRight: const Radius.circular(2.0),
-        )),
+        // Inactive track.
+        ..rrect(rrect: RRect.fromLTRBR(398.0, 298.0, 776.0, 302.0, const Radius.circular(2.0)))
+        // Active track.
+        ..rrect(rrect: RRect.fromLTRBR(24.0, 293.0, 402.0, 307.0, const Radius.circular(7.0))),
     );
 
     // Finish gesture to release resources.
@@ -2078,8 +2126,8 @@ void main() {
         valueIndicatorBox,
         paints
           ..rrect(color: const Color(0xfffef7ff))
-          ..rrect(color: const Color(0xff6750a4))
           ..rrect(color: const Color(0xffe6e0e9))
+          ..rrect(color: const Color(0xff6750a4))
           ..path(color: Color(theme.colorScheme.primary.value))
       );
 
@@ -2434,6 +2482,75 @@ void main() {
     await gesture.up();
   });
 
+  group('RoundedRectSliderTrackShape', () {
+    testWidgets('Only draw active track if thumb center is higher than trackRect.left and track radius', (WidgetTester tester) async {
+      const SliderThemeData sliderTheme = SliderThemeData(trackShape: RoundedRectSliderTrackShape());
+      await tester.pumpWidget(_buildApp(sliderTheme));
+
+      MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+      expect(
+        material,
+        paints
+          // Inactive track.
+          ..rrect(
+            rrect: RRect.fromLTRBR(22.0, 298.0, 776.0, 302.0,  const Radius.circular(2.0)),
+          ),
+      );
+
+      await tester.pumpWidget(_buildApp(sliderTheme, value: 0.025));
+
+      material = Material.of(tester.element(find.byType(Slider)));
+      expect(
+        material,
+        paints
+          // Inactive track.
+          ..rrect(
+            rrect: RRect.fromLTRBR(40.8, 298.0, 776.0, 302.0,  const Radius.circular(2.0)),
+          )
+          // Active track.
+          ..rrect(
+            rrect: RRect.fromLTRBR(24.0, 297.0, 44.8, 303.0,  const Radius.circular(3.0)),
+          ),
+      );
+    });
+
+    testWidgets('Only draw inactive track if thumb center is lower than trackRect.right and track radius', (WidgetTester tester) async {
+      const SliderThemeData sliderTheme = SliderThemeData(trackShape: RoundedRectSliderTrackShape());
+      await tester.pumpWidget(_buildApp(sliderTheme, value: 1.0));
+
+      MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+      expect(
+        material,
+        paints
+          // Active track.
+          ..rrect(
+            rrect: RRect.fromLTRBR(24.0, 297.0, 778.0, 303.0,  const Radius.circular(3.0)),
+          ),
+      );
+
+      await tester.pumpWidget(_buildApp(sliderTheme, value: 0.975));
+
+      material = Material.of(tester.element(find.byType(Slider)));
+      expect(
+        material,
+        paints
+          // Inactive track.
+          ..rrect(
+            rrect: RRect.fromLTRBR(755.2, 298.0, 776.0, 302.0,  const Radius.circular(2.0)),
+          )
+          // Active track.
+          ..rrect(
+            rrect: RRect.fromLTRBR(24.0, 297.0, 759.2, 303.0,  const Radius.circular(3.0)),
+          ),
+      );
+    });
+  });
+
+  testWidgets('SliderTrackShape isRounded defaults', (WidgetTester tester) async {
+    expect(const RectangularSliderTrackShape().isRounded, isFalse);
+    expect(const RoundedRectSliderTrackShape().isRounded, isTrue);
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
@@ -2500,12 +2617,17 @@ void main() {
         expect(
           material,
           paints
-            ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 297.0, 362.4, 303.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: activeTrackColor)
-            ..rrect(rrect: RRect.fromLTRBAndCorners(362.4, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius), color: inactiveTrackColor),
+            ..rrect(
+              rrect: RRect.fromLTRBR(360.4, 298.0, 776.0, 302.0, radius),
+              color: inactiveTrackColor)
+            ..rrect(
+              rrect: RRect.fromLTRBR(24.0, 297.0, 364.4, 303.0, activatedRadius),
+              color: activeTrackColor,
+            ),
         );
 
         // Test default colors for enabled slider.
-        expect(material, paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor)..rrect(color: secondaryActiveTrackColor));
+        expect(material, paints..rrect(color: inactiveTrackColor)..rrect(color: activeTrackColor)..rrect(color: secondaryActiveTrackColor));
         expect(material, paints..shadow(color: shadowColor));
         expect(material, paints..circle(color: thumbColor));
         expect(material, isNot(paints..circle(color: disabledThumbColor)));
@@ -2517,7 +2639,7 @@ void main() {
 
         // Test defaults colors for discrete slider.
         await tester.pumpWidget(buildApp(divisions: 3));
-        expect(material, paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor)..rrect(color: secondaryActiveTrackColor));
+        expect(material, paints..rrect(color: inactiveTrackColor)..rrect(color: activeTrackColor)..rrect(color: secondaryActiveTrackColor));
         expect(
           material,
           paints
@@ -2539,8 +2661,8 @@ void main() {
         expect(
           material,
           paints
-            ..rrect(color: disabledActiveTrackColor)
             ..rrect(color: disabledInactiveTrackColor)
+            ..rrect(color: disabledActiveTrackColor)
             ..rrect(color: disabledSecondaryActiveTrackColor),
         );
         expect(material, paints..shadow(color: Colors.black)..circle(color: disabledThumbColor));
@@ -2634,8 +2756,8 @@ void main() {
           valueIndicatorBox,
           paints
             ..rrect(color: const Color(0xfffafafa))
-            ..rrect(color: const Color(0xff2196f3))
             ..rrect(color: const Color(0x3d2196f3))
+            ..rrect(color: const Color(0xff2196f3))
             // Test that the value indicator text is painted with the correct color.
             ..path(color: const Color(0xf55f5f5f))
         );

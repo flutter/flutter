@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'bottom_navigation_bar.dart';
+/// @docImport 'floating_action_button.dart';
+/// @docImport 'icons.dart';
+/// @docImport 'scaffold.dart';
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
@@ -71,7 +77,7 @@ const double _kIndicatorHeight = 32;
 class NavigationRail extends StatefulWidget {
   /// Creates a Material Design navigation rail.
   ///
-  /// The value of [destinations] must be a list of two or more
+  /// The value of [destinations] must be a list of zero or more
   /// [NavigationRailDestination] values.
   ///
   /// If [elevation] is specified, it must be non-negative.
@@ -112,8 +118,7 @@ class NavigationRail extends StatefulWidget {
     this.useIndicator,
     this.indicatorColor,
     this.indicatorShape,
-  }) :  assert(destinations.length >= 2),
-        assert(selectedIndex == null || (0 <= selectedIndex && selectedIndex < destinations.length)),
+  }) :  assert(selectedIndex == null || (0 <= selectedIndex && selectedIndex < destinations.length)),
         assert(elevation == null || elevation > 0),
         assert(minWidth == null || minWidth > 0),
         assert(minExtendedWidth == null || minExtendedWidth > 0),
@@ -167,7 +172,7 @@ class NavigationRail extends StatefulWidget {
   /// Defines the appearance of the button items that are arrayed within the
   /// navigation rail.
   ///
-  /// The value must be a list of two or more [NavigationRailDestination]
+  /// The value must be a list of zero or more [NavigationRailDestination]
   /// values.
   final List<NavigationRailDestination> destinations;
 
@@ -184,8 +189,8 @@ class NavigationRail extends StatefulWidget {
 
   /// The rail's elevation or z-coordinate.
   ///
-  /// If [Directionality] is [intl.TextDirection.LTR], the inner side is the
-  /// right side, and if [Directionality] is [intl.TextDirection.RTL], it is
+  /// If [Directionality] is [TextDirection.ltr], the inner side is the
+  /// right side, and if [Directionality] is [TextDirection.rtl], it is
   /// the left side.
   ///
   /// The default value is 0.
@@ -741,39 +746,38 @@ class _RailDestinationState extends State<_RailDestination> {
             indicatorVerticalPadding + indicatorVerticalOffset,
           );
         }
-        content = Container(
-          constraints: BoxConstraints(
-            minWidth: widget.minWidth,
-            minHeight: minHeight,
-          ),
-          padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
-          child: ClipRect(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                topSpacing,
-                _AddIndicator(
-                  addIndicator: widget.useIndicator,
-                  indicatorColor: widget.indicatorColor,
-                  indicatorShape: widget.indicatorShape,
-                  isCircular: false,
-                  indicatorAnimation: widget.destinationAnimation,
-                  child: themedIcon,
-                ),
-                labelSpacing,
-                Align(
-                  alignment: Alignment.topCenter,
-                  heightFactor: appearingAnimationValue,
-                  widthFactor: 1.0,
-                  child: FadeTransition(
-                    alwaysIncludeSemantics: true,
-                    opacity: labelFadeAnimation,
-                    child: styledLabel,
+        content = ConstrainedBox(
+          constraints: BoxConstraints(minWidth: widget.minWidth, minHeight: minHeight),
+          child: Padding(
+            padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
+            child: ClipRect(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  topSpacing,
+                  _AddIndicator(
+                    addIndicator: widget.useIndicator,
+                    indicatorColor: widget.indicatorColor,
+                    indicatorShape: widget.indicatorShape,
+                    isCircular: false,
+                    indicatorAnimation: widget.destinationAnimation,
+                    child: themedIcon,
                   ),
-                ),
-                bottomSpacing,
-              ],
+                  labelSpacing,
+                  Align(
+                    alignment: Alignment.topCenter,
+                    heightFactor: appearingAnimationValue,
+                    widthFactor: 1.0,
+                    child: FadeTransition(
+                      alwaysIncludeSemantics: true,
+                      opacity: labelFadeAnimation,
+                      child: styledLabel,
+                    ),
+                  ),
+                  bottomSpacing,
+                ],
+              ),
             ),
           ),
         );
@@ -794,27 +798,26 @@ class _RailDestinationState extends State<_RailDestination> {
             indicatorVerticalPadding + indicatorVerticalOffset,
           );
         }
-        content = Container(
-          constraints: BoxConstraints(
-            minWidth: widget.minWidth,
-            minHeight: minHeight,
-          ),
-          padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
-          child: Column(
-            children: <Widget>[
-              topSpacing,
-              _AddIndicator(
-                addIndicator: widget.useIndicator,
-                indicatorColor: widget.indicatorColor,
-                indicatorShape: widget.indicatorShape,
-                isCircular: false,
-                indicatorAnimation: widget.destinationAnimation,
-                child: themedIcon,
-              ),
-              labelSpacing,
-              styledLabel,
-              bottomSpacing,
-            ],
+        content = ConstrainedBox(
+          constraints: BoxConstraints(minWidth: widget.minWidth, minHeight: minHeight),
+          child: Padding(
+            padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
+            child: Column(
+              children: <Widget>[
+                topSpacing,
+                _AddIndicator(
+                  addIndicator: widget.useIndicator,
+                  indicatorColor: widget.indicatorColor,
+                  indicatorShape: widget.indicatorShape,
+                  isCircular: false,
+                  indicatorAnimation: widget.destinationAnimation,
+                  child: themedIcon,
+                ),
+                labelSpacing,
+                styledLabel,
+                bottomSpacing,
+              ],
+            ),
           ),
         );
     }
