@@ -237,11 +237,19 @@ Future<TaskResult> runTask(
     print('[$taskName] Connected to VM server.');
     isolateParams = isolateParams == null ? <String, String>{} : Map<String, String>.of(isolateParams);
     isolateParams['runProcessCleanup'] = terminateStrayDartProcesses.toString();
-    final Map<String, dynamic> taskResultJson = (await result.vmService.callServiceExtension(
+    final VmService service = result.vmService;
+    final String isolateId = result.isolate.id!;
+    final Map<String, dynamic> taskResultJson = (await service.callServiceExtension(
       'ext.cocoonRunTask',
       args: isolateParams,
-      isolateId: result.isolate.id,
+      isolateId: isolateId,
     )).json!;
+    // Notify the task process that the task result has been received and it
+    // can proceed to shutdown.
+    await _acknowledgeTaskResultReceived(
+      service: service,
+      isolateId: isolateId,
+    );
     final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
     final int exitCode = await runner.exitCode;
     print('[$taskName] Process terminated with exit code $exitCode.');
@@ -281,6 +289,7 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
         vm = await client.getVM();
       }
       final IsolateRef isolate = vm.isolates!.first;
+      // Sanity check to ensure we're talking with the main isolate.
       final Response response = await client.callServiceExtension('ext.cocoonRunnerReady', isolateId: isolate.id);
       if (response.json!['response'] != 'ready') {
         throw 'not ready yet';
@@ -298,6 +307,20 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
       }
       await Future<void>.delayed(const Duration(milliseconds: 50));
     }
+  }
+}
+
+Future<void> _acknowledgeTaskResultReceived({
+    required VmService service,
+    required String isolateId,
+  }) async {
+  try {
+    await service.callServiceExtension(
+      'ext.cocoonTaskResultReceived',
+      isolateId: isolateId,
+    );
+  } on RPCError {
+    // The target VM may shutdown before the response is received.
   }
 }
 
