@@ -43,12 +43,6 @@ typedef FilterCallback<T> = List<DropdownMenuEntry<T>> Function(List<DropdownMen
 /// Used by [DropdownMenu.searchCallback].
 typedef SearchCallback<T> = int? Function(List<DropdownMenuEntry<T>> entries, String query);
 
-// Navigation shortcuts to move the selected menu items up or down.
-final Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent> {
-  LogicalKeySet(LogicalKeyboardKey.arrowUp): const _ArrowUpIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowDown): const _ArrowDownIntent(),
-};
-
 const double _kMinimumWidth = 112.0;
 
 const double _kDefaultHorizontalPadding = 12.0;
@@ -987,26 +981,15 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       );
     }
 
-    return Shortcuts(
-      shortcuts: _kMenuTraversalShortcuts,
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(
-            onInvoke: handleDirectionalFocus,
-          ),
-        },
-        child: menuAnchor,
-      ),
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(
+          onInvoke: handleDirectionalFocus,
+        ),
+      },
+      child: menuAnchor,
     );
   }
-}
-
-class _ArrowUpIntent extends Intent {
-  const _ArrowUpIntent();
-}
-
-class _ArrowDownIntent extends Intent {
-  const _ArrowDownIntent();
 }
 
 class _DropdownMenuBody extends MultiChildRenderObjectWidget {
