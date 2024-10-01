@@ -49,14 +49,13 @@ class BuildApkCommand extends BuildSubCommand {
                 'do not build any artifacts.')
       ..addMultiOption('target-platform',
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
-        // https://github.com/flutter/flutter/issues/153359 tracks debug build type support.
         help:
             'The target platform for which the app is compiled.',
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
 
-  BuildMode get buildMode {
+  BuildMode get _buildMode {
     if (boolArg('release')) {
       return BuildMode.release;
     } else if (boolArg('profile')) {
@@ -66,7 +65,6 @@ class BuildApkCommand extends BuildSubCommand {
     } else if (boolArg('jit-release')) {
       return BuildMode.jitRelease;
     }
-    // The build defaults to release.
     return BuildMode.release;
   }
   static const List<String> _kDefaultJitArchs = <String>[
@@ -80,8 +78,8 @@ class BuildApkCommand extends BuildSubCommand {
     'android-arm64',
     'android-x64',
   ];
-  List<String> get targetArchs => stringsArg('target-platform').isEmpty
-    ? switch (buildMode) {
+  List<String> get _targetArchs => stringsArg('target-platform').isEmpty
+    ? switch (_buildMode) {
       BuildMode.release || BuildMode.profile => _kDefaultAotArchs,
       BuildMode.debug || BuildMode.jitRelease => _kDefaultJitArchs,
     }
@@ -112,8 +110,8 @@ class BuildApkCommand extends BuildSubCommand {
   @override
   Future<CustomDimensions> get usageValues async {
     return CustomDimensions(
-      commandBuildApkTargetPlatform: targetArchs.join(','),
-      commandBuildApkBuildMode: buildMode.cliName,
+      commandBuildApkTargetPlatform: _targetArchs.join(','),
+      commandBuildApkBuildMode: _buildMode.cliName,
       commandBuildApkSplitPerAbi: boolArg('split-per-abi'),
     );
   }
@@ -123,8 +121,8 @@ class BuildApkCommand extends BuildSubCommand {
     return Event.commandUsageValues(
       workflow: commandPath,
       commandHasTerminal: hasTerminal,
-      buildApkTargetPlatform: targetArchs.join(','),
-      buildApkBuildMode: buildMode.cliName,
+      buildApkTargetPlatform: _targetArchs.join(','),
+      buildApkBuildMode: _buildMode.cliName,
       buildApkSplitPerAbi: boolArg('split-per-abi'),
     );
   }
@@ -139,7 +137,7 @@ class BuildApkCommand extends BuildSubCommand {
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(
       buildInfo,
       splitPerAbi: boolArg('split-per-abi'),
-      targetArchs: targetArchs.map<AndroidArch>(getAndroidArchForName),
+      targetArchs: _targetArchs.map<AndroidArch>(getAndroidArchForName),
     );
     validateBuild(androidBuildInfo);
     displayNullSafetyMode(androidBuildInfo.buildInfo);
