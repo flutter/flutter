@@ -1316,12 +1316,13 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/154532.
-  testWidgets('keyboard navigation does not throw when entries are filtered empty',
+  testWidgets('Keyboard navigation does not throw when no entries match the filter',
     (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: DropdownMenu<TestMenu>(
             enableFilter: true,
+            requestFocusOnTap: true,
             dropdownMenuEntries: menuChildren,
           ),
         ),
@@ -1335,7 +1336,7 @@ void main() {
       await tester.enterText(find.byType(TextField).first, 'No match 2');
       await tester.pump();
       expect(tester.takeException(), isNull);
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/147253.
   testWidgets('Default search prioritises the current highlight on desktop platforms',
@@ -1374,7 +1375,7 @@ void main() {
     );
     item2material = tester.widget<Material>(button2Material);
     expect(item2material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/152375.
   testWidgets('Down key and up key can navigate on desktop platforms when a label text contains '
