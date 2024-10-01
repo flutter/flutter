@@ -83,6 +83,8 @@ struct _FlView {
 
   // Accessible tree from Flutter, exposed as an AtkPlug.
   FlViewAccessible* view_accessible;
+
+  GCancellable* cancellable;
 };
 
 enum { kSignalFirstFrame, kSignalLastSignal };
@@ -275,6 +277,25 @@ static void handle_geometry_changed(FlView* self) {
                                allocation.width * scale_factor,
                                allocation.height * scale_factor);
   }
+}
+
+static void view_added_cb(GObject* object,
+                          GAsyncResult* result,
+                          gpointer user_data) {
+  FlView* self = FL_VIEW(user_data);
+
+  g_autoptr(GError) error = nullptr;
+  if (!fl_engine_add_view_finish(FL_ENGINE(object), result, &error)) {
+    if (g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+      return;
+    }
+
+    g_warning("Failed to add view: %s", error->message);
+    // FIXME: Show on the GLArea
+    return;
+  }
+
+  handle_geometry_changed(self);
 }
 
 // Called when the engine updates accessibility.
@@ -664,6 +685,8 @@ static void fl_view_notify(GObject* object, GParamSpec* pspec) {
 static void fl_view_dispose(GObject* object) {
   FlView* self = FL_VIEW(object);
 
+  g_cancellable_cancel(self->cancellable);
+
   if (self->engine != nullptr) {
     fl_engine_set_update_semantics_handler(self->engine, nullptr, nullptr,
                                            nullptr);
@@ -688,6 +711,7 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->mouse_cursor_handler);
   g_clear_object(&self->platform_handler);
   g_clear_object(&self->view_accessible);
+  g_clear_object(&self->cancellable);
 
   G_OBJECT_CLASS(fl_view_parent_class)->dispose(object);
 }
@@ -739,11 +763,11 @@ static void fl_view_class_init(FlViewClass* klass) {
 }
 
 static void fl_view_init(FlView* self) {
+  self->cancellable = g_cancellable_new();
+
   gtk_widget_set_can_focus(GTK_WIDGET(self), TRUE);
 
-  // When we support multiple views this will become variable.
-  // https://github.com/flutter/flutter/issues/138178
-  self->view_id = flutter::kFlutterImplicitViewId;
+  self->view_id = -1;
 
   GdkRGBA default_background = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
@@ -789,14 +813,7 @@ static void fl_view_init(FlView* self) {
   gtk_gl_area_set_has_alpha(self->gl_area, TRUE);
   gtk_widget_show(GTK_WIDGET(self->gl_area));
   gtk_container_add(GTK_CONTAINER(self->event_box), GTK_WIDGET(self->gl_area));
-
-  g_signal_connect_swapped(self->gl_area, "create-context",
-                           G_CALLBACK(create_context_cb), self);
-  g_signal_connect_swapped(self->gl_area, "realize", G_CALLBACK(realize_cb),
-                           self);
   g_signal_connect_swapped(self->gl_area, "render", G_CALLBACK(render_cb),
-                           self);
-  g_signal_connect_swapped(self->gl_area, "unrealize", G_CALLBACK(unrealize_cb),
                            self);
 
   g_signal_connect_swapped(self, "size-allocate", G_CALLBACK(size_allocate_cb),
@@ -805,12 +822,9 @@ static void fl_view_init(FlView* self) {
 
 G_MODULE_EXPORT FlView* fl_view_new(FlDartProject* project) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
-  return fl_view_new_for_engine(engine);
-}
-
-G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
   FlView* self = FL_VIEW(g_object_new(fl_view_get_type(), nullptr));
 
+  self->view_id = flutter::kFlutterImplicitViewId;
   self->engine = FL_ENGINE(g_object_ref(engine));
   FlRenderer* renderer = fl_engine_get_renderer(engine);
   g_assert(FL_IS_RENDERER_GDK(renderer));
@@ -822,12 +836,44 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
       g_signal_connect_swapped(engine, "on-pre-engine-restart",
                                G_CALLBACK(on_pre_engine_restart_cb), self);
 
+  g_signal_connect_swapped(self->gl_area, "create-context",
+                           G_CALLBACK(create_context_cb), self);
+  g_signal_connect_swapped(self->gl_area, "realize", G_CALLBACK(realize_cb),
+                           self);
+  g_signal_connect_swapped(self->gl_area, "unrealize", G_CALLBACK(unrealize_cb),
+                           self);
+
+  return self;
+}
+
+G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
+  FlView* self = FL_VIEW(g_object_new(fl_view_get_type(), nullptr));
+
+  self->engine = FL_ENGINE(g_object_ref(engine));
+  FlRenderer* renderer = fl_engine_get_renderer(engine);
+  g_assert(FL_IS_RENDERER_GDK(renderer));
+  self->renderer = FL_RENDERER_GDK(g_object_ref(renderer));
+
+  self->on_pre_engine_restart_handler =
+      g_signal_connect_swapped(engine, "on-pre-engine-restart",
+                               G_CALLBACK(on_pre_engine_restart_cb), self);
+
+  self->view_id = fl_engine_add_view(self->engine, 1, 1, 1.0, self->cancellable,
+                                     view_added_cb, self);
+  fl_renderer_add_view(FL_RENDERER(self->renderer), self->view_id, self);
+
   return self;
 }
 
 G_MODULE_EXPORT FlEngine* fl_view_get_engine(FlView* self) {
   g_return_val_if_fail(FL_IS_VIEW(self), nullptr);
   return self->engine;
+}
+
+G_MODULE_EXPORT
+int64_t fl_view_get_id(FlView* self) {
+  g_return_val_if_fail(FL_IS_VIEW(self), -1);
+  return self->view_id;
 }
 
 G_MODULE_EXPORT void fl_view_set_background_color(FlView* self,

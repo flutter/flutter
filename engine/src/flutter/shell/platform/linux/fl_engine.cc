@@ -129,9 +129,8 @@ static void parse_locale(const gchar* locale,
 static void view_added_cb(const FlutterAddViewResult* result) {
   g_autoptr(GTask) task = G_TASK(result->user_data);
 
-  FlutterViewId view_id = GPOINTER_TO_INT(g_task_get_task_data(task));
   if (result->added) {
-    g_task_return_int(task, view_id);
+    g_task_return_boolean(task, TRUE);
   } else {
     g_task_return_new_error(task, fl_engine_error_quark(),
                             FL_ENGINE_ERROR_FAILED, "Failed to add view");
@@ -639,20 +638,19 @@ FlutterEngineProcTable* fl_engine_get_embedder_api(FlEngine* self) {
   return &(self->embedder_api);
 }
 
-void fl_engine_add_view(FlEngine* self,
-                        size_t width,
-                        size_t height,
-                        double pixel_ratio,
-                        GCancellable* cancellable,
-                        GAsyncReadyCallback callback,
-                        gpointer user_data) {
-  g_return_if_fail(FL_IS_ENGINE(self));
+FlutterViewId fl_engine_add_view(FlEngine* self,
+                                 size_t width,
+                                 size_t height,
+                                 double pixel_ratio,
+                                 GCancellable* cancellable,
+                                 GAsyncReadyCallback callback,
+                                 gpointer user_data) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), -1);
 
   g_autoptr(GTask) task = g_task_new(self, cancellable, callback, user_data);
 
   FlutterViewId view_id = self->next_view_id;
   self->next_view_id++;
-  g_task_set_task_data(task, GINT_TO_POINTER(view_id), nullptr);
 
   FlutterWindowMetricsEvent metrics;
   metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
@@ -674,13 +672,15 @@ void fl_engine_add_view(FlEngine* self,
     // This would have been done in the callback, but that won't occur now.
     g_object_unref(task);
   }
+
+  return view_id;
 }
 
-FlutterViewId fl_engine_add_view_finish(FlEngine* self,
-                                        GAsyncResult* result,
-                                        GError** error) {
+gboolean fl_engine_add_view_finish(FlEngine* self,
+                                   GAsyncResult* result,
+                                   GError** error) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
-  return g_task_propagate_int(G_TASK(result), error);
+  return g_task_propagate_boolean(G_TASK(result), error);
 }
 
 void fl_engine_remove_view(FlEngine* self,

@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
+#include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
+#include "flutter/shell/platform/linux/testing/fl_test.h"
 #include "flutter/shell/platform/linux/testing/fl_test_gtk_logs.h"
 
 #include "gtest/gtest.h"
@@ -56,4 +59,51 @@ TEST(FlViewTest, FirstFrameSignal) {
 
   // Check view has detected frame.
   EXPECT_TRUE(first_frame_emitted);
+}
+
+// Check secondary view is registered with engine.
+TEST(FlViewTest, SecondaryView) {
+  flutter::testing::fl_ensure_gtk_init();
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  FlView* implicit_view = fl_view_new(project);
+
+  FlEngine* engine = fl_view_get_engine(implicit_view);
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  FlutterViewId view_id = -1;
+  embedder_api->AddView = MOCK_ENGINE_PROC(
+      AddView, ([&view_id](auto engine, const FlutterAddViewInfo* info) {
+        view_id = info->view_id;
+        FlutterAddViewResult result = {
+            .struct_size = sizeof(FlutterAddViewResult),
+            .added = true,
+            .user_data = info->user_data};
+        info->add_view_callback(&result);
+        return kSuccess;
+      }));
+
+  FlView* secondary_view = fl_view_new_for_engine(engine);
+  EXPECT_EQ(view_id, fl_view_get_id(secondary_view));
+}
+
+// Check secondary view that fails registration.
+TEST(FlViewTest, SecondaryViewError) {
+  flutter::testing::fl_ensure_gtk_init();
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  FlView* implicit_view = fl_view_new(project);
+
+  FlEngine* engine = fl_view_get_engine(implicit_view);
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  FlutterViewId view_id = -1;
+  embedder_api->AddView = MOCK_ENGINE_PROC(
+      AddView, ([&view_id](auto engine, const FlutterAddViewInfo* info) {
+        view_id = info->view_id;
+        return kInvalidArguments;
+      }));
+
+  FlView* secondary_view = fl_view_new_for_engine(engine);
+  EXPECT_EQ(view_id, fl_view_get_id(secondary_view));
 }
