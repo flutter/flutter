@@ -518,11 +518,11 @@ class CupertinoTextField extends StatefulWidget {
   /// Has no effect when [suffix] is null.
   final OverlayVisibilityMode suffixMode;
 
-  /// Controls the vertical aligment of the [suffix] and the [prefix] widget in relation to content.
+  /// Controls the vertical alignment of the [prefix] and the [suffix] widget in relation to content.
   ///
   /// Defaults to [CrossAxisAlignment.center].
   ///
-  /// Has no effect when the [suffix] and the [prefix] are null.
+  /// Has no effect when both the [prefix] and [suffix] are null.
   final CrossAxisAlignment crossAxisAlignment;
 
   /// Show an iOS-style clear button to clear the current text entry.
@@ -1244,7 +1244,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
                 ],
               ),
             ),
-            if (suffixWidget != null) suffixWidget
+            if (suffixWidget != null) suffixWidget,
           ],
         );
       },

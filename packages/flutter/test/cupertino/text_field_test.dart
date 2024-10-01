@@ -8095,8 +8095,8 @@ void main() {
       final double prefixDy = tester.getTopLeft(find.byIcon(CupertinoIcons.add)).dy;
       final double suffixDy = tester.getTopLeft(find.byIcon(CupertinoIcons.clear)).dy;
 
-      expect(prefixDy == editableDy, isTrue);
-      expect(suffixDy == editableDy, isTrue);
+      expect(prefixDy, editableDy);
+      expect(suffixDy, editableDy);
     },
   );
 
@@ -8129,8 +8129,8 @@ void main() {
       final double prefixDy = tester.getTopLeft(find.byIcon(CupertinoIcons.add)).dy;
       final double suffixDy = tester.getTopLeft(find.byIcon(CupertinoIcons.clear)).dy;
 
-      expect(prefixDy < editableDy, isTrue);
-      expect(suffixDy < editableDy, isTrue);
+      expect(prefixDy, lessThan(editableDy));
+      expect(suffixDy, lessThan(editableDy));
     },
   );
 
