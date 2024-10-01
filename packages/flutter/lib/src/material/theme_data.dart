@@ -320,7 +320,8 @@ class ThemeData with Diagnosticable {
     ChipThemeData? chipTheme,
     DataTableThemeData? dataTableTheme,
     DatePickerThemeData? datePickerTheme,
-    DialogThemeData? dialogTheme,
+    // TODO(QuncCccccc): Change the parameter type to DialogThemeData
+    Object? dialogTheme,
     DividerThemeData? dividerTheme,
     DrawerThemeData? drawerTheme,
     DropdownMenuThemeData? dropdownMenuTheme,
@@ -497,6 +498,13 @@ class ThemeData with Diagnosticable {
     chipTheme ??= const ChipThemeData();
     dataTableTheme ??= const DataTableThemeData();
     datePickerTheme ??= const DatePickerThemeData();
+    if (dialogTheme != null) {
+      if (dialogTheme is DialogTheme) {
+        dialogTheme = dialogTheme.data;
+      } else if (dialogTheme is! DialogThemeData) {
+        throw ArgumentError('dialogTheme must be either a DialogThemeData or a DialogTheme');
+      }
+    }
     dialogTheme ??= const DialogThemeData();
     dividerTheme ??= const DividerThemeData();
     drawerTheme ??= const DrawerThemeData();
@@ -590,7 +598,7 @@ class ThemeData with Diagnosticable {
       chipTheme: chipTheme,
       dataTableTheme: dataTableTheme,
       datePickerTheme: datePickerTheme,
-      dialogTheme: dialogTheme,
+      dialogTheme: dialogTheme as DialogThemeData,
       dividerTheme: dividerTheme,
       drawerTheme: drawerTheme,
       dropdownMenuTheme: dropdownMenuTheme,
@@ -1462,7 +1470,8 @@ class ThemeData with Diagnosticable {
     ChipThemeData? chipTheme,
     DataTableThemeData? dataTableTheme,
     DatePickerThemeData? datePickerTheme,
-    DialogThemeData? dialogTheme,
+    // TODO(QuncCccccc): Change the parameter type to DialogThemeData
+    Object? dialogTheme,
     DividerThemeData? dividerTheme,
     DrawerThemeData? drawerTheme,
     DropdownMenuThemeData? dropdownMenuTheme,
@@ -1510,6 +1519,13 @@ class ThemeData with Diagnosticable {
     ButtonBarThemeData? buttonBarTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
+    if (dialogTheme != null) {
+      if (dialogTheme is DialogTheme) {
+        dialogTheme = dialogTheme.data;
+      } else if (dialogTheme is! DialogThemeData) {
+        throw ArgumentError('dialogTheme must be either a DialogThemeData or a DialogTheme');
+      }
+    }
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
       // order in every place that they are separated by section comments (e.g.
@@ -1571,7 +1587,7 @@ class ThemeData with Diagnosticable {
       chipTheme: chipTheme ?? this.chipTheme,
       dataTableTheme: dataTableTheme ?? this.dataTableTheme,
       datePickerTheme: datePickerTheme ?? this.datePickerTheme,
-      dialogTheme: dialogTheme ?? this.dialogTheme,
+      dialogTheme: dialogTheme as DialogThemeData? ?? this.dialogTheme,
       dividerTheme: dividerTheme ?? this.dividerTheme,
       drawerTheme: drawerTheme ?? this.drawerTheme,
       dropdownMenuTheme: dropdownMenuTheme ?? this.dropdownMenuTheme,
