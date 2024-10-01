@@ -1135,7 +1135,7 @@ void main() {
       matching: find.byType(Material),
     ).last;
     expect(menuMaterial, findsOneWidget);
-  });
+  },);
 
   testWidgets('Down key can highlight the menu item on desktop platforms', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
@@ -1322,7 +1322,6 @@ void main() {
         home: Scaffold(
           body: DropdownMenu<TestMenu>(
             enableFilter: true,
-            requestFocusOnTap: true,
             dropdownMenuEntries: menuChildren,
           ),
         ),
@@ -1336,7 +1335,7 @@ void main() {
       await tester.enterText(find.byType(TextField).first, 'No match 2');
       await tester.pump();
       expect(tester.takeException(), isNull);
-  });
+  }, variant: TargetPlatformVariant.desktop());
 
   // Regression test for https://github.com/flutter/flutter/issues/147253.
   testWidgets('Default search prioritises the current highlight on desktop platforms',
