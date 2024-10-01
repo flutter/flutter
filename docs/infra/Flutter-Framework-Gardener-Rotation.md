@@ -33,17 +33,17 @@ Before heading out on holiday, or if you get to your shift and find you can't do
 Open the [Framework build dashboard].
 1. If the tree is closed, identify which test shards are failing. If there are yellow boxes with an exclamation point, that means that the failed tests are automatically re-running themselves. The tree is not fully closed until there are solid red boxes or red boxes with exclamation points. You can begin investigation as soon as you notice the tree going red, but it is suggested not to begin escalation until re-runs have completed.
 1. Identify which test within the shard failed, and try to locate obvious errors or failures in the logs. This procedure will be different if the failure is in [devicelab](#handling-a-devicelab-failure) or [LUCI](#handling-a-luci-failure).
-1. Update the [tree-status channel] on [Discord] with an announcement that the tree is red, the affected shard(s), and the failure message from the logs.
+1. Update the [tree-gardener channel] on [Discord] with an announcement that the tree is red, the affected shard(s), and the failure message from the logs.
 1. Cross reference the failure with the commit in question. If it is obvious the PR in question caused the failure, [revert](#reverting-commits) immediately.
 1. Search through the [Flutter issues] for any existing issues with the same error. Some flakes are not specific to a specific test suite, but are nonetheless flakes and should not require a revert.
 1. If the failure is happening on an engine roll, [escalate to the engine sheriff](#handling-an-engine-roll-failure).
 1. If the test failure is not a known flake or infrastructure issue, [revert it immediately](#reverting-commits).
 1. Escalate to the [test owner][TESTOWNERS].
-1. When the tree reopens, announce it in the [tree-status channel] on [Discord].
+1. When the tree reopens, announce it in the [tree-gardener channel] on [Discord].
 1. If the tree is open, investigate green exclamation point squares, which are tests that have failed, rerun, and then passed. They may be [flaky and warrant an investigation](#handling-a-flaky-test). They also may have hit an intermittent infrastructure issue.
 1. Check [benchmarks](#handling-a-benchmark-regression) for regressions. File issues and escalate.
 
-Unmute the [tree-status channel] and [hackers-infra channel] on [Discord]. Contributors are encouraged to escalate tree closures to you. Respond there as quickly as possible.
+Unmute the [tree-gardener channel] and [hackers-infra channel] on [Discord]. Contributors are encouraged to escalate tree closures to you. Respond there as quickly as possible. If you'd like automatic notifications of when the tree goes red, you can also unmute the [tree-status channel].
 
 ### Escalation
 
@@ -52,8 +52,7 @@ Escalate to the [test owner][TESTOWNERS]. File GitHub issues if none are already
 1. Assign the issue to the test owner with a `P1` priority.
 1. Add the `team` label.
 1. Include links to the failing tests. Download any relevant logs and attach them to the issue, even if the link to the failing tests has the same information. This prevents the issues from becoming stale when logs are expunged.
-1. @ mention the test owner in the [tree-status channel] on [Discord] with a link to the GitHub issue. If they are unavailable, escalate to another team member. Continue escalating until someone acknowledges the issue is being investigated.
-1. Investigation updates and questions should not be posted in the [tree-status channel]. This channel should remain free of noise to discourage notification muting.
+1. @ mention the test owner in the [tree-gardener channel] on [Discord] with a link to the GitHub issue. If they are unavailable, escalate to another team member. Continue escalating until someone acknowledges the issue is being investigated.
 
 ### Handling a devicelab failure
 
@@ -87,7 +86,7 @@ If the commit could not be automatically reverted:
 1. Add the `revert` label to the PR to allow the bot to land it without approval.
 1. Add the original author to the as a reviewer so they are notified. If they are not a member of [flutter-hackers], also include the original pull request reviewers.
 1. In "Related Issues" add a link to any GitHub issues that describe the failure.
-1. @ mention the author in the [tree-status channel] with a link to the revert pull request. If they are unavailable, send an email. If they are not a [Flutter committer][flutter-hackers] and are not on Discord, escalate to the reviewers of the original pull request.
+1. @ mention the author in the [tree-gardener channel] with a link to the revert pull request. If they are unavailable, send an email. If they are not a [Flutter committer][flutter-hackers] and are not on Discord, escalate to the reviewers of the original pull request.
 1. As soon as the `analyze-linux` test passes, merge it. You do not need to wait for all presubmit tests to pass, or for an LGTM.
 1. Reopen any issues that were automatically closed by the original commit. Add a comment: "This has been reverted with pull request #1234."
 
@@ -155,7 +154,8 @@ See the [golden test build breakage] guide.
 ## Communication channels (public)
 
 The bulk of communication happens on [Discord].
-* Tree closure escalation and announcements: [tree-status channel].
+* Tree closure escalation and announcements: [tree-gardener channel].
+* Automated bot posts of tree red/green status: [tree-status channel].
 * Infra issues: [hackers-infra channel]
 * Infrastructure tickets: File an [infrastructure ticket].
 
@@ -183,6 +183,7 @@ The bulk of communication happens on [Discord].
 [engine benchmarks]: https://flutter-engine-perf.skia.org/e/
 
 [Discord]: https://discord.gg/BS8KZyg
+[tree-gardener channel]: https://discord.com/channels/608014603317936148/1290464157765865552
 [tree-status channel]: https://discord.com/channels/608014603317936148/613398423093116959
 [hackers-infra channel]: https://discord.com/channels/608014603317936148/608021351567065092
 [Engine Sheriff chat]: http://go/engine-sheriff
