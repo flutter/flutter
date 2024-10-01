@@ -552,9 +552,8 @@ static void add_view_cb(GObject* object,
                         GAsyncResult* result,
                         gpointer user_data) {
   g_autoptr(GError) error = nullptr;
-  FlutterViewId view_id =
-      fl_engine_add_view_finish(FL_ENGINE(object), result, &error);
-  EXPECT_GT(view_id, 0);
+  gboolean r = fl_engine_add_view_finish(FL_ENGINE(object), result, &error);
+  EXPECT_TRUE(r);
   EXPECT_EQ(error, nullptr);
 
   g_main_loop_quit(static_cast<GMainLoop*>(user_data));
@@ -583,7 +582,9 @@ TEST(FlEngineTest, AddView) {
         return kSuccess;
       }));
 
-  fl_engine_add_view(engine, 123, 456, 2.0, nullptr, add_view_cb, loop);
+  FlutterViewId view_id =
+      fl_engine_add_view(engine, 123, 456, 2.0, nullptr, add_view_cb, loop);
+  EXPECT_GT(view_id, 0);
   EXPECT_TRUE(called);
 
   // Blocks here until add_view_cb is called.
@@ -594,9 +595,8 @@ static void add_view_error_cb(GObject* object,
                               GAsyncResult* result,
                               gpointer user_data) {
   g_autoptr(GError) error = nullptr;
-  FlutterViewId view_id =
-      fl_engine_add_view_finish(FL_ENGINE(object), result, &error);
-  EXPECT_EQ(view_id, -1);
+  gboolean r = fl_engine_add_view_finish(FL_ENGINE(object), result, &error);
+  EXPECT_FALSE(r);
   EXPECT_NE(error, nullptr);
 
   g_main_loop_quit(static_cast<GMainLoop*>(user_data));
@@ -619,7 +619,9 @@ TEST(FlEngineTest, AddViewError) {
         return kSuccess;
       }));
 
-  fl_engine_add_view(engine, 123, 456, 2.0, nullptr, add_view_error_cb, loop);
+  FlutterViewId view_id = fl_engine_add_view(engine, 123, 456, 2.0, nullptr,
+                                             add_view_error_cb, loop);
+  EXPECT_GT(view_id, 0);
 
   // Blocks here until add_view_error_cb is called.
   g_main_loop_run(loop);
@@ -629,9 +631,8 @@ static void add_view_engine_error_cb(GObject* object,
                                      GAsyncResult* result,
                                      gpointer user_data) {
   g_autoptr(GError) error = nullptr;
-  FlutterViewId view_id =
-      fl_engine_add_view_finish(FL_ENGINE(object), result, &error);
-  EXPECT_EQ(view_id, -1);
+  gboolean r = fl_engine_add_view_finish(FL_ENGINE(object), result, &error);
+  EXPECT_FALSE(r);
   EXPECT_NE(error, nullptr);
 
   g_main_loop_quit(static_cast<GMainLoop*>(user_data));
@@ -648,8 +649,9 @@ TEST(FlEngineTest, AddViewEngineError) {
         return kInvalidArguments;
       }));
 
-  fl_engine_add_view(engine, 123, 456, 2.0, nullptr, add_view_engine_error_cb,
-                     loop);
+  FlutterViewId view_id = fl_engine_add_view(engine, 123, 456, 2.0, nullptr,
+                                             add_view_engine_error_cb, loop);
+  EXPECT_GT(view_id, 0);
 
   // Blocks here until remove_view_engine_error_cb is called.
   g_main_loop_run(loop);

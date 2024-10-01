@@ -521,6 +521,18 @@ FlutterEngineResult FlutterEngineNotifyDisplayUpdate(
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineAddView(FLUTTER_API_SYMBOL(FlutterEngine)
+                                             engine,
+                                         const FlutterAddViewInfo* info) {
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineRemoveView(FLUTTER_API_SYMBOL(FlutterEngine)
+                                                engine,
+                                            const FlutterRemoveViewInfo* info) {
+  return kSuccess;
+}
+
 }  // namespace
 
 FlutterEngineResult FlutterEngineGetProcAddresses(
@@ -561,5 +573,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   table->UpdateAccessibilityFeatures =
       &FlutterEngineUpdateAccessibilityFeatures;
   table->NotifyDisplayUpdate = &FlutterEngineNotifyDisplayUpdate;
+  table->AddView = &FlutterEngineAddView;
+  table->RemoveView = &FlutterEngineRemoveView;
   return kSuccess;
 }
