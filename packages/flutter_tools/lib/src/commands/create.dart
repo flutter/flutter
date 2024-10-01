@@ -258,8 +258,7 @@ class CreateCommand extends CreateBase {
         'template: the language will always be C or C++.',
         exitCode: 2,
       );
-    } else if (!generateModule && argResults!.wasParsed('ios-language')) {
-      // Swift is not yet supported for add-to-app https://github.com/flutter/flutter/issues/23955.
+    } else if (argResults!.wasParsed('ios-language')) {
       globals.printWarning(
           'The "ios-language" option is deprecated and will be removed in a future Flutter release.');
       if (stringArg('ios-language') == 'objc') {

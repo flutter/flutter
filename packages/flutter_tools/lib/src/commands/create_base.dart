@@ -100,7 +100,7 @@ abstract class CreateBase extends FlutterCommand {
       abbr: 'i',
       defaultsTo: 'swift',
       allowed: <String>['objc', 'swift'],
-      help: '(deprecated) The language to use for iOS-specific code, either Objective-C (legacy) or Swift (recommended).',
+      help: '(deprecated) The language to use for iOS-specific code, either Swift (recommended) or Objective-C (legacy).',
       hide: !verboseHelp,
     );
     argParser.addOption(
@@ -108,7 +108,7 @@ abstract class CreateBase extends FlutterCommand {
       abbr: 'a',
       defaultsTo: 'kotlin',
       allowed: <String>['java', 'kotlin'],
-      help: 'The language to use for Android-specific code, either Java (legacy) or Kotlin (recommended).',
+      help: 'The language to use for Android-specific code, either Kotlin (recommended) or Java (legacy).',
     );
     argParser.addFlag(
       'skip-name-checks',
