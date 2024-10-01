@@ -44,12 +44,16 @@ class VulkanApplication {
   std::unique_ptr<VulkanDevice> AcquireFirstCompatibleLogicalDevice() const;
 
  private:
-  VulkanProcTable& vk_;
-  VulkanHandle<VkInstance> instance_;
-  uint32_t api_version_;
-  std::unique_ptr<VulkanDebugReport> debug_report_;
+  // Located at the beginning so it outlives instance_.
+  std::string initialization_logs_;
+  bool initialization_logs_enabled_ = true;
   bool valid_;
   bool enable_validation_layers_;
+  uint8_t padding_;
+  uint32_t api_version_;
+  VulkanProcTable& vk_;
+  VulkanHandle<VkInstance> instance_;
+  std::unique_ptr<VulkanDebugReport> debug_report_;
 
   std::vector<VkPhysicalDevice> GetPhysicalDevices() const;
   std::vector<VkExtensionProperties> GetSupportedInstanceExtensions(
@@ -57,6 +61,15 @@ class VulkanApplication {
   bool ExtensionSupported(
       const std::vector<VkExtensionProperties>& supported_extensions,
       const std::string& extension_name);
+  static VKAPI_ATTR VkBool32 DebugReportCallback(
+      VkDebugReportFlagsEXT flags,
+      VkDebugReportObjectTypeEXT objectType,
+      uint64_t object,
+      size_t location,
+      int32_t messageCode,
+      const char* pLayerPrefix,
+      const char* pMessage,
+      void* pUserData);
 
   FML_DISALLOW_COPY_AND_ASSIGN(VulkanApplication);
 };

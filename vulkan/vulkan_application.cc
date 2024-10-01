@@ -13,6 +13,25 @@
 
 namespace vulkan {
 
+// static
+VKAPI_ATTR VkBool32 VulkanApplication::DebugReportCallback(
+    VkDebugReportFlagsEXT flags,
+    VkDebugReportObjectTypeEXT objectType,
+    uint64_t object,
+    size_t location,
+    int32_t messageCode,
+    const char* pLayerPrefix,
+    const char* pMessage,
+    void* pUserData) {
+  auto application = static_cast<VulkanApplication*>(pUserData);
+  if (application->initialization_logs_enabled_) {
+    application->initialization_logs_ += pMessage;
+    application->initialization_logs_ += "\n";
+  }
+
+  return VK_FALSE;
+}
+
 VulkanApplication::VulkanApplication(
     VulkanProcTable& p_vk,  // NOLINT
     const std::string& application_name,
@@ -20,10 +39,10 @@ VulkanApplication::VulkanApplication(
     uint32_t application_version,
     uint32_t api_version,
     bool enable_validation_layers)
-    : vk_(p_vk),
+    : valid_(false),
+      enable_validation_layers_(enable_validation_layers),
       api_version_(api_version),
-      valid_(false),
-      enable_validation_layers_(enable_validation_layers) {
+      vk_(p_vk) {
   // Check if we want to enable debugging.
   std::vector<VkExtensionProperties> supported_extensions =
       GetSupportedInstanceExtensions(vk_);
@@ -79,9 +98,21 @@ VulkanApplication::VulkanApplication(
       .apiVersion = api_version_,
   };
 
+  const VkDebugReportCallbackCreateInfoEXT debug_report_info = {
+      .sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT,
+      .pNext = nullptr,
+      .flags = VK_DEBUG_REPORT_INFORMATION_BIT_EXT |
+               VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_ERROR_BIT_EXT |
+               VK_DEBUG_REPORT_DEBUG_BIT_EXT,
+      .pfnCallback = &DebugReportCallback,
+      .pUserData = this};
+
   const VkInstanceCreateInfo create_info = {
       .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-      .pNext = nullptr,
+      .pNext = ExtensionSupported(supported_extensions,
+                                  VK_EXT_DEBUG_REPORT_EXTENSION_NAME)
+                   ? &debug_report_info
+                   : nullptr,
       .flags = 0,
       .pApplicationInfo = &info,
       .enabledLayerCount = static_cast<uint32_t>(layers.size()),
@@ -96,9 +127,15 @@ VulkanApplication::VulkanApplication(
 
   if (VK_CALL_LOG_ERROR(vk_.CreateInstance(&create_info, nullptr, &instance)) !=
       VK_SUCCESS) {
-    FML_DLOG(INFO) << "Could not create application instance.";
+    FML_LOG(ERROR) << "Creating application instance failed with error:\n"
+                   << initialization_logs_;
     return;
   }
+
+  // The debug report callback will also be used in vkDestroyInstance, but we
+  // don't need its data there.
+  initialization_logs_enabled_ = false;
+  initialization_logs_.clear();
 
   // Now that we have an instance, set up instance proc table entries.
   if (!vk_.SetupInstanceProcAddresses(VulkanHandle<VkInstance>(instance))) {
